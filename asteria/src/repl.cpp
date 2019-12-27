@@ -384,141 +384,141 @@ void do_handle_repl_command(cow_string&& cmd)
     unsigned long index = 0;
     cow_string code;
 
-  z:
-    // Check for exit condition.
-    if(::ferror(stdin)) {
-      ::fprintf(stderr, "! error reading standard input\n");
-      do_quick_exit(exit_unspecified);
-    }
-    if(::feof(stdin)) {
-      ::fprintf(stderr, "~ have a nice day :)\n");
-      do_quick_exit(exit_success);
-    }
-    // Move on and read the next snippet.
-    code.clear();
-    ::interrupted = 0;
-    // Prompt for the first line.
-    bool escape = false;
-    long line = 0;
-    int indent;
-    ::fprintf(stderr, "\n#%lu:%lu%n> ", ++index, ++line, &indent);
+    do {
+      // Check for exit condition.
+      if(::ferror(stdin)) {
+        ::fprintf(stderr, "! error reading standard input\n");
+        do_quick_exit(exit_unspecified);
+      }
+      if(::feof(stdin)) {
+        ::fprintf(stderr, "~ have a nice day :)\n");
+        do_quick_exit(exit_success);
+      }
+      // Move on and read the next snippet.
+      code.clear();
+      ::interrupted = 0;
+      // Prompt for the first line.
+      bool escape = false;
+      long line = 0;
+      int indent;
+      ::fprintf(stderr, "\n#%lu:%lu%n> ", ++index, ++line, &indent);
 
-    for(;;) {
-      // Read a character. Break upon read errors.
-      int ch = ::fgetc(stdin);
-      if(ch == EOF) {
-        // Force-move the cursor to the next line.
-        ::fputc('\n', stderr);
-        break;
+      for(;;) {
+        // Read a character. Break upon read errors.
+        int ch = ::fgetc(stdin);
+        if(ch == EOF) {
+          // Force-move the cursor to the next line.
+          ::fputc('\n', stderr);
+          break;
+        }
+        if(ch == '\n') {
+          // Check for termination.
+          if(heredoc.empty()) {
+            // In line input mode, the current snippet is terminated by an unescaped line feed.
+            if(!escape) {
+              break;
+            }
+            // REPL commands can't straddle multiple lines.
+            if(code.empty() || (code.front() == '\\')) {
+              break;
+            }
+          }
+          else {
+            // In heredoc mode, the current snippet is terminated by a line consisting of the
+            // user-defined terminator, which is not part of the snippet and must be removed.
+            if(code.ends_with(heredoc)) {
+              code.erase(code.size() - heredoc.size());
+              heredoc.clear();
+              break;
+            }
+          }
+          // The line feed should be preserved. It'll be appended later.
+          // Prompt for the next consecutive line.
+          ::fprintf(stderr, "%*lu> ", indent, ++line);
+        }
+        else if(heredoc.empty()) {
+          // In line input mode, backslashes that precede line feeds are deleted. Those that
+          // do not precede line feeds are kept as is.
+          if(escape) {
+            code.push_back('\\');
+          }
+          if(ch == '\\') {
+            escape = true;
+            continue;
+          }
+        }
+        // Append the character.
+        code.push_back(static_cast<char>(ch));
+        escape = false;
       }
-      if(ch == '\n') {
-        // Check for termination.
-        if(heredoc.empty()) {
-          // In line input mode, the current snippet is terminated by an unescaped line feed.
-          if(!escape) {
-            break;
-          }
-          // REPL commands can't straddle multiple lines.
-          if(code.empty() || (code.front() == '\\')) {
-            break;
-          }
-        }
-        else {
-          // In heredoc mode, the current snippet is terminated by a line consisting of the
-          // user-defined terminator, which is not part of the snippet and must be removed.
-          if(code.ends_with(heredoc)) {
-            code.erase(code.size() - heredoc.size());
-            heredoc.clear();
-            break;
-          }
-        }
-        // The line feed should be preserved. It'll be appended later.
-        // Prompt for the next consecutive line.
-        ::fprintf(stderr, "%*lu> ", indent, ++line);
+      if(::interrupted) {
+        // Discard this snippet. Recover the stream so we can read the next one.
+        (void)!::freopen(nullptr, "r", stdin);
+        ::fprintf(stderr, "! interrupted\n");
+        continue;
       }
-      else if(heredoc.empty()) {
-        // In line input mode, backslashes that precede line feeds are deleted. Those that
-        // do not precede line feeds are kept as is.
-        if(escape) {
-          code.push_back('\\');
+      if(code.empty()) {
+        continue;
+      }
+
+      // Check for REPL commands.
+      if(code.front() == '\\') {
+        code.erase(0, 1);
+        do_handle_repl_command(::rocket::move(code));
+        continue;
+      }
+
+      // Name the snippet.
+      char name[32];
+      size_t nlen = (unsigned)::std::sprintf(name, "snippet #%lu", index);
+      ::cmdline.path.assign(name, nlen);
+
+      // The snippet might be a statement list or an expression.
+      // First, try parsing it as the former.
+      ::script.set_options(::options);
+      try {
+        ::script.reload_string(code, ::cmdline.path);
+      }
+      catch(Parser_Error& except) {
+        // We only want to make another attempt in the case of absence of a semicolon at the end.
+        bool retry = (except.status() == parser_status_semicolon_expected) &&
+                     (except.line() <= 0);
+        if(retry) {
+          // Rewrite the potential expression to a `return` statement.
+          code.insert(0, "return& ( ");
+          code.append(" );");
+          // Try parsing it again.
+          try {
+            ::script.reload_string(code, ::cmdline.path);
+          }
+          catch(Parser_Error& /*other*/) {
+            // If we fail again, it is the previous exception that we are interested in.
+            retry = false;
+          }
         }
-        if(ch == '\\') {
-          escape = true;
+        if(!retry) {
+          // Bail out upon irrecoverable errors.
+          ::fprintf(stderr, "! invalid script: %s\n", do_stringify(except).c_str());
           continue;
         }
       }
-      // Append the character.
-      code.push_back(static_cast<char>(ch));
-      escape = false;
-    }
-    if(::interrupted) {
-      // Discard this snippet. Recover the stream so we can read the next one.
-      (void)!::freopen(nullptr, "r", stdin);
-      ::fprintf(stderr, "! interrupted\n");
-      goto z;
-    }
-    if(code.empty()) {
-      goto z;
-    }
-
-    // Check for REPL commands.
-    if(code.front() == '\\') {
-      code.erase(0, 1);
-      do_handle_repl_command(::rocket::move(code));
-      goto z;
-    }
-
-    // Name the snippet.
-    char name[32];
-    size_t nlen = (unsigned)::std::sprintf(name, "snippet #%lu", index);
-    ::cmdline.path.assign(name, nlen);
-
-    // The snippet might be a statement list or an expression.
-    // First, try parsing it as the former.
-    ::script.set_options(::options);
-    try {
-      ::script.reload_string(code, ::cmdline.path);
-    }
-    catch(Parser_Error& except) {
-      // We only want to make another attempt in the case of absence of a semicolon at the end.
-      bool retry = (except.status() == parser_status_semicolon_expected) &&
-                   (except.line() <= 0);
-      if(retry) {
-        // Rewrite the potential expression to a `return` statement.
-        code.insert(0, "return& ( ");
-        code.append(" );");
-        // Try parsing it again.
-        try {
-          ::script.reload_string(code, ::cmdline.path);
-        }
-        catch(Parser_Error& /*other*/) {
-          // If we fail again, it is the previous exception that we are interested in.
-          retry = false;
-        }
+      // Execute the script as a function, which returns a `Reference`.
+      try {
+        const auto ref = ::script.execute(::global, ::rocket::move(::cmdline.args));
+        const auto& val = ref.read();
+        // Print the result.
+        ::fprintf(stderr, "* result #%lu: %s\n", index, do_stringify(val).c_str());
       }
-      if(!retry) {
-        // Bail out upon irrecoverable errors.
-        ::fprintf(stderr, "! invalid script: %s\n", do_stringify(except).c_str());
-        goto z;
+      catch(Runtime_Error& except) {
+        // If an exception was thrown, print something informative.
+        ::fprintf(stderr, "! runtime error: %s\n", do_stringify(except).c_str());
+        do_backtrace(except);
       }
-    }
-    // Execute the script as a function, which returns a `Reference`.
-    try {
-      const auto ref = ::script.execute(::global, ::rocket::move(::cmdline.args));
-      const auto& val = ref.read();
-      // Print the result.
-      ::fprintf(stderr, "* result #%lu: %s\n", index, do_stringify(val).c_str());
-    }
-    catch(Runtime_Error& except) {
-      // If an exception was thrown, print something informative.
-      ::fprintf(stderr, "! runtime error: %s\n", do_stringify(except).c_str());
-      do_backtrace(except);
-    }
-    catch(::std::exception& stdex) {
-      // If an exception was thrown, print something informative.
-      ::fprintf(stderr, "! unhandled exception: %s\n", do_stringify(stdex).c_str());
-    }
-    goto z;
+      catch(::std::exception& stdex) {
+        // If an exception was thrown, print something informative.
+        ::fprintf(stderr, "! unhandled exception: %s\n", do_stringify(stdex).c_str());
+      }
+    } while(true);
   }
 
 [[noreturn]] int do_single_noreturn()
