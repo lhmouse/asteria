@@ -384,9 +384,7 @@ void do_handle_repl_command(cow_string&& cmd)
     unsigned long index = 0;
     cow_string code;
 
-    // Clear output.
   z:
-    ::fputc('\n', stderr);
     // Check for exit condition.
     if(::ferror(stdin)) {
       ::fprintf(stderr, "! error reading standard input\n");
@@ -403,12 +401,14 @@ void do_handle_repl_command(cow_string&& cmd)
     bool escape = false;
     long line = 0;
     int indent;
-    ::fprintf(stderr, "#%lu:%lu%n> ", ++index, ++line, &indent);
+    ::fprintf(stderr, "\n#%lu:%lu%n> ", ++index, ++line, &indent);
 
     for(;;) {
       // Read a character. Break upon read errors.
       int ch = ::fgetc(stdin);
       if(ch == EOF) {
+        // Force-move the cursor to the next line.
+        ::fputc('\n', stderr);
         break;
       }
       if(ch == '\n') {
@@ -454,7 +454,7 @@ void do_handle_repl_command(cow_string&& cmd)
     if(::interrupted) {
       // Discard this snippet. Recover the stream so we can read the next one.
       (void)!::freopen(nullptr, "r", stdin);
-      ::fprintf(stderr, "\n! interrupted\n");
+      ::fprintf(stderr, "! interrupted\n");
       goto z;
     }
     if(code.empty()) {
