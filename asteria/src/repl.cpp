@@ -453,7 +453,7 @@ void do_handle_repl_command(cow_string&& cmd)
     }
     if(::interrupted) {
       // Discard this snippet. Recover the stream so we can read the next one.
-      ::clearerr(stdin);
+      (void)!::freopen(nullptr, "r", stdin);
       ::fprintf(stderr, "\n! interrupted\n");
       goto z;
     }
