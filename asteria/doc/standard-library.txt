@@ -58,19 +58,18 @@
 `std.debug.print(templ, ...)`
 
 	* Compose a `string` in the same way as `std.string.format()`,
-	  but instead of returning it, write it to the standard error
-	  stream. A line break is appended to terminate the line.
+	  but instead of returning it, write it to standard error. A line
+	  break is appended to terminate the line.
 
 	* Returns `true` if the operation succeeds, or `null` otherwise.
 
 `std.debug.dump(value, [indent])`
 
-	* Prints the value to the standard error stream with detailed
-	  information. `indent` specifies the number of spaces to use as
-	  a single level of indent. Its value is clamped between `0` and
-	  `10` inclusively. If it is set to `0`, no line break is
-	  inserted and output lines are not indented. It has a default
-	  value of `2`.
+	* Prints the value to standard error with detailed information.
+	  `indent` specifies the number of spaces to use as a single
+	  level of indent. Its value is clamped between `0` and `10`
+	  inclusively. If it is set to `0`, no line break is inserted and
+	  output lines are not indented. It has a default value of `2`.
 
 	* Returns `true` if the operation succeeds, or `null` otherwise.
 
