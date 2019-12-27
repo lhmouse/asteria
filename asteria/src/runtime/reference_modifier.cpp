@@ -48,6 +48,23 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
         return ::std::addressof(rit->second);
       }
 
+    case index_array_head: {
+        // We have to verify that the parent value is actually an `array` or `null`.
+        if(parent.is_null()) {
+          // Elements of a `null` are also `null`s.
+          return nullptr;
+        }
+        if(!parent.is_array()) {
+          ASTERIA_THROW("head subscript applied to non-array (parent `$1`)", parent);
+        }
+        const auto& arr = parent.as_array();
+        // Returns the last element.
+        if(arr.empty()) {
+          return nullptr;
+        }
+        return ::std::addressof(arr.front());
+      }
+
     case index_array_tail: {
         // We have to verify that the parent value is actually an `array` or `null`.
         if(parent.is_null()) {
@@ -129,6 +146,23 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
         return ::std::addressof(rit->second);
       }
 
+    case index_array_head: {
+        // We have to verify that the parent value is actually an `array` or `null`.
+        if(parent.is_null()) {
+          // Create elements as needed.
+          if(!create_new) {
+            return nullptr;
+          }
+          parent = G_array();
+        }
+        if(!parent.is_array()) {
+          ASTERIA_THROW("head subscript applied to non-array (parent `$1`)", parent);
+        }
+        auto& arr = parent.open_array();
+        // Append a new element to the end and return a pointer to it.
+        return ::std::addressof(arr.insert(0, null_value).mut_front());
+      }
+
     case index_array_tail: {
         // We have to verify that the parent value is actually an `array` or `null`.
         if(parent.is_null()) {
@@ -192,6 +226,25 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         }
         auto elem = ::rocket::move(rit->second);
         obj.erase(rit);
+        return elem;
+      }
+
+    case index_array_head: {
+        // We have to verify that the parent value is actually an `array` or `null`.
+        if(parent.is_null()) {
+          // There is nothing to erase.
+          return nullptr;
+        }
+        if(!parent.is_array()) {
+          ASTERIA_THROW("head subscript applied to non-array (parent `$1`)", parent);
+        }
+        auto& arr = parent.open_array();
+        // Erase the last element and return it.
+        if(arr.empty()) {
+          return nullptr;
+        }
+        auto elem = ::rocket::move(arr.mut_front());
+        arr.erase(0, 1);
         return elem;
       }
 

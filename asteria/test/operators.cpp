@@ -354,6 +354,21 @@ int main()
         assert null ?? null ?? 1 ?? null ?? 2 == 1;
 
         assert a == [1, 3];
+        assert a[^] == 1;
+        assert (a[^] = 'hello') == "hello";
+        assert a == ['hello', 1, 3];
+        assert unset a[^] == 'hello';
+        assert a == [1, 3];
+        assert unset a[^] == 1;
+        assert a == [3];
+        assert unset a[^] == 3;
+        assert a == [];
+        assert unset a[^] == null;
+
+        assert a == [];
+        assert (a[$] = 1) == 1;
+        assert (a[$] = 3) == 3;
+        assert a == [1, 3];
         assert a[$] == 3;
         assert (a[$] = 'meow') == "meow";
         assert a == [1, 3, 'meow'];

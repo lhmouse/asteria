@@ -19,6 +19,9 @@ class Reference_Modifier
       {
         phsh_string key;
       };
+    struct S_array_head
+      {
+      };
     struct S_array_tail
       {
       };
@@ -27,13 +30,15 @@ class Reference_Modifier
       {
         index_array_index  = 0,
         index_object_key   = 1,
-        index_array_tail   = 2,
+        index_array_head   = 2,
+        index_array_tail   = 3,
       };
     using Xvariant = variant<
       ROCKET_CDR(
       , S_array_index  // 0,
       , S_object_key   // 1,
-      , S_array_tail   // 2,
+      , S_array_head   // 2,
+      , S_array_tail   // 3,
       )>;
     static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
 

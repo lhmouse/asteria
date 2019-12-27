@@ -198,7 +198,7 @@ postfix-operator-list-opt ::=
 postfix-operator-list ::=
 	postfix-operator | postfix-function-call | postfix-subscript | postfix-member-access
 postfix-operator ::=
-	"++" | "--" | "[$]"
+	"++" | "--" | "[^]" | "[$]"
 postfix-function-call ::=
 	"(" argument-list-opt ")"
 argument-list ::=

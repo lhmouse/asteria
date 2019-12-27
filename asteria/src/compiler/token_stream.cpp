@@ -249,13 +249,12 @@ bool do_may_infix_operators_follow(cow_vector<Token>& tokens)
     if(p.is_keyword()) {
       // Infix operators may follow if the keyword denotes a value or reference.
       return ::rocket::is_any_of(p.as_keyword(),{ keyword_null, keyword_true, keyword_false,
-                                                keyword_nan, keyword_infinity, keyword_this });
+                                                  keyword_nan, keyword_infinity, keyword_this });
     }
     if(p.is_punctuator()) {
       // Infix operators may follow if the punctuator can terminate an expression.
-      return ::rocket::is_any_of(p.as_punctuator(), { punctuator_inc, punctuator_dec, punctuator_tail,
-                                                    punctuator_parenth_cl, punctuator_bracket_cl,
-                                                    punctuator_brace_cl });
+      return ::rocket::is_any_of(p.as_punctuator(), { punctuator_inc, punctuator_dec, punctuator_head, punctuator_tail,
+                                                      punctuator_parenth_cl, punctuator_bracket_cl, punctuator_brace_cl });
     }
     // Infix operators can follow.
     return true;
@@ -476,6 +475,7 @@ constexpr s_punctuators[] =
     { "?\?=",  punctuator_coales_eq   },
     { "[",     punctuator_bracket_op  },
     { "[$]",   punctuator_tail        },
+    { "[^]",   punctuator_head        },
     { "]",     punctuator_bracket_cl  },
     { "^",     punctuator_xorb        },
     { "^=",    punctuator_xorb_eq     },

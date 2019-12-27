@@ -1640,6 +1640,7 @@ constexpr s_postfix_operator_table[] =
   {
     { punctuator_inc,   xop_inc_post  },
     { punctuator_dec,   xop_dec_post  },
+    { punctuator_head,  xop_head      },
     { punctuator_tail,  xop_tail      },
   };
 
@@ -1651,7 +1652,7 @@ constexpr bool operator==(const Postfix_Operator_Element& lhs, Punctuator rhs) n
 bool do_accept_postfix_operator(cow_vector<Xprunit>& units, Token_Stream& tstrm)
   {
     // postfix-operator ::=
-    //   "++" | "--" | "[$]"
+    //   "++" | "--" | "[^]" | "[$]"
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
       return false;

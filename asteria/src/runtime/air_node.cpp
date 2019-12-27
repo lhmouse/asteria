@@ -2433,6 +2433,15 @@ AIR_Status do_apply_xop_TAIL(Executive_Context& ctx, ParamU /*pu*/, const void* 
     return air_status_next;
   }
 
+AIR_Status do_apply_xop_HEAD(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
+  {
+    // This operator is unary.
+    auto& lref = ctx.stack().open_top();
+    Reference_Modifier::S_array_head xmod = { };
+    lref.zoom_in(::rocket::move(xmod));
+    return air_status_next;
+  }
+
 AIR_Status do_unpack_struct_array(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
@@ -3359,6 +3368,9 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
           }
         case xop_fma_3: {
             return avmcp.output<do_apply_xop_FMA>(queue);
+          }
+        case xop_head: {
+            return avmcp.output<do_apply_xop_HEAD>(queue);
           }
         case xop_tail: {
             return avmcp.output<do_apply_xop_TAIL>(queue);

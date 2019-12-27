@@ -230,6 +230,9 @@ const char* stringify_punctuator(Punctuator punct) noexcept
     case punctuator_ellipsis: {
         return "...";
       }
+    case punctuator_head: {
+        return "[^]";
+      }
     case punctuator_tail: {
         return "[$]";
       }
