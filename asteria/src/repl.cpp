@@ -505,8 +505,9 @@ void do_handle_repl_command(cow_string&& cmd)
     // Execute the script as a function, which returns a `Reference`.
     try {
       const auto ref = ::script.execute(::global, ::rocket::move(::cmdline.args));
+      const auto& val = ref.read();
       // Print the result.
-      ::fprintf(stderr, "* result #%lu: %s\n", index, do_stringify(ref).c_str());
+      ::fprintf(stderr, "* result #%lu: %s\n", index, do_stringify(val).c_str());
     }
     catch(Runtime_Error& except) {
       // If an exception was thrown, print something informative.
