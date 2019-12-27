@@ -35,7 +35,7 @@
 
 	* Sets the threshold of the collector for `generation` to
 	  `threshold`. Valid values for `generation` are `0`, `1` and
-	  `2`. Valid values for `threshould` range from `0` to an
+	  `2`. Valid values for `threshold` range from `0` to an
 	  unspecified positive `integer`; overlarge values are capped
 	  silently without failure. A larger `threshold` makes garbage
 	  collection run less often but slower. Setting `threshold` to
@@ -956,7 +956,7 @@
 `std.array.count(data, target)`
 
 	* Searches `data` for `target` and figures the total number of
-	  occurences.
+	  occurrences.
 
 	* Returns the number of occurrences as an `integer`, which is
 	  always non-negative.
@@ -964,7 +964,7 @@
 `std.array.count(data, from, target)`
 
 	* Searches `data` for `target` and figures the total number of
-	  occurences. The search operation is performed on the same
+	  occurrences. The search operation is performed on the same
 	  subrange that would be returned by `slice(data, from)`.
 
 	* Returns the number of occurrences as an `integer`, which is
@@ -973,7 +973,7 @@
 `std.array.count(data, from, [length], target)`
 
 	* Searches `data` for `target` and figures the total number of
-	  occurences. The search operation is performed on the same
+	  occurrences. The search operation is performed on the same
 	  subrange that would be returned by `slice(data, from, length)`.
 
 	* Returns the number of occurrences as an `integer`, which is
@@ -983,7 +983,7 @@
 
 	* Searches every element, namely `x`, in `data`, for which
 	  `predictor(x)` yields logically true, and figures the total
-	  number of such occurences.
+	  number of such occurrences.
 
 	* Returns the number of occurrences as an `integer`, which is
 	  always non-negative.
@@ -1013,7 +1013,7 @@
 
 	* Searches every element, namely `x`, in `data`, for which
 	  `predictor(x)` yields logically false, and figures the total
-	  number of such occurences.
+	  number of such occurrences.
 
 	* Returns the number of occurrences as an `integer`, which is
 	  always non-negative.

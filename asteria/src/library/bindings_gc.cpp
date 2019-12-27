@@ -161,7 +161,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
           "\n"
           "  * Sets the threshold of the collector for `generation` to\n"
           "    `threshold`. Valid values for `generation` are `0`, `1` and\n"
-          "    `2`. Valid values for `threshould` range from `0` to an\n"
+          "    `2`. Valid values for `threshold` range from `0` to an\n"
           "    unspecified positive `integer`; overlarge values are capped\n"
           "    silently without failure. A larger `threshold` makes garbage\n"
           "    collection run less often but slower. Setting `threshold` to\n"
