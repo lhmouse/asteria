@@ -152,7 +152,7 @@ struct REPL_Hooks : Abstract_Hooks
     void on_variable_declare(const Source_Location& sloc, const cow_string& inside,
                              const phsh_string& name) noexcept override
       {
-        if(ROCKET_EXPECT(!::cmdline.verbose)) {
+        if(ROCKET_EXPECT(!cmdline.verbose)) {
           return;
         }
         ::fprintf(stderr, "~ running: ['%s:%ld' inside `%s`] declaring variable: %s\n",
@@ -162,7 +162,7 @@ struct REPL_Hooks : Abstract_Hooks
     void on_function_call(const Source_Location& sloc, const cow_string& inside,
                           const ckptr<Abstract_Function>& target) noexcept override
       {
-        if(ROCKET_EXPECT(!::cmdline.verbose)) {
+        if(ROCKET_EXPECT(!cmdline.verbose)) {
           return;
         }
         ::fprintf(stderr, "~ running: ['%s:%ld' inside `%s`] initiating function call: %s\n",
@@ -172,7 +172,7 @@ struct REPL_Hooks : Abstract_Hooks
     void on_function_return(const Source_Location& sloc, const cow_string& inside,
                             const Reference& result) noexcept override
       {
-        if(ROCKET_EXPECT(!::cmdline.verbose)) {
+        if(ROCKET_EXPECT(!cmdline.verbose)) {
           return;
         }
         ::fprintf(stderr, "~ running: ['%s:%ld' inside `%s`] returned from function call: %s\n",
@@ -182,7 +182,7 @@ struct REPL_Hooks : Abstract_Hooks
     void on_function_except(const Source_Location& sloc, const cow_string& inside,
                             const Runtime_Error& except) noexcept override
       {
-        if(ROCKET_EXPECT(!::cmdline.verbose)) {
+        if(ROCKET_EXPECT(!cmdline.verbose)) {
           return;
         }
         ::fprintf(stderr, "~ running: ['%s:%ld' inside `%s`] caught exception from function call: %s\n",
@@ -192,97 +192,14 @@ struct REPL_Hooks : Abstract_Hooks
     void on_single_step_trap(const Source_Location& sloc, const cow_string& inside,
                              Executive_Context* /*ctx*/) override
       {
-        if(ROCKET_EXPECT(!::interrupted)) {
+        if(ROCKET_EXPECT(!interrupted)) {
           return;
         }
         ASTERIA_THROW("interrupt received\n[received at '$1' inside `$2`]", sloc, inside);
       }
   };
 
-void do_parse_command_line(int argc, char** argv)
-  {
-    opt<bool> help;
-    opt<bool> version;
-    opt<long> optimize;
-    opt<bool> verbose;
-    opt<bool> interactive;
-    opt<cow_string> path;
-    cow_vector<Value> args;
-
-    for(;;) {
-      int ch = ::getopt(argc, argv, "+hIiO::Vv");
-      if(ch == -1) {
-        // There are no more arguments.
-        break;
-      }
-      switch(ch) {
-      case 'h': {
-          help = true;
-          break;
-        }
-      case 'I': {
-          interactive = false;
-          break;
-        }
-      case 'i': {
-          interactive = true;
-          break;
-        }
-      case 'O': {
-          // If `-O` is specified without an argument, it is equivalent to `-O1`.
-          const char* arg = ::optarg;
-          if(!arg || !*arg) {
-            optimize = 1;
-            break;
-          }
-          // Parse the level.
-          char* eptr;
-          long ival = ::strtol(arg, &eptr, 10);
-          if((*eptr != 0) || (ival < 0) || (ival > 99)) {
-            ::fprintf(stderr, "%s: invalid optimization level -- '%s'\n", argv[0], arg);
-            do_quick_exit(exit_invalid_argument);
-          }
-          optimize = ival;
-          break;
-        }
-      case 'V': {
-          version = true;
-          break;
-        }
-      case 'v': {
-          verbose = true;
-          break;
-        }
-      default:
-        // `getopt()` will have written an error message to standard error.
-        ::fprintf(stderr, "Try `%s -h` for help.\n", argv[0]);
-        do_quick_exit(exit_invalid_argument);
-      }
-    }
-    if(::optind < argc) {
-      // The first non-option argument is the filename to execute. `-` is not special.
-      path = G_string(argv[::optind]);
-      // All subsequent arguments are passed to the script verbatim.
-      ::std::for_each(argv + ::optind + 1, argv + argc,
-                      [&](const char* arg) { args.emplace_back(G_string(arg));  });
-    }
-
-    // Copy options into `*this`.
-    ::cmdline.help = help.value_or(false);
-    ::cmdline.version = version.value_or(false);
-    // The default optimization level is `2`.
-    // Note again that `-O` without an argument is equivalent to `-O1`, which effectively decreases
-    // optimization in comparison to when it wasn't specified.
-    ::cmdline.optimize = static_cast<uint8_t>(::rocket::clamp(optimize.value_or(2), 0, UINT8_MAX));
-    ::cmdline.verbose = verbose.value_or(false);
-    // Interactive mode is enabled when no FILE is given (not even `-`) and standard input is
-    // connected to a terminal.
-    ::cmdline.interactive = interactive ? *interactive : (!path && ::isatty(STDIN_FILENO));
-    ::cmdline.path = path.move_value_or(::rocket::sref("-"));
-    ::cmdline.args = ::rocket::move(args);
-  }
-
-[[noreturn]] int do_print_help_and_exit(const char* self)
+void do_print_help(const char* self)
   {
     ::printf(
       //        1         2         3         4         5         6         7      |
@@ -323,10 +240,9 @@ void do_parse_command_line(int argc, char** argv)
       PACKAGE_URL,
       PACKAGE_BUGREPORT
     );
-    do_quick_exit(exit_success);
   }
 
-[[noreturn]] int do_print_version_and_exit()
+void do_print_version()
   {
     ::printf(
       //        1         2         3         4         5         6         7      |
@@ -342,14 +258,112 @@ void do_parse_command_line(int argc, char** argv)
       PACKAGE_URL,
       PACKAGE_BUGREPORT
     );
-    do_quick_exit(exit_success);
+  }
+
+void do_parse_command_line(int argc, char** argv)
+  {
+    bool help = false;
+    bool version = false;
+
+    opt<long> optimize;
+    opt<bool> verbose;
+    opt<bool> interactive;
+    opt<cow_string> path;
+    cow_vector<Value> args;
+
+    if(argc > 1) {
+      // Rewrite some common options before calling `getopt()`.
+      if(::strcmp(argv[1], "--help") == 0) {
+        ::strcpy(argv[1], "-h");
+      }
+      else if(::strcmp(argv[1], "--version") == 0) {
+        ::strcpy(argv[1], "-V");
+      }
+    }
+    for(;;) {
+      int ch = ::getopt(argc, argv, "+hIiO::Vv");
+      if(ch == -1) {
+        // There are no more arguments.
+        break;
+      }
+      switch(ch) {
+      case 'h': {
+          help = true;
+          break;
+        }
+      case 'I': {
+          interactive = false;
+          break;
+        }
+      case 'i': {
+          interactive = true;
+          break;
+        }
+      case 'O': {
+          // If `-O` is specified without an argument, it is equivalent to `-O1`.
+          if(!optarg || !*optarg) {
+            optimize = 1;
+            break;
+          }
+          // Parse the level.
+          char* ep;
+          long val = ::strtol(optarg, &ep, 10);
+          if((*ep != 0) || (val < 0) || (val > 99)) {
+            ::fprintf(stderr, "%s: invalid optimization level -- '%s'\n", argv[0], optarg);
+            do_quick_exit(exit_invalid_argument);
+          }
+          optimize = val;
+          break;
+        }
+      case 'V': {
+          version = true;
+          break;
+        }
+      case 'v': {
+          verbose = true;
+          break;
+        }
+      default:
+        // `getopt()` will have written an error message to standard error.
+        ::fprintf(stderr, "Try `%s -h` for help.\n", argv[0]);
+        do_quick_exit(exit_invalid_argument);
+      }
+    }
+    // Check for early exit conditions.
+    if(help) {
+      do_print_help(argv[0]);
+      do_quick_exit(exit_success);
+    }
+    if(version) {
+      do_print_version();
+      do_quick_exit(exit_success);
+    }
+    // If more arguments follow, they denote the script to execute.
+    if(optind < argc) {
+      // The first non-option argument is the filename to execute. `-` is not special.
+      path = G_string(argv[optind]);
+      // All subsequent arguments are passed to the script verbatim.
+      ::std::for_each(argv + optind + 1, argv + argc,
+                      [&](const char* arg) { args.emplace_back(G_string(arg));  });
+    }
+
+    // The default optimization level is `2`.
+    // Note again that `-O` without an argument is equivalent to `-O1`, which effectively decreases
+    // optimization in comparison to when it wasn't specified.
+    cmdline.optimize = static_cast<uint8_t>(::rocket::clamp(optimize.value_or(2), 0, UINT8_MAX));
+    cmdline.verbose = verbose.value_or(false);
+    // Interactive mode is enabled when no FILE is given (not even `-`) and standard input is
+    // connected to a terminal.
+    cmdline.interactive = interactive ? *interactive : (!path && ::isatty(STDIN_FILENO));
+    cmdline.path = path.move_value_or(::rocket::sref("-"));
+    cmdline.args = ::rocket::move(args);
   }
 
 void do_trap_sigint()
   {
     // Trap Ctrl-C. Failure to set the signal handler is ignored.
     struct ::sigaction sa = { };
-    sa.sa_handler = [](int) { ::interrupted = 1;  };
+    sa.sa_handler = [](int) { interrupted = 1;  };
     sa.sa_flags = 0;  // non-restartable
     ::sigaction(SIGINT, &sa, nullptr);
   }
@@ -396,7 +410,7 @@ void do_handle_repl_command(cow_string&& cmd)
       }
       // Move on and read the next snippet.
       code.clear();
-      ::interrupted = 0;
+      interrupted = 0;
       // Prompt for the first line.
       bool escape = false;
       long line = 0;
@@ -451,7 +465,7 @@ void do_handle_repl_command(cow_string&& cmd)
         code.push_back(static_cast<char>(ch));
         escape = false;
       }
-      if(::interrupted) {
+      if(interrupted) {
         // Discard this snippet. Recover the stream so we can read the next one.
         (void)!::freopen(nullptr, "r", stdin);
         ::fprintf(stderr, "! interrupted\n");
@@ -471,13 +485,13 @@ void do_handle_repl_command(cow_string&& cmd)
       // Name the snippet.
       char name[32];
       size_t nlen = (unsigned)::std::sprintf(name, "snippet #%lu", index);
-      ::cmdline.path.assign(name, nlen);
+      cmdline.path.assign(name, nlen);
 
       // The snippet might be a statement list or an expression.
       // First, try parsing it as the former.
-      ::script.set_options(::options);
+      script.set_options(options);
       try {
-        ::script.reload_string(code, ::cmdline.path);
+        script.reload_string(code, cmdline.path);
       }
       catch(Parser_Error& except) {
         // We only want to make another attempt in the case of absence of a semicolon at the end.
@@ -489,7 +503,7 @@ void do_handle_repl_command(cow_string&& cmd)
           code.append(" );");
           // Try parsing it again.
           try {
-            ::script.reload_string(code, ::cmdline.path);
+            script.reload_string(code, cmdline.path);
           }
           catch(Parser_Error& /*other*/) {
             // If we fail again, it is the previous exception that we are interested in.
@@ -504,7 +518,7 @@ void do_handle_repl_command(cow_string&& cmd)
       }
       // Execute the script as a function, which returns a `Reference`.
       try {
-        const auto ref = ::script.execute(::global, ::rocket::move(::cmdline.args));
+        const auto ref = script.execute(global, ::rocket::move(cmdline.args));
         const auto& val = ref.read();
         // Print the result.
         ::fprintf(stderr, "* result #%lu: %s\n", index, do_stringify(val).c_str());
@@ -524,12 +538,12 @@ void do_handle_repl_command(cow_string&& cmd)
 [[noreturn]] int do_single_noreturn()
   {
     // Consume all data from standard input.
-    ::script.set_options(::options);
+    script.set_options(options);
     try {
-      if(::cmdline.path == "-")
-        ::script.reload_stdin();
+      if(cmdline.path == "-")
+        script.reload_stdin();
       else
-        ::script.reload_file(::cmdline.path);
+        script.reload_file(cmdline.path);
     }
     catch(Parser_Error& except) {
       // Report the error and exit.
@@ -540,7 +554,7 @@ void do_handle_repl_command(cow_string&& cmd)
     // Execute the script.
     Exit_Code status = exit_runtime_error;
     try {
-      const auto ref = ::script.execute(::global, ::rocket::move(::cmdline.args));
+      const auto ref = script.execute(global, ::rocket::move(cmdline.args));
       const auto& val = ref.read();
       // If the script returned an `integer`, forward its lower 8 bits.
       // Otherwise, `null` indicates success and all other values indicate failure.
@@ -568,14 +582,6 @@ int main(int argc, char** argv)
     // Note that this function shall not return in case of errors.
     do_parse_command_line(argc, argv);
 
-    // Check for early exit conditions.
-    if(::cmdline.help) {
-      do_print_help_and_exit(argv[0]);
-    }
-    if(::cmdline.version) {
-      do_print_version_and_exit();
-    }
-
     // Set up runtime hooks. This is sticky.
     global.set_hooks(::rocket::make_refcnt<REPL_Hooks>());
     // Protect against stack overflows.
@@ -583,7 +589,7 @@ int main(int argc, char** argv)
 
     // Call other functions which are declared `noreturn`. `main()` itself is not `noreturn` so we
     // don't get stupid warngings like 'function declared `noreturn` has a `return` statement'.
-    if(::cmdline.interactive)
+    if(cmdline.interactive)
       do_repl_noreturn();
     else
       do_single_noreturn();
