@@ -409,13 +409,14 @@ void do_handle_repl_command(cow_string&& cmd)
         do_quick_exit(exit_success);
       }
       // Move on and read the next snippet.
+      ::fputc('\n', stderr);
       code.clear();
       interrupted = 0;
       // Prompt for the first line.
       bool escape = false;
       long line = 0;
       int indent;
-      ::fprintf(stderr, "\n#%lu:%lu%n> ", ++index, ++line, &indent);
+      ::fprintf(stderr, "#%lu:%lu%n> ", ++index, ++line, &indent);
 
       for(;;) {
         // Read a character. Break upon read errors.
