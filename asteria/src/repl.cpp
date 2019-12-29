@@ -48,6 +48,7 @@ cow_string do_xindent(cow_string&& str)
 cow_string do_stringify(const Value& val) noexcept
   try {
     ::rocket::tinyfmt_str fmt;
+
     fmt << val;
     return do_xindent(fmt.extract_string());
   }
@@ -58,19 +59,23 @@ cow_string do_stringify(const Value& val) noexcept
 cow_string do_stringify(const Reference& ref) noexcept
   try {
     ::rocket::tinyfmt_str fmt;
+
     auto var = ref.get_variable_opt();
-    if(var)
+    if(var) {
       if(var->is_immutable())
         fmt << "immutable variable: ";
       else
         fmt << "variable: ";
-    else
+    }
+    else {
       if(ref.is_constant())
         fmt << "constant: ";
       else if(ref.is_temporary())
         fmt << "temporary: ";
       else
         return ::rocket::sref("<tail call>");
+    }
+
     fmt << ref.read();
     return do_xindent(fmt.extract_string());
   }
@@ -78,24 +83,12 @@ cow_string do_stringify(const Reference& ref) noexcept
     return ::rocket::sref("<invalid reference>");
   }
 
-cow_string do_stringify(const Runtime_Error& except) noexcept
-  try {
-    ::rocket::tinyfmt_str fmt;
-    if(except.value().is_string())
-      fmt << except.value().as_string();
-    else
-      fmt << except.value();
-    fmt << "\n[exception class `" << typeid(except).name() << "`]";
-    return do_xindent(fmt.extract_string());
-  }
-  catch(::std::exception& other) {
-    return ::rocket::sref("<invalid exception>");
-  }
-
 cow_string do_stringify(const ::std::exception& stdex) noexcept
   try {
     ::rocket::tinyfmt_str fmt;
+
     fmt << stdex.what();
+
     fmt << "\n[exception class `" << typeid(stdex).name() << "`]";
     return do_xindent(fmt.extract_string());
   }
@@ -103,24 +96,43 @@ cow_string do_stringify(const ::std::exception& stdex) noexcept
     return ::rocket::sref("<invalid exception>");
   }
 
-int do_backtrace(const Runtime_Error& except) noexcept
+cow_string do_stringify(const Parser_Error& except) noexcept
   try {
     ::rocket::tinyfmt_str fmt;
-    ::fprintf(stderr, "\t-- backtrace:\n");
+
+    fmt << "ERROR " << except.status() << ": " << describe_parser_status(except.status());
+
+    if(except.line() <= 0)
+      fmt << "\n[end of input encountered]";
+    else
+      fmt << "\n[line " << except.line() << ", offset " << except.offset() << ", length " << except.length() << "]";
+
+    fmt << "\n[exception class `" << typeid(except).name() << "`]";
+    return do_xindent(fmt.extract_string());
+  }
+  catch(::std::exception& other) {
+    return ::rocket::sref("<invalid exception>");
+  }
+
+cow_string do_stringify(const Runtime_Error& except) noexcept
+  try {
+    ::rocket::tinyfmt_str fmt;
+
+    if(except.value().is_string())
+      fmt << except.value().as_string();
+    else
+      fmt << except.value();
+
     for(unsigned long i = 0; i != except.count_frames(); ++i) {
       const auto& f = except.frame(i);
-      // Format the value.
-      fmt.clear_string();
-      fmt << f.value();
-      // Print a line of backtrace.
-      ::fprintf(stderr, "\t * [%lu] %s:%ld (%s) -- %s\n",
-                        i, f.sloc().c_file(), f.sloc().line(), f.what_type(),
-                        fmt.get_c_string());
+      fmt << "\n[frame #" << i << ": <" << f.what_type() << "> at '" << f.sloc() << "': " << f.value() << "]";
     }
-    return ::fprintf(stderr, "\t-- end of backtrace\n");
+
+    fmt << "\n[exception class `" << typeid(except).name() << "`]";
+    return do_xindent(fmt.extract_string());
   }
-  catch(::std::exception& stdex) {
-    return ::fprintf(stderr, "\t-- no backtrace available\n");
+  catch(::std::exception& other) {
+    return ::rocket::sref("<invalid exception>");
   }
 
 // Define command-line options here.
@@ -513,7 +525,7 @@ void do_handle_repl_command(cow_string&& cmd)
         }
         if(!retry) {
           // Bail out upon irrecoverable errors.
-          ::fprintf(stderr, "! invalid script: %s\n", do_stringify(except).c_str());
+          ::fprintf(stderr, "! parser error: %s\n", do_stringify(except).c_str());
           continue;
         }
       }
@@ -527,7 +539,6 @@ void do_handle_repl_command(cow_string&& cmd)
       catch(Runtime_Error& except) {
         // If an exception was thrown, print something informative.
         ::fprintf(stderr, "! runtime error: %s\n", do_stringify(except).c_str());
-        do_backtrace(except);
       }
       catch(::std::exception& stdex) {
         // If an exception was thrown, print something informative.
@@ -548,7 +559,7 @@ void do_handle_repl_command(cow_string&& cmd)
     }
     catch(Parser_Error& except) {
       // Report the error and exit.
-      ::fprintf(stderr, "! invalid script: %s\n", do_stringify(except).c_str());
+      ::fprintf(stderr, "! parser error: %s\n", do_stringify(except).c_str());
       do_quick_exit(exit_parser_error);
     }
 
@@ -567,7 +578,6 @@ void do_handle_repl_command(cow_string&& cmd)
     catch(Runtime_Error& except) {
       // If an exception was thrown, print something informative.
       ::fprintf(stderr, "! runtime error: %s\n", do_stringify(except).c_str());
-      do_backtrace(except);
     }
     catch(::std::exception& stdex) {
       // If an exception was thrown, print something informative.
