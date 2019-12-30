@@ -1172,7 +1172,7 @@
 `std.array.reverse(data)`
 
 	* Reverses an `array`. This function returns a new `array`
-	  without modifying `text`.
+	  without modifying `data`.
 
 	* Returns the reversed `array`.
 

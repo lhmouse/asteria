@@ -11,11 +11,11 @@
 namespace Asteria {
 namespace {
 
-pair<G_array::const_iterator, G_array::const_iterator> do_slice(const G_array& text, G_array::const_iterator tbegin, const opt<G_integer>& length)
+pair<G_array::const_iterator, G_array::const_iterator> do_slice(const G_array& data, G_array::const_iterator tbegin, const opt<G_integer>& length)
   {
-    if(!length || (*length >= text.end() - tbegin)) {
+    if(!length || (*length >= data.end() - tbegin)) {
       // Get the subrange from `tbegin` to the end.
-      return ::std::make_pair(tbegin, text.end());
+      return ::std::make_pair(tbegin, data.end());
     }
     if(*length <= 0) {
       // Return an empty range.
@@ -24,34 +24,35 @@ pair<G_array::const_iterator, G_array::const_iterator> do_slice(const G_array& t
     // Don't go past the end.
     return ::std::make_pair(tbegin, tbegin + static_cast<ptrdiff_t>(*length));
   }
-pair<G_array::const_iterator, G_array::const_iterator> do_slice(const G_array& text, const G_integer& from, const opt<G_integer>& length)
+
+pair<G_array::const_iterator, G_array::const_iterator> do_slice(const G_array& data, const G_integer& from, const opt<G_integer>& length)
   {
-    auto slen = static_cast<int64_t>(text.size());
+    auto slen = static_cast<int64_t>(data.size());
     if(from >= 0) {
-      // Behave like `::std::string::substr()` except that no exception is thrown when `from` is greater than `text.size()`.
+      // Behave like `::std::string::substr()` except that no exception is thrown when `from` is greater than `data.size()`.
       if(from >= slen) {
-        return ::std::make_pair(text.end(), text.end());
+        return ::std::make_pair(data.end(), data.end());
       }
-      return do_slice(text, text.begin() + static_cast<ptrdiff_t>(from), length);
+      return do_slice(data, data.begin() + static_cast<ptrdiff_t>(from), length);
     }
     // Wrap `from` from the end. Notice that `from + slen` will not overflow when `from` is negative and `slen` is not.
     auto rfrom = from + slen;
     if(rfrom >= 0) {
       // Get a subrange from the wrapped index.
-      return do_slice(text, text.begin() + static_cast<ptrdiff_t>(rfrom), length);
+      return do_slice(data, data.begin() + static_cast<ptrdiff_t>(rfrom), length);
     }
-    // Get a subrange from the beginning of `text`, if the wrapped index is before the first byte.
+    // Get a subrange from the beginning of `data`, if the wrapped index is before the first byte.
     if(!length) {
       // Get the subrange from the beginning to the end.
-      return ::std::make_pair(text.begin(), text.end());
+      return ::std::make_pair(data.begin(), data.end());
     }
     if(*length <= 0) {
       // Return an empty range.
-      return ::std::make_pair(text.begin(), text.begin());
+      return ::std::make_pair(data.begin(), data.begin());
     }
     // Get a subrange excluding the part before the beginning.
     // Notice that `rfrom + *length` will not overflow when `rfrom` is negative and `*length` is not.
-    return do_slice(text, text.begin(), rfrom + *length);
+    return do_slice(data, data.begin(), rfrom + *length);
   }
 
 template<typename IteratorT> opt<IteratorT> do_find_opt(IteratorT begin, IteratorT end, const Value& target)
@@ -1880,7 +1881,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "`std.array.reverse(data)`\n"
           "\n"
           "  * Reverses an `array`. This function returns a new `array`\n"
-          "    without modifying `text`.\n"
+          "    without modifying `data`.\n"
           "\n"
           "  * Returns the reversed `array`.\n"
         ),
