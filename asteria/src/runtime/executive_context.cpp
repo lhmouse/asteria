@@ -63,7 +63,7 @@ Reference* Executive_Context::do_lazy_lookup_opt(Reference_Dictionary& named_ref
     // N.B. If you have ever changed these, remember to update 'analytic_context.cpp' as well.
     if(name == "__func") {
       auto& ref = named_refs.open(::rocket::sref("__func"));
-      Reference_Root::S_constant xref = { G_string(this->m_zvarg->func()) };
+      Reference_Root::S_constant xref = { this->m_zvarg->func() };
       ref = ::rocket::move(xref);
       return &ref;
     }
@@ -75,11 +75,13 @@ Reference* Executive_Context::do_lazy_lookup_opt(Reference_Dictionary& named_ref
     }
     if(name == "__varg") {
       auto& ref = named_refs.open(::rocket::sref("__varg"));
-      auto varg = this->m_zvarg;
-      if(!this->m_args_opt->empty())
+      ckptr<Abstract_Function> varg;
+      if(ROCKET_EXPECT(this->m_args_opt->empty()))
+        varg = this->m_zvarg;
+      else
         varg = ::rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg), ::rocket::move(*(this->m_args_opt)));
       this->m_args_opt.reset();
-      Reference_Root::S_constant xref = { G_function(::rocket::move(varg)) };
+      Reference_Root::S_constant xref = { ::rocket::move(varg) };
       ref = ::rocket::move(xref);
       return &ref;
     }
