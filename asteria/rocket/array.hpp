@@ -178,6 +178,12 @@ template<typename valueT, size_t capacityT, size_t... nestedT> class array
         }
         return this->mut_data()[pos];
       }
+    reference operator[](size_type pos) noexcept
+      {
+        auto cnt = this->size();
+        ROCKET_ASSERT(pos < cnt);
+        return this->mut_data()[pos];
+      }
     // N.B. This is a non-standard extension.
     reference mut_front()
       {
