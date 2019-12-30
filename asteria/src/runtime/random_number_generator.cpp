@@ -36,7 +36,7 @@ size_t do_read_random_device(void* data, size_t size) noexcept
 class Scrambler
   {
   private:
-    ::std::array<uint32_t, 8> m_regs;
+    array<uint32_t, 8> m_regs;
 
   public:
     Scrambler() noexcept
