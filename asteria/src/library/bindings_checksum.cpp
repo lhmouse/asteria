@@ -138,11 +138,11 @@ constexpr auto s_hexdigits = do_generate_hexdigits_impl(::std::make_index_sequen
 template<bool bigendT, typename WordT> G_string& do_pdigits_impl(G_string& str, const WordT& ref)
   {
     static_assert(::std::is_unsigned<WordT>::value, "");
-    ::std::array<uint8_t, sizeof(WordT)> stor_le;
+    array<uint8_t, sizeof(WordT)> stor_le;
     uint64_t word = static_cast<uint64_t>(ref);
     // Write the word in little-endian order.
-    for(uint8_t& byte : stor_le) {
-      byte = word & 0xFF;
+    for(size_t i = 0; i != stor_le.size(); ++i) {
+      stor_le[i] = word & 0xFF;
       word >>= 8;
     }
     // Append hexadecimal digits.
@@ -166,13 +166,13 @@ template<typename WordT> G_string& do_pdigits_le(G_string& str, const WordT& ref
 template<bool bigendT, typename WordT> WordT& do_load_impl(WordT& ref, const uint8_t* ptr)
   {
     static_assert(::std::is_unsigned<WordT>::value, "");
-    ::std::array<uint8_t, sizeof(WordT)> stor_be;
+    array<uint8_t, sizeof(WordT)> stor_be;
     uint64_t word = 0;
     // Re-arrange bytes.
     if(bigendT)
-      ::std::copy_n(ptr, stor_be.size(), stor_be.begin());
+      ::std::copy_n(ptr, stor_be.size(), stor_be.mut_begin());
     else
-      ::std::copy_n(ptr, stor_be.size(), stor_be.rbegin());
+      ::std::copy_n(ptr, stor_be.size(), stor_be.mut_rbegin());
     // Assemble the word.
     for(uint8_t byte : stor_be) {
       word <<= 8;
@@ -199,7 +199,7 @@ template<typename WordT> constexpr WordT do_rotl(const WordT& ref, size_t bits)
   }
 
 template<typename WordT, size_t sizeT>
-    inline void do_padd(::std::array<WordT, sizeT>& lhs, const ::std::array<WordT, sizeT>& rhs)
+    inline void do_padd(array<WordT, sizeT>& lhs, const array<WordT, sizeT>& rhs)
   {
     ::rocket::ranged_for(size_t(0), sizeT, [&](size_t i) { lhs[i] += rhs[i];  });
   }
@@ -207,14 +207,14 @@ template<typename WordT, size_t sizeT>
 class MD5_Hasher final : public Abstract_Opaque
   {
   private:
-    static constexpr ::std::array<uint32_t, 4> init() noexcept
+    static constexpr array<uint32_t, 4> init() noexcept
       {
         return { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476 };
       }
 
-    ::std::array<uint32_t, 4> m_regs = init();
+    array<uint32_t, 4> m_regs = init();
     uint64_t m_size = 0;
-    ::std::array<uint8_t, 64> m_chunk;
+    array<uint8_t, 64> m_chunk;
 
   public:
     MD5_Hasher() noexcept
@@ -343,8 +343,8 @@ class MD5_Hasher final : public Abstract_Opaque
       {
         auto bp = reinterpret_cast<const uint8_t*>(data.data());
         auto ep = bp + data.size();
-        auto bc = this->m_chunk.begin() + static_cast<ptrdiff_t>(this->m_size % 64);
-        auto ec = this->m_chunk.end();
+        auto bc = this->m_chunk.mut_begin() + this->m_size % 64;
+        auto ec = this->m_chunk.mut_end();
         ptrdiff_t n;
         // If the last chunk was not empty, ...
         if(bc != this->m_chunk.begin()) {
@@ -362,7 +362,7 @@ class MD5_Hasher final : public Abstract_Opaque
           // Consume the last chunk.
           ROCKET_ASSERT(this->m_size % 64 == 0);
           this->do_consume_chunk(this->m_chunk.data());
-          bc = this->m_chunk.begin();
+          bc = this->m_chunk.mut_begin();
         }
         // Consume as many chunks as possible; don't bother copying them.
         while(ep - bp >= 64) {
@@ -384,8 +384,8 @@ class MD5_Hasher final : public Abstract_Opaque
     G_string finish() noexcept
       {
         // Finalize the hasher.
-        auto bc = this->m_chunk.begin() + static_cast<ptrdiff_t>(this->m_size % 64);
-        auto ec = this->m_chunk.end();
+        auto bc = this->m_chunk.mut_begin() + this->m_size % 64;
+        auto ec = this->m_chunk.mut_end();
         ptrdiff_t n;
         // Append a `0x80` byte followed by zeroes.
         *(bc++) = 0x80;
@@ -394,7 +394,7 @@ class MD5_Hasher final : public Abstract_Opaque
           // Wrap.
           ::std::fill_n(bc, n, 0);
           this->do_consume_chunk(this->m_chunk.data());
-          bc = this->m_chunk.begin();
+          bc = this->m_chunk.mut_begin();
         }
         n = ec - bc - 8;
         if(n > 0) {
@@ -424,14 +424,14 @@ class MD5_Hasher final : public Abstract_Opaque
 class SHA1_Hasher final : public Abstract_Opaque
   {
   private:
-    static constexpr ::std::array<uint32_t, 5> init() noexcept
+    static constexpr array<uint32_t, 5> init() noexcept
       {
         return { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 };
       }
 
-    ::std::array<uint32_t, 5> m_regs = init();
+    array<uint32_t, 5> m_regs = init();
     uint64_t m_size = 0;
-    ::std::array<uint8_t, 64> m_chunk;
+    array<uint8_t, 64> m_chunk;
 
   public:
     SHA1_Hasher() noexcept
@@ -441,7 +441,7 @@ class SHA1_Hasher final : public Abstract_Opaque
   private:
     void do_consume_chunk(const uint8_t* p) noexcept
       {
-        ::std::array<uint32_t, 80> w;
+        array<uint32_t, 80> w;
         uint32_t f, k;
         // https://en.wikipedia.org/wiki/SHA-1
         for(size_t i =  0; i < 16; ++i) {
@@ -584,8 +584,8 @@ class SHA1_Hasher final : public Abstract_Opaque
       {
         auto bp = reinterpret_cast<const uint8_t*>(data.data());
         auto ep = bp + data.size();
-        auto bc = this->m_chunk.begin() + static_cast<ptrdiff_t>(this->m_size % 64);
-        auto ec = this->m_chunk.end();
+        auto bc = this->m_chunk.mut_begin() + this->m_size % 64;
+        auto ec = this->m_chunk.mut_end();
         ptrdiff_t n;
         // If the last chunk was not empty, ...
         if(bc != this->m_chunk.begin()) {
@@ -603,7 +603,7 @@ class SHA1_Hasher final : public Abstract_Opaque
           // Consume the last chunk.
           ROCKET_ASSERT(this->m_size % 64 == 0);
           this->do_consume_chunk(this->m_chunk.data());
-          bc = this->m_chunk.begin();
+          bc = this->m_chunk.mut_begin();
         }
         // Consume as many chunks as possible; don't bother copying them.
         while(ep - bp >= 64) {
@@ -625,8 +625,8 @@ class SHA1_Hasher final : public Abstract_Opaque
     G_string finish() noexcept
       {
         // Finalize the hasher.
-        auto bc = this->m_chunk.begin() + static_cast<ptrdiff_t>(this->m_size % 64);
-        auto ec = this->m_chunk.end();
+        auto bc = this->m_chunk.mut_begin() + this->m_size % 64;
+        auto ec = this->m_chunk.mut_end();
         ptrdiff_t n;
         // Append a `0x80` byte followed by zeroes.
         *(bc++) = 0x80;
@@ -635,7 +635,7 @@ class SHA1_Hasher final : public Abstract_Opaque
           // Wrap.
           ::std::fill_n(bc, n, 0);
           this->do_consume_chunk(this->m_chunk.data());
-          bc = this->m_chunk.begin();
+          bc = this->m_chunk.mut_begin();
         }
         n = ec - bc - 8;
         if(n > 0) {
@@ -665,15 +665,15 @@ class SHA1_Hasher final : public Abstract_Opaque
 class SHA256_Hasher final : public Abstract_Opaque
   {
   private:
-    static constexpr ::std::array<uint32_t, 8> init() noexcept
+    static constexpr array<uint32_t, 8> init() noexcept
       {
         return { 0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C,
                  0x1F83D9AB, 0x5BE0CD19 };
       }
 
-    ::std::array<uint32_t, 8> m_regs = init();
+    array<uint32_t, 8> m_regs = init();
     uint64_t m_size = 0;
-    ::std::array<uint8_t, 64> m_chunk;
+    array<uint8_t, 64> m_chunk;
 
   public:
     SHA256_Hasher() noexcept
@@ -683,7 +683,7 @@ class SHA256_Hasher final : public Abstract_Opaque
   private:
     void do_consume_chunk(const uint8_t* p) noexcept
       {
-        ::std::array<uint32_t, 64> w;
+        array<uint32_t, 64> w;
         uint32_t s0, maj, t2, s1, ch, t1;
         // https://en.wikipedia.org/wiki/SHA-2
         for(size_t i =  0; i < 16; ++i) {
@@ -796,8 +796,8 @@ class SHA256_Hasher final : public Abstract_Opaque
       {
         auto bp = reinterpret_cast<const uint8_t*>(data.data());
         auto ep = bp + data.size();
-        auto bc = this->m_chunk.begin() + static_cast<ptrdiff_t>(this->m_size % 64);
-        auto ec = this->m_chunk.end();
+        auto bc = this->m_chunk.mut_begin() + this->m_size % 64;
+        auto ec = this->m_chunk.mut_end();
         ptrdiff_t n;
         // If the last chunk was not empty, ...
         if(bc != this->m_chunk.begin()) {
@@ -815,7 +815,7 @@ class SHA256_Hasher final : public Abstract_Opaque
           // Consume the last chunk.
           ROCKET_ASSERT(this->m_size % 64 == 0);
           this->do_consume_chunk(this->m_chunk.data());
-          bc = this->m_chunk.begin();
+          bc = this->m_chunk.mut_begin();
         }
         // Consume as many chunks as possible; don't bother copying them.
         while(ep - bp >= 64) {
@@ -836,8 +836,8 @@ class SHA256_Hasher final : public Abstract_Opaque
     G_string finish() noexcept
       {
         // Finalize the hasher.
-        auto bc = this->m_chunk.begin() + static_cast<ptrdiff_t>(this->m_size % 64);
-        auto ec = this->m_chunk.end();
+        auto bc = this->m_chunk.mut_begin() + this->m_size % 64;
+        auto ec = this->m_chunk.mut_end();
         ptrdiff_t n;
         // Append a `0x80` byte followed by zeroes.
         *(bc++) = 0x80;
@@ -846,7 +846,7 @@ class SHA256_Hasher final : public Abstract_Opaque
           // Wrap.
           ::std::fill_n(bc, n, 0);
           this->do_consume_chunk(this->m_chunk.data());
-          bc = this->m_chunk.begin();
+          bc = this->m_chunk.mut_begin();
         }
         n = ec - bc - 8;
         if(n > 0) {

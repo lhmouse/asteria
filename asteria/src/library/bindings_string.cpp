@@ -63,7 +63,7 @@ template<typename IteratorT> opt<IteratorT> do_find_opt(IteratorT tbegin, Iterat
       return tbegin;
     }
     // Build a table according to the Bad Character Rule.
-    ::std::array<ptrdiff_t, 0x100> bcr_table;
+    array<ptrdiff_t, 0x100> bcr_table;
     for(size_t i = 0; i != 0x100; ++i) {
       bcr_table[i] = plen;
     }
@@ -87,7 +87,7 @@ template<typename IteratorT> opt<IteratorT> do_find_opt(IteratorT tbegin, Iterat
 template<typename IteratorT> opt<IteratorT> do_find_of_opt(IteratorT begin, IteratorT end, const G_string& set, bool match)
   {
     // Make a lookup table.
-    ::std::array<bool, 256> table = { };
+    array<bool, 256> table = { };
     ::rocket::for_each(set, [&](char c) { table[uint8_t(c)] = true;  });
     // Search the range.
     for(auto it = ::rocket::move(begin); it != end; ++it) {
@@ -172,11 +172,11 @@ const char* do_xstrchr(const char* str, char c) noexcept
 template<bool bigendT, typename WordT> G_string& do_pack_one_impl(G_string& text, const G_integer& value)
   {
     // Define temporary storage.
-    ::std::array<char, sizeof(WordT)> stor_le;
+    array<char, sizeof(WordT)> stor_le;
     uint64_t word = static_cast<uint64_t>(value);
     // Write it in little-endian order.
-    for(auto& byte : stor_le) {
-      byte = static_cast<char>(word);
+    for(size_t i = 0; i != stor_le.size(); ++i) {
+      stor_le[i] = static_cast<char>(word);
       word >>= 8;
     }
     // Append this word.
@@ -200,7 +200,7 @@ template<bool bigendT, typename WordT> G_array do_unpack_impl(const G_string& te
   {
     G_array values;
     // Define temporary storage.
-    ::std::array<char, sizeof(WordT)> stor_be;
+    array<char, sizeof(WordT)> stor_be;
     uint64_t word = 0;
     // How many words will the result have?
     auto nwords = text.size() / stor_be.size();
@@ -212,9 +212,9 @@ template<bool bigendT, typename WordT> G_array do_unpack_impl(const G_string& te
     for(size_t i = 0; i < nwords; ++i) {
       // Read some bytes in big-endian order.
       if(bigendT)
-        ::std::copy_n(text.data() + i * stor_be.size(), stor_be.size(), stor_be.begin());
+        ::std::copy_n(text.data() + i * stor_be.size(), stor_be.size(), stor_be.mut_begin());
       else
-        ::std::copy_n(text.data() + i * stor_be.size(), stor_be.size(), stor_be.rbegin());
+        ::std::copy_n(text.data() + i * stor_be.size(), stor_be.size(), stor_be.mut_rbegin());
       // Assemble the word.
       for(const auto& byte : stor_be) {
         word <<= 8;
@@ -760,7 +760,7 @@ G_string std_string_hex_encode(const G_string& data, const opt<G_boolean>& lower
     text.reserve(data.size() * (2 + rdelim.length()));
     // These shall be operated in big-endian order.
     uint32_t reg = 0;
-    ::std::array<char, 2> unit;
+    array<char, 2> unit;
     // Encode source data.
     size_t nread = 0;
     while(nread != data.size()) {
@@ -840,7 +840,7 @@ G_string std_string_base32_encode(const G_string& data, const opt<G_boolean>& lo
     text.reserve((data.size() + 4) / 5 * 8);
     // These shall be operated in big-endian order.
     uint64_t reg = 0;
-    ::std::array<char, 8> unit;
+    array<char, 8> unit;
     // Encode source data.
     size_t nread = 0;
     while(data.size() - nread >= 5) {
@@ -958,7 +958,7 @@ G_string std_string_base64_encode(const G_string& data)
     text.reserve((data.size() + 2) / 3 * 4);
     // These shall be operated in big-endian order.
     uint32_t reg = 0;
-    ::std::array<char, 4> unit;
+    array<char, 4> unit;
     // Encode source data.
     size_t nread = 0;
     while(data.size() - nread >= 3) {
