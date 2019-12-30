@@ -123,10 +123,12 @@ cow_string do_stringify(const Runtime_Error& except) noexcept
     else
       fmt << except.value();
 
+    fmt << "\n[backtrace:";
     for(unsigned long i = 0; i != except.count_frames(); ++i) {
       const auto& f = except.frame(i);
-      fmt << "\n[frame #" << i << ": <" << f.what_type() << "> at '" << f.sloc() << "': " << f.value() << "]";
+      fmt << "\n  #" << i << " <" << f.what_type() << "> at '" << f.sloc() << "': " << f.value();
     }
+    fmt << "\n  -- end of backtrace]";
 
     fmt << "\n[exception class `" << typeid(except).name() << "`]";
     return do_xindent(fmt.extract_string());
