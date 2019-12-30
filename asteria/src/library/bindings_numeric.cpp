@@ -97,13 +97,11 @@ pair<G_integer, int> do_decompose_integer(uint8_t ebase, const G_integer& value)
     int64_t ireg = value;
     int iexp = 0;
     for(;;) {
-      if(ireg == 0) {
+      if(ireg == 0)
         break;
-      }
       auto next = ireg / ebase;
-      if(ireg % ebase != 0) {
+      if(ireg % ebase != 0)
         break;
-      }
       ireg = next;
       iexp++;
     }
