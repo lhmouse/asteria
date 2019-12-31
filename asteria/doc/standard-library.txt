@@ -1527,6 +1527,36 @@
 
 	* Returns the bit count as an `integer`.
 
+`std.numeric.rotl(m, x, n)`
+
+	* Rotates the rightmost `m` bits of `x` to the left by `n`; all
+	  arguments must be of type `integer`. This has the effect of
+	  shifting `x` by `n` to the left then filling the vacuum in the
+	  right with the last `n` bits that have just been shifted past
+	  the left boundary. `n` is modulo `m` so rotating by a negative
+	  count to the left has the same effect as rotating by its
+	  absolute value to the right. All other bits are zeroed. If `m`
+	  is zero, zero is returned.
+
+	* Returns the rotated value as an `integer`.
+
+	* Throws an exception if `m` is negative or greater than `64`.
+
+`std.numeric.rotr(m, x, n)`
+
+	* Rotates the rightmost `m` bits of `x` to the right by `n`; all
+	  arguments must be of type `integer`. This has the effect of
+	  shifting `x` by `n` to the right then filling the vacuum in the
+	  left with the last `n` bits that have just been shifted past
+	  the right boundary. `n` is modulo `m` so rotating by a negative
+	  count to the right has the same effect as rotating by its
+	  absolute value to the left. All other bits are zeroed. If `m`
+	  is zero, zero is returned.
+
+	* Returns the rotated value as an `integer`.
+
+	* Throws an exception if `m` is negative or greater than `64`.
+
 `std.numeric.format(value, [base], [ebase])`
 
 	* Converts an `integer` or `real` to a `string` in `base`. This
