@@ -436,7 +436,7 @@ G_integer std_numeric_rotl(const G_integer& m, const G_integer& x, const G_integ
       if(sh < 0) {
         sh += m;
       }
-      ireg = (ireg << sh) | (ireg >> (m - sh));
+      ireg = (ireg << sh) | ((ireg & mask) >> (m - sh));
     }
     // Clear the other bits.
     return static_cast<int64_t>(ireg & mask);
@@ -460,7 +460,7 @@ G_integer std_numeric_rotr(const G_integer& m, const G_integer& x, const G_integ
       if(sh < 0) {
         sh += m;
       }
-      ireg = (ireg >> sh) | (ireg << (m - sh));
+      ireg = ((ireg & mask) >> sh) | (ireg << (m - sh));
     }
     // Clear the other bits.
     return static_cast<int64_t>(ireg & mask);
