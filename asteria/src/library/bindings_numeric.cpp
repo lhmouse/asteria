@@ -418,6 +418,54 @@ G_integer std_numeric_popcnt(const G_integer& x)
     return count;
   }
 
+G_integer std_numeric_rotl(const G_integer& m, const G_integer& x, const G_integer& n)
+  {
+    if((m < 0) || (m > 64)) {
+      ASTERIA_THROW("invalid modulo bit count (`$1` is not between 0 and 64)", m);
+    }
+    if(m == 0) {
+      return 0;
+    }
+    uint64_t ireg = static_cast<uint64_t>(x);
+    uint64_t mask = (UINT64_C(1) << (m - 1) << 1) - 1;
+    // The shift count is modulo `m` so all values are defined.
+    int64_t sh = n % m;
+    if(sh != 0) {
+      // Normalize the shift count.
+      // Note that `sh + m` cannot be zero.
+      if(sh < 0) {
+        sh += m;
+      }
+      ireg = (ireg << sh) | (ireg >> (m - sh));
+    }
+    // Clear the other bits.
+    return static_cast<int64_t>(ireg & mask);
+  }
+
+G_integer std_numeric_rotr(const G_integer& m, const G_integer& x, const G_integer& n)
+  {
+    if((m < 0) || (m > 64)) {
+      ASTERIA_THROW("invalid modulo bit count (`$1` is not between 0 and 64)", m);
+    }
+    if(m == 0) {
+      return 0;
+    }
+    uint64_t ireg = static_cast<uint64_t>(x);
+    uint64_t mask = (UINT64_C(1) << (m - 1) << 1) - 1;
+    // The shift count is modulo `m` so all values are defined.
+    int64_t sh = n % m;
+    if(sh != 0) {
+      // Normalize the shift count.
+      // Note that `sh + m` cannot be zero.
+      if(sh < 0) {
+        sh += m;
+      }
+      ireg = (ireg >> sh) | (ireg << (m - sh));
+    }
+    // Clear the other bits.
+    return static_cast<int64_t>(ireg & mask);
+  }
+
 G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, const opt<G_integer>& ebase)
   {
     G_string text;
@@ -1671,6 +1719,84 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           if(reader.start().g(x).finish()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_numeric_popcnt(x) };
+            return ::rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
+    //===================================================================
+    // `std.numeric.rotl()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("rotl"),
+      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+        // Description
+        ::rocket::sref(
+          "\n"
+          "`std.numeric.rotl(m, x, n)`\n"
+          "\n"
+          "  * Rotates the rightmost `m` bits of `x` to the left by `n`; all\n"
+          "    arguments must be of type `integer`. This has the effect of\n"
+          "    shifting `x` by `n` to the left then filling the vacuum in the\n"
+          "    right with the last `n` bits that have just been shifted past\n"
+          "    the left boundary. `n` is modulo `m` so rotating by a negative\n"
+          "    count to the left has the same effect as rotating by its\n"
+          "    absolute value to the right. All other bits are zeroed. If `m`\n"
+          "    is zero, zero is returned.\n"
+          "\n"
+          "  * Returns the rotated value as an `integer`.\n"
+          "\n"
+          "  * Throws an exception if `m` is negative or greater than `64`.\n"
+        ),
+        // Definition
+        [](cow_vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(::rocket::sref("std.numeric.rotl"), ::rocket::ref(args));
+          // Parse arguments.
+          G_integer m;
+          G_integer x;
+          G_integer n;
+          if(reader.start().g(m).g(x).g(n).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_numeric_rotl(m, x, n) };
+            return ::rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
+    //===================================================================
+    // `std.numeric.rotr()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("rotr"),
+      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+        // Description
+        ::rocket::sref(
+          "\n"
+          "`std.numeric.rotr(m, x, n)`\n"
+          "\n"
+          "  * Rotates the rightmost `m` bits of `x` to the right by `n`; all\n"
+          "    arguments must be of type `integer`. This has the effect of\n"
+          "    shifting `x` by `n` to the right then filling the vacuum in the\n"
+          "    left with the last `n` bits that have just been shifted past\n"
+          "    the right boundary. `n` is modulo `m` so rotating by a negative\n"
+          "    count to the right has the same effect as rotating by its\n"
+          "    absolute value to the left. All other bits are zeroed. If `m`\n"
+          "    is zero, zero is returned.\n"
+          "\n"
+          "  * Returns the rotated value as an `integer`.\n"
+          "\n"
+          "  * Throws an exception if `m` is negative or greater than `64`.\n"
+        ),
+        // Definition
+        [](cow_vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(::rocket::sref("std.numeric.rotr"), ::rocket::ref(args));
+          // Parse arguments.
+          G_integer m;
+          G_integer x;
+          G_integer n;
+          if(reader.start().g(m).g(x).g(n).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_numeric_rotr(m, x, n) };
             return ::rocket::move(xref);
           }
           // Fail.

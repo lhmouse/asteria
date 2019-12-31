@@ -65,6 +65,8 @@ extern G_real std_numeric_muls(const G_real& x, const G_real& y);
 extern G_integer std_numeric_lzcnt(const G_integer& x);
 extern G_integer std_numeric_tzcnt(const G_integer& x);
 extern G_integer std_numeric_popcnt(const G_integer& x);
+extern G_integer std_numeric_rotl(const G_integer& m, const G_integer& x, const G_integer& n);
+extern G_integer std_numeric_rotr(const G_integer& m, const G_integer& x, const G_integer& n);
 
 extern G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base = ::rocket::clear, const opt<G_integer>& ebase = ::rocket::clear);
 extern G_string std_numeric_format(const G_real& value, const opt<G_integer>& base = ::rocket::clear, const opt<G_integer>& ebase = ::rocket::clear);
