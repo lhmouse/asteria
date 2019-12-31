@@ -576,8 +576,9 @@ opt<G_real> std_numeric_parse_real(const G_string& text, const opt<G_boolean>& s
     }
     if(!numg.cast_F(value, -HUGE_VAL, HUGE_VAL)) {
       // The value is out of range.
-      // Accept infinities if `saturating` is set to `true`.
-      if(!(::std::isinf(value) && (saturating == true)))
+      // Unlike integers, underflows are accepted unconditionally.
+      // Overflows are accepted unless `saturating` is `false` or absent.
+      if(numg.overflowed() && (saturating != true))
         return ::rocket::clear;
     }
     // The value has been stored successfully.

@@ -277,7 +277,8 @@ check_PROGRAMS =  \
   asteria/test/bindings_json.test  \
   asteria/test/github_65.test  \
   asteria/test/github_71.test  \
-  asteria/test/github_78.test
+  asteria/test/github_78.test  \
+  asteria/test/github_84.test
 
 TESTS = ${check_PROGRAMS}
 
