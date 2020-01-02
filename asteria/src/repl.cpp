@@ -10,6 +10,7 @@
 #include "runtime/runtime_error.hpp"
 #include "runtime/abstract_hooks.hpp"
 #include "compiler/parser_error.hpp"
+#include <locale.h>
 #include <unistd.h>
 #include <signal.h>
 #include <string.h>
@@ -592,6 +593,9 @@ void do_handle_repl_command(cow_string&& cmd)
 
 int main(int argc, char** argv)
   try {
+    // Select the C locale. UTF-8 is required for wide-oriented standard streams.
+    ::setlocale(LC_ALL, "C.UTF-8");
+
     // Note that this function shall not return in case of errors.
     do_parse_command_line(argc, argv);
 
