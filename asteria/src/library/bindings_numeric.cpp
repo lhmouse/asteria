@@ -126,7 +126,7 @@ constexpr char s_spaces[] = " \f\n\r\t\v";
 
 }  // namespace
 
-G_integer std_numeric_abs(const G_integer& value)
+G_integer std_numeric_abs(G_integer value)
   {
     if(value == INT64_MIN) {
       ASTERIA_THROW("integer absolute value overflow (value `$1`)", value);
@@ -134,142 +134,142 @@ G_integer std_numeric_abs(const G_integer& value)
     return ::std::abs(value);
   }
 
-G_real std_numeric_abs(const G_real& value)
+G_real std_numeric_abs(G_real value)
   {
     return ::std::fabs(value);
   }
 
-G_integer std_numeric_sign(const G_integer& value)
+G_integer std_numeric_sign(G_integer value)
   {
     return value >> 63;
   }
 
-G_integer std_numeric_sign(const G_real& value)
+G_integer std_numeric_sign(G_real value)
   {
     return ::std::signbit(value) ? -1 : 0;
   }
 
-G_boolean std_numeric_is_finite(const G_integer& /*value*/)
+G_boolean std_numeric_is_finite(G_integer /*value*/)
   {
     return true;
   }
 
-G_boolean std_numeric_is_finite(const G_real& value)
+G_boolean std_numeric_is_finite(G_real value)
   {
     return ::std::isfinite(value);
   }
 
-G_boolean std_numeric_is_infinity(const G_integer& /*value*/)
+G_boolean std_numeric_is_infinity(G_integer /*value*/)
   {
     return false;
   }
 
-G_boolean std_numeric_is_infinity(const G_real& value)
+G_boolean std_numeric_is_infinity(G_real value)
   {
     return ::std::isinf(value);
   }
 
-G_boolean std_numeric_is_nan(const G_integer& /*value*/)
+G_boolean std_numeric_is_nan(G_integer /*value*/)
   {
     return false;
   }
 
-G_boolean std_numeric_is_nan(const G_real& value)
+G_boolean std_numeric_is_nan(G_real value)
   {
     return ::std::isnan(value);
   }
 
-G_integer std_numeric_clamp(const G_integer& value, const G_integer& lower, const G_integer& upper)
+G_integer std_numeric_clamp(G_integer value, G_integer lower, G_integer upper)
   {
     return ::rocket::clamp(value, lower, do_verify_bounds(lower, upper));
   }
 
-G_real std_numeric_clamp(const G_real& value, const G_real& lower, const G_real& upper)
+G_real std_numeric_clamp(G_real value, G_real lower, G_real upper)
   {
     return ::rocket::clamp(value, lower, do_verify_bounds(lower, upper));
   }
 
-G_integer std_numeric_round(const G_integer& value)
+G_integer std_numeric_round(G_integer value)
   {
     return value;
   }
 
-G_real std_numeric_round(const G_real& value)
+G_real std_numeric_round(G_real value)
   {
     return ::std::round(value);
   }
 
-G_integer std_numeric_floor(const G_integer& value)
+G_integer std_numeric_floor(G_integer value)
   {
     return value;
   }
 
-G_real std_numeric_floor(const G_real& value)
+G_real std_numeric_floor(G_real value)
   {
     return ::std::floor(value);
   }
 
-G_integer std_numeric_ceil(const G_integer& value)
+G_integer std_numeric_ceil(G_integer value)
   {
     return value;
   }
 
-G_real std_numeric_ceil(const G_real& value)
+G_real std_numeric_ceil(G_real value)
   {
     return ::std::ceil(value);
   }
 
-G_integer std_numeric_trunc(const G_integer& value)
+G_integer std_numeric_trunc(G_integer value)
   {
     return value;
   }
 
-G_real std_numeric_trunc(const G_real& value)
+G_real std_numeric_trunc(G_real value)
   {
     return ::std::trunc(value);
   }
 
-G_integer std_numeric_iround(const G_integer& value)
+G_integer std_numeric_iround(G_integer value)
   {
     return value;
   }
 
-G_integer std_numeric_iround(const G_real& value)
+G_integer std_numeric_iround(G_real value)
   {
     return do_cast_to_integer(::std::round(value));
   }
 
-G_integer std_numeric_ifloor(const G_integer& value)
+G_integer std_numeric_ifloor(G_integer value)
   {
     return value;
   }
 
-G_integer std_numeric_ifloor(const G_real& value)
+G_integer std_numeric_ifloor(G_real value)
   {
     return do_cast_to_integer(::std::floor(value));
   }
 
-G_integer std_numeric_iceil(const G_integer& value)
+G_integer std_numeric_iceil(G_integer value)
   {
     return value;
   }
 
-G_integer std_numeric_iceil(const G_real& value)
+G_integer std_numeric_iceil(G_real value)
   {
     return do_cast_to_integer(::std::ceil(value));
   }
 
-G_integer std_numeric_itrunc(const G_integer& value)
+G_integer std_numeric_itrunc(G_integer value)
   {
     return value;
   }
 
-G_integer std_numeric_itrunc(const G_real& value)
+G_integer std_numeric_itrunc(G_real value)
   {
     return do_cast_to_integer(::std::trunc(value));
   }
 
-G_real std_numeric_random(Global_Context& global, const opt<G_real>& limit)
+G_real std_numeric_random(Global_Context& global, opt<G_real> limit)
   {
     // Generate a random `double` in the range [0.0,1.0).
     int64_t high = global.get_random_uint32();
@@ -292,80 +292,80 @@ G_real std_numeric_random(Global_Context& global, const opt<G_real>& limit)
     return *limit * ratio;
   }
 
-G_real std_numeric_sqrt(const G_real& x)
+G_real std_numeric_sqrt(G_real x)
   {
     return ::std::sqrt(x);
   }
 
-G_real std_numeric_fma(const G_real& x, const G_real& y, const G_real& z)
+G_real std_numeric_fma(G_real x, G_real y, G_real z)
   {
     return ::std::fma(x, y, z);
   }
 
-G_real std_numeric_remainder(const G_real& x, const G_real& y)
+G_real std_numeric_remainder(G_real x, G_real y)
   {
     return ::std::remainder(x, y);
   }
 
-pair<G_real, G_integer> std_numeric_frexp(const G_real& x)
+pair<G_real, G_integer> std_numeric_frexp(G_real x)
   {
     int exp;
     auto frac = ::std::frexp(x, &exp);
     return { frac, exp };
   }
 
-G_real std_numeric_ldexp(const G_real& frac, const G_integer& exp)
+G_real std_numeric_ldexp(G_real frac, G_integer exp)
   {
     int rexp = static_cast<int>(::rocket::clamp(exp, INT_MIN, INT_MAX));
     return ::std::ldexp(frac, rexp);
   }
 
-G_integer std_numeric_addm(const G_integer& x, const G_integer& y)
+G_integer std_numeric_addm(G_integer x, G_integer y)
   {
     return G_integer(static_cast<uint64_t>(x) + static_cast<uint64_t>(y));
   }
 
-G_integer std_numeric_subm(const G_integer& x, const G_integer& y)
+G_integer std_numeric_subm(G_integer x, G_integer y)
   {
     return G_integer(static_cast<uint64_t>(x) - static_cast<uint64_t>(y));
   }
 
-G_integer std_numeric_mulm(const G_integer& x, const G_integer& y)
+G_integer std_numeric_mulm(G_integer x, G_integer y)
   {
     return G_integer(static_cast<uint64_t>(x) * static_cast<uint64_t>(y));
   }
 
-G_integer std_numeric_adds(const G_integer& x, const G_integer& y)
+G_integer std_numeric_adds(G_integer x, G_integer y)
   {
     return do_saturating_add(x, y);
   }
 
-G_real std_numeric_adds(const G_real& x, const G_real& y)
+G_real std_numeric_adds(G_real x, G_real y)
   {
     return do_saturating_add(x, y);
   }
 
-G_integer std_numeric_subs(const G_integer& x, const G_integer& y)
+G_integer std_numeric_subs(G_integer x, G_integer y)
   {
     return do_saturating_sub(x, y);
   }
 
-G_real std_numeric_subs(const G_real& x, const G_real& y)
+G_real std_numeric_subs(G_real x, G_real y)
   {
     return do_saturating_sub(x, y);
   }
 
-G_integer std_numeric_muls(const G_integer& x, const G_integer& y)
+G_integer std_numeric_muls(G_integer x, G_integer y)
   {
     return do_saturating_mul(x, y);
   }
 
-G_real std_numeric_muls(const G_real& x, const G_real& y)
+G_real std_numeric_muls(G_real x, G_real y)
   {
     return do_saturating_mul(x, y);
   }
 
-G_integer std_numeric_lzcnt(const G_integer& x)
+G_integer std_numeric_lzcnt(G_integer x)
   {
     // TODO: Modern CPUs have intrinsics for this.
     uint64_t ireg = static_cast<uint64_t>(x);
@@ -383,7 +383,7 @@ G_integer std_numeric_lzcnt(const G_integer& x)
     return count;
   }
 
-G_integer std_numeric_tzcnt(const G_integer& x)
+G_integer std_numeric_tzcnt(G_integer x)
   {
     // TODO: Modern CPUs have intrinsics for this.
     uint64_t ireg = static_cast<uint64_t>(x);
@@ -401,7 +401,7 @@ G_integer std_numeric_tzcnt(const G_integer& x)
     return count;
   }
 
-G_integer std_numeric_popcnt(const G_integer& x)
+G_integer std_numeric_popcnt(G_integer x)
   {
     // TODO: Modern CPUs have intrinsics for this.
     uint64_t ireg = static_cast<uint64_t>(x);
@@ -418,7 +418,7 @@ G_integer std_numeric_popcnt(const G_integer& x)
     return count;
   }
 
-G_integer std_numeric_rotl(const G_integer& m, const G_integer& x, const G_integer& n)
+G_integer std_numeric_rotl(G_integer m, G_integer x, G_integer n)
   {
     if((m < 0) || (m > 64)) {
       ASTERIA_THROW("invalid modulo bit count (`$1` is not between 0 and 64)", m);
@@ -442,7 +442,7 @@ G_integer std_numeric_rotl(const G_integer& m, const G_integer& x, const G_integ
     return static_cast<int64_t>(ireg & mask);
   }
 
-G_integer std_numeric_rotr(const G_integer& m, const G_integer& x, const G_integer& n)
+G_integer std_numeric_rotr(G_integer m, G_integer x, G_integer n)
   {
     if((m < 0) || (m > 64)) {
       ASTERIA_THROW("invalid modulo bit count (`$1` is not between 0 and 64)", m);
@@ -466,7 +466,7 @@ G_integer std_numeric_rotr(const G_integer& m, const G_integer& x, const G_integ
     return static_cast<int64_t>(ireg & mask);
   }
 
-G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, const opt<G_integer>& ebase)
+G_string std_numeric_format(G_integer value, opt<G_integer> base, opt<G_integer> ebase)
   {
     G_string text;
     ::rocket::ascii_numput nump;
@@ -523,7 +523,7 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
     return text;
   }
 
-G_string std_numeric_format(const G_real& value, const opt<G_integer>& base, const opt<G_integer>& ebase)
+G_string std_numeric_format(G_real value, opt<G_integer> base, opt<G_integer> ebase)
   {
     G_string text;
     ::rocket::ascii_numput nump;
@@ -574,7 +574,7 @@ G_string std_numeric_format(const G_real& value, const opt<G_integer>& base, con
     return text;
   }
 
-opt<G_integer> std_numeric_parse_integer(const G_string& text)
+opt<G_integer> std_numeric_parse_integer(G_string text)
   {
     auto tpos = text.find_first_not_of(s_spaces);
     if(tpos == G_string::npos) {
@@ -602,7 +602,7 @@ opt<G_integer> std_numeric_parse_integer(const G_string& text)
     return value;
   }
 
-opt<G_real> std_numeric_parse_real(const G_string& text, const opt<G_boolean>& saturating)
+opt<G_real> std_numeric_parse_real(G_string text, opt<G_boolean> saturating)
   {
     auto tpos = text.find_first_not_of(s_spaces);
     if(tpos == G_string::npos) {
@@ -710,13 +710,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer ivalue;
           if(reader.start().g(ivalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_abs(ivalue) };
+            Reference_Root::S_temporary xref = { std_numeric_abs(::rocket::move(ivalue)) };
             return ::rocket::move(xref);
           }
           G_real rvalue;
           if(reader.start().g(rvalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_abs(rvalue) };
+            Reference_Root::S_temporary xref = { std_numeric_abs(::rocket::move(rvalue)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -746,13 +746,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer ivalue;
           if(reader.start().g(ivalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_sign(ivalue) };
+            Reference_Root::S_temporary xref = { std_numeric_sign(::rocket::move(ivalue)) };
             return ::rocket::move(xref);
           }
           G_real rvalue;
           if(reader.start().g(rvalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_sign(rvalue) };
+            Reference_Root::S_temporary xref = { std_numeric_sign(::rocket::move(rvalue)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -784,13 +784,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer ivalue;
           if(reader.start().g(ivalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_is_finite(ivalue) };
+            Reference_Root::S_temporary xref = { std_numeric_is_finite(::rocket::move(ivalue)) };
             return ::rocket::move(xref);
           }
           G_real rvalue;
           if(reader.start().g(rvalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_is_finite(rvalue) };
+            Reference_Root::S_temporary xref = { std_numeric_is_finite(::rocket::move(rvalue)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -822,13 +822,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer ivalue;
           if(reader.start().g(ivalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_is_infinity(ivalue) };
+            Reference_Root::S_temporary xref = { std_numeric_is_infinity(::rocket::move(ivalue)) };
             return ::rocket::move(xref);
           }
           G_real rvalue;
           if(reader.start().g(rvalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_is_infinity(rvalue) };
+            Reference_Root::S_temporary xref = { std_numeric_is_infinity(::rocket::move(rvalue)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -859,13 +859,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer ivalue;
           if(reader.start().g(ivalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_is_nan(ivalue) };
+            Reference_Root::S_temporary xref = { std_numeric_is_nan(::rocket::move(ivalue)) };
             return ::rocket::move(xref);
           }
           G_real rvalue;
           if(reader.start().g(rvalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_is_nan(rvalue) };
+            Reference_Root::S_temporary xref = { std_numeric_is_nan(::rocket::move(rvalue)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -901,7 +901,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer iupper;
           if(reader.start().g(ivalue).g(ilower).g(iupper).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_clamp(ivalue, ilower, iupper) };
+            Reference_Root::S_temporary xref = { std_numeric_clamp(::rocket::move(ivalue), ::rocket::move(ilower), ::rocket::move(iupper)) };
             return ::rocket::move(xref);
           }
           G_real rvalue;
@@ -909,7 +909,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_real fupper;
           if(reader.start().g(rvalue).g(flower).g(fupper).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_clamp(rvalue, flower, fupper) };
+            Reference_Root::S_temporary xref = { std_numeric_clamp(::rocket::move(rvalue), ::rocket::move(flower), ::rocket::move(fupper)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -939,13 +939,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer ivalue;
           if(reader.start().g(ivalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_round(ivalue) };
+            Reference_Root::S_temporary xref = { std_numeric_round(::rocket::move(ivalue)) };
             return ::rocket::move(xref);
           }
           G_real rvalue;
           if(reader.start().g(rvalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_round(rvalue) };
+            Reference_Root::S_temporary xref = { std_numeric_round(::rocket::move(rvalue)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -975,13 +975,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer ivalue;
           if(reader.start().g(ivalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_floor(ivalue) };
+            Reference_Root::S_temporary xref = { std_numeric_floor(::rocket::move(ivalue)) };
             return ::rocket::move(xref);
           }
           G_real rvalue;
           if(reader.start().g(rvalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_floor(rvalue) };
+            Reference_Root::S_temporary xref = { std_numeric_floor(::rocket::move(rvalue)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1011,13 +1011,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer ivalue;
           if(reader.start().g(ivalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_ceil(ivalue) };
+            Reference_Root::S_temporary xref = { std_numeric_ceil(::rocket::move(ivalue)) };
             return ::rocket::move(xref);
           }
           G_real rvalue;
           if(reader.start().g(rvalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_ceil(rvalue) };
+            Reference_Root::S_temporary xref = { std_numeric_ceil(::rocket::move(rvalue)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1047,13 +1047,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer ivalue;
           if(reader.start().g(ivalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_trunc(ivalue) };
+            Reference_Root::S_temporary xref = { std_numeric_trunc(::rocket::move(ivalue)) };
             return ::rocket::move(xref);
           }
           G_real rvalue;
           if(reader.start().g(rvalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_trunc(rvalue) };
+            Reference_Root::S_temporary xref = { std_numeric_trunc(::rocket::move(rvalue)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1087,13 +1087,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer ivalue;
           if(reader.start().g(ivalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_iround(ivalue) };
+            Reference_Root::S_temporary xref = { std_numeric_iround(::rocket::move(ivalue)) };
             return ::rocket::move(xref);
           }
           G_real rvalue;
           if(reader.start().g(rvalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_iround(rvalue) };
+            Reference_Root::S_temporary xref = { std_numeric_iround(::rocket::move(rvalue)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1127,13 +1127,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer ivalue;
           if(reader.start().g(ivalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_ifloor(ivalue) };
+            Reference_Root::S_temporary xref = { std_numeric_ifloor(::rocket::move(ivalue)) };
             return ::rocket::move(xref);
           }
           G_real rvalue;
           if(reader.start().g(rvalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_ifloor(rvalue) };
+            Reference_Root::S_temporary xref = { std_numeric_ifloor(::rocket::move(rvalue)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1167,13 +1167,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer ivalue;
           if(reader.start().g(ivalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_iceil(ivalue) };
+            Reference_Root::S_temporary xref = { std_numeric_iceil(::rocket::move(ivalue)) };
             return ::rocket::move(xref);
           }
           G_real rvalue;
           if(reader.start().g(rvalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_iceil(rvalue) };
+            Reference_Root::S_temporary xref = { std_numeric_iceil(::rocket::move(rvalue)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1207,13 +1207,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer ivalue;
           if(reader.start().g(ivalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_itrunc(ivalue) };
+            Reference_Root::S_temporary xref = { std_numeric_itrunc(::rocket::move(ivalue)) };
             return ::rocket::move(xref);
           }
           G_real rvalue;
           if(reader.start().g(rvalue).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_itrunc(rvalue) };
+            Reference_Root::S_temporary xref = { std_numeric_itrunc(::rocket::move(rvalue)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1245,7 +1245,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           opt<G_real> limit;
           if(reader.start().g(limit).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_random(global, limit) };
+            Reference_Root::S_temporary xref = { std_numeric_random(global, ::rocket::move(limit)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1274,7 +1274,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_real x;
           if(reader.start().g(x).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_sqrt(x) };
+            Reference_Root::S_temporary xref = { std_numeric_sqrt(::rocket::move(x)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1306,7 +1306,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_real z;
           if(reader.start().g(x).g(y).g(z).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_fma(x, y, z) };
+            Reference_Root::S_temporary xref = { std_numeric_fma(::rocket::move(x), ::rocket::move(y), ::rocket::move(z)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1337,7 +1337,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_real y;
           if(reader.start().g(x).g(y).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_remainder(x, y) };
+            Reference_Root::S_temporary xref = { std_numeric_remainder(::rocket::move(x), ::rocket::move(y)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1371,7 +1371,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_real x;
           if(reader.start().g(x).finish()) {
             // Call the binding function.
-            auto pair = std_numeric_frexp(x);
+            auto pair = std_numeric_frexp(::rocket::move(x));
             // This function returns a `pair`, but we would like to return an array so convert it.
             G_array xval;
             xval.emplace_back(pair.first);
@@ -1408,7 +1408,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer exp;
           if(reader.start().g(frac).g(exp).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_ldexp(frac, exp) };
+            Reference_Root::S_temporary xref = { std_numeric_ldexp(::rocket::move(frac), ::rocket::move(exp)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1440,7 +1440,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer y;
           if(reader.start().g(x).g(y).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_addm(x, y) };
+            Reference_Root::S_temporary xref = { std_numeric_addm(::rocket::move(x), ::rocket::move(y)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1473,7 +1473,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer y;
           if(reader.start().g(x).g(y).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_subm(x, y) };
+            Reference_Root::S_temporary xref = { std_numeric_subm(::rocket::move(x), ::rocket::move(y)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1506,7 +1506,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer y;
           if(reader.start().g(x).g(y).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_mulm(x, y) };
+            Reference_Root::S_temporary xref = { std_numeric_mulm(::rocket::move(x), ::rocket::move(y)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1540,14 +1540,14 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer iy;
           if(reader.start().g(ix).g(iy).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_adds(ix, iy) };
+            Reference_Root::S_temporary xref = { std_numeric_adds(::rocket::move(ix), ::rocket::move(iy)) };
             return ::rocket::move(xref);
           }
           G_real fx;
           G_real fy;
           if(reader.start().g(fx).g(fy).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_adds(fx, fy) };
+            Reference_Root::S_temporary xref = { std_numeric_adds(::rocket::move(fx), ::rocket::move(fy)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1581,14 +1581,14 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer iy;
           if(reader.start().g(ix).g(iy).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_subs(ix, iy) };
+            Reference_Root::S_temporary xref = { std_numeric_subs(::rocket::move(ix), ::rocket::move(iy)) };
             return ::rocket::move(xref);
           }
           G_real fx;
           G_real fy;
           if(reader.start().g(fx).g(fy).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_subs(fx, fy) };
+            Reference_Root::S_temporary xref = { std_numeric_subs(::rocket::move(fx), ::rocket::move(fy)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1622,14 +1622,14 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer iy;
           if(reader.start().g(ix).g(iy).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_muls(ix, iy) };
+            Reference_Root::S_temporary xref = { std_numeric_muls(::rocket::move(ix), ::rocket::move(iy)) };
             return ::rocket::move(xref);
           }
           G_real fx;
           G_real fy;
           if(reader.start().g(fx).g(fy).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_muls(fx, fy) };
+            Reference_Root::S_temporary xref = { std_numeric_muls(::rocket::move(fx), ::rocket::move(fy)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1659,7 +1659,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer x;
           if(reader.start().g(x).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_lzcnt(x) };
+            Reference_Root::S_temporary xref = { std_numeric_lzcnt(::rocket::move(x)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1689,7 +1689,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer x;
           if(reader.start().g(x).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_tzcnt(x) };
+            Reference_Root::S_temporary xref = { std_numeric_tzcnt(::rocket::move(x)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1718,7 +1718,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer x;
           if(reader.start().g(x).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_popcnt(x) };
+            Reference_Root::S_temporary xref = { std_numeric_popcnt(::rocket::move(x)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1757,7 +1757,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer n;
           if(reader.start().g(m).g(x).g(n).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_rotl(m, x, n) };
+            Reference_Root::S_temporary xref = { std_numeric_rotl(::rocket::move(m), ::rocket::move(x), ::rocket::move(n)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1796,7 +1796,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer n;
           if(reader.start().g(m).g(x).g(n).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_rotr(m, x, n) };
+            Reference_Root::S_temporary xref = { std_numeric_rotr(::rocket::move(m), ::rocket::move(x), ::rocket::move(n)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1840,13 +1840,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           opt<G_integer> ebase;
           if(reader.start().g(ivalue).g(base).g(ebase).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_format(ivalue, base, ebase) };
+            Reference_Root::S_temporary xref = { std_numeric_format(::rocket::move(ivalue), ::rocket::move(base), ::rocket::move(ebase)) };
             return ::rocket::move(xref);
           }
           G_real fvalue;
           if(reader.start().g(fvalue).g(base).g(ebase).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_format(fvalue, base, ebase) };
+            Reference_Root::S_temporary xref = { std_numeric_format(::rocket::move(fvalue), ::rocket::move(base), ::rocket::move(ebase)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1890,7 +1890,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_string text;
           if(reader.start().g(text).finish()) {
             // Call the binding function.
-            auto qres = std_numeric_parse_integer(text);
+            auto qres = std_numeric_parse_integer(::rocket::move(text));
             if(!qres) {
               return Reference_Root::S_null();
             }
@@ -1945,7 +1945,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           opt<G_boolean> saturating;
           if(reader.start().g(text).g(saturating).finish()) {
             // Call the binding function.
-            auto qres = std_numeric_parse_real(text, saturating);
+            auto qres = std_numeric_parse_real(::rocket::move(text), ::rocket::move(saturating));
             if(!qres) {
               return Reference_Root::S_null();
             }

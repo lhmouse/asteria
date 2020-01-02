@@ -58,7 +58,7 @@ G_integer std_chrono_steady_now()
     return secs * 1000 + msecs + 6543210987654321;
   }
 
-G_integer std_chrono_local_from_utc(const G_integer& time_utc)
+G_integer std_chrono_local_from_utc(G_integer time_utc)
   {
     // Handle special time values.
     if(time_utc <= -11644473600000) {
@@ -82,7 +82,7 @@ G_integer std_chrono_local_from_utc(const G_integer& time_utc)
     return time_local;
   }
 
-G_integer std_chrono_utc_from_local(const G_integer& time_local)
+G_integer std_chrono_utc_from_local(G_integer time_local)
   {
     // Handle special time values.
     if(time_local <= -11644473600000) {
@@ -106,7 +106,7 @@ G_integer std_chrono_utc_from_local(const G_integer& time_local)
     return time_utc;
   }
 
-G_string std_chrono_utc_format(const G_integer& time_point, const opt<G_boolean>& with_ms)
+G_string std_chrono_utc_format(G_integer time_point, opt<G_boolean> with_ms)
   {
     // No millisecond part is added by default.
     bool pms = with_ms.value_or(false);
@@ -162,7 +162,7 @@ G_string std_chrono_utc_format(const G_integer& time_point, const opt<G_boolean>
     return cow_string(tstr, pms ? 23 : 19);
   }
 
-opt<G_integer> std_chrono_utc_parse(const G_string& time_str)
+opt<G_integer> std_chrono_utc_parse(G_string time_str)
   {
     // Trim leading and trailing spaces. Fail if the string becomes empty.
     static constexpr char s_spaces[] = " \f\n\r\t\v";
@@ -396,7 +396,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           G_integer time_utc;
           if(reader.start().g(time_utc).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_chrono_local_from_utc(time_utc) };
+            Reference_Root::S_temporary xref = { std_chrono_local_from_utc(::rocket::move(time_utc)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -427,7 +427,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           G_integer time_local;
           if(reader.start().g(time_local).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_chrono_utc_from_local(time_local) };
+            Reference_Root::S_temporary xref = { std_chrono_utc_from_local(::rocket::move(time_local)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -458,7 +458,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           opt<G_boolean> with_ms;
           if(reader.start().g(time_point).g(with_ms).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_chrono_utc_format(time_point, with_ms) };
+            Reference_Root::S_temporary xref = { std_chrono_utc_format(::rocket::move(time_point), ::rocket::move(with_ms)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -491,7 +491,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           G_string time_str;
           if(reader.start().g(time_str).finish()) {
             // Call the binding function.
-            auto qres = std_chrono_utc_parse(time_str);
+            auto qres = std_chrono_utc_parse(::rocket::move(time_str));
             if(!qres) {
               return Reference_Root::S_null();
             }

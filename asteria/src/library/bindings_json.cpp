@@ -598,21 +598,21 @@ opt<Value> do_json_parse_nonrecursive_opt(Token_Stream& tstrm)
 
 }  // namespace
 
-G_string std_json_format(const Value& value, const opt<G_string>& indent)
+G_string std_json_format(Value value, opt<G_string> indent)
   {
     // No line break is inserted if `indent` is null or empty.
     return (!indent || indent->empty()) ? do_format_nonrecursive(value, Indenter_none())
                                         : do_format_nonrecursive(value, Indenter_string(*indent));
   }
 
-G_string std_json_format(const Value& value, const G_integer& indent)
+G_string std_json_format(Value value, G_integer indent)
   {
     // No line break is inserted if `indent` is non-positive.
     return (indent <= 0) ? do_format_nonrecursive(value, Indenter_none())
                          : do_format_nonrecursive(value, Indenter_spaces(static_cast<size_t>(::rocket::min(indent, 10))));
   }
 
-Value std_json_parse(const G_string& text)
+Value std_json_parse(G_string text)
   {
     // We reuse the lexer of Asteria here, allowing quite a few extensions e.g. binary numeric literals and comments.
     Compiler_Options opts = { };
@@ -677,13 +677,13 @@ void create_bindings_json(G_object& result, API_Version /*version*/)
           opt<G_string> sindent;
           if(reader.start().g(value).save(state).g(sindent).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_json_format(value, sindent) };
+            Reference_Root::S_temporary xref = { std_json_format(::rocket::move(value), ::rocket::move(sindent)) };
             return ::rocket::move(xref);
           }
           G_integer nindent;
           if(reader.load(state).g(nindent).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_json_format(value, nindent) };
+            Reference_Root::S_temporary xref = { std_json_format(::rocket::move(value), ::rocket::move(nindent)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -728,7 +728,7 @@ void create_bindings_json(G_object& result, API_Version /*version*/)
           G_string text;
           if(reader.start().g(text).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_json_parse(text) };
+            Reference_Root::S_temporary xref = { std_json_parse(::rocket::move(text)) };
             return ::rocket::move(xref);
           }
           // Fail.

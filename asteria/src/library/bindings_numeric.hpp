@@ -8,70 +8,70 @@
 
 namespace Asteria {
 
-extern G_integer std_numeric_abs(const G_integer& value);
-extern G_real std_numeric_abs(const G_real& value);
+extern G_integer std_numeric_abs(G_integer value);
+extern G_real std_numeric_abs(G_real value);
 
-extern G_integer std_numeric_sign(const G_integer& value);
-extern G_integer std_numeric_sign(const G_real& value);
+extern G_integer std_numeric_sign(G_integer value);
+extern G_integer std_numeric_sign(G_real value);
 
-extern G_boolean std_numeric_is_finite(const G_integer& value);
-extern G_boolean std_numeric_is_finite(const G_real& value);
-extern G_boolean std_numeric_is_infinity(const G_integer& value);
-extern G_boolean std_numeric_is_infinity(const G_real& value);
-extern G_boolean std_numeric_is_nan(const G_integer& value);
-extern G_boolean std_numeric_is_nan(const G_real& value);
+extern G_boolean std_numeric_is_finite(G_integer value);
+extern G_boolean std_numeric_is_finite(G_real value);
+extern G_boolean std_numeric_is_infinity(G_integer value);
+extern G_boolean std_numeric_is_infinity(G_real value);
+extern G_boolean std_numeric_is_nan(G_integer value);
+extern G_boolean std_numeric_is_nan(G_real value);
 
-extern G_integer std_numeric_clamp(const G_integer& value, const G_integer& lower, const G_integer& upper);
-extern G_real std_numeric_clamp(const G_real& value, const G_real& lower, const G_real& upper);
+extern G_integer std_numeric_clamp(G_integer value, G_integer lower, G_integer upper);
+extern G_real std_numeric_clamp(G_real value, G_real lower, G_real upper);
 
-extern G_integer std_numeric_round(const G_integer& value);
-extern G_real std_numeric_round(const G_real& value);
-extern G_integer std_numeric_floor(const G_integer& value);
-extern G_real std_numeric_floor(const G_real& value);
-extern G_integer std_numeric_ceil(const G_integer& value);
-extern G_real std_numeric_ceil(const G_real& value);
-extern G_integer std_numeric_trunc(const G_integer& value);
-extern G_real std_numeric_trunc(const G_real& value);
+extern G_integer std_numeric_round(G_integer value);
+extern G_real std_numeric_round(G_real value);
+extern G_integer std_numeric_floor(G_integer value);
+extern G_real std_numeric_floor(G_real value);
+extern G_integer std_numeric_ceil(G_integer value);
+extern G_real std_numeric_ceil(G_real value);
+extern G_integer std_numeric_trunc(G_integer value);
+extern G_real std_numeric_trunc(G_real value);
 
-extern G_integer std_numeric_iround(const G_integer& value);
-extern G_integer std_numeric_iround(const G_real& value);
-extern G_integer std_numeric_ifloor(const G_integer& value);
-extern G_integer std_numeric_ifloor(const G_real& value);
-extern G_integer std_numeric_iceil(const G_integer& value);
-extern G_integer std_numeric_iceil(const G_real& value);
-extern G_integer std_numeric_itrunc(const G_integer& value);
-extern G_integer std_numeric_itrunc(const G_real& value);
+extern G_integer std_numeric_iround(G_integer value);
+extern G_integer std_numeric_iround(G_real value);
+extern G_integer std_numeric_ifloor(G_integer value);
+extern G_integer std_numeric_ifloor(G_real value);
+extern G_integer std_numeric_iceil(G_integer value);
+extern G_integer std_numeric_iceil(G_real value);
+extern G_integer std_numeric_itrunc(G_integer value);
+extern G_integer std_numeric_itrunc(G_real value);
 
-extern G_real std_numeric_random(Global_Context& global, const opt<G_real>& limit = ::rocket::clear);
+extern G_real std_numeric_random(Global_Context& global, opt<G_real> limit = ::rocket::clear);
 
-extern G_real std_numeric_sqrt(const G_real& x);
-extern G_real std_numeric_fma(const G_real& x, const G_real& y, const G_real& z);
-extern G_real std_numeric_remainder(const G_real& x, const G_real& y);
+extern G_real std_numeric_sqrt(G_real x);
+extern G_real std_numeric_fma(G_real x, G_real y, G_real z);
+extern G_real std_numeric_remainder(G_real x, G_real y);
 
-extern pair<G_real, G_integer> std_numeric_frexp(const G_real& x);
-extern G_real std_numeric_ldexp(const G_real& frac, const G_integer& exp);
+extern pair<G_real, G_integer> std_numeric_frexp(G_real x);
+extern G_real std_numeric_ldexp(G_real frac, G_integer exp);
 
-extern G_integer std_numeric_addm(const G_integer& x, const G_integer& y);
-extern G_integer std_numeric_subm(const G_integer& x, const G_integer& y);
-extern G_integer std_numeric_mulm(const G_integer& x, const G_integer& y);
+extern G_integer std_numeric_addm(G_integer x, G_integer y);
+extern G_integer std_numeric_subm(G_integer x, G_integer y);
+extern G_integer std_numeric_mulm(G_integer x, G_integer y);
 
-extern G_integer std_numeric_adds(const G_integer& x, const G_integer& y);
-extern G_real std_numeric_adds(const G_real& x, const G_real& y);
-extern G_integer std_numeric_subs(const G_integer& x, const G_integer& y);
-extern G_real std_numeric_subs(const G_real& x, const G_real& y);
-extern G_integer std_numeric_muls(const G_integer& x, const G_integer& y);
-extern G_real std_numeric_muls(const G_real& x, const G_real& y);
+extern G_integer std_numeric_adds(G_integer x, G_integer y);
+extern G_real std_numeric_adds(G_real x, G_real y);
+extern G_integer std_numeric_subs(G_integer x, G_integer y);
+extern G_real std_numeric_subs(G_real x, G_real y);
+extern G_integer std_numeric_muls(G_integer x, G_integer y);
+extern G_real std_numeric_muls(G_real x, G_real y);
 
-extern G_integer std_numeric_lzcnt(const G_integer& x);
-extern G_integer std_numeric_tzcnt(const G_integer& x);
-extern G_integer std_numeric_popcnt(const G_integer& x);
-extern G_integer std_numeric_rotl(const G_integer& m, const G_integer& x, const G_integer& n);
-extern G_integer std_numeric_rotr(const G_integer& m, const G_integer& x, const G_integer& n);
+extern G_integer std_numeric_lzcnt(G_integer x);
+extern G_integer std_numeric_tzcnt(G_integer x);
+extern G_integer std_numeric_popcnt(G_integer x);
+extern G_integer std_numeric_rotl(G_integer m, G_integer x, G_integer n);
+extern G_integer std_numeric_rotr(G_integer m, G_integer x, G_integer n);
 
-extern G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base = ::rocket::clear, const opt<G_integer>& ebase = ::rocket::clear);
-extern G_string std_numeric_format(const G_real& value, const opt<G_integer>& base = ::rocket::clear, const opt<G_integer>& ebase = ::rocket::clear);
-extern opt<G_integer> std_numeric_parse_integer(const G_string& text);
-extern opt<G_real> std_numeric_parse_real(const G_string& text, const opt<G_boolean>& saturating = ::rocket::clear);
+extern G_string std_numeric_format(G_integer value, opt<G_integer> base = ::rocket::clear, opt<G_integer> ebase = ::rocket::clear);
+extern G_string std_numeric_format(G_real value, opt<G_integer> base = ::rocket::clear, opt<G_integer> ebase = ::rocket::clear);
+extern opt<G_integer> std_numeric_parse_integer(G_string text);
+extern opt<G_real> std_numeric_parse_real(G_string text, opt<G_boolean> saturating = ::rocket::clear);
 
 // Create an object that is to be referenced as `std.numeric`.
 extern void create_bindings_numeric(G_object& result, API_Version version);

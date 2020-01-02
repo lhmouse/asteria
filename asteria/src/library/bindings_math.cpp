@@ -18,7 +18,7 @@ constexpr G_real s_const_lb10 = 3.3219280948873623478703194294893901758648313930
 
 }  // namespace
 
-G_real std_math_exp(const G_real& y, const opt<G_real>& base)
+G_real std_math_exp(G_real y, opt<G_real> base)
   {
     if(!base) {
       return ::std::exp(y);
@@ -32,17 +32,17 @@ G_real std_math_exp(const G_real& y, const opt<G_real>& base)
     return ::std::pow(*base, y);
   }
 
-G_real std_math_expm1(const G_real& y)
+G_real std_math_expm1(G_real y)
   {
     return ::std::expm1(y);
   }
 
-G_real std_math_pow(const G_real& x, const G_real& y)
+G_real std_math_pow(G_real x, G_real y)
   {
     return ::std::pow(x, y);
   }
 
-G_real std_math_log(const G_real& x, const opt<G_real>& base)
+G_real std_math_log(G_real x, opt<G_real> base)
   {
     if(!base) {
       return ::std::log(x);
@@ -59,47 +59,47 @@ G_real std_math_log(const G_real& x, const opt<G_real>& base)
     return ::std::log2(x) / ::std::log2(*base);
   }
 
-G_real std_math_log1p(const G_real& x)
+G_real std_math_log1p(G_real x)
   {
     return ::std::log1p(x);
   }
 
-G_real std_math_sin(const G_real& x)
+G_real std_math_sin(G_real x)
   {
     return ::std::sin(x);
   }
 
-G_real std_math_cos(const G_real& x)
+G_real std_math_cos(G_real x)
   {
     return ::std::cos(x);
   }
 
-G_real std_math_tan(const G_real& x)
+G_real std_math_tan(G_real x)
   {
     return ::std::tan(x);
   }
 
-G_real std_math_asin(const G_real& x)
+G_real std_math_asin(G_real x)
   {
     return ::std::asin(x);
   }
 
-G_real std_math_acos(const G_real& x)
+G_real std_math_acos(G_real x)
   {
     return ::std::acos(x);
   }
 
-G_real std_math_atan(const G_real& x)
+G_real std_math_atan(G_real x)
   {
     return ::std::atan(x);
   }
 
-G_real std_math_atan2(const G_real& y, const G_real& x)
+G_real std_math_atan2(G_real y, G_real x)
   {
     return ::std::atan2(y, x);
   }
 
-G_real std_math_hypot(const cow_vector<Value>& values)
+G_real std_math_hypot(cow_vector<Value> values)
   {
     switch(values.size()) {
     case 0: {
@@ -122,52 +122,52 @@ G_real std_math_hypot(const cow_vector<Value>& values)
     }
   }
 
-G_real std_math_sinh(const G_real& x)
+G_real std_math_sinh(G_real x)
   {
     return ::std::sinh(x);
   }
 
-G_real std_math_cosh(const G_real& x)
+G_real std_math_cosh(G_real x)
   {
     return ::std::cosh(x);
   }
 
-G_real std_math_tanh(const G_real& x)
+G_real std_math_tanh(G_real x)
   {
     return ::std::tanh(x);
   }
 
-G_real std_math_asinh(const G_real& x)
+G_real std_math_asinh(G_real x)
   {
     return ::std::asinh(x);
   }
 
-G_real std_math_acosh(const G_real& x)
+G_real std_math_acosh(G_real x)
   {
     return ::std::acosh(x);
   }
 
-G_real std_math_atanh(const G_real& x)
+G_real std_math_atanh(G_real x)
   {
     return ::std::atanh(x);
   }
 
-G_real std_math_erf(const G_real& x)
+G_real std_math_erf(G_real x)
   {
     return ::std::erf(x);
   }
 
-G_real std_math_cerf(const G_real& x)
+G_real std_math_cerf(G_real x)
   {
     return ::std::erfc(x);
   }
 
-G_real std_math_gamma(const G_real& x)
+G_real std_math_gamma(G_real x)
   {
     return ::std::tgamma(x);
   }
 
-G_real std_math_lgamma(const G_real& x)
+G_real std_math_lgamma(G_real x)
   {
     return ::std::lgamma(x);
   }
@@ -221,7 +221,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           opt<G_real> base;
           if(reader.start().g(y).g(base).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_exp(y, base) };
+            Reference_Root::S_temporary xref = { std_math_exp(::rocket::move(y), ::rocket::move(base)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -250,7 +250,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           G_real y;
           if(reader.start().g(y).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_expm1(y) };
+            Reference_Root::S_temporary xref = { std_math_expm1(::rocket::move(y)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -281,7 +281,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           G_real y;
           if(reader.start().g(x).g(y).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_pow(x, y) };
+            Reference_Root::S_temporary xref = { std_math_pow(::rocket::move(x), ::rocket::move(y)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -311,7 +311,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           opt<G_real> base;
           if(reader.start().g(y).g(base).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_log(y, base) };
+            Reference_Root::S_temporary xref = { std_math_log(::rocket::move(y), ::rocket::move(base)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -340,7 +340,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           G_real y;
           if(reader.start().g(y).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_log1p(y) };
+            Reference_Root::S_temporary xref = { std_math_log1p(::rocket::move(y)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -368,7 +368,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           G_real x;
           if(reader.start().g(x).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_sin(x) };
+            Reference_Root::S_temporary xref = { std_math_sin(::rocket::move(x)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -396,7 +396,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           G_real x;
           if(reader.start().g(x).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_cos(x) };
+            Reference_Root::S_temporary xref = { std_math_cos(::rocket::move(x)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -424,7 +424,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           G_real x;
           if(reader.start().g(x).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_tan(x) };
+            Reference_Root::S_temporary xref = { std_math_tan(::rocket::move(x)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -452,7 +452,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           G_real x;
           if(reader.start().g(x).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_asin(x) };
+            Reference_Root::S_temporary xref = { std_math_asin(::rocket::move(x)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -480,7 +480,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           G_real x;
           if(reader.start().g(x).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_acos(x) };
+            Reference_Root::S_temporary xref = { std_math_acos(::rocket::move(x)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -508,7 +508,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           G_real x;
           if(reader.start().g(x).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_atan(x) };
+            Reference_Root::S_temporary xref = { std_math_atan(::rocket::move(x)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -537,7 +537,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           G_real x;
           if(reader.start().g(y).g(x).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_atan2(y, x) };
+            Reference_Root::S_temporary xref = { std_math_atan2(::rocket::move(y), ::rocket::move(x)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -569,7 +569,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           cow_vector<Value> values;
           if(reader.start().finish(values)) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_hypot(values) };
+            Reference_Root::S_temporary xref = { std_math_hypot(::rocket::move(values)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -597,7 +597,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           G_real x;
           if(reader.start().g(x).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_sinh(x) };
+            Reference_Root::S_temporary xref = { std_math_sinh(::rocket::move(x)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -625,7 +625,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           G_real x;
           if(reader.start().g(x).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_cosh(x) };
+            Reference_Root::S_temporary xref = { std_math_cosh(::rocket::move(x)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -653,7 +653,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           G_real x;
           if(reader.start().g(x).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_tanh(x) };
+            Reference_Root::S_temporary xref = { std_math_tanh(::rocket::move(x)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -681,7 +681,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           G_real x;
           if(reader.start().g(x).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_asinh(x) };
+            Reference_Root::S_temporary xref = { std_math_asinh(::rocket::move(x)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -709,7 +709,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           G_real x;
           if(reader.start().g(x).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_acosh(x) };
+            Reference_Root::S_temporary xref = { std_math_acosh(::rocket::move(x)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -737,7 +737,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           G_real x;
           if(reader.start().g(x).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_atanh(x) };
+            Reference_Root::S_temporary xref = { std_math_atanh(::rocket::move(x)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -765,7 +765,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           G_real x;
           if(reader.start().g(x).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_erf(x) };
+            Reference_Root::S_temporary xref = { std_math_erf(::rocket::move(x)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -793,7 +793,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           G_real x;
           if(reader.start().g(x).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_cerf(x) };
+            Reference_Root::S_temporary xref = { std_math_cerf(::rocket::move(x)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -821,7 +821,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           G_real x;
           if(reader.start().g(x).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_gamma(x) };
+            Reference_Root::S_temporary xref = { std_math_gamma(::rocket::move(x)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -850,7 +850,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           G_real x;
           if(reader.start().g(x).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_lgamma(x) };
+            Reference_Root::S_temporary xref = { std_math_lgamma(::rocket::move(x)) };
             return ::rocket::move(xref);
           }
           // Fail.

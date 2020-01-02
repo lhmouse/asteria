@@ -928,7 +928,7 @@ G_object std_checksum_crc32_new()
     return r;
   }
 
-G_integer std_checksum_crc32(const G_string& data)
+G_integer std_checksum_crc32(G_string data)
   {
     CRC32_Hasher h;
     h.write(data);
@@ -988,7 +988,7 @@ G_object std_checksum_fnv1a32_new()
     return r;
   }
 
-G_integer std_checksum_fnv1a32(const G_string& data)
+G_integer std_checksum_fnv1a32(G_string data)
   {
     FNV1a32_Hasher h;
     h.write(data);
@@ -1048,7 +1048,7 @@ G_object std_checksum_md5_new()
     return r;
   }
 
-G_string std_checksum_md5(const G_string& data)
+G_string std_checksum_md5(G_string data)
   {
     MD5_Hasher h;
     h.write(data);
@@ -1108,7 +1108,7 @@ G_object std_checksum_sha1_new()
     return r;
   }
 
-G_string std_checksum_sha1(const G_string& data)
+G_string std_checksum_sha1(G_string data)
   {
     SHA1_Hasher h;
     h.write(data);
@@ -1168,7 +1168,7 @@ G_object std_checksum_sha256_new()
     return r;
   }
 
-G_string std_checksum_sha256(const G_string& data)
+G_string std_checksum_sha256(G_string data)
   {
     SHA256_Hasher h;
     h.write(data);
@@ -1250,7 +1250,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
           G_string data;
           if(reader.start().g(data).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_checksum_crc32(data) };
+            Reference_Root::S_temporary xref = { std_checksum_crc32(::rocket::move(data)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1331,7 +1331,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
           G_string data;
           if(reader.start().g(data).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_checksum_fnv1a32(data) };
+            Reference_Root::S_temporary xref = { std_checksum_fnv1a32(::rocket::move(data)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1410,7 +1410,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
           G_string data;
           if(reader.start().g(data).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_checksum_md5(data) };
+            Reference_Root::S_temporary xref = { std_checksum_md5(::rocket::move(data)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1489,7 +1489,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
           G_string data;
           if(reader.start().g(data).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_checksum_sha1(data) };
+            Reference_Root::S_temporary xref = { std_checksum_sha1(::rocket::move(data)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1568,7 +1568,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
           G_string data;
           if(reader.start().g(data).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_checksum_sha256(data) };
+            Reference_Root::S_temporary xref = { std_checksum_sha256(::rocket::move(data)) };
             return ::rocket::move(xref);
           }
           // Fail.

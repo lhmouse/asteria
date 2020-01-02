@@ -10,7 +10,9 @@
 namespace Asteria {
 namespace {
 
-pair<G_string::const_iterator, G_string::const_iterator> do_slice(const G_string& text, G_string::const_iterator tbegin, const opt<G_integer>& length)
+using Slice = pair<G_string::const_iterator, G_string::const_iterator>;
+
+Slice do_slice(const G_string& text, G_string::const_iterator tbegin, const opt<G_integer>& length)
   {
     if(!length || (*length >= text.end() - tbegin)) {
       // Get the subrange from `tbegin` to the end.
@@ -24,7 +26,7 @@ pair<G_string::const_iterator, G_string::const_iterator> do_slice(const G_string
     return ::std::make_pair(tbegin, tbegin + static_cast<ptrdiff_t>(*length));
   }
 
-pair<G_string::const_iterator, G_string::const_iterator> do_slice(const G_string& text, const G_integer& from, const opt<G_integer>& length)
+Slice do_slice(const G_string& text, const G_integer& from, const opt<G_integer>& length)
   {
     auto slen = static_cast<int64_t>(text.size());
     if(from >= 0) {
@@ -236,7 +238,7 @@ template<typename WordT> G_array do_unpack_le(const G_string& text)
 
 }  // namespace
 
-G_string std_string_slice(const G_string& text, const G_integer& from, const opt<G_integer>& length)
+G_string std_string_slice(G_string text, G_integer from, opt<G_integer> length)
   {
     auto range = do_slice(text, from, length);
     if((range.first == text.begin()) && (range.second == text.end())) {
@@ -246,7 +248,7 @@ G_string std_string_slice(const G_string& text, const G_integer& from, const opt
     return G_string(range.first, range.second);
   }
 
-G_string std_string_replace_slice(const G_string& text, const G_integer& from, const G_string& replacement)
+G_string std_string_replace_slice(G_string text, G_integer from, G_string replacement)
   {
     G_string res = text;
     auto range = do_slice(res, from, ::rocket::clear);
@@ -255,7 +257,7 @@ G_string std_string_replace_slice(const G_string& text, const G_integer& from, c
     return res;
   }
 
-G_string std_string_replace_slice(const G_string& text, const G_integer& from, const opt<G_integer>& length, const G_string& replacement)
+G_string std_string_replace_slice(G_string text, G_integer from, opt<G_integer> length, G_string replacement)
   {
     G_string res = text;
     auto range = do_slice(res, from, length);
@@ -264,7 +266,7 @@ G_string std_string_replace_slice(const G_string& text, const G_integer& from, c
     return res;
   }
 
-G_integer std_string_compare(const G_string& text1, const G_string& text2, const opt<G_integer>& length)
+G_integer std_string_compare(G_string text1, G_string text2, opt<G_integer> length)
   {
     if(!length || (*length >= PTRDIFF_MAX)) {
       // Compare the entire strings.
@@ -278,17 +280,17 @@ G_integer std_string_compare(const G_string& text1, const G_string& text2, const
     return text1.compare(0, static_cast<size_t>(*length), text2, 0, static_cast<size_t>(*length));
   }
 
-G_boolean std_string_starts_with(const G_string& text, const G_string& prefix)
+G_boolean std_string_starts_with(G_string text, G_string prefix)
   {
     return text.starts_with(prefix);
   }
 
-G_boolean std_string_ends_with(const G_string& text, const G_string& suffix)
+G_boolean std_string_ends_with(G_string text, G_string suffix)
   {
     return text.ends_with(suffix);
   }
 
-opt<G_integer> std_string_find(const G_string& text, const G_string& pattern)
+opt<G_integer> std_string_find(G_string text, G_string pattern)
   {
     auto range = ::std::make_pair(text.begin(), text.end());
     auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
@@ -298,7 +300,7 @@ opt<G_integer> std_string_find(const G_string& text, const G_string& pattern)
     return *qit - text.begin();
   }
 
-opt<G_integer> std_string_find(const G_string& text, const G_integer& from, const G_string& pattern)
+opt<G_integer> std_string_find(G_string text, G_integer from, G_string pattern)
   {
     auto range = do_slice(text, from, ::rocket::clear);
     auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
@@ -308,7 +310,7 @@ opt<G_integer> std_string_find(const G_string& text, const G_integer& from, cons
     return *qit - text.begin();
   }
 
-opt<G_integer> std_string_find(const G_string& text, const G_integer& from, const opt<G_integer>& length, const G_string& pattern)
+opt<G_integer> std_string_find(G_string text, G_integer from, opt<G_integer> length, G_string pattern)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
@@ -318,7 +320,7 @@ opt<G_integer> std_string_find(const G_string& text, const G_integer& from, cons
     return *qit - text.begin();
   }
 
-opt<G_integer> std_string_rfind(const G_string& text, const G_string& pattern)
+opt<G_integer> std_string_rfind(G_string text, G_string pattern)
   {
     auto range = ::std::make_pair(text.begin(), text.end());
     auto qit = do_find_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first), pattern.rbegin(), pattern.rend());
@@ -328,7 +330,7 @@ opt<G_integer> std_string_rfind(const G_string& text, const G_string& pattern)
     return text.rend() - *qit - pattern.ssize();
   }
 
-opt<G_integer> std_string_rfind(const G_string& text, const G_integer& from, const G_string& pattern)
+opt<G_integer> std_string_rfind(G_string text, G_integer from, G_string pattern)
   {
     auto range = do_slice(text, from, ::rocket::clear);
     auto qit = do_find_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first), pattern.rbegin(), pattern.rend());
@@ -338,7 +340,7 @@ opt<G_integer> std_string_rfind(const G_string& text, const G_integer& from, con
     return text.rend() - *qit - pattern.ssize();
   }
 
-opt<G_integer> std_string_rfind(const G_string& text, const G_integer& from, const opt<G_integer>& length, const G_string& pattern)
+opt<G_integer> std_string_rfind(G_string text, G_integer from, opt<G_integer> length, G_string pattern)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first), pattern.rbegin(), pattern.rend());
@@ -348,7 +350,7 @@ opt<G_integer> std_string_rfind(const G_string& text, const G_integer& from, con
     return text.rend() - *qit - pattern.ssize();
   }
 
-G_string std_string_find_and_replace(const G_string& text, const G_string& pattern, const G_string& replacement)
+G_string std_string_find_and_replace(G_string text, G_string pattern, G_string replacement)
   {
     G_string res = text;
     auto range = ::std::make_pair(res.begin(), res.end());
@@ -366,7 +368,7 @@ G_string std_string_find_and_replace(const G_string& text, const G_string& patte
     return res;
   }
 
-G_string std_string_find_and_replace(const G_string& text, const G_integer& from, const G_string& pattern, const G_string& replacement)
+G_string std_string_find_and_replace(G_string text, G_integer from, G_string pattern, G_string replacement)
   {
     G_string res = text;
     auto range = do_slice(res, from, ::rocket::clear);
@@ -384,7 +386,7 @@ G_string std_string_find_and_replace(const G_string& text, const G_integer& from
     return res;
   }
 
-G_string std_string_find_and_replace(const G_string& text, const G_integer& from, const opt<G_integer>& length, const G_string& pattern, const G_string& replacement)
+G_string std_string_find_and_replace(G_string text, G_integer from, opt<G_integer> length, G_string pattern, G_string replacement)
   {
     G_string res = text;
     auto range = do_slice(res, from, length);
@@ -402,7 +404,7 @@ G_string std_string_find_and_replace(const G_string& text, const G_integer& from
     return res;
   }
 
-opt<G_integer> std_string_find_any_of(const G_string& text, const G_string& accept)
+opt<G_integer> std_string_find_any_of(G_string text, G_string accept)
   {
     auto qit = do_find_of_opt(text.begin(), text.end(), accept, true);
     if(!qit) {
@@ -411,7 +413,7 @@ opt<G_integer> std_string_find_any_of(const G_string& text, const G_string& acce
     return *qit - text.begin();
   }
 
-opt<G_integer> std_string_find_any_of(const G_string& text, const G_integer& from, const G_string& accept)
+opt<G_integer> std_string_find_any_of(G_string text, G_integer from, G_string accept)
   {
     auto range = do_slice(text, from, ::rocket::clear);
     auto qit = do_find_of_opt(range.first, range.second, accept, true);
@@ -421,7 +423,7 @@ opt<G_integer> std_string_find_any_of(const G_string& text, const G_integer& fro
     return *qit - text.begin();
   }
 
-opt<G_integer> std_string_find_any_of(const G_string& text, const G_integer& from, const opt<G_integer>& length, const G_string& accept)
+opt<G_integer> std_string_find_any_of(G_string text, G_integer from, opt<G_integer> length, G_string accept)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(range.first, range.second, accept, true);
@@ -431,7 +433,7 @@ opt<G_integer> std_string_find_any_of(const G_string& text, const G_integer& fro
     return *qit - text.begin();
   }
 
-opt<G_integer> std_string_find_not_of(const G_string& text, const G_string& reject)
+opt<G_integer> std_string_find_not_of(G_string text, G_string reject)
   {
     auto qit = do_find_of_opt(text.begin(), text.end(), reject, false);
     if(!qit) {
@@ -440,7 +442,7 @@ opt<G_integer> std_string_find_not_of(const G_string& text, const G_string& reje
     return *qit - text.begin();
   }
 
-opt<G_integer> std_string_find_not_of(const G_string& text, const G_integer& from, const G_string& reject)
+opt<G_integer> std_string_find_not_of(G_string text, G_integer from, G_string reject)
   {
     auto range = do_slice(text, from, ::rocket::clear);
     auto qit = do_find_of_opt(range.first, range.second, reject, false);
@@ -450,7 +452,7 @@ opt<G_integer> std_string_find_not_of(const G_string& text, const G_integer& fro
     return *qit - text.begin();
   }
 
-opt<G_integer> std_string_find_not_of(const G_string& text, const G_integer& from, const opt<G_integer>& length, const G_string& reject)
+opt<G_integer> std_string_find_not_of(G_string text, G_integer from, opt<G_integer> length, G_string reject)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(range.first, range.second, reject, false);
@@ -460,7 +462,7 @@ opt<G_integer> std_string_find_not_of(const G_string& text, const G_integer& fro
     return *qit - text.begin();
   }
 
-opt<G_integer> std_string_rfind_any_of(const G_string& text, const G_string& accept)
+opt<G_integer> std_string_rfind_any_of(G_string text, G_string accept)
   {
     auto qit = do_find_of_opt(text.rbegin(), text.rend(), accept, true);
     if(!qit) {
@@ -469,7 +471,7 @@ opt<G_integer> std_string_rfind_any_of(const G_string& text, const G_string& acc
     return text.rend() - *qit - 1;
   }
 
-opt<G_integer> std_string_rfind_any_of(const G_string& text, const G_integer& from, const G_string& accept)
+opt<G_integer> std_string_rfind_any_of(G_string text, G_integer from, G_string accept)
   {
     auto range = do_slice(text, from, ::rocket::clear);
     auto qit = do_find_of_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first), accept, true);
@@ -479,7 +481,7 @@ opt<G_integer> std_string_rfind_any_of(const G_string& text, const G_integer& fr
     return text.rend() - *qit - 1;
   }
 
-opt<G_integer> std_string_rfind_any_of(const G_string& text, const G_integer& from, const opt<G_integer>& length, const G_string& accept)
+opt<G_integer> std_string_rfind_any_of(G_string text, G_integer from, opt<G_integer> length, G_string accept)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first), accept, true);
@@ -489,7 +491,7 @@ opt<G_integer> std_string_rfind_any_of(const G_string& text, const G_integer& fr
     return text.rend() - *qit - 1;
   }
 
-opt<G_integer> std_string_rfind_not_of(const G_string& text, const G_string& reject)
+opt<G_integer> std_string_rfind_not_of(G_string text, G_string reject)
   {
     auto qit = do_find_of_opt(text.rbegin(), text.rend(), reject, false);
     if(!qit) {
@@ -498,7 +500,7 @@ opt<G_integer> std_string_rfind_not_of(const G_string& text, const G_string& rej
     return text.rend() - *qit - 1;
   }
 
-opt<G_integer> std_string_rfind_not_of(const G_string& text, const G_integer& from, const G_string& reject)
+opt<G_integer> std_string_rfind_not_of(G_string text, G_integer from, G_string reject)
   {
     auto range = do_slice(text, from, ::rocket::clear);
     auto qit = do_find_of_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first), reject, false);
@@ -508,7 +510,7 @@ opt<G_integer> std_string_rfind_not_of(const G_string& text, const G_integer& fr
     return text.rend() - *qit - 1;
   }
 
-opt<G_integer> std_string_rfind_not_of(const G_string& text, const G_integer& from, const opt<G_integer>& length, const G_string& reject)
+opt<G_integer> std_string_rfind_not_of(G_string text, G_integer from, opt<G_integer> length, G_string reject)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first), reject, false);
@@ -518,13 +520,13 @@ opt<G_integer> std_string_rfind_not_of(const G_string& text, const G_integer& fr
     return text.rend() - *qit - 1;
   }
 
-G_string std_string_reverse(const G_string& text)
+G_string std_string_reverse(G_string text)
   {
     // This is an easy matter, isn't it?
     return G_string(text.rbegin(), text.rend());
   }
 
-G_string std_string_trim(const G_string& text, const opt<G_string>& reject)
+G_string std_string_trim(G_string text, opt<G_string> reject)
   {
     auto rchars = do_get_reject(reject);
     if(rchars.length() == 0) {
@@ -547,7 +549,7 @@ G_string std_string_trim(const G_string& text, const opt<G_string>& reject)
     return text.substr(start, end + 1 - start);
   }
 
-G_string std_string_ltrim(const G_string& text, const opt<G_string>& reject)
+G_string std_string_ltrim(G_string text, opt<G_string> reject)
   {
     auto rchars = do_get_reject(reject);
     if(rchars.length() == 0) {
@@ -568,7 +570,7 @@ G_string std_string_ltrim(const G_string& text, const opt<G_string>& reject)
     return text.substr(start);
   }
 
-G_string std_string_rtrim(const G_string& text, const opt<G_string>& reject)
+G_string std_string_rtrim(G_string text, opt<G_string> reject)
   {
     auto rchars = do_get_reject(reject);
     if(rchars.length() == 0) {
@@ -589,7 +591,7 @@ G_string std_string_rtrim(const G_string& text, const opt<G_string>& reject)
     return text.substr(0, end + 1);
   }
 
-G_string std_string_lpad(const G_string& text, const G_integer& length, const opt<G_string>& padding)
+G_string std_string_lpad(G_string text, G_integer length, opt<G_string> padding)
   {
     G_string res = text;
     auto rpadding = do_get_padding(padding);
@@ -605,7 +607,7 @@ G_string std_string_lpad(const G_string& text, const G_integer& length, const op
     return res;
   }
 
-G_string std_string_rpad(const G_string& text, const G_integer& length, const opt<G_string>& padding)
+G_string std_string_rpad(G_string text, G_integer length, opt<G_string> padding)
   {
     G_string res = text;
     auto rpadding = do_get_padding(padding);
@@ -621,7 +623,7 @@ G_string std_string_rpad(const G_string& text, const G_integer& length, const op
     return res;
   }
 
-G_string std_string_to_upper(const G_string& text)
+G_string std_string_to_upper(G_string text)
   {
     // Use reference counting as our advantage.
     G_string res = text;
@@ -641,7 +643,7 @@ G_string std_string_to_upper(const G_string& text)
     return res;
   }
 
-G_string std_string_to_lower(const G_string& text)
+G_string std_string_to_lower(G_string text)
   {
     // Use reference counting as our advantage.
     G_string res = text;
@@ -661,7 +663,7 @@ G_string std_string_to_lower(const G_string& text)
     return res;
   }
 
-G_string std_string_translate(const G_string& text, const G_string& inputs, const opt<G_string>& outputs)
+G_string std_string_translate(G_string text, G_string inputs, opt<G_string> outputs)
   {
     // Use reference counting as our advantage.
     G_string res = text;
@@ -688,7 +690,7 @@ G_string std_string_translate(const G_string& text, const G_string& inputs, cons
     return res;
   }
 
-G_array std_string_explode(const G_string& text, const opt<G_string>& delim, const opt<G_integer>& limit)
+G_array std_string_explode(G_string text, opt<G_string> delim, opt<G_integer> limit)
   {
     uint64_t rlimit = UINT64_MAX;
     if(limit) {
@@ -732,7 +734,7 @@ G_array std_string_explode(const G_string& text, const opt<G_string>& delim, con
     return segments;
   }
 
-G_string std_string_implode(const G_array& segments, const opt<G_string>& delim)
+G_string std_string_implode(G_array segments, opt<G_string> delim)
   {
     G_string text;
     auto nsegs = segments.size();
@@ -752,7 +754,7 @@ G_string std_string_implode(const G_array& segments, const opt<G_string>& delim)
     return text;
   }
 
-G_string std_string_hex_encode(const G_string& data, const opt<G_boolean>& lowercase, const opt<G_string>& delim)
+G_string std_string_hex_encode(G_string data, opt<G_boolean> lowercase, opt<G_string> delim)
   {
     G_string text;
     auto rdelim = delim ? ::rocket::sref(*delim) : ::rocket::sref("");
@@ -781,7 +783,7 @@ G_string std_string_hex_encode(const G_string& data, const opt<G_boolean>& lower
     return text;
   }
 
-opt<G_string> std_string_hex_decode(const G_string& text)
+opt<G_string> std_string_hex_decode(G_string text)
   {
     G_string data;
     // These shall be operated in big-endian order.
@@ -833,7 +835,7 @@ opt<G_string> std_string_hex_decode(const G_string& text)
     return ::rocket::move(data);
   }
 
-G_string std_string_base32_encode(const G_string& data, const opt<G_boolean>& lowercase)
+G_string std_string_base32_encode(G_string data, opt<G_boolean> lowercase)
   {
     G_string text;
     bool rlowerc = lowercase == true;
@@ -884,7 +886,7 @@ G_string std_string_base32_encode(const G_string& data, const opt<G_boolean>& lo
     return text;
   }
 
-opt<G_string> std_string_base32_decode(const G_string& text)
+opt<G_string> std_string_base32_decode(G_string text)
   {
     G_string data;
     // These shall be operated in big-endian order.
@@ -952,7 +954,7 @@ opt<G_string> std_string_base32_decode(const G_string& text)
     return ::rocket::move(data);
   }
 
-G_string std_string_base64_encode(const G_string& data)
+G_string std_string_base64_encode(G_string data)
   {
     G_string text;
     text.reserve((data.size() + 2) / 3 * 4);
@@ -1002,7 +1004,7 @@ G_string std_string_base64_encode(const G_string& data)
     return text;
   }
 
-opt<G_string> std_string_base64_decode(const G_string& text)
+opt<G_string> std_string_base64_decode(G_string text)
   {
     G_string data;
     // These shall be operated in big-endian order.
@@ -1070,7 +1072,7 @@ opt<G_string> std_string_base64_decode(const G_string& text)
     return ::rocket::move(data);
   }
 
-opt<G_string> std_string_utf8_encode(const G_integer& code_point, const opt<G_boolean>& permissive)
+opt<G_string> std_string_utf8_encode(G_integer code_point, opt<G_boolean> permissive)
   {
     G_string text;
     text.reserve(4);
@@ -1087,7 +1089,7 @@ opt<G_string> std_string_utf8_encode(const G_integer& code_point, const opt<G_bo
     return ::rocket::move(text);
   }
 
-opt<G_string> std_string_utf8_encode(const G_array& code_points, const opt<G_boolean>& permissive)
+opt<G_string> std_string_utf8_encode(G_array code_points, opt<G_boolean> permissive)
   {
     G_string text;
     text.reserve(code_points.size() * 3);
@@ -1106,7 +1108,7 @@ opt<G_string> std_string_utf8_encode(const G_array& code_points, const opt<G_boo
     return ::rocket::move(text);
   }
 
-opt<G_array> std_string_utf8_decode(const G_string& text, const opt<G_boolean>& permissive)
+opt<G_array> std_string_utf8_decode(G_string text, opt<G_boolean> permissive)
   {
     G_array code_points;
     code_points.reserve(text.size());
@@ -1130,7 +1132,7 @@ opt<G_array> std_string_utf8_decode(const G_string& text, const opt<G_boolean>& 
     return ::rocket::move(code_points);
   }
 
-G_string std_string_pack_8(const G_integer& value)
+G_string std_string_pack_8(G_integer value)
   {
     G_string text;
     text.reserve(1);
@@ -1138,7 +1140,7 @@ G_string std_string_pack_8(const G_integer& value)
     return text;
   }
 
-G_string std_string_pack_8(const G_array& values)
+G_string std_string_pack_8(G_array values)
   {
     G_string text;
     text.reserve(values.size());
@@ -1148,12 +1150,12 @@ G_string std_string_pack_8(const G_array& values)
     return text;
   }
 
-G_array std_string_unpack_8(const G_string& text)
+G_array std_string_unpack_8(G_string text)
   {
     return do_unpack_le<int8_t>(text);
   }
 
-G_string std_string_pack_16be(const G_integer& value)
+G_string std_string_pack_16be(G_integer value)
   {
     G_string text;
     text.reserve(2);
@@ -1161,7 +1163,7 @@ G_string std_string_pack_16be(const G_integer& value)
     return text;
   }
 
-G_string std_string_pack_16be(const G_array& values)
+G_string std_string_pack_16be(G_array values)
   {
     G_string text;
     text.reserve(values.size() * 2);
@@ -1171,12 +1173,12 @@ G_string std_string_pack_16be(const G_array& values)
     return text;
   }
 
-G_array std_string_unpack_16be(const G_string& text)
+G_array std_string_unpack_16be(G_string text)
   {
     return do_unpack_be<int16_t>(text);
   }
 
-G_string std_string_pack_16le(const G_integer& value)
+G_string std_string_pack_16le(G_integer value)
   {
     G_string text;
     text.reserve(2);
@@ -1184,7 +1186,7 @@ G_string std_string_pack_16le(const G_integer& value)
     return text;
   }
 
-G_string std_string_pack_16le(const G_array& values)
+G_string std_string_pack_16le(G_array values)
   {
     G_string text;
     text.reserve(values.size() * 2);
@@ -1194,12 +1196,12 @@ G_string std_string_pack_16le(const G_array& values)
     return text;
   }
 
-G_array std_string_unpack_16le(const G_string& text)
+G_array std_string_unpack_16le(G_string text)
   {
     return do_unpack_le<int16_t>(text);
   }
 
-G_string std_string_pack_32be(const G_integer& value)
+G_string std_string_pack_32be(G_integer value)
   {
     G_string text;
     text.reserve(4);
@@ -1207,7 +1209,7 @@ G_string std_string_pack_32be(const G_integer& value)
     return text;
   }
 
-G_string std_string_pack_32be(const G_array& values)
+G_string std_string_pack_32be(G_array values)
   {
     G_string text;
     text.reserve(values.size() * 4);
@@ -1217,12 +1219,12 @@ G_string std_string_pack_32be(const G_array& values)
     return text;
   }
 
-G_array std_string_unpack_32be(const G_string& text)
+G_array std_string_unpack_32be(G_string text)
   {
     return do_unpack_be<int32_t>(text);
   }
 
-G_string std_string_pack_32le(const G_integer& value)
+G_string std_string_pack_32le(G_integer value)
   {
     G_string text;
     text.reserve(4);
@@ -1230,7 +1232,7 @@ G_string std_string_pack_32le(const G_integer& value)
     return text;
   }
 
-G_string std_string_pack_32le(const G_array& values)
+G_string std_string_pack_32le(G_array values)
   {
     G_string text;
     text.reserve(values.size() * 4);
@@ -1240,12 +1242,12 @@ G_string std_string_pack_32le(const G_array& values)
     return text;
   }
 
-G_array std_string_unpack_32le(const G_string& text)
+G_array std_string_unpack_32le(G_string text)
   {
     return do_unpack_le<int32_t>(text);
   }
 
-G_string std_string_pack_64be(const G_integer& value)
+G_string std_string_pack_64be(G_integer value)
   {
     G_string text;
     text.reserve(8);
@@ -1253,7 +1255,7 @@ G_string std_string_pack_64be(const G_integer& value)
     return text;
   }
 
-G_string std_string_pack_64be(const G_array& values)
+G_string std_string_pack_64be(G_array values)
   {
     G_string text;
     text.reserve(values.size() * 8);
@@ -1263,12 +1265,12 @@ G_string std_string_pack_64be(const G_array& values)
     return text;
   }
 
-G_array std_string_unpack_64be(const G_string& text)
+G_array std_string_unpack_64be(G_string text)
   {
     return do_unpack_be<int64_t>(text);
   }
 
-G_string std_string_pack_64le(const G_integer& value)
+G_string std_string_pack_64le(G_integer value)
   {
     G_string text;
     text.reserve(8);
@@ -1276,7 +1278,7 @@ G_string std_string_pack_64le(const G_integer& value)
     return text;
   }
 
-G_string std_string_pack_64le(const G_array& values)
+G_string std_string_pack_64le(G_array values)
   {
     G_string text;
     text.reserve(values.size() * 8);
@@ -1286,12 +1288,12 @@ G_string std_string_pack_64le(const G_array& values)
     return text;
   }
 
-G_array std_string_unpack_64le(const G_string& text)
+G_array std_string_unpack_64le(G_string text)
   {
     return do_unpack_le<int64_t>(text);
   }
 
-G_string std_string_format(const G_string& templ, const cow_vector<Value>& values)
+G_string std_string_format(G_string templ, cow_vector<Value> values)
   {
     // Prepare inserters.
     cow_vector<::rocket::formatter> insts;
@@ -1339,7 +1341,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           opt<G_integer> length;
           if(reader.start().g(text).g(from).g(length).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_slice(text, from, length) };
+            Reference_Root::S_temporary xref = { std_string_slice(::rocket::move(text), ::rocket::move(from), ::rocket::move(length)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1385,13 +1387,13 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_string replacement;
           if(reader.start().g(text).g(from).save(state).g(replacement).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_replace_slice(text, from, replacement) };
+            Reference_Root::S_temporary xref = { std_string_replace_slice(::rocket::move(text), ::rocket::move(from), ::rocket::move(replacement)) };
             return ::rocket::move(xref);
           }
           opt<G_integer> length;
           if(reader.load(state).g(length).g(replacement).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_replace_slice(text, from, length, replacement) };
+            Reference_Root::S_temporary xref = { std_string_replace_slice(::rocket::move(text), ::rocket::move(from), ::rocket::move(length), ::rocket::move(replacement)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1427,7 +1429,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           opt<G_integer> length;
           if(reader.start().g(text1).g(text2).g(length).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_compare(text1, text2, length) };
+            Reference_Root::S_temporary xref = { std_string_compare(::rocket::move(text1), ::rocket::move(text2), ::rocket::move(length)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1458,7 +1460,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_string prefix;
           if(reader.start().g(text).g(prefix).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_starts_with(text, prefix) };
+            Reference_Root::S_temporary xref = { std_string_starts_with(::rocket::move(text), ::rocket::move(prefix)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1489,7 +1491,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_string suffix;
           if(reader.start().g(text).g(suffix).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_ends_with(text, suffix) };
+            Reference_Root::S_temporary xref = { std_string_ends_with(::rocket::move(text), ::rocket::move(suffix)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1541,7 +1543,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_string pattern;
           if(reader.start().g(text).save(state).g(pattern).finish()) {
             // Call the binding function.
-            auto qindex = std_string_find(text, pattern);
+            auto qindex = std_string_find(::rocket::move(text), ::rocket::move(pattern));
             if(!qindex) {
               return Reference_Root::S_null();
             }
@@ -1551,7 +1553,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_integer from;
           if(reader.load(state).g(from).save(state).g(pattern).finish()) {
             // Call the binding function.
-            auto qindex = std_string_find(text, from, pattern);
+            auto qindex = std_string_find(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern));
             if(!qindex) {
               return Reference_Root::S_null();
             }
@@ -1561,7 +1563,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           opt<G_integer> length;
           if(reader.load(state).g(length).g(pattern).finish()) {
             // Call the binding function.
-            auto qindex = std_string_find(text, from, length, pattern);
+            auto qindex = std_string_find(::rocket::move(text), ::rocket::move(from), ::rocket::move(length), ::rocket::move(pattern));
             if(!qindex) {
               return Reference_Root::S_null();
             }
@@ -1615,7 +1617,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_string pattern;
           if(reader.start().g(text).save(state).g(pattern).finish()) {
             // Call the binding function.
-            auto qindex = std_string_rfind(text, pattern);
+            auto qindex = std_string_rfind(::rocket::move(text), ::rocket::move(pattern));
             if(!qindex) {
               return Reference_Root::S_null();
             }
@@ -1625,7 +1627,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_integer from;
           if(reader.load(state).g(from).save(state).g(pattern).finish()) {
             // Call the binding function.
-            auto qindex = std_string_rfind(text, from, pattern);
+            auto qindex = std_string_rfind(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern));
             if(!qindex) {
               return Reference_Root::S_null();
             }
@@ -1635,7 +1637,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           opt<G_integer> length;
           if(reader.load(state).g(length).g(pattern).finish()) {
             // Call the binding function.
-            auto qindex = std_string_rfind(text, from, length, pattern);
+            auto qindex = std_string_rfind(::rocket::move(text), ::rocket::move(from), ::rocket::move(length), ::rocket::move(pattern));
             if(!qindex) {
               return Reference_Root::S_null();
             }
@@ -1693,19 +1695,19 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_string replacement;
           if(reader.start().g(text).save(state).g(pattern).g(replacement).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_find_and_replace(text, pattern, replacement) };
+            Reference_Root::S_temporary xref = { std_string_find_and_replace(::rocket::move(text), ::rocket::move(pattern), ::rocket::move(replacement)) };
             return ::rocket::move(xref);
           }
           G_integer from;
           if(reader.load(state).g(from).save(state).g(pattern).g(replacement).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_find_and_replace(text, from, pattern, replacement) };
+            Reference_Root::S_temporary xref = { std_string_find_and_replace(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern), ::rocket::move(replacement)) };
             return ::rocket::move(xref);
           }
           opt<G_integer> length;
           if(reader.load(state).g(length).g(pattern).g(replacement).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_find_and_replace(text, from, length, pattern, replacement) };
+            Reference_Root::S_temporary xref = { std_string_find_and_replace(::rocket::move(text), ::rocket::move(from), ::rocket::move(length), ::rocket::move(pattern), ::rocket::move(replacement)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1754,7 +1756,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_string accept;
           if(reader.start().g(text).save(state).g(accept).finish()) {
             // Call the binding function.
-            auto qindex = std_string_find_any_of(text, accept);
+            auto qindex = std_string_find_any_of(::rocket::move(text), ::rocket::move(accept));
             if(!qindex) {
               return Reference_Root::S_null();
             }
@@ -1764,7 +1766,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_integer from;
           if(reader.load(state).g(from).save(state).g(accept).finish()) {
             // Call the binding function.
-            auto qindex = std_string_find_any_of(text, from, accept);
+            auto qindex = std_string_find_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
             if(!qindex) {
               return Reference_Root::S_null();
             }
@@ -1774,7 +1776,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           opt<G_integer> length;
           if(reader.load(state).g(length).g(accept).finish()) {
             // Call the binding function.
-            auto qindex = std_string_find_any_of(text, from, length, accept);
+            auto qindex = std_string_find_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length), ::rocket::move(accept));
             if(!qindex) {
               return Reference_Root::S_null();
             }
@@ -1827,7 +1829,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_string accept;
           if(reader.start().g(text).save(state).g(accept).finish()) {
             // Call the binding function.
-            auto qindex = std_string_rfind_any_of(text, accept);
+            auto qindex = std_string_rfind_any_of(::rocket::move(text), ::rocket::move(accept));
             if(!qindex) {
               return Reference_Root::S_null();
             }
@@ -1837,7 +1839,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_integer from;
           if(reader.load(state).g(from).save(state).g(accept).finish()) {
             // Call the binding function.
-            auto qindex = std_string_rfind_any_of(text, from, accept);
+            auto qindex = std_string_rfind_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
             if(!qindex) {
               return Reference_Root::S_null();
             }
@@ -1847,7 +1849,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           opt<G_integer> length;
           if(reader.load(state).g(length).g(accept).finish()) {
             // Call the binding function.
-            auto qindex = std_string_rfind_any_of(text, from, length, accept);
+            auto qindex = std_string_rfind_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length), ::rocket::move(accept));
             if(!qindex) {
               return Reference_Root::S_null();
             }
@@ -1900,7 +1902,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_string accept;
           if(reader.start().g(text).save(state).g(accept).finish()) {
             // Call the binding function.
-            auto qindex = std_string_find_not_of(text, accept);
+            auto qindex = std_string_find_not_of(::rocket::move(text), ::rocket::move(accept));
             if(!qindex) {
               return Reference_Root::S_null();
             }
@@ -1910,7 +1912,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_integer from;
           if(reader.load(state).g(from).save(state).g(accept).finish()) {
             // Call the binding function.
-            auto qindex = std_string_find_not_of(text, from, accept);
+            auto qindex = std_string_find_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
             if(!qindex) {
               return Reference_Root::S_null();
             }
@@ -1920,7 +1922,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           opt<G_integer> length;
           if(reader.load(state).g(length).g(accept).finish()) {
             // Call the binding function.
-            auto qindex = std_string_find_not_of(text, from, length, accept);
+            auto qindex = std_string_find_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length), ::rocket::move(accept));
             if(!qindex) {
               return Reference_Root::S_null();
             }
@@ -1973,7 +1975,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_string accept;
           if(reader.start().g(text).save(state).g(accept).finish()) {
             // Call the binding function.
-            auto qindex = std_string_rfind_not_of(text, accept);
+            auto qindex = std_string_rfind_not_of(::rocket::move(text), ::rocket::move(accept));
             if(!qindex) {
               return Reference_Root::S_null();
             }
@@ -1983,7 +1985,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_integer from;
           if(reader.load(state).g(from).save(state).g(accept).finish()) {
             // Call the binding function.
-            auto qindex = std_string_rfind_not_of(text, from, accept);
+            auto qindex = std_string_rfind_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
             if(!qindex) {
               return Reference_Root::S_null();
             }
@@ -1993,7 +1995,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           opt<G_integer> length;
           if(reader.load(state).g(length).g(accept).finish()) {
             // Call the binding function.
-            auto qindex = std_string_rfind_not_of(text, from, length, accept);
+            auto qindex = std_string_rfind_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length), ::rocket::move(accept));
             if(!qindex) {
               return Reference_Root::S_null();
             }
@@ -2026,7 +2028,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_string text;
           if(reader.start().g(text).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_reverse(text) };
+            Reference_Root::S_temporary xref = { std_string_reverse(::rocket::move(text)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -2058,7 +2060,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           opt<G_string> reject;
           if(reader.start().g(text).g(reject).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_trim(text, reject) };
+            Reference_Root::S_temporary xref = { std_string_trim(::rocket::move(text), ::rocket::move(reject)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -2090,7 +2092,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           opt<G_string> reject;
           if(reader.start().g(text).g(reject).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_ltrim(text, reject) };
+            Reference_Root::S_temporary xref = { std_string_ltrim(::rocket::move(text), ::rocket::move(reject)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -2122,7 +2124,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           opt<G_string> reject;
           if(reader.start().g(text).g(reject).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_rtrim(text, reject) };
+            Reference_Root::S_temporary xref = { std_string_rtrim(::rocket::move(text), ::rocket::move(reject)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -2157,7 +2159,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           opt<G_string> padding;
           if(reader.start().g(text).g(length).g(padding).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_lpad(text, length, padding) };
+            Reference_Root::S_temporary xref = { std_string_lpad(::rocket::move(text), ::rocket::move(length), ::rocket::move(padding)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -2192,7 +2194,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           opt<G_string> padding;
           if(reader.start().g(text).g(length).g(padding).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_rpad(text, length, padding) };
+            Reference_Root::S_temporary xref = { std_string_rpad(::rocket::move(text), ::rocket::move(length), ::rocket::move(padding)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -2222,7 +2224,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_string text;
           if(reader.start().g(text).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_to_upper(text) };
+            Reference_Root::S_temporary xref = { std_string_to_upper(::rocket::move(text)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -2252,7 +2254,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_string text;
           if(reader.start().g(text).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_to_lower(text) };
+            Reference_Root::S_temporary xref = { std_string_to_lower(::rocket::move(text)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -2290,7 +2292,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           opt<G_string> outputs;
           if(reader.start().g(text).g(inputs).g(outputs).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_translate(text, inputs, outputs) };
+            Reference_Root::S_temporary xref = { std_string_translate(::rocket::move(text), ::rocket::move(inputs), ::rocket::move(outputs)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -2327,7 +2329,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           opt<G_integer> limit;
           if(reader.start().g(text).g(delim).g(limit).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_explode(text, delim, limit) };
+            Reference_Root::S_temporary xref = { std_string_explode(::rocket::move(text), ::rocket::move(delim), ::rocket::move(limit)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -2359,7 +2361,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           opt<G_string> delim;
           if(reader.start().g(segments).g(delim).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_implode(segments, delim) };
+            Reference_Root::S_temporary xref = { std_string_implode(::rocket::move(segments), ::rocket::move(delim)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -2394,7 +2396,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           opt<G_string> delim;
           if(reader.start().g(data).g(lowercase).g(delim).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_hex_encode(data, lowercase, delim) };
+            Reference_Root::S_temporary xref = { std_string_hex_encode(::rocket::move(data), ::rocket::move(lowercase), ::rocket::move(delim)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -2428,7 +2430,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_string text;
           if(reader.start().g(text).finish()) {
             // Call the binding function.
-            auto qdata = std_string_hex_decode(text);
+            auto qdata = std_string_hex_decode(::rocket::move(text));
             if(!qdata) {
               return Reference_Root::S_null();
             }
@@ -2466,7 +2468,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           opt<G_boolean> lowercase;
           if(reader.start().g(data).g(lowercase).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_base32_encode(data, lowercase) };
+            Reference_Root::S_temporary xref = { std_string_base32_encode(::rocket::move(data), ::rocket::move(lowercase)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -2500,7 +2502,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_string text;
           if(reader.start().g(text).finish()) {
             // Call the binding function.
-            auto qdata = std_string_base32_decode(text);
+            auto qdata = std_string_base32_decode(::rocket::move(text));
             if(!qdata) {
               return Reference_Root::S_null();
             }
@@ -2534,7 +2536,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_string data;
           if(reader.start().g(data).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_base64_encode(data) };
+            Reference_Root::S_temporary xref = { std_string_base64_encode(::rocket::move(data)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -2569,7 +2571,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_string text;
           if(reader.start().g(text).finish()) {
             // Call the binding function.
-            auto qdata = std_string_base64_decode(text);
+            auto qdata = std_string_base64_decode(::rocket::move(text));
             if(!qdata) {
               return Reference_Root::S_null();
             }
@@ -2607,7 +2609,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           opt<G_boolean> permissive;
           if(reader.start().g(code_point).g(permissive).finish()) {
             // Call the binding function.
-            auto qtext = std_string_utf8_encode(code_point, permissive);
+            auto qtext = std_string_utf8_encode(::rocket::move(code_point), ::rocket::move(permissive));
             if(!qtext) {
               return Reference_Root::S_null();
             }
@@ -2617,7 +2619,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_array code_points;
           if(reader.start().g(code_points).g(permissive).finish()) {
             // Call the binding function.
-            auto qtext = std_string_utf8_encode(code_points, permissive);
+            auto qtext = std_string_utf8_encode(::rocket::move(code_points), ::rocket::move(permissive));
             if(!qtext) {
               return Reference_Root::S_null();
             }
@@ -2656,7 +2658,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           opt<G_boolean> permissive;
           if(reader.start().g(text).g(permissive).finish()) {
             // Call the binding function.
-            auto qres = std_string_utf8_decode(text, permissive);
+            auto qres = std_string_utf8_decode(::rocket::move(text), ::rocket::move(permissive));
             if(!qres) {
               return Reference_Root::S_null();
             }
@@ -2690,7 +2692,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_integer value;
           if(reader.start().g(value).finish()) {
             // Call the binding function.
-            auto text = std_string_pack_8(value);
+            auto text = std_string_pack_8(::rocket::move(value));
             // Forward the result.
             Reference_Root::S_temporary xref = { ::rocket::move(text) };
             return ::rocket::move(xref);
@@ -2698,7 +2700,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_array values;
           if(reader.start().g(values).finish()) {
             // Call the binding function.
-            auto text = std_string_pack_8(values);
+            auto text = std_string_pack_8(::rocket::move(values));
             // Forward the result.
             Reference_Root::S_temporary xref = { ::rocket::move(text) };
             return ::rocket::move(xref);
@@ -2730,7 +2732,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_string text;
           if(reader.start().g(text).finish()) {
             // Call the binding function.
-            auto values = std_string_unpack_8(text);
+            auto values = std_string_unpack_8(::rocket::move(text));
             // Forward the result.
             Reference_Root::S_temporary xref = { ::rocket::move(values) };
             return ::rocket::move(xref);
@@ -2763,7 +2765,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_integer value;
           if(reader.start().g(value).finish()) {
             // Call the binding function.
-            auto text = std_string_pack_16be(value);
+            auto text = std_string_pack_16be(::rocket::move(value));
             // Forward the result.
             Reference_Root::S_temporary xref = { ::rocket::move(text) };
             return ::rocket::move(xref);
@@ -2771,7 +2773,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_array values;
           if(reader.start().g(values).finish()) {
             // Call the binding function.
-            auto text = std_string_pack_16be(values);
+            auto text = std_string_pack_16be(::rocket::move(values));
             // Forward the result.
             Reference_Root::S_temporary xref = { ::rocket::move(text) };
             return ::rocket::move(xref);
@@ -2807,7 +2809,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_string text;
           if(reader.start().g(text).finish()) {
             // Call the binding function.
-            auto values = std_string_unpack_16be(text);
+            auto values = std_string_unpack_16be(::rocket::move(text));
             // Forward the result.
             Reference_Root::S_temporary xref = { ::rocket::move(values) };
             return ::rocket::move(xref);
@@ -2840,7 +2842,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_integer value;
           if(reader.start().g(value).finish()) {
             // Call the binding function.
-            auto text = std_string_pack_16le(value);
+            auto text = std_string_pack_16le(::rocket::move(value));
             // Forward the result.
             Reference_Root::S_temporary xref = { ::rocket::move(text) };
             return ::rocket::move(xref);
@@ -2848,7 +2850,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_array values;
           if(reader.start().g(values).finish()) {
             // Call the binding function.
-            auto text = std_string_pack_16le(values);
+            auto text = std_string_pack_16le(::rocket::move(values));
             // Forward the result.
             Reference_Root::S_temporary xref = { ::rocket::move(text) };
             return ::rocket::move(xref);
@@ -2884,7 +2886,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_string text;
           if(reader.start().g(text).finish()) {
             // Call the binding function.
-            auto values = std_string_unpack_16le(text);
+            auto values = std_string_unpack_16le(::rocket::move(text));
             // Forward the result.
             Reference_Root::S_temporary xref = { ::rocket::move(values) };
             return ::rocket::move(xref);
@@ -2917,7 +2919,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_integer value;
           if(reader.start().g(value).finish()) {
             // Call the binding function.
-            auto text = std_string_pack_32be(value);
+            auto text = std_string_pack_32be(::rocket::move(value));
             // Forward the result.
             Reference_Root::S_temporary xref = { ::rocket::move(text) };
             return ::rocket::move(xref);
@@ -2925,7 +2927,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_array values;
           if(reader.start().g(values).finish()) {
             // Call the binding function.
-            auto text = std_string_pack_32be(values);
+            auto text = std_string_pack_32be(::rocket::move(values));
             // Forward the result.
             Reference_Root::S_temporary xref = { ::rocket::move(text) };
             return ::rocket::move(xref);
@@ -2961,7 +2963,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_string text;
           if(reader.start().g(text).finish()) {
             // Call the binding function.
-            auto values = std_string_unpack_32be(text);
+            auto values = std_string_unpack_32be(::rocket::move(text));
             // Forward the result.
             Reference_Root::S_temporary xref = { ::rocket::move(values) };
             return ::rocket::move(xref);
@@ -2994,7 +2996,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_integer value;
           if(reader.start().g(value).finish()) {
             // Call the binding function.
-            auto text = std_string_pack_32le(value);
+            auto text = std_string_pack_32le(::rocket::move(value));
             // Forward the result.
             Reference_Root::S_temporary xref = { ::rocket::move(text) };
             return ::rocket::move(xref);
@@ -3002,7 +3004,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_array values;
           if(reader.start().g(values).finish()) {
             // Call the binding function.
-            auto text = std_string_pack_32le(values);
+            auto text = std_string_pack_32le(::rocket::move(values));
             // Forward the result.
             Reference_Root::S_temporary xref = { ::rocket::move(text) };
             return ::rocket::move(xref);
@@ -3038,7 +3040,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_string text;
           if(reader.start().g(text).finish()) {
             // Call the binding function.
-            auto values = std_string_unpack_32le(text);
+            auto values = std_string_unpack_32le(::rocket::move(text));
             // Forward the result.
             Reference_Root::S_temporary xref = { ::rocket::move(values) };
             return ::rocket::move(xref);
@@ -3070,7 +3072,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_integer value;
           if(reader.start().g(value).finish()) {
             // Call the binding function.
-            auto text = std_string_pack_64be(value);
+            auto text = std_string_pack_64be(::rocket::move(value));
             // Forward the result.
             Reference_Root::S_temporary xref = { ::rocket::move(text) };
             return ::rocket::move(xref);
@@ -3078,7 +3080,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_array values;
           if(reader.start().g(values).finish()) {
             // Call the binding function.
-            auto text = std_string_pack_64be(values);
+            auto text = std_string_pack_64be(::rocket::move(values));
             // Forward the result.
             Reference_Root::S_temporary xref = { ::rocket::move(text) };
             return ::rocket::move(xref);
@@ -3113,7 +3115,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_string text;
           if(reader.start().g(text).finish()) {
             // Call the binding function.
-            auto values = std_string_unpack_64be(text);
+            auto values = std_string_unpack_64be(::rocket::move(text));
             // Forward the result.
             Reference_Root::S_temporary xref = { ::rocket::move(values) };
             return ::rocket::move(xref);
@@ -3146,7 +3148,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_integer value;
           if(reader.start().g(value).finish()) {
             // Call the binding function.
-            auto text = std_string_pack_64le(value);
+            auto text = std_string_pack_64le(::rocket::move(value));
             // Forward the result.
             Reference_Root::S_temporary xref = { ::rocket::move(text) };
             return ::rocket::move(xref);
@@ -3154,7 +3156,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_array values;
           if(reader.start().g(values).finish()) {
             // Call the binding function.
-            auto text = std_string_pack_64le(values);
+            auto text = std_string_pack_64le(::rocket::move(values));
             // Forward the result.
             Reference_Root::S_temporary xref = { ::rocket::move(text) };
             return ::rocket::move(xref);
@@ -3190,7 +3192,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_string text;
           if(reader.start().g(text).finish()) {
             // Call the binding function.
-            auto values = std_string_unpack_64le(text);
+            auto values = std_string_unpack_64le(::rocket::move(text));
             // Forward the result.
             Reference_Root::S_temporary xref = { ::rocket::move(values) };
             return ::rocket::move(xref);
@@ -3234,7 +3236,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           cow_vector<Value> values;
           if(reader.start().g(templ).finish(values)) {
             // Call the binding function.
-            auto str = std_string_format(templ, values);
+            auto str = std_string_format(::rocket::move(templ), ::rocket::move(values));
             // Forward the result.
             Reference_Root::S_temporary xref = { ::rocket::move(str) };
             return ::rocket::move(xref);

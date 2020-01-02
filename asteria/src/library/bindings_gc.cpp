@@ -11,7 +11,7 @@
 
 namespace Asteria {
 
-opt<G_integer> std_gc_tracked_count(Global_Context& global, const G_integer& generation)
+opt<G_integer> std_gc_tracked_count(Global_Context& global, G_integer generation)
   {
     if((generation < gc_generation_newest) || (generation > gc_generation_oldest)) {
       return ::rocket::clear;
@@ -27,7 +27,7 @@ opt<G_integer> std_gc_tracked_count(Global_Context& global, const G_integer& gen
     return G_integer(count);
   }
 
-opt<G_integer> std_gc_get_threshold(Global_Context& global, const G_integer& generation)
+opt<G_integer> std_gc_get_threshold(Global_Context& global, G_integer generation)
   {
     if((generation < gc_generation_newest) || (generation > gc_generation_oldest)) {
       return ::rocket::clear;
@@ -43,7 +43,7 @@ opt<G_integer> std_gc_get_threshold(Global_Context& global, const G_integer& gen
     return G_integer(thres);
   }
 
-opt<G_integer> std_gc_set_threshold(Global_Context& global, const G_integer& generation, const G_integer& threshold)
+opt<G_integer> std_gc_set_threshold(Global_Context& global, G_integer generation, G_integer threshold)
   {
     if((generation < gc_generation_newest) || (generation > gc_generation_oldest)) {
       return ::rocket::clear;
@@ -60,7 +60,7 @@ opt<G_integer> std_gc_set_threshold(Global_Context& global, const G_integer& gen
     return G_integer(thres);
   }
 
-G_integer std_gc_collect(Global_Context& global, const opt<G_integer>& generation_limit)
+G_integer std_gc_collect(Global_Context& global, opt<G_integer> generation_limit)
   {
     auto gc_limit = gc_generation_oldest;
     // Get the maximum generation to collect when `generation_limit` is specified.
@@ -104,7 +104,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
           G_integer generation;
           if(reader.start().g(generation).finish()) {
             // Call the binding function.
-            auto qthres = std_gc_tracked_count(global, generation);
+            auto qthres = std_gc_tracked_count(global, ::rocket::move(generation));
             if(!qthres) {
               return Reference_Root::S_null();
             }
@@ -138,7 +138,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
           G_integer generation;
           if(reader.start().g(generation).finish()) {
             // Call the binding function.
-            auto qthres = std_gc_get_threshold(global, generation);
+            auto qthres = std_gc_get_threshold(global, ::rocket::move(generation));
             if(!qthres) {
               return Reference_Root::S_null();
             }
@@ -178,7 +178,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
           G_integer threshold;
           if(reader.start().g(generation).g(threshold).finish()) {
             // Call the binding function.
-            auto qoldthres = std_gc_set_threshold(global, generation, threshold);
+            auto qoldthres = std_gc_set_threshold(global, ::rocket::move(generation), ::rocket::move(threshold));
             if(!qoldthres) {
               return Reference_Root::S_null();
             }
@@ -213,7 +213,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
           opt<G_integer> generation_limit;
           if(reader.start().g(generation_limit).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_gc_collect(global, generation_limit) };
+            Reference_Root::S_temporary xref = { std_gc_collect(global, ::rocket::move(generation_limit)) };
             return ::rocket::move(xref);
           }
           // Fail.
