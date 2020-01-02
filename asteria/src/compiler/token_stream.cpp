@@ -494,7 +494,8 @@ bool do_accept_punctuator(cow_vector<Token>& tokens, Line_Reader& reader)
     ROCKET_ASSERT(::std::is_sorted(begin(s_punctuators), end(s_punctuators), Prefix_Comparator()));
 #endif
     // For two elements X and Y, if X is in front of Y, then X is potential a prefix of Y.
-    // Traverse the range backwards to prevent premature matches, as a token is defined to be the longest valid character sequence.
+    // Traverse the range backwards to prevent premature matches, as a token is defined to be the longest valid
+    // character sequence.
     auto range = ::std::equal_range(begin(s_punctuators), end(s_punctuators), reader.peek(), Prefix_Comparator());
     for(;;) {
       if(range.first == range.second) {

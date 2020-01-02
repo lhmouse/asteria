@@ -901,7 +901,8 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_integer iupper;
           if(reader.start().g(ivalue).g(ilower).g(iupper).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_clamp(::rocket::move(ivalue), ::rocket::move(ilower), ::rocket::move(iupper)) };
+            Reference_Root::S_temporary xref = { std_numeric_clamp(::rocket::move(ivalue), ::rocket::move(ilower),
+                                                                   ::rocket::move(iupper)) };
             return ::rocket::move(xref);
           }
           G_real rvalue;
@@ -909,7 +910,8 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_real fupper;
           if(reader.start().g(rvalue).g(flower).g(fupper).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_clamp(::rocket::move(rvalue), ::rocket::move(flower), ::rocket::move(fupper)) };
+            Reference_Root::S_temporary xref = { std_numeric_clamp(::rocket::move(rvalue), ::rocket::move(flower),
+                                                                   ::rocket::move(fupper)) };
             return ::rocket::move(xref);
           }
           // Fail.
@@ -1840,13 +1842,15 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           opt<G_integer> ebase;
           if(reader.start().g(ivalue).g(base).g(ebase).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_format(::rocket::move(ivalue), ::rocket::move(base), ::rocket::move(ebase)) };
+            Reference_Root::S_temporary xref = { std_numeric_format(::rocket::move(ivalue), ::rocket::move(base),
+                                                                    ::rocket::move(ebase)) };
             return ::rocket::move(xref);
           }
           G_real fvalue;
           if(reader.start().g(fvalue).g(base).g(ebase).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_format(::rocket::move(fvalue), ::rocket::move(base), ::rocket::move(ebase)) };
+            Reference_Root::S_temporary xref = { std_numeric_format(::rocket::move(fvalue), ::rocket::move(base),
+                                                                    ::rocket::move(ebase)) };
             return ::rocket::move(xref);
           }
           // Fail.

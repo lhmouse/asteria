@@ -64,16 +64,17 @@ cow_vector<AIR_Node>& do_generate_expression_partial(cow_vector<AIR_Node>& code,
     return code;
   }
 
-cow_vector<AIR_Node> do_generate_expression_partial(const Compiler_Options& opts, PTC_Aware ptc_aware, const Analytic_Context& ctx,
-                                                    const Statement::S_expression& expr)
+cow_vector<AIR_Node> do_generate_expression_partial(const Compiler_Options& opts, PTC_Aware ptc_aware,
+                                                    const Analytic_Context& ctx, const Statement::S_expression& expr)
   {
     cow_vector<AIR_Node> code;
     do_generate_expression_partial(code, opts, ptc_aware, ctx, expr);
     return code;
   }
 
-cow_vector<AIR_Node>& do_generate_statement_list(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
-                                                 const Compiler_Options& opts, PTC_Aware ptc_aware, const Statement::S_block& block)
+cow_vector<AIR_Node>& do_generate_statement_list(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
+                                                 Analytic_Context& ctx, const Compiler_Options& opts, PTC_Aware ptc_aware,
+                                                 const Statement::S_block& block)
   {
     size_t epos = block.stmts.size() - 1;
     if(epos != SIZE_MAX) {
@@ -83,7 +84,8 @@ cow_vector<AIR_Node>& do_generate_statement_list(cow_vector<AIR_Node>& code, cow
       }
       // Statements other than the last one cannot be the end of function.
       for(size_t i = 0; i != epos; ++i) {
-        block.stmts[i].generate_code(code, names_opt, ctx, opts, block.stmts[i+1].is_empty_return() ? ptc_aware_nullify : ptc_aware_none);
+        block.stmts[i].generate_code(code, names_opt, ctx, opts,
+                                     block.stmts[i+1].is_empty_return() ? ptc_aware_nullify : ptc_aware_none);
       }
       block.stmts[epos].generate_code(code, names_opt, ctx, opts, ptc_aware);
     }
@@ -91,7 +93,8 @@ cow_vector<AIR_Node>& do_generate_statement_list(cow_vector<AIR_Node>& code, cow
   }
 
 cow_vector<AIR_Node> do_generate_statement_list(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
-                                                const Compiler_Options& opts, PTC_Aware ptc_aware, const Statement::S_block& block)
+                                                const Compiler_Options& opts, PTC_Aware ptc_aware,
+                                                const Statement::S_block& block)
   {
     cow_vector<AIR_Node> code;
     do_generate_statement_list(code, names_opt, ctx, opts, ptc_aware, block);
@@ -290,7 +293,8 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
           names_added.emplace_back(names);
         }
         // Encode arguments.
-        AIR_Node::S_switch_statement xnode = { ::rocket::move(code_labels), ::rocket::move(code_bodies), ::rocket::move(names_added) };
+        AIR_Node::S_switch_statement xnode = { ::rocket::move(code_labels), ::rocket::move(code_bodies),
+                                               ::rocket::move(names_added) };
         code.emplace_back(::rocket::move(xnode));
         return code;
       }
@@ -336,14 +340,16 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Loop statements cannot be PTC'd.
         auto code_body = do_generate_block(opts, ptc_aware_none, ctx_for, altr.body);
         // Encode arguments.
-        AIR_Node::S_for_each_statement xnode = { altr.name_key, altr.name_mapped, ::rocket::move(code_init), ::rocket::move(code_body) };
+        AIR_Node::S_for_each_statement xnode = { altr.name_key, altr.name_mapped, ::rocket::move(code_init),
+                                                 ::rocket::move(code_body) };
         code.emplace_back(::rocket::move(xnode));
         return code;
       }
 
     case index_for: {
         const auto& altr = this->m_stor.as<index_for>();
-        // Note that names declared in the first segment of a for-statement outlasts every iteration, so we have to create an outer contexts here.
+        // Note that names declared in the first segment of a for-statement outlasts every iteration, so we have to
+        // create an outer contexts here.
         Analytic_Context ctx_for(::rocket::ref(ctx));
         // Generate code for the initializer, the condition and the loop increment.
         auto code_init = do_generate_statement_list(nullptr, ctx_for, opts, ptc_aware_none, altr.init);
@@ -353,7 +359,8 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Loop statements cannot be PTC'd.
         auto code_body = do_generate_block(opts, ptc_aware_none, ctx_for, altr.body);
         // Encode arguments.
-        AIR_Node::S_for_statement xnode = { ::rocket::move(code_init), ::rocket::move(code_cond), ::rocket::move(code_step), ::rocket::move(code_body) };
+        AIR_Node::S_for_statement xnode = { ::rocket::move(code_init), ::rocket::move(code_cond), ::rocket::move(code_step),
+                                            ::rocket::move(code_body) };
         code.emplace_back(::rocket::move(xnode));
         return code;
       }

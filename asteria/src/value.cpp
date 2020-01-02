@@ -8,7 +8,8 @@
 namespace Asteria {
 namespace {
 
-template<typename ValT, ROCKET_ENABLE_IF(::std::is_integral<ValT>::value)> Compare do_3way_compare(const ValT& lhs, const ValT& rhs) noexcept
+template<typename ValT, ROCKET_ENABLE_IF(::std::is_integral<ValT>::value)>
+    Compare do_3way_compare(const ValT& lhs, const ValT& rhs) noexcept
   {
     if(lhs < rhs) {
       return compare_less;
@@ -19,7 +20,8 @@ template<typename ValT, ROCKET_ENABLE_IF(::std::is_integral<ValT>::value)> Compa
     return compare_equal;
   }
 
-template<typename ValT, ROCKET_ENABLE_IF(::std::is_floating_point<ValT>::value)> Compare do_3way_compare(const ValT& lhs, const ValT& rhs) noexcept
+template<typename ValT, ROCKET_ENABLE_IF(::std::is_floating_point<ValT>::value)>
+    Compare do_3way_compare(const ValT& lhs, const ValT& rhs) noexcept
   {
     if(::std::isless(lhs, rhs)) {
       return compare_less;
@@ -376,10 +378,12 @@ Variable_Callback& Value::enumerate_variables(Variable_Callback& callback) const
         return this->m_stor.as<gtype_function>()->enumerate_variables(callback);
       }
     case gtype_array: {
-        return ::rocket::for_each(this->m_stor.as<gtype_array>(), [&](const auto& e) { e.enumerate_variables(callback);  }), callback;
+        return ::rocket::for_each(this->m_stor.as<gtype_array>(),
+                                  [&](const auto& e) { e.enumerate_variables(callback);  }), callback;
       }
     case gtype_object: {
-        return ::rocket::for_each(this->m_stor.as<gtype_object>(), [&](const auto& p) { p.second.enumerate_variables(callback);  }), callback;
+        return ::rocket::for_each(this->m_stor.as<gtype_object>(),
+                                  [&](const auto& p) { p.second.enumerate_variables(callback);  }), callback;
       }
     default:
       ASTERIA_TERMINATE("invalid value type (gtype `$1`)", this->gtype());

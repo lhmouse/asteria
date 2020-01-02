@@ -315,7 +315,8 @@ opt<G_string> std_filesystem_file_read(G_string path, opt<G_integer> offset, opt
     return ::rocket::move(data);
   }
 
-bool std_filesystem_file_stream(Global_Context& global, G_string path, G_function callback, opt<G_integer> offset, opt<G_integer> limit)
+bool std_filesystem_file_stream(Global_Context& global, G_string path, G_function callback,
+                                opt<G_integer> offset, opt<G_integer> limit)
   {
     if(offset && (*offset < 0)) {
       ASTERIA_THROW("negative file offset (offset `$1`)", *offset);

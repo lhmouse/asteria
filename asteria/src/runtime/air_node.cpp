@@ -64,7 +64,12 @@ template<typename XValT> Reference& do_set_temporary(Evaluation_Stack& stack, bo
     return ref = ::rocket::move(xref);
   }
 
-AIR_Status do_execute_block(const AVMC_Queue& queue, /*const*/ Executive_Context& ctx)
+Reference& do_declare(Executive_Context& ctx, const phsh_string& name)
+  {
+    return ctx.open_named_reference(name) = Reference_Root::S_null();
+  }
+
+AIR_Status do_execute_block(const AVMC_Queue& queue, Executive_Context& ctx)
   {
     if(ROCKET_EXPECT(queue.empty())) {
       // Don't bother creating a context.
@@ -77,7 +82,7 @@ AIR_Status do_execute_block(const AVMC_Queue& queue, /*const*/ Executive_Context
     return status;
   }
 
-AIR_Status do_evaluate_branch(const AVMC_Queue& queue, bool assign, /*const*/ Executive_Context& ctx)
+AIR_Status do_evaluate_branch(const AVMC_Queue& queue, bool assign, Executive_Context& ctx)
   {
     if(ROCKET_EXPECT(queue.empty())) {
       // Leave the condition on the top of the stack.
@@ -100,7 +105,8 @@ AIR_Status do_evaluate_branch(const AVMC_Queue& queue, bool assign, /*const*/ Ex
     return queue.execute(ctx);
   }
 
-AIR_Status do_execute_catch(const AVMC_Queue& queue, const phsh_string& name_except, const Runtime_Error& except, const Executive_Context& ctx)
+AIR_Status do_execute_catch(const AVMC_Queue& queue, const phsh_string& name_except,
+                            const Runtime_Error& except, Executive_Context& ctx)
   {
     if(ROCKET_EXPECT(queue.empty())) {
       return air_status_next;
@@ -453,7 +459,7 @@ AIR_Status do_switch_statement(Executive_Context& ctx, ParamU /*pu*/, const void
     Executive_Context ctx_body(::rocket::ref(ctx));
     // Fly over all clauses that precede `target`.
     for(size_t i = 0; i != target; ++i) {
-      ::rocket::for_each(names_added[i], [&](const phsh_string& name) { ctx_body.open_named_reference(name) = Reference_Root::S_null();  });
+      ::rocket::for_each(names_added[i], [&](const phsh_string& name) { do_declare(ctx_body, name);  });
     }
     // Execute all clauses from `target`.
     for(size_t i = target; i != nclauses; ++i) {
@@ -542,8 +548,7 @@ AIR_Status do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const vo
       ctx_for.open_named_reference(name_key) = ::rocket::move(xref);
     }
     // Create the mapped reference.
-    auto& mapped = ctx_for.open_named_reference(name_mapped);
-    mapped = Reference_Root::S_null();
+    auto& mapped = do_declare(ctx_for, name_mapped);
     // Evaluate the range initializer.
     ctx_for.stack().clear();
     auto status = queue_init.execute(ctx_for);
@@ -2212,8 +2217,8 @@ AIR_Status do_apply_xop_SLL(Executive_Context& ctx, ParamU pu, const void* /*pv*
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
     if(lhs.is_integer() && rhs.is_integer()) {
-      // If the LHS operand has type `integer`, shift the LHS operand to the left by the number of bits specified by the RHS operand.
-      // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
+      // If the LHS operand has type `integer`, shift the LHS operand to the left by the number of bits specified by
+      // the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with zeroes.
       auto& reg = rhs.open_integer();
       reg = do_operator_SLL(lhs.as_integer(), reg);
     }
@@ -2240,8 +2245,8 @@ AIR_Status do_apply_xop_SRL(Executive_Context& ctx, ParamU pu, const void* /*pv*
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
     if(lhs.is_integer() && rhs.is_integer()) {
-      // If the LHS operand has type `integer`, shift the LHS operand to the right by the number of bits specified by the RHS operand.
-      // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
+      // If the LHS operand has type `integer`, shift the LHS operand to the right by the number of bits specified by
+      // the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with zeroes.
       auto& reg = rhs.open_integer();
       reg = do_operator_SRL(lhs.as_integer(), reg);
     }
@@ -2268,9 +2273,9 @@ AIR_Status do_apply_xop_SLA(Executive_Context& ctx, ParamU pu, const void* /*pv*
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
     if(lhs.is_integer() && rhs.is_integer()) {
-      // If the LHS operand is of type `integer`, shift the LHS operand to the left by the number of bits specified by the RHS operand.
-      // Bits shifted out that are equal to the sign bit are discarded. Bits shifted in are filled with zeroes.
-      // If any bits that are different from the sign bit would be shifted out, an exception is thrown.
+      // If the LHS operand is of type `integer`, shift the LHS operand to the left by the number of bits specified by
+      // the RHS operand. Bits shifted out that are equal to the sign bit are discarded. Bits shifted in are filled with
+      // zeroes. If any bits that are different from the sign bit would be shifted out, an exception is thrown.
       auto& reg = rhs.open_integer();
       reg = do_operator_SLA(lhs.as_integer(), reg);
     }
@@ -2296,8 +2301,8 @@ AIR_Status do_apply_xop_SRA(Executive_Context& ctx, ParamU pu, const void* /*pv*
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
     if(lhs.is_integer() && rhs.is_integer()) {
-      // If the LHS operand is of type `integer`, shift the LHS operand to the right by the number of bits specified by the RHS operand.
-      // Bits shifted out are discarded. Bits shifted in are filled with the sign bit.
+      // If the LHS operand is of type `integer`, shift the LHS operand to the right by the number of bits specified by
+      // the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with the sign bit.
       auto& reg = rhs.open_integer();
       reg = do_operator_SRA(lhs.as_integer(), reg);
     }
