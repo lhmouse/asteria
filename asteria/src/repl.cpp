@@ -248,9 +248,9 @@ void do_print_help(const char* self)
       "\n"
       "Visit the homepage at <%s>.\n"
       "Report bugs to <%s>.\n"
+      ,
       // 34567890123456789012345678901234567890123456789012345678901234567890123456|
       //        1         2         3         4         5         6         7      |
-      ,
       self,
       PACKAGE_URL,
       PACKAGE_BUGREPORT
@@ -266,9 +266,9 @@ void do_print_version()
       "\n"
       "Visit the homepage at <%s>.\n"
       "Report bugs to <%s>.\n"
+      ,
       // 34567890123456789012345678901234567890123456789012345678901234567890123456|
       //        1         2         3         4         5         6         7      |
-      ,
       PACKAGE_STRING, __DATE__,
       PACKAGE_URL,
       PACKAGE_BUGREPORT
@@ -396,12 +396,15 @@ void do_handle_repl_command(cow_string&& cmd)
       // 34567890123456789012345678901234567890123456789012345678901234567890123456|
       "%s [built on %s]\n"
       "\n"
+      "  Global locale is now `%s`.\n"
+      "\n"
       "  All REPL commands start with a backslash. Type `\\help` for instructions.\n"
       "  Multiple lines may be joined together using trailing backslashes.\n"
+      ,
       // 34567890123456789012345678901234567890123456789012345678901234567890123456|
       //        1         2         3         4         5         6         7      |
-      ,
-      PACKAGE_STRING, __DATE__
+      PACKAGE_STRING, __DATE__,
+      ::setlocale(LC_ALL, nullptr)
     );
 
     // Trap Ctrl-C. Failure to set the signal handler is ignored.
