@@ -35,15 +35,15 @@ opt<Keyword> do_accept_keyword_opt(Token_Stream& tstrm, initializer_list<Keyword
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
-      return ::rocket::clear;
+      return clear;
     }
     // See whether it is one of the acceptable keywords.
     if(!qtok->is_keyword()) {
-      return ::rocket::clear;
+      return clear;
     }
     auto keyword = qtok->as_keyword();
     if(::rocket::is_none_of(keyword, accept)) {
-      return ::rocket::clear;
+      return clear;
     }
     // Return the keyword and discard this token.
     tstrm.shift();
@@ -54,15 +54,15 @@ opt<Punctuator> do_accept_punctuator_opt(Token_Stream& tstrm, initializer_list<P
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
-      return ::rocket::clear;
+      return clear;
     }
     // See whether it is one of the acceptable punctuators.
     if(!qtok->is_punctuator()) {
-      return ::rocket::clear;
+      return clear;
     }
     auto punct = qtok->as_punctuator();
     if(::rocket::is_none_of(punct, accept)) {
-      return ::rocket::clear;
+      return clear;
     }
     // Return the punctuator and discard this token.
     tstrm.shift();
@@ -73,11 +73,11 @@ opt<cow_string> do_accept_identifier_opt(Token_Stream& tstrm)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
-      return ::rocket::clear;
+      return clear;
     }
     // See whether it is an identifier.
     if(!qtok->is_identifier()) {
-      return ::rocket::clear;
+      return clear;
     }
     auto name = qtok->as_identifier();
     // Return the identifier and discard this token.
@@ -107,11 +107,11 @@ opt<cow_string> do_accept_string_literal_opt(Token_Stream& tstrm)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
-      return ::rocket::clear;
+      return clear;
     }
     // See whether it is a string literal.
     if(!qtok->is_string_literal()) {
-      return ::rocket::clear;
+      return clear;
     }
     auto val = qtok->as_string_literal();
     // Return the string literal and discard this token.
@@ -124,7 +124,7 @@ opt<cow_string> do_accept_json5_key_opt(Token_Stream& tstrm)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
-      return ::rocket::clear;
+      return clear;
     }
     // See whether it is a keyword, identifier, or string literal.
     if(qtok->is_keyword()) {
@@ -146,7 +146,7 @@ opt<cow_string> do_accept_json5_key_opt(Token_Stream& tstrm)
       do_concatenate_string_literal_sequence(val, tstrm);
       return val;
     }
-    return ::rocket::clear;
+    return clear;
   }
 
 Value do_generate_null()
@@ -203,12 +203,12 @@ opt<Value> do_accept_literal_value_opt(Token_Stream& tstrm)
     //   "infinity"
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
-      return ::rocket::clear;
+      return clear;
     }
     if(qtok->is_keyword()) {
       auto qconf = ::std::find(begin(s_literal_table), end(s_literal_table), qtok->as_keyword());
       if(qconf == end(s_literal_table)) {
-        return ::rocket::clear;
+        return clear;
       }
       auto generator = qconf->generator;
       // Discard this token and create a new value using the generator.
@@ -234,7 +234,7 @@ opt<Value> do_accept_literal_value_opt(Token_Stream& tstrm)
       do_concatenate_string_literal_sequence(val, tstrm);
       return val;
     }
-    return ::rocket::clear;
+    return clear;
   }
 
 opt<bool> do_accept_negation_opt(Token_Stream& tstrm)
@@ -243,7 +243,7 @@ opt<bool> do_accept_negation_opt(Token_Stream& tstrm)
     //   "!" | "not"
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
-      return ::rocket::clear;
+      return clear;
     }
     if(qtok->is_keyword() && (qtok->as_keyword() == keyword_not)) {
       // Discard this token.
@@ -255,7 +255,7 @@ opt<bool> do_accept_negation_opt(Token_Stream& tstrm)
       tstrm.shift();
       return true;
     }
-    return ::rocket::clear;
+    return clear;
   }
 
 opt<cow_vector<phsh_string>> do_accept_identifier_list_opt(Token_Stream& tstrm)
@@ -266,7 +266,7 @@ opt<cow_vector<phsh_string>> do_accept_identifier_list_opt(Token_Stream& tstrm)
     //   identifier identifier-list-opt
     auto qname = do_accept_identifier_opt(tstrm);
     if(!qname) {
-      return ::rocket::clear;
+      return clear;
     }
     cow_vector<phsh_string> names;
     for(;;) {
@@ -333,7 +333,7 @@ opt<cow_vector<phsh_string>> do_accept_variable_declarator_opt(Token_Stream& tst
       qnames->emplace_back(::rocket::sref("}"));
       return ::rocket::move(qnames);
     }
-    return ::rocket::clear;
+    return clear;
   }
 
 // Accept a statement; a blockt is converted to a single statement.
@@ -351,7 +351,7 @@ opt<Statement::S_expression> do_accept_expression_opt(Token_Stream& tstrm)
     cow_vector<Xprunit> units;
     bool succ = do_accept_expression(units, tstrm);
     if(!succ) {
-      return ::rocket::clear;
+      return clear;
     }
     Statement::S_expression xexpr = { ::rocket::move(sloc), ::rocket::move(units) };
     return ::rocket::move(xexpr);
@@ -368,7 +368,7 @@ opt<Statement::S_block> do_accept_block_opt(Token_Stream& tstrm)
     auto sloc = do_tell_source_location(tstrm);
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
     if(!kpunct) {
-      return ::rocket::clear;
+      return clear;
     }
     cow_vector<Statement> body;
     for(;;) {
@@ -390,7 +390,7 @@ opt<Statement> do_accept_block_statement_opt(Token_Stream& tstrm)
   {
     auto qblock = do_accept_block_opt(tstrm);
     if(!qblock) {
-      return ::rocket::clear;
+      return clear;
     }
     return ::rocket::move(*qblock);
   }
@@ -403,7 +403,7 @@ opt<Statement::S_expression> do_accept_equal_initializer_opt(Token_Stream& tstrm
     //   "=" expression
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_assign });
     if(!kpunct) {
-      return ::rocket::clear;
+      return clear;
     }
     return do_accept_expression_opt(tstrm);
   }
@@ -415,9 +415,9 @@ opt<Statement> do_accept_null_statement_opt(Token_Stream& tstrm)
     auto sloc = do_tell_source_location(tstrm);
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct) {
-      return ::rocket::clear;
+      return clear;
     }
-    Statement::S_expression xstmt = { ::rocket::move(sloc), ::rocket::clear };
+    Statement::S_expression xstmt = { ::rocket::move(sloc), clear };
     return ::rocket::move(xstmt);
   }
 
@@ -427,7 +427,7 @@ opt<Statement> do_accept_variable_definition_opt(Token_Stream& tstrm)
     //   "var" variable-declarator equal-initailizer-opt ( "," variable-declarator equal-initializer-opt | "" ) ";"
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_var });
     if(!qkwrd) {
-      return ::rocket::clear;
+      return clear;
     }
     // Each declaractor has its own source location.
     cow_vector<Source_Location> slocs;
@@ -467,7 +467,7 @@ opt<Statement> do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
     //   "const" variable-declarator equal-initailizer ( "," identifier equal-initializer | "" ) ";"
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_const });
     if(!qkwrd) {
-      return ::rocket::clear;
+      return clear;
     }
     // Each declaractor has its own source location.
     cow_vector<Source_Location> slocs;
@@ -536,7 +536,7 @@ opt<cow_vector<phsh_string>> do_accept_parameter_list_opt(Token_Stream& tstrm)
       names.emplace_back(::rocket::sref("..."));
       return ::rocket::move(names);
     }
-    return ::rocket::clear;
+    return clear;
   }
 
 opt<cow_vector<phsh_string>> do_accept_parameter_list_declaration_opt(Token_Stream& tstrm)
@@ -545,7 +545,7 @@ opt<cow_vector<phsh_string>> do_accept_parameter_list_declaration_opt(Token_Stre
     //   "(" parameter-list-opt ")"
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct) {
-      return ::rocket::clear;
+      return clear;
     }
     auto qnames = do_accept_parameter_list_opt(tstrm);
     if(!qnames) {
@@ -565,7 +565,7 @@ opt<Statement> do_accept_function_definition_opt(Token_Stream& tstrm)
     auto sloc = do_tell_source_location(tstrm);
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_func });
     if(!qkwrd) {
-      return ::rocket::clear;
+      return clear;
     }
     auto qname = do_accept_identifier_opt(tstrm);
     if(!qname) {
@@ -590,7 +590,7 @@ opt<Statement> do_accept_expression_statement_opt(Token_Stream& tstrm)
     //   expression ";"
     auto kexpr = do_accept_expression_opt(tstrm);
     if(!kexpr) {
-      return ::rocket::clear;
+      return clear;
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct) {
@@ -606,7 +606,7 @@ opt<Statement::S_block> do_accept_else_branch_opt(Token_Stream& tstrm)
     //   "else" statement | ""
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_else });
     if(!qkwrd) {
-      return ::rocket::clear;
+      return clear;
     }
     auto qblock = do_accept_statement_as_block_opt(tstrm);
     if(!qblock) {
@@ -625,7 +625,7 @@ opt<Statement> do_accept_if_statement_opt(Token_Stream& tstrm)
     //   "!" | "not"
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_if });
     if(!qkwrd) {
-      return ::rocket::clear;
+      return clear;
     }
     auto kneg = do_accept_negation_opt(tstrm);
     if(!kneg) {
@@ -669,7 +669,7 @@ opt<Statement> do_accept_switch_statement_opt(Token_Stream& tstrm)
     //   ( "case" expression | "default" ) ":" statement-list-opt
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_switch });
     if(!qkwrd) {
-      return ::rocket::clear;
+      return clear;
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct) {
@@ -729,7 +729,7 @@ opt<Statement> do_accept_do_while_statement_opt(Token_Stream& tstrm)
     //   "do" statement "while" negation-opt "(" expression ")" ";"
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_do });
     if(!qkwrd) {
-      return ::rocket::clear;
+      return clear;
     }
     auto qblock = do_accept_statement_as_block_opt(tstrm);
     if(!qblock) {
@@ -737,7 +737,7 @@ opt<Statement> do_accept_do_while_statement_opt(Token_Stream& tstrm)
     }
     qkwrd = do_accept_keyword_opt(tstrm, { keyword_while });
     if(!qkwrd) {
-      return ::rocket::clear;
+      return clear;
     }
     auto kneg = do_accept_negation_opt(tstrm);
     if(!kneg) {
@@ -769,7 +769,7 @@ opt<Statement> do_accept_while_statement_opt(Token_Stream& tstrm)
     //   "while" negation-opt "(" expression ")" statement
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_while });
     if(!qkwrd) {
-      return ::rocket::clear;
+      return clear;
     }
     auto kneg = do_accept_negation_opt(tstrm);
     if(!kneg) {
@@ -801,7 +801,7 @@ opt<Statement> do_accept_for_complement_range_opt(Token_Stream& tstrm)
     //   "each" identifier "," identifier ":" expression ")" statement
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_each });
     if(!qkwrd) {
-      return ::rocket::clear;
+      return clear;
     }
     auto qkname = do_accept_identifier_opt(tstrm);
     if(!qkname) {
@@ -862,7 +862,7 @@ opt<Statement::S_block> do_accept_for_initializer_opt(Token_Stream& tstrm)
     if(qinit) {
       return do_blockify_statement(::rocket::move(sloc), ::rocket::move(*qinit));
     }
-    return ::rocket::clear;
+    return clear;
   }
 
 opt<Statement> do_accept_for_complement_triplet_opt(Token_Stream& tstrm)
@@ -871,7 +871,7 @@ opt<Statement> do_accept_for_complement_triplet_opt(Token_Stream& tstrm)
     //   for-initializer expression-opt ";" expression-opt ")" statement
     auto qinit = do_accept_for_initializer_opt(tstrm);
     if(!qinit) {
-      return ::rocket::clear;
+      return clear;
     }
     auto qcond = do_accept_expression_opt(tstrm);
     if(!qcond) {
@@ -910,7 +910,7 @@ opt<Statement> do_accept_for_complement_opt(Token_Stream& tstrm)
     if(qcompl) {
       return qcompl;
     }
-    return ::rocket::clear;
+    return clear;
   }
 
 opt<Statement> do_accept_for_statement_opt(Token_Stream& tstrm)
@@ -919,7 +919,7 @@ opt<Statement> do_accept_for_statement_opt(Token_Stream& tstrm)
     //   "for" "(" for-complement
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_for });
     if(!qkwrd) {
-      return ::rocket::clear;
+      return clear;
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct) {
@@ -946,7 +946,7 @@ opt<Jump_Target> do_accept_break_target_opt(Token_Stream& tstrm)
     if(qkwrd == keyword_for) {
       return jump_target_for;
     }
-    return ::rocket::clear;
+    return clear;
   }
 
 opt<Statement> do_accept_break_statement_opt(Token_Stream& tstrm)
@@ -956,7 +956,7 @@ opt<Statement> do_accept_break_statement_opt(Token_Stream& tstrm)
     auto sloc = do_tell_source_location(tstrm);
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_break });
     if(!qkwrd) {
-      return ::rocket::clear;
+      return clear;
     }
     auto qtarget = do_accept_break_target_opt(tstrm);
     if(!qtarget) {
@@ -981,7 +981,7 @@ opt<Jump_Target> do_accept_continue_target_opt(Token_Stream& tstrm)
     if(qkwrd == keyword_for) {
       return jump_target_for;
     }
-    return ::rocket::clear;
+    return clear;
   }
 
 opt<Statement> do_accept_continue_statement_opt(Token_Stream& tstrm)
@@ -991,7 +991,7 @@ opt<Statement> do_accept_continue_statement_opt(Token_Stream& tstrm)
     auto sloc = do_tell_source_location(tstrm);
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_continue });
     if(!qkwrd) {
-      return ::rocket::clear;
+      return clear;
     }
     auto qtarget = do_accept_continue_target_opt(tstrm);
     if(!qtarget) {
@@ -1011,7 +1011,7 @@ opt<Statement> do_accept_throw_statement_opt(Token_Stream& tstrm)
     //   "throw" expression ";"
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_throw });
     if(!qkwrd) {
-      return ::rocket::clear;
+      return clear;
     }
     auto kexpr = do_accept_expression_opt(tstrm);
     if(!kexpr) {
@@ -1031,7 +1031,7 @@ opt<bool> do_accept_reference_specifier_opt(Token_Stream& tstrm)
     //   "&" | ""
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_andb });
     if(!kpunct) {
-      return ::rocket::clear;
+      return clear;
     }
     return true;
   }
@@ -1042,7 +1042,7 @@ opt<Statement> do_accept_return_statement_opt(Token_Stream& tstrm)
     //   "return" reference-specifier-opt expression-opt ";"
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_return });
     if(!qkwrd) {
-      return ::rocket::clear;
+      return clear;
     }
     auto qref = do_accept_reference_specifier_opt(tstrm);
     if(!qref) {
@@ -1066,7 +1066,7 @@ opt<cow_string> do_accept_assert_message_opt(Token_Stream& tstrm)
     //   ":" string-literal | ""
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
     if(!kpunct) {
-      return ::rocket::clear;
+      return clear;
     }
     auto kmsg = do_accept_string_literal_opt(tstrm);
     if(!kmsg) {
@@ -1081,7 +1081,7 @@ opt<Statement> do_accept_assert_statement_opt(Token_Stream& tstrm)
     //   "assert" negation-opt expression assert-message-opt ";"
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_assert });
     if(!qkwrd) {
-      return ::rocket::clear;
+      return clear;
     }
     auto kneg = do_accept_negation_opt(tstrm);
     if(!kneg) {
@@ -1109,7 +1109,7 @@ opt<Statement> do_accept_try_statement_opt(Token_Stream& tstrm)
     //   "try" statement "catch" "(" identifier ")" statement
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_try });
     if(!qkwrd) {
-      return ::rocket::clear;
+      return clear;
     }
     auto qbtry = do_accept_statement_as_block_opt(tstrm);
     if(!qbtry) {
@@ -1215,7 +1215,7 @@ opt<Statement> do_accept_nonblock_statement_opt(Token_Stream& tstrm)
     if(qstmt) {
       return qstmt;
     }
-    return ::rocket::clear;
+    return clear;
   }
 
 opt<Statement> do_accept_statement_opt(Token_Stream& tstrm)
@@ -1232,7 +1232,7 @@ opt<Statement> do_accept_statement_opt(Token_Stream& tstrm)
     if(qstmt) {
       return qstmt;
     }
-    return ::rocket::clear;
+    return clear;
   }
 
 opt<Statement::S_block> do_accept_statement_as_block_opt(Token_Stream& tstrm)
@@ -1250,7 +1250,7 @@ opt<Statement::S_block> do_accept_statement_as_block_opt(Token_Stream& tstrm)
     if(qstmt) {
       return do_blockify_statement(::rocket::move(sloc), ::rocket::move(*qstmt));
     }
-    return ::rocket::clear;
+    return clear;
   }
 
 struct Keyword_Element
@@ -1421,7 +1421,7 @@ opt<Statement::S_block> do_accept_closure_body_opt(Token_Stream& tstrm)
       Statement::S_return xstmt = { false, ::rocket::move(*qinit) };
       return do_blockify_statement(::rocket::move(sloc), ::rocket::move(xstmt));
     }
-    return ::rocket::clear;
+    return clear;
   }
 
 bool do_accept_closure_function(cow_vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1796,7 +1796,7 @@ opt<Infix_Element> do_accept_infix_head_opt(Token_Stream& tstrm)
     cow_vector<Xprunit> units;
     bool succ = do_accept_infix_element(units, tstrm);
     if(!succ) {
-      return ::rocket::clear;
+      return clear;
     }
     Infix_Element::S_head xelem = { ::rocket::move(units) };
     return ::rocket::move(xelem);
@@ -1808,7 +1808,7 @@ opt<Infix_Element> do_accept_infix_operator_ternary_opt(Token_Stream& tstrm)
     //   ( "?" | "?=" ) expression ":"
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_quest, punctuator_quest_eq });
     if(!kpunct) {
-      return ::rocket::clear;
+      return clear;
     }
     cow_vector<Xprunit> btrue;
     if(!do_accept_expression(btrue, tstrm)) {
@@ -1818,7 +1818,7 @@ opt<Infix_Element> do_accept_infix_operator_ternary_opt(Token_Stream& tstrm)
     if(!kpunct) {
       do_throw_parser_error(parser_status_colon_expected, tstrm);
     }
-    Infix_Element::S_ternary xelem = { *kpunct == punctuator_quest_eq, ::rocket::move(btrue), ::rocket::clear };
+    Infix_Element::S_ternary xelem = { *kpunct == punctuator_quest_eq, ::rocket::move(btrue), clear };
     return ::rocket::move(xelem);
   }
 
@@ -1830,11 +1830,11 @@ opt<Infix_Element> do_accept_infix_operator_logical_and_opt(Token_Stream& tstrm)
     if(!kpunct) {
       auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_and });
       if(!qkwrd) {
-        return ::rocket::clear;
+        return clear;
       }
       kpunct.emplace(punctuator_andl);
     }
-    Infix_Element::S_logical_and xelem = { *kpunct == punctuator_andl_eq, ::rocket::clear };
+    Infix_Element::S_logical_and xelem = { *kpunct == punctuator_andl_eq, clear };
     return ::rocket::move(xelem);
   }
 
@@ -1846,11 +1846,11 @@ opt<Infix_Element> do_accept_infix_operator_logical_or_opt(Token_Stream& tstrm)
     if(!kpunct) {
       auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_or });
       if(!qkwrd) {
-        return ::rocket::clear;
+        return clear;
       }
       kpunct.emplace(punctuator_orl);
     }
-    Infix_Element::S_logical_or xelem = { *kpunct == punctuator_orl_eq, ::rocket::clear };
+    Infix_Element::S_logical_or xelem = { *kpunct == punctuator_orl_eq, clear };
     return ::rocket::move(xelem);
   }
 
@@ -1860,9 +1860,9 @@ opt<Infix_Element> do_accept_infix_operator_coalescence_opt(Token_Stream& tstrm)
     //   "??" | "??="
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_coales, punctuator_coales_eq });
     if(!kpunct) {
-      return ::rocket::clear;
+      return clear;
     }
-    Infix_Element::S_coalescence xelem = { *kpunct == punctuator_coales_eq, ::rocket::clear };
+    Infix_Element::S_coalescence xelem = { *kpunct == punctuator_coales_eq, clear };
     return ::rocket::move(xelem);
   }
 
@@ -1921,19 +1921,19 @@ opt<Infix_Element> do_accept_infix_operator_general_opt(Token_Stream& tstrm)
     //   "="  | "==" | "!=" | "<"  | ">"  | "<="  | ">="  | "<=>"
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
-      return ::rocket::clear;
+      return clear;
     }
     if(qtok->is_punctuator()) {
       auto qconf = ::std::find(begin(s_infix_operator_table), end(s_infix_operator_table), qtok->as_punctuator());
       if(qconf == end(s_infix_operator_table)) {
-        return ::rocket::clear;
+        return clear;
       }
       // Return the infix operator and discard this token.
       tstrm.shift();
-      Infix_Element::S_general xelem = { qconf->xop, qconf->assign, ::rocket::clear };
+      Infix_Element::S_general xelem = { qconf->xop, qconf->assign, clear };
       return ::rocket::move(xelem);
     }
-    return ::rocket::clear;
+    return clear;
   }
 
 opt<Infix_Element> do_accept_infix_operator_opt(Token_Stream& tstrm)
@@ -1961,7 +1961,7 @@ opt<Infix_Element> do_accept_infix_operator_opt(Token_Stream& tstrm)
     if(qelem) {
       return qelem;
     }
-    return ::rocket::clear;
+    return clear;
   }
 
 bool do_accept_expression(cow_vector<Xprunit>& units, Token_Stream& tstrm)

@@ -8,7 +8,7 @@
 
 namespace Asteria {
 
-extern Aval std_array_slice(Aval data, Ival from, Iopt length = ::rocket::clear);
+extern Aval std_array_slice(Aval data, Ival from, Iopt length = clear);
 extern Aval std_array_replace_slice(Aval data, Ival from, Aval replacement);
 extern Aval std_array_replace_slice(Aval data, Ival from, Iopt length, Aval replacement);
 
@@ -42,21 +42,21 @@ extern Ival std_array_count_if_not(Global& global, Aval data, Fval predictor);
 extern Ival std_array_count_if_not(Global& global, Aval data, Ival from, Fval predictor);
 extern Ival std_array_count_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor);
 
-extern Bval std_array_is_sorted(Global& global, Aval data, Fopt comparator = ::rocket::clear);
-extern Iopt std_array_binary_search(Global& global, Aval data, Value target, Fopt comparator = ::rocket::clear);
-extern Ival std_array_lower_bound(Global& global, Aval data, Value target, Fopt comparator = ::rocket::clear);
-extern Ival std_array_upper_bound(Global& global, Aval data, Value target, Fopt comparator = ::rocket::clear);
-extern pair<Ival, Ival> std_array_equal_range(Global& global, Aval data, Value target, Fopt comparator = ::rocket::clear);
+extern Bval std_array_is_sorted(Global& global, Aval data, Fopt comparator = clear);
+extern Iopt std_array_binary_search(Global& global, Aval data, Value target, Fopt comparator = clear);
+extern Ival std_array_lower_bound(Global& global, Aval data, Value target, Fopt comparator = clear);
+extern Ival std_array_upper_bound(Global& global, Aval data, Value target, Fopt comparator = clear);
+extern pair<Ival, Ival> std_array_equal_range(Global& global, Aval data, Value target, Fopt comparator = clear);
 
-extern Aval std_array_sort(Global& global, Aval data, Fopt comparator = ::rocket::clear);
-extern Aval std_array_sortu(Global& global, Aval data, Fopt comparator = ::rocket::clear);
+extern Aval std_array_sort(Global& global, Aval data, Fopt comparator = clear);
+extern Aval std_array_sortu(Global& global, Aval data, Fopt comparator = clear);
 
-extern Value std_array_max_of(Global& global, Aval data, Fopt comparator = ::rocket::clear);
-extern Value std_array_min_of(Global& global, Aval data, Fopt comparator = ::rocket::clear);
+extern Value std_array_max_of(Global& global, Aval data, Fopt comparator = clear);
+extern Value std_array_min_of(Global& global, Aval data, Fopt comparator = clear);
 
 extern Aval std_array_reverse(Aval data);
 extern Aval std_array_generate(Global& global, Fval generator, Ival length);
-extern Aval std_array_shuffle(Aval data, Iopt seed = ::rocket::clear);
+extern Aval std_array_shuffle(Aval data, Iopt seed = clear);
 
 extern Aopt std_array_copy_keys(Oopt source);
 extern Aopt std_array_copy_values(Oopt source);

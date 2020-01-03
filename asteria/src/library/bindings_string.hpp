@@ -8,11 +8,11 @@
 
 namespace Asteria {
 
-extern Sval std_string_slice(Sval text, Ival from, Iopt length = ::rocket::clear);
+extern Sval std_string_slice(Sval text, Ival from, Iopt length = clear);
 extern Sval std_string_replace_slice(Sval text, Ival from, Sval replacement);
 extern Sval std_string_replace_slice(Sval text, Ival from, Iopt length, Sval replacement);
 
-extern Ival std_string_compare(Sval text1, Sval text2, Iopt length = ::rocket::clear);
+extern Ival std_string_compare(Sval text1, Sval text2, Iopt length = clear);
 extern Bval std_string_starts_with(Sval text, Sval prefix);
 extern Bval std_string_ends_with(Sval text, Sval suffix);
 
@@ -41,30 +41,30 @@ extern Iopt std_string_rfind_not_of(Sval text, Ival from, Sval reject);
 extern Iopt std_string_rfind_not_of(Sval text, Ival from, Iopt length, Sval reject);
 
 extern Sval std_string_reverse(Sval text);
-extern Sval std_string_trim(Sval text, Sopt reject = ::rocket::clear);
-extern Sval std_string_ltrim(Sval text, Sopt reject = ::rocket::clear);
-extern Sval std_string_rtrim(Sval text, Sopt reject = ::rocket::clear);
-extern Sval std_string_lpad(Sval text, Ival length, Sopt padding = ::rocket::clear);
-extern Sval std_string_rpad(Sval text, Ival length, Sopt padding = ::rocket::clear);
+extern Sval std_string_trim(Sval text, Sopt reject = clear);
+extern Sval std_string_ltrim(Sval text, Sopt reject = clear);
+extern Sval std_string_rtrim(Sval text, Sopt reject = clear);
+extern Sval std_string_lpad(Sval text, Ival length, Sopt padding = clear);
+extern Sval std_string_rpad(Sval text, Ival length, Sopt padding = clear);
 extern Sval std_string_to_upper(Sval text);
 extern Sval std_string_to_lower(Sval text);
-extern Sval std_string_translate(Sval text, Sval inputs, Sopt outputs = ::rocket::clear);
+extern Sval std_string_translate(Sval text, Sval inputs, Sopt outputs = clear);
 
-extern Aval std_string_explode(Sval text, Sopt delim, Iopt limit = ::rocket::clear);
-extern Sval std_string_implode(Aval segments, Sopt delim = ::rocket::clear);
+extern Aval std_string_explode(Sval text, Sopt delim, Iopt limit = clear);
+extern Sval std_string_implode(Aval segments, Sopt delim = clear);
 
-extern Sval std_string_hex_encode(Sval data, Bopt lowercase = ::rocket::clear, Sopt delim = ::rocket::clear);
+extern Sval std_string_hex_encode(Sval data, Bopt lowercase = clear, Sopt delim = clear);
 extern Sopt std_string_hex_decode(Sval text);
 
-extern Sval std_string_base32_encode(Sval data, Bopt lowercase = ::rocket::clear);
+extern Sval std_string_base32_encode(Sval data, Bopt lowercase = clear);
 extern Sopt std_string_base32_decode(Sval text);
 
 extern Sval std_string_base64_encode(Sval data);
 extern Sopt std_string_base64_decode(Sval text);
 
-extern Sopt std_string_utf8_encode(Ival code_point, Bopt permissive = ::rocket::clear);
-extern Sopt std_string_utf8_encode(Aval code_points, Bopt permissive = ::rocket::clear);
-extern Aopt std_string_utf8_decode(Sval text, Bopt permissive = ::rocket::clear);
+extern Sopt std_string_utf8_encode(Ival code_point, Bopt permissive = clear);
+extern Sopt std_string_utf8_encode(Aval code_points, Bopt permissive = clear);
+extern Aopt std_string_utf8_decode(Sval text, Bopt permissive = clear);
 
 extern Sval std_string_pack_8(Ival value);
 extern Sval std_string_pack_8(Aval values);

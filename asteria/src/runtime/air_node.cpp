@@ -2561,7 +2561,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
     switch(this->index()) {
     case index_clear_stack: {
         // There is nothing to bind.
-        return ::rocket::clear;
+        return clear;
       }
 
     case index_execute_block: {
@@ -2572,7 +2572,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         auto xaltr = altr;
         do_rebind_nodes(dirty, xaltr.code_body, ctx_body);
         if(!dirty) {
-          return ::rocket::clear;
+          return clear;
         }
         // Return the bound node.
         return ::rocket::move(xaltr);
@@ -2581,7 +2581,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
     case index_declare_variable: {
     case index_initialize_variable:
         // There is nothing to bind.
-        return ::rocket::clear;
+        return clear;
       }
 
     case index_if_statement: {
@@ -2593,7 +2593,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         do_rebind_nodes(dirty, xaltr.code_true, ctx_body);
         do_rebind_nodes(dirty, xaltr.code_false, ctx_body);
         if(!dirty) {
-          return ::rocket::clear;
+          return clear;
         }
         // Return the bound node.
         return ::rocket::move(xaltr);
@@ -2608,7 +2608,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         do_rebind_nodes(dirty, xaltr.code_labels, ctx_body);
         do_rebind_nodes(dirty, xaltr.code_bodies, ctx_body);
         if(!dirty) {
-          return ::rocket::clear;
+          return clear;
         }
         // Return the bound node.
         return ::rocket::move(xaltr);
@@ -2623,7 +2623,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         do_rebind_nodes(dirty, xaltr.code_body, ctx_body);
         do_rebind_nodes(dirty, xaltr.code_cond, ctx_body);
         if(!dirty) {
-          return ::rocket::clear;
+          return clear;
         }
         // Return the bound node.
         return ::rocket::move(xaltr);
@@ -2638,7 +2638,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         do_rebind_nodes(dirty, xaltr.code_cond, ctx_body);
         do_rebind_nodes(dirty, xaltr.code_body, ctx_body);
         if(!dirty) {
-          return ::rocket::clear;
+          return clear;
         }
         // Return the bound node.
         return ::rocket::move(xaltr);
@@ -2654,7 +2654,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         do_rebind_nodes(dirty, xaltr.code_init, ctx_for);
         do_rebind_nodes(dirty, xaltr.code_body, ctx_body);
         if(!dirty) {
-          return ::rocket::clear;
+          return clear;
         }
         // Return the bound node.
         return ::rocket::move(xaltr);
@@ -2672,7 +2672,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         do_rebind_nodes(dirty, xaltr.code_step, ctx_for);
         do_rebind_nodes(dirty, xaltr.code_body, ctx_body);
         if(!dirty) {
-          return ::rocket::clear;
+          return clear;
         }
         // Return the bound node.
         return ::rocket::move(xaltr);
@@ -2687,7 +2687,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         do_rebind_nodes(dirty, xaltr.code_try, ctx_body);
         do_rebind_nodes(dirty, xaltr.code_catch, ctx_body);
         if(!dirty) {
-          return ::rocket::clear;
+          return clear;
         }
         // Return the bound node.
         return ::rocket::move(xaltr);
@@ -2700,7 +2700,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
     case index_push_immediate:
     case index_push_global_reference:
         // There is nothing to bind.
-        return ::rocket::clear;
+        return clear;
       }
 
     case index_push_local_reference: {
@@ -2711,12 +2711,12 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         ROCKET_ASSERT(qctx);
         // Don't bind references in analytic contexts.
         if(qctx->is_analytic()) {
-          return ::rocket::clear;
+          return clear;
         }
         // Look for the name in the context.
         auto qref = qctx->get_named_reference_opt(altr.name);
         if(!qref) {
-          return ::rocket::clear;
+          return clear;
         }
         // Bind it now.
         S_push_bound_reference xaltr = { *qref };
@@ -2725,7 +2725,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
 
     case index_push_bound_reference: {
         // There is nothing to bind.
-        return ::rocket::clear;
+        return clear;
       }
 
     case index_define_function: {
@@ -2736,7 +2736,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         auto xaltr = altr;
         do_rebind_nodes(dirty, xaltr.code_body, ctx_func);
         if(!dirty) {
-          return ::rocket::clear;
+          return clear;
         }
         // Return the bound node.
         return ::rocket::move(xaltr);
@@ -2750,7 +2750,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         do_rebind_nodes(dirty, xaltr.code_true, ctx);
         do_rebind_nodes(dirty, xaltr.code_false, ctx);
         if(!dirty) {
-          return ::rocket::clear;
+          return clear;
         }
         // Return the bound node.
         return ::rocket::move(xaltr);
@@ -2763,7 +2763,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         auto xaltr = altr;
         do_rebind_nodes(dirty, xaltr.code_null, ctx);
         if(!dirty) {
-          return ::rocket::clear;
+          return clear;
         }
         // Return the bound node.
         return ::rocket::move(xaltr);
@@ -2779,7 +2779,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
     case index_define_null_variable:
     case index_single_step_trap:
         // There is nothing to bind.
-        return ::rocket::clear;
+        return clear;
       }
 
     default:

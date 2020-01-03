@@ -65,7 +65,7 @@ template<typename IteratorT> opt<IteratorT> do_find_opt(IteratorT begin, Iterato
         return ::rocket::move(it);
     }
     // Fail to find an element.
-    return ::rocket::clear;
+    return clear;
   }
 
 inline void do_push_argument(cow_vector<Reference>& args, const Value& value)
@@ -89,7 +89,7 @@ template<typename IteratorT> opt<IteratorT> do_find_if_opt(Global& global, Itera
         return ::rocket::move(it);
     }
     // Fail to find an element.
-    return ::rocket::clear;
+    return clear;
   }
 
 Compare do_compare(Global& global, const Fval& comp, const Value& lhs, const Value& rhs)
@@ -250,7 +250,7 @@ Aval std_array_slice(Aval data, Ival from, Iopt length)
 
 Aval std_array_replace_slice(Aval data, Ival from, Aval replacement)
   {
-    auto range = do_slice(data, from, ::rocket::clear);
+    auto range = do_slice(data, from, clear);
     // Append segments.
     Aval res;
     res.reserve(data.size() - static_cast<size_t>(range.second - range.first) + replacement.size());
@@ -277,17 +277,17 @@ Iopt std_array_find(Aval data, Value target)
     auto range = ::std::make_pair(data.begin(), data.end());
     auto qit = do_find_opt(range.first, range.second, target);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return *qit - data.begin();
   }
 
 Iopt std_array_find(Aval data, Ival from, Value target)
   {
-    auto range = do_slice(data, from, ::rocket::clear);
+    auto range = do_slice(data, from, clear);
     auto qit = do_find_opt(range.first, range.second, target);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return *qit - data.begin();
   }
@@ -297,7 +297,7 @@ Iopt std_array_find(Aval data, Ival from, Iopt length, Value target)
     auto range = do_slice(data, from, length);
     auto qit = do_find_opt(range.first, range.second, target);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return *qit - data.begin();
   }
@@ -307,17 +307,17 @@ Iopt std_array_find_if(Global& global, Aval data, Fval predictor)
     auto range = ::std::make_pair(data.begin(), data.end());
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return *qit - data.begin();
   }
 
 Iopt std_array_find_if(Global& global, Aval data, Ival from, Fval predictor)
   {
-    auto range = do_slice(data, from, ::rocket::clear);
+    auto range = do_slice(data, from, clear);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return *qit - data.begin();
   }
@@ -328,7 +328,7 @@ Iopt std_array_find_if(Global& global, Aval data, Ival from, Iopt length,
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return *qit - data.begin();
   }
@@ -338,17 +338,17 @@ Iopt std_array_find_if_not(Global& global, Aval data, Fval predictor)
     auto range = ::std::make_pair(data.begin(), data.end());
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return *qit - data.begin();
   }
 
 Iopt std_array_find_if_not(Global& global, Aval data, Ival from, Fval predictor)
   {
-    auto range = do_slice(data, from, ::rocket::clear);
+    auto range = do_slice(data, from, clear);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return *qit - data.begin();
   }
@@ -359,7 +359,7 @@ Iopt std_array_find_if_not(Global& global, Aval data, Ival from, Iopt length,
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return *qit - data.begin();
   }
@@ -369,17 +369,17 @@ Iopt std_array_rfind(Aval data, Value target)
     auto range = ::std::make_pair(data.begin(), data.end());
     auto qit = do_find_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first), target);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return data.rend() - *qit - 1;
   }
 
 Iopt std_array_rfind(Aval data, Ival from, Value target)
   {
-    auto range = do_slice(data, from, ::rocket::clear);
+    auto range = do_slice(data, from, clear);
     auto qit = do_find_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first), target);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return data.rend() - *qit - 1;
   }
@@ -389,7 +389,7 @@ Iopt std_array_rfind(Aval data, Ival from, Iopt length, Value target)
     auto range = do_slice(data, from, length);
     auto qit = do_find_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first), target);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return data.rend() - *qit - 1;
   }
@@ -400,18 +400,18 @@ Iopt std_array_rfind_if(Global& global, Aval data, Fval predictor)
     auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
                                       predictor, true);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return data.rend() - *qit - 1;
   }
 
 Iopt std_array_rfind_if(Global& global, Aval data, Ival from, Fval predictor)
   {
-    auto range = do_slice(data, from, ::rocket::clear);
+    auto range = do_slice(data, from, clear);
     auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
                                       predictor, true);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return data.rend() - *qit - 1;
   }
@@ -423,7 +423,7 @@ Iopt std_array_rfind_if(Global& global, Aval data, Ival from, Iopt length,
     auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
                                       predictor, true);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return data.rend() - *qit - 1;
   }
@@ -434,18 +434,18 @@ Iopt std_array_rfind_if_not(Global& global, Aval data, Fval predictor)
     auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
                                       predictor, false);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return data.rend() - *qit - 1;
   }
 
 Iopt std_array_rfind_if_not(Global& global, Aval data, Ival from, Fval predictor)
   {
-    auto range = do_slice(data, from, ::rocket::clear);
+    auto range = do_slice(data, from, clear);
     auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
                                       predictor, false);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return data.rend() - *qit - 1;
   }
@@ -457,7 +457,7 @@ Iopt std_array_rfind_if_not(Global& global, Aval data, Ival from, Iopt length,
     auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
                                       predictor, false);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return data.rend() - *qit - 1;
   }
@@ -480,7 +480,7 @@ Ival std_array_count(Aval data, Value target)
 Ival std_array_count(Aval data, Ival from, Value target)
   {
     Ival count = 0;
-    auto range = do_slice(data, from, ::rocket::clear);
+    auto range = do_slice(data, from, clear);
     for(;;) {
       auto qit = do_find_opt(range.first, range.second, target);
       if(!qit) {
@@ -525,7 +525,7 @@ Ival std_array_count_if(Global& global, Aval data, Fval predictor)
 Ival std_array_count_if(Global& global, Aval data, Ival from, Fval predictor)
   {
     Ival count = 0;
-    auto range = do_slice(data, from, ::rocket::clear);
+    auto range = do_slice(data, from, clear);
     for(;;) {
       auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
       if(!qit) {
@@ -570,7 +570,7 @@ Ival std_array_count_if_not(Global& global, Aval data, Fval predictor)
 Ival std_array_count_if_not(Global& global, Aval data, Ival from, Fval predictor)
   {
     Ival count = 0;
-    auto range = do_slice(data, from, ::rocket::clear);
+    auto range = do_slice(data, from, clear);
     for(;;) {
       auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
       if(!qit) {
@@ -617,7 +617,7 @@ Iopt std_array_binary_search(Global& global, Aval data, Value target, Fopt compa
   {
     auto pair = do_bsearch(global, data.begin(), data.end(), comparator, target);
     if(!pair.second) {
-      return ::rocket::clear;
+      return clear;
     }
     return pair.first - data.begin();
   }
@@ -773,7 +773,7 @@ Aval std_array_shuffle(Aval data, Iopt seed)
 Aopt std_array_copy_keys(Oopt source)
   {
     if(!source) {
-      return ::rocket::clear;
+      return clear;
     }
     Aval res;
     res.reserve(source->size());
@@ -784,7 +784,7 @@ Aopt std_array_copy_keys(Oopt source)
 Aopt std_array_copy_values(Oopt source)
   {
     if(!source) {
-      return ::rocket::clear;
+      return clear;
     }
     Aval res;
     res.reserve(source->size());

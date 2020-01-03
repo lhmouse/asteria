@@ -142,6 +142,7 @@ using ::rocket::begin;
 using ::rocket::end;
 using ::rocket::xswap;
 using ::rocket::swap;
+using ::rocket::clear;
 
 // Fundamental types
 using G_null      = nullptr_t;

@@ -76,7 +76,7 @@ template<typename IteratorT> opt<IteratorT> do_find_opt(IteratorT tbegin, Iterat
     auto tpos = tbegin;
     for(;;) {
       if(tend - tpos < plen) {
-        return ::rocket::clear;
+        return clear;
       }
       if(::std::equal(pbegin, pend, tpos)) {
         break;
@@ -96,7 +96,7 @@ template<typename IteratorT> opt<IteratorT> do_find_of_opt(IteratorT begin, Iter
       if(table[uint8_t(*it)] == match)
         return ::rocket::move(it);
     }
-    return ::rocket::clear;
+    return clear;
   }
 
 inline Sval::shallow_type do_get_reject(const Sopt& reject)
@@ -251,7 +251,7 @@ Sval std_string_slice(Sval text, Ival from, Iopt length)
 Sval std_string_replace_slice(Sval text, Ival from, Sval replacement)
   {
     Sval res = text;
-    auto range = do_slice(res, from, ::rocket::clear);
+    auto range = do_slice(res, from, clear);
     // Replace the subrange.
     res.replace(range.first, range.second, replacement);
     return res;
@@ -295,17 +295,17 @@ Iopt std_string_find(Sval text, Sval pattern)
     auto range = ::std::make_pair(text.begin(), text.end());
     auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return *qit - text.begin();
   }
 
 Iopt std_string_find(Sval text, Ival from, Sval pattern)
   {
-    auto range = do_slice(text, from, ::rocket::clear);
+    auto range = do_slice(text, from, clear);
     auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return *qit - text.begin();
   }
@@ -315,7 +315,7 @@ Iopt std_string_find(Sval text, Ival from, Iopt length, Sval pattern)
     auto range = do_slice(text, from, length);
     auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return *qit - text.begin();
   }
@@ -326,18 +326,18 @@ Iopt std_string_rfind(Sval text, Sval pattern)
     auto qit = do_find_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
                            pattern.rbegin(), pattern.rend());
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return text.rend() - *qit - pattern.ssize();
   }
 
 Iopt std_string_rfind(Sval text, Ival from, Sval pattern)
   {
-    auto range = do_slice(text, from, ::rocket::clear);
+    auto range = do_slice(text, from, clear);
     auto qit = do_find_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
                            pattern.rbegin(), pattern.rend());
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return text.rend() - *qit - pattern.ssize();
   }
@@ -348,7 +348,7 @@ Iopt std_string_rfind(Sval text, Ival from, Iopt length, Sval pattern)
     auto qit = do_find_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
                            pattern.rbegin(), pattern.rend());
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return text.rend() - *qit - pattern.ssize();
   }
@@ -374,7 +374,7 @@ Sval std_string_find_and_replace(Sval text, Sval pattern, Sval replacement)
 Sval std_string_find_and_replace(Sval text, Ival from, Sval pattern, Sval replacement)
   {
     Sval res = text;
-    auto range = do_slice(res, from, ::rocket::clear);
+    auto range = do_slice(res, from, clear);
     for(;;) {
       auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
       if(!qit) {
@@ -412,17 +412,17 @@ Iopt std_string_find_any_of(Sval text, Sval accept)
   {
     auto qit = do_find_of_opt(text.begin(), text.end(), accept, true);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return *qit - text.begin();
   }
 
 Iopt std_string_find_any_of(Sval text, Ival from, Sval accept)
   {
-    auto range = do_slice(text, from, ::rocket::clear);
+    auto range = do_slice(text, from, clear);
     auto qit = do_find_of_opt(range.first, range.second, accept, true);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return *qit - text.begin();
   }
@@ -432,7 +432,7 @@ Iopt std_string_find_any_of(Sval text, Ival from, Iopt length, Sval accept)
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(range.first, range.second, accept, true);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return *qit - text.begin();
   }
@@ -441,17 +441,17 @@ Iopt std_string_find_not_of(Sval text, Sval reject)
   {
     auto qit = do_find_of_opt(text.begin(), text.end(), reject, false);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return *qit - text.begin();
   }
 
 Iopt std_string_find_not_of(Sval text, Ival from, Sval reject)
   {
-    auto range = do_slice(text, from, ::rocket::clear);
+    auto range = do_slice(text, from, clear);
     auto qit = do_find_of_opt(range.first, range.second, reject, false);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return *qit - text.begin();
   }
@@ -461,7 +461,7 @@ Iopt std_string_find_not_of(Sval text, Ival from, Iopt length, Sval reject)
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(range.first, range.second, reject, false);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return *qit - text.begin();
   }
@@ -470,18 +470,18 @@ Iopt std_string_rfind_any_of(Sval text, Sval accept)
   {
     auto qit = do_find_of_opt(text.rbegin(), text.rend(), accept, true);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return text.rend() - *qit - 1;
   }
 
 Iopt std_string_rfind_any_of(Sval text, Ival from, Sval accept)
   {
-    auto range = do_slice(text, from, ::rocket::clear);
+    auto range = do_slice(text, from, clear);
     auto qit = do_find_of_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
                               accept, true);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return text.rend() - *qit - 1;
   }
@@ -492,7 +492,7 @@ Iopt std_string_rfind_any_of(Sval text, Ival from, Iopt length, Sval accept)
     auto qit = do_find_of_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
                               accept, true);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return text.rend() - *qit - 1;
   }
@@ -501,18 +501,18 @@ Iopt std_string_rfind_not_of(Sval text, Sval reject)
   {
     auto qit = do_find_of_opt(text.rbegin(), text.rend(), reject, false);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return text.rend() - *qit - 1;
   }
 
 Iopt std_string_rfind_not_of(Sval text, Ival from, Sval reject)
   {
-    auto range = do_slice(text, from, ::rocket::clear);
+    auto range = do_slice(text, from, clear);
     auto qit = do_find_of_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
                               reject, false);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return text.rend() - *qit - 1;
   }
@@ -523,7 +523,7 @@ Iopt std_string_rfind_not_of(Sval text, Ival from, Iopt length, Sval reject)
     auto qit = do_find_of_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
                               reject, false);
     if(!qit) {
-      return ::rocket::clear;
+      return clear;
     }
     return text.rend() - *qit - 1;
   }
@@ -545,7 +545,7 @@ Sval std_string_trim(Sval text, Sopt reject)
     auto start = text.find_first_not_of(rchars);
     if(start == Sval::npos) {
       // There is no byte to keep. Return an empty string.
-      return ::rocket::clear;
+      return clear;
     }
     // Get the index of the last byte to keep.
     auto end = text.find_last_not_of(rchars);
@@ -568,7 +568,7 @@ Sval std_string_ltrim(Sval text, Sopt reject)
     auto start = text.find_first_not_of(rchars);
     if(start == Sval::npos) {
       // There is no byte to keep. Return an empty string.
-      return ::rocket::clear;
+      return clear;
     }
     if(start == 0) {
       // There is no byte to strip. Make use of reference counting.
@@ -589,7 +589,7 @@ Sval std_string_rtrim(Sval text, Sopt reject)
     auto end = text.find_last_not_of(rchars);
     if(end == Sval::npos) {
       // There is no byte to keep. Return an empty string.
-      return ::rocket::clear;
+      return clear;
     }
     if(end == text.size() - 1) {
       // There is no byte to strip. Make use of reference counting.
@@ -807,7 +807,7 @@ Sopt std_string_hex_decode(Sval text)
         // The character is a whitespace.
         if(unit.size() != 0) {
           // Fail if it occurs in the middle of a encoding unit.
-          return ::rocket::clear;
+          return clear;
         }
         // Ignore it.
         continue;
@@ -822,7 +822,7 @@ Sopt std_string_hex_decode(Sval text)
         pos = do_xstrchr(s_base16_table, unit[i]);
         if(!pos) {
           // The character is invalid.
-          return ::rocket::clear;
+          return clear;
         }
         auto off = static_cast<size_t>(pos - s_base16_table) / 2;
         ROCKET_ASSERT(off < 16);
@@ -838,7 +838,7 @@ Sopt std_string_hex_decode(Sval text)
     }
     if(unit.size() != 0) {
       // Fail in case of excess digits.
-      return ::rocket::clear;
+      return clear;
     }
     return ::rocket::move(data);
   }
@@ -910,7 +910,7 @@ Sopt std_string_base32_decode(Sval text)
         // The character is a whitespace.
         if(unit.size() != 0) {
           // Fail if it occurs in the middle of a encoding unit.
-          return ::rocket::clear;
+          return clear;
         }
         // Ignore it.
         continue;
@@ -924,21 +924,21 @@ Sopt std_string_base32_decode(Sval text)
       auto pt = ::std::find(unit.begin(), unit.end(), s_base32_table[64]);
       if(::std::any_of(pt, unit.end(), [&](char cx) { return cx != s_base32_table[64];  })) {
         // Fail if a non-padding character follows a padding character.
-        return ::rocket::clear;
+        return clear;
       }
       auto p = static_cast<size_t>(pt - unit.begin());
       // How many bytes are there in this unit?
       auto m = p * 5 / 8;
       if((m == 0) || ((m * 8 + 4) / 5 != p)) {
         // Fail due to invalid number of non-padding characters.
-        return ::rocket::clear;
+        return clear;
       }
       // Decode the current encoding unit.
       for(size_t i = 0; i != p; ++i) {
         pos = do_xstrchr(s_base32_table, unit[i]);
         if(!pos) {
           // The character is invalid.
-          return ::rocket::clear;
+          return clear;
         }
         auto off = static_cast<size_t>(pos - s_base32_table) / 2;
         ROCKET_ASSERT(off < 32);
@@ -957,7 +957,7 @@ Sopt std_string_base32_decode(Sval text)
     }
     if(unit.size() != 0) {
       // Fail in case of excess digits.
-      return ::rocket::clear;
+      return clear;
     }
     return ::rocket::move(data);
   }
@@ -1028,7 +1028,7 @@ Sopt std_string_base64_decode(Sval text)
         // The character is a whitespace.
         if(unit.size() != 0) {
           // Fail if it occurs in the middle of a encoding unit.
-          return ::rocket::clear;
+          return clear;
         }
         // Ignore it.
         continue;
@@ -1042,21 +1042,21 @@ Sopt std_string_base64_decode(Sval text)
       auto pt = ::std::find(unit.begin(), unit.end(), s_base64_table[64]);
       if(::std::any_of(pt, unit.end(), [&](char cx) { return cx != s_base64_table[64];  })) {
         // Fail if a non-padding character follows a padding character.
-        return ::rocket::clear;
+        return clear;
       }
       auto p = static_cast<size_t>(pt - unit.begin());
       // How many bytes are there in this unit?
       auto m = p * 3 / 4;
       if((m == 0) || ((m * 8 + 5) / 6 != p)) {
         // Fail due to invalid number of non-padding characters.
-        return ::rocket::clear;
+        return clear;
       }
       // Decode the current encoding unit.
       for(size_t i = 0; i != p; ++i) {
         pos = do_xstrchr(s_base64_table, unit[i]);
         if(!pos) {
           // The character is invalid.
-          return ::rocket::clear;
+          return clear;
         }
         auto off = static_cast<size_t>(pos - s_base64_table);
         ROCKET_ASSERT(off < 64);
@@ -1075,7 +1075,7 @@ Sopt std_string_base64_decode(Sval text)
     }
     if(unit.size() != 0) {
       // Fail in case of excess digits.
-      return ::rocket::clear;
+      return clear;
     }
     return ::rocket::move(data);
   }
@@ -1089,7 +1089,7 @@ Sopt std_string_utf8_encode(Ival code_point, Bopt permissive)
     if(!utf8_encode(text, cp)) {
       // This comparison with `true` is by intention, because it may be unset.
       if(permissive != true) {
-        return ::rocket::clear;
+        return clear;
       }
       // Encode the replacement character.
       utf8_encode(text, 0xFFFD);
@@ -1107,7 +1107,7 @@ Sopt std_string_utf8_encode(Aval code_points, Bopt permissive)
       if(!utf8_encode(text, cp)) {
         // This comparison with `true` is by intention, because it may be unset.
         if(permissive != true) {
-          return ::rocket::clear;
+          return clear;
         }
         // Encode the replacement character.
         utf8_encode(text, 0xFFFD);
@@ -1130,7 +1130,7 @@ Aopt std_string_utf8_decode(Sval text, Bopt permissive)
       if(!utf8_decode(cp, text, offset)) {
         // This comparison with `true` is by intention, because it may be unset.
         if(permissive != true) {
-          return ::rocket::clear;
+          return clear;
         }
         // Re-interpret it as an isolated byte.
         cp = text[offset++] & 0xFF;

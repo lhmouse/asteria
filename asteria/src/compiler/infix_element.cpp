@@ -112,14 +112,14 @@ void Infix_Element::extract(cow_vector<Xprunit>& units)
     case index_logical_and: {
         auto& altr = this->m_stor.as<index_logical_and>();
         // Construct a branch unit from the TRUE branch and an empty FALSE branch, then append it to `units`.
-        Xprunit::S_branch xunit = { ::rocket::move(altr.branch_true), ::rocket::clear, altr.assign };
+        Xprunit::S_branch xunit = { ::rocket::move(altr.branch_true), clear, altr.assign };
         units.emplace_back(::rocket::move(xunit));
         return;
       }
     case index_logical_or: {
         auto& altr = this->m_stor.as<index_logical_or>();
         // Construct a branch unit from an empty TRUE branch and the FALSE branch, then append it to `units`.
-        Xprunit::S_branch xunit = { ::rocket::clear, ::rocket::move(altr.branch_false), altr.assign };
+        Xprunit::S_branch xunit = { clear, ::rocket::move(altr.branch_false), altr.assign };
         units.emplace_back(::rocket::move(xunit));
         return;
       }

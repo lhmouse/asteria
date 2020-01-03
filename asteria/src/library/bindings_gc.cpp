@@ -14,13 +14,13 @@ namespace Asteria {
 Iopt std_gc_tracked_count(Global& global, Ival generation)
   {
     if((generation < gc_generation_newest) || (generation > gc_generation_oldest)) {
-      return ::rocket::clear;
+      return clear;
     }
     auto gc_gen = static_cast<GC_Generation>(generation);
     // Get the collector.
     auto qcoll = global.get_collector_opt(gc_gen);
     if(!qcoll) {
-      return ::rocket::clear;
+      return clear;
     }
     // Get the current number of variables being tracked.
     auto count = qcoll->count_tracked_variables();
@@ -30,13 +30,13 @@ Iopt std_gc_tracked_count(Global& global, Ival generation)
 Iopt std_gc_get_threshold(Global& global, Ival generation)
   {
     if((generation < gc_generation_newest) || (generation > gc_generation_oldest)) {
-      return ::rocket::clear;
+      return clear;
     }
     auto gc_gen = static_cast<GC_Generation>(generation);
     // Get the collector.
     auto qcoll = global.get_collector_opt(gc_gen);
     if(!qcoll) {
-      return ::rocket::clear;
+      return clear;
     }
     // Get the current threshold.
     auto thres = qcoll->get_threshold();
@@ -46,13 +46,13 @@ Iopt std_gc_get_threshold(Global& global, Ival generation)
 Iopt std_gc_set_threshold(Global& global, Ival generation, Ival threshold)
   {
     if((generation < gc_generation_newest) || (generation > gc_generation_oldest)) {
-      return ::rocket::clear;
+      return clear;
     }
     auto gc_gen = static_cast<GC_Generation>(generation);
     // Get the collector.
     auto qcoll = global.open_collector_opt(gc_gen);
     if(!qcoll) {
-      return ::rocket::clear;
+      return clear;
     }
     // Set the threshold and return its old value.
     auto thres = qcoll->get_threshold();

@@ -168,13 +168,13 @@ Iopt std_chrono_utc_parse(Sval time_str)
     static constexpr char s_spaces[] = " \f\n\r\t\v";
     size_t off = time_str.find_first_not_of(s_spaces);
     if(off == Sval::npos) {
-      return ::rocket::clear;
+      return clear;
     }
     // The shortest form is '1234-67-90 23:56:89' which contains 19 characters.
     const char* p = time_str.data() + off;
     off = time_str.find_last_not_of(s_spaces) + 1;
     if(time_str.data() + off - p < 19) {
-      return ::rocket::clear;
+      return clear;
     }
     // Declare the timepoint value as two parts: 'yyyy-mm-dd HH:MM:SS' and '.sss'.
     ::tm tr = { };
@@ -192,38 +192,38 @@ Iopt std_chrono_utc_parse(Sval time_str)
       };
     // 'yyyy'
     if(!xget(tr.tm_year, 4, 0, 9999, 1900))
-      return ::rocket::clear;
+      return clear;
     // '-' or '/'
     if(!::rocket::is_any_of(*(p++), { '-', '/' }))
-      return ::rocket::clear;
+      return clear;
     // 'mm'
     if(!xget(tr.tm_mon, 2, 1, 12, 1))
-      return ::rocket::clear;
+      return clear;
     // '-' or '/'
     if(!::rocket::is_any_of(*(p++), { '-', '/' }))
-      return ::rocket::clear;
+      return clear;
     // 'dd'
     if(!xget(tr.tm_mday, 2, 1, 31, 0))
-      return ::rocket::clear;
+      return clear;
     // ' ' or 'T'
     if(!::rocket::is_any_of(*(p++), { ' ', 'T' }))
-      return ::rocket::clear;
+      return clear;
     // 'HH'
     if(!xget(tr.tm_hour, 2, 0, 23, 0))
-      return ::rocket::clear;
+      return clear;
     // ':'
     if(!::rocket::is_any_of(*(p++), { ':' }))
-      return ::rocket::clear;
+      return clear;
     // 'MM'
     if(!xget(tr.tm_min, 2, 0, 59, 0))
-      return ::rocket::clear;
+      return clear;
     // ':'
     if(!::rocket::is_any_of(*(p++), { ':' }))
-      return ::rocket::clear;
+      return clear;
     // 'SS'
     // Note leap seconds.
     if(!xget(tr.tm_sec, 2, 0, 60, 0))
-      return ::rocket::clear;
+      return clear;
     // Check for the millisecond part.
     const char* ep = time_str.data() + off;
     if(*p == '.') {
@@ -231,12 +231,12 @@ Iopt std_chrono_utc_parse(Sval time_str)
       p -= 2;
       // 'SS.sss'
       if(!numg.parse_F(p, ep, 10) || !numg.cast_F(msecs, 0, 60.9999) || (p != ep))
-        return ::rocket::clear;
+        return clear;
       msecs = (msecs - tr.tm_sec) * 1000 + 0.01;
     }
     // Ensure all characters have been consumed.
     if(p != ep) {
-      return ::rocket::clear;
+      return clear;
     }
     // Handle special time values.
     if(tr.tm_year + 1900 < 1600) {
@@ -248,7 +248,7 @@ Iopt std_chrono_utc_parse(Sval time_str)
     // Assemble all parts.
     ::time_t tp = ::timegm(&tr);
     if(tp == ::time_t(-1)) {
-      return ::rocket::clear;
+      return clear;
     }
     return static_cast<int64_t>(tp) * 1000 + static_cast<int64_t>(msecs);
   }
