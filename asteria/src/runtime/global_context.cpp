@@ -23,16 +23,18 @@
 namespace Asteria {
 namespace {
 
+using Module_Initializer = void (G_object& result, API_Version version);
+
 // N.B. Please keep this list sorted by the `version` member.
 struct Module
   {
     API_Version version;
     const char* name;
-    void (*init)(G_object&, API_Version);
+    Module_Initializer& init;
   }
 constexpr s_modules[] =
   {
-    { api_version_none,       "",            nullptr                     },
+    { api_version_none,       "version",     create_bindings_version     },
     { api_version_0001_0000,  "gc",          create_bindings_gc          },
     { api_version_0001_0000,  "debug",       create_bindings_debug       },
     { api_version_0001_0000,  "chrono",      create_bindings_chrono      },
@@ -104,28 +106,21 @@ void Global_Context::initialize(API_Version version)
     // Get the range of modules to initialize.
     // This also determines the maximum version number of the library, which will be referenced as `yend[-1].version`.
     G_object ostd;
-    auto bmods = begin(s_modules) + 1;
-    auto emods = ::std::upper_bound(bmods, end(s_modules), version, Module_Comparator());
+    auto bptr = begin(s_modules);
+    auto eptr = ::std::upper_bound(bptr, end(s_modules), version, Module_Comparator());
     // Initialize library modules.
-    for(auto q = bmods; q != emods; ++q) {
+    for(auto q = bptr; q != eptr; ++q) {
       // Create the subobject if it doesn't exist.
       auto pair = ostd.try_emplace(::rocket::sref(q->name));
       if(pair.second) {
         ROCKET_ASSERT(pair.first->second.is_null());
         pair.first->second = G_object();
       }
-      (*(q->init))(pair.first->second.open_object(), emods[-1].version);
+      q->init(pair.first->second.open_object(), eptr[-1].version);
     }
-    // Set up version information.
-    auto pair = ostd.try_emplace(::rocket::sref("version"));
-    if(pair.second) {
-      ROCKET_ASSERT(pair.first->second.is_null());
-      pair.first->second = G_object();
-    }
-    create_bindings_version(pair.first->second.open_object(), emods[-1].version);
-    // Set the `std` variable now.
     auto vstd = gcoll->create_variable(gc_generation_oldest);
     vstd->reset(::rocket::move(ostd), true);
+    // Set the `std` reference now.
     Reference_Root::S_variable xref = { vstd };
     this->open_named_reference(::rocket::sref("std")) = ::rocket::move(xref);
     this->m_vstd = vstd;
