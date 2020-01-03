@@ -72,9 +72,7 @@ bool Value::test() const noexcept
 
 Compare Value::compare(const Value& other) const noexcept
   {
-    ///////////////////////////////////////////////////////////////////////////
     // Compare values of different types
-    ///////////////////////////////////////////////////////////////////////////
     if(this->gtype() != other.gtype()) {
       // Compare operands that are both of arithmetic types.
       if(this->is_convertible_to_real() && other.is_convertible_to_real()) {
@@ -83,9 +81,7 @@ Compare Value::compare(const Value& other) const noexcept
       // Otherwise, they are unordered.
       return compare_unordered;
     }
-    ///////////////////////////////////////////////////////////////////////////
     // Compare values of the same type
-    ///////////////////////////////////////////////////////////////////////////
     switch(this->gtype()) {
     case gtype_null: {
         return compare_equal;

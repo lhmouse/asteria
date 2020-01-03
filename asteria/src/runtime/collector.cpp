@@ -113,6 +113,7 @@ Collector* Collector::collect_single_opt()
     // We initialize `gcref` to zero then increment it, rather than initialize `gcref` to
     // the reference count then decrement it. This saves a phase below for us.
     this->m_staging.clear();
+
     ///////////////////////////////////////////////////////////////////////////
     // Phase 1
     //   Add variables that are either tracked or reachable from tracked ones
@@ -151,6 +152,7 @@ Collector* Collector::collect_single_opt()
           });
         return false;
       });
+
     ///////////////////////////////////////////////////////////////////////////
     // Phase 2
     //   Drop references directly or indirectly from `m_staging`.
@@ -176,6 +178,7 @@ Collector* Collector::collect_single_opt()
           });
         return false;
       });
+
     ///////////////////////////////////////////////////////////////////////////
     // Phase 3
     //   Mark variables reachable indirectly from those reachable directly.
@@ -202,6 +205,7 @@ Collector* Collector::collect_single_opt()
           });
         return false;
       });
+
     ///////////////////////////////////////////////////////////////////////////
     // Phase 4
     //   Wipe out variables whose `gcref` counters have excceeded their
@@ -232,6 +236,7 @@ Collector* Collector::collect_single_opt()
         this->m_tracked.erase(root);
         return false;
       });
+
     ///////////////////////////////////////////////////////////////////////////
     // Finish
     ///////////////////////////////////////////////////////////////////////////
