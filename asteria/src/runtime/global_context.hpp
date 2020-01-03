@@ -16,7 +16,7 @@ class Global_Context final : public virtual Rcbase, public Abstract_Context
   private:
     Recursion_Sentry m_sentry;
     rcptr<Rcbase> m_prng;  // the global pseudo random number generator
-    rcptr<Rcbase> m_stdv;  // the `std` variable
+    rcptr<Rcbase> m_vstd;  // the `std` variable
     rcptr<Rcbase> m_hooks_opt;  // the hook callback dispatcher
 
   public:
