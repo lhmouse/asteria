@@ -80,7 +80,8 @@ Reference* Executive_Context::do_lazy_lookup_opt(Reference_Dictionary& named_ref
       if(ROCKET_EXPECT(this->m_args_opt->empty()))
         varg = this->m_zvarg;
       else
-        varg = ::rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg), ::rocket::move(*(this->m_args_opt)));
+        varg = ::rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg),  // copy `sloc` and `func`
+                                                      ::rocket::move(*(this->m_args_opt)));
       this->m_args_opt.reset();
       Reference_Root::S_constant xref = { ::rocket::move(varg) };
       ref = ::rocket::move(xref);
