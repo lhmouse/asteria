@@ -1396,7 +1396,7 @@ ascii_numget& ascii_numget::cast_F(double& value, double lower, double upper, bo
             uint64_t xlo = ireg << 32 >> 32;
             uint64_t yhi = mult.mant >> 32;
             uint64_t ylo = mult.mant << 32 >> 32;
-            ireg = xhi * yhi + (((xlo * yhi >> 16) + (xhi * ylo >> 16) + (xlo * ylo >> 48)) >> 16);
+            ireg = xhi * yhi + (((xlo * yhi >> 30) + (xhi * ylo >> 30) + (xlo * ylo >> 62)) >> 2);
             // Convert the mantissa to a floating-point number.
             freg = do_cast_mant_I(ireg | 1, single);
             freg = ::std::ldexp(freg, mult.bexp - lzcnt);

@@ -883,7 +883,7 @@ void do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
     uint64_t xlo = ireg << 32 >> 32;
     uint64_t yhi = mult.mant >> 32;
     uint64_t ylo = mult.mant << 32 >> 32;
-    ireg = xhi * yhi + (((xlo * yhi >> 16) + (xhi * ylo >> 16) + (xlo * ylo >> 48)) >> 16);
+    ireg = xhi * yhi + (((xlo * yhi >> 30) + (xhi * ylo >> 30) + (xlo * ylo >> 62)) >> 2);
     // Round the mantissa. We now have 18 digits.
     // In the case of single precision we have to drop 8 digits before rounding.
     if(ROCKET_UNEXPECT(single))
