@@ -122,7 +122,7 @@ class Argument_Reader
     // The argument must exist and must be of the desired type or `null`; otherwise the operation fails.
     // `g` stands for `get` or `go`.
     Argument_Reader& g(Reference& ref);
-    Argument_Reader& g(Value& value);
+    Argument_Reader& g(Value& val);
     Argument_Reader& g(Bopt& xopt);
     Argument_Reader& g(Iopt& xopt);
     Argument_Reader& g(Ropt& xopt);  // This function converts `integer`s to `real`s implicitly.
