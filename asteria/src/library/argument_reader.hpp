@@ -110,27 +110,27 @@ class Argument_Reader
 
     // Get a REQUIRED argument.
     // The argument must exist and must be of the desired type; otherwise the operation fails.
-    Argument_Reader& g(Bval& xvalue);
-    Argument_Reader& g(Ival& xvalue);
-    Argument_Reader& g(Rval& xvalue);  // This function converts `integer`s to `real`s implicitly.
-    Argument_Reader& g(Sval& xvalue);
-    Argument_Reader& g(Pval& xvalue);
-    Argument_Reader& g(Fval& xvalue);
-    Argument_Reader& g(Aval& xvalue);
-    Argument_Reader& g(Oval& xvalue);
+    Argument_Reader& g(Bval& xval);
+    Argument_Reader& g(Ival& xval);
+    Argument_Reader& g(Rval& xval);  // This function converts `integer`s to `real`s implicitly.
+    Argument_Reader& g(Sval& xval);
+    Argument_Reader& g(Pval& xval);
+    Argument_Reader& g(Fval& xval);
+    Argument_Reader& g(Aval& xval);
+    Argument_Reader& g(Oval& xval);
     // Get an OPTIONAL argument.
     // The argument must exist and must be of the desired type or `null`; otherwise the operation fails.
     // `g` stands for `get` or `go`.
     Argument_Reader& g(Reference& ref);
     Argument_Reader& g(Value& value);
-    Argument_Reader& g(Bopt& qxvalue);
-    Argument_Reader& g(Iopt& qxvalue);
-    Argument_Reader& g(Ropt& qxvalue);  // This function converts `integer`s to `real`s implicitly.
-    Argument_Reader& g(Sopt& qxvalue);
-    Argument_Reader& g(Popt& qxvalue);
-    Argument_Reader& g(Fopt& qxvalue);
-    Argument_Reader& g(Aopt& qxvalue);
-    Argument_Reader& g(Oopt& qxvalue);
+    Argument_Reader& g(Bopt& xopt);
+    Argument_Reader& g(Iopt& xopt);
+    Argument_Reader& g(Ropt& xopt);  // This function converts `integer`s to `real`s implicitly.
+    Argument_Reader& g(Sopt& xopt);
+    Argument_Reader& g(Popt& xopt);
+    Argument_Reader& g(Fopt& xopt);
+    Argument_Reader& g(Aopt& xopt);
+    Argument_Reader& g(Oopt& xopt);
 
     // Throw an exception saying there are no viable overloads.
     [[noreturn]] void throw_no_matching_function_call() const;

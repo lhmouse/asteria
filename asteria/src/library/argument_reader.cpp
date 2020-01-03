@@ -152,7 +152,7 @@ bool Argument_Reader::F()
     return true;
   }
 
-Argument_Reader& Argument_Reader::g(Bval& xvalue)
+Argument_Reader& Argument_Reader::g(Bval& xval)
   {
     this->do_record_parameter_required(gtype_boolean);
     // Get the next argument.
@@ -170,11 +170,11 @@ Argument_Reader& Argument_Reader::g(Bval& xvalue)
       return *this;
     }
     // Copy the val.
-    xvalue = val.as_boolean();
+    xval = val.as_boolean();
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Ival& xvalue)
+Argument_Reader& Argument_Reader::g(Ival& xval)
   {
     this->do_record_parameter_required(gtype_integer);
     // Get the next argument.
@@ -192,11 +192,11 @@ Argument_Reader& Argument_Reader::g(Ival& xvalue)
       return *this;
     }
     // Copy the val.
-    xvalue = val.as_integer();
+    xval = val.as_integer();
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Rval& xvalue)
+Argument_Reader& Argument_Reader::g(Rval& xval)
   {
     this->do_record_parameter_required(gtype_real);
     // Get the next argument.
@@ -214,11 +214,11 @@ Argument_Reader& Argument_Reader::g(Rval& xvalue)
       return *this;
     }
     // Copy the val.
-    xvalue = val.convert_to_real();
+    xval = val.convert_to_real();
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Sval& xvalue)
+Argument_Reader& Argument_Reader::g(Sval& xval)
   {
     this->do_record_parameter_required(gtype_string);
     // Get the next argument.
@@ -236,11 +236,11 @@ Argument_Reader& Argument_Reader::g(Sval& xvalue)
       return *this;
     }
     // Copy the val.
-    xvalue = val.as_string();
+    xval = val.as_string();
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Pval& xvalue)
+Argument_Reader& Argument_Reader::g(Pval& xval)
   {
     this->do_record_parameter_required(gtype_opaque);
     // Get the next argument.
@@ -258,11 +258,11 @@ Argument_Reader& Argument_Reader::g(Pval& xvalue)
       return *this;
     }
     // Copy the val.
-    xvalue = val.as_opaque();
+    xval = val.as_opaque();
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Fval& xvalue)
+Argument_Reader& Argument_Reader::g(Fval& xval)
   {
     this->do_record_parameter_required(gtype_function);
     // Get the next argument.
@@ -280,11 +280,11 @@ Argument_Reader& Argument_Reader::g(Fval& xvalue)
       return *this;
     }
     // Copy the val.
-    xvalue = val.as_function();
+    xval = val.as_function();
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Aval& xvalue)
+Argument_Reader& Argument_Reader::g(Aval& xval)
   {
     this->do_record_parameter_required(gtype_array);
     // Get the next argument.
@@ -302,11 +302,11 @@ Argument_Reader& Argument_Reader::g(Aval& xvalue)
       return *this;
     }
     // Copy the val.
-    xvalue = val.as_array();
+    xval = val.as_array();
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Oval& xvalue)
+Argument_Reader& Argument_Reader::g(Oval& xval)
   {
     this->do_record_parameter_required(gtype_object);
     // Get the next argument.
@@ -324,7 +324,7 @@ Argument_Reader& Argument_Reader::g(Oval& xvalue)
       return *this;
     }
     // Copy the val.
-    xvalue = val.as_object();
+    xval = val.as_object();
     return *this;
   }
 
@@ -356,20 +356,20 @@ Argument_Reader& Argument_Reader::g(Value& val)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Bopt& qxvalue)
+Argument_Reader& Argument_Reader::g(Bopt& xopt)
   {
     this->do_record_parameter_optional(gtype_boolean);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
-      qxvalue.reset();
+      xopt.reset();
       return *this;
     }
     // Read a valuefrom the argument.
     const auto& val = karg->read();
     if(val.is_null()) {
       // Accept a `null` argument.
-      qxvalue.reset();
+      xopt.reset();
       return *this;
     }
     if(!val.is_boolean()) {
@@ -379,24 +379,24 @@ Argument_Reader& Argument_Reader::g(Bopt& qxvalue)
       return *this;
     }
     // Copy the val.
-    qxvalue = val.as_boolean();
+    xopt = val.as_boolean();
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Iopt& qxvalue)
+Argument_Reader& Argument_Reader::g(Iopt& xopt)
   {
     this->do_record_parameter_optional(gtype_integer);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
-      qxvalue.reset();
+      xopt.reset();
       return *this;
     }
     // Read a valuefrom the argument.
     const auto& val = karg->read();
     if(val.is_null()) {
       // Accept a `null` argument.
-      qxvalue.reset();
+      xopt.reset();
       return *this;
     }
     if(!val.is_integer()) {
@@ -406,24 +406,24 @@ Argument_Reader& Argument_Reader::g(Iopt& qxvalue)
       return *this;
     }
     // Copy the val.
-    qxvalue = val.as_integer();
+    xopt = val.as_integer();
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Ropt& qxvalue)
+Argument_Reader& Argument_Reader::g(Ropt& xopt)
   {
     this->do_record_parameter_optional(gtype_real);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
-      qxvalue.reset();
+      xopt.reset();
       return *this;
     }
     // Read a valuefrom the argument.
     const auto& val = karg->read();
     if(val.is_null()) {
       // Accept a `null` argument.
-      qxvalue.reset();
+      xopt.reset();
       return *this;
     }
     if(!val.is_convertible_to_real()) {
@@ -433,24 +433,24 @@ Argument_Reader& Argument_Reader::g(Ropt& qxvalue)
       return *this;
     }
     // Copy the val.
-    qxvalue = val.convert_to_real();
+    xopt = val.convert_to_real();
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Sopt& qxvalue)
+Argument_Reader& Argument_Reader::g(Sopt& xopt)
   {
     this->do_record_parameter_optional(gtype_string);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
-      qxvalue.reset();
+      xopt.reset();
       return *this;
     }
     // Read a valuefrom the argument.
     const auto& val = karg->read();
     if(val.is_null()) {
       // Accept a `null` argument.
-      qxvalue.reset();
+      xopt.reset();
       return *this;
     }
     if(!val.is_string()) {
@@ -460,24 +460,24 @@ Argument_Reader& Argument_Reader::g(Sopt& qxvalue)
       return *this;
     }
     // Copy the val.
-    qxvalue = val.as_string();
+    xopt = val.as_string();
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Popt& qxvalue)
+Argument_Reader& Argument_Reader::g(Popt& xopt)
   {
     this->do_record_parameter_optional(gtype_opaque);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
-      qxvalue.reset();
+      xopt.reset();
       return *this;
     }
     // Read a valuefrom the argument.
     const auto& val = karg->read();
     if(val.is_null()) {
       // Accept a `null` argument.
-      qxvalue.reset();
+      xopt.reset();
       return *this;
     }
     if(!val.is_opaque()) {
@@ -487,24 +487,24 @@ Argument_Reader& Argument_Reader::g(Popt& qxvalue)
       return *this;
     }
     // Copy the val.
-    qxvalue = val.as_opaque();
+    xopt = val.as_opaque();
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Fopt& qxvalue)
+Argument_Reader& Argument_Reader::g(Fopt& xopt)
   {
     this->do_record_parameter_optional(gtype_function);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
-      qxvalue.reset();
+      xopt.reset();
       return *this;
     }
     // Read a valuefrom the argument.
     const auto& val = karg->read();
     if(val.is_null()) {
       // Accept a `null` argument.
-      qxvalue.reset();
+      xopt.reset();
       return *this;
     }
     if(!val.is_function()) {
@@ -514,24 +514,24 @@ Argument_Reader& Argument_Reader::g(Fopt& qxvalue)
       return *this;
     }
     // Copy the val.
-    qxvalue = val.as_function();
+    xopt = val.as_function();
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Aopt& qxvalue)
+Argument_Reader& Argument_Reader::g(Aopt& xopt)
   {
     this->do_record_parameter_optional(gtype_array);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
-      qxvalue.reset();
+      xopt.reset();
       return *this;
     }
     // Read a valuefrom the argument.
     const auto& val = karg->read();
     if(val.is_null()) {
       // Accept a `null` argument.
-      qxvalue.reset();
+      xopt.reset();
       return *this;
     }
     if(!val.is_array()) {
@@ -541,24 +541,24 @@ Argument_Reader& Argument_Reader::g(Aopt& qxvalue)
       return *this;
     }
     // Copy the val.
-    qxvalue = val.as_array();
+    xopt = val.as_array();
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Oopt& qxvalue)
+Argument_Reader& Argument_Reader::g(Oopt& xopt)
   {
     this->do_record_parameter_optional(gtype_object);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
-      qxvalue.reset();
+      xopt.reset();
       return *this;
     }
     // Read a valuefrom the argument.
     const auto& val = karg->read();
     if(val.is_null()) {
       // Accept a `null` argument.
-      qxvalue.reset();
+      xopt.reset();
       return *this;
     }
     if(!val.is_object()) {
@@ -568,7 +568,7 @@ Argument_Reader& Argument_Reader::g(Oopt& qxvalue)
       return *this;
     }
     // Copy the val.
-    qxvalue = val.as_object();
+    xopt = val.as_object();
     return *this;
   }
 
