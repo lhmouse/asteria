@@ -79,52 +79,58 @@ class Argument_Reader
         return this->m_throw_on_failure = throw_on_failure, *this;
       }
 
-    const Argument_Reader& save(State& state) const noexcept
+    // `S` stands for `save` or `store`.
+    const Argument_Reader& S(State& state) const noexcept
       {
         state = this->m_state;
         return *this;
       }
-    Argument_Reader& save(State& state) noexcept
+    Argument_Reader& S(State& state) noexcept
       {
         state = this->m_state;
         return *this;
       }
-    Argument_Reader& load(const State& state) noexcept
+    // `L` stands for `load`.
+    Argument_Reader& L(const State& state) noexcept
       {
         this->m_state = state;
         return *this;
       }
 
     // Start recording an overload.
-    Argument_Reader& start() noexcept;
-    // Get an OPTIONAL argument.
-    // The argument must exist and must be of the desired type or `null`; otherwise the operation fails.
-    Argument_Reader& g(Reference& ref);
-    Argument_Reader& g(Value& value);
-    Argument_Reader& g(opt<G_boolean>& qxvalue);
-    Argument_Reader& g(opt<G_integer>& qxvalue);
-    Argument_Reader& g(opt<G_real>& qxvalue);  // This function converts `integer`s to `real`s implicitly.
-    Argument_Reader& g(opt<G_string>& qxvalue);
-    Argument_Reader& g(opt<G_opaque>& qxvalue);
-    Argument_Reader& g(opt<G_function>& qxvalue);
-    Argument_Reader& g(opt<G_array>& qxvalue);
-    Argument_Reader& g(opt<G_object>& qxvalue);
-    // Get a REQUIRED argument.
-    // The argument must exist and must be of the desired type; otherwise the operation fails.
-    Argument_Reader& g(G_boolean& xvalue);
-    Argument_Reader& g(G_integer& xvalue);
-    Argument_Reader& g(G_real& xvalue);  // This function converts `integer`s to `real`s implicitly.
-    Argument_Reader& g(G_string& xvalue);
-    Argument_Reader& g(G_opaque& xvalue);
-    Argument_Reader& g(G_function& xvalue);
-    Argument_Reader& g(G_array& xvalue);
-    Argument_Reader& g(G_object& xvalue);
+    // `I` stands for `initiate` or `initialize`.
+    Argument_Reader& I() noexcept;
     // Terminate the argument list and finish this overload.
     // For the overload taking no argument, if there are excess arguments, the operation fails.
     // For the other overloads, excess arguments are copied into `vargs`.
-    bool finish(cow_vector<Reference>& vargs);
-    bool finish(cow_vector<Value>& vargs);
-    bool finish();
+    // `F` stands for `finish` or `finalize`.
+    bool F(cow_vector<Reference>& vargs);
+    bool F(cow_vector<Value>& vargs);
+    bool F();
+
+    // Get a REQUIRED argument.
+    // The argument must exist and must be of the desired type; otherwise the operation fails.
+    Argument_Reader& g(Bval& xvalue);
+    Argument_Reader& g(Ival& xvalue);
+    Argument_Reader& g(Rval& xvalue);  // This function converts `integer`s to `real`s implicitly.
+    Argument_Reader& g(Sval& xvalue);
+    Argument_Reader& g(Pval& xvalue);
+    Argument_Reader& g(Fval& xvalue);
+    Argument_Reader& g(Aval& xvalue);
+    Argument_Reader& g(Oval& xvalue);
+    // Get an OPTIONAL argument.
+    // The argument must exist and must be of the desired type or `null`; otherwise the operation fails.
+    // `g` stands for `get` or `go`.
+    Argument_Reader& g(Reference& ref);
+    Argument_Reader& g(Value& value);
+    Argument_Reader& g(Bopt& qxvalue);
+    Argument_Reader& g(Iopt& qxvalue);
+    Argument_Reader& g(Ropt& qxvalue);  // This function converts `integer`s to `real`s implicitly.
+    Argument_Reader& g(Sopt& qxvalue);
+    Argument_Reader& g(Popt& qxvalue);
+    Argument_Reader& g(Fopt& qxvalue);
+    Argument_Reader& g(Aopt& qxvalue);
+    Argument_Reader& g(Oopt& qxvalue);
 
     // Throw an exception saying there are no viable overloads.
     [[noreturn]] void throw_no_matching_function_call() const;

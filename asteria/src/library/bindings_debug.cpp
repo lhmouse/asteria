@@ -9,7 +9,7 @@
 
 namespace Asteria {
 
-bool std_debug_print(G_string templ, cow_vector<Value> values)
+bool std_debug_print(Sval templ, cow_vector<Value> values)
   {
     // Prepare inserters.
     cow_vector<::rocket::formatter> insts;
@@ -27,7 +27,7 @@ bool std_debug_print(G_string templ, cow_vector<Value> values)
     return write_log_to_stderr(__FILE__, __LINE__, fmt.extract_string());
   }
 
-bool std_debug_dump(Value value, opt<G_integer> indent)
+bool std_debug_dump(Value value, Iopt indent)
   {
     // Clamp the suggested indent so we don't produce overlong lines.
     size_t rindent = static_cast<size_t>(::rocket::clamp(indent.value_or(2), 0, 10));
@@ -37,13 +37,13 @@ bool std_debug_dump(Value value, opt<G_integer> indent)
     return write_log_to_stderr(__FILE__, __LINE__, fmt.extract_string());
   }
 
-void create_bindings_debug(G_object& result, API_Version /*version*/)
+void create_bindings_debug(Oval& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.debug.print()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("print"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -59,9 +59,9 @@ void create_bindings_debug(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.debug.print"), ::rocket::ref(args));
           // Parse variadic arguments.
-          G_string templ;
+          Sval templ;
           cow_vector<Value> values;
-          if(reader.start().g(templ).finish(values)) {
+          if(reader.I().g(templ).F(values)) {
             // Call the binding function.
             if(!std_debug_print(templ, values)) {
               return Reference_Root::S_null();
@@ -77,7 +77,7 @@ void create_bindings_debug(G_object& result, API_Version /*version*/)
     // `std.debug.dump()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("dump"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -96,8 +96,8 @@ void create_bindings_debug(G_object& result, API_Version /*version*/)
           Argument_Reader reader(::rocket::sref("std.debug.dump"), ::rocket::ref(args));
           // Parse arguments.
           Value value;
-          opt<G_integer> indent;
-          if(reader.start().g(value).g(indent).finish()) {
+          Iopt indent;
+          if(reader.I().g(value).g(indent).F()) {
             // Call the binding function.
             if(!std_debug_dump(value, indent)) {
               return Reference_Root::S_null();

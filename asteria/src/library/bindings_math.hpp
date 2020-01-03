@@ -8,36 +8,36 @@
 
 namespace Asteria {
 
-extern G_real std_math_exp(G_real y, opt<G_real> base);
-extern G_real std_math_expm1(G_real y);
-extern G_real std_math_pow(G_real x, G_real y);
-extern G_real std_math_log(G_real x, opt<G_real> base);
-extern G_real std_math_log1p(G_real x);
+extern Rval std_math_exp(Rval y, Ropt base);
+extern Rval std_math_expm1(Rval y);
+extern Rval std_math_pow(Rval x, Rval y);
+extern Rval std_math_log(Rval x, Ropt base);
+extern Rval std_math_log1p(Rval x);
 
-extern G_real std_math_sin(G_real x);
-extern G_real std_math_cos(G_real x);
-extern G_real std_math_tan(G_real x);
-extern G_real std_math_asin(G_real x);
-extern G_real std_math_acos(G_real x);
-extern G_real std_math_atan(G_real x);
-extern G_real std_math_atan2(G_real y, G_real x);
+extern Rval std_math_sin(Rval x);
+extern Rval std_math_cos(Rval x);
+extern Rval std_math_tan(Rval x);
+extern Rval std_math_asin(Rval x);
+extern Rval std_math_acos(Rval x);
+extern Rval std_math_atan(Rval x);
+extern Rval std_math_atan2(Rval y, Rval x);
 
-extern G_real std_math_hypot(cow_vector<Value> values);
+extern Rval std_math_hypot(cow_vector<Value> values);
 
-extern G_real std_math_sinh(G_real x);
-extern G_real std_math_cosh(G_real x);
-extern G_real std_math_tanh(G_real x);
-extern G_real std_math_asinh(G_real x);
-extern G_real std_math_acosh(G_real x);
-extern G_real std_math_atanh(G_real x);
+extern Rval std_math_sinh(Rval x);
+extern Rval std_math_cosh(Rval x);
+extern Rval std_math_tanh(Rval x);
+extern Rval std_math_asinh(Rval x);
+extern Rval std_math_acosh(Rval x);
+extern Rval std_math_atanh(Rval x);
 
-extern G_real std_math_erf(G_real x);
-extern G_real std_math_cerf(G_real x);
-extern G_real std_math_gamma(G_real x);
-extern G_real std_math_lgamma(G_real x);
+extern Rval std_math_erf(Rval x);
+extern Rval std_math_cerf(Rval x);
+extern Rval std_math_gamma(Rval x);
+extern Rval std_math_lgamma(Rval x);
 
 // Create an object that is to be referenced as `std.math`.
-extern void create_bindings_math(G_object& result, API_Version version);
+extern void create_bindings_math(Oval& result, API_Version version);
 
 }  // namespace Asteria
 

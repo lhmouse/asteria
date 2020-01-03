@@ -8,23 +8,23 @@
 
 namespace Asteria {
 
-extern G_object std_checksum_crc32_new();
-extern G_integer std_checksum_crc32(G_string data);
+extern Oval std_checksum_crc32_new();
+extern Ival std_checksum_crc32(Sval data);
 
-extern G_object std_checksum_fnv1a32_new();
-extern G_integer std_checksum_fnv1a32(G_string data);
+extern Oval std_checksum_fnv1a32_new();
+extern Ival std_checksum_fnv1a32(Sval data);
 
-extern G_object std_checksum_md5_new();
-extern G_string std_checksum_md5(G_string data);
+extern Oval std_checksum_md5_new();
+extern Sval std_checksum_md5(Sval data);
 
-extern G_object std_checksum_sha1_new();
-extern G_string std_checksum_sha1(G_string data);
+extern Oval std_checksum_sha1_new();
+extern Sval std_checksum_sha1(Sval data);
 
-extern G_object std_checksum_sha256_new();
-extern G_string std_checksum_sha256(G_string data);
+extern Oval std_checksum_sha256_new();
+extern Sval std_checksum_sha256(Sval data);
 
 // Create an object that is to be referenced as `std.checksum`.
-extern void create_bindings_checksum(G_object& result, API_Version version);
+extern void create_bindings_checksum(Oval& result, API_Version version);
 
 }  // namespace Asteria
 

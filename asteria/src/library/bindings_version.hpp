@@ -9,7 +9,7 @@
 namespace Asteria {
 
 // Create an object that is to be referenced as `std.version`.
-extern void create_bindings_version(G_object& result, API_Version version);
+extern void create_bindings_version(Oval& result, API_Version version);
 
 }  // namespace Asteria
 

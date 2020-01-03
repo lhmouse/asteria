@@ -8,73 +8,73 @@
 
 namespace Asteria {
 
-extern G_integer std_numeric_abs(G_integer value);
-extern G_real std_numeric_abs(G_real value);
+extern Ival std_numeric_abs(Ival value);
+extern Rval std_numeric_abs(Rval value);
 
-extern G_integer std_numeric_sign(G_integer value);
-extern G_integer std_numeric_sign(G_real value);
+extern Ival std_numeric_sign(Ival value);
+extern Ival std_numeric_sign(Rval value);
 
-extern G_boolean std_numeric_is_finite(G_integer value);
-extern G_boolean std_numeric_is_finite(G_real value);
-extern G_boolean std_numeric_is_infinity(G_integer value);
-extern G_boolean std_numeric_is_infinity(G_real value);
-extern G_boolean std_numeric_is_nan(G_integer value);
-extern G_boolean std_numeric_is_nan(G_real value);
+extern Bval std_numeric_is_finite(Ival value);
+extern Bval std_numeric_is_finite(Rval value);
+extern Bval std_numeric_is_infinity(Ival value);
+extern Bval std_numeric_is_infinity(Rval value);
+extern Bval std_numeric_is_nan(Ival value);
+extern Bval std_numeric_is_nan(Rval value);
 
-extern G_integer std_numeric_clamp(G_integer value, G_integer lower, G_integer upper);
-extern G_real std_numeric_clamp(G_real value, G_real lower, G_real upper);
+extern Ival std_numeric_clamp(Ival value, Ival lower, Ival upper);
+extern Rval std_numeric_clamp(Rval value, Rval lower, Rval upper);
 
-extern G_integer std_numeric_round(G_integer value);
-extern G_real std_numeric_round(G_real value);
-extern G_integer std_numeric_floor(G_integer value);
-extern G_real std_numeric_floor(G_real value);
-extern G_integer std_numeric_ceil(G_integer value);
-extern G_real std_numeric_ceil(G_real value);
-extern G_integer std_numeric_trunc(G_integer value);
-extern G_real std_numeric_trunc(G_real value);
+extern Ival std_numeric_round(Ival value);
+extern Rval std_numeric_round(Rval value);
+extern Ival std_numeric_floor(Ival value);
+extern Rval std_numeric_floor(Rval value);
+extern Ival std_numeric_ceil(Ival value);
+extern Rval std_numeric_ceil(Rval value);
+extern Ival std_numeric_trunc(Ival value);
+extern Rval std_numeric_trunc(Rval value);
 
-extern G_integer std_numeric_iround(G_integer value);
-extern G_integer std_numeric_iround(G_real value);
-extern G_integer std_numeric_ifloor(G_integer value);
-extern G_integer std_numeric_ifloor(G_real value);
-extern G_integer std_numeric_iceil(G_integer value);
-extern G_integer std_numeric_iceil(G_real value);
-extern G_integer std_numeric_itrunc(G_integer value);
-extern G_integer std_numeric_itrunc(G_real value);
+extern Ival std_numeric_iround(Ival value);
+extern Ival std_numeric_iround(Rval value);
+extern Ival std_numeric_ifloor(Ival value);
+extern Ival std_numeric_ifloor(Rval value);
+extern Ival std_numeric_iceil(Ival value);
+extern Ival std_numeric_iceil(Rval value);
+extern Ival std_numeric_itrunc(Ival value);
+extern Ival std_numeric_itrunc(Rval value);
 
-extern G_real std_numeric_random(Global_Context& global, opt<G_real> limit = ::rocket::clear);
+extern Rval std_numeric_random(Global& global, Ropt limit = ::rocket::clear);
 
-extern G_real std_numeric_sqrt(G_real x);
-extern G_real std_numeric_fma(G_real x, G_real y, G_real z);
-extern G_real std_numeric_remainder(G_real x, G_real y);
+extern Rval std_numeric_sqrt(Rval x);
+extern Rval std_numeric_fma(Rval x, Rval y, Rval z);
+extern Rval std_numeric_remainder(Rval x, Rval y);
 
-extern pair<G_real, G_integer> std_numeric_frexp(G_real x);
-extern G_real std_numeric_ldexp(G_real frac, G_integer exp);
+extern pair<Rval, Ival> std_numeric_frexp(Rval x);
+extern Rval std_numeric_ldexp(Rval frac, Ival exp);
 
-extern G_integer std_numeric_addm(G_integer x, G_integer y);
-extern G_integer std_numeric_subm(G_integer x, G_integer y);
-extern G_integer std_numeric_mulm(G_integer x, G_integer y);
+extern Ival std_numeric_addm(Ival x, Ival y);
+extern Ival std_numeric_subm(Ival x, Ival y);
+extern Ival std_numeric_mulm(Ival x, Ival y);
 
-extern G_integer std_numeric_adds(G_integer x, G_integer y);
-extern G_real std_numeric_adds(G_real x, G_real y);
-extern G_integer std_numeric_subs(G_integer x, G_integer y);
-extern G_real std_numeric_subs(G_real x, G_real y);
-extern G_integer std_numeric_muls(G_integer x, G_integer y);
-extern G_real std_numeric_muls(G_real x, G_real y);
+extern Ival std_numeric_adds(Ival x, Ival y);
+extern Rval std_numeric_adds(Rval x, Rval y);
+extern Ival std_numeric_subs(Ival x, Ival y);
+extern Rval std_numeric_subs(Rval x, Rval y);
+extern Ival std_numeric_muls(Ival x, Ival y);
+extern Rval std_numeric_muls(Rval x, Rval y);
 
-extern G_integer std_numeric_lzcnt(G_integer x);
-extern G_integer std_numeric_tzcnt(G_integer x);
-extern G_integer std_numeric_popcnt(G_integer x);
-extern G_integer std_numeric_rotl(G_integer m, G_integer x, G_integer n);
-extern G_integer std_numeric_rotr(G_integer m, G_integer x, G_integer n);
+extern Ival std_numeric_lzcnt(Ival x);
+extern Ival std_numeric_tzcnt(Ival x);
+extern Ival std_numeric_popcnt(Ival x);
+extern Ival std_numeric_rotl(Ival m, Ival x, Ival n);
+extern Ival std_numeric_rotr(Ival m, Ival x, Ival n);
 
-extern G_string std_numeric_format(G_integer value, opt<G_integer> base = ::rocket::clear, opt<G_integer> ebase = ::rocket::clear);
-extern G_string std_numeric_format(G_real value, opt<G_integer> base = ::rocket::clear, opt<G_integer> ebase = ::rocket::clear);
-extern opt<G_integer> std_numeric_parse_integer(G_string text);
-extern opt<G_real> std_numeric_parse_real(G_string text, opt<G_boolean> saturating = ::rocket::clear);
+extern Sval std_numeric_format(Ival value, Iopt base = ::rocket::clear, Iopt ebase = ::rocket::clear);
+extern Sval std_numeric_format(Rval value, Iopt base = ::rocket::clear, Iopt ebase = ::rocket::clear);
+extern Iopt std_numeric_parse_integer(Sval text);
+extern Ropt std_numeric_parse_real(Sval text, Bopt saturating = ::rocket::clear);
 
 // Create an object that is to be referenced as `std.numeric`.
-extern void create_bindings_numeric(G_object& result, API_Version version);
+extern void create_bindings_numeric(Oval& result, API_Version version);
 
 }  // namespace Asteria
 

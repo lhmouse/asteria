@@ -104,7 +104,7 @@ class Indenter_spaces final : public Indenter
       }
   };
 
-tinyfmt& do_quote_string(tinyfmt& fmt, const G_string& str)
+tinyfmt& do_quote_string(tinyfmt& fmt, const Sval& str)
   {
     // Although JavaScript uses UCS-2 rather than UTF-16, the JSON specification adopts UTF-16.
     fmt << '\"';
@@ -172,7 +172,7 @@ tinyfmt& do_quote_string(tinyfmt& fmt, const G_string& str)
     return fmt;
   }
 
-G_object::const_iterator do_find_uncensored(const G_object& object, G_object::const_iterator from)
+Oval::const_iterator do_find_uncensored(const Oval& object, Oval::const_iterator from)
   {
     return ::std::find_if(from, object.end(),
                         [](const auto& p) { return p.second.is_boolean() || p.second.is_integer() || p.second.is_real() ||
@@ -204,17 +204,17 @@ tinyfmt& do_format_scalar(tinyfmt& fmt, const Value& value)
 
 struct S_xformat_array
   {
-    ref_to<const G_array> refa;
-    G_array::const_iterator curp;
+    ref_to<const Aval> refa;
+    Aval::const_iterator curp;
   };
 struct S_xformat_object
   {
-    ref_to<const G_object> refo;
-    G_object::const_iterator curp;
+    ref_to<const Oval> refo;
+    Oval::const_iterator curp;
   };
 using Xformat = variant<S_xformat_array, S_xformat_object>;
 
-G_string do_format_nonrecursive(const Value& value, Indenter& indent)
+Sval do_format_nonrecursive(const Value& value, Indenter& indent)
   {
     ::rocket::tinyfmt_str fmt;
     // Transform recursion to iteration using a handwritten stack.
@@ -317,12 +317,12 @@ G_string do_format_nonrecursive(const Value& value, Indenter& indent)
     }
   }
 
-G_string do_format_nonrecursive(const Value& value, Indenter&& indent)
+Sval do_format_nonrecursive(const Value& value, Indenter&& indent)
   {
     return do_format_nonrecursive(value, indent);
   }
 
-opt<G_string> do_accept_identifier_opt(Token_Stream& tstrm, initializer_list<const char*> accept)
+Sopt do_accept_identifier_opt(Token_Stream& tstrm, initializer_list<const char*> accept)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
@@ -356,7 +356,7 @@ opt<Punctuator> do_accept_punctuator_opt(Token_Stream& tstrm, initializer_list<P
     return ::rocket::clear;
   }
 
-opt<G_real> do_accept_number_opt(Token_Stream& tstrm)
+Ropt do_accept_number_opt(Token_Stream& tstrm)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
@@ -366,18 +366,18 @@ opt<G_real> do_accept_number_opt(Token_Stream& tstrm)
       auto val = qtok->as_integer_literal();
       tstrm.shift();
       // Convert integers to reals, as JSON does not have an integral type.
-      return G_real(val);
+      return Rval(val);
     }
     if(qtok->is_real_literal()) {
       auto val = qtok->as_real_literal();
       tstrm.shift();
       // This real can be copied as is.
-      return G_real(val);
+      return Rval(val);
     }
     if(qtok->is_punctuator()) {
       auto punct = qtok->as_punctuator();
       if(::rocket::is_any_of(punct, { punctuator_add, punctuator_sub })) {
-        G_real sign = (punct == punctuator_sub) ? -1.0 : +1.0;
+        Rval sign = (punct == punctuator_sub) ? -1.0 : +1.0;
         // Only `Infinity` and `NaN` are allowed.
         // Please note that the tokenizer will have merged sign symbols into adjacent number literals.
         qtok = tstrm.peek_opt(1);
@@ -391,19 +391,19 @@ opt<G_real> do_accept_number_opt(Token_Stream& tstrm)
         if(name == "Infinity") {
           tstrm.shift(2);
           // Accept a signed `Infinity`.
-          return ::std::copysign(::std::numeric_limits<G_real>::infinity(), sign);
+          return ::std::copysign(::std::numeric_limits<Rval>::infinity(), sign);
         }
         if(name == "NaN") {
           tstrm.shift(2);
           // Accept a signed `NaN`.
-          return ::std::copysign(::std::numeric_limits<G_real>::quiet_NaN(), sign);
+          return ::std::copysign(::std::numeric_limits<Rval>::quiet_NaN(), sign);
         }
       }
     }
     return ::rocket::clear;
   }
 
-opt<G_string> do_accept_string_opt(Token_Stream& tstrm)
+Sopt do_accept_string_opt(Token_Stream& tstrm)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
@@ -413,7 +413,7 @@ opt<G_string> do_accept_string_opt(Token_Stream& tstrm)
       auto val = qtok->as_string_literal();
       tstrm.shift();
       // This string literal can be copied as is in UTF-8.
-      return G_string(::rocket::move(val));
+      return Sval(::rocket::move(val));
     }
     return ::rocket::clear;
   }
@@ -442,11 +442,11 @@ opt<Value> do_accept_scalar_opt(Token_Stream& tstrm)
       }
       if(qstr->front() == 'I') {
         // Accept a `Number` of value `Infinity`.
-        return ::std::numeric_limits<G_real>::infinity();
+        return ::std::numeric_limits<Rval>::infinity();
       }
       if(qstr->front() == 'N') {
         // Accept a `Number` of value `NaN`.
-        return ::std::numeric_limits<G_real>::quiet_NaN();
+        return ::std::numeric_limits<Rval>::quiet_NaN();
       }
       // Accept an explicit `null`.
       return nullptr;
@@ -454,7 +454,7 @@ opt<Value> do_accept_scalar_opt(Token_Stream& tstrm)
     return ::rocket::clear;
   }
 
-opt<G_string> do_accept_key_opt(Token_Stream& tstrm)
+Sopt do_accept_key_opt(Token_Stream& tstrm)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
@@ -464,25 +464,25 @@ opt<G_string> do_accept_key_opt(Token_Stream& tstrm)
       auto name = qtok->as_identifier();
       tstrm.shift();
       // Identifiers are allowed unquoted in JSON5.
-      return G_string(::rocket::move(name));
+      return Sval(::rocket::move(name));
     }
     if(qtok->is_string_literal()) {
       auto val = qtok->as_string_literal();
       tstrm.shift();
       // This string literal can be copied as is in UTF-8.
-      return G_string(::rocket::move(val));
+      return Sval(::rocket::move(val));
     }
     return ::rocket::clear;
   }
 
 struct S_xparse_array
   {
-    G_array array;
+    Aval array;
   };
 struct S_xparse_object
   {
-    G_object object;
-    G_string key;
+    Oval object;
+    Sval key;
   };
 using Xparse = variant<S_xparse_array, S_xparse_object>;
 
@@ -504,7 +504,7 @@ opt<Value> do_json_parse_nonrecursive_opt(Token_Stream& tstrm)
           continue;
         }
         // Accept an empty array.
-        value = G_array();
+        value = Aval();
       }
       else if(kpunct == punctuator_brace_op) {
         // An open brace has been accepted.
@@ -525,7 +525,7 @@ opt<Value> do_json_parse_nonrecursive_opt(Token_Stream& tstrm)
           continue;
         }
         // Accept an empty object.
-        value = G_object();
+        value = Oval();
       }
       else {
         // Just accept a scalar value which is never recursive.
@@ -598,21 +598,21 @@ opt<Value> do_json_parse_nonrecursive_opt(Token_Stream& tstrm)
 
 }  // namespace
 
-G_string std_json_format(Value value, opt<G_string> indent)
+Sval std_json_format(Value value, Sopt indent)
   {
     // No line break is inserted if `indent` is null or empty.
     return (!indent || indent->empty()) ? do_format_nonrecursive(value, Indenter_none())
                                         : do_format_nonrecursive(value, Indenter_string(*indent));
   }
 
-G_string std_json_format(Value value, G_integer indent)
+Sval std_json_format(Value value, Ival indent)
   {
     // No line break is inserted if `indent` is non-positive.
     return (indent <= 0) ? do_format_nonrecursive(value, Indenter_none())
                          : do_format_nonrecursive(value, Indenter_spaces(static_cast<size_t>(::rocket::min(indent, 10))));
   }
 
-Value std_json_parse(G_string text)
+Value std_json_parse(Sval text)
   {
     // We reuse the lexer of Asteria here, allowing quite a few extensions e.g. binary numeric literals and comments.
     Compiler_Options opts = { };
@@ -642,13 +642,13 @@ Value std_json_parse(G_string text)
     return ::rocket::move(*qvalue);
   }
 
-void create_bindings_json(G_object& result, API_Version /*version*/)
+void create_bindings_json(Oval& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.json.format()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("format"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -674,14 +674,14 @@ void create_bindings_json(G_object& result, API_Version /*version*/)
           Argument_Reader::State state;
           // Parse arguments.
           Value value;
-          opt<G_string> sindent;
-          if(reader.start().g(value).save(state).g(sindent).finish()) {
+          Sopt sindent;
+          if(reader.I().g(value).S(state).g(sindent).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_json_format(::rocket::move(value), ::rocket::move(sindent)) };
             return ::rocket::move(xref);
           }
-          G_integer nindent;
-          if(reader.load(state).g(nindent).finish()) {
+          Ival nindent;
+          if(reader.L(state).g(nindent).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_json_format(::rocket::move(value), ::rocket::move(nindent)) };
             return ::rocket::move(xref);
@@ -694,7 +694,7 @@ void create_bindings_json(G_object& result, API_Version /*version*/)
     // `std.json.parse()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("parse"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -725,8 +725,8 @@ void create_bindings_json(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.json.parse"), ::rocket::ref(args));
           // Parse arguments.
-          G_string text;
-          if(reader.start().g(text).finish()) {
+          Sval text;
+          if(reader.I().g(text).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_json_parse(::rocket::move(text)) };
             return ::rocket::move(xref);

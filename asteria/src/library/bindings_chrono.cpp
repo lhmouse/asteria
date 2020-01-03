@@ -10,7 +10,7 @@
 
 namespace Asteria {
 
-G_integer std_chrono_utc_now()
+Ival std_chrono_utc_now()
   {
     // Get UTC time from the system.
     ::timespec ts;
@@ -21,7 +21,7 @@ G_integer std_chrono_utc_now()
     return secs * 1000 + msecs;
   }
 
-G_integer std_chrono_local_now()
+Ival std_chrono_local_now()
   {
     // Get local time and GMT offset from the system.
     ::timespec ts;
@@ -34,7 +34,7 @@ G_integer std_chrono_local_now()
     return secs * 1000 + msecs;
   }
 
-G_real std_chrono_hires_now()
+Rval std_chrono_hires_now()
   {
     // Get the time since the system was started.
     ::timespec ts;
@@ -46,7 +46,7 @@ G_real std_chrono_hires_now()
     return secs * 1000 + msecs + 1234567890123456;
   }
 
-G_integer std_chrono_steady_now()
+Ival std_chrono_steady_now()
   {
     // Get the time since the system was started.
     ::timespec ts;
@@ -58,7 +58,7 @@ G_integer std_chrono_steady_now()
     return secs * 1000 + msecs + 6543210987654321;
   }
 
-G_integer std_chrono_local_from_utc(G_integer time_utc)
+Ival std_chrono_local_from_utc(Ival time_utc)
   {
     // Handle special time values.
     if(time_utc <= -11644473600000) {
@@ -71,7 +71,7 @@ G_integer std_chrono_local_from_utc(G_integer time_utc)
     ::time_t tp = 0;
     ::tm tr;
     ::localtime_r(&tp, &tr);
-    G_integer time_local = time_utc + tr.tm_gmtoff * 1000;
+    Ival time_local = time_utc + tr.tm_gmtoff * 1000;
     // Ensure the value is within the range of finite values.
     if(time_local <= -11644473600000) {
       return INT64_MIN;
@@ -82,7 +82,7 @@ G_integer std_chrono_local_from_utc(G_integer time_utc)
     return time_local;
   }
 
-G_integer std_chrono_utc_from_local(G_integer time_local)
+Ival std_chrono_utc_from_local(Ival time_local)
   {
     // Handle special time values.
     if(time_local <= -11644473600000) {
@@ -95,7 +95,7 @@ G_integer std_chrono_utc_from_local(G_integer time_local)
     ::time_t tp = 0;
     ::tm tr;
     ::localtime_r(&tp, &tr);
-    G_integer time_utc = time_local - tr.tm_gmtoff * 1000;
+    Ival time_utc = time_local - tr.tm_gmtoff * 1000;
     // Ensure the value is within the range of finite values.
     if(time_utc <= -11644473600000) {
       return INT64_MIN;
@@ -106,7 +106,7 @@ G_integer std_chrono_utc_from_local(G_integer time_local)
     return time_utc;
   }
 
-G_string std_chrono_utc_format(G_integer time_point, opt<G_boolean> with_ms)
+Sval std_chrono_utc_format(Ival time_point, Bopt with_ms)
   {
     // No millisecond part is added by default.
     bool pms = with_ms.value_or(false);
@@ -162,12 +162,12 @@ G_string std_chrono_utc_format(G_integer time_point, opt<G_boolean> with_ms)
     return cow_string(tstr, pms ? 23 : 19);
   }
 
-opt<G_integer> std_chrono_utc_parse(G_string time_str)
+Iopt std_chrono_utc_parse(Sval time_str)
   {
     // Trim leading and trailing spaces. Fail if the string becomes empty.
     static constexpr char s_spaces[] = " \f\n\r\t\v";
     size_t off = time_str.find_first_not_of(s_spaces);
-    if(off == G_string::npos) {
+    if(off == Sval::npos) {
       return ::rocket::clear;
     }
     // The shortest form is '1234-67-90 23:56:89' which contains 19 characters.
@@ -253,13 +253,13 @@ opt<G_integer> std_chrono_utc_parse(G_string time_str)
     return static_cast<int64_t>(tp) * 1000 + static_cast<int64_t>(msecs);
   }
 
-void create_bindings_chrono(G_object& result, API_Version /*version*/)
+void create_bindings_chrono(Oval& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.chrono.utc_now()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("utc_now"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -274,7 +274,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.chrono.utc_now"), ::rocket::ref(args));
           // Parse arguments.
-          if(reader.start().finish()) {
+          if(reader.I().F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_chrono_utc_now() };
             return ::rocket::move(xref);
@@ -287,7 +287,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     // `std.chrono.local_now()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("local_now"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -302,7 +302,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.chrono.local_now"), ::rocket::ref(args));
           // Parse arguments.
-          if(reader.start().finish()) {
+          if(reader.I().F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_chrono_local_now() };
             return ::rocket::move(xref);
@@ -315,7 +315,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     // `std.chrono.hires_now()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("hires_now"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -333,7 +333,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.chrono.hires_now"), ::rocket::ref(args));
           // Parse arguments.
-          if(reader.start().finish()) {
+          if(reader.I().F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_chrono_hires_now() };
             return ::rocket::move(xref);
@@ -346,7 +346,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     // `std.chrono.steady_now()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("steady_now"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -364,7 +364,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.chrono.steady_now"), ::rocket::ref(args));
           // Parse arguments.
-          if(reader.start().finish()) {
+          if(reader.I().F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_chrono_steady_now() };
             return ::rocket::move(xref);
@@ -377,7 +377,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     // `std.chrono.local_from_utc()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("local_from_utc"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -393,8 +393,8 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.chrono.local_from_utc"), ::rocket::ref(args));
           // Parse arguments.
-          G_integer time_utc;
-          if(reader.start().g(time_utc).finish()) {
+          Ival time_utc;
+          if(reader.I().g(time_utc).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_chrono_local_from_utc(::rocket::move(time_utc)) };
             return ::rocket::move(xref);
@@ -407,7 +407,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     // `std.chrono.utc_from_local()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("utc_from_local"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -424,8 +424,8 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.chrono.utc_from_local"), ::rocket::ref(args));
           // Parse arguments.
-          G_integer time_local;
-          if(reader.start().g(time_local).finish()) {
+          Ival time_local;
+          if(reader.I().g(time_local).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_chrono_utc_from_local(::rocket::move(time_local)) };
             return ::rocket::move(xref);
@@ -438,7 +438,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     // `std.chrono.utc_format()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("utc_format"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -454,9 +454,9 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.chrono.utc_format"), ::rocket::ref(args));
           // Parse arguments.
-          G_integer time_point;
-          opt<G_boolean> with_ms;
-          if(reader.start().g(time_point).g(with_ms).finish()) {
+          Ival time_point;
+          Bopt with_ms;
+          if(reader.I().g(time_point).g(with_ms).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_chrono_utc_format(::rocket::move(time_point), ::rocket::move(with_ms)) };
             return ::rocket::move(xref);
@@ -469,7 +469,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     // `std.chrono.utc_parse()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("utc_parse"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -488,8 +488,8 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.chrono.utc_parse"), ::rocket::ref(args));
           // Parse arguments.
-          G_string time_str;
-          if(reader.start().g(time_str).finish()) {
+          Sval time_str;
+          if(reader.I().g(time_str).F()) {
             // Call the binding function.
             auto qres = std_chrono_utc_parse(::rocket::move(time_str));
             if(!qres) {

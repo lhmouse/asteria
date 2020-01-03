@@ -12,13 +12,13 @@
 namespace Asteria {
 namespace {
 
-constexpr G_real s_const_e    = 2.7182818284590452353602874713526624977572470937000;
-constexpr G_real s_const_pi   = 3.1415926535897932384626433832795028841971693993751;
-constexpr G_real s_const_lb10 = 3.3219280948873623478703194294893901758648313930246;
+constexpr Rval s_const_e    = 2.7182818284590452353602874713526624977572470937000;
+constexpr Rval s_const_pi   = 3.1415926535897932384626433832795028841971693993751;
+constexpr Rval s_const_lb10 = 3.3219280948873623478703194294893901758648313930246;
 
 }  // namespace
 
-G_real std_math_exp(G_real y, opt<G_real> base)
+Rval std_math_exp(Rval y, Ropt base)
   {
     if(!base) {
       return ::std::exp(y);
@@ -32,17 +32,17 @@ G_real std_math_exp(G_real y, opt<G_real> base)
     return ::std::pow(*base, y);
   }
 
-G_real std_math_expm1(G_real y)
+Rval std_math_expm1(Rval y)
   {
     return ::std::expm1(y);
   }
 
-G_real std_math_pow(G_real x, G_real y)
+Rval std_math_pow(Rval x, Rval y)
   {
     return ::std::pow(x, y);
   }
 
-G_real std_math_log(G_real x, opt<G_real> base)
+Rval std_math_log(Rval x, Ropt base)
   {
     if(!base) {
       return ::std::log(x);
@@ -54,52 +54,52 @@ G_real std_math_log(G_real x, opt<G_real> base)
       return ::std::log10(x);
     }
     if((*base == 1) || (*base <= 0)) {
-      return ::std::numeric_limits<G_real>::quiet_NaN();
+      return ::std::numeric_limits<Rval>::quiet_NaN();
     }
     return ::std::log2(x) / ::std::log2(*base);
   }
 
-G_real std_math_log1p(G_real x)
+Rval std_math_log1p(Rval x)
   {
     return ::std::log1p(x);
   }
 
-G_real std_math_sin(G_real x)
+Rval std_math_sin(Rval x)
   {
     return ::std::sin(x);
   }
 
-G_real std_math_cos(G_real x)
+Rval std_math_cos(Rval x)
   {
     return ::std::cos(x);
   }
 
-G_real std_math_tan(G_real x)
+Rval std_math_tan(Rval x)
   {
     return ::std::tan(x);
   }
 
-G_real std_math_asin(G_real x)
+Rval std_math_asin(Rval x)
   {
     return ::std::asin(x);
   }
 
-G_real std_math_acos(G_real x)
+Rval std_math_acos(Rval x)
   {
     return ::std::acos(x);
   }
 
-G_real std_math_atan(G_real x)
+Rval std_math_atan(Rval x)
   {
     return ::std::atan(x);
   }
 
-G_real std_math_atan2(G_real y, G_real x)
+Rval std_math_atan2(Rval y, Rval x)
   {
     return ::std::atan2(y, x);
   }
 
-G_real std_math_hypot(cow_vector<Value> values)
+Rval std_math_hypot(cow_vector<Value> values)
   {
     switch(values.size()) {
     case 0: {
@@ -122,63 +122,63 @@ G_real std_math_hypot(cow_vector<Value> values)
     }
   }
 
-G_real std_math_sinh(G_real x)
+Rval std_math_sinh(Rval x)
   {
     return ::std::sinh(x);
   }
 
-G_real std_math_cosh(G_real x)
+Rval std_math_cosh(Rval x)
   {
     return ::std::cosh(x);
   }
 
-G_real std_math_tanh(G_real x)
+Rval std_math_tanh(Rval x)
   {
     return ::std::tanh(x);
   }
 
-G_real std_math_asinh(G_real x)
+Rval std_math_asinh(Rval x)
   {
     return ::std::asinh(x);
   }
 
-G_real std_math_acosh(G_real x)
+Rval std_math_acosh(Rval x)
   {
     return ::std::acosh(x);
   }
 
-G_real std_math_atanh(G_real x)
+Rval std_math_atanh(Rval x)
   {
     return ::std::atanh(x);
   }
 
-G_real std_math_erf(G_real x)
+Rval std_math_erf(Rval x)
   {
     return ::std::erf(x);
   }
 
-G_real std_math_cerf(G_real x)
+Rval std_math_cerf(Rval x)
   {
     return ::std::erfc(x);
   }
 
-G_real std_math_gamma(G_real x)
+Rval std_math_gamma(Rval x)
   {
     return ::std::tgamma(x);
   }
 
-G_real std_math_lgamma(G_real x)
+Rval std_math_lgamma(Rval x)
   {
     return ::std::lgamma(x);
   }
 
-void create_bindings_math(G_object& result, API_Version /*version*/)
+void create_bindings_math(Oval& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.math.e`
     //===================================================================
     result.insert_or_assign(::rocket::sref("e"),
-      G_real(
+      Rval(
         // The base of the natural logarithm.
         s_const_e
       ));
@@ -186,7 +186,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.pi`
     //===================================================================
     result.insert_or_assign(::rocket::sref("pi"),
-      G_real(
+      Rval(
         // The ratio of a circle's circumference to its diameter.
         s_const_pi
       ));
@@ -194,7 +194,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.lb10`
     //===================================================================
     result.insert_or_assign(::rocket::sref("real_max"),
-      G_real(
+      Rval(
         // The binary logarithm of the integer ten.
         s_const_lb10
       ));
@@ -202,7 +202,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.exp()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("exp"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -217,9 +217,9 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.math.exp"), ::rocket::ref(args));
           // Parse arguments.
-          G_real y;
-          opt<G_real> base;
-          if(reader.start().g(y).g(base).finish()) {
+          Rval y;
+          Ropt base;
+          if(reader.I().g(y).g(base).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_exp(::rocket::move(y), ::rocket::move(base)) };
             return ::rocket::move(xref);
@@ -232,7 +232,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.expm1()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("expm1"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -247,8 +247,8 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.math.expm1"), ::rocket::ref(args));
           // Parse arguments.
-          G_real y;
-          if(reader.start().g(y).finish()) {
+          Rval y;
+          if(reader.I().g(y).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_expm1(::rocket::move(y)) };
             return ::rocket::move(xref);
@@ -261,7 +261,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.pow()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("pow"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -277,9 +277,9 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.math.pow"), ::rocket::ref(args));
           // Parse arguments.
-          G_real x;
-          G_real y;
-          if(reader.start().g(x).g(y).finish()) {
+          Rval x;
+          Rval y;
+          if(reader.I().g(x).g(y).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_pow(::rocket::move(x), ::rocket::move(y)) };
             return ::rocket::move(xref);
@@ -292,7 +292,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.log()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("log"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -307,9 +307,9 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.math.log"), ::rocket::ref(args));
           // Parse arguments.
-          G_real y;
-          opt<G_real> base;
-          if(reader.start().g(y).g(base).finish()) {
+          Rval y;
+          Ropt base;
+          if(reader.I().g(y).g(base).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_log(::rocket::move(y), ::rocket::move(base)) };
             return ::rocket::move(xref);
@@ -322,7 +322,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.log1p()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("log1p"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -337,8 +337,8 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.math.log1p"), ::rocket::ref(args));
           // Parse arguments.
-          G_real y;
-          if(reader.start().g(y).finish()) {
+          Rval y;
+          if(reader.I().g(y).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_log1p(::rocket::move(y)) };
             return ::rocket::move(xref);
@@ -351,7 +351,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.sin()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("sin"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -365,8 +365,8 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.math.sin"), ::rocket::ref(args));
           // Parse arguments.
-          G_real x;
-          if(reader.start().g(x).finish()) {
+          Rval x;
+          if(reader.I().g(x).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_sin(::rocket::move(x)) };
             return ::rocket::move(xref);
@@ -379,7 +379,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.cos()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("cos"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -393,8 +393,8 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.math.cos"), ::rocket::ref(args));
           // Parse arguments.
-          G_real x;
-          if(reader.start().g(x).finish()) {
+          Rval x;
+          if(reader.I().g(x).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_cos(::rocket::move(x)) };
             return ::rocket::move(xref);
@@ -407,7 +407,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.tan()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("tan"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -421,8 +421,8 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.math.tan"), ::rocket::ref(args));
           // Parse arguments.
-          G_real x;
-          if(reader.start().g(x).finish()) {
+          Rval x;
+          if(reader.I().g(x).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_tan(::rocket::move(x)) };
             return ::rocket::move(xref);
@@ -435,7 +435,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.asin()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("asin"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -449,8 +449,8 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.math.asin"), ::rocket::ref(args));
           // Parse arguments.
-          G_real x;
-          if(reader.start().g(x).finish()) {
+          Rval x;
+          if(reader.I().g(x).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_asin(::rocket::move(x)) };
             return ::rocket::move(xref);
@@ -463,7 +463,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.acos()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("acos"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -477,8 +477,8 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.math.acos"), ::rocket::ref(args));
           // Parse arguments.
-          G_real x;
-          if(reader.start().g(x).finish()) {
+          Rval x;
+          if(reader.I().g(x).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_acos(::rocket::move(x)) };
             return ::rocket::move(xref);
@@ -491,7 +491,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.atan()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("atan"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -505,8 +505,8 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.math.atan"), ::rocket::ref(args));
           // Parse arguments.
-          G_real x;
-          if(reader.start().g(x).finish()) {
+          Rval x;
+          if(reader.I().g(x).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_atan(::rocket::move(x)) };
             return ::rocket::move(xref);
@@ -519,7 +519,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.atan2()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("atan2"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -533,9 +533,9 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.math.atan2"), ::rocket::ref(args));
           // Parse arguments.
-          G_real y;
-          G_real x;
-          if(reader.start().g(y).g(x).finish()) {
+          Rval y;
+          Rval x;
+          if(reader.I().g(y).g(x).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_atan2(::rocket::move(y), ::rocket::move(x)) };
             return ::rocket::move(xref);
@@ -548,7 +548,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.hypot()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("hypot"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -567,7 +567,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           Argument_Reader reader(::rocket::sref("std.math.hypot"), ::rocket::ref(args));
           // Parse variadic arguments.
           cow_vector<Value> values;
-          if(reader.start().finish(values)) {
+          if(reader.I().F(values)) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_hypot(::rocket::move(values)) };
             return ::rocket::move(xref);
@@ -580,7 +580,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.sinh()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("sinh"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -594,8 +594,8 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.math.sinh"), ::rocket::ref(args));
           // Parse arguments.
-          G_real x;
-          if(reader.start().g(x).finish()) {
+          Rval x;
+          if(reader.I().g(x).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_sinh(::rocket::move(x)) };
             return ::rocket::move(xref);
@@ -608,7 +608,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.cosh()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("cosh"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -622,8 +622,8 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.math.cosh"), ::rocket::ref(args));
           // Parse arguments.
-          G_real x;
-          if(reader.start().g(x).finish()) {
+          Rval x;
+          if(reader.I().g(x).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_cosh(::rocket::move(x)) };
             return ::rocket::move(xref);
@@ -636,7 +636,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.tanh()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("tanh"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -650,8 +650,8 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.math.tanh"), ::rocket::ref(args));
           // Parse arguments.
-          G_real x;
-          if(reader.start().g(x).finish()) {
+          Rval x;
+          if(reader.I().g(x).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_tanh(::rocket::move(x)) };
             return ::rocket::move(xref);
@@ -664,7 +664,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.asinh()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("asinh"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -678,8 +678,8 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.math.asinh"), ::rocket::ref(args));
           // Parse arguments.
-          G_real x;
-          if(reader.start().g(x).finish()) {
+          Rval x;
+          if(reader.I().g(x).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_asinh(::rocket::move(x)) };
             return ::rocket::move(xref);
@@ -692,7 +692,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.acosh()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("acosh"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -706,8 +706,8 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.math.acosh"), ::rocket::ref(args));
           // Parse arguments.
-          G_real x;
-          if(reader.start().g(x).finish()) {
+          Rval x;
+          if(reader.I().g(x).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_acosh(::rocket::move(x)) };
             return ::rocket::move(xref);
@@ -720,7 +720,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.atanh()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("atanh"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -734,8 +734,8 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.math.atanh"), ::rocket::ref(args));
           // Parse arguments.
-          G_real x;
-          if(reader.start().g(x).finish()) {
+          Rval x;
+          if(reader.I().g(x).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_atanh(::rocket::move(x)) };
             return ::rocket::move(xref);
@@ -748,7 +748,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.erf()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("erf"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -762,8 +762,8 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.math.erf"), ::rocket::ref(args));
           // Parse arguments.
-          G_real x;
-          if(reader.start().g(x).finish()) {
+          Rval x;
+          if(reader.I().g(x).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_erf(::rocket::move(x)) };
             return ::rocket::move(xref);
@@ -776,7 +776,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.cerf()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("cerf"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -790,8 +790,8 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.math.cerf"), ::rocket::ref(args));
           // Parse arguments.
-          G_real x;
-          if(reader.start().g(x).finish()) {
+          Rval x;
+          if(reader.I().g(x).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_cerf(::rocket::move(x)) };
             return ::rocket::move(xref);
@@ -804,7 +804,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.gamma()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("gamma"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -818,8 +818,8 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.math.gamma"), ::rocket::ref(args));
           // Parse arguments.
-          G_real x;
-          if(reader.start().g(x).finish()) {
+          Rval x;
+          if(reader.I().g(x).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_gamma(::rocket::move(x)) };
             return ::rocket::move(xref);
@@ -832,7 +832,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.lgamma()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("lgamma"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -847,8 +847,8 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.math.lgamma"), ::rocket::ref(args));
           // Parse arguments.
-          G_real x;
-          if(reader.start().g(x).finish()) {
+          Rval x;
+          if(reader.I().g(x).F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_lgamma(::rocket::move(x)) };
             return ::rocket::move(xref);

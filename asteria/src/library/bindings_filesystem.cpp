@@ -23,8 +23,8 @@ inline void do_push_argument(cow_vector<Reference>& args, const Value& value)
     args.emplace_back(::rocket::move(xref));
   }
 
-void do_process_block(Global_Context& global, const G_function& callback,
-                      const G_integer& offset, const G_string& data)
+void do_process_block(Global& global, const Fval& callback,
+                      const Ival& offset, const Sval& data)
   {
     // Set up arguments for the user-defined predictor.
     cow_vector<Reference> args;
@@ -37,10 +37,10 @@ void do_process_block(Global_Context& global, const G_function& callback,
 
 }  // namespace
 
-G_string std_filesystem_get_working_directory()
+Sval std_filesystem_get_working_directory()
   {
     // Get the current directory, resizing the buffer as needed.
-    G_string cwd(PATH_MAX, '*');
+    Sval cwd(PATH_MAX, '*');
     while(::getcwd(cwd.mut_data(), cwd.size()) == nullptr) {
       int err = errno;
       if(err != ERANGE) {
@@ -52,64 +52,64 @@ G_string std_filesystem_get_working_directory()
     return cwd;
   }
 
-opt<G_object> std_filesystem_get_information(G_string path)
+Oopt std_filesystem_get_information(Sval path)
   {
     struct ::stat stb;
     if(::lstat(path.c_str(), &stb) != 0) {
       return ::rocket::clear;
     }
     // Convert the result to an `object`.
-    G_object stat;
+    Oval stat;
     stat.try_emplace(::rocket::sref("i_dev"),
-      G_integer(
+      Ival(
         stb.st_dev  // unique device id on this machine.
       ));
     stat.try_emplace(::rocket::sref("i_file"),
-      G_integer(
+      Ival(
         stb.st_ino  // unique file id on this device.
       ));
     stat.try_emplace(::rocket::sref("n_ref"),
-      G_integer(
+      Ival(
         stb.st_nlink  // number of hard links to this file.
       ));
     stat.try_emplace(::rocket::sref("b_dir"),
-      G_boolean(
+      Bval(
         S_ISDIR(stb.st_mode)  // whether this is a directory.
       ));
     stat.try_emplace(::rocket::sref("b_sym"),
-      G_boolean(
+      Bval(
         S_ISLNK(stb.st_mode)  // whether this is a symbolic link.
       ));
     stat.try_emplace(::rocket::sref("n_size"),
-      G_integer(
+      Ival(
         stb.st_size  // number of bytes this file contains.
       ));
     stat.try_emplace(::rocket::sref("n_ocup"),
-      G_integer(
+      Ival(
         static_cast<int64_t>(stb.st_blocks) * 512  // number of bytes this file occupies.
       ));
     stat.try_emplace(::rocket::sref("t_accs"),
-      G_integer(
+      Ival(
         static_cast<int64_t>(stb.st_atim.tv_sec) * 1000 + stb.st_atim.tv_nsec / 1000000  // timestamp of last access.
       ));
     stat.try_emplace(::rocket::sref("t_mod"),
-      G_integer(
+      Ival(
         static_cast<int64_t>(stb.st_mtim.tv_sec) * 1000 + stb.st_mtim.tv_nsec / 1000000  // timestamp of last modification.
       ));
     return ::rocket::move(stat);
   }
 
-bool std_filesystem_move_from(G_string path_new, G_string path_old)
+bool std_filesystem_move_from(Sval path_new, Sval path_old)
   {
     return ::rename(path_old.c_str(), path_new.c_str()) == 0;
   }
 
-opt<G_integer> std_filesystem_remove_recursive(G_string path)
+Iopt std_filesystem_remove_recursive(Sval path)
   {
     if(::rmdir(path.c_str()) == 0) {
       // An empty directory has been removed.
       // Succeed.
-      return G_integer(1);
+      return Ival(1);
     }
     int err = errno;
     if(err == ENOTDIR) {
@@ -118,7 +118,7 @@ opt<G_integer> std_filesystem_remove_recursive(G_string path)
         return ::rocket::clear;
       }
       // Succeed.
-      return G_integer(1);
+      return Ival(1);
     }
     // Remove the directory recursively.
     enum Rmlist
@@ -196,29 +196,29 @@ opt<G_integer> std_filesystem_remove_recursive(G_string path)
     return count;
   }
 
-opt<G_object> std_filesystem_directory_list(G_string path)
+Oopt std_filesystem_directory_list(Sval path)
   {
     ::rocket::unique_posix_dir dp(::opendir(path.c_str()), closedir);
     if(!dp) {
       return ::rocket::clear;
     }
     // Write entries.
-    G_object entries;
+    Oval entries;
     struct ::dirent* next;
     while((next = ::readdir(dp)) != nullptr) {
       cow_string name;
-      G_object entry;
+      Oval entry;
       // Assume the name is in UTF-8.
       name.assign(next->d_name);
 #ifdef _DIRENT_HAVE_D_TYPE
       if(next->d_type != DT_UNKNOWN) {
         // Get the file type if it is available immediately.
         entry.try_emplace(::rocket::sref("b_dir"),
-          G_boolean(
+          Bval(
             next->d_type == DT_DIR
           ));
         entry.try_emplace(::rocket::sref("b_sym"),
-          G_boolean(
+          Bval(
             next->d_type == DT_LNK
           ));
       }
@@ -234,11 +234,11 @@ opt<G_object> std_filesystem_directory_list(G_string path)
           return ::rocket::clear;
         }
         entry.try_emplace(::rocket::sref("b_dir"),
-          G_boolean(
+          Bval(
             S_ISDIR(stb.st_mode)
           ));
         entry.try_emplace(::rocket::sref("b_sym"),
-          G_boolean(
+          Bval(
             S_ISLNK(stb.st_mode)
           ));
       }
@@ -248,11 +248,11 @@ opt<G_object> std_filesystem_directory_list(G_string path)
     return ::rocket::move(entries);
   }
 
-opt<G_integer> std_filesystem_directory_create(G_string path)
+Iopt std_filesystem_directory_create(Sval path)
   {
     if(::mkdir(path.c_str(), 0777) == 0) {
       // A new directory has been created.
-      return G_integer(1);
+      return Ival(1);
     }
     int err = errno;
     if(err != EEXIST) {
@@ -267,31 +267,31 @@ opt<G_integer> std_filesystem_directory_create(G_string path)
       return ::rocket::clear;
     }
     // The directory already exists.
-    return G_integer(0);
+    return Ival(0);
   }
 
-opt<G_integer> std_filesystem_directory_remove(G_string path)
+Iopt std_filesystem_directory_remove(Sval path)
   {
     if(::rmdir(path.c_str()) == 0) {
       // The directory has been removed.
-      return G_integer(1);
+      return Ival(1);
     }
     int err = errno;
     if((err != ENOTEMPTY) && (err != EEXIST)) {
       return ::rocket::clear;
     }
     // The directory is not empty.
-    return G_integer(0);
+    return Ival(0);
   }
 
-opt<G_string> std_filesystem_file_read(G_string path, opt<G_integer> offset, opt<G_integer> limit)
+Sopt std_filesystem_file_read(Sval path, Iopt offset, Iopt limit)
   {
     if(offset && (*offset < 0)) {
       ASTERIA_THROW("negative file offset (offset `$1`)", *offset);
     }
     int64_t roffset = offset.value_or(0);
     int64_t rlimit = ::rocket::clamp(limit.value_or(INT32_MAX), 0, 16777216);
-    G_string data;
+    Sval data;
     // Open the file for reading.
     ::rocket::unique_posix_fd fd(::open(path.c_str(), O_RDONLY), ::close);
     if(!fd) {
@@ -315,8 +315,8 @@ opt<G_string> std_filesystem_file_read(G_string path, opt<G_integer> offset, opt
     return ::rocket::move(data);
   }
 
-bool std_filesystem_file_stream(Global_Context& global, G_string path, G_function callback,
-                                opt<G_integer> offset, opt<G_integer> limit)
+bool std_filesystem_file_stream(Global& global, Sval path, Fval callback,
+                                Iopt offset, Iopt limit)
   {
     if(offset && (*offset < 0)) {
       ASTERIA_THROW("negative file offset (offset `$1`)", *offset);
@@ -324,7 +324,7 @@ bool std_filesystem_file_stream(Global_Context& global, G_string path, G_functio
     int64_t roffset = offset.value_or(0);
     int64_t rlimit = ::rocket::clamp(limit.value_or(INT32_MAX), 0, 16777216);
     int64_t nremaining = ::rocket::max(limit.value_or(INT64_MAX), 0);
-    G_string data;
+    Sval data;
     // Open the file for reading.
     ::rocket::unique_posix_fd fd(::open(path.c_str(), O_RDONLY), ::close);
     if(!fd) {
@@ -361,7 +361,7 @@ bool std_filesystem_file_stream(Global_Context& global, G_string path, G_functio
     return true;
   }
 
-bool std_filesystem_file_write(G_string path, G_string data, opt<G_integer> offset)
+bool std_filesystem_file_write(Sval path, Sval data, Iopt offset)
   {
     if(offset && (*offset < 0)) {
       ASTERIA_THROW("negative file offset (offset `$1`)", *offset);
@@ -403,7 +403,7 @@ bool std_filesystem_file_write(G_string path, G_string data, opt<G_integer> offs
     return true;
   }
 
-bool std_filesystem_file_append(G_string path, G_string data, opt<G_boolean> exclusive)
+bool std_filesystem_file_append(Sval path, Sval data, Bopt exclusive)
   {
     int64_t nremaining = static_cast<int64_t>(data.size());
     // Calculate the `flags` argument.
@@ -433,7 +433,7 @@ bool std_filesystem_file_append(G_string path, G_string data, opt<G_boolean> exc
     return true;
   }
 
-bool std_filesystem_file_copy_from(G_string path_new, G_string path_old)
+bool std_filesystem_file_copy_from(Sval path_new, Sval path_old)
   {
     // Open the old file.
     ::rocket::unique_posix_fd hf_old(::open(path_old.c_str(), O_RDONLY), ::close);
@@ -458,7 +458,7 @@ bool std_filesystem_file_copy_from(G_string path_new, G_string path_old)
       }
     }
     // Allocate the I/O buffer.
-    G_string buff;
+    Sval buff;
     buff.resize(static_cast<size_t>(stb_old.st_blksize));
     for(;;) {
       // Read some bytes.
@@ -486,18 +486,18 @@ bool std_filesystem_file_copy_from(G_string path_new, G_string path_old)
     return true;
   }
 
-bool std_filesystem_file_remove(G_string path)
+bool std_filesystem_file_remove(Sval path)
   {
     return ::unlink(path.c_str()) == 0;
   }
 
-void create_bindings_filesystem(G_object& result, API_Version /*version*/)
+void create_bindings_filesystem(Oval& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.filesystem.get_working_directory()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("get_working_directory"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -512,7 +512,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.filesystem.get_working_directory"), ::rocket::ref(args));
           // Parse arguments.
-          if(reader.start().finish()) {
+          if(reader.I().F()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_filesystem_get_working_directory() };
             return ::rocket::move(xref);
@@ -525,7 +525,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     // `std.filesystem.get_information()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("get_information"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -556,8 +556,8 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.filesystem.get_information"), ::rocket::ref(args));
           // Parse arguments.
-          G_string path;
-          if(reader.start().g(path).finish()) {
+          Sval path;
+          if(reader.I().g(path).F()) {
             // Call the binding function.
             auto qres = std_filesystem_get_information(::rocket::move(path));
             if(!qres) {
@@ -574,7 +574,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     // `std.filesystem.remove_recursive()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("remove_recursive"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -590,8 +590,8 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.filesystem.remove_recursive"), ::rocket::ref(args));
           // Parse arguments.
-          G_string path;
-          if(reader.start().g(path).finish()) {
+          Sval path;
+          if(reader.I().g(path).F()) {
             // Call the binding function.
             auto qres = std_filesystem_remove_recursive(::rocket::move(path));
             if(!qres) {
@@ -608,7 +608,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     // `std.filesystem.move_from(path_new, path_old)`
     //===================================================================
     result.insert_or_assign(::rocket::sref("move_from"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -623,9 +623,9 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.filesystem.move_from"), ::rocket::ref(args));
           // Parse arguments.
-          G_string path_new;
-          G_string path_old;
-          if(reader.start().g(path_new).g(path_old).finish()) {
+          Sval path_new;
+          Sval path_old;
+          if(reader.I().g(path_new).g(path_old).F()) {
             // Call the binding function.
             if(!std_filesystem_move_from(path_new, path_old)) {
               return Reference_Root::S_null();
@@ -641,7 +641,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     // `std.filesystem.directory_list()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("directory_list"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -665,8 +665,8 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.filesystem.directory_list"), ::rocket::ref(args));
           // Parse arguments.
-          G_string path;
-          if(reader.start().g(path).finish()) {
+          Sval path;
+          if(reader.I().g(path).F()) {
             // Call the binding function.
             auto qres = std_filesystem_directory_list(::rocket::move(path));
             if(!qres) {
@@ -683,7 +683,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     // `std.filesystem.directory_create()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("directory_create"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -701,8 +701,8 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.filesystem.directory_create"), ::rocket::ref(args));
           // Parse arguments.
-          G_string path;
-          if(reader.start().g(path).finish()) {
+          Sval path;
+          if(reader.I().g(path).F()) {
             // Call the binding function.
             auto qres = std_filesystem_directory_create(::rocket::move(path));
             if(!qres) {
@@ -719,7 +719,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     // `std.filesystem.directory_remove()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("directory_remove"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -735,8 +735,8 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.filesystem.directory_remove"), ::rocket::ref(args));
           // Parse arguments.
-          G_string path;
-          if(reader.start().g(path).finish()) {
+          Sval path;
+          if(reader.I().g(path).F()) {
             // Call the binding function.
             auto qres = std_filesystem_directory_remove(::rocket::move(path));
             if(!qres) {
@@ -753,7 +753,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     // `std.filesystem.file_read()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("file_read"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -774,10 +774,10 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.filesystem.file_read"), ::rocket::ref(args));
           // Parse arguments.
-          G_string path;
-          opt<G_integer> offset;
-          opt<G_integer> limit;
-          if(reader.start().g(path).g(offset).g(limit).finish()) {
+          Sval path;
+          Iopt offset;
+          Iopt limit;
+          if(reader.I().g(path).g(offset).g(limit).F()) {
             // Call the binding function.
             auto qres = std_filesystem_file_read(::rocket::move(path), ::rocket::move(offset), ::rocket::move(limit));
             if(!qres) {
@@ -794,7 +794,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     // `std.filesystem.file_stream()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("file_stream"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -819,14 +819,14 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           "  * Throws an exception if `offset` is negative.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global_Context& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Reference {
           Argument_Reader reader(::rocket::sref("std.filesystem.file_stream"), ::rocket::ref(args));
           // Parse arguments.
-          G_string path;
-          G_function callback;
-          opt<G_integer> offset;
-          opt<G_integer> limit;
-          if(reader.start().g(path).g(callback).g(offset).g(limit).finish()) {
+          Sval path;
+          Fval callback;
+          Iopt offset;
+          Iopt limit;
+          if(reader.I().g(path).g(callback).g(offset).g(limit).F()) {
             // Call the binding function.
             if(!std_filesystem_file_stream(global, path, callback, offset, limit)) {
               return Reference_Root::S_null();
@@ -842,7 +842,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     // `std.filesystem.file_write()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("file_write"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -864,10 +864,10 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.filesystem.file_write"), ::rocket::ref(args));
           // Parse arguments.
-          G_string path;
-          G_string data;
-          opt<G_integer> offset;
-          if(reader.start().g(path).g(data).g(offset).finish()) {
+          Sval path;
+          Sval data;
+          Iopt offset;
+          if(reader.I().g(path).g(data).g(offset).F()) {
             // Call the binding function.
             if(!std_filesystem_file_write(path, data, offset)) {
               return Reference_Root::S_null();
@@ -883,7 +883,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     // `std.filesystem.file_append()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("file_append"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -902,10 +902,10 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.filesystem.file_append"), ::rocket::ref(args));
           // Parse arguments.
-          G_string path;
-          G_string data;
-          opt<G_boolean> exclusive;
-          if(reader.start().g(path).g(data).g(exclusive).finish()) {
+          Sval path;
+          Sval data;
+          Bopt exclusive;
+          if(reader.I().g(path).g(data).g(exclusive).F()) {
             // Call the binding function.
             if(!std_filesystem_file_append(path, data, exclusive)) {
               return Reference_Root::S_null();
@@ -921,7 +921,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     // `std.filesystem.file_copy_from(path_new, path_old)`
     //===================================================================
     result.insert_or_assign(::rocket::sref("file_copy_from"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -938,9 +938,9 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.filesystem.file_copy_from"), ::rocket::ref(args));
           // Parse arguments.
-          G_string path_new;
-          G_string path_old;
-          if(reader.start().g(path_new).g(path_old).finish()) {
+          Sval path_new;
+          Sval path_old;
+          if(reader.I().g(path_new).g(path_old).F()) {
             // Call the binding function.
             if(!std_filesystem_file_copy_from(path_new, path_old)) {
               return Reference_Root::S_null();
@@ -956,7 +956,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     // `std.filesystem.file_remove()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("file_remove"),
-      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
@@ -972,8 +972,8 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(::rocket::sref("std.filesystem.file_remove"), ::rocket::ref(args));
           // Parse arguments.
-          G_string path;
-          if(reader.start().g(path).finish()) {
+          Sval path;
+          if(reader.I().g(path).F()) {
             // Call the binding function.
             if(!std_filesystem_file_remove(path)) {
               return Reference_Root::S_null();

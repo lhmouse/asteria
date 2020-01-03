@@ -18,7 +18,7 @@ Reference& Variadic_Arguer::invoke(Reference& self, Global_Context& /*global*/, 
     Argument_Reader reader(::rocket::sref("<built-in>.__varg"), ::rocket::ref(args));
     // Extract arguments.
     opt<G_integer> qindex;
-    if(reader.start().g(qindex).finish()) {
+    if(reader.I().g(qindex).F()) {
       auto nvargs = this->m_vargs.size();
       if(!qindex) {
         // Return the number of variadic arguments if `index` is `null` or absent.
