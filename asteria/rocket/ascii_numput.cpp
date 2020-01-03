@@ -880,10 +880,10 @@ void do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
     // This produces 18 significant figures.
     // TODO: Modern CPUs have intrinsics for this.
     uint64_t xhi = ireg >> 32;
-    uint64_t xlo = ireg & UINT32_MAX;
+    uint64_t xlo = ireg << 32 >> 32;
     uint64_t yhi = mult.mant >> 32;
-    uint64_t ylo = mult.mant & UINT32_MAX;
-    ireg = xhi * yhi + (xlo * yhi >> 32) + (xhi * ylo >> 32);
+    uint64_t ylo = mult.mant << 32 >> 32;
+    ireg = xhi * yhi + (((xlo * yhi >> 16) + (xhi * ylo >> 16) + (xlo * ylo >> 48)) >> 16);
     // Round the mantissa. We now have 18 digits.
     // In the case of single precision we have to drop 8 digits before rounding.
     if(ROCKET_UNEXPECT(single))

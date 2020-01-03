@@ -1393,12 +1393,12 @@ ascii_numget& ascii_numget::cast_F(double& value, double lower, double upper, bo
             // Multiply two 64-bit values and get the high-order half.
             // TODO: Modern CPUs have intrinsics for this.
             uint64_t xhi = ireg >> 32;
-            uint64_t xlo = ireg & UINT32_MAX;
+            uint64_t xlo = ireg << 32 >> 32;
             uint64_t yhi = mult.mant >> 32;
-            uint64_t ylo = mult.mant & UINT32_MAX;
-            ireg = (xhi * yhi + (xlo * yhi >> 32) + (xhi * ylo >> 32)) | 1;
+            uint64_t ylo = mult.mant << 32 >> 32;
+            ireg = xhi * yhi + (((xlo * yhi >> 16) + (xhi * ylo >> 16) + (xlo * ylo >> 48)) >> 16);
             // Convert the mantissa to a floating-point number.
-            freg = do_cast_mant_I(ireg, single);
+            freg = do_cast_mant_I(ireg | 1, single);
             freg = ::std::ldexp(freg, mult.bexp - lzcnt);
             break;
           }}
