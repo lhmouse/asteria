@@ -161,7 +161,7 @@ Argument_Reader& Argument_Reader::g(Bval& xval)
       this->do_fail([&]{ ASTERIA_THROW("no more arguments");  });
       return *this;
     }
-    // Read a valuefrom the argument.
+    // Read a value from the argument.
     const auto& val = karg->read();
     if(!val.is_boolean()) {
       // If the val doesn't have the desired type, fail.
@@ -169,7 +169,7 @@ Argument_Reader& Argument_Reader::g(Bval& xval)
                                        karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
-    // Copy the val.
+    // Copy the value.
     xval = val.as_boolean();
     return *this;
   }
@@ -183,7 +183,7 @@ Argument_Reader& Argument_Reader::g(Ival& xval)
       this->do_fail([&]{ ASTERIA_THROW("no more arguments");  });
       return *this;
     }
-    // Read a valuefrom the argument.
+    // Read a value from the argument.
     const auto& val = karg->read();
     if(!val.is_integer()) {
       // If the val doesn't have the desired type, fail.
@@ -191,7 +191,7 @@ Argument_Reader& Argument_Reader::g(Ival& xval)
                                        karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
-    // Copy the val.
+    // Copy the value.
     xval = val.as_integer();
     return *this;
   }
@@ -205,7 +205,7 @@ Argument_Reader& Argument_Reader::g(Rval& xval)
       this->do_fail([&]{ ASTERIA_THROW("no more arguments");  });
       return *this;
     }
-    // Read a valuefrom the argument.
+    // Read a value from the argument.
     const auto& val = karg->read();
     if(!val.is_convertible_to_real()) {
       // If the val doesn't have the desired type, fail.
@@ -213,7 +213,7 @@ Argument_Reader& Argument_Reader::g(Rval& xval)
                                        karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
-    // Copy the val.
+    // Copy the value.
     xval = val.convert_to_real();
     return *this;
   }
@@ -227,7 +227,7 @@ Argument_Reader& Argument_Reader::g(Sval& xval)
       this->do_fail([&]{ ASTERIA_THROW("no more arguments");  });
       return *this;
     }
-    // Read a valuefrom the argument.
+    // Read a value from the argument.
     const auto& val = karg->read();
     if(!val.is_string()) {
       // If the val doesn't have the desired type, fail.
@@ -235,7 +235,7 @@ Argument_Reader& Argument_Reader::g(Sval& xval)
                                        karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
-    // Copy the val.
+    // Copy the value.
     xval = val.as_string();
     return *this;
   }
@@ -249,7 +249,7 @@ Argument_Reader& Argument_Reader::g(Pval& xval)
       this->do_fail([&]{ ASTERIA_THROW("no more arguments");  });
       return *this;
     }
-    // Read a valuefrom the argument.
+    // Read a value from the argument.
     const auto& val = karg->read();
     if(!val.is_opaque()) {
       // If the val doesn't have the desired type, fail.
@@ -257,7 +257,7 @@ Argument_Reader& Argument_Reader::g(Pval& xval)
                                        karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
-    // Copy the val.
+    // Copy the value.
     xval = val.as_opaque();
     return *this;
   }
@@ -271,7 +271,7 @@ Argument_Reader& Argument_Reader::g(Fval& xval)
       this->do_fail([&]{ ASTERIA_THROW("no more arguments");  });
       return *this;
     }
-    // Read a valuefrom the argument.
+    // Read a value from the argument.
     const auto& val = karg->read();
     if(!val.is_function()) {
       // If the val doesn't have the desired type, fail.
@@ -279,7 +279,7 @@ Argument_Reader& Argument_Reader::g(Fval& xval)
                                        karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
-    // Copy the val.
+    // Copy the value.
     xval = val.as_function();
     return *this;
   }
@@ -293,7 +293,7 @@ Argument_Reader& Argument_Reader::g(Aval& xval)
       this->do_fail([&]{ ASTERIA_THROW("no more arguments");  });
       return *this;
     }
-    // Read a valuefrom the argument.
+    // Read a value from the argument.
     const auto& val = karg->read();
     if(!val.is_array()) {
       // If the val doesn't have the desired type, fail.
@@ -301,7 +301,7 @@ Argument_Reader& Argument_Reader::g(Aval& xval)
                                        karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
-    // Copy the val.
+    // Copy the value.
     xval = val.as_array();
     return *this;
   }
@@ -315,7 +315,7 @@ Argument_Reader& Argument_Reader::g(Oval& xval)
       this->do_fail([&]{ ASTERIA_THROW("no more arguments");  });
       return *this;
     }
-    // Read a valuefrom the argument.
+    // Read a value from the argument.
     const auto& val = karg->read();
     if(!val.is_object()) {
       // If the val doesn't have the desired type, fail.
@@ -323,7 +323,7 @@ Argument_Reader& Argument_Reader::g(Oval& xval)
                                        karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
-    // Copy the val.
+    // Copy the value.
     xval = val.as_object();
     return *this;
   }
@@ -365,7 +365,7 @@ Argument_Reader& Argument_Reader::g(Bopt& xopt)
       xopt.reset();
       return *this;
     }
-    // Read a valuefrom the argument.
+    // Read a value from the argument.
     const auto& val = karg->read();
     if(val.is_null()) {
       // Accept a `null` argument.
@@ -378,7 +378,7 @@ Argument_Reader& Argument_Reader::g(Bopt& xopt)
                                        karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
-    // Copy the val.
+    // Copy the value.
     xopt = val.as_boolean();
     return *this;
   }
@@ -392,7 +392,7 @@ Argument_Reader& Argument_Reader::g(Iopt& xopt)
       xopt.reset();
       return *this;
     }
-    // Read a valuefrom the argument.
+    // Read a value from the argument.
     const auto& val = karg->read();
     if(val.is_null()) {
       // Accept a `null` argument.
@@ -405,7 +405,7 @@ Argument_Reader& Argument_Reader::g(Iopt& xopt)
                                        karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
-    // Copy the val.
+    // Copy the value.
     xopt = val.as_integer();
     return *this;
   }
@@ -419,7 +419,7 @@ Argument_Reader& Argument_Reader::g(Ropt& xopt)
       xopt.reset();
       return *this;
     }
-    // Read a valuefrom the argument.
+    // Read a value from the argument.
     const auto& val = karg->read();
     if(val.is_null()) {
       // Accept a `null` argument.
@@ -432,7 +432,7 @@ Argument_Reader& Argument_Reader::g(Ropt& xopt)
                                        karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
-    // Copy the val.
+    // Copy the value.
     xopt = val.convert_to_real();
     return *this;
   }
@@ -446,7 +446,7 @@ Argument_Reader& Argument_Reader::g(Sopt& xopt)
       xopt.reset();
       return *this;
     }
-    // Read a valuefrom the argument.
+    // Read a value from the argument.
     const auto& val = karg->read();
     if(val.is_null()) {
       // Accept a `null` argument.
@@ -459,7 +459,7 @@ Argument_Reader& Argument_Reader::g(Sopt& xopt)
                                        karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
-    // Copy the val.
+    // Copy the value.
     xopt = val.as_string();
     return *this;
   }
@@ -473,7 +473,7 @@ Argument_Reader& Argument_Reader::g(Popt& xopt)
       xopt.reset();
       return *this;
     }
-    // Read a valuefrom the argument.
+    // Read a value from the argument.
     const auto& val = karg->read();
     if(val.is_null()) {
       // Accept a `null` argument.
@@ -486,7 +486,7 @@ Argument_Reader& Argument_Reader::g(Popt& xopt)
                                        karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
-    // Copy the val.
+    // Copy the value.
     xopt = val.as_opaque();
     return *this;
   }
@@ -500,7 +500,7 @@ Argument_Reader& Argument_Reader::g(Fopt& xopt)
       xopt.reset();
       return *this;
     }
-    // Read a valuefrom the argument.
+    // Read a value from the argument.
     const auto& val = karg->read();
     if(val.is_null()) {
       // Accept a `null` argument.
@@ -513,7 +513,7 @@ Argument_Reader& Argument_Reader::g(Fopt& xopt)
                                        karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
-    // Copy the val.
+    // Copy the value.
     xopt = val.as_function();
     return *this;
   }
@@ -527,7 +527,7 @@ Argument_Reader& Argument_Reader::g(Aopt& xopt)
       xopt.reset();
       return *this;
     }
-    // Read a valuefrom the argument.
+    // Read a value from the argument.
     const auto& val = karg->read();
     if(val.is_null()) {
       // Accept a `null` argument.
@@ -540,7 +540,7 @@ Argument_Reader& Argument_Reader::g(Aopt& xopt)
                                        karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
-    // Copy the val.
+    // Copy the value.
     xopt = val.as_array();
     return *this;
   }
@@ -554,7 +554,7 @@ Argument_Reader& Argument_Reader::g(Oopt& xopt)
       xopt.reset();
       return *this;
     }
-    // Read a valuefrom the argument.
+    // Read a value from the argument.
     const auto& val = karg->read();
     if(val.is_null()) {
       // Accept a `null` argument.
@@ -567,7 +567,7 @@ Argument_Reader& Argument_Reader::g(Oopt& xopt)
                                        karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
-    // Copy the val.
+    // Copy the value.
     xopt = val.as_object();
     return *this;
   }
