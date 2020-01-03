@@ -12,9 +12,6 @@ namespace Asteria {
 class Collector
   {
   private:
-    // This implements the variable tracking algorithm similar to what is used by Python.
-    //   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
-
     Variable_HashSet* m_output_opt;
     Collector* m_tied_opt;
     uint32_t m_threshold;
