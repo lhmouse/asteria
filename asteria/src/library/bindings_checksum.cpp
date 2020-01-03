@@ -833,6 +833,7 @@ class SHA256_Hasher final : public Abstract_Opaque
         }
         ROCKET_ASSERT(bp == ep);
       }
+
     Sval finish() noexcept
       {
         // Finalize the hasher.
@@ -875,304 +876,389 @@ class SHA256_Hasher final : public Abstract_Opaque
 
 }  // namespace
 
+Pval std_checksum_crc32_new_private()
+  {
+    return Pval(::rocket::make_refcnt<CRC32_Hasher>());
+  }
+
+void std_checksum_crc32_new_write(Pval& self, Sval data)
+  {
+    return self->share_this<CRC32_Hasher>()->write(data);
+  }
+
+Ival std_checksum_crc32_new_finish(Pval& self)
+  {
+    return self->share_this<CRC32_Hasher>()->finish();
+  }
+
 Oval std_checksum_crc32_new()
   {
-    Oval r;
-    r.insert_or_assign(::rocket::sref("!p"),  // details
-      Pval(
-        ::rocket::make_refcnt<CRC32_Hasher>()
-      ));
-    r.insert_or_assign(::rocket::sref("write"),
-      Fval(
-        ::rocket::make_refcnt<Simple_Binding_Wrapper>(
-          // Description
-          ::rocket::sref("<std.checksum.crc32_new()>.write"),
-          // Definition
-          [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
-            Argument_Reader reader(::rocket::sref("<std.checksum.crc32_new()>.write"), ::rocket::ref(args));
-            // Get the hasher.
-            Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
-            self.zoom_in(::rocket::move(xmod));
-            auto& p = *(self.open().as_opaque()->share_this<CRC32_Hasher>());
-            // Parse arguments.
-            Sval data;
-            if(reader.I().g(data).F()) {
-              p.write(data);
-              return Reference_Root::S_null();
-            }
+    Oval result;
+    //===================================================================
+    // * private data
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("!p"),
+      std_checksum_crc32_new_private());
+    //===================================================================
+    // `.write(data)`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("write"),
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+        ::rocket::sref("std.checksum.crc32_new().write"),
+        [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
+          Argument_Reader reader(::rocket::sref("std.checksum.crc32_new().write"), ::rocket::ref(args));
+          // Get the hasher.
+          Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
+          self.zoom_in(::rocket::move(xmod));
+          // Parse arguments.
+          Sval data;
+          if(!reader.I().g(data).F()) {
             reader.throw_no_matching_function_call();
           }
-        )
+          // Call the binding function.
+          std_checksum_crc32_new_write(self.open().open_opaque(), ::rocket::move(data));
+          return Reference_Root::S_null();
+        })
       ));
-    r.insert_or_assign(::rocket::sref("finish"),
-      Fval(
-        ::rocket::make_refcnt<Simple_Binding_Wrapper>(
-          // Description
-          ::rocket::sref("<std.checksum.crc32_new()>.finish"),
-          // Definition
-          [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
-            Argument_Reader reader(::rocket::sref("<std.checksum.crc32_new()>.finish"), ::rocket::ref(args));
-            // Get the hasher.
-            Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
-            self.zoom_in(::rocket::move(xmod));
-            auto& p = *(self.open().as_opaque()->share_this<CRC32_Hasher>());
-            // Parse arguments.
-            if(reader.I().F()) {
-              Reference_Root::S_temporary xref = { p.finish() };
-              return ::rocket::move(xref);
-            }
+    //===================================================================
+    // `.finish()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("finish"),
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+        ::rocket::sref("std.checksum.crc32_new().finish"),
+        [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
+          Argument_Reader reader(::rocket::sref("std.checksum.crc32_new().finish"), ::rocket::ref(args));
+          // Get the hasher.
+          Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
+          self.zoom_in(::rocket::move(xmod));
+          // Parse arguments.
+          if(!reader.I().F()) {
             reader.throw_no_matching_function_call();
           }
-        )
+          // Call the binding function.
+          Reference_Root::S_temporary xref = { std_checksum_crc32_new_finish(self.open().open_opaque()) };
+          return ::rocket::move(xref);
+        })
       ));
-    return r;
+    //===================================================================
+    // End of `std.checksum.crc32_new()`
+    //===================================================================
+    return result;
   }
 
 Ival std_checksum_crc32(Sval data)
   {
-    CRC32_Hasher p;
-    p.write(data);
-    return p.finish();
+    CRC32_Hasher h;
+    h.write(data);
+    return h.finish();
+  }
+
+Pval std_checksum_fnv1a32_new_private()
+  {
+    return Pval(::rocket::make_refcnt<FNV1a32_Hasher>());
+  }
+
+void std_checksum_fnv1a32_new_write(Pval& self, Sval data)
+  {
+    return self->share_this<FNV1a32_Hasher>()->write(data);
+  }
+
+Ival std_checksum_fnv1a32_new_finish(Pval& self)
+  {
+    return self->share_this<FNV1a32_Hasher>()->finish();
   }
 
 Oval std_checksum_fnv1a32_new()
   {
-    Oval r;
-    r.insert_or_assign(::rocket::sref("!p"),  // details
-      Pval(
-        ::rocket::make_refcnt<FNV1a32_Hasher>()
-      ));
-    r.insert_or_assign(::rocket::sref("write"),
-      Fval(
-        ::rocket::make_refcnt<Simple_Binding_Wrapper>(
-          // Description
-          ::rocket::sref("<std.checksum.fnv1a32_new()>.write"),
-          // Definition
-          [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
-            Argument_Reader reader(::rocket::sref("<std.checksum.fnv1a32_new()>.write"), ::rocket::ref(args));
-            // Get the hasher.
-            Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
-            self.zoom_in(::rocket::move(xmod));
-            auto& p = *(self.open().as_opaque()->share_this<FNV1a32_Hasher>());
-            // Parse arguments.
-            Sval data;
-            if(reader.I().g(data).F()) {
-              p.write(data);
-              return Reference_Root::S_null();
-            }
+    Oval result;
+    //===================================================================
+    // * private data
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("!p"),
+      std_checksum_fnv1a32_new_private());
+    //===================================================================
+    // `.write(data)`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("write"),
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+        ::rocket::sref("std.checksum.fnv1a32_new().write"),
+        [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
+          Argument_Reader reader(::rocket::sref("std.checksum.fnv1a32_new().write"), ::rocket::ref(args));
+          // Get the hasher.
+          Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
+          self.zoom_in(::rocket::move(xmod));
+          // Parse arguments.
+          Sval data;
+          if(!reader.I().g(data).F()) {
             reader.throw_no_matching_function_call();
           }
-        )
+          // Call the binding function.
+          std_checksum_fnv1a32_new_write(self.open().open_opaque(), ::rocket::move(data));
+          return Reference_Root::S_null();
+        })
       ));
-    r.insert_or_assign(::rocket::sref("finish"),
-      Fval(
-        ::rocket::make_refcnt<Simple_Binding_Wrapper>(
-          // Description
-          ::rocket::sref("<std.checksum.fnv1a32_new()>.finish"),
-          // Definition
-          [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
-            Argument_Reader reader(::rocket::sref("<std.checksum.fnv1a32_new()>.finish"), ::rocket::ref(args));
-            // Get the hasher.
-            Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
-            self.zoom_in(::rocket::move(xmod));
-            auto& p = *(self.open().as_opaque()->share_this<FNV1a32_Hasher>());
-            // Parse arguments.
-            if(reader.I().F()) {
-              Reference_Root::S_temporary xref = { p.finish() };
-              return ::rocket::move(xref);
-            }
+    //===================================================================
+    // `.finish()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("finish"),
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+        ::rocket::sref("std.checksum.fnv1a32_new().finish"),
+        [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
+          Argument_Reader reader(::rocket::sref("std.checksum.fnv1a32_new().finish"), ::rocket::ref(args));
+          // Get the hasher.
+          Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
+          self.zoom_in(::rocket::move(xmod));
+          // Parse arguments.
+          if(!reader.I().F()) {
             reader.throw_no_matching_function_call();
           }
-        )
+          // Call the binding function.
+          Reference_Root::S_temporary xref = { std_checksum_fnv1a32_new_finish(self.open().open_opaque()) };
+          return ::rocket::move(xref);
+        })
       ));
-    return r;
+    //===================================================================
+    // End of `std.checksum.fnv1a32_new()`
+    //===================================================================
+    return result;
   }
 
 Ival std_checksum_fnv1a32(Sval data)
   {
-    FNV1a32_Hasher p;
-    p.write(data);
-    return p.finish();
+    FNV1a32_Hasher h;
+    h.write(data);
+    return h.finish();
+  }
+
+Pval std_checksum_md5_new_private()
+  {
+    return Pval(::rocket::make_refcnt<MD5_Hasher>());
+  }
+
+void std_checksum_md5_new_write(Pval& self, Sval data)
+  {
+    return self->share_this<MD5_Hasher>()->write(data);
+  }
+
+Sval std_checksum_md5_new_finish(Pval& self)
+  {
+    return self->share_this<MD5_Hasher>()->finish();
   }
 
 Oval std_checksum_md5_new()
   {
-    Oval r;
-    r.insert_or_assign(::rocket::sref("!p"),  // details
-      Pval(
-        ::rocket::make_refcnt<MD5_Hasher>()
-      ));
-    r.insert_or_assign(::rocket::sref("write"),
-      Fval(
-        ::rocket::make_refcnt<Simple_Binding_Wrapper>(
-          // Description
-          ::rocket::sref("<std.checksum.md5_new()>.write"),
-          // Definition
-          [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
-            Argument_Reader reader(::rocket::sref("<std.checksum.md5_new()>.write"), ::rocket::ref(args));
-            // Get the hasher.
-            Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
-            self.zoom_in(::rocket::move(xmod));
-            auto& p = *(self.open().as_opaque()->share_this<MD5_Hasher>());
-            // Parse arguments.
-            Sval data;
-            if(reader.I().g(data).F()) {
-              p.write(data);
-              return Reference_Root::S_null();
-            }
+    Oval result;
+    //===================================================================
+    // * private data
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("!p"),
+      std_checksum_md5_new_private());
+    //===================================================================
+    // `.write(data)`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("write"),
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+        ::rocket::sref("std.checksum.md5_new().write"),
+        [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
+          Argument_Reader reader(::rocket::sref("std.checksum.md5_new().write"), ::rocket::ref(args));
+          // Get the hasher.
+          Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
+          self.zoom_in(::rocket::move(xmod));
+          // Parse arguments.
+          Sval data;
+          if(!reader.I().g(data).F()) {
             reader.throw_no_matching_function_call();
           }
-        )
+          // Call the binding function.
+          std_checksum_md5_new_write(self.open().open_opaque(), ::rocket::move(data));
+          return Reference_Root::S_null();
+        })
       ));
-    r.insert_or_assign(::rocket::sref("finish"),
-      Fval(
-        ::rocket::make_refcnt<Simple_Binding_Wrapper>(
-          // Description
-          ::rocket::sref("<std.checksum.md5_new()>.finish"),
-          // Definition
-          [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
-            Argument_Reader reader(::rocket::sref("<std.checksum.md5_new()>.finish"), ::rocket::ref(args));
-            // Get the hasher.
-            Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
-            self.zoom_in(::rocket::move(xmod));
-            auto& p = *(self.open().as_opaque()->share_this<MD5_Hasher>());
-            // Parse arguments.
-            if(reader.I().F()) {
-              Reference_Root::S_temporary xref = { p.finish() };
-              return ::rocket::move(xref);
-            }
+    //===================================================================
+    // `.finish()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("finish"),
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+        ::rocket::sref("std.checksum.md5_new().finish"),
+        [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
+          Argument_Reader reader(::rocket::sref("std.checksum.md5_new().finish"), ::rocket::ref(args));
+          // Get the hasher.
+          Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
+          self.zoom_in(::rocket::move(xmod));
+          // Parse arguments.
+          if(!reader.I().F()) {
             reader.throw_no_matching_function_call();
           }
-        )
+          // Call the binding function.
+          Reference_Root::S_temporary xref = { std_checksum_md5_new_finish(self.open().open_opaque()) };
+          return ::rocket::move(xref);
+        })
       ));
-    return r;
+    //===================================================================
+    // End of `std.checksum.md5_new()`
+    //===================================================================
+    return result;
   }
 
 Sval std_checksum_md5(Sval data)
   {
-    MD5_Hasher p;
-    p.write(data);
-    return p.finish();
+    MD5_Hasher h;
+    h.write(data);
+    return h.finish();
+  }
+
+Pval std_checksum_sha1_new_private()
+  {
+    return Pval(::rocket::make_refcnt<SHA1_Hasher>());
+  }
+
+void std_checksum_sha1_new_write(Pval& self, Sval data)
+  {
+    return self->share_this<SHA1_Hasher>()->write(data);
+  }
+
+Sval std_checksum_sha1_new_finish(Pval& self)
+  {
+    return self->share_this<SHA1_Hasher>()->finish();
   }
 
 Oval std_checksum_sha1_new()
   {
-    Oval r;
-    r.insert_or_assign(::rocket::sref("!p"),  // details
-      Pval(
-        ::rocket::make_refcnt<SHA1_Hasher>()
-      ));
-    r.insert_or_assign(::rocket::sref("write"),
-      Fval(
-        ::rocket::make_refcnt<Simple_Binding_Wrapper>(
-          // Description
-          ::rocket::sref("<std.checksum.sha1_new()>.write"),
-          // Definition
-          [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
-            Argument_Reader reader(::rocket::sref("<std.checksum.sha1_new()>.write"), ::rocket::ref(args));
-            // Get the hasher.
-            Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
-            self.zoom_in(::rocket::move(xmod));
-            auto& p = *(self.open().as_opaque()->share_this<SHA1_Hasher>());
-            // Parse arguments.
-            Sval data;
-            if(reader.I().g(data).F()) {
-              p.write(data);
-              return Reference_Root::S_null();
-            }
+    Oval result;
+    //===================================================================
+    // * private data
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("!p"),
+      std_checksum_sha1_new_private());
+    //===================================================================
+    // `.write(data)`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("write"),
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+        ::rocket::sref("std.checksum.sha1_new().write"),
+        [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
+          Argument_Reader reader(::rocket::sref("std.checksum.sha1_new().write"), ::rocket::ref(args));
+          // Get the hasher.
+          Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
+          self.zoom_in(::rocket::move(xmod));
+          // Parse arguments.
+          Sval data;
+          if(!reader.I().g(data).F()) {
             reader.throw_no_matching_function_call();
           }
-        )
+          // Call the binding function.
+          std_checksum_sha1_new_write(self.open().open_opaque(), ::rocket::move(data));
+          return Reference_Root::S_null();
+        })
       ));
-    r.insert_or_assign(::rocket::sref("finish"),
-      Fval(
-        ::rocket::make_refcnt<Simple_Binding_Wrapper>(
-          // Description
-          ::rocket::sref("<std.checksum.sha1_new()>.finish"),
-          // Definition
-          [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
-            Argument_Reader reader(::rocket::sref("<std.checksum.sha1_new()>.finish"), ::rocket::ref(args));
-            // Get the hasher.
-            Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
-            self.zoom_in(::rocket::move(xmod));
-            auto& p = *(self.open().as_opaque()->share_this<SHA1_Hasher>());
-            // Parse arguments.
-            if(reader.I().F()) {
-              Reference_Root::S_temporary xref = { p.finish() };
-              return ::rocket::move(xref);
-            }
+    //===================================================================
+    // `.finish()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("finish"),
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+        ::rocket::sref("std.checksum.sha1_new().finish"),
+        [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
+          Argument_Reader reader(::rocket::sref("std.checksum.sha1_new().finish"), ::rocket::ref(args));
+          // Get the hasher.
+          Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
+          self.zoom_in(::rocket::move(xmod));
+          // Parse arguments.
+          if(!reader.I().F()) {
             reader.throw_no_matching_function_call();
           }
-        )
+          // Call the binding function.
+          Reference_Root::S_temporary xref = { std_checksum_sha1_new_finish(self.open().open_opaque()) };
+          return ::rocket::move(xref);
+        })
       ));
-    return r;
+    //===================================================================
+    // End of `std.checksum.sha1_new()`
+    //===================================================================
+    return result;
   }
 
 Sval std_checksum_sha1(Sval data)
   {
-    SHA1_Hasher p;
-    p.write(data);
-    return p.finish();
+    SHA1_Hasher h;
+    h.write(data);
+    return h.finish();
+  }
+
+Pval std_checksum_sha256_new_private()
+  {
+    return Pval(::rocket::make_refcnt<SHA256_Hasher>());
+  }
+
+void std_checksum_sha256_new_write(Pval& self, Sval data)
+  {
+    return self->share_this<SHA256_Hasher>()->write(data);
+  }
+
+Sval std_checksum_sha256_new_finish(Pval& self)
+  {
+    return self->share_this<SHA256_Hasher>()->finish();
   }
 
 Oval std_checksum_sha256_new()
   {
-    Oval r;
-    r.insert_or_assign(::rocket::sref("!p"),  // details
-      Pval(
-        ::rocket::make_refcnt<SHA256_Hasher>()
-      ));
-    r.insert_or_assign(::rocket::sref("write"),
-      Fval(
-        ::rocket::make_refcnt<Simple_Binding_Wrapper>(
-          // Description
-          ::rocket::sref("<std.checksum.sha256_new()>.write"),
-          // Definition
-          [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
-            Argument_Reader reader(::rocket::sref("<std.checksum.sha256_new()>.write"), ::rocket::ref(args));
-            // Get the hasher.
-            Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
-            self.zoom_in(::rocket::move(xmod));
-            auto& p = *(self.open().as_opaque()->share_this<SHA256_Hasher>());
-            // Parse arguments.
-            Sval data;
-            if(reader.I().g(data).F()) {
-              p.write(data);
-              return Reference_Root::S_null();
-            }
+    Oval result;
+    //===================================================================
+    // * private data
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("!p"),
+      std_checksum_sha256_new_private());
+    //===================================================================
+    // `.write(data)`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("write"),
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+        ::rocket::sref("std.checksum.sha256_new().write"),
+        [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
+          Argument_Reader reader(::rocket::sref("std.checksum.sha256_new().write"), ::rocket::ref(args));
+          // Get the hasher.
+          Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
+          self.zoom_in(::rocket::move(xmod));
+          // Parse arguments.
+          Sval data;
+          if(!reader.I().g(data).F()) {
             reader.throw_no_matching_function_call();
           }
-        )
+          // Call the binding function.
+          std_checksum_sha256_new_write(self.open().open_opaque(), ::rocket::move(data));
+          return Reference_Root::S_null();
+        })
       ));
-    r.insert_or_assign(::rocket::sref("finish"),
-      Fval(
-        ::rocket::make_refcnt<Simple_Binding_Wrapper>(
-          // Description
-          ::rocket::sref("<std.checksum.sha256_new()>.finish"),
-          // Definition
-          [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
-            Argument_Reader reader(::rocket::sref("<std.checksum.sha256_new()>.finish"), ::rocket::ref(args));
-            // Get the hasher.
-            Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
-            self.zoom_in(::rocket::move(xmod));
-            auto& p = *(self.open().as_opaque()->share_this<SHA256_Hasher>());
-            // Parse arguments.
-            if(reader.I().F()) {
-              Reference_Root::S_temporary xref = { p.finish() };
-              return ::rocket::move(xref);
-            }
+    //===================================================================
+    // `.finish()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("finish"),
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+        ::rocket::sref("std.checksum.sha256_new().finish"),
+        [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
+          Argument_Reader reader(::rocket::sref("std.checksum.sha256_new().finish"), ::rocket::ref(args));
+          // Get the hasher.
+          Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
+          self.zoom_in(::rocket::move(xmod));
+          // Parse arguments.
+          if(!reader.I().F()) {
             reader.throw_no_matching_function_call();
           }
-        )
+          // Call the binding function.
+          Reference_Root::S_temporary xref = { std_checksum_sha256_new_finish(self.open().open_opaque()) };
+          return ::rocket::move(xref);
+        })
       ));
-    return r;
+    //===================================================================
+    // End of `std.checksum.sha256_new()`
+    //===================================================================
+    return result;
   }
 
 Sval std_checksum_sha256(Sval data)
   {
-    SHA256_Hasher p;
-    p.write(data);
-    return p.finish();
+    SHA256_Hasher h;
+    h.write(data);
+    return h.finish();
   }
 
 void create_bindings_checksum(Oval& result, API_Version /*version*/)
