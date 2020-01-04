@@ -49,105 +49,100 @@ cow_string do_xindent(cow_string&& str)
 cow_string do_stringify(const Value& val) noexcept
   try {
     ::rocket::tinyfmt_str fmt;
-
     fmt << val;
     return do_xindent(fmt.extract_string());
   }
-  catch(::std::exception& stdex) {
+  catch(exception& stdex) {
     return ::rocket::sref("<invalid value>");
   }
 
 cow_string do_stringify(const Reference& ref) noexcept
   try {
+    if(ref.is_void()) {
+      return ::rocket::sref("<void>");
+    }
+    if(ref.is_tail_call()) {
+      return ::rocket::sref("<tail call>");
+    }
     ::rocket::tinyfmt_str fmt;
-
-    auto var = ref.get_variable_opt();
-    if(var) {
-      if(var->is_immutable())
-        fmt << "immutable variable: ";
-      else
-        fmt << "variable: ";
-    }
-    else {
-      if(ref.is_constant())
-        fmt << "constant: ";
-      else if(ref.is_temporary())
-        fmt << "temporary: ";
-      else
-        return ::rocket::sref("<tail call>");
-    }
-
+    // Print the value category.
+    if(ref.is_constant())
+      fmt << "constant ";
+    else if(ref.is_temporary())
+      fmt << "temporary ";
+    else if(ref.is_variable())
+      fmt << (ref.is_immutable() ? "immutable variable " : "variable ");
+    // Print the value.
     fmt << ref.read();
     return do_xindent(fmt.extract_string());
   }
-  catch(::std::exception& other) {
+  catch(exception& stdex) {
     return ::rocket::sref("<invalid reference>");
   }
 
-cow_string do_stringify(const ::std::exception& stdex) noexcept
+cow_string do_stringify(const exception& stdex) noexcept
   try {
     ::rocket::tinyfmt_str fmt;
-
+    // Print the description.
     fmt << stdex.what();
-
+    // Print the exception type.
     fmt << "\n[exception class `" << typeid(stdex).name() << "`]";
     return do_xindent(fmt.extract_string());
   }
-  catch(::std::exception& other) {
+  catch(exception& other) {
     return ::rocket::sref("<invalid exception>");
   }
 
 cow_string do_stringify(const Parser_Error& except) noexcept
   try {
     ::rocket::tinyfmt_str fmt;
-
+    // Print the description.
     fmt << "ERROR " << except.status() << ": " << describe_parser_status(except.status());
-
+    // Print the source location.
     if(except.line() <= 0)
       fmt << "\n[end of input encountered]";
     else
-      fmt << "\n[line " << except.line() << ", offset " << except.offset() << ", length " << except.length() << "]";
-
+      fmt << "\n[line " << except.line() << ", offset " << except.offset() << ", length "
+          << except.length() << "]";
+    // Print the exception type.
     fmt << "\n[exception class `" << typeid(except).name() << "`]";
     return do_xindent(fmt.extract_string());
   }
-  catch(::std::exception& other) {
+  catch(exception& other) {
     return ::rocket::sref("<invalid exception>");
   }
 
 cow_string do_stringify(const Runtime_Error& except) noexcept
   try {
     ::rocket::tinyfmt_str fmt;
-
+    // Print the description.
     if(except.value().is_string())
       fmt << except.value().as_string();
     else
       fmt << except.value();
-
+    // Print the backtrace.
     fmt << "\n[backtrace:";
     for(unsigned long i = 0; i != except.count_frames(); ++i) {
       const auto& f = except.frame(i);
       fmt << "\n  #" << i << " <" << f.what_type() << "> at '" << f.sloc() << "': " << f.value();
     }
     fmt << "\n  -- end of backtrace]";
-
+    // Print the exception type.
     fmt << "\n[exception class `" << typeid(except).name() << "`]";
     return do_xindent(fmt.extract_string());
   }
-  catch(::std::exception& other) {
+  catch(exception& other) {
     return ::rocket::sref("<invalid exception>");
   }
 
 // Define command-line options here.
 struct Command_Line_Options
   {
-    bool help = false;
-    bool version = false;
-
+    // options
     uint8_t optimize = 0;
     bool verbose = false;
     bool interactive = false;
-
+    // non-options
     cow_string path;
     cow_vector<Value> args;
   };
@@ -242,8 +237,8 @@ void do_print_help(const char* self)
       "When running in non-interactive mode, characters are read from FILE, then\n"
       "compiled and executed. If the script returns an `integer`, it is truncated\n"
       "to 8 bits as an unsigned integer and the result denotes the exit status. If\n"
-      "the script returns `null`, the exit status is zero. If the script returns a\n"
-      "value that is neither an `integer` nor `null`, or throws an exception, the\n"
+      "the script returns no value, the exit status is zero. If the script returns\n"
+      "a value that is neither an `integer` nor `null`, or throws an exception, the\n"
       "exit status is non-zero.\n"
       "\n"
       "Visit the homepage at <%s>.\n"
@@ -538,15 +533,14 @@ void do_handle_repl_command(cow_string&& cmd)
       // Execute the script as a function, which returns a `Reference`.
       try {
         const auto ref = script.execute(global, ::rocket::move(cmdline.args));
-        const auto& val = ref.read();
         // Print the result.
-        ::fprintf(stderr, "* result #%lu: %s\n", index, do_stringify(val).c_str());
+        ::fprintf(stderr, "* result #%lu: %s\n", index, do_stringify(ref).c_str());
       }
       catch(Runtime_Error& except) {
         // If an exception was thrown, print something informative.
         ::fprintf(stderr, "! runtime error: %s\n", do_stringify(except).c_str());
       }
-      catch(::std::exception& stdex) {
+      catch(exception& stdex) {
         // If an exception was thrown, print something informative.
         ::fprintf(stderr, "! unhandled exception: %s\n", do_stringify(stdex).c_str());
       }
@@ -573,19 +567,25 @@ void do_handle_repl_command(cow_string&& cmd)
     Exit_Code status = exit_runtime_error;
     try {
       const auto ref = script.execute(global, ::rocket::move(cmdline.args));
-      const auto& val = ref.read();
-      // If the script returned an `integer`, forward its lower 8 bits.
-      // Otherwise, `null` indicates success and all other values indicate failure.
-      if(val.is_integer())
-        status = static_cast<Exit_Code>(val.as_integer());
-      else
-        status = val.is_null() ? exit_success : exit_unspecified;
+      if(ref.is_void()) {
+        // If the script returned no value, exit with zero.
+        status = exit_success;
+      }
+      else {
+        // If the script returned an `integer`, forward its lower 8 bits.
+        // Any other value indicates failure.
+        const auto& val = ref.read();
+        if(val.is_integer())
+          status = static_cast<Exit_Code>(val.as_integer());
+        else
+          status = exit_unspecified;
+      }
     }
     catch(Runtime_Error& except) {
       // If an exception was thrown, print something informative.
       ::fprintf(stderr, "! runtime error: %s\n", do_stringify(except).c_str());
     }
-    catch(::std::exception& stdex) {
+    catch(exception& stdex) {
       // If an exception was thrown, print something informative.
       ::fprintf(stderr, "! unhandled exception: %s\n", do_stringify(stdex).c_str());
     }
@@ -614,7 +614,7 @@ int main(int argc, char** argv)
     else
       do_single_noreturn();
   }
-  catch(::std::exception& stdex) {
+  catch(exception& stdex) {
     // Print a message followed by the backtrace if it is available. There isn't much we can do.
     ::fprintf(stderr, "! unhandled exception: %s\n", do_stringify(stdex).c_str());
     do_quick_exit(exit_unspecified);
