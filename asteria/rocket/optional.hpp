@@ -45,9 +45,8 @@ template<typename valueT> class optional
       :
         m_stor()
       {
-        if(other.m_stor.empty()) {
+        if(other.m_stor.empty())
           this->m_stor.emplace_back(other.m_stor.front());
-        }
       }
     template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<typename optional<yvalueT>::value_type&&, value_type>::value)>
         optional(optional<yvalueT>&& other)
@@ -55,9 +54,8 @@ template<typename valueT> class optional
       :
         m_stor()
       {
-        if(!other.m_stor.empty()) {
+        if(!other.m_stor.empty())
           this->m_stor.emplace_back(noadl::move(other.m_stor.front()));
-        }
       }
     // 19.6.3.3, assignment
     optional& operator=(clear_t) noexcept
@@ -69,12 +67,10 @@ template<typename valueT> class optional
         optional& operator=(yvalueT&& yvalue)
                     noexcept(conjunction<is_nothrow_constructible<value_type, yvalueT&&>, is_nothrow_assignable<value_type, yvalueT&&>>::value)
       {
-        if(!this->m_stor.empty()) {
+        if(!this->m_stor.empty())
           this->m_stor.mut_front() = noadl::forward<yvalueT>(yvalue);
-        }
-        else {
+        else
           this->m_stor.emplace_back(noadl::forward<yvalueT>(yvalue));
-        }
         return *this;
       }
     template<typename yvalueT, ROCKET_ENABLE_IF(is_assignable<value_type, const typename optional<yvalueT>::value_type&>::value)>
@@ -82,15 +78,12 @@ template<typename valueT> class optional
                     noexcept(conjunction<is_nothrow_constructible<value_type, const typename optional<yvalueT>::value_type&>,
                                          is_nothrow_assignable<value_type, const typename optional<yvalueT>::value_type&>>::value)
       {
-        if(other.m_stor.empty()) {
+        if(other.m_stor.empty())
           this->m_stor.clear();
-        }
-        else if(!this->m_stor.empty()) {
+        else if(!this->m_stor.empty())
           this->m_stor.mut_front() = other.m_stor.front();
-        }
-        else {
+        else
           this->m_stor.emplace_back(other.m_stor.front());
-        }
         return *this;
       }
     template<typename yvalueT, ROCKET_ENABLE_IF(is_assignable<value_type, typename optional<yvalueT>::value_type&&>::value)>
@@ -98,15 +91,12 @@ template<typename valueT> class optional
                     noexcept(conjunction<is_nothrow_constructible<value_type, typename optional<yvalueT>::value_type&&>,
                                          is_nothrow_assignable<value_type, typename optional<yvalueT>::value_type&&>>::value)
       {
-        if(other.m_stor.empty()) {
+        if(other.m_stor.empty())
           this->m_stor.clear();
-        }
-        else if(!this->m_stor.empty()) {
+        else if(!this->m_stor.empty())
           this->m_stor.mut_front() = noadl::move(other.m_stor.front());
-        }
-        else {
+        else
           this->m_stor.emplace_back(noadl::move(other.m_stor.front()));
-        }
         return *this;
       }
 
