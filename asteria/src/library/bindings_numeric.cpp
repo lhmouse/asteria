@@ -704,20 +704,18 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "  * Throws an exception if `value` is the `integer` `-0x1p63`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.abs"), ::rocket::ref(args));
           // Parse arguments.
           Ival ivalue;
           if(reader.I().g(ivalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_abs(::rocket::move(ivalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_abs(::rocket::move(ivalue));
           }
           Rval rvalue;
           if(reader.I().g(rvalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_abs(::rocket::move(rvalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_abs(::rocket::move(rvalue));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -740,20 +738,18 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "  * Returns `-1` if `value` is negative, or `0` otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.sign"), ::rocket::ref(args));
           // Parse arguments.
           Ival ivalue;
           if(reader.I().g(ivalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_sign(::rocket::move(ivalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_sign(::rocket::move(ivalue));
           }
           Rval rvalue;
           if(reader.I().g(rvalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_sign(::rocket::move(rvalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_sign(::rocket::move(rvalue));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -778,20 +774,18 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "    is neither an infinity or a NaN, or `false` otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.is_finite"), ::rocket::ref(args));
           // Parse arguments.
           Ival ivalue;
           if(reader.I().g(ivalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_is_finite(::rocket::move(ivalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_is_finite(::rocket::move(ivalue));
           }
           Rval rvalue;
           if(reader.I().g(rvalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_is_finite(::rocket::move(rvalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_is_finite(::rocket::move(rvalue));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -816,20 +810,18 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "    or `false` otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.is_infinity"), ::rocket::ref(args));
           // Parse arguments.
           Ival ivalue;
           if(reader.I().g(ivalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_is_infinity(::rocket::move(ivalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_is_infinity(::rocket::move(ivalue));
           }
           Rval rvalue;
           if(reader.I().g(rvalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_is_infinity(::rocket::move(rvalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_is_infinity(::rocket::move(rvalue));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -853,20 +845,18 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "    `false` otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.is_nan"), ::rocket::ref(args));
           // Parse arguments.
           Ival ivalue;
           if(reader.I().g(ivalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_is_nan(::rocket::move(ivalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_is_nan(::rocket::move(ivalue));
           }
           Rval rvalue;
           if(reader.I().g(rvalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_is_nan(::rocket::move(rvalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_is_nan(::rocket::move(rvalue));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -893,7 +883,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "    `upper`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.clamp"), ::rocket::ref(args));
           // Parse arguments.
           Ival ivalue;
@@ -901,18 +891,14 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           Ival iupper;
           if(reader.I().g(ivalue).g(ilower).g(iupper).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_clamp(::rocket::move(ivalue), ::rocket::move(ilower),
-                                                                   ::rocket::move(iupper)) };
-            return ::rocket::move(xref);
+            return std_numeric_clamp(::rocket::move(ivalue), ::rocket::move(ilower), ::rocket::move(iupper));
           }
           Rval rvalue;
           Rval flower;
           Rval fupper;
           if(reader.I().g(rvalue).g(flower).g(fupper).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_clamp(::rocket::move(rvalue), ::rocket::move(flower),
-                                                                   ::rocket::move(fupper)) };
-            return ::rocket::move(xref);
+            return std_numeric_clamp(::rocket::move(rvalue), ::rocket::move(flower), ::rocket::move(fupper));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -935,20 +921,18 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "  * Returns the rounded value.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.round"), ::rocket::ref(args));
           // Parse arguments.
           Ival ivalue;
           if(reader.I().g(ivalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_round(::rocket::move(ivalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_round(::rocket::move(ivalue));
           }
           Rval rvalue;
           if(reader.I().g(rvalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_round(::rocket::move(rvalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_round(::rocket::move(rvalue));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -971,20 +955,18 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "  * Returns the rounded value.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.floor"), ::rocket::ref(args));
           // Parse arguments.
           Ival ivalue;
           if(reader.I().g(ivalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_floor(::rocket::move(ivalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_floor(::rocket::move(ivalue));
           }
           Rval rvalue;
           if(reader.I().g(rvalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_floor(::rocket::move(rvalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_floor(::rocket::move(rvalue));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1007,20 +989,18 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "  * Returns the rounded value.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.ceil"), ::rocket::ref(args));
           // Parse arguments.
           Ival ivalue;
           if(reader.I().g(ivalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_ceil(::rocket::move(ivalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_ceil(::rocket::move(ivalue));
           }
           Rval rvalue;
           if(reader.I().g(rvalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_ceil(::rocket::move(rvalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_ceil(::rocket::move(rvalue));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1043,20 +1023,18 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "  * Returns the rounded value.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.trunc"), ::rocket::ref(args));
           // Parse arguments.
           Ival ivalue;
           if(reader.I().g(ivalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_trunc(::rocket::move(ivalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_trunc(::rocket::move(ivalue));
           }
           Rval rvalue;
           if(reader.I().g(rvalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_trunc(::rocket::move(rvalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_trunc(::rocket::move(rvalue));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1083,20 +1061,18 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "    `integer`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.iround"), ::rocket::ref(args));
           // Parse arguments.
           Ival ivalue;
           if(reader.I().g(ivalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_iround(::rocket::move(ivalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_iround(::rocket::move(ivalue));
           }
           Rval rvalue;
           if(reader.I().g(rvalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_iround(::rocket::move(rvalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_iround(::rocket::move(rvalue));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1123,20 +1099,18 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "    `integer`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.ifloor"), ::rocket::ref(args));
           // Parse arguments.
           Ival ivalue;
           if(reader.I().g(ivalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_ifloor(::rocket::move(ivalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_ifloor(::rocket::move(ivalue));
           }
           Rval rvalue;
           if(reader.I().g(rvalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_ifloor(::rocket::move(rvalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_ifloor(::rocket::move(rvalue));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1163,20 +1137,18 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "    `integer`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.iceil"), ::rocket::ref(args));
           // Parse arguments.
           Ival ivalue;
           if(reader.I().g(ivalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_iceil(::rocket::move(ivalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_iceil(::rocket::move(ivalue));
           }
           Rval rvalue;
           if(reader.I().g(rvalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_iceil(::rocket::move(rvalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_iceil(::rocket::move(rvalue));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1203,20 +1175,18 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "    `integer`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.itrunc"), ::rocket::ref(args));
           // Parse arguments.
           Ival ivalue;
           if(reader.I().g(ivalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_itrunc(::rocket::move(ivalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_itrunc(::rocket::move(ivalue));
           }
           Rval rvalue;
           if(reader.I().g(rvalue).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_itrunc(::rocket::move(rvalue)) };
-            return ::rocket::move(xref);
+            return std_numeric_itrunc(::rocket::move(rvalue));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1241,14 +1211,13 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "  * Throws an exception if `limit` is zero or non-finite.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.random"), ::rocket::ref(args));
           // Parse arguments.
           Ropt limit;
           if(reader.I().g(limit).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_random(global, ::rocket::move(limit)) };
-            return ::rocket::move(xref);
+            return std_numeric_random(global, ::rocket::move(limit));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1270,14 +1239,13 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "  * Returns the square root of `x` as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.sqrt"), ::rocket::ref(args));
           // Parse arguments.
           Rval x;
           if(reader.I().g(x).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_sqrt(::rocket::move(x)) };
-            return ::rocket::move(xref);
+            return std_numeric_sqrt(::rocket::move(x));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1300,7 +1268,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "  * Returns the value of `x * y + z` as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.fma"), ::rocket::ref(args));
           // Parse arguments.
           Rval x;
@@ -1308,8 +1276,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           Rval z;
           if(reader.I().g(x).g(y).g(z).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_fma(::rocket::move(x), ::rocket::move(y), ::rocket::move(z)) };
-            return ::rocket::move(xref);
+            return std_numeric_fma(::rocket::move(x), ::rocket::move(y), ::rocket::move(z));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1332,15 +1299,14 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "  * Returns the remainder as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.remainder"), ::rocket::ref(args));
           // Parse arguments.
           Rval x;
           Rval y;
           if(reader.I().g(x).g(y).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_remainder(::rocket::move(x), ::rocket::move(y)) };
-            return ::rocket::move(xref);
+            return std_numeric_remainder(::rocket::move(x), ::rocket::move(y));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1367,7 +1333,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "    that is of type `integer`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.frexp"), ::rocket::ref(args));
           // Parse arguments.
           Rval x;
@@ -1375,12 +1341,10 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto pair = std_numeric_frexp(::rocket::move(x));
             // This function returns a `pair`, but we would like to return an array so convert it.
-            Aval xval;
-            xval.emplace_back(pair.first);
-            xval.emplace_back(pair.second);
-            // Return the array.
-            Reference_Root::S_temporary xref = { ::rocket::move(xval) };
-            return ::rocket::move(xref);
+            Aval rval(2);
+            rval.mut(0) = ::rocket::move(pair.first);
+            rval.mut(1) = ::rocket::move(pair.second);
+            return ::rocket::move(rval);
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1403,15 +1367,14 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "  * Returns the product as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.ldexp"), ::rocket::ref(args));
           // Parse arguments.
           Rval frac;
           Ival exp;
           if(reader.I().g(frac).g(exp).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_ldexp(::rocket::move(frac), ::rocket::move(exp)) };
-            return ::rocket::move(xref);
+            return std_numeric_ldexp(::rocket::move(frac), ::rocket::move(exp));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1435,15 +1398,14 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "  * Returns the reduced sum of `x` and `y`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.addm"), ::rocket::ref(args));
           // Parse arguments.
           Ival x;
           Ival y;
           if(reader.I().g(x).g(y).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_addm(::rocket::move(x), ::rocket::move(y)) };
-            return ::rocket::move(xref);
+            return std_numeric_addm(::rocket::move(x), ::rocket::move(y));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1468,15 +1430,14 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "  * Returns the reduced difference of `x` and `y`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.subm"), ::rocket::ref(args));
           // Parse arguments.
           Ival x;
           Ival y;
           if(reader.I().g(x).g(y).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_subm(::rocket::move(x), ::rocket::move(y)) };
-            return ::rocket::move(xref);
+            return std_numeric_subm(::rocket::move(x), ::rocket::move(y));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1501,15 +1462,14 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "  * Returns the reduced product of `x` and `y`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.mulm"), ::rocket::ref(args));
           // Parse arguments.
           Ival x;
           Ival y;
           if(reader.I().g(x).g(y).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_mulm(::rocket::move(x), ::rocket::move(y)) };
-            return ::rocket::move(xref);
+            return std_numeric_mulm(::rocket::move(x), ::rocket::move(y));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1535,22 +1495,20 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "  * Returns the saturated sum of `x` and `y`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.adds"), ::rocket::ref(args));
           // Parse arguments.
           Ival ix;
           Ival iy;
           if(reader.I().g(ix).g(iy).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_adds(::rocket::move(ix), ::rocket::move(iy)) };
-            return ::rocket::move(xref);
+            return std_numeric_adds(::rocket::move(ix), ::rocket::move(iy));
           }
           Rval fx;
           Rval fy;
           if(reader.I().g(fx).g(fy).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_adds(::rocket::move(fx), ::rocket::move(fy)) };
-            return ::rocket::move(xref);
+            return std_numeric_adds(::rocket::move(fx), ::rocket::move(fy));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1576,22 +1534,20 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "  * Returns the saturated difference of `x` and `y`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.subs"), ::rocket::ref(args));
           // Parse arguments.
           Ival ix;
           Ival iy;
           if(reader.I().g(ix).g(iy).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_subs(::rocket::move(ix), ::rocket::move(iy)) };
-            return ::rocket::move(xref);
+            return std_numeric_subs(::rocket::move(ix), ::rocket::move(iy));
           }
           Rval fx;
           Rval fy;
           if(reader.I().g(fx).g(fy).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_subs(::rocket::move(fx), ::rocket::move(fy)) };
-            return ::rocket::move(xref);
+            return std_numeric_subs(::rocket::move(fx), ::rocket::move(fy));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1617,22 +1573,20 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "  * Returns the saturated product of `x` and `y`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.muls"), ::rocket::ref(args));
           // Parse arguments.
           Ival ix;
           Ival iy;
           if(reader.I().g(ix).g(iy).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_muls(::rocket::move(ix), ::rocket::move(iy)) };
-            return ::rocket::move(xref);
+            return std_numeric_muls(::rocket::move(ix), ::rocket::move(iy));
           }
           Rval fx;
           Rval fy;
           if(reader.I().g(fx).g(fy).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_muls(::rocket::move(fx), ::rocket::move(fy)) };
-            return ::rocket::move(xref);
+            return std_numeric_muls(::rocket::move(fx), ::rocket::move(fy));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1655,14 +1609,13 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "    returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.lzcnt"), ::rocket::ref(args));
           // Parse arguments.
           Ival x;
           if(reader.I().g(x).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_lzcnt(::rocket::move(x)) };
-            return ::rocket::move(xref);
+            return std_numeric_lzcnt(::rocket::move(x));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1685,14 +1638,13 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "    returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.tzcnt"), ::rocket::ref(args));
           // Parse arguments.
           Ival x;
           if(reader.I().g(x).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_tzcnt(::rocket::move(x)) };
-            return ::rocket::move(xref);
+            return std_numeric_tzcnt(::rocket::move(x));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1714,14 +1666,13 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "  * Returns the bit count as an `integer`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.popcnt"), ::rocket::ref(args));
           // Parse arguments.
           Ival x;
           if(reader.I().g(x).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_popcnt(::rocket::move(x)) };
-            return ::rocket::move(xref);
+            return std_numeric_popcnt(::rocket::move(x));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1751,7 +1702,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "  * Throws an exception if `m` is negative or greater than `64`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.rotl"), ::rocket::ref(args));
           // Parse arguments.
           Ival m;
@@ -1759,8 +1710,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           Ival n;
           if(reader.I().g(m).g(x).g(n).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_rotl(::rocket::move(m), ::rocket::move(x), ::rocket::move(n)) };
-            return ::rocket::move(xref);
+            return std_numeric_rotl(::rocket::move(m), ::rocket::move(x), ::rocket::move(n));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1790,7 +1740,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "  * Throws an exception if `m` is negative or greater than `64`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.rotr"), ::rocket::ref(args));
           // Parse arguments.
           Ival m;
@@ -1798,8 +1748,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           Ival n;
           if(reader.I().g(m).g(x).g(n).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_rotr(::rocket::move(m), ::rocket::move(x), ::rocket::move(n)) };
-            return ::rocket::move(xref);
+            return std_numeric_rotr(::rocket::move(m), ::rocket::move(x), ::rocket::move(n));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1834,7 +1783,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "    but `ebase` is `10`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.format"), ::rocket::ref(args));
           // Parse arguments.
           Ival ivalue;
@@ -1842,16 +1791,12 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           Iopt ebase;
           if(reader.I().g(ivalue).g(base).g(ebase).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_format(::rocket::move(ivalue), ::rocket::move(base),
-                                                                    ::rocket::move(ebase)) };
-            return ::rocket::move(xref);
+            return std_numeric_format(::rocket::move(ivalue), ::rocket::move(base), ::rocket::move(ebase));
           }
           Rval fvalue;
           if(reader.I().g(fvalue).g(base).g(ebase).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_format(::rocket::move(fvalue), ::rocket::move(base),
-                                                                    ::rocket::move(ebase)) };
-            return ::rocket::move(xref);
+            return std_numeric_format(::rocket::move(fvalue), ::rocket::move(base), ::rocket::move(ebase));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1888,18 +1833,13 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "    `null` is returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.parse_integer"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
           if(reader.I().g(text).F()) {
             // Call the binding function.
-            auto qres = std_numeric_parse_integer(::rocket::move(text));
-            if(!qres) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qres) };
-            return ::rocket::move(xref);
+            return std_numeric_parse_integer(::rocket::move(text));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1942,19 +1882,14 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "    `null` is returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.numeric.parse_real"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
           Bopt saturating;
           if(reader.I().g(text).g(saturating).F()) {
             // Call the binding function.
-            auto qres = std_numeric_parse_real(::rocket::move(text), ::rocket::move(saturating));
-            if(!qres) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qres) };
-            return ::rocket::move(xref);
+            return std_numeric_parse_real(::rocket::move(text), ::rocket::move(saturating));
           }
           // Fail.
           reader.throw_no_matching_function_call();

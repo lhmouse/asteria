@@ -17,14 +17,13 @@
 namespace Asteria {
 namespace {
 
-inline void do_push_argument(cow_vector<Reference>& args, const Value& value)
+void do_push_argument(cow_vector<Reference>& args, const Value& value)
   {
     Reference_Root::S_temporary xref = { value };
     args.emplace_back(::rocket::move(xref));
   }
 
-void do_process_block(Global& global, const Fval& callback,
-                      const Ival& offset, const Sval& data)
+void do_process_block(Global& global, const Fval& callback, const Ival& offset, const Sval& data)
   {
     // Set up arguments for the user-defined predictor.
     cow_vector<Reference> args;
@@ -509,13 +508,12 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "    directory.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.filesystem.get_working_directory"), ::rocket::ref(args));
           // Parse arguments.
           if(reader.I().F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_filesystem_get_working_directory() };
-            return ::rocket::move(xref);
+            return std_filesystem_get_working_directory();
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -553,18 +551,13 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "    On failure, `null` is returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.filesystem.get_information"), ::rocket::ref(args));
           // Parse arguments.
           Sval path;
           if(reader.I().g(path).F()) {
             // Call the binding function.
-            auto qres = std_filesystem_get_information(::rocket::move(path));
-            if(!qres) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qres) };
-            return ::rocket::move(xref);
+            return std_filesystem_get_information(::rocket::move(path));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -587,18 +580,13 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "    successfully removed in total, or `null` on failure.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.filesystem.remove_recursive"), ::rocket::ref(args));
           // Parse arguments.
           Sval path;
           if(reader.I().g(path).F()) {
             // Call the binding function.
-            auto qres = std_filesystem_remove_recursive(::rocket::move(path));
-            if(!qres) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qres) };
-            return ::rocket::move(xref);
+            return std_filesystem_remove_recursive(::rocket::move(path));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -620,18 +608,14 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "  * Returns `true` on success, or `null` on failure.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.filesystem.move_from"), ::rocket::ref(args));
           // Parse arguments.
           Sval path_new;
           Sval path_old;
           if(reader.I().g(path_new).g(path_old).F()) {
             // Call the binding function.
-            if(!std_filesystem_move_from(path_new, path_old)) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { true };
-            return ::rocket::move(xref);
+            return std_filesystem_move_from(path_new, path_old) ? true : null_value;
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -662,18 +646,13 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "    On failure, `null` is returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.filesystem.directory_list"), ::rocket::ref(args));
           // Parse arguments.
           Sval path;
           if(reader.I().g(path).F()) {
             // Call the binding function.
-            auto qres = std_filesystem_directory_list(::rocket::move(path));
-            if(!qres) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qres) };
-            return ::rocket::move(xref);
+            return std_filesystem_directory_list(::rocket::move(path));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -698,18 +677,13 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "    `0` if the directory already exists, or `null` on failure.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.filesystem.directory_create"), ::rocket::ref(args));
           // Parse arguments.
           Sval path;
           if(reader.I().g(path).F()) {
             // Call the binding function.
-            auto qres = std_filesystem_directory_create(::rocket::move(path));
-            if(!qres) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qres) };
-            return ::rocket::move(xref);
+            return std_filesystem_directory_create(::rocket::move(path));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -732,18 +706,13 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "    if it is not empty, or `null` on failure.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.filesystem.directory_remove"), ::rocket::ref(args));
           // Parse arguments.
           Sval path;
           if(reader.I().g(path).F()) {
             // Call the binding function.
-            auto qres = std_filesystem_directory_remove(::rocket::move(path));
-            if(!qres) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qres) };
-            return ::rocket::move(xref);
+            return std_filesystem_directory_remove(::rocket::move(path));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -771,7 +740,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "  * Throws an exception if `offset` is negative.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.filesystem.file_read"), ::rocket::ref(args));
           // Parse arguments.
           Sval path;
@@ -779,12 +748,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           Iopt limit;
           if(reader.I().g(path).g(offset).g(limit).F()) {
             // Call the binding function.
-            auto qres = std_filesystem_file_read(::rocket::move(path), ::rocket::move(offset), ::rocket::move(limit));
-            if(!qres) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qres) };
-            return ::rocket::move(xref);
+            return std_filesystem_file_read(::rocket::move(path), ::rocket::move(offset), ::rocket::move(limit));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -819,7 +783,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "  * Throws an exception if `offset` is negative.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
           Argument_Reader reader(::rocket::sref("std.filesystem.file_stream"), ::rocket::ref(args));
           // Parse arguments.
           Sval path;
@@ -828,11 +792,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           Iopt limit;
           if(reader.I().g(path).g(callback).g(offset).g(limit).F()) {
             // Call the binding function.
-            if(!std_filesystem_file_stream(global, path, callback, offset, limit)) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { true };
-            return ::rocket::move(xref);
+            return std_filesystem_file_stream(global, path, callback, offset, limit) ? true : null_value;
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -861,7 +821,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "  * Throws an exception if `offset` is negative.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.filesystem.file_write"), ::rocket::ref(args));
           // Parse arguments.
           Sval path;
@@ -869,11 +829,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           Iopt offset;
           if(reader.I().g(path).g(data).g(offset).F()) {
             // Call the binding function.
-            if(!std_filesystem_file_write(path, data, offset)) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { true };
-            return ::rocket::move(xref);
+            return std_filesystem_file_write(path, data, offset) ? true : null_value;
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -899,7 +855,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "    `null` on failure.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.filesystem.file_append"), ::rocket::ref(args));
           // Parse arguments.
           Sval path;
@@ -907,11 +863,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           Bopt exclusive;
           if(reader.I().g(path).g(data).g(exclusive).F()) {
             // Call the binding function.
-            if(!std_filesystem_file_append(path, data, exclusive)) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { true };
-            return ::rocket::move(xref);
+            return std_filesystem_file_append(path, data, exclusive) ? true : null_value;
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -935,18 +887,14 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "  * Returns `true` on success, or `null` on failure.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.filesystem.file_copy_from"), ::rocket::ref(args));
           // Parse arguments.
           Sval path_new;
           Sval path_old;
           if(reader.I().g(path_new).g(path_old).F()) {
             // Call the binding function.
-            if(!std_filesystem_file_copy_from(path_new, path_old)) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { true };
-            return ::rocket::move(xref);
+            return std_filesystem_file_copy_from(path_new, path_old) ? true : null_value;
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -969,17 +917,13 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "    `null` on failure.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.filesystem.file_remove"), ::rocket::ref(args));
           // Parse arguments.
           Sval path;
           if(reader.I().g(path).F()) {
             // Call the binding function.
-            if(!std_filesystem_file_remove(path)) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { true };
-            return ::rocket::move(xref);
+            return std_filesystem_file_remove(path) ? true : null_value;
           }
           // Fail.
           reader.throw_no_matching_function_call();

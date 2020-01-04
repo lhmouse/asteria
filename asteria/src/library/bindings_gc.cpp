@@ -98,18 +98,13 @@ void create_bindings_gc(Oval& result, API_Version /*version*/)
           "    is not valid, `null` is returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
           Argument_Reader reader(::rocket::sref("std.gc.tracked_count"), ::rocket::ref(args));
           // Parse arguments.
           Ival generation;
           if(reader.I().g(generation).F()) {
             // Call the binding function.
-            auto qthres = std_gc_tracked_count(global, ::rocket::move(generation));
-            if(!qthres) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { *qthres };
-            return ::rocket::move(xref);
+            return std_gc_tracked_count(global, ::rocket::move(generation));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -132,18 +127,13 @@ void create_bindings_gc(Oval& result, API_Version /*version*/)
           "    returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
           Argument_Reader reader(::rocket::sref("std.gc.get_threshold"), ::rocket::ref(args));
           // Parse arguments.
           Ival generation;
           if(reader.I().g(generation).F()) {
             // Call the binding function.
-            auto qthres = std_gc_get_threshold(global, ::rocket::move(generation));
-            if(!qthres) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { *qthres };
-            return ::rocket::move(xref);
+            return std_gc_get_threshold(global, ::rocket::move(generation));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -171,19 +161,14 @@ void create_bindings_gc(Oval& result, API_Version /*version*/)
           "    valid, `null` is returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
           Argument_Reader reader(::rocket::sref("std.gc.set_threshold"), ::rocket::ref(args));
           // Parse arguments.
           Ival generation;
           Ival threshold;
           if(reader.I().g(generation).g(threshold).F()) {
             // Call the binding function.
-            auto qoldthres = std_gc_set_threshold(global, ::rocket::move(generation), ::rocket::move(threshold));
-            if(!qoldthres) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { *qoldthres };
-            return ::rocket::move(xref);
+            return std_gc_set_threshold(global, ::rocket::move(generation), ::rocket::move(threshold));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -207,14 +192,13 @@ void create_bindings_gc(Oval& result, API_Version /*version*/)
           "    total.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
           Argument_Reader reader(::rocket::sref("std.gc.collect"), ::rocket::ref(args));
           // Parse arguments.
           Iopt generation_limit;
           if(reader.I().g(generation_limit).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_gc_collect(global, ::rocket::move(generation_limit)) };
-            return ::rocket::move(xref);
+            return std_gc_collect(global, ::rocket::move(generation_limit));
           }
           // Fail.
           reader.throw_no_matching_function_call();

@@ -56,18 +56,14 @@ void create_bindings_debug(Oval& result, API_Version /*version*/)
           "  * Returns `true` if the operation succeeds, or `null` otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.debug.print"), ::rocket::ref(args));
           // Parse variadic arguments.
           Sval templ;
           cow_vector<Value> values;
           if(reader.I().g(templ).F(values)) {
             // Call the binding function.
-            if(!std_debug_print(templ, values)) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { true };
-            return ::rocket::move(xref);
+            return std_debug_print(templ, values) ? true : null_value;
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -92,18 +88,14 @@ void create_bindings_debug(Oval& result, API_Version /*version*/)
           "  * Returns `true` if the operation succeeds, or `null` otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.debug.dump"), ::rocket::ref(args));
           // Parse arguments.
           Value value;
           Iopt indent;
           if(reader.I().g(value).g(indent).F()) {
             // Call the binding function.
-            if(!std_debug_dump(value, indent)) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { true };
-            return ::rocket::move(xref);
+            return std_debug_dump(value, indent) ? true : null_value;
           }
           // Fail.
           reader.throw_no_matching_function_call();

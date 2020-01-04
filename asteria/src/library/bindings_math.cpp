@@ -214,15 +214,14 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Returns the power as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.math.exp"), ::rocket::ref(args));
           // Parse arguments.
           Rval y;
           Ropt base;
           if(reader.I().g(y).g(base).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_exp(::rocket::move(y), ::rocket::move(base)) };
-            return ::rocket::move(xref);
+            return std_math_exp(::rocket::move(y), ::rocket::move(base));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -244,14 +243,13 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Returns the result as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.math.expm1"), ::rocket::ref(args));
           // Parse arguments.
           Rval y;
           if(reader.I().g(y).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_expm1(::rocket::move(y)) };
-            return ::rocket::move(xref);
+            return std_math_expm1(::rocket::move(y));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -274,15 +272,14 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Returns the power as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.math.pow"), ::rocket::ref(args));
           // Parse arguments.
           Rval x;
           Rval y;
           if(reader.I().g(x).g(y).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_pow(::rocket::move(x), ::rocket::move(y)) };
-            return ::rocket::move(xref);
+            return std_math_pow(::rocket::move(x), ::rocket::move(y));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -304,15 +301,14 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Returns the logarithm as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.math.log"), ::rocket::ref(args));
           // Parse arguments.
           Rval y;
           Ropt base;
           if(reader.I().g(y).g(base).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_log(::rocket::move(y), ::rocket::move(base)) };
-            return ::rocket::move(xref);
+            return std_math_log(::rocket::move(y), ::rocket::move(base));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -334,14 +330,13 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Returns the result as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.math.log1p"), ::rocket::ref(args));
           // Parse arguments.
           Rval y;
           if(reader.I().g(y).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_log1p(::rocket::move(y)) };
-            return ::rocket::move(xref);
+            return std_math_log1p(::rocket::move(y));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -362,14 +357,13 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Returns the result as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.math.sin"), ::rocket::ref(args));
           // Parse arguments.
           Rval x;
           if(reader.I().g(x).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_sin(::rocket::move(x)) };
-            return ::rocket::move(xref);
+            return std_math_sin(::rocket::move(x));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -390,14 +384,13 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Returns the result as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.math.cos"), ::rocket::ref(args));
           // Parse arguments.
           Rval x;
           if(reader.I().g(x).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_cos(::rocket::move(x)) };
-            return ::rocket::move(xref);
+            return std_math_cos(::rocket::move(x));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -418,14 +411,13 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Returns the result as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.math.tan"), ::rocket::ref(args));
           // Parse arguments.
           Rval x;
           if(reader.I().g(x).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_tan(::rocket::move(x)) };
-            return ::rocket::move(xref);
+            return std_math_tan(::rocket::move(x));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -446,14 +438,13 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Returns the result as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.math.asin"), ::rocket::ref(args));
           // Parse arguments.
           Rval x;
           if(reader.I().g(x).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_asin(::rocket::move(x)) };
-            return ::rocket::move(xref);
+            return std_math_asin(::rocket::move(x));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -474,14 +465,13 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Returns the result as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.math.acos"), ::rocket::ref(args));
           // Parse arguments.
           Rval x;
           if(reader.I().g(x).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_acos(::rocket::move(x)) };
-            return ::rocket::move(xref);
+            return std_math_acos(::rocket::move(x));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -502,14 +492,13 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Returns the result as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.math.atan"), ::rocket::ref(args));
           // Parse arguments.
           Rval x;
           if(reader.I().g(x).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_atan(::rocket::move(x)) };
-            return ::rocket::move(xref);
+            return std_math_atan(::rocket::move(x));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -530,15 +519,14 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Returns the result as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.math.atan2"), ::rocket::ref(args));
           // Parse arguments.
           Rval y;
           Rval x;
           if(reader.I().g(y).g(x).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_atan2(::rocket::move(y), ::rocket::move(x)) };
-            return ::rocket::move(xref);
+            return std_math_atan2(::rocket::move(y), ::rocket::move(x));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -563,14 +551,13 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Returns the length as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.math.hypot"), ::rocket::ref(args));
           // Parse variadic arguments.
           cow_vector<Value> values;
           if(reader.I().F(values)) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_hypot(::rocket::move(values)) };
-            return ::rocket::move(xref);
+            return std_math_hypot(::rocket::move(values));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -591,14 +578,13 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Returns the result as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.math.sinh"), ::rocket::ref(args));
           // Parse arguments.
           Rval x;
           if(reader.I().g(x).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_sinh(::rocket::move(x)) };
-            return ::rocket::move(xref);
+            return std_math_sinh(::rocket::move(x));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -619,14 +605,13 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Returns the result as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.math.cosh"), ::rocket::ref(args));
           // Parse arguments.
           Rval x;
           if(reader.I().g(x).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_cosh(::rocket::move(x)) };
-            return ::rocket::move(xref);
+            return std_math_cosh(::rocket::move(x));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -647,14 +632,13 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Returns the result as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.math.tanh"), ::rocket::ref(args));
           // Parse arguments.
           Rval x;
           if(reader.I().g(x).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_tanh(::rocket::move(x)) };
-            return ::rocket::move(xref);
+            return std_math_tanh(::rocket::move(x));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -675,14 +659,13 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Returns the result as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.math.asinh"), ::rocket::ref(args));
           // Parse arguments.
           Rval x;
           if(reader.I().g(x).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_asinh(::rocket::move(x)) };
-            return ::rocket::move(xref);
+            return std_math_asinh(::rocket::move(x));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -703,14 +686,13 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Returns the result as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.math.acosh"), ::rocket::ref(args));
           // Parse arguments.
           Rval x;
           if(reader.I().g(x).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_acosh(::rocket::move(x)) };
-            return ::rocket::move(xref);
+            return std_math_acosh(::rocket::move(x));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -731,14 +713,13 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Returns the result as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.math.atanh"), ::rocket::ref(args));
           // Parse arguments.
           Rval x;
           if(reader.I().g(x).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_atanh(::rocket::move(x)) };
-            return ::rocket::move(xref);
+            return std_math_atanh(::rocket::move(x));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -759,14 +740,13 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Returns the result as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.math.erf"), ::rocket::ref(args));
           // Parse arguments.
           Rval x;
           if(reader.I().g(x).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_erf(::rocket::move(x)) };
-            return ::rocket::move(xref);
+            return std_math_erf(::rocket::move(x));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -787,14 +767,13 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Returns the result as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.math.cerf"), ::rocket::ref(args));
           // Parse arguments.
           Rval x;
           if(reader.I().g(x).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_cerf(::rocket::move(x)) };
-            return ::rocket::move(xref);
+            return std_math_cerf(::rocket::move(x));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -815,14 +794,13 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Returns the result as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.math.gamma"), ::rocket::ref(args));
           // Parse arguments.
           Rval x;
           if(reader.I().g(x).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_gamma(::rocket::move(x)) };
-            return ::rocket::move(xref);
+            return std_math_gamma(::rocket::move(x));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -844,14 +822,13 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Returns the result as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.math.lgamma"), ::rocket::ref(args));
           // Parse arguments.
           Rval x;
           if(reader.I().g(x).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_math_lgamma(::rocket::move(x)) };
-            return ::rocket::move(xref);
+            return std_math_lgamma(::rocket::move(x));
           }
           // Fail.
           reader.throw_no_matching_function_call();

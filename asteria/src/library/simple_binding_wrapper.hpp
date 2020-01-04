@@ -15,15 +15,15 @@ class Simple_Binding_Wrapper final : public Abstract_Function
   public:
     // This is the complete prototype of binding callbacks.
     // Parameters that are less likely to be useful come more behind and can be conditionally omitted.
-    using Prototype_4  = Reference (cow_vector<Reference>&& args,  // required if takes arguments
-                                    Reference&& self,              // required if is a member function
-                                    Global& global,                // required if wishes to call other functions
-                                    const Value& pval);            // required if contains static data
+    using Prototype_4  = Value (cow_vector<Reference>&& args,  // required if takes arguments
+                                Reference&& self,              // required if is a member function
+                                Global& global,                // required if wishes to call other functions
+                                const Value& pval);            // required if contains static data
     // These are shorthand prototypes.
-    using Prototype_0  = Reference (void);
-    using Prototype_1  = Reference (cow_vector<Reference>&&);
-    using Prototype_2  = Reference (cow_vector<Reference>&&, Reference&&);
-    using Prototype_3  = Reference (cow_vector<Reference>&&, Reference&&, Global&);
+    using Prototype_0  = Value (void);
+    using Prototype_1  = Value (cow_vector<Reference>&&);
+    using Prototype_2  = Value (cow_vector<Reference>&&, Reference&&);
+    using Prototype_3  = Value (cow_vector<Reference>&&, Reference&&, Global&);
 
   private:
     cow_string m_desc;

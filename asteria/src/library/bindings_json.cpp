@@ -669,7 +669,7 @@ void create_bindings_json(Oval& result, API_Version /*version*/)
           "  * Returns the formatted text as a `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.json.format"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -677,14 +677,12 @@ void create_bindings_json(Oval& result, API_Version /*version*/)
           Sopt sindent;
           if(reader.I().g(value).S(state).g(sindent).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_json_format(::rocket::move(value), ::rocket::move(sindent)) };
-            return ::rocket::move(xref);
+            return std_json_format(::rocket::move(value), ::rocket::move(sindent));
           }
           Ival nindent;
           if(reader.L(state).g(nindent).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_json_format(::rocket::move(value), ::rocket::move(nindent)) };
-            return ::rocket::move(xref);
+            return std_json_format(::rocket::move(value), ::rocket::move(nindent));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -722,14 +720,13 @@ void create_bindings_json(Oval& result, API_Version /*version*/)
           "    or explicit `\"null\"` inputs from failures.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.json.parse"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
           if(reader.I().g(text).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_json_parse(::rocket::move(text)) };
-            return ::rocket::move(xref);
+            return std_json_parse(::rocket::move(text));
           }
           // Fail.
           reader.throw_no_matching_function_call();

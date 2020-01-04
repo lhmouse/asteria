@@ -271,13 +271,12 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
           "    represented as an `integer`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.chrono.utc_now"), ::rocket::ref(args));
           // Parse arguments.
           if(reader.I().F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_chrono_utc_now() };
-            return ::rocket::move(xref);
+            return std_chrono_utc_now();
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -299,13 +298,12 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
           "    in the local time zone, represented as an `integer`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.chrono.local_now"), ::rocket::ref(args));
           // Parse arguments.
           if(reader.I().F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_chrono_local_now() };
-            return ::rocket::move(xref);
+            return std_chrono_local_now();
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -330,13 +328,12 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
           "    point, represented as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.chrono.hires_now"), ::rocket::ref(args));
           // Parse arguments.
           if(reader.I().F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_chrono_hires_now() };
-            return ::rocket::move(xref);
+            return std_chrono_hires_now();
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -361,13 +358,12 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
           "    point, represented as an `integer`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.chrono.steady_now"), ::rocket::ref(args));
           // Parse arguments.
           if(reader.I().F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_chrono_steady_now() };
-            return ::rocket::move(xref);
+            return std_chrono_steady_now();
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -390,14 +386,13 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
           "    in the local time zone, represented as an `integer`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.chrono.local_from_utc"), ::rocket::ref(args));
           // Parse arguments.
           Ival time_utc;
           if(reader.I().g(time_utc).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_chrono_local_from_utc(::rocket::move(time_utc)) };
-            return ::rocket::move(xref);
+            return std_chrono_local_from_utc(::rocket::move(time_utc));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -421,14 +416,13 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
           "    represented as an `integer`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.chrono.utc_from_local"), ::rocket::ref(args));
           // Parse arguments.
           Ival time_local;
           if(reader.I().g(time_local).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_chrono_utc_from_local(::rocket::move(time_local)) };
-            return ::rocket::move(xref);
+            return std_chrono_utc_from_local(::rocket::move(time_local));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -451,15 +445,14 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
           "    fractional part. By default, no fractional part is added.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.chrono.utc_format"), ::rocket::ref(args));
           // Parse arguments.
           Ival time_point;
           Bopt with_ms;
           if(reader.I().g(time_point).g(with_ms).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_chrono_utc_format(::rocket::move(time_point), ::rocket::move(with_ms)) };
-            return ::rocket::move(xref);
+            return std_chrono_utc_format(::rocket::move(time_point), ::rocket::move(with_ms));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -485,18 +478,13 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
           "    otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.chrono.utc_parse"), ::rocket::ref(args));
           // Parse arguments.
           Sval time_str;
           if(reader.I().g(time_str).F()) {
             // Call the binding function.
-            auto qres = std_chrono_utc_parse(::rocket::move(time_str));
-            if(!qres) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qres) };
-            return ::rocket::move(xref);
+            return std_chrono_utc_parse(::rocket::move(time_str));
           }
           // Fail.
           reader.throw_no_matching_function_call();

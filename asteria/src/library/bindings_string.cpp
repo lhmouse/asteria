@@ -162,13 +162,13 @@ constexpr char s_spaces[] = " \f\n\r\t\v";
 const char* do_xstrchr(const char* str, char c) noexcept
   {
     const char* p = str;
-    for(;;) {
+    do {
       if(*p == 0)
         return nullptr;
       if(*p == c)
         return p;
       ++p;
-    }
+    } while(true);
   }
 
 template<bool bigendT, typename WordT> Sval& do_pack_one_impl(Sval& text, const Ival& value)
@@ -1341,7 +1341,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the specified substring of `text`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.slice"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -1349,9 +1349,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           Iopt length;
           if(reader.I().g(text).g(from).g(length).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_slice(::rocket::move(text), ::rocket::move(from),
-                                                                  ::rocket::move(length)) };
-            return ::rocket::move(xref);
+            return std_string_slice(::rocket::move(text), ::rocket::move(from), ::rocket::move(length));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1387,7 +1385,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns a `string` with the subrange replaced.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.replace"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -1396,16 +1394,13 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           Sval replacement;
           if(reader.I().g(text).g(from).S(state).g(replacement).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_replace_slice(::rocket::move(text), ::rocket::move(from),
-                                                                          ::rocket::move(replacement)) };
-            return ::rocket::move(xref);
+            return std_string_replace_slice(::rocket::move(text), ::rocket::move(from), ::rocket::move(replacement));
           }
           Iopt length;
           if(reader.L(state).g(length).g(replacement).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_replace_slice(::rocket::move(text), ::rocket::move(from),
-                                                                          ::rocket::move(length), ::rocket::move(replacement)) };
-            return ::rocket::move(xref);
+            return std_string_replace_slice(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
+                                            ::rocket::move(replacement));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1432,7 +1427,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    `text2`, or zero if `text1` compares equal to `text2`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.compare"), ::rocket::ref(args));
           // Parse arguments.
           Sval text1;
@@ -1440,9 +1435,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           Iopt length;
           if(reader.I().g(text1).g(text2).g(length).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_compare(::rocket::move(text1), ::rocket::move(text2),
-                                                                    ::rocket::move(length)) };
-            return ::rocket::move(xref);
+            return std_string_compare(::rocket::move(text1), ::rocket::move(text2), ::rocket::move(length));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1465,15 +1458,14 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.starts_with"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
           Sval prefix;
           if(reader.I().g(text).g(prefix).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_starts_with(::rocket::move(text), ::rocket::move(prefix)) };
-            return ::rocket::move(xref);
+            return std_string_starts_with(::rocket::move(text), ::rocket::move(prefix));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1496,15 +1488,14 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.ends_with"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
           Sval suffix;
           if(reader.I().g(text).g(suffix).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_ends_with(::rocket::move(text), ::rocket::move(suffix)) };
-            return ::rocket::move(xref);
+            return std_string_ends_with(::rocket::move(text), ::rocket::move(suffix));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1547,7 +1538,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    non-negative, or `null` otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.find"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -1555,33 +1546,18 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           Sval pattern;
           if(reader.I().g(text).S(state).g(pattern).F()) {
             // Call the binding function.
-            auto qindex = std_string_find(::rocket::move(text), ::rocket::move(pattern));
-            if(!qindex) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
-            return ::rocket::move(xref);
+            return std_string_find(::rocket::move(text), ::rocket::move(pattern));
           }
           Ival from;
           if(reader.L(state).g(from).S(state).g(pattern).F()) {
             // Call the binding function.
-            auto qindex = std_string_find(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern));
-            if(!qindex) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
-            return ::rocket::move(xref);
+            return std_string_find(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern));
           }
           Iopt length;
           if(reader.L(state).g(length).g(pattern).F()) {
             // Call the binding function.
-            auto qindex = std_string_find(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
-                                          ::rocket::move(pattern));
-            if(!qindex) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
-            return ::rocket::move(xref);
+            return std_string_find(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
+                                   ::rocket::move(pattern));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1622,7 +1598,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    non-negative, or `null` otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.rfind"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -1630,33 +1606,18 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           Sval pattern;
           if(reader.I().g(text).S(state).g(pattern).F()) {
             // Call the binding function.
-            auto qindex = std_string_rfind(::rocket::move(text), ::rocket::move(pattern));
-            if(!qindex) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
-            return ::rocket::move(xref);
+            return std_string_rfind(::rocket::move(text), ::rocket::move(pattern));
           }
           Ival from;
           if(reader.L(state).g(from).S(state).g(pattern).F()) {
             // Call the binding function.
-            auto qindex = std_string_rfind(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern));
-            if(!qindex) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
-            return ::rocket::move(xref);
+            return std_string_rfind(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern));
           }
           Iopt length;
           if(reader.L(state).g(length).g(pattern).F()) {
             // Call the binding function.
-            auto qindex = std_string_rfind(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
-                                           ::rocket::move(pattern));
-            if(!qindex) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
-            return ::rocket::move(xref);
+            return std_string_rfind(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
+                                    ::rocket::move(pattern));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1700,7 +1661,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    contain `pattern`, it is returned intact.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.find_and_replace"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -1709,25 +1670,20 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           Sval replacement;
           if(reader.I().g(text).S(state).g(pattern).g(replacement).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_find_and_replace(::rocket::move(text), ::rocket::move(pattern),
-                                                                             ::rocket::move(replacement)) };
-            return ::rocket::move(xref);
+            return std_string_find_and_replace(::rocket::move(text), ::rocket::move(pattern),
+                                               ::rocket::move(replacement));
           }
           Ival from;
           if(reader.L(state).g(from).S(state).g(pattern).g(replacement).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_find_and_replace(::rocket::move(text), ::rocket::move(from),
-                                                                             ::rocket::move(pattern),
-                                                                             ::rocket::move(replacement)) };
-            return ::rocket::move(xref);
+            return std_string_find_and_replace(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern),
+                                               ::rocket::move(replacement));
           }
           Iopt length;
           if(reader.L(state).g(length).g(pattern).g(replacement).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_find_and_replace(::rocket::move(text), ::rocket::move(from),
-                                                                             ::rocket::move(length), ::rocket::move(pattern),
-                                                                             ::rocket::move(replacement)) };
-            return ::rocket::move(xref);
+            return std_string_find_and_replace(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
+                                               ::rocket::move(pattern), ::rocket::move(replacement));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1767,7 +1723,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    non-negative; or `null` if no such byte exists.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.find_any_of"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -1775,33 +1731,18 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           Sval accept;
           if(reader.I().g(text).S(state).g(accept).F()) {
             // Call the binding function.
-            auto qindex = std_string_find_any_of(::rocket::move(text), ::rocket::move(accept));
-            if(!qindex) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
-            return ::rocket::move(xref);
+            return std_string_find_any_of(::rocket::move(text), ::rocket::move(accept));
           }
           Ival from;
           if(reader.L(state).g(from).S(state).g(accept).F()) {
             // Call the binding function.
-            auto qindex = std_string_find_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
-            if(!qindex) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
-            return ::rocket::move(xref);
+            return std_string_find_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
           }
           Iopt length;
           if(reader.L(state).g(length).g(accept).F()) {
             // Call the binding function.
-            auto qindex = std_string_find_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
-                                                 ::rocket::move(accept));
-            if(!qindex) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
-            return ::rocket::move(xref);
+            return std_string_find_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
+                                          ::rocket::move(accept));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1841,7 +1782,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    non-negative; or `null` if no such byte exists.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.rfind_any_of"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -1849,33 +1790,18 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           Sval accept;
           if(reader.I().g(text).S(state).g(accept).F()) {
             // Call the binding function.
-            auto qindex = std_string_rfind_any_of(::rocket::move(text), ::rocket::move(accept));
-            if(!qindex) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
-            return ::rocket::move(xref);
+            return std_string_rfind_any_of(::rocket::move(text), ::rocket::move(accept));
           }
           Ival from;
           if(reader.L(state).g(from).S(state).g(accept).F()) {
             // Call the binding function.
-            auto qindex = std_string_rfind_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
-            if(!qindex) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
-            return ::rocket::move(xref);
+            return std_string_rfind_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
           }
           Iopt length;
           if(reader.L(state).g(length).g(accept).F()) {
             // Call the binding function.
-            auto qindex = std_string_rfind_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
-                                                  ::rocket::move(accept));
-            if(!qindex) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
-            return ::rocket::move(xref);
+            return std_string_rfind_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
+                                           ::rocket::move(accept));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1915,7 +1841,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    non-negative; or `null` if no such byte exists.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.find_not_of"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -1923,33 +1849,18 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           Sval accept;
           if(reader.I().g(text).S(state).g(accept).F()) {
             // Call the binding function.
-            auto qindex = std_string_find_not_of(::rocket::move(text), ::rocket::move(accept));
-            if(!qindex) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
-            return ::rocket::move(xref);
+            return std_string_find_not_of(::rocket::move(text), ::rocket::move(accept));
           }
           Ival from;
           if(reader.L(state).g(from).S(state).g(accept).F()) {
             // Call the binding function.
-            auto qindex = std_string_find_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
-            if(!qindex) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
-            return ::rocket::move(xref);
+            return std_string_find_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
           }
           Iopt length;
           if(reader.L(state).g(length).g(accept).F()) {
             // Call the binding function.
-            auto qindex = std_string_find_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
-                                                 ::rocket::move(accept));
-            if(!qindex) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
-            return ::rocket::move(xref);
+            return std_string_find_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
+                                          ::rocket::move(accept));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1989,7 +1900,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    non-negative; or `null` if no such byte exists.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.rfind_not_of"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -1997,33 +1908,18 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           Sval accept;
           if(reader.I().g(text).S(state).g(accept).F()) {
             // Call the binding function.
-            auto qindex = std_string_rfind_not_of(::rocket::move(text), ::rocket::move(accept));
-            if(!qindex) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
-            return ::rocket::move(xref);
+            return std_string_rfind_not_of(::rocket::move(text), ::rocket::move(accept));
           }
           Ival from;
           if(reader.L(state).g(from).S(state).g(accept).F()) {
             // Call the binding function.
-            auto qindex = std_string_rfind_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
-            if(!qindex) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
-            return ::rocket::move(xref);
+            return std_string_rfind_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
           }
           Iopt length;
           if(reader.L(state).g(length).g(accept).F()) {
             // Call the binding function.
-            auto qindex = std_string_rfind_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
-                                                  ::rocket::move(accept));
-            if(!qindex) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
-            return ::rocket::move(xref);
+            return std_string_rfind_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
+                                           ::rocket::move(accept));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2045,14 +1941,13 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the reversed `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.reverse"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
           if(reader.I().g(text).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_reverse(::rocket::move(text)) };
-            return ::rocket::move(xref);
+            return std_string_reverse(::rocket::move(text));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2076,15 +1971,14 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the trimmed `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.trim"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
           Sopt reject;
           if(reader.I().g(text).g(reject).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_trim(::rocket::move(text), ::rocket::move(reject)) };
-            return ::rocket::move(xref);
+            return std_string_trim(::rocket::move(text), ::rocket::move(reject));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2108,15 +2002,14 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the trimmed `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.ltrim"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
           Sopt reject;
           if(reader.I().g(text).g(reject).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_ltrim(::rocket::move(text), ::rocket::move(reject)) };
-            return ::rocket::move(xref);
+            return std_string_ltrim(::rocket::move(text), ::rocket::move(reject));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2140,15 +2033,14 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the trimmed `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.rtrim"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
           Sopt reject;
           if(reader.I().g(text).g(reject).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_rtrim(::rocket::move(text), ::rocket::move(reject)) };
-            return ::rocket::move(xref);
+            return std_string_rtrim(::rocket::move(text), ::rocket::move(reject));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2174,7 +2066,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Throws an exception if `padding` is empty.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.lpad"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -2182,9 +2074,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           Sopt padding;
           if(reader.I().g(text).g(length).g(padding).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_lpad(::rocket::move(text), ::rocket::move(length),
-                                                                 ::rocket::move(padding)) };
-            return ::rocket::move(xref);
+            return std_string_lpad(::rocket::move(text), ::rocket::move(length), ::rocket::move(padding));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2210,7 +2100,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Throws an exception if `padding` is empty.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.rpad"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -2218,9 +2108,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           Sopt padding;
           if(reader.I().g(text).g(length).g(padding).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_rpad(::rocket::move(text), ::rocket::move(length),
-                                                                 ::rocket::move(padding)) };
-            return ::rocket::move(xref);
+            return std_string_rpad(::rocket::move(text), ::rocket::move(length), ::rocket::move(padding));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2243,14 +2131,13 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns a new `string` after the conversion.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.to_upper"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
           if(reader.I().g(text).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_to_upper(::rocket::move(text)) };
-            return ::rocket::move(xref);
+            return std_string_to_upper(::rocket::move(text));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2273,14 +2160,13 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns a new `string` after the conversion.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.to_lower"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
           if(reader.I().g(text).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_to_lower(::rocket::move(text)) };
-            return ::rocket::move(xref);
+            return std_string_to_lower(::rocket::move(text));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2309,7 +2195,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the translated `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.translate"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -2317,9 +2203,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           Sopt outputs;
           if(reader.I().g(text).g(inputs).g(outputs).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_translate(::rocket::move(text), ::rocket::move(inputs),
-                                                                      ::rocket::move(outputs)) };
-            return ::rocket::move(xref);
+            return std_string_translate(::rocket::move(text), ::rocket::move(inputs), ::rocket::move(outputs));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2347,7 +2231,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Throws an exception if `limit` is negative or zero.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.explode"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -2355,9 +2239,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           Iopt limit;
           if(reader.I().g(text).g(delim).g(limit).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_explode(::rocket::move(text), ::rocket::move(delim),
-                                                                    ::rocket::move(limit)) };
-            return ::rocket::move(xref);
+            return std_string_explode(::rocket::move(text), ::rocket::move(delim), ::rocket::move(limit));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2381,15 +2263,14 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    empty, an empty `string` is returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.implode"), ::rocket::ref(args));
           // Parse arguments.
           Aval segments;
           Sopt delim;
           if(reader.I().g(segments).g(delim).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_implode(::rocket::move(segments), ::rocket::move(delim)) };
-            return ::rocket::move(xref);
+            return std_string_implode(::rocket::move(segments), ::rocket::move(delim));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2415,7 +2296,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    `string` is returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.hex_encode"), ::rocket::ref(args));
           // Parse arguments.
           Sval data;
@@ -2423,9 +2304,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           Sopt delim;
           if(reader.I().g(data).g(lowercase).g(delim).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_hex_encode(::rocket::move(data), ::rocket::move(lowercase),
-                                                                       ::rocket::move(delim)) };
-            return ::rocket::move(xref);
+            return std_string_hex_encode(::rocket::move(data), ::rocket::move(lowercase), ::rocket::move(delim));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2452,18 +2331,13 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    In the case of parse errors, `null` is returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.hex_decode"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
           if(reader.I().g(text).F()) {
             // Call the binding function.
-            auto qdata = std_string_hex_decode(::rocket::move(text));
-            if(!qdata) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qdata) };
-            return ::rocket::move(xref);
+            return std_string_hex_decode(::rocket::move(text));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2489,15 +2363,14 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the encoded `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.base32_encode"), ::rocket::ref(args));
           // Parse arguments.
           Sval data;
           Bopt lowercase;
           if(reader.I().g(data).g(lowercase).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_base32_encode(::rocket::move(data), ::rocket::move(lowercase)) };
-            return ::rocket::move(xref);
+            return std_string_base32_encode(::rocket::move(data), ::rocket::move(lowercase));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2524,18 +2397,13 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    In the case of parse errors, `null` is returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.base32_decode"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
           if(reader.I().g(text).F()) {
             // Call the binding function.
-            auto qdata = std_string_base32_decode(::rocket::move(text));
-            if(!qdata) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qdata) };
-            return ::rocket::move(xref);
+            return std_string_base32_decode(::rocket::move(text));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2558,14 +2426,13 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the encoded `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.base64_encode"), ::rocket::ref(args));
           // Parse arguments.
           Sval data;
           if(reader.I().g(data).F()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_string_base64_encode(::rocket::move(data)) };
-            return ::rocket::move(xref);
+            return std_string_base64_encode(::rocket::move(data));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2593,18 +2460,13 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    In the case of parse errors, `null` is returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.base64_decode"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
           if(reader.I().g(text).F()) {
             // Call the binding function.
-            auto qdata = std_string_base64_decode(::rocket::move(text));
-            if(!qdata) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qdata) };
-            return ::rocket::move(xref);
+            return std_string_base64_decode(::rocket::move(text));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2630,29 +2492,19 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the encoded `string` on success, or `null` otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.utf8_encode"), ::rocket::ref(args));
           // Parse arguments.
           Ival code_point;
           Bopt permissive;
           if(reader.I().g(code_point).g(permissive).F()) {
             // Call the binding function.
-            auto qtext = std_string_utf8_encode(::rocket::move(code_point), ::rocket::move(permissive));
-            if(!qtext) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qtext) };
-            return ::rocket::move(xref);
+            return std_string_utf8_encode(::rocket::move(code_point), ::rocket::move(permissive));
           }
           Aval code_points;
           if(reader.I().g(code_points).g(permissive).F()) {
             // Call the binding function.
-            auto qtext = std_string_utf8_encode(::rocket::move(code_points), ::rocket::move(permissive));
-            if(!qtext) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qtext) };
-            return ::rocket::move(xref);
+            return std_string_utf8_encode(::rocket::move(code_points), ::rocket::move(permissive));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2679,19 +2531,14 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.utf8_decode"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
           Bopt permissive;
           if(reader.I().g(text).g(permissive).F()) {
             // Call the binding function.
-            auto qres = std_string_utf8_decode(::rocket::move(text), ::rocket::move(permissive));
-            if(!qres) {
-              return Reference_Root::S_void();
-            }
-            Reference_Root::S_temporary xref = { ::rocket::move(*qres) };
-            return ::rocket::move(xref);
+            return std_string_utf8_decode(::rocket::move(text), ::rocket::move(permissive));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2714,24 +2561,18 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the packed `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.pack_8"), ::rocket::ref(args));
           // Parse arguments.
           Ival value;
           if(reader.I().g(value).F()) {
             // Call the binding function.
-            auto text = std_string_pack_8(::rocket::move(value));
-            // Forward the result.
-            Reference_Root::S_temporary xref = { ::rocket::move(text) };
-            return ::rocket::move(xref);
+            return std_string_pack_8(::rocket::move(value));
           }
           Aval values;
           if(reader.I().g(values).F()) {
             // Call the binding function.
-            auto text = std_string_pack_8(::rocket::move(values));
-            // Forward the result.
-            Reference_Root::S_temporary xref = { ::rocket::move(text) };
-            return ::rocket::move(xref);
+            return std_string_pack_8(::rocket::move(values));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2754,16 +2595,13 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns an `array` containing unpacked integers.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.unpack_8"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
           if(reader.I().g(text).F()) {
             // Call the binding function.
-            auto values = std_string_unpack_8(::rocket::move(text));
-            // Forward the result.
-            Reference_Root::S_temporary xref = { ::rocket::move(values) };
-            return ::rocket::move(xref);
+            return std_string_unpack_8(::rocket::move(text));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2787,24 +2625,18 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the packed `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.pack_16be"), ::rocket::ref(args));
           // Parse arguments.
           Ival value;
           if(reader.I().g(value).F()) {
             // Call the binding function.
-            auto text = std_string_pack_16be(::rocket::move(value));
-            // Forward the result.
-            Reference_Root::S_temporary xref = { ::rocket::move(text) };
-            return ::rocket::move(xref);
+            return std_string_pack_16be(::rocket::move(value));
           }
           Aval values;
           if(reader.I().g(values).F()) {
             // Call the binding function.
-            auto text = std_string_pack_16be(::rocket::move(values));
-            // Forward the result.
-            Reference_Root::S_temporary xref = { ::rocket::move(text) };
-            return ::rocket::move(xref);
+            return std_string_pack_16be(::rocket::move(values));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2831,16 +2663,13 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    of 2.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.unpack_16be"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
           if(reader.I().g(text).F()) {
             // Call the binding function.
-            auto values = std_string_unpack_16be(::rocket::move(text));
-            // Forward the result.
-            Reference_Root::S_temporary xref = { ::rocket::move(values) };
-            return ::rocket::move(xref);
+            return std_string_unpack_16be(::rocket::move(text));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2864,24 +2693,18 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the packed `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.pack_16le"), ::rocket::ref(args));
           // Parse arguments.
           Ival value;
           if(reader.I().g(value).F()) {
             // Call the binding function.
-            auto text = std_string_pack_16le(::rocket::move(value));
-            // Forward the result.
-            Reference_Root::S_temporary xref = { ::rocket::move(text) };
-            return ::rocket::move(xref);
+            return std_string_pack_16le(::rocket::move(value));
           }
           Aval values;
           if(reader.I().g(values).F()) {
             // Call the binding function.
-            auto text = std_string_pack_16le(::rocket::move(values));
-            // Forward the result.
-            Reference_Root::S_temporary xref = { ::rocket::move(text) };
-            return ::rocket::move(xref);
+            return std_string_pack_16le(::rocket::move(values));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2908,16 +2731,13 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    of 2.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.unpack_16le"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
           if(reader.I().g(text).F()) {
             // Call the binding function.
-            auto values = std_string_unpack_16le(::rocket::move(text));
-            // Forward the result.
-            Reference_Root::S_temporary xref = { ::rocket::move(values) };
-            return ::rocket::move(xref);
+            return std_string_unpack_16le(::rocket::move(text));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2941,24 +2761,18 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the packed `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.pack_32be"), ::rocket::ref(args));
           // Parse arguments.
           Ival value;
           if(reader.I().g(value).F()) {
             // Call the binding function.
-            auto text = std_string_pack_32be(::rocket::move(value));
-            // Forward the result.
-            Reference_Root::S_temporary xref = { ::rocket::move(text) };
-            return ::rocket::move(xref);
+            return std_string_pack_32be(::rocket::move(value));
           }
           Aval values;
           if(reader.I().g(values).F()) {
             // Call the binding function.
-            auto text = std_string_pack_32be(::rocket::move(values));
-            // Forward the result.
-            Reference_Root::S_temporary xref = { ::rocket::move(text) };
-            return ::rocket::move(xref);
+            return std_string_pack_32be(::rocket::move(values));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -2985,16 +2799,13 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    of 4.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.unpack_32be"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
           if(reader.I().g(text).F()) {
             // Call the binding function.
-            auto values = std_string_unpack_32be(::rocket::move(text));
-            // Forward the result.
-            Reference_Root::S_temporary xref = { ::rocket::move(values) };
-            return ::rocket::move(xref);
+            return std_string_unpack_32be(::rocket::move(text));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -3018,24 +2829,18 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the packed `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.pack_32le"), ::rocket::ref(args));
           // Parse arguments.
           Ival value;
           if(reader.I().g(value).F()) {
             // Call the binding function.
-            auto text = std_string_pack_32le(::rocket::move(value));
-            // Forward the result.
-            Reference_Root::S_temporary xref = { ::rocket::move(text) };
-            return ::rocket::move(xref);
+            return std_string_pack_32le(::rocket::move(value));
           }
           Aval values;
           if(reader.I().g(values).F()) {
             // Call the binding function.
-            auto text = std_string_pack_32le(::rocket::move(values));
-            // Forward the result.
-            Reference_Root::S_temporary xref = { ::rocket::move(text) };
-            return ::rocket::move(xref);
+            return std_string_pack_32le(::rocket::move(values));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -3062,16 +2867,13 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    of 4.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.unpack_32le"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
           if(reader.I().g(text).F()) {
             // Call the binding function.
-            auto values = std_string_unpack_32le(::rocket::move(text));
-            // Forward the result.
-            Reference_Root::S_temporary xref = { ::rocket::move(values) };
-            return ::rocket::move(xref);
+            return std_string_unpack_32le(::rocket::move(text));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -3094,24 +2896,18 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the packed `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.pack_64be"), ::rocket::ref(args));
           // Parse arguments.
           Ival value;
           if(reader.I().g(value).F()) {
             // Call the binding function.
-            auto text = std_string_pack_64be(::rocket::move(value));
-            // Forward the result.
-            Reference_Root::S_temporary xref = { ::rocket::move(text) };
-            return ::rocket::move(xref);
+            return std_string_pack_64be(::rocket::move(value));
           }
           Aval values;
           if(reader.I().g(values).F()) {
             // Call the binding function.
-            auto text = std_string_pack_64be(::rocket::move(values));
-            // Forward the result.
-            Reference_Root::S_temporary xref = { ::rocket::move(text) };
-            return ::rocket::move(xref);
+            return std_string_pack_64be(::rocket::move(values));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -3137,16 +2933,13 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    of 8.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.unpack_64be"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
           if(reader.I().g(text).F()) {
             // Call the binding function.
-            auto values = std_string_unpack_64be(::rocket::move(text));
-            // Forward the result.
-            Reference_Root::S_temporary xref = { ::rocket::move(values) };
-            return ::rocket::move(xref);
+            return std_string_unpack_64be(::rocket::move(text));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -3170,24 +2963,18 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the packed `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.pack_64le"), ::rocket::ref(args));
           // Parse arguments.
           Ival value;
           if(reader.I().g(value).F()) {
             // Call the binding function.
-            auto text = std_string_pack_64le(::rocket::move(value));
-            // Forward the result.
-            Reference_Root::S_temporary xref = { ::rocket::move(text) };
-            return ::rocket::move(xref);
+            return std_string_pack_64le(::rocket::move(value));
           }
           Aval values;
           if(reader.I().g(values).F()) {
             // Call the binding function.
-            auto text = std_string_pack_64le(::rocket::move(values));
-            // Forward the result.
-            Reference_Root::S_temporary xref = { ::rocket::move(text) };
-            return ::rocket::move(xref);
+            return std_string_pack_64le(::rocket::move(values));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -3214,16 +3001,13 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    of 8.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.unpack_64le"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
           if(reader.I().g(text).F()) {
             // Call the binding function.
-            auto values = std_string_unpack_64le(::rocket::move(text));
-            // Forward the result.
-            Reference_Root::S_temporary xref = { ::rocket::move(values) };
-            return ::rocket::move(xref);
+            return std_string_unpack_64le(::rocket::move(text));
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -3257,17 +3041,14 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "   argument.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.string.format"), ::rocket::ref(args));
           // Parse arguments.
           Sval templ;
           cow_vector<Value> values;
           if(reader.I().g(templ).F(values)) {
             // Call the binding function.
-            auto str = std_string_format(::rocket::move(templ), ::rocket::move(values));
-            // Forward the result.
-            Reference_Root::S_temporary xref = { ::rocket::move(str) };
-            return ::rocket::move(xref);
+            return std_string_format(::rocket::move(templ), ::rocket::move(values));
           }
           // Fail.
           reader.throw_no_matching_function_call();
