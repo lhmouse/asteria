@@ -13,7 +13,7 @@ const Value& Reference_Root::dereference_const() const
   {
     switch(this->index()) {
     case index_void: {
-        ASTERIA_THROW("attempt to copy an uninitialized variable or a function call that returned no value");
+        ASTERIA_THROW("attempt to take the result of a function call which returned no value");
       }
     case index_constant: {
         return this->m_stor.as<index_constant>().val;
@@ -36,7 +36,7 @@ Value& Reference_Root::dereference_mutable() const
   {
     switch(this->index()) {
     case index_void: {
-        ASTERIA_THROW("attempt to modify an uninitialized variable or a function call that returned no value");
+        ASTERIA_THROW("attempt to modify the result of a function call which returned no value");
       }
     case index_constant: {
         ASTERIA_THROW("attempt to modify a constant `$1`", this->m_stor.as<index_constant>().val);
