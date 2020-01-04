@@ -46,6 +46,30 @@ class Value
         this->m_stor = ::rocket::forward<XvalT>(xval);
         return *this;
       }
+    template<typename XvalT> Value(const opt<XvalT>& opt)
+      {
+        if(opt)
+          this->m_stor = *opt;
+      }
+    template<typename XvalT> Value(opt<XvalT>&& opt) noexcept
+      {
+        if(opt)
+          this->m_stor = ::rocket::move(*opt);
+      }
+    template<typename XvalT> Value& operator=(const opt<XvalT>& opt)
+      {
+        if(opt)
+          return this->m_stor = *opt, *this;
+        else
+          return this->m_stor = nullptr, *this;
+      }
+    template<typename XvalT> Value& operator=(opt<XvalT>&& opt) noexcept
+      {
+        if(opt)
+          return this->m_stor = ::rocket::move(*opt), *this;
+        else
+          return this->m_stor = nullptr, *this;
+      }
 
   public:
     Gtype gtype() const noexcept
