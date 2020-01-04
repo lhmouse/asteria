@@ -113,6 +113,7 @@ using ::std::intmax_t;
 using ::std::uintmax_t;
 using ::std::ptrdiff_t;
 using ::std::size_t;
+using ::std::exception;
 
 using cow_string = ::rocket::cow_string;
 using cow_wstring = ::rocket::cow_wstring;

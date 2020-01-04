@@ -677,7 +677,7 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
       // User-provided bindings may obtain the current exception using `::std::current_exception`.
       return do_execute_catch(queue_catch, name_except, except, ctx);
     }
-    catch(::std::exception& stdex) {
+    catch(exception& stdex) {
       // Translate the exception.
       Runtime_Error except(stdex);
       except.push_frame_catch(sloc);
@@ -706,7 +706,7 @@ AIR_Status do_throw_statement(Executive_Context& ctx, ParamU /*pu*/, const void*
       except.push_frame_throw(sloc, ::rocket::move(value));
       throw;
     }
-    catch(::std::exception& stdex) {
+    catch(exception& stdex) {
       // Translate the exception.
       Runtime_Error except(stdex);
       except.push_frame_throw(sloc, ::rocket::move(value));
@@ -918,7 +918,7 @@ ROCKET_NOINLINE Reference& do_wrap_tail_call(Reference& self, const Source_Locat
     throw;
   }
 
-[[noreturn]] ROCKET_NOINLINE void do_xrethrow(::std::exception& stdex, const Source_Location& sloc,
+[[noreturn]] ROCKET_NOINLINE void do_xrethrow(exception& stdex, const Source_Location& sloc,
                                               const cow_string& inside, const rcptr<Abstract_Hooks>& qhooks)
   {
     // Translate the exception, append the current frame, and throw the new exception.
@@ -973,7 +973,7 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
     catch(Runtime_Error& except) {
       do_xrethrow(except, sloc, inside, qhooks);
     }
-    catch(::std::exception& stdex) {
+    catch(exception& stdex) {
       do_xrethrow(stdex, sloc, inside, qhooks);
     }
     // Call the hook function if any.

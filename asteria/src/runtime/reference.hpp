@@ -74,6 +74,10 @@ class Reference
       {
         return this->is_constant() || this->is_temporary();
       }
+    bool is_immutable() const noexcept
+      {
+        return !this->m_root.is_variable() || this->m_root.as_variable()->is_immutable();
+      }
 
     template<typename XModT> Reference& zoom_in(XModT&& xmod)
       {

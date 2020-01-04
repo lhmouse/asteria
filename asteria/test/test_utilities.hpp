@@ -17,7 +17,7 @@
         /* failed */  \
         ASTERIA_TERMINATE("ASTERIA_TEST_CHECK: $1\n  failed", #expr);  \
       }  \
-      catch(::std::exception& stdex) {  \
+      catch(exception& stdex) {  \
         /* failed */  \
         ASTERIA_TERMINATE("ASTERIA_TEST_CHECK: $1\n  caught an exception: $2", #expr, stdex.what());  \
       }  \
@@ -31,7 +31,7 @@
         /* failed */  \
         ASTERIA_TERMINATE("ASTERIA_TEST_CHECK_CATCH: $1\n  didn't catch an exception", #expr);  \
       }  \
-      catch(::std::exception& /*stdex*/) {  \
+      catch(exception& /*stdex*/) {  \
         /* successful */  \
         break;  \
       }  \

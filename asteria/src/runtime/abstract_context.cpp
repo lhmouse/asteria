@@ -14,7 +14,7 @@ void Abstract_Context::Cleaner::operator()(Rcbase* base) noexcept
     ROCKET_ASSERT(coll);
     coll->collect_variables(gc_generation_oldest);
   }
-  catch(::std::exception& stdex) {
+  catch(exception& stdex) {
   }
 
 Abstract_Context::~Abstract_Context()

@@ -10,7 +10,7 @@
 
 namespace Asteria {
 
-class Runtime_Error : public ::std::exception
+class Runtime_Error : public exception
   {
   private:
     Value m_value;
@@ -26,7 +26,7 @@ class Runtime_Error : public ::std::exception
         this->m_frames.emplace_back(frame_type_throw, sloc, this->m_value);
         this->do_compose_message();
       }
-    explicit Runtime_Error(const ::std::exception& stdex)
+    explicit Runtime_Error(const exception& stdex)
       :
         m_value(G_string(stdex.what()))
       {

@@ -9,7 +9,7 @@
 
 namespace Asteria {
 
-class Parser_Error : public virtual ::std::exception
+class Parser_Error : public virtual exception
   {
   private:
     Parser_Status m_stat;

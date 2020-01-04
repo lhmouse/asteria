@@ -114,7 +114,7 @@ Reference& Reference::do_finish_call(Global_Context& global)
         }
         throw;
       }
-      catch(::std::exception& stdex) {
+      catch(exception& stdex) {
         // Translate the exception, append all frames that have been expanded so far, and throw the new exception.
         Runtime_Error except(stdex);
         ::std::for_each(frames.rbegin(), frames.rend(), [&](const auto& p) { except.push_frame_func(p->sloc(), p->inside());  });
