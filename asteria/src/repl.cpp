@@ -243,9 +243,9 @@ void do_print_help(const char* self)
       "\n"
       "Visit the homepage at <%s>.\n"
       "Report bugs to <%s>.\n"
-      ,
       // 34567890123456789012345678901234567890123456789012345678901234567890123456|
       //        1         2         3         4         5         6         7      |
+      ,
       self,
       PACKAGE_URL,
       PACKAGE_BUGREPORT
@@ -261,9 +261,9 @@ void do_print_version()
       "\n"
       "Visit the homepage at <%s>.\n"
       "Report bugs to <%s>.\n"
-      ,
       // 34567890123456789012345678901234567890123456789012345678901234567890123456|
       //        1         2         3         4         5         6         7      |
+      ,
       PACKAGE_STRING, __DATE__,
       PACKAGE_URL,
       PACKAGE_BUGREPORT
@@ -378,9 +378,25 @@ void do_trap_sigint()
     ::sigaction(SIGINT, &sa, nullptr);
   }
 
+void do_repl_help()
+  {
+    ::fprintf(stderr,
+      //        1         2         3         4         5         6         7      |
+      // 34567890123456789012345678901234567890123456789012345678901234567890123456|
+      "~ Commands\n"
+      "  \\help   show this message\n"
+      // 34567890123456789012345678901234567890123456789012345678901234567890123456|
+      //        1         2         3         4         5         6         7      |
+    );
+  }
+
 void do_handle_repl_command(cow_string&& cmd)
   {
-    ::printf("TODO: REPL CMD %s\n", cmd.c_str());
+    // TODO tokenize
+    if(cmd == "help") {
+      return do_repl_help();
+    }
+    ::fprintf(stderr, "! unknown command: %s\n", cmd.c_str());
   }
 
 [[noreturn]] int do_repl_noreturn()
@@ -395,9 +411,9 @@ void do_handle_repl_command(cow_string&& cmd)
       "\n"
       "  All REPL commands start with a backslash. Type `\\help` for instructions.\n"
       "  Multiple lines may be joined together using trailing backslashes.\n"
-      ,
       // 34567890123456789012345678901234567890123456789012345678901234567890123456|
       //        1         2         3         4         5         6         7      |
+      ,
       PACKAGE_STRING, __DATE__,
       ::setlocale(LC_ALL, nullptr)
     );
