@@ -64,7 +64,7 @@ void create_bindings_debug(Oval& result, API_Version /*version*/)
           if(reader.I().g(templ).F(values)) {
             // Call the binding function.
             if(!std_debug_print(templ, values)) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { true };
             return ::rocket::move(xref);
@@ -100,7 +100,7 @@ void create_bindings_debug(Oval& result, API_Version /*version*/)
           if(reader.I().g(value).g(indent).F()) {
             // Call the binding function.
             if(!std_debug_dump(value, indent)) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { true };
             return ::rocket::move(xref);

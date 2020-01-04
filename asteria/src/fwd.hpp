@@ -194,10 +194,10 @@ enum AIR_Status : uint8_t
 // Tail call optimization (PTC) awareness
 enum PTC_Aware : uint8_t
   {
-    ptc_aware_none     = 0,  // Tail call optimization is not allowed.
-    ptc_aware_by_ref   = 1,  // The tail call is forwarded by reference.
-    ptc_aware_by_val   = 2,  // The tail call is forwarded by value.
-    ptc_aware_nullify  = 3,  // The tail call is forwarded but its result is discarded.
+    ptc_aware_none    = 0,  // Tail call optimization is not allowed.
+    ptc_aware_by_ref  = 1,  // The tail call is forwarded by reference.
+    ptc_aware_by_val  = 2,  // The tail call is forwarded by value.
+    ptc_aware_prune   = 3,  // The tail call is forwarded but its result is discarded.
   };
 
 // Stack frame types

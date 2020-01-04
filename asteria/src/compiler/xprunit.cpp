@@ -101,9 +101,9 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
           // Generate code with regard to proper tail calls.
           for(size_t i = 0; i != epos; ++i) {
             altr.body[i].generate_code(code_body, nullptr, ctx_func, opts,
-                                       altr.body[i + 1].is_empty_return() ? ptc_aware_nullify : ptc_aware_none);
+                                       altr.body[i + 1].is_empty_return() ? ptc_aware_prune : ptc_aware_none);
           }
-          altr.body[epos].generate_code(code_body, nullptr, ctx_func, opts, ptc_aware_nullify);
+          altr.body[epos].generate_code(code_body, nullptr, ctx_func, opts, ptc_aware_prune);
         }
         // TODO: Insert optimization passes.
         // Encode arguments.

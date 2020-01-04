@@ -68,7 +68,7 @@ template<typename IteratorT> opt<IteratorT> do_find_opt(IteratorT begin, Iterato
     return clear;
   }
 
-inline void do_push_argument(cow_vector<Reference>& args, const Value& value)
+void do_push_argument(cow_vector<Reference>& args, const Value& value)
   {
     Reference_Root::S_temporary xref = { value };
     args.emplace_back(::rocket::move(xref));
@@ -692,9 +692,8 @@ Value std_array_max_of(Global& global, Aval data, Fopt comparator)
     }
     for(auto it = qmax + 1; it != data.end(); ++it) {
       // Compare `*qmax` with the other elements, ignoring unordered elements.
-      if(do_compare(global, comparator, *qmax, *it) != compare_less) {
+      if(do_compare(global, comparator, *qmax, *it) != compare_less)
         continue;
-      }
       qmax = it;
     }
     return *qmax;
@@ -709,9 +708,8 @@ Value std_array_min_of(Global& global, Aval data, Fopt comparator)
     }
     for(auto it = qmin + 1; it != data.end(); ++it) {
       // Compare `*qmin` with the other elements, ignoring unordered elements.
-      if(do_compare(global, comparator, *qmin, *it) != compare_greater) {
+      if(do_compare(global, comparator, *qmin, *it) != compare_greater)
         continue;
-      }
       qmin = it;
     }
     return *qmin;
@@ -932,7 +930,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qindex = std_array_find(::rocket::move(data), ::rocket::move(target));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -942,7 +940,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qindex = std_array_find(::rocket::move(data), ::rocket::move(from), ::rocket::move(target));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -953,7 +951,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
             auto qindex = std_array_find(::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                                          ::rocket::move(target));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1009,7 +1007,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qindex = std_array_find_if(global, ::rocket::move(data), ::rocket::move(predictor));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1019,7 +1017,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qindex = std_array_find_if(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(predictor));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1030,7 +1028,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
             auto qindex = std_array_find_if(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                                                     ::rocket::move(predictor));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1086,7 +1084,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qindex = std_array_find_if_not(global, ::rocket::move(data), ::rocket::move(predictor));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1096,7 +1094,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qindex = std_array_find_if_not(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(predictor));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1107,7 +1105,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
             auto qindex = std_array_find_if_not(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                                                         ::rocket::move(predictor));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1163,7 +1161,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qindex = std_array_rfind(::rocket::move(data), ::rocket::move(target));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1173,7 +1171,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qindex = std_array_rfind(::rocket::move(data), ::rocket::move(from), ::rocket::move(target));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1184,7 +1182,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
             auto qindex = std_array_rfind(::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                                           ::rocket::move(target));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1240,7 +1238,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qindex = std_array_rfind_if(global, ::rocket::move(data), ::rocket::move(predictor));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1251,7 +1249,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
             auto qindex = std_array_rfind_if(global, ::rocket::move(data), ::rocket::move(from),
                                                      ::rocket::move(predictor));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1262,7 +1260,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
             auto qindex = std_array_rfind_if(global, ::rocket::move(data), ::rocket::move(from),
                                                      ::rocket::move(length), ::rocket::move(predictor));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1318,7 +1316,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qindex = std_array_rfind_if_not(global, ::rocket::move(data), ::rocket::move(predictor));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1329,7 +1327,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
             auto qindex = std_array_rfind_if_not(global, ::rocket::move(data), ::rocket::move(from),
                                                          ::rocket::move(predictor));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1340,7 +1338,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
             auto qindex = std_array_rfind_if_not(global, ::rocket::move(data), ::rocket::move(from),
                                                          ::rocket::move(length), ::rocket::move(predictor));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1625,7 +1623,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
             auto qindex = std_array_binary_search(global, ::rocket::move(data), ::rocket::move(target),
                                                           ::rocket::move(comparator));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -2028,7 +2026,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qres = std_array_copy_keys(::rocket::move(source));
             if(!qres) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qres) };
             return ::rocket::move(xref);
@@ -2062,7 +2060,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qres = std_array_copy_values(::rocket::move(source));
             if(!qres) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qres) };
             return ::rocket::move(xref);

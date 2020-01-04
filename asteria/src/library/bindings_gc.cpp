@@ -106,7 +106,7 @@ void create_bindings_gc(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qthres = std_gc_tracked_count(global, ::rocket::move(generation));
             if(!qthres) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { *qthres };
             return ::rocket::move(xref);
@@ -140,7 +140,7 @@ void create_bindings_gc(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qthres = std_gc_get_threshold(global, ::rocket::move(generation));
             if(!qthres) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { *qthres };
             return ::rocket::move(xref);
@@ -180,7 +180,7 @@ void create_bindings_gc(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qoldthres = std_gc_set_threshold(global, ::rocket::move(generation), ::rocket::move(threshold));
             if(!qoldthres) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { *qoldthres };
             return ::rocket::move(xref);

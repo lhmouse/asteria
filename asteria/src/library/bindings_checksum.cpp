@@ -917,7 +917,7 @@ Oval std_checksum_crc32_new()
           }
           // Call the binding function.
           std_checksum_crc32_new_write(self.open().open_opaque(), ::rocket::move(data));
-          return Reference_Root::S_null();
+          return Reference_Root::S_void();
         })
       ));
     //===================================================================
@@ -994,7 +994,7 @@ Oval std_checksum_fnv1a32_new()
           }
           // Call the binding function.
           std_checksum_fnv1a32_new_write(self.open().open_opaque(), ::rocket::move(data));
-          return Reference_Root::S_null();
+          return Reference_Root::S_void();
         })
       ));
     //===================================================================
@@ -1071,7 +1071,7 @@ Oval std_checksum_md5_new()
           }
           // Call the binding function.
           std_checksum_md5_new_write(self.open().open_opaque(), ::rocket::move(data));
-          return Reference_Root::S_null();
+          return Reference_Root::S_void();
         })
       ));
     //===================================================================
@@ -1148,7 +1148,7 @@ Oval std_checksum_sha1_new()
           }
           // Call the binding function.
           std_checksum_sha1_new_write(self.open().open_opaque(), ::rocket::move(data));
-          return Reference_Root::S_null();
+          return Reference_Root::S_void();
         })
       ));
     //===================================================================
@@ -1225,7 +1225,7 @@ Oval std_checksum_sha256_new()
           }
           // Call the binding function.
           std_checksum_sha256_new_write(self.open().open_opaque(), ::rocket::move(data));
-          return Reference_Root::S_null();
+          return Reference_Root::S_void();
         })
       ));
     //===================================================================

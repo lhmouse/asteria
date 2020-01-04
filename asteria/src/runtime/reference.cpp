@@ -88,8 +88,8 @@ Reference& Reference::do_finish_call(Global_Context& global)
       if((tca->ptc_aware() == ptc_aware_by_val) && (ptc_conj == ptc_aware_by_ref)) {
         ptc_conj = ptc_aware_by_val;
       }
-      else if(tca->ptc_aware() == ptc_aware_nullify) {
-        ptc_conj = ptc_aware_nullify;
+      else if(tca->ptc_aware() == ptc_aware_prune) {
+        ptc_conj = ptc_aware_prune;
       }
       // Unpack the function reference.
       const auto& target = tca->get_target();
@@ -133,9 +133,9 @@ Reference& Reference::do_finish_call(Global_Context& global)
       // Convert the result to an rvalue if it shouldn't be passed by reference.
       this->convert_to_rvalue();
     }
-    else if(ptc_conj == ptc_aware_nullify) {
+    else if(ptc_conj == ptc_aware_prune) {
       // Return a `null`.
-      *this = Reference_Root::S_null();
+      *this = Reference_Root::S_void();
     }
     return *this;
   }

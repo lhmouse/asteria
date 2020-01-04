@@ -28,7 +28,7 @@ void do_user_declare(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx, 
       names_opt->emplace_back(name);
     }
     // Just ensure the name exists.
-    ctx.open_named_reference(name) /*= Reference_Root::S_null()*/;
+    ctx.open_named_reference(name) /*= Reference_Root::S_void()*/;
   }
 
 cow_vector<AIR_Node>& do_generate_single_step_trap(cow_vector<AIR_Node>& code, const Source_Location& sloc)
@@ -85,7 +85,7 @@ cow_vector<AIR_Node>& do_generate_statement_list(cow_vector<AIR_Node>& code, cow
       // Statements other than the last one cannot be the end of function.
       for(size_t i = 0; i != epos; ++i) {
         block.stmts[i].generate_code(code, names_opt, ctx, opts,
-                                     block.stmts[i+1].is_empty_return() ? ptc_aware_nullify : ptc_aware_none);
+                                     block.stmts[i+1].is_empty_return() ? ptc_aware_prune : ptc_aware_none);
       }
       block.stmts[epos].generate_code(code, names_opt, ctx, opts, ptc_aware);
     }
@@ -234,9 +234,9 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
           // Generate code with regard to proper tail calls.
           for(size_t i = 0; i != epos; ++i) {
             altr.body[i].generate_code(code_body, nullptr, ctx_func, opts,
-                                       altr.body[i + 1].is_empty_return() ? ptc_aware_nullify : ptc_aware_none);
+                                       altr.body[i + 1].is_empty_return() ? ptc_aware_prune : ptc_aware_none);
           }
-          altr.body[epos].generate_code(code_body, nullptr, ctx_func, opts, ptc_aware_nullify);
+          altr.body[epos].generate_code(code_body, nullptr, ctx_func, opts, ptc_aware_prune);
         }
         // TODO: Insert optimization passes.
         // Encode arguments.

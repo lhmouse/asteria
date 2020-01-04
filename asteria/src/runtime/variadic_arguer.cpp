@@ -29,7 +29,7 @@ Reference& Variadic_Arguer::invoke(Reference& self, Global_Context& /*global*/, 
       auto w = wrap_index(*qindex, nvargs);
       auto nadd = w.nprepend | w.nappend;
       if(nadd != 0) {
-        return self = Reference_Root::S_null();
+        return self = Reference_Root::S_void();
       }
       return self = this->m_vargs.at(w.rindex);
     }

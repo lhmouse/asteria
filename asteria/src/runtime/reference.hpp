@@ -45,18 +45,25 @@ class Reference
     Reference& do_finish_call(Global_Context& global);
 
   public:
+    bool is_void() const noexcept
+      {
+        return this->m_root.is_void();
+      }
     bool is_constant() const noexcept
       {
-        return (this->m_root.index() == Reference_Root::index_null) ||
-               (this->m_root.index() == Reference_Root::index_constant);
+        return this->m_root.is_constant();
       }
     bool is_temporary() const noexcept
       {
-        return this->m_root.index() == Reference_Root::index_temporary;
+        return this->m_root.is_temporary();
       }
     bool is_variable() const noexcept
       {
-        return this->m_root.index() == Reference_Root::index_variable;
+        return this->m_root.is_variable();
+      }
+    bool is_tail_call() const noexcept
+      {
+        return this->m_root.is_tail_call();
       }
 
     bool is_lvalue() const noexcept
@@ -78,7 +85,7 @@ class Reference
       {
         // Drop the last modifier. If there is no modifier, set `this` to `null`.
         if(ROCKET_EXPECT(this->m_mods.empty()))
-          this->m_root = Reference_Root::S_null();
+          this->m_root = Reference_Root::S_void();
         else
           this->m_mods.pop_back();
         return *this;

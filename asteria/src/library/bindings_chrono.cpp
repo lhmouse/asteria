@@ -493,7 +493,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qres = std_chrono_utc_parse(::rocket::move(time_str));
             if(!qres) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qres) };
             return ::rocket::move(xref);

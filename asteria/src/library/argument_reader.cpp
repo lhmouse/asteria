@@ -334,7 +334,7 @@ Argument_Reader& Argument_Reader::g(Reference& ref)
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
-      ref = Reference_Root::S_null();
+      ref = Reference_Root::S_void();
       return *this;
     }
     // Copy the reference as is.

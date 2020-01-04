@@ -15,7 +15,7 @@ namespace Asteria {
 class Reference_Root
   {
   public:
-    struct S_null
+    struct S_void
       {
       };
     struct S_constant
@@ -37,7 +37,7 @@ class Reference_Root
 
     enum Index : uint8_t
       {
-        index_null       = 0,
+        index_void       = 0,
         index_constant   = 1,
         index_temporary  = 2,
         index_variable   = 3,
@@ -45,7 +45,7 @@ class Reference_Root
       };
     using Xvariant = variant<
       ROCKET_CDR(
-      , S_null       // 0,
+      , S_void       // 0,
       , S_constant   // 1,
       , S_temporary  // 2,
       , S_variable   // 3,
@@ -77,6 +77,29 @@ class Reference_Root
     Index index() const noexcept
       {
         return static_cast<Index>(this->m_stor.index());
+      }
+
+    bool is_void() const noexcept
+      {
+        return this->index() == index_void;
+      }
+
+    bool is_constant() const noexcept
+      {
+        return this->index() == index_constant;
+      }
+    const Value& as_constant() const
+      {
+        return this->m_stor.as<index_constant>().val;
+      }
+
+    bool is_temporary() const noexcept
+      {
+        return this->index() == index_temporary;
+      }
+    const Value& as_temporary() const
+      {
+        return this->m_stor.as<index_temporary>().val;
       }
 
     bool is_variable() const noexcept

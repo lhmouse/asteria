@@ -561,7 +561,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qres = std_filesystem_get_information(::rocket::move(path));
             if(!qres) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qres) };
             return ::rocket::move(xref);
@@ -595,7 +595,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qres = std_filesystem_remove_recursive(::rocket::move(path));
             if(!qres) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qres) };
             return ::rocket::move(xref);
@@ -628,7 +628,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           if(reader.I().g(path_new).g(path_old).F()) {
             // Call the binding function.
             if(!std_filesystem_move_from(path_new, path_old)) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { true };
             return ::rocket::move(xref);
@@ -670,7 +670,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qres = std_filesystem_directory_list(::rocket::move(path));
             if(!qres) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qres) };
             return ::rocket::move(xref);
@@ -706,7 +706,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qres = std_filesystem_directory_create(::rocket::move(path));
             if(!qres) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qres) };
             return ::rocket::move(xref);
@@ -740,7 +740,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qres = std_filesystem_directory_remove(::rocket::move(path));
             if(!qres) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qres) };
             return ::rocket::move(xref);
@@ -781,7 +781,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qres = std_filesystem_file_read(::rocket::move(path), ::rocket::move(offset), ::rocket::move(limit));
             if(!qres) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qres) };
             return ::rocket::move(xref);
@@ -829,7 +829,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           if(reader.I().g(path).g(callback).g(offset).g(limit).F()) {
             // Call the binding function.
             if(!std_filesystem_file_stream(global, path, callback, offset, limit)) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { true };
             return ::rocket::move(xref);
@@ -870,7 +870,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           if(reader.I().g(path).g(data).g(offset).F()) {
             // Call the binding function.
             if(!std_filesystem_file_write(path, data, offset)) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { true };
             return ::rocket::move(xref);
@@ -908,7 +908,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           if(reader.I().g(path).g(data).g(exclusive).F()) {
             // Call the binding function.
             if(!std_filesystem_file_append(path, data, exclusive)) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { true };
             return ::rocket::move(xref);
@@ -943,7 +943,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           if(reader.I().g(path_new).g(path_old).F()) {
             // Call the binding function.
             if(!std_filesystem_file_copy_from(path_new, path_old)) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { true };
             return ::rocket::move(xref);
@@ -976,7 +976,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           if(reader.I().g(path).F()) {
             // Call the binding function.
             if(!std_filesystem_file_remove(path)) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { true };
             return ::rocket::move(xref);

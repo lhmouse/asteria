@@ -12,7 +12,7 @@ namespace Asteria {
 const Value& Reference_Root::dereference_const() const
   {
     switch(this->index()) {
-    case index_null: {
+    case index_void: {
         return null_value;
       }
     case index_constant: {
@@ -35,7 +35,7 @@ const Value& Reference_Root::dereference_const() const
 Value& Reference_Root::dereference_mutable() const
   {
     switch(this->index()) {
-    case index_null: {
+    case index_void: {
         ASTERIA_THROW("attempt to modify a constant `null`");
       }
     case index_constant: {
@@ -62,7 +62,7 @@ Value& Reference_Root::dereference_mutable() const
 Variable_Callback& Reference_Root::enumerate_variables(Variable_Callback& callback) const
   {
     switch(this->index()) {
-    case index_null: {
+    case index_void: {
         return callback;
       }
     case index_constant: {

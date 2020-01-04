@@ -41,6 +41,7 @@ rcptr<Variable> Generational_Collector::create_variable(GC_Generation gc_hint)
       var = ::rocket::make_refcnt<Variable>();
     }
     coll.track_variable(var);
+    var->reset(nullptr, false);
     return var;
   }
 

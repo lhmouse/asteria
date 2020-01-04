@@ -17,7 +17,7 @@ ROCKET_NOINLINE Reference& do_handle_status(Reference& self, Evaluation_Stack& s
     switch(status) {
     case air_status_next: {
         // Return `null` if the control flow reached the end of the function.
-        self = Reference_Root::S_null();
+        self = Reference_Root::S_void();
         break;
       }
     case air_status_return: {

@@ -66,7 +66,7 @@ template<typename XValT> Reference& do_set_temporary(Evaluation_Stack& stack, bo
 
 Reference& do_declare(Executive_Context& ctx, const phsh_string& name)
   {
-    return ctx.open_named_reference(name) = Reference_Root::S_null();
+    return ctx.open_named_reference(name) = Reference_Root::S_void();
   }
 
 AIR_Status do_execute_block(const AVMC_Queue& queue, Executive_Context& ctx)

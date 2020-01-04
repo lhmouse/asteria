@@ -1557,7 +1557,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qindex = std_string_find(::rocket::move(text), ::rocket::move(pattern));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1567,7 +1567,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qindex = std_string_find(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1578,7 +1578,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
             auto qindex = std_string_find(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
                                           ::rocket::move(pattern));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1632,7 +1632,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qindex = std_string_rfind(::rocket::move(text), ::rocket::move(pattern));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1642,7 +1642,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qindex = std_string_rfind(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1653,7 +1653,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
             auto qindex = std_string_rfind(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
                                            ::rocket::move(pattern));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1777,7 +1777,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qindex = std_string_find_any_of(::rocket::move(text), ::rocket::move(accept));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1787,7 +1787,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qindex = std_string_find_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1798,7 +1798,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
             auto qindex = std_string_find_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
                                                  ::rocket::move(accept));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1851,7 +1851,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qindex = std_string_rfind_any_of(::rocket::move(text), ::rocket::move(accept));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1861,7 +1861,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qindex = std_string_rfind_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1872,7 +1872,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
             auto qindex = std_string_rfind_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
                                                   ::rocket::move(accept));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1925,7 +1925,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qindex = std_string_find_not_of(::rocket::move(text), ::rocket::move(accept));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1935,7 +1935,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qindex = std_string_find_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1946,7 +1946,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
             auto qindex = std_string_find_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
                                                  ::rocket::move(accept));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -1999,7 +1999,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qindex = std_string_rfind_not_of(::rocket::move(text), ::rocket::move(accept));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -2009,7 +2009,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qindex = std_string_rfind_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -2020,7 +2020,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
             auto qindex = std_string_rfind_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
                                                   ::rocket::move(accept));
             if(!qindex) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qindex) };
             return ::rocket::move(xref);
@@ -2460,7 +2460,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qdata = std_string_hex_decode(::rocket::move(text));
             if(!qdata) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qdata) };
             return ::rocket::move(xref);
@@ -2532,7 +2532,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qdata = std_string_base32_decode(::rocket::move(text));
             if(!qdata) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qdata) };
             return ::rocket::move(xref);
@@ -2601,7 +2601,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qdata = std_string_base64_decode(::rocket::move(text));
             if(!qdata) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qdata) };
             return ::rocket::move(xref);
@@ -2639,7 +2639,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qtext = std_string_utf8_encode(::rocket::move(code_point), ::rocket::move(permissive));
             if(!qtext) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qtext) };
             return ::rocket::move(xref);
@@ -2649,7 +2649,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qtext = std_string_utf8_encode(::rocket::move(code_points), ::rocket::move(permissive));
             if(!qtext) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qtext) };
             return ::rocket::move(xref);
@@ -2688,7 +2688,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
             // Call the binding function.
             auto qres = std_string_utf8_decode(::rocket::move(text), ::rocket::move(permissive));
             if(!qres) {
-              return Reference_Root::S_null();
+              return Reference_Root::S_void();
             }
             Reference_Root::S_temporary xref = { ::rocket::move(*qres) };
             return ::rocket::move(xref);
