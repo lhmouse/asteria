@@ -121,6 +121,7 @@ enum Keyword : uint8_t
     keyword_iceil     = 43,  // __iceil
     keyword_itrunc    = 44,  // __itrunc
     keyword_fma       = 45,  // __fma
+    keyword_global    = 46,  // __global
   };
 
 ROCKET_PURE_FUNCTION extern const char* stringify_keyword(Keyword kwrd) noexcept;

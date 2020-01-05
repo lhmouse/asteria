@@ -171,7 +171,7 @@ primary-expression ::=
 	identifier | global-identifier | literal | "this" | closure-function | unnamed-array | unnamed-object |
 	nested-expression | fused-multiply-add
 global-identifier ::=
-	"." identifier
+	"__global" identifier
 closure-function ::=
 	"func" parameter-list-declaration closure-body
 closure-body ::=

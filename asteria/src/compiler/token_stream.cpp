@@ -659,6 +659,7 @@ constexpr s_keywords[] =
     { "__ceil",    keyword_ceil      },
     { "__floor",   keyword_floor     },
     { "__fma",     keyword_fma       },
+    { "__global",  keyword_global    },
     { "__iceil",   keyword_iceil     },
     { "__ifloor",  keyword_ifloor    },
     { "__iround",  keyword_iround    },

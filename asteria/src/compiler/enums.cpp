@@ -326,6 +326,9 @@ const char* stringify_keyword(Keyword kwrd) noexcept
     case keyword_fma: {
         return "__fma";
       }
+    case keyword_global: {
+        return "__global";
+      }
     default:
       return "<unknown keyword>";
     }

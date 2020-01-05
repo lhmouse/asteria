@@ -1367,9 +1367,9 @@ bool do_accept_named_reference(cow_vector<Xprunit>& units, Token_Stream& tstrm)
 bool do_accept_global_reference(cow_vector<Xprunit>& units, Token_Stream& tstrm)
   {
     // global-identifier ::=
-    //   "." identifier
-    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_dot });
-    if(!kpunct) {
+    //   "__global" identifier
+    auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_global });
+    if(!qkwrd) {
       return false;
     }
     auto qname = do_accept_identifier_opt(tstrm);
