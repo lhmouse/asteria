@@ -21,21 +21,21 @@ bool write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept
     ::localtime_r(&(ts.tv_sec), &tr);
     // 'yyyy-mmmm-dd HH:MM:SS.sss'
     ::rocket::ascii_numput nump;
-    fmt << nump.put_DU(static_cast<uint32_t>(tr.tm_year + 1900), 4)
+    fmt << nump.put_DU(static_cast<uint64_t>(tr.tm_year + 1900), 4)
         << '-'
-        << nump.put_DU(static_cast<uint32_t>(tr.tm_mon + 1), 2)
+        << nump.put_DU(static_cast<uint64_t>(tr.tm_mon + 1), 2)
         << '-'
-        << nump.put_DU(static_cast<uint32_t>(tr.tm_mday), 2)
+        << nump.put_DU(static_cast<uint64_t>(tr.tm_mday), 2)
         << ' '
-        << nump.put_DU(static_cast<uint32_t>(tr.tm_hour), 2)
+        << nump.put_DU(static_cast<uint64_t>(tr.tm_hour), 2)
         << ':'
-        << nump.put_DU(static_cast<uint32_t>(tr.tm_min), 2)
+        << nump.put_DU(static_cast<uint64_t>(tr.tm_min), 2)
         << ':'
-        << nump.put_DU(static_cast<uint32_t>(tr.tm_sec), 2)
+        << nump.put_DU(static_cast<uint64_t>(tr.tm_sec), 2)
         << '.'
-        << nump.put_DU(static_cast<uint32_t>(ts.tv_nsec / 1000000), 3);
+        << nump.put_DU(static_cast<uint64_t>(ts.tv_nsec / 1000000), 3);
     // Append the file name and line number, followed by a LF.
-    fmt << " @@ " << file << ':' << line << "\n\t";
+    fmt << " @ " << file << ':' << line << "\n\t";
 
     // Neutralize control characters.
     static constexpr char s_lchars[][6] =
