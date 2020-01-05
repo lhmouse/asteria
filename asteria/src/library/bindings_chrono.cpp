@@ -230,7 +230,7 @@ Iopt std_chrono_utc_parse(Sval time_str)
       // Parse the second and millisecond parts as a whole.
       p -= 2;
       // 'SS.sss'
-      if(!numg.parse_F(p, ep, 10) || !numg.cast_F(msecs, 0, 60.9999) || (p != ep))
+      if(!numg.parse_F(p, ep, 10) || !numg.cast_F(msecs, 0, 60) || (p != ep))
         return clear;
       msecs = (msecs - tr.tm_sec) * 1000 + 0.01;
     }
