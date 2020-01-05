@@ -15,7 +15,8 @@ class Variable final : public virtual Rcbase
   private:
     // contents
     Value m_value;
-    bool m_immut = true;
+    bool m_immut = false;
+    bool m_alive = false;
     // garbage collection support
     pair<long, double> m_gcref;
 
@@ -47,10 +48,23 @@ class Variable final : public virtual Rcbase
       {
         return this->m_immut = immutable, *this;
       }
-    template<typename XValT> Variable& reset(XValT&& xval, bool immutable)
+
+    bool is_initialized() const noexcept
+      {
+        return this->m_alive;
+      }
+    template<typename XValT> Variable& initialize(XValT&& xval, bool immut)
       {
         this->m_value = ::rocket::forward<XValT>(xval);
-        this->m_immut = immutable;
+        this->m_immut = immut;
+        this->m_alive = true;
+        return *this;
+      }
+    Variable& uninitialize() noexcept
+      {
+        this->m_value = INT64_C(0x6eef8badf00ddead);
+        this->m_immut = true;
+        this->m_alive = false;
         return *this;
       }
 
@@ -64,7 +78,7 @@ class Variable final : public virtual Rcbase
       }
     Variable& reset_gcref(long iref) noexcept
       {
-        return this->m_gcref = ::std::make_pair(iref, 0x1p-26), *this;
+        return this->m_gcref = { iref, 0x1p-26 }, *this;
       }
     long increment_gcref(long split) noexcept;
 

@@ -22,7 +22,11 @@ const Value& Reference_Root::dereference_const() const
         return this->m_stor.as<index_temporary>().val;
       }
     case index_variable: {
-        return this->m_stor.as<index_variable>().var->get_value();
+        const auto& var = this->m_stor.as<index_variable>().var;
+        if(!var->is_initialized()) {
+          ASTERIA_THROW("attempt to read from an uninitialized variable");
+        }
+        return var->get_value();
       }
     case index_tail_call: {
         ASTERIA_THROW("tail call wrapper not dereferenceable");
@@ -46,6 +50,9 @@ Value& Reference_Root::dereference_mutable() const
       }
     case index_variable: {
         const auto& var = this->m_stor.as<index_variable>().var;
+        if(!var->is_initialized()) {
+          ASTERIA_THROW("attempt to modify an uninitialized variable");
+        }
         if(var->is_immutable()) {
           ASTERIA_THROW("attempt to modify an immutable variable `$1`", var->get_value());
         }
@@ -73,10 +80,10 @@ Variable_Callback& Reference_Root::enumerate_variables(Variable_Callback& callba
       }
     case index_variable: {
         const auto& var = this->m_stor.as<index_variable>().var;
-        if(callback(var)) {
-          var->enumerate_variables(callback);
+        if(!callback(var)) {
+          return callback;
         }
-        return callback;
+        return var->enumerate_variables(callback);
       }
     case index_tail_call: {
         return this->m_stor.as<index_tail_call>().tca->enumerate_variables(callback);

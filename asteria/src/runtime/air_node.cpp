@@ -365,16 +365,15 @@ AIR_Status do_declare_variable(Executive_Context& ctx, ParamU /*pu*/, const void
     const auto& inside = ctx.func();
     const auto& qhooks = ctx.global().get_hooks_opt();
 
-    // Allocate a variable and initialize it to `null`.
+    // Allocate an uninitialized variable.
     auto var = ctx.global().create_variable();
-    var->reset(nullptr, true);
+    // Inject the variable into the current context.
+    Reference_Root::S_variable xref = { ::rocket::move(var) };
+    ctx.open_named_reference(name) = xref;
     // Call the hook function if any.
     if(qhooks) {
       qhooks->on_variable_declare(sloc, inside, name);
     }
-    // Inject the variable into the current context.
-    Reference_Root::S_variable xref = { ::rocket::move(var) };
-    ctx.open_named_reference(name) = xref;
     // Push a copy of the reference onto the stack.
     ctx.stack().push(::rocket::move(xref));
     return air_status_next;
@@ -391,11 +390,10 @@ AIR_Status do_initialize_variable(Executive_Context& ctx, ParamU pu, const void*
     ctx.stack().pop();
     // Get the variable back.
     auto var = ctx.stack().get_top().get_variable_opt();
-    ROCKET_ASSERT(var);
-    ROCKET_ASSERT(var->get_value().is_null());
     ctx.stack().pop();
     // Initialize it.
-    var->reset(::rocket::move(val), immutable);
+    ROCKET_ASSERT(var && !var->is_initialized());
+    var->initialize(::rocket::move(val), immutable);
     return air_status_next;
   }
 
@@ -540,36 +538,31 @@ AIR_Status do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const vo
 
     // We have to create an outer context due to the fact that the key and mapped references outlast every iteration.
     Executive_Context ctx_for(::rocket::ref(ctx));
-    // Create a variable for the key.
-    // Important: As long as this variable is immutable, there cannot be circular reference.
-    auto key = ::rocket::make_refcnt<Variable>();
-    {
-      Reference_Root::S_variable xref = { key };
-      ctx_for.open_named_reference(name_key) = ::rocket::move(xref);
-    }
+    // Allocate an uninitialized variable for the key.
+    const auto vkey = ctx_for.global().create_variable();
+    // Inject the variable into the current context.
+    Reference_Root::S_variable xref = { vkey };
+    ctx_for.open_named_reference(name_key) = xref;
     // Create the mapped reference.
     auto& mapped = do_declare(ctx_for, name_mapped);
+
     // Evaluate the range initializer.
     ctx_for.stack().clear();
     auto status = queue_init.execute(ctx_for);
     ROCKET_ASSERT(status == air_status_next);
     // Set the range up.
     mapped = ::rocket::move(ctx_for.stack().open_top());
-    auto range = mapped.read();
+    const auto range = mapped.read();
 
-    // The range value has been saved.
-    // We are immune to dangling pointers in case the object being iterated is modified by the loop body.
+    // Iterate over the range. The range isn't going to change even if the argument got modified by the loop body.
     if(range.is_array()) {
-      const auto& array = range.as_array();
-      // The key is the subscript of an element of the array.
-      for(ptrdiff_t i = 0; i != array.ssize(); ++i) {
-        // Set up the key.
-        key->reset(G_integer(i), true);
-        // Be advised that the mapped parameter is a reference rather than a value.
-        {
-          Reference_Modifier::S_array_index xmod = { i };
-          mapped.zoom_in(::rocket::move(xmod));
-        }
+      const auto& arr = range.as_array();
+      for(int64_t i = 0; i != arr.ssize(); ++i) {
+        // Set the key which is the subscript of the mapped element in the array.
+        vkey->initialize(i, true);
+        // Set the mapped reference.
+        Reference_Modifier::S_array_index xmod = { i };
+        mapped.zoom_in(::rocket::move(xmod));
         // Execute the loop body.
         status = do_execute_block(queue_body, ctx_for);
         if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for })) {
@@ -583,16 +576,13 @@ AIR_Status do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const vo
       }
     }
     else if(range.is_object()) {
-      const auto& object = range.as_object();
-      // The key is a string.
-      for(auto q = object.begin(); q != object.end(); ++q) {
-        // Set up the key.
-        key->reset(G_string(q->first), true);
-        // Be advised that the mapped parameter is a reference rather than a value.
-        {
-          Reference_Modifier::S_object_key xmod = { q->first };
-          mapped.zoom_in(::rocket::move(xmod));
-        }
+      const auto& obj = range.as_object();
+      for(auto it = obj.begin(); it != obj.end(); ++it) {
+        // Set the key which is the key of this element in the object.
+        vkey->initialize(it->first.rdstr(), true);
+        // Set the mapped reference.
+        Reference_Modifier::S_object_key xmod = { it->first.rdstr() };
+        mapped.zoom_in(::rocket::move(xmod));
         // Execute the loop body.
         status = do_execute_block(queue_body, ctx_for);
         if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for })) {
@@ -2458,26 +2448,24 @@ AIR_Status do_unpack_struct_array(Executive_Context& ctx, ParamU pu, const void*
     auto val = ctx.stack().get_top().read();
     ctx.stack().pop();
     // Make sure it is really an `array`.
-    if(val.is_null()) {
-      val = G_array();
+    G_array arr;
+    if(!val.is_null()) {
+      if(!val.is_array()) {
+        ASTERIA_THROW("invalid argument for structured array binding (initializer was `$1`)", val);
+      }
+      arr = ::rocket::move(val.open_array());
     }
-    if(!val.is_array()) {
-      ASTERIA_THROW("attempt to unpack a non-`array` as an `array` (initializer was `$1`)", val);
-    }
-    auto& arr = val.open_array();
-    // Pop and initialize variables from right to left.
-    for(size_t i = 0; i != nelems; ++i) {
+    for(uint32_t i = nelems - 1; i != UINT32_MAX; --i) {
       // Get the variable back.
       auto var = ctx.stack().get_top().get_variable_opt();
-      ROCKET_ASSERT(var);
-      ROCKET_ASSERT(var->get_value().is_null());
       ctx.stack().pop();
       // Initialize it.
-      auto qelem = arr.mut_ptr(nelems - i - 1);
-      if(!qelem) {
-        continue;
-      }
-      var->reset(::rocket::move(*qelem), immutable);
+      ROCKET_ASSERT(var && !var->is_initialized());
+      auto qinit = arr.mut_ptr(i);
+      if(qinit)
+        var->initialize(::rocket::move(*qinit), immutable);
+      else
+        var->initialize(nullptr, immutable);
     }
     return air_status_next;
   }
@@ -2493,27 +2481,24 @@ AIR_Status do_unpack_struct_object(Executive_Context& ctx, ParamU pu, const void
     auto val = ctx.stack().get_top().read();
     ctx.stack().pop();
     // Make sure it is really an `object`.
-    if(val.is_null()) {
-      val = G_object();
+    G_object obj;
+    if(!val.is_null()) {
+      if(!val.is_object()) {
+        ASTERIA_THROW("invalid argument for structured object binding (initializer was `$1`)", val);
+      }
+      obj = ::rocket::move(val.open_object());
     }
-    if(!val.is_object()) {
-      ASTERIA_THROW("attempt to unpack a non-`object` as an `object` (initializer was `$1`)", val);
-    }
-    auto& obj = val.open_object();
-    // Pop and initialize variables from right to left.
     for(auto it = keys.rbegin(); it != keys.rend(); ++it) {
       // Get the variable back.
       auto var = ctx.stack().get_top().get_variable_opt();
-      ROCKET_ASSERT(var);
-      ROCKET_ASSERT(var->get_value().is_null());
       ctx.stack().pop();
       // Initialize it.
-      auto qelem = obj.mut_ptr(*it);
-      if(!qelem) {
-        var->set_immutable(immutable);
-        continue;
-      }
-      var->reset(::rocket::move(*qelem), immutable);
+      ROCKET_ASSERT(var && !var->is_initialized());
+      auto qinit = obj.mut_ptr(*it);
+      if(qinit)
+        var->initialize(::rocket::move(*qinit), immutable);
+      else
+        var->initialize(nullptr, immutable);
     }
     return air_status_next;
   }
@@ -2527,16 +2512,17 @@ AIR_Status do_define_null_variable(Executive_Context& ctx, ParamU pu, const void
     const auto& inside = ctx.func();
     const auto& qhooks = ctx.global().get_hooks_opt();
 
-    // Allocate a variable and initialize it to `null`.
+    // Allocate an uninitialized variable.
     auto var = ctx.global().create_variable();
-    var->reset(nullptr, immutable);
+    // Inject the variable into the current context.
+    Reference_Root::S_variable xref = { var };
+    ctx.open_named_reference(name) = ::rocket::move(xref);
     // Call the hook function if any.
     if(qhooks) {
       qhooks->on_variable_declare(sloc, inside, name);
     }
-    // Inject the variable into the current context.
-    Reference_Root::S_variable xref = { ::rocket::move(var) };
-    ctx.open_named_reference(name) = ::rocket::move(xref);
+    // Initialize the variable to `null`.
+    var->initialize(nullptr, immutable);
     return air_status_next;
   }
 

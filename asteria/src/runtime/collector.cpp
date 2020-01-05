@@ -69,8 +69,6 @@ template<typename ContT, typename FuncT>
     cont.enumerate_variables(callback);
   }
 
-constexpr G_integer s_defunct_value = 0x7EEDFACECAFEBEEF;
-
 }  // namespace
 
 bool Collector::track_variable(const rcptr<Variable>& var)
@@ -133,7 +131,7 @@ Collector* Collector::collect_single_opt()
         // immediately.
         auto nref = root->use_count();
         if(nref <= 1) {
-          root->reset(s_defunct_value, true);
+          root->uninitialize();
           return false;
         }
         // Enumerate variables that are reachable from `root` indirectly.
@@ -216,7 +214,7 @@ Collector* Collector::collect_single_opt()
         // All reachable variables will have negative gcref counters.
         if(root->get_gcref() >= 0) {
           // Overwrite the value of this variable with a scalar value to break reference cycles.
-          root->reset(s_defunct_value, true);
+          root->uninitialize();
           // Cache this variable if a pool is specified.
           if(output) {
             output->insert(root);
