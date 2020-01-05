@@ -156,6 +156,7 @@ pkginclude_runtime_HEADERS =  \
 
 pkginclude_compilerdir = ${pkgincludedir}/compiler
 pkginclude_compiler_HEADERS =  \
+  asteria/src/compiler/enums.hpp  \
   asteria/src/compiler/parser_error.hpp  \
   asteria/src/compiler/token.hpp  \
   asteria/src/compiler/token_stream.hpp  \
@@ -213,6 +214,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/runtime/instantiated_function.cpp  \
   asteria/src/runtime/air_node.cpp  \
   asteria/src/runtime/simple_script.cpp  \
+  asteria/src/compiler/enums.cpp  \
   asteria/src/compiler/parser_error.cpp  \
   asteria/src/compiler/token.cpp  \
   asteria/src/compiler/token_stream.cpp  \

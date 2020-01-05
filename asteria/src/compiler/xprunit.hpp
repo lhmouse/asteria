@@ -5,6 +5,7 @@
 #define ASTERIA_COMPILER_XPRUNIT_HPP_
 
 #include "../fwd.hpp"
+#include "enums.hpp"
 #include "../value.hpp"
 #include "../source_location.hpp"
 

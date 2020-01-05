@@ -5,6 +5,7 @@
 #define ASTERIA_COMPILER_INFIX_ELEMENT_HPP_
 
 #include "../fwd.hpp"
+#include "enums.hpp"
 
 namespace Asteria {
 
