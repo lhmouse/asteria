@@ -66,12 +66,18 @@ cow_string do_stringify(const Reference& ref) noexcept
     }
     ::rocket::tinyfmt_str fmt;
     // Print the value category.
-    if(ref.is_constant())
-      fmt << "constant ";
-    else if(ref.is_temporary())
-      fmt << "temporary ";
-    else if(ref.is_variable())
-      fmt << (ref.is_immutable() ? "immutable variable " : "variable ");
+    if(auto var = ref.get_variable_opt())
+      if(var->is_immutable())
+        fmt << "immutable variable ";
+      else
+        fmt << "variable ";
+    else
+      if(ref.is_constant())
+        fmt << "constant ";
+      else if(ref.is_temporary())
+        fmt << "temporary ";
+      else
+        ROCKET_ASSERT(false);
     // Print the value.
     fmt << ref.read();
     return do_xindent(fmt.extract_string());
