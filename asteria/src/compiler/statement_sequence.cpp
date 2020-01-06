@@ -3,11 +3,13 @@
 
 #include "../precompiled.hpp"
 #include "statement_sequence.hpp"
+#include "enums.hpp"
 #include "token_stream.hpp"
 #include "token.hpp"
 #include "xprunit.hpp"
 #include "statement.hpp"
 #include "infix_element.hpp"
+#include "../runtime/enums.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {

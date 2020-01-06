@@ -6,7 +6,6 @@
 
 #include "../fwd.hpp"
 #include "reference.hpp"
-#include "../compiler/enums.hpp"
 #include "../value.hpp"
 #include "../source_location.hpp"
 

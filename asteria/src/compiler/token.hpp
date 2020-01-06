@@ -5,7 +5,6 @@
 #define ASTERIA_COMPILER_TOKEN_HPP_
 
 #include "../fwd.hpp"
-#include "enums.hpp"
 #include "parser_error.hpp"
 
 namespace Asteria {

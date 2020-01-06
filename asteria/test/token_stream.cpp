@@ -4,6 +4,7 @@
 #include "test_utilities.hpp"
 #include "../src/compiler/token_stream.hpp"
 #include "../src/compiler/token.hpp"
+#include "../src/compiler/enums.hpp"
 
 using namespace Asteria;
 

@@ -46,6 +46,36 @@ namespace Asteria {
 #define ASTERIA_VOID_T(...)        typename ::rocket::make_void<__VA_ARGS__>::type
 #define ASTERIA_VOID_OF(...)       typename ::rocket::make_void<decltype(__VA_ARGS__)>::type
 
+// `using`-directives
+using ::std::initializer_list;
+using ::std::integer_sequence;
+using ::std::index_sequence;
+using ::std::nullptr_t;
+using ::std::max_align_t;
+using ::std::int8_t;
+using ::std::uint8_t;
+using ::std::int16_t;
+using ::std::uint16_t;
+using ::std::int32_t;
+using ::std::uint32_t;
+using ::std::int64_t;
+using ::std::uint64_t;
+using ::std::intptr_t;
+using ::std::uintptr_t;
+using ::std::intmax_t;
+using ::std::uintmax_t;
+using ::std::ptrdiff_t;
+using ::std::size_t;
+using ::std::exception;
+
+using ::rocket::cbegin;
+using ::rocket::cend;
+using ::rocket::begin;
+using ::rocket::end;
+using ::rocket::xswap;
+using ::rocket::swap;
+using ::rocket::clear;
+
 // Low-level Data Structure
 class Variable_HashSet;
 class Reference_Dictionary;
@@ -88,40 +118,15 @@ class Xprunit;
 class Statement;
 class Infix_Element;
 class Statement_Sequence;
+enum Punctuator : uint8_t;
+enum Keyword : uint8_t;
+enum Jump_Target : uint8_t;
+enum Precedence : uint8_t;
+enum Xop : uint8_t;
 
 // Library
 class Argument_Reader;
 class Simple_Binding_Wrapper;
-
-// Aliases
-using ::std::initializer_list;
-using ::std::integer_sequence;
-using ::std::index_sequence;
-using ::std::nullptr_t;
-using ::std::max_align_t;
-using ::std::int8_t;
-using ::std::uint8_t;
-using ::std::int16_t;
-using ::std::uint16_t;
-using ::std::int32_t;
-using ::std::uint32_t;
-using ::std::int64_t;
-using ::std::uint64_t;
-using ::std::intptr_t;
-using ::std::uintptr_t;
-using ::std::intmax_t;
-using ::std::uintmax_t;
-using ::std::ptrdiff_t;
-using ::std::size_t;
-using ::std::exception;
-
-using cow_string = ::rocket::cow_string;
-using cow_wstring = ::rocket::cow_wstring;
-using cow_u16string = ::rocket::cow_u16string;
-using cow_u32string = ::rocket::cow_u32string;
-using phsh_string = ::rocket::prehashed_string;
-using tinybuf = ::rocket::tinybuf;
-using tinyfmt = ::rocket::tinyfmt;
 
 template<typename E, typename D = ::std::default_delete<const E>> using uptr = ::rocket::unique_ptr<E, D>;
 template<typename E> using rcptr = ::rocket::refcnt_ptr<E>;
@@ -136,14 +141,14 @@ template<typename F, typename S> using cow_bivector = ::rocket::cow_vector<::std
 template<typename E, size_t... k> using array = ::rocket::array<E, k...>;
 template<typename E> using ref_to = ::rocket::reference_wrapper<E>;
 
-// `using`-directives
-using ::rocket::cbegin;
-using ::rocket::cend;
-using ::rocket::begin;
-using ::rocket::end;
-using ::rocket::xswap;
-using ::rocket::swap;
-using ::rocket::clear;
+// Aliases
+using cow_string = ::rocket::cow_string;
+using cow_wstring = ::rocket::cow_wstring;
+using cow_u16string = ::rocket::cow_u16string;
+using cow_u32string = ::rocket::cow_u32string;
+using phsh_string = ::rocket::prehashed_string;
+using tinybuf = ::rocket::tinybuf;
+using tinyfmt = ::rocket::tinyfmt;
 
 // Fundamental types
 using G_null      = nullptr_t;

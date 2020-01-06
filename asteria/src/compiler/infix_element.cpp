@@ -4,6 +4,8 @@
 #include "../precompiled.hpp"
 #include "infix_element.hpp"
 #include "xprunit.hpp"
+#include "enums.hpp"
+#include "../runtime/enums.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {

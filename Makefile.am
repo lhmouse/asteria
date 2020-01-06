@@ -132,6 +132,7 @@ pkginclude_llds_HEADERS =  \
 
 pkginclude_runtimedir = ${pkgincludedir}/runtime
 pkginclude_runtime_HEADERS =  \
+  asteria/src/runtime/enums.hpp  \
   asteria/src/runtime/abstract_hooks.hpp  \
   asteria/src/runtime/reference_root.hpp  \
   asteria/src/runtime/reference_modifier.hpp  \
@@ -193,6 +194,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/llds/variable_hashset.cpp  \
   asteria/src/llds/reference_dictionary.cpp  \
   asteria/src/llds/avmc_queue.cpp  \
+  asteria/src/runtime/enums.cpp  \
   asteria/src/runtime/abstract_hooks.cpp  \
   asteria/src/runtime/reference_root.cpp  \
   asteria/src/runtime/reference_modifier.cpp  \
