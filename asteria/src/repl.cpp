@@ -440,13 +440,14 @@ void do_handle_repl_command(cow_string&& cmd)
         do_quick_exit(exit_unspecified);
       }
       if(::feof(stdin)) {
-        ::fprintf(stderr, "~ have a nice day :)\n");
+        ::fprintf(stderr, "* have a nice day :)\n");
         do_quick_exit(exit_success);
       }
       // Move on and read the next snippet.
       ::fputc('\n', stderr);
       code.clear();
       interrupted = 0;
+
       // Prompt for the first line.
       bool escape = false;
       long line = 0;
