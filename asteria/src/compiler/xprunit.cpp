@@ -83,7 +83,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
         const auto& altr = this->m_stor.as<index_closure_function>();
         // Name the closure.
         ::rocket::tinyfmt_str fmt;
-        fmt << "<closure>._" << altr.sloc.line() << '(';
+        fmt << "<closure>._" << altr.unique_id << '(';
         // Append the parameter list. Parameters are separated by commas.
         size_t epos = altr.params.size() - 1;
         if(epos != SIZE_MAX) {

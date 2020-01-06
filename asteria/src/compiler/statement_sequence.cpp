@@ -33,6 +33,20 @@ inline Source_Location do_tell_source_location(const Token_Stream& tstrm)
     return Source_Location(qtok->file(), qtok->line());
   }
 
+constexpr uint64_t do_cantor_pair(uint64_t x, uint64_t y) noexcept
+  {
+    return (x + y) * (x + y + 1) / 2 + y;
+  }
+
+inline uint64_t do_get_unique_id(const Token_Stream& tstrm)
+  {
+    auto qtok = tstrm.peek_opt();
+    if(!qtok) {
+      return 0;
+    }
+    return do_cantor_pair(static_cast<unsigned long>(qtok->line()), qtok->offset());
+  }
+
 opt<Keyword> do_accept_keyword_opt(Token_Stream& tstrm, initializer_list<Keyword> accept)
   {
     auto qtok = tstrm.peek_opt();
@@ -1431,6 +1445,7 @@ bool do_accept_closure_function(cow_vector<Xprunit>& units, Token_Stream& tstrm)
     // closure-function ::=
     //   "func" parameter-declaration closure-body
     auto sloc = do_tell_source_location(tstrm);
+    auto uniq = do_get_unique_id(tstrm);
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_func });
     if(!qkwrd) {
       return false;
@@ -1443,7 +1458,7 @@ bool do_accept_closure_function(cow_vector<Xprunit>& units, Token_Stream& tstrm)
     if(!qblock) {
       do_throw_parser_error(parser_status_open_brace_or_equal_initializer_expected, tstrm);
     }
-    Xprunit::S_closure_function xunit = { ::rocket::move(sloc), ::rocket::move(*kparams),
+    Xprunit::S_closure_function xunit = { ::rocket::move(sloc), uniq, rocket::move(*kparams),
                                           ::rocket::move(qblock->stmts) };
     units.emplace_back(::rocket::move(xunit));
     return true;
