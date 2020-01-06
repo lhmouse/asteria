@@ -836,14 +836,14 @@ constexpr s_decmult_F[] =
   };
 static_assert(noadl::countof(s_decmult_F) == 652, "");
 
-double do_cast_mant_I(uint64_t ireg, bool single) noexcept
+double do_xldexp_I(uint64_t ireg, int bexp, bool single) noexcept
   {
     ROCKET_ASSERT(ireg <= INT64_MAX);
     // Round it correctly.
     if(ROCKET_UNEXPECT(single))
-      return (double)(float)(int64_t)ireg;
+      return (double)::std::ldexp((float)(int64_t)ireg, bexp);
     else
-      return (double)(int64_t)ireg;
+      return ::std::ldexp((double)(int64_t)ireg, bexp);
   }
 
 }  // namespace
@@ -1358,14 +1358,12 @@ ascii_numget& ascii_numget::cast_F(double& value, double lower, double upper, bo
             if(ireg >> 62) {
               // Drop two bits from the right.
               ireg = (ireg >> 2) | (((ireg >> 1) | ireg) & 1) | this->m_madd;
-              freg = do_cast_mant_I(ireg, single);
-              freg = ::std::ldexp(freg, this->m_expo + 2);
+              freg = do_xldexp_I(ireg, this->m_expo + 2, single);
             }
             else {
               // Shift overflowed digits into the right.
               ireg = (ireg << 1) | this->m_madd;
-              freg = do_cast_mant_I(ireg, single);
-              freg = ::std::ldexp(freg, this->m_expo - 1);
+              freg = do_xldexp_I(ireg, this->m_expo - 1, single);
             }
             break;
           }{
@@ -1398,8 +1396,7 @@ ascii_numget& ascii_numget::cast_F(double& value, double lower, double upper, bo
             uint64_t ylo = mult.mant << 32 >> 32;
             ireg = xhi * yhi + (((xlo * yhi >> 30) + (xhi * ylo >> 30) + (xlo * ylo >> 62)) >> 2);
             // Convert the mantissa to a floating-point number.
-            freg = do_cast_mant_I(ireg | 1, single);
-            freg = ::std::ldexp(freg, mult.bexp - lzcnt);
+            freg = do_xldexp_I(ireg | 1, mult.bexp - lzcnt, single);
             break;
           }}
         default:
