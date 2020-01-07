@@ -79,7 +79,8 @@ Reference* Executive_Context::do_lazy_lookup_opt(Reference_Dictionary& named_ref
     if(name == "__varg") {
       auto& ref = named_refs.open(::rocket::sref("__varg"));
       auto varg = this->m_args.empty() ? ckptr<Abstract_Function>(this->m_zvarg)  // pre-allocated
-                            : ::rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg), ::rocket::move(this->m_args));
+                                       : ::rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg),
+                                                                                ::rocket::move(this->m_args));
       Reference_Root::S_constant xref = { ::rocket::move(varg) };
       ref = ::rocket::move(xref);
       return &ref;
