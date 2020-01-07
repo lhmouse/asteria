@@ -43,9 +43,12 @@ void Executive_Context::do_prepare_function(const cow_vector<phsh_string>& param
     }
     args.erase(0, elps);
 
-    // Stash arguments for lazy initialization.
-    this->m_self_opt = ::rocket::move(self);
-    this->m_args_opt = ::rocket::move(args);
+    // Stash the `this` reference for lazy initialization.
+    this->m_self = ::rocket::move(self);
+    // Stash variadic arguments for lazy initialization.
+    // If all arguments are positional, `args` may be reused for the evaluation stack, so don't move it at all.
+    if(!args.empty())
+      this->m_args = ::rocket::move(args.shrink_to_fit());
   }
 
 bool Executive_Context::do_is_analytic() const noexcept
@@ -70,19 +73,13 @@ Reference* Executive_Context::do_lazy_lookup_opt(Reference_Dictionary& named_ref
     }
     if(name == "__this") {
       auto& ref = named_refs.open(::rocket::sref("__this"));
-      ref = ::rocket::move(*(this->m_self_opt));
-      this->m_self_opt.reset();
+      ref = ::rocket::move(this->m_self);
       return &ref;
     }
     if(name == "__varg") {
       auto& ref = named_refs.open(::rocket::sref("__varg"));
-      ckptr<Abstract_Function> varg;
-      if(ROCKET_EXPECT(this->m_args_opt->empty()))
-        varg = this->m_zvarg;
-      else
-        varg = ::rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg),  // copy `sloc` and `func`
-                                                      ::rocket::move(*(this->m_args_opt)));
-      this->m_args_opt.reset();
+      auto varg = this->m_args.empty() ? ckptr<Abstract_Function>(this->m_zvarg)  // pre-allocated
+                            : ::rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg), ::rocket::move(this->m_args));
       Reference_Root::S_constant xref = { ::rocket::move(varg) };
       ref = ::rocket::move(xref);
       return &ref;

@@ -22,8 +22,8 @@ class Executive_Context final : public Abstract_Context
     ckptr<Variadic_Arguer> m_zvarg;
 
     // These members are used for lazy initialization.
-    mutable opt<Reference> m_self_opt;
-    mutable opt<cow_vector<Reference>> m_args_opt;
+    mutable Reference m_self;
+    mutable cow_vector<Reference> m_args;
 
   public:
     template<typename ContextT, ASTERIA_SFINAE_CONVERT(ContextT*, const Executive_Context*)>
