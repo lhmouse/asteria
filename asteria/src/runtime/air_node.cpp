@@ -3115,7 +3115,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_function_call: {
         const auto& altr = this->m_stor.as<index_function_call>();
         // `pu.u8s[0]` is `ptc_aware`.
-        // `pv` points to the source location and the argument avmcp.cifier vector.
+        // `pv` points to the source location and the argument vector.
         AVMC_Appender<Pv_call> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
