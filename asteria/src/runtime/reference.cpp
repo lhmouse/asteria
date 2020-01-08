@@ -107,7 +107,8 @@ Reference& Reference::do_finish_call(Global_Context& global)
       }
       catch(Runtime_Error& except) {
         // Append all frames that have been expanded so far and rethrow the exception.
-        ::std::for_each(frames.rbegin(), frames.rend(), [&](const auto& p) { except.push_frame_func(p->sloc(), p->inside());  });
+        ::std::for_each(frames.rbegin(), frames.rend(),
+                        [&](const auto& p) { except.push_frame_func(p->sloc(), p->inside());  });
         // Call the hook function if any.
         if(qhooks) {
           qhooks->on_function_except(sloc, inside, except);
@@ -117,7 +118,8 @@ Reference& Reference::do_finish_call(Global_Context& global)
       catch(exception& stdex) {
         // Translate the exception, append all frames that have been expanded so far, and throw the new exception.
         Runtime_Error except(stdex);
-        ::std::for_each(frames.rbegin(), frames.rend(), [&](const auto& p) { except.push_frame_func(p->sloc(), p->inside());  });
+        ::std::for_each(frames.rbegin(), frames.rend(),
+                        [&](const auto& p) { except.push_frame_func(p->sloc(), p->inside());  });
         // Call the hook function if any.
         if(qhooks) {
           qhooks->on_function_except(sloc, inside, except);
