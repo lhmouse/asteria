@@ -671,6 +671,7 @@ constexpr s_keywords[] =
     { "__sign",    keyword_sign      },
     { "__sqrt",    keyword_sqrt      },
     { "__trunc",   keyword_trunc     },
+    { "__vcall",   keyword_vcall     },
     { "and",       keyword_and       },
     { "assert",    keyword_assert    },
     { "break",     keyword_break     },

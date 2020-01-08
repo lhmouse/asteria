@@ -329,6 +329,9 @@ const char* stringify_keyword(Keyword kwrd) noexcept
     case keyword_global: {
         return "__global";
       }
+    case keyword_vcall: {
+        return "__vcall";
+      }
     default:
       return "<unknown keyword>";
     }
