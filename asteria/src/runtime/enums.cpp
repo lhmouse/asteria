@@ -145,7 +145,7 @@ const char* describe_xop(Xop xop) noexcept
         return "infix `=`";
       }
     case xop_fma: {
-        return "infix `__fma`";
+        return "prefix `__fma`";
       }
     case xop_head: {
         return "postfix `[^]`";
