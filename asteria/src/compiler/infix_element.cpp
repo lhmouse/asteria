@@ -3,7 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "infix_element.hpp"
-#include "xprunit.hpp"
+#include "expression_unit.hpp"
 #include "enums.hpp"
 #include "../runtime/enums.hpp"
 #include "../utilities.hpp"
@@ -95,7 +95,7 @@ Precedence Infix_Element::tell_precedence() const noexcept
     }
   }
 
-void Infix_Element::extract(cow_vector<Xprunit>& units)
+void Infix_Element::extract(cow_vector<Expression_Unit>& units)
   {
     switch(this->index()) {
     case index_head: {
@@ -107,28 +107,28 @@ void Infix_Element::extract(cow_vector<Xprunit>& units)
     case index_ternary: {
         auto& altr = this->m_stor.as<index_ternary>();
         // Construct a branch unit from both branches, then append it to `units`.
-        Xprunit::S_branch xunit = { ::rocket::move(altr.branch_true), ::rocket::move(altr.branch_false), altr.assign };
+        Expression_Unit::S_branch xunit = { ::rocket::move(altr.branch_true), ::rocket::move(altr.branch_false), altr.assign };
         units.emplace_back(::rocket::move(xunit));
         return;
       }
     case index_logical_and: {
         auto& altr = this->m_stor.as<index_logical_and>();
         // Construct a branch unit from the TRUE branch and an empty FALSE branch, then append it to `units`.
-        Xprunit::S_branch xunit = { ::rocket::move(altr.branch_true), clear, altr.assign };
+        Expression_Unit::S_branch xunit = { ::rocket::move(altr.branch_true), clear, altr.assign };
         units.emplace_back(::rocket::move(xunit));
         return;
       }
     case index_logical_or: {
         auto& altr = this->m_stor.as<index_logical_or>();
         // Construct a branch unit from an empty TRUE branch and the FALSE branch, then append it to `units`.
-        Xprunit::S_branch xunit = { clear, ::rocket::move(altr.branch_false), altr.assign };
+        Expression_Unit::S_branch xunit = { clear, ::rocket::move(altr.branch_false), altr.assign };
         units.emplace_back(::rocket::move(xunit));
         return;
       }
     case index_coalescence: {
         auto& altr = this->m_stor.as<index_coalescence>();
         // Construct a branch unit from the NULL branch, then append it to `units`.
-        Xprunit::S_coalescence xunit = { ::rocket::move(altr.branch_null), altr.assign };
+        Expression_Unit::S_coalescence xunit = { ::rocket::move(altr.branch_null), altr.assign };
         units.emplace_back(::rocket::move(xunit));
         return;
       }
@@ -138,7 +138,7 @@ void Infix_Element::extract(cow_vector<Xprunit>& units)
         // Append the RHS operand to the LHS operand, followed by the operator, forming the Reverse Polish Notation (RPN).
         ::std::move(altr.rhs.mut_begin(), altr.rhs.mut_end(), ::std::back_inserter(units));
         // Append the operator itself.
-        Xprunit::S_operator_rpn xunit = { altr.xop, altr.assign };
+        Expression_Unit::S_operator_rpn xunit = { altr.xop, altr.assign };
         units.emplace_back(::rocket::move(xunit));
         return;
       }
@@ -147,7 +147,7 @@ void Infix_Element::extract(cow_vector<Xprunit>& units)
     }
   }
 
-cow_vector<Xprunit>& Infix_Element::open_junction() noexcept
+cow_vector<Expression_Unit>& Infix_Element::open_junction() noexcept
   {
     switch(this->index()) {
     case index_head: {

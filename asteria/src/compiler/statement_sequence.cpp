@@ -6,7 +6,7 @@
 #include "enums.hpp"
 #include "token_stream.hpp"
 #include "token.hpp"
-#include "xprunit.hpp"
+#include "expression_unit.hpp"
 #include "statement.hpp"
 #include "infix_element.hpp"
 #include "../runtime/enums.hpp"
@@ -357,14 +357,14 @@ extern opt<Statement> do_accept_statement_opt(Token_Stream& tstrm);
 // Accept a statement; a non-block statement is converted to a block consisting of a single statement.
 extern opt<Statement::S_block> do_accept_statement_as_block_opt(Token_Stream& tstrm);
 
-extern bool do_accept_expression(cow_vector<Xprunit>& units, Token_Stream& tstrm);
+extern bool do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm);
 
 opt<Statement::S_expression> do_accept_expression_opt(Token_Stream& tstrm)
   {
     // expression-opt ::=
     //   expression | ""
     auto sloc = do_tell_source_location(tstrm);
-    cow_vector<Xprunit> units;
+    cow_vector<Expression_Unit> units;
     bool succ = do_accept_expression(units, tstrm);
     if(!succ) {
       return clear;
@@ -1320,7 +1320,7 @@ constexpr bool operator==(const Punctuator_Element& lhs, Punctuator rhs) noexcep
     return lhs.punct == rhs;
   }
 
-bool do_accept_prefix_operator(cow_vector<Xprunit>& units, Token_Stream& tstrm)
+bool do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // prefix-operator ::=
     //   "+" | "-" | "~" | "!" | "++" | "--" |
@@ -1338,7 +1338,7 @@ bool do_accept_prefix_operator(cow_vector<Xprunit>& units, Token_Stream& tstrm)
       }
       // Return the prefix operator and discard this token.
       tstrm.shift();
-      Xprunit::S_operator_rpn xunit = { qconf->xop, false };
+      Expression_Unit::S_operator_rpn xunit = { qconf->xop, false };
       units.emplace_back(::rocket::move(xunit));
       return true;
     }
@@ -1349,14 +1349,14 @@ bool do_accept_prefix_operator(cow_vector<Xprunit>& units, Token_Stream& tstrm)
       }
       // Return the prefix operator and discard this token.
       tstrm.shift();
-      Xprunit::S_operator_rpn xunit = { qconf->xop, false };
+      Expression_Unit::S_operator_rpn xunit = { qconf->xop, false };
       units.emplace_back(::rocket::move(xunit));
       return true;
     }
     return false;
   }
 
-bool do_accept_named_reference(cow_vector<Xprunit>& units, Token_Stream& tstrm)
+bool do_accept_named_reference(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // Get an identifier.
     auto sloc = do_tell_source_location(tstrm);
@@ -1366,21 +1366,21 @@ bool do_accept_named_reference(cow_vector<Xprunit>& units, Token_Stream& tstrm)
     }
     // Replace special names. This is what macros in C do.
     if(*qname == "__file") {
-      Xprunit::S_literal xunit = { G_string(sloc.file()) };
+      Expression_Unit::S_literal xunit = { G_string(sloc.file()) };
       units.emplace_back(::rocket::move(xunit));
       return true;
     }
     if(*qname == "__line") {
-      Xprunit::S_literal xunit = { G_integer(sloc.line()) };
+      Expression_Unit::S_literal xunit = { G_integer(sloc.line()) };
       units.emplace_back(::rocket::move(xunit));
       return true;
     }
-    Xprunit::S_named_reference xunit = { ::rocket::move(*qname) };
+    Expression_Unit::S_named_reference xunit = { ::rocket::move(*qname) };
     units.emplace_back(::rocket::move(xunit));
     return true;
   }
 
-bool do_accept_global_reference(cow_vector<Xprunit>& units, Token_Stream& tstrm)
+bool do_accept_global_reference(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // global-identifier ::=
     //   "__global" identifier
@@ -1392,31 +1392,31 @@ bool do_accept_global_reference(cow_vector<Xprunit>& units, Token_Stream& tstrm)
     if(!qname) {
       do_throw_parser_error(parser_status_identifier_expected, tstrm);
     }
-    Xprunit::S_global_reference xunit = { ::rocket::move(*qname) };
+    Expression_Unit::S_global_reference xunit = { ::rocket::move(*qname) };
     units.emplace_back(::rocket::move(xunit));
     return true;
   }
 
-bool do_accept_literal(cow_vector<Xprunit>& units, Token_Stream& tstrm)
+bool do_accept_literal(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // Get a literal as a `Value`.
     auto qval = do_accept_literal_value_opt(tstrm);
     if(!qval) {
       return false;
     }
-    Xprunit::S_literal xunit = { ::rocket::move(*qval) };
+    Expression_Unit::S_literal xunit = { ::rocket::move(*qval) };
     units.emplace_back(::rocket::move(xunit));
     return true;
   }
 
-bool do_accept_this(cow_vector<Xprunit>& units, Token_Stream& tstrm)
+bool do_accept_this(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // Get the keyword `this`.
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_this });
     if(!qkwrd) {
       return false;
     }
-    Xprunit::S_named_reference xunit = { ::rocket::sref("__this") };
+    Expression_Unit::S_named_reference xunit = { ::rocket::sref("__this") };
     units.emplace_back(::rocket::move(xunit));
     return true;
   }
@@ -1440,7 +1440,7 @@ opt<Statement::S_block> do_accept_closure_body_opt(Token_Stream& tstrm)
     return clear;
   }
 
-bool do_accept_closure_function(cow_vector<Xprunit>& units, Token_Stream& tstrm)
+bool do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // closure-function ::=
     //   "func" parameter-declaration closure-body
@@ -1458,13 +1458,13 @@ bool do_accept_closure_function(cow_vector<Xprunit>& units, Token_Stream& tstrm)
     if(!qblock) {
       do_throw_parser_error(parser_status_open_brace_or_equal_initializer_expected, tstrm);
     }
-    Xprunit::S_closure_function xunit = { ::rocket::move(sloc), uniq, rocket::move(*kparams),
+    Expression_Unit::S_closure_function xunit = { ::rocket::move(sloc), uniq, rocket::move(*kparams),
                                           ::rocket::move(qblock->stmts) };
     units.emplace_back(::rocket::move(xunit));
     return true;
   }
 
-bool do_accept_unnamed_array(cow_vector<Xprunit>& units, Token_Stream& tstrm)
+bool do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // unnamed-array ::=
     //   "[" array-element-list-opt "]"
@@ -1496,12 +1496,12 @@ bool do_accept_unnamed_array(cow_vector<Xprunit>& units, Token_Stream& tstrm)
     if(!kpunct) {
       do_throw_parser_error(parser_status_closed_bracket_expected, tstrm);
     }
-    Xprunit::S_unnamed_array xunit = { nelems };
+    Expression_Unit::S_unnamed_array xunit = { nelems };
     units.emplace_back(::rocket::move(xunit));
     return true;
   }
 
-bool do_accept_unnamed_object(cow_vector<Xprunit>& units, Token_Stream& tstrm)
+bool do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // unnamed-object ::=
     //   "{" key-mapped-list-opt "}"
@@ -1539,12 +1539,12 @@ bool do_accept_unnamed_object(cow_vector<Xprunit>& units, Token_Stream& tstrm)
     if(!kpunct) {
       do_throw_parser_error(parser_status_closed_brace_or_name_expected, tstrm);
     }
-    Xprunit::S_unnamed_object xunit = { ::rocket::move(keys) };
+    Expression_Unit::S_unnamed_object xunit = { ::rocket::move(keys) };
     units.emplace_back(::rocket::move(xunit));
     return true;
   }
 
-bool do_accept_nested_expression(cow_vector<Xprunit>& units, Token_Stream& tstrm)
+bool do_accept_nested_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // nested-expression ::=
     //   "(" expression ")"
@@ -1563,7 +1563,7 @@ bool do_accept_nested_expression(cow_vector<Xprunit>& units, Token_Stream& tstrm
     return true;
   }
 
-bool do_accept_fused_multiply_add(cow_vector<Xprunit>& units, Token_Stream& tstrm)
+bool do_accept_fused_multiply_add(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // fused-multiply-add ::=
     //   "__fma" "(" expression "," expression "," expression ")"
@@ -1599,12 +1599,12 @@ bool do_accept_fused_multiply_add(cow_vector<Xprunit>& units, Token_Stream& tstr
     if(!kpunct) {
       do_throw_parser_error(parser_status_closed_parenthesis_expected, tstrm);
     }
-    Xprunit::S_operator_rpn xunit = { xop_fma, false };
+    Expression_Unit::S_operator_rpn xunit = { xop_fma, false };
     units.emplace_back(::rocket::move(xunit));
     return true;
   }
 
-bool do_accept_primary_expression(cow_vector<Xprunit>& units, Token_Stream& tstrm)
+bool do_accept_primary_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // primary-expression ::=
     //   identifier | global-identifier | literal | "this" | closure-function | unnamed-array | unnamed-object |
@@ -1666,7 +1666,7 @@ constexpr bool operator==(const Postfix_Operator_Element& lhs, Punctuator rhs) n
     return lhs.punct == rhs;
   }
 
-bool do_accept_postfix_operator(cow_vector<Xprunit>& units, Token_Stream& tstrm)
+bool do_accept_postfix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // postfix-operator ::=
     //   "++" | "--" | "[^]" | "[$]"
@@ -1681,14 +1681,14 @@ bool do_accept_postfix_operator(cow_vector<Xprunit>& units, Token_Stream& tstrm)
       }
       // Return the postfix operator and discard this token.
       tstrm.shift();
-      Xprunit::S_operator_rpn xunit = { qconf->xop, false };
+      Expression_Unit::S_operator_rpn xunit = { qconf->xop, false };
       units.emplace_back(::rocket::move(xunit));
       return true;
     }
     return false;
   }
 
-bool do_accept_postfix_function_call(cow_vector<Xprunit>& units, Token_Stream& tstrm)
+bool do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // postfix-function-call ::=
     //   "(" argument-list-opt ")"
@@ -1725,12 +1725,12 @@ bool do_accept_postfix_function_call(cow_vector<Xprunit>& units, Token_Stream& t
     if(!kpunct) {
       do_throw_parser_error(parser_status_closed_parenthesis_or_argument_expected, tstrm);
     }
-    Xprunit::S_function_call xunit = { ::rocket::move(sloc), ::rocket::move(args_by_refs) };
+    Expression_Unit::S_function_call xunit = { ::rocket::move(sloc), ::rocket::move(args_by_refs) };
     units.emplace_back(::rocket::move(xunit));
     return true;
   }
 
-bool do_accept_postfix_subscript(cow_vector<Xprunit>& units, Token_Stream& tstrm)
+bool do_accept_postfix_subscript(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // postfix-subscript ::=
     //   "[" expression "]"
@@ -1746,12 +1746,12 @@ bool do_accept_postfix_subscript(cow_vector<Xprunit>& units, Token_Stream& tstrm
     if(!kpunct) {
       do_throw_parser_error(parser_status_closed_bracket_expected, tstrm);
     }
-    Xprunit::S_operator_rpn xunit = { xop_subscr, false };
+    Expression_Unit::S_operator_rpn xunit = { xop_subscr, false };
     units.emplace_back(::rocket::move(xunit));
     return true;
   }
 
-bool do_accept_postfix_member_access(cow_vector<Xprunit>& units, Token_Stream& tstrm)
+bool do_accept_postfix_member_access(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // postfix-member-access ::=
     //   "." ( string-literal | identifier )
@@ -1763,12 +1763,12 @@ bool do_accept_postfix_member_access(cow_vector<Xprunit>& units, Token_Stream& t
     if(!qkey) {
       do_throw_parser_error(parser_status_identifier_expected, tstrm);
     }
-    Xprunit::S_member_access xunit = { ::rocket::move(*qkey) };
+    Expression_Unit::S_member_access xunit = { ::rocket::move(*qkey) };
     units.emplace_back(::rocket::move(xunit));
     return true;
   }
 
-bool do_accept_infix_element(cow_vector<Xprunit>& units, Token_Stream& tstrm)
+bool do_accept_infix_element(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // infix-element ::=
     //   prefix-operator-list-opt primary-expression postfix-operator-list-opt
@@ -1780,7 +1780,7 @@ bool do_accept_infix_element(cow_vector<Xprunit>& units, Token_Stream& tstrm)
     //   postfix-operator-list | ""
     // postfix-operator-list ::=
     //   postfix-operator | postfix-function-call | postfix-subscript | postfix-member-access
-    cow_vector<Xprunit> prefixes;
+    cow_vector<Expression_Unit> prefixes;
     bool succ;
     do {
       succ = do_accept_prefix_operator(prefixes, tstrm);
@@ -1810,7 +1810,7 @@ opt<Infix_Element> do_accept_infix_head_opt(Token_Stream& tstrm)
   {
     // infix-head ::=
     //   infix-element
-    cow_vector<Xprunit> units;
+    cow_vector<Expression_Unit> units;
     bool succ = do_accept_infix_element(units, tstrm);
     if(!succ) {
       return clear;
@@ -1827,7 +1827,7 @@ opt<Infix_Element> do_accept_infix_operator_ternary_opt(Token_Stream& tstrm)
     if(!kpunct) {
       return clear;
     }
-    cow_vector<Xprunit> btrue;
+    cow_vector<Expression_Unit> btrue;
     if(!do_accept_expression(btrue, tstrm)) {
       do_throw_parser_error(parser_status_expression_expected, tstrm);
     }
@@ -1981,7 +1981,7 @@ opt<Infix_Element> do_accept_infix_operator_opt(Token_Stream& tstrm)
     return clear;
   }
 
-bool do_accept_expression(cow_vector<Xprunit>& units, Token_Stream& tstrm)
+bool do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // Check for stack overflows.
     const auto sentry = tstrm.copy_recursion_sentry();

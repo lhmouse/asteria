@@ -15,7 +15,7 @@ class Statement
     struct S_expression
       {
         Source_Location sloc;
-        cow_vector<Xprunit> units;
+        cow_vector<Expression_Unit> units;
       };
     struct S_block
       {

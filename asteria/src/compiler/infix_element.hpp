@@ -13,34 +13,34 @@ class Infix_Element
   public:
     struct S_head
       {
-        cow_vector<Xprunit> units;
+        cow_vector<Expression_Unit> units;
       };
     struct S_ternary  // ? :
       {
         bool assign;
-        cow_vector<Xprunit> branch_true;
-        cow_vector<Xprunit> branch_false;
+        cow_vector<Expression_Unit> branch_true;
+        cow_vector<Expression_Unit> branch_false;
       };
     struct S_logical_and  // &&
       {
         bool assign;
-        cow_vector<Xprunit> branch_true;
+        cow_vector<Expression_Unit> branch_true;
       };
     struct S_logical_or  // ||
       {
         bool assign;
-        cow_vector<Xprunit> branch_false;
+        cow_vector<Expression_Unit> branch_false;
       };
     struct S_coalescence  // ??
       {
         bool assign;
-        cow_vector<Xprunit> branch_null;
+        cow_vector<Expression_Unit> branch_null;
       };
     struct S_general  // no short circuit
       {
         Xop xop;
         bool assign;
-        cow_vector<Xprunit> rhs;
+        cow_vector<Expression_Unit> rhs;
       };
 
     enum Index : uint8_t
@@ -93,9 +93,9 @@ class Infix_Element
     // Returns the precedence of this element.
     Precedence tell_precedence() const noexcept;
     // Moves all units into `units`.
-    void extract(cow_vector<Xprunit>& units);
+    void extract(cow_vector<Expression_Unit>& units);
     // Returns a reference where new units will be appended.
-    cow_vector<Xprunit>& open_junction() noexcept;
+    cow_vector<Expression_Unit>& open_junction() noexcept;
   };
 
 inline void swap(Infix_Element& lhs, Infix_Element& rhs) noexcept

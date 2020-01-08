@@ -114,7 +114,7 @@ class Simple_Script;
 class Parser_Error;
 class Token;
 class Token_Stream;
-class Xprunit;
+class Expression_Unit;
 class Statement;
 class Infix_Element;
 class Statement_Sequence;

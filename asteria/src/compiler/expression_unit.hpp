@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_COMPILER_XPRUNIT_HPP_
-#define ASTERIA_COMPILER_XPRUNIT_HPP_
+#ifndef ASTERIA_COMPILER_EXPRESSION_UNIT_HPP_
+#define ASTERIA_COMPILER_EXPRESSION_UNIT_HPP_
 
 #include "../fwd.hpp"
 #include "../value.hpp"
@@ -10,7 +10,7 @@
 
 namespace Asteria {
 
-class Xprunit
+class Expression_Unit
   {
   public:
     struct S_literal
@@ -30,8 +30,8 @@ class Xprunit
       };
     struct S_branch
       {
-        cow_vector<Xprunit> branch_true;
-        cow_vector<Xprunit> branch_false;
+        cow_vector<Expression_Unit> branch_true;
+        cow_vector<Expression_Unit> branch_false;
         bool assign;
       };
     struct S_function_call
@@ -58,7 +58,7 @@ class Xprunit
       };
     struct S_coalescence
       {
-        cow_vector<Xprunit> branch_null;
+        cow_vector<Expression_Unit> branch_null;
         bool assign;
       };
     struct S_global_reference
@@ -100,12 +100,12 @@ class Xprunit
     Xvariant m_stor;
 
   public:
-    ASTERIA_VARIANT_CONSTRUCTOR(Xprunit, Xvariant, XunitT, xunit)
+    ASTERIA_VARIANT_CONSTRUCTOR(Expression_Unit, Xvariant, XunitT, xunit)
       :
         m_stor(::rocket::forward<XunitT>(xunit))
       {
       }
-    ASTERIA_VARIANT_ASSIGNMENT(Xprunit, Xvariant, XunitT, xunit)
+    ASTERIA_VARIANT_ASSIGNMENT(Expression_Unit, Xvariant, XunitT, xunit)
       {
         this->m_stor = ::rocket::forward<XunitT>(xunit);
         return *this;
@@ -117,7 +117,7 @@ class Xprunit
         return static_cast<Index>(this->m_stor.index());
       }
 
-    Xprunit& swap(Xprunit& other) noexcept
+    Expression_Unit& swap(Expression_Unit& other) noexcept
       {
         this->m_stor.swap(other.m_stor);
         return *this;
@@ -127,7 +127,7 @@ class Xprunit
                                         PTC_Aware ptc, const Analytic_Context& ctx) const;
   };
 
-inline void swap(Xprunit& lhs, Xprunit& rhs) noexcept
+inline void swap(Expression_Unit& lhs, Expression_Unit& rhs) noexcept
   {
     lhs.swap(rhs);
   }

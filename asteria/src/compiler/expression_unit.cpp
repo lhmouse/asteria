@@ -2,7 +2,7 @@
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
 #include "../precompiled.hpp"
-#include "xprunit.hpp"
+#include "expression_unit.hpp"
 #include "statement.hpp"
 #include "../runtime/enums.hpp"
 #include "../runtime/air_node.hpp"
@@ -13,7 +13,7 @@ namespace Asteria {
 namespace {
 
 cow_vector<AIR_Node> do_generate_code_branch(const Compiler_Options& opts, PTC_Aware ptc,
-                                             const Analytic_Context& ctx, const cow_vector<Xprunit>& units)
+                                             const Analytic_Context& ctx, const cow_vector<Expression_Unit>& units)
   {
     cow_vector<AIR_Node> code;
     // Expression units other than the last one cannot be PTC'd.
@@ -29,7 +29,7 @@ cow_vector<AIR_Node> do_generate_code_branch(const Compiler_Options& opts, PTC_A
 
 }  // namespace
 
-cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
+cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
                                              PTC_Aware ptc, const Analytic_Context& ctx) const
   {
     switch(this->index()) {
