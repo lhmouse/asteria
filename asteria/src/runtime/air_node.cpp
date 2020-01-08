@@ -737,10 +737,11 @@ AIR_Status do_return_by_value(Executive_Context& ctx, ParamU /*pu*/, const void*
   {
     // The result will have been pushed onto the top.
     auto& self = ctx.stack().open_top();
-    // Convert the result to an rvalue.
-    // PTC wrappers are forwarded as is.
-    if(ROCKET_UNEXPECT(self.is_lvalue())) {
-      self.convert_to_rvalue();
+    // Check for glvalues only. PTC wrappers are forwarded as is.
+    if(self.is_glvalue()) {
+      // Convert the result to an rvalue.
+      Reference_Root::S_temporary xref = { self.read() };
+      self = ::rocket::move(xref);
     }
     return air_status_return;
   }
@@ -961,17 +962,20 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
     // Pop arguments off the stack backwards.
     args.resize(args_by_refs.size());
     for(size_t i = args.size() - 1; i != SIZE_MAX; --i) {
-      // Get an argument.
+      // Get an argument. Ensure it is dereferenceable.
       auto& arg = ctx.stack().open_top();
-      // Convert the argument to an rvalue if it shouldn't be passed by reference.
+      const auto& aval = arg.read();
+      // How to pass it?
       bool by_ref = args_by_refs[i];
-      if(!by_ref) {
-        arg.convert_to_rvalue();
+      if(!by_ref && arg.is_glvalue()) {
+        // Convert the argument to an rvalue if it shouldn't be passed by reference.
+        Reference_Root::S_temporary xref = { aval };
+        args.mut(i) = ::rocket::move(xref);
       }
-      // Ensure it is dereferenceable.
-      static_cast<void>(arg.read());
-      // Move and pop this argument.
-      args.mut(i) = ::rocket::move(arg);
+      else {
+        // Push the argument as is.
+        args.mut(i) = ::rocket::move(arg);
+      }
       ctx.stack().pop();
     }
     // Copy the target, which shall be of type `function`.

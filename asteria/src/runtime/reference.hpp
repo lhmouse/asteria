@@ -35,13 +35,12 @@ class Reference
       }
 
   private:
-    [[noreturn]] Value do_throw_unset_no_modifier() const;
+    [[noreturn]] void do_throw_unset_no_modifier() const;
 
     const Value& do_read(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const;
     Value& do_open(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const;
     Value do_unset(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const;
 
-    Reference& do_convert_to_temporary();
     Reference& do_finish_call(Global_Context& global);
 
   public:
@@ -70,6 +69,10 @@ class Reference
       {
         return this->is_variable();
       }
+    bool is_glvalue() const noexcept
+      {
+        return this->is_variable() || this->m_mods.size();
+      }
     bool is_rvalue() const noexcept
       {
         return this->is_constant() || this->is_temporary();
@@ -78,17 +81,15 @@ class Reference
     template<typename XModT> Reference& zoom_in(XModT&& xmod)
       {
         // Append a modifier.
-        this->m_mods.emplace_back(::rocket::forward<XModT>(xmod));
-        return *this;
+        return this->m_mods.emplace_back(::rocket::forward<XModT>(xmod)), *this;
       }
     Reference& zoom_out()
       {
         // Drop the last modifier. If there is no modifier, set `this` to `null`.
-        if(ROCKET_EXPECT(this->m_mods.empty()))
-          this->m_root = Reference_Root::S_void();
-        else
-          this->m_mods.pop_back();
-        return *this;
+        if(ROCKET_EXPECT(this->m_mods.empty())) {
+          return this->m_root = Reference_Root::S_constant(), *this;
+        }
+        return this->m_mods.pop_back(), *this;
       }
 
     Reference& swap(Reference& other) noexcept
@@ -123,7 +124,7 @@ class Reference
     Value unset() const
       {
         if(this->m_mods.empty()) {
-          return this->do_throw_unset_no_modifier();
+          this->do_throw_unset_no_modifier();
         }
         return this->do_unset(this->m_mods.data(), this->m_mods.size() - 1, this->m_mods.back());
       }
@@ -139,13 +140,7 @@ class Reference
         }
         return this->m_root.as_variable();
       }
-    Reference& convert_to_rvalue()
-      {
-        if(ROCKET_EXPECT(this->is_rvalue() && this->m_mods.empty())) {
-          return *this;
-        }
-        return this->do_convert_to_temporary();
-      }
+
     Reference& finish_call(Global_Context& global)
       {
         if(ROCKET_EXPECT(!this->m_root.is_tail_call())) {

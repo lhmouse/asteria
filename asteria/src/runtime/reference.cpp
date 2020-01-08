@@ -10,7 +10,7 @@
 
 namespace Asteria {
 
-Value Reference::do_throw_unset_no_modifier() const
+void Reference::do_throw_unset_no_modifier() const
   {
     ASTERIA_THROW("non-members can't be unset");
   }
@@ -56,14 +56,6 @@ Value Reference::do_unset(const Reference_Modifier* mods, size_t nmod, const Ref
     }
     // Apply the last modifier.
     return last.apply_and_erase(*qref);
-  }
-
-Reference& Reference::do_convert_to_temporary()
-  {
-    // Replace `*this` with a reference to temporary.
-    Reference_Root::S_temporary xref = { this->read() };
-    *this = ::rocket::move(xref);
-    return *this;
   }
 
 Reference& Reference::do_finish_call(Global_Context& global)
@@ -131,9 +123,10 @@ Reference& Reference::do_finish_call(Global_Context& global)
         qhooks->on_function_return(sloc, inside, *this);
       }
     }
-    if(ptc_conj == ptc_aware_by_val) {
+    if((ptc_conj == ptc_aware_by_val) && this->is_glvalue()) {
       // Convert the result to an rvalue if it shouldn't be passed by reference.
-      this->convert_to_rvalue();
+      Reference_Root::S_temporary xref = { this->read() };
+      *this = ::rocket::move(xref);
     }
     else if(ptc_conj == ptc_aware_prune) {
       // Return a `null`.
