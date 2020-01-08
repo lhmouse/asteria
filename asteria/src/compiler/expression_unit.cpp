@@ -185,6 +185,14 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         return code;
       }
 
+    case index_variadic_call: {
+        const auto& altr = this->m_stor.as<index_variadic_call>();
+        // Encode arguments.
+        AIR_Node::S_variadic_call xnode = { altr.sloc, opts.no_proper_tail_calls ? ptc_aware_none : ptc };
+        code.emplace_back(::rocket::move(xnode));
+        return code;
+      }
+
     default:
       ASTERIA_TERMINATE("invalid expression unit type (index `$1`)", this->index());
     }

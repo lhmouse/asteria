@@ -65,6 +65,10 @@ class Expression_Unit
       {
         phsh_string name;
       };
+    struct S_variadic_call
+      {
+        Source_Location sloc;
+      };
 
     enum Index : uint8_t
       {
@@ -79,6 +83,7 @@ class Expression_Unit
         index_unnamed_object    =  8,
         index_coalescence       =  9,
         index_global_reference  = 10,
+        index_variadic_call     = 11,
       };
     using Xvariant = variant<
       ROCKET_CDR(
@@ -93,6 +98,7 @@ class Expression_Unit
       , S_unnamed_object    //  8,
       , S_coalescence       //  9,
       , S_global_reference  // 10,
+      , S_variadic_call     // 11,
       )>;
     static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
 

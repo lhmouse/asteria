@@ -33,7 +33,7 @@ void Executive_Context::do_prepare_function(const cow_vector<phsh_string>& param
       }
       // Set the parameter.
       if(ROCKET_UNEXPECT(i >= args.size()))
-        this->open_named_reference(name) = Reference_Root::S_void();
+        this->open_named_reference(name) = Reference_Root::S_constant();
       else
         this->open_named_reference(name) = ::rocket::move(args.mut(i));
     }

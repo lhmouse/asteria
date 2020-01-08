@@ -169,7 +169,7 @@ prefix-operator ::=
 
 primary-expression ::=
 	identifier | global-identifier | literal | "this" | closure-function | unnamed-array | unnamed-object |
-	nested-expression | fused-multiply-add
+	nested-expression | fused-multiply-add | variadic-function-call
 global-identifier ::=
 	"__global" identifier
 closure-function ::=
@@ -192,6 +192,8 @@ nested-expression ::=
 	"(" expression ")"
 fused-multiply-add ::=
 	"__fma" "(" expression "," expression "," expression ")"
+variadic-function-call ::=
+	"__vcall" "(" expression "," expression ")"
 
 postfix-operator-list-opt ::=
 	postfix-operator-list | ""

@@ -2554,6 +2554,61 @@ AIR_Status do_single_step_trap(Executive_Context& ctx, ParamU /*pu*/, const void
     return air_status_next;
   }
 
+AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
+  {
+    // Unpack arguments.
+    const auto& sloc = do_pcast<Pv_call>(pv)->sloc;
+    const auto& ptc_aware = static_cast<PTC_Aware>(pu.u8s[0]);
+    const auto& inside = ctx.func();
+    const auto& qhooks = ctx.global().get_hooks_opt();
+
+    // Check for stack overflows.
+    const auto sentry = ctx.global().copy_recursion_sentry();
+    // Generate a single-step trap.
+    if(qhooks) {
+      qhooks->on_single_step_trap(sloc, inside, ::std::addressof(ctx));
+    }
+    cow_vector<Reference> args;
+
+    // Pop the argument generator, which shall be of type `function`.
+    auto value = ctx.stack().get_top().read();
+    if(!value.is_function()) {
+      ASTERIA_THROW("invalid variadic argument generator (value `$1`)", value);
+    }
+    auto generator = ::rocket::move(value.open_function());
+    auto gself = ctx.stack().open_top().zoom_out();
+    // Pass an empty argument list to get the number of arguments to generate.
+    cow_vector<Reference> gargs;
+    do_invoke_plain(ctx.stack().open_top(), sloc, inside, generator, ctx.global(), qhooks, ::rocket::move(gargs));
+    value = ctx.stack().get_top().read();
+    ctx.stack().pop();
+    // Verify the argument count.
+    if(!value.is_integer()) {
+      ASTERIA_THROW("invalid number of variadic arguments (value `$1`)", value);
+    }
+    int64_t nvargs = value.as_integer();
+    if((nvargs < 0) || (nvargs > INT_MAX)) {
+      ASTERIA_THROW("number of variadic arguments not acceptable (nvargs `$1`)", nvargs);
+    }
+    // Generate arguments.
+    args.resize(static_cast<size_t>(nvargs), gself);
+    for(size_t i = 0; i != args.size(); ++i) {
+      // Initialize the argument list for the generator.
+      Reference_Root::S_constant xref = { G_integer(i) };
+      gargs.clear().emplace_back(::rocket::move(xref));
+      // Generate an argument. Ensure it is dereferenceable.
+      do_invoke_plain(args.mut(i), sloc, inside, generator, ctx.global(), qhooks, ::rocket::move(gargs));
+      static_cast<void>(args[i].read());
+    }
+    // Copy the target, which shall be of type `function`.
+    value = ctx.stack().get_top().read();
+    if(!value.is_function()) {
+      ASTERIA_THROW("attempt to call a non-function (value `$1`)", value);
+    }
+    return do_function_call_common(ctx.stack().open_top().zoom_out(), sloc, ptc_aware, inside, qhooks,
+                                   value.as_function(), ctx.global(), ::rocket::move(args));
+  }
+
 }  // namespace
 
 opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
@@ -2777,7 +2832,8 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
     case index_unpack_struct_array:
     case index_unpack_struct_object:
     case index_define_null_variable:
-    case index_single_step_trap: {
+    case index_single_step_trap:
+    case index_variadic_call: {
         // There is nothing to bind.
         return clear;
       }
@@ -3446,6 +3502,21 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_single_step_trap>(queue);
       }
 
+    case index_variadic_call: {
+        const auto& altr = this->m_stor.as<index_variadic_call>();
+        // `pu.u8s[0]` is `ptc`.
+        // `pv` points to the source location.
+        AVMC_Appender<Pv_sloc> avmcp;
+        if(ipass == 0) {
+          return avmcp.request(queue);
+        }
+        // Encode arguments.
+        avmcp.sloc = altr.sloc;
+        avmcp.pu.u8s[0] = altr.ptc;
+        // Push a new node.
+        return avmcp.output<do_variadic_call>(queue);
+      }
+
     default:
       ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
     }
@@ -3573,7 +3644,8 @@ Variable_Callback& AIR_Node::enumerate_variables(Variable_Callback& callback) co
     case index_unpack_struct_array:
     case index_unpack_struct_object:
     case index_define_null_variable:
-    case index_single_step_trap: {
+    case index_single_step_trap:
+    case index_variadic_call: {
         return callback;
       }
 

@@ -1604,11 +1604,45 @@ bool do_accept_fused_multiply_add(cow_vector<Expression_Unit>& units, Token_Stre
     return true;
   }
 
+bool do_accept_variadic_function_call(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+  {
+    // variadic-function-call ::=
+    //   "__vcall" "(" expression "," expression ")"
+    auto sloc = do_tell_source_location(tstrm);
+    auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_vcall });
+    if(!qkwrd) {
+      return false;
+    }
+    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
+    if(!kpunct) {
+      do_throw_parser_error(parser_status_open_parenthesis_expected, tstrm);
+    }
+    bool succ = do_accept_expression(units, tstrm);
+    if(!succ) {
+      do_throw_parser_error(parser_status_expression_expected, tstrm);
+    }
+    kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
+    if(!kpunct) {
+      do_throw_parser_error(parser_status_comma_expected, tstrm);
+    }
+    succ = do_accept_expression(units, tstrm);
+    if(!succ) {
+      do_throw_parser_error(parser_status_expression_expected, tstrm);
+    }
+    kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
+    if(!kpunct) {
+      do_throw_parser_error(parser_status_closed_parenthesis_expected, tstrm);
+    }
+    Expression_Unit::S_variadic_call xunit = { ::rocket::move(sloc) };
+    units.emplace_back(::rocket::move(xunit));
+    return true;
+  }
+
 bool do_accept_primary_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // primary-expression ::=
     //   identifier | global-identifier | literal | "this" | closure-function | unnamed-array | unnamed-object |
-    //   nested-expression | fused-multiply-add
+    //   nested-expression | fused-multiply-add | variadic-function-call
     bool succ = do_accept_named_reference(units, tstrm);
     if(succ) {
       return succ;
@@ -1642,6 +1676,10 @@ bool do_accept_primary_expression(cow_vector<Expression_Unit>& units, Token_Stre
       return true;
     }
     succ = do_accept_fused_multiply_add(units, tstrm);
+    if(succ) {
+      return true;
+    }
+    succ = do_accept_variadic_function_call(units, tstrm);
     if(succ) {
       return true;
     }
