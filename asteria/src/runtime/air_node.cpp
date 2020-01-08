@@ -2420,20 +2420,20 @@ AIR_Status do_apply_xop_FMA(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_TAIL(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
-  {
-    // This operator is unary.
-    auto& lref = ctx.stack().open_top();
-    Reference_Modifier::S_array_tail xmod = { };
-    lref.zoom_in(::rocket::move(xmod));
-    return air_status_next;
-  }
-
 AIR_Status do_apply_xop_HEAD(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // This operator is unary.
     auto& lref = ctx.stack().open_top();
     Reference_Modifier::S_array_head xmod = { };
+    lref.zoom_in(::rocket::move(xmod));
+    return air_status_next;
+  }
+
+AIR_Status do_apply_xop_TAIL(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
+  {
+    // This operator is unary.
+    auto& lref = ctx.stack().open_top();
+    Reference_Modifier::S_array_tail xmod = { };
     lref.zoom_in(::rocket::move(xmod));
     return air_status_next;
   }
