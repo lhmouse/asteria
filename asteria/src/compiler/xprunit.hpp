@@ -124,7 +124,7 @@ class Xprunit
       }
 
     cow_vector<AIR_Node>& generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
-                                        PTC_Aware ptc_aware, const Analytic_Context& ctx) const;
+                                        PTC_Aware ptc, const Analytic_Context& ctx) const;
   };
 
 inline void swap(Xprunit& lhs, Xprunit& rhs) noexcept

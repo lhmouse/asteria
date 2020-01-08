@@ -22,10 +22,10 @@ class Tail_Call_Arguments final : public virtual Rcbase
     cow_vector<Reference> m_args_self;
 
   public:
-    Tail_Call_Arguments(const Source_Location& sloc, const cow_string& inside, PTC_Aware ptc_aware,
+    Tail_Call_Arguments(const Source_Location& sloc, const cow_string& inside, PTC_Aware ptc,
                         const ckptr<Abstract_Function>& target, cow_vector<Reference>&& args_self)
       :
-        m_sloc(sloc), m_inside(inside), m_tco_aware(ptc_aware),
+        m_sloc(sloc), m_inside(inside), m_tco_aware(ptc),
         m_target(target), m_args_self(::rocket::move(args_self))
       {
       }
@@ -45,7 +45,7 @@ class Tail_Call_Arguments final : public virtual Rcbase
       {
         return this->m_inside;
       }
-    PTC_Aware ptc_aware() const noexcept
+    PTC_Aware ptc() const noexcept
       {
         return this->m_tco_aware;
       }

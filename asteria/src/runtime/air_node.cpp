@@ -886,12 +886,12 @@ ROCKET_NOINLINE ckptr<Abstract_Function> do_pop_arguments(cow_vector<Reference>&
 
 ROCKET_NOINLINE Reference& do_wrap_tail_call(Reference& self, const Source_Location& sloc, const cow_string& inside,
                                              const ckptr<Abstract_Function>& target, cow_vector<Reference>&& args,
-                                             PTC_Aware ptc_aware)
+                                             PTC_Aware ptc)
   {
     // Pack arguments for this proper tail call.
     args.emplace_back(::rocket::move(self));
     // Create a PTC wrapper.
-    auto tca = ::rocket::make_refcnt<Tail_Call_Arguments>(sloc, inside, ptc_aware, target, ::rocket::move(args));
+    auto tca = ::rocket::make_refcnt<Tail_Call_Arguments>(sloc, inside, ptc, target, ::rocket::move(args));
     // Return it.
     Reference_Root::S_tail_call xref = { ::rocket::move(tca) };
     return self = ::rocket::move(xref);
@@ -927,7 +927,7 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
     // Unpack arguments.
     const auto& sloc = do_pcast<Pv_call>(pv)->sloc;
     const auto& args_by_refs = do_pcast<Pv_call>(pv)->args_by_refs;
-    const auto& ptc_aware = static_cast<PTC_Aware>(pu.u8s[0]);
+    const auto& ptc = static_cast<PTC_Aware>(pu.u8s[0]);
     const auto& inside = ctx.func();
     const auto& qhooks = ctx.global().get_hooks_opt();
 
@@ -944,9 +944,9 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
     auto& self = ctx.stack().open_top().zoom_out();
 
     // Wrap proper tail calls.
-    if(ptc_aware != ptc_aware_none) {
+    if(ptc != ptc_aware_none) {
       // The result will be unpacked outside this scope.
-      do_wrap_tail_call(self, sloc, inside, target, ::rocket::move(args), ptc_aware);
+      do_wrap_tail_call(self, sloc, inside, target, ::rocket::move(args), ptc);
       // Force `air_status_return` if control flow reaches the end of a function.
       // Otherwise a null reference is returned instead of this PTC wrapper, which can then never be unpacked.
       return air_status_return;
@@ -3114,7 +3114,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
 
     case index_function_call: {
         const auto& altr = this->m_stor.as<index_function_call>();
-        // `pu.u8s[0]` is `ptc_aware`.
+        // `pu.u8s[0]` is `ptc`.
         // `pv` points to the source location and the argument vector.
         AVMC_Appender<Pv_call> avmcp;
         if(ipass == 0) {
@@ -3123,7 +3123,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // Encode arguments.
         avmcp.sloc = altr.sloc;
         avmcp.args_by_refs = altr.args_by_refs;
-        avmcp.pu.u8s[0] = altr.ptc_aware;
+        avmcp.pu.u8s[0] = altr.ptc;
         // Push a new node.
         return avmcp.output<do_function_call>(queue);
       }

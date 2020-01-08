@@ -85,10 +85,10 @@ Reference& Reference::do_finish_call(Global_Context& global)
         qhooks->on_single_step_trap(sloc, inside, nullptr);
       }
       // Tell out how to forward the result.
-      if((tca->ptc_aware() == ptc_aware_by_val) && (ptc_conj == ptc_aware_by_ref)) {
+      if((tca->ptc() == ptc_aware_by_val) && (ptc_conj == ptc_aware_by_ref)) {
         ptc_conj = ptc_aware_by_val;
       }
-      else if(tca->ptc_aware() == ptc_aware_prune) {
+      else if(tca->ptc() == ptc_aware_prune) {
         ptc_conj = ptc_aware_prune;
       }
       // Unpack the function reference.

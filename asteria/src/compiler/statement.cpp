@@ -47,7 +47,7 @@ cow_vector<AIR_Node>& do_generate_clear_stack(cow_vector<AIR_Node>& code)
   }
 
 cow_vector<AIR_Node>& do_generate_expression_partial(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
-                                                     PTC_Aware ptc_aware, const Analytic_Context& ctx,
+                                                     PTC_Aware ptc, const Analytic_Context& ctx,
                                                      const Statement::S_expression& expr)
   {
     size_t epos = expr.units.size() - 1;
@@ -60,21 +60,21 @@ cow_vector<AIR_Node>& do_generate_expression_partial(cow_vector<AIR_Node>& code,
       for(size_t i = 0; i != epos; ++i) {
         expr.units[i].generate_code(code, opts, ptc_aware_none, ctx);
       }
-      expr.units[epos].generate_code(code, opts, ptc_aware, ctx);
+      expr.units[epos].generate_code(code, opts, ptc, ctx);
     }
     return code;
   }
 
-cow_vector<AIR_Node> do_generate_expression_partial(const Compiler_Options& opts, PTC_Aware ptc_aware,
+cow_vector<AIR_Node> do_generate_expression_partial(const Compiler_Options& opts, PTC_Aware ptc,
                                                     const Analytic_Context& ctx, const Statement::S_expression& expr)
   {
     cow_vector<AIR_Node> code;
-    do_generate_expression_partial(code, opts, ptc_aware, ctx, expr);
+    do_generate_expression_partial(code, opts, ptc, ctx, expr);
     return code;
   }
 
 cow_vector<AIR_Node>& do_generate_statement_list(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
-                                                 Analytic_Context& ctx, const Compiler_Options& opts, PTC_Aware ptc_aware,
+                                                 Analytic_Context& ctx, const Compiler_Options& opts, PTC_Aware ptc,
                                                  const Statement::S_block& block)
   {
     size_t epos = block.stmts.size() - 1;
@@ -88,33 +88,33 @@ cow_vector<AIR_Node>& do_generate_statement_list(cow_vector<AIR_Node>& code, cow
         block.stmts[i].generate_code(code, names_opt, ctx, opts,
                                      block.stmts[i+1].is_empty_return() ? ptc_aware_prune : ptc_aware_none);
       }
-      block.stmts[epos].generate_code(code, names_opt, ctx, opts, ptc_aware);
+      block.stmts[epos].generate_code(code, names_opt, ctx, opts, ptc);
     }
     return code;
   }
 
 cow_vector<AIR_Node> do_generate_statement_list(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
-                                                const Compiler_Options& opts, PTC_Aware ptc_aware,
+                                                const Compiler_Options& opts, PTC_Aware ptc,
                                                 const Statement::S_block& block)
   {
     cow_vector<AIR_Node> code;
-    do_generate_statement_list(code, names_opt, ctx, opts, ptc_aware, block);
+    do_generate_statement_list(code, names_opt, ctx, opts, ptc, block);
     return code;
   }
 
-cow_vector<AIR_Node> do_generate_block(const Compiler_Options& opts, PTC_Aware ptc_aware, const Analytic_Context& ctx,
+cow_vector<AIR_Node> do_generate_block(const Compiler_Options& opts, PTC_Aware ptc, const Analytic_Context& ctx,
                                        const Statement::S_block& block)
   {
     // Create a new context for the block. No new names are injected into `ctx`.
     Analytic_Context ctx_stmts(::rocket::ref(ctx));
-    auto code = do_generate_statement_list(nullptr, ctx_stmts, opts, ptc_aware, block);
+    auto code = do_generate_statement_list(nullptr, ctx_stmts, opts, ptc, block);
     return code;
   }
 
 }  // namespace
 
 cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
-                                               Analytic_Context& ctx, const Compiler_Options& opts, PTC_Aware ptc_aware) const
+                                               Analytic_Context& ctx, const Compiler_Options& opts, PTC_Aware ptc) const
   {
     switch(this->index()) {
     case index_expression: {
@@ -126,7 +126,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Clear the stack.
         do_generate_clear_stack(code);
         // Evaluate the expression. Its value is discarded.
-        do_generate_expression_partial(code, opts, ptc_aware, ctx, altr);
+        do_generate_expression_partial(code, opts, ptc, ctx, altr);
         return code;
       }
 
@@ -137,7 +137,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
           return code;
         }
         // Generate code for the body. This can be PTC'd.
-        auto code_body = do_generate_block(opts, ptc_aware, ctx, altr);
+        auto code_body = do_generate_block(opts, ptc, ctx, altr);
         // Encode arguments.
         AIR_Node::S_execute_block xnode = { ::rocket::move(code_body) };
         code.emplace_back(::rocket::move(xnode));
@@ -259,8 +259,8 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // The result will have been pushed onto the top of the stack.
         // Generate code for both branches.
         // Both can be PTC'd.
-        auto code_true = do_generate_block(opts, ptc_aware, ctx, altr.branch_true);
-        auto code_false = do_generate_block(opts, ptc_aware, ctx, altr.branch_false);
+        auto code_true = do_generate_block(opts, ptc, ctx, altr.branch_true);
+        auto code_false = do_generate_block(opts, ptc, ctx, altr.branch_false);
         // Encode arguments.
         AIR_Node::S_if_statement xnode = { altr.negative, ::rocket::move(code_true), ::rocket::move(code_false) };
         code.emplace_back(::rocket::move(xnode));
@@ -369,14 +369,14 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
     case index_try: {
         const auto& altr = this->m_stor.as<index_try>();
         // Generate code for the `try` body.
-        auto code_try = do_generate_block(opts, ptc_aware, ctx, altr.body_try);
+        auto code_try = do_generate_block(opts, ptc, ctx, altr.body_try);
         // Create a fresh context for the `catch` clause.
         Analytic_Context ctx_catch(::rocket::ref(ctx));
         do_user_declare(names_opt, ctx_catch, altr.name_except, "exception placeholder");
         ctx_catch.open_named_reference(::rocket::sref("__backtrace"));
         // Generate code for the `catch` body.
         // Unlike the `try` body, this may be PTC'd.
-        auto code_catch = do_generate_statement_list(nullptr, ctx_catch, opts, ptc_aware, altr.body_catch);
+        auto code_catch = do_generate_statement_list(nullptr, ctx_catch, opts, ptc, altr.body_catch);
         // Encode arguments.
         AIR_Node::S_try_statement xnode = { ::rocket::move(code_try), altr.sloc, altr.name_except, ::rocket::move(code_catch) };
         code.emplace_back(::rocket::move(xnode));
