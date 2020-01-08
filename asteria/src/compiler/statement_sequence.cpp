@@ -1599,7 +1599,7 @@ bool do_accept_fused_multiply_add(cow_vector<Xprunit>& units, Token_Stream& tstr
     if(!kpunct) {
       do_throw_parser_error(parser_status_closed_parenthesis_expected, tstrm);
     }
-    Xprunit::S_operator_rpn xunit = { xop_fma_3, false };
+    Xprunit::S_operator_rpn xunit = { xop_fma, false };
     units.emplace_back(::rocket::move(xunit));
     return true;
   }

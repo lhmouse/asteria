@@ -56,7 +56,7 @@ enum Xop : uint8_t
     xop_orb       = 42,  // |
     xop_xorb      = 43,  // ^
     xop_assign    = 44,  // =
-    xop_fma_3     = 45,  // __fma()
+    xop_fma       = 45,  // __fma()
     xop_head      = 46,  // [^]
     xop_tail      = 47,  // [$]
   };

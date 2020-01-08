@@ -3358,7 +3358,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         case xop_assign: {
             return avmcp.output<do_apply_xop_ASSIGN>(queue);
           }
-        case xop_fma_3: {
+        case xop_fma: {
             return avmcp.output<do_apply_xop_FMA>(queue);
           }
         case xop_head: {
