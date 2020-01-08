@@ -25,15 +25,15 @@ ROCKET_NOINLINE Reference& do_handle_status(Reference& self, Evaluation_Stack& s
         self = ::rocket::move(stack.open_top());
         break;
       }
-    case air_status_break_unspec: {
+    case air_status_break_unspec:
     case air_status_break_switch:
     case air_status_break_while:
-    case air_status_break_for:
+    case air_status_break_for: {
         ASTERIA_THROW("stray `break` statement");
       }
-    case air_status_continue_unspec: {
+    case air_status_continue_unspec:
     case air_status_continue_while:
-    case air_status_continue_for:
+    case air_status_continue_for: {
         ASTERIA_THROW("stray `continue` statement");
       }
     default:

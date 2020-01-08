@@ -48,30 +48,30 @@ Precedence Infix_Element::tell_precedence() const noexcept
           return precedence_assignment;
         }
         switch(::rocket::weaken_enum(altr.xop)) {
-        case xop_mul: {
+        case xop_mul:
         case xop_div:
-        case xop_mod:
+        case xop_mod: {
             return precedence_multiplicative;
           }
-        case xop_add: {
-        case xop_sub:
+        case xop_add:
+        case xop_sub: {
             return precedence_additive;
           }
-        case xop_sla: {
+        case xop_sla:
         case xop_sra:
         case xop_sll:
-        case xop_srl:
+        case xop_srl: {
             return precedence_shift;
           }
-        case xop_cmp_lt: {
+        case xop_cmp_lt:
         case xop_cmp_lte:
         case xop_cmp_gt:
-        case xop_cmp_gte:
+        case xop_cmp_gte: {
             return precedence_relational;
           }
-        case xop_cmp_eq: {
+        case xop_cmp_eq:
         case xop_cmp_ne:
-        case xop_cmp_3way:
+        case xop_cmp_3way: {
             return precedence_equality;
           }
         case xop_andb: {

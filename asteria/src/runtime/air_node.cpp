@@ -2565,8 +2565,8 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         return ::rocket::move(xaltr);
       }
 
-    case index_declare_variable: {
-    case index_initialize_variable:
+    case index_declare_variable:
+    case index_initialize_variable: {
         // There is nothing to bind.
         return clear;
       }
@@ -2680,12 +2680,12 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         return ::rocket::move(xaltr);
       }
 
-    case index_throw_statement: {
+    case index_throw_statement:
     case index_assert_statement:
     case index_simple_status:
     case index_return_by_value:
     case index_push_immediate:
-    case index_push_global_reference:
+    case index_push_global_reference: {
         // There is nothing to bind.
         return clear;
       }
@@ -2756,7 +2756,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         return ::rocket::move(xaltr);
       }
 
-    case index_function_call: {
+    case index_function_call:
     case index_member_access:
     case index_push_unnamed_array:
     case index_push_unnamed_object:
@@ -2764,7 +2764,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
     case index_unpack_struct_array:
     case index_unpack_struct_object:
     case index_define_null_variable:
-    case index_single_step_trap:
+    case index_single_step_trap: {
         // There is nothing to bind.
         return clear;
       }
@@ -3451,8 +3451,8 @@ Variable_Callback& AIR_Node::enumerate_variables(Variable_Callback& callback) co
         return callback;
       }
 
-    case index_declare_variable: {
-    case index_initialize_variable:
+    case index_declare_variable:
+    case index_initialize_variable: {
         return callback;
       }
 
@@ -3509,10 +3509,10 @@ Variable_Callback& AIR_Node::enumerate_variables(Variable_Callback& callback) co
         return callback;
       }
 
-    case index_throw_statement: {
+    case index_throw_statement:
     case index_assert_statement:
     case index_simple_status:
-    case index_return_by_value:
+    case index_return_by_value: {
         return callback;
       }
 
@@ -3522,8 +3522,8 @@ Variable_Callback& AIR_Node::enumerate_variables(Variable_Callback& callback) co
         return callback;
       }
 
-    case index_push_global_reference: {
-    case index_push_local_reference:
+    case index_push_global_reference:
+    case index_push_local_reference: {
         return callback;
       }
 
@@ -3552,7 +3552,7 @@ Variable_Callback& AIR_Node::enumerate_variables(Variable_Callback& callback) co
         return callback;
       }
 
-    case index_function_call: {
+    case index_function_call:
     case index_member_access:
     case index_push_unnamed_array:
     case index_push_unnamed_object:
@@ -3560,7 +3560,7 @@ Variable_Callback& AIR_Node::enumerate_variables(Variable_Callback& callback) co
     case index_unpack_struct_array:
     case index_unpack_struct_object:
     case index_define_null_variable:
-    case index_single_step_trap:
+    case index_single_step_trap: {
         return callback;
       }
 

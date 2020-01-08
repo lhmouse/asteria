@@ -556,11 +556,11 @@ bool do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, ch
       // Translate it.
       int xcnt = 0;
       switch(next) {
-      case '\'': {
+      case '\'':
       case '\"':
       case '\\':
       case '?':
-      case '/':
+      case '/': {
           val.push_back(next);
           break;
         }

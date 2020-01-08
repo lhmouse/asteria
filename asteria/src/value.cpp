@@ -55,8 +55,8 @@ bool Value::test() const noexcept
     case gtype_string: {
         return this->m_stor.as<gtype_string>().size() != 0;
       }
-    case gtype_opaque: {
-    case gtype_function:
+    case gtype_opaque:
+    case gtype_function: {
         return true;
       }
     case gtype_array: {
@@ -98,8 +98,8 @@ Compare Value::compare(const Value& other) const noexcept
     case gtype_string: {
         return do_3way_compare(this->m_stor.as<gtype_string>().compare(other.m_stor.as<gtype_string>()), 0);
       }
-    case gtype_opaque: {
-    case gtype_function:
+    case gtype_opaque:
+    case gtype_function: {
         return compare_unordered;
       }
     case gtype_array: {
@@ -129,9 +129,9 @@ bool Value::unique() const noexcept
     case gtype_null: {
         return false;
       }
-    case gtype_boolean: {
+    case gtype_boolean:
     case gtype_integer:
-    case gtype_real:
+    case gtype_real: {
         return true;
       }
     case gtype_string: {
@@ -160,9 +160,9 @@ long Value::use_count() const noexcept
     case gtype_null: {
         return 0;
       }
-    case gtype_boolean: {
+    case gtype_boolean:
     case gtype_integer:
-    case gtype_real:
+    case gtype_real: {
         return 1;
       }
     case gtype_string: {
@@ -188,11 +188,11 @@ long Value::use_count() const noexcept
 long Value::gcref_split() const noexcept
   {
     switch(this->gtype()) {
-    case gtype_null: {
+    case gtype_null:
     case gtype_boolean:
     case gtype_integer:
     case gtype_real:
-    case gtype_string:
+    case gtype_string: {
         return 0;
       }
     case gtype_opaque: {
@@ -360,11 +360,11 @@ tinyfmt& Value::dump(tinyfmt& fmt, size_t indent, size_t hanging) const
 Variable_Callback& Value::enumerate_variables(Variable_Callback& callback) const
   {
     switch(this->gtype()) {
-    case gtype_null: {
+    case gtype_null:
     case gtype_boolean:
     case gtype_integer:
     case gtype_real:
-    case gtype_string:
+    case gtype_string: {
         return callback;
       }
     case gtype_opaque: {
