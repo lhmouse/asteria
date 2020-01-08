@@ -61,10 +61,6 @@ class Xprunit
         cow_vector<Xprunit> branch_null;
         bool assign;
       };
-    struct S_operator_fma
-      {
-        bool assign;
-      };
     struct S_global_reference
       {
         phsh_string name;
@@ -82,8 +78,7 @@ class Xprunit
         index_unnamed_array     =  7,
         index_unnamed_object    =  8,
         index_coalescence       =  9,
-        index_operator_fma      = 10,
-        index_global_reference  = 11,
+        index_global_reference  = 10,
       };
     using Xvariant = variant<
       ROCKET_CDR(
@@ -97,8 +92,7 @@ class Xprunit
       , S_unnamed_array     //  7,
       , S_unnamed_object    //  8,
       , S_coalescence       //  9,
-      , S_operator_fma      // 10,
-      , S_global_reference  // 11,
+      , S_global_reference  // 10,
       )>;
     static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
 
