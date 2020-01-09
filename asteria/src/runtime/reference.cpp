@@ -123,14 +123,18 @@ Reference& Reference::do_finish_call(Global_Context& global)
         qhooks->on_function_return(sloc, inside, *this);
       }
     }
-    if((ptc_conj == ptc_aware_by_val) && this->is_glvalue()) {
-      // Convert the result to an rvalue if it shouldn't be passed by reference.
-      Reference_Root::S_temporary xref = { this->read() };
-      *this = ::rocket::move(xref);
-    }
-    else if(ptc_conj == ptc_aware_prune) {
-      // Return a `null`.
+    if(ptc_conj == ptc_aware_prune) {
+      // Return `void`.
       *this = Reference_Root::S_void();
+    }
+    else {
+      // Ensure the result is dereferenceable.
+      const auto& val = this->read();
+      if((ptc_conj == ptc_aware_by_val) && this->is_glvalue()) {
+        // Convert the result to an rvalue if it shouldn't be passed by reference.
+        Reference_Root::S_temporary xref = { val };
+        *this = ::rocket::move(xref);
+      }
     }
     return *this;
   }
