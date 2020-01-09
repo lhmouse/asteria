@@ -653,24 +653,24 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
 
     // This is almost identical to JavaScript.
     try {
-      // Execute the `try` block. If no exception is thrown, this will have little overhead.
-      auto status = do_execute_block(queue_try, ctx);
-      if(status == air_status_return) {
-        // This cannot be PTC'd, otherwise exceptions thrown from tail calls won't be caught.
-        ctx.stack().open_top().finish_call(ctx.global());
+      try {
+        // Execute the `try` block. If no exception is thrown, this will have little overhead.
+        auto status = do_execute_block(queue_try, ctx);
+        if(status == air_status_return) {
+          // This cannot be PTC'd, otherwise exceptions thrown from tail calls won't be caught.
+          ctx.stack().open_top().finish_call(ctx.global());
+        }
+        return status;
       }
-      return status;
+      catch(Runtime_Error& /*except*/) {
+        throw;
+      }
+      catch(exception& stdex) {
+        throw Runtime_Error(stdex);
+      }
     }
     catch(Runtime_Error& except) {
       // Reuse the exception object. Don't bother allocating a new one.
-      except.push_frame_catch(sloc);
-      // This branch must be executed inside this `catch` block.
-      // User-provided bindings may obtain the current exception using `::std::current_exception`.
-      return do_execute_catch(queue_catch, name_except, except, ctx);
-    }
-    catch(exception& stdex) {
-      // Translate the exception.
-      Runtime_Error except(stdex);
       except.push_frame_catch(sloc);
       // This branch must be executed inside this `catch` block.
       // User-provided bindings may obtain the current exception using `::std::current_exception`.
@@ -687,25 +687,26 @@ AIR_Status do_throw_statement(Executive_Context& ctx, ParamU /*pu*/, const void*
     // Note that the operand must not have been empty for this code.
     auto value = ctx.stack().get_top().read();
     try {
-      // Unpack nested exceptions, if any.
-      auto eptr = ::std::current_exception();
-      if(eptr)
-        ::std::rethrow_exception(eptr);
+      try {
+        // Unpack nested exceptions, if any.
+        auto eptr = ::std::current_exception();
+        if(eptr)
+          ::std::rethrow_exception(eptr);
+      }
+      catch(Runtime_Error& /*except*/) {
+        throw;
+      }
+      catch(exception& stdex) {
+        throw Runtime_Error(stdex);
+      }
     }
     catch(Runtime_Error& except) {
       // Modify it in place. Don't bother allocating a new one.
       except.push_frame_throw(sloc, ::rocket::move(value));
       throw;
     }
-    catch(exception& stdex) {
-      // Translate the exception.
-      Runtime_Error except(stdex);
-      except.push_frame_throw(sloc, ::rocket::move(value));
-      throw except;
-    }
     // If no nested exception exists, construct a fresh one.
-    Runtime_Error except(sloc, ::rocket::move(value));
-    throw except;
+    throw Runtime_Error(sloc, ::rocket::move(value));
   }
 
 AIR_Status do_assert_statement(Executive_Context& ctx, ParamU pu, const void* pv)
@@ -882,8 +883,16 @@ ROCKET_NOINLINE Reference& do_invoke_plain(Reference& self, const Source_Locatio
     }
     // Perform a non-proper call.
     try {
-      target->invoke(self, global, ::rocket::move(args));
-      self.finish_call(global);
+      try {
+        target->invoke(self, global, ::rocket::move(args));
+        self.finish_call(global);
+      }
+      catch(Runtime_Error& /*except*/) {
+        throw;
+      }
+      catch(exception& stdex) {
+        throw Runtime_Error(stdex);
+      }
     }
     catch(Runtime_Error& except) {
       // Append the current frame and rethrow the exception.
@@ -893,16 +902,6 @@ ROCKET_NOINLINE Reference& do_invoke_plain(Reference& self, const Source_Locatio
         qhooks->on_function_except(sloc, inside, except);
       }
       throw;
-    }
-    catch(exception& stdex) {
-      // Translate the exception, append the current frame, and throw the new exception.
-      Runtime_Error except(stdex);
-      except.push_frame_func(sloc, inside);
-      // Call the hook function if any.
-      if(qhooks) {
-        qhooks->on_function_except(sloc, inside, except);
-      }
-      throw except;
     }
     // Call the hook function if any.
     if(qhooks) {

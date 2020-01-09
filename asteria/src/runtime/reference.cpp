@@ -95,7 +95,15 @@ Reference& Reference::do_finish_call(Global_Context& global)
       }
       // Unwrap the function call.
       try {
-        target->invoke(*this, global, ::rocket::move(args));
+        try {
+          target->invoke(*this, global, ::rocket::move(args));
+        }
+        catch(Runtime_Error& /*except*/) {
+          throw;
+        }
+        catch(exception& stdex) {
+          throw Runtime_Error(stdex);
+        }
       }
       catch(Runtime_Error& except) {
         // Append all frames that have been expanded so far and rethrow the exception.
@@ -106,17 +114,6 @@ Reference& Reference::do_finish_call(Global_Context& global)
           qhooks->on_function_except(sloc, inside, except);
         }
         throw;
-      }
-      catch(exception& stdex) {
-        // Translate the exception, append all frames that have been expanded so far, and throw the new exception.
-        Runtime_Error except(stdex);
-        ::std::for_each(frames.rbegin(), frames.rend(),
-                        [&](const auto& p) { except.push_frame_func(p->sloc(), p->inside());  });
-        // Call the hook function if any.
-        if(qhooks) {
-          qhooks->on_function_except(sloc, inside, except);
-        }
-        throw except;
       }
       // Call the hook function if any.
       if(qhooks) {
