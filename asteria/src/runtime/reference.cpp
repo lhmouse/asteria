@@ -78,11 +78,11 @@ Reference& Reference::do_finish_call(Global_Context& global)
         qhooks->on_single_step_trap(sloc, inside, nullptr);
       }
       // Tell out how to forward the result.
-      if((tca->ptc() == ptc_aware_by_val) && (ptc_conj == ptc_aware_by_ref)) {
-        ptc_conj = ptc_aware_by_val;
-      }
-      else if(tca->ptc() == ptc_aware_prune) {
+      if(tca->ptc() == ptc_aware_prune) {
         ptc_conj = ptc_aware_prune;
+      }
+      else if((tca->ptc() == ptc_aware_by_val) && (ptc_conj == ptc_aware_by_ref)) {
+        ptc_conj = ptc_aware_by_val;
       }
       // Unpack the function reference.
       const auto& target = tca->get_target();
@@ -125,14 +125,10 @@ Reference& Reference::do_finish_call(Global_Context& global)
       // Return `void`.
       *this = Reference_Root::S_void();
     }
-    else {
-      // Ensure the result is dereferenceable.
-      const auto& val = this->read();
-      if((ptc_conj == ptc_aware_by_val) && this->is_glvalue()) {
-        // Convert the result to an rvalue if it shouldn't be passed by reference.
-        Reference_Root::S_temporary xref = { val };
-        *this = ::rocket::move(xref);
-      }
+    else if((ptc_conj == ptc_aware_by_val) && this->is_glvalue()) {
+      // Convert the result to an rvalue if it shouldn't be passed by reference.
+      Reference_Root::S_temporary xref = { this->read() };
+      *this = ::rocket::move(xref);
     }
     return *this;
   }
