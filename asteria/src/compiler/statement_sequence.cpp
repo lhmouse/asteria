@@ -1494,7 +1494,7 @@ bool do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& t
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
     if(!kpunct) {
-      do_throw_parser_error(parser_status_closed_bracket_expected, tstrm);
+      do_throw_parser_error(parser_status_end_of_array_initializer_expected, tstrm);
     }
     Expression_Unit::S_unnamed_array xunit = { nelems };
     units.emplace_back(::rocket::move(xunit));
@@ -1537,7 +1537,7 @@ bool do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& 
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
     if(!kpunct) {
-      do_throw_parser_error(parser_status_closed_brace_or_name_expected, tstrm);
+      do_throw_parser_error(parser_status_end_of_object_initializer_expected, tstrm);
     }
     Expression_Unit::S_unnamed_object xunit = { ::rocket::move(keys) };
     units.emplace_back(::rocket::move(xunit));

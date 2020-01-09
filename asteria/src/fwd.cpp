@@ -194,8 +194,11 @@ const char* describe_parser_status(Parser_Status status) noexcept
     case parser_status_equals_sign_or_colon_expected: {
         return "`=` or `:` expected";
       }
-    case parser_status_closed_brace_or_name_expected: {
-        return "`}`, identifier or string literal expected";
+    case parser_status_end_of_array_initializer_expected: {
+        return "end of array initializer expected";
+      }
+    case parser_status_end_of_object_initializer_expected: {
+        return "end of object initializer expected";
       }
     default:
       return "<unknown parser error>";
