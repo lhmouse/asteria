@@ -7,6 +7,7 @@
 #include "enums.hpp"
 #include "../runtime/air_node.hpp"
 #include "../runtime/analytic_context.hpp"
+#include "../runtime/enums.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {

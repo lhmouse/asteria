@@ -5,6 +5,7 @@
 #define ASTERIA_LLDS_AVMC_QUEUE_HPP_
 
 #include "../fwd.hpp"
+#include "../runtime/enums.hpp"
 
 namespace Asteria {
 

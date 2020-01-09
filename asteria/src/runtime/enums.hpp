@@ -63,6 +63,29 @@ enum Xop : uint8_t
 
 ROCKET_PURE_FUNCTION extern const char* describe_xop(Xop xop) noexcept;
 
+// IR status codes
+enum AIR_Status : uint8_t
+  {
+    air_status_next             = 0,
+    air_status_return           = 1,
+    air_status_break_unspec     = 2,
+    air_status_break_switch     = 3,
+    air_status_break_while      = 4,
+    air_status_break_for        = 5,
+    air_status_continue_unspec  = 6,
+    air_status_continue_while   = 7,
+    air_status_continue_for     = 8,
+  };
+
+// Tail call optimization (PTC) awareness
+enum PTC_Aware : uint8_t
+  {
+    ptc_aware_none    = 0,  // Tail call optimization is not allowed.
+    ptc_aware_by_ref  = 1,  // The tail call is forwarded by reference.
+    ptc_aware_by_val  = 2,  // The tail call is forwarded by value.
+    ptc_aware_prune   = 3,  // The tail call is forwarded but its result is discarded.
+  };
+
 }  // namespace Asteria
 
 #endif

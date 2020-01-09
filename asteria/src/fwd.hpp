@@ -109,6 +109,8 @@ class Instantiated_Function;
 class AIR_Node;
 class Backtrace_Frame;
 class Simple_Script;
+enum AIR_Status : uint8_t;
+enum PTC_Aware : uint8_t;
 
 // Compiler
 class Parser_Error;
@@ -182,29 +184,6 @@ using Popt = opt<G_opaque>;
 using Fopt = opt<G_function>;
 using Aopt = opt<G_array>;
 using Oopt = opt<G_object>;
-
-// IR status codes
-enum AIR_Status : uint8_t
-  {
-    air_status_next             = 0,
-    air_status_return           = 1,
-    air_status_break_unspec     = 2,
-    air_status_break_switch     = 3,
-    air_status_break_while      = 4,
-    air_status_break_for        = 5,
-    air_status_continue_unspec  = 6,
-    air_status_continue_while   = 7,
-    air_status_continue_for     = 8,
-  };
-
-// Tail call optimization (PTC) awareness
-enum PTC_Aware : uint8_t
-  {
-    ptc_aware_none    = 0,  // Tail call optimization is not allowed.
-    ptc_aware_by_ref  = 1,  // The tail call is forwarded by reference.
-    ptc_aware_by_val  = 2,  // The tail call is forwarded by value.
-    ptc_aware_prune   = 3,  // The tail call is forwarded but its result is discarded.
-  };
 
 // Stack frame types
 enum Frame_Type : uint8_t

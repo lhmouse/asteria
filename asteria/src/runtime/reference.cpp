@@ -6,6 +6,7 @@
 #include "global_context.hpp"
 #include "abstract_hooks.hpp"
 #include "runtime_error.hpp"
+#include "enums.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
