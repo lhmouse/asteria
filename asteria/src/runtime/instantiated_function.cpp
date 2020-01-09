@@ -15,12 +15,13 @@ namespace {
 ROCKET_NOINLINE Reference& do_handle_status(Reference& self, Evaluation_Stack& stack, AIR_Status status)
   {
     switch(status) {
-    case air_status_next: {
+    case air_status_next:
+    case air_status_return_void: {
         // Return void if the control flow reached the end of the function.
         self = Reference_Root::S_void();
         break;
       }
-    case air_status_return: {
+    case air_status_return_ref: {
         // Return the reference at the top of `stack`.
         self = ::rocket::move(stack.open_top());
         break;

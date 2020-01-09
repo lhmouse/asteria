@@ -102,7 +102,7 @@ AIR_Status do_evaluate_branch(const AVMC_Queue& queue, bool assign, Executive_Co
     // Discard the top which will be overwritten anyway.
     ctx.stack().pop();
     // Evaluate the branch.
-    // Be advised that you must forward the status code as is, because PTCs may return `air_status_return`.
+    // Be advised that you must forward the status code as is, because PTCs may return `air_status_return_ref`.
     return queue.execute(ctx);
   }
 
@@ -656,7 +656,7 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
       try {
         // Execute the `try` block. If no exception is thrown, this will have little overhead.
         auto status = do_execute_block(queue_try, ctx);
-        if(status == air_status_return) {
+        if(status == air_status_return_ref) {
           // This cannot be PTC'd, otherwise exceptions thrown from tail calls won't be caught.
           ctx.stack().open_top().finish_call(ctx.global());
         }
@@ -744,7 +744,7 @@ AIR_Status do_return_by_value(Executive_Context& ctx, ParamU /*pu*/, const void*
       Reference_Root::S_temporary xref = { self.read() };
       self = ::rocket::move(xref);
     }
-    return air_status_return;
+    return air_status_return_ref;
   }
 
 AIR_Status do_push_immediate(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
@@ -924,9 +924,9 @@ AIR_Status do_function_call_common(Reference& self, const Source_Location& sloc,
     // Wrap proper tail calls.
     // The result will be unpacked outside this scope.
     do_wrap_tail_call(self, sloc, inside, target, ptc, ::rocket::move(args));
-    // Force `air_status_return` if control flow reaches the end of a function.
+    // Force `air_status_return_ref` if control flow reaches the end of a function.
     // Otherwise a null reference is returned instead of this PTC wrapper, which can then never be unpacked.
-    return air_status_return;
+    return air_status_return_ref;
   }
 
 AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)

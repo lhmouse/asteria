@@ -461,32 +461,27 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
 
     case index_return: {
         const auto& altr = this->m_stor.as<index_return>();
-        // Clear the stack.
-        do_generate_clear_stack(code);
         // We don't tell empty return statements from non-empty ones here.
         if(altr.expr.units.empty()) {
-          // If no expression is provided, return `null`.
-          AIR_Node::S_push_immediate xnode_def = { nullptr };
-          code.emplace_back(::rocket::move(xnode_def));
-          // Forward the result as is.
-          AIR_Node::S_simple_status xnode_ret = { air_status_return };
-          code.emplace_back(::rocket::move(xnode_ret));
+          // If no expression is provided, return a void reference.
+          AIR_Node::S_simple_status xnode = { air_status_return_void };
+          code.emplace_back(::rocket::move(xnode));
         }
         else if(altr.by_ref) {
-          // Generate code for the operand.
-          // This may be PTC'd by reference.
+          // Generate code for the operand. This may be PTC'd by reference.
+          do_generate_clear_stack(code);
           do_generate_expression_partial(code, opts, ptc_aware_by_ref, ctx, altr.expr);
           // Forward the result as is.
-          AIR_Node::S_simple_status xnode_ret = { air_status_return };
-          code.emplace_back(::rocket::move(xnode_ret));
+          AIR_Node::S_simple_status xnode = { air_status_return_ref };
+          code.emplace_back(::rocket::move(xnode));
         }
         else {
-          // Generate code for the operand.
-          // This may be PTC'd by value.
+          // Generate code for the operand. This may be PTC'd by value.
+          do_generate_clear_stack(code);
           do_generate_expression_partial(code, opts, ptc_aware_by_val, ctx, altr.expr);
           // Convert the result to an rvalue and return it.
-          AIR_Node::S_return_by_value xnode_ret = { };
-          code.emplace_back(::rocket::move(xnode_ret));
+          AIR_Node::S_return_by_value xnode = { };
+          code.emplace_back(::rocket::move(xnode));
         }
         return code;
       }
