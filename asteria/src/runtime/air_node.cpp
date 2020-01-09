@@ -872,31 +872,6 @@ ROCKET_NOINLINE Reference& do_wrap_tail_call(Reference& self, const Source_Locat
     return self = ::rocket::move(xref);
   }
 
-[[noreturn]] ROCKET_NOINLINE void do_xrethrow(Runtime_Error& except, const Source_Location& sloc,
-                                              const cow_string& inside, const rcptr<Abstract_Hooks>& qhooks)
-  {
-    // Append the current frame and rethrow the exception.
-    except.push_frame_func(sloc, inside);
-    // Call the hook function if any.
-    if(qhooks) {
-      qhooks->on_function_except(sloc, inside, except);
-    }
-    throw;
-  }
-
-[[noreturn]] ROCKET_NOINLINE void do_xrethrow(exception& stdex, const Source_Location& sloc,
-                                              const cow_string& inside, const rcptr<Abstract_Hooks>& qhooks)
-  {
-    // Translate the exception, append the current frame, and throw the new exception.
-    Runtime_Error except(stdex);
-    except.push_frame_func(sloc, inside);
-    // Call the hook function if any.
-    if(qhooks) {
-      qhooks->on_function_except(sloc, inside, except);
-    }
-    throw except;
-  }
-
 ROCKET_NOINLINE Reference& do_invoke_plain(Reference& self, const Source_Location& sloc, const cow_string& inside,
                                            const ckptr<Abstract_Function>& target, Global_Context& global,
                                            const rcptr<Abstract_Hooks>& qhooks, cow_vector<Reference>&& args)
@@ -911,10 +886,23 @@ ROCKET_NOINLINE Reference& do_invoke_plain(Reference& self, const Source_Locatio
       self.finish_call(global);
     }
     catch(Runtime_Error& except) {
-      do_xrethrow(except, sloc, inside, qhooks);
+      // Append the current frame and rethrow the exception.
+      except.push_frame_func(sloc, inside);
+      // Call the hook function if any.
+      if(qhooks) {
+        qhooks->on_function_except(sloc, inside, except);
+      }
+      throw;
     }
     catch(exception& stdex) {
-      do_xrethrow(stdex, sloc, inside, qhooks);
+      // Translate the exception, append the current frame, and throw the new exception.
+      Runtime_Error except(stdex);
+      except.push_frame_func(sloc, inside);
+      // Call the hook function if any.
+      if(qhooks) {
+        qhooks->on_function_except(sloc, inside, except);
+      }
+      throw except;
     }
     // Call the hook function if any.
     if(qhooks) {
