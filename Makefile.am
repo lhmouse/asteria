@@ -271,6 +271,7 @@ check_PROGRAMS =  \
   asteria/test/stack_overflow.test  \
   asteria/test/structured_binding.test  \
   asteria/test/global_identifier.test  \
+  asteria/test/variadic_function_call.test  \
   asteria/test/bindings_chrono.test  \
   asteria/test/bindings_string.test  \
   asteria/test/bindings_array.test  \
