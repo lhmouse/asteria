@@ -78,7 +78,7 @@ Reference Simple_Script::execute(Global_Context& global, cow_vector<Reference>&&
     if(!qtarget) {
       ASTERIA_THROW("no script loaded");
     }
-    Reference self;
+    Reference self = Reference_Root::S_constant();
     qtarget->invoke(self, global, ::rocket::move(args));
     self.finish_call(global);
     return self;
