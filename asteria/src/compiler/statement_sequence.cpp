@@ -1745,7 +1745,7 @@ bool do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_S
     if(!kpunct) {
       return false;
     }
-    cow_vector<bool> args_by_refs;
+    uint32_t nargs = 0;
     for(;;) {
       auto qref = do_accept_reference_specifier_opt(tstrm);
       if(!qref) {
@@ -1753,12 +1753,14 @@ bool do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_S
       }
       bool succ = do_accept_expression(units, tstrm);
       if(!succ) {
-        if(args_by_refs.empty()) {
-          break;
-        }
-        do_throw_parser_error(parser_status_expression_expected, tstrm);
+        if(*kpunct == punctuator_comma)
+          do_throw_parser_error(parser_status_expression_expected, tstrm);
+        break;
       }
-      args_by_refs.emplace_back(*qref);
+      nargs += 1;
+      // Mark the end of this argument.
+      Expression_Unit::S_argument_finish xunit = { *qref };
+      units.emplace_back(::rocket::move(xunit));
       // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
       if(!kpunct) {
@@ -1769,7 +1771,7 @@ bool do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_S
     if(!kpunct) {
       do_throw_parser_error(parser_status_closed_parenthesis_or_argument_expected, tstrm);
     }
-    Expression_Unit::S_function_call xunit = { ::rocket::move(sloc), ::rocket::move(args_by_refs) };
+    Expression_Unit::S_function_call xunit = { ::rocket::move(sloc), nargs };
     units.emplace_back(::rocket::move(xunit));
     return true;
   }

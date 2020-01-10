@@ -37,7 +37,7 @@ class Expression_Unit
     struct S_function_call
       {
         Source_Location sloc;
-        cow_vector<bool> args_by_refs;
+        uint32_t nargs;
       };
     struct S_member_access
       {
@@ -69,6 +69,10 @@ class Expression_Unit
       {
         Source_Location sloc;
       };
+    struct S_argument_finish
+      {
+        bool by_ref;
+      };
 
     enum Index : uint8_t
       {
@@ -84,6 +88,7 @@ class Expression_Unit
         index_coalescence       =  9,
         index_global_reference  = 10,
         index_variadic_call     = 11,
+        index_argument_finish   = 12,
       };
     using Xvariant = variant<
       ROCKET_CDR(
@@ -99,6 +104,7 @@ class Expression_Unit
       , S_coalescence       //  9,
       , S_global_reference  // 10,
       , S_variadic_call     // 11,
+      , S_argument_finish   // 12,
       )>;
     static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
 

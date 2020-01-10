@@ -130,7 +130,7 @@ class AIR_Node
     struct S_function_call
       {
         Source_Location sloc;
-        cow_vector<bool> args_by_refs;
+        uint32_t nargs;
         PTC_Aware ptc;
       };
     struct S_member_access

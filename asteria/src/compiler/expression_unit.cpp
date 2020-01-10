@@ -30,7 +30,7 @@ cow_vector<AIR_Node> do_generate_code_branch(const Compiler_Options& opts, PTC_A
 }  // namespace
 
 cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
-                                             PTC_Aware ptc, const Analytic_Context& ctx) const
+                                                     PTC_Aware ptc, const Analytic_Context& ctx) const
   {
     switch(this->index()) {
     case index_literal: {
@@ -128,8 +128,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
     case index_function_call: {
         const auto& altr = this->m_stor.as<index_function_call>();
         // Encode arguments.
-        AIR_Node::S_function_call xnode = { altr.sloc, altr.args_by_refs,
-                                            opts.no_proper_tail_calls ? ptc_aware_none : ptc };
+        AIR_Node::S_function_call xnode = { altr.sloc, altr.nargs, opts.no_proper_tail_calls ? ptc_aware_none : ptc };
         code.emplace_back(::rocket::move(xnode));
         return code;
       }
@@ -190,6 +189,17 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         // Encode arguments.
         AIR_Node::S_variadic_call xnode = { altr.sloc, opts.no_proper_tail_calls ? ptc_aware_none : ptc };
         code.emplace_back(::rocket::move(xnode));
+        return code;
+      }
+
+    case index_argument_finish: {
+        const auto& altr = this->m_stor.as<index_argument_finish>();
+        // Apply glvalue-to-rvalue conversion if the argument is to be passed by value.
+        if(!altr.by_ref) {
+          // Encode arguments.
+          AIR_Node::S_glvalue_to_rvalue xnode = { };
+          code.emplace_back(::rocket::move(xnode));
+        }
         return code;
       }
 

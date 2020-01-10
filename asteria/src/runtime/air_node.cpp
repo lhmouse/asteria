@@ -330,14 +330,6 @@ struct Pv_sloc_msg
     using nonenumerable = ::std::true_type;
   };
 
-struct Pv_call
-  {
-    Source_Location sloc;
-    cow_vector<bool> args_by_refs;
-
-    using nonenumerable = ::std::true_type;
-  };
-
 ///////////////////////////////////////////////////////////////////////////
 // Executor functions
 ///////////////////////////////////////////////////////////////////////////
@@ -932,9 +924,9 @@ AIR_Status do_function_call_common(Reference& self, const Source_Location& sloc,
 AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
   {
     // Unpack arguments.
-    const auto& sloc = do_pcast<Pv_call>(pv)->sloc;
-    const auto& args_by_refs = do_pcast<Pv_call>(pv)->args_by_refs;
-    const auto& ptc_aware = static_cast<PTC_Aware>(pu.u8s[0]);
+    const auto& sloc = do_pcast<Pv_sloc>(pv)->sloc;
+    const auto& nargs = static_cast<size_t>(pu.y32);
+    const auto& ptc_aware = static_cast<PTC_Aware>(pu.y8s[0]);
     const auto& inside = ctx.func();
     const auto& qhooks = ctx.global().get_hooks_opt();
 
@@ -947,22 +939,13 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
     cow_vector<Reference> args;
 
     // Pop arguments off the stack backwards.
-    args.resize(args_by_refs.size());
+    args.resize(nargs);
     for(size_t i = args.size() - 1; i != SIZE_MAX; --i) {
       // Get an argument. Ensure it is dereferenceable.
       auto& arg = ctx.stack().open_top();
-      const auto& aval = arg.read();
-      // How to pass it?
-      bool by_ref = args_by_refs[i];
-      if(!by_ref && arg.is_glvalue()) {
-        // Convert the argument to an rvalue if it shouldn't be passed by reference.
-        Reference_Root::S_temporary xref = { aval };
-        args.mut(i) = ::rocket::move(xref);
-      }
-      else {
-        // Push the argument as is.
-        args.mut(i) = ::rocket::move(arg);
-      }
+      static_cast<void>(arg.read());
+      // Set the argument as is.
+      args.mut(i) = ::rocket::move(arg);
       ctx.stack().pop();
     }
     // Copy the target, which shall be of type `function`.
@@ -988,7 +971,7 @@ AIR_Status do_member_access(Executive_Context& ctx, ParamU /*pu*/, const void* p
 AIR_Status do_push_unnamed_array(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
-    const auto& nelems = pu.x32;
+    const auto& nelems = static_cast<size_t>(pu.x32);
 
     // Pop elements from the stack and store them in an array backwards.
     G_array array;
@@ -2442,7 +2425,7 @@ AIR_Status do_unpack_struct_array(Executive_Context& ctx, ParamU pu, const void*
   {
     // Unpack arguments.
     const auto& immutable = static_cast<bool>(pu.y8s[0]);
-    const auto& nelems = pu.y32;
+    const auto& nelems = static_cast<size_t>(pu.y32);
 
     // Read the value of the initializer.
     // Note that the initializer must not have been empty for this function.
@@ -2456,7 +2439,7 @@ AIR_Status do_unpack_struct_array(Executive_Context& ctx, ParamU pu, const void*
       }
       arr = ::rocket::move(val.open_array());
     }
-    for(uint32_t i = nelems - 1; i != UINT32_MAX; --i) {
+    for(size_t i = nelems - 1; i != SIZE_MAX; --i) {
       // Get the variable back.
       auto var = ctx.stack().get_top().get_variable_opt();
       ctx.stack().pop();
@@ -2544,7 +2527,7 @@ AIR_Status do_single_step_trap(Executive_Context& ctx, ParamU /*pu*/, const void
 AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
   {
     // Unpack arguments.
-    const auto& sloc = do_pcast<Pv_call>(pv)->sloc;
+    const auto& sloc = do_pcast<Pv_sloc>(pv)->sloc;
     const auto& ptc_aware = static_cast<PTC_Aware>(pu.u8s[0]);
     const auto& inside = ctx.func();
     const auto& qhooks = ctx.global().get_hooks_opt();
@@ -2578,7 +2561,7 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
       ASTERIA_THROW("number of variadic arguments not acceptable (nvargs `$1`)", nvargs);
     }
     // Generate arguments.
-    args.resize(static_cast<size_t>(nvargs), gself);
+    args.assign(static_cast<size_t>(nvargs), gself);
     for(size_t i = 0; i != args.size(); ++i) {
       // Initialize the argument list for the generator.
       Reference_Root::S_constant xref = { G_integer(i) };
@@ -3170,16 +3153,16 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
 
     case index_function_call: {
         const auto& altr = this->m_stor.as<index_function_call>();
-        // `pu.u8s[0]` is `ptc`.
-        // `pv` points to the source location and the argument vector.
-        AVMC_Appender<Pv_call> avmcp;
+        // `pu.u8s[0]` is `nargs` and `ptc`.
+        // `pv` points to the source location.
+        AVMC_Appender<Pv_sloc> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
         // Encode arguments.
         avmcp.sloc = altr.sloc;
-        avmcp.args_by_refs = altr.args_by_refs;
-        avmcp.pu.u8s[0] = altr.ptc;
+        avmcp.pu.y32 = altr.nargs;
+        avmcp.pu.y8s[0] = altr.ptc;
         // Push a new node.
         return avmcp.output<do_function_call>(queue);
       }
