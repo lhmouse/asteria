@@ -467,20 +467,23 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
           AIR_Node::S_simple_status xnode = { air_status_return_void };
           code.emplace_back(::rocket::move(xnode));
         }
-        else if(altr.by_ref) {
-          // Generate code for the operand. This may be PTC'd by reference.
+        else {
+          // Clear the stack.
           do_generate_clear_stack(code);
-          do_generate_expression_partial(code, opts, ptc_aware_by_ref, ctx, altr.expr);
+          // Generate code for the operand.
+          if(altr.by_ref) {
+            // This may be PTC'd by reference.
+            do_generate_expression_partial(code, opts, ptc_aware_by_ref, ctx, altr.expr);
+          }
+          else {
+            // This may be PTC'd by value.
+            do_generate_expression_partial(code, opts, ptc_aware_by_val, ctx, altr.expr);
+            // Convert it to an rvalue.
+            AIR_Node::S_glvalue_to_rvalue xnode = { };
+            code.emplace_back(::rocket::move(xnode));
+          }
           // Forward the result as is.
           AIR_Node::S_simple_status xnode = { air_status_return_ref };
-          code.emplace_back(::rocket::move(xnode));
-        }
-        else {
-          // Generate code for the operand. This may be PTC'd by value.
-          do_generate_clear_stack(code);
-          do_generate_expression_partial(code, opts, ptc_aware_by_val, ctx, altr.expr);
-          // Convert the result to an rvalue and return it.
-          AIR_Node::S_return_by_value xnode = { };
           code.emplace_back(::rocket::move(xnode));
         }
         return code;

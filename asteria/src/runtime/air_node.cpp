@@ -734,17 +734,17 @@ AIR_Status do_simple_status(Executive_Context& /*ctx*/, ParamU pu, const void* /
     return status;
   }
 
-AIR_Status do_return_by_value(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
+AIR_Status do_glvalue_to_rvalue(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
-    // The result will have been pushed onto the top.
+    // Check for glvalues only. Void references and PTC wrappers are forwarded as is.
     auto& self = ctx.stack().open_top();
-    // Check for glvalues only. PTC wrappers are forwarded as is.
-    if(self.is_glvalue()) {
-      // Convert the result to an rvalue.
-      Reference_Root::S_temporary xref = { self.read() };
-      self = ::rocket::move(xref);
+    if(!self.is_glvalue()) {
+      return air_status_next;
     }
-    return air_status_return_ref;
+    // Convert the result to an rvalue.
+    Reference_Root::S_temporary xref = { self.read() };
+    self = ::rocket::move(xref);
+    return air_status_next;
   }
 
 AIR_Status do_push_immediate(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
@@ -2738,7 +2738,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
     case index_throw_statement:
     case index_assert_statement:
     case index_simple_status:
-    case index_return_by_value:
+    case index_glvalue_to_rvalue:
     case index_push_immediate:
     case index_push_global_reference: {
         // There is nothing to bind.
@@ -3050,8 +3050,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_simple_status>(queue);
       }
 
-    case index_return_by_value: {
-        const auto& altr = this->m_stor.as<index_return_by_value>();
+    case index_glvalue_to_rvalue: {
+        const auto& altr = this->m_stor.as<index_glvalue_to_rvalue>();
         // There is no parameter.
         AVMC_Appender<void> avmcp;
         if(ipass == 0) {
@@ -3060,7 +3060,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // Encode arguments.
         (void)altr;
         // Push a new node.
-        return avmcp.output<do_return_by_value>(queue);
+        return avmcp.output<do_glvalue_to_rvalue>(queue);
       }
 
     case index_push_immediate: {
@@ -3583,7 +3583,7 @@ Variable_Callback& AIR_Node::enumerate_variables(Variable_Callback& callback) co
     case index_throw_statement:
     case index_assert_statement:
     case index_simple_status:
-    case index_return_by_value: {
+    case index_glvalue_to_rvalue: {
         return callback;
       }
 
