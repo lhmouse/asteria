@@ -75,7 +75,7 @@ void do_push_argument(cow_vector<Reference>& args, const Value& value)
   }
 
 template<typename IteratorT> opt<IteratorT> do_find_if_opt(Global& global, IteratorT begin, IteratorT end,
-                                                           const Fval& predictor, bool match)
+                                                           const Fval& pred, bool match)
   {
     for(auto it = ::rocket::move(begin); it != end; ++it) {
       // Set up arguments for the user-defined predictor.
@@ -83,7 +83,7 @@ template<typename IteratorT> opt<IteratorT> do_find_if_opt(Global& global, Itera
       do_push_argument(args, *it);
       // Call the predictor function and check the return value.
       Reference self = Reference_Root::S_void();
-      predictor->invoke(self, global, ::rocket::move(args));
+      pred->invoke(self, global, ::rocket::move(args));
       self.finish_call(global);
       if(self.read().test() == match)
         return ::rocket::move(it);
@@ -116,7 +116,7 @@ template<typename IteratorT>
   {
     auto bpos = ::rocket::move(begin);
     auto epos = ::rocket::move(end);
-    do {
+    for(;;) {
       auto dist = epos - bpos;
       if(dist <= 0) {
         return ::std::make_pair(::rocket::move(bpos), false);
@@ -134,7 +134,7 @@ template<typename IteratorT>
         epos = mpos;
       else
         bpos = mpos + 1;
-    } while(true);
+    }
   }
 
 template<typename IteratorT, typename PredT>
@@ -143,7 +143,7 @@ template<typename IteratorT, typename PredT>
   {
     auto bpos = ::rocket::move(begin);
     auto epos = ::rocket::move(end);
-    do {
+    for(;;) {
       auto dist = epos - bpos;
       if(dist <= 0) {
         return ::rocket::move(bpos);
@@ -154,22 +154,20 @@ template<typename IteratorT, typename PredT>
       if(cmp == compare_unordered) {
         ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)", target, *mpos);
       }
-      if(::rocket::forward<PredT>(pred)(cmp))
+      if(pred(cmp))
         epos = mpos;
       else
         bpos = mpos + 1;
-    } while(true);
+    }
   }
 
-void do_unique_move(Aval::iterator& opos, Global& global, const Fopt& comparator,
-                    Aval::iterator ibegin, Aval::iterator iend, bool unique)
+Aval::iterator& do_unique_move(Aval::iterator& opos, Global& global, const Fopt& comparator,
+                               Aval::iterator ibegin, Aval::iterator iend, bool unique)
   {
-    for(auto ipos = ibegin; ipos != iend; ++ipos) {
-      if(unique && (do_compare(global, comparator, *ipos, opos[-1]) == compare_equal)) {
-        continue;
-      }
-      *(opos++) = ::rocket::move(*ipos);
-    }
+    for(auto ipos = ibegin; ipos != iend; ++ipos)
+      if(!unique || (do_compare(global, comparator, ipos[0], opos[-1]) != compare_equal))
+        *(opos++) = ::rocket::move(*ipos);
+    return opos;
   }
 
 Aval::iterator do_merge_blocks(Aval& output, Global& global, const Fopt& comparator,

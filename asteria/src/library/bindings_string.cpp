@@ -161,14 +161,11 @@ constexpr char s_spaces[] = " \f\n\r\t\v";
 
 const char* do_xstrchr(const char* str, char c) noexcept
   {
-    const char* p = str;
-    do {
-      if(*p == 0)
-        return nullptr;
+    // If `c == 0`, this function returns a null pointer.
+    for(auto p = str; *p != 0; ++p)
       if(*p == c)
         return p;
-      ++p;
-    } while(true);
+    return nullptr;
   }
 
 template<bool bigendT, typename WordT> Sval& do_pack_one_impl(Sval& text, const Ival& value)
