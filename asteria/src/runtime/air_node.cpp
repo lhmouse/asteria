@@ -543,11 +543,9 @@ AIR_Status do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const vo
     ctx_for.stack().clear();
     auto status = queue_init.execute(ctx_for);
     ROCKET_ASSERT(status == air_status_next);
-    // Set the range up.
+    // Set the range up, which isn't going to change even if the argument got modified by the loop body.
     mapped = ::rocket::move(ctx_for.stack().open_top());
     const auto range = mapped.read();
-
-    // Iterate over the range. The range isn't going to change even if the argument got modified by the loop body.
     if(range.is_array()) {
       const auto& arr = range.as_array();
       for(int64_t i = 0; i != arr.ssize(); ++i) {
