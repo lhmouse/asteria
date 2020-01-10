@@ -521,10 +521,6 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
     // N.B. This is a non-standard extension.
     static_vector subvector(size_type tpos, size_type tn = size_type(-1)) const
       {
-        if((tpos == 0) && (tn >= this->size())) {
-          // Utilize reference counting.
-          return static_vector(*this, this->m_sth.as_allocator());
-        }
         return static_vector(this->data() + tpos, this->data() + tpos + this->do_clamp_subrange(tpos, tn),
                              this->m_sth.as_allocator());
       }
