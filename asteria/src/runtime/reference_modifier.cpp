@@ -13,11 +13,11 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
     switch(this->index()) {
     case index_array_index: {
         const auto& altr = this->m_stor.as<index_array_index>();
+        // Elements of a `null` are also `null`s.
         if(parent.is_null()) {
-          // Elements of a `null` are also `null`s.
           return nullptr;
         }
-        if(!parent.is_array()) {
+        else if(!parent.is_array()) {
           ASTERIA_THROW("integer subscript applied to non-array (parent `$1`, index `$2`)", parent, altr.index);
         }
         const auto& arr = parent.as_array();
@@ -32,29 +32,28 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
 
     case index_object_key: {
         const auto& altr = this->m_stor.as<index_object_key>();
+        // Members of a `null` are also `null`s.
         if(parent.is_null()) {
-          // Members of a `null` are also `null`s.
           return nullptr;
         }
-        if(!parent.is_object()) {
+        else if(!parent.is_object()) {
           ASTERIA_THROW("string subscript applied to non-object (parent `$1`, key `$2`)", parent, altr.key);
         }
         const auto& obj = parent.as_object();
         // Return a pointer to the value with the given key.
-        auto rit = obj.find(altr.key);
-        if(rit == obj.end()) {
+        auto q = obj.find(altr.key);
+        if(q == obj.end()) {
           return nullptr;
         }
-        return ::std::addressof(rit->second);
+        return ::std::addressof(q->second);
       }
 
     case index_array_head: {
-        // We have to verify that the parent value is actually an `array` or `null`.
+        // Elements of a `null` are also `null`s.
         if(parent.is_null()) {
-          // Elements of a `null` are also `null`s.
           return nullptr;
         }
-        if(!parent.is_array()) {
+        else if(!parent.is_array()) {
           ASTERIA_THROW("head subscript applied to non-array (parent `$1`)", parent);
         }
         const auto& arr = parent.as_array();
@@ -66,12 +65,11 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
       }
 
     case index_array_tail: {
-        // We have to verify that the parent value is actually an `array` or `null`.
+        // Elements of a `null` are also `null`s.
         if(parent.is_null()) {
-          // Elements of a `null` are also `null`s.
           return nullptr;
         }
-        if(!parent.is_array()) {
+        else if(!parent.is_array()) {
           ASTERIA_THROW("tail subscript applied to non-array (parent `$1`)", parent);
         }
         const auto& arr = parent.as_array();
@@ -92,14 +90,15 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
     switch(this->index()) {
     case index_array_index: {
         const auto& altr = this->m_stor.as<index_array_index>();
+        // Elements of a `null` are also `null`s.
         if(parent.is_null()) {
-          // Create elements as needed.
           if(!create_new) {
             return nullptr;
           }
+          // Create elements as needed.
           parent = G_array();
         }
-        if(!parent.is_array()) {
+        else if(!parent.is_array()) {
           ASTERIA_THROW("integer subscript applied to non-array (parent `$1`, index `$2`)", parent, altr.index);
         }
         auto& arr = parent.open_array();
@@ -121,41 +120,42 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
 
     case index_object_key: {
         const auto& altr = this->m_stor.as<index_object_key>();
+        // Members of a `null` are also `null`s.
         if(parent.is_null()) {
-          // Create members as needed.
           if(!create_new) {
             return nullptr;
           }
+          // Create members as needed.
           parent = G_object();
         }
-        if(!parent.is_object()) {
+        else if(!parent.is_object()) {
           ASTERIA_THROW("string subscript applied to non-object (parent `$1`, key `$2`)", parent, altr.key);
         }
         auto& obj = parent.open_object();
         // Return a pointer to the value with the given key if it is found; create a value otherwise.
-        G_object::iterator rit;
+        G_object::iterator q;
         if(!create_new) {
-          rit = obj.find_mut(altr.key);
-          if(rit == obj.end()) {
+          q = obj.find_mut(altr.key);
+          if(q == obj.end()) {
             return nullptr;
           }
         }
         else {
-          rit = obj.try_emplace(altr.key).first;
+          q = obj.try_emplace(altr.key).first;
         }
-        return ::std::addressof(rit->second);
+        return ::std::addressof(q->second);
       }
 
     case index_array_head: {
-        // We have to verify that the parent value is actually an `array` or `null`.
+        // Elements of a `null` are also `null`s.
         if(parent.is_null()) {
-          // Create elements as needed.
           if(!create_new) {
             return nullptr;
           }
+          // Create elements as needed.
           parent = G_array();
         }
-        if(!parent.is_array()) {
+        else if(!parent.is_array()) {
           ASTERIA_THROW("head subscript applied to non-array (parent `$1`)", parent);
         }
         auto& arr = parent.open_array();
@@ -164,15 +164,15 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
       }
 
     case index_array_tail: {
-        // We have to verify that the parent value is actually an `array` or `null`.
+        // Elements of a `null` are also `null`s.
         if(parent.is_null()) {
-          // Create elements as needed.
           if(!create_new) {
             return nullptr;
           }
+          // Create elements as needed.
           parent = G_array();
         }
-        if(!parent.is_array()) {
+        else if(!parent.is_array()) {
           ASTERIA_THROW("tail subscript applied to non-array (parent `$1`)", parent);
         }
         auto& arr = parent.open_array();
@@ -190,11 +190,11 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
     switch(this->index()) {
     case index_array_index: {
         const auto& altr = this->m_stor.as<index_array_index>();
+        // Elements of a `null` are also `null`s.
         if(parent.is_null()) {
-          // There is nothing to erase.
           return nullptr;
         }
-        if(!parent.is_array()) {
+        else if(!parent.is_array()) {
           ASTERIA_THROW("integer subscript applied to non-array (parent `$1`, index `$2`)", parent, altr.index);
         }
         auto& arr = parent.open_array();
@@ -211,31 +211,30 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
 
     case index_object_key: {
         const auto& altr = this->m_stor.as<index_object_key>();
+        // Members of a `null` are also `null`s.
         if(parent.is_null()) {
-          // There is nothing to erase.
           return nullptr;
         }
-        if(!parent.is_object()) {
+        else if(!parent.is_object()) {
           ASTERIA_THROW("string subscript applied to non-object (parent `$1`, key `$2`)", parent, altr.key);
         }
         auto& obj = parent.open_object();
         // Erase the value with the given key and return it.
-        auto rit = obj.find_mut(altr.key);
-        if(rit == obj.end()) {
+        auto q = obj.find_mut(altr.key);
+        if(q == obj.end()) {
           return nullptr;
         }
-        auto elem = ::rocket::move(rit->second);
-        obj.erase(rit);
+        auto elem = ::rocket::move(q->second);
+        obj.erase(q);
         return elem;
       }
 
     case index_array_head: {
-        // We have to verify that the parent value is actually an `array` or `null`.
+        // Elements of a `null` are also `null`s.
         if(parent.is_null()) {
-          // There is nothing to erase.
           return nullptr;
         }
-        if(!parent.is_array()) {
+        else if(!parent.is_array()) {
           ASTERIA_THROW("head subscript applied to non-array (parent `$1`)", parent);
         }
         auto& arr = parent.open_array();
@@ -249,12 +248,11 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
       }
 
     case index_array_tail: {
-        // We have to verify that the parent value is actually an `array` or `null`.
+        // Elements of a `null` are also `null`s.
         if(parent.is_null()) {
-          // There is nothing to erase.
           return nullptr;
         }
-        if(!parent.is_array()) {
+        else if(!parent.is_array()) {
           ASTERIA_THROW("tail subscript applied to non-array (parent `$1`)", parent);
         }
         auto& arr = parent.open_array();
