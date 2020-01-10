@@ -1477,24 +1477,27 @@ bool do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& t
       return false;
     }
     uint32_t nelems = 0;
+    bool comma_allowed = false;
     for(;;) {
       bool succ = do_accept_expression(units, tstrm);
       if(!succ) {
         break;
       }
       if(nelems >= INT32_MAX) {
-        do_throw_parser_error(parser_status_too_many_array_elements, tstrm);
+        do_throw_parser_error(parser_status_too_many_elements, tstrm);
       }
       nelems += 1;
       // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
+      comma_allowed = !kpunct;
       if(!kpunct) {
         break;
       }
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
     if(!kpunct) {
-      do_throw_parser_error(parser_status_end_of_array_initializer_expected, tstrm);
+      do_throw_parser_error(comma_allowed ? parser_status_closed_bracket_or_comma_expected
+                                          : parser_status_closed_bracket_or_expression_expected, tstrm);
     }
     Expression_Unit::S_unnamed_array xunit = { nelems };
     units.emplace_back(::rocket::move(xunit));
@@ -1514,6 +1517,7 @@ bool do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& 
       return false;
     }
     cow_vector<phsh_string> keys;
+    bool comma_allowed = false;
     for(;;) {
       auto qkey = do_accept_json5_key_opt(tstrm);
       if(!qkey) {
@@ -1531,13 +1535,15 @@ bool do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& 
       keys.emplace_back(::rocket::move(*qkey));
       // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
+      comma_allowed = !kpunct;
       if(!kpunct) {
         break;
       }
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
     if(!kpunct) {
-      do_throw_parser_error(parser_status_end_of_object_initializer_expected, tstrm);
+      do_throw_parser_error(comma_allowed ? parser_status_closed_brace_or_comma_expected
+                                          : parser_status_closed_brace_or_json5_key_expected, tstrm);
     }
     Expression_Unit::S_unnamed_object xunit = { ::rocket::move(keys) };
     units.emplace_back(::rocket::move(xunit));

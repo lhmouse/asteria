@@ -270,13 +270,15 @@ enum Parser_Status : uint32_t
     parser_status_for_statement_initializer_expected         = 3018,
     parser_status_semicolon_or_expression_expected           = 3019,
     parser_status_closed_brace_expected                      = 3020,
-    parser_status_too_many_array_elements                    = 3021,
+    parser_status_too_many_elements                          = 3021,
     parser_status_closed_parenthesis_or_argument_expected    = 3022,
     parser_status_closed_bracket_expected                    = 3023,
     parser_status_open_brace_or_equal_initializer_expected   = 3024,
     parser_status_equals_sign_or_colon_expected              = 3025,
-    parser_status_end_of_array_initializer_expected          = 3026,
-    parser_status_end_of_object_initializer_expected         = 3027,
+    parser_status_closed_bracket_or_comma_expected           = 3026,
+    parser_status_closed_brace_or_comma_expected             = 3027,
+    parser_status_closed_bracket_or_expression_expected      = 3028,
+    parser_status_closed_brace_or_json5_key_expected         = 3029,
   };
 
 ROCKET_PURE_FUNCTION extern const char* describe_parser_status(Parser_Status status) noexcept;

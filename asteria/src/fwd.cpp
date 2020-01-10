@@ -179,8 +179,8 @@ const char* describe_parser_status(Parser_Status status) noexcept
     case parser_status_closed_brace_expected: {
         return "`}` expected";
       }
-    case parser_status_too_many_array_elements: {
-        return "array elements too many";
+    case parser_status_too_many_elements: {
+        return "max number of elements exceeded";
       }
     case parser_status_closed_parenthesis_or_argument_expected: {
         return "`)` or expression expected";
@@ -194,11 +194,17 @@ const char* describe_parser_status(Parser_Status status) noexcept
     case parser_status_equals_sign_or_colon_expected: {
         return "`=` or `:` expected";
       }
-    case parser_status_end_of_array_initializer_expected: {
-        return "end of array initializer expected";
+    case parser_status_closed_bracket_or_comma_expected: {
+        return "`]` or `,` expected";
       }
-    case parser_status_end_of_object_initializer_expected: {
-        return "end of object initializer expected";
+    case parser_status_closed_brace_or_comma_expected: {
+        return "`}` or `,` expected";
+      }
+    case parser_status_closed_bracket_or_expression_expected: {
+        return "`]` or expression expected";
+      }
+    case parser_status_closed_brace_or_json5_key_expected: {
+        return "`}`, identifier or string literal expected";
       }
     default:
       return "<unknown parser error>";
