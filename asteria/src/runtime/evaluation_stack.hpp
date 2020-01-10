@@ -40,6 +40,7 @@ class Evaluation_Stack
         this->m_etop = this->m_refs.mut_data();
         return *this;
       }
+
     Evaluation_Stack& reserve(cow_vector<Reference>&& refs)
       {
         // This may throw allocation failure if `refs` is not unique.
@@ -47,6 +48,14 @@ class Evaluation_Stack
         this->m_etop = refs.mut_data();
         this->m_refs = ::rocket::move(refs);
         ROCKET_ASSERT(this->m_etop == this->m_refs.data());
+        return *this;
+      }
+    Evaluation_Stack& unreserve(cow_vector<Reference>& refs) noexcept
+      {
+        // This is the inverse of `reserve()`.
+        refs = ::rocket::move(this->m_refs);
+        this->m_refs.clear();
+        this->m_etop = nullptr;
         return *this;
       }
 

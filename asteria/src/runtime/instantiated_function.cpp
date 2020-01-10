@@ -69,7 +69,10 @@ Reference& Instantiated_Function::invoke(Reference& self, Global_Context& global
     stack.reserve(::rocket::move(args));
     // Execute the function body.
     auto status = this->m_queue.execute(ctx_func);
-    return do_handle_status(self, stack, status);
+    do_handle_status(self, stack, status);
+    // Enable `args` to be reused after this call.
+    stack.unreserve(args);
+    return self;
   }
 
 Variable_Callback& Instantiated_Function::enumerate_variables(Variable_Callback& callback) const
