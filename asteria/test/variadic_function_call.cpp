@@ -49,6 +49,20 @@ int main()
         assert __vcall(obj.do_imuladd, obj.generator) == "ifma success";
         assert num == 67;  // 31 * 2 + 5
 
+        var obj = {
+          value = "meow";
+
+          do_sum = func(x, y, z) {
+            this.value = x + y + z;
+            return "sum success";
+          };
+        };
+
+        assert __vcall(obj.do_sum, [ 1, 2, 3 ]) == "sum success";
+        assert obj.value == 6;
+        assert __vcall(obj.do_sum, [ 7, 8, 9 ]) == "sum success";
+        assert obj.value == 24;
+
 ///////////////////////////////////////////////////////////////////////////////
       )__"), tinybuf::open_read);
 

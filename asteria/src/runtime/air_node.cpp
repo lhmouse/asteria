@@ -2538,35 +2538,48 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
     }
     cow_vector<Reference> args;
 
-    // Pop the argument generator, which shall be of type `function`.
+    // Pop the argument generator.
     auto value = ctx.stack().get_top().read();
-    if(!value.is_function()) {
+    if(value.is_array()) {
+      auto source = ::rocket::move(value.open_array());
+      ctx.stack().pop();
+      // Convert all elements to temporaries.
+      args.resize(source.size());
+      for(size_t i = 0; i != args.size(); ++i) {
+        // Make a reference to temporary.
+        Reference_Root::S_temporary xref = { source.mut(i) };
+        args.mut(i) = ::rocket::move(xref);
+      }
+    }
+    else if(value.is_function()) {
+      const auto generator = ::rocket::move(value.open_function());
+      auto gself = ctx.stack().open_top().zoom_out();
+      // Pass an empty argument list to get the number of arguments to generate.
+      cow_vector<Reference> gargs;
+      value = do_invoke_plain(ctx.stack().open_top(), sloc, inside, generator, ctx.global(), qhooks,
+                              ::rocket::move(gargs)).read();
+      ctx.stack().pop();
+      // Verify the argument count.
+      if(!value.is_integer()) {
+        ASTERIA_THROW("invalid number of variadic arguments (value `$1`)", value);
+      }
+      int64_t nvargs = value.as_integer();
+      if((nvargs < 0) || (nvargs > INT_MAX)) {
+        ASTERIA_THROW("number of variadic arguments not acceptable (nvargs `$1`)", nvargs);
+      }
+      // Generate arguments.
+      args.assign(static_cast<size_t>(nvargs), gself);
+      for(size_t i = 0; i != args.size(); ++i) {
+        // Initialize the argument list for the generator.
+        Reference_Root::S_constant xref = { G_integer(i) };
+        gargs.resize(1).mut_front() = ::rocket::move(xref);
+        // Generate an argument. Ensure it is dereferenceable.
+        do_invoke_plain(args.mut(i), sloc, inside, generator, ctx.global(), qhooks, ::rocket::move(gargs));
+        static_cast<void>(args[i].read());
+      }
+    }
+    else {
       ASTERIA_THROW("invalid variadic argument generator (value `$1`)", value);
-    }
-    auto generator = ::rocket::move(value.open_function());
-    auto gself = ctx.stack().open_top().zoom_out();
-    // Pass an empty argument list to get the number of arguments to generate.
-    cow_vector<Reference> gargs;
-    do_invoke_plain(ctx.stack().open_top(), sloc, inside, generator, ctx.global(), qhooks, ::rocket::move(gargs));
-    value = ctx.stack().get_top().read();
-    ctx.stack().pop();
-    // Verify the argument count.
-    if(!value.is_integer()) {
-      ASTERIA_THROW("invalid number of variadic arguments (value `$1`)", value);
-    }
-    int64_t nvargs = value.as_integer();
-    if((nvargs < 0) || (nvargs > INT_MAX)) {
-      ASTERIA_THROW("number of variadic arguments not acceptable (nvargs `$1`)", nvargs);
-    }
-    // Generate arguments.
-    args.assign(static_cast<size_t>(nvargs), gself);
-    for(size_t i = 0; i != args.size(); ++i) {
-      // Initialize the argument list for the generator.
-      Reference_Root::S_constant xref = { G_integer(i) };
-      gargs.clear().emplace_back(::rocket::move(xref));
-      // Generate an argument. Ensure it is dereferenceable.
-      do_invoke_plain(args.mut(i), sloc, inside, generator, ctx.global(), qhooks, ::rocket::move(gargs));
-      static_cast<void>(args[i].read());
     }
     // Copy the target, which shall be of type `function`.
     value = ctx.stack().get_top().read();
