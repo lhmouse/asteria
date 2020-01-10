@@ -15,26 +15,6 @@
 #include <errno.h>  // errno
 
 namespace Asteria {
-namespace {
-
-void do_push_argument(cow_vector<Reference>& args, const Value& value)
-  {
-    Reference_Root::S_temporary xref = { value };
-    args.emplace_back(::rocket::move(xref));
-  }
-
-void do_process_block(Global& global, const Fval& callback, const Ival& offset, const Sval& data)
-  {
-    // Set up arguments for the user-defined predictor.
-    cow_vector<Reference> args;
-    do_push_argument(args, offset);
-    do_push_argument(args, data);
-    // Call the predictor function, but discard the return value.
-    Reference self;
-    callback->invoke(self, global, ::rocket::move(args));
-  }
-
-}  // namespace
 
 Sval std_filesystem_get_working_directory()
   {
@@ -329,6 +309,7 @@ bool std_filesystem_file_stream(Global& global, Sval path, Fval callback,
     if(!fd) {
       return false;
     }
+    cow_vector<Reference> args;
     for(;;) {
       // Has the read limit been reached?
       if(nremaining <= 0) {
@@ -352,7 +333,16 @@ bool std_filesystem_file_stream(Global& global, Sval path, Fval callback,
         break;
       }
       data.erase(static_cast<size_t>(nread));
-      do_process_block(global, callback, roffset, data);
+      // Prepare arguments for the user-defined function.
+      args.resize(2);
+      Reference_Root::S_temporary xref_offset = { roffset };
+      args.mut(0) = ::rocket::move(xref_offset);
+      Reference_Root::S_temporary xref_data = { ::rocket::move(data) };
+      args.mut(1) = ::rocket::move(xref_data);
+      // Call the function but discard its return value.
+      Reference self = Reference_Root::S_constant();
+      callback->invoke(self, global, ::rocket::move(args));
+      self.finish_call(global);
       // Read the next block.
       nremaining -= nread;
       roffset += nread;
