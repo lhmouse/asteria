@@ -334,7 +334,7 @@ bool std_filesystem_file_stream(Global& global, Sval path, Fval callback,
       }
       data.erase(static_cast<size_t>(nread));
       // Prepare arguments for the user-defined function.
-      args.resize(2);
+      args.resize(2, Reference_Root::S_void());
       Reference_Root::S_temporary xref_offset = { roffset };
       args.mut(0) = ::rocket::move(xref_offset);
       Reference_Root::S_temporary xref_data = { ::rocket::move(data) };

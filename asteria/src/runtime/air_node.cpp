@@ -293,6 +293,17 @@ struct Pv_func
       }
   };
 
+struct Pv_ref
+  {
+    Reference ref = Reference_Root::S_void();
+
+    Variable_Callback& enumerate_variables(Variable_Callback& callback) const
+      {
+        this->ref.enumerate_variables(callback);
+        return callback;
+      }
+  };
+
 struct Pv_name
   {
     phsh_string name;
@@ -786,7 +797,7 @@ AIR_Status do_push_local_reference(Executive_Context& ctx, ParamU pu, const void
 AIR_Status do_push_bound_reference(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
   {
     // Unpack arguments.
-    const auto& ref = do_pcast<Reference>(pv)[0];
+    const auto& ref = do_pcast<Pv_ref>(pv)->ref;
 
     // Push a copy of the bound reference.
     ctx.stack().push(ref);
@@ -937,7 +948,7 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
     cow_vector<Reference> args;
 
     // Pop arguments off the stack backwards.
-    args.resize(nargs);
+    args.resize(nargs, Reference_Root::S_void());
     for(size_t i = args.size() - 1; i != SIZE_MAX; --i) {
       // Get an argument. Ensure it is dereferenceable.
       auto& arg = ctx.stack().open_top();
@@ -2544,7 +2555,7 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
       auto source = ::rocket::move(value.open_array());
       ctx.stack().pop();
       // Convert all elements to temporaries.
-      args.resize(source.size());
+      args.assign(source.size(), Reference_Root::S_void());
       for(size_t i = 0; i != args.size(); ++i) {
         // Make a reference to temporary.
         Reference_Root::S_temporary xref = { source.mut(i) };
@@ -2572,7 +2583,7 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
       for(size_t i = 0; i != args.size(); ++i) {
         // Initialize the argument list for the generator.
         Reference_Root::S_constant xref = { G_integer(i) };
-        gargs.resize(1).mut_front() = ::rocket::move(xref);
+        gargs.clear().emplace_back(::rocket::move(xref));
         // Generate an argument. Ensure it is dereferenceable.
         do_invoke_plain(args.mut(i), sloc, inside, generator, ctx.global(), qhooks, ::rocket::move(gargs));
         static_cast<void>(args[i].read());
@@ -3104,12 +3115,12 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_push_bound_reference>();
         // `pu` is unused.
         // `pv` points to a copy of `ref`.
-        AVMC_Appender<Reference> avmcp;
+        AVMC_Appender<Pv_ref> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
         // Encode arguments.
-        static_cast<Reference&>(avmcp) = altr.ref;
+        avmcp.ref = altr.ref;
         // Push a new node.
         return avmcp.output<do_push_bound_reference>(queue);
       }

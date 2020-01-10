@@ -82,7 +82,7 @@ template<typename IteratorT> opt<IteratorT> do_find_if_opt(Global& global, Itera
       cow_vector<Reference> args;
       do_push_argument(args, *it);
       // Call the predictor function and check the return value.
-      Reference self;
+      Reference self = Reference_Root::S_void();
       predictor->invoke(self, global, ::rocket::move(args));
       self.finish_call(global);
       if(self.read().test() == match)
@@ -99,7 +99,7 @@ Compare do_compare(Global& global, const Fval& comp, const Value& lhs, const Val
     do_push_argument(args, lhs);
     do_push_argument(args, rhs);
     // Call the predictor function and compare the result with `0`.
-    Reference self;
+    Reference self = Reference_Root::S_void();
     comp->invoke(self, global, ::rocket::move(args));
     self.finish_call(global);
     return self.read().compare(Ival(0));
@@ -731,7 +731,7 @@ Aval std_array_generate(Global& global, Fval generator, Ival length)
       do_push_argument(args, Ival(i));
       do_push_argument(args, res.empty() ? null_value : res.back());
       // Call the generator function and push the return value.
-      Reference self;
+      Reference self = Reference_Root::S_void();
       generator->invoke(self, global, ::rocket::move(args));
       self.finish_call(global);
       res.emplace_back(self.read());

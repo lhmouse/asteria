@@ -57,11 +57,6 @@ class Reference_Root
     Xvariant m_stor;
 
   public:
-    Reference_Root() noexcept
-      :
-        m_stor()  // Initialize to a null reference.
-      {
-      }
     ASTERIA_VARIANT_CONSTRUCTOR(Reference_Root, Xvariant, XrootT, xroot)
       :
         m_stor(::rocket::forward<XrootT>(xroot))

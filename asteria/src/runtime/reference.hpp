@@ -17,11 +17,6 @@ class Reference
     cow_vector<Reference_Modifier> m_mods;
 
   public:
-    Reference() noexcept
-      :
-        m_root(), m_mods()
-      {
-      }
     ASTERIA_VARIANT_CONSTRUCTOR(Reference, Reference_Root, XRootT, xroot)
       :
         m_root(::rocket::forward<XRootT>(xroot)), m_mods()

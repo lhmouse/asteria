@@ -22,7 +22,7 @@ class Executive_Context final : public Abstract_Context
     ckptr<Variadic_Arguer> m_zvarg;
 
     // These members are used for lazy initialization.
-    mutable Reference m_self;
+    mutable Reference m_self = Reference_Root::S_void();
     mutable cow_vector<Reference> m_args;
 
   public:
