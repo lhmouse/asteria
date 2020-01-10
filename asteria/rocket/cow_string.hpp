@@ -22,6 +22,7 @@ namespace rocket {
  * 5. The assignment operator taking a character and the one taking a const pointer are not provided.
  * 6. It is possible to create strings holding non-owning references of null-terminated character arrays allocated externally.
  * 7. `data()` returns a null pointer if the string is empty.
+ * 8. `erase()` and `substr()` cannot be called without arguments.
  */
 template<typename charT, typename traitsT> class basic_tinyfmt;
 template<typename charT, typename traitsT = char_traits<charT>> class basic_shallow_string;
@@ -714,7 +715,8 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
         return *this;
       }
 
-    basic_cow_string& erase(size_type tpos = 0, size_type tn = npos)
+    // N.B. There is no default argument for `tpos`.
+    basic_cow_string& erase(size_type tpos, size_type tn = npos)
       {
         this->do_erase_no_bound_check(tpos, this->do_clamp_substr(tpos, tn));
         return *this;
@@ -1153,13 +1155,14 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
         return this->do_find_backwards_if(to, 1, [&](const char* p) { return pred(*p);  });
       }
 
-    basic_cow_string substr(size_type pos = 0, size_type n = npos) const
+    // N.B. There is no default argument for `tpos`.
+    basic_cow_string substr(size_type tpos, size_type tn = npos) const
       {
-        if((pos == 0) && (n >= this->size())) {
+        if((tpos == 0) && (tn >= this->size())) {
           // Utilize reference counting.
           return basic_cow_string(*this, this->m_sth.as_allocator());
         }
-        return basic_cow_string(*this, pos, n, this->m_sth.as_allocator());
+        return basic_cow_string(*this, tpos, tn, this->m_sth.as_allocator());
       }
 
     int compare(const basic_cow_string& other) const noexcept
