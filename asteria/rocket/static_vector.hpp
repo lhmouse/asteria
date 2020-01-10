@@ -157,6 +157,17 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
                                                static_cast<unsigned long long>(this->size()));
       }
 
+    // This function works the same way as `std::string::substr()`.
+    // Ensure `tpos` is in `[0, size()]` and return `min(tn, size() - tpos)`.
+    ROCKET_PURE_FUNCTION size_type do_clamp_subrange(size_type tpos, size_type tn) const
+      {
+        auto tcnt = this->size();
+        if(tpos > tcnt) {
+          this->do_throw_subscript_of_range(tpos);
+        }
+        return noadl::min(tcnt - tpos, tn);
+      }
+
     template<typename... paramsT> value_type* do_insert_no_bound_check(size_type tpos, paramsT&&... params)
       {
         auto cnt_old = this->size();
@@ -414,6 +425,38 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         return *ptr;
       }
 
+    // N.B. This is a non-standard extension.
+    static_vector& insert(size_type tpos, const value_type& value)
+      {
+        this->do_insert_no_bound_check(this->do_clamp_subrange(tpos, 0), details_static_vector::push_back, value);
+        return *this;
+      }
+    // N.B. This is a non-standard extension.
+    static_vector& insert(size_type tpos, value_type&& value)
+      {
+        this->do_insert_no_bound_check(this->do_clamp_subrange(tpos, 0), details_static_vector::push_back, noadl::move(value));
+        return *this;
+      }
+    // N.B. This is a non-standard extension.
+    template<typename... paramsT> static_vector& insert(size_type tpos, size_type n, const paramsT&... params)
+      {
+        this->do_insert_no_bound_check(this->do_clamp_subrange(tpos, 0), details_static_vector::append, n, params...);
+        return *this;
+      }
+    // N.B. This is a non-standard extension.
+    static_vector& insert(size_type tpos, initializer_list<value_type> init)
+      {
+        this->do_insert_no_bound_check(this->do_clamp_subrange(tpos, 0), details_static_vector::append, init);
+        return *this;
+      }
+    // N.B. This is a non-standard extension.
+    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
+        static_vector& insert(size_type tpos, inputT first, inputT last)
+      {
+        this->do_insert_no_bound_check(this->do_clamp_subrange(tpos, 0),
+                                       details_static_vector::append, noadl::move(first), noadl::move(last));
+        return *this;
+      }
     iterator insert(const_iterator tins, const value_type& value)
       {
         auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
@@ -447,7 +490,12 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         return iterator(this->m_sth, ptr);
       }
 
-    // N.B. This function may throw `std::bad_alloc`.
+    // N.B. This is a non-standard extension.
+    static_vector& erase(size_type tpos, size_type tn = size_type(-1))
+      {
+        this->do_erase_no_bound_check(tpos, this->do_clamp_subrange(tpos, tn));
+        return *this;
+      }
     iterator erase(const_iterator tfirst, const_iterator tlast)
       {
         auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->data());
@@ -455,14 +503,12 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         auto ptr = this->do_erase_no_bound_check(tpos, tn);
         return iterator(this->m_sth, ptr);
       }
-    // N.B. This function may throw `std::bad_alloc`.
     iterator erase(const_iterator tfirst)
       {
         auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->data());
         auto ptr = this->do_erase_no_bound_check(tpos, 1);
         return iterator(this->m_sth, ptr);
       }
-    // N.B. This function may throw `std::bad_alloc`.
     // N.B. The return type and parameter are non-standard extensions.
     static_vector& pop_back(size_type n = 1)
       {
@@ -470,6 +516,17 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         ROCKET_ASSERT(n <= cnt_old);
         this->m_sth.pop_back_n_unchecked(n);
         return *this;
+      }
+
+    // N.B. This is a non-standard extension.
+    static_vector subvector(size_type tpos, size_type tn = size_type(-1)) const
+      {
+        if((tpos == 0) && (tn >= this->size())) {
+          // Utilize reference counting.
+          return static_vector(*this, this->m_sth.as_allocator());
+        }
+        return static_vector(this->data() + tpos, this->data() + tpos + this->do_clamp_subrange(tpos, tn),
+                             this->m_sth.as_allocator());
       }
 
     // N.B. The return type is a non-standard extension.
@@ -568,7 +625,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         return this->m_sth.data();
       }
 
-    // Get a pointer to mutable data. This function may throw `std::bad_alloc`.
+    // Get a pointer to mutable data.
     // N.B. This is a non-standard extension.
     value_type* mut_data()
       {
