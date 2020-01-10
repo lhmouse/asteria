@@ -568,7 +568,7 @@ template<typename valueT, typename allocT> class cow_vector
 
     // N.B. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
-    cow_vector& erase(size_type tpos = 0, size_type tn = size_type(-1))
+    cow_vector& erase(size_type tpos, size_type tn = size_type(-1))
       {
         this->do_erase_no_bound_check(tpos, this->do_clamp_subrange(tpos, tn));
         return *this;
@@ -603,6 +603,17 @@ template<typename valueT, typename allocT> class cow_vector
         }
         this->m_sth.pop_back_n_unchecked(n);
         return *this;
+      }
+
+    // N.B. This is a non-standard extension.
+    cow_vector subvector(size_type tpos, size_type tn = size_type(-1)) const
+      {
+        if((tpos == 0) && (tn >= this->size())) {
+          // Utilize reference counting.
+          return cow_vector(*this, this->m_sth.as_allocator());
+        }
+        return cow_vector(this->data() + tpos, this->data() + tpos + this->do_clamp_subrange(tpos, tn),
+                          this->m_sth.as_allocator());
       }
 
     // N.B. The return type is a non-standard extension.
