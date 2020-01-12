@@ -46,7 +46,8 @@ void Executive_Context::do_prepare_function(const cow_vector<phsh_string>& param
     // Stash the `this` reference for lazy initialization.
     this->m_self = ::rocket::move(self);
     // Stash variadic arguments for lazy initialization.
-    // If all arguments are positional, `args` may be reused for the evaluation stack, so don't move it at all.
+    // If all arguments are positional, `args` may be reused for the evaluation stack,
+    // so don't move it at all.
     if(!args.empty())
       this->m_args = ::rocket::move(args.shrink_to_fit());
   }
@@ -61,7 +62,8 @@ const Abstract_Context* Executive_Context::do_get_parent_opt() const noexcept
     return this->get_parent_opt();
   }
 
-Reference* Executive_Context::do_lazy_lookup_opt(Reference_Dictionary& named_refs, const phsh_string& name) const
+Reference* Executive_Context::do_lazy_lookup_opt(Reference_Dictionary& named_refs,
+                                                 const phsh_string& name) const
   {
     // Create pre-defined references as needed.
     // N.B. If you have ever changed these, remember to update 'analytic_context.cpp' as well.

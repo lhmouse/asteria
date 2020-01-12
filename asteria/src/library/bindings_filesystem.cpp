@@ -41,39 +41,39 @@ Oopt std_filesystem_get_information(Sval path)
     Oval stat;
     stat.try_emplace(::rocket::sref("i_dev"),
       Ival(
-        stb.st_dev  // unique device id on this machine.
+        stb.st_dev  // unique device id on this machine
       ));
     stat.try_emplace(::rocket::sref("i_file"),
       Ival(
-        stb.st_ino  // unique file id on this device.
+        stb.st_ino  // unique file id on this device
       ));
     stat.try_emplace(::rocket::sref("n_ref"),
       Ival(
-        stb.st_nlink  // number of hard links to this file.
+        stb.st_nlink  // number of hard links to this file
       ));
     stat.try_emplace(::rocket::sref("b_dir"),
       Bval(
-        S_ISDIR(stb.st_mode)  // whether this is a directory.
+        S_ISDIR(stb.st_mode)  // whether this is a directory
       ));
     stat.try_emplace(::rocket::sref("b_sym"),
       Bval(
-        S_ISLNK(stb.st_mode)  // whether this is a symbolic link.
+        S_ISLNK(stb.st_mode)  // whether this is a symbolic link
       ));
     stat.try_emplace(::rocket::sref("n_size"),
       Ival(
-        stb.st_size  // number of bytes this file contains.
+        stb.st_size  // number of bytes this file contains
       ));
     stat.try_emplace(::rocket::sref("n_ocup"),
       Ival(
-        static_cast<int64_t>(stb.st_blocks) * 512  // number of bytes this file occupies.
+        int64_t(stb.st_blocks) * 512  // number of bytes this file occupies
       ));
     stat.try_emplace(::rocket::sref("t_accs"),
       Ival(
-        static_cast<int64_t>(stb.st_atim.tv_sec) * 1000 + stb.st_atim.tv_nsec / 1000000  // timestamp of last access.
+        int64_t(stb.st_atim.tv_sec) * 1000 + stb.st_atim.tv_nsec / 1000000  // timestamp of last access
       ));
     stat.try_emplace(::rocket::sref("t_mod"),
       Ival(
-        static_cast<int64_t>(stb.st_mtim.tv_sec) * 1000 + stb.st_mtim.tv_nsec / 1000000  // timestamp of last modification.
+        int64_t(stb.st_mtim.tv_sec) * 1000 + stb.st_mtim.tv_nsec / 1000000  // timestamp of last modification
       ));
     return ::rocket::move(stat);
   }

@@ -31,13 +31,15 @@ Slice do_slice(const Aval& data, const Ival& from, const Iopt& length)
   {
     auto slen = static_cast<int64_t>(data.size());
     if(from >= 0) {
-      // Behave like `::std::string::substr()` except that no exception is thrown when `from` is greater than `data.size()`.
+      // Behave like `::std::string::substr()` except that no exception is thrown when `from` is
+      // greater than `data.size()`.
       if(from >= slen) {
         return ::std::make_pair(data.end(), data.end());
       }
       return do_slice(data, data.begin() + static_cast<ptrdiff_t>(from), length);
     }
-    // Wrap `from` from the end. Notice that `from + slen` will not overflow when `from` is negative and `slen` is not.
+    // Wrap `from` from the end. Notice that `from + slen` will not overflow when `from` is negative
+    // and `slen` is not.
     auto rfrom = from + slen;
     if(rfrom >= 0) {
       // Get a subrange from the wrapped index.
@@ -203,15 +205,18 @@ Aval::iterator do_merge_blocks(Aval& output, Global& global, const Fopt& compara
         if(cmp == compare_unordered) {
           ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)", *(bpos[0]), *(bpos[1]));
         }
-        // For Merge Sort to be stable, the two elements will only be swapped if the first one is greater than the second one.
+        // For Merge Sort to be stable, the two elements will only be swapped if the first one is greater
+        // than the second one.
         bi = (cmp == compare_greater);
         // Move this element unless uniqueness is requested and it is equal to the previous output.
-        if(!(unique && (opos != output.begin()) && (do_compare(global, comparator, *(bpos[bi]), opos[-1]) == compare_equal))) {
+        bool discard = unique && (opos != output.begin())
+                              && (do_compare(global, comparator, *(bpos[bi]), opos[-1]) == compare_equal);
+        if(!discard) {
           *(opos++) = ::rocket::move(*(bpos[bi]));
         }
         bpos[bi]++;
-        // When uniqueness is requested, if elements from the two blocks are equal, discard the one from the second block.
-        // This may exhaust the second block.
+        // When uniqueness is requested, if elements from the two blocks are equal, discard the one from
+        // the second block. This may exhaust the second block.
         if(unique && (cmp == compare_equal)) {
           size_t oi = bi ^ 1;
           bpos[oi]++;
@@ -320,8 +325,7 @@ Iopt std_array_find_if(Global& global, Aval data, Ival from, Fval predictor)
     return *qit - data.begin();
   }
 
-Iopt std_array_find_if(Global& global, Aval data, Ival from, Iopt length,
-                            Fval predictor)
+Iopt std_array_find_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
@@ -351,8 +355,7 @@ Iopt std_array_find_if_not(Global& global, Aval data, Ival from, Fval predictor)
     return *qit - data.begin();
   }
 
-Iopt std_array_find_if_not(Global& global, Aval data, Ival from, Iopt length,
-                                Fval predictor)
+Iopt std_array_find_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
@@ -365,7 +368,8 @@ Iopt std_array_find_if_not(Global& global, Aval data, Ival from, Iopt length,
 Iopt std_array_rfind(Aval data, Value target)
   {
     auto range = ::std::make_pair(data.begin(), data.end());
-    auto qit = do_find_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first), target);
+    auto qit = do_find_opt(::std::make_reverse_iterator(range.second),
+                           ::std::make_reverse_iterator(range.first), target);
     if(!qit) {
       return clear;
     }
@@ -375,7 +379,8 @@ Iopt std_array_rfind(Aval data, Value target)
 Iopt std_array_rfind(Aval data, Ival from, Value target)
   {
     auto range = do_slice(data, from, clear);
-    auto qit = do_find_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first), target);
+    auto qit = do_find_opt(::std::make_reverse_iterator(range.second),
+                           ::std::make_reverse_iterator(range.first), target);
     if(!qit) {
       return clear;
     }
@@ -385,7 +390,8 @@ Iopt std_array_rfind(Aval data, Ival from, Value target)
 Iopt std_array_rfind(Aval data, Ival from, Iopt length, Value target)
   {
     auto range = do_slice(data, from, length);
-    auto qit = do_find_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first), target);
+    auto qit = do_find_opt(::std::make_reverse_iterator(range.second),
+                           ::std::make_reverse_iterator(range.first), target);
     if(!qit) {
       return clear;
     }
@@ -395,8 +401,8 @@ Iopt std_array_rfind(Aval data, Ival from, Iopt length, Value target)
 Iopt std_array_rfind_if(Global& global, Aval data, Fval predictor)
   {
     auto range = ::std::make_pair(data.begin(), data.end());
-    auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
-                                      predictor, true);
+    auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second),
+                                      ::std::make_reverse_iterator(range.first), predictor, true);
     if(!qit) {
       return clear;
     }
@@ -406,20 +412,19 @@ Iopt std_array_rfind_if(Global& global, Aval data, Fval predictor)
 Iopt std_array_rfind_if(Global& global, Aval data, Ival from, Fval predictor)
   {
     auto range = do_slice(data, from, clear);
-    auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
-                                      predictor, true);
+    auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second),
+                                      ::std::make_reverse_iterator(range.first), predictor, true);
     if(!qit) {
       return clear;
     }
     return data.rend() - *qit - 1;
   }
 
-Iopt std_array_rfind_if(Global& global, Aval data, Ival from, Iopt length,
-                             Fval predictor)
+Iopt std_array_rfind_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
   {
     auto range = do_slice(data, from, length);
-    auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
-                                      predictor, true);
+    auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second),
+                                      ::std::make_reverse_iterator(range.first), predictor, true);
     if(!qit) {
       return clear;
     }
@@ -429,8 +434,8 @@ Iopt std_array_rfind_if(Global& global, Aval data, Ival from, Iopt length,
 Iopt std_array_rfind_if_not(Global& global, Aval data, Fval predictor)
   {
     auto range = ::std::make_pair(data.begin(), data.end());
-    auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
-                                      predictor, false);
+    auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second),
+                                      ::std::make_reverse_iterator(range.first), predictor, false);
     if(!qit) {
       return clear;
     }
@@ -440,20 +445,19 @@ Iopt std_array_rfind_if_not(Global& global, Aval data, Fval predictor)
 Iopt std_array_rfind_if_not(Global& global, Aval data, Ival from, Fval predictor)
   {
     auto range = do_slice(data, from, clear);
-    auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
-                                      predictor, false);
+    auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second),
+                                      ::std::make_reverse_iterator(range.first), predictor, false);
     if(!qit) {
       return clear;
     }
     return data.rend() - *qit - 1;
   }
 
-Iopt std_array_rfind_if_not(Global& global, Aval data, Ival from, Iopt length,
-                                 Fval predictor)
+Iopt std_array_rfind_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
   {
     auto range = do_slice(data, from, length);
-    auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
-                                      predictor, false);
+    auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second),
+                                      ::std::make_reverse_iterator(range.first), predictor, false);
     if(!qit) {
       return clear;
     }
@@ -580,8 +584,7 @@ Ival std_array_count_if_not(Global& global, Aval data, Ival from, Fval predictor
     return count;
   }
 
-Ival std_array_count_if_not(Global& global, Aval data, Ival from, Iopt length,
-                            Fval predictor)
+Ival std_array_count_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
   {
     Ival count = 0;
     auto range = do_slice(data, from, length);
@@ -622,21 +625,25 @@ Iopt std_array_binary_search(Global& global, Aval data, Value target, Fopt compa
 
 Ival std_array_lower_bound(Global& global, Aval data, Value target, Fopt comparator)
   {
-    auto lpos = do_bound(global, data.begin(), data.end(), comparator, target, [](auto cmp) { return cmp != compare_greater;  });
+    auto lpos = do_bound(global, data.begin(), data.end(), comparator, target,
+                         [](Compare cmp) { return cmp != compare_greater;  });
     return lpos - data.begin();
   }
 
 Ival std_array_upper_bound(Global& global, Aval data, Value target, Fopt comparator)
   {
-    auto upos = do_bound(global, data.begin(), data.end(), comparator, target, [](auto cmp) { return cmp == compare_less;  });
+    auto upos = do_bound(global, data.begin(), data.end(), comparator, target,
+                         [](Compare cmp) { return cmp == compare_less;  });
     return upos - data.begin();
   }
 
 pair<Ival, Ival> std_array_equal_range(Global& global, Aval data, Value target, Fopt comparator)
   {
     auto pair = do_bsearch(global, data.begin(), data.end(), comparator, target);
-    auto lpos = do_bound(global, data.begin(), pair.first, comparator, target, [](auto cmp) { return cmp != compare_greater;  });
-    auto upos = do_bound(global, pair.first, data.end(), comparator, target, [](auto cmp) { return cmp == compare_less;  });
+    auto lpos = do_bound(global, data.begin(), pair.first, comparator, target,
+                         [](Compare cmp) { return cmp != compare_greater;  });
+    auto upos = do_bound(global, pair.first, data.end(), comparator, target,
+                         [](Compare cmp) { return cmp == compare_less;  });
     return { lpos - data.begin(), upos - data.begin() };
   }
 
@@ -1050,13 +1057,14 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           Ival from;
           if(reader.L(state).g(from).S(state).g(predictor).F()) {
             // Call the binding function.
-            return std_array_find_if_not(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(predictor));
+            return std_array_find_if_not(global, ::rocket::move(data), ::rocket::move(from),
+                                                 ::rocket::move(predictor));
           }
           Iopt length;
           if(reader.L(state).g(length).g(predictor).F()) {
             // Call the binding function.
-            return std_array_find_if_not(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
-                                                 ::rocket::move(predictor));
+            return std_array_find_if_not(global, ::rocket::move(data), ::rocket::move(from),
+                                                 ::rocket::move(length), ::rocket::move(predictor));
           }
           // Fail.
           reader.throw_no_matching_function_call();

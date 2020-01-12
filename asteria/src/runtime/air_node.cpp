@@ -615,7 +615,8 @@ AIR_Status do_for_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
     const auto& queue_body = do_pcast<Pv_queues_fixed<4>>(pv)->queues[3];
 
     // This is the same as the `for` statement in C.
-    // We have to create an outer context due to the fact that names declared in the first segment outlast every iteration.
+    // We have to create an outer context due to the fact that names declared in the first segment
+    // outlast every iteration.
     Executive_Context ctx_for(::rocket::ref(ctx));
     // Execute the loop initializer, which shall only be a definition or an expression statement.
     auto status = queue_init.execute(ctx_for);
@@ -1008,7 +1009,8 @@ AIR_Status do_push_unnamed_object(Executive_Context& ctx, ParamU /*pu*/, const v
     G_object object;
     object.reserve(keys.size());
     for(auto it = keys.rbegin(); it != keys.rend(); ++it) {
-      // Use `try_emplace()` instead of `insert_or_assign()`. In case of duplicate keys, the last value takes precedence.
+      // Use `try_emplace()` instead of `insert_or_assign()`. In case of duplicate keys,
+      // the last value takes precedence.
       object.try_emplace(*it, ctx.stack().get_top().read());
       ctx.stack().pop();
     }
@@ -1338,7 +1340,8 @@ G_string do_duplicate_string(const G_string& source, uint64_t count)
     char* ptr = res.assign(nchars * times, '*').mut_data();
     // Copy the source string once.
     ::std::memcpy(ptr, source.data(), nchars);
-    // Append the result string to itself, doubling its length, until more than half of the result string has been populated.
+    // Append the result string to itself, doubling its length, until more than half of the result string
+    // has been populated.
     while(nchars <= res.size() / 2) {
       ::std::memcpy(ptr + nchars, ptr, nchars);
       nchars *= 2;
@@ -2203,14 +2206,14 @@ AIR_Status do_apply_xop_SLL(Executive_Context& ctx, ParamU pu, const void* /*pv*
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
     if(lhs.is_integer() && rhs.is_integer()) {
-      // If the LHS operand has type `integer`, shift the LHS operand to the left by the number of bits specified by
-      // the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with zeroes.
+      // If the LHS operand has type `integer`, shift the LHS operand to the left by the number of bits specified
+      // by the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with zeroes.
       auto& reg = rhs.open_integer();
       reg = do_operator_SLL(lhs.as_integer(), reg);
     }
     else if(lhs.is_string() && rhs.is_integer()) {
-      // If the LHS operand has type `string`, fill space characters in the right and discard characters from the left.
-      // The number of bytes in the LHS operand will be preserved.
+      // If the LHS operand has type `string`, fill space characters in the right and discard characters from the
+      // left. The number of bytes in the LHS operand will be preserved.
       // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
       rhs = do_operator_SLL(lhs.as_string(), rhs.as_integer());
     }
@@ -2231,14 +2234,14 @@ AIR_Status do_apply_xop_SRL(Executive_Context& ctx, ParamU pu, const void* /*pv*
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
     if(lhs.is_integer() && rhs.is_integer()) {
-      // If the LHS operand has type `integer`, shift the LHS operand to the right by the number of bits specified by
-      // the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with zeroes.
+      // If the LHS operand has type `integer`, shift the LHS operand to the right by the number of bits specified
+      // by the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with zeroes.
       auto& reg = rhs.open_integer();
       reg = do_operator_SRL(lhs.as_integer(), reg);
     }
     else if(lhs.is_string() && rhs.is_integer()) {
-      // If the LHS operand has type `string`, fill space characters in the left and discard characters from the right.
-      // The number of bytes in the LHS operand will be preserved.
+      // If the LHS operand has type `string`, fill space characters in the left and discard characters from the
+      // right. The number of bytes in the LHS operand will be preserved.
       // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
       rhs = do_operator_SRL(lhs.as_string(), rhs.as_integer());
     }
@@ -2259,9 +2262,9 @@ AIR_Status do_apply_xop_SLA(Executive_Context& ctx, ParamU pu, const void* /*pv*
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
     if(lhs.is_integer() && rhs.is_integer()) {
-      // If the LHS operand is of type `integer`, shift the LHS operand to the left by the number of bits specified by
-      // the RHS operand. Bits shifted out that are equal to the sign bit are discarded. Bits shifted in are filled with
-      // zeroes. If any bits that are different from the sign bit would be shifted out, an exception is thrown.
+      // If the LHS operand is of type `integer`, shift the LHS operand to the left by the number of bits specified
+      // by the RHS operand. Bits shifted out that are equal to the sign bit are discarded. Bits shifted in are filled
+      // with zeroes. If any bits that are different from the sign bit would be shifted out, an exception is thrown.
       auto& reg = rhs.open_integer();
       reg = do_operator_SLA(lhs.as_integer(), reg);
     }
@@ -2287,8 +2290,8 @@ AIR_Status do_apply_xop_SRA(Executive_Context& ctx, ParamU pu, const void* /*pv*
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
     if(lhs.is_integer() && rhs.is_integer()) {
-      // If the LHS operand is of type `integer`, shift the LHS operand to the right by the number of bits specified by
-      // the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with the sign bit.
+      // If the LHS operand is of type `integer`, shift the LHS operand to the right by the number of bits specified
+      // by the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with the sign bit.
       auto& reg = rhs.open_integer();
       reg = do_operator_SRA(lhs.as_integer(), reg);
     }

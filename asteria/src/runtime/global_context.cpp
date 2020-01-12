@@ -104,7 +104,8 @@ void Global_Context::initialize(API_Version version)
     ROCKET_ASSERT(::std::is_sorted(begin(s_modules), end(s_modules), Module_Comparator()));
 #endif
     // Get the range of modules to initialize.
-    // This also determines the maximum version number of the library, which will be referenced as `yend[-1].version`.
+    // This also determines the maximum version number of the library, which will be referenced
+    // as `yend[-1].version`.
     G_object ostd;
     auto bptr = begin(s_modules);
     auto eptr = ::std::upper_bound(bptr, end(s_modules), version, Module_Comparator());

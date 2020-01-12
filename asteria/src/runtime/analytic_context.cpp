@@ -47,7 +47,8 @@ const Abstract_Context* Analytic_Context::do_get_parent_opt() const noexcept
     return this->get_parent_opt();
   }
 
-Reference* Analytic_Context::do_lazy_lookup_opt(Reference_Dictionary& /*named_refs*/, const phsh_string& /*name*/) const
+Reference* Analytic_Context::do_lazy_lookup_opt(Reference_Dictionary& /*named_refs*/,
+                                                const phsh_string& /*name*/) const
   {
     return nullptr;
   }

@@ -14,8 +14,9 @@ void Abstract_Context::Cleaner::operator()(Rcbase* base) noexcept
     ROCKET_ASSERT(coll);
     coll->collect_variables(gc_generation_oldest);
   }
-  catch(exception& /*stdex*/) {
-    // Ignore this exception.
+  catch(exception& stdex) {
+    // Ignore this exception, but notify the user about this error.
+    ::fprintf(stderr, "-- WARNING: garbage collection failed: %s\n", stdex.what());
   }
 
 Abstract_Context::~Abstract_Context()

@@ -102,7 +102,8 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
           ASTERIA_THROW("integer subscript applied to non-array (parent `$1`, index `$2`)", parent, altr.index);
         }
         auto& arr = parent.open_array();
-        // Return a pointer to the element at the given index if the index is valid; create an element if it is out of range.
+        // Return a pointer to the element at the given index if the index is valid; create an element if it is
+        // out of range.
         auto w = wrap_index(altr.index, arr.size());
         auto nadd = w.nprepend | w.nappend;
         if(nadd != 0) {

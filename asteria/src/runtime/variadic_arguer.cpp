@@ -13,7 +13,8 @@ tinyfmt& Variadic_Arguer::describe(tinyfmt& fmt) const
     return fmt << "<built-in>.__varg([index]) @ " << this->m_sloc;
   }
 
-Reference& Variadic_Arguer::invoke(Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) const
+Reference& Variadic_Arguer::invoke(Reference& self, Global_Context& /*global*/,
+                                   cow_vector<Reference>&& args) const
   {
     Argument_Reader reader(::rocket::sref("<built-in>.__varg"), ::rocket::ref(args));
     // Extract arguments.
@@ -40,7 +41,8 @@ Reference& Variadic_Arguer::invoke(Reference& self, Global_Context& /*global*/, 
 
 Variable_Callback& Variadic_Arguer::enumerate_variables(Variable_Callback& callback) const
   {
-    return ::rocket::for_each(this->m_vargs, [&](const Reference& arg) { arg.enumerate_variables(callback);  }), callback;
+    ::rocket::for_each(this->m_vargs, [&](const Reference& arg) { arg.enumerate_variables(callback);  });
+    return callback;
   }
 
 }  // namespace Asteria

@@ -30,13 +30,15 @@ Slice do_slice(const Sval& text, const Ival& from, const Iopt& length)
   {
     auto slen = static_cast<int64_t>(text.size());
     if(from >= 0) {
-      // Behave like `::std::string::substr()` except that no exception is thrown when `from` is greater than `text.size()`.
+      // Behave like `::std::string::substr()` except that no exception is thrown when `from` is
+      // greater than `text.size()`.
       if(from >= slen) {
         return ::std::make_pair(text.end(), text.end());
       }
       return do_slice(text, text.begin() + static_cast<ptrdiff_t>(from), length);
     }
-    // Wrap `from` from the end. Notice that `from + slen` will not overflow when `from` is negative and `slen` is not.
+    // Wrap `from` from the end. Notice that `from + slen` will not overflow when `from` is negative
+    // and `slen` is not.
     auto rfrom = from + slen;
     if(rfrom >= 0) {
       // Get a subrange from the wrapped index.
@@ -56,7 +58,8 @@ Slice do_slice(const Sval& text, const Ival& from, const Iopt& length)
     return do_slice(text, text.begin(), rfrom + *length);
   }
 
-template<typename IteratorT> opt<IteratorT> do_find_opt(IteratorT tbegin, IteratorT tend, IteratorT pbegin, IteratorT pend)
+template<typename IteratorT> opt<IteratorT> do_find_opt(IteratorT tbegin, IteratorT tend,
+                                                        IteratorT pbegin, IteratorT pend)
   {
     // https://en.wikipedia.org/wiki/Boyer-Moore-Horspool_algorithm
     auto plen = ::std::distance(pbegin, pend);
@@ -86,7 +89,8 @@ template<typename IteratorT> opt<IteratorT> do_find_opt(IteratorT tbegin, Iterat
     return ::rocket::move(tpos);
   }
 
-template<typename IteratorT> opt<IteratorT> do_find_of_opt(IteratorT begin, IteratorT end, const Sval& set, bool match)
+template<typename IteratorT> opt<IteratorT> do_find_of_opt(IteratorT begin, IteratorT end,
+                                                           const Sval& set, bool match)
   {
     // Make a lookup table.
     array<bool, 256> table = { };

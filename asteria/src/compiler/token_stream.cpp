@@ -233,9 +233,11 @@ class Tack
       }
   };
 
-template<typename XTokenT> bool do_push_token(cow_vector<Token>& tokens, Line_Reader& reader, size_t tlen, XTokenT&& xtoken)
+template<typename XTokenT> bool do_push_token(cow_vector<Token>& tokens, Line_Reader& reader, size_t tlen,
+                                              XTokenT&& xtoken)
   {
-    tokens.emplace_back(reader.file(), reader.line(), reader.offset(), tlen, ::rocket::forward<XTokenT>(xtoken));
+    tokens.emplace_back(reader.file(), reader.line(), reader.offset(), tlen,
+                        ::rocket::forward<XTokenT>(xtoken));
     reader.consume(tlen);
     return true;
   }
@@ -249,13 +251,15 @@ bool do_may_infix_operators_follow(cow_vector<Token>& tokens)
     const auto& p = tokens.back();
     if(p.is_keyword()) {
       // Infix operators may follow if the keyword denotes a value or reference.
-      return ::rocket::is_any_of(p.as_keyword(),{ keyword_null, keyword_true, keyword_false,
-                                                  keyword_nan, keyword_infinity, keyword_this });
+      return ::rocket::is_any_of(p.as_keyword(), { keyword_null, keyword_true, keyword_false,
+                                                   keyword_nan, keyword_infinity, keyword_this });
     }
     if(p.is_punctuator()) {
       // Infix operators may follow if the punctuator can terminate an expression.
-      return ::rocket::is_any_of(p.as_punctuator(), { punctuator_inc, punctuator_dec, punctuator_head, punctuator_tail,
-                                                      punctuator_parenth_cl, punctuator_bracket_cl, punctuator_brace_cl });
+      return ::rocket::is_any_of(p.as_punctuator(), { punctuator_inc, punctuator_dec,
+                                                      punctuator_head, punctuator_tail,
+                                                      punctuator_parenth_cl, punctuator_bracket_cl,
+                                                      punctuator_brace_cl });
     }
     // Infix operators can follow.
     return true;

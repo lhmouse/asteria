@@ -19,7 +19,8 @@ class Runtime_Error : public exception
     cow_string m_what;
 
   public:
-    template<typename XValT, ASTERIA_SFINAE_CONSTRUCT(Value, XValT&&)> Runtime_Error(const Source_Location& sloc, XValT&& xval)
+    template<typename XValT, ASTERIA_SFINAE_CONSTRUCT(Value, XValT&&)> Runtime_Error(const Source_Location& sloc,
+                                                                                     XValT&& xval)
       :
         m_value(::rocket::forward<XValT>(xval))
       {

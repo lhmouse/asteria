@@ -107,7 +107,8 @@ void Infix_Element::extract(cow_vector<Expression_Unit>& units)
     case index_ternary: {
         auto& altr = this->m_stor.as<index_ternary>();
         // Construct a branch unit from both branches, then append it to `units`.
-        Expression_Unit::S_branch xunit = { ::rocket::move(altr.branch_true), ::rocket::move(altr.branch_false), altr.assign };
+        Expression_Unit::S_branch xunit = { ::rocket::move(altr.branch_true), ::rocket::move(altr.branch_false),
+                                            altr.assign };
         units.emplace_back(::rocket::move(xunit));
         return;
       }
@@ -135,7 +136,8 @@ void Infix_Element::extract(cow_vector<Expression_Unit>& units)
     case index_general: {
         auto& altr = this->m_stor.as<index_general>();
         // N.B. `units` is the LHS operand.
-        // Append the RHS operand to the LHS operand, followed by the operator, forming the Reverse Polish Notation (RPN).
+        // Append the RHS operand to the LHS operand, followed by the operator, forming the Reverse Polish
+        // Notation (RPN).
         ::std::move(altr.rhs.mut_begin(), altr.rhs.mut_end(), ::std::back_inserter(units));
         // Append the operator itself.
         Expression_Unit::S_operator_rpn xunit = { altr.xop, altr.assign };

@@ -84,9 +84,9 @@ class Indenter_spaces final : public Indenter
     size_t m_cur;
 
   public:
-    explicit Indenter_spaces(size_t add)
+    explicit Indenter_spaces(int64_t add)
       :
-        m_add(add), m_cur(0)
+        m_add(static_cast<size_t>(::rocket::clamp(add, 0, 10))), m_cur(0)
       {
       }
 
@@ -176,9 +176,11 @@ tinyfmt& do_quote_string(tinyfmt& fmt, const Sval& str)
 Oval::const_iterator do_find_uncensored(const Oval& object, Oval::const_iterator from)
   {
     return ::std::find_if(from, object.end(),
-                        [](const auto& p) { return p.second.is_boolean() || p.second.is_integer() || p.second.is_real() ||
-                                                   p.second.is_string() || p.second.is_array() || p.second.is_object() ||
-                                                   p.second.is_null();  });
+      [](const auto& pair) {
+        return pair.second.is_null() || pair.second.is_boolean() || pair.second.is_integer() ||
+               pair.second.is_real() || pair.second.is_string() ||
+               pair.second.is_array() || pair.second.is_object();
+      });
   }
 
 tinyfmt& do_format_scalar(tinyfmt& fmt, const Value& value)
@@ -610,7 +612,7 @@ Sval std_json_format(Value value, Ival indent)
   {
     // No line break is inserted if `indent` is non-positive.
     return (indent <= 0) ? do_format_nonrecursive(value, Indenter_none())
-                         : do_format_nonrecursive(value, Indenter_spaces(static_cast<size_t>(::rocket::min(indent, 10))));
+                         : do_format_nonrecursive(value, Indenter_spaces(indent));
   }
 
 Value std_json_parse(Sval text)

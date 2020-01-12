@@ -17,10 +17,12 @@ tinyfmt& Simple_Binding_Wrapper::describe(tinyfmt& fmt) const
     return fmt << this->m_desc;
   }
 
-Reference& Simple_Binding_Wrapper::invoke(Reference& self, Global& global, cow_vector<Reference>&& args) const
+Reference& Simple_Binding_Wrapper::invoke(Reference& self, Global& global,
+                                          cow_vector<Reference>&& args) const
   {
-    Reference_Root::S_temporary xref = { (*(this->m_proc))(::rocket::move(args), ::rocket::move(self),
-                                                           global, this->m_pval) };
+    Reference_Root::S_temporary xref = {
+      (*(this->m_proc))(::rocket::move(args), ::rocket::move(self), global, this->m_pval)
+    };
     return self = ::rocket::move(xref);
   }
 

@@ -108,7 +108,8 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         }
         // TODO: Insert optimization passes.
         // Encode arguments.
-        AIR_Node::S_define_function xnode = { altr.sloc, ::rocket::move(func), altr.params, ::rocket::move(code_body) };
+        AIR_Node::S_define_function xnode = { altr.sloc, ::rocket::move(func), altr.params,
+                                              ::rocket::move(code_body) };
         code.emplace_back(::rocket::move(xnode));
         return code;
       }
