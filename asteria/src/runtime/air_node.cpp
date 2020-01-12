@@ -557,7 +557,10 @@ AIR_Status do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const vo
     // Set the range up, which isn't going to change even if the argument got modified by the loop body.
     mapped = ::rocket::move(ctx_for.stack().open_top());
     const auto range = mapped.read();
-    if(range.is_array()) {
+    if(range.is_null()) {
+      // Do nothing.
+    }
+    else if(range.is_array()) {
       const auto& arr = range.as_array();
       for(int64_t i = 0; i != arr.ssize(); ++i) {
         // Set the key which is the subscript of the mapped element in the array.
@@ -2551,7 +2554,10 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
 
     // Pop the argument generator.
     auto value = ctx.stack().get_top().read();
-    if(value.is_array()) {
+    if(value.is_null()) {
+      // Leave `args` empty.
+    }
+    else if(value.is_array()) {
       auto source = ::rocket::move(value.open_array());
       ctx.stack().pop();
       // Convert all elements to temporaries.
