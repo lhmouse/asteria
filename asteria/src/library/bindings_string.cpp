@@ -103,15 +103,15 @@ template<typename IteratorT> opt<IteratorT> do_find_of_opt(IteratorT begin, Iter
     return clear;
   }
 
-inline Sval::shallow_type do_get_reject(const Sopt& reject)
+inline Sval do_get_reject(const Sopt& reject)
   {
     if(!reject) {
       return ::rocket::sref(" \t");
     }
-    return ::rocket::sref(*reject);
+    return *reject;
   }
 
-inline Sval::shallow_type do_get_padding(const Sopt& padding)
+inline Sval do_get_padding(const Sopt& padding)
   {
     if(!padding) {
       return ::rocket::sref(" ");
@@ -119,7 +119,7 @@ inline Sval::shallow_type do_get_padding(const Sopt& padding)
     if(padding->empty()) {
       ASTERIA_THROW("empty padding string not valid");
     }
-    return ::rocket::sref(*padding);
+    return *padding;
   }
 
 constexpr char s_char_table[][2] =
