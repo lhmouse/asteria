@@ -13,7 +13,7 @@ class Recursion_Sentry
   public:
     enum : size_t
       {
-        max_stack_usage  = 0x40000,  // 256 KiB
+        stack_mask_bits = 19,  // 512KiB
       };
 
   private:
@@ -35,14 +35,14 @@ class Recursion_Sentry
         m_base(other.m_base)
       {
         // Estimate stack usage.
-        size_t usage = static_cast<size_t>(::std::abs(reinterpret_cast<const char*>(this) -
-                                                      reinterpret_cast<const char*>(this->m_base)));
-        if(ROCKET_UNEXPECT(usage >= max_stack_usage))
-          this->do_throw_stack_overflow(usage, max_stack_usage);
+        size_t usage = (size_t)::std::abs((const char*)this - (const char*)this->m_base);
+        if(ROCKET_UNEXPECT(usage >> stack_mask_bits))
+          this->do_throw_stack_overflow(usage, uint32_t(1) << stack_mask_bits);
       }
     ~Recursion_Sentry()
       {
       }
+
     Recursion_Sentry& operator=(const Recursion_Sentry&)  // not assignable
       = delete;
 
