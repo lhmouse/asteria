@@ -57,13 +57,13 @@ opt<Keyword> do_accept_keyword_opt(Token_Stream& tstrm, initializer_list<Keyword
     if(!qtok->is_keyword()) {
       return clear;
     }
-    auto keyword = qtok->as_keyword();
-    if(::rocket::is_none_of(keyword, accept)) {
+    auto kwrd = qtok->as_keyword();
+    if(::rocket::is_none_of(kwrd, accept)) {
       return clear;
     }
     // Return the keyword and discard this token.
     tstrm.shift();
-    return keyword;
+    return kwrd;
   }
 
 opt<Punctuator> do_accept_punctuator_opt(Token_Stream& tstrm, initializer_list<Punctuator> accept)
@@ -144,10 +144,10 @@ opt<cow_string> do_accept_json5_key_opt(Token_Stream& tstrm)
     }
     // See whether it is a keyword, identifier, or string literal.
     if(qtok->is_keyword()) {
-      auto keyword = qtok->as_keyword();
+      auto kwrd = qtok->as_keyword();
       // Treat the keyword as a plain identifier and discard this token.
       tstrm.shift();
-      return ::rocket::sref(stringify_keyword(keyword));
+      return ::rocket::sref(stringify_keyword(kwrd));
     }
     if(qtok->is_identifier()) {
       auto name = qtok->as_identifier();
@@ -186,10 +186,12 @@ Value do_generate_infinity()
     return ::std::numeric_limits<double>::infinity();
   }
 
+using Value_Generator = Value ();
+
 struct Literal_Element
   {
-    Keyword keyword;
-    Value (*generator)();
+    Keyword kwrd;
+    Value_Generator& vgen;
   }
 const s_literal_table[] =
   {
@@ -202,7 +204,7 @@ const s_literal_table[] =
 
 constexpr bool operator==(const Literal_Element& lhs, Keyword rhs) noexcept
   {
-    return lhs.keyword == rhs;
+    return lhs.kwrd == rhs;
   }
 
 opt<Value> do_accept_literal_value_opt(Token_Stream& tstrm)
@@ -222,29 +224,28 @@ opt<Value> do_accept_literal_value_opt(Token_Stream& tstrm)
       return clear;
     }
     if(qtok->is_keyword()) {
-      auto qconf = ::std::find(begin(s_literal_table), end(s_literal_table), qtok->as_keyword());
-      if(qconf == end(s_literal_table)) {
+      auto qcnf = ::std::find(begin(s_literal_table), end(s_literal_table), qtok->as_keyword());
+      if(qcnf == end(s_literal_table)) {
         return clear;
       }
-      auto generator = qconf->generator;
       // Discard this token and create a new value using the generator.
       tstrm.shift();
-      return (*generator)();
+      return qcnf->vgen();
     }
     if(qtok->is_integer_literal()) {
-      auto val = G_integer(qtok->as_integer_literal());
+      auto val = qtok->as_integer_literal();
       // Copy the value and discard this token.
       tstrm.shift();
       return val;
     }
     if(qtok->is_real_literal()) {
-      auto val = G_real(qtok->as_real_literal());
+      auto val = qtok->as_real_literal();
       // Copy the value and discard this token.
       tstrm.shift();
       return val;
     }
     if(qtok->is_string_literal()) {
-      auto val = G_string(qtok->as_string_literal());
+      auto val = qtok->as_string_literal();
       // Copy the value and discard this token.
       tstrm.shift();
       do_concatenate_string_literal_sequence(val, tstrm);
@@ -1265,7 +1266,7 @@ opt<Statement::S_block> do_accept_statement_as_block_opt(Token_Stream& tstrm)
 
 struct Keyword_Element
   {
-    Keyword keyword;
+    Keyword kwrd;
     Xop xop;
   }
 constexpr s_keyword_table[] =
@@ -1291,7 +1292,7 @@ constexpr s_keyword_table[] =
 
 constexpr bool operator==(const Keyword_Element& lhs, Keyword rhs) noexcept
   {
-    return lhs.keyword == rhs;
+    return lhs.kwrd == rhs;
   }
 
 struct Punctuator_Element
@@ -1326,24 +1327,24 @@ bool do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream&
       return false;
     }
     if(qtok->is_keyword()) {
-      auto qconf = ::std::find(begin(s_keyword_table), end(s_keyword_table), qtok->as_keyword());
-      if(qconf == end(s_keyword_table)) {
+      auto qcnf = ::std::find(begin(s_keyword_table), end(s_keyword_table), qtok->as_keyword());
+      if(qcnf == end(s_keyword_table)) {
         return false;
       }
       // Return the prefix operator and discard this token.
       tstrm.shift();
-      Expression_Unit::S_operator_rpn xunit = { qconf->xop, false };
+      Expression_Unit::S_operator_rpn xunit = { qcnf->xop, false };
       units.emplace_back(::rocket::move(xunit));
       return true;
     }
     if(qtok->is_punctuator()) {
-      auto qconf = ::std::find(begin(s_punctuator_table), end(s_punctuator_table), qtok->as_punctuator());
-      if(qconf == end(s_punctuator_table)) {
+      auto qcnf = ::std::find(begin(s_punctuator_table), end(s_punctuator_table), qtok->as_punctuator());
+      if(qcnf == end(s_punctuator_table)) {
         return false;
       }
       // Return the prefix operator and discard this token.
       tstrm.shift();
-      Expression_Unit::S_operator_rpn xunit = { qconf->xop, false };
+      Expression_Unit::S_operator_rpn xunit = { qcnf->xop, false };
       units.emplace_back(::rocket::move(xunit));
       return true;
     }
@@ -1713,13 +1714,13 @@ bool do_accept_postfix_operator(cow_vector<Expression_Unit>& units, Token_Stream
       return false;
     }
     if(qtok->is_punctuator()) {
-      auto qconf = ::std::find(begin(s_postfix_operator_table), end(s_postfix_operator_table), qtok->as_punctuator());
-      if(qconf == end(s_postfix_operator_table)) {
+      auto qcnf = ::std::find(begin(s_postfix_operator_table), end(s_postfix_operator_table), qtok->as_punctuator());
+      if(qcnf == end(s_postfix_operator_table)) {
         return false;
       }
       // Return the postfix operator and discard this token.
       tstrm.shift();
-      Expression_Unit::S_operator_rpn xunit = { qconf->xop, false };
+      Expression_Unit::S_operator_rpn xunit = { qcnf->xop, false };
       units.emplace_back(::rocket::move(xunit));
       return true;
     }
@@ -1981,13 +1982,13 @@ opt<Infix_Element> do_accept_infix_operator_general_opt(Token_Stream& tstrm)
       return clear;
     }
     if(qtok->is_punctuator()) {
-      auto qconf = ::std::find(begin(s_infix_operator_table), end(s_infix_operator_table), qtok->as_punctuator());
-      if(qconf == end(s_infix_operator_table)) {
+      auto qcnf = ::std::find(begin(s_infix_operator_table), end(s_infix_operator_table), qtok->as_punctuator());
+      if(qcnf == end(s_infix_operator_table)) {
         return clear;
       }
       // Return the infix operator and discard this token.
       tstrm.shift();
-      Infix_Element::S_general xelem = { qconf->xop, qconf->assign, clear };
+      Infix_Element::S_general xelem = { qcnf->xop, qcnf->assign, clear };
       return ::rocket::move(xelem);
     }
     return clear;
