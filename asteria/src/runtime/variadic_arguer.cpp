@@ -3,6 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "variadic_arguer.hpp"
+#include "variable_callback.hpp"
 #include "../library/argument_reader.hpp"
 #include "../utilities.hpp"
 
@@ -41,7 +42,7 @@ Reference& Variadic_Arguer::invoke(Reference& self, Global_Context& /*global*/,
 
 Variable_Callback& Variadic_Arguer::enumerate_variables(Variable_Callback& callback) const
   {
-    ::rocket::for_each(this->m_vargs, [&](const Reference& arg) { arg.enumerate_variables(callback);  });
+    ::rocket::for_each(this->m_vargs, callback);
     return callback;
   }
 

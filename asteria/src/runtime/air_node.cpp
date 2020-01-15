@@ -11,6 +11,7 @@
 #include "analytic_context.hpp"
 #include "instantiated_function.hpp"
 #include "runtime_error.hpp"
+#include "variable_callback.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -230,7 +231,7 @@ template<size_t nqsT> struct Pv_queues_fixed
 
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const
       {
-        ::rocket::for_each(this->queues, [&](const AVMC_Queue& queue) { queue.enumerate_variables(callback);  });
+        ::rocket::for_each(this->queues, callback);
         return callback;
       }
   };
@@ -243,8 +244,8 @@ struct Pv_switch
 
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const
       {
-        ::rocket::for_each(this->queues_labels, [&](const AVMC_Queue& queue) { queue.enumerate_variables(callback);  });
-        ::rocket::for_each(this->queues_bodies, [&](const AVMC_Queue& queue) { queue.enumerate_variables(callback);  });
+        ::rocket::for_each(this->queues_labels, callback);
+        ::rocket::for_each(this->queues_bodies, callback);
         return callback;
       }
   };
@@ -288,7 +289,7 @@ struct Pv_func
 
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const
       {
-        ::rocket::for_each(this->code_body, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        ::rocket::for_each(this->code_body, callback);
         return callback;
       }
   };
@@ -3532,7 +3533,7 @@ Variable_Callback& AIR_Node::enumerate_variables(Variable_Callback& callback) co
 
     case index_execute_block: {
         const auto& altr = this->m_stor.as<index_execute_block>();
-        ::rocket::for_each(altr.code_body, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        ::rocket::for_each(altr.code_body, callback);
         return callback;
       }
 
@@ -3543,54 +3544,54 @@ Variable_Callback& AIR_Node::enumerate_variables(Variable_Callback& callback) co
 
     case index_if_statement: {
         const auto& altr = this->m_stor.as<index_if_statement>();
-        ::rocket::for_each(altr.code_true, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
-        ::rocket::for_each(altr.code_false, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        ::rocket::for_each(altr.code_true, callback);
+        ::rocket::for_each(altr.code_false, callback);
         return callback;
       }
 
     case index_switch_statement: {
         const auto& altr = this->m_stor.as<index_switch_statement>();
         for(size_t i = 0; i != altr.code_labels.size(); ++i) {
-          ::rocket::for_each(altr.code_labels.at(i), [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
-          ::rocket::for_each(altr.code_bodies.at(i), [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+          ::rocket::for_each(altr.code_labels.at(i), callback);
+          ::rocket::for_each(altr.code_bodies.at(i), callback);
         }
         return callback;
       }
 
     case index_do_while_statement: {
         const auto& altr = this->m_stor.as<index_do_while_statement>();
-        ::rocket::for_each(altr.code_body, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
-        ::rocket::for_each(altr.code_cond, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        ::rocket::for_each(altr.code_body, callback);
+        ::rocket::for_each(altr.code_cond, callback);
         return callback;
       }
 
     case index_while_statement: {
         const auto& altr = this->m_stor.as<index_while_statement>();
-        ::rocket::for_each(altr.code_cond, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
-        ::rocket::for_each(altr.code_body, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        ::rocket::for_each(altr.code_cond, callback);
+        ::rocket::for_each(altr.code_body, callback);
         return callback;
       }
 
     case index_for_each_statement: {
         const auto& altr = this->m_stor.as<index_for_each_statement>();
-        ::rocket::for_each(altr.code_init, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
-        ::rocket::for_each(altr.code_body, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        ::rocket::for_each(altr.code_init, callback);
+        ::rocket::for_each(altr.code_body, callback);
         return callback;
       }
 
     case index_for_statement: {
         const auto& altr = this->m_stor.as<index_for_statement>();
-        ::rocket::for_each(altr.code_init, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
-        ::rocket::for_each(altr.code_cond, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
-        ::rocket::for_each(altr.code_step, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
-        ::rocket::for_each(altr.code_body, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        ::rocket::for_each(altr.code_init, callback);
+        ::rocket::for_each(altr.code_cond, callback);
+        ::rocket::for_each(altr.code_step, callback);
+        ::rocket::for_each(altr.code_body, callback);
         return callback;
       }
 
     case index_try_statement: {
         const auto& altr = this->m_stor.as<index_try_statement>();
-        ::rocket::for_each(altr.code_try, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
-        ::rocket::for_each(altr.code_catch, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        ::rocket::for_each(altr.code_try, callback);
+        ::rocket::for_each(altr.code_catch, callback);
         return callback;
       }
 
@@ -3620,20 +3621,20 @@ Variable_Callback& AIR_Node::enumerate_variables(Variable_Callback& callback) co
 
     case index_define_function: {
         const auto& altr = this->m_stor.as<index_define_function>();
-        ::rocket::for_each(altr.code_body, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        ::rocket::for_each(altr.code_body, callback);
         return callback;
       }
 
     case index_branch_expression: {
         const auto& altr = this->m_stor.as<index_branch_expression>();
-        ::rocket::for_each(altr.code_true, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
-        ::rocket::for_each(altr.code_false, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        ::rocket::for_each(altr.code_true, callback);
+        ::rocket::for_each(altr.code_false, callback);
         return callback;
       }
 
     case index_coalescence: {
         const auto& altr = this->m_stor.as<index_coalescence>();
-        ::rocket::for_each(altr.code_null, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        ::rocket::for_each(altr.code_null, callback);
         return callback;
       }
 

@@ -80,7 +80,7 @@ Variable_Callback& Reference_Root::enumerate_variables(Variable_Callback& callba
       }
     case index_variable: {
         const auto& var = this->m_stor.as<index_variable>().var;
-        if(!callback(var)) {
+        if(!callback.process(var)) {
           return callback;
         }
         return var->enumerate_variables(callback);

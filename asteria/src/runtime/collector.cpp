@@ -40,31 +40,31 @@ class Reentrance_Guard
       }
   };
 
-template<typename FuncT>
+template<typename FunctionT>
     class Callback_Wrapper final : public Variable_Callback
   {
   private:
-    FuncT m_func;  // If `FuncT` is a reference type then this is a reference.
+    FunctionT m_func;  // If `FunctionT` is a reference type then this is a reference.
 
   public:
-    explicit Callback_Wrapper(FuncT&& func)
+    explicit Callback_Wrapper(FunctionT&& func)
       :
-        m_func(::rocket::forward<FuncT>(func))
+        m_func(::rocket::forward<FunctionT>(func))
       {
       }
 
   public:
-    bool operator()(const rcptr<Variable>& var) const override
+    bool process(const rcptr<Variable>& var) const override
       {
         return this->m_func(var);
       }
   };
 
-template<typename ContT, typename FuncT>
-    void do_enumerate_variables(const ContT& cont, FuncT&& func)
+template<typename ContainerT, typename FunctionT>
+    void do_enumerate_variables(const ContainerT& cont, FunctionT&& func)
   {
     // The callback has to be an lvalue.
-    Callback_Wrapper<FuncT> callback(::rocket::forward<FuncT>(func));
+    Callback_Wrapper<FunctionT> callback(::rocket::forward<FunctionT>(func));
     // Call the `enumerate_variables()` member function.
     cont.enumerate_variables(callback);
   }

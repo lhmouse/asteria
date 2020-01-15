@@ -17,9 +17,15 @@ class Variable_Callback
     virtual ~Variable_Callback();
 
   public:
+    // This is a helper function for `std` algorithms.
+    template<typename ContainerT> Variable_Callback& operator()(ContainerT& cont)
+      {
+        return cont.enumerate_variables(*this);
+      }
+
     // The return value indicates whether to invoke `*this` on child VARIABLES recursively.
     // It has no effect on children that are not variables, which are always enumerated.
-    virtual bool operator()(const rcptr<Variable>& var) const = 0;
+    virtual bool process(const rcptr<Variable>& var) const = 0;
   };
 
 }  // namespace Asteria

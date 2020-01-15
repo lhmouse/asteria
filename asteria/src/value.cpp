@@ -374,12 +374,14 @@ Variable_Callback& Value::enumerate_variables(Variable_Callback& callback) const
         return this->m_stor.as<gtype_function>()->enumerate_variables(callback);
       }
     case gtype_array: {
-        return ::rocket::for_each(this->m_stor.as<gtype_array>(),
-                                  [&](const auto& e) { e.enumerate_variables(callback);  }), callback;
+        ::rocket::for_each(this->m_stor.as<gtype_array>(),
+                           [&](const auto& elem) { elem.enumerate_variables(callback);  });
+        return callback;
       }
     case gtype_object: {
-        return ::rocket::for_each(this->m_stor.as<gtype_object>(),
-                                  [&](const auto& p) { p.second.enumerate_variables(callback);  }), callback;
+        ::rocket::for_each(this->m_stor.as<gtype_object>(),
+                           [&](const auto& pair) { pair.second.enumerate_variables(callback);  });
+        return callback;
       }
     default:
       ASTERIA_TERMINATE("invalid value type (gtype `$1`)", this->gtype());
