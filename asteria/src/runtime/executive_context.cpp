@@ -3,6 +3,9 @@
 
 #include "../precompiled.hpp"
 #include "executive_context.hpp"
+#include "air_node.hpp"
+#include "runtime_error.hpp"
+#include "../llds/avmc_queue.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -45,6 +48,69 @@ void Executive_Context::do_bind_parameters(const cow_vector<phsh_string>& params
     // If all arguments are positional, `args` may be reused for the evaluation stack, so don't move it at all.
     if(!args.empty())
       this->m_args = ::rocket::move(args);
+  }
+
+void Executive_Context::do_defer_expression(const Source_Location& sloc, const cow_vector<AIR_Node>& code)
+  {
+    AVMC_Queue queue;
+    // Solidify the expression.
+    ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(queue, 0);  });  // 1st pass
+    ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(queue, 1);  });  // 2nd pass
+    // Append it.
+    this->m_defer.emplace_back(sloc, ::rocket::move(queue));
+  }
+
+void Executive_Context::do_on_scope_exit_normal()
+  {
+    // Execute all deferred expressions backwards.
+    while(this->m_defer.size()) {
+      // Pop an expression.
+      auto pair = ::rocket::move(this->m_defer.mut_back());
+      this->m_defer.pop_back();
+      // Execute it. If an exception is thrown, append a frame and rethrow it.
+      ASTERIA_RUNTIME_TRY {
+        auto status = pair.second.execute(*this);
+        ROCKET_ASSERT(status == air_status_next);
+      }
+      ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+        except.push_frame_defer(pair.first, except.value());
+        this->do_on_scope_exit_exception(except);
+        throw;
+      }
+    }
+    ROCKET_ASSERT(this->m_defer.empty());
+  }
+
+void Executive_Context::do_on_scope_exit_tail_call(const rcptr<Tail_Call_Arguments>& tca)
+  {
+    // Postpone all expressions.
+    auto& target = tca->open_defer_stack();
+    if(target.empty())
+      target = ::rocket::move(this->m_defer);
+    else
+      target.insert(target.begin(), ::std::make_move_iterator(this->m_defer.mut_begin()),
+                                    ::std::make_move_iterator(this->m_defer.mut_end()));
+    this->m_defer.clear();
+  }
+
+void Executive_Context::do_on_scope_exit_exception(Runtime_Error& except)
+  {
+    // Execute all deferred expressions backwards.
+    while(this->m_defer.size()) {
+      // Pop an expression.
+      auto pair = ::rocket::move(this->m_defer.mut_back());
+      this->m_defer.pop_back();
+      // Execute it. If an exception is thrown, replace `except` with it.
+      ASTERIA_RUNTIME_TRY {
+        auto status = pair.second.execute(*this);
+        ROCKET_ASSERT(status == air_status_next);
+      }
+      ASTERIA_RUNTIME_CATCH(Runtime_Error& nested) {
+        except = nested;
+        except.push_frame_defer(pair.first, nested.value());
+      }
+    }
+    ROCKET_ASSERT(this->m_defer.empty());
   }
 
 bool Executive_Context::do_is_analytic() const noexcept

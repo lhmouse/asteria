@@ -56,7 +56,7 @@ nonblock-statement ::=
 	expression-statement |
 	if-statement | switch-statement | do-while-statement | while-statement | for-statement |
 	break-statement | continue-statement | throw-statement | return-statement | assert-statement |
-	try-statement
+	try-statement | defer-statement
 
 null-statement ::=
 	";"
@@ -146,6 +146,8 @@ assert-message ::=
 
 try-statement ::=
 	"try" statement "catch" "(" identifier ")" statement
+defer-statement ::=
+	"defer" expression ";"
 
 expression-opt ::=
 	expression | ""

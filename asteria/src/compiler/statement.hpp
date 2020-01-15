@@ -107,6 +107,10 @@ class Statement
         S_expression expr;
         cow_string msg;
       };
+    struct S_defer
+      {
+        S_expression expr;
+      };
 
     enum Index : uint8_t
       {
@@ -126,6 +130,7 @@ class Statement
         index_throw       = 13,
         index_return      = 14,
         index_assert      = 15,
+        index_defer       = 16,
       };
     using Xvariant = variant<
       ROCKET_CDR(
@@ -145,6 +150,7 @@ class Statement
       , S_throw       // 13,
       , S_return      // 14,
       , S_assert      // 15,
+      , S_defer       // 16,
       )>;
     static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
 

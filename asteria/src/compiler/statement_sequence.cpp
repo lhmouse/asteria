@@ -1151,6 +1151,26 @@ opt<Statement> do_accept_try_statement_opt(Token_Stream& tstrm)
     return ::rocket::move(xstmt);
   }
 
+opt<Statement> do_accept_defer_statement_opt(Token_Stream& tstrm)
+  {
+    // defer-statement ::=
+    //  "defer" expression ";"
+    auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_defer });
+    if(!qkwrd) {
+      return nullopt;
+    }
+    auto kexpr = do_accept_expression_opt(tstrm);
+    if(!kexpr) {
+      do_throw_parser_error(parser_status_expression_expected, tstrm);
+    }
+    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
+    if(!kpunct) {
+      do_throw_parser_error(parser_status_semicolon_expected, tstrm);
+    }
+    Statement::S_defer xstmt = { ::rocket::move(*kexpr) };
+    return ::rocket::move(xstmt);
+  }
+
 opt<Statement> do_accept_nonblock_statement_opt(Token_Stream& tstrm)
   {
     // nonblock-statement ::=
@@ -1159,7 +1179,7 @@ opt<Statement> do_accept_nonblock_statement_opt(Token_Stream& tstrm)
     //   expression-statement |
     //   if-statement | switch-statement | do-while-statement | while-statement | for-statement |
     //   break-statement | continue-statement | throw-statement | return-statement | assert-statement |
-    //   try-statement
+    //   try-statement | defer-statement
     if(auto qstmt = do_accept_null_statement_opt(tstrm)) {
       return qstmt;
     }
@@ -1206,6 +1226,9 @@ opt<Statement> do_accept_nonblock_statement_opt(Token_Stream& tstrm)
       return qstmt;
     }
     if(auto qstmt = do_accept_try_statement_opt(tstrm)) {
+      return qstmt;
+    }
+    if(auto qstmt = do_accept_defer_statement_opt(tstrm)) {
       return qstmt;
     }
     return nullopt;

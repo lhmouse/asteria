@@ -7,6 +7,8 @@
 #include "../fwd.hpp"
 #include "abstract_context.hpp"
 #include "variadic_arguer.hpp"
+#include "evaluation_stack.hpp"
+#include "enums.hpp"
 
 namespace Asteria {
 
@@ -24,6 +26,9 @@ class Executive_Context : public Abstract_Context
     // These members are used for lazy initialization.
     Reference m_self;
     cow_vector<Reference> m_args;
+
+    // This stores deferred expressions.
+    cow_bivector<Source_Location, AVMC_Queue> m_defer;
 
   public:
     Executive_Context(ref_to<const Executive_Context> parent, nullptr_t)  // for non-functions
@@ -47,6 +52,11 @@ class Executive_Context : public Abstract_Context
 
   private:
     void do_bind_parameters(const cow_vector<phsh_string>& params, cow_vector<Reference>&& args);
+
+    void do_defer_expression(const Source_Location& sloc, const cow_vector<AIR_Node>& code);
+    void do_on_scope_exit_normal();
+    void do_on_scope_exit_tail_call(const rcptr<Tail_Call_Arguments>& tca);
+    void do_on_scope_exit_exception(Runtime_Error& except);
 
   protected:
     bool do_is_analytic() const noexcept final;
@@ -74,6 +84,42 @@ class Executive_Context : public Abstract_Context
     const ckptr<Variadic_Arguer>& zvarg() const noexcept
       {
         return this->m_zvarg;
+      }
+
+    Executive_Context& defer_expression(const Source_Location& sloc, const cow_vector<AIR_Node>& code)
+      {
+        this->do_defer_expression(sloc, code);
+        return *this;
+      }
+    // These functions must be called before exiting a scope.
+    // Note that these functions may throw exceptions on their own, which is why RAII is inapplicable.
+    AIR_Status on_scope_exit(AIR_Status status)
+      {
+        if(ROCKET_EXPECT(this->m_defer.empty())) {
+          // nothing to do
+          return status;
+        }
+        if(status == air_status_return_ref) {
+          auto qtca = this->m_stack->open_top().get_tail_call_opt();
+          if(qtca) {
+            // tail call
+            this->do_on_scope_exit_tail_call(qtca);
+            return status;
+          }
+        }
+        // normal exit
+        this->do_on_scope_exit_normal();
+        return status;
+      }
+    Runtime_Error& on_scope_exit(Runtime_Error& except)
+      {
+        if(ROCKET_EXPECT(this->m_defer.empty())) {
+          // nothing to do
+          return except;
+        }
+        // exceptional exit
+        this->do_on_scope_exit_exception(except);
+        return except;
       }
   };
 

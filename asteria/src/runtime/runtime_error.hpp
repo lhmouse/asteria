@@ -64,8 +64,8 @@ class Runtime_Error : public exception
         Backtrace_Frame& push_frame_throw(const Source_Location& sloc, XValT&& xval)
       {
         // The value also replaces the one in `*this`.
-        this->m_value = ::rocket::forward<XValT>(xval);
-        auto& f = this->m_frames.emplace_back(frame_type_throw, sloc, this->m_value);
+        auto& f = this->m_frames.emplace_back(frame_type_throw, sloc,
+                                              this->m_value = ::rocket::forward<XValT>(xval));
         this->do_compose_message();
         return f;
       }
@@ -87,6 +87,15 @@ class Runtime_Error : public exception
       {
         // The value is the signature of the enclosing function.
         auto& f = this->m_frames.emplace_back(frame_type_func, sloc, func);
+        this->do_compose_message();
+        return f;
+      }
+    template<typename XValT>
+        Backtrace_Frame& push_frame_defer(const Source_Location& sloc, XValT&& xval)
+      {
+        // The value also replaces the one in `*this`.
+        auto& f = this->m_frames.emplace_back(frame_type_defer, sloc,
+                                              this->m_value = ::rocket::forward<XValT>(xval));
         this->do_compose_message();
         return f;
       }

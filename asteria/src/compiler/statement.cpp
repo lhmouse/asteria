@@ -505,6 +505,17 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         return code;
       }
 
+    case index_defer: {
+        const auto& altr = this->m_stor.as<index_defer>();
+        // Generate code for the operand.
+        ROCKET_ASSERT(!altr.expr.units.empty());
+        auto code_body = do_generate_expression(opts, ptc_aware_none, ctx, altr.expr);
+        // Encode arguments.
+        AIR_Node::S_defer_expression xnode = { altr.expr.sloc, ::rocket::move(code_body) };
+        code.emplace_back(::rocket::move(xnode));
+        return code;
+      }
+
     default:
       ASTERIA_TERMINATE("invalid statement type (index `$1`)", this->index());
     }
