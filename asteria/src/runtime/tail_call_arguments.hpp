@@ -19,14 +19,14 @@ class Tail_Call_Arguments final : public virtual Rcbase
     ckptr<Variadic_Arguer> m_zvarg;
     PTC_Aware m_ptc;
 
+    // These are deferreed expressions.
+    cow_bivector<Source_Location, AVMC_Queue> m_defer;
+
     // This is the target function.
     ckptr<Abstract_Function> m_target;
     // The last reference is `self`.
     // We can't store a `Reference` directly as the class `Reference` is incomplete here.
     cow_vector<Reference> m_args_self;
-
-    // This stores deferred expressions.
-    cow_bivector<Source_Location, AVMC_Queue> m_defer;
 
   public:
     Tail_Call_Arguments(const Source_Location& sloc, const ckptr<Variadic_Arguer>& zvarg, PTC_Aware ptc,
@@ -57,6 +57,15 @@ class Tail_Call_Arguments final : public virtual Rcbase
         return this->m_ptc;
       }
 
+    const cow_bivector<Source_Location, AVMC_Queue>& get_defer_stack() const noexcept
+      {
+        return this->m_defer;
+      }
+    cow_bivector<Source_Location, AVMC_Queue>& open_defer_stack() noexcept
+      {
+        return this->m_defer;
+      }
+
     const ckptr<Abstract_Function>& get_target() const noexcept
       {
         return this->m_target;
@@ -68,15 +77,6 @@ class Tail_Call_Arguments final : public virtual Rcbase
     cow_vector<Reference>& open_arguments_and_self() noexcept
       {
         return this->m_args_self;
-      }
-
-    const cow_bivector<Source_Location, AVMC_Queue>& get_defer_stack() const noexcept
-      {
-        return this->m_defer;
-      }
-    cow_bivector<Source_Location, AVMC_Queue>& open_defer_stack() noexcept
-      {
-        return this->m_defer;
       }
 
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const;

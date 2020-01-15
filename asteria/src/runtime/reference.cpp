@@ -5,6 +5,8 @@
 #include "reference.hpp"
 #include "global_context.hpp"
 #include "abstract_hooks.hpp"
+#include "evaluation_stack.hpp"
+#include "executive_context.hpp"
 #include "runtime_error.hpp"
 #include "enums.hpp"
 #include "../utilities.hpp"
@@ -12,19 +14,47 @@
 namespace Asteria {
 namespace {
 
+Runtime_Error& do_unpack_frames(Runtime_Error& except, Global_Context& global, Evaluation_Stack& stack,
+                                cow_vector<rcptr<Tail_Call_Arguments>>&& frames)
+  {
+    while(frames.size()) {
+      auto tca = ::rocket::move(frames.mut_back());
+      frames.pop_back();
+      // Unpack arguments.
+      const auto& sloc = tca->sloc();
+      const auto& inside = tca->zvarg()->func();
+      const auto& qhooks = global.get_hooks_opt();
+
+      // Push the function call.
+      except.push_frame_call(sloc, inside);
+      // Call the hook function if any.
+      if(qhooks) {
+        qhooks->on_function_except(sloc, inside, except);
+      }
+      // Evaluate deferred expressions if any.
+      if(tca->get_defer_stack().size()) {
+        Executive_Context ctx(::rocket::ref(global), ::rocket::ref(stack), tca->zvarg(),
+                              ::rocket::move(tca->open_defer_stack()));
+        ctx.on_scope_exit(except);
+      }
+      // Push the caller.
+      except.push_frame_func(tca->zvarg()->sloc(), inside);
+    }
+    return except;
+  }
+
 Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
   {
-    // Note that `self` is overwritten before the wrapped function is called.
-    auto tca = self.get_tail_call_opt();
-    if(ROCKET_EXPECT(!tca)) {
-      return self;
-    }
     // The function call shall yield an rvalue unless all wrapped calls return by reference.
     PTC_Aware ptc_conj = ptc_aware_by_ref;
+    rcptr<Tail_Call_Arguments> tca;
     // We must rebuild the backtrace using this queue if an exception is thrown.
     cow_vector<rcptr<Tail_Call_Arguments>> frames;
+    Evaluation_Stack stack;
 
-    for(;;) {
+    // Unpack all frames recursively.
+    // Note that `self` is overwritten before the wrapped function is called.
+    while(tca = self.get_tail_call_opt()) {
       // Unpack arguments.
       const auto& sloc = tca->sloc();
       const auto& inside = tca->zvarg()->func();
@@ -37,6 +67,8 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
       else if((tca->ptc_aware() == ptc_aware_by_val) && (ptc_conj == ptc_aware_by_ref)) {
         ptc_conj = ptc_aware_by_val;
       }
+      // Record this frame.
+      frames.emplace_back(tca);
 
       // Generate a single-step trap.
       if(qhooks) {
@@ -56,30 +88,28 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
         target->invoke_ptc_aware(self, global, ::rocket::move(args));
       }
       ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
-        // Append all frames that have been unpacked so far and rethrow the exception.
-        for(;;) {
-          except.push_frame_call(tca->sloc(), tca->zvarg()->func());
-          // Call the hook function if any.
-          if(qhooks) {
-            qhooks->on_function_except(tca->sloc(), tca->zvarg()->func(), except);
-          }
-          except.push_frame_func(tca->zvarg()->sloc(), tca->zvarg()->func());
-          // Get the previous frame.
-          if(frames.empty())
-            break;
-          tca = ::rocket::move(frames.mut_back());
-          frames.pop_back();
-        }
+        do_unpack_frames(except, global, stack, ::rocket::move(frames));
         throw;
       }
-      // Get the next frame.
-      auto next = self.get_tail_call_opt();
-      if(!next)
-        break;
-      frames.emplace_back(tca);
-      tca = ::rocket::move(next);
     }
-
+    // Check for deferred expressions.
+    while(frames.size()) {
+      tca = ::rocket::move(frames.mut_back());
+      frames.pop_back();
+      // Evaluate deferred expressions if any.
+      if(tca->get_defer_stack().empty()) {
+        continue;
+      }
+      ASTERIA_RUNTIME_TRY {
+        Executive_Context ctx(::rocket::ref(global), ::rocket::ref(stack), tca->zvarg(),
+                              ::rocket::move(tca->open_defer_stack()));
+        ctx.on_scope_exit(air_status_next);
+      }
+      ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+        do_unpack_frames(except, global, stack, ::rocket::move(frames));
+        throw;
+      }
+    }
     // Process the result.
     if(ptc_conj == ptc_aware_void) {
       // Return `void`.
