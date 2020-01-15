@@ -257,18 +257,12 @@ opt<bool> do_accept_negation_opt(Token_Stream& tstrm)
   {
     // negation ::=
     //   "!" | "not"
-    auto qtok = tstrm.peek_opt();
-    if(!qtok) {
-      return clear;
-    }
-    if(qtok->is_keyword() && (qtok->as_keyword() == keyword_not)) {
-      // Discard this token.
-      tstrm.shift();
+    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_notl });
+    if(kpunct) {
       return true;
     }
-    if(qtok->is_punctuator() && (qtok->as_punctuator() == punctuator_notl)) {
-      // Discard this token.
-      tstrm.shift();
+    auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_not });
+    if(qkwrd) {
       return true;
     }
     return clear;
@@ -1046,10 +1040,10 @@ opt<bool> do_accept_reference_specifier_opt(Token_Stream& tstrm)
     // reference-specifier-opt ::=
     //   "&" | ""
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_andb });
-    if(!kpunct) {
-      return clear;
+    if(kpunct) {
+      return true;
     }
-    return true;
+    return clear;
   }
 
 opt<Statement> do_accept_return_statement_opt(Token_Stream& tstrm)
