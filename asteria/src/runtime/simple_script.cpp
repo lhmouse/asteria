@@ -34,7 +34,7 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
     if(epos != SIZE_MAX) {
       Analytic_Context ctx_func(nullptr, this->m_params);
       // Generate code with regard to proper tail calls.
-      for(size_t i = 0; i != epos; ++i) {
+      for(size_t i = 0; i < epos; ++i) {
         stmtq.at(i).generate_code(code_body, nullptr, ctx_func, this->m_opts,
                                   stmtq.at(i + 1).is_empty_return() ? ptc_aware_prune : ptc_aware_none);
       }
@@ -88,7 +88,7 @@ Reference Simple_Script::execute(Global_Context& global, cow_vector<Value>&& val
   {
     cow_vector<Reference> args;
     args.reserve(vals.size());
-    for(size_t i = 0; i != args.size(); ++i) {
+    for(size_t i = 0; i < args.size(); ++i) {
       Reference_Root::S_temporary xref = { ::rocket::move(vals.mut(i)) };
       args.emplace_back(::rocket::move(xref));
     }

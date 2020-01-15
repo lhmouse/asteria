@@ -410,7 +410,7 @@ Ival std_numeric_popcnt(Ival x)
     }
     uint32_t count = 0;
     // Scan bits from right to left.
-    for(unsigned i = 0; i != 64; ++i) {
+    for(unsigned i = 0; i < 64; ++i) {
       uint32_t n = ireg & 1;
       ireg >>= 1;
       count += n;

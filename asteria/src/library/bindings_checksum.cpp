@@ -58,7 +58,7 @@ class CRC32_Hasher final : public Abstract_Opaque
         const auto n = data.size();
         uint32_t r = this->m_reg;
         // Hash bytes one by one.
-        for(size_t i = 0; i != n; ++i) {
+        for(size_t i = 0; i < n; ++i) {
           r = s_iso3309_CRC32_table[((r ^ p[i]) & 0xFF)] ^ (r >> 8);
         }
         this->m_reg = r;
@@ -104,7 +104,7 @@ class FNV1a32_Hasher final : public Abstract_Opaque
         const auto n = data.size();
         uint32_t r = this->m_reg;
         // Hash bytes one by one.
-        for(size_t i = 0; i != n; ++i) {
+        for(size_t i = 0; i < n; ++i) {
           r = (r ^ p[i]) * prime;
         }
         this->m_reg = r;
@@ -143,7 +143,7 @@ template<bool bigendT, typename WordT> Sval& do_pdigits_impl(Sval& str, const Wo
     array<uint8_t, sizeof(WordT)> stor_le;
     uint64_t word = static_cast<uint64_t>(ref);
     // Write the word in little-endian order.
-    for(size_t i = 0; i != stor_le.size(); ++i) {
+    for(size_t i = 0; i < stor_le.size(); ++i) {
       stor_le[i] = word & 0xFF;
       word >>= 8;
     }
@@ -408,7 +408,7 @@ class MD5_Hasher final : public Abstract_Opaque
         ROCKET_ASSERT(ec - bc == 8);
         // Write the number of bits in little-endian order.
         auto bits = this->m_size * 8;
-        for(ptrdiff_t i = 0; i != 8; ++i) {
+        for(ptrdiff_t i = 0; i < 8; ++i) {
           bc[i] = bits & 0xFF;
           bits >>= 8;
         }

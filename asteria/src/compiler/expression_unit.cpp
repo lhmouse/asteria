@@ -19,7 +19,7 @@ cow_vector<AIR_Node> do_generate_code_branch(const Compiler_Options& opts, PTC_A
     // Expression units other than the last one cannot be PTC'd.
     size_t epos = units.size() - 1;
     if(epos != SIZE_MAX) {
-      for(size_t i = 0; i != epos; ++i) {
+      for(size_t i = 0; i < epos; ++i) {
         units[i].generate_code(code, opts, ptc_aware_none, ctx);
       }
       units[epos].generate_code(code, opts, ptc, ctx);
@@ -87,7 +87,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         // Append the parameter list. Parameters are separated by commas.
         size_t epos = altr.params.size() - 1;
         if(epos != SIZE_MAX) {
-          for(size_t i = 0; i != epos; ++i) {
+          for(size_t i = 0; i < epos; ++i) {
             fmt << altr.params[i] << ", ";
           }
           fmt << altr.params[epos];
@@ -100,7 +100,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         if(epos != SIZE_MAX) {
           Analytic_Context ctx_func(::std::addressof(ctx), altr.params);
           // Generate code with regard to proper tail calls.
-          for(size_t i = 0; i != epos; ++i) {
+          for(size_t i = 0; i < epos; ++i) {
             altr.body[i].generate_code(code_body, nullptr, ctx_func, opts,
                                        altr.body[i + 1].is_empty_return() ? ptc_aware_prune : ptc_aware_none);
           }

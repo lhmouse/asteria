@@ -59,7 +59,7 @@ cow_vector<AIR_Node>& do_generate_subexpression(cow_vector<AIR_Node>& code, cons
         do_generate_single_step_trap(code, expr.sloc);
       }
       // Expression units other than the last one cannot be PTC'd.
-      for(size_t i = 0; i != epos; ++i) {
+      for(size_t i = 0; i < epos; ++i) {
         expr.units[i].generate_code(code, opts, ptc_aware_none, ctx);
       }
       expr.units[epos].generate_code(code, opts, ptc, ctx);
@@ -95,7 +95,7 @@ cow_vector<AIR_Node>& do_generate_statement_list(cow_vector<AIR_Node>& code, cow
         do_generate_single_step_trap(code, block.sloc);
       }
       // Statements other than the last one cannot be the end of function.
-      for(size_t i = 0; i != epos; ++i) {
+      for(size_t i = 0; i < epos; ++i) {
         block.stmts[i].generate_code(code, names_opt, ctx, opts,
                                      block.stmts[i+1].is_empty_return() ? ptc_aware_prune : ptc_aware_none);
       }
@@ -161,7 +161,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         ROCKET_ASSERT(nvars == altr.decls.size());
         ROCKET_ASSERT(nvars == altr.inits.size());
         // Declare all variables from left to right.
-        for(size_t i = 0; i != nvars; ++i) {
+        for(size_t i = 0; i < nvars; ++i) {
           // Create dummy references for further name lookups.
           for(const auto& name : altr.decls[i]) {
             if(::rocket::is_any_of(name[0], { '[', ']', '{', '}' }))
@@ -230,7 +230,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Append the parameter list. Parameters are separated by commas.
         size_t epos = altr.params.size() - 1;
         if(epos != SIZE_MAX) {
-          for(size_t i = 0; i != epos; ++i) {
+          for(size_t i = 0; i < epos; ++i) {
             fmt << altr.params[i] << ", ";
           }
           fmt << altr.params[epos];
@@ -243,7 +243,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         if(epos != SIZE_MAX) {
           Analytic_Context ctx_func(::std::addressof(ctx), altr.params);
           // Generate code with regard to proper tail calls.
-          for(size_t i = 0; i != epos; ++i) {
+          for(size_t i = 0; i < epos; ++i) {
             altr.body[i].generate_code(code_body, nullptr, ctx_func, opts,
                                        altr.body[i + 1].is_empty_return() ? ptc_aware_prune : ptc_aware_none);
           }
@@ -292,7 +292,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Get the number of clauses.
         auto nclauses = altr.labels.size();
         ROCKET_ASSERT(nclauses == altr.bodies.size());
-        for(size_t i = 0; i != nclauses; ++i) {
+        for(size_t i = 0; i < nclauses; ++i) {
           // Generate code for the label.
           do_generate_expression(code_labels.emplace_back(), opts, ptc_aware_none, ctx_body, altr.labels[i]);
           // Generate code for the clause and accumulate names.

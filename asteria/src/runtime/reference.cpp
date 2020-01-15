@@ -19,7 +19,7 @@ void Reference::do_throw_unset_no_modifier() const
 const Value& Reference::do_read(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const
   {
     auto qref = ::std::addressof(this->m_root.dereference_const());
-    for(size_t i = 0; i != nmod; ++i) {
+    for(size_t i = 0; i < nmod; ++i) {
       // Apply a modifier.
       qref = mods[i].apply_const_opt(*qref);
       if(!qref)
@@ -35,7 +35,7 @@ const Value& Reference::do_read(const Reference_Modifier* mods, size_t nmod, con
 Value& Reference::do_open(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const
   {
     auto qref = ::std::addressof(this->m_root.dereference_mutable());
-    for(size_t i = 0; i != nmod; ++i) {
+    for(size_t i = 0; i < nmod; ++i) {
       // Apply a modifier.
       qref = mods[i].apply_mutable_opt(*qref, true);  // create new
       ROCKET_ASSERT(qref);
@@ -49,7 +49,7 @@ Value& Reference::do_open(const Reference_Modifier* mods, size_t nmod, const Ref
 Value Reference::do_unset(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const
   {
     auto qref = ::std::addressof(this->m_root.dereference_mutable());
-    for(size_t i = 0; i != nmod; ++i) {
+    for(size_t i = 0; i < nmod; ++i) {
       // Apply a modifier.
       qref = mods[i].apply_mutable_opt(*qref, false);  // no create
       if(!qref)

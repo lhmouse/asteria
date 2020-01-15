@@ -45,7 +45,7 @@ bool write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept
         "[DLE]",  "[DC1]",  "[DC2]",  "[DC3]",  "[DC4]",  "[NAK]",  "[SYN]",  "[ETB]",
         "[CAN]",  "[EM]",   "[SUB]",  "[ESC]",  "[FS]",   "[GS]",   "[RS]",   "[US]",
       };
-    for(size_t i = 0; i != msg.size(); ++i) {
+    for(size_t i = 0; i < msg.size(); ++i) {
       size_t ch = msg[i] & 0xFF;
       // Control characters are ['\x00','\x1F'] and '\x7F'.
       if(ch <= 0x1F)
@@ -297,7 +297,7 @@ tinyfmt& operator<<(tinyfmt& fmt, const Quote_Wrapper& q)
         "\\xF0",  "\\xF1",  "\\xF2",  "\\xF3",  "\\xF4",  "\\xF5",  "\\xF6",  "\\xF7",
         "\\xF8",  "\\xF9",  "\\xFA",  "\\xFB",  "\\xFC",  "\\xFD",  "\\xFE",  "\\xFF",
       };
-    for(size_t i = 0; i != q.len; ++i) {
+    for(size_t i = 0; i < q.len; ++i) {
       size_t ch = q.str[i] & 0xFF;
       // Insert this quoted sequence.
       // Optimize the operation a little if it consists of only one character.
@@ -322,7 +322,7 @@ tinyfmt& operator<<(tinyfmt& fmt, const Paragraph_Wrapper& q)
       // Terminate the current line.
       fmt << '\n';
       // Indent the next line accordingly.
-      for(size_t i = 0; i != q.hanging; ++i)
+      for(size_t i = 0; i < q.hanging; ++i)
         fmt << ' ';
     }
     return fmt;

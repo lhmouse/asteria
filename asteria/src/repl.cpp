@@ -128,7 +128,7 @@ cow_string do_stringify(const Runtime_Error& except) noexcept
       fmt << except.value();
     // Print the backtrace.
     fmt << "\n[backtrace:";
-    for(unsigned long i = 0; i != except.count_frames(); ++i) {
+    for(unsigned long i = 0; i < except.count_frames(); ++i) {
       const auto& f = except.frame(i);
       fmt << "\n  #" << i << " <" << f.what_type() << "> at '" << f.sloc() << "': " << f.value();
     }
