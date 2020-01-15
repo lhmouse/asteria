@@ -7,7 +7,6 @@
 #include "executive_context.hpp"
 #include "global_context.hpp"
 #include "abstract_hooks.hpp"
-#include "evaluation_stack.hpp"
 #include "analytic_context.hpp"
 #include "instantiated_function.hpp"
 #include "runtime_error.hpp"
@@ -73,10 +72,17 @@ Reference& do_declare(Executive_Context& ctx, const phsh_string& name)
 
 AIR_Status do_execute_block(const AVMC_Queue& queue, Executive_Context& ctx)
   {
-    // Execute the queue on a new context.
+    // Execute the body on a new context.
     Executive_Context ctx_next(::rocket::ref(ctx), nullptr);
-    auto status = queue.execute(ctx_next);
-    // Forward the status as is.
+    AIR_Status status;
+    ASTERIA_RUNTIME_TRY {
+      status = queue.execute(ctx_next);
+    }
+    ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+      ctx_next.on_scope_exit(except);
+      throw;
+    }
+    ctx_next.on_scope_exit(status);
     return status;
   }
 
@@ -256,6 +262,18 @@ struct Pv_func
       }
   };
 
+struct Pv_defer
+  {
+    Source_Location sloc;
+    cow_vector<AIR_Node> code_body;
+
+    Variable_Callback& enumerate_variables(Variable_Callback& callback) const
+      {
+        ::rocket::for_each(this->code_body, callback);
+        return callback;
+      }
+  };
+
 struct Pv_ref
   {
     Reference ref = Reference_Root::S_void();
@@ -421,19 +439,30 @@ AIR_Status do_switch_statement(Executive_Context& ctx, ParamU /*pu*/, const void
     // Jump to the clause denoted by `target`.
     // Note that all clauses share the same context.
     Executive_Context ctx_body(::rocket::ref(ctx), nullptr);
-    // Fly over all clauses that precede `target`.
-    for(size_t i = 0;  i < target;  ++i) {
-      ::rocket::for_each(names_added[i], [&](const phsh_string& name) { do_declare(ctx_body, name);  });
+    AIR_Status status;
+    ASTERIA_RUNTIME_TRY {
+      size_t k = SIZE_MAX;
+      // Fly over all clauses that precede `target`.
+      while(++k < target) {
+        ::rocket::for_each(names_added[k], [&](const phsh_string& name) { do_declare(ctx_body, name);  });
+      }
+      // Execute all clauses from `target`.
+      do {
+        status = queues_bodies[k].execute(ctx_body);
+        if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch })) {
+          status = air_status_next;
+          break;
+        }
+        if(status != air_status_next)
+          break;
+      } while(++k < nclauses);
     }
-    // Execute all clauses from `target`.
-    for(size_t i = target;  i != nclauses;  ++i) {
-      auto status = queues_bodies[i].execute(ctx_body);
-      if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch }))
-        break;
-      if(status != air_status_next)
-        return status;
+    ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+      ctx_body.on_scope_exit(except);
+      throw;
     }
-    return air_status_next;
+    ctx_body.on_scope_exit(status);
+    return status;
   }
 
 AIR_Status do_do_while_statement(Executive_Context& ctx, ParamU pu, const void* pv)
@@ -597,9 +626,10 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
     const auto& queue_catch = do_pcast<Pv_try>(pv)->queue_catch;
 
     // This is almost identical to JavaScript.
+    AIR_Status status;
     ASTERIA_RUNTIME_TRY {
       // Execute the `try` block. If no exception is thrown, this will have little overhead.
-      auto status = do_execute_block(queue_try, ctx);
+      status = do_execute_block(queue_try, ctx);
       // This cannot be PTC'd, otherwise exceptions thrown from tail calls won't be caught.
       if(status == air_status_return_ref) {
         ctx.stack().open_top().finish_call(ctx.global());
@@ -612,25 +642,33 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
       // This branch must be executed inside this `catch` block.
       // User-provided bindings may obtain the current exception using `::std::current_exception`.
       Executive_Context ctx_catch(::rocket::ref(ctx), nullptr);
-      // Set the exception reference.
-      Reference_Root::S_temporary xref_except = { except.value() };
-      ctx_catch.open_named_reference(name_except) = ::rocket::move(xref_except);
-      // Set backtrace frames.
-      G_array backtrace;
-      for(size_t i = 0;  i < except.count_frames();  ++i) {
-        const auto& frame = except.frame(i);
-        // Translate each frame into a human-readable format.
-        G_object f;
-        f.try_emplace(::rocket::sref("frame"), G_string(::rocket::sref(frame.what_type())));
-        f.try_emplace(::rocket::sref("file"), G_string(frame.file()));
-        f.try_emplace(::rocket::sref("line"), G_integer(frame.line()));
-        f.try_emplace(::rocket::sref("value"), frame.value());
-        // Append this frame.
-        backtrace.emplace_back(::rocket::move(f));
+      ASTERIA_RUNTIME_TRY {
+        // Set the exception reference.
+        Reference_Root::S_temporary xref_except = { except.value() };
+        ctx_catch.open_named_reference(name_except) = ::rocket::move(xref_except);
+        // Set backtrace frames.
+        G_array backtrace;
+        for(size_t i = 0;  i < except.count_frames();  ++i) {
+          const auto& frame = except.frame(i);
+          // Translate each frame into a human-readable format.
+          G_object f;
+          f.try_emplace(::rocket::sref("frame"), G_string(::rocket::sref(frame.what_type())));
+          f.try_emplace(::rocket::sref("file"), G_string(frame.file()));
+          f.try_emplace(::rocket::sref("line"), G_integer(frame.line()));
+          f.try_emplace(::rocket::sref("value"), frame.value());
+          // Append this frame.
+          backtrace.emplace_back(::rocket::move(f));
+        }
+        Reference_Root::S_constant xref = { ::rocket::move(backtrace) };
+        ctx_catch.open_named_reference(::rocket::sref("__backtrace")) = ::rocket::move(xref);
+        status = queue_catch.execute(ctx_catch);
       }
-      Reference_Root::S_constant xref = { ::rocket::move(backtrace) };
-      ctx_catch.open_named_reference(::rocket::sref("__backtrace")) = ::rocket::move(xref);
-      return queue_catch.execute(ctx_catch);
+      ASTERIA_RUNTIME_CATCH(Runtime_Error& nested) {
+        ctx_catch.on_scope_exit(nested);
+        throw;
+      }
+      ctx_catch.on_scope_exit(status);
+      return status;
     }
   }
 
@@ -2529,6 +2567,20 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
                                    value.as_function(), ptc, ::rocket::move(args));
   }
 
+AIR_Status do_defer_expression(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
+  {
+    // Unpack arguments.
+    const auto& sloc = do_pcast<Pv_defer>(pv)->sloc;
+    const auto& code_body = do_pcast<Pv_defer>(pv)->code_body;
+
+    // Rebind the body here.
+    auto pair = ::std::make_pair(false, code_body);
+    do_rebind_nodes(pair.first, pair.second, ctx);
+    // Push this expression.
+    ctx.defer_expression(sloc, pair.second);
+    return air_status_next;
+  }
+
 }  // namespace
 
 opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
@@ -2734,6 +2786,17 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
     case index_variadic_call: {
         // There is nothing to bind.
         return nullopt;
+      }
+
+    case index_defer_expression: {
+        const auto& altr = this->m_stor.as<index_defer_expression>();
+        // Check for rebinds recursively.
+        auto pair = ::std::make_pair(false, altr);
+        do_rebind_nodes(pair.first, pair.second.code_body, ctx);
+        if(!pair.first) {
+          return nullopt;
+        }
+        return ::rocket::move(pair.second);
       }
 
     default:
@@ -3415,6 +3478,21 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_variadic_call>(queue);
       }
 
+    case index_defer_expression: {
+        const auto& altr = this->m_stor.as<index_defer_expression>();
+        // `pu` is unused.
+        // `pv` points to the source location and body.
+        AVMC_Appender<Pv_defer> avmcp;
+        if(ipass == 0) {
+          return avmcp.request(queue);
+        }
+        // Encode arguments.
+        avmcp.sloc = altr.sloc;
+        avmcp.code_body = altr.code_body;
+        // Push a new node.
+        return avmcp.output<do_defer_expression>(queue);
+      }
+
     default:
       ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
     }
@@ -3544,6 +3622,12 @@ Variable_Callback& AIR_Node::enumerate_variables(Variable_Callback& callback) co
     case index_define_null_variable:
     case index_single_step_trap:
     case index_variadic_call: {
+        return callback;
+      }
+
+    case index_defer_expression: {
+        const auto& altr = this->m_stor.as<index_defer_expression>();
+        ::rocket::for_each(altr.code_body, callback);
         return callback;
       }
 

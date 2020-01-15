@@ -175,6 +175,11 @@ class AIR_Node
         Source_Location sloc;
         PTC_Aware ptc;
       };
+    struct S_defer_expression
+      {
+        Source_Location sloc;
+        cow_vector<AIR_Node> code_body;
+      };
 
     enum Index : uint8_t
       {
@@ -210,6 +215,7 @@ class AIR_Node
         index_define_null_variable   = 29,
         index_single_step_trap       = 30,
         index_variadic_call          = 31,
+        index_defer_expression       = 32,
       };
     using Xvariant = variant<
       ROCKET_CDR(
@@ -245,6 +251,7 @@ class AIR_Node
       , S_define_null_variable   // 29,
       , S_single_step_trap       // 30,
       , S_variadic_call          // 31,
+      , S_defer_expression       // 32,
       )>;
     static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
 
