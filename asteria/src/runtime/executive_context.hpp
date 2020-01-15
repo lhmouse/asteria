@@ -26,7 +26,6 @@ class Executive_Context : public Abstract_Context
     // These members are used for lazy initialization.
     Reference m_self;
     cow_vector<Reference> m_args;
-
     // This stores deferred expressions.
     cow_bivector<Source_Location, AVMC_Queue> m_defer;
 
@@ -36,6 +35,15 @@ class Executive_Context : public Abstract_Context
         m_parent_opt(parent.ptr()),
         m_global(parent->m_global), m_stack(parent->m_stack), m_zvarg(parent->m_zvarg),
         m_self(Reference_Root::S_void())
+      {
+      }
+    Executive_Context(ref_to<Global_Context> xglobal, ref_to<Evaluation_Stack> xstack,
+                      const ckptr<Variadic_Arguer>& xzvarg,
+                      cow_bivector<Source_Location, AVMC_Queue>&& defer)  // for proper tail calls
+      :
+        m_parent_opt(nullptr),
+        m_global(xglobal), m_stack(xstack), m_zvarg(xzvarg),
+        m_self(Reference_Root::S_void()), m_defer(::rocket::move(defer))
       {
       }
     Executive_Context(ref_to<Global_Context> xglobal, ref_to<Evaluation_Stack> xstack,
