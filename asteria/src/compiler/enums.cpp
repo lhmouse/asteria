@@ -332,6 +332,12 @@ const char* stringify_keyword(Keyword kwrd) noexcept
     case keyword_vcall: {
         return "__vcall";
       }
+    case keyword_export: {
+        return "export";
+      }
+    case keyword_import: {
+        return "import";
+      }
     default:
       return "<unknown keyword>";
     }
