@@ -913,12 +913,10 @@ opt<Statement> do_accept_for_complement_opt(Token_Stream& tstrm)
   {
     // for-complement ::=
     //   for-complement-range | for-complement-triplet
-    auto qcompl = do_accept_for_complement_range_opt(tstrm);
-    if(qcompl) {
+    if(auto qcompl = do_accept_for_complement_range_opt(tstrm)) {
       return qcompl;
     }
-    qcompl = do_accept_for_complement_triplet_opt(tstrm);
-    if(qcompl) {
+    if(auto qcompl = do_accept_for_complement_triplet_opt(tstrm)) {
       return qcompl;
     }
     return clear;
@@ -1162,68 +1160,52 @@ opt<Statement> do_accept_nonblock_statement_opt(Token_Stream& tstrm)
     //   if-statement | switch-statement | do-while-statement | while-statement | for-statement |
     //   break-statement | continue-statement | throw-statement | return-statement | assert-statement |
     //   try-statement
-    auto qstmt = do_accept_null_statement_opt(tstrm);
-    if(qstmt) {
+    if(auto qstmt = do_accept_null_statement_opt(tstrm)) {
       return qstmt;
     }
-    qstmt = do_accept_variable_definition_opt(tstrm);
-    if(qstmt) {
+    if(auto qstmt = do_accept_variable_definition_opt(tstrm)) {
       return qstmt;
     }
-    qstmt = do_accept_immutable_variable_definition_opt(tstrm);
-    if(qstmt) {
+    if(auto qstmt = do_accept_immutable_variable_definition_opt(tstrm)) {
       return qstmt;
     }
-    qstmt = do_accept_function_definition_opt(tstrm);
-    if(qstmt) {
+    if(auto qstmt = do_accept_function_definition_opt(tstrm)) {
       return qstmt;
     }
-    qstmt = do_accept_expression_statement_opt(tstrm);
-    if(qstmt) {
+    if(auto qstmt = do_accept_expression_statement_opt(tstrm)) {
       return qstmt;
     }
-    qstmt = do_accept_if_statement_opt(tstrm);
-    if(qstmt) {
+    if(auto qstmt = do_accept_if_statement_opt(tstrm)) {
       return qstmt;
     }
-    qstmt = do_accept_switch_statement_opt(tstrm);
-    if(qstmt) {
+    if(auto qstmt = do_accept_switch_statement_opt(tstrm)) {
       return qstmt;
     }
-    qstmt = do_accept_do_while_statement_opt(tstrm);
-    if(qstmt) {
+    if(auto qstmt = do_accept_do_while_statement_opt(tstrm)) {
       return qstmt;
     }
-    qstmt = do_accept_while_statement_opt(tstrm);
-    if(qstmt) {
+    if(auto qstmt = do_accept_while_statement_opt(tstrm)) {
       return qstmt;
     }
-    qstmt = do_accept_for_statement_opt(tstrm);
-    if(qstmt) {
+    if(auto qstmt = do_accept_for_statement_opt(tstrm)) {
       return qstmt;
     }
-    qstmt = do_accept_break_statement_opt(tstrm);
-    if(qstmt) {
+    if(auto qstmt = do_accept_break_statement_opt(tstrm)) {
       return qstmt;
     }
-    qstmt = do_accept_continue_statement_opt(tstrm);
-    if(qstmt) {
+    if(auto qstmt = do_accept_continue_statement_opt(tstrm)) {
       return qstmt;
     }
-    qstmt = do_accept_throw_statement_opt(tstrm);
-    if(qstmt) {
+    if(auto qstmt = do_accept_throw_statement_opt(tstrm)) {
       return qstmt;
     }
-    qstmt = do_accept_return_statement_opt(tstrm);
-    if(qstmt) {
+    if(auto qstmt = do_accept_return_statement_opt(tstrm)) {
       return qstmt;
     }
-    qstmt = do_accept_assert_statement_opt(tstrm);
-    if(qstmt) {
+    if(auto qstmt = do_accept_assert_statement_opt(tstrm)) {
       return qstmt;
     }
-    qstmt = do_accept_try_statement_opt(tstrm);
-    if(qstmt) {
+    if(auto qstmt = do_accept_try_statement_opt(tstrm)) {
       return qstmt;
     }
     return clear;
@@ -1235,12 +1217,10 @@ opt<Statement> do_accept_statement_opt(Token_Stream& tstrm)
     const auto sentry = tstrm.copy_recursion_sentry();
     // statement ::=
     //   block | nonblock-statement
-    auto qstmt = do_accept_block_statement_opt(tstrm);
-    if(qstmt) {
+    if(auto qstmt = do_accept_block_statement_opt(tstrm)) {
       return qstmt;
     }
-    qstmt = do_accept_nonblock_statement_opt(tstrm);
-    if(qstmt) {
+    if(auto qstmt = do_accept_nonblock_statement_opt(tstrm)) {
       return qstmt;
     }
     return clear;
@@ -1644,44 +1624,34 @@ bool do_accept_primary_expression(cow_vector<Expression_Unit>& units, Token_Stre
     // primary-expression ::=
     //   identifier | global-identifier | literal | "this" | closure-function | unnamed-array | unnamed-object |
     //   nested-expression | fused-multiply-add | variadic-function-call
-    bool succ = do_accept_named_reference(units, tstrm);
-    if(succ) {
-      return succ;
-    }
-    succ = do_accept_global_reference(units, tstrm);
-    if(succ) {
+    if(do_accept_named_reference(units, tstrm)) {
       return true;
     }
-    succ = do_accept_literal(units, tstrm);
-    if(succ) {
+    if(do_accept_global_reference(units, tstrm)) {
       return true;
     }
-    succ = do_accept_this(units, tstrm);
-    if(succ) {
+    if(do_accept_literal(units, tstrm)) {
       return true;
     }
-    succ = do_accept_closure_function(units, tstrm);
-    if(succ) {
+    if(do_accept_this(units, tstrm)) {
       return true;
     }
-    succ = do_accept_unnamed_array(units, tstrm);
-    if(succ) {
+    if(do_accept_closure_function(units, tstrm)) {
       return true;
     }
-    succ = do_accept_unnamed_object(units, tstrm);
-    if(succ) {
+    if(do_accept_unnamed_array(units, tstrm)) {
       return true;
     }
-    succ = do_accept_nested_expression(units, tstrm);
-    if(succ) {
+    if(do_accept_unnamed_object(units, tstrm)) {
       return true;
     }
-    succ = do_accept_fused_multiply_add(units, tstrm);
-    if(succ) {
+    if(do_accept_nested_expression(units, tstrm)) {
       return true;
     }
-    succ = do_accept_variadic_function_call(units, tstrm);
-    if(succ) {
+    if(do_accept_fused_multiply_add(units, tstrm)) {
+      return true;
+    }
+    if(do_accept_variadic_function_call(units, tstrm)) {
       return true;
     }
     return false;
@@ -1999,24 +1969,19 @@ opt<Infix_Element> do_accept_infix_operator_opt(Token_Stream& tstrm)
     // infix-operator ::=
     //   infix-operator-ternary | infix-operator-logical-and | infix-operator-logical-or |
     //   infix-operator-coalescence | infix-operator-general
-    auto qelem = do_accept_infix_operator_ternary_opt(tstrm);
-    if(qelem) {
+    if(auto qelem = do_accept_infix_operator_ternary_opt(tstrm)) {
       return qelem;
     }
-    qelem = do_accept_infix_operator_logical_and_opt(tstrm);
-    if(qelem) {
+    if(auto qelem = do_accept_infix_operator_logical_and_opt(tstrm)) {
       return qelem;
     }
-    qelem = do_accept_infix_operator_logical_or_opt(tstrm);
-    if(qelem) {
+    if(auto qelem = do_accept_infix_operator_logical_or_opt(tstrm)) {
       return qelem;
     }
-    qelem = do_accept_infix_operator_coalescence_opt(tstrm);
-    if(qelem) {
+    if(auto qelem = do_accept_infix_operator_coalescence_opt(tstrm)) {
       return qelem;
     }
-    qelem = do_accept_infix_operator_general_opt(tstrm);
-    if(qelem) {
+    if(auto qelem = do_accept_infix_operator_general_opt(tstrm)) {
       return qelem;
     }
     return clear;
