@@ -830,10 +830,8 @@ ROCKET_NOINLINE Reference& do_wrap_tail_call(Reference& self, const Source_Locat
                                              cow_vector<Reference>&& args)
   {
     // Pack arguments for this proper tail call.
-    args.emplace_back(::rocket::move(self));
-    // Create a PTC wrapper.
-    auto tca = ::rocket::make_refcnt<Tail_Call_Arguments>(sloc, ctx.zvarg()->func(), ctx.zvarg()->sloc(),
-                                                          ptc, target, ::rocket::move(args));
+    auto tca = ::rocket::make_refcnt<Tail_Call_Arguments>(sloc, ctx.zvarg(), ptc, target,
+                                              ::rocket::move(args.insert(args.size(), ::rocket::move(self))));
     // Return it.
     Reference_Root::S_tail_call xref = { ::rocket::move(tca) };
     return self = ::rocket::move(xref);

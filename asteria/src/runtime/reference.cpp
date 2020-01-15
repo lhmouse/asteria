@@ -27,7 +27,7 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
     for(;;) {
       // Unpack arguments.
       const auto& sloc = tca->sloc();
-      const auto& inside = tca->inside();
+      const auto& inside = tca->zvarg()->func();
       const auto& qhooks = global.get_hooks_opt();
 
       // Figure out how to forward the result.
@@ -58,12 +58,12 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
       ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
         // Append all frames that have been unpacked so far and rethrow the exception.
         for(;;) {
-          except.push_frame_call(tca->sloc(), tca->inside());
+          except.push_frame_call(tca->sloc(), tca->zvarg()->func());
           // Call the hook function if any.
           if(qhooks) {
-            qhooks->on_function_except(tca->sloc(), tca->inside(), except);
+            qhooks->on_function_except(tca->sloc(), tca->zvarg()->func(), except);
           }
-          except.push_frame_func(tca->enclosing_function_location(), tca->inside());
+          except.push_frame_func(tca->zvarg()->sloc(), tca->zvarg()->func());
           // Get the previous frame.
           if(frames.empty())
             break;
