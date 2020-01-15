@@ -467,12 +467,10 @@ AIR_Status do_switch_statement(Executive_Context& ctx, ParamU /*pu*/, const void
     // Execute all clauses from `target`.
     for(size_t i = target; i != nclauses; ++i) {
       auto status = queues_bodies[i].execute(ctx_body);
-      if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch })) {
+      if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch }))
         break;
-      }
-      if(status != air_status_next) {
+      if(status != air_status_next)
         return status;
-      }
     }
     return air_status_next;
   }
@@ -488,19 +486,16 @@ AIR_Status do_do_while_statement(Executive_Context& ctx, ParamU pu, const void* 
     for(;;) {
       // Execute the body.
       auto status = do_execute_block(queue_body, ctx);
-      if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while })) {
+      if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while }))
         break;
-      }
-      if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_while })) {
+      if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_while }))
         return status;
-      }
       // Check the condition.
       ctx.stack().clear();
       status = queue_cond.execute(ctx);
       ROCKET_ASSERT(status == air_status_next);
-      if(ctx.stack().get_top().read().test() == negative) {
+      if(ctx.stack().get_top().read().test() == negative)
         break;
-      }
     }
     return air_status_next;
   }
@@ -518,17 +513,14 @@ AIR_Status do_while_statement(Executive_Context& ctx, ParamU pu, const void* pv)
       ctx.stack().clear();
       auto status = queue_cond.execute(ctx);
       ROCKET_ASSERT(status == air_status_next);
-      if(ctx.stack().get_top().read().test() == negative) {
+      if(ctx.stack().get_top().read().test() == negative)
         break;
-      }
       // Execute the body.
       status = do_execute_block(queue_body, ctx);
-      if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while })) {
+      if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while }))
         break;
-      }
-      if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_while })) {
+      if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_while }))
         return status;
-      }
     }
     return air_status_next;
   }
@@ -571,12 +563,10 @@ AIR_Status do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const vo
         mapped.zoom_in(::rocket::move(xmod));
         // Execute the loop body.
         status = do_execute_block(queue_body, ctx_for);
-        if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for })) {
+        if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
           break;
-        }
-        if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_for })) {
+        if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_for }))
           return status;
-        }
         // Restore the mapped reference.
         mapped.zoom_out();
       }
@@ -591,12 +581,10 @@ AIR_Status do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const vo
         mapped.zoom_in(::rocket::move(xmod));
         // Execute the loop body.
         status = do_execute_block(queue_body, ctx_for);
-        if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for })) {
+        if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
           break;
-        }
-        if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_for })) {
+        if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_for }))
           return status;
-        }
         // Restore the mapped reference.
         mapped.zoom_out();
       }
@@ -629,18 +617,15 @@ AIR_Status do_for_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
         ctx_for.stack().clear();
         status = queue_cond.execute(ctx_for);
         ROCKET_ASSERT(status == air_status_next);
-        if(ctx_for.stack().get_top().read().test() == false) {
+        if(ctx_for.stack().get_top().read().test() == false)
           break;
-        }
       }
       // Execute the body.
       status = do_execute_block(queue_body, ctx_for);
-      if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for })) {
+      if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
         break;
-      }
-      if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_for })) {
+      if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_for }))
         return status;
-      }
       // Execute the increment.
       ctx_for.stack().clear();
       status = queue_step.execute(ctx_for);
