@@ -864,9 +864,9 @@ ROCKET_NOINLINE Reference& do_wrap_tail_call(Reference& self, const Source_Locat
     return self = ::rocket::move(xref);
   }
 
-ROCKET_NOINLINE Reference& do_invoke_plain(Reference& self, const Source_Location& sloc, const cow_string& inside,
-                                           const ckptr<Abstract_Function>& target, Global_Context& global,
-                                           const rcptr<Abstract_Hooks>& qhooks, cow_vector<Reference>&& args)
+ROCKET_NOINLINE Reference& do_invoke_nontail(Reference& self, const Source_Location& sloc, const cow_string& inside,
+                                             const ckptr<Abstract_Function>& target, Global_Context& global,
+                                             const rcptr<Abstract_Hooks>& qhooks, cow_vector<Reference>&& args)
   {
     // Call the hook function if any.
     if(qhooks) {
@@ -908,7 +908,7 @@ AIR_Status do_function_call_common(Reference& self, const Source_Location& sloc,
   {
     if(ptc == ptc_aware_none) {
       // Perform plain calls.
-      do_invoke_plain(self, sloc, inside, target, global, qhooks, ::rocket::move(args));
+      do_invoke_nontail(self, sloc, inside, target, global, qhooks, ::rocket::move(args));
       // Discard `self`.
       return air_status_next;
     }
@@ -2562,7 +2562,7 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
       auto gself = ctx.stack().open_top().zoom_out();
       // Pass an empty argument list to get the number of arguments to generate.
       cow_vector<Reference> gargs;
-      do_invoke_plain(ctx.stack().open_top(), sloc, inside, generator, ctx.global(), qhooks, ::rocket::move(gargs));
+      do_invoke_nontail(ctx.stack().open_top(), sloc, inside, generator, ctx.global(), qhooks, ::rocket::move(gargs));
       value = ctx.stack().get_top().read();
       ctx.stack().pop();
       // Verify the argument count.
@@ -2580,7 +2580,7 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
         Reference_Root::S_constant xref = { G_integer(i) };
         gargs.clear().emplace_back(::rocket::move(xref));
         // Generate an argument. Ensure it is dereferenceable.
-        do_invoke_plain(args.mut(i), sloc, inside, generator, ctx.global(), qhooks, ::rocket::move(gargs));
+        do_invoke_nontail(args.mut(i), sloc, inside, generator, ctx.global(), qhooks, ::rocket::move(gargs));
         static_cast<void>(args[i].read());
       }
     }
