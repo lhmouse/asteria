@@ -645,11 +645,10 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
     // This is almost identical to JavaScript.
     ASTERIA_RUNTIME_TRY {
       // Execute the `try` block. If no exception is thrown, this will have little overhead.
+      // This cannot be PTC'd, otherwise exceptions thrown from tail calls won't be caught.
       auto status = do_execute_block(queue_try, ctx);
-      if(status == air_status_return_ref) {
-        // This cannot be PTC'd, otherwise exceptions thrown from tail calls won't be caught.
+      if(status == air_status_return_ref)
         ctx.stack().open_top().finish_call(ctx.global());
-      }
       return status;
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
@@ -661,7 +660,7 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
     }
   }
 
-AIR_Status do_throw_statement(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
+[[noreturn]] AIR_Status do_throw_statement(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
   {
     // Unpack arguments.
     const auto& sloc = do_pcast<Pv_sloc>(pv)->sloc;
