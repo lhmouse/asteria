@@ -95,18 +95,10 @@ Reference& Reference::do_finish_call(Global_Context& global)
         qhooks->on_function_call(sloc, inside, target);
       }
       // Unwrap the function call.
-      try {
-        try {
-          target->invoke(*this, global, ::rocket::move(args));
-        }
-        catch(Runtime_Error& /*except*/) {
-          throw;
-        }
-        catch(exception& stdex) {
-          throw Runtime_Error(stdex);
-        }
+      ASTERIA_RUNTIME_TRY {
+        target->invoke(*this, global, ::rocket::move(args));
       }
-      catch(Runtime_Error& except) {
+      ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
         // Append all frames that have been expanded so far and rethrow the exception.
         ::std::for_each(frames.rbegin(), frames.rend(),
                         [&](const auto& p) { except.push_frame_func(p->sloc(), p->inside());  });

@@ -82,6 +82,16 @@ class Runtime_Error : public exception
       }
   };
 
+#define ASTERIA_RUNTIME_TRY           try {  \
+                                        try
+                                          // Perform operations that might throw exceptions here.
+#define ASTERIA_RUNTIME_CATCH(...)      catch(::Asteria::Runtime_Error&)  \
+                                          { throw;  }  \
+                                        catch(::std::exception& zTrSr9grT)  \
+                                          { throw ::Asteria::Runtime_Error(zTrSr9grT); }  \
+                                      }  \
+                                      catch(__VA_ARGS__)
+
 }  // namespace Asteria
 
 #endif

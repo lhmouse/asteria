@@ -643,24 +643,16 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
     const auto& queue_catch = do_pcast<Pv_try>(pv)->queue_catch;
 
     // This is almost identical to JavaScript.
-    try {
-      try {
-        // Execute the `try` block. If no exception is thrown, this will have little overhead.
-        auto status = do_execute_block(queue_try, ctx);
-        if(status == air_status_return_ref) {
-          // This cannot be PTC'd, otherwise exceptions thrown from tail calls won't be caught.
-          ctx.stack().open_top().finish_call(ctx.global());
-        }
-        return status;
+    ASTERIA_RUNTIME_TRY {
+      // Execute the `try` block. If no exception is thrown, this will have little overhead.
+      auto status = do_execute_block(queue_try, ctx);
+      if(status == air_status_return_ref) {
+        // This cannot be PTC'd, otherwise exceptions thrown from tail calls won't be caught.
+        ctx.stack().open_top().finish_call(ctx.global());
       }
-      catch(Runtime_Error& /*except*/) {
-        throw;
-      }
-      catch(exception& stdex) {
-        throw Runtime_Error(stdex);
-      }
+      return status;
     }
-    catch(Runtime_Error& except) {
+    ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
       // Reuse the exception object. Don't bother allocating a new one.
       except.push_frame_catch(sloc);
       // This branch must be executed inside this `catch` block.
@@ -677,21 +669,13 @@ AIR_Status do_throw_statement(Executive_Context& ctx, ParamU /*pu*/, const void*
     // Read the value to throw.
     // Note that the operand must not have been empty for this code.
     auto value = ctx.stack().get_top().read();
-    try {
-      try {
-        // Unpack nested exceptions, if any.
-        auto eptr = ::std::current_exception();
-        if(eptr)
-          ::std::rethrow_exception(eptr);
-      }
-      catch(Runtime_Error& /*except*/) {
-        throw;
-      }
-      catch(exception& stdex) {
-        throw Runtime_Error(stdex);
-      }
+    ASTERIA_RUNTIME_TRY {
+      // Unpack nested exceptions, if any.
+      auto eptr = ::std::current_exception();
+      if(eptr)
+        ::std::rethrow_exception(eptr);
     }
-    catch(Runtime_Error& except) {
+    ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
       // Modify it in place. Don't bother allocating a new one.
       except.push_frame_throw(sloc, ::rocket::move(value));
       throw;
@@ -873,19 +857,11 @@ ROCKET_NOINLINE Reference& do_invoke_nontail(Reference& self, const Source_Locat
       qhooks->on_function_call(sloc, inside, target);
     }
     // Perform a non-proper call.
-    try {
-      try {
-        target->invoke(self, global, ::rocket::move(args));
-        self.finish_call(global);
-      }
-      catch(Runtime_Error& /*except*/) {
-        throw;
-      }
-      catch(exception& stdex) {
-        throw Runtime_Error(stdex);
-      }
+    ASTERIA_RUNTIME_TRY {
+      target->invoke(self, global, ::rocket::move(args));
+      self.finish_call(global);
     }
-    catch(Runtime_Error& except) {
+    ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
       // Append the current frame and rethrow the exception.
       except.push_frame_func(sloc, inside);
       // Call the hook function if any.
