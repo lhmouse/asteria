@@ -2553,7 +2553,7 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
       args.assign(source.size(), Reference_Root::S_void());
       for(size_t i = 0; i < args.size(); ++i) {
         // Make a reference to temporary.
-        Reference_Root::S_temporary xref = { source.mut(i) };
+        Reference_Root::S_temporary xref = { ::rocket::move(source.mut(i)) };
         args.mut(i) = ::rocket::move(xref);
       }
     }
@@ -2562,8 +2562,8 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
       auto gself = ctx.stack().open_top().zoom_out();
       // Pass an empty argument list to get the number of arguments to generate.
       cow_vector<Reference> gargs;
-      value = do_invoke_plain(ctx.stack().open_top(), sloc, inside, generator, ctx.global(), qhooks,
-                              ::rocket::move(gargs)).read();
+      do_invoke_plain(ctx.stack().open_top(), sloc, inside, generator, ctx.global(), qhooks, ::rocket::move(gargs));
+      value = ctx.stack().get_top().read();
       ctx.stack().pop();
       // Verify the argument count.
       if(!value.is_integer()) {
