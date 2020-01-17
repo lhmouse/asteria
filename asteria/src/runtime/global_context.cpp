@@ -67,6 +67,9 @@ struct Module_Comparator
 
 Global_Context::~Global_Context()
   {
+    auto gcoll = ::rocket::dynamic_pointer_cast<Generational_Collector>(this->m_gcoll);
+    ROCKET_ASSERT(gcoll);
+    gcoll->wipe_out_variables();
   }
 
 bool Global_Context::do_is_analytic() const noexcept
@@ -91,14 +94,29 @@ API_Version Global_Context::max_api_version() const noexcept
 
 void Global_Context::initialize(API_Version version)
   {
-    // Initialize global objects.
+    // Tidy old contents.
     this->clear_named_references();
-    // Initialize the global garbage collector.
-    auto gcoll = ::rocket::make_refcnt<Generational_Collector>();
-    this->tie_collector(gcoll);
-    // Use default seed.
-    auto prng = ::rocket::make_refcnt<Random_Number_Generator>();
+    this->m_vstd.reset();
+    // Perform a level-2 garbage collection.
+    auto gcoll = ::rocket::dynamic_pointer_cast<Generational_Collector>(this->m_gcoll);
+    try {
+      if(gcoll)
+        gcoll->collect_variables(gc_generation_oldest);
+    }
+    catch(exception& stdex) {
+      // Ignore this exception, but notify the user about this error.
+      ::fprintf(stderr, "-- WARNING: garbage collection failed: %s\n", stdex.what());
+    }
+    if(!gcoll)
+      gcoll = ::rocket::make_refcnt<Generational_Collector>();
+    this->m_gcoll = gcoll;
+
+    // Initialize the global random numbger generator.
+    auto prng = ::rocket::dynamic_pointer_cast<Random_Number_Generator>(this->m_prng);
+    if(!prng)
+      prng = ::rocket::make_refcnt<Random_Number_Generator>();
     this->m_prng = prng;
+
     // Initialize standard library modules.
 #ifdef ROCKET_DEBUG
     ROCKET_ASSERT(::std::is_sorted(begin(s_modules), end(s_modules), Module_Comparator()));
@@ -129,37 +147,29 @@ void Global_Context::initialize(API_Version version)
 
 const Collector* Global_Context::get_collector_opt(GC_Generation gc_gen) const
   {
-    auto gcoll = this->get_tied_collector_opt();
-    if(ROCKET_UNEXPECT(!gcoll)) {
-      return nullptr;
-    }
+    auto gcoll = ::rocket::dynamic_pointer_cast<Generational_Collector>(this->m_gcoll);
+    ROCKET_ASSERT(gcoll);
     return ::std::addressof(gcoll->get_collector(gc_gen));
   }
 
 Collector* Global_Context::open_collector_opt(GC_Generation gc_gen)
   {
-    auto gcoll = this->get_tied_collector_opt();
-    if(ROCKET_UNEXPECT(!gcoll)) {
-      return nullptr;
-    }
+    auto gcoll = ::rocket::dynamic_pointer_cast<Generational_Collector>(this->m_gcoll);
+    ROCKET_ASSERT(gcoll);
     return ::std::addressof(gcoll->open_collector(gc_gen));
   }
 
 rcptr<Variable> Global_Context::create_variable(GC_Generation gc_hint)
   {
-    auto gcoll = this->get_tied_collector_opt();
-    if(ROCKET_UNEXPECT(!gcoll)) {
-      return ::rocket::make_refcnt<Variable>();
-    }
+    auto gcoll = ::rocket::dynamic_pointer_cast<Generational_Collector>(this->m_gcoll);
+    ROCKET_ASSERT(gcoll);
     return gcoll->create_variable(gc_hint);
   }
 
 size_t Global_Context::collect_variables(GC_Generation gc_limit)
   {
-    auto gcoll = this->get_tied_collector_opt();
-    if(ROCKET_UNEXPECT(!gcoll)) {
-      return 0;
-    }
+    auto gcoll = ::rocket::dynamic_pointer_cast<Generational_Collector>(this->m_gcoll);
+    ROCKET_ASSERT(gcoll);
     return gcoll->collect_variables(gc_limit);
   }
 

@@ -5,19 +5,21 @@
 #define ASTERIA_RUNTIME_GLOBAL_CONTEXT_HPP_
 
 #include "../fwd.hpp"
+#include "abstract_context.hpp"
 #include "../rcbase.hpp"
 #include "../recursion_sentry.hpp"
-#include "abstract_context.hpp"
 
 namespace Asteria {
 
-class Global_Context final : public virtual Rcbase, public Abstract_Context
+class Global_Context final : public Abstract_Context
   {
   private:
+    rcptr<Rcbase> m_gcoll;  // the global garbage collector
+    rcptr<Rcbase> m_hooks_opt;
     Recursion_Sentry m_sentry;
+
     rcptr<Rcbase> m_prng;  // the global pseudo random number generator
     rcptr<Rcbase> m_vstd;  // the `std` variable
-    rcptr<Rcbase> m_hooks_opt;  // the hook callback dispatcher
 
   public:
     explicit Global_Context(API_Version version = api_version_latest)

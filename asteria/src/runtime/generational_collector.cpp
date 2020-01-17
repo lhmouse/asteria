@@ -49,13 +49,22 @@ rcptr<Variable> Generational_Collector::create_variable(GC_Generation gc_hint)
 size_t Generational_Collector::collect_variables(GC_Generation gc_limit)
   {
     // Collect variables from the newest generation to the oldest.
-    for(auto p = ::std::make_pair(::std::addressof(this->m_newest), gc_limit + 1);
-                 p.first && p.second; p.first = p.first->get_tied_collector_opt(), p.second--)
+    for(auto p = ::std::make_pair(&(this->m_newest), gc_limit + 1);
+          p.first && p.second;  p.first = p.first->get_tied_collector_opt(), p.second--)
       p.first->collect_single_opt();
     // Clear the variable pool.
     auto nvars = this->m_pool.size();
     this->m_pool.clear();
     return nvars;
+  }
+
+Generational_Collector& Generational_Collector::wipe_out_variables() noexcept
+  {
+    // Uninitialize all variables recursively.
+    this->m_newest.wipe_out_variables();
+    this->m_middle.wipe_out_variables();
+    this->m_oldest.wipe_out_variables();
+    return *this;
   }
 
 }  // namespace Asteria

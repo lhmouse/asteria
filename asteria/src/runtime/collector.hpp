@@ -69,6 +69,7 @@ class Collector
     bool untrack_variable(const rcptr<Variable>& var) noexcept;
 
     Collector* collect_single_opt();
+    Collector& wipe_out_variables() noexcept;
   };
 
 }  // namespace Asteria

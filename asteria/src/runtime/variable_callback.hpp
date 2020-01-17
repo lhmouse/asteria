@@ -25,7 +25,7 @@ class Variable_Callback
 
     // The return value indicates whether to invoke `*this` on child VARIABLES recursively.
     // It has no effect on children that are not variables, which are always enumerated.
-    virtual bool process(const rcptr<Variable>& var) const = 0;
+    virtual bool process(const rcptr<Variable>& var) = 0;
   };
 
 }  // namespace Asteria

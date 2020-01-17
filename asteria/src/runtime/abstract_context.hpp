@@ -12,11 +12,6 @@ namespace Asteria {
 class Abstract_Context
   {
   private:
-    // This pointer owns a reference count of the collector if it isn't null.
-    // It triggers a full garbage collection when destroyed, which occurs after destruction
-    // of all local references, so it shall precede everything else.
-    struct Cleaner { void operator()(Rcbase* base) noexcept;  };
-    uptr<Rcbase, Cleaner> m_coll_opt;
     // This stores all named references (variables, parameters, etc.) of this context.
     mutable Reference_Dictionary m_named_refs;
 
@@ -63,9 +58,6 @@ class Abstract_Context
       {
         return this->m_named_refs.clear(), *this;
       }
-
-    rcptr<Generational_Collector> get_tied_collector_opt() const noexcept;
-    void tie_collector(const rcptr<Generational_Collector>& coll_opt) noexcept;
   };
 
 }  // namespace Asteria

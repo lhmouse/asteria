@@ -40,6 +40,11 @@ class Reentrance_Guard
       }
   };
 
+Reentrance_Guard do_check_reentrance(long& ref) noexcept
+  {
+    return Reentrance_Guard(ref);
+  }
+
 template<typename FunctionT>
     class Callback_Wrapper final : public Variable_Callback
   {
@@ -54,7 +59,7 @@ template<typename FunctionT>
       }
 
   public:
-    bool process(const rcptr<Variable>& var) const override
+    bool process(const rcptr<Variable>& var) override
       {
         return this->m_func(var);
       }
@@ -68,6 +73,25 @@ template<typename ContainerT, typename FunctionT>
     // Call the `enumerate_variables()` member function.
     cont.enumerate_variables(callback);
   }
+
+class Variable_Wiper final : public Variable_Callback
+  {
+  public:
+    Variable_Wiper()
+      {
+      }
+
+  public:
+    bool process(const rcptr<Variable>& var) override
+      {
+        // Don't modify variables in place which might have side effects.
+        auto value = ::rocket::move(var->open_value());
+        var->uninitialize();
+        // Uninitialize all children.
+        value.enumerate_variables(*this);
+        return false;
+      }
+  };
 
 }  // namespace
 
@@ -99,7 +123,7 @@ bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
 Collector* Collector::collect_single_opt()
   {
     // Ignore recursive requests.
-    const auto sentry = Reentrance_Guard(this->m_recur);
+    const auto sentry = do_check_reentrance(this->m_recur);
     if(!sentry)
       return nullptr;
     Collector* next = nullptr;
@@ -241,6 +265,18 @@ Collector* Collector::collect_single_opt()
     this->m_staging.clear();
     this->m_counter = 0;
     return next;
+  }
+
+Collector& Collector::wipe_out_variables() noexcept
+  {
+    // Ignore recursive requests.
+    const auto sentry = do_check_reentrance(this->m_recur);
+    if(!sentry)
+      return *this;
+    // Wipe all variables recursively.
+    Variable_Wiper wiper;
+    this->m_tracked.enumerate_variables(wiper);
+    return *this;
   }
 
 }  // namespace Asteria

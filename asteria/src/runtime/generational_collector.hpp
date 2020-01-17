@@ -59,6 +59,7 @@ class Generational_Collector final : public virtual Rcbase
 
     rcptr<Variable> create_variable(GC_Generation gc_hint);
     size_t collect_variables(GC_Generation gc_limit);
+    Generational_Collector& wipe_out_variables() noexcept;
   };
 
 }  // namespace Asteria
