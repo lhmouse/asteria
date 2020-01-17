@@ -125,6 +125,59 @@ template<typename pointerT>
     lhs.swap(rhs);
   }
 
+template<typename xpointerT, typename ypointerT>
+    constexpr bool operator==(const checked_ptr<xpointerT>& lhs, const checked_ptr<ypointerT>& rhs) noexcept
+  {
+    return lhs.get() == rhs.get();
+  }
+template<typename xpointerT, typename ypointerT>
+    constexpr bool operator!=(const checked_ptr<xpointerT>& lhs, const checked_ptr<ypointerT>& rhs) noexcept
+  {
+    return lhs.get() != rhs.get();
+  }
+template<typename xpointerT, typename ypointerT>
+    constexpr bool operator<(const checked_ptr<xpointerT>& lhs, const checked_ptr<ypointerT>& rhs)
+  {
+    return lhs.get() < rhs.get();
+  }
+template<typename xpointerT, typename ypointerT>
+    constexpr bool operator>(const checked_ptr<xpointerT>& lhs, const checked_ptr<ypointerT>& rhs)
+  {
+    return lhs.get() > rhs.get();
+  }
+template<typename xpointerT, typename ypointerT>
+    constexpr bool operator<=(const checked_ptr<xpointerT>& lhs, const checked_ptr<ypointerT>& rhs)
+  {
+    return lhs.get() <= rhs.get();
+  }
+template<typename xpointerT, typename ypointerT>
+    constexpr bool operator>=(const checked_ptr<xpointerT>& lhs, const checked_ptr<ypointerT>& rhs)
+  {
+    return lhs.get() >= rhs.get();
+  }
+
+template<typename pointerT>
+    constexpr bool operator==(const checked_ptr<pointerT>& lhs, nullptr_t) noexcept
+  {
+    return +!lhs;
+  }
+template<typename pointerT>
+    constexpr bool operator!=(const checked_ptr<pointerT>& lhs, nullptr_t) noexcept
+  {
+    return !!lhs;
+  }
+
+template<typename pointerT>
+    constexpr bool operator==(nullptr_t, const checked_ptr<pointerT>& rhs) noexcept
+  {
+    return +!rhs;
+  }
+template<typename pointerT>
+    constexpr bool operator!=(nullptr_t, const checked_ptr<pointerT>& rhs) noexcept
+  {
+    return !!rhs;
+  }
+
 template<typename charT, typename traitsT, typename pointerT>
     inline basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
                                                      const checked_ptr<pointerT>& rhs)
