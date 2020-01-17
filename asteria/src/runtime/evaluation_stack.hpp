@@ -29,6 +29,10 @@ class Evaluation_Stack
       = delete;
 
   public:
+    bool empty() const noexcept
+      {
+        return this->m_etop == this->m_refs.data();
+      }
     size_t size() const noexcept
       {
         return static_cast<size_t>(this->m_etop - this->m_refs.data());
