@@ -99,10 +99,9 @@ bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
 Collector* Collector::collect_single_opt()
   {
     // Ignore recursive requests.
-    Reentrance_Guard guard(this->m_recur);
-    if(!guard) {
+    const auto sentry = Reentrance_Guard(this->m_recur);
+    if(!sentry)
       return nullptr;
-    }
     Collector* next = nullptr;
     auto output = this->m_output_opt;
     auto tied = this->m_tied_opt;
@@ -222,16 +221,17 @@ Collector* Collector::collect_single_opt()
           this->m_tracked.erase(root);
           return false;
         }
-        // Transfer this variable to the next generational collector, if one has been tied.
-        if(!tied) {
+        if(tied) {
+          // Transfer this variable to the next generational collector, if one has been tied.
+          tied->m_tracked.insert(root);
+          // Check whether the next generation needs to be checked as well.
+          if(tied->m_counter++ >= tied->m_threshold) {
+            next = tied;
+          }
+          this->m_tracked.erase(root);
           return false;
         }
-        tied->m_tracked.insert(root);
-        // Check whether the next generation needs to be checked as well.
-        if(tied->m_counter++ >= tied->m_threshold) {
-          next = tied;
-        }
-        this->m_tracked.erase(root);
+        // Leave this variable intact.
         return false;
       });
 
