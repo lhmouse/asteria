@@ -491,7 +491,6 @@ AIR_Status do_do_while_statement(Executive_Context& ctx, ParamU pu, const void* 
       if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_while }))
         return status;
       // Check the condition.
-      ctx.stack().clear();
       status = queue_cond.execute(ctx);
       ROCKET_ASSERT(status == air_status_next);
       if(ctx.stack().get_top().read().test() == negative)
@@ -510,7 +509,6 @@ AIR_Status do_while_statement(Executive_Context& ctx, ParamU pu, const void* pv)
     // This is the same as the `while` statement in C.
     for(;;) {
       // Check the condition.
-      ctx.stack().clear();
       auto status = queue_cond.execute(ctx);
       ROCKET_ASSERT(status == air_status_next);
       if(ctx.stack().get_top().read().test() == negative)
@@ -544,7 +542,6 @@ AIR_Status do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const vo
     auto& mapped = do_declare(ctx_for, name_mapped);
 
     // Evaluate the range initializer.
-    ctx_for.stack().clear();
     auto status = queue_init.execute(ctx_for);
     ROCKET_ASSERT(status == air_status_next);
     // Set the range up, which isn't going to change even if the argument got modified by the loop body.
@@ -611,15 +608,12 @@ AIR_Status do_for_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
     auto status = queue_init.execute(ctx_for);
     ROCKET_ASSERT(status == air_status_next);
     for(;;) {
+      // Check the condition.
+      status = queue_cond.execute(ctx_for);
+      ROCKET_ASSERT(status == air_status_next);
       // This is a special case: If the condition is empty then the loop is infinite.
-      if(!queue_cond.empty()) {
-        // Check the condition.
-        ctx_for.stack().clear();
-        status = queue_cond.execute(ctx_for);
-        ROCKET_ASSERT(status == air_status_next);
-        if(ctx_for.stack().get_top().read().test() == false)
-          break;
-      }
+      if(ctx_for.stack().size() && (ctx_for.stack().get_top().read().test() == false))
+        break;
       // Execute the body.
       status = do_execute_block(queue_body, ctx_for);
       if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
@@ -627,7 +621,6 @@ AIR_Status do_for_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
       if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_for }))
         return status;
       // Execute the increment.
-      ctx_for.stack().clear();
       status = queue_step.execute(ctx_for);
       ROCKET_ASSERT(status == air_status_next);
     }

@@ -34,13 +34,6 @@ void do_user_declare(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
     ctx.open_named_reference(name) /*= Reference_Root::S_void()*/;
   }
 
-cow_vector<AIR_Node>& do_generate_single_step_trap(cow_vector<AIR_Node>& code, const Source_Location& sloc)
-  {
-    AIR_Node::S_single_step_trap xnode = { sloc };
-    code.emplace_back(::rocket::move(xnode));
-    return code;
-  }
-
 cow_vector<AIR_Node>& do_generate_clear_stack(cow_vector<AIR_Node>& code)
   {
     AIR_Node::S_clear_stack xnode = { };
@@ -54,10 +47,6 @@ cow_vector<AIR_Node>& do_generate_subexpression(cow_vector<AIR_Node>& code, cons
   {
     size_t epos = expr.units.size() - 1;
     if(epos != SIZE_MAX) {
-      // Generate a single-step trap unless disabled.
-      if(!opts.no_plain_single_step_traps) {
-        do_generate_single_step_trap(code, expr.sloc);
-      }
       // Expression units other than the last one cannot be PTC'd.
       for(size_t i = 0;  i < epos;  ++i) {
         expr.units[i].generate_code(code, opts, ptc_aware_none, ctx);
@@ -71,8 +60,16 @@ cow_vector<AIR_Node>& do_generate_expression(cow_vector<AIR_Node>& code, const C
                                              PTC_Aware ptc, const Analytic_Context& ctx,
                                              const Statement::S_expression& expr)
   {
-    do_generate_clear_stack(code);
-    do_generate_subexpression(code, opts, ptc, ctx, expr);
+    // Generate a single-step trap unless disabled.
+    if(!opts.no_plain_single_step_traps) {
+      AIR_Node::S_single_step_trap xnode = { expr.sloc };
+      code.emplace_back(::rocket::move(xnode));
+    }
+    // Generate code for the full expression.
+    if(expr.units.size()) {
+      do_generate_clear_stack(code);
+      do_generate_subexpression(code, opts, ptc, ctx, expr);
+    }
     return code;
   }
 
@@ -90,10 +87,6 @@ cow_vector<AIR_Node>& do_generate_statement_list(cow_vector<AIR_Node>& code, cow
   {
     size_t epos = block.stmts.size() - 1;
     if(epos != SIZE_MAX) {
-      // Generate a single-step trap unless disabled.
-      if(!opts.no_plain_single_step_traps) {
-        do_generate_single_step_trap(code, block.sloc);
-      }
       // Statements other than the last one cannot be the end of function.
       for(size_t i = 0;  i < epos;  ++i) {
         block.stmts[i].generate_code(code, names_opt, ctx, opts,
@@ -113,12 +106,27 @@ cow_vector<AIR_Node> do_generate_statement_list(cow_vector<phsh_string>* names_o
     return code;
   }
 
+cow_vector<AIR_Node>& do_generate_block(cow_vector<AIR_Node>& code, const Compiler_Options& opts, PTC_Aware ptc,
+                                        const Analytic_Context& ctx, const Statement::S_block& block)
+  {
+    // Generate a single-step trap unless disabled.
+    if(!opts.no_plain_single_step_traps) {
+      AIR_Node::S_single_step_trap xnode = { block.sloc };
+      code.emplace_back(::rocket::move(xnode));
+    }
+    // Create a new context for the block. No new names are injected into `ctx`.
+    if(block.stmts.size()) {
+      Analytic_Context ctx_stmts(::rocket::ref(ctx));
+      do_generate_statement_list(code, nullptr, ctx_stmts, opts, ptc, block);
+    }
+    return code;
+  }
+
 cow_vector<AIR_Node> do_generate_block(const Compiler_Options& opts, PTC_Aware ptc, const Analytic_Context& ctx,
                                        const Statement::S_block& block)
   {
-    // Create a new context for the block. No new names are injected into `ctx`.
-    Analytic_Context ctx_stmts(::rocket::ref(ctx));
-    auto code = do_generate_statement_list(nullptr, ctx_stmts, opts, ptc, block);
+    cow_vector<AIR_Node> code;
+    do_generate_block(code, opts, ptc, ctx, block);
     return code;
   }
 
@@ -131,10 +139,6 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
     switch(this->index()) {
     case index_expression: {
         const auto& altr = this->m_stor.as<index_expression>();
-        if(altr.units.empty()) {
-          // If the expression is empty, don't bother doing anything.
-          return code;
-        }
         // Evaluate the expression. Its value is discarded.
         do_generate_expression(code, opts, ptc, ctx, altr);
         return code;
@@ -142,10 +146,6 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
 
     case index_block: {
         const auto& altr = this->m_stor.as<index_block>();
-        if(altr.stmts.empty()) {
-          // If the block is empty, don't bother doing anything.
-          return code;
-        }
         // Generate code for the body. This can be PTC'd.
         auto code_body = do_generate_block(opts, ptc, ctx, altr);
         // Encode arguments.
@@ -395,10 +395,6 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
 
     case index_break: {
         const auto& altr = this->m_stor.as<index_break>();
-        // Generate a single-step trap unless disabled.
-        if(!opts.no_plain_single_step_traps) {
-          do_generate_single_step_trap(code, altr.sloc);
-        }
         // Translate jump targets to AIR status codes.
         switch(altr.target) {
         case jump_target_unspec: {
@@ -428,10 +424,6 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
 
     case index_continue: {
         const auto& altr = this->m_stor.as<index_continue>();
-        // Generate a single-step trap unless disabled.
-        if(!opts.no_plain_single_step_traps) {
-          do_generate_single_step_trap(code, altr.sloc);
-        }
         // Translate jump targets to AIR status codes.
         switch(altr.target) {
         case jump_target_unspec: {
