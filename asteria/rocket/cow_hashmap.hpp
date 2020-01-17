@@ -23,6 +23,7 @@ namespace rocket {
  * 5. There are no buckets. Bucket lookups and local iterators are not provided. Multimap cannot be implemented.
  * 6. The key and mapped types may be incomplete. The mapped type need be neither copy-assignable nor move-assignable.
  * 7. `erase()` may move elements around and invalidate iterators.
+ * 8. `operator[]()` is not provided.
  */
 template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename eqT = equal_to<keyT>,
          typename allocT = allocator<pair<const keyT, mappedT>>> class cow_hashmap;
@@ -557,14 +558,6 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         return ::std::addressof(ptr[tpos]->second);
       }
 
-    template<typename ykeyT> mapped_type& operator[](ykeyT&& key)
-      {
-        this->do_reserve_more(1);
-        auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
-                                                               ::std::forward_as_tuple(noadl::forward<ykeyT>(key)),
-                                                               ::std::forward_as_tuple());
-        return result.first->get()->second;
-      }
     // N.B. This is a non-standard extension.
     template<typename ykeyT> mapped_type& mut(const ykeyT& key)
       {
