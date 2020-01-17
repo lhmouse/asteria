@@ -29,8 +29,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
 
 #include "details/cow_hashmap.tcc"
 
-template<typename keyT, typename mappedT, typename hashT, typename eqT, typename allocT>
-    class cow_hashmap
+template<typename keyT, typename mappedT, typename hashT, typename eqT, typename allocT> class cow_hashmap
   {
     static_assert(!is_array<keyT>::value, "invalid key type");
     static_assert(!is_array<mappedT>::value, "invalid mapped value type");
