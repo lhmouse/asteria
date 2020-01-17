@@ -43,14 +43,14 @@ class Scrambler
       {
         this->m_regs.fill(0x9E3779B9);
 
-        for(size_t i = 0; i < 4; ++i)
+        for(size_t i = 0;  i < 4;  ++i)
           this->mix();
       }
 
   public:
     void combine(const uint32_t* src) noexcept
       {
-        for(size_t i = 0; i < 8; ++i)
+        for(size_t i = 0;  i < 8;  ++i)
           this->m_regs[i] += src[i];
       }
     void mix() noexcept
@@ -72,7 +72,7 @@ class Scrambler
       }
     void output(uint32_t* out) const noexcept
       {
-        for(size_t i = 0; i < 8; ++i)
+        for(size_t i = 0;  i < 8;  ++i)
           out[i] = this->m_regs[i];
       }
   };
@@ -89,7 +89,7 @@ void Random_Number_Generator::do_update() noexcept
     this->m_cc += 1;
     this->m_bb += this->m_cc;
     // Unroll the loop by 4.
-    for(size_t i = 0; i < 64; ++i) {
+    for(size_t i = 0;  i < 64;  ++i) {
       auto step = [&](size_t r, auto shift, int b)
         {
           auto x = this->m_mm[r];
@@ -123,7 +123,7 @@ void Random_Number_Generator::reset() noexcept
     do_read_random_device(this->m_mm, sizeof(m_mm));
     // Scramble words.
     Scrambler regs;
-    for(size_t i = 0; i < 64; ++i) {
+    for(size_t i = 0;  i < 64;  ++i) {
       auto view = this->m_mm + i%32*8;
       regs.combine(view);
       regs.mix();

@@ -128,7 +128,7 @@ void Global_Context::initialize(API_Version version)
     auto bptr = begin(s_modules);
     auto eptr = ::std::upper_bound(bptr, end(s_modules), version, Module_Comparator());
     // Initialize library modules.
-    for(auto q = bptr; q != eptr; ++q) {
+    for(auto q = bptr;  q != eptr;  ++q) {
       // Create the subobject if it doesn't exist.
       auto pair = ostd.try_emplace(::rocket::sref(q->name));
       if(pair.second) {

@@ -256,7 +256,7 @@ tinyfmt& Value::print(tinyfmt& fmt, bool escape) const
         const auto& altr = this->m_stor.as<gtype_array>();
         // [ 1, 2, 3, ]
         fmt << '[';
-        for(size_t i = 0; i < altr.size(); ++i) {
+        for(size_t i = 0;  i < altr.size();  ++i) {
           fmt << ' ';
           altr[i].print(fmt, true);
           fmt << ',';
@@ -268,7 +268,7 @@ tinyfmt& Value::print(tinyfmt& fmt, bool escape) const
         const auto& altr = this->m_stor.as<gtype_object>();
         // { "one" = 1, "two" = 2, "three" = 3, }
         fmt << '{';
-        for(auto q = altr.begin(); q != altr.end(); ++q) {
+        for(auto q = altr.begin();  q != altr.end();  ++q) {
           fmt << ' ' << quote(q->first) << " = ";
           q->second.print(fmt, true);
           fmt << ',';
@@ -328,7 +328,7 @@ tinyfmt& Value::dump(tinyfmt& fmt, size_t indent, size_t hanging) const
         //  ]
         fmt << "array(" << altr.size() << ")";
         fmt << pwrap(indent, hanging + 1) << '[';
-        for(size_t i = 0; i < altr.size(); ++i) {
+        for(size_t i = 0;  i < altr.size();  ++i) {
           fmt << pwrap(indent, hanging + indent) << i << " = ";
           altr[i].dump(fmt, indent, hanging + indent) << ';';
         }
@@ -345,7 +345,7 @@ tinyfmt& Value::dump(tinyfmt& fmt, size_t indent, size_t hanging) const
         //  }
         fmt << "object(" << altr.size() << ")";
         fmt << pwrap(indent, hanging + 1) << '{';
-        for(auto q = altr.begin(); q != altr.end(); ++q) {
+        for(auto q = altr.begin();  q != altr.end();  ++q) {
           fmt << pwrap(indent, hanging + indent) << quote(q->first) << " = ";
           q->second.dump(fmt, indent, hanging + indent) << ';';
         }

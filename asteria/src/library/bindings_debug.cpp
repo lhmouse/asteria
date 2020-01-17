@@ -14,7 +14,7 @@ bool std_debug_print(Sval templ, cow_vector<Value> values)
     // Prepare inserters.
     cow_vector<::rocket::formatter> insts;
     insts.reserve(values.size());
-    for(size_t i = 0; i < values.size(); ++i) {
+    for(size_t i = 0;  i < values.size();  ++i) {
       insts.push_back({
         [](tinyfmt& fmt, const void* ptr) -> tinyfmt&
           { return static_cast<const Value*>(ptr)->print(fmt);  },

@@ -58,7 +58,7 @@ class CRC32_Hasher final : public Abstract_Opaque
         const auto n = data.size();
         uint32_t r = this->m_reg;
         // Hash bytes one by one.
-        for(size_t i = 0; i < n; ++i) {
+        for(size_t i = 0;  i < n;  ++i) {
           r = s_iso3309_CRC32_table[((r ^ p[i]) & 0xFF)] ^ (r >> 8);
         }
         this->m_reg = r;
@@ -104,7 +104,7 @@ class FNV1a32_Hasher final : public Abstract_Opaque
         const auto n = data.size();
         uint32_t r = this->m_reg;
         // Hash bytes one by one.
-        for(size_t i = 0; i < n; ++i) {
+        for(size_t i = 0;  i < n;  ++i) {
           r = (r ^ p[i]) * prime;
         }
         this->m_reg = r;
@@ -143,7 +143,7 @@ template<bool bigendT, typename WordT> Sval& do_pdigits_impl(Sval& str, const Wo
     array<uint8_t, sizeof(WordT)> stor_le;
     uint64_t word = static_cast<uint64_t>(ref);
     // Write the word in little-endian order.
-    for(size_t i = 0; i < stor_le.size(); ++i) {
+    for(size_t i = 0;  i < stor_le.size();  ++i) {
       stor_le[i] = word & 0xFF;
       word >>= 8;
     }
@@ -408,7 +408,7 @@ class MD5_Hasher final : public Abstract_Opaque
         ROCKET_ASSERT(ec - bc == 8);
         // Write the number of bits in little-endian order.
         auto bits = this->m_size * 8;
-        for(ptrdiff_t i = 0; i < 8; ++i) {
+        for(ptrdiff_t i = 0;  i < 8;  ++i) {
           bc[i] = bits & 0xFF;
           bits >>= 8;
         }
@@ -447,13 +447,13 @@ class SHA1_Hasher final : public Abstract_Opaque
         array<uint32_t, 80> w;
         uint32_t f, k;
         // https://en.wikipedia.org/wiki/SHA-1
-        for(size_t i =  0; i < 16; ++i) {
+        for(size_t i =  0;  i < 16;  ++i) {
           do_load_be(w[i], p + i * 4);
         }
-        for(size_t i = 16; i < 32; ++i) {
+        for(size_t i = 16;  i < 32;  ++i) {
           w[i] = do_rotl(w[i-3] ^ w[i- 8] ^ w[i-14] ^ w[i-16], 1);
         }
-        for(size_t i = 32; i < 80; ++i) {
+        for(size_t i = 32;  i < 80;  ++i) {
           w[i] = do_rotl(w[i-6] ^ w[i-16] ^ w[i-28] ^ w[i-32], 2);
         }
         auto update = [&](uint32_t i, auto&& specx, uint32_t& a, uint32_t& b, uint32_t& c,
@@ -650,7 +650,7 @@ class SHA1_Hasher final : public Abstract_Opaque
         ROCKET_ASSERT(ec - bc == 8);
         // Write the number of bits in big-endian order.
         auto bits = this->m_size * 8;
-        for(ptrdiff_t i = 7; i != -1; --i) {
+        for(ptrdiff_t i = 7;  i != -1;  --i) {
           bc[i] = bits & 0xFF;
           bits >>= 8;
         }
@@ -690,10 +690,10 @@ class SHA256_Hasher final : public Abstract_Opaque
         array<uint32_t, 64> w;
         uint32_t s0, maj, t2, s1, ch, t1;
         // https://en.wikipedia.org/wiki/SHA-2
-        for(size_t i =  0; i < 16; ++i) {
+        for(size_t i =  0;  i < 16;  ++i) {
           do_load_be(w[i], p + i * 4);
         }
-        for(size_t i = 16; i < 64; ++i) {
+        for(size_t i = 16;  i < 64;  ++i) {
           t1 = w[i-15];
           s0 = do_rotl(t1, 14) ^ do_rotl(t1, 25) ^ (t1 >>  3);
           t2 = w[i- 2];
@@ -863,7 +863,7 @@ class SHA256_Hasher final : public Abstract_Opaque
         ROCKET_ASSERT(ec - bc == 8);
         // Write the number of bits in big-endian order.
         auto bits = this->m_size * 8;
-        for(ptrdiff_t i = 7; i != -1; --i) {
+        for(ptrdiff_t i = 7;  i != -1;  --i) {
           bc[i] = bits & 0xFF;
           bits >>= 8;
         }

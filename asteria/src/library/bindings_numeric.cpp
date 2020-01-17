@@ -374,7 +374,7 @@ Ival std_numeric_lzcnt(Ival x)
     }
     uint32_t count = 0;
     // Scan bits from left to right.
-    for(unsigned i = 32; i != 0; i /= 2) {
+    for(unsigned i = 32;  i != 0;  i /= 2) {
       if(ireg >> (64 - i))
         continue;
       ireg <<= i;
@@ -392,7 +392,7 @@ Ival std_numeric_tzcnt(Ival x)
     }
     uint32_t count = 0;
     // Scan bits from right to left.
-    for(unsigned i = 32; i != 0; i /= 2) {
+    for(unsigned i = 32;  i != 0;  i /= 2) {
       if(ireg << (64 - i))
         continue;
       ireg >>= i;
@@ -410,7 +410,7 @@ Ival std_numeric_popcnt(Ival x)
     }
     uint32_t count = 0;
     // Scan bits from right to left.
-    for(unsigned i = 0; i < 64; ++i) {
+    for(unsigned i = 0;  i < 64;  ++i) {
       uint32_t n = ireg & 1;
       ireg >>= 1;
       count += n;

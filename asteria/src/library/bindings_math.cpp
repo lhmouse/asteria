@@ -114,7 +114,7 @@ Rval std_math_hypot(cow_vector<Value> values)
         // Call the C `hypot()` function.
         auto result = ::std::hypot(values[0].convert_to_real(), values[1].convert_to_real());
         // Sum up all the other values.
-        for(size_t i = 2; i < values.size(); ++i) {
+        for(size_t i = 2;  i < values.size();  ++i) {
           result = ::std::hypot(result, values[i].convert_to_real());
         }
         return result;

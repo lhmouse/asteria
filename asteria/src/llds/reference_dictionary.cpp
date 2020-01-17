@@ -110,7 +110,7 @@ void Reference_Dictionary::do_rehash(size_t nbkt)
     auto bptr = static_cast<Bucket*>(::operator new(nbkt * sizeof(Bucket)));
     auto eptr = bptr + nbkt;
     // Initialize an empty table.
-    for(auto qbkt = bptr; qbkt != eptr; ++qbkt) {
+    for(auto qbkt = bptr;  qbkt != eptr;  ++qbkt) {
       qbkt->prev = nullptr;
     }
     auto bold = ::std::exchange(this->m_stor.bptr, bptr);

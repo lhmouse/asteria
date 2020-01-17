@@ -17,7 +17,7 @@ void Executive_Context::do_prepare_function(const cow_vector<phsh_string>& param
     // This is the subscript of the special parameter placeholder `...`.
     size_t elps = SIZE_MAX;
     // Set parameters, which are local references.
-    for(size_t i = 0; i < params.size(); ++i) {
+    for(size_t i = 0;  i < params.size();  ++i) {
       const auto& name = params.at(i);
       if(name.empty()) {
         continue;

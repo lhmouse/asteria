@@ -619,7 +619,7 @@ bool do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, ch
           xcnt += 2;
           // Read hex digits.
           char32_t cp = 0;
-          for(int i = 0; i < xcnt; ++i) {
+          for(int i = 0;  i < xcnt;  ++i) {
             // Read a hex digit.
             auto digit = reader.peek(tlen);
             if(digit == 0) {

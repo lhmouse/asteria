@@ -159,7 +159,7 @@ tinyfmt& do_quote_string(tinyfmt& fmt, const Sval& str)
           utf16_encode(epos, cp);
           // Write code units.
           ::rocket::ascii_numput nump;
-          for(auto p = ustr; p != epos; ++p) {
+          for(auto p = ustr;  p != epos;  ++p) {
             nump.put_XU(*p, 4);
             char seq[8] = { "\\u" };
             ::std::memcpy(seq + 2, nump.data() + 2, 4);

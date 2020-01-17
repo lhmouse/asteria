@@ -45,7 +45,7 @@ bool write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept
         "[DLE]",  "[DC1]",  "[DC2]",  "[DC3]",  "[DC4]",  "[NAK]",  "[SYN]",  "[ETB]",
         "[CAN]",  "[EM]",   "[SUB]",  "[ESC]",  "[FS]",   "[GS]",   "[RS]",   "[US]",
       };
-    for(size_t i = 0; i < msg.size(); ++i) {
+    for(size_t i = 0;  i < msg.size();  ++i) {
       size_t ch = msg[i] & 0xFF;
       // Control characters are ['\x00','\x1F'] and '\x7F'.
       if(ch <= 0x1F)
@@ -139,7 +139,7 @@ bool utf8_decode(char32_t& cp, const char*& pos, size_t avail)
     // Unset bits that are not part of the payload.
     cp &= UINT32_C(0xFF) >> u8len;
     // Accumulate trailing code units.
-    for(size_t i = 1; i < u8len; ++i) {
+    for(size_t i = 1;  i < u8len;  ++i) {
       char32_t cu = *(pos++) & 0xFF;
       if((cu < 0x80) || (0xC0 <= cu)) {
         // This trailing character is not valid.
@@ -297,7 +297,7 @@ tinyfmt& operator<<(tinyfmt& fmt, const Quote_Wrapper& q)
         "\\xF0",  "\\xF1",  "\\xF2",  "\\xF3",  "\\xF4",  "\\xF5",  "\\xF6",  "\\xF7",
         "\\xF8",  "\\xF9",  "\\xFA",  "\\xFB",  "\\xFC",  "\\xFD",  "\\xFE",  "\\xFF",
       };
-    for(size_t i = 0; i < q.len; ++i) {
+    for(size_t i = 0;  i < q.len;  ++i) {
       size_t ch = q.str[i] & 0xFF;
       // Insert this quoted sequence.
       // Optimize the operation a little if it consists of only one character.
@@ -322,7 +322,7 @@ tinyfmt& operator<<(tinyfmt& fmt, const Paragraph_Wrapper& q)
       // Terminate the current line.
       fmt << '\n';
       // Indent the next line accordingly.
-      for(size_t i = 0; i < q.hanging; ++i)
+      for(size_t i = 0;  i < q.hanging;  ++i)
         fmt << ' ';
     }
     return fmt;
@@ -363,7 +363,7 @@ uint64_t generate_random_seed() noexcept
     //   https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function
     // The source is read in little-endian byte order.
     uint64_t seed = 0xCBF29CE484222325;
-    for(size_t i = 0; i < 8; ++i) {
+    for(size_t i = 0;  i < 8;  ++i) {
       seed = (seed ^ (source & 0xFF)) * 0x100000001B3;
       source >>= 8;
     }

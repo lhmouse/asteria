@@ -61,7 +61,7 @@ Slice do_slice(const Aval& data, const Ival& from, const Iopt& length)
 
 template<typename IteratorT> opt<IteratorT> do_find_opt(IteratorT begin, IteratorT end, const Value& target)
   {
-    for(auto it = ::rocket::move(begin); it != end; ++it) {
+    for(auto it = ::rocket::move(begin);  it != end;  ++it) {
       // Compare the value using the builtin 3-way comparison operator.
       if(it->compare(target) == compare_equal)
         return ::rocket::move(it);
@@ -79,7 +79,7 @@ void do_push_argument(cow_vector<Reference>& args, const Value& value)
 template<typename IteratorT> opt<IteratorT> do_find_if_opt(Global& global, IteratorT begin, IteratorT end,
                                                            const Fval& pred, bool match)
   {
-    for(auto it = ::rocket::move(begin); it != end; ++it) {
+    for(auto it = ::rocket::move(begin);  it != end;  ++it) {
       // Set up arguments for the user-defined predictor.
       cow_vector<Reference> args;
       do_push_argument(args, *it);
@@ -166,7 +166,7 @@ template<typename IteratorT, typename PredT>
 Aval::iterator& do_unique_move(Aval::iterator& opos, Global& global, const Fopt& comparator,
                                Aval::iterator ibegin, Aval::iterator iend, bool unique)
   {
-    for(auto ipos = ibegin; ipos != iend; ++ipos)
+    for(auto ipos = ibegin;  ipos != iend;  ++ipos)
       if(!unique || (do_compare(global, comparator, ipos[0], opos[-1]) != compare_equal))
         *(opos++) = ::rocket::move(*ipos);
     return opos;
@@ -605,7 +605,7 @@ Bval std_array_is_sorted(Global& global, Aval data, Fopt comparator)
       // If `data` contains no more than 2 elements, it is considered sorted.
       return true;
     }
-    for(auto it = data.begin() + 1; it != data.end(); ++it) {
+    for(auto it = data.begin() + 1;  it != data.end();  ++it) {
       // Compare the two elements.
       auto cmp = do_compare(global, comparator, it[-1], it[0]);
       if((cmp == compare_greater) || (cmp == compare_unordered))
@@ -695,7 +695,7 @@ Value std_array_max_of(Global& global, Aval data, Fopt comparator)
       // Return `null` if `data` is empty.
       return nullptr;
     }
-    for(auto it = qmax + 1; it != data.end(); ++it) {
+    for(auto it = qmax + 1;  it != data.end();  ++it) {
       // Compare `*qmax` with the other elements, ignoring unordered elements.
       if(do_compare(global, comparator, *qmax, *it) != compare_less)
         continue;
@@ -711,7 +711,7 @@ Value std_array_min_of(Global& global, Aval data, Fopt comparator)
       // Return `null` if `data` is empty.
       return nullptr;
     }
-    for(auto it = qmin + 1; it != data.end(); ++it) {
+    for(auto it = qmin + 1;  it != data.end();  ++it) {
       // Compare `*qmin` with the other elements, ignoring unordered elements.
       if(do_compare(global, comparator, *qmin, *it) != compare_greater)
         continue;
@@ -730,7 +730,7 @@ Aval std_array_generate(Global& global, Fval generator, Ival length)
   {
     Aval res;
     res.reserve(static_cast<size_t>(length));
-    for(int64_t i = 0; i < length; ++i) {
+    for(int64_t i = 0;  i < length;  ++i) {
       // Set up arguments for the user-defined generator.
       cow_vector<Reference> args;
       do_push_argument(args, Ival(i));
@@ -754,7 +754,7 @@ Aval std_array_shuffle(Aval data, Iopt seed)
     auto lcg = seed ? static_cast<uint64_t>(*seed) : generate_random_seed();
     // Shuffle elements.
     Aval res = data;
-    for(size_t i = 0; i < res.size(); ++i) {
+    for(size_t i = 0;  i < res.size();  ++i) {
       // These arguments are the same as glibc's `drand48()` function.
       //   https://en.wikipedia.org/wiki/Linear_congruential_generator#Parameters_in_common_use
       lcg *= 0x5DEECE66D;     // a

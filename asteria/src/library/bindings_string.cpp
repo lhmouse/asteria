@@ -69,10 +69,10 @@ template<typename IteratorT> opt<IteratorT> do_find_opt(IteratorT tbegin, Iterat
     }
     // Build a table according to the Bad Character Rule.
     array<ptrdiff_t, 0x100> bcr_table;
-    for(size_t i = 0; i < 0x100; ++i) {
+    for(size_t i = 0;  i < 0x100;  ++i) {
       bcr_table[i] = plen;
     }
-    for(ptrdiff_t i = plen - 1; i != 0; --i) {
+    for(ptrdiff_t i = plen - 1;  i != 0;  --i) {
       bcr_table[(pend[~i] & 0xFF)] = i;
     }
     // Search for the pattern.
@@ -96,7 +96,7 @@ template<typename IteratorT> opt<IteratorT> do_find_of_opt(IteratorT begin, Iter
     array<bool, 256> table = { };
     ::rocket::for_each(set, [&](char c) { table[uint8_t(c)] = true;  });
     // Search the range.
-    for(auto it = ::rocket::move(begin); it != end; ++it) {
+    for(auto it = ::rocket::move(begin);  it != end;  ++it) {
       if(table[uint8_t(*it)] == match)
         return ::rocket::move(it);
     }
@@ -166,7 +166,7 @@ constexpr char s_spaces[] = " \f\n\r\t\v";
 const char* do_xstrchr(const char* str, char c) noexcept
   {
     // If `c == 0`, this function returns a null pointer.
-    for(auto p = str; *p != 0; ++p)
+    for(auto p = str;  *p != 0;  ++p)
       if(*p == c)
         return p;
     return nullptr;
@@ -178,7 +178,7 @@ template<bool bigendT, typename WordT> Sval& do_pack_one_impl(Sval& text, const 
     array<char, sizeof(WordT)> stor_le;
     uint64_t word = static_cast<uint64_t>(value);
     // Write it in little-endian order.
-    for(size_t i = 0; i < stor_le.size(); ++i) {
+    for(size_t i = 0;  i < stor_le.size();  ++i) {
       stor_le[i] = static_cast<char>(word);
       word >>= 8;
     }
@@ -212,7 +212,7 @@ template<bool bigendT, typename WordT> Aval do_unpack_impl(const Sval& text)
     }
     values.reserve(nwords);
     // Unpack integers.
-    for(size_t i = 0; i < nwords; ++i) {
+    for(size_t i = 0;  i < nwords;  ++i) {
       // Read some bytes in big-endian order.
       if(bigendT)
         ::std::copy_n(text.data() + i * stor_be.size(), stor_be.size(), stor_be.mut_begin());
@@ -638,7 +638,7 @@ Sval std_string_to_upper(Sval text)
     Sval res = text;
     char* wptr = nullptr;
     // Translate each character.
-    for(size_t i = 0; i < res.size(); ++i) {
+    for(size_t i = 0;  i < res.size();  ++i) {
       char c = res[i];
       if((c < 'a') || ('z' < c)) {
         continue;
@@ -658,7 +658,7 @@ Sval std_string_to_lower(Sval text)
     Sval res = text;
     char* wptr = nullptr;
     // Translate each character.
-    for(size_t i = 0; i < res.size(); ++i) {
+    for(size_t i = 0;  i < res.size();  ++i) {
       char c = res[i];
       if((c < 'A') || ('Z' < c)) {
         continue;
@@ -678,7 +678,7 @@ Sval std_string_translate(Sval text, Sval inputs, Sopt outputs)
     Sval res = text;
     char* wptr = nullptr;
     // Translate each character.
-    for(size_t i = 0; i < res.size(); ++i) {
+    for(size_t i = 0;  i < res.size();  ++i) {
       char c = res[i];
       auto ipos = inputs.find(c);
       if(ipos == Sval::npos) {
@@ -716,7 +716,7 @@ Aval std_string_explode(Sval text, Sopt delim, Iopt limit)
     if(!delim || delim->empty()) {
       // Split every byte.
       segments.reserve(text.size());
-      for(size_t i = 0; i < text.size(); ++i) {
+      for(size_t i = 0;  i < text.size();  ++i) {
         size_t b = text[i] & 0xFF;
         // Store a reference to the null-terminated string allocated statically.
         // Don't bother allocating a new buffer of only two characters.
@@ -754,7 +754,7 @@ Sval std_string_implode(Aval segments, Sopt delim)
     // Append the first string.
     text = segments.front().as_string();
     // Any segment other than the first one follows a delimiter.
-    for(size_t i = 1; i != nsegs; ++i) {
+    for(size_t i = 1;  i != nsegs;  ++i) {
       if(delim) {
         text += *delim;
       }
@@ -779,7 +779,7 @@ Sval std_string_hex_encode(Sval data, Bopt lowercase, Sopt delim)
       reg = data[nread++] & 0xFF;
       reg <<= 24;
       // Encode it.
-      for(size_t i = 0; i < 2; ++i) {
+      for(size_t i = 0;  i < 2;  ++i) {
         size_t b = ((reg >> 28) * 2 + rlowerc) & 0xFF;
         reg <<= 4;
         unit[i] = s_base16_table[b];
@@ -819,7 +819,7 @@ Sopt std_string_hex_decode(Sval text)
         continue;
       }
       // Decode the current encoding unit if it has been filled up.
-      for(size_t i = 0; i < 2; ++i) {
+      for(size_t i = 0;  i < 2;  ++i) {
         pos = do_xstrchr(s_base16_table, unit[i]);
         if(!pos) {
           // The character is invalid.
@@ -856,14 +856,14 @@ Sval std_string_base32_encode(Sval data, Bopt lowercase)
     size_t nread = 0;
     while(data.size() - nread >= 5) {
       // Read 5 consecutive bytes.
-      for(size_t i = 0; i < 5; ++i) {
+      for(size_t i = 0;  i < 5;  ++i) {
         uint64_t b = data[nread++] & 0xFF;
         reg <<= 8;
         reg |= b;
       }
       reg <<= 24;
       // Encode them.
-      for(size_t i = 0; i < 8; ++i) {
+      for(size_t i = 0;  i < 8;  ++i) {
         size_t b = ((reg >> 59) * 2 + rlowerc) & 0xFF;
         reg <<= 5;
         unit[i] = s_base32_table[b];
@@ -875,19 +875,19 @@ Sval std_string_base32_encode(Sval data, Bopt lowercase)
       auto m = data.size() - nread;
       auto p = (m * 8 + 4) / 5;
       // Read all remaining bytes that cannot fill up a unit.
-      for(size_t i = 0; i < m; ++i) {
+      for(size_t i = 0;  i < m;  ++i) {
         uint64_t b = data[nread++] & 0xFF;
         reg <<= 8;
         reg |= b;
       }
       reg <<= 64 - m * 8;
       // Encode them.
-      for(size_t i = 0; i < p; ++i) {
+      for(size_t i = 0;  i < p;  ++i) {
         size_t b = ((reg >> 59) * 2 + rlowerc) & 0xFF;
         reg <<= 5;
         unit[i] = s_base32_table[b];
       }
-      for(size_t i = p; i != 8; ++i) {
+      for(size_t i = p;  i != 8;  ++i) {
         unit[i] = s_base32_table[64];
       }
       text.append(unit.data(), unit.size());
@@ -935,7 +935,7 @@ Sopt std_string_base32_decode(Sval text)
         return clear;
       }
       // Decode the current encoding unit.
-      for(size_t i = 0; i < p; ++i) {
+      for(size_t i = 0;  i < p;  ++i) {
         pos = do_xstrchr(s_base32_table, unit[i]);
         if(!pos) {
           // The character is invalid.
@@ -950,7 +950,7 @@ Sopt std_string_base32_decode(Sval text)
       }
       reg <<= 64 - p * 5;
       // Write the unit.
-      for(size_t i = 0; i < m; ++i) {
+      for(size_t i = 0;  i < m;  ++i) {
         data.push_back(static_cast<char>(reg >> 56));
         reg <<= 8;
       }
@@ -974,14 +974,14 @@ Sval std_string_base64_encode(Sval data)
     size_t nread = 0;
     while(data.size() - nread >= 3) {
       // Read 3 consecutive bytes.
-      for(size_t i = 0; i < 3; ++i) {
+      for(size_t i = 0;  i < 3;  ++i) {
         uint32_t b = data[nread++] & 0xFF;
         reg <<= 8;
         reg |= b;
       }
       reg <<= 8;
       // Encode them.
-      for(size_t i = 0; i < 4; ++i) {
+      for(size_t i = 0;  i < 4;  ++i) {
         size_t b = (reg >> 26) & 0xFF;
         reg <<= 6;
         unit[i] = s_base64_table[b];
@@ -993,19 +993,19 @@ Sval std_string_base64_encode(Sval data)
       auto m = data.size() - nread;
       auto p = (m * 8 + 5) / 6;
       // Read all remaining bytes that cannot fill up a unit.
-      for(size_t i = 0; i < m; ++i) {
+      for(size_t i = 0;  i < m;  ++i) {
         uint32_t b = data[nread++] & 0xFF;
         reg <<= 8;
         reg |= b;
       }
       reg <<= 32 - m * 8;
       // Encode them.
-      for(size_t i = 0; i < p; ++i) {
+      for(size_t i = 0;  i < p;  ++i) {
         size_t b = (reg >> 26) & 0xFF;
         reg <<= 6;
         unit[i] = s_base64_table[b];
       }
-      for(size_t i = p; i != 4; ++i) {
+      for(size_t i = p;  i != 4;  ++i) {
         unit[i] = s_base64_table[64];
       }
       text.append(unit.data(), unit.size());
@@ -1053,7 +1053,7 @@ Sopt std_string_base64_decode(Sval text)
         return clear;
       }
       // Decode the current encoding unit.
-      for(size_t i = 0; i < p; ++i) {
+      for(size_t i = 0;  i < p;  ++i) {
         pos = do_xstrchr(s_base64_table, unit[i]);
         if(!pos) {
           // The character is invalid.
@@ -1068,7 +1068,7 @@ Sopt std_string_base64_decode(Sval text)
       }
       reg <<= 32 - p * 6;
       // Write the unit.
-      for(size_t i = 0; i < m; ++i) {
+      for(size_t i = 0;  i < m;  ++i) {
         data.push_back(static_cast<char>(reg >> 24));
         reg <<= 8;
       }
@@ -1307,7 +1307,7 @@ Sval std_string_format(Sval templ, cow_vector<Value> values)
     // Prepare inserters.
     cow_vector<::rocket::formatter> insts;
     insts.reserve(values.size());
-    for(size_t i = 0; i < values.size(); ++i) {
+    for(size_t i = 0;  i < values.size();  ++i) {
       insts.push_back({
         [](tinyfmt& fmt, const void* ptr) -> tinyfmt& { return static_cast<const Value*>(ptr)->print(fmt);  },
         values.data() + i

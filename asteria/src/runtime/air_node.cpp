@@ -27,7 +27,7 @@ using Enumerator  = AVMC_Queue::Enumerator;
 
 bool do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code, const Abstract_Context& ctx)
   {
-    for(size_t i = 0; i < code.size(); ++i) {
+    for(size_t i = 0;  i < code.size();  ++i) {
       auto qnode = code.at(i).rebind_opt(ctx);
       if(!qnode) {
         continue;
@@ -40,8 +40,8 @@ bool do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code, const Abstract_Con
 
 bool do_rebind_nodes(bool& dirty, cow_vector<cow_vector<AIR_Node>>& code, const Abstract_Context& ctx)
   {
-    for(size_t i = 0; i < code.size(); ++i) {
-      for(size_t k = 0; k < code.at(i).size(); ++k) {
+    for(size_t i = 0;  i < code.size();  ++i) {
+      for(size_t k = 0;  k < code.at(i).size();  ++k) {
         auto qnode = code.at(i).at(k).rebind_opt(ctx);
         if(!qnode) {
           continue;
@@ -124,7 +124,7 @@ AIR_Status do_execute_catch(const AVMC_Queue& queue, const phsh_string& name_exc
     {
       G_array backtrace;
       G_object r;
-      for(size_t i = 0; i < except.count_frames(); ++i) {
+      for(size_t i = 0;  i < except.count_frames();  ++i) {
         const auto& frame = except.frame(i);
         // Translate each frame into a human-readable format.
         r.clear();
@@ -434,7 +434,7 @@ AIR_Status do_switch_statement(Executive_Context& ctx, ParamU /*pu*/, const void
     // Find a target clause.
     // This is different from the `switch` statement in C, where `case` labels must have constant operands.
     size_t target = SIZE_MAX;
-    for(size_t i = 0; i < nclauses; ++i) {
+    for(size_t i = 0;  i < nclauses;  ++i) {
       if(queues_labels[i].empty()) {
         // This is a `default` label.
         if(target != SIZE_MAX) {
@@ -461,11 +461,11 @@ AIR_Status do_switch_statement(Executive_Context& ctx, ParamU /*pu*/, const void
     // Note that all clauses share the same context.
     Executive_Context ctx_body(::rocket::ref(ctx));
     // Fly over all clauses that precede `target`.
-    for(size_t i = 0; i < target; ++i) {
+    for(size_t i = 0;  i < target;  ++i) {
       ::rocket::for_each(names_added[i], [&](const phsh_string& name) { do_declare(ctx_body, name);  });
     }
     // Execute all clauses from `target`.
-    for(size_t i = target; i != nclauses; ++i) {
+    for(size_t i = target;  i != nclauses;  ++i) {
       auto status = queues_bodies[i].execute(ctx_body);
       if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch }))
         break;
@@ -555,7 +555,7 @@ AIR_Status do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const vo
     }
     else if(range.is_array()) {
       const auto& arr = range.as_array();
-      for(int64_t i = 0; i < arr.ssize(); ++i) {
+      for(int64_t i = 0;  i < arr.ssize();  ++i) {
         // Set the key which is the subscript of the mapped element in the array.
         vkey->initialize(i, true);
         // Set the mapped reference.
@@ -573,7 +573,7 @@ AIR_Status do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const vo
     }
     else if(range.is_object()) {
       const auto& obj = range.as_object();
-      for(auto it = obj.begin(); it != obj.end(); ++it) {
+      for(auto it = obj.begin();  it != obj.end();  ++it) {
         // Set the key which is the key of this element in the object.
         vkey->initialize(it->first.rdstr(), true);
         // Set the mapped reference.
@@ -914,7 +914,7 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
 
     // Pop arguments off the stack backwards.
     args.resize(nargs, Reference_Root::S_void());
-    for(size_t i = args.size() - 1; i != SIZE_MAX; --i) {
+    for(size_t i = args.size() - 1;  i != SIZE_MAX;  --i) {
       // Get an argument. Ensure it is dereferenceable.
       auto& arg = ctx.stack().open_top();
       static_cast<void>(arg.read());
@@ -950,7 +950,7 @@ AIR_Status do_push_unnamed_array(Executive_Context& ctx, ParamU pu, const void* 
     // Pop elements from the stack and store them in an array backwards.
     G_array array;
     array.resize(nelems);
-    for(auto it = array.mut_rbegin(); it != array.rend(); ++it) {
+    for(auto it = array.mut_rbegin();  it != array.rend();  ++it) {
       // Write elements backwards.
       *it = ctx.stack().get_top().read();
       ctx.stack().pop();
@@ -969,7 +969,7 @@ AIR_Status do_push_unnamed_object(Executive_Context& ctx, ParamU /*pu*/, const v
     // Pop elements from the stack and store them in an object backwards.
     G_object object;
     object.reserve(keys.size());
-    for(auto it = keys.rbegin(); it != keys.rend(); ++it) {
+    for(auto it = keys.rbegin();  it != keys.rend();  ++it) {
       // Use `try_emplace()` instead of `insert_or_assign()`. In case of duplicate keys,
       // the last value takes precedence.
       object.try_emplace(*it, ctx.stack().get_top().read());
@@ -2415,7 +2415,7 @@ AIR_Status do_unpack_struct_array(Executive_Context& ctx, ParamU pu, const void*
       }
       arr = ::rocket::move(val.open_array());
     }
-    for(size_t i = nelems - 1; i != SIZE_MAX; --i) {
+    for(size_t i = nelems - 1;  i != SIZE_MAX;  --i) {
       // Get the variable back.
       auto var = ctx.stack().get_top().get_variable_opt();
       ctx.stack().pop();
@@ -2448,7 +2448,7 @@ AIR_Status do_unpack_struct_object(Executive_Context& ctx, ParamU pu, const void
       }
       obj = ::rocket::move(val.open_object());
     }
-    for(auto it = keys.rbegin(); it != keys.rend(); ++it) {
+    for(auto it = keys.rbegin();  it != keys.rend();  ++it) {
       // Get the variable back.
       auto var = ctx.stack().get_top().get_variable_opt();
       ctx.stack().pop();
@@ -2526,7 +2526,7 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
       ctx.stack().pop();
       // Convert all elements to temporaries.
       args.assign(source.size(), Reference_Root::S_void());
-      for(size_t i = 0; i < args.size(); ++i) {
+      for(size_t i = 0;  i < args.size();  ++i) {
         // Make a reference to temporary.
         Reference_Root::S_temporary xref = { ::rocket::move(source.mut(i)) };
         args.mut(i) = ::rocket::move(xref);
@@ -2550,7 +2550,7 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
       }
       // Generate arguments.
       args.assign(static_cast<size_t>(nvargs), gself);
-      for(size_t i = 0; i < args.size(); ++i) {
+      for(size_t i = 0;  i < args.size();  ++i) {
         // Initialize the argument list for the generator.
         Reference_Root::S_constant xref = { G_integer(i) };
         gargs.clear().emplace_back(::rocket::move(xref));
@@ -2889,7 +2889,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
           return avmcp.request(queue);
         }
         // Encode arguments.
-        for(size_t i = 0; i < altr.code_bodies.size(); ++i) {
+        for(size_t i = 0;  i < altr.code_bodies.size();  ++i) {
           do_solidify_queue(avmcp.queues_labels.emplace_back(), altr.code_labels.at(i));
           do_solidify_queue(avmcp.queues_bodies.emplace_back(), altr.code_bodies.at(i));
         }
@@ -3511,7 +3511,7 @@ Variable_Callback& AIR_Node::enumerate_variables(Variable_Callback& callback) co
 
     case index_switch_statement: {
         const auto& altr = this->m_stor.as<index_switch_statement>();
-        for(size_t i = 0; i < altr.code_labels.size(); ++i) {
+        for(size_t i = 0;  i < altr.code_labels.size();  ++i) {
           ::rocket::for_each(altr.code_labels.at(i), callback);
           ::rocket::for_each(altr.code_bodies.at(i), callback);
         }

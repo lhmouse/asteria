@@ -23,7 +23,7 @@ void Runtime_Error::do_compose_message()
     else
       fmt << this->m_value;
     // Append stack frames.
-    for(unsigned long i = 0; i < this->m_frames.size(); ++i) {
+    for(unsigned long i = 0;  i < this->m_frames.size();  ++i) {
       const auto& frm = this->m_frames[i];
       format(fmt, "\n[frame #$1 at '$2' ($3): $4]", i, frm.sloc(), frm.what_type(), frm.value());
     }
