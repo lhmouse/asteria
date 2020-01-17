@@ -73,10 +73,6 @@ Reference& do_declare(Executive_Context& ctx, const phsh_string& name)
 
 AIR_Status do_execute_block(const AVMC_Queue& queue, Executive_Context& ctx)
   {
-    if(ROCKET_EXPECT(queue.empty())) {
-      // Don't bother creating a context.
-      return air_status_next;
-    }
     // Execute the queue on a new context.
     Executive_Context ctx_next(::rocket::ref(ctx));
     auto status = queue.execute(ctx_next);
@@ -110,9 +106,6 @@ AIR_Status do_evaluate_branch(const AVMC_Queue& queue, bool assign, Executive_Co
 AIR_Status do_execute_catch(const AVMC_Queue& queue, const phsh_string& name_except,
                             const Runtime_Error& except, Executive_Context& ctx)
   {
-    if(ROCKET_EXPECT(queue.empty())) {
-      return air_status_next;
-    }
     // Execute the queue on a new context.
     Executive_Context ctx_next(::rocket::ref(ctx));
     // Set the exception reference.
@@ -435,15 +428,13 @@ AIR_Status do_switch_statement(Executive_Context& ctx, ParamU /*pu*/, const void
     // This is different from the `switch` statement in C, where `case` labels must have constant operands.
     size_t target = SIZE_MAX;
     for(size_t i = 0;  i < nclauses;  ++i) {
+      // This is a `default` clause if the condition is empty, and a `case` clause otherwise.
       if(queues_labels[i].empty()) {
-        // This is a `default` label.
-        if(target != SIZE_MAX) {
+        if(target != SIZE_MAX)
           ASTERIA_THROW("multiple `default` clauses");
-        }
         target = i;
         continue;
       }
-      // This is a `case` label.
       // Evaluate the operand and check whether it equals `value`.
       auto status = queues_labels[i].execute(ctx);
       ROCKET_ASSERT(status == air_status_next);
@@ -452,10 +443,9 @@ AIR_Status do_switch_statement(Executive_Context& ctx, ParamU /*pu*/, const void
         break;
       }
     }
-    if(ROCKET_EXPECT(target == SIZE_MAX)) {
+    if(target == SIZE_MAX)
       // No matching clause has been found.
       return air_status_next;
-    }
 
     // Jump to the clause denoted by `target`.
     // Note that all clauses share the same context.
@@ -612,7 +602,7 @@ AIR_Status do_for_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
       status = queue_cond.execute(ctx_for);
       ROCKET_ASSERT(status == air_status_next);
       // This is a special case: If the condition is empty then the loop is infinite.
-      if(ctx_for.stack().size() && (ctx_for.stack().get_top().read().test() == false))
+      if(!(ctx_for.stack().empty() || ctx_for.stack().get_top().read().test()))
         break;
       // Execute the body.
       status = do_execute_block(queue_body, ctx_for);
