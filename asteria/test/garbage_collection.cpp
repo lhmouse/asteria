@@ -36,10 +36,15 @@ void operator delete(void* ptr, size_t) noexcept
 int main()
   {
     // Ignore leaks of emutls, emergency pool, etc.
-    ::rocket::make_unique<int>().reset();
+    delete new int;
 
+    rcptr<Variable> var;
     bcnt.store(0, ::std::memory_order_relaxed);
     {
+      Global_Context global;
+      var = global.create_variable();
+      var->initialize(G_string("meow"), true);
+
       ::rocket::tinybuf_str cbuf;
       cbuf.set_string(::rocket::sref(
         R"__(
@@ -54,8 +59,9 @@ int main()
           }
         )__"), tinybuf::open_read);
       Simple_Script code(cbuf, ::rocket::sref(__FILE__));
-      Global_Context global;
       code.execute(global);
     }
+    ASTERIA_TEST_CHECK(var->is_initialized() == false);
+    var.reset();
     ASTERIA_TEST_CHECK(bcnt.load(::std::memory_order_relaxed) == 0);
   }
