@@ -10,27 +10,27 @@
 namespace Asteria {
 namespace {
 
-class Reentrance_Guard
+class Sentry
   {
   private:
-    long m_old;
     ref_to<long> m_ref;
+    long m_old;
 
   public:
-    explicit Reentrance_Guard(long& ref) noexcept
+    explicit Sentry(long& ref) noexcept
       :
-        m_old(ref), m_ref(ref)
+        m_ref(ref), m_old(ref)
       {
         this->m_ref++;
       }
-    ~Reentrance_Guard()
+    ~Sentry()
       {
         this->m_ref--;
       }
 
-    Reentrance_Guard(const Reentrance_Guard&)
+    Sentry(const Sentry&)
       = delete;
-    Reentrance_Guard& operator=(const Reentrance_Guard&)
+    Sentry& operator=(const Sentry&)
       = delete;
 
   public:
@@ -39,11 +39,6 @@ class Reentrance_Guard
         return this->m_old == 0;
       }
   };
-
-Reentrance_Guard do_check_reentrance(long& ref) noexcept
-  {
-    return Reentrance_Guard(ref);
-  }
 
 template<typename FunctionT>
     class Callback_Wrapper final : public Variable_Callback
@@ -123,7 +118,7 @@ bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
 Collector* Collector::collect_single_opt()
   {
     // Ignore recursive requests.
-    const auto sentry = do_check_reentrance(this->m_recur);
+    const Sentry sentry(this->m_recur);
     if(!sentry)
       return nullptr;
     Collector* next = nullptr;
@@ -270,7 +265,7 @@ Collector* Collector::collect_single_opt()
 Collector& Collector::wipe_out_variables() noexcept
   {
     // Ignore recursive requests.
-    const auto sentry = do_check_reentrance(this->m_recur);
+    const Sentry sentry(this->m_recur);
     if(!sentry)
       return *this;
     // Wipe all variables recursively.
