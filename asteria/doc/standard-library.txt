@@ -1900,8 +1900,8 @@
 	  `limit` is specified, no more than this number of bytes will be
 	  read.
 
-	* Returns `true` if all data have been processed successfully, or
-	  `null` on failure.
+	* Returns the number of bytes that have been read and processed
+	  as an `integer`, or `null` on failure.
 
 	* Throws an exception if `offset` is negative.
 

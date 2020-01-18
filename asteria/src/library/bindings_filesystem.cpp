@@ -278,15 +278,8 @@ Sopt std_filesystem_file_read(Sval path, Iopt offset, Iopt limit)
     }
     // Don't read too many bytes at a time.
     data.resize(static_cast<size_t>(rlimit));
-    ::ssize_t nread;
-    if(offset) {
-      // Read data from the offset specified.
-      nread = ::pread(fd, data.mut_data(), data.size(), roffset);
-    }
-    else {
-      // Read data from the beginning.
-      nread = ::read(fd, data.mut_data(), data.size());
-    }
+    ::ssize_t nread = offset ? ::pread(fd, data.mut_data(), data.size(), roffset)
+                             : ::read(fd, data.mut_data(), data.size());
     if(nread < 0) {
       return clear;
     }
@@ -294,7 +287,7 @@ Sopt std_filesystem_file_read(Sval path, Iopt offset, Iopt limit)
     return ::rocket::move(data);
   }
 
-bool std_filesystem_file_stream(Global& global, Sval path, Fval callback,
+Iopt std_filesystem_file_stream(Global& global, Sval path, Fval callback,
                                 Iopt offset, Iopt limit)
   {
     if(offset && (*offset < 0)) {
@@ -302,32 +295,26 @@ bool std_filesystem_file_stream(Global& global, Sval path, Fval callback,
     }
     int64_t roffset = offset.value_or(0);
     int64_t rlimit = ::rocket::clamp(limit.value_or(INT32_MAX), 0, 16777216);
-    int64_t nremaining = ::rocket::max(limit.value_or(INT64_MAX), 0);
+    int64_t ntotal = 0;
+    int64_t ntlimit = ::rocket::max(limit.value_or(INT64_MAX), 0);
     Sval data;
     // Open the file for reading.
     ::rocket::unique_posix_fd fd(::open(path.c_str(), O_RDONLY), ::close);
     if(!fd) {
-      return false;
+      return clear;
     }
     cow_vector<Reference> args;
     for(;;) {
       // Has the read limit been reached?
-      if(nremaining <= 0) {
+      if(ntotal >= ntlimit) {
         break;
       }
       // Don't read too many bytes at a time.
       data.resize(static_cast<size_t>(rlimit));
-      ::ssize_t nread;
-      if(offset) {
-        // Read data from the offset specified.
-        nread = ::pread(fd, data.mut_data(), data.size(), roffset);
-      }
-      else {
-        // Read data from the beginning.
-        nread = ::read(fd, data.mut_data(), data.size());
-      }
+      ::ssize_t nread = offset ? ::pread(fd, data.mut_data(), data.size(), roffset)
+                               : ::read(fd, data.mut_data(), data.size());
       if(nread < 0) {
-        return false;
+        return clear;
       }
       if(nread == 0) {
         break;
@@ -344,10 +331,10 @@ bool std_filesystem_file_stream(Global& global, Sval path, Fval callback,
       callback->invoke(self, global, ::rocket::move(args));
       self.finish_call(global);
       // Read the next block.
-      nremaining -= nread;
       roffset += nread;
+      ntotal += nread;
     }
-    return true;
+    return ntotal;
   }
 
 bool std_filesystem_file_write(Sval path, Sval data, Iopt offset)
@@ -356,7 +343,8 @@ bool std_filesystem_file_write(Sval path, Sval data, Iopt offset)
       ASTERIA_THROW("negative file offset (offset `$1`)", *offset);
     }
     int64_t roffset = offset.value_or(0);
-    int64_t nremaining = static_cast<int64_t>(data.size());
+    int64_t ntotal = 0;
+    int64_t ntlimit = data.ssize();
     // Calculate the `flags` argument.
     // If we are to write from the beginning, truncate the file at creation.
     // This saves us two syscalls to truncate the file below.
@@ -379,22 +367,25 @@ bool std_filesystem_file_write(Sval path, Sval data, Iopt offset)
     }
     for(;;) {
       // Have all data been written successfully?
-      if(nremaining <= 0) {
+      if(ntotal >= ntlimit) {
         break;
       }
       // Write data to the end.
-      ::ssize_t nwritten = ::write(fd, data.data() + data.size() - nremaining, static_cast<size_t>(nremaining));
+      ::ssize_t nwritten = ::write(fd, data.data() + static_cast<ptrdiff_t>(ntotal),
+                                   static_cast<size_t>(ntlimit - ntotal));
       if(nwritten < 0) {
         return false;
       }
-      nremaining -= nwritten;
+      // Write remaining data.
+      ntotal += nwritten;
     }
     return true;
   }
 
 bool std_filesystem_file_append(Sval path, Sval data, Bopt exclusive)
   {
-    int64_t nremaining = static_cast<int64_t>(data.size());
+    int64_t ntotal = 0;
+    int64_t ntlimit = data.ssize();
     // Calculate the `flags` argument.
     // If we are to write from the beginning, truncate the file at creation.
     // This saves us two syscalls to truncate the file below.
@@ -409,15 +400,17 @@ bool std_filesystem_file_append(Sval path, Sval data, Bopt exclusive)
     }
     for(;;) {
       // Have all data been written successfully?
-      if(nremaining <= 0) {
+      if(ntotal >= ntlimit) {
         break;
       }
       // Write data to the end.
-      ::ssize_t nwritten = ::write(fd, data.data() + data.size() - nremaining, static_cast<size_t>(nremaining));
+      ::ssize_t nwritten = ::write(fd, data.data() + static_cast<ptrdiff_t>(ntotal),
+                                   static_cast<size_t>(ntlimit - ntotal));
       if(nwritten < 0) {
         return false;
       }
-      nremaining -= nwritten;
+      // Write remaining data.
+      ntotal += nwritten;
     }
     return true;
   }
@@ -425,24 +418,26 @@ bool std_filesystem_file_append(Sval path, Sval data, Bopt exclusive)
 bool std_filesystem_file_copy_from(Sval path_new, Sval path_old)
   {
     // Open the old file.
-    ::rocket::unique_posix_fd hf_old(::open(path_old.c_str(), O_RDONLY), ::close);
-    if(!hf_old) {
+    ::rocket::unique_posix_fd fd_old(::open(path_old.c_str(), O_RDONLY), ::close);
+    if(!fd_old) {
       return false;
     }
     // Get the file mode and preferred I/O block size.
     struct ::stat stb_old;
-    if(::fstat(hf_old, &stb_old) != 0) {
+    if(::fstat(fd_old, &stb_old) != 0) {
       return false;
     }
+    // We always overwrite the destination file.
+    int flags = O_WRONLY | O_CREAT | O_TRUNC | O_APPEND;
     // Create the new file, discarding its contents.
-    ::rocket::unique_posix_fd hf_new(::open(path_new.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_APPEND, 0200), ::close);
-    if(!hf_new) {
+    ::rocket::unique_posix_fd fd_new(::open(path_new.c_str(), flags, 0200), ::close);
+    if(!fd_new) {
       // If the file cannot be opened, unlink it and try again.
       if((errno == EISDIR) || (::unlink(path_new.c_str()) != 0)) {
         return false;
       }
-      hf_new.reset(::open(path_new.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_APPEND, 0200));
-      if(!hf_new) {
+      fd_new.reset(::open(path_new.c_str(), flags, 0200));
+      if(!fd_new) {
         return false;
       }
     }
@@ -451,7 +446,7 @@ bool std_filesystem_file_copy_from(Sval path_new, Sval path_old)
     buff.resize(static_cast<size_t>(stb_old.st_blksize));
     for(;;) {
       // Read some bytes.
-      ::ssize_t nread = ::read(hf_old, buff.mut_data(), buff.size());
+      ::ssize_t nread = ::read(fd_old, buff.mut_data(), buff.size());
       if(nread < 0) {
         return false;
       }
@@ -460,16 +455,23 @@ bool std_filesystem_file_copy_from(Sval path_new, Sval path_old)
       }
       // Write them all.
       ::ssize_t ntotal = 0;
-      do {
-        ::ssize_t nwritten = ::write(hf_new, buff.mut_data() + ntotal, static_cast<size_t>(nread - ntotal));
+      for(;;) {
+        // Have all data been written successfully?
+        if(ntotal >= nread) {
+          break;
+        }
+        // Write data to the end.
+        ::ssize_t nwritten = ::write(fd_new, buff.data() + static_cast<ptrdiff_t>(ntotal),
+                                     static_cast<size_t>(nread - ntotal));
         if(nwritten < 0) {
           return false;
         }
+        // Write remaining data.
         ntotal += nwritten;
-      } while(ntotal < nread);
+      }
     }
     // Set the file mode. This must be at the last.
-    if(::fchmod(hf_new, stb_old.st_mode) != 0) {
+    if(::fchmod(fd_new, stb_old.st_mode) != 0) {
       return false;
     }
     return true;
@@ -782,7 +784,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           Iopt limit;
           if(reader.I().g(path).g(callback).g(offset).g(limit).F()) {
             // Call the binding function.
-            return std_filesystem_file_stream(global, path, callback, offset, limit) ? true : null_value;
+            return std_filesystem_file_stream(global, path, callback, offset, limit);
           }
           // Fail.
           reader.throw_no_matching_function_call();
