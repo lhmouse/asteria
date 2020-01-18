@@ -102,9 +102,9 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
           // Generate code with regard to proper tail calls.
           for(size_t i = 0;  i < epos;  ++i) {
             altr.body[i].generate_code(code_body, nullptr, ctx_func, opts,
-                                       altr.body[i + 1].is_empty_return() ? ptc_aware_prune : ptc_aware_none);
+                                       altr.body[i + 1].is_empty_return() ? ptc_aware_void : ptc_aware_none);
           }
-          altr.body[epos].generate_code(code_body, nullptr, ctx_func, opts, ptc_aware_prune);
+          altr.body[epos].generate_code(code_body, nullptr, ctx_func, opts, ptc_aware_void);
         }
         // TODO: Insert optimization passes.
         // Encode arguments.

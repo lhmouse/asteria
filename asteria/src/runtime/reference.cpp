@@ -26,8 +26,8 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
 
     do {
       // Figure out how to forward the result.
-      if(tca->ptc() == ptc_aware_prune) {
-        ptc_conj = ptc_aware_prune;
+      if(tca->ptc() == ptc_aware_void) {
+        ptc_conj = ptc_aware_void;
       }
       else if((tca->ptc() == ptc_aware_by_val) && (ptc_conj == ptc_aware_by_ref)) {
         ptc_conj = ptc_aware_by_val;
@@ -78,7 +78,7 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
     } while(tca = self.get_tail_call_opt());
 
     // Process the result.
-    if(ptc_conj == ptc_aware_prune) {
+    if(ptc_conj == ptc_aware_void) {
       // Return `void`.
       self = Reference_Root::S_void();
     }
