@@ -215,8 +215,8 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
               code.emplace_back(::rocket::move(xnode));
             }
             else {
-              AIR_Node::S_initialize_variable xnode_init = { altr.immutable };
-              code.emplace_back(::rocket::move(xnode_init));
+              AIR_Node::S_initialize_variable xnode = { altr.immutable };
+              code.emplace_back(::rocket::move(xnode));
             }
           }
         }
@@ -261,8 +261,8 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
                                                    ::rocket::move(code_body) };
         code.emplace_back(::rocket::move(xnode_defn));
         // Initialize the function.
-        AIR_Node::S_initialize_variable xnode_init = { true };
-        code.emplace_back(::rocket::move(xnode_init));
+        AIR_Node::S_initialize_variable xnode = { true };
+        code.emplace_back(::rocket::move(xnode));
         return code;
       }
 
