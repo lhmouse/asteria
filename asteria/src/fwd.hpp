@@ -74,7 +74,7 @@ using ::rocket::begin;
 using ::rocket::end;
 using ::rocket::xswap;
 using ::rocket::swap;
-using ::rocket::clear;
+using ::rocket::emptyc;
 
 // Low-level Data Structure
 class Variable_HashSet;

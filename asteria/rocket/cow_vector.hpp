@@ -80,7 +80,7 @@ template<typename valueT, typename allocT> class cow_vector
       {
         this->assign(noadl::move(other));
       }
-    constexpr cow_vector(clear_t = clear_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
+    constexpr cow_vector(emptyc_t = emptyc_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
       :
         cow_vector(allocator_type())
       {
@@ -118,7 +118,7 @@ template<typename valueT, typename allocT> class cow_vector
       {
         this->assign(init);
       }
-    cow_vector& operator=(clear_t) noexcept
+    cow_vector& operator=(emptyc_t) noexcept
       {
         this->clear();
         return *this;

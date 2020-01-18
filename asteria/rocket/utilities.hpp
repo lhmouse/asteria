@@ -429,11 +429,11 @@ template<uintmax_t valueT>
   {
   };
 
-// This tag value is used to construct an empty container. Assigning `clear` to a container clears it.
-struct clear_t
+// This tag value is used to construct an empty container. Assigning `emptyc` to a container clears it.
+struct emptyc_t
   {
   }
-constexpr clear;
+constexpr emptyc;
 
 // Fancy pointer conversion
 template<typename pointerT>

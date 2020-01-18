@@ -8,7 +8,7 @@
 
 namespace Asteria {
 
-extern Sval std_json_format(Value value, Sopt indent = clear);
+extern Sval std_json_format(Value value, Sopt indent = emptyc);
 extern Sval std_json_format(Value value, Ival indent);
 extern Value std_json_parse(Sval text);
 

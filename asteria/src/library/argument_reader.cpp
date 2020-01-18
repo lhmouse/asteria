@@ -79,7 +79,7 @@ const Reference* Argument_Reader::do_peek_argument_opt() const
 opt<size_t> Argument_Reader::do_check_finish_opt() const
   {
     if(!this->m_state.succeeded) {
-      return clear;
+      return emptyc;
     }
     // Before calling this function, the current overload must have been finished.
     auto index = this->m_state.nparams;

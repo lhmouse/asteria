@@ -15,7 +15,7 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
 template<typename valueT> class optional
   {
     static_assert(!is_array<valueT>::value, "invalid element type");
-    static_assert(!is_same<valueT, clear_t>::value, "invalid element type");
+    static_assert(!is_same<valueT, emptyc_t>::value, "invalid element type");
 
   public:
     using value_type       = valueT;
@@ -27,7 +27,7 @@ template<typename valueT> class optional
 
   public:
     // 19.6.3.1, constructors
-    constexpr optional(clear_t = clear) noexcept
+    constexpr optional(emptyc_t = emptyc) noexcept
       :
         m_stor()
       {
@@ -58,7 +58,7 @@ template<typename valueT> class optional
           this->m_stor.emplace_back(noadl::move(other.m_stor.front()));
       }
     // 19.6.3.3, assignment
-    optional& operator=(clear_t) noexcept
+    optional& operator=(emptyc_t) noexcept
       {
         this->m_stor.clear();
         return *this;
@@ -218,23 +218,23 @@ template<typename valueT>
   }
 
 template<typename valueT>
-    constexpr bool operator==(const optional<valueT>& lhs, clear_t) noexcept
+    constexpr bool operator==(const optional<valueT>& lhs, emptyc_t) noexcept
   {
     return +!lhs;
   }
 template<typename valueT>
-    constexpr bool operator!=(const optional<valueT>& lhs, clear_t) noexcept
+    constexpr bool operator!=(const optional<valueT>& lhs, emptyc_t) noexcept
   {
     return !!lhs;
   }
 
 template<typename valueT>
-    constexpr bool operator==(clear_t, const optional<valueT>& rhs) noexcept
+    constexpr bool operator==(emptyc_t, const optional<valueT>& rhs) noexcept
   {
     return +!rhs;
   }
 template<typename valueT>
-    constexpr bool operator!=(clear_t, const optional<valueT>& rhs) noexcept
+    constexpr bool operator!=(emptyc_t, const optional<valueT>& rhs) noexcept
   {
     return !!rhs;
   }

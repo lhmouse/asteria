@@ -18,10 +18,10 @@ extern Oopt std_filesystem_directory_list(Sval path);
 extern Iopt std_filesystem_directory_create(Sval path);
 extern Iopt std_filesystem_directory_remove(Sval path);
 
-extern Sopt std_filesystem_file_read(Sval path, Iopt offset = clear, Iopt limit = clear);
-extern Iopt std_filesystem_file_stream(Global& global, Sval path, Fval callback, Iopt offset = clear, Iopt limit = clear);
-extern bool std_filesystem_file_write(Sval path, Sval data, Iopt offset = clear);
-extern bool std_filesystem_file_append(Sval path, Sval data, Bopt exclusive = clear);
+extern Sopt std_filesystem_file_read(Sval path, Iopt offset = emptyc, Iopt limit = emptyc);
+extern Iopt std_filesystem_file_stream(Global& global, Sval path, Fval callback, Iopt offset = emptyc, Iopt limit = emptyc);
+extern bool std_filesystem_file_write(Sval path, Sval data, Iopt offset = emptyc);
+extern bool std_filesystem_file_append(Sval path, Sval data, Bopt exclusive = emptyc);
 extern bool std_filesystem_file_copy_from(Sval path_new, Sval path_old);
 extern bool std_filesystem_file_remove(Sval path);
 

@@ -579,7 +579,7 @@ Iopt std_numeric_parse_integer(Sval text)
     auto tpos = text.find_first_not_of(s_spaces);
     if(tpos == Sval::npos) {
       // `text` consists of only spaces. Fail.
-      return clear;
+      return emptyc;
     }
     auto bptr = text.data() + tpos;
     auto eptr = text.data() + text.find_last_not_of(s_spaces) + 1;
@@ -588,15 +588,15 @@ Iopt std_numeric_parse_integer(Sval text)
     ::rocket::ascii_numget numg;
     if(!numg.parse_I(bptr, eptr)) {
       // `text` could not be converted to an integer. Fail.
-      return clear;
+      return emptyc;
     }
     if(bptr != eptr) {
       // `text` consists of invalid characters. Fail.
-      return clear;
+      return emptyc;
     }
     if(!numg.cast_I(value, INT64_MIN, INT64_MAX)) {
       // The value is out of range.
-      return clear;
+      return emptyc;
     }
     // The value has been stored successfully.
     return value;
@@ -607,7 +607,7 @@ Ropt std_numeric_parse_real(Sval text, Bopt saturating)
     auto tpos = text.find_first_not_of(s_spaces);
     if(tpos == Sval::npos) {
       // `text` consists of only spaces. Fail.
-      return clear;
+      return emptyc;
     }
     auto bptr = text.data() + tpos;
     auto eptr = text.data() + text.find_last_not_of(s_spaces) + 1;
@@ -616,18 +616,18 @@ Ropt std_numeric_parse_real(Sval text, Bopt saturating)
     ::rocket::ascii_numget numg;
     if(!numg.parse_F(bptr, eptr)) {
       // `text` could not be converted to an integer. Fail.
-      return clear;
+      return emptyc;
     }
     if(bptr != eptr) {
       // `text` consists of invalid characters. Fail.
-      return clear;
+      return emptyc;
     }
     if(!numg.cast_F(value, -HUGE_VAL, HUGE_VAL)) {
       // The value is out of range.
       // Unlike integers, underflows are accepted unconditionally.
       // Overflows are accepted unless `saturating` is `false` or absent.
       if(numg.overflowed() && (saturating != true))
-        return clear;
+        return emptyc;
     }
     // The value has been stored successfully.
     return value;
