@@ -74,7 +74,7 @@ Reference& do_declare(Executive_Context& ctx, const phsh_string& name)
 AIR_Status do_execute_block(const AVMC_Queue& queue, Executive_Context& ctx)
   {
     // Execute the queue on a new context.
-    Executive_Context ctx_next(::rocket::ref(ctx));
+    Executive_Context ctx_next(::rocket::ref(ctx), nullptr);
     auto status = queue.execute(ctx_next);
     // Forward the status as is.
     return status;
@@ -107,7 +107,7 @@ AIR_Status do_execute_catch(const AVMC_Queue& queue, const phsh_string& name_exc
                             const Runtime_Error& except, Executive_Context& ctx)
   {
     // Execute the queue on a new context.
-    Executive_Context ctx_next(::rocket::ref(ctx));
+    Executive_Context ctx_next(::rocket::ref(ctx), nullptr);
     // Set the exception reference.
     {
       Reference_Root::S_temporary xref = { except.value() };
@@ -449,7 +449,7 @@ AIR_Status do_switch_statement(Executive_Context& ctx, ParamU /*pu*/, const void
 
     // Jump to the clause denoted by `target`.
     // Note that all clauses share the same context.
-    Executive_Context ctx_body(::rocket::ref(ctx));
+    Executive_Context ctx_body(::rocket::ref(ctx), nullptr);
     // Fly over all clauses that precede `target`.
     for(size_t i = 0;  i < target;  ++i) {
       ::rocket::for_each(names_added[i], [&](const phsh_string& name) { do_declare(ctx_body, name);  });
@@ -522,7 +522,7 @@ AIR_Status do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const vo
     const auto& queue_body = do_pcast<Pv_for_each>(pv)->queue_body;
 
     // We have to create an outer context due to the fact that the key and mapped references outlast every iteration.
-    Executive_Context ctx_for(::rocket::ref(ctx));
+    Executive_Context ctx_for(::rocket::ref(ctx), nullptr);
     // Allocate an uninitialized variable for the key.
     const auto vkey = ctx_for.global().create_variable();
     // Inject the variable into the current context.
@@ -593,7 +593,7 @@ AIR_Status do_for_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
     // This is the same as the `for` statement in C.
     // We have to create an outer context due to the fact that names declared in the first segment
     // outlast every iteration.
-    Executive_Context ctx_for(::rocket::ref(ctx));
+    Executive_Context ctx_for(::rocket::ref(ctx), nullptr);
     // Execute the loop initializer, which shall only be a definition or an expression statement.
     auto status = queue_init.execute(ctx_for);
     ROCKET_ASSERT(status == air_status_next);
@@ -2567,7 +2567,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
     case index_execute_block: {
         const auto& altr = this->m_stor.as<index_execute_block>();
         // Check for rebinds recursively.
-        Analytic_Context ctx_body(::rocket::ref(ctx));
+        Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
         bool dirty = false;
         auto xaltr = altr;
         do_rebind_nodes(dirty, xaltr.code_body, ctx_body);
@@ -2587,7 +2587,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
     case index_if_statement: {
         const auto& altr = this->m_stor.as<index_if_statement>();
         // Check for rebinds recursively.
-        Analytic_Context ctx_body(::rocket::ref(ctx));
+        Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
         bool dirty = false;
         auto xaltr = altr;
         do_rebind_nodes(dirty, xaltr.code_true, ctx_body);
@@ -2602,7 +2602,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
     case index_switch_statement: {
         const auto& altr = this->m_stor.as<index_switch_statement>();
         // Check for rebinds recursively.
-        Analytic_Context ctx_body(::rocket::ref(ctx));
+        Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
         bool dirty = false;
         auto xaltr = altr;
         do_rebind_nodes(dirty, xaltr.code_labels, ctx_body);
@@ -2617,7 +2617,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
     case index_do_while_statement: {
         const auto& altr = this->m_stor.as<index_do_while_statement>();
         // Check for rebinds recursively.
-        Analytic_Context ctx_body(::rocket::ref(ctx));
+        Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
         bool dirty = false;
         auto xaltr = altr;
         do_rebind_nodes(dirty, xaltr.code_body, ctx_body);
@@ -2632,7 +2632,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
     case index_while_statement: {
         const auto& altr = this->m_stor.as<index_while_statement>();
         // Check for rebinds recursively.
-        Analytic_Context ctx_body(::rocket::ref(ctx));
+        Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
         bool dirty = false;
         auto xaltr = altr;
         do_rebind_nodes(dirty, xaltr.code_cond, ctx_body);
@@ -2647,8 +2647,8 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
     case index_for_each_statement: {
         const auto& altr = this->m_stor.as<index_for_each_statement>();
         // Check for rebinds recursively.
-        Analytic_Context ctx_for(::rocket::ref(ctx));
-        Analytic_Context ctx_body(::rocket::ref(ctx_for));
+        Analytic_Context ctx_for(::rocket::ref(ctx), nullptr);
+        Analytic_Context ctx_body(::rocket::ref(ctx_for), nullptr);
         bool dirty = false;
         auto xaltr = altr;
         do_rebind_nodes(dirty, xaltr.code_init, ctx_for);
@@ -2663,8 +2663,8 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
     case index_for_statement: {
         const auto& altr = this->m_stor.as<index_for_statement>();
         // Check for rebinds recursively.
-        Analytic_Context ctx_for(::rocket::ref(ctx));
-        Analytic_Context ctx_body(::rocket::ref(ctx_for));
+        Analytic_Context ctx_for(::rocket::ref(ctx), nullptr);
+        Analytic_Context ctx_body(::rocket::ref(ctx_for), nullptr);
         bool dirty = false;
         auto xaltr = altr;
         do_rebind_nodes(dirty, xaltr.code_init, ctx_for);
@@ -2681,7 +2681,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
     case index_try_statement: {
         const auto& altr = this->m_stor.as<index_try_statement>();
         // Check for rebinds recursively.
-        Analytic_Context ctx_body(::rocket::ref(ctx));
+        Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
         bool dirty = false;
         auto xaltr = altr;
         do_rebind_nodes(dirty, xaltr.code_try, ctx_body);

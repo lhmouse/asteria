@@ -65,8 +65,8 @@ Reference& Instantiated_Function::invoke(Reference& self, Global_Context& global
   {
     // Create the stack and context for this function.
     Evaluation_Stack stack;
-    Executive_Context ctx_func(::rocket::ref(global), ::rocket::ref(stack), this->m_zvarg, this->m_params,
-                               ::rocket::move(self), ::rocket::move(args));
+    Executive_Context ctx_func(::rocket::ref(global), ::rocket::ref(stack), this->m_zvarg,
+                               ::rocket::move(self), this->m_params, ::rocket::move(args));
     stack.reserve(::rocket::move(args));
     // Execute the function body.
     auto status = this->m_queue.execute(ctx_func);

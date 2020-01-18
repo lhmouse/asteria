@@ -11,8 +11,7 @@ Executive_Context::~Executive_Context()
   {
   }
 
-void Executive_Context::do_prepare_function(const cow_vector<phsh_string>& params,
-                                            Reference&& self, cow_vector<Reference>&& args)
+void Executive_Context::do_bind_parameters(const cow_vector<phsh_string>& params, cow_vector<Reference>&& args)
   {
     // This is the subscript of the special parameter placeholder `...`.
     size_t elps = SIZE_MAX;
@@ -42,14 +41,10 @@ void Executive_Context::do_prepare_function(const cow_vector<phsh_string>& param
       ASTERIA_THROW("too many arguments (`$1` > `$2`)", args.size(), params.size());
     }
     args.erase(0, elps);
-
-    // Stash the `this` reference for lazy initialization.
-    this->m_self = ::rocket::move(self);
     // Stash variadic arguments for lazy initialization.
-    // If all arguments are positional, `args` may be reused for the evaluation stack,
-    // so don't move it at all.
+    // If all arguments are positional, `args` may be reused for the evaluation stack, so don't move it at all.
     if(!args.empty())
-      this->m_args = ::rocket::move(args.shrink_to_fit());
+      this->m_args = ::rocket::move(args);
   }
 
 bool Executive_Context::do_is_analytic() const noexcept
@@ -81,8 +76,8 @@ Reference* Executive_Context::do_lazy_lookup_opt(Reference_Dictionary& named_ref
     if(name == "__varg") {
       auto& ref = named_refs.open(::rocket::sref("__varg"));
       auto varg = this->m_args.empty() ? ckptr<Abstract_Function>(this->m_zvarg)  // pre-allocated
-                                       : ::rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg),
-                                                                                ::rocket::move(this->m_args));
+                          : ::rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg),
+                                                                   ::rocket::move(this->m_args));
       Reference_Root::S_constant xref = { ::rocket::move(varg) };
       ref = ::rocket::move(xref);
       return &ref;

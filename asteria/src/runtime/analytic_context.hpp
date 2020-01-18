@@ -15,8 +15,7 @@ class Analytic_Context : public Abstract_Context
     const Abstract_Context* m_parent_opt;
 
   public:
-    template<typename ContextT, ASTERIA_SFINAE_CONVERT(ContextT*, const Abstract_Context*)>
-        explicit Analytic_Context(ref_to<ContextT> parent)  // for non-functions
+    Analytic_Context(ref_to<const Abstract_Context> parent, nullptr_t)  // for non-functions
       :
         m_parent_opt(parent.ptr())
       {
@@ -36,7 +35,8 @@ class Analytic_Context : public Abstract_Context
   protected:
     bool do_is_analytic() const noexcept final;
     const Abstract_Context* do_get_parent_opt() const noexcept override;
-    Reference* do_lazy_lookup_opt(Reference_Dictionary& named_refs, const phsh_string& name) const override;
+    Reference* do_lazy_lookup_opt(Reference_Dictionary& named_refs,
+                                  const phsh_string& name) const override;
 
   public:
     bool is_analytic() const noexcept
