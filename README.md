@@ -39,9 +39,9 @@ console.log("a = ", a);   // [ 'hello' ]
 console.log("b = ", b);   // []
 ```
 
-But comparing to typed languages such as **Java**, **JavaScript** has a few advantages:
+However, compared with typed languages such as **Java**, **JavaScript** has a few advantages:
 
-1. A number is always a `Number`. There are no integer types of varieties of widths which simplifies programming. Unlike integers, `Number`s never overflow.
+1. A number is always a `Number`. There are no integer types of varieties of widths, which simplifies programming. Unlike integers, `Number`s never overflow.
 2. Being untyped, a function can be passed around like objects without knowing its parameters.
 
 **Asteria** is highly inspired by **JavaScript** but has been designed to address such issues.
