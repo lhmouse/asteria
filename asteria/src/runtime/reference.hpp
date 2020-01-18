@@ -12,17 +12,22 @@ namespace Asteria {
 
 class Reference
   {
+  public:
+    using Root      = Reference_Root;
+    using Modifier  = Reference_Modifier;
+
   private:
-    Reference_Root m_root;
-    cow_vector<Reference_Modifier> m_mods;
+    Root m_root;
+    cow_vector<Modifier> m_mods;
 
   public:
-    ASTERIA_VARIANT_CONSTRUCTOR(Reference, Reference_Root, XRootT, xroot)
+    ASTERIA_VARIANT_CONSTRUCTOR(Reference, Root, XRootT, xroot)
       :
-        m_root(::rocket::forward<XRootT>(xroot)), m_mods()
+        m_root(::rocket::forward<XRootT>(xroot)),
+        m_mods()
       {
       }
-    ASTERIA_VARIANT_ASSIGNMENT(Reference, Reference_Root, XRootT, xroot)
+    ASTERIA_VARIANT_ASSIGNMENT(Reference, Root, XRootT, xroot)
       {
         this->m_root = ::rocket::forward<XRootT>(xroot);
         this->m_mods.clear();
@@ -32,9 +37,9 @@ class Reference
   private:
     [[noreturn]] void do_throw_unset_no_modifier() const;
 
-    const Value& do_read(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const;
-    Value& do_open(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const;
-    Value do_unset(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const;
+    const Value& do_read(const Modifier* mods, size_t nmod, const Modifier& last) const;
+    Value& do_open(const Modifier* mods, size_t nmod, const Modifier& last) const;
+    Value do_unset(const Modifier* mods, size_t nmod, const Modifier& last) const;
 
     Reference& do_finish_call(Global_Context& global);
 
@@ -76,15 +81,17 @@ class Reference
     template<typename XModT> Reference& zoom_in(XModT&& xmod)
       {
         // Append a modifier.
-        return this->m_mods.emplace_back(::rocket::forward<XModT>(xmod)), *this;
+        this->m_mods.emplace_back(::rocket::forward<XModT>(xmod));
+        return *this;
       }
     Reference& zoom_out()
       {
         // Drop the last modifier. If there is no modifier, set `this` to `null`.
-        if(ROCKET_EXPECT(this->m_mods.empty())) {
-          return this->m_root = Reference_Root::S_constant(), *this;
-        }
-        return this->m_mods.pop_back(), *this;
+        if(ROCKET_EXPECT(this->m_mods.empty()))
+          this->m_root = Root::S_constant();
+        else
+          this->m_mods.pop_back();
+        return *this;
       }
 
     Reference& swap(Reference& other) noexcept
@@ -96,52 +103,59 @@ class Reference
 
     const Value& read() const
       {
-        if(this->m_mods.empty()) {
+        if(ROCKET_EXPECT(this->m_mods.empty()))
           return this->m_root.dereference_const();
-        }
-        return this->do_read(this->m_mods.data(), this->m_mods.size() - 1, this->m_mods.back());
-      }
-    const Value& read(const Reference_Modifier& last) const
-      {
-        return this->do_read(this->m_mods.data(), this->m_mods.size(), last);
+        else
+          return this->do_read(this->m_mods.data(), this->m_mods.size() - 1, this->m_mods.back());
       }
     Value& open() const
       {
-        if(this->m_mods.empty()) {
+        if(ROCKET_EXPECT(this->m_mods.empty()))
           return this->m_root.dereference_mutable();
-        }
-        return this->do_open(this->m_mods.data(), this->m_mods.size() - 1, this->m_mods.back());
-      }
-    Value& open(const Reference_Modifier& last) const
-      {
-        return this->do_open(this->m_mods.data(), this->m_mods.size(), last);
+        else
+          return this->do_open(this->m_mods.data(), this->m_mods.size() - 1, this->m_mods.back());
       }
     Value unset() const
       {
-        if(this->m_mods.empty()) {
+        if(ROCKET_EXPECT(this->m_mods.empty()))
           this->do_throw_unset_no_modifier();
-        }
-        return this->do_unset(this->m_mods.data(), this->m_mods.size() - 1, this->m_mods.back());
+        else
+          return this->do_unset(this->m_mods.data(), this->m_mods.size() - 1, this->m_mods.back());
       }
-    Value unset(const Reference_Modifier& last) const
+
+    const Value& read(const Modifier& last) const
+      {
+        return this->do_read(this->m_mods.data(), this->m_mods.size(), last);
+      }
+    Value& open(const Modifier& last) const
+      {
+        return this->do_open(this->m_mods.data(), this->m_mods.size(), last);
+      }
+    Value unset(const Modifier& last) const
       {
         return this->do_unset(this->m_mods.data(), this->m_mods.size(), last);
       }
 
-    rcptr<Variable> get_variable_opt() const
+    rcptr<Variable> get_variable_opt() const noexcept
       {
-        if(!this->is_variable()) {
+        if(ROCKET_UNEXPECT(!this->is_variable()))
           return nullptr;
-        }
-        return this->m_root.as_variable();
+        else
+          return this->m_root.as_variable();
       }
-
+    rcptr<Tail_Call_Arguments> get_tail_call_opt() const noexcept
+      {
+        if(ROCKET_UNEXPECT(!this->is_tail_call()))
+          return nullptr;
+        else
+          return this->m_root.as_tail_call();
+      }
     Reference& finish_call(Global_Context& global)
       {
-        if(ROCKET_EXPECT(!this->m_root.is_tail_call())) {
+        if(ROCKET_EXPECT(!this->is_tail_call()))
           return *this;
-        }
-        return this->do_finish_call(global);
+        else
+          return this->do_finish_call(global);
       }
 
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const;

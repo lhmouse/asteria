@@ -10,13 +10,19 @@
 #include "../utilities.hpp"
 
 namespace Asteria {
+namespace {
+
+using Root      = Reference::Root;
+using Modifier  = Reference::Modifier;
+
+}  // namespace
 
 void Reference::do_throw_unset_no_modifier() const
   {
     ASTERIA_THROW("non-members can't be unset");
   }
 
-const Value& Reference::do_read(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const
+const Value& Reference::do_read(const Modifier* mods, size_t nmod, const Modifier& last) const
   {
     auto qref = ::std::addressof(this->m_root.dereference_const());
     for(size_t i = 0;  i < nmod;  ++i) {
@@ -32,7 +38,7 @@ const Value& Reference::do_read(const Reference_Modifier* mods, size_t nmod, con
     return *qref;
   }
 
-Value& Reference::do_open(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const
+Value& Reference::do_open(const Modifier* mods, size_t nmod, const Modifier& last) const
   {
     auto qref = ::std::addressof(this->m_root.dereference_mutable());
     for(size_t i = 0;  i < nmod;  ++i) {
@@ -46,7 +52,7 @@ Value& Reference::do_open(const Reference_Modifier* mods, size_t nmod, const Ref
     return *qref;
   }
 
-Value Reference::do_unset(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const
+Value Reference::do_unset(const Modifier* mods, size_t nmod, const Modifier& last) const
   {
     auto qref = ::std::addressof(this->m_root.dereference_mutable());
     for(size_t i = 0;  i < nmod;  ++i) {
@@ -115,11 +121,11 @@ Reference& Reference::do_finish_call(Global_Context& global)
     }
     if(ptc_conj == ptc_aware_prune) {
       // Return `void`.
-      *this = Reference_Root::S_void();
+      *this = Root::S_void();
     }
     else if((ptc_conj == ptc_aware_by_val) && this->is_glvalue()) {
       // Convert the result to an rvalue if it shouldn't be passed by reference.
-      Reference_Root::S_temporary xref = { this->read() };
+      Root::S_temporary xref = { this->read() };
       *this = ::rocket::move(xref);
     }
     return *this;
