@@ -40,43 +40,31 @@ class Sentry
       }
   };
 
-template<typename FunctionT>
-    class Callback_Wrapper final : public Variable_Callback
+template<typename FuncT> struct Variable_Walker final : Variable_Callback
   {
-  private:
-    FunctionT m_func;  // If `FunctionT` is a reference type then this is a reference.
+    FuncT func;  // If `FunctionT` is a reference type then this is a reference.
 
-  public:
-    explicit Callback_Wrapper(FunctionT&& func)
+    explicit Variable_Walker(FuncT&& xfunc)
       :
-        m_func(::rocket::forward<FunctionT>(func))
+        func(::rocket::forward<FuncT>(xfunc))
       {
       }
-
-  public:
     bool process(const rcptr<Variable>& var) override
       {
-        return this->m_func(var);
+        return this->func(var);
       }
   };
 
-template<typename ContainerT, typename FunctionT>
-    void do_enumerate_variables(const ContainerT& cont, FunctionT&& func)
+template<typename ContT, typename FuncT> FuncT&& do_traverse(const ContT& cont, FuncT&& func)
   {
     // The callback has to be an lvalue.
-    Callback_Wrapper<FunctionT> callback(::rocket::forward<FunctionT>(func));
-    // Call the `enumerate_variables()` member function.
-    cont.enumerate_variables(callback);
+    Variable_Walker<FuncT&&> walker(::rocket::forward<FuncT>(func));
+    cont.enumerate_variables(walker);
+    return ::rocket::forward<FuncT>(walker.func);
   }
 
-class Variable_Wiper final : public Variable_Callback
+struct Variable_Wiper final : Variable_Callback
   {
-  public:
-    Variable_Wiper()
-      {
-      }
-
-  public:
     bool process(const rcptr<Variable>& var) override
       {
         // Don't modify variables in place which might have side effects.
@@ -135,7 +123,7 @@ Collector* Collector::collect_single_opt()
     //   Add variables that are either tracked or reachable from tracked ones
     //   into the staging area.
     ///////////////////////////////////////////////////////////////////////////
-    do_enumerate_variables(this->m_tracked,
+    do_traverse(this->m_tracked,
       [&](const rcptr<Variable>& root) {
         // Add a variable that is reachable directly.
         // The reference from `m_tracked` should be excluded, so we initialize the gcref
@@ -153,7 +141,7 @@ Collector* Collector::collect_single_opt()
           return false;
         }
         // Enumerate variables that are reachable from `root` indirectly.
-        do_enumerate_variables(*root,
+        do_traverse(*root,
           [&](const rcptr<Variable>& child) {
             // If this variable has been inserted indirectly, finish.
             if(!this->m_staging.insert(child)) {
@@ -173,7 +161,7 @@ Collector* Collector::collect_single_opt()
     // Phase 2
     //   Drop references directly or indirectly from `m_staging`.
     ///////////////////////////////////////////////////////////////////////////
-    do_enumerate_variables(this->m_staging,
+    do_traverse(this->m_staging,
       [&](const rcptr<Variable>& root) {
         // Drop a direct reference.
         root->increment_gcref(1);
@@ -184,7 +172,7 @@ Collector* Collector::collect_single_opt()
           return false;
         }
         // Enumerate variables that are reachable from `root` indirectly.
-        do_enumerate_variables(*root,
+        do_traverse(*root,
           [&](const rcptr<Variable>& child) {
             // Drop an indirect reference.
             child->increment_gcref(split);
@@ -199,7 +187,7 @@ Collector* Collector::collect_single_opt()
     // Phase 3
     //   Mark variables reachable indirectly from those reachable directly.
     ///////////////////////////////////////////////////////////////////////////
-    do_enumerate_variables(this->m_staging,
+    do_traverse(this->m_staging,
       [&](const rcptr<Variable>& root) {
         // Skip variables that are possibly unreachable.
         if(root->get_gcref() >= root->use_count()) {
@@ -208,7 +196,7 @@ Collector* Collector::collect_single_opt()
         // Make this variable reachable, ...
         root->reset_gcref(-1);
         // ... as well as all children.
-        do_enumerate_variables(*root,
+        do_traverse(*root,
           [&](const rcptr<Variable>& child) {
             // Skip variables that have already been marked.
             if(child->get_gcref() < 0) {
@@ -227,7 +215,7 @@ Collector* Collector::collect_single_opt()
     //   Wipe out variables whose `gcref` counters have excceeded their
     //   reference counts.
     ///////////////////////////////////////////////////////////////////////////
-    do_enumerate_variables(this->m_staging,
+    do_traverse(this->m_staging,
       [&](const rcptr<Variable>& root) {
         // All reachable variables will have negative gcref counters.
         if(root->get_gcref() >= 0) {
