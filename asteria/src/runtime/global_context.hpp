@@ -11,7 +11,7 @@
 
 namespace Asteria {
 
-class Global_Context final : public Abstract_Context
+class Global_Context : public Abstract_Context
   {
   private:
     rcptr<Rcbase> m_gcoll;  // the global garbage collector
@@ -29,8 +29,8 @@ class Global_Context final : public Abstract_Context
     ~Global_Context() override;
 
   protected:
-    bool do_is_analytic() const noexcept override;
-    const Abstract_Context* do_get_parent_opt() const noexcept override;
+    bool do_is_analytic() const noexcept final;
+    const Abstract_Context* do_get_parent_opt() const noexcept final;
     Reference* do_lazy_lookup_opt(Reference_Dictionary& named_refs, const phsh_string& name) const override;
 
   public:

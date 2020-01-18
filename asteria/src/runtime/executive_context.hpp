@@ -10,7 +10,7 @@
 
 namespace Asteria {
 
-class Executive_Context final : public Abstract_Context
+class Executive_Context : public Abstract_Context
   {
   private:
     const Executive_Context* m_parent_opt;
@@ -48,7 +48,7 @@ class Executive_Context final : public Abstract_Context
     void do_prepare_function(const cow_vector<phsh_string>& params, Reference&& self, cow_vector<Reference>&& args);
 
   protected:
-    bool do_is_analytic() const noexcept override;
+    bool do_is_analytic() const noexcept final;
     const Abstract_Context* do_get_parent_opt() const noexcept override;
     Reference* do_lazy_lookup_opt(Reference_Dictionary& named_refs, const phsh_string& name) const override;
 
