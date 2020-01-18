@@ -60,8 +60,13 @@ tinyfmt& Instantiated_Function::describe(tinyfmt& fmt) const
     return fmt << this->m_zvarg->func() << " @ " << this->m_zvarg->sloc();
   }
 
-Reference& Instantiated_Function::invoke(Reference& self, Global_Context& global,
-                                         cow_vector<Reference>&& args) const
+Variable_Callback& Instantiated_Function::enumerate_variables(Variable_Callback& callback) const
+  {
+    return this->m_queue.enumerate_variables(callback);
+  }
+
+Reference& Instantiated_Function::invoke_ptc_aware(Reference& self, Global_Context& global,
+                                                   cow_vector<Reference>&& args) const
   {
     // Create the stack and context for this function.
     Evaluation_Stack stack;
@@ -74,11 +79,6 @@ Reference& Instantiated_Function::invoke(Reference& self, Global_Context& global
     // Enable `args` to be reused after this call.
     stack.unreserve(args);
     return self;
-  }
-
-Variable_Callback& Instantiated_Function::enumerate_variables(Variable_Callback& callback) const
-  {
-    return this->m_queue.enumerate_variables(callback);
   }
 
 }  // namespace Asteria

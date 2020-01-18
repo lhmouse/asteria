@@ -46,8 +46,9 @@ class Instantiated_Function final : public Abstract_Function
       }
 
     tinyfmt& describe(tinyfmt& fmt) const override;
-    Reference& invoke(Reference& self, Global_Context& global, cow_vector<Reference>&& args) const override;
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const override;
+    Reference& invoke_ptc_aware(Reference& self, Global_Context& global,
+                                cow_vector<Reference>&& args) const override;
   };
 
 }  // namespace Asteria

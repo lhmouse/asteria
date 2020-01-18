@@ -17,18 +17,17 @@ tinyfmt& Simple_Binding_Wrapper::describe(tinyfmt& fmt) const
     return fmt << this->m_desc;
   }
 
-Reference& Simple_Binding_Wrapper::invoke(Reference& self, Global& global,
-                                          cow_vector<Reference>&& args) const
-  {
-    Reference_Root::S_temporary xref = {
-      (*(this->m_proc))(::rocket::move(args), ::rocket::move(self), global, this->m_pval)
-    };
-    return self = ::rocket::move(xref);
-  }
-
 Variable_Callback& Simple_Binding_Wrapper::enumerate_variables(Variable_Callback& callback) const
   {
     return this->m_pval.enumerate_variables(callback);
+  }
+
+Reference& Simple_Binding_Wrapper::invoke_ptc_aware(Reference& self, Global& global,
+                                                    cow_vector<Reference>&& args) const
+  {
+    Reference_Root::S_temporary xref = { (*(this->m_proc))(::rocket::move(args), ::rocket::move(self),
+                                                           global, this->m_pval) };
+    return self = ::rocket::move(xref);
   }
 
 }  // namespace Asteria

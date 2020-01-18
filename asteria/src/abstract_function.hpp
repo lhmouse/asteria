@@ -19,8 +19,14 @@ class Abstract_Function : public virtual Rcbase
 
   public:
     virtual tinyfmt& describe(tinyfmt& fmt) const = 0;
-    virtual Reference& invoke(Reference& self, Global_Context& global, cow_vector<Reference>&& args) const = 0;
     virtual Variable_Callback& enumerate_variables(Variable_Callback& callback) const = 0;
+
+    // This function may return a proper tail call wrapper.
+    virtual Reference& invoke_ptc_aware(Reference& self, Global_Context& global,
+                                        cow_vector<Reference>&& args) const = 0;
+    // These are convenience wrappers.
+    Reference& invoke(Reference& self, Global_Context& global, cow_vector<Reference>&& args = emptyc);
+    Reference invoke(Global_Context& global, cow_vector<Reference>&& args = emptyc);
   };
 
 inline tinyfmt& operator<<(tinyfmt& fmt, const Abstract_Function& func)

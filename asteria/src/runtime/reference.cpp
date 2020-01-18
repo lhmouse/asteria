@@ -12,8 +12,83 @@
 namespace Asteria {
 namespace {
 
-using Root      = Reference::Root;
-using Modifier  = Reference::Modifier;
+Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
+  {
+    // Note that `self` is overwritten before the wrapped function is called.
+    auto tca = self.get_tail_call_opt();
+    if(ROCKET_EXPECT(!tca)) {
+      return self;
+    }
+    // The function call shall yield an rvalue unless all wrapped calls return by reference.
+    PTC_Aware ptc_conj = ptc_aware_by_ref;
+    // We must rebuild the backtrace using this queue if an exception is thrown.
+    cow_vector<rcptr<Tail_Call_Arguments>> frames;
+
+    do {
+      // Figure out how to forward the result.
+      if(tca->ptc() == ptc_aware_prune) {
+        ptc_conj = ptc_aware_prune;
+      }
+      else if((tca->ptc() == ptc_aware_by_val) && (ptc_conj == ptc_aware_by_ref)) {
+        ptc_conj = ptc_aware_by_val;
+      }
+      // Record a frame.
+      frames.emplace_back(tca);
+
+      // Unpack arguments.
+      const auto& sloc = tca->sloc();
+      const auto& inside = tca->inside();
+      const auto& qhooks = global.get_hooks_opt();
+
+      // Generate a single-step trap.
+      if(qhooks) {
+        qhooks->on_single_step_trap(sloc, inside, nullptr);
+      }
+      // Get the `this` reference and all the other arguments.
+      const auto& target = tca->get_target();
+      auto args = ::rocket::move(tca->open_arguments_and_self());
+      self = ::rocket::move(args.mut_back());
+      args.pop_back();
+      // Call the hook function if any.
+      if(qhooks) {
+        qhooks->on_function_call(sloc, inside, target);
+      }
+      // Perform a non-tail call.
+      ASTERIA_RUNTIME_TRY {
+        target->invoke_ptc_aware(self, global, ::rocket::move(args));
+      }
+      ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+        // Append all frames that have been unpacked so far and rethrow the exception.
+        while(!frames.empty()) {
+          tca = ::rocket::move(frames.mut_back());
+          except.push_frame_func(tca->sloc(), tca->inside());
+          frames.pop_back();
+        }
+        // Call the hook function if any.
+        if(qhooks) {
+          qhooks->on_function_except(sloc, inside, except);
+        }
+        throw;
+      }
+      // Call the hook function if any.
+      if(qhooks) {
+        qhooks->on_function_return(sloc, inside, self);
+      }
+      // Get the next frame.
+    } while(tca = self.get_tail_call_opt());
+
+    // Process the result.
+    if(ptc_conj == ptc_aware_prune) {
+      // Return `void`.
+      self = Reference_Root::S_void();
+    }
+    else if((ptc_conj == ptc_aware_by_val) && self.is_glvalue()) {
+      // Convert the result to an rvalue if it shouldn't be passed by reference.
+      Reference_Root::S_temporary xref = { self.read() };
+      self = ::rocket::move(xref);
+    }
+    return self;
+  }
 
 }  // namespace
 
@@ -67,68 +142,7 @@ Value Reference::do_unset(const Modifier* mods, size_t nmod, const Modifier& las
 
 Reference& Reference::do_finish_call(Global_Context& global)
   {
-    // Note that `*this` is overwritten before the wrapped function is called.
-    // We must rebuild the backtrace using this queue if an exception is thrown.
-    cow_vector<rcptr<Tail_Call_Arguments>> frames;
-    // The function call shall yield an rvalue unless all wrapped calls return by reference.
-    PTC_Aware ptc_conj = ptc_aware_by_ref;
-    // Unpack all tail call wrappers.
-    while(this->m_root.is_tail_call()) {
-      // Unpack a frame.
-      auto& tca = frames.emplace_back(this->m_root.as_tail_call());
-      const auto& sloc = tca->sloc();
-      const auto& inside = tca->inside();
-      const auto& qhooks = global.get_hooks_opt();
-      // Generate a single-step trap.
-      if(qhooks) {
-        qhooks->on_single_step_trap(sloc, inside, nullptr);
-      }
-      // Tell out how to forward the result.
-      if(tca->ptc() == ptc_aware_prune) {
-        ptc_conj = ptc_aware_prune;
-      }
-      else if((tca->ptc() == ptc_aware_by_val) && (ptc_conj == ptc_aware_by_ref)) {
-        ptc_conj = ptc_aware_by_val;
-      }
-      // Unpack the function reference.
-      const auto& target = tca->get_target();
-      // Unpack arguments.
-      auto args = ::rocket::move(tca->open_arguments_and_self());
-      *this = ::rocket::move(args.mut_back());
-      args.pop_back();
-      // Call the hook function if any.
-      if(qhooks) {
-        qhooks->on_function_call(sloc, inside, target);
-      }
-      // Unwrap the function call.
-      ASTERIA_RUNTIME_TRY {
-        target->invoke(*this, global, ::rocket::move(args));
-      }
-      ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
-        // Append all frames that have been expanded so far and rethrow the exception.
-        ::std::for_each(frames.rbegin(), frames.rend(),
-                        [&](const auto& p) { except.push_frame_func(p->sloc(), p->inside());  });
-        // Call the hook function if any.
-        if(qhooks) {
-          qhooks->on_function_except(sloc, inside, except);
-        }
-        throw;
-      }
-      // Call the hook function if any.
-      if(qhooks) {
-        qhooks->on_function_return(sloc, inside, *this);
-      }
-    }
-    if(ptc_conj == ptc_aware_prune) {
-      // Return `void`.
-      *this = Root::S_void();
-    }
-    else if((ptc_conj == ptc_aware_by_val) && this->is_glvalue()) {
-      // Convert the result to an rvalue if it shouldn't be passed by reference.
-      Root::S_temporary xref = { this->read() };
-      *this = ::rocket::move(xref);
-    }
-    return *this;
+    return do_unpack_tail_calls(*this, global);
   }
 
 Variable_Callback& Reference::enumerate_variables(Variable_Callback& callback) const

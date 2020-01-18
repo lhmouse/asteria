@@ -628,8 +628,8 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
     // This is almost identical to JavaScript.
     ASTERIA_RUNTIME_TRY {
       // Execute the `try` block. If no exception is thrown, this will have little overhead.
-      // This cannot be PTC'd, otherwise exceptions thrown from tail calls won't be caught.
       auto status = do_execute_block(queue_try, ctx);
+      // This cannot be PTC'd, otherwise exceptions thrown from tail calls won't be caught.
       if(status == air_status_return_ref)
         ctx.stack().open_top().finish_call(ctx.global());
       return status;
@@ -838,10 +838,9 @@ ROCKET_NOINLINE Reference& do_invoke_nontail(Reference& self, const Source_Locat
     if(qhooks) {
       qhooks->on_function_call(sloc, inside, target);
     }
-    // Perform a non-proper call.
+    // Perform a non-tail call.
     ASTERIA_RUNTIME_TRY {
       target->invoke(self, global, ::rocket::move(args));
-      self.finish_call(global);
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
       // Append the current frame and rethrow the exception.
@@ -864,7 +863,7 @@ AIR_Status do_function_call_common(Reference& self, const Source_Location& sloc,
                                    const ckptr<Abstract_Function>& target,
                                    Global_Context& global, cow_vector<Reference>&& args)
   {
-    if(ptc == ptc_aware_none) {
+    if(ROCKET_EXPECT(ptc == ptc_aware_none)) {
       // Perform plain calls.
       do_invoke_nontail(self, sloc, inside, target, global, qhooks, ::rocket::move(args));
       // Discard `self`.
@@ -893,9 +892,8 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
     if(qhooks) {
       qhooks->on_single_step_trap(sloc, inside, ::std::addressof(ctx));
     }
-    cow_vector<Reference> args;
-
     // Pop arguments off the stack backwards.
+    cow_vector<Reference> args;
     args.resize(nargs, Reference_Root::S_void());
     for(size_t i = args.size() - 1;  i != SIZE_MAX;  --i) {
       // Get an argument. Ensure it is dereferenceable.
@@ -2497,9 +2495,8 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
     if(qhooks) {
       qhooks->on_single_step_trap(sloc, inside, ::std::addressof(ctx));
     }
-    cow_vector<Reference> args;
-
     // Pop the argument generator.
+    cow_vector<Reference> args;
     auto value = ctx.stack().get_top().read();
     if(value.is_null()) {
       // Leave `args` empty.

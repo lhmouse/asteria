@@ -67,21 +67,12 @@ Simple_Script& Simple_Script::reload_stdin()
     return this->reload(cbuf, ::rocket::sref("<stdin>"));
   }
 
-rcptr<Abstract_Function> Simple_Script::copy_function_opt() const noexcept
-  {
-    return ::rocket::dynamic_pointer_cast<Abstract_Function>(this->m_cptr);
-  }
-
 Reference Simple_Script::execute(Global_Context& global, cow_vector<Reference>&& args) const
   {
-    auto qtarget = this->copy_function_opt();
-    if(!qtarget) {
+    if(!this->m_cptr) {
       ASTERIA_THROW("no script loaded");
     }
-    Reference self = Reference_Root::S_constant();
-    qtarget->invoke(self, global, ::rocket::move(args));
-    self.finish_call(global);
-    return self;
+    return this->m_cptr->invoke(global, ::rocket::move(args));
   }
 
 Reference Simple_Script::execute(Global_Context& global, cow_vector<Value>&& vals) const
@@ -92,12 +83,6 @@ Reference Simple_Script::execute(Global_Context& global, cow_vector<Value>&& val
       Reference_Root::S_temporary xref = { ::rocket::move(vals.mut(i)) };
       args.emplace_back(::rocket::move(xref));
     }
-    return this->execute(global, ::rocket::move(args));
-  }
-
-Reference Simple_Script::execute(Global_Context& global) const
-  {
-    cow_vector<Reference> args;
     return this->execute(global, ::rocket::move(args));
   }
 

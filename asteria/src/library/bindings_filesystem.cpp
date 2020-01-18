@@ -327,9 +327,7 @@ Iopt std_filesystem_file_stream(Global& global, Sval path, Fval callback,
       Reference_Root::S_temporary xref_data = { ::rocket::move(data) };
       args.emplace_back(::rocket::move(xref_data));
       // Call the function but discard its return value.
-      Reference self = Reference_Root::S_constant();
-      callback->invoke(self, global, ::rocket::move(args));
-      self.finish_call(global);
+      callback->invoke(global, ::rocket::move(args));
       // Read the next block.
       roffset += nread;
       ntotal += nread;

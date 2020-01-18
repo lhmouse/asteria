@@ -14,7 +14,7 @@ class Simple_Script
   private:
     cow_vector<phsh_string> m_params;  // constant
     Compiler_Options m_opts = { };
-    rcptr<Rcbase> m_cptr;  // note type erasure
+    rcptr<Abstract_Function> m_cptr;  // note type erasure
 
   public:
     Simple_Script() noexcept
@@ -57,11 +57,14 @@ class Simple_Script
     Simple_Script& reload_file(const cow_string& path);
     Simple_Script& reload_stdin();
 
-    rcptr<Abstract_Function> copy_function_opt() const noexcept;
-
-    Reference execute(Global_Context& global, cow_vector<Reference>&& args) const;
+    // Get the stored function.
+    const rcptr<Abstract_Function>& get_function_opt() const noexcept
+      {
+        return this->m_cptr;
+      }
+    // These are convenience wrappers.
+    Reference execute(Global_Context& global, cow_vector<Reference>&& args = emptyc) const;
     Reference execute(Global_Context& global, cow_vector<Value>&& vals) const;
-    Reference execute(Global_Context& global) const;
   };
 
 }  // namespace Asteria
