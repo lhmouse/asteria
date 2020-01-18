@@ -17,7 +17,7 @@
 
 # Concepts
 
-I started learning programming from **ActionScript** since **Flash 5** days. It was not sooner (and not strange, either) that I learned **JavaScript**, because they are so similar. I admit that **JavaScript** is a fascinating language, but also has quite a few drawbacks when we look at it today:
+I started learning programming from **ActionScript** since **Flash 5** days. It was no sooner (and not strange, either) than I learned **JavaScript**, because they are so similar. I admit that **JavaScript** is a fascinating language, but it also has quite a few drawbacks when we look at it today:
 
 1. There is no 64-bit integer type. While some data exchange formats (such as **Protocol Buffers**) do have 64-bit integers, they cannot be stored as `Number`s safely. Some implementations split 64-bit integers into higher and lower parts, which is not very handy, as the lower part suddenly becomes signed and may be negative.
 2. There are no binary strings. `String`s are in **UCS-2** (rather than **UTF-16**), while `ArrayBuffer`s are not resizable.
