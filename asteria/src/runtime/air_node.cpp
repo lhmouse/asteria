@@ -2565,14 +2565,12 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         const auto& altr = this->m_stor.as<index_execute_block>();
         // Check for rebinds recursively.
         Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
-        bool dirty = false;
-        auto xaltr = altr;
-        do_rebind_nodes(dirty, xaltr.code_body, ctx_body);
-        if(!dirty) {
+        auto pair = ::std::make_pair(false, altr);
+        do_rebind_nodes(pair.first, pair.second.code_body, ctx_body);
+        if(!pair.first) {
           return emptyc;
         }
-        // Return the bound node.
-        return ::rocket::move(xaltr);
+        return ::rocket::move(pair.second);
       }
 
     case index_declare_variable:
@@ -2585,60 +2583,52 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         const auto& altr = this->m_stor.as<index_if_statement>();
         // Check for rebinds recursively.
         Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
-        bool dirty = false;
-        auto xaltr = altr;
-        do_rebind_nodes(dirty, xaltr.code_true, ctx_body);
-        do_rebind_nodes(dirty, xaltr.code_false, ctx_body);
-        if(!dirty) {
+        auto pair = ::std::make_pair(false, altr);
+        do_rebind_nodes(pair.first, pair.second.code_true, ctx_body);
+        do_rebind_nodes(pair.first, pair.second.code_false, ctx_body);
+        if(!pair.first) {
           return emptyc;
         }
-        // Return the bound node.
-        return ::rocket::move(xaltr);
+        return ::rocket::move(pair.second);
       }
 
     case index_switch_statement: {
         const auto& altr = this->m_stor.as<index_switch_statement>();
         // Check for rebinds recursively.
         Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
-        bool dirty = false;
-        auto xaltr = altr;
-        do_rebind_nodes(dirty, xaltr.code_labels, ctx_body);
-        do_rebind_nodes(dirty, xaltr.code_bodies, ctx_body);
-        if(!dirty) {
+        auto pair = ::std::make_pair(false, altr);
+        do_rebind_nodes(pair.first, pair.second.code_labels, ctx_body);
+        do_rebind_nodes(pair.first, pair.second.code_bodies, ctx_body);
+        if(!pair.first) {
           return emptyc;
         }
-        // Return the bound node.
-        return ::rocket::move(xaltr);
+        return ::rocket::move(pair.second);
       }
 
     case index_do_while_statement: {
         const auto& altr = this->m_stor.as<index_do_while_statement>();
         // Check for rebinds recursively.
         Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
-        bool dirty = false;
-        auto xaltr = altr;
-        do_rebind_nodes(dirty, xaltr.code_body, ctx_body);
-        do_rebind_nodes(dirty, xaltr.code_cond, ctx_body);
-        if(!dirty) {
+        auto pair = ::std::make_pair(false, altr);
+        do_rebind_nodes(pair.first, pair.second.code_body, ctx_body);
+        do_rebind_nodes(pair.first, pair.second.code_cond, ctx_body);
+        if(!pair.first) {
           return emptyc;
         }
-        // Return the bound node.
-        return ::rocket::move(xaltr);
+        return ::rocket::move(pair.second);
       }
 
     case index_while_statement: {
         const auto& altr = this->m_stor.as<index_while_statement>();
         // Check for rebinds recursively.
         Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
-        bool dirty = false;
-        auto xaltr = altr;
-        do_rebind_nodes(dirty, xaltr.code_cond, ctx_body);
-        do_rebind_nodes(dirty, xaltr.code_body, ctx_body);
-        if(!dirty) {
+        auto pair = ::std::make_pair(false, altr);
+        do_rebind_nodes(pair.first, pair.second.code_cond, ctx_body);
+        do_rebind_nodes(pair.first, pair.second.code_body, ctx_body);
+        if(!pair.first) {
           return emptyc;
         }
-        // Return the bound node.
-        return ::rocket::move(xaltr);
+        return ::rocket::move(pair.second);
       }
 
     case index_for_each_statement: {
@@ -2646,15 +2636,13 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         // Check for rebinds recursively.
         Analytic_Context ctx_for(::rocket::ref(ctx), nullptr);
         Analytic_Context ctx_body(::rocket::ref(ctx_for), nullptr);
-        bool dirty = false;
-        auto xaltr = altr;
-        do_rebind_nodes(dirty, xaltr.code_init, ctx_for);
-        do_rebind_nodes(dirty, xaltr.code_body, ctx_body);
-        if(!dirty) {
+        auto pair = ::std::make_pair(false, altr);
+        do_rebind_nodes(pair.first, pair.second.code_init, ctx_for);
+        do_rebind_nodes(pair.first, pair.second.code_body, ctx_body);
+        if(!pair.first) {
           return emptyc;
         }
-        // Return the bound node.
-        return ::rocket::move(xaltr);
+        return ::rocket::move(pair.second);
       }
 
     case index_for_statement: {
@@ -2662,32 +2650,28 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         // Check for rebinds recursively.
         Analytic_Context ctx_for(::rocket::ref(ctx), nullptr);
         Analytic_Context ctx_body(::rocket::ref(ctx_for), nullptr);
-        bool dirty = false;
-        auto xaltr = altr;
-        do_rebind_nodes(dirty, xaltr.code_init, ctx_for);
-        do_rebind_nodes(dirty, xaltr.code_cond, ctx_for);
-        do_rebind_nodes(dirty, xaltr.code_step, ctx_for);
-        do_rebind_nodes(dirty, xaltr.code_body, ctx_body);
-        if(!dirty) {
+        auto pair = ::std::make_pair(false, altr);
+        do_rebind_nodes(pair.first, pair.second.code_init, ctx_for);
+        do_rebind_nodes(pair.first, pair.second.code_cond, ctx_for);
+        do_rebind_nodes(pair.first, pair.second.code_step, ctx_for);
+        do_rebind_nodes(pair.first, pair.second.code_body, ctx_body);
+        if(!pair.first) {
           return emptyc;
         }
-        // Return the bound node.
-        return ::rocket::move(xaltr);
+        return ::rocket::move(pair.second);
       }
 
     case index_try_statement: {
         const auto& altr = this->m_stor.as<index_try_statement>();
         // Check for rebinds recursively.
         Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
-        bool dirty = false;
-        auto xaltr = altr;
-        do_rebind_nodes(dirty, xaltr.code_try, ctx_body);
-        do_rebind_nodes(dirty, xaltr.code_catch, ctx_body);
-        if(!dirty) {
+        auto pair = ::std::make_pair(false, altr);
+        do_rebind_nodes(pair.first, pair.second.code_try, ctx_body);
+        do_rebind_nodes(pair.first, pair.second.code_catch, ctx_body);
+        if(!pair.first) {
           return emptyc;
         }
-        // Return the bound node.
-        return ::rocket::move(xaltr);
+        return ::rocket::move(pair.second);
       }
 
     case index_throw_statement:
@@ -2716,8 +2700,8 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
           return emptyc;
         }
         // Bind it now.
-        S_push_bound_reference xaltr = { *qref };
-        return ::rocket::move(xaltr);
+        S_push_bound_reference xnode = { *qref };
+        return ::rocket::move(xnode);
       }
 
     case index_push_bound_reference: {
@@ -2729,41 +2713,35 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         const auto& altr = this->m_stor.as<index_define_function>();
         // Check for rebinds recursively.
         Analytic_Context ctx_func(::std::addressof(ctx), altr.params);
-        bool dirty = false;
-        auto xaltr = altr;
-        do_rebind_nodes(dirty, xaltr.code_body, ctx_func);
-        if(!dirty) {
+        auto pair = ::std::make_pair(false, altr);
+        do_rebind_nodes(pair.first, pair.second.code_body, ctx_func);
+        if(!pair.first) {
           return emptyc;
         }
-        // Return the bound node.
-        return ::rocket::move(xaltr);
+        return ::rocket::move(pair.second);
       }
 
     case index_branch_expression: {
         const auto& altr = this->m_stor.as<index_branch_expression>();
         // Check for rebinds recursively.
-        bool dirty = false;
-        auto xaltr = altr;
-        do_rebind_nodes(dirty, xaltr.code_true, ctx);
-        do_rebind_nodes(dirty, xaltr.code_false, ctx);
-        if(!dirty) {
+        auto pair = ::std::make_pair(false, altr);
+        do_rebind_nodes(pair.first, pair.second.code_true, ctx);
+        do_rebind_nodes(pair.first, pair.second.code_false, ctx);
+        if(!pair.first) {
           return emptyc;
         }
-        // Return the bound node.
-        return ::rocket::move(xaltr);
+        return ::rocket::move(pair.second);
       }
 
     case index_coalescence: {
         const auto& altr = this->m_stor.as<index_coalescence>();
         // Check for rebinds recursively.
-        bool dirty = false;
-        auto xaltr = altr;
-        do_rebind_nodes(dirty, xaltr.code_null, ctx);
-        if(!dirty) {
+        auto pair = ::std::make_pair(false, altr);
+        do_rebind_nodes(pair.first, pair.second.code_null, ctx);
+        if(!pair.first) {
           return emptyc;
         }
-        // Return the bound node.
-        return ::rocket::move(xaltr);
+        return ::rocket::move(pair.second);
       }
 
     case index_function_call:
