@@ -32,7 +32,7 @@ template<typename valueT> class reference_wrapper
       {
       }
     template<typename otherT, ROCKET_ENABLE_IF(is_convertible<otherT*, valueT*>::value)>
-        constexpr reference_wrapper(reference_wrapper<otherT> other) noexcept
+        constexpr reference_wrapper(const reference_wrapper<otherT>& other) noexcept
       :
         m_ptr(other.m_ptr)
       {
