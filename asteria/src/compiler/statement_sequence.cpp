@@ -1813,7 +1813,8 @@ bool do_accept_infix_element(cow_vector<Expression_Unit>& units, Token_Stream& t
     } while(succ);
     // Append prefixes in reverse order.
     // N.B. Prefix operators have lower precedence than postfix ones.
-    ::std::move(prefixes.mut_rbegin(), prefixes.mut_rend(), ::std::back_inserter(units));
+    units.append(::std::make_move_iterator(prefixes.mut_rbegin()),
+                 ::std::make_move_iterator(prefixes.mut_rend()));
     return true;
   }
 
