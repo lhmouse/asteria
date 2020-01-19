@@ -95,14 +95,14 @@ Precedence Infix_Element::tell_precedence() const noexcept
     }
   }
 
-void Infix_Element::extract(cow_vector<Expression_Unit>& units)
+Infix_Element& Infix_Element::extract(cow_vector<Expression_Unit>& units)
   {
     switch(this->index()) {
     case index_head: {
         auto& altr = this->m_stor.as<index_head>();
         // Move-append all units into `units`.
         ::std::move(altr.units.mut_begin(), altr.units.mut_end(), ::std::back_inserter(units));
-        return;
+        return *this;
       }
     case index_ternary: {
         auto& altr = this->m_stor.as<index_ternary>();
@@ -110,28 +110,28 @@ void Infix_Element::extract(cow_vector<Expression_Unit>& units)
         Expression_Unit::S_branch xunit = { ::rocket::move(altr.branch_true), ::rocket::move(altr.branch_false),
                                             altr.assign };
         units.emplace_back(::rocket::move(xunit));
-        return;
+        return *this;
       }
     case index_logical_and: {
         auto& altr = this->m_stor.as<index_logical_and>();
         // Construct a branch unit from the TRUE branch and an empty FALSE branch, then append it to `units`.
         Expression_Unit::S_branch xunit = { ::rocket::move(altr.branch_true), emptyc, altr.assign };
         units.emplace_back(::rocket::move(xunit));
-        return;
+        return *this;
       }
     case index_logical_or: {
         auto& altr = this->m_stor.as<index_logical_or>();
         // Construct a branch unit from an empty TRUE branch and the FALSE branch, then append it to `units`.
         Expression_Unit::S_branch xunit = { emptyc, ::rocket::move(altr.branch_false), altr.assign };
         units.emplace_back(::rocket::move(xunit));
-        return;
+        return *this;
       }
     case index_coalescence: {
         auto& altr = this->m_stor.as<index_coalescence>();
         // Construct a branch unit from the NULL branch, then append it to `units`.
         Expression_Unit::S_coalescence xunit = { ::rocket::move(altr.branch_null), altr.assign };
         units.emplace_back(::rocket::move(xunit));
-        return;
+        return *this;
       }
     case index_general: {
         auto& altr = this->m_stor.as<index_general>();
@@ -142,7 +142,7 @@ void Infix_Element::extract(cow_vector<Expression_Unit>& units)
         // Append the operator itself.
         Expression_Unit::S_operator_rpn xunit = { altr.xop, altr.assign };
         units.emplace_back(::rocket::move(xunit));
-        return;
+        return *this;
       }
     default:
       ASTERIA_TERMINATE("invalid infix element type (index `$1`)", this->index());

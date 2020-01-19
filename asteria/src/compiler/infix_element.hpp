@@ -93,7 +93,7 @@ class Infix_Element
     // Returns the precedence of this element.
     Precedence tell_precedence() const noexcept;
     // Moves all units into `units`.
-    void extract(cow_vector<Expression_Unit>& units);
+    Infix_Element& extract(cow_vector<Expression_Unit>& units);
     // Returns a reference where new units will be appended.
     cow_vector<Expression_Unit>& open_junction() noexcept;
   };
