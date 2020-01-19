@@ -51,13 +51,14 @@ class AVMC_Queue
       {
         uint16_t nphdrs : 8;  // size of `paramv`, in number of `Header`s [!]
         uint16_t has_vtbl : 1;  // vtable exists?
+        uint16_t : 7;
         uint16_t paramu_x16;  // user-defined data [1]
         uint32_t paramu_x32;  // user-defined data [2]
         union {
           Executor* exec;  // active if `has_vtbl`
           const Vtable* vtbl;  // active otherwise
         };
-        alignas(max_align_t) intptr_t paramv[];  // user-defined data [3]
+        alignas(max_align_t) mutable intptr_t paramv[];  // user-defined data [3]
 
         constexpr ParamU get_paramu() const noexcept
           {
@@ -65,7 +66,7 @@ class AVMC_Queue
           }
         constexpr void* get_paramv() const noexcept
           {
-            return const_cast<intptr_t*>(this->paramv);
+            return this->paramv;
           }
       };
 
