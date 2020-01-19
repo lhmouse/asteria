@@ -144,11 +144,6 @@ template<typename... unusedT> struct make_void
 #define ROCKET_ENABLE_IF_HAS_TYPE(...)       typename ::rocket::make_void<typename __VA_ARGS__>::type* = nullptr
 #define ROCKET_ENABLE_IF_HAS_VALUE(...)      typename ::std::enable_if<!sizeof((__VA_ARGS__)) || true>::type* = nullptr
 
-template<typename lhsT, typename rhsT>
-    struct is_lvalue_assignable : is_assignable<typename add_lvalue_reference<lhsT>::type, rhsT>
-  {
-  };
-
 // The argument must be a non-const lvalue.
 template<typename argT, ROCKET_DISABLE_IF(is_same<const argT, argT>::value)>
     ROCKET_ARTIFICIAL_FUNCTION constexpr argT&& move(argT& arg) noexcept
@@ -164,6 +159,11 @@ template<typename targetT, typename argT, ROCKET_ENABLE_IF(is_reference<argT>::v
   }
 
 #include "details/utilities.tcc"
+
+template<typename lhsT, typename rhsT>
+    struct is_lvalue_assignable : is_assignable<typename add_lvalue_reference<lhsT>::type, rhsT>
+  {
+  };
 
 template<typename typeT>
     struct remove_cvref : remove_cv<typename remove_reference<typeT>::type>
