@@ -26,17 +26,17 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
 
     do {
       // Figure out how to forward the result.
-      if(tca->ptc() == ptc_aware_void) {
+      if(tca->ptc_aware() == ptc_aware_void) {
         ptc_conj = ptc_aware_void;
       }
-      else if((tca->ptc() == ptc_aware_by_val) && (ptc_conj == ptc_aware_by_ref)) {
+      else if((tca->ptc_aware() == ptc_aware_by_val) && (ptc_conj == ptc_aware_by_ref)) {
         ptc_conj = ptc_aware_by_val;
       }
       // Record a frame.
       frames.emplace_back(tca);
 
       // Unpack arguments.
-      const auto& sloc = tca->sloc();
+      const auto& sloc = tca->source_location();
       const auto& inside = tca->inside();
       const auto& qhooks = global.get_hooks_opt();
 
@@ -61,7 +61,7 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
         // Append all frames that have been unpacked so far and rethrow the exception.
         while(!frames.empty()) {
           tca = ::rocket::move(frames.mut_back());
-          except.push_frame_func(tca->sloc(), tca->inside());
+          except.push_frame_func(tca->source_location(), tca->inside());
           frames.pop_back();
         }
         // Call the hook function if any.

@@ -15,17 +15,19 @@ class Tail_Call_Arguments final : public virtual Rcbase
   private:
     Source_Location m_sloc;
     cow_string m_inside;
-    PTC_Aware m_tco_aware;
+    PTC_Aware m_ptc;
 
+    // This is the target function.
     ckptr<Abstract_Function> m_target;
-    // The last reference is `self`. We can't store a `Reference` directly as the class has not been defined here.
+    // The last reference is `self`.
+    // We can't store a `Reference` directly as the class `Reference` is incomplete here.
     cow_vector<Reference> m_args_self;
 
   public:
     Tail_Call_Arguments(const Source_Location& sloc, const cow_string& inside, PTC_Aware ptc,
                         const ckptr<Abstract_Function>& target, cow_vector<Reference>&& args_self)
       :
-        m_sloc(sloc), m_inside(inside), m_tco_aware(ptc),
+        m_sloc(sloc), m_inside(inside), m_ptc(ptc),
         m_target(target), m_args_self(::rocket::move(args_self))
       {
       }
@@ -37,7 +39,7 @@ class Tail_Call_Arguments final : public virtual Rcbase
       = delete;
 
   public:
-    const Source_Location& sloc() const noexcept
+    const Source_Location& source_location() const noexcept
       {
         return this->m_sloc;
       }
@@ -45,9 +47,9 @@ class Tail_Call_Arguments final : public virtual Rcbase
       {
         return this->m_inside;
       }
-    PTC_Aware ptc() const noexcept
+    PTC_Aware ptc_aware() const noexcept
       {
-        return this->m_tco_aware;
+        return this->m_ptc;
       }
 
     const ckptr<Abstract_Function>& get_target() const noexcept
