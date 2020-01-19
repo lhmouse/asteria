@@ -63,35 +63,35 @@ class Evaluation_Stack
         return *this;
       }
 
-    const Reference& get_top(size_t offset = 0) const noexcept
+    const Reference& get_top(size_t off = 0) const noexcept
       {
-        ROCKET_ASSERT(offset < this->size());
-        return this->m_etop[~offset];
+        ROCKET_ASSERT(off < this->size());
+        return this->m_etop[~off];
       }
-    Reference& open_top(size_t offset = 0) noexcept
+    Reference& open_top(size_t off = 0) noexcept
       {
-        ROCKET_ASSERT(offset < this->size());
-        return this->m_etop[~offset];
+        ROCKET_ASSERT(off < this->size());
+        return this->m_etop[~off];
       }
     template<typename XRefT> Reference& push(XRefT&& xref)
       {
         if(ROCKET_EXPECT(this->size() < this->m_refs.size())) {
           // Overwrite the next element.
-          auto& ref = this->m_etop[0];
-          ref = ::rocket::forward<XRefT>(xref);
-          this->m_etop++;
-          return ref;
+          this->m_etop[0] = ::rocket::forward<XRefT>(xref);
+          this->m_etop += 1;
         }
-        // Push a new element.
-        auto& ref = this->m_refs.emplace_back(::rocket::forward<XRefT>(xref));
-        this->m_etop = ::std::addressof(ref);
-        this->m_etop++;
-        return ref;
+        else {
+          // Push a new element.
+          this->m_refs.emplace_back(::rocket::forward<XRefT>(xref));
+          this->m_etop = this->m_refs.mut_data() + this->m_refs.size();
+        }
+        return this->m_etop[-1];
       }
-    Evaluation_Stack& pop(size_t count = 1) noexcept
+    Evaluation_Stack& pop(size_t cnt = 1) noexcept
       {
-        ROCKET_ASSERT(count <= this->size());
-        this->m_etop -= count;
+        // Move the top pointer without destroying elements.
+        ROCKET_ASSERT(cnt <= this->size());
+        this->m_etop -= cnt;
         return *this;
       }
   };
