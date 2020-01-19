@@ -109,7 +109,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       {
         this->m_sth.reallocate(0, 0, 0, res_arg);
       }
-    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
+    template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
         cow_hashmap(inputT first, inputT last, size_type res_arg = 0,
                     const hasher& hf = hasher(), const key_equal& eq = key_equal(), const allocator_type& alloc = allocator_type())
       :
@@ -130,7 +130,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       {
         this->m_sth.reallocate(0, 0, 0, res_arg);
       }
-    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
+    template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
         cow_hashmap(inputT first, inputT last, size_type res_arg, const hasher& hf, const allocator_type& alloc)
       :
         cow_hashmap(res_arg, hf, alloc)
@@ -149,7 +149,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       {
         this->m_sth.reallocate(0, 0, 0, res_arg);
       }
-    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
+    template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
         cow_hashmap(inputT first, inputT last, size_type res_arg, const allocator_type& alloc)
       :
         cow_hashmap(res_arg, alloc)
@@ -393,7 +393,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         return this->try_emplace(noadl::move(value.first), noadl::move(value.second));
       }
     // N.B. The return type is a non-standard extension.
-    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
+    template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
         cow_hashmap& insert(inputT first, inputT last)
       {
         if(first == last) {
@@ -599,8 +599,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         return *this;
       }
     // N.B. This function is a non-standard extension.
-    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
-        cow_hashmap& assign(inputT first, inputT last)
+    template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)> cow_hashmap& assign(inputT first, inputT last)
       {
         this->clear();
         this->insert(noadl::move(first), noadl::move(last));

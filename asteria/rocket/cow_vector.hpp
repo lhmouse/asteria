@@ -105,7 +105,7 @@ template<typename valueT, typename allocT> class cow_vector
       {
         this->assign(n, first, rest...);
       }
-    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
+    template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
         cow_vector(inputT first, inputT last, const allocator_type& alloc = allocator_type())
       :
         cow_vector(alloc)
@@ -455,8 +455,7 @@ template<typename valueT, typename allocT> class cow_vector
         return this->append(init.begin(), init.end());
       }
     // N.B. This is a non-standard extension.
-    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
-        cow_vector& append(inputT first, inputT last)
+    template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)> cow_vector& append(inputT first, inputT last)
       {
         if(first == last) {
           return *this;
@@ -526,8 +525,7 @@ template<typename valueT, typename allocT> class cow_vector
         return *this;
       }
     // N.B. This is a non-standard extension.
-    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
-        cow_vector& insert(size_type tpos, inputT first, inputT last)
+    template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)> cow_vector& insert(size_type tpos, inputT first, inputT last)
       {
         this->do_insert_no_bound_check(this->do_clamp_subrange(tpos, 0),
                                        details_cow_vector::append, noadl::move(first), noadl::move(last));
@@ -558,8 +556,7 @@ template<typename valueT, typename allocT> class cow_vector
         auto ptr = this->do_insert_no_bound_check(tpos, details_cow_vector::append, init);
         return iterator(this->m_sth, ptr);
       }
-    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
-        iterator insert(const_iterator tins, inputT first, inputT last)
+    template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)> iterator insert(const_iterator tins, inputT first, inputT last)
       {
         auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
         auto ptr = this->do_insert_no_bound_check(tpos, details_cow_vector::append, noadl::move(first), noadl::move(last));
@@ -644,8 +641,7 @@ template<typename valueT, typename allocT> class cow_vector
         return *this;
       }
     // N.B. The return type is a non-standard extension.
-    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
-        cow_vector& assign(inputT first, inputT last)
+    template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)> cow_vector& assign(inputT first, inputT last)
       {
         this->clear();
         this->append(noadl::move(first), noadl::move(last));

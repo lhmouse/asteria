@@ -215,6 +215,17 @@ template<typename testT, typename lowerT, typename upperT>
                                            : noadl::forward<testT>(test);
   }
 
+template<typename typeT, typename = void>
+    struct is_input_iterator
+      : integral_constant<bool, false>
+  {
+  };
+template<typename typeT>
+    struct is_input_iterator<typeT, typename make_void<typename iterator_traits<typeT>::iterator_category>::type>
+      : integral_constant<bool, true>
+  {
+  };
+
 template<typename firstT, typename lastT, typename funcT, typename... paramsT>
     void ranged_for(firstT first, lastT last, funcT&& func, const paramsT&... params)
   {
