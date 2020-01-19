@@ -57,27 +57,30 @@ const Abstract_Context* Executive_Context::do_get_parent_opt() const noexcept
     return this->get_parent_opt();
   }
 
-Reference* Executive_Context::do_lazy_lookup_opt(Reference_Dictionary& named_refs,
-                                                 const phsh_string& name) const
+Reference* Executive_Context::do_lazy_lookup_opt(const phsh_string& name)
   {
     // Create pre-defined references as needed.
     // N.B. If you have ever changed these, remember to update 'analytic_context.cpp' as well.
     if(name == "__func") {
-      auto& ref = named_refs.open(::rocket::sref("__func"));
+      auto& ref = this->open_named_reference(::rocket::sref("__func"));
+      // Copy the function name as a constant.
       Reference_Root::S_constant xref = { this->m_zvarg->func() };
       ref = ::rocket::move(xref);
       return &ref;
     }
     if(name == "__this") {
-      auto& ref = named_refs.open(::rocket::sref("__this"));
+      auto& ref = this->open_named_reference(::rocket::sref("__this"));
+      // Copy the `this` reference.
       ref = ::rocket::move(this->m_self);
       return &ref;
     }
     if(name == "__varg") {
-      auto& ref = named_refs.open(::rocket::sref("__varg"));
-      auto varg = this->m_args.empty() ? ckptr<Abstract_Function>(this->m_zvarg)  // pre-allocated
-                          : ::rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg),
-                                                                   ::rocket::move(this->m_args));
+      auto& ref = this->open_named_reference(::rocket::sref("__varg"));
+      // Use the pre-allocated zero-ary variadic argument getter if there is no variadic argument,
+      // or allocate a new one if there is.
+      auto varg = this->m_args.empty() ? ckptr<Abstract_Function>(this->m_zvarg)
+                                       : ::rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg),
+                                                                                ::rocket::move(this->m_args));
       Reference_Root::S_constant xref = { ::rocket::move(varg) };
       ref = ::rocket::move(xref);
       return &ref;

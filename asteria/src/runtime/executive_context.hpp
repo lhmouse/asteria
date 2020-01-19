@@ -22,8 +22,8 @@ class Executive_Context : public Abstract_Context
     ckptr<Variadic_Arguer> m_zvarg;
 
     // These members are used for lazy initialization.
-    mutable Reference m_self;
-    mutable cow_vector<Reference> m_args;
+    Reference m_self;
+    cow_vector<Reference> m_args;
 
   public:
     Executive_Context(ref_to<const Executive_Context> parent, nullptr_t)  // for non-functions
@@ -51,8 +51,7 @@ class Executive_Context : public Abstract_Context
   protected:
     bool do_is_analytic() const noexcept final;
     const Abstract_Context* do_get_parent_opt() const noexcept override;
-    Reference* do_lazy_lookup_opt(Reference_Dictionary& named_refs,
-                                  const phsh_string& name) const override;
+    Reference* do_lazy_lookup_opt(const phsh_string& name) override;
 
   public:
     bool is_analytic() const noexcept

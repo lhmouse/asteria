@@ -13,7 +13,7 @@ class Abstract_Context
   {
   private:
     // This stores all named references (variables, parameters, etc.) of this context.
-    mutable Reference_Dictionary m_named_refs;
+    Reference_Dictionary m_named_refs;
 
   public:
     Abstract_Context() noexcept
@@ -29,8 +29,7 @@ class Abstract_Context
   protected:
     virtual bool do_is_analytic() const noexcept = 0;
     virtual const Abstract_Context* do_get_parent_opt() const noexcept = 0;
-    virtual Reference* do_lazy_lookup_opt(Reference_Dictionary& named_refs,
-                                          const phsh_string& name) const = 0;
+    virtual Reference* do_lazy_lookup_opt(const phsh_string& name) = 0;
 
   public:
     bool is_analytic() const noexcept
@@ -47,7 +46,7 @@ class Abstract_Context
         auto qref = this->m_named_refs.get_opt(name);
         if(ROCKET_UNEXPECT(!qref)) {
           // Initialize builtins only when needed.
-          qref = this->do_lazy_lookup_opt(this->m_named_refs, name);
+          qref = const_cast<Abstract_Context*>(this)->do_lazy_lookup_opt(name);
         }
         return qref;
       }

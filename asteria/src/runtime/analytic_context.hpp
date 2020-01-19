@@ -35,8 +35,7 @@ class Analytic_Context : public Abstract_Context
   protected:
     bool do_is_analytic() const noexcept final;
     const Abstract_Context* do_get_parent_opt() const noexcept override;
-    Reference* do_lazy_lookup_opt(Reference_Dictionary& named_refs,
-                                  const phsh_string& name) const override;
+    Reference* do_lazy_lookup_opt(const phsh_string& name) override;
 
   public:
     bool is_analytic() const noexcept
