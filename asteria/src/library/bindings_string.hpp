@@ -8,11 +8,11 @@
 
 namespace Asteria {
 
-extern Sval std_string_slice(Sval text, Ival from, Iopt length = emptyc);
+extern Sval std_string_slice(Sval text, Ival from, Iopt length = nullopt);
 extern Sval std_string_replace_slice(Sval text, Ival from, Sval replacement);
 extern Sval std_string_replace_slice(Sval text, Ival from, Iopt length, Sval replacement);
 
-extern Ival std_string_compare(Sval text1, Sval text2, Iopt length = emptyc);
+extern Ival std_string_compare(Sval text1, Sval text2, Iopt length = nullopt);
 extern Bval std_string_starts_with(Sval text, Sval prefix);
 extern Bval std_string_ends_with(Sval text, Sval suffix);
 
@@ -41,30 +41,30 @@ extern Iopt std_string_rfind_not_of(Sval text, Ival from, Sval reject);
 extern Iopt std_string_rfind_not_of(Sval text, Ival from, Iopt length, Sval reject);
 
 extern Sval std_string_reverse(Sval text);
-extern Sval std_string_trim(Sval text, Sopt reject = emptyc);
-extern Sval std_string_ltrim(Sval text, Sopt reject = emptyc);
-extern Sval std_string_rtrim(Sval text, Sopt reject = emptyc);
-extern Sval std_string_lpad(Sval text, Ival length, Sopt padding = emptyc);
-extern Sval std_string_rpad(Sval text, Ival length, Sopt padding = emptyc);
+extern Sval std_string_trim(Sval text, Sopt reject = nullopt);
+extern Sval std_string_ltrim(Sval text, Sopt reject = nullopt);
+extern Sval std_string_rtrim(Sval text, Sopt reject = nullopt);
+extern Sval std_string_lpad(Sval text, Ival length, Sopt padding = nullopt);
+extern Sval std_string_rpad(Sval text, Ival length, Sopt padding = nullopt);
 extern Sval std_string_to_upper(Sval text);
 extern Sval std_string_to_lower(Sval text);
-extern Sval std_string_translate(Sval text, Sval inputs, Sopt outputs = emptyc);
+extern Sval std_string_translate(Sval text, Sval inputs, Sopt outputs = nullopt);
 
-extern Aval std_string_explode(Sval text, Sopt delim, Iopt limit = emptyc);
-extern Sval std_string_implode(Aval segments, Sopt delim = emptyc);
+extern Aval std_string_explode(Sval text, Sopt delim, Iopt limit = nullopt);
+extern Sval std_string_implode(Aval segments, Sopt delim = nullopt);
 
-extern Sval std_string_hex_encode(Sval data, Bopt lowercase = emptyc, Sopt delim = emptyc);
+extern Sval std_string_hex_encode(Sval data, Bopt lowercase = nullopt, Sopt delim = nullopt);
 extern Sopt std_string_hex_decode(Sval text);
 
-extern Sval std_string_base32_encode(Sval data, Bopt lowercase = emptyc);
+extern Sval std_string_base32_encode(Sval data, Bopt lowercase = nullopt);
 extern Sopt std_string_base32_decode(Sval text);
 
 extern Sval std_string_base64_encode(Sval data);
 extern Sopt std_string_base64_decode(Sval text);
 
-extern Sopt std_string_utf8_encode(Ival code_point, Bopt permissive = emptyc);
-extern Sopt std_string_utf8_encode(Aval code_points, Bopt permissive = emptyc);
-extern Aopt std_string_utf8_decode(Sval text, Bopt permissive = emptyc);
+extern Sopt std_string_utf8_encode(Ival code_point, Bopt permissive = nullopt);
+extern Sopt std_string_utf8_encode(Aval code_points, Bopt permissive = nullopt);
+extern Aopt std_string_utf8_decode(Sval text, Bopt permissive = nullopt);
 
 extern Sval std_string_pack_8(Ival value);
 extern Sval std_string_pack_8(Aval values);

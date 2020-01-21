@@ -35,7 +35,7 @@ Oopt std_filesystem_get_information(Sval path)
   {
     struct ::stat stb;
     if(::lstat(path.c_str(), &stb) != 0) {
-      return emptyc;
+      return nullopt;
     }
     // Convert the result to an `object`.
     Oval stat;
@@ -94,7 +94,7 @@ Iopt std_filesystem_remove_recursive(Sval path)
     if(err == ENOTDIR) {
       // This is something not a directory.
       if(::unlink(path.c_str()) != 0) {
-        return emptyc;
+        return nullopt;
       }
       // Succeed.
       return Ival(1);
@@ -118,7 +118,7 @@ Iopt std_filesystem_remove_recursive(Sval path)
       if(pair.first == rmlist_rmdir) {
         // This is an empty directory. Remove it.
         if(::rmdir(pair.second.c_str()) != 0) {
-          return emptyc;
+          return nullopt;
         }
         count++;
         continue;
@@ -126,7 +126,7 @@ Iopt std_filesystem_remove_recursive(Sval path)
       if(pair.first == rmlist_unlink) {
         // This is a plain file. Remove it.
         if(::unlink(pair.second.c_str()) != 0) {
-          return emptyc;
+          return nullopt;
         }
         count++;
         continue;
@@ -138,7 +138,7 @@ Iopt std_filesystem_remove_recursive(Sval path)
       // Append all entries.
       ::rocket::unique_posix_dir dp(::opendir(pair.second.c_str()), ::closedir);
       if(!dp) {
-        return emptyc;
+        return nullopt;
       }
       // Write entries.
       struct ::dirent* next;
@@ -164,7 +164,7 @@ Iopt std_filesystem_remove_recursive(Sval path)
           // If the file type is unknown, ask for it.
           struct ::stat stb;
           if(::lstat(child.c_str(), &stb) != 0) {
-            return emptyc;
+            return nullopt;
           }
           is_dir = S_ISDIR(stb.st_mode);
         }
@@ -179,7 +179,7 @@ Oopt std_filesystem_directory_list(Sval path)
   {
     ::rocket::unique_posix_dir dp(::opendir(path.c_str()), closedir);
     if(!dp) {
-      return emptyc;
+      return nullopt;
     }
     // Write entries.
     Oval entries;
@@ -210,7 +210,7 @@ Oopt std_filesystem_directory_list(Sval path)
         // Identify the entry.
         struct ::stat stb;
         if(::lstat(child.c_str(), &stb) != 0) {
-          return emptyc;
+          return nullopt;
         }
         entry.try_emplace(::rocket::sref("b_dir"),
           Bval(
@@ -235,15 +235,15 @@ Iopt std_filesystem_directory_create(Sval path)
     }
     int err = errno;
     if(err != EEXIST) {
-      return emptyc;
+      return nullopt;
     }
     // Fail only if it is not a directory that exists.
     struct ::stat stb;
     if(::stat(path.c_str(), &stb) != 0) {
-      return emptyc;
+      return nullopt;
     }
     if(!S_ISDIR(stb.st_mode)) {
-      return emptyc;
+      return nullopt;
     }
     // The directory already exists.
     return Ival(0);
@@ -257,7 +257,7 @@ Iopt std_filesystem_directory_remove(Sval path)
     }
     int err = errno;
     if((err != ENOTEMPTY) && (err != EEXIST)) {
-      return emptyc;
+      return nullopt;
     }
     // The directory is not empty.
     return Ival(0);
@@ -274,14 +274,14 @@ Sopt std_filesystem_file_read(Sval path, Iopt offset, Iopt limit)
     // Open the file for reading.
     ::rocket::unique_posix_fd fd(::open(path.c_str(), O_RDONLY), ::close);
     if(!fd) {
-      return emptyc;
+      return nullopt;
     }
     // Don't read too many bytes at a time.
     data.resize(static_cast<size_t>(rlimit));
     ::ssize_t nread = offset ? ::pread(fd, data.mut_data(), data.size(), roffset)
                              : ::read(fd, data.mut_data(), data.size());
     if(nread < 0) {
-      return emptyc;
+      return nullopt;
     }
     data.erase(static_cast<size_t>(nread));
     return ::rocket::move(data);
@@ -301,7 +301,7 @@ Iopt std_filesystem_file_stream(Global& global, Sval path, Fval callback,
     // Open the file for reading.
     ::rocket::unique_posix_fd fd(::open(path.c_str(), O_RDONLY), ::close);
     if(!fd) {
-      return emptyc;
+      return nullopt;
     }
     cow_vector<Reference> args;
     for(;;) {
@@ -314,7 +314,7 @@ Iopt std_filesystem_file_stream(Global& global, Sval path, Fval callback,
       ::ssize_t nread = offset ? ::pread(fd, data.mut_data(), data.size(), roffset)
                                : ::read(fd, data.mut_data(), data.size());
       if(nread < 0) {
-        return emptyc;
+        return nullopt;
       }
       if(nread == 0) {
         break;

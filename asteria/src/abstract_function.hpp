@@ -25,8 +25,8 @@ class Abstract_Function : public virtual Rcbase
     virtual Reference& invoke_ptc_aware(Reference& self, Global_Context& global,
                                         cow_vector<Reference>&& args) const = 0;
     // These are convenience wrappers.
-    Reference& invoke(Reference& self, Global_Context& global, cow_vector<Reference>&& args = emptyc);
-    Reference invoke(Global_Context& global, cow_vector<Reference>&& args = emptyc);
+    Reference& invoke(Reference& self, Global_Context& global, cow_vector<Reference>&& args = nullopt);
+    Reference invoke(Global_Context& global, cow_vector<Reference>&& args = nullopt);
   };
 
 inline tinyfmt& operator<<(tinyfmt& fmt, const Abstract_Function& func)

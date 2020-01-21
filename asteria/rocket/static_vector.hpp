@@ -79,7 +79,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
       {
         this->assign(noadl::move(other));
       }
-    static_vector(emptyc_t = emptyc_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
+    static_vector(nullopt_t = nullopt_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
       :
         static_vector(allocator_type())
       {
@@ -116,7 +116,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
       {
         this->assign(init);
       }
-    static_vector& operator=(emptyc_t) noexcept
+    static_vector& operator=(nullopt_t) noexcept
       {
         this->clear();
         return *this;

@@ -2546,7 +2546,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
     switch(this->index()) {
     case index_clear_stack: {
         // There is nothing to bind.
-        return emptyc;
+        return nullopt;
       }
 
     case index_execute_block: {
@@ -2556,7 +2556,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         auto pair = ::std::make_pair(false, altr);
         do_rebind_nodes(pair.first, pair.second.code_body, ctx_body);
         if(!pair.first) {
-          return emptyc;
+          return nullopt;
         }
         return ::rocket::move(pair.second);
       }
@@ -2564,7 +2564,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
     case index_declare_variable:
     case index_initialize_variable: {
         // There is nothing to bind.
-        return emptyc;
+        return nullopt;
       }
 
     case index_if_statement: {
@@ -2575,7 +2575,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         do_rebind_nodes(pair.first, pair.second.code_true, ctx_body);
         do_rebind_nodes(pair.first, pair.second.code_false, ctx_body);
         if(!pair.first) {
-          return emptyc;
+          return nullopt;
         }
         return ::rocket::move(pair.second);
       }
@@ -2588,7 +2588,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         do_rebind_nodes(pair.first, pair.second.code_labels, ctx_body);
         do_rebind_nodes(pair.first, pair.second.code_bodies, ctx_body);
         if(!pair.first) {
-          return emptyc;
+          return nullopt;
         }
         return ::rocket::move(pair.second);
       }
@@ -2601,7 +2601,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         do_rebind_nodes(pair.first, pair.second.code_body, ctx_body);
         do_rebind_nodes(pair.first, pair.second.code_cond, ctx_body);
         if(!pair.first) {
-          return emptyc;
+          return nullopt;
         }
         return ::rocket::move(pair.second);
       }
@@ -2614,7 +2614,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         do_rebind_nodes(pair.first, pair.second.code_cond, ctx_body);
         do_rebind_nodes(pair.first, pair.second.code_body, ctx_body);
         if(!pair.first) {
-          return emptyc;
+          return nullopt;
         }
         return ::rocket::move(pair.second);
       }
@@ -2628,7 +2628,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         do_rebind_nodes(pair.first, pair.second.code_init, ctx_for);
         do_rebind_nodes(pair.first, pair.second.code_body, ctx_body);
         if(!pair.first) {
-          return emptyc;
+          return nullopt;
         }
         return ::rocket::move(pair.second);
       }
@@ -2644,7 +2644,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         do_rebind_nodes(pair.first, pair.second.code_step, ctx_for);
         do_rebind_nodes(pair.first, pair.second.code_body, ctx_body);
         if(!pair.first) {
-          return emptyc;
+          return nullopt;
         }
         return ::rocket::move(pair.second);
       }
@@ -2657,7 +2657,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         do_rebind_nodes(pair.first, pair.second.code_try, ctx_body);
         do_rebind_nodes(pair.first, pair.second.code_catch, ctx_body);
         if(!pair.first) {
-          return emptyc;
+          return nullopt;
         }
         return ::rocket::move(pair.second);
       }
@@ -2669,7 +2669,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
     case index_push_immediate:
     case index_push_global_reference: {
         // There is nothing to bind.
-        return emptyc;
+        return nullopt;
       }
 
     case index_push_local_reference: {
@@ -2680,12 +2680,12 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         ROCKET_ASSERT(qctx);
         // Don't bind references in analytic contexts.
         if(qctx->is_analytic()) {
-          return emptyc;
+          return nullopt;
         }
         // Look for the name in the context.
         auto qref = qctx->get_named_reference_opt(altr.name);
         if(!qref) {
-          return emptyc;
+          return nullopt;
         }
         // Bind it now.
         S_push_bound_reference xnode = { *qref };
@@ -2694,7 +2694,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
 
     case index_push_bound_reference: {
         // There is nothing to bind.
-        return emptyc;
+        return nullopt;
       }
 
     case index_define_function: {
@@ -2704,7 +2704,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         auto pair = ::std::make_pair(false, altr);
         do_rebind_nodes(pair.first, pair.second.code_body, ctx_func);
         if(!pair.first) {
-          return emptyc;
+          return nullopt;
         }
         return ::rocket::move(pair.second);
       }
@@ -2716,7 +2716,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         do_rebind_nodes(pair.first, pair.second.code_true, ctx);
         do_rebind_nodes(pair.first, pair.second.code_false, ctx);
         if(!pair.first) {
-          return emptyc;
+          return nullopt;
         }
         return ::rocket::move(pair.second);
       }
@@ -2727,7 +2727,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         auto pair = ::std::make_pair(false, altr);
         do_rebind_nodes(pair.first, pair.second.code_null, ctx);
         if(!pair.first) {
-          return emptyc;
+          return nullopt;
         }
         return ::rocket::move(pair.second);
       }
@@ -2743,7 +2743,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
     case index_single_step_trap:
     case index_variadic_call: {
         // There is nothing to bind.
-        return emptyc;
+        return nullopt;
       }
 
     default:

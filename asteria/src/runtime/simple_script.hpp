@@ -63,7 +63,7 @@ class Simple_Script
         return this->m_cptr;
       }
     // These are convenience wrappers.
-    Reference execute(Global_Context& global, cow_vector<Reference>&& args = emptyc) const;
+    Reference execute(Global_Context& global, cow_vector<Reference>&& args = nullopt) const;
     Reference execute(Global_Context& global, cow_vector<Value>&& vals) const;
   };
 

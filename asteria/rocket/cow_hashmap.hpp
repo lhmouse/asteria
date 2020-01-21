@@ -95,7 +95,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       {
         this->assign(noadl::move(other));
       }
-    constexpr cow_hashmap(emptyc_t = emptyc_t()) noexcept(conjunction<is_nothrow_constructible<hasher>, is_nothrow_copy_constructible<hasher>,
+    constexpr cow_hashmap(nullopt_t = nullopt_t()) noexcept(conjunction<is_nothrow_constructible<hasher>, is_nothrow_copy_constructible<hasher>,
                                                                       is_nothrow_constructible<key_equal>, is_nothrow_copy_constructible<key_equal>,
                                                                       is_nothrow_constructible<allocator_type>>::value)
       :
@@ -162,7 +162,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       {
         this->assign(init);
       }
-    cow_hashmap& operator=(emptyc_t) noexcept
+    cow_hashmap& operator=(nullopt_t) noexcept
       {
         this->clear();
         return *this;

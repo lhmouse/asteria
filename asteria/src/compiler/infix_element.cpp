@@ -116,14 +116,14 @@ Infix_Element& Infix_Element::extract(cow_vector<Expression_Unit>& units)
     case index_logical_and: {
         auto& altr = this->m_stor.as<index_logical_and>();
         // Construct a branch unit from the TRUE branch and an empty FALSE branch, then append it to `units`.
-        Expression_Unit::S_branch xunit = { ::rocket::move(altr.branch_true), emptyc, altr.assign };
+        Expression_Unit::S_branch xunit = { ::rocket::move(altr.branch_true), nullopt, altr.assign };
         units.emplace_back(::rocket::move(xunit));
         return *this;
       }
     case index_logical_or: {
         auto& altr = this->m_stor.as<index_logical_or>();
         // Construct a branch unit from an empty TRUE branch and the FALSE branch, then append it to `units`.
-        Expression_Unit::S_branch xunit = { emptyc, ::rocket::move(altr.branch_false), altr.assign };
+        Expression_Unit::S_branch xunit = { nullopt, ::rocket::move(altr.branch_false), altr.assign };
         units.emplace_back(::rocket::move(xunit));
         return *this;
       }

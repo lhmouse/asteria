@@ -168,7 +168,7 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       {
         this->assign(noadl::move(other));
       }
-    constexpr basic_cow_string(emptyc_t = emptyc_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
+    constexpr basic_cow_string(nullopt_t = nullopt_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
       :
         basic_cow_string(allocator_type())
       {
@@ -211,7 +211,7 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       {
         this->assign(init);
       }
-    basic_cow_string& operator=(emptyc_t) noexcept
+    basic_cow_string& operator=(nullopt_t) noexcept
       {
         this->clear();
         return *this;
