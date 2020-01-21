@@ -103,37 +103,6 @@ AIR_Status do_evaluate_branch(const AVMC_Queue& queue, bool assign, Executive_Co
     return queue.execute(ctx);
   }
 
-AIR_Status do_execute_catch(const AVMC_Queue& queue, const phsh_string& name_except,
-                            const Runtime_Error& except, Executive_Context& ctx)
-  {
-    // Execute the queue on a new context.
-    Executive_Context ctx_next(::rocket::ref(ctx), nullptr);
-    // Set the exception reference.
-    {
-      Reference_Root::S_temporary xref = { except.value() };
-      ctx_next.open_named_reference(name_except) = ::rocket::move(xref);
-    }
-    // Set backtrace frames.
-    {
-      G_array backtrace;
-      G_object r;
-      for(size_t i = 0;  i < except.count_frames();  ++i) {
-        const auto& frame = except.frame(i);
-        // Translate each frame into a human-readable format.
-        r.clear();
-        r.try_emplace(::rocket::sref("frame"), G_string(::rocket::sref(frame.what_type())));
-        r.try_emplace(::rocket::sref("file"), G_string(frame.file()));
-        r.try_emplace(::rocket::sref("line"), G_integer(frame.line()));
-        r.try_emplace(::rocket::sref("value"), frame.value());
-        // Append this frame.
-        backtrace.emplace_back(::rocket::move(r));
-      }
-      Reference_Root::S_constant xref = { ::rocket::move(backtrace) };
-      ctx_next.open_named_reference(::rocket::sref("__backtrace")) = ::rocket::move(xref);
-    }
-    return queue.execute(ctx_next);
-  }
-
 template<typename ParamV> inline const ParamV* do_pcast(const void* pv) noexcept
   {
     return static_cast<const ParamV*>(pv);
@@ -639,7 +608,27 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
       except.push_frame_catch(sloc);
       // This branch must be executed inside this `catch` block.
       // User-provided bindings may obtain the current exception using `::std::current_exception`.
-      return do_execute_catch(queue_catch, name_except, except, ctx);
+      Executive_Context ctx_catch(::rocket::ref(ctx), nullptr);
+      // Set the exception reference.
+      Reference_Root::S_temporary xref_except = { except.value() };
+      ctx_catch.open_named_reference(name_except) = ::rocket::move(xref_except);
+      // Set backtrace frames.
+      G_array backtrace;
+      G_object r;
+      for(size_t i = 0;  i < except.count_frames();  ++i) {
+        const auto& frame = except.frame(i);
+        // Translate each frame into a human-readable format.
+        r.clear();
+        r.try_emplace(::rocket::sref("frame"), G_string(::rocket::sref(frame.what_type())));
+        r.try_emplace(::rocket::sref("file"), G_string(frame.file()));
+        r.try_emplace(::rocket::sref("line"), G_integer(frame.line()));
+        r.try_emplace(::rocket::sref("value"), frame.value());
+        // Append this frame.
+        backtrace.emplace_back(::rocket::move(r));
+      }
+      Reference_Root::S_constant xref = { ::rocket::move(backtrace) };
+      ctx_catch.open_named_reference(::rocket::sref("__backtrace")) = ::rocket::move(xref);
+      return queue_catch.execute(ctx_catch);
     }
   }
 
