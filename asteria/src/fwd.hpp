@@ -193,6 +193,7 @@ enum Frame_Type : uint8_t
     frame_type_catch   = 2,  // An exception was caught here.
     frame_type_call    = 3,  // An exception propagated across a function call.
     frame_type_func    = 4,  // An exception propagated across a function boundary.
+    frame_type_defer   = 5,  // A new exception was thrown here.
   };
 
 ROCKET_PURE_FUNCTION extern const char* describe_frame_type(Frame_Type type) noexcept;
