@@ -98,6 +98,10 @@ template<typename allocT, size_t capacityT>
       {
         return this->m_ebase;
       }
+    bool empty() const noexcept
+      {
+        return this->m_nelem == 0;
+      }
     size_type size() const noexcept
       {
         return this->m_nelem;

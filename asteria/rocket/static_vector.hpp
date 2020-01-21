@@ -249,7 +249,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
     // 26.3.11.3, capacity
     bool empty() const noexcept
       {
-        return this->m_sth.size() == 0;
+        return this->m_sth.empty();
       }
     size_type size() const noexcept
       {

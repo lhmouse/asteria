@@ -293,6 +293,14 @@ template<typename allocT>
         }
         return ptr->data;
       }
+    bool empty() const noexcept
+      {
+        auto ptr = this->m_ptr;
+        if(!ptr) {
+          return true;
+        }
+        return reinterpret_cast<const storage_header*>(ptr)->nelem == 0;
+      }
     size_type size() const noexcept
       {
         auto ptr = this->m_ptr;

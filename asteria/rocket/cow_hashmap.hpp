@@ -293,7 +293,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     // capacity
     bool empty() const noexcept
       {
-        return this->m_sth.element_count() == 0;
+        return this->m_sth.empty();
       }
     size_type size() const noexcept
       {
