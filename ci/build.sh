@@ -1,8 +1,8 @@
 #!/bin/bash -e
 
 # setup
-test -n "${CXX}" || CXX="g++"
-export CXX
+export CXX=${CXX:-"g++"}
+export CXXFLAGS
 
 # build
 ${CXX} --version
