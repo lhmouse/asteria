@@ -25,6 +25,9 @@ const char* describe_frame_type(Frame_Type type) noexcept
     case frame_type_func: {
         return "function";
       }
+    case frame_type_defer: {
+        return "defer";
+      }
     default:
       return "<unknown frame type>";
     }
