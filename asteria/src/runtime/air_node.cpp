@@ -399,8 +399,9 @@ AIR_Status do_switch_statement(Executive_Context& ctx, ParamU /*pu*/, const void
     for(size_t i = 0;  i < nclauses;  ++i) {
       // This is a `default` clause if the condition is empty, and a `case` clause otherwise.
       if(queues_labels[i].empty()) {
-        if(target != SIZE_MAX)
+        if(target != SIZE_MAX) {
           ASTERIA_THROW("multiple `default` clauses");
+        }
         target = i;
         continue;
       }
@@ -412,9 +413,10 @@ AIR_Status do_switch_statement(Executive_Context& ctx, ParamU /*pu*/, const void
         break;
       }
     }
-    if(target == SIZE_MAX)
+    if(target < nclauses) {
       // No matching clause has been found.
       return air_status_next;
+    }
 
     // Jump to the clause denoted by `target`.
     // Note that all clauses share the same context.
@@ -641,8 +643,7 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
     auto value = ctx.stack().get_top().read();
     ASTERIA_RUNTIME_TRY {
       // Unpack nested exceptions, if any.
-      auto eptr = ::std::current_exception();
-      if(eptr)
+      if(auto eptr = ::std::current_exception())
         ::std::rethrow_exception(eptr);
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
@@ -763,11 +764,10 @@ AIR_Status do_define_function(Executive_Context& ctx, ParamU /*pu*/, const void*
     // Rewrite nodes in the body as necessary.
     // Don't trigger copy-on-write unless a node needs rewriting.
     Analytic_Context ctx_func(::std::addressof(ctx), params);
-    bool dirty = false;
-    auto code_bound = code_body;
-    do_rebind_nodes(dirty, code_bound, ctx_func);
+    auto pair = ::std::make_pair(false, code_body);
+    do_rebind_nodes(pair.first, pair.second, ctx_func);
     // Instantiate the function.
-    auto qtarget = ::rocket::make_refcnt<Instantiated_Function>(params, ::rocket::move(zvarg), code_bound);
+    auto qtarget = ::rocket::make_refcnt<Instantiated_Function>(params, ::rocket::move(zvarg), pair.second);
     // Push the function as a temporary.
     Reference_Root::S_temporary xref = { G_function(::rocket::move(qtarget)) };
     ctx.stack().push(::rocket::move(xref));
