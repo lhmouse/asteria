@@ -19,6 +19,9 @@ const char* describe_frame_type(Frame_Type type) noexcept
     case frame_type_catch: {
         return "catch";
       }
+    case frame_type_call: {
+        return "call";
+      }
     case frame_type_func: {
         return "function";
       }

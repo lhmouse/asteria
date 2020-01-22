@@ -65,23 +65,30 @@ class Runtime_Error : public exception
       {
         // The value also replaces the one in `*this`.
         this->m_value = ::rocket::forward<XValT>(xval);
-        auto& frm = this->m_frames.emplace_back(frame_type_throw, sloc, this->m_value);
+        auto& f = this->m_frames.emplace_back(frame_type_throw, sloc, this->m_value);
         this->do_compose_message();
-        return frm;
+        return f;
       }
     Backtrace_Frame& push_frame_catch(const Source_Location& sloc)
       {
         // The value is the one stored in `*this` at this point.
-        auto& frm = this->m_frames.emplace_back(frame_type_catch, sloc, this->m_value);
+        auto& f = this->m_frames.emplace_back(frame_type_catch, sloc, this->m_value);
         this->do_compose_message();
-        return frm;
+        return f;
+      }
+    Backtrace_Frame& push_frame_call(const Source_Location& sloc, const cow_string& inside)
+      {
+        // The value is the signature of the enclosing function.
+        auto& f = this->m_frames.emplace_back(frame_type_call, sloc, inside);
+        this->do_compose_message();
+        return f;
       }
     Backtrace_Frame& push_frame_func(const Source_Location& sloc, const cow_string& func)
       {
         // The value is the signature of the enclosing function.
-        auto& frm = this->m_frames.emplace_back(frame_type_func, sloc, func);
+        auto& f = this->m_frames.emplace_back(frame_type_func, sloc, func);
         this->do_compose_message();
-        return frm;
+        return f;
       }
   };
 

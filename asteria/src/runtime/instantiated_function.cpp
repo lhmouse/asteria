@@ -7,6 +7,7 @@
 #include "evaluation_stack.hpp"
 #include "executive_context.hpp"
 #include "global_context.hpp"
+#include "runtime_error.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -74,11 +75,17 @@ Reference& Instantiated_Function::invoke_ptc_aware(Reference& self, Global_Conte
                                ::rocket::move(self), this->m_params, ::rocket::move(args));
     stack.reserve(::rocket::move(args));
     // Execute the function body.
-    auto status = this->m_queue.execute(ctx_func);
-    do_handle_status(self, stack, status);
-    // Enable `args` to be reused after this call.
-    stack.unreserve(args);
-    return self;
+    try {
+      auto status = this->m_queue.execute(ctx_func);
+      do_handle_status(self, stack, status);
+      // Enable `args` to be reused after this call.
+      stack.unreserve(args);
+      return self;
+    }
+    catch(Runtime_Error& except) {
+      except.push_frame_func(this->m_zvarg->sloc(), this->m_zvarg->func());
+      throw;
+    }
   }
 
 }  // namespace Asteria

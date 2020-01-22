@@ -822,7 +822,7 @@ ROCKET_NOINLINE Reference& do_invoke_nontail(Reference& self, const Source_Locat
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
       // Append the current frame and rethrow the exception.
-      except.push_frame_func(sloc, inside);
+      except.push_frame_call(sloc, inside);
       // Call the hook function if any.
       if(qhooks) {
         qhooks->on_function_except(sloc, inside, except);
