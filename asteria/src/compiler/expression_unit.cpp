@@ -52,31 +52,21 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
           // Look for the name in the current context.
           qref = qctx->get_named_reference_opt(altr.name);
           if(qref) {
-            break;
+            // A reference declared later has been found. Record the context depth for later lookups.
+            AIR_Node::S_push_local_reference xnode = { depth, altr.name };
+            code.emplace_back(::rocket::move(xnode));
+            return code;
           }
           // Step out to its parent context.
           qctx = qctx->get_parent_opt();
           if(!qctx) {
-            break;
+            // No name has been found so far. Assume that the name will be found in the global context.
+            AIR_Node::S_push_global_reference xnode = { altr.name };
+            code.emplace_back(::rocket::move(xnode));
+            return code;
           }
           ++depth;
         }
-        if(!qref) {
-          // No name has been found so far. Assume that the name will be found in the global context later.
-          AIR_Node::S_push_global_reference xnode = { altr.name };
-          code.emplace_back(::rocket::move(xnode));
-        }
-        else if(qctx->is_analytic()) {
-          // A reference declared later has been found. Record the context depth for later lookups.
-          AIR_Node::S_push_local_reference xnode = { depth, altr.name };
-          code.emplace_back(::rocket::move(xnode));
-        }
-        else {
-          // A reference declared previously has been found. Bind it immediately.
-          AIR_Node::S_push_bound_reference xnode = { *qref };
-          code.emplace_back(::rocket::move(xnode));
-        }
-        return code;
       }
 
     case index_closure_function: {
