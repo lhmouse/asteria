@@ -13,7 +13,8 @@
 namespace Asteria {
 namespace {
 
-ROCKET_NOINLINE Reference& do_handle_status(Reference& self, Evaluation_Stack& stack, AIR_Status status)
+ROCKET_NOINLINE Reference& do_handle_status(Reference& self, Evaluation_Stack& stack,
+                                            const Source_Location& tsloc, AIR_Status status)
   {
     switch(status) {
     case air_status_next:
@@ -25,6 +26,10 @@ ROCKET_NOINLINE Reference& do_handle_status(Reference& self, Evaluation_Stack& s
     case air_status_return_ref: {
         // Return the reference at the top of `stack`.
         self = ::rocket::move(stack.open_top());
+        // Decorate the tail call if any.
+        auto tca = self.get_tail_call_opt();
+        if(tca)
+          tca->set_target_location(tsloc);
         break;
       }
     case air_status_break_unspec:
@@ -77,7 +82,7 @@ Reference& Instantiated_Function::invoke_ptc_aware(Reference& self, Global_Conte
     // Execute the function body.
     try {
       auto status = this->m_queue.execute(ctx_func);
-      do_handle_status(self, stack, status);
+      do_handle_status(self, stack, this->m_zvarg->sloc(), status);
       // Enable `args` to be reused after this call.
       stack.unreserve(args);
       return self;
