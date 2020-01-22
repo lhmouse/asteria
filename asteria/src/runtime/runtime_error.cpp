@@ -10,6 +10,27 @@ Runtime_Error::~Runtime_Error()
   {
   }
 
+void Runtime_Error::do_backtrace()
+  try {
+    // Unpack nested exceptions, if any.
+    auto eptr = ::std::current_exception();
+    if(ROCKET_EXPECT(!eptr))
+      return;
+    ::std::rethrow_exception(eptr);
+  }
+  catch(Runtime_Error& nested) {
+    // Copy frames.
+    if(this->m_frames.empty())
+      this->m_frames = nested.m_frames;
+    else
+      this->m_frames.append(nested.m_frames.begin(), nested.m_frames.end());
+  }
+  catch(::std::exception& nested) {
+    // Push a native frame.
+    this->m_frames.emplace_back(frame_type_native,
+                                ::rocket::sref("<native code>"), -1, this->m_value);
+  }
+
 void Runtime_Error::do_compose_message()
   {
     // Reuse the string.

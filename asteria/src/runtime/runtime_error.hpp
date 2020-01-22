@@ -19,11 +19,12 @@ class Runtime_Error : public exception
     cow_string m_what;
 
   public:
-    template<typename XValT, ASTERIA_SFINAE_CONSTRUCT(Value, XValT&&)> Runtime_Error(const Source_Location& sloc,
-                                                                                     XValT&& xval)
+    template<typename XValT, ASTERIA_SFINAE_CONSTRUCT(Value, XValT&&)>
+                            Runtime_Error(const Source_Location& sloc, XValT&& xval)
       :
         m_value(::rocket::forward<XValT>(xval))
       {
+        this->do_backtrace();
         this->m_frames.emplace_back(frame_type_throw, sloc, this->m_value);
         this->do_compose_message();
       }
@@ -31,12 +32,13 @@ class Runtime_Error : public exception
       :
         m_value(G_string(stdex.what()))
       {
-        this->m_frames.emplace_back(frame_type_native, ::rocket::sref("<native code>"), -1, this->m_value);
+        this->do_backtrace();
         this->do_compose_message();
       }
     ~Runtime_Error() override;
 
   private:
+    void do_backtrace();
     void do_compose_message();
 
   public:
@@ -58,7 +60,8 @@ class Runtime_Error : public exception
         return this->m_frames.at(index);
       }
 
-    template<typename XValT> Backtrace_Frame& push_frame_throw(const Source_Location& sloc, XValT&& xval)
+    template<typename XValT>
+        Backtrace_Frame& push_frame_throw(const Source_Location& sloc, XValT&& xval)
       {
         // The value also replaces the one in `*this`.
         this->m_value = ::rocket::forward<XValT>(xval);
