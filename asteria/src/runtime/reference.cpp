@@ -109,10 +109,7 @@ const Value& Reference::do_read(const Modifier* mods, size_t nmod, const Modifie
         return null_value;
     }
     // Apply the last modifier.
-    qref = last.apply_const_opt(*qref);
-    if(!qref)
-      return null_value;
-    return *qref;
+    return (qref = last.apply_const_opt(*qref)) ? *qref : null_value;
   }
 
 Value& Reference::do_open(const Modifier* mods, size_t nmod, const Modifier& last) const
@@ -121,12 +118,11 @@ Value& Reference::do_open(const Modifier* mods, size_t nmod, const Modifier& las
     for(size_t i = 0;  i < nmod;  ++i) {
       // Apply a modifier.
       qref = mods[i].apply_mutable_opt(*qref, true);  // create new
-      ROCKET_ASSERT(qref);
+      if(!qref)
+        ROCKET_ASSERT(false);
     }
     // Apply the last modifier.
-    qref = last.apply_mutable_opt(*qref, true);
-    ROCKET_ASSERT(qref);
-    return *qref;
+    return *(last.apply_mutable_opt(*qref, true));
   }
 
 Value Reference::do_unset(const Modifier* mods, size_t nmod, const Modifier& last) const
@@ -136,7 +132,7 @@ Value Reference::do_unset(const Modifier* mods, size_t nmod, const Modifier& las
       // Apply a modifier.
       qref = mods[i].apply_mutable_opt(*qref, false);  // no create
       if(!qref)
-        return null_value;
+        return nullptr;
     }
     // Apply the last modifier.
     return last.apply_and_erase(*qref);
