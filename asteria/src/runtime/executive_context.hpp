@@ -34,7 +34,7 @@ class Executive_Context : public Abstract_Context
       {
       }
     Executive_Context(ref_to<Global_Context> xglobal, ref_to<Evaluation_Stack> xstack,
-                      const ckptr<Variadic_Arguer> xzvarg, Reference&& self,
+                      const ckptr<Variadic_Arguer>& xzvarg, Reference&& self,
                       const cow_vector<phsh_string>& params, cow_vector<Reference>&& args)  // for functions
       :
         m_parent_opt(nullptr),
