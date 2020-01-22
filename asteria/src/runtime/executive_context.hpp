@@ -71,6 +71,10 @@ class Executive_Context : public Abstract_Context
       {
         return this->m_stack;
       }
+    const ckptr<Variadic_Arguer>& zvarg() const noexcept
+      {
+        return this->m_zvarg;
+      }
     const cow_string& func() const noexcept
       {
         return this->m_zvarg->func();

@@ -13,8 +13,10 @@ namespace Asteria {
 class Tail_Call_Arguments final : public virtual Rcbase
   {
   private:
-    Source_Location m_sloc;
-    cow_string m_inside;
+    // These describe characteristics of the function call.
+    Source_Location m_sloc;  // location of the call
+    cow_string m_inside;  // signature of the enclosing function
+    Source_Location m_insloc;  // location of the enclosing function
     PTC_Aware m_ptc;
 
     // This is the target function.
@@ -24,11 +26,11 @@ class Tail_Call_Arguments final : public virtual Rcbase
     cow_vector<Reference> m_args_self;
 
   public:
-    Tail_Call_Arguments(const Source_Location& sloc, const cow_string& inside, PTC_Aware ptc,
-                        const ckptr<Abstract_Function>& target, cow_vector<Reference>&& args_self)
+    Tail_Call_Arguments(const Source_Location& sloc, const cow_string& inside, const Source_Location& insloc,
+                        PTC_Aware ptc, const ckptr<Abstract_Function>& target, cow_vector<Reference>&& args_self)
       :
-        m_sloc(sloc), m_inside(inside), m_ptc(ptc),
-        m_target(target), m_args_self(::rocket::move(args_self))
+        m_sloc(sloc), m_inside(inside), m_insloc(insloc),
+        m_ptc(ptc), m_target(target), m_args_self(::rocket::move(args_self))
       {
       }
     ~Tail_Call_Arguments() override;
@@ -46,6 +48,10 @@ class Tail_Call_Arguments final : public virtual Rcbase
     const cow_string& inside() const noexcept
       {
         return this->m_inside;
+      }
+    const Source_Location& enclosing_function_location() const noexcept
+      {
+        return this->m_insloc;
       }
     PTC_Aware ptc_aware() const noexcept
       {

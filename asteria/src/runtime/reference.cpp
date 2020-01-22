@@ -61,8 +61,10 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
         // Append all frames that have been unpacked so far and rethrow the exception.
         while(!frames.empty()) {
           tca = ::rocket::move(frames.mut_back());
-          except.push_frame_call(tca->source_location(), tca->inside());
           frames.pop_back();
+          // Push the caller followed by the callee.
+          except.push_frame_call(tca->source_location(), tca->inside());
+          except.push_frame_func(tca->enclosing_function_location(), tca->inside());
         }
         // Call the hook function if any.
         if(qhooks) {
