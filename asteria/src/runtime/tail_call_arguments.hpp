@@ -13,11 +13,9 @@ namespace Asteria {
 class Tail_Call_Arguments final : public virtual Rcbase
   {
   private:
-    // These describe characteristics of the function call.
     Source_Location m_sloc;
     cow_string m_inside;
     PTC_Aware m_ptc;
-    opt<Source_Location> m_tsloc;  // location of enclosing function
 
     // This is the target function.
     ckptr<Abstract_Function> m_target;
@@ -52,15 +50,6 @@ class Tail_Call_Arguments final : public virtual Rcbase
     PTC_Aware ptc_aware() const noexcept
       {
         return this->m_ptc;
-      }
-
-    const Source_Location* target_location_opt() const noexcept
-      {
-        return this->m_tsloc.value_ptr();
-      }
-    Tail_Call_Arguments& set_target_location(const Source_Location& tsloc) noexcept
-      {
-        return this->m_tsloc = tsloc, *this;
       }
 
     const ckptr<Abstract_Function>& get_target() const noexcept
