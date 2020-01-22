@@ -850,7 +850,7 @@ void do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
     double freg = ::std::fabs(value);
     // Locate the last number in the table that is <= `freg`.
     uint32_t bpos = 1;
-    uint32_t epos = noadl::countof(s_decmult_F);
+    uint32_t epos = static_cast<uint32_t>(noadl::countof(s_decmult_F));
     for(;;) {
       // Stop if the range is empty.
       if(bpos == epos) {
