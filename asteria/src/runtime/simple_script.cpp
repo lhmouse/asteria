@@ -26,7 +26,7 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
       this->m_params.emplace_back(::rocket::sref("..."));
     }
     // Create the zero-ary argument getter.
-    auto zvarg = ::rocket::make_refcnt<Variadic_Arguer>(name, 1, ::rocket::sref("<top level>"));
+    auto zvarg = ::rocket::make_refcnt<Variadic_Arguer>(name, 0, ::rocket::sref("<top level>"));
     // Generate IR nodes for the function body.
     // TODO: Move this elsewhere.
     cow_vector<AIR_Node> code_body;
