@@ -150,7 +150,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         ROCKET_ASSERT(this->capacity() >= cap);
       }
 
-    [[noreturn]] ROCKET_NOINLINE void do_throw_subscript_of_range(size_type pos) const
+    [[noreturn]] ROCKET_NOINLINE void do_throw_subscript_out_of_range(size_type pos) const
       {
         noadl::sprintf_and_throw<out_of_range>("static_vector: subscript out of range (`%llu` > `%llu`)",
                                                static_cast<unsigned long long>(pos),
@@ -163,7 +163,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
       {
         auto tcnt = this->size();
         if(tpos > tcnt) {
-          this->do_throw_subscript_of_range(tpos);
+          this->do_throw_subscript_out_of_range(tpos);
         }
         return noadl::min(tcnt - tpos, tn);
       }
@@ -309,7 +309,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
       {
         auto cnt = this->size();
         if(pos >= cnt) {
-          this->do_throw_subscript_of_range(pos);
+          this->do_throw_subscript_out_of_range(pos);
         }
         return this->data()[pos];
       }
@@ -338,7 +338,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
       {
         auto cnt = this->size();
         if(pos >= cnt) {
-          this->do_throw_subscript_of_range(pos);
+          this->do_throw_subscript_out_of_range(pos);
         }
         return this->mut_data()[pos];
       }

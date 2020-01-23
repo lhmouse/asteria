@@ -43,7 +43,7 @@ template<typename valueT, size_t capacityT, size_t... nestedT> class array
     value_type m_stor[capacityT];
 
   private:
-    [[noreturn]] ROCKET_NOINLINE void do_throw_subscript_of_range(size_type pos) const
+    [[noreturn]] ROCKET_NOINLINE void do_throw_subscript_out_of_range(size_type pos) const
       {
         noadl::sprintf_and_throw<out_of_range>("array: subscript out of range (`%llu` > `%llu`)",
                                                static_cast<unsigned long long>(pos),
@@ -144,7 +144,7 @@ template<typename valueT, size_t capacityT, size_t... nestedT> class array
       {
         auto cnt = this->size();
         if(pos >= cnt) {
-          this->do_throw_subscript_of_range(pos);
+          this->do_throw_subscript_out_of_range(pos);
         }
         return this->data()[pos];
       }
@@ -174,7 +174,7 @@ template<typename valueT, size_t capacityT, size_t... nestedT> class array
       {
         auto cnt = this->size();
         if(pos >= cnt) {
-          this->do_throw_subscript_of_range(pos);
+          this->do_throw_subscript_out_of_range(pos);
         }
         return this->mut_data()[pos];
       }

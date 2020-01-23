@@ -295,7 +295,7 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
         ROCKET_ASSERT(this->capacity() >= cap);
       }
 
-    [[noreturn]] ROCKET_NOINLINE void do_throw_subscript_of_range(size_type pos) const
+    [[noreturn]] ROCKET_NOINLINE void do_throw_subscript_out_of_range(size_type pos) const
       {
         noadl::sprintf_and_throw<out_of_range>("cow_string: subscript out of range (`%llu` > `%llu`)",
                                                static_cast<unsigned long long>(pos),
@@ -308,7 +308,7 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       {
         auto tlen = this->size();
         if(tpos > tlen) {
-          this->do_throw_subscript_of_range(tpos);
+          this->do_throw_subscript_out_of_range(tpos);
         }
         return noadl::min(tlen - tpos, tn);
       }
@@ -540,7 +540,7 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       {
         auto len = this->size();
         if(pos >= len) {
-          this->do_throw_subscript_of_range(pos);
+          this->do_throw_subscript_out_of_range(pos);
         }
         return this->data()[pos];
       }
@@ -570,7 +570,7 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       {
         auto len = this->size();
         if(pos >= len) {
-          this->do_throw_subscript_of_range(pos);
+          this->do_throw_subscript_out_of_range(pos);
         }
         return this->mut_data()[pos];
       }
