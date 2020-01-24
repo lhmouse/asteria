@@ -8,13 +8,13 @@
 
 namespace Asteria {
 
-extern Iopt std_gc_tracked_count(Global& global, Ival generation);
-extern Iopt std_gc_get_threshold(Global& global, Ival generation);
-extern Iopt std_gc_set_threshold(Global& global, Ival generation, Ival threshold);
-extern Ival std_gc_collect(Global& global, Iopt generation_limit);
+Iopt std_gc_tracked_count(Global& global, Ival generation);
+Iopt std_gc_get_threshold(Global& global, Ival generation);
+Iopt std_gc_set_threshold(Global& global, Ival generation, Ival threshold);
+Ival std_gc_collect(Global& global, Iopt generation_limit);
 
 // Create an object that is to be referenced as `std.gc`.
-extern void create_bindings_gc(Oval& result, API_Version version);
+void create_bindings_gc(Oval& result, API_Version version);
 
 }  // namespace Asteria
 

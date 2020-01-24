@@ -8,25 +8,25 @@
 
 namespace Asteria {
 
-extern Sval std_filesystem_get_working_directory();
+Sval std_filesystem_get_working_directory();
 
-extern Oopt std_filesystem_get_information(Sval path);
-extern bool std_filesystem_move_from(Sval path_new, Sval path_old);
-extern Iopt std_filesystem_remove_recursive(Sval path);
+Oopt std_filesystem_get_information(Sval path);
+bool std_filesystem_move_from(Sval path_new, Sval path_old);
+Iopt std_filesystem_remove_recursive(Sval path);
 
-extern Oopt std_filesystem_directory_list(Sval path);
-extern Iopt std_filesystem_directory_create(Sval path);
-extern Iopt std_filesystem_directory_remove(Sval path);
+Oopt std_filesystem_directory_list(Sval path);
+Iopt std_filesystem_directory_create(Sval path);
+Iopt std_filesystem_directory_remove(Sval path);
 
-extern Sopt std_filesystem_file_read(Sval path, Iopt offset = nullopt, Iopt limit = nullopt);
-extern Iopt std_filesystem_file_stream(Global& global, Sval path, Fval callback, Iopt offset = nullopt, Iopt limit = nullopt);
-extern bool std_filesystem_file_write(Sval path, Sval data, Iopt offset = nullopt);
-extern bool std_filesystem_file_append(Sval path, Sval data, Bopt exclusive = nullopt);
-extern bool std_filesystem_file_copy_from(Sval path_new, Sval path_old);
-extern bool std_filesystem_file_remove(Sval path);
+Sopt std_filesystem_file_read(Sval path, Iopt offset = nullopt, Iopt limit = nullopt);
+Iopt std_filesystem_file_stream(Global& global, Sval path, Fval callback, Iopt offset = nullopt, Iopt limit = nullopt);
+bool std_filesystem_file_write(Sval path, Sval data, Iopt offset = nullopt);
+bool std_filesystem_file_append(Sval path, Sval data, Bopt exclusive = nullopt);
+bool std_filesystem_file_copy_from(Sval path_new, Sval path_old);
+bool std_filesystem_file_remove(Sval path);
 
 // Create an object that is to be referenced as `std.filesystem`.
-extern void create_bindings_filesystem(Oval& result, API_Version version);
+void create_bindings_filesystem(Oval& result, API_Version version);
 
 }  // namespace Asteria
 

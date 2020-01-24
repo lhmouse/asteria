@@ -9,7 +9,7 @@
 namespace rocket {
 
 // `report_assertion_failure()` is always provided even when assertions are disabled.
-[[noreturn]] extern void report_assertion_failure(const char* expr, const char* file, long line, const char* msg) noexcept;
+[[noreturn]] void report_assertion_failure(const char* expr, const char* file, long line, const char* msg) noexcept;
 
 #ifdef ROCKET_DEBUG
 #  define ROCKET_XASSERT_FAIL_(...)        ::rocket::report_assertion_failure(__VA_ARGS__)

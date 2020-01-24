@@ -348,11 +348,11 @@ opt<cow_vector<phsh_string>> do_accept_variable_declarator_opt(Token_Stream& tst
   }
 
 // Accept a statement; a blockt is converted to a single statement.
-extern opt<Statement> do_accept_statement_opt(Token_Stream& tstrm);
+opt<Statement> do_accept_statement_opt(Token_Stream& tstrm);
 // Accept a statement; a non-block statement is converted to a block consisting of a single statement.
-extern opt<Statement::S_block> do_accept_statement_as_block_opt(Token_Stream& tstrm);
+opt<Statement::S_block> do_accept_statement_as_block_opt(Token_Stream& tstrm);
 
-extern bool do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm);
+bool do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm);
 
 opt<Statement::S_expression> do_accept_expression_opt(Token_Stream& tstrm)
   {
