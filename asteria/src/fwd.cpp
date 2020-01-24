@@ -11,7 +11,7 @@ const char* describe_frame_type(Frame_Type type) noexcept
   {
     switch(type) {
     case frame_type_native: {
-        return "native code";
+        return "native";
       }
     case frame_type_throw: {
         return "throw";
