@@ -110,7 +110,7 @@ class Reference_Root
       {
         return this->index() == index_tail_call;
       }
-    const rcptr<Tail_Call_Arguments_Fwd>& as_tail_call() const
+    const rcptr<Tail_Call_Arguments_Fwd>& as_tail_call_fwd() const
       {
         return this->m_stor.as<index_tail_call>().tca;
       }

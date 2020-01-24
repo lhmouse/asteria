@@ -143,12 +143,12 @@ class Reference
         else
           return this->m_root.as_variable();
       }
-    rcptr<Tail_Call_Arguments_Fwd> get_tail_call_opt() const noexcept
+    rcptr<Tail_Call_Arguments_Fwd> get_tail_call_fwd_opt() const noexcept
       {
         if(ROCKET_UNEXPECT(!this->is_tail_call()))
           return nullptr;
         else
-          return this->m_root.as_tail_call();
+          return this->m_root.as_tail_call_fwd();
       }
     Reference& finish_call(Global_Context& global)
       {
