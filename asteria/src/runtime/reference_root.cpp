@@ -87,8 +87,8 @@ Variable_Callback& Reference_Root::enumerate_variables(Variable_Callback& callba
         return var->enumerate_variables(callback);
       }
     case index_tail_call: {
-        const auto& tca = ::rocket::static_pointer_cast<Tail_Call_Arguments>(this->m_stor.as<index_tail_call>().tca);
-        return tca->enumerate_variables(callback);
+        return ::rocket::static_pointer_cast<Tail_Call_Arguments>(
+                              this->m_stor.as<index_tail_call>().tca)->enumerate_variables(callback);
       }
     default:
       ASTERIA_TERMINATE("invalid reference root type enumeration (index `$1`)", this->index());
