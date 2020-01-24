@@ -60,7 +60,7 @@ void Executive_Context::do_defer_expression(const Source_Location& sloc, const c
     this->m_defer.emplace_back(sloc, ::rocket::move(queue));
   }
 
-void Executive_Context::do_on_scope_exit_normal()
+void Executive_Context::do_on_scope_exit_void()
   {
     // Execute all deferred expressions backwards.
     while(this->m_defer.size()) {
@@ -81,16 +81,29 @@ void Executive_Context::do_on_scope_exit_normal()
     ROCKET_ASSERT(this->m_defer.empty());
   }
 
-void Executive_Context::do_on_scope_exit_tail_call(const rcptr<Tail_Call_Arguments>& tca)
+void Executive_Context::do_on_scope_exit_return()
   {
-    // Postpone all expressions.
-    auto& target = tca->open_defer_stack();
-    if(target.empty())
-      target = ::rocket::move(this->m_defer);
-    else
-      target.insert(target.begin(), ::std::make_move_iterator(this->m_defer.mut_begin()),
+    // Stash the return reference.
+    this->m_self = this->m_stack->get_top();
+    // If a PTC wrapper is returned, prepend all deferred expressions to it.
+    if(auto tca = this->m_self.get_tail_call_opt()) {
+      // Take advantage of reference counting.
+      auto& defer = tca->open_defer_stack();
+      if(defer.empty()) {
+        defer.swap(this->m_defer);
+      }
+      else {
+        defer.insert(defer.begin(), ::std::make_move_iterator(this->m_defer.mut_begin()),
                                     ::std::make_move_iterator(this->m_defer.mut_end()));
-    this->m_defer.clear();
+        this->m_defer.clear();
+      }
+      return;
+    }
+    // Evaluate all deferred expressions.
+    this->do_on_scope_exit_void();
+    // Restore the return reference.
+    this->m_stack->clear();
+    this->m_stack->push(::rocket::move(this->m_self));
   }
 
 void Executive_Context::do_on_scope_exit_exception(Runtime_Error& except)

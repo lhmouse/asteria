@@ -62,8 +62,8 @@ class Executive_Context : public Abstract_Context
     void do_bind_parameters(const cow_vector<phsh_string>& params, cow_vector<Reference>&& args);
 
     void do_defer_expression(const Source_Location& sloc, const cow_vector<AIR_Node>& code);
-    void do_on_scope_exit_normal();
-    void do_on_scope_exit_tail_call(const rcptr<Tail_Call_Arguments>& tca);
+    void do_on_scope_exit_void();
+    void do_on_scope_exit_return();
     void do_on_scope_exit_exception(Runtime_Error& except);
 
   protected:
@@ -99,33 +99,31 @@ class Executive_Context : public Abstract_Context
         this->do_defer_expression(sloc, code);
         return *this;
       }
+
     // These functions must be called before exiting a scope.
     // Note that these functions may throw exceptions on their own, which is why RAII is inapplicable.
     AIR_Status on_scope_exit(AIR_Status status)
       {
         if(ROCKET_EXPECT(this->m_defer.empty())) {
-          // nothing to do
+          // There is nothing to do.
           return status;
         }
-        if(status == air_status_return_ref) {
-          auto qtca = this->m_stack->open_top().get_tail_call_opt();
-          if(qtca) {
-            // tail call
-            this->do_on_scope_exit_tail_call(qtca);
-            return status;
-          }
+        if(status != air_status_return_ref) {
+          // Discard the stack.
+          this->do_on_scope_exit_void();
+          return status;
         }
-        // normal exit
-        this->do_on_scope_exit_normal();
+        // Process the return reference.
+        this->do_on_scope_exit_return();
         return status;
       }
     Runtime_Error& on_scope_exit(Runtime_Error& except)
       {
         if(ROCKET_EXPECT(this->m_defer.empty())) {
-          // nothing to do
+          // There is nothing to do.
           return except;
         }
-        // exceptional exit
+        // Append frames to the exception object.
         this->do_on_scope_exit_exception(except);
         return except;
       }
