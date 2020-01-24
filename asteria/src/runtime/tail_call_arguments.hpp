@@ -41,7 +41,7 @@ class Tail_Call_Arguments final : public virtual Rcbase
       = delete;
 
   public:
-    const Source_Location& source_location() const noexcept
+    const Source_Location& sloc() const noexcept
       {
         return this->m_sloc;
       }

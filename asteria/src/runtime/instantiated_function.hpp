@@ -32,15 +32,15 @@ class Instantiated_Function final : public Abstract_Function
     void do_solidify_code(const cow_vector<AIR_Node>& code);
 
   public:
-    const Source_Location& get_source_location() const noexcept
+    const Source_Location& source_location() const noexcept
       {
         return this->m_zvarg->sloc();
       }
-    const cow_string& get_function_signature() const noexcept
+    const cow_string& signature() const noexcept
       {
         return this->m_zvarg->func();
       }
-    const cow_vector<phsh_string>& get_parameters() const noexcept
+    const cow_vector<phsh_string>& parameters() const noexcept
       {
         return this->m_params;
       }
