@@ -211,7 +211,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
               code.emplace_back(::rocket::move(xnode));
             }
             else if(sb_obj) {
-              AIR_Node::S_unpack_struct_object xnode = { altr.immutable, altr.decls[i].subvector(bpos, epos - bpos) };
+              AIR_Node::S_unpack_struct_object xnode = { altr.immutable, altr.decls[i].subvec(bpos, epos - bpos) };
               code.emplace_back(::rocket::move(xnode));
             }
             else {

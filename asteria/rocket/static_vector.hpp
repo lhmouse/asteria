@@ -515,7 +515,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
       }
 
     // N.B. This is a non-standard extension.
-    static_vector subvector(size_type tpos, size_type tn = size_type(-1)) const
+    static_vector subvec(size_type tpos, size_type tn = size_type(-1)) const
       {
         return static_vector(this->data() + tpos, this->data() + tpos + this->do_clamp_subvec(tpos, tn),
                              this->m_sth.as_allocator());

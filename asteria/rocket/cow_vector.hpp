@@ -602,7 +602,7 @@ template<typename valueT, typename allocT> class cow_vector
       }
 
     // N.B. This is a non-standard extension.
-    cow_vector subvector(size_type tpos, size_type tn = size_type(-1)) const
+    cow_vector subvec(size_type tpos, size_type tn = size_type(-1)) const
       {
         if((tpos == 0) && (tn >= this->size())) {
           // Utilize reference counting.
