@@ -62,10 +62,6 @@ class Tail_Call_Arguments final : public virtual Rcbase
       {
         return this->m_target;
       }
-    ckptr<Abstract_Function>& open_target() noexcept
-      {
-        return this->m_target;
-      }
     const cow_vector<Reference>& get_arguments_and_self() const noexcept
       {
         return this->m_args_self;
