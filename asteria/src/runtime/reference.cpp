@@ -8,6 +8,7 @@
 #include "evaluation_stack.hpp"
 #include "executive_context.hpp"
 #include "runtime_error.hpp"
+#include "tail_call_arguments.hpp"
 #include "enums.hpp"
 #include "../utilities.hpp"
 
@@ -54,7 +55,7 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
 
     // Unpack all frames recursively.
     // Note that `self` is overwritten before the wrapped function is called.
-    while(tca = self.get_tail_call_opt()) {
+    while(tca = ::rocket::static_pointer_cast<Tail_Call_Arguments>(self.get_tail_call_opt())) {
       // Unpack arguments.
       const auto& sloc = tca->sloc();
       const auto& inside = tca->zvarg()->func();

@@ -11,6 +11,7 @@
 #include "instantiated_function.hpp"
 #include "runtime_error.hpp"
 #include "variable_callback.hpp"
+#include "tail_call_arguments.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {

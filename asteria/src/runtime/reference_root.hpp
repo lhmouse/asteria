@@ -7,7 +7,7 @@
 #include "../fwd.hpp"
 #include "../value.hpp"
 #include "variable.hpp"
-#include "tail_call_arguments.hpp"
+#include "tail_call_arguments_fwd.hpp"
 #include "../source_location.hpp"
 
 namespace Asteria {
@@ -32,7 +32,7 @@ class Reference_Root
       };
     struct S_tail_call
       {
-        ckptr<Tail_Call_Arguments> tca;
+        rcptr<Tail_Call_Arguments_Fwd> tca;  // note type erasure
       };
 
     enum Index : uint8_t
@@ -110,7 +110,7 @@ class Reference_Root
       {
         return this->index() == index_tail_call;
       }
-    const ckptr<Tail_Call_Arguments>& as_tail_call() const
+    const rcptr<Tail_Call_Arguments_Fwd>& as_tail_call() const
       {
         return this->m_stor.as<index_tail_call>().tca;
       }

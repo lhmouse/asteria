@@ -5,13 +5,14 @@
 #define ASTERIA_RUNTIME_TAIL_CALL_ARGUMENTS_HPP_
 
 #include "../fwd.hpp"
+#include "tail_call_arguments_fwd.hpp"
 #include "variadic_arguer.hpp"
 #include "../source_location.hpp"
 #include "../abstract_function.hpp"
 
 namespace Asteria {
 
-class Tail_Call_Arguments final : public virtual Rcbase
+class Tail_Call_Arguments final : public Tail_Call_Arguments_Fwd
   {
   private:
     // These describe characteristics of the function call.
