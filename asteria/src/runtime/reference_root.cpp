@@ -3,8 +3,8 @@
 
 #include "../precompiled.hpp"
 #include "reference_root.hpp"
-#include "variable_callback.hpp"
 #include "reference.hpp"
+#include "variable_callback.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
