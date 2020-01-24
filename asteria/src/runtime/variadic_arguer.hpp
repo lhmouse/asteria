@@ -5,7 +5,6 @@
 #define ASTERIA_RUNTIME_VARIADIC_ARGUER_HPP_
 
 #include "../fwd.hpp"
-#include "reference.hpp"
 #include "../abstract_function.hpp"
 #include "../source_location.hpp"
 
