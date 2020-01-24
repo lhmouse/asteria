@@ -95,6 +95,25 @@ int main()
           assert rec == [2,1];
         }
 
+        func xpush(x) {
+          rec[$] = x;
+          throw x;
+        }
+
+        func foo() {
+          defer xpush(1);
+          defer xpush(2);
+          defer xpush(3);
+          throw 4;
+        }
+        rec = [ ];
+        try
+          foo();
+        catch(e) {
+          assert e == 1;
+          assert rec == [3,2,1];
+        }
+
 ///////////////////////////////////////////////////////////////////////////////
       )__"), tinybuf::open_read);
     Simple_Script code(cbuf, ::rocket::sref(__FILE__));
