@@ -24,7 +24,12 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
     // We must rebuild the backtrace using this queue if an exception is thrown.
     cow_vector<rcptr<Tail_Call_Arguments>> frames;
 
-    do {
+    for(;;) {
+      // Unpack arguments.
+      const auto& sloc = tca->source_location();
+      const auto& inside = tca->inside();
+      const auto& qhooks = global.get_hooks_opt();
+
       // Figure out how to forward the result.
       if(tca->ptc_aware() == ptc_aware_void) {
         ptc_conj = ptc_aware_void;
@@ -32,13 +37,6 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
       else if((tca->ptc_aware() == ptc_aware_by_val) && (ptc_conj == ptc_aware_by_ref)) {
         ptc_conj = ptc_aware_by_val;
       }
-      // Record a frame.
-      frames.emplace_back(tca);
-
-      // Unpack arguments.
-      const auto& sloc = tca->source_location();
-      const auto& inside = tca->inside();
-      const auto& qhooks = global.get_hooks_opt();
 
       // Generate a single-step trap.
       if(qhooks) {
@@ -59,25 +57,28 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
       }
       ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
         // Append all frames that have been unpacked so far and rethrow the exception.
-        while(!frames.empty()) {
+        for(;;) {
+          except.push_frame_call(tca->source_location(), tca->inside());
+          // Call the hook function if any.
+          if(qhooks) {
+            qhooks->on_function_except(tca->source_location(), tca->inside(), except);
+          }
+          except.push_frame_func(tca->enclosing_function_location(), tca->inside());
+          // Get the previous frame.
+          if(frames.empty())
+            break;
           tca = ::rocket::move(frames.mut_back());
           frames.pop_back();
-          // Push the caller followed by the callee.
-          except.push_frame_call(tca->source_location(), tca->inside());
-          except.push_frame_func(tca->enclosing_function_location(), tca->inside());
-        }
-        // Call the hook function if any.
-        if(qhooks) {
-          qhooks->on_function_except(sloc, inside, except);
         }
         throw;
       }
-      // Call the hook function if any.
-      if(qhooks) {
-        qhooks->on_function_return(sloc, inside, self);
-      }
       // Get the next frame.
-    } while(tca = self.get_tail_call_opt());
+      auto next = self.get_tail_call_opt();
+      if(!next)
+        break;
+      frames.emplace_back(tca);
+      tca = ::rocket::move(next);
+    }
 
     // Process the result.
     if(ptc_conj == ptc_aware_void) {
