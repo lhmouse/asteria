@@ -601,8 +601,9 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
       // Execute the `try` block. If no exception is thrown, this will have little overhead.
       auto status = do_execute_block(queue_try, ctx);
       // This cannot be PTC'd, otherwise exceptions thrown from tail calls won't be caught.
-      if(status == air_status_return_ref)
+      if(status == air_status_return_ref) {
         ctx.stack().open_top().finish_call(ctx.global());
+      }
       return status;
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
