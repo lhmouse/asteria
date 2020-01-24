@@ -329,7 +329,7 @@ AIR_Status do_declare_variable(Executive_Context& ctx, ParamU /*pu*/, const void
     // Unpack arguments.
     const auto& sloc = do_pcast<Pv_sloc_name>(pv)->sloc;
     const auto& name = do_pcast<Pv_sloc_name>(pv)->name;
-    const auto& inside = ctx.func();
+    const auto& inside = ctx.zvarg()->func();
     const auto& qhooks = ctx.global().get_hooks_opt();
 
     // Allocate an uninitialized variable.
@@ -795,18 +795,18 @@ AIR_Status do_coalescence(Executive_Context& ctx, ParamU pu, const void* pv)
     return air_status_next;
   }
 
-ROCKET_NOINLINE Reference& do_invoke_nontail(Reference& self, const Source_Location& sloc, const cow_string& inside,
-                                             const ckptr<Abstract_Function>& target,
-                                             Global_Context& global, const rcptr<Abstract_Hooks>& qhooks,
-                                             cow_vector<Reference>&& args)
+ROCKET_NOINLINE Reference& do_invoke_nontail(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
+                                             const ckptr<Abstract_Function>& target, cow_vector<Reference>&& args)
   {
     // Call the hook function if any.
+    const auto& inside = ctx.zvarg()->func();
+    const auto& qhooks = ctx.global().get_hooks_opt();
     if(qhooks) {
       qhooks->on_function_call(sloc, inside, target);
     }
     // Perform a non-tail call.
     ASTERIA_RUNTIME_TRY {
-      target->invoke(self, global, ::rocket::move(args));
+      target->invoke(self, ctx.global(), ::rocket::move(args));
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
       // Append the current frame and rethrow the exception.
@@ -824,34 +824,33 @@ ROCKET_NOINLINE Reference& do_invoke_nontail(Reference& self, const Source_Locat
     return self;
   }
 
-ROCKET_NOINLINE Reference& do_wrap_tail_call(Reference& self, const Source_Location& sloc, const cow_string& inside,
-                                             const ckptr<Abstract_Function>& target,
-                                             const Source_Location& insloc, PTC_Aware ptc,
+ROCKET_NOINLINE Reference& do_wrap_tail_call(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
+                                             const ckptr<Abstract_Function>& target, PTC_Aware ptc,
                                              cow_vector<Reference>&& args)
   {
     // Pack arguments for this proper tail call.
     args.emplace_back(::rocket::move(self));
     // Create a PTC wrapper.
-    auto tca = ::rocket::make_refcnt<Tail_Call_Arguments>(sloc, inside, insloc, ptc, target, ::rocket::move(args));
+    auto tca = ::rocket::make_refcnt<Tail_Call_Arguments>(sloc, ctx.zvarg()->func(), ctx.zvarg()->sloc(),
+                                                          ptc, target, ::rocket::move(args));
     // Return it.
     Reference_Root::S_tail_call xref = { ::rocket::move(tca) };
     return self = ::rocket::move(xref);
   }
 
-AIR_Status do_function_call_common(Reference& self, const Source_Location& sloc, const cow_string& inside,
-                                   const ckptr<Abstract_Function>& target,
-                                   const Source_Location& insloc, PTC_Aware ptc, Global_Context& global,
-                                   const rcptr<Abstract_Hooks>& qhooks, cow_vector<Reference>&& args)
+AIR_Status do_function_call_common(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
+                                   const ckptr<Abstract_Function>& target, PTC_Aware ptc,
+                                   cow_vector<Reference>&& args)
   {
     if(ROCKET_EXPECT(ptc == ptc_aware_none)) {
       // Perform plain calls.
-      do_invoke_nontail(self, sloc, inside, target, global, qhooks, ::rocket::move(args));
+      do_invoke_nontail(self, sloc, ctx, target, ::rocket::move(args));
       // Discard `self`.
       return air_status_next;
     }
     // Wrap proper tail calls.
     // The result will be unpacked outside this scope.
-    do_wrap_tail_call(self, sloc, inside, target, insloc, ptc, ::rocket::move(args));
+    do_wrap_tail_call(self, sloc, ctx, target, ptc, ::rocket::move(args));
     // Force `air_status_return_ref` if control flow reaches the end of a function.
     // Otherwise a null reference is returned instead of this PTC wrapper, which can then never be unpacked.
     return air_status_return_ref;
@@ -863,7 +862,7 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
     const auto& sloc = do_pcast<Pv_sloc>(pv)->sloc;
     const auto& nargs = static_cast<size_t>(pu.y32);
     const auto& ptc = static_cast<PTC_Aware>(pu.y8s[0]);
-    const auto& inside = ctx.func();
+    const auto& inside = ctx.zvarg()->func();
     const auto& qhooks = ctx.global().get_hooks_opt();
 
     // Check for stack overflows.
@@ -888,8 +887,8 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
     if(!value.is_function()) {
       ASTERIA_THROW("attempt to call a non-function (value `$1`)", value);
     }
-    return do_function_call_common(ctx.stack().open_top().zoom_out(), sloc, inside, value.as_function(),
-                                   ctx.zvarg()->sloc(), ptc, ctx.global(), qhooks, ::rocket::move(args));
+    return do_function_call_common(ctx.stack().open_top().zoom_out(),sloc, ctx,
+                                   value.as_function(), ptc, ::rocket::move(args));
   }
 
 AIR_Status do_member_access(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
@@ -2430,7 +2429,7 @@ AIR_Status do_define_null_variable(Executive_Context& ctx, ParamU pu, const void
     const auto& immutable = static_cast<bool>(pu.u8s[0]);
     const auto& sloc = do_pcast<Pv_sloc_name>(pv)->sloc;
     const auto& name = do_pcast<Pv_sloc_name>(pv)->name;
-    const auto& inside = ctx.func();
+    const auto& inside = ctx.zvarg()->func();
     const auto& qhooks = ctx.global().get_hooks_opt();
 
     // Allocate an uninitialized variable.
@@ -2451,7 +2450,7 @@ AIR_Status do_single_step_trap(Executive_Context& ctx, ParamU /*pu*/, const void
   {
     // Unpack arguments.
     const auto& sloc = do_pcast<Pv_sloc>(pv)->sloc;
-    const auto& inside = ctx.func();
+    const auto& inside = ctx.zvarg()->func();
     const auto& qhooks = ctx.global().get_hooks_opt();
 
     // Call the hook function if any.
@@ -2466,7 +2465,7 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
     // Unpack arguments.
     const auto& sloc = do_pcast<Pv_sloc>(pv)->sloc;
     const auto& ptc = static_cast<PTC_Aware>(pu.u8s[0]);
-    const auto& inside = ctx.func();
+    const auto& inside = ctx.zvarg()->func();
     const auto& qhooks = ctx.global().get_hooks_opt();
 
     // Check for stack overflows.
@@ -2497,7 +2496,7 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
       auto gself = ctx.stack().open_top().zoom_out();
       // Pass an empty argument list to get the number of arguments to generate.
       cow_vector<Reference> gargs;
-      do_invoke_nontail(ctx.stack().open_top(), sloc, inside, generator, ctx.global(), qhooks, ::rocket::move(gargs));
+      do_invoke_nontail(ctx.stack().open_top(), sloc, ctx, generator, ::rocket::move(gargs));
       value = ctx.stack().get_top().read();
       ctx.stack().pop();
       // Verify the argument count.
@@ -2515,7 +2514,7 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
         Reference_Root::S_constant xref = { G_integer(i) };
         gargs.clear().emplace_back(::rocket::move(xref));
         // Generate an argument. Ensure it is dereferenceable.
-        do_invoke_nontail(args.mut(i), sloc, inside, generator, ctx.global(), qhooks, ::rocket::move(gargs));
+        do_invoke_nontail(args.mut(i), sloc, ctx, generator, ::rocket::move(gargs));
         static_cast<void>(args[i].read());
       }
     }
@@ -2527,8 +2526,8 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
     if(!value.is_function()) {
       ASTERIA_THROW("attempt to call a non-function (value `$1`)", value);
     }
-    return do_function_call_common(ctx.stack().open_top().zoom_out(), sloc, inside, value.as_function(),
-                                   ctx.zvarg()->sloc(), ptc, ctx.global(), qhooks, ::rocket::move(args));
+    return do_function_call_common(ctx.stack().open_top().zoom_out(),sloc, ctx,
+                                   value.as_function(), ptc, ::rocket::move(args));
   }
 
 }  // namespace
