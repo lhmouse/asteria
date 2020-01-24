@@ -390,7 +390,7 @@ void do_repl_help()
       //        1         2         3         4         5         6         7      |
       // 34567890123456789012345678901234567890123456789012345678901234567890123456|
       "* commands:\n"
-      "  \\help   show this message\n"
+      "  ,help   show this message\n"
       // 34567890123456789012345678901234567890123456789012345678901234567890123456|
       //        1         2         3         4         5         6         7      |
     );
@@ -415,7 +415,7 @@ void do_handle_repl_command(cow_string&& cmd)
       "\n"
       "  Global locale is now `%s`.\n"
       "\n"
-      "  All REPL commands start with a backslash. Type `\\help` for instructions.\n"
+      "  All REPL commands start with a backslash. Type `,help` for instructions.\n"
       "  Multiple lines may be joined together using trailing backslashes.\n"
       // 34567890123456789012345678901234567890123456789012345678901234567890123456|
       //        1         2         3         4         5         6         7      |
@@ -470,7 +470,7 @@ void do_handle_repl_command(cow_string&& cmd)
               break;
             }
             // REPL commands can't straddle multiple lines.
-            if(code.empty() || (code.front() == '\\')) {
+            if(code.empty() || (code.front() == ',')) {
               break;
             }
           }
@@ -513,7 +513,7 @@ void do_handle_repl_command(cow_string&& cmd)
       }
 
       // Check for REPL commands.
-      if(code.front() == '\\') {
+      if(code.front() == ',') {
         code.erase(0, 1);
         do_handle_repl_command(::rocket::move(code));
         continue;
