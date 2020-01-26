@@ -59,7 +59,8 @@ Slice do_slice(const Aval& data, const Ival& from, const Iopt& length)
     return do_slice(data, data.begin(), rfrom + *length);
   }
 
-template<typename IteratorT> opt<IteratorT> do_find_opt(IteratorT begin, IteratorT end, const Value& target)
+template<typename IterT>
+    opt<IterT> do_find_opt(IterT begin, IterT end, const Value& target)
   {
     for(auto it = ::rocket::move(begin);  it != end;  ++it) {
       // Compare the value using the builtin 3-way comparison operator.
@@ -70,19 +71,20 @@ template<typename IteratorT> opt<IteratorT> do_find_opt(IteratorT begin, Iterato
     return nullopt;
   }
 
-void do_push_argument(cow_vector<Reference>& args, const Value& value)
+Reference_Root::S_temporary do_make_temporary(const Value& value)
   {
     Reference_Root::S_temporary xref = { value };
-    args.emplace_back(::rocket::move(xref));
+    return xref;
   }
 
-template<typename IteratorT> opt<IteratorT> do_find_if_opt(Global& global, IteratorT begin, IteratorT end,
-                                                           const Fval& pred, bool match)
+template<typename IterT>
+    opt<IterT> do_find_if_opt(Global& global, IterT begin, IterT end, const Fval& pred, bool match)
   {
+    cow_vector<Reference> args;
     for(auto it = ::rocket::move(begin);  it != end;  ++it) {
       // Set up arguments for the user-defined predictor.
-      cow_vector<Reference> args;
-      do_push_argument(args, *it);
+      args.resize(1, Reference_Root::S_void());
+      args.mut(0) = do_make_temporary(*it);
       // Call the predictor function and check the return value.
       auto self = pred->invoke(global, ::rocket::move(args));
       if(self.read().test() == match)
@@ -92,41 +94,44 @@ template<typename IteratorT> opt<IteratorT> do_find_if_opt(Global& global, Itera
     return nullopt;
   }
 
-Compare do_compare(Global& global, const Fval& comp, const Value& lhs, const Value& rhs)
+Compare do_compare(Global& global, cow_vector<Reference>& args,
+                   const Fval& comparator, const Value& lhs, const Value& rhs)
   {
     // Set up arguments for the user-defined comparator.
-    cow_vector<Reference> args;
-    do_push_argument(args, lhs);
-    do_push_argument(args, rhs);
+    args.resize(2, Reference_Root::S_void());
+    args.mut(0) = do_make_temporary(lhs);
+    args.mut(1) = do_make_temporary(rhs);
     // Call the predictor function and compare the result with `0`.
-    auto self = comp->invoke(global, ::rocket::move(args));
+    auto self = comparator->invoke(global, ::rocket::move(args));
     return self.read().compare(Ival(0));
   }
 
-Compare do_compare(Global& global, const Fopt& comp, const Value& lhs, const Value& rhs)
+Compare do_compare(Global& global, cow_vector<Reference>& args,
+                   const Fopt& comparator, const Value& lhs, const Value& rhs)
   {
-    return ROCKET_UNEXPECT(comp) ? do_compare(global, *comp, lhs, rhs) : lhs.compare(rhs);
+    return ROCKET_UNEXPECT(comparator) ? do_compare(global, args, *comparator, lhs, rhs)
+                                       : lhs.compare(rhs);
   }
 
-template<typename IteratorT>
-    pair<IteratorT, bool> do_bsearch(Global& global, IteratorT begin, IteratorT end,
-                                     const Fopt& comparator, const Value& target)
+template<typename IterT>
+    pair<IterT, bool> do_bsearch(Global& global, cow_vector<Reference>& args, IterT begin, IterT end,
+                                 const Fopt& comparator, const Value& target)
   {
     auto bpos = ::rocket::move(begin);
     auto epos = ::rocket::move(end);
     for(;;) {
       auto dist = epos - bpos;
       if(dist <= 0) {
-        return ::std::make_pair(::rocket::move(bpos), false);
+        return { ::rocket::move(bpos), false };
       }
       auto mpos = bpos + dist / 2;
       // Compare `target` with the element in the middle.
-      auto cmp = do_compare(global, comparator, target, *mpos);
+      auto cmp = do_compare(global, args, comparator, target, *mpos);
       if(cmp == compare_unordered) {
         ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)", target, *mpos);
       }
       if(cmp == compare_equal) {
-        return ::std::make_pair(::rocket::move(mpos), true);
+        return { ::rocket::move(mpos), true };
       }
       if(cmp == compare_less)
         epos = mpos;
@@ -135,9 +140,9 @@ template<typename IteratorT>
     }
   }
 
-template<typename IteratorT, typename PredT>
-    IteratorT do_bound(Global& global, IteratorT begin, IteratorT end,
-                       const Fopt& comparator, const Value& target, PredT&& pred)
+template<typename IterT, typename PredT>
+    IterT do_bound(Global& global, cow_vector<Reference>& args, IterT begin, IterT end,
+                   const Fopt& comparator, const Value& target, PredT&& pred)
   {
     auto bpos = ::rocket::move(begin);
     auto epos = ::rocket::move(end);
@@ -148,7 +153,7 @@ template<typename IteratorT, typename PredT>
       }
       auto mpos = bpos + dist / 2;
       // Compare `target` with the element in the middle.
-      auto cmp = do_compare(global, comparator, target, *mpos);
+      auto cmp = do_compare(global, args, comparator, target, *mpos);
       if(cmp == compare_unordered) {
         ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)", target, *mpos);
       }
@@ -159,17 +164,18 @@ template<typename IteratorT, typename PredT>
     }
   }
 
-Aval::iterator& do_unique_move(Aval::iterator& opos, Global& global, const Fopt& comparator,
-                               Aval::iterator ibegin, Aval::iterator iend, bool unique)
+Aval::iterator& do_merge_range(Aval::iterator& opos, Global& global, cow_vector<Reference>& args,
+                               const Fopt& comparator, Aval::iterator ibegin, Aval::iterator iend, bool unique)
   {
-    for(auto ipos = ibegin;  ipos != iend;  ++ipos)
-      if(!unique || (do_compare(global, comparator, ipos[0], opos[-1]) != compare_equal))
+    for(auto ipos = ibegin;  ipos != iend;  ++ipos) {
+      if(!unique || (do_compare(global, args, comparator, ipos[0], opos[-1]) != compare_equal))
         *(opos++) = ::rocket::move(*ipos);
+    }
     return opos;
   }
 
-Aval::iterator do_merge_blocks(Aval& output, Global& global, const Fopt& comparator,
-                               Aval&& input, ptrdiff_t bsize, bool unique)
+Aval::iterator do_merge_blocks(Aval& output, Global& global, cow_vector<Reference>& args,
+                               const Fopt& comparator, Aval&& input, ptrdiff_t bsize, bool unique)
   {
     ROCKET_ASSERT(output.size() >= input.size());
     // Define the range information for a pair of contiguous blocks.
@@ -185,7 +191,7 @@ Aval::iterator do_merge_blocks(Aval& output, Global& global, const Fopt& compara
       if(iend - ipos <= bsize) {
         // Copy all remaining elements.
         ROCKET_ASSERT(opos != output.begin());
-        do_unique_move(opos, global, comparator, ipos, iend, unique);
+        do_merge_range(opos, global, args, comparator, ipos, iend, unique);
         break;
       }
       ipos += bsize;
@@ -197,7 +203,7 @@ Aval::iterator do_merge_blocks(Aval& output, Global& global, const Fopt& compara
       // Merge elements one by one, until either block has been exhausted, then store the index of it here.
       size_t bi;
       for(;;) {
-        auto cmp = do_compare(global, comparator, *(bpos[0]), *(bpos[1]));
+        auto cmp = do_compare(global, args, comparator, *(bpos[0]), *(bpos[1]));
         if(cmp == compare_unordered) {
           ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)", *(bpos[0]), *(bpos[1]));
         }
@@ -206,7 +212,7 @@ Aval::iterator do_merge_blocks(Aval& output, Global& global, const Fopt& compara
         bi = (cmp == compare_greater);
         // Move this element unless uniqueness is requested and it is equal to the previous output.
         bool discard = unique && (opos != output.begin())
-                              && (do_compare(global, comparator, *(bpos[bi]), opos[-1]) == compare_equal);
+                              && (do_compare(global, args, comparator, *(bpos[bi]), opos[-1]) == compare_equal);
         if(!discard) {
           *(opos++) = ::rocket::move(*(bpos[bi]));
         }
@@ -230,7 +236,7 @@ Aval::iterator do_merge_blocks(Aval& output, Global& global, const Fopt& compara
       // Move all elements from the other block.
       ROCKET_ASSERT(opos != output.begin());
       bi ^= 1;
-      do_unique_move(opos, global, comparator, bpos[bi], bend[bi], unique);
+      do_merge_range(opos, global, args, comparator, bpos[bi], bend[bi], unique);
     }
     return opos;
   }
@@ -601,9 +607,10 @@ Bval std_array_is_sorted(Global& global, Aval data, Fopt comparator)
       // If `data` contains no more than 2 elements, it is considered sorted.
       return true;
     }
+    cow_vector<Reference> args;
     for(auto it = data.begin() + 1;  it != data.end();  ++it) {
       // Compare the two elements.
-      auto cmp = do_compare(global, comparator, it[-1], it[0]);
+      auto cmp = do_compare(global, args, comparator, it[-1], it[0]);
       if((cmp == compare_greater) || (cmp == compare_unordered))
         return false;
     }
@@ -612,7 +619,8 @@ Bval std_array_is_sorted(Global& global, Aval data, Fopt comparator)
 
 Iopt std_array_binary_search(Global& global, Aval data, Value target, Fopt comparator)
   {
-    auto pair = do_bsearch(global, data.begin(), data.end(), comparator, target);
+    cow_vector<Reference> args;
+    auto pair = do_bsearch(global, args, data.begin(), data.end(), comparator, target);
     if(!pair.second) {
       return nullopt;
     }
@@ -621,24 +629,27 @@ Iopt std_array_binary_search(Global& global, Aval data, Value target, Fopt compa
 
 Ival std_array_lower_bound(Global& global, Aval data, Value target, Fopt comparator)
   {
-    auto lpos = do_bound(global, data.begin(), data.end(), comparator, target,
+    cow_vector<Reference> args;
+    auto lpos = do_bound(global, args, data.begin(), data.end(), comparator, target,
                          [](Compare cmp) { return cmp != compare_greater;  });
     return lpos - data.begin();
   }
 
 Ival std_array_upper_bound(Global& global, Aval data, Value target, Fopt comparator)
   {
-    auto upos = do_bound(global, data.begin(), data.end(), comparator, target,
+    cow_vector<Reference> args;
+    auto upos = do_bound(global, args, data.begin(), data.end(), comparator, target,
                          [](Compare cmp) { return cmp == compare_less;  });
     return upos - data.begin();
   }
 
 pair<Ival, Ival> std_array_equal_range(Global& global, Aval data, Value target, Fopt comparator)
   {
-    auto pair = do_bsearch(global, data.begin(), data.end(), comparator, target);
-    auto lpos = do_bound(global, data.begin(), pair.first, comparator, target,
+    cow_vector<Reference> args;
+    auto pair = do_bsearch(global, args, data.begin(), data.end(), comparator, target);
+    auto lpos = do_bound(global, args, data.begin(), pair.first, comparator, target,
                          [](Compare cmp) { return cmp != compare_greater;  });
-    auto upos = do_bound(global, pair.first, data.end(), comparator, target,
+    auto upos = do_bound(global, args, pair.first, data.end(), comparator, target,
                          [](Compare cmp) { return cmp == compare_less;  });
     return { lpos - data.begin(), upos - data.begin() };
   }
@@ -653,9 +664,10 @@ Aval std_array_sort(Global& global, Aval data, Fopt comparator)
     Aval res = data;
     Aval temp(data.size());
     // Merge blocks of exponential sizes.
+    cow_vector<Reference> args;
     ptrdiff_t bsize = 1;
     while(bsize < res.ssize()) {
-      do_merge_blocks(temp, global, comparator, ::rocket::move(res), bsize, false);
+      do_merge_blocks(temp, global, args, comparator, ::rocket::move(res), bsize, false);
       res.swap(temp);
       bsize *= 2;
     }
@@ -672,13 +684,14 @@ Aval std_array_sortu(Global& global, Aval data, Fopt comparator)
     Aval res = data;
     Aval temp(res.size());
     // Merge blocks of exponential sizes.
+    cow_vector<Reference> args;
     ptrdiff_t bsize = 1;
     while(bsize * 2 < res.ssize()) {
-      do_merge_blocks(temp, global, comparator, ::rocket::move(res), bsize, false);
+      do_merge_blocks(temp, global, args, comparator, ::rocket::move(res), bsize, false);
       res.swap(temp);
       bsize *= 2;
     }
-    auto epos = do_merge_blocks(temp, global, comparator, ::rocket::move(res), bsize, true);
+    auto epos = do_merge_blocks(temp, global, args, comparator, ::rocket::move(res), bsize, true);
     temp.erase(epos, temp.end());
     res.swap(temp);
     return res;
@@ -691,9 +704,10 @@ Value std_array_max_of(Global& global, Aval data, Fopt comparator)
       // Return `null` if `data` is empty.
       return nullptr;
     }
+    cow_vector<Reference> args;
     for(auto it = qmax + 1;  it != data.end();  ++it) {
       // Compare `*qmax` with the other elements, ignoring unordered elements.
-      if(do_compare(global, comparator, *qmax, *it) != compare_less)
+      if(do_compare(global, args, comparator, *qmax, *it) != compare_less)
         continue;
       qmax = it;
     }
@@ -707,9 +721,10 @@ Value std_array_min_of(Global& global, Aval data, Fopt comparator)
       // Return `null` if `data` is empty.
       return nullptr;
     }
+    cow_vector<Reference> args;
     for(auto it = qmin + 1;  it != data.end();  ++it) {
       // Compare `*qmin` with the other elements, ignoring unordered elements.
-      if(do_compare(global, comparator, *qmin, *it) != compare_greater)
+      if(do_compare(global, args, comparator, *qmin, *it) != compare_greater)
         continue;
       qmin = it;
     }
@@ -726,11 +741,12 @@ Aval std_array_generate(Global& global, Fval generator, Ival length)
   {
     Aval res;
     res.reserve(static_cast<size_t>(length));
+    cow_vector<Reference> args;
     for(int64_t i = 0;  i < length;  ++i) {
       // Set up arguments for the user-defined generator.
-      cow_vector<Reference> args;
-      do_push_argument(args, Ival(i));
-      do_push_argument(args, res.empty() ? null_value : res.back());
+      args.resize(2, Reference_Root::S_void());
+      args.mut(0) = do_make_temporary(i);
+      args.mut(1) = do_make_temporary(res.empty() ? null_value : res.back());
       // Call the generator function and push the return value.
       auto self = generator->invoke(global, ::rocket::move(args));
       res.emplace_back(self.read());
