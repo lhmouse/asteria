@@ -13,7 +13,7 @@ class Abstract_Context
   {
   private:
     // This stores all named references (variables, parameters, etc.) of this context.
-    Reference_Dictionary m_named_refs;
+    mutable Reference_Dictionary m_named_refs;
 
   public:
     Abstract_Context() noexcept
