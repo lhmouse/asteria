@@ -58,8 +58,8 @@ Slice do_slice(const Sval& text, const Ival& from, const Iopt& length)
     return do_slice(text, text.begin(), rfrom + *length);
   }
 
-template<typename IteratorT> opt<IteratorT> do_find_opt(IteratorT tbegin, IteratorT tend,
-                                                        IteratorT pbegin, IteratorT pend)
+template<typename IterT>
+    opt<IterT> do_find_opt(IterT tbegin, IterT tend, IterT pbegin, IterT pend)
   {
     // https://en.wikipedia.org/wiki/Boyer-Moore-Horspool_algorithm
     auto plen = ::std::distance(pbegin, pend);
@@ -89,8 +89,8 @@ template<typename IteratorT> opt<IteratorT> do_find_opt(IteratorT tbegin, Iterat
     return ::rocket::move(tpos);
   }
 
-template<typename IteratorT> opt<IteratorT> do_find_of_opt(IteratorT begin, IteratorT end,
-                                                           const Sval& set, bool match)
+template<typename IterT>
+    opt<IterT> do_find_of_opt(IterT begin, IterT end, const Sval& set, bool match)
   {
     // Make a lookup table.
     array<bool, 256> table = { };
