@@ -55,8 +55,7 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
 
     // Unpack all frames recursively.
     // Note that `self` is overwritten before the wrapped function is called.
-    while(tca = ::rocket::static_pointer_cast<Tail_Call_Arguments>(
-                                            self.get_tail_call_fwd_opt())) {
+    while(tca = self.get_tail_call_opt()) {
       // Unpack arguments.
       const auto& sloc = tca->sloc();
       const auto& inside = tca->zvarg()->func();

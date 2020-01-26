@@ -143,12 +143,15 @@ class Reference
         else
           return this->m_root.as_variable();
       }
-    rcptr<Tail_Call_Arguments_Fwd> get_tail_call_fwd_opt() const noexcept
+    // This must be a template as `Tail_Call_Arguments` is incomplete.
+    template<typename XArgsT = Tail_Call_Arguments,
+                        ROCKET_ENABLE_IF(::std::is_same<XArgsT, Tail_Call_Arguments>::value)>
+        rcptr<XArgsT> get_tail_call_opt() const
       {
         if(ROCKET_UNEXPECT(!this->is_tail_call()))
           return nullptr;
         else
-          return this->m_root.as_tail_call_fwd();
+          return ::rocket::static_pointer_cast<XArgsT>(this->m_root.as_tail_call_fwd());
       }
     Reference& finish_call(Global_Context& global)
       {

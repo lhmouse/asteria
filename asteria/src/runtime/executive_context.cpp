@@ -87,8 +87,7 @@ void Executive_Context::do_on_scope_exit_return()
     // Stash the return reference.
     this->m_self = this->m_stack->get_top();
     // If a PTC wrapper is returned, prepend all deferred expressions to it.
-    if(auto tca = ::rocket::static_pointer_cast<Tail_Call_Arguments>(
-                                        this->m_self.get_tail_call_fwd_opt())) {
+    if(auto tca = this->m_self.get_tail_call_opt()) {
       // Take advantage of reference counting.
       auto& defer = tca->open_defer_stack();
       if(defer.empty()) {
