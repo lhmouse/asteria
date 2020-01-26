@@ -11,20 +11,6 @@ Variable::~Variable()
   {
   }
 
-long Variable::increment_gcref(long split) noexcept
-  {
-    if(ROCKET_EXPECT(split <= 1)) {
-      // Update the integral part only.
-      return this->m_gcref.first += 1;
-    }
-    // Update the fractional part.
-    this->m_gcref.second += 1 / static_cast<double>(split);
-    // If the result is equal to or greater than one, accumulate the integral part separatedly.
-    auto carry = static_cast<long>(this->m_gcref.second);
-    this->m_gcref.second -= static_cast<double>(carry);
-    return this->m_gcref.first += carry;
-  }
-
 Variable_Callback& Variable::enumerate_variables(Variable_Callback& callback) const
   {
     return this->m_value.enumerate_variables(callback);

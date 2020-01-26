@@ -13,12 +13,16 @@ namespace Asteria {
 class Variable final : public virtual Rcbase
   {
   private:
-    // contents
     Value m_value;
     bool m_immut = false;
     bool m_alive = false;
-    // garbage collection support
-    pair<long, double> m_gcref;
+
+    // These are reference counters for garbage collection and are uninitialized by default.
+    // As values are reference-counting, reference counts can be fractional. For example,
+    // if three variablesshare a single instance of a function, then each of them is supposed
+    // to have 1/3 of the object.
+    long m_gcref_i;
+    double m_gcref_f;
 
   public:
     Variable() noexcept
@@ -74,13 +78,28 @@ class Variable final : public virtual Rcbase
       }
     long get_gcref() const noexcept
       {
-        return this->m_gcref.first;
+        return this->m_gcref_i;
       }
     Variable& reset_gcref(long iref) noexcept
       {
-        return this->m_gcref = { iref, 0x1p-26 }, *this;
+        this->m_gcref_i = iref;
+        this->m_gcref_f = 0x1p-26;
+        return *this;
       }
-    long increment_gcref(long split) noexcept;
+    Variable& increment_gcref(long split) noexcept
+      {
+        // Optimize for the non-split case.
+        if(split > 1) {
+          // Update the fractional part.
+          this->m_gcref_f += 1 / static_cast<double>(split);
+          // Check and accumulate the carry bit.
+          if(static_cast<long>(this->m_gcref_f) == 0)
+            return *this;
+          this->m_gcref_f -= 1;
+        }
+        this->m_gcref_i += 1;
+        return *this;
+      }
 
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const;
   };
