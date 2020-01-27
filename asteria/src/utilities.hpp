@@ -11,7 +11,7 @@
 namespace Asteria {
 
 // Error handling
-bool write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept;
+ptrdiff_t write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept;
 
 template<typename... ParamsT> ROCKET_NOINLINE cow_string format_string(const ParamsT&... params)
   {

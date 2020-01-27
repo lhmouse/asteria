@@ -8,7 +8,7 @@
 
 namespace Asteria {
 
-bool write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept
+ptrdiff_t write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept
   {
     ::rocket::tinyfmt_str fmt;
     fmt.set_string(cow_string(1023, '/'));
@@ -57,8 +57,13 @@ bool write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept
     }
     // Terminate the message with a line feed.
     fmt << '\n';
-    // Write the string now. Note that the string cannot be empty.
-    return ::fwrite(fmt.get_c_string(), fmt.get_length(), 1, stderr) == 1;
+    // Write the string now.
+    size_t nput = ::fwrite(fmt.get_c_string(), 1, fmt.get_length(), stderr);
+    if(nput == 0) {
+      // Note that the string cannot be empty so a return value of zero always indicates failure.
+      return -1;
+    }
+    return static_cast<ptrdiff_t>(nput);
   }
 
 bool utf8_encode(char*& pos, char32_t cp)
