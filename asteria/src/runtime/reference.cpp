@@ -98,13 +98,12 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
       tca = ::rocket::move(frames.mut_back());
       frames.pop_back();
       // Evaluate deferred expressions if any.
-      if(tca->get_defer_stack().empty()) {
-        continue;
-      }
       ASTERIA_RUNTIME_TRY {
-        Executive_Context ctx(::rocket::ref(global), ::rocket::ref(stack), tca->zvarg(),
-                              ::rocket::move(tca->open_defer_stack()));
-        ctx.on_scope_exit(air_status_next);
+        if(tca->get_defer_stack().size()) {
+          Executive_Context ctx(::rocket::ref(global), ::rocket::ref(stack), tca->zvarg(),
+                                ::rocket::move(tca->open_defer_stack()));
+          ctx.on_scope_exit(air_status_next);
+        }
       }
       ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
         do_unpack_frames(except, global, stack, ::rocket::move(frames));
