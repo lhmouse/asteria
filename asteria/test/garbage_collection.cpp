@@ -47,6 +47,11 @@ int main()
 
       ::rocket::tinybuf_str cbuf;
       cbuf.set_string(::rocket::sref(
+#ifdef __OPTIMIZE__
+        "const nloop = 1000000;"
+#else
+        "const nloop = 10000;"
+#endif
         R"__(
           var g;
           func leak() {
@@ -54,7 +59,7 @@ int main()
             f = func() { return f; };
             g = f;
           }
-          for(var i = 0; i < 1000000; ++i) {
+          for(var i = 0;  i < nloop;  ++i) {
             leak();
           }
         )__"), tinybuf::open_read);
