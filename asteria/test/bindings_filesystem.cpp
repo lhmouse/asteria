@@ -46,7 +46,12 @@ int main()
           ;
         assert std.array.sort(std.array.copy_keys(std.filesystem.directory_list(dname))) == [".","..","f3","f4","f5"];
 
-        assert std.filesystem.file_remove(dname) == null;
+        try {
+          std.filesystem.file_remove(dname);
+          assert false;
+        }
+        catch(e)
+          ;
         try {
           std.filesystem.directory_remove(dname);
           assert false;
@@ -106,11 +111,16 @@ int main()
         catch(e)
           ;
         assert std.filesystem.file_remove(fname) == true;
-        assert std.filesystem.file_remove(fname) == null;
+        assert std.filesystem.file_remove(fname) == false;
         assert std.filesystem.file_remove(fname + ".2") == true;
 
         assert std.filesystem.directory_create(fname) == true;
-        assert std.filesystem.file_remove(fname) == null;
+        try {
+          std.filesystem.file_remove(fname);
+          assert false;
+        }
+        catch(e)
+          ;
         assert std.filesystem.directory_remove(fname) == true;
       )__"), tinybuf::open_read);
 

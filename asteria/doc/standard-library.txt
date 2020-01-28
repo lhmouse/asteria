@@ -1964,8 +1964,11 @@
 	* Removes the file at `path`. This function fails if `path`
 	  designates a directory.
 
-	* Returns `true` if the file has been removed successfully, or
-	  `null` on failure.
+	* Returns `true` if a file has been removed successfully, or
+	  `false` if no such file exists.
+
+	* Throws an exception if `path` designates a directory, or some
+	  other errors occur.
 
 ### `std.checksum`
 

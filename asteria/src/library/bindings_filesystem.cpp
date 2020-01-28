@@ -549,7 +549,15 @@ bool std_filesystem_file_copy_from(Sval path_new, Sval path_old)
 
 bool std_filesystem_file_remove(Sval path)
   {
-    return ::unlink(path.c_str()) == 0;
+    if(::unlink(path.c_str()) == 0) {
+      // The file has been removed.
+      return true;
+    }
+    if(errno != ENOENT)
+      throw_system_error("unlink");
+
+    // The file does not exist.
+    return false;
   }
 
 void create_bindings_filesystem(Oval& result, API_Version /*version*/)
@@ -994,8 +1002,11 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "  * Removes the file at `path`. This function fails if `path`\n"
           "    designates a directory.\n"
           "\n"
-          "  * Returns `true` if the file has been removed successfully, or\n"
-          "    `null` on failure.\n"
+          "  * Returns `true` if a file has been removed successfully, or\n"
+          "    `false` if no such file exists.\n"
+          "\n"
+          "  * Throws an exception if `path` designates a directory, or some\n"
+          "    other errors occur.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value {
@@ -1004,7 +1015,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           Sval path;
           if(reader.I().g(path).F()) {
             // Call the binding function.
-            return std_filesystem_file_remove(path) ? true : null_value;
+            return std_filesystem_file_remove(path);
           }
           // Fail.
           reader.throw_no_matching_function_call();

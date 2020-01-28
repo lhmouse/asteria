@@ -23,7 +23,7 @@ Iopt std_filesystem_file_stream(Global& global, Sval path, Fval callback, Iopt o
 bool std_filesystem_file_write(Sval path, Sval data, Iopt offset = nullopt);
 bool std_filesystem_file_append(Sval path, Sval data, Bopt exclusive = nullopt);
 bool std_filesystem_file_copy_from(Sval path_new, Sval path_old);
-bool std_filesystem_file_remove(Sval path);
+Bval std_filesystem_file_remove(Sval path);
 
 // Create an object that is to be referenced as `std.filesystem`.
 void create_bindings_filesystem(Oval& result, API_Version version);
