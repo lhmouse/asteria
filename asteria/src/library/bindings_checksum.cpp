@@ -51,6 +51,12 @@ class CRC32_Hasher final : public Abstract_Opaque
       {
         return callback;
       }
+    CRC32_Hasher* clone_opt(rcptr<Abstract_Opaque>& output) const override
+      {
+        auto qnew = ::rocket::make_unique<CRC32_Hasher>(*this);
+        output.reset(qnew.get());
+        return qnew.release();
+      }
 
     Ival write(const Sval& data) noexcept
       {
@@ -96,6 +102,12 @@ class FNV1a32_Hasher final : public Abstract_Opaque
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
       {
         return callback;
+      }
+    FNV1a32_Hasher* clone_opt(rcptr<Abstract_Opaque>& output) const override
+      {
+        auto qnew = ::rocket::make_unique<FNV1a32_Hasher>(*this);
+        output.reset(qnew.get());
+        return qnew.release();
       }
 
     Ival write(const Sval& data) noexcept
@@ -340,6 +352,12 @@ class MD5_Hasher final : public Abstract_Opaque
       {
         return callback;
       }
+    MD5_Hasher* clone_opt(rcptr<Abstract_Opaque>& output) const override
+      {
+        auto qnew = ::rocket::make_unique<MD5_Hasher>(*this);
+        output.reset(qnew.get());
+        return qnew.release();
+      }
 
     Ival write(const Sval& data) noexcept
       {
@@ -582,6 +600,12 @@ class SHA1_Hasher final : public Abstract_Opaque
       {
         return callback;
       }
+    SHA1_Hasher* clone_opt(rcptr<Abstract_Opaque>& output) const override
+      {
+        auto qnew = ::rocket::make_unique<SHA1_Hasher>(*this);
+        output.reset(qnew.get());
+        return qnew.release();
+      }
 
     Ival write(const Sval& data) noexcept
       {
@@ -794,6 +818,12 @@ class SHA256_Hasher final : public Abstract_Opaque
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
       {
         return callback;
+      }
+    SHA256_Hasher* clone_opt(rcptr<Abstract_Opaque>& output) const override
+      {
+        auto qnew = ::rocket::make_unique<SHA256_Hasher>(*this);
+        output.reset(qnew.get());
+        return qnew.release();
       }
 
     Ival write(const Sval& data) noexcept
