@@ -20,8 +20,8 @@ Bval std_filesystem_directory_remove(Sval path);
 
 Sopt std_filesystem_file_read(Sval path, Iopt offset = nullopt, Iopt limit = nullopt);
 Iopt std_filesystem_file_stream(Global& global, Sval path, Fval callback, Iopt offset = nullopt, Iopt limit = nullopt);
-bool std_filesystem_file_write(Sval path, Sval data, Iopt offset = nullopt);
-bool std_filesystem_file_append(Sval path, Sval data, Bopt exclusive = nullopt);
+void std_filesystem_file_write(Sval path, Sval data, Iopt offset = nullopt);
+void std_filesystem_file_append(Sval path, Sval data, Bopt exclusive = nullopt);
 void std_filesystem_file_copy_from(Sval path_new, Sval path_old);
 Bval std_filesystem_file_remove(Sval path);
 

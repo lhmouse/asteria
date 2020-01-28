@@ -116,7 +116,7 @@ int64_t do_remove_recursive(const Sval& path)
     return nremoved;
   }
 
-::ssize_t xwrite_loop(int fd, const void* buf, size_t count)
+::ssize_t loop_write(int fd, const void* buf, size_t count)
   {
     auto bp = static_cast<const char*>(buf);
     auto ep = bp + count;
@@ -422,7 +422,7 @@ Iopt std_filesystem_file_stream(Global& global, Sval path, Fval callback, Iopt o
     return ntotal;
   }
 
-bool std_filesystem_file_write(Sval path, Sval data, Iopt offset)
+void std_filesystem_file_write(Sval path, Sval data, Iopt offset)
   {
     if(offset && (*offset < 0)) {
       ASTERIA_THROW("negative file offset (offset `$1`)", *offset);
@@ -432,72 +432,44 @@ bool std_filesystem_file_write(Sval path, Sval data, Iopt offset)
     int64_t ntlimit = data.ssize();
     // Calculate the `flags` argument.
     // If we are to write from the beginning, truncate the file at creation.
-    // This saves us two syscalls to truncate the file below.
     int flags = O_WRONLY | O_CREAT | O_APPEND;
-    if(roffset == 0) {
+    if(roffset == 0)
       flags |= O_TRUNC;
-    }
     // Open the file for writing.
     ::rocket::unique_posix_fd fd(::open(path.c_str(), flags, 0666), ::close);
-    if(!fd) {
-      return false;
-    }
+    if(!fd)
+      throw_system_error("open");
     // Set the file pointer when an offset is specified, even when it is an explicit zero.
     if(offset) {
       // If `roffset` is not zero, truncate the file there.
       // This also ensures it is a normal file (not a pipe or socket whatsoever).
       // Otherwise, the file will have been truncate at creation.
       if(::ftruncate(fd, roffset) != 0)
-        return false;
+        throw_system_error("ftruncate");
     }
-    for(;;) {
-      // Have all data been written successfully?
-      if(ntotal >= ntlimit) {
-        break;
-      }
-      // Write data to the end.
-      ::ssize_t nwritten = ::write(fd, data.data() + static_cast<ptrdiff_t>(ntotal),
-                                   static_cast<size_t>(ntlimit - ntotal));
-      if(nwritten < 0) {
-        return false;
-      }
-      // Write remaining data.
-      ntotal += nwritten;
-    }
-    return true;
+    // Write all data.
+    ::ssize_t nwrtn = loop_write(fd, data.data(), data.size());
+    if(nwrtn < data.ssize())
+      throw_system_error("write");
   }
 
-bool std_filesystem_file_append(Sval path, Sval data, Bopt exclusive)
+void std_filesystem_file_append(Sval path, Sval data, Bopt exclusive)
   {
     int64_t ntotal = 0;
     int64_t ntlimit = data.ssize();
     // Calculate the `flags` argument.
     // If we are to write from the beginning, truncate the file at creation.
-    // This saves us two syscalls to truncate the file below.
     int flags = O_WRONLY | O_CREAT | O_APPEND;
-    if(exclusive == true) {
+    if(exclusive == true)
       flags |= O_EXCL;
-    }
     // Open the file for writing.
     ::rocket::unique_posix_fd fd(::open(path.c_str(), flags, 0666), ::close);
-    if(!fd) {
-      return false;
-    }
-    for(;;) {
-      // Have all data been written successfully?
-      if(ntotal >= ntlimit) {
-        break;
-      }
-      // Write data to the end.
-      ::ssize_t nwritten = ::write(fd, data.data() + static_cast<ptrdiff_t>(ntotal),
-                                   static_cast<size_t>(ntlimit - ntotal));
-      if(nwritten < 0) {
-        return false;
-      }
-      // Write remaining data.
-      ntotal += nwritten;
-    }
-    return true;
+    if(!fd)
+      throw_system_error("open");
+    // Write all data.
+    ::ssize_t nwrtn = loop_write(fd, data.data(), data.size());
+    if(nwrtn < data.ssize())
+      throw_system_error("write");
   }
 
 void std_filesystem_file_copy_from(Sval path_new, Sval path_old)
@@ -518,7 +490,7 @@ void std_filesystem_file_copy_from(Sval path_new, Sval path_old)
       throw_system_error("open");
 
     // Copy data in blocks.
-    ::ssize_t nread, nwritten;
+    ::ssize_t nread, nwrtn;
     Sval buff;
     buff.resize(static_cast<size_t>(stb_old.st_blksize));
     for(;;) {
@@ -530,8 +502,8 @@ void std_filesystem_file_copy_from(Sval path_new, Sval path_old)
       if(nread == 0)
         break;
       // Write them all.
-      nwritten = xwrite_loop(fd_new, buff.data(), static_cast<size_t>(nread));
-      if(nwritten < nread)
+      nwrtn = loop_write(fd_new, buff.data(), static_cast<size_t>(nread));
+      if(nwrtn < nread)
         throw_system_error("write");
     }
     // Set the file mode. This must be at the last.
@@ -816,7 +788,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "  * Returns the bytes that have been read as a `string`, or `null`\n"
           "    if the file does not exist.\n"
           "\n"
-          "  * Throws an exception if `offset` is negative, or an read error\n"
+          "  * Throws an exception if `offset` is negative, or a read error\n"
           "    occurs.\n"
         ),
         // Definition
@@ -860,7 +832,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "  * Returns `true` if all data have been processed successfully, or\n"
           "    `null` if the file does not exist.\n"
           "\n"
-          "  * Throws an exception if `offset` is negative, or an read error\n"
+          "  * Throws an exception if `offset` is negative, or a read error\n"
           "    occurs.\n"
         ),
         // Definition
@@ -896,10 +868,10 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "    any existent contents after the write point are discarded. This\n"
           "    function fails if the data can only be written partially.\n"
           "\n"
-          "  * Returns `true` if all data have been written successfully, or\n"
-          "    `null` on failure.\n"
+          "  * Returns `true` if all data have been written successfully.\n"
           "\n"
-          "  * Throws an exception if `offset` is negative.\n"
+          "  * Throws an exception if `offset` is negative, or a write error\n"
+          "    occurs.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value {
@@ -910,7 +882,8 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           Iopt offset;
           if(reader.I().g(path).g(data).g(offset).F()) {
             // Call the binding function.
-            return std_filesystem_file_write(path, data, offset) ? true : null_value;
+            std_filesystem_file_write(path, data, offset);
+            return true;
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -932,8 +905,10 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "    `path`, this function fails. This function also fails if the\n"
           "    data can only be written partially.\n"
           "\n"
-          "  * Returns `true` if all data have been written successfully, or\n"
-          "    `null` on failure.\n"
+          "  * Returns `true` if all data have been written successfully.\n"
+          "\n"
+          "  * Throws an exception if `offset` is negative, or a write error\n"
+          "    occurs.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value {
@@ -944,7 +919,8 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           Bopt exclusive;
           if(reader.I().g(path).g(data).g(exclusive).F()) {
             // Call the binding function.
-            return std_filesystem_file_append(path, data, exclusive) ? true : null_value;
+            std_filesystem_file_append(path, data, exclusive);
+            return true;
           }
           // Fail.
           reader.throw_no_matching_function_call();

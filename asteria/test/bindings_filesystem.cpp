@@ -76,7 +76,12 @@ int main()
         assert std.filesystem.get_information(fname).n_size == 8;
         assert std.filesystem.file_append(fname, "!!") == true; // "helHE#??!!"
         assert std.filesystem.get_information(fname).n_size == 10;
-        assert std.filesystem.file_append(fname, "!!", true) == null;
+        try {
+          std.filesystem.file_append(fname, "!!", true);
+          assert false;
+        }
+        catch(e)
+          ;
 
         assert std.filesystem.file_read(fname) == "helHE#??!!";
         assert std.filesystem.file_read(fname, 2) == "lHE#??!!";

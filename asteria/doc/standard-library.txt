@@ -1901,7 +1901,7 @@
 	* Returns the bytes that have been read as a `string`, or `null`
 	  if the file does not exist.
 
-	* Throws an exception if `offset` is negative, or an read error
+	* Throws an exception if `offset` is negative, or a read error
 	  occurs.
 
 `std.filesystem.file_stream(path, callback, [offset], [limit])`
@@ -1922,7 +1922,7 @@
 	* Returns the number of bytes that have been read and processed
 	  as an `integer`, or `null` if the file does not exist.
 
-	* Throws an exception if `offset` is negative, or an read error
+	* Throws an exception if `offset` is negative, or a read error
 	  occurs.
 
 `std.filesystem.file_write(path, data, [offset])`
@@ -1934,10 +1934,10 @@
 	  any existent contents after the write point are discarded. This
 	  function fails if the data can only be written partially.
 
-	* Returns `true` if all data have been written successfully, or
-	  `null` on failure.
+	* Returns `true` if all data have been written successfully.
 
-	* Throws an exception if `offset` is negative.
+	* Throws an exception if `offset` is negative, or a write error
+	  occurs.
 
 `std.filesystem.file_append(path, data, [exclusive])`
 
@@ -1947,8 +1947,10 @@
 	  `path`, this function fails. This function also fails if the
 	  data can only be written partially.
 
-	* Returns `true` if all data have been written successfully, or
-	  `null` on failure.
+	* Returns `true` if all data have been written successfully.
+
+	* Throws an exception if `offset` is negative, or a write error
+	  occurs.
 
 `std.filesystem.file_copy_from(path_new, path_old)`
 
