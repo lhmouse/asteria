@@ -320,8 +320,7 @@ Sopt std_filesystem_file_read(Sval path, Iopt offset, Iopt limit)
       ASTERIA_THROW("negative file offset (offset `$1`)", *offset);
     }
     int64_t roffset = offset.value_or(0);
-    int64_t rlimit = ::rocket::clamp(limit.value_or(INT32_MAX), 0, 16777216);
-    Sval data;
+    int64_t rlimit = ::rocket::clamp(limit.value_or(INT32_MAX), 0, 0x10'00000);
     // Open the file for reading.
     ::rocket::unique_posix_fd fd(::open(path.c_str(), O_RDONLY), ::close);
     if(!fd) {
@@ -332,8 +331,9 @@ Sopt std_filesystem_file_read(Sval path, Iopt offset, Iopt limit)
     }
 
     // Don't read too many bytes at a time.
-    data.resize(static_cast<size_t>(rlimit));
     ::ssize_t nread;
+    Sval data;
+    data.resize(static_cast<size_t>(rlimit));
     if(offset) {
       nread = ::pread(fd, data.mut_data(), data.size(), roffset);
       if(nread < 0)
@@ -348,39 +348,50 @@ Sopt std_filesystem_file_read(Sval path, Iopt offset, Iopt limit)
     return ::rocket::move(data);
   }
 
-Iopt std_filesystem_file_stream(Global& global, Sval path, Fval callback,
-                                Iopt offset, Iopt limit)
+Iopt std_filesystem_file_stream(Global& global, Sval path, Fval callback, Iopt offset, Iopt limit)
   {
     if(offset && (*offset < 0)) {
       ASTERIA_THROW("negative file offset (offset `$1`)", *offset);
     }
     int64_t roffset = offset.value_or(0);
-    int64_t rlimit = ::rocket::clamp(limit.value_or(INT32_MAX), 0, 16777216);
+    int64_t rlimit = ::rocket::clamp(limit.value_or(INT32_MAX), 0, 0x10'00000);
     int64_t ntotal = 0;
     int64_t ntlimit = ::rocket::max(limit.value_or(INT64_MAX), 0);
-    Sval data;
     // Open the file for reading.
     ::rocket::unique_posix_fd fd(::open(path.c_str(), O_RDONLY), ::close);
     if(!fd) {
+      if(errno != ENOENT)
+        throw_system_error("open");
+      // The path denotes a non-existent file.
       return nullopt;
     }
+
+    // Read and process all data in blocks.
     cow_vector<Reference> args;
+    ::ssize_t nread;
+    Sval data;
     for(;;) {
-      // Has the read limit been reached?
-      if(ntotal >= ntlimit) {
+      // Check for the read limit.
+      if(ntotal >= ntlimit)
         break;
-      }
+
       // Don't read too many bytes at a time.
       data.resize(static_cast<size_t>(rlimit));
-      ::ssize_t nread = offset ? ::pread(fd, data.mut_data(), data.size(), roffset)
-                               : ::read(fd, data.mut_data(), data.size());
-      if(nread < 0) {
-        return nullopt;
+      if(offset) {
+        nread = ::pread(fd, data.mut_data(), data.size(), roffset);
+        if(nread < 0)
+          throw_system_error("pread");
       }
-      if(nread == 0) {
-        break;
+      else {
+        nread = ::read(fd, data.mut_data(), data.size());
+        if(nread < 0)
+          throw_system_error("read");
       }
       data.erase(static_cast<size_t>(nread));
+      // Check for EOF.
+      if(data.empty())
+        break;
+
       // Prepare arguments for the user-defined function.
       args.clear().reserve(2);
       Reference_Root::S_temporary xref_offset = { roffset };
@@ -803,7 +814,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "    read.\n"
           "\n"
           "  * Returns the bytes that have been read as a `string`, or `null`\n"
-          "    on if the file does not exist.\n"
+          "    if the file does not exist.\n"
           "\n"
           "  * Throws an exception if `offset` is negative, or an read error\n"
           "    occurs.\n"
@@ -847,9 +858,10 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "    read.\n"
           "\n"
           "  * Returns `true` if all data have been processed successfully, or\n"
-          "    `null` on failure.\n"
+          "    `null` if the file does not exist.\n"
           "\n"
-          "  * Throws an exception if `offset` is negative.\n"
+          "  * Throws an exception if `offset` is negative, or an read error\n"
+          "    occurs.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {

@@ -1899,7 +1899,7 @@
 	  read.
 
 	* Returns the bytes that have been read as a `string`, or `null`
-	  on if the file does not exist.
+	  if the file does not exist.
 
 	* Throws an exception if `offset` is negative, or an read error
 	  occurs.
@@ -1920,9 +1920,10 @@
 	  read.
 
 	* Returns the number of bytes that have been read and processed
-	  as an `integer`, or `null` on failure.
+	  as an `integer`, or `null` if the file does not exist.
 
-	* Throws an exception if `offset` is negative.
+	* Throws an exception if `offset` is negative, or an read error
+	  occurs.
 
 `std.filesystem.file_write(path, data, [offset])`
 
