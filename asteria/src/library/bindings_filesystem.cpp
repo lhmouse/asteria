@@ -698,8 +698,8 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "    If `path` references a non-existent directory, `null` is\n"
           "    returned.\n"
           "\n"
-          "  * Throws an exception if `path` designates a normal file or some\n"
-          "    other errors occur.\n"
+          "  * Throws an exception if `path` designates a non-directory, or\n"
+          "    some other errors occur.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value {

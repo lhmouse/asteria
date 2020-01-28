@@ -1863,8 +1863,8 @@
 	  If `path` references a non-existent directory, `null` is
 	  returned.
 
-	* Throws an exception if `path` designates a normal file or some
-	  other errors occur.
+	* Throws an exception if `path` designates a non-directory, or
+	  some other errors occur.
 
 `std.filesystem.directory_create(path)`
 
