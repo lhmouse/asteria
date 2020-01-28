@@ -1899,9 +1899,10 @@
 	  read.
 
 	* Returns the bytes that have been read as a `string`, or `null`
-	  on failure.
+	  on if the file does not exist.
 
-	* Throws an exception if `offset` is negative.
+	* Throws an exception if `offset` is negative, or an read error
+	  occurs.
 
 `std.filesystem.file_stream(path, callback, [offset], [limit])`
 

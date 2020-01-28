@@ -325,14 +325,24 @@ Sopt std_filesystem_file_read(Sval path, Iopt offset, Iopt limit)
     // Open the file for reading.
     ::rocket::unique_posix_fd fd(::open(path.c_str(), O_RDONLY), ::close);
     if(!fd) {
+      if(errno != ENOENT)
+        throw_system_error("open");
+      // The path denotes a non-existent file.
       return nullopt;
     }
+
     // Don't read too many bytes at a time.
     data.resize(static_cast<size_t>(rlimit));
-    ::ssize_t nread = offset ? ::pread(fd, data.mut_data(), data.size(), roffset)
-                             : ::read(fd, data.mut_data(), data.size());
-    if(nread < 0) {
-      return nullopt;
+    ::ssize_t nread;
+    if(offset) {
+      nread = ::pread(fd, data.mut_data(), data.size(), roffset);
+      if(nread < 0)
+        throw_system_error("pread");
+    }
+    else {
+      nread = ::read(fd, data.mut_data(), data.size());
+      if(nread < 0)
+        throw_system_error("read");
     }
     data.erase(static_cast<size_t>(nread));
     return ::rocket::move(data);
@@ -793,9 +803,10 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "    read.\n"
           "\n"
           "  * Returns the bytes that have been read as a `string`, or `null`\n"
-          "    on failure.\n"
+          "    on if the file does not exist.\n"
           "\n"
-          "  * Throws an exception if `offset` is negative.\n"
+          "  * Throws an exception if `offset` is negative, or an read error\n"
+          "    occurs.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value {
