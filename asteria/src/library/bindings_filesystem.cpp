@@ -15,17 +15,35 @@
 #include <errno.h>  // errno
 
 namespace Asteria {
+namespace {
+
+[[noreturn]] void throw_system_error(const char* name, int err)
+  {
+    char sbuf[256];
+    ::strerror_r(err, sbuf, sizeof(sbuf));
+    ASTERIA_THROW("`$1()` failed (errno was `$2`: $3)", name, err, sbuf);
+  }
+
+}  // namespace
 
 Sval std_filesystem_get_working_directory()
   {
     // Get the current directory, resizing the buffer as needed.
-    Sval cwd(PATH_MAX, '*');
+    Sval cwd;
+#ifdef ROCKET_DEBUG
+    cwd.append(1, '*');
+#else
+    cwd.append(PATH_MAX, '*');
+#endif
     while(::getcwd(cwd.mut_data(), cwd.size()) == nullptr) {
-      int err = errno;
-      if(err != ERANGE) {
-        ASTERIA_THROW("`getcwd()` failed (errno `$1`)", err);
-      }
+      // Resize the buffer if it isn't large enough.
+      if(errno != ERANGE)
+        throw_system_error("getcwd", errno);
+#ifdef ROCKET_DEBUG
+      cwd.append(1, '*');
+#else
       cwd.append(cwd.size() / 2, '*');
+#endif
     }
     cwd.erase(cwd.find('\0'));
     return cwd;
