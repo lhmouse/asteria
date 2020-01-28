@@ -1957,7 +1957,9 @@
 	  than the symbolic link itself. This function fails if
 	  `path_old` designates a directory.
 
-	* Returns `true` on success, or `null` on failure.
+	* Returns `true`.
+
+	* Throws an exception on failure.
 
 `std.filesystem.file_remove(path)`
 

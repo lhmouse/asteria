@@ -116,6 +116,21 @@ int64_t do_remove_recursive(const Sval& path)
     return nremoved;
   }
 
+::ssize_t xwrite_loop(int fd, const void* buf, size_t count)
+  {
+    auto bp = static_cast<const char*>(buf);
+    auto ep = bp + count;
+    for(;;) {
+      if(bp >= ep)
+        break;
+      ::ssize_t nwrtn = ::write(fd, bp, static_cast<size_t>(ep - bp));
+      if(nwrtn < 0)
+        break;
+      bp += nwrtn;
+    }
+    return bp - static_cast<const char*>(buf);
+  }
+
 }  // namespace
 
 Sval std_filesystem_get_working_directory()
@@ -485,66 +500,43 @@ bool std_filesystem_file_append(Sval path, Sval data, Bopt exclusive)
     return true;
   }
 
-bool std_filesystem_file_copy_from(Sval path_new, Sval path_old)
+void std_filesystem_file_copy_from(Sval path_new, Sval path_old)
   {
     // Open the old file.
     ::rocket::unique_posix_fd fd_old(::open(path_old.c_str(), O_RDONLY), ::close);
-    if(!fd_old) {
-      return false;
-    }
+    if(!fd_old)
+      throw_system_error("open");
     // Get the file mode and preferred I/O block size.
     struct ::stat stb_old;
-    if(::fstat(fd_old, &stb_old) != 0) {
-      return false;
-    }
+    if(::fstat(fd_old, &stb_old) != 0)
+      throw_system_error("fstat");
     // We always overwrite the destination file.
     int flags = O_WRONLY | O_CREAT | O_TRUNC | O_APPEND;
     // Create the new file, discarding its contents.
     ::rocket::unique_posix_fd fd_new(::open(path_new.c_str(), flags, 0200), ::close);
-    if(!fd_new) {
-      // If the file cannot be opened, unlink it and try again.
-      if((errno == EISDIR) || (::unlink(path_new.c_str()) != 0)) {
-        return false;
-      }
-      fd_new.reset(::open(path_new.c_str(), flags, 0200));
-      if(!fd_new) {
-        return false;
-      }
-    }
-    // Allocate the I/O buffer.
+    if(!fd_new)
+      throw_system_error("open");
+
+    // Copy data in blocks.
+    ::ssize_t nread, nwritten;
     Sval buff;
     buff.resize(static_cast<size_t>(stb_old.st_blksize));
     for(;;) {
       // Read some bytes.
-      ::ssize_t nread = ::read(fd_old, buff.mut_data(), buff.size());
-      if(nread < 0) {
-        return false;
-      }
-      if(nread == 0) {
+      nread = ::read(fd_old, buff.mut_data(), buff.size());
+      if(nread < 0)
+        throw_system_error("read");
+      // Check for EOF.
+      if(nread == 0)
         break;
-      }
       // Write them all.
-      ::ssize_t ntotal = 0;
-      for(;;) {
-        // Have all data been written successfully?
-        if(ntotal >= nread) {
-          break;
-        }
-        // Write data to the end.
-        ::ssize_t nwritten = ::write(fd_new, buff.data() + static_cast<ptrdiff_t>(ntotal),
-                                     static_cast<size_t>(nread - ntotal));
-        if(nwritten < 0) {
-          return false;
-        }
-        // Write remaining data.
-        ntotal += nwritten;
-      }
+      nwritten = xwrite_loop(fd_new, buff.data(), static_cast<size_t>(nread));
+      if(nwritten < nread)
+        throw_system_error("write");
     }
     // Set the file mode. This must be at the last.
-    if(::fchmod(fd_new, stb_old.st_mode) != 0) {
-      return false;
-    }
-    return true;
+    if(::fchmod(fd_new, stb_old.st_mode) != 0)
+      throw_system_error("fchmod");
   }
 
 bool std_filesystem_file_remove(Sval path)
@@ -983,7 +975,8 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           Sval path_old;
           if(reader.I().g(path_new).g(path_old).F()) {
             // Call the binding function.
-            return std_filesystem_file_copy_from(path_new, path_old) ? true : null_value;
+            std_filesystem_file_copy_from(path_new, path_old);
+            return true;
           }
           // Fail.
           reader.throw_no_matching_function_call();

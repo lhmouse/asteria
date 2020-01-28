@@ -22,7 +22,7 @@ Sopt std_filesystem_file_read(Sval path, Iopt offset = nullopt, Iopt limit = nul
 Iopt std_filesystem_file_stream(Global& global, Sval path, Fval callback, Iopt offset = nullopt, Iopt limit = nullopt);
 bool std_filesystem_file_write(Sval path, Sval data, Iopt offset = nullopt);
 bool std_filesystem_file_append(Sval path, Sval data, Bopt exclusive = nullopt);
-bool std_filesystem_file_copy_from(Sval path_new, Sval path_old);
+void std_filesystem_file_copy_from(Sval path_new, Sval path_old);
 Bval std_filesystem_file_remove(Sval path);
 
 // Create an object that is to be referenced as `std.filesystem`.
