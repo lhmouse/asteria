@@ -46,6 +46,11 @@ class Value
         this->m_stor = ::rocket::forward<XvalT>(xval);
         return *this;
       }
+    template<typename XvalT> Value(const XvalT* opt)
+      {
+        if(opt)
+          this->m_stor = *opt;
+      }
     template<typename XvalT> Value(const opt<XvalT>& opt)
       {
         if(opt)
@@ -55,6 +60,13 @@ class Value
       {
         if(opt)
           this->m_stor = ::rocket::move(*opt);
+      }
+    template<typename XvalT> Value& operator=(const XvalT* opt)
+      {
+        this->m_stor = nullptr;
+        if(opt)
+          this->m_stor = *opt;
+        return *this;
       }
     template<typename XvalT> Value& operator=(const opt<XvalT>& opt)
       {
