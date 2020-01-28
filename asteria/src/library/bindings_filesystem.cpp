@@ -227,16 +227,25 @@ Oopt std_filesystem_directory_list(Sval path)
   {
     ::rocket::unique_posix_dir dp(::opendir(path.c_str()), closedir);
     if(!dp) {
+      if(errno != ENOENT)
+        throw_system_error("opendir");
+      // The path denotes a non-existent directory.
       return nullopt;
     }
     // Write entries.
     Oval entries;
+    cow_string child;
     struct ::dirent* next;
     while((next = ::readdir(dp)) != nullptr) {
-      cow_string name;
-      Oval entry;
       // Assume the name is in UTF-8.
-      name.assign(next->d_name);
+      phsh_string name = cow_string(next->d_name);
+      Oval entry;
+      // Compose the full path of the child.
+      // We want to reuse the storage so don't just assign to `child` here.
+      child.clear();
+      child += path;
+      child += '/';
+      child += next->d_name;
 #ifdef _DIRENT_HAVE_D_TYPE
       if(next->d_type != DT_UNKNOWN) {
         // Get the file type if it is available immediately.
@@ -253,13 +262,11 @@ Oopt std_filesystem_directory_list(Sval path)
 #endif
       {
         // If the file type is unknown, ask for it.
-        // Compose the path.
-        auto child = path + '/' + name;
         // Identify the entry.
         struct ::stat stb;
-        if(::lstat(child.c_str(), &stb) != 0) {
-          return nullopt;
-        }
+        if(::lstat(child.c_str(), &stb) != 0)
+          throw_system_error("lstat");
+        // Check whether the child path denotes a directory or symlink.
         entry.try_emplace(::rocket::sref("b_dir"),
           Bval(
             S_ISDIR(stb.st_mode)
@@ -688,7 +695,11 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "    * `b_dir`   whether this is a directory.\n"
           "    * `b_sym`   whether this is a symbolic link.\n"
           "\n"
-          "    On failure, `null` is returned.\n"
+          "    If `path` references a non-existent directory, `null` is\n"
+          "    returned.\n"
+          "\n"
+          "  * Throws an exception if `path` designates a normal file or some\n"
+          "    other errors occur.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value {
