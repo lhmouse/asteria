@@ -1840,7 +1840,11 @@
 	  a directory, all of its contents are removed recursively.
 
 	* Returns the number of files and directories that have been
-	  successfully removed in total, or `null` on failure.
+	  successfully removed in total. If `path` does not reference an
+	  existent file or directory, `0` is returned.
+
+	* Throws an exception if the file or directory at `path` cannot
+	  be removed.
 
 `std.filesystem.directory_list(path)`
 

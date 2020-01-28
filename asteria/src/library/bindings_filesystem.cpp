@@ -21,9 +21,22 @@ namespace {
   {
     const int err = errno;
     char sbuf[256];
-    ::strerror_r(err, sbuf, sizeof(sbuf));
-    ASTERIA_THROW("`$1()` failed (errno was `$2`: $3)", name, err, sbuf);
+    const char* msg = ::strerror_r(err, sbuf, sizeof(sbuf));
+    ASTERIA_THROW("`$1()` failed (errno was `$2`: $3)", name, err, msg);
   }
+
+enum Rmdisp
+  {
+    rmdisp_rmdir,     // a subdirectory which should be empty and can be removed
+    rmdisp_unlink,    // a plain file to be unlinked
+    rmdisp_expand,    // a subdirectory to be expanded
+  };
+
+struct Rmelem
+  {
+    Rmdisp disp;
+    cow_string path;
+  };
 
 }  // namespace
 
@@ -103,96 +116,97 @@ void std_filesystem_move_from(Sval path_new, Sval path_old)
       throw_system_error("rename");
   }
 
-Iopt std_filesystem_remove_recursive(Sval path)
+Ival std_filesystem_remove_recursive(Sval path)
   {
     if(::rmdir(path.c_str()) == 0) {
       // An empty directory has been removed.
-      // Succeed.
-      return Ival(1);
+      return 1;
     }
-    int err = errno;
-    if(err == ENOTDIR) {
+    if(errno == ENOTDIR) {
       // This is something not a directory.
-      if(::unlink(path.c_str()) != 0) {
-        return nullopt;
-      }
-      // Succeed.
-      return Ival(1);
+      if(::unlink(path.c_str()) != 0)
+        throw_system_error("unlink");
+      // A file has been removed.
+      return 1;
     }
+    if(::rocket::is_none_of(errno, { EEXIST, ENOTEMPTY }))
+      throw_system_error("rmdir");
+
     // Remove the directory recursively.
-    enum Rmlist
-      {
-        rmlist_rmdir,     // a subdirectory which should be empty and can be removed
-        rmlist_unlink,    // a plain file to be unlinked
-        rmlist_expand,    // a subdirectory to be expanded
-      };
-    int64_t count = 0;
-    // This is the list of files and directories to be removed.
-    cow_bivector<Rmlist, cow_string> stack;
-    stack.emplace_back(rmlist_expand, path);
-    while(!stack.empty()) {
-      // Pop an element off the stack.
-      auto pair = ::rocket::move(stack.mut_back());
+    int64_t nremoved = 0;
+    cow_vector<Rmelem> stack;
+    // Push the first element.
+    stack.push_back({ rmdisp_expand, path });
+    while(stack.size()) {
+      auto elem = ::rocket::move(stack.mut_back());
       stack.pop_back();
-      // Do something.
-      if(pair.first == rmlist_rmdir) {
-        // This is an empty directory. Remove it.
-        if(::rmdir(pair.second.c_str()) != 0) {
-          return nullopt;
+      // Process this element.
+      switch(elem.disp) {
+      case rmdisp_rmdir: {
+          // This is an empty directory. Remove it.
+          if(::rmdir(elem.path.c_str()) != 0)
+            throw_system_error("rmdir");
+          // An element has been removed.
+          nremoved++;
+          break;
         }
-        count++;
-        continue;
-      }
-      if(pair.first == rmlist_unlink) {
-        // This is a plain file. Remove it.
-        if(::unlink(pair.second.c_str()) != 0) {
-          return nullopt;
+      case rmdisp_unlink: {
+          // This is a plain file. Unlink it.
+          if(::unlink(elem.path.c_str()) != 0)
+            throw_system_error("unlink");
+          // An element has been removed.
+          nremoved++;
+          break;
         }
-        count++;
-        continue;
-      }
-      // This is a subdirectory that has not been expanded. Expand it.
-      // Push the directory itself. Since elements are maintained in LIFO order, only when this element
-      // is encountered for a second time, will all of its children have been removed.
-      stack.emplace_back(rmlist_rmdir, pair.second);
-      // Append all entries.
-      ::rocket::unique_posix_dir dp(::opendir(pair.second.c_str()), ::closedir);
-      if(!dp) {
-        return nullopt;
-      }
-      // Write entries.
-      struct ::dirent* next;
-      while((next = ::readdir(dp)) != nullptr) {
-        // Skip special entries.
-        if(next->d_name[0] == '.') {
-          if(next->d_name[1] == 0)  // "."
-            continue;
-          if((next->d_name[1] == '.') && (next->d_name[2] == 0))  // ".."
-            continue;
-        }
-        // Get the name and type of this entry.
-        auto child = pair.second + '/' + next->d_name;
-        bool is_dir;
+      case rmdisp_expand: {
+          // This is a subdirectory that has not been expanded. Expand it.
+          // Push the directory itself. Since elements are maintained in LIFO order, only when this
+          // element is encountered for a second time, will all of its children have been removed.
+          stack.push_back({ rmdisp_rmdir, elem.path });
+          // Append all entries.
+          ::rocket::unique_posix_dir dp(::opendir(elem.path.c_str()), ::closedir);
+          if(!dp)
+            throw_system_error("opendir");
+          // Write entries.
+          struct ::dirent* next;
+          while((next = ::readdir(dp)) != nullptr) {
+            // Skip special entries.
+            if(next->d_name[0] == '.') {
+              if(next->d_name[1] == 0)  // "."
+                continue;
+              if((next->d_name[1] == '.') && (next->d_name[2] == 0))  // ".."
+                continue;
+            }
+            // Get the name and type of this entry.
+            Rmdisp disp = rmdisp_unlink;
+            cow_string child = elem.path + '/' + next->d_name;
 #ifdef _DIRENT_HAVE_D_TYPE
-        if(ROCKET_EXPECT(next->d_type != DT_UNKNOWN)) {
-          // Get the file type if it is available immediately.
-          is_dir = next->d_type == DT_DIR;
-        }
-        else
+            if(ROCKET_EXPECT(next->d_type != DT_UNKNOWN)) {
+              // Get the file type if it is available immediately.
+              if(next->d_type == DT_DIR)
+                disp = rmdisp_expand;
+            }
+            else
 #endif
-        {
-          // If the file type is unknown, ask for it.
-          struct ::stat stb;
-          if(::lstat(child.c_str(), &stb) != 0) {
-            return nullopt;
+            {
+              // If the file type is unknown, ask for it.
+              struct ::stat stb;
+              if(::lstat(child.c_str(), &stb) != 0)
+                throw_system_error("lstat");
+              // Check whether the child path denotes a directory.
+              if(S_ISDIR(stb.st_mode))
+                disp = rmdisp_expand;
+            }
+            // Append the entry.
+            stack.push_back({ disp, ::rocket::move(child) });
           }
-          is_dir = S_ISDIR(stb.st_mode);
+          break;
         }
-        // Append the entry.
-        stack.emplace_back(is_dir ? rmlist_expand : rmlist_unlink, ::rocket::move(child));
+      default:
+        ROCKET_ASSERT(false);
       }
     }
-    return count;
+    return nremoved;
   }
 
 Oopt std_filesystem_directory_list(Sval path)
@@ -587,7 +601,11 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "    a directory, all of its contents are removed recursively.\n"
           "\n"
           "  * Returns the number of files and directories that have been\n"
-          "    successfully removed in total, or `null` on failure.\n"
+          "    successfully removed in total. If `path` does not reference an\n"
+          "    existent file or directory, `0` is returned.\n"
+          "\n"
+          "  * Throws an exception if the file or directory at `path` cannot\n"
+          "    be removed.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value {
