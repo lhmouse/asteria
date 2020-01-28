@@ -35,12 +35,7 @@ int main()
         assert std.array.sort(std.array.copy_keys(std.filesystem.directory_list(dname))) == [".","..","f1","f2","f3","f4"];
 
         assert std.filesystem.remove_recursive(dname + "/f1") == 1;
-        try {
-          std.filesystem.remove_recursive(dname + "/f1");
-          assert false;
-        }
-        catch(e)
-          ;
+        assert std.filesystem.remove_recursive(dname + "/f1") == 0;
 
         assert std.filesystem.move_from(dname + "/f5", dname + "/f2") == true;
         try {
