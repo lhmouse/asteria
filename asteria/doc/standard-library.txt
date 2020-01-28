@@ -1884,8 +1884,11 @@
 	* Removes the directory at `path`. The directory must be empty.
 	  This function fails if `path` does not designate a directory.
 
-	* Returns `1` if the directory has been removed successfully, `0`
-	  if it is not empty, or `null` on failure.
+	* Returns `true` if a directory has been removed successfully,
+	  or `false` if no such directory exists.
+
+	* Throws an exception if `path` designates a non-directory, or
+	  some other errors occur.
 
 `std.filesystem.file_read(path, [offset], [limit])`
 

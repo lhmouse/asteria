@@ -47,9 +47,14 @@ int main()
         assert std.array.sort(std.array.copy_keys(std.filesystem.directory_list(dname))) == [".","..","f3","f4","f5"];
 
         assert std.filesystem.file_remove(dname) == null;
-        assert std.filesystem.directory_remove(dname) == 0;
+        try {
+          std.filesystem.directory_remove(dname);
+          assert false;
+        }
+        catch(e)
+          ;
         assert std.filesystem.remove_recursive(dname) == 8;
-        assert std.filesystem.directory_remove(dname) == null;
+        assert std.filesystem.directory_remove(dname) == false;
 
         assert std.filesystem.file_read(fname) == null;
         assert std.filesystem.file_append(fname, "@@@@$$", true) == true; // "@@@@$$"
@@ -106,7 +111,7 @@ int main()
 
         assert std.filesystem.directory_create(fname) == true;
         assert std.filesystem.file_remove(fname) == null;
-        assert std.filesystem.directory_remove(fname) == 1;
+        assert std.filesystem.directory_remove(fname) == true;
       )__"), tinybuf::open_read);
 
     Simple_Script code(cbuf, ::rocket::sref(__FILE__));

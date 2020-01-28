@@ -296,21 +296,22 @@ Bval std_filesystem_directory_create(Sval path)
       throw_system_error("stat");
     if(!S_ISDIR(stb.st_mode))
       throw_system_error("mkdir", EEXIST);
+
+    // A directory already exists.
     return false;
   }
 
-Iopt std_filesystem_directory_remove(Sval path)
+Bval std_filesystem_directory_remove(Sval path)
   {
     if(::rmdir(path.c_str()) == 0) {
       // The directory has been removed.
-      return Ival(1);
+      return true;
     }
-    int err = errno;
-    if((err != ENOTEMPTY) && (err != EEXIST)) {
-      return nullopt;
-    }
-    // The directory is not empty.
-    return Ival(0);
+    if(errno != ENOENT)
+      throw_system_error("rmdir");
+
+    // The directory does not exist.
+    return false;
   }
 
 Sopt std_filesystem_file_read(Sval path, Iopt offset, Iopt limit)
@@ -756,8 +757,11 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "  * Removes the directory at `path`. The directory must be empty.\n"
           "    This function fails if `path` does not designate a directory.\n"
           "\n"
-          "  * Returns `1` if the directory has been removed successfully, `0`\n"
-          "    if it is not empty, or `null` on failure.\n"
+          "  * Returns `true` if a directory has been removed successfully,\n"
+          "    or `false` if no such directory exists.\n"
+          "\n"
+          "  * Throws an exception if `path` designates a non-directory, or\n"
+          "    some other errors occur.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value {
