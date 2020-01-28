@@ -15,7 +15,7 @@ void std_filesystem_move_from(Sval path_new, Sval path_old);
 Ival std_filesystem_remove_recursive(Sval path);
 
 Oopt std_filesystem_directory_list(Sval path);
-Iopt std_filesystem_directory_create(Sval path);
+Bval std_filesystem_directory_create(Sval path);
 Iopt std_filesystem_directory_remove(Sval path);
 
 Sopt std_filesystem_file_read(Sval path, Iopt offset = nullopt, Iopt limit = nullopt);

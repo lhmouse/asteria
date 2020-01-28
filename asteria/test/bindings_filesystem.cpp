@@ -20,16 +20,16 @@ int main()
         assert std.filesystem.get_information(dname) == null;
         assert std.filesystem.get_information(fname) == null;
 
-        assert std.filesystem.directory_create(dname) == 1;
+        assert std.filesystem.directory_create(dname) == true;
         assert std.filesystem.get_information(dname).b_dir == true;
-        assert std.filesystem.directory_create(dname) == 0;
+        assert std.filesystem.directory_create(dname) == false;
 
         assert std.filesystem.file_append(dname + "/f1", "1") == true;
         assert std.filesystem.file_append(dname + "/f2", "2") == true;
-        assert std.filesystem.directory_create(dname + "/f3") == 1;
+        assert std.filesystem.directory_create(dname + "/f3") == true;
         assert std.filesystem.file_append(dname + "/f3/a", "3") == true;
-        assert std.filesystem.directory_create(dname + "/f4") == 1;
-        assert std.filesystem.directory_create(dname + "/f4/f5") == 1;
+        assert std.filesystem.directory_create(dname + "/f4") == true;
+        assert std.filesystem.directory_create(dname + "/f4/f5") == true;
         assert std.filesystem.file_append(dname + "/f4/f5/a", "4") == true;
         assert std.filesystem.file_append(dname + "/f4/f5/b", "5") == true;
         assert std.array.sort(std.array.copy_keys(std.filesystem.directory_list(dname))) == [".","..","f1","f2","f3","f4"];
@@ -94,12 +94,17 @@ int main()
         assert std.filesystem.file_stream(fname, appender, 2, 3) == 3;
         assert data == "lHE";
 
-        assert std.filesystem.directory_create(fname) == null;
+        try {
+          std.filesystem.directory_create(fname);
+          assert false;
+        }
+        catch(e)
+          ;
         assert std.filesystem.file_remove(fname) == true;
         assert std.filesystem.file_remove(fname) == null;
         assert std.filesystem.file_remove(fname + ".2") == true;
 
-        assert std.filesystem.directory_create(fname) == 1;
+        assert std.filesystem.directory_create(fname) == true;
         assert std.filesystem.file_remove(fname) == null;
         assert std.filesystem.directory_remove(fname) == 1;
       )__"), tinybuf::open_read);

@@ -17,9 +17,8 @@
 namespace Asteria {
 namespace {
 
-[[noreturn]] ROCKET_NOINLINE void throw_system_error(const char* name)
+[[noreturn]] ROCKET_NOINLINE void throw_system_error(const char* name, int err = errno)
   {
-    const int err = errno;
     char sbuf[256];
     const char* msg = ::strerror_r(err, sbuf, sizeof(sbuf));
     ASTERIA_THROW("`$1()` failed (errno was `$2`: $3)", name, err, msg);
@@ -282,26 +281,22 @@ Oopt std_filesystem_directory_list(Sval path)
     return ::rocket::move(entries);
   }
 
-Iopt std_filesystem_directory_create(Sval path)
+Bval std_filesystem_directory_create(Sval path)
   {
     if(::mkdir(path.c_str(), 0777) == 0) {
       // A new directory has been created.
-      return Ival(1);
+      return true;
     }
-    int err = errno;
-    if(err != EEXIST) {
-      return nullopt;
-    }
-    // Fail only if it is not a directory that exists.
+    if(errno != EEXIST)
+      throw_system_error("mkdir");
+
+    // Check whether a directory or a symlink to a directory already exists.
     struct ::stat stb;
-    if(::stat(path.c_str(), &stb) != 0) {
-      return nullopt;
-    }
-    if(!S_ISDIR(stb.st_mode)) {
-      return nullopt;
-    }
-    // The directory already exists.
-    return Ival(0);
+    if(::stat(path.c_str(), &stb) != 0)
+      throw_system_error("stat");
+    if(!S_ISDIR(stb.st_mode))
+      throw_system_error("mkdir", EEXIST);
+    return false;
   }
 
 Iopt std_filesystem_directory_remove(Sval path)
@@ -729,8 +724,11 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "    a directory or a symbolic link to a directory already exists on\n"
           "    `path`.\n"
           "\n"
-          "  * Returns `1` if a new directory has been created successfully,\n"
-          "    `0` if the directory already exists, or `null` on failure.\n"
+          "  * Returns `true` if a new directory has been created, or `false`\n"
+          "    if a directory already exists.\n"
+          "\n"
+          "  * Throws an exception if `path` designates a non-directory, or\n"
+          "    some other errors occur.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value {

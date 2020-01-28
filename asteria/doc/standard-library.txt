@@ -1873,8 +1873,11 @@
 	  a directory or a symbolic link to a directory already exists on
 	  `path`.
 
-	* Returns `1` if a new directory has been created successfully,
-	  `0` if the directory already exists, or `null` on failure.
+	* Returns `true` if a new directory has been created, or `false`
+	  if a directory already exists.
+
+	* Throws an exception if `path` designates a non-directory, or
+	  some other errors occur.
 
 `std.filesystem.directory_remove(path)`
 
