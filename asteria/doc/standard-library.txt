@@ -1830,7 +1830,9 @@
 	* Moves (renames) the file or directory at `path_old` to
 	  `path_new`.
 
-	* Returns `true` on success, or `null` on failure.
+	* Returns `true`.
+
+	* Throws an exception on failure.
 
 `std.filesystem.remove_recursive(path)`
 

@@ -37,7 +37,12 @@ int main()
         assert std.filesystem.remove_recursive(dname + "/f1") == 1;
         assert std.filesystem.remove_recursive(dname + "/f1") == null;
         assert std.filesystem.move_from(dname + "/f5", dname + "/f2") == true;
-        assert std.filesystem.move_from(dname + "/f5", dname + "/f2") == null;
+        try {
+          std.filesystem.move_from(dname + "/f5", dname + "/f2");
+          assert false;
+        }
+        catch(e)
+          ;
         assert std.array.sort(std.array.copy_keys(std.filesystem.directory_list(dname))) == [".","..","f3","f4","f5"];
 
         assert std.filesystem.file_remove(dname) == null;

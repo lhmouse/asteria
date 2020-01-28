@@ -96,9 +96,10 @@ Oopt std_filesystem_get_information(Sval path)
     return ::rocket::move(stat);
   }
 
-bool std_filesystem_move_from(Sval path_new, Sval path_old)
+void std_filesystem_move_from(Sval path_new, Sval path_old)
   {
-    return ::rename(path_old.c_str(), path_new.c_str()) == 0;
+    if(::rename(path_old.c_str(), path_new.c_str()) != 0)
+      throw_system_error("rename", errno);
   }
 
 Iopt std_filesystem_remove_recursive(Sval path)
@@ -613,7 +614,9 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           "  * Moves (renames) the file or directory at `path_old` to\n"
           "    `path_new`.\n"
           "\n"
-          "  * Returns `true` on success, or `null` on failure.\n"
+          "  * Returns `true`.\n"
+          "\n"
+          "  * Throws an exception on failure.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value {
@@ -623,7 +626,8 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
           Sval path_old;
           if(reader.I().g(path_new).g(path_old).F()) {
             // Call the binding function.
-            return std_filesystem_move_from(path_new, path_old) ? true : null_value;
+            std_filesystem_move_from(path_new, path_old);
+            return true;
           }
           // Fail.
           reader.throw_no_matching_function_call();
