@@ -17,8 +17,9 @@
 namespace Asteria {
 namespace {
 
-[[noreturn]] void throw_system_error(const char* name, int err)
+[[noreturn]] ROCKET_NOINLINE void throw_system_error(const char* name)
   {
+    const int err = errno;
     char sbuf[256];
     ::strerror_r(err, sbuf, sizeof(sbuf));
     ASTERIA_THROW("`$1()` failed (errno was `$2`: $3)", name, err, sbuf);
@@ -38,7 +39,7 @@ Sval std_filesystem_get_working_directory()
     while(::getcwd(cwd.mut_data(), cwd.size()) == nullptr) {
       // Resize the buffer if it isn't large enough.
       if(errno != ERANGE)
-        throw_system_error("getcwd", errno);
+        throw_system_error("getcwd");
 #ifdef ROCKET_DEBUG
       cwd.append(1, '*');
 #else
@@ -99,7 +100,7 @@ Oopt std_filesystem_get_information(Sval path)
 void std_filesystem_move_from(Sval path_new, Sval path_old)
   {
     if(::rename(path_old.c_str(), path_new.c_str()) != 0)
-      throw_system_error("rename", errno);
+      throw_system_error("rename");
   }
 
 Iopt std_filesystem_remove_recursive(Sval path)
