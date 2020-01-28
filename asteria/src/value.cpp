@@ -11,28 +11,25 @@ namespace {
 template<typename ValT, ROCKET_ENABLE_IF(::std::is_integral<ValT>::value)>
     Compare do_3way_compare(const ValT& lhs, const ValT& rhs) noexcept
   {
-    if(lhs < rhs) {
+    if(lhs < rhs)
       return compare_less;
-    }
-    if(lhs > rhs) {
+    else if(lhs > rhs)
       return compare_greater;
-    }
-    return compare_equal;
+    else
+      return compare_equal;
   }
 
 template<typename ValT, ROCKET_ENABLE_IF(::std::is_floating_point<ValT>::value)>
     Compare do_3way_compare(const ValT& lhs, const ValT& rhs) noexcept
   {
-    if(::std::isless(lhs, rhs)) {
+    if(::std::isless(lhs, rhs))
       return compare_less;
-    }
-    if(::std::isgreater(lhs, rhs)) {
+    else if(::std::isgreater(lhs, rhs))
       return compare_greater;
-    }
-    if(::std::isunordered(lhs, rhs)) {
+    else if(::std::isunordered(lhs, rhs))
       return compare_unordered;
-    }
-    return compare_equal;
+    else
+      return compare_equal;
   }
 
 }  // namespace
