@@ -8,14 +8,12 @@ export CXX
 export CPPFLAGS
 export CXXFLAGS
 
-function check_one()
-  {
-    _cmd="${CXX} ${CPPFLAGS} ${CXXFLAGS} -x c++ -fsyntax-only -I."
-    echo "Checking \`#include\` directives:  ${_cmd}  \"$1\""
-    ${_cmd}  "$1"
-  }
+_sem="parallel --will-cite --semaphore"
 
 for _file in $(find -L "asteria" -name "*.[hc]pp")
 do
-  check_one ${_file}
-done;
+  _cmd="${CXX} ${CPPFLAGS} ${CXXFLAGS} -x c++ -fsyntax-only -I."
+  echo "Checking \`#include\` directives:  ${_cmd}  \"${_file}\""
+  ${_sem} -j+0 -- ${_cmd}  "${_file}"
+done
+${_sem} --wait
