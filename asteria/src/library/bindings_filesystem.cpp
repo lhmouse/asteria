@@ -428,8 +428,6 @@ void std_filesystem_file_write(Sval path, Sval data, Iopt offset)
       ASTERIA_THROW("negative file offset (offset `$1`)", *offset);
     }
     int64_t roffset = offset.value_or(0);
-    int64_t ntotal = 0;
-    int64_t ntlimit = data.ssize();
     // Calculate the `flags` argument.
     // If we are to write from the beginning, truncate the file at creation.
     int flags = O_WRONLY | O_CREAT | O_APPEND;
@@ -455,10 +453,6 @@ void std_filesystem_file_write(Sval path, Sval data, Iopt offset)
 
 void std_filesystem_file_append(Sval path, Sval data, Bopt exclusive)
   {
-    int64_t ntotal = 0;
-    int64_t ntlimit = data.ssize();
-    // Calculate the `flags` argument.
-    // If we are to write from the beginning, truncate the file at creation.
     int flags = O_WRONLY | O_CREAT | O_APPEND;
     if(exclusive == true)
       flags |= O_EXCL;
