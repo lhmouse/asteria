@@ -15,11 +15,11 @@ class Instantiated_Function final : public Abstract_Function
   {
   private:
     cow_vector<phsh_string> m_params;
-    ckptr<Variadic_Arguer> m_zvarg;
+    rcptr<Variadic_Arguer> m_zvarg;
     AVMC_Queue m_queue;
 
   public:
-    Instantiated_Function(const cow_vector<phsh_string>& params, ckptr<Variadic_Arguer>&& zvarg,
+    Instantiated_Function(const cow_vector<phsh_string>& params, rcptr<Variadic_Arguer>&& zvarg,
                           const cow_vector<AIR_Node>& code)
       :
         m_params(params), m_zvarg(::rocket::move(zvarg))

@@ -836,7 +836,7 @@ AIR_Status do_coalescence(Executive_Context& ctx, ParamU pu, const void* pv)
   }
 
 ROCKET_NOINLINE Reference& do_invoke_nontail(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
-                                             const ckptr<Abstract_Function>& target, cow_vector<Reference>&& args)
+                                             const rcptr<Abstract_Function>& target, cow_vector<Reference>&& args)
   {
     // Call the hook function if any.
     const auto& inside = ctx.zvarg()->func();
@@ -865,7 +865,7 @@ ROCKET_NOINLINE Reference& do_invoke_nontail(Reference& self, const Source_Locat
   }
 
 ROCKET_NOINLINE Reference& do_wrap_tail_call(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
-                                             const ckptr<Abstract_Function>& target, PTC_Aware ptc,
+                                             const rcptr<Abstract_Function>& target, PTC_Aware ptc,
                                              cow_vector<Reference>&& args)
   {
     // Pack arguments for this proper tail call.
@@ -877,7 +877,7 @@ ROCKET_NOINLINE Reference& do_wrap_tail_call(Reference& self, const Source_Locat
   }
 
 AIR_Status do_function_call_common(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
-                                   const ckptr<Abstract_Function>& target, PTC_Aware ptc,
+                                   const rcptr<Abstract_Function>& target, PTC_Aware ptc,
                                    cow_vector<Reference>&& args)
   {
     if(ROCKET_EXPECT(ptc == ptc_aware_none)) {

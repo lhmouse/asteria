@@ -135,10 +135,10 @@ bool Value::unique() const noexcept
         return this->m_stor.as<gtype_string>().unique();
       }
     case gtype_opaque: {
-        return this->m_stor.as<gtype_opaque>().get().unique();
+        return this->m_stor.as<gtype_opaque>().unique();
       }
     case gtype_function: {
-        return this->m_stor.as<gtype_function>().get().unique();
+        return this->m_stor.as<gtype_function>().unique();
       }
     case gtype_array: {
         return this->m_stor.as<gtype_array>().unique();
@@ -166,10 +166,10 @@ long Value::use_count() const noexcept
         return this->m_stor.as<gtype_string>().use_count();
       }
     case gtype_opaque: {
-        return this->m_stor.as<gtype_opaque>().get().use_count();
+        return this->m_stor.as<gtype_opaque>().use_count();
       }
     case gtype_function: {
-        return this->m_stor.as<gtype_function>().get().use_count();
+        return this->m_stor.as<gtype_function>().use_count();
       }
     case gtype_array: {
         return this->m_stor.as<gtype_array>().use_count();
@@ -193,10 +193,10 @@ long Value::gcref_split() const noexcept
         return 0;
       }
     case gtype_opaque: {
-        return this->m_stor.as<gtype_opaque>().get().use_count();
+        return this->m_stor.as<gtype_opaque>().use_count();
       }
     case gtype_function: {
-        return this->m_stor.as<gtype_function>().get().use_count();
+        return this->m_stor.as<gtype_function>().use_count();
       }
     case gtype_array: {
         return this->m_stor.as<gtype_array>().use_count();

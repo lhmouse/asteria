@@ -158,7 +158,7 @@ Reference* Executive_Context::do_lazy_lookup_opt(const phsh_string& name)
       auto& ref = this->open_named_reference(::rocket::sref("__varg"));
       // Use the pre-allocated zero-ary variadic argument getter if there is no variadic argument,
       // or allocate a new one if there is.
-      auto varg = this->m_args.empty() ? ckptr<Abstract_Function>(this->m_zvarg.get())
+      auto varg = this->m_args.empty() ? rcptr<Abstract_Function>(this->m_zvarg.get())
                                        : ::rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg.get()),
                                                                                 ::rocket::move(this->m_args));
       Reference_Root::S_constant xref = { ::rocket::move(varg) };

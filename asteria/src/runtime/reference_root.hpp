@@ -28,7 +28,7 @@ class Reference_Root
       };
     struct S_variable
       {
-        ckptr<Variable> var;
+        rcptr<Variable> var;
       };
     struct S_tail_call
       {
@@ -101,7 +101,7 @@ class Reference_Root
       {
         return this->index() == index_variable;
       }
-    const ckptr<Variable>& as_variable() const
+    const rcptr<Variable>& as_variable() const
       {
         return this->m_stor.as<index_variable>().var;
       }

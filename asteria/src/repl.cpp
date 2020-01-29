@@ -176,7 +176,7 @@ struct REPL_Hooks : Abstract_Hooks
                           name.c_str());
       }
     void on_function_call(const Source_Location& sloc, const cow_string& inside,
-                          const ckptr<Abstract_Function>& target) noexcept override
+                          const rcptr<Abstract_Function>& target) noexcept override
       {
         if(ROCKET_EXPECT(!cmdline.verbose)) {
           return;

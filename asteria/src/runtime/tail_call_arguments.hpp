@@ -17,21 +17,21 @@ class Tail_Call_Arguments final : public Tail_Call_Arguments_Fwd
   private:
     // These describe characteristics of the function call.
     Source_Location m_sloc;
-    ckptr<Variadic_Arguer> m_zvarg;
+    rcptr<Variadic_Arguer> m_zvarg;
     PTC_Aware m_ptc;
 
     // These are deferreed expressions.
     cow_bivector<Source_Location, AVMC_Queue> m_defer;
 
     // This is the target function.
-    ckptr<Abstract_Function> m_target;
+    rcptr<Abstract_Function> m_target;
     // The last reference is `self`.
     // We can't store a `Reference` directly as the class `Reference` is incomplete here.
     cow_vector<Reference> m_args_self;
 
   public:
-    Tail_Call_Arguments(const Source_Location& sloc, const ckptr<Variadic_Arguer>& zvarg, PTC_Aware ptc,
-                        const ckptr<Abstract_Function>& target, cow_vector<Reference>&& args_self)
+    Tail_Call_Arguments(const Source_Location& sloc, const rcptr<Variadic_Arguer>& zvarg, PTC_Aware ptc,
+                        const rcptr<Abstract_Function>& target, cow_vector<Reference>&& args_self)
       :
         m_sloc(sloc), m_zvarg(zvarg), m_ptc(ptc),
         m_target(target), m_args_self(::rocket::move(args_self))
@@ -49,7 +49,7 @@ class Tail_Call_Arguments final : public Tail_Call_Arguments_Fwd
       {
         return this->m_sloc;
       }
-    const ckptr<Variadic_Arguer>& zvarg() const noexcept
+    const rcptr<Variadic_Arguer>& zvarg() const noexcept
       {
         return this->m_zvarg;
       }
@@ -67,7 +67,7 @@ class Tail_Call_Arguments final : public Tail_Call_Arguments_Fwd
         return this->m_defer;
       }
 
-    const ckptr<Abstract_Function>& get_target() const noexcept
+    const rcptr<Abstract_Function>& get_target() const noexcept
       {
         return this->m_target;
       }

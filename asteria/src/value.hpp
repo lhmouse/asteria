@@ -173,17 +173,7 @@ class Value
       }
     G_opaque& open_opaque()
       {
-        auto& altr = this->m_stor.as<gtype_opaque>();
-        if(ROCKET_UNEXPECT(altr.get().use_count() > 1)) {
-          // Copy the opaque object as needed.
-          G_opaque qown;
-          auto qnew = altr->clone_opt(qown);
-          ROCKET_ASSERT(qnew == qown.get());
-          // Replace the current instance.
-          if(qown)
-            altr = ::rocket::move(qown);
-        }
-        return altr;
+        return this->m_stor.as<gtype_opaque>();
       }
 
     bool is_array() const noexcept

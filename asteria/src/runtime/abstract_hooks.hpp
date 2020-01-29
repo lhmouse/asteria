@@ -24,7 +24,7 @@ class Abstract_Hooks : public virtual Rcbase
                                      const phsh_string& name);
     // This hook is called before every function call (whether native or not) from Asteria.
     virtual void on_function_call(const Source_Location& sloc, const cow_string& inside,
-                                  const ckptr<Abstract_Function>& target);
+                                  const rcptr<Abstract_Function>& target);
     // This hook is called after every function call that completes by returning normally.
     virtual void on_function_return(const Source_Location& sloc, const cow_string& inside,
                                     const Reference& result);

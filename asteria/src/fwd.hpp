@@ -26,7 +26,6 @@
 #include "../rocket/unique_handle.hpp"
 #include "../rocket/unique_ptr.hpp"
 #include "../rocket/refcnt_ptr.hpp"
-#include "../rocket/checked_ptr.hpp"
 #include "../rocket/variant.hpp"
 #include "../rocket/optional.hpp"
 #include "../rocket/array.hpp"
@@ -133,7 +132,6 @@ class Simple_Binding_Wrapper;
 
 template<typename E, typename D = ::std::default_delete<const E>> using uptr = ::rocket::unique_ptr<E, D>;
 template<typename E> using rcptr = ::rocket::refcnt_ptr<E>;
-template<typename E> using ckptr = ::rocket::checked_ptr<::rocket::refcnt_ptr<E>>;
 template<typename E> using cow_vector = ::rocket::cow_vector<E>;
 template<typename K, typename V, typename H> using cow_hashmap = ::rocket::cow_hashmap<K, V, H, ::std::equal_to<void>>;
 template<typename E, size_t k> using sso_vector = ::rocket::static_vector<E, k>;
@@ -159,8 +157,8 @@ using G_boolean   = bool;
 using G_integer   = int64_t;
 using G_real      = double;
 using G_string    = cow_string;
-using G_opaque    = ckptr<Abstract_Opaque>;
-using G_function  = ckptr<Abstract_Function>;
+using G_opaque    = rcptr<Abstract_Opaque>;
+using G_function  = rcptr<Abstract_Function>;
 using G_array     = cow_vector<Value>;
 using G_object    = cow_hashmap<phsh_string, Value, phsh_string::hash>;
 

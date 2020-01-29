@@ -55,7 +55,6 @@ pkginclude_rocket_HEADERS =  \
   asteria/rocket/cow_hashmap.hpp  \
   asteria/rocket/unique_ptr.hpp  \
   asteria/rocket/refcnt_ptr.hpp  \
-  asteria/rocket/checked_ptr.hpp  \
   asteria/rocket/prehashed_string.hpp  \
   asteria/rocket/static_vector.hpp  \
   asteria/rocket/optional.hpp  \
