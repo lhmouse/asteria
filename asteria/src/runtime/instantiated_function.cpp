@@ -70,8 +70,8 @@ Reference& Instantiated_Function::invoke_ptc_aware(Reference& self, Global_Conte
   {
     // Create the stack and context for this function.
     Evaluation_Stack stack;
-    Executive_Context ctx_func(::rocket::ref(global), ::rocket::ref(stack), this->m_zvarg,
-                               ::rocket::move(self), this->m_params, ::rocket::move(args));
+    Executive_Context ctx_func(::rocket::ref(global), ::rocket::ref(stack), ::rocket::ref(this->m_zvarg),
+                               this->m_params, ::rocket::move(self), ::rocket::move(args));
     stack.reserve(::rocket::move(args));
     // Execute the function body.
     AIR_Status status;

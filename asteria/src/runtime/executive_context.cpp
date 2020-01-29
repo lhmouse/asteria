@@ -144,7 +144,7 @@ Reference* Executive_Context::do_lazy_lookup_opt(const phsh_string& name)
     if(name == "__func") {
       auto& ref = this->open_named_reference(::rocket::sref("__func"));
       // Copy the function name as a constant.
-      Reference_Root::S_constant xref = { this->m_zvarg->func() };
+      Reference_Root::S_constant xref = { this->m_zvarg.get()->func() };
       ref = ::rocket::move(xref);
       return &ref;
     }
@@ -158,8 +158,8 @@ Reference* Executive_Context::do_lazy_lookup_opt(const phsh_string& name)
       auto& ref = this->open_named_reference(::rocket::sref("__varg"));
       // Use the pre-allocated zero-ary variadic argument getter if there is no variadic argument,
       // or allocate a new one if there is.
-      auto varg = this->m_args.empty() ? ckptr<Abstract_Function>(this->m_zvarg)
-                                       : ::rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg),
+      auto varg = this->m_args.empty() ? ckptr<Abstract_Function>(this->m_zvarg.get())
+                                       : ::rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg.get()),
                                                                                 ::rocket::move(this->m_args));
       Reference_Root::S_constant xref = { ::rocket::move(varg) };
       ref = ::rocket::move(xref);

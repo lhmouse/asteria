@@ -34,7 +34,7 @@ Runtime_Error& do_unpack_frames(Runtime_Error& except, Global_Context& global, E
       }
       // Evaluate deferred expressions if any.
       if(tca->get_defer_stack().size()) {
-        Executive_Context ctx(::rocket::ref(global), ::rocket::ref(stack), tca->zvarg(),
+        Executive_Context ctx(::rocket::ref(global), ::rocket::ref(stack), ::rocket::ref(tca->zvarg()),
                               ::rocket::move(tca->open_defer_stack()));
         ctx.on_scope_exit(except);
       }
@@ -100,7 +100,7 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
       // Evaluate deferred expressions if any.
       ASTERIA_RUNTIME_TRY {
         if(tca->get_defer_stack().size()) {
-          Executive_Context ctx(::rocket::ref(global), ::rocket::ref(stack), tca->zvarg(),
+          Executive_Context ctx(::rocket::ref(global), ::rocket::ref(stack), ::rocket::ref(tca->zvarg()),
                                 ::rocket::move(tca->open_defer_stack()));
           ctx.on_scope_exit(air_status_next);
         }

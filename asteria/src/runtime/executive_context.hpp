@@ -21,7 +21,7 @@ class Executive_Context : public Abstract_Context
     // so they are not passed here and there upon each native call.
     ref_to<Global_Context> m_global;
     ref_to<Evaluation_Stack> m_stack;
-    ckptr<Variadic_Arguer> m_zvarg;
+    ref_to<const ckptr<Variadic_Arguer>> m_zvarg;
 
     // These members are used for lazy initialization.
     Reference m_self;
@@ -38,7 +38,7 @@ class Executive_Context : public Abstract_Context
       {
       }
     Executive_Context(ref_to<Global_Context> xglobal, ref_to<Evaluation_Stack> xstack,
-                      const ckptr<Variadic_Arguer>& xzvarg,
+                      ref_to<const ckptr<Variadic_Arguer>> xzvarg,
                       cow_bivector<Source_Location, AVMC_Queue>&& defer)  // for proper tail calls
       :
         m_parent_opt(nullptr),
@@ -47,8 +47,8 @@ class Executive_Context : public Abstract_Context
       {
       }
     Executive_Context(ref_to<Global_Context> xglobal, ref_to<Evaluation_Stack> xstack,
-                      const ckptr<Variadic_Arguer>& xzvarg, Reference&& self,
-                      const cow_vector<phsh_string>& params, cow_vector<Reference>&& args)  // for functions
+                      ref_to<const ckptr<Variadic_Arguer>> xzvarg, const cow_vector<phsh_string>& params,
+                      Reference&& self, cow_vector<Reference>&& args)  // for functions
       :
         m_parent_opt(nullptr),
         m_global(xglobal), m_stack(xstack), m_zvarg(xzvarg),
