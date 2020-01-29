@@ -36,46 +36,46 @@ class Value
         m_stor()  // Initialize to `null`.
       {
       }
-    ASTERIA_VARIANT_CONSTRUCTOR(Value, Xvariant, XvalT, xval)
+    ASTERIA_VARIANT_CONSTRUCTOR(Value, Xvariant, XValT, xval)
       :
-        m_stor(::rocket::forward<XvalT>(xval))
+        m_stor(::rocket::forward<XValT>(xval))
       {
       }
-    ASTERIA_VARIANT_ASSIGNMENT(Value, Xvariant, XvalT, xval)
+    ASTERIA_VARIANT_ASSIGNMENT(Value, Xvariant, XValT, xval)
       {
-        this->m_stor = ::rocket::forward<XvalT>(xval);
+        this->m_stor = ::rocket::forward<XValT>(xval);
         return *this;
       }
-    template<typename XvalT> Value(const XvalT* opt)
+    template<typename XValT> Value(const XValT* opt)
       {
         if(opt)
           this->m_stor = *opt;
       }
-    template<typename XvalT> Value(const opt<XvalT>& opt)
+    template<typename XValT> Value(const opt<XValT>& opt)
       {
         if(opt)
           this->m_stor = *opt;
       }
-    template<typename XvalT> Value(opt<XvalT>&& opt) noexcept
+    template<typename XValT> Value(opt<XValT>&& opt) noexcept
       {
         if(opt)
           this->m_stor = ::rocket::move(*opt);
       }
-    template<typename XvalT> Value& operator=(const XvalT* opt)
+    template<typename XValT> Value& operator=(const XValT* opt)
       {
         this->m_stor = nullptr;
         if(opt)
           this->m_stor = *opt;
         return *this;
       }
-    template<typename XvalT> Value& operator=(const opt<XvalT>& opt)
+    template<typename XValT> Value& operator=(const opt<XValT>& opt)
       {
         this->m_stor = nullptr;
         if(opt)
           this->m_stor = *opt;
         return *this;
       }
-    template<typename XvalT> Value& operator=(opt<XvalT>&& opt) noexcept
+    template<typename XValT> Value& operator=(opt<XValT>&& opt) noexcept
       {
         this->m_stor = nullptr;
         if(opt)

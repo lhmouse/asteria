@@ -46,14 +46,14 @@ class Reference_Modifier
     Xvariant m_stor;
 
   public:
-    ASTERIA_VARIANT_CONSTRUCTOR(Reference_Modifier, Xvariant, XmodT, xmod)
+    ASTERIA_VARIANT_CONSTRUCTOR(Reference_Modifier, Xvariant, XModT, xmod)
       :
-        m_stor(::rocket::forward<XmodT>(xmod))
+        m_stor(::rocket::forward<XModT>(xmod))
       {
       }
-    ASTERIA_VARIANT_ASSIGNMENT(Reference_Modifier, Xvariant, XmodT, xmod)
+    ASTERIA_VARIANT_ASSIGNMENT(Reference_Modifier, Xvariant, XModT, xmod)
       {
-        this->m_stor = ::rocket::forward<XmodT>(xmod);
+        this->m_stor = ::rocket::forward<XModT>(xmod);
         return *this;
       }
 

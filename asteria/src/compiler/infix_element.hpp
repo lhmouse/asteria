@@ -67,14 +67,14 @@ class Infix_Element
     Xvariant m_stor;
 
   public:
-    ASTERIA_VARIANT_CONSTRUCTOR(Infix_Element, Xvariant, XelemT, xelem)
+    ASTERIA_VARIANT_CONSTRUCTOR(Infix_Element, Xvariant, XElemT, xelem)
       :
-        m_stor(::rocket::forward<XelemT>(xelem))
+        m_stor(::rocket::forward<XElemT>(xelem))
       {
       }
-    ASTERIA_VARIANT_ASSIGNMENT(Infix_Element, Xvariant, XelemT, xelem)
+    ASTERIA_VARIANT_ASSIGNMENT(Infix_Element, Xvariant, XElemT, xelem)
       {
-        this->m_stor = ::rocket::forward<XelemT>(xelem);
+        this->m_stor = ::rocket::forward<XElemT>(xelem);
         return *this;
       }
 

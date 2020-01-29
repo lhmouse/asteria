@@ -259,14 +259,14 @@ class AIR_Node
     Xvariant m_stor;
 
   public:
-    ASTERIA_VARIANT_CONSTRUCTOR(AIR_Node, Xvariant, XnodeT, xnode)
+    ASTERIA_VARIANT_CONSTRUCTOR(AIR_Node, Xvariant, XNodeT, xnode)
       :
-        m_stor(::rocket::forward<XnodeT>(xnode))
+        m_stor(::rocket::forward<XNodeT>(xnode))
       {
       }
-    ASTERIA_VARIANT_ASSIGNMENT(AIR_Node, Xvariant, XnodeT, xnode)
+    ASTERIA_VARIANT_ASSIGNMENT(AIR_Node, Xvariant, XNodeT, xnode)
       {
-        this->m_stor = ::rocket::forward<XnodeT>(xnode);
+        this->m_stor = ::rocket::forward<XNodeT>(xnode);
         return *this;
       }
 

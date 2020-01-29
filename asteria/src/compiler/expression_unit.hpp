@@ -112,14 +112,14 @@ class Expression_Unit
     Xvariant m_stor;
 
   public:
-    ASTERIA_VARIANT_CONSTRUCTOR(Expression_Unit, Xvariant, XunitT, xunit)
+    ASTERIA_VARIANT_CONSTRUCTOR(Expression_Unit, Xvariant, XUnitT, xunit)
       :
-        m_stor(::rocket::forward<XunitT>(xunit))
+        m_stor(::rocket::forward<XUnitT>(xunit))
       {
       }
-    ASTERIA_VARIANT_ASSIGNMENT(Expression_Unit, Xvariant, XunitT, xunit)
+    ASTERIA_VARIANT_ASSIGNMENT(Expression_Unit, Xvariant, XUnitT, xunit)
       {
-        this->m_stor = ::rocket::forward<XunitT>(xunit);
+        this->m_stor = ::rocket::forward<XUnitT>(xunit);
         return *this;
       }
 
