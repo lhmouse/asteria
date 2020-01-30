@@ -23,7 +23,7 @@ int main()
           ;
 
         assert std.process.execute('/bin/bash',
-          [ '/bin/bash', '-c', 'kill -4 $$' ]) == 132;
+          [ '/bin/bash', '-c', 'kill -1 $$' ]) == 129;
         assert std.process.execute('/bin/bash',
           [ '/bin/bash', '-c', 'kill -9 $$' ]) == 137;
 
