@@ -2199,3 +2199,27 @@
 	* Returns the parsed value. If `text` is empty or is not a valid
 	  JSON string, `null` is returned. There is no way to tell empty
 	  or explicit `"null"` inputs from failures.
+
+### `std.process`
+
+`std.process.execute(path, [argv], [envp])`
+
+	* Launches the program denoted by `path`, awaits its termination,
+	  and returns its exit status. If `argv` is provided, it shall be
+	  an `array` of `string`s, which specify arguments passed to the
+	  program. If `envp` is provided, it shall also be an `array` of
+	  `string`s, which specify environment variables passed to the
+	  program.
+
+	* Returns the exit status as an `integer` using sign-extension.
+
+	* Throws an exception if the program could not be launched or its
+	  exit status could not be retrieved.
+
+`std.process.daemonize()`
+
+	* Detaches the current process from its controlling terminal and
+	  continues in the background. The calling process terminates on
+	  success so this function never returns.
+
+	* Throws an exception on failure.

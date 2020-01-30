@@ -180,7 +180,8 @@ pkginclude_library_HEADERS =  \
   asteria/src/library/bindings_math.hpp  \
   asteria/src/library/bindings_filesystem.hpp  \
   asteria/src/library/bindings_checksum.hpp  \
-  asteria/src/library/bindings_json.hpp
+  asteria/src/library/bindings_json.hpp  \
+  asteria/src/library/bindings_process.hpp
 
 lib_libasteria_la_SOURCES =  \
   asteria/src/fwd.cpp  \
@@ -237,7 +238,8 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/library/bindings_math.cpp  \
   asteria/src/library/bindings_filesystem.cpp  \
   asteria/src/library/bindings_checksum.cpp  \
-  asteria/src/library/bindings_json.cpp
+  asteria/src/library/bindings_json.cpp  \
+  asteria/src/library/bindings_process.cpp
 
 lib_libasteria_la_CXXFLAGS =  \
   ${AM_CXXFLAGS} -include .pch.hpp
