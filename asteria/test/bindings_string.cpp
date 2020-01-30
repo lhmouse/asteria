@@ -194,8 +194,8 @@ int main()
         assert std.string.hex_decode("68656c6c6f") == "hello";
         assert std.string.hex_decode("68 65 6c 6c 6f") == "hello";
         assert std.string.hex_decode("68 65 06 0c 6c 6f") == "he\x06\x0clo";
-        assert std.string.hex_decode("686") == null;
-        assert std.string.hex_decode("6865invalid") == null;
+        try { std.string.hex_decode("686");  assert false;  } catch(e);
+        try { std.string.hex_decode("6865invalid");  assert false;  } catch(e);
         assert std.string.hex_decode("") == "";
 
         assert std.string.base32_encode("hello") == "NBSWY3DP";
@@ -207,16 +207,16 @@ int main()
         assert std.string.base32_encode("") == "";
 
         assert std.string.base32_decode("NBSWY3DP") == "hello";
-        assert std.string.base32_decode("nbSWy3DpE=======") == null;
+        try { std.string.base32_decode("nbSWy3DpE=======");  assert false;  } catch(e);
         assert std.string.base32_decode("nbSWy3DpEe======") == "hello!";
-        assert std.string.base32_decode("nbSWy3DpH4q=====") == null;
+        try { std.string.base32_decode("nbSWy3DpH4q=====");  assert false;  } catch(e);
         assert std.string.base32_decode("nbSWy3DpH4qQ====") == "hello?!";
         assert std.string.base32_decode("nbSWy3DpIA7SC===") == "hello@?!";
-        assert std.string.base32_decode("nbSWy3DpENAD6I==") == null;
+        try { std.string.base32_decode("nbSWy3DpENAD6I==");  assert false;  } catch(e);
         assert std.string.base32_decode("nbSWy3DpENAD6II=") == "hello#@?!";
         assert std.string.base32_decode("nbSWy3Dp   ENAD6II=") == "hello#@?!";
-        assert std.string.base32_decode("NBSWY3D") == null;
-        assert std.string.base32_decode("NBSWY3DP!invalid") == null;
+        try { std.string.base32_decode("NBSWY3D");  assert false;  } catch(e);
+        try { std.string.base32_decode("NBSWY3DP!invalid");  assert false;  } catch(e);
         assert std.string.base32_decode("") == "";
 
         assert std.string.base64_encode("hello") == "aGVsbG8=";
@@ -226,27 +226,27 @@ int main()
 
         assert std.string.base64_decode("aGVsbG8=") == "hello";
         assert std.string.base64_decode("aGVsbG8h") == "hello!";
-        assert std.string.base64_decode("aGVsbG8/I===") == null;
+        try { std.string.base64_decode("aGVsbG8/I===");  assert false;  } catch(e);
         assert std.string.base64_decode("aGVsbG8/IQ==") == "hello?!";
         assert std.string.base64_decode("aGVs  bG8/IQ==") == "hello?!";
         assert std.string.base64_decode("aGVs  bG8/  IQ==") == "hello?!";
-        assert std.string.base64_decode("aGVsbG8=!invalid") == null;
+        try { std.string.base64_decode("aGVsbG8=!invalid");  assert false;  } catch(e);
         assert std.string.base64_decode("") == "";
 
         assert std.string.translate("hello", "el") == "ho";
         assert std.string.translate("hello", "el", "a") == "hao";
 
         assert std.string.utf8_encode(30002) == "甲";
-        assert std.string.utf8_encode(0xFFFFFF) == null;
+        try { std.string.utf8_encode(0xFFFFFF);  assert false;  } catch(e);
         assert std.string.utf8_encode(0xFFFFFF, true) == "\uFFFD";
         assert std.string.utf8_encode([ 97, 98, 99, 100, 1040, 1042, 1043, 1044, 30002, 20057, 19993, 19969 ]) == "abcdАВГД甲乙丙丁";
-        assert std.string.utf8_encode([ 0xFFFFFF ]) == null;
+        try { std.string.utf8_encode([ 0xFFFFFF ]);  assert false;  } catch(e);
         assert std.string.utf8_encode([ 0xFFFFFF ], true) == "\uFFFD";
 
         assert std.string.utf8_decode("abcdАВГД甲乙丙丁") == [ 97, 98, 99, 100, 1040, 1042, 1043, 1044, 30002, 20057, 19993, 19969 ];
-        assert std.string.utf8_decode("\xC0\x80\x61") == null;
+        try { std.string.utf8_decode("\xC0\x80\x61");  assert false;  } catch(e);
         assert std.string.utf8_decode("\xC0\x80\x61", true) == [ 192, 128, 97 ];
-        assert std.string.utf8_decode("\xFF\xFE\x62") == null;
+        try { std.string.utf8_decode("\xFF\xFE\x62");  assert false;  } catch(e);
         assert std.string.utf8_decode("\xFF\xFE\x62", true) == [ 255, 254, 98 ];
 
         assert std.string.pack_8(0x1234) == "\x34";

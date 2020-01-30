@@ -717,7 +717,7 @@ Aval std_string_explode(Sval text, Sopt delim, Iopt limit)
       // Split every byte.
       segments.reserve(text.size());
       for(size_t i = 0;  i < text.size();  ++i) {
-        size_t b = text[i] & 0xFF;
+        uint32_t b = text[i] & 0xFF;
         // Store a reference to the null-terminated string allocated statically.
         // Don't bother allocating a new buffer of only two characters.
         segments.emplace_back(Sval(::rocket::sref(s_char_table[b], 1)));
@@ -771,33 +771,31 @@ Sval std_string_hex_encode(Sval data, Bopt lowercase, Sopt delim)
     text.reserve(data.size() * (2 + rdelim.length()));
     // These shall be operated in big-endian order.
     uint32_t reg = 0;
-    array<char, 2> unit;
     // Encode source data.
     size_t nread = 0;
     while(nread != data.size()) {
+      // Insert a delimiter before every byte other than the first one.
+      if(!text.empty()) {
+        text += rdelim;
+      }
       // Read a byte.
       reg = data[nread++] & 0xFF;
       reg <<= 24;
       // Encode it.
       for(size_t i = 0;  i < 2;  ++i) {
-        size_t b = ((reg >> 28) * 2 + rlowerc) & 0xFF;
+        uint32_t b = ((reg >> 28) * 2 + rlowerc) & 0xFF;
         reg <<= 4;
-        unit[i] = s_base16_table[b];
+        text += s_base16_table[b];
       }
-      if(!text.empty()) {
-        text.append(rdelim);
-      }
-      text.append(unit.data(), unit.size());
     }
     return text;
   }
 
-Sopt std_string_hex_decode(Sval text)
+Sval std_string_hex_decode(Sval text)
   {
     Sval data;
     // These shall be operated in big-endian order.
-    uint32_t reg = 0;
-    sso_vector<char, 2> unit;
+    uint32_t reg = 1;
     // Decode source data.
     size_t nread = 0;
     while(nread != text.size()) {
@@ -806,40 +804,27 @@ Sopt std_string_hex_decode(Sval text)
       const char* pos = do_xstrchr(s_spaces, c);
       if(pos) {
         // The character is a whitespace.
-        if(unit.size() != 0) {
-          // Fail if it occurs in the middle of a encoding unit.
-          return nullopt;
+        if(reg != 1) {
+          ASTERIA_THROW("unpaired hexadecimal digit");
         }
-        // Ignore it.
         continue;
       }
-      unit.emplace_back(c);
-      if(unit.size() != unit.capacity()) {
-        // Await remaining digits.
+      reg <<= 4;
+      // Decode a digit.
+      pos = do_xstrchr(s_base16_table, c);
+      if(!pos) {
+        ASTERIA_THROW("invalid hexadecimal digit (character `$1`)", c);
+      }
+      reg |= static_cast<uint32_t>(pos - s_base16_table) / 2;
+      // Decode the current group if it is complete.
+      if(!(reg & 0x1'00)) {
         continue;
       }
-      // Decode the current encoding unit if it has been filled up.
-      for(size_t i = 0;  i < 2;  ++i) {
-        pos = do_xstrchr(s_base16_table, unit[i]);
-        if(!pos) {
-          // The character is invalid.
-          return nullopt;
-        }
-        auto off = static_cast<size_t>(pos - s_base16_table) / 2;
-        ROCKET_ASSERT(off < 16);
-        // Accept a digit.
-        uint32_t b = off & 0xFF;
-        reg <<= 4;
-        reg |= b;
-      }
-      reg <<= 24;
-      // Write the unit.
-      data.push_back(static_cast<char>(reg >> 24));
-      unit.clear();
+      data += static_cast<char>(reg);
+      reg = 1;
     }
-    if(unit.size() != 0) {
-      // Fail in case of excess digits.
-      return nullopt;
+    if(reg != 1) {
+      ASTERIA_THROW("unpaired hexadecimal digit");
     }
     return ::rocket::move(data);
   }
@@ -851,24 +836,22 @@ Sval std_string_base32_encode(Sval data, Bopt lowercase)
     text.reserve((data.size() + 4) / 5 * 8);
     // These shall be operated in big-endian order.
     uint64_t reg = 0;
-    array<char, 8> unit;
     // Encode source data.
     size_t nread = 0;
     while(data.size() - nread >= 5) {
       // Read 5 consecutive bytes.
       for(size_t i = 0;  i < 5;  ++i) {
-        uint64_t b = data[nread++] & 0xFF;
+        uint32_t b = data[nread++] & 0xFF;
         reg <<= 8;
         reg |= b;
       }
       reg <<= 24;
       // Encode them.
       for(size_t i = 0;  i < 8;  ++i) {
-        size_t b = ((reg >> 59) * 2 + rlowerc) & 0xFF;
+        uint32_t b = ((reg >> 59) * 2 + rlowerc) & 0xFF;
         reg <<= 5;
-        unit[i] = s_base32_table[b];
+        text += s_base32_table[b];
       }
-      text.append(unit.data(), unit.size());
     }
     if(nread != data.size()) {
       // Get the start of padding characters.
@@ -876,31 +859,31 @@ Sval std_string_base32_encode(Sval data, Bopt lowercase)
       auto p = (m * 8 + 4) / 5;
       // Read all remaining bytes that cannot fill up a unit.
       for(size_t i = 0;  i < m;  ++i) {
-        uint64_t b = data[nread++] & 0xFF;
+        uint32_t b = data[nread++] & 0xFF;
         reg <<= 8;
         reg |= b;
       }
       reg <<= 64 - m * 8;
       // Encode them.
       for(size_t i = 0;  i < p;  ++i) {
-        size_t b = ((reg >> 59) * 2 + rlowerc) & 0xFF;
+        uint32_t b = ((reg >> 59) * 2 + rlowerc) & 0xFF;
         reg <<= 5;
-        unit[i] = s_base32_table[b];
+        text += s_base32_table[b];
       }
+      // Fill padding characters.
       for(size_t i = p;  i != 8;  ++i) {
-        unit[i] = s_base32_table[64];
+        text += s_base32_table[64];
       }
-      text.append(unit.data(), unit.size());
     }
     return text;
   }
 
-Sopt std_string_base32_decode(Sval text)
+Sval std_string_base32_decode(Sval text)
   {
     Sval data;
     // These shall be operated in big-endian order.
-    uint64_t reg = 0;
-    sso_vector<char, 8> unit;
+    uint64_t reg = 1;
+    uint32_t npad = 0;
     // Decode source data.
     size_t nread = 0;
     while(nread != text.size()) {
@@ -909,56 +892,40 @@ Sopt std_string_base32_decode(Sval text)
       const char* pos = do_xstrchr(s_spaces, c);
       if(pos) {
         // The character is a whitespace.
-        if(unit.size() != 0) {
-          // Fail if it occurs in the middle of a encoding unit.
-          return nullopt;
+        if(reg != 1) {
+          ASTERIA_THROW("incomplete base32 group");
         }
-        // Ignore it.
         continue;
       }
-      unit.emplace_back(c);
-      if(unit.size() != unit.capacity()) {
-        // Await remaining digits.
-        continue;
+      reg <<= 5;
+      if(c == s_base32_table[64]) {
+        // The character is a padding character.
+        if(reg < 0x100) {
+          ASTERIA_THROW("unexpected base32 padding character");
+        }
+        npad += 1;
       }
-      // Get the start of padding characters.
-      auto pt = ::std::find(unit.begin(), unit.end(), s_base32_table[64]);
-      if(::std::any_of(pt, unit.end(), [&](char cx) { return cx != s_base32_table[64];  })) {
-        // Fail if a non-padding character follows a padding character.
-        return nullopt;
-      }
-      auto p = static_cast<size_t>(pt - unit.begin());
-      // How many bytes are there in this unit?
-      auto m = p * 5 / 8;
-      if((m == 0) || ((m * 8 + 4) / 5 != p)) {
-        // Fail due to invalid number of non-padding characters.
-        return nullopt;
-      }
-      // Decode the current encoding unit.
-      for(size_t i = 0;  i < p;  ++i) {
-        pos = do_xstrchr(s_base32_table, unit[i]);
+      else {
+        // Decode a digit.
+        pos = do_xstrchr(s_base32_table, c);
         if(!pos) {
-          // The character is invalid.
-          return nullopt;
+          ASTERIA_THROW("invalid base32 digit (character `$1`)", c);
         }
-        auto off = static_cast<size_t>(pos - s_base32_table) / 2;
-        ROCKET_ASSERT(off < 32);
-        // Accept a digit.
-        uint64_t b = off & 0xFF;
-        reg <<= 5;
-        reg |= b;
+        if(npad != 0) {
+          ASTERIA_THROW("unexpected base32 digit following padding character");
+        }
+        reg |= static_cast<uint32_t>(pos - s_base32_table) / 2;
       }
-      reg <<= 64 - p * 5;
-      // Write the unit.
-      for(size_t i = 0;  i < m;  ++i) {
-        data.push_back(static_cast<char>(reg >> 56));
+      // Decode the current group if it is complete.
+      if(!(reg & 0x1'00'00'00'00'00)) {
+        continue;
+      }
+      for(uint32_t i = (40 - npad * 5) / 8;  i != 0;  --i) {
         reg <<= 8;
+        data += static_cast<char>(reg >> 40);
       }
-      unit.clear();
-    }
-    if(unit.size() != 0) {
-      // Fail in case of excess digits.
-      return nullopt;
+      reg = 1;
+      npad = 0;
     }
     return ::rocket::move(data);
   }
@@ -969,7 +936,6 @@ Sval std_string_base64_encode(Sval data)
     text.reserve((data.size() + 2) / 3 * 4);
     // These shall be operated in big-endian order.
     uint32_t reg = 0;
-    array<char, 4> unit;
     // Encode source data.
     size_t nread = 0;
     while(data.size() - nread >= 3) {
@@ -982,11 +948,10 @@ Sval std_string_base64_encode(Sval data)
       reg <<= 8;
       // Encode them.
       for(size_t i = 0;  i < 4;  ++i) {
-        size_t b = (reg >> 26) & 0xFF;
+        uint32_t b = (reg >> 26) & 0xFF;
         reg <<= 6;
-        unit[i] = s_base64_table[b];
+        text += s_base64_table[b];
       }
-      text.append(unit.data(), unit.size());
     }
     if(nread != data.size()) {
       // Get the start of padding characters.
@@ -1001,24 +966,24 @@ Sval std_string_base64_encode(Sval data)
       reg <<= 32 - m * 8;
       // Encode them.
       for(size_t i = 0;  i < p;  ++i) {
-        size_t b = (reg >> 26) & 0xFF;
+        uint32_t b = (reg >> 26) & 0xFF;
         reg <<= 6;
-        unit[i] = s_base64_table[b];
+        text += s_base64_table[b];
       }
+      // Fill padding characters.
       for(size_t i = p;  i != 4;  ++i) {
-        unit[i] = s_base64_table[64];
+        text += s_base64_table[64];
       }
-      text.append(unit.data(), unit.size());
     }
     return text;
   }
 
-Sopt std_string_base64_decode(Sval text)
+Sval std_string_base64_decode(Sval text)
   {
     Sval data;
     // These shall be operated in big-endian order.
-    uint32_t reg = 0;
-    sso_vector<char, 4> unit;
+    uint32_t reg = 1;
+    uint32_t npad = 0;
     // Decode source data.
     size_t nread = 0;
     while(nread != text.size()) {
@@ -1027,61 +992,45 @@ Sopt std_string_base64_decode(Sval text)
       const char* pos = do_xstrchr(s_spaces, c);
       if(pos) {
         // The character is a whitespace.
-        if(unit.size() != 0) {
-          // Fail if it occurs in the middle of a encoding unit.
-          return nullopt;
+        if(reg != 1) {
+          ASTERIA_THROW("incomplete base64 group");
         }
-        // Ignore it.
         continue;
       }
-      unit.emplace_back(c);
-      if(unit.size() != unit.capacity()) {
-        // Await remaining digits.
-        continue;
+      reg <<= 6;
+      if(c == s_base64_table[64]) {
+        // The character is a padding character.
+        if(reg < 0x100) {
+          ASTERIA_THROW("unexpected base64 padding character");
+        }
+        npad += 1;
       }
-      // Get the start of padding characters.
-      auto pt = ::std::find(unit.begin(), unit.end(), s_base64_table[64]);
-      if(::std::any_of(pt, unit.end(), [&](char cx) { return cx != s_base64_table[64];  })) {
-        // Fail if a non-padding character follows a padding character.
-        return nullopt;
-      }
-      auto p = static_cast<size_t>(pt - unit.begin());
-      // How many bytes are there in this unit?
-      auto m = p * 3 / 4;
-      if((m == 0) || ((m * 8 + 5) / 6 != p)) {
-        // Fail due to invalid number of non-padding characters.
-        return nullopt;
-      }
-      // Decode the current encoding unit.
-      for(size_t i = 0;  i < p;  ++i) {
-        pos = do_xstrchr(s_base64_table, unit[i]);
+      else {
+        // Decode a digit.
+        pos = do_xstrchr(s_base64_table, c);
         if(!pos) {
-          // The character is invalid.
-          return nullopt;
+          ASTERIA_THROW("invalid base64 digit (character `$1`)", c);
         }
-        auto off = static_cast<size_t>(pos - s_base64_table);
-        ROCKET_ASSERT(off < 64);
-        // Accept a digit.
-        uint32_t b = off & 0xFF;
-        reg <<= 6;
-        reg |= b;
+        if(npad != 0) {
+          ASTERIA_THROW("unexpected base64 digit following padding character");
+        }
+        reg |= static_cast<uint32_t>(pos - s_base64_table);
       }
-      reg <<= 32 - p * 6;
-      // Write the unit.
-      for(size_t i = 0;  i < m;  ++i) {
-        data.push_back(static_cast<char>(reg >> 24));
+      // Decode the current group if it is complete.
+      if(!(reg & 0x1'00'00'00)) {
+        continue;
+      }
+      for(uint32_t i = (24 - npad * 6) / 8;  i != 0;  --i) {
         reg <<= 8;
+        data += static_cast<char>(reg >> 24);
       }
-      unit.clear();
-    }
-    if(unit.size() != 0) {
-      // Fail in case of excess digits.
-      return nullopt;
+      reg = 1;
+      npad = 0;
     }
     return ::rocket::move(data);
   }
 
-Sopt std_string_utf8_encode(Ival code_point, Bopt permissive)
+Sval std_string_utf8_encode(Ival code_point, Bopt permissive)
   {
     Sval text;
     text.reserve(4);
@@ -1090,7 +1039,7 @@ Sopt std_string_utf8_encode(Ival code_point, Bopt permissive)
     if(!utf8_encode(text, cp)) {
       // This comparison with `true` is by intention, because it may be unset.
       if(permissive != true) {
-        return nullopt;
+        ASTERIA_THROW("invalid UTF code point (value `$1`)", code_point);
       }
       // Encode the replacement character.
       utf8_encode(text, 0xFFFD);
@@ -1098,17 +1047,18 @@ Sopt std_string_utf8_encode(Ival code_point, Bopt permissive)
     return ::rocket::move(text);
   }
 
-Sopt std_string_utf8_encode(Aval code_points, Bopt permissive)
+Sval std_string_utf8_encode(Aval code_points, Bopt permissive)
   {
     Sval text;
     text.reserve(code_points.size() * 3);
     for(const auto& elem : code_points) {
+      Ival code_point = elem.as_integer();
       // Try encoding the code point.
-      auto cp = static_cast<char32_t>(::rocket::clamp(elem.as_integer(), -1, INT32_MAX));
+      auto cp = static_cast<char32_t>(::rocket::clamp(code_point, -1, INT32_MAX));
       if(!utf8_encode(text, cp)) {
         // This comparison with `true` is by intention, because it may be unset.
         if(permissive != true) {
-          return nullopt;
+          ASTERIA_THROW("invalid UTF code point (value `$1`)", code_point);
         }
         // Encode the replacement character.
         utf8_encode(text, 0xFFFD);
@@ -1117,7 +1067,7 @@ Sopt std_string_utf8_encode(Aval code_points, Bopt permissive)
     return ::rocket::move(text);
   }
 
-Aopt std_string_utf8_decode(Sval text, Bopt permissive)
+Aval std_string_utf8_decode(Sval text, Bopt permissive)
   {
     Aval code_points;
     code_points.reserve(text.size());
@@ -2329,7 +2279,8 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "\n"
           "  * Returns a `string` containing decoded bytes. If `text` is empty\n"
           "    or consists of only whitespaces, an empty `string` is returned.\n"
-          "    In the case of parse errors, `null` is returned.\n"
+          "\n"
+          "  * Throws an exception if the string is invalid.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value {
@@ -2395,7 +2346,8 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "\n"
           "  * Returns a `string` containing decoded bytes. If `dstr` is empty\n"
           "    or consists of only whitespaces, an empty `string` is returned.\n"
-          "    In the case of parse errors, `null` is returned.\n"
+          "\n"
+          "  * Throws an exception if the string is invalid.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value {
@@ -2458,7 +2410,8 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "\n"
           "  * Returns a `string` containing decoded bytes. If `dstr` is empty\n"
           "    or consists of only whitespaces, an empty `string` is returned.\n"
-          "    In the case of parse errors, `null` is returned.\n"
+          "\n"
+          "  * Throws an exception if the string is invalid.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value {
@@ -2490,7 +2443,9 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  replacement character `\"\\uFFFD\"` and consequently encoded as\n"
           "  `\"\\xEF\\xBF\\xBD\"`; otherwise this function fails.\n"
           "\n"
-          "  * Returns the encoded `string` on success, or `null` otherwise.\n"
+          "  * Returns the encoded `string`.\n"
+          "\n"
+          "  * Throws an exception on failure.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value {
@@ -2528,8 +2483,9 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    re-interpreted as isolated bytes according to ISO/IEC 8859-1;\n"
           "    otherwise this function fails.\n"
           "\n"
-          "  * Returns an `array` containing decoded code points, or `null`\n"
-          "    otherwise.\n"
+          "  * Returns an `array` containing decoded code points.\n"
+          "\n"
+          "  * Throws an exception on failure.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value {
