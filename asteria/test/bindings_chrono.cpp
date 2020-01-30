@@ -36,12 +36,7 @@ int main()
         assert t == std.numeric.integer_max;
 
         s = "invalid";
-        try {
-          t = std.chrono.utc_parse(s);
-          assert false;
-        }
-        catch(e)
-          ;
+        try { t = std.chrono.utc_parse(s);  assert false;  } catch(e);
       )__"), tinybuf::open_read);
 
     Simple_Script code(cbuf, ::rocket::sref(__FILE__));
