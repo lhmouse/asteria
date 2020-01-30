@@ -16,7 +16,7 @@ Ival std_chrono_steady_now();
 Ival std_chrono_local_from_utc(Ival time_utc);
 Ival std_chrono_utc_from_local(Ival time_local);
 Sval std_chrono_utc_format(Ival time_point, Bopt with_ms = nullopt);
-Iopt std_chrono_utc_parse(Sval time_str);
+Ival std_chrono_utc_parse(Sval time_str);
 
 // Initialize an object that is to be referenced as `std.chrono`.
 void create_bindings_chrono(Oval& result, API_Version version);

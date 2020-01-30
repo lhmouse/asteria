@@ -70,8 +70,8 @@ Ival std_numeric_rotr(Ival m, Ival x, Ival n);
 
 Sval std_numeric_format(Ival value, Iopt base = nullopt, Iopt ebase = nullopt);
 Sval std_numeric_format(Rval value, Iopt base = nullopt, Iopt ebase = nullopt);
-Iopt std_numeric_parse_integer(Sval text);
-Ropt std_numeric_parse_real(Sval text, Bopt saturating = nullopt);
+Ival std_numeric_parse_integer(Sval text);
+Rval std_numeric_parse_real(Sval text, Bopt saturating = nullopt);
 
 // Create an object that is to be referenced as `std.numeric`.
 void create_bindings_numeric(Oval& result, API_Version version);

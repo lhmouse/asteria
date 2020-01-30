@@ -22,9 +22,24 @@ int main()
         assert std.numeric.parse_real("+0x1p-10000") == +0.0;
         assert std.numeric.parse_real("-0x1p-10000") == -0.0;
 
-        assert std.numeric.parse_real(" 0x1p+10000") == null;
-        assert std.numeric.parse_real("+0x1p+10000") == null;
-        assert std.numeric.parse_real("-0x1p+10000") == null;
+        try {
+          std.numeric.parse_real(" 0x1p+10000");
+          assert false;
+        }
+        catch(e)
+          ;
+        try {
+          std.numeric.parse_real("+0x1p+10000");
+          assert false;
+        }
+        catch(e)
+          ;
+        try {
+          std.numeric.parse_real("-0x1p+10000");
+          assert false;
+        }
+        catch(e)
+          ;
 
         assert std.numeric.parse_real(" 0x1p+10000", true) == +infinity;
         assert std.numeric.parse_real("+0x1p+10000", true) == +infinity;

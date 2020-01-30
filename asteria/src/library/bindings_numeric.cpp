@@ -574,12 +574,11 @@ Sval std_numeric_format(Rval value, Iopt base, Iopt ebase)
     return text;
   }
 
-Iopt std_numeric_parse_integer(Sval text)
+Ival std_numeric_parse_integer(Sval text)
   {
     auto tpos = text.find_first_not_of(s_spaces);
     if(tpos == Sval::npos) {
-      // `text` consists of only spaces. Fail.
-      return nullopt;
+      ASTERIA_THROW("blank string");
     }
     auto bptr = text.data() + tpos;
     auto eptr = text.data() + text.find_last_not_of(s_spaces) + 1;
@@ -587,27 +586,22 @@ Iopt std_numeric_parse_integer(Sval text)
     Ival value;
     ::rocket::ascii_numget numg;
     if(!numg.parse_I(bptr, eptr)) {
-      // `text` could not be converted to an integer. Fail.
-      return nullopt;
+      ASTERIA_THROW("string not convertible to integer (text `$1`)", text);
     }
     if(bptr != eptr) {
-      // `text` consists of invalid characters. Fail.
-      return nullopt;
+      ASTERIA_THROW("non-integer character in string (character `$1`)", *bptr);
     }
     if(!numg.cast_I(value, INT64_MIN, INT64_MAX)) {
-      // The value is out of range.
-      return nullopt;
+      ASTERIA_THROW("integer overflow (text `$1`)", text);
     }
-    // The value has been stored successfully.
     return value;
   }
 
-Ropt std_numeric_parse_real(Sval text, Bopt saturating)
+Rval std_numeric_parse_real(Sval text, Bopt saturating)
   {
     auto tpos = text.find_first_not_of(s_spaces);
     if(tpos == Sval::npos) {
-      // `text` consists of only spaces. Fail.
-      return nullopt;
+      ASTERIA_THROW("blank string");
     }
     auto bptr = text.data() + tpos;
     auto eptr = text.data() + text.find_last_not_of(s_spaces) + 1;
@@ -615,21 +609,18 @@ Ropt std_numeric_parse_real(Sval text, Bopt saturating)
     Rval value;
     ::rocket::ascii_numget numg;
     if(!numg.parse_F(bptr, eptr)) {
-      // `text` could not be converted to an integer. Fail.
-      return nullopt;
+      ASTERIA_THROW("string not convertible to real number (text `$1`)", text);
     }
     if(bptr != eptr) {
-      // `text` consists of invalid characters. Fail.
-      return nullopt;
+      ASTERIA_THROW("non-real-number character in string (character `$1`)", *bptr);
     }
     if(!numg.cast_F(value, -HUGE_VAL, HUGE_VAL)) {
       // The value is out of range.
       // Unlike integers, underflows are accepted unconditionally.
       // Overflows are accepted unless `saturating` is `false` or absent.
       if(numg.overflowed() && (saturating != true))
-        return nullopt;
+        ASTERIA_THROW("real number overflow (text `$1`)", text);
     }
-    // The value has been stored successfully.
     return value;
   }
 
@@ -1828,8 +1819,9 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "    fails. If the result is outside the range of representable\n"
           "    values of type `integer`, this function fails.\n"
           "\n"
-          "  * Returns the `integer` value converted from `text`. On failure,\n"
-          "    `null` is returned.\n"
+          "  * Returns the `integer` value converted from `text`.\n"
+          "\n"
+          "  * Throws an exception on failure.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value {
@@ -1876,8 +1868,9 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
           "    is too large, if `saturating` is set to `true`, a signed\n"
           "    infinity is returned; otherwise this function fails.\n"
           "\n"
-          "  * Returns the `real` value converted from `text`. On failure,\n"
-          "    `null` is returned.\n"
+          "  * Returns the `real` value converted from `text`.\n"
+          "\n"
+          "  * Throws an exception on failure.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value {

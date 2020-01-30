@@ -145,9 +145,9 @@
 	  ISO 8601 standard. The subsecond part is optional and may have
 	  fewer or more digits. There may be leading or trailing spaces.
 
-	* Returns the number of milliseconds since `1970-01-01 00:00:00`
-	  if the time string has been parsed successfully, or `null`
-	  otherwise.
+	* Returns the number of milliseconds since `1970-01-01 00:00:00`.
+
+	* Throws an exception if the string is invalid.
 
 ### `std.string`
 
@@ -510,7 +510,8 @@
 
 	* Returns a `string` containing decoded bytes. If `text` is empty
 	  or consists of only whitespaces, an empty `string` is returned.
-	  In the case of parse errors, `null` is returned.
+
+	* Throws an exception if the string is invalid.
 
 `std.string.base32_encode(data, [uppercase])`
 
@@ -533,7 +534,8 @@
 
 	* Returns a `string` containing decoded bytes. If `text` is empty
 	  or consists of only whitespaces, an empty `string` is returned.
-	  In the case of parse errors, `null` is returned.
+
+	* Throws an exception if the string is invalid.
 
 `std.string.base64_encode(data)`
 
@@ -553,7 +555,8 @@
 
 	* Returns a `string` containing decoded bytes. If `text` is empty
 	  or consists of only whitespaces, an empty `string` is returned.
-	  In the case of parse errors, `null` is returned.
+
+	* Throws an exception if the string is invalid.
 
 `std.string.translate(text, inputs, [outputs])`
 
@@ -578,7 +581,9 @@
 	  replacement character `"\uFFFD"` and consequently encoded as
 	  `"\xEF\xBF\xBD"`; otherwise this function fails.
 
-	* Returns the encoded `string` on success, or `null` otherwise.
+	* Returns the encoded `string`.
+
+	* Throws an exception on failure.
 
 `std.string.utf8_decode(text, [permissive])`
 
@@ -589,8 +594,9 @@
 	  re-interpreted as isolated bytes according to ISO/IEC 8859-1;
 	  otherwise this function fails.
 
-	* Returns an `array` containing decoded code points, or `null`
-	  otherwise.
+	* Returns an `array` containing decoded code points.
+
+	* Throws an exception on failure.
 
 `std.string.pack_8(values)`
 
@@ -1597,8 +1603,9 @@
 	  fails. If the result is outside the range of representable
 	  values of type `integer`, this function fails.
 
-	* Returns the `integer` value converted from `text`. On failure,
-	  `null` is returned.
+	* Returns the `integer` value converted from `text`.
+
+	* Throws an exception on failure.
 
 `std.numeric.parse_real(text, [saturating])`
 
@@ -1624,8 +1631,9 @@
 	  is too large, if `saturating` is set to `true`, a signed
 	  infinity is returned; otherwise this function fails.
 
-	* Returns the `real` value converted from `text`. On failure,
-	  `null` is returned.
+	* Returns the `real` value converted from `text`.
+
+	* Throws an exception on failure.
 
 ### `std.math`
 
@@ -2196,9 +2204,9 @@
 
 	  Be advised that numbers are always parsed as `real`s.
 
-	* Returns the parsed value. If `text` is empty or is not a valid
-	  JSON string, `null` is returned. There is no way to tell empty
-	  or explicit `"null"` inputs from failures.
+	* Returns the parsed value.
+
+	* Throws an exception if the string is invalid.
 
 ### `std.process`
 

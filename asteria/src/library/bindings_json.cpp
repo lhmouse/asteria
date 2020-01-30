@@ -631,17 +631,17 @@ Value std_json_parse(Sval text)
       tstrm.reload(cbuf, ::rocket::sref("<JSON text>"), opts);
     }
     catch(Parser_Error& except) {
-      return nullptr;
+      ASTERIA_THROW("invalid JSON string: $1", describe_parser_status(except.status()));
     }
     // Parse tokens.
     auto qvalue = do_json_parse_nonrecursive_opt(tstrm);
     if(!qvalue) {
-      return nullptr;
+      ASTERIA_THROW("empty JSON string");
     }
     // Check whether all tokens have been consumed.
     auto qtok = tstrm.peek_opt();
     if(qtok) {
-      return nullptr;
+      ASTERIA_THROW("invalid JSON string: excess text at the end");
     }
     return ::rocket::move(*qvalue);
   }
@@ -719,9 +719,9 @@ void create_bindings_json(Oval& result, API_Version /*version*/)
           "\n"
           "    Be advised that numbers are always parsed as `real`s.\n"
           "\n"
-          "  * Returns the parsed value. If `text` is empty or is not a valid\n"
-          "    JSON string, `null` is returned. There is no way to tell empty\n"
-          "    or explicit `\"null\"` inputs from failures.\n"
+          "  * Returns the parsed value.\n"
+          "\n"
+          "  * Throws an exception if the string is invalid.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value {

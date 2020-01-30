@@ -443,12 +443,42 @@ int main()
         assert std.numeric.parse_integer(" 0x4321") == +17185;
         assert std.numeric.parse_integer("+0x4321") == +17185;
         assert std.numeric.parse_integer("-0x4321") == -17185;
-        assert std.numeric.parse_integer(" 999999999999999999999999999999") == null;
-        assert std.numeric.parse_integer("+999999999999999999999999999999") == null;
-        assert std.numeric.parse_integer("-999999999999999999999999999999") == null;
-        assert std.numeric.parse_integer(" 1e100") == null;
-        assert std.numeric.parse_integer("+1e100") == null;
-        assert std.numeric.parse_integer("-1e100") == null;
+        try {
+          std.numeric.parse_integer(" 999999999999999999999999999999");
+          assert false;
+        }
+        catch(e)
+          ;
+        try {
+          std.numeric.parse_integer("+999999999999999999999999999999");
+          assert false;
+        }
+        catch(e)
+          ;
+        try {
+          std.numeric.parse_integer("-999999999999999999999999999999");
+          assert false;
+        }
+        catch(e)
+          ;
+        try {
+          std.numeric.parse_integer(" 1e100");
+          assert false;
+        }
+        catch(e)
+          ;
+        try {
+          std.numeric.parse_integer("+1e100");
+          assert false;
+        }
+        catch(e)
+          ;
+        try {
+          std.numeric.parse_integer("-1e100");
+          assert false;
+        }
+        catch(e)
+          ;
 
         assert std.numeric.parse_real(" 1234") == +1234;
         assert std.numeric.parse_real("+1234") == +1234;
@@ -470,15 +500,45 @@ int main()
         assert std.numeric.parse_real(" infinity") == +infinity;
         assert std.numeric.parse_real("+infinity") == +infinity;
         assert std.numeric.parse_real("-infinity") == -infinity;
-        assert std.numeric.parse_real(" Infinity") == null;
-        assert std.numeric.parse_real("+Infinity") == null;
-        assert std.numeric.parse_real("-Infinity") == null;
+        try {
+          std.numeric.parse_real(" Infinity");
+          assert false;
+        }
+        catch(e)
+          ;
+        try {
+          std.numeric.parse_real("+Infinity");
+          assert false;
+        }
+        catch(e)
+          ;
+        try {
+          std.numeric.parse_real("-Infinity");
+          assert false;
+        }
+        catch(e)
+          ;
         assert __isnan std.numeric.parse_real(" nan");
         assert __isnan std.numeric.parse_real("+nan");
         assert __isnan std.numeric.parse_real("-nan");
-        assert std.numeric.parse_real(" NaN") == null;
-        assert std.numeric.parse_real("+NaN") == null;
-        assert std.numeric.parse_real("-NaN") == null;
+        try {
+          std.numeric.parse_real(" NaN");
+          assert false;
+        }
+        catch(e)
+          ;
+        try {
+          std.numeric.parse_real("+NaN");
+          assert false;
+        }
+        catch(e)
+          ;
+        try {
+          std.numeric.parse_real("-NaN");
+          assert false;
+        }
+        catch(e)
+          ;
         assert std.numeric.parse_real(" 0b01000011.00100001  ") == +67.12890625;
         assert std.numeric.parse_real("+0b01000011.00100001  ") == +67.12890625;
         assert std.numeric.parse_real("-0b01000011.00100001  ") == -67.12890625;
@@ -491,9 +551,24 @@ int main()
         assert std.numeric.parse_real(" 0x43.21p3") == +537.03125;
         assert std.numeric.parse_real("+0x43.21p3") == +537.03125;
         assert std.numeric.parse_real("-0x43.21p3") == -537.03125;
-        assert std.numeric.parse_real(" 1e1000000") == null;
-        assert std.numeric.parse_real("+1e1000000") == null;
-        assert std.numeric.parse_real("-1e1000000") == null;
+        try {
+          std.numeric.parse_real(" 1e1000000");
+          assert false;
+        }
+        catch(e)
+          ;
+        try {
+          std.numeric.parse_real("+1e1000000");
+          assert false;
+        }
+        catch(e)
+          ;
+        try {
+          std.numeric.parse_real("-1e1000000");
+          assert false;
+        }
+        catch(e)
+          ;
         assert std.numeric.parse_real(" 1e1000000", true) ==  +infinity;
         assert std.numeric.parse_real("+1e1000000", true) ==  +infinity;
         assert std.numeric.parse_real("-1e1000000", true) ==  -infinity;
