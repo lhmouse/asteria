@@ -275,6 +275,8 @@ check_PROGRAMS =  \
   asteria/test/structured_binding.test  \
   asteria/test/global_identifier.test  \
   asteria/test/variadic_function_call.test  \
+  asteria/test/defer.test  \
+  asteria/test/defer_ptc.test  \
   asteria/test/bindings_chrono.test  \
   asteria/test/bindings_string.test  \
   asteria/test/bindings_array.test  \
@@ -283,13 +285,12 @@ check_PROGRAMS =  \
   asteria/test/bindings_filesystem.test  \
   asteria/test/bindings_checksum.test  \
   asteria/test/bindings_json.test  \
+  asteria/test/bindings_process.test  \
   asteria/test/github_65.test  \
   asteria/test/github_71.test  \
   asteria/test/github_78.test  \
   asteria/test/github_84.test  \
-  asteria/test/github_85.test  \
-  asteria/test/defer.test  \
-  asteria/test/defer_ptc.test
+  asteria/test/github_85.test
 
 TESTS = ${check_PROGRAMS}
 
