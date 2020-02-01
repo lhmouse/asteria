@@ -761,7 +761,7 @@ Aval std_array_shuffle(Aval data, Iopt seed)
       return data;
     }
     // Create a linear congruential generator.
-    auto lcg = seed ? static_cast<uint64_t>(*seed) : generate_random_seed();
+    uint64_t lcg = seed ? static_cast<uint64_t>(*seed) : generate_random_seed();
     // Shuffle elements.
     Aval res = data;
     for(size_t i = 0;  i < res.size();  ++i) {
@@ -774,11 +774,11 @@ Aval std_array_shuffle(Aval data, Iopt seed)
       // ratio <= [0.0, 1.0)
       double ratio = static_cast<double>(static_cast<int64_t>(lcg)) * 0x1p-48;
       // k <= [0, res.size())
-      auto k = static_cast<size_t>(static_cast<int64_t>(ratio * static_cast<double>(data.ssize())));
+      size_t k = static_cast<size_t>(static_cast<int64_t>(ratio * static_cast<double>(data.ssize())));
       if(k == i) {
         continue;
       }
-      xswap(res.mut(k), res.mut(i));
+      swap(res.mut(k), res.mut(i));
     }
     return res;
   }
