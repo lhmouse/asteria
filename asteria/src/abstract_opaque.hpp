@@ -28,9 +28,9 @@ class Abstract_Opaque : public virtual Rcbase
     virtual Abstract_Opaque* clone_opt(rcptr<Abstract_Opaque>& output) const = 0;
   };
 
-inline tinyfmt& operator<<(tinyfmt& fmt, const Abstract_Opaque& opaque)
+inline tinyfmt& operator<<(tinyfmt& fmt, const Abstract_Opaque& opaq)
   {
-    return opaque.describe(fmt);
+    return opaq.describe(fmt);
   }
 
 }  // namespace Asteria
