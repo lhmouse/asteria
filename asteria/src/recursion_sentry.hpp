@@ -34,20 +34,28 @@ class Recursion_Sentry
       :
         m_base(other.m_base)
       {
-        // Estimate stack usage.
-        size_t usage = (size_t)::std::abs((const char*)this - (const char*)this->m_base);
-        if(ROCKET_UNEXPECT(usage >> stack_mask_bits))
-          this->do_throw_stack_overflow(usage, uint32_t(1) << stack_mask_bits);
+        this->do_check();
+      }
+    Recursion_Sentry& operator=(const Recursion_Sentry& other)  // copy assignment
+      {
+        this->m_base = other.m_base;
+        this->do_check();
+        return *this;
       }
     ~Recursion_Sentry()
       {
       }
 
-    Recursion_Sentry& operator=(const Recursion_Sentry&)  // not assignable
-      = delete;
-
   private:
     [[noreturn]] void do_throw_stack_overflow(size_t usage, size_t limit);
+
+    ROCKET_ARTIFICIAL_FUNCTION inline void do_check()
+      {
+        // Estimate stack usage.
+        size_t usage = (size_t)::std::abs((const char*)this - (const char*)this->m_base);
+        if(ROCKET_UNEXPECT(usage >> stack_mask_bits))
+          this->do_throw_stack_overflow(usage, uint32_t(1) << stack_mask_bits);
+      }
 
   public:
     const void* get_base() const noexcept
