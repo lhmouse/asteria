@@ -36,13 +36,13 @@ size_t do_read_random_device(void* data, size_t size) noexcept
 class Scrambler
   {
   private:
-    array<uint32_t, 8> m_regs;
+    uint32_t m_regs[8];
 
   public:
     Scrambler() noexcept
       {
-        this->m_regs.fill(0x9E3779B9);
-
+        for(size_t i = 0;  i < 8;  ++i)
+          this->m_regs[i] = 0x9E3779B9;
         for(size_t i = 0;  i < 4;  ++i)
           this->mix();
       }

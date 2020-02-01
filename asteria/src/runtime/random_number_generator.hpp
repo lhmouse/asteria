@@ -16,9 +16,10 @@ class Random_Number_Generator final : public virtual Rcbase
     // The reference implementation assumes that `long` has 32 bits.
     //   https://www.burtleburtle.net/bob/rand/isaac.html
 
+    // output pool
     uint32_t m_ngot;
     uint32_t m_pool[256];
-
+    // internal state
     uint32_t m_aa;
     uint32_t m_bb;
     uint32_t m_cc;
