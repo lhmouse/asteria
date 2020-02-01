@@ -25,7 +25,7 @@ class Recursion_Sentry
         m_base(this)
       {
       }
-    constexpr Recursion_Sentry(const void* base) noexcept
+    explicit constexpr Recursion_Sentry(const void* base) noexcept
       :
         m_base(base)
       {
