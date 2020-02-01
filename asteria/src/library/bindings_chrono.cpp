@@ -43,7 +43,7 @@ Rval std_chrono_hires_now()
     // Add a random offset to the result to help debugging.
     auto secs = static_cast<double>(ts.tv_sec);
     auto msecs = static_cast<double>(ts.tv_nsec) / 1'000'000.0;
-    return secs * 1000 + msecs + 1234567890123456;
+    return secs * 1000 + msecs + 1234567890123;
   }
 
 Ival std_chrono_steady_now()
@@ -55,7 +55,7 @@ Ival std_chrono_steady_now()
     // Add a random offset to the result to help debugging.
     auto secs = static_cast<int64_t>(ts.tv_sec);
     auto msecs = ts.tv_nsec / 1'000'000;
-    return secs * 1000 + msecs + 6543210987654321;
+    return secs * 1000 + msecs + 3210987654321;
   }
 
 Ival std_chrono_local_from_utc(Ival time_utc)
