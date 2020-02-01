@@ -650,15 +650,15 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
         // Set backtrace frames.
         G_array backtrace;
         for(size_t i = 0;  i < except.count_frames();  ++i) {
-          const auto& frame = except.frame(i);
+          const auto& f = except.frame(i);
           // Translate each frame into a human-readable format.
-          G_object f;
-          f.try_emplace(::rocket::sref("frame"), G_string(::rocket::sref(frame.what_type())));
-          f.try_emplace(::rocket::sref("file"), G_string(frame.file()));
-          f.try_emplace(::rocket::sref("line"), G_integer(frame.line()));
-          f.try_emplace(::rocket::sref("value"), frame.value());
+          G_object r;
+          r.try_emplace(::rocket::sref("frame"), G_string(::rocket::sref(f.what_type())));
+          r.try_emplace(::rocket::sref("file"), G_string(f.file()));
+          r.try_emplace(::rocket::sref("line"), G_integer(f.line()));
+          r.try_emplace(::rocket::sref("value"), f.value());
           // Append this frame.
-          backtrace.emplace_back(::rocket::move(f));
+          backtrace.emplace_back(::rocket::move(r));
         }
         Reference_Root::S_constant xref = { ::rocket::move(backtrace) };
         ctx_catch.open_named_reference(::rocket::sref("__backtrace")) = ::rocket::move(xref);
