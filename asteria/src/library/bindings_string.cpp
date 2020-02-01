@@ -927,6 +927,9 @@ Sval std_string_base32_decode(Sval text)
       reg = 1;
       npad = 0;
     }
+    if(reg != 1) {
+      ASTERIA_THROW("incomplete base32 group");
+    }
     return ::rocket::move(data);
   }
 
@@ -1026,6 +1029,9 @@ Sval std_string_base64_decode(Sval text)
       }
       reg = 1;
       npad = 0;
+    }
+    if(reg != 1) {
+      ASTERIA_THROW("incomplete base64 group");
     }
     return ::rocket::move(data);
   }
