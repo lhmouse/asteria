@@ -855,8 +855,8 @@ Sval std_string_base32_encode(Sval data, Bopt lowercase)
     }
     if(nread != data.size()) {
       // Get the start of padding characters.
-      auto m = data.size() - nread;
-      auto p = (m * 8 + 4) / 5;
+      size_t m = data.size() - nread;
+      size_t p = (m * 8 + 4) / 5;
       // Read all remaining bytes that cannot fill up a unit.
       for(size_t i = 0;  i < m;  ++i) {
         uint32_t b = data[nread++] & 0xFF;
@@ -920,7 +920,12 @@ Sval std_string_base32_decode(Sval text)
       if(!(reg & 0x1'00'00'00'00'00)) {
         continue;
       }
-      for(uint32_t i = (40 - npad * 5) / 8;  i != 0;  --i) {
+      size_t m = (40 - npad * 5) / 8;
+      size_t p = (m * 8 + 4) / 5;
+      if(p + npad != 8) {
+        ASTERIA_THROW("unexpected number of base32 padding characters (got `$1`)", npad);
+      }
+      for(size_t i = 0; i < m; ++i) {
         reg <<= 8;
         data += static_cast<char>(reg >> 40);
       }
@@ -958,8 +963,8 @@ Sval std_string_base64_encode(Sval data)
     }
     if(nread != data.size()) {
       // Get the start of padding characters.
-      auto m = data.size() - nread;
-      auto p = (m * 8 + 5) / 6;
+      size_t m = data.size() - nread;
+      size_t p = (m * 8 + 5) / 6;
       // Read all remaining bytes that cannot fill up a unit.
       for(size_t i = 0;  i < m;  ++i) {
         uint32_t b = data[nread++] & 0xFF;
@@ -1023,7 +1028,12 @@ Sval std_string_base64_decode(Sval text)
       if(!(reg & 0x1'00'00'00)) {
         continue;
       }
-      for(uint32_t i = (24 - npad * 6) / 8;  i != 0;  --i) {
+      size_t m = (24 - npad * 6) / 8;
+      size_t p = (m * 8 + 5) / 6;
+      if(p + npad != 4) {
+        ASTERIA_THROW("unexpected number of base64 padding characters (got `$1`)", npad);
+      }
+      for(size_t i = 0; i < m; ++i) {
         reg <<= 8;
         data += static_cast<char>(reg >> 24);
       }
@@ -1079,15 +1089,12 @@ Aval std_string_utf8_decode(Sval text, Bopt permissive)
     code_points.reserve(text.size());
     // Decode code points repeatedly.
     size_t offset = 0;
-    for(;;) {
-      if(offset >= text.size()) {
-        break;
-      }
+    while(offset < text.size()) {
       char32_t cp;
       if(!utf8_decode(cp, text, offset)) {
         // This comparison with `true` is by intention, because it may be unset.
         if(permissive != true) {
-          return nullopt;
+          ASTERIA_THROW("invalid UTF-8 string");
         }
         // Re-interpret it as an isolated byte.
         cp = text[offset++] & 0xFF;
