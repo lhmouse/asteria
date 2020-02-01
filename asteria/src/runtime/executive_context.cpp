@@ -74,7 +74,7 @@ void Executive_Context::do_on_scope_exit_void()
         ROCKET_ASSERT(status == air_status_next);
       }
       ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
-        except.push_frame_defer(pair.first, except.value());
+        except.push_frame_defer(pair.first);
         this->do_on_scope_exit_exception(except);
         throw;
       }
@@ -121,7 +121,7 @@ void Executive_Context::do_on_scope_exit_exception(Runtime_Error& except)
       }
       ASTERIA_RUNTIME_CATCH(Runtime_Error& nested) {
         except = nested;
-        except.push_frame_defer(pair.first, nested.value());
+        except.push_frame_defer(pair.first);
       }
     }
     ROCKET_ASSERT(this->m_defer.empty());

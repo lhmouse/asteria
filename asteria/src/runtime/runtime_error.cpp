@@ -25,10 +25,8 @@ void Runtime_Error::do_backtrace()
     else
       this->m_frames.append(nested.m_frames.begin(), nested.m_frames.end());
   }
-  catch(::std::exception& nested) {
-    // Push a native frame.
-    this->m_frames.emplace_back(frame_type_native,
-                                ::rocket::sref("<native code>"), -1, this->m_value);
+  catch(::std::exception& /*nested*/) {
+    // Do nothing.
   }
 
 void Runtime_Error::do_compose_message()

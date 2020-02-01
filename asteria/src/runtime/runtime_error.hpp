@@ -15,31 +15,41 @@ class Runtime_Error : public exception
   private:
     Value m_value;
     cow_vector<Backtrace_Frame> m_frames;
+    size_t m_ipos = 0;  // where to insert new frames
     // Create a comprehensive string that is also human-readable.
     cow_string m_what;
 
   public:
     template<typename XValT, ASTERIA_SFINAE_CONSTRUCT(Value, XValT&&)>
-                            Runtime_Error(const Source_Location& sloc, XValT&& xval)
+                                               Runtime_Error(const Source_Location& sloc, XValT&& xval)
       :
         m_value(::rocket::forward<XValT>(xval))
       {
         this->do_backtrace();
-        this->m_frames.emplace_back(frame_type_throw, sloc, this->m_value);
-        this->do_compose_message();
+        this->do_insert_frame(frame_type_throw, sloc, this->m_value);
       }
     explicit Runtime_Error(const exception& stdex)
       :
         m_value(G_string(stdex.what()))
       {
         this->do_backtrace();
-        this->do_compose_message();
+        this->do_insert_frame(frame_type_native, ::rocket::sref("<native code>"), -1, this->m_value);
       }
     ~Runtime_Error() override;
 
   private:
     void do_backtrace();
     void do_compose_message();
+
+    template<typename... ParamsT> void do_insert_frame(ParamsT&&... params)
+      {
+        // Insert the frame.
+        size_t ipos = this->m_ipos;
+        this->m_frames.insert(ipos, Backtrace_Frame(::rocket::forward<ParamsT>(params)...));
+        this->m_ipos = ipos + 1;
+        // Rebuild the message using new frames.
+        this->do_compose_message();
+      }
 
   public:
     const char* what() const noexcept override
@@ -60,44 +70,38 @@ class Runtime_Error : public exception
         return this->m_frames.at(index);
       }
 
-    template<typename XValT>
-        Backtrace_Frame& push_frame_throw(const Source_Location& sloc, XValT&& xval)
+    template<typename XValT> Runtime_Error& push_frame_throw(const Source_Location& sloc, XValT&& xval)
       {
-        // The value also replaces the one in `*this`.
-        auto& f = this->m_frames.emplace_back(frame_type_throw, sloc,
-                                              this->m_value = ::rocket::forward<XValT>(xval));
-        this->do_compose_message();
-        return f;
+        // Start a new backtrace.
+        this->m_value = ::rocket::forward<XValT>(xval);
+        this->m_ipos = 0;
+        // Append the first frame to the current backtrace.
+        this->do_insert_frame(frame_type_throw, sloc, this->m_value);
+        return *this;
       }
-    Backtrace_Frame& push_frame_catch(const Source_Location& sloc)
+    Runtime_Error& push_frame_catch(const Source_Location& sloc)
       {
-        // The value is the one stored in `*this` at this point.
-        auto& f = this->m_frames.emplace_back(frame_type_catch, sloc, this->m_value);
-        this->do_compose_message();
-        return f;
+        // Append a new frame to the current backtrace.
+        this->do_insert_frame(frame_type_catch, sloc, this->m_value);
+        return *this;
       }
-    Backtrace_Frame& push_frame_call(const Source_Location& sloc, const cow_string& inside)
+    Runtime_Error& push_frame_call(const Source_Location& sloc, const cow_string& inside)
       {
-        // The value is the signature of the enclosing function.
-        auto& f = this->m_frames.emplace_back(frame_type_call, sloc, inside);
-        this->do_compose_message();
-        return f;
+        // Append a new frame to the current backtrace.
+        this->do_insert_frame(frame_type_call, sloc, inside);
+        return *this;
       }
-    Backtrace_Frame& push_frame_func(const Source_Location& sloc, const cow_string& func)
+    Runtime_Error& push_frame_func(const Source_Location& sloc, const cow_string& func)
       {
-        // The value is the signature of the enclosing function.
-        auto& f = this->m_frames.emplace_back(frame_type_func, sloc, func);
-        this->do_compose_message();
-        return f;
+        // Append a new frame to the current backtrace.
+        this->do_insert_frame(frame_type_func, sloc, func);
+        return *this;
       }
-    template<typename XValT>
-        Backtrace_Frame& push_frame_defer(const Source_Location& sloc, XValT&& xval)
+    Runtime_Error& push_frame_defer(const Source_Location& sloc)
       {
-        // The value also replaces the one in `*this`.
-        auto& f = this->m_frames.emplace_back(frame_type_defer, sloc,
-                                              this->m_value = ::rocket::forward<XValT>(xval));
-        this->do_compose_message();
-        return f;
+        // Append a new frame to the current backtrace.
+        this->do_insert_frame(frame_type_defer, sloc, this->m_value);
+        return *this;
       }
   };
 

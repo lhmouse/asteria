@@ -23,12 +23,13 @@ int main()
     // convert the backtrace to somethign comparable
     func transform_backtrace(st, bt) {
       st = [ ];
-      // discard the last call site
-      const k = lengthof(bt) - 2;
-      for(var i = 0; i < k; ++i) {
-        st[$] = bt[i].frame;
-        st[$] = bt[i].line;
-        st[$] = bt[i].value;
+      // ignore top level calls
+      for(each k, v : bt) {
+        st[$] = v.frame;
+        st[$] = v.frame == "call" && v.func == "<top level>"
+                ? 12345
+                : v.line;
+        st[$] = v.value;
       }
       // print the backtrace
       std.debug.print("backtrace: $1", st);
