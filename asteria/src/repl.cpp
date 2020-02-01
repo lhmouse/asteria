@@ -415,7 +415,7 @@ void do_handle_repl_command(cow_string&& cmd)
       "\n"
       "  Global locale is now `%s`.\n"
       "\n"
-      "  All REPL commands start with a backslash. Type `,help` for instructions.\n"
+      "  All REPL commands start with a comma. Type `,help` for instructions.\n"
       "  Multiple lines may be joined together using trailing backslashes.\n"
       // 34567890123456789012345678901234567890123456789012345678901234567890123456|
       //        1         2         3         4         5         6         7      |
