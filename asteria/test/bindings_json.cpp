@@ -38,13 +38,15 @@ int main()
         assert std.json.format([[1,2],[3,4]], -1) == "[[1,2],[3,4]]";
         assert std.json.format([[1,2],[3,4]], 2) == "[\n  [\n    1,\n    2\n  ],\n  [\n    3,\n    4\n  ]\n]";
 
-        try { std.json.parse("");  assert false;  } catch(e);
+        try { std.json.parse("");  assert false;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         assert std.json.parse("null") == null;
         assert std.json.parse("true  ") == true;
         assert std.json.parse("  false") == false;
         assert std.json.parse("  42  ") == 42;
         assert std.json.parse("  76.5") == 76.5;
-        try { std.json.parse("2 1");  assert false;  } catch(e);
+        try { std.json.parse("2 1");  assert false;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         assert std.json.parse("'hello'") == "hello";
         assert std.json.parse("\"\u55B5\"") == "喵";
         assert std.json.parse("\"\u55b5\"") == "喵";

@@ -15,7 +15,8 @@ int main()
         assert std.process.execute('/bin/true') == 0;
         assert std.process.execute('/bin/false') != 0;
 
-        try { std.process.execute('nonexistent-command');  assert false;  } catch(e);
+        try { std.process.execute('nonexistent-command');  assert false;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
 
         assert std.process.execute('/bin/bash',
           [ '/bin/bash', '-c', 'kill -1 $$' ]) == 129;
