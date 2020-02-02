@@ -466,13 +466,11 @@ void do_handle_repl_command(cow_string&& cmd)
           // Check for termination.
           if(heredoc.empty()) {
             // In line input mode, the current snippet is terminated by an unescaped line feed.
-            if(!escape) {
+            if(!escape)
               break;
-            }
             // REPL commands can't straddle multiple lines.
-            if(code.empty() || (code.front() == ',')) {
+            if(!code.empty() && (code.front() == ','))
               break;
-            }
           }
           else {
             // In heredoc mode, the current snippet is terminated by a line consisting of the
@@ -532,8 +530,7 @@ void do_handle_repl_command(cow_string&& cmd)
       }
       catch(Parser_Error& except) {
         // We only want to make another attempt in the case of absence of a semicolon at the end.
-        bool retry = (except.status() == parser_status_semicolon_expected) &&
-                     (except.line() <= 0);
+        bool retry = (except.status() == parser_status_semicolon_expected) && (except.line() < 0);
         if(retry) {
           // Rewrite the potential expression to a `return` statement.
           code.insert(0, "return& ( ");
