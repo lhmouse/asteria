@@ -95,6 +95,16 @@ Aval std_string_unpack_64le(Sval text);
 
 Sval std_string_format(Sval templ, cow_vector<Value> values);
 
+opt<pair<Ival, Ival>> std_string_regex_find(Sval text, Sval pattern);
+opt<pair<Ival, Ival>> std_string_regex_find(Sval text, Ival from, Sval pattern);
+opt<pair<Ival, Ival>> std_string_regex_find(Sval text, Ival from, Iopt length, Sval pattern);
+Aopt std_string_regex_match(Sval text, Sval pattern);
+Aopt std_string_regex_match(Sval text, Ival from, Sval pattern);
+Aopt std_string_regex_match(Sval text, Ival from, Iopt length, Sval pattern);
+Sval std_string_regex_replace(Sval text, Sval pattern, Sval replacement);
+Sval std_string_regex_replace(Sval text, Ival from, Sval pattern, Sval replacement);
+Sval std_string_regex_replace(Sval text, Ival from, Iopt length, Sval pattern, Sval replacement);
+
 // Create an object that is to be referenced as `std.string`.
 void create_bindings_string(Oval& result, API_Version version);
 

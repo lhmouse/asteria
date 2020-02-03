@@ -6,6 +6,7 @@
 #include "argument_reader.hpp"
 #include "simple_binding_wrapper.hpp"
 #include "../utilities.hpp"
+#include <regex>
 
 namespace Asteria {
 namespace {
@@ -297,6 +298,45 @@ template<typename WordT> Aval do_unpack_be(const Sval& text)
 template<typename WordT> Aval do_unpack_le(const Sval& text)
   {
     return do_unpack_impl<0, WordT>(text);
+  }
+
+template<typename IterT>
+    ::std::sub_match<IterT> do_regex_search(IterT tbegin, IterT tend, IterT pbegin, IterT pend)
+  {
+    ::std::sub_match<IterT> match;
+    ::std::match_results<IterT> matches;
+    if(::std::regex_search(tbegin, tend, matches, ::std::regex(pbegin, pend)))
+      match = matches[0];
+    return match;
+  }
+
+template<typename IterT>
+    ::std::match_results<IterT> do_regex_match(IterT tbegin, IterT tend, IterT pbegin, IterT pend)
+  {
+    ::std::match_results<IterT> matches;
+    ::std::regex_match(tbegin, tend, matches, ::std::regex(pbegin, pend));
+    return matches;
+  }
+
+template<typename IterT>
+    Aval do_regex_copy_matches(const ::std::match_results<IterT>& matches)
+  {
+    Aval rval(matches.size());
+    for(size_t i = 0;  i < matches.size();  ++i) {
+      const auto& m = matches[i];
+      if(m.matched)
+        rval.mut(i) = Sval(m.first, m.second);
+    }
+    return rval;
+  }
+
+template<typename IterT>
+    Sval& do_regex_replace(Sval& res, IterT tbegin, IterT tend, IterT pbegin, IterT pend,
+                                      IterT rbegin, IterT rend)
+  {
+    ::std::regex_replace(::std::back_inserter(res), tbegin, tend, ::std::regex(pbegin, pend),
+                                                    ::std::string(rbegin, rend));
+    return res;
   }
 
 }  // namespace
@@ -1318,6 +1358,97 @@ Sval std_string_format(Sval templ, cow_vector<Value> values)
     ::rocket::tinyfmt_str fmt;
     vformat(fmt, templ.data(), templ.size(), insts.data(), insts.size());
     return fmt.extract_string();
+  }
+
+opt<pair<Ival, Ival>> std_string_regex_find(Sval text, Sval pattern)
+  {
+    auto range = ::std::make_pair(text.begin(), text.end());
+    auto match = do_regex_search(range.first, range.second, pattern.begin(), pattern.end());
+    if(!match.matched) {
+      return nullopt;
+    }
+    return ::std::make_pair(match.first - text.begin(), match.second - match.first);
+  }
+
+opt<pair<Ival, Ival>> std_string_regex_find(Sval text, Ival from, Sval pattern)
+  {
+    auto range = do_slice(text, from, nullopt);
+    auto match = do_regex_search(range.first, range.second, pattern.begin(), pattern.end());
+    if(!match.matched) {
+      return nullopt;
+    }
+    return ::std::make_pair(match.first - text.begin(), match.second - match.first);
+  }
+
+opt<pair<Ival, Ival>> std_string_regex_find(Sval text, Ival from, Iopt length, Sval pattern)
+  {
+    auto range = do_slice(text, from, length);
+    auto match = do_regex_search(range.first, range.second, pattern.begin(), pattern.end());
+    if(!match.matched) {
+      return nullopt;
+    }
+    return ::std::make_pair(match.first - text.begin(), match.second - match.first);
+  }
+
+Aopt std_string_regex_match(Sval text, Sval pattern)
+  {
+    auto range = ::std::make_pair(text.begin(), text.end());
+    auto matches = do_regex_match(range.first, range.second, pattern.begin(), pattern.end());
+    if(matches.empty()) {
+      return nullopt;
+    }
+    return do_regex_copy_matches(matches);
+  }
+
+Aopt std_string_regex_match(Sval text, Ival from, Sval pattern)
+  {
+    auto range = do_slice(text, from, nullopt);
+    auto matches = do_regex_match(range.first, range.second, pattern.begin(), pattern.end());
+    if(matches.empty()) {
+      return nullopt;
+    }
+    return do_regex_copy_matches(matches);
+  }
+
+Aopt std_string_regex_match(Sval text, Ival from, Iopt length, Sval pattern)
+  {
+    auto range = do_slice(text, from, length);
+    auto matches = do_regex_match(range.first, range.second, pattern.begin(), pattern.end());
+    if(matches.empty()) {
+      return nullopt;
+    }
+    return do_regex_copy_matches(matches);
+  }
+
+Sval std_string_regex_replace(Sval text, Sval pattern, Sval replacement)
+  {
+    Sval res;
+    auto range = ::std::make_pair(text.begin(), text.end());
+    do_regex_replace(res, range.first, range.second, pattern.begin(), pattern.end(),
+                          replacement.begin(), replacement.end());
+    return res;
+  }
+
+Sval std_string_regex_replace(Sval text, Ival from, Sval pattern, Sval replacement)
+  {
+    Sval res;
+    auto range = do_slice(text, from, nullopt);
+    res.append(text.begin(), range.first);
+    do_regex_replace(res, range.first, range.second, pattern.begin(), pattern.end(),
+                          replacement.begin(), replacement.end());
+    res.append(range.second, text.end());
+    return res;
+  }
+
+Sval std_string_regex_replace(Sval text, Ival from, Iopt length, Sval pattern, Sval replacement)
+  {
+    Sval res;
+    auto range = do_slice(text, from, length);
+    res.append(text.begin(), range.first);
+    do_regex_replace(res, range.first, range.second, pattern.begin(), pattern.end(),
+                          replacement.begin(), replacement.end());
+    res.append(range.second, text.end());
+    return res;
   }
 
 void create_bindings_string(Oval& result, API_Version /*version*/)
@@ -3057,6 +3188,256 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           if(reader.I().g(templ).F(values)) {
             // Call the binding function.
             return std_string_format(::rocket::move(templ), ::rocket::move(values));
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
+    //===================================================================
+    // `std.string.regex_find()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("regex_find"),
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+        // Description
+        ::rocket::sref(
+          "\n"
+          "`std.string.regex_find(text, pattern)`\n"
+          "\n"
+          "  * Searches `text` for the first occurrence of the regular\n"
+          "    expression `pattern`.\n"
+          "\n"
+          "  * Returns an `array` of two `integer`s, the first of which\n"
+          "    specifies the subscript of the matching sequence and the second\n"
+          "    of which specifies its length. If `pattern` is not found, this\n"
+          "    function returns `null`.\n"
+          "\n"
+          "  * Throws an exception if `pattern` is not a valid regular\n"
+          "    expression.\n"
+          "\n"
+          "`std.string.regex_find(text, from, pattern)`\n"
+          "\n"
+          "  * Searches `text` for the first occurrence of the regular\n"
+          "    expression `pattern`. The search operation is performed on the\n"
+          "    same subrange that would be returned by `slice(text, from)`.\n"
+          "\n"
+          "  * Returns an `array` of two `integer`s, the first of which\n"
+          "    specifies the subscript of the matching sequence and the second\n"
+          "    of which specifies its length. If `pattern` is not found, this\n"
+          "    function returns `null`.\n"
+          "\n"
+          "  * Throws an exception if `pattern` is not a valid regular\n"
+          "    expression.\n"
+          "\n"
+          "`std.string.regex_find(text, from, [length], pattern)`\n"
+          "\n"
+          "  * Searches `text` for the first occurrence of the regular\n"
+          "    expression `pattern`. The search operation is performed on the\n"
+          "    same subrange that would be returned by\n"
+          "    `slice(text, from, length)`.\n"
+          "\n"
+          "  * Returns an `array` of two `integer`s, the first of which\n"
+          "    specifies the subscript of the matching sequence and the second\n"
+          "    of which specifies its length. If `pattern` is not found, this\n"
+          "    function returns `null`.\n"
+          "\n"
+          "  * Throws an exception if `pattern` is not a valid regular\n"
+          "    expression.\n"
+        ),
+        // Definition
+        [](cow_vector<Reference>&& args) -> Value {
+          Argument_Reader reader(::rocket::sref("std.string.regex_find"), ::rocket::ref(args));
+          Argument_Reader::State state;
+          // Parse arguments.
+          Sval text;
+          Sval pattern;
+          if(reader.I().g(text).S(state).g(pattern).F()) {
+            // Call the binding function.
+            auto kpair = std_string_regex_find(::rocket::move(text), ::rocket::move(pattern));
+            if(!kpair)
+              return nullptr;
+            // This function returns a `pair`, but we would like to return an array so convert it.
+            Aval rval(2);
+            rval.mut(0) = ::rocket::move(kpair->first);
+            rval.mut(1) = ::rocket::move(kpair->second);
+            return ::rocket::move(rval);
+          }
+          Ival from;
+          if(reader.L(state).g(from).S(state).g(pattern).F()) {
+            // Call the binding function.
+            auto kpair = std_string_regex_find(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern));
+            if(!kpair)
+              return nullptr;
+            // This function returns a `pair`, but we would like to return an array so convert it.
+            Aval rval(2);
+            rval.mut(0) = ::rocket::move(kpair->first);
+            rval.mut(1) = ::rocket::move(kpair->second);
+            return ::rocket::move(rval);
+          }
+          Iopt length;
+          if(reader.L(state).g(length).g(pattern).F()) {
+            // Call the binding function.
+            auto kpair = std_string_regex_find(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
+                                               ::rocket::move(pattern));
+            if(!kpair)
+              return nullptr;
+            // This function returns a `pair`, but we would like to return an array so convert it.
+            Aval rval(2);
+            rval.mut(0) = ::rocket::move(kpair->first);
+            rval.mut(1) = ::rocket::move(kpair->second);
+            return ::rocket::move(rval);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
+    //===================================================================
+    // `std.string.regex_match()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("regex_match"),
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+        // Description
+        ::rocket::sref(
+          "\n"
+          "`std.string.regex_find(text, pattern)`\n"
+          "\n"
+          "  * Searches `text` for the first occurrence of the regular\n"
+          "    expression `pattern`.\n"
+          "\n"
+          "  * Returns an `array` of two `integer`s, the first of which\n"
+          "    specifies the subscript of the matching sequence and the second\n"
+          "    of which specifies its length. If `pattern` is not found, this\n"
+          "    function returns `null`.\n"
+          "\n"
+          "  * Throws an exception if `pattern` is not a valid regular\n"
+          "    expression.\n"
+          "\n"
+          "`std.string.regex_find(text, from, pattern)`\n"
+          "\n"
+          "  * Searches `text` for the first occurrence of the regular\n"
+          "    expression `pattern`. The search operation is performed on the\n"
+          "    same subrange that would be returned by `slice(text, from)`.\n"
+          "\n"
+          "  * Returns an `array` of two `integer`s, the first of which\n"
+          "    specifies the subscript of the matching sequence and the second\n"
+          "    of which specifies its length. If `pattern` is not found, this\n"
+          "    function returns `null`.\n"
+          "\n"
+          "  * Throws an exception if `pattern` is not a valid regular\n"
+          "    expression.\n"
+          "\n"
+          "`std.string.regex_find(text, from, [length], pattern)`\n"
+          "\n"
+          "  * Searches `text` for the first occurrence of the regular\n"
+          "    expression `pattern`. The search operation is performed on the\n"
+          "    same subrange that would be returned by\n"
+          "    `slice(text, from, length)`.\n"
+          "\n"
+          "  * Returns an `array` of two `integer`s, the first of which\n"
+          "    specifies the subscript of the matching sequence and the second\n"
+          "    of which specifies its length. If `pattern` is not found, this\n"
+          "    function returns `null`.\n"
+          "\n"
+          "  * Throws an exception if `pattern` is not a valid regular\n"
+          "    expression.\n"
+        ),
+        // Definition
+        [](cow_vector<Reference>&& args) -> Value {
+          Argument_Reader reader(::rocket::sref("std.string.regex_match"), ::rocket::ref(args));
+          Argument_Reader::State state;
+          // Parse arguments.
+          Sval text;
+          Sval pattern;
+          if(reader.I().g(text).S(state).g(pattern).F()) {
+            // Call the binding function.
+            return std_string_regex_match(::rocket::move(text), ::rocket::move(pattern));
+          }
+          Ival from;
+          if(reader.L(state).g(from).S(state).g(pattern).F()) {
+            // Call the binding function.
+            return std_string_regex_match(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern));
+          }
+          Iopt length;
+          if(reader.L(state).g(length).g(pattern).F()) {
+            // Call the binding function.
+            return std_string_regex_match(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
+                                          ::rocket::move(pattern));
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
+    //===================================================================
+    // `std.string.regex_replace()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("regex_replace"),
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+        // Description
+        ::rocket::sref(
+          "\n"
+          "`std.string.regex_replace(text, pattern, replacement)`\n"
+          "\n"
+          "  * Searches `text` and replaces all matches of the regular\n"
+          "    expression `pattern` with `replacement`. This function returns\n"
+          "    a new `string` without modifying `text`.\n"
+          "\n"
+          "  * Returns the string with `pattern` replaced. If `text` does not\n"
+          "    contain `pattern`, it is returned intact.\n"
+          "\n"
+          "  * Throws an exception if `pattern` is not a valid regular\n"
+          "    expression.\n"
+          "\n"
+          "`std.string.regex_replace(text, from, pattern, replacement)`\n"
+          "\n"
+          "  * Searches `text` and replaces all matches of the regular\n"
+          "    expression `pattern` with `replacement`. The search operation\n"
+          "    is performed on the same subrange that would be returned by\n"
+          "    `slice(text, from)`. This function returns a new `string`\n"
+          "    without modifying `text`.\n"
+          "\n"
+          "  * Returns the string with `pattern` replaced. If `text` does not\n"
+          "    contain `pattern`, it is returned intact.\n"
+          "\n"
+          "  * Throws an exception if either `pattern` or `replacement` is not\n"
+          "    a valid regular expression.\n"
+          "\n"
+          "`std.string.regex_replace(text, from, [length], pattern, replacement)`\n"
+          "\n"
+          "  * Searches `text` and replaces all matches of the regular\n"
+          "    expression `pattern` with `replacement`. The search operation\n"
+          "    is performed on the same subrange that would be returned by\n"
+          "    `slice(text, from, length)`. This function returns a new\n"
+          "    `string` without modifying `text`.\n"
+          "\n"
+          "  * Returns the string with `pattern` replaced. If `text` does not\n"
+          "    contain `pattern`, it is returned intact.\n"
+          "\n"
+          "  * Throws an exception if `pattern` is not a valid regular\n"
+          "    expression.\n"
+        ),
+        // Definition
+        [](cow_vector<Reference>&& args) -> Value {
+          Argument_Reader reader(::rocket::sref("std.string.regex_replace"), ::rocket::ref(args));
+          Argument_Reader::State state;
+          // Parse arguments.
+          Sval text;
+          Sval pattern;
+          Sval replacement;
+          if(reader.I().g(text).S(state).g(pattern).g(replacement).F()) {
+            // Call the binding function.
+            return std_string_regex_replace(::rocket::move(text), ::rocket::move(pattern),
+                                               ::rocket::move(replacement));
+          }
+          Ival from;
+          if(reader.L(state).g(from).S(state).g(pattern).g(replacement).F()) {
+            // Call the binding function.
+            return std_string_regex_replace(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern),
+                                               ::rocket::move(replacement));
+          }
+          Iopt length;
+          if(reader.L(state).g(length).g(pattern).g(replacement).F()) {
+            // Call the binding function.
+            return std_string_regex_replace(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
+                                            ::rocket::move(pattern), ::rocket::move(replacement));
           }
           // Fail.
           reader.throw_no_matching_function_call();
