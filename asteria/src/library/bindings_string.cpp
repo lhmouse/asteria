@@ -58,35 +58,52 @@ Slice do_slice(const Sval& text, const Ival& from, const Iopt& length)
     return do_slice(text, text.begin(), rfrom + *length);
   }
 
+// https://en.wikipedia.org/wiki/Boyer-Moore-Horspool_algorithm
+class BMH_Searcher
+  {
+  private:
+    ptrdiff_t m_plen;
+    ptrdiff_t m_bcrs[0x100];
+
+  public:
+    template<typename IterT> BMH_Searcher(IterT pbegin, IterT pend)
+      {
+        // Calculate the pattern length.
+        this->m_plen = ::std::distance(pbegin, pend);
+        // Build a table according to the Bad Character Rule.
+        for(size_t i = 0;  i < 0x100;  ++i)
+          this->m_bcrs[i] = this->m_plen;
+        for(ptrdiff_t i = this->m_plen - 1;  i != 0;  --i)
+          this->m_bcrs[uint8_t(pend[~i])] = i;
+      }
+
+  public:
+    template<typename IterT> opt<IterT> search_opt(IterT tbegin, IterT tend, IterT pbegin) const
+      {
+        // Search for the pattern.
+        auto tcur = tbegin;
+        for(;;) {
+          if(tend - tcur < this->m_plen)
+            return nullopt;
+          auto tnext = tcur + this->m_plen;
+          if(::std::equal(tcur, tnext, pbegin))
+            return tcur;
+          // Adjust the read iterator using the Bad Character Rule.
+          tcur += this->m_bcrs[uint8_t(tnext[-1])];
+        }
+      }
+  };
+
 template<typename IterT>
     opt<IterT> do_find_opt(IterT tbegin, IterT tend, IterT pbegin, IterT pend)
   {
-    // https://en.wikipedia.org/wiki/Boyer-Moore-Horspool_algorithm
-    auto plen = ::std::distance(pbegin, pend);
-    if(plen <= 0) {
-      // Return a match at the the beginning if the pattern is empty.
+    if(pbegin == pend)
       return tbegin;
-    }
-    // Build a table according to the Bad Character Rule.
-    array<ptrdiff_t, 0x100> bcr_table;
-    for(size_t i = 0;  i < 0x100;  ++i) {
-      bcr_table[i] = plen;
-    }
-    for(ptrdiff_t i = plen - 1;  i != 0;  --i) {
-      bcr_table[(pend[~i] & 0xFF)] = i;
-    }
-    // Search for the pattern.
-    auto tpos = tbegin;
-    for(;;) {
-      if(tend - tpos < plen) {
-        return nullopt;
-      }
-      if(::std::equal(pbegin, pend, tpos)) {
-        break;
-      }
-      tpos += bcr_table[(tpos[(plen - 1)] & 0xFF)];
-    }
-    return ::rocket::move(tpos);
+    if(tbegin == tend)
+      return nullopt;
+    // Slower.
+    BMH_Searcher srch(pbegin, pend);
+    return srch.search_opt(tbegin, tend, pbegin);
   }
 
 template<typename IterT>
@@ -96,7 +113,7 @@ template<typename IterT>
     array<bool, 256> table = { };
     ::rocket::for_each(set, [&](char c) { table[uint8_t(c)] = true;  });
     // Search the range.
-    for(auto it = ::rocket::move(begin);  it != end;  ++it) {
+    for(auto it = begin;  it != end;  ++it) {
       if(table[uint8_t(*it)] == match)
         return ::rocket::move(it);
     }

@@ -82,6 +82,9 @@ int main()
         assert std.string.find("hello hello world", 3, 8, "lo") == 3;
         assert std.string.find("hello hello world", 4, 6, "lo") == null;
         assert std.string.find("hello hello world", 5, 6, "lo") == 9;
+        assert std.string.find("hello", "") == 0;
+        assert std.string.find("hello", 2, "") == 2;
+        assert std.string.find("hello", 2, 0, "") == 2;
 
         assert std.string.rfind("hello hello world", "lo") == 9;
         assert std.string.rfind("hello hello world", 3, "lo") == 9;
@@ -90,6 +93,9 @@ int main()
         assert std.string.rfind("hello hello world", 3, 8, "lo") == 9;
         assert std.string.rfind("hello hello world", 4, 6, "lo") == null;
         assert std.string.rfind("hello hello world", 5, 6, "lo") == 9;
+        assert std.string.rfind("hello", "") == 5;
+        assert std.string.rfind("hello", 2, "") == 5;
+        assert std.string.rfind("hello", 2, 0, "") == 2;
 
         assert std.string.find_and_replace("hello hello world", "llo", "####") == "he#### he#### world";
         assert std.string.find_and_replace("hello hello world", 2, "llo", "####") == "he#### he#### world";
