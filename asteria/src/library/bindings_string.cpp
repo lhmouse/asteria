@@ -78,6 +78,10 @@ class BMH_Searcher
       }
 
   public:
+    ptrdiff_t pattern_length() const noexcept
+      {
+        return this->m_plen;
+      }
     template<typename IterT> opt<IterT> search_opt(IterT tbegin, IterT tend, IterT pbegin) const
       {
         // Search for the pattern.
@@ -97,13 +101,54 @@ class BMH_Searcher
 template<typename IterT>
     opt<IterT> do_find_opt(IterT tbegin, IterT tend, IterT pbegin, IterT pend)
   {
-    if(pbegin == pend)
+    // If the pattern is empty, there is a match at the beginning.
+    if(pbegin == pend) {
       return tbegin;
-    if(tbegin == tend)
+    }
+    // If the text is empty but the pattern is not, there cannot be matches.
+    if(tbegin == tend) {
       return nullopt;
-    // Slower.
+    }
+    // This is the slow path.
     BMH_Searcher srch(pbegin, pend);
     return srch.search_opt(tbegin, tend, pbegin);
+  }
+
+template<typename IterT>
+    Sval& do_find_and_replace(Sval& res, IterT tbegin, IterT tend, IterT pbegin, IterT pend,
+                                         IterT rbegin, IterT rend)
+  {
+    // If the pattern is empty, there is a match beside every byte.
+    if(pbegin == pend) {
+      // This is really evil.
+      for(auto it = tbegin;  it != tend;  ++it) {
+        res.append(rbegin, rend);
+        res.push_back(*it);
+      }
+      res.append(rbegin, rend);
+      return res;
+    }
+    // If the text is empty but the pattern is not, there cannot be matches.
+    if(tbegin == tend) {
+      return res;
+    }
+    // This is the slow path.
+    BMH_Searcher srch(pbegin, pend);
+    auto tcur = tbegin;
+    for(;;) {
+      auto qtnext = srch.search_opt(tcur, tend, pbegin);
+      if(!qtnext) {
+        // Append all remaining characters and finish.
+        res.append(tcur, tend);
+        break;
+      }
+      // Append all characters that precede the match, followed by the replacement string.
+      res.append(tcur, *qtnext);
+      res.append(rbegin, rend);
+      // Move `tcur` past the match.
+      tcur = *qtnext + srch.pattern_length();
+    }
+    return res;
   }
 
 template<typename IterT>
@@ -373,55 +418,32 @@ Iopt std_string_rfind(Sval text, Ival from, Iopt length, Sval pattern)
 
 Sval std_string_find_and_replace(Sval text, Sval pattern, Sval replacement)
   {
-    Sval res = text;
-    auto range = ::std::make_pair(res.begin(), res.end());
-    for(;;) {
-      auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
-      if(!qit) {
-        // Make use of reference counting if no match has been found.
-        break;
-      }
-      // Save offsets before replacing due to possibility of invalidation of iterators.
-      auto roffs = ::std::make_pair(*qit - res.begin(), range.second - res.begin());
-      res.replace(*qit, *qit + pattern.ssize(), replacement);
-      range = ::std::make_pair(res.begin() + roffs.first + replacement.ssize(), res.begin() + roffs.second);
-    }
+    Sval res;
+    auto range = ::std::make_pair(text.begin(), text.end());
+    do_find_and_replace(res, range.first, range.second, pattern.begin(), pattern.end(),
+                             replacement.begin(), replacement.end());
     return res;
   }
 
 Sval std_string_find_and_replace(Sval text, Ival from, Sval pattern, Sval replacement)
   {
-    Sval res = text;
-    auto range = do_slice(res, from, nullopt);
-    for(;;) {
-      auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
-      if(!qit) {
-        // Make use of reference counting if no match has been found.
-        break;
-      }
-      // Save offsets before replacing due to possibility of invalidation of iterators.
-      auto roffs = ::std::make_pair(*qit - res.begin(), range.second - res.begin());
-      res.replace(*qit, *qit + pattern.ssize(), replacement);
-      range = ::std::make_pair(res.begin() + roffs.first + replacement.ssize(), res.begin() + roffs.second);
-    }
+    Sval res;
+    auto range = do_slice(text, from, nullopt);
+    res.append(text.begin(), range.first);
+    do_find_and_replace(res, range.first, range.second, pattern.begin(), pattern.end(),
+                             replacement.begin(), replacement.end());
+    res.append(range.second, text.end());
     return res;
   }
 
 Sval std_string_find_and_replace(Sval text, Ival from, Iopt length, Sval pattern, Sval replacement)
   {
-    Sval res = text;
-    auto range = do_slice(res, from, length);
-    for(;;) {
-      auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
-      if(!qit) {
-        // Make use of reference counting if no match has been found.
-        break;
-      }
-      // Save offsets before replacing due to possibility of invalidation of iterators.
-      auto roffs = ::std::make_pair(*qit - res.begin(), range.second - res.begin());
-      res.replace(*qit, *qit + pattern.ssize(), replacement);
-      range = ::std::make_pair(res.begin() + roffs.first + replacement.ssize(), res.begin() + roffs.second);
-    }
+    Sval res;
+    auto range = do_slice(text, from, length);
+    res.append(text.begin(), range.first);
+    do_find_and_replace(res, range.first, range.second, pattern.begin(), pattern.end(),
+                             replacement.begin(), replacement.end());
+    res.append(range.second, text.end());
     return res;
   }
 

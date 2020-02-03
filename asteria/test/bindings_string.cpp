@@ -103,9 +103,17 @@ int main()
         assert std.string.find_and_replace("hello hello world", 8, "llo", "####") == "hello he#### world";
         assert std.string.find_and_replace("hello hello world", 9, "llo", "####") == "hello hello world";
         assert std.string.find_and_replace("hello hello world", 2, 7, "llo", "####") == "he#### hello world";
-        assert std.string.find_and_replace("hello hello world", 2, 9, "llo", "####") == "he#### hello world";
+        assert std.string.find_and_replace("hello hello world", 2, 8, "llo", "####") == "he#### hello world";
+        assert std.string.find_and_replace("hello hello world", 2, 9, "llo", "####") == "he#### he#### world";
         assert std.string.find_and_replace("hello hello world", 3, 7, "llo", "####") == "hello hello world";
         assert std.string.find_and_replace("hello hello world", 4, 7, "llo", "####") == "hello he#### world";
+        assert std.string.find_and_replace("abab", "ab", "abab") == "abababab";
+        assert std.string.find_and_replace("abab", 1, "ab", "abab") == "ababab";
+        assert std.string.find_and_replace("abab", 2, "ab", "abab") == "ababab";
+        assert std.string.find_and_replace("abab", 3, "ab", "abab") == "abab";
+        assert std.string.find_and_replace("hello", "", "X") == "XhXeXlXlXoX";
+        assert std.string.find_and_replace("hello", 2, "", "X") == "heXlXlXoX";
+        assert std.string.find_and_replace("hello", 2, 2, "", "X") == "heXlXlXo";
 
         assert std.string.find_any_of("hello", "aeiou") == 1;
         assert std.string.find_any_of("hello", 1, "aeiou") == 1;
