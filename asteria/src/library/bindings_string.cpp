@@ -390,8 +390,7 @@ Sval std_string_find_and_replace(Sval text, Ival from, Sval pattern, Sval replac
     return res;
   }
 
-Sval std_string_find_and_replace(Sval text, Ival from, Iopt length, Sval pattern,
-                                 Sval replacement)
+Sval std_string_find_and_replace(Sval text, Ival from, Iopt length, Sval pattern, Sval replacement)
   {
     Sval res = text;
     auto range = do_slice(res, from, length);

@@ -22,7 +22,6 @@ Iopt std_string_find(Sval text, Ival from, Iopt length, Sval pattern);
 Iopt std_string_rfind(Sval text, Sval pattern);
 Iopt std_string_rfind(Sval text, Ival from, Sval pattern);
 Iopt std_string_rfind(Sval text, Ival from, Iopt length, Sval pattern);
-
 Sval std_string_find_and_replace(Sval text, Sval pattern, Sval replacement);
 Sval std_string_find_and_replace(Sval text, Ival from, Sval pattern, Sval replacement);
 Sval std_string_find_and_replace(Sval text, Ival from, Iopt length, Sval pattern, Sval replacement);
