@@ -651,7 +651,7 @@ pair<Ival, Ival> std_array_equal_range(Global& global, Aval data, Value target, 
                          [](Compare cmp) { return cmp != compare_greater;  });
     auto upos = do_bound(global, args, pair.first, data.end(), comparator, target,
                          [](Compare cmp) { return cmp == compare_less;  });
-    return { lpos - data.begin(), upos - data.begin() };
+    return ::std::make_pair(lpos - data.begin(), upos - lpos);
   }
 
 Aval std_array_sort(Global& global, Aval data, Fopt comparator)
@@ -1631,11 +1631,11 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "    a single function call. This function is equivalent to calling\n"
           "    `lower_bound(data, target, comparator)` and\n"
           "    `upper_bound(data, target, comparator)` respectively then\n"
-          "    storing both results in an `array`.\n"
+          "    storing the start and length in an `array`.\n"
           "\n"
           "  * Returns an `array` of two `integer`s, the first of which\n"
-          "    specifies the lower bound and the other specifies the upper\n"
-          "    bound.\n"
+          "    specifies the lower bound and the second of which specifies\n"
+          "    the number of elements in the range.\n"
           "\n"
           "  * Throws an exception if `data` has not been sorted properly. Be\n"
           "    advised that in this case there is no guarantee whether an\n"

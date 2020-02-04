@@ -1118,11 +1118,11 @@
 	  a single function call. This function is equivalent to calling
 	  `lower_bound(data, target, comparator)` and
 	  `upper_bound(data, target, comparator)` respectively then
-	  storing both results in an `array`.
+	  storing the start and length in an `array`.
 
 	* Returns an `array` of two `integer`s, the first of which
-	  specifies the lower bound and the other specifies the upper
-	  bound.
+	  specifies the lower bound and the second of which specifies
+	  the number of elements in the range.
 
 	* Throws an exception if `data` has not been sorted properly. Be
 	  advised that in this case there is no guarantee whether an
