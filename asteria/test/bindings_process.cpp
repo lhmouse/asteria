@@ -15,8 +15,13 @@ int main()
         assert std.process.execute('true') == 0;
         assert std.process.execute('false') != 0;
 
-        try { std.process.execute('nonexistent-command');  assert false;  }
-          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
+        try {
+          // note this may or may not throw
+          var status = std.process.execute('./nonexistent-command');
+          assert status != 0;
+        }
+        catch(e)
+          assert std.string.find(e, "assertion failure") == null;
 
         assert std.process.execute('bash',
           [ 'bash', '-c', 'kill -1 $$' ]) == 129;
