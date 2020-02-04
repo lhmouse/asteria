@@ -6,7 +6,7 @@
 #include "argument_reader.hpp"
 #include "simple_binding_wrapper.hpp"
 #include "../utilities.hpp"
-#include <spawn.h>  // ::posix_spawn()
+#include <spawn.h>  // ::posix_spawnp()
 #include <sys/wait.h>  // ::waitpid()
 #include <unistd.h>  // ::daemon()
 
@@ -46,7 +46,7 @@ Ival std_process_execute(Sval cmd, Aopt argv, Aopt envp)
     // Launch the program.
     ::pid_t pid;
     if(::posix_spawnp(&pid, cmd.c_str(), nullptr, nullptr, pargv, penvp) != 0)
-      throw_system_error("posix_spawn");
+      throw_system_error("posix_spawnp");
 
     // Await its termination.
     for(;;) {
