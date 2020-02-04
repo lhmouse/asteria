@@ -49,7 +49,7 @@ class Recursion_Sentry
   private:
     [[noreturn]] void do_throw_stack_overflow(size_t usage, size_t limit);
 
-    ROCKET_ARTIFICIAL_FUNCTION inline void do_check()
+    void do_check()
       {
         // Estimate stack usage.
         size_t usage = (size_t)::std::abs((const char*)this - (const char*)this->m_base);
