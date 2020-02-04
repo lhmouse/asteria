@@ -22,9 +22,9 @@ namespace {
 
 }  // namespace
 
-Ival std_process_execute(Sval path, Aopt argv, Aopt envp)
+Ival std_process_execute(Sval cmd, Aopt argv, Aopt envp)
   {
-    cow_vector<const char*> ptrs = { path.c_str(), nullptr };
+    cow_vector<const char*> ptrs = { cmd.c_str(), nullptr };
     size_t eoff = 1;  // beginning of environment variables
 
     // Append arguments. `eoff` will be the offset of the terminating null pointer.
@@ -45,7 +45,7 @@ Ival std_process_execute(Sval path, Aopt argv, Aopt envp)
     auto penvp = const_cast<char**>(ptrs.data() + eoff);
     // Launch the program.
     ::pid_t pid;
-    if(::posix_spawn(&pid, path.c_str(), nullptr, nullptr, pargv, penvp) != 0)
+    if(::posix_spawnp(&pid, cmd.c_str(), nullptr, nullptr, pargv, penvp) != 0)
       throw_system_error("posix_spawn");
 
     // Await its termination.
@@ -79,9 +79,9 @@ void create_bindings_process(Oval& result, API_Version /*version*/)
         // Description
         ::rocket::sref(
           "\n"
-          "`std.process.execute(path, [argv], [envp])`\n"
+          "`std.process.execute(cmd, [argv], [envp])`\n"
           "\n"
-          "  * Launches the program denoted by `path`, awaits its termination,\n"
+          "  * Launches the program denoted by `cmd`, awaits its termination,\n"
           "    and returns its exit status. If `argv` is provided, it shall be\n"
           "    an `array` of `string`s, which specify arguments passed to the\n"
           "    program. If `envp` is provided, it shall also be an `array` of\n"
@@ -99,13 +99,13 @@ void create_bindings_process(Oval& result, API_Version /*version*/)
         [](cow_vector<Reference>&& args) -> Value {
           Argument_Reader reader(::rocket::sref("std.process.execute"), ::rocket::ref(args));
           // Parse arguments.
-          Sval path;
+          Sval cmd;
           Aopt argv;
           Aopt envp;
-          if(reader.I().g(path).g(argv).g(envp).F()) {
+          if(reader.I().g(cmd).g(argv).g(envp).F()) {
             // Call the binding function.
-            return std_process_execute(::rocket::move(path), ::rocket::move(argv),
-                                                             ::rocket::move(envp));
+            return std_process_execute(::rocket::move(cmd), ::rocket::move(argv),
+                                                            ::rocket::move(envp));
           }
           // Fail.
           reader.throw_no_matching_function_call();

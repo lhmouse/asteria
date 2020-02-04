@@ -2210,9 +2210,9 @@
 
 ### `std.process`
 
-`std.process.execute(path, [argv], [envp])`
+`std.process.execute(cmd, [argv], [envp])`
 
-	* Launches the program denoted by `path`, awaits its termination,
+	* Launches the program denoted by `cmd`, awaits its termination,
 	  and returns its exit status. If `argv` is provided, it shall be
 	  an `array` of `string`s, which specify arguments passed to the
 	  program. If `envp` is provided, it shall also be an `array` of
