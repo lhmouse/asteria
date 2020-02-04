@@ -15,7 +15,7 @@
 #define ROCKET_SECTION(...)                 __attribute__((__section__(__VA_ARGS__)))
 #define ROCKET_NOINLINE                     __attribute__((__noinline__))
 #define ROCKET_PURE_FUNCTION                __attribute__((__pure__))
-#define ROCKET_ARTIFICIAL_FUNCTION          __attribute__((__artificial__, __gnu_inline__, __always_inline__))
+#define ROCKET_ARTIFICIAL_FUNCTION          __attribute__((__artificial__, __always_inline__))
 #define ROCKET_CONSTANT_P(...)              __builtin_constant_p(__VA_ARGS__)
 #define ROCKET_FLATTEN_FUNCTION             __attribute__((__flatten__))
 
