@@ -636,9 +636,9 @@ template<typename hashmapT, typename valueT> class hashmap_iterator
 
   public:
     using iterator_category  = forward_iterator_tag;
-    using value_type         = valueT;
-    using pointer            = value_type*;
-    using reference          = value_type&;
+    using value_type         = typename remove_cv<valueT>::type;
+    using pointer            = valueT*;
+    using reference          = valueT&;
     using difference_type    = ptrdiff_t;
 
     using parent_type   = storage_handle<typename hashmapT::allocator_type,

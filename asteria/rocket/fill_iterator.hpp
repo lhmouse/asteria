@@ -11,11 +11,11 @@ namespace rocket {
 template<typename elementT> class fill_iterator
   {
   public:
-    using value_type         = elementT;
-    using pointer            = const value_type*;
-    using reference          = const value_type&;
-    using difference_type    = ptrdiff_t;
     using iterator_category  = random_access_iterator_tag;
+    using value_type         = typename remove_cv<elementT>::type;
+    using pointer            = elementT*;
+    using reference          = elementT&;
+    using difference_type    = ptrdiff_t;
 
   private:
     difference_type m_pos;

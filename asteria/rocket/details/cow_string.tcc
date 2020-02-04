@@ -276,19 +276,19 @@ template<typename stringT, typename charT> class string_iterator
 
   public:
     using iterator_category  = random_access_iterator_tag;
-    using value_type         = charT;
-    using pointer            = value_type*;
-    using reference          = value_type&;
+    using value_type         = typename remove_cv<charT>::type;
+    using pointer            = charT*;
+    using reference          = charT&;
     using difference_type    = ptrdiff_t;
 
     using parent_type   = stringT;
 
   private:
     const parent_type* m_ref;
-    value_type* m_ptr;
+    pointer m_ptr;
 
   private:
-    constexpr string_iterator(const parent_type* ref, value_type* ptr) noexcept
+    constexpr string_iterator(const parent_type* ref, pointer ptr) noexcept
       :
         m_ref(ref), m_ptr(ptr)
       {
@@ -308,7 +308,7 @@ template<typename stringT, typename charT> class string_iterator
       }
 
   private:
-    value_type* do_assert_valid_pointer(value_type* ptr, bool deref) const noexcept
+    pointer do_assert_valid_pointer(pointer ptr, bool deref) const noexcept
       {
         auto ref = this->m_ref;
         ROCKET_ASSERT_MSG(ref, "iterator not initialized");
@@ -324,17 +324,17 @@ template<typename stringT, typename charT> class string_iterator
         return this->m_ref;
       }
 
-    value_type* tell() const noexcept
+    pointer tell() const noexcept
       {
         auto ptr = this->do_assert_valid_pointer(this->m_ptr, false);
         return ptr;
       }
-    value_type* tell_owned_by(const parent_type* ref) const noexcept
+    pointer tell_owned_by(const parent_type* ref) const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_ref == ref, "iterator not belonging to the same container");
         return this->tell();
       }
-    string_iterator& seek(value_type* ptr) noexcept
+    string_iterator& seek(pointer ptr) noexcept
       {
         this->m_ptr = this->do_assert_valid_pointer(ptr, false);
         return *this;
