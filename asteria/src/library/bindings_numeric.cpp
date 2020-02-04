@@ -311,7 +311,7 @@ pair<Rval, Ival> std_numeric_frexp(Rval x)
   {
     int exp;
     auto frac = ::std::frexp(x, &exp);
-    return { frac, exp };
+    return ::std::make_pair(frac, exp);
   }
 
 Rval std_numeric_ldexp(Rval frac, Ival exp)
