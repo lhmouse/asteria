@@ -1,8 +1,8 @@
 language: cpp
 
 os: linux
-dist: xenial
-sudo: required
+dist: bionic
+sudo: false
 
 compiler:
   - gcc
