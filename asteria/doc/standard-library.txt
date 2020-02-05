@@ -804,8 +804,8 @@
 	* Checks whether the regular expression `patterm` matches the
 	  entire sequence `text`.
 
-	* Returns an `array` of `array`s of optional `string`s. The first
-	  element contains a copy of `text`. All the other elements hold
+	* Returns an `array` of optional `string`s. The first element
+	  contains a copy of `text`. All the other elements hold
 	  substrings that match positional capturing groups. If a group
 	  matches nothing, the corresponding element is `null`. The total
 	  number of elements equals the number of capturing groups plus
@@ -819,8 +819,8 @@
 	* Checks whether the regular expression `patterm` matches the
 	  subrange that would be returned by `slice(text, from)`.
 
-	* Returns an `array` of `array`s of optional `string`s. The first
-	  element contains a copy of `text`. All the other elements hold
+	* Returns an `array` of optional `string`s. The first element
+	  contains a copy of `text`. All the other elements hold
 	  substrings that match positional capturing groups. If a group
 	  matches nothing, the corresponding element is `null`. The total
 	  number of elements equals the number of capturing groups plus
@@ -834,8 +834,8 @@
 	* Checks whether the regular expression `patterm` matches the
 	  subrange that would be returned by `slice(text, from, length)`.
 
-	* Returns an `array` of `array`s of optional `string`s. The first
-	  element contains a copy of `text`. All the other elements hold
+	* Returns an `array` of optional `string`s. The first element
+	  contains a copy of `text`. All the other elements hold
 	  substrings that match positional capturing groups. If a group
 	  matches nothing, the corresponding element is `null`. The total
 	  number of elements equals the number of capturing groups plus
