@@ -300,21 +300,34 @@ template<typename WordT> Aval do_unpack_le(const Sval& text)
     return do_unpack_impl<0, WordT>(text);
   }
 
+::std::regex do_make_regex(const Sval& pattern)
+  try {
+    return ::std::regex(pattern.data(), pattern.size());
+  }
+  catch(::std::regex_error& stdex) {
+    ASTERIA_THROW("invalid regular expression (text `$1`): $2", pattern, stdex.what());
+  }
+
+::std::string do_make_regex_replacement(const Sval& replacement)
+  {
+    return ::std::string(replacement.data(), replacement.size());
+  }
+
 template<typename IterT>
-    ::std::sub_match<IterT> do_regex_search(IterT tbegin, IterT tend, IterT pbegin, IterT pend)
+    ::std::sub_match<IterT> do_regex_search(IterT tbegin, IterT tend, const ::std::regex& pattern)
   {
     ::std::sub_match<IterT> match;
     ::std::match_results<IterT> matches;
-    if(::std::regex_search(tbegin, tend, matches, ::std::regex(pbegin, pend)))
+    if(::std::regex_search(tbegin, tend, matches, pattern))
       match = matches[0];
     return match;
   }
 
 template<typename IterT>
-    ::std::match_results<IterT> do_regex_match(IterT tbegin, IterT tend, IterT pbegin, IterT pend)
+    ::std::match_results<IterT> do_regex_match(IterT tbegin, IterT tend, const ::std::regex& pattern)
   {
     ::std::match_results<IterT> matches;
-    ::std::regex_match(tbegin, tend, matches, ::std::regex(pbegin, pend));
+    ::std::regex_match(tbegin, tend, matches, pattern);
     return matches;
   }
 
@@ -331,11 +344,10 @@ template<typename IterT>
   }
 
 template<typename IterT>
-    Sval& do_regex_replace(Sval& res, IterT tbegin, IterT tend, IterT pbegin, IterT pend,
-                                      IterT rbegin, IterT rend)
+    Sval& do_regex_replace(Sval& res, IterT tbegin, IterT tend, const ::std::regex& pattern,
+                                      const ::std::string& replacement)
   {
-    ::std::regex_replace(::std::back_inserter(res), tbegin, tend, ::std::regex(pbegin, pend),
-                                                    ::std::string(rbegin, rend));
+    ::std::regex_replace(::std::back_inserter(res), tbegin, tend, pattern, replacement);
     return res;
   }
 
@@ -1363,7 +1375,7 @@ Sval std_string_format(Sval templ, cow_vector<Value> values)
 opt<pair<Ival, Ival>> std_string_regex_find(Sval text, Sval pattern)
   {
     auto range = ::std::make_pair(text.begin(), text.end());
-    auto match = do_regex_search(range.first, range.second, pattern.begin(), pattern.end());
+    auto match = do_regex_search(range.first, range.second, do_make_regex(pattern));
     if(!match.matched) {
       return nullopt;
     }
@@ -1373,7 +1385,7 @@ opt<pair<Ival, Ival>> std_string_regex_find(Sval text, Sval pattern)
 opt<pair<Ival, Ival>> std_string_regex_find(Sval text, Ival from, Sval pattern)
   {
     auto range = do_slice(text, from, nullopt);
-    auto match = do_regex_search(range.first, range.second, pattern.begin(), pattern.end());
+    auto match = do_regex_search(range.first, range.second, do_make_regex(pattern));
     if(!match.matched) {
       return nullopt;
     }
@@ -1383,7 +1395,7 @@ opt<pair<Ival, Ival>> std_string_regex_find(Sval text, Ival from, Sval pattern)
 opt<pair<Ival, Ival>> std_string_regex_find(Sval text, Ival from, Iopt length, Sval pattern)
   {
     auto range = do_slice(text, from, length);
-    auto match = do_regex_search(range.first, range.second, pattern.begin(), pattern.end());
+    auto match = do_regex_search(range.first, range.second, do_make_regex(pattern));
     if(!match.matched) {
       return nullopt;
     }
@@ -1393,7 +1405,7 @@ opt<pair<Ival, Ival>> std_string_regex_find(Sval text, Ival from, Iopt length, S
 Aopt std_string_regex_match(Sval text, Sval pattern)
   {
     auto range = ::std::make_pair(text.begin(), text.end());
-    auto matches = do_regex_match(range.first, range.second, pattern.begin(), pattern.end());
+    auto matches = do_regex_match(range.first, range.second, do_make_regex(pattern));
     if(matches.empty()) {
       return nullopt;
     }
@@ -1403,7 +1415,7 @@ Aopt std_string_regex_match(Sval text, Sval pattern)
 Aopt std_string_regex_match(Sval text, Ival from, Sval pattern)
   {
     auto range = do_slice(text, from, nullopt);
-    auto matches = do_regex_match(range.first, range.second, pattern.begin(), pattern.end());
+    auto matches = do_regex_match(range.first, range.second, do_make_regex(pattern));
     if(matches.empty()) {
       return nullopt;
     }
@@ -1413,7 +1425,7 @@ Aopt std_string_regex_match(Sval text, Ival from, Sval pattern)
 Aopt std_string_regex_match(Sval text, Ival from, Iopt length, Sval pattern)
   {
     auto range = do_slice(text, from, length);
-    auto matches = do_regex_match(range.first, range.second, pattern.begin(), pattern.end());
+    auto matches = do_regex_match(range.first, range.second, do_make_regex(pattern));
     if(matches.empty()) {
       return nullopt;
     }
@@ -1424,8 +1436,8 @@ Sval std_string_regex_replace(Sval text, Sval pattern, Sval replacement)
   {
     Sval res;
     auto range = ::std::make_pair(text.begin(), text.end());
-    do_regex_replace(res, range.first, range.second, pattern.begin(), pattern.end(),
-                          replacement.begin(), replacement.end());
+    do_regex_replace(res, range.first, range.second, do_make_regex(pattern),
+                          do_make_regex_replacement(replacement));
     return res;
   }
 
@@ -1434,8 +1446,8 @@ Sval std_string_regex_replace(Sval text, Ival from, Sval pattern, Sval replaceme
     Sval res;
     auto range = do_slice(text, from, nullopt);
     res.append(text.begin(), range.first);
-    do_regex_replace(res, range.first, range.second, pattern.begin(), pattern.end(),
-                          replacement.begin(), replacement.end());
+    do_regex_replace(res, range.first, range.second, do_make_regex(pattern),
+                          do_make_regex_replacement(replacement));
     res.append(range.second, text.end());
     return res;
   }
@@ -1445,8 +1457,8 @@ Sval std_string_regex_replace(Sval text, Ival from, Iopt length, Sval pattern, S
     Sval res;
     auto range = do_slice(text, from, length);
     res.append(text.begin(), range.first);
-    do_regex_replace(res, range.first, range.second, pattern.begin(), pattern.end(),
-                          replacement.begin(), replacement.end());
+    do_regex_replace(res, range.first, range.second, do_make_regex(pattern),
+                          do_make_regex_replacement(replacement));
     res.append(range.second, text.end());
     return res;
   }
