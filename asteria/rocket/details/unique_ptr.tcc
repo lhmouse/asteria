@@ -93,17 +93,12 @@ template<typename pointerT, typename deleterT>
       }
   };
 
-template<typename targetT, typename sourceT,
-         typename casterT> unique_ptr<targetT> pointer_cast_aux(unique_ptr<sourceT>&& sptr, casterT&& caster)
+template<typename targetT, typename sourceT, typename casterT>
+    unique_ptr<targetT> pointer_cast_aux(unique_ptr<sourceT>&& uptr, casterT&& caster)
   {
-    unique_ptr<targetT> dptr;
-    // Try casting.
-    auto ptr = noadl::forward<casterT>(caster)(sptr.get());
-    if(ptr) {
-      // Transfer ownership.
-      dptr.reset(ptr);
-      sptr.release();
-    }
+    unique_ptr<targetT> dptr(noadl::forward<casterT>(caster)(uptr.get()));
+    if(dptr)
+      uptr.release();
     return dptr;
   }
 

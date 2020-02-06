@@ -68,24 +68,18 @@ template<typename elementT, typename deleterT>
 
     template<typename yelementT = elementT> refcnt_ptr<const yelementT> share_this() const
       {
-        auto ptr = noadl::static_or_dynamic_cast<const yelementT*>(this);
-        if(!ptr) {
+        refcnt_ptr<const yelementT> dptr(noadl::static_or_dynamic_cast<const yelementT*>(this));
+        if(!dptr)
           this->do_throw_bad_cast(typeid(yelementT), typeid(*this));
-        }
-        // Share ownership.
-        refcnt_ptr<const yelementT> dptr(ptr);
-        this->details_refcnt_ptr::reference_counter_base::add_reference();
+        dptr->details_refcnt_ptr::reference_counter_base::add_reference();
         return dptr;
       }
     template<typename yelementT = elementT> refcnt_ptr<yelementT> share_this()
       {
-        auto ptr = noadl::static_or_dynamic_cast<yelementT*>(this);
-        if(!ptr) {
+        refcnt_ptr<yelementT> dptr(noadl::static_or_dynamic_cast<yelementT*>(this));
+        if(!dptr)
           this->do_throw_bad_cast(typeid(yelementT), typeid(*this));
-        }
-        // Share ownership.
-        refcnt_ptr<yelementT> dptr(ptr);
-        this->details_refcnt_ptr::reference_counter_base::add_reference();
+        dptr->details_refcnt_ptr::reference_counter_base::add_reference();
         return dptr;
       }
   };
