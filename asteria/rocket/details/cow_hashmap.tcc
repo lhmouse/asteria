@@ -510,6 +510,9 @@ template<typename allocT, typename hashT, typename eqT>
 
     template<typename ykeyT> bool index_of(size_type& index, const ykeyT& ykey) const
       {
+#ifdef ROCKET_DEBUG
+        index = size_type(0xDEADBEEF);
+#endif
         auto ptr = this->m_ptr;
         if(!ptr) {
           return false;
