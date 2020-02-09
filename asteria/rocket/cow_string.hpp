@@ -1294,8 +1294,8 @@ template<typename charT, typename traitsT, typename allocT>
     return res;
   }
 template<typename charT, typename traitsT, typename allocT>
-    inline basic_cow_string<charT, traitsT, allocT>&& operator+(basic_cow_string<charT, traitsT, allocT>&& lhs,
-                                                                basic_cow_string<charT, traitsT, allocT>&& rhs)
+    inline basic_cow_string<charT, traitsT, allocT> operator+(basic_cow_string<charT, traitsT, allocT>&& lhs,
+                                                              basic_cow_string<charT, traitsT, allocT>&& rhs)
   {
     auto ntotal = lhs.size() + rhs.size();
     if(ROCKET_EXPECT((ntotal <= lhs.capacity()) || (ntotal > rhs.capacity())))
@@ -1305,14 +1305,16 @@ template<typename charT, typename traitsT, typename allocT>
   }
 
 template<typename charT, typename traitsT, typename allocT>
-    inline basic_cow_string<charT, traitsT, allocT> operator+(const basic_cow_string<charT, traitsT, allocT>& lhs, const charT* rhs)
+    inline basic_cow_string<charT, traitsT, allocT> operator+(const basic_cow_string<charT, traitsT, allocT>& lhs,
+                                                              const charT* rhs)
   {
     auto res = lhs;
     res.append(rhs);
     return res;
   }
 template<typename charT, typename traitsT, typename allocT>
-    inline basic_cow_string<charT, traitsT, allocT> operator+(const basic_cow_string<charT, traitsT, allocT>& lhs, charT rhs)
+    inline basic_cow_string<charT, traitsT, allocT> operator+(const basic_cow_string<charT, traitsT, allocT>& lhs,
+                                                              charT rhs)
   {
     auto res = lhs;
     res.push_back(rhs);
@@ -1320,14 +1322,16 @@ template<typename charT, typename traitsT, typename allocT>
   }
 
 template<typename charT, typename traitsT, typename allocT>
-    inline basic_cow_string<charT, traitsT, allocT> operator+(const charT* lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
+    inline basic_cow_string<charT, traitsT, allocT> operator+(const charT* lhs,
+                                                              const basic_cow_string<charT, traitsT, allocT>& rhs)
   {
     auto res = rhs;
     res.insert(0, lhs);
     return res;
   }
 template<typename charT, typename traitsT, typename allocT>
-    inline basic_cow_string<charT, traitsT, allocT> operator+(charT lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
+    inline basic_cow_string<charT, traitsT, allocT> operator+(charT lhs,
+                                                              const basic_cow_string<charT, traitsT, allocT>& rhs)
   {
     auto res = rhs;
     res.insert(0, 1, lhs);
@@ -1335,24 +1339,28 @@ template<typename charT, typename traitsT, typename allocT>
   }
 
 template<typename charT, typename traitsT, typename allocT>
-    inline basic_cow_string<charT, traitsT, allocT>&& operator+(basic_cow_string<charT, traitsT, allocT>&& lhs, const charT* rhs)
+    inline basic_cow_string<charT, traitsT, allocT> operator+(basic_cow_string<charT, traitsT, allocT>&& lhs,
+                                                              const charT* rhs)
   {
     return noadl::move(lhs.append(rhs));
   }
 template<typename charT, typename traitsT, typename allocT>
-    inline basic_cow_string<charT, traitsT, allocT>&& operator+(basic_cow_string<charT, traitsT, allocT>&& lhs, charT rhs)
+    inline basic_cow_string<charT, traitsT, allocT> operator+(basic_cow_string<charT, traitsT, allocT>&& lhs,
+                                                              charT rhs)
   {
     return noadl::move(lhs.append(1, rhs));
   }
 
 template<typename charT, typename traitsT, typename allocT>
-    inline basic_cow_string<charT, traitsT, allocT>&& operator+(const charT* lhs, basic_cow_string<charT, traitsT, allocT>&& rhs)
+    inline basic_cow_string<charT, traitsT, allocT> operator+(const charT* lhs,
+                                                              basic_cow_string<charT, traitsT, allocT>&& rhs)
   {
     // Prepend `lhs` to `rhs`.
     return noadl::move(rhs.insert(0, lhs));
   }
 template<typename charT, typename traitsT, typename allocT>
-    inline basic_cow_string<charT, traitsT, allocT>&& operator+(charT lhs, basic_cow_string<charT, traitsT, allocT>&& rhs)
+    inline basic_cow_string<charT, traitsT, allocT> operator+(charT lhs,
+                                                              basic_cow_string<charT, traitsT, allocT>&& rhs)
   {
     // Prepend `lhs` to `rhs`.
     return noadl::move(rhs.insert(0, 1, lhs));
