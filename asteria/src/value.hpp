@@ -51,16 +51,6 @@ class Value
         if(opt)
           this->m_stor = *opt;
       }
-    template<typename XValT> Value(const opt<XValT>& opt)
-      {
-        if(opt)
-          this->m_stor = *opt;
-      }
-    template<typename XValT> Value(opt<XValT>&& opt) noexcept
-      {
-        if(opt)
-          this->m_stor = ::rocket::move(*opt);
-      }
     template<typename XValT> Value& operator=(const XValT* opt)
       {
         this->m_stor = nullptr;
@@ -68,12 +58,22 @@ class Value
           this->m_stor = *opt;
         return *this;
       }
+    template<typename XValT> Value(const opt<XValT>& opt)
+      {
+        if(opt)
+          this->m_stor = *opt;
+      }
     template<typename XValT> Value& operator=(const opt<XValT>& opt)
       {
         this->m_stor = nullptr;
         if(opt)
           this->m_stor = *opt;
         return *this;
+      }
+    template<typename XValT> Value(opt<XValT>&& opt) noexcept
+      {
+        if(opt)
+          this->m_stor = ::rocket::move(*opt);
       }
     template<typename XValT> Value& operator=(opt<XValT>&& opt) noexcept
       {
