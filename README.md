@@ -15,6 +15,22 @@
 
 ![GNU nano for the win!](https://raw.githubusercontent.com/lhmouse/poseidon/master/gnu-nano-ftw.png)
 
+# How to Build
+
+```sh
+$ autoreconf -i     # requires Autoconf and Automake
+$ ./configure
+$ make -j$(nproc)
+```
+
+# The REPL
+
+```sh
+$ ./bin/asteria
+```
+
+### WIP
+
 # Concepts
 
 I started learning programming from **ActionScript** since **Flash 5** days. It was no sooner (and not strange, either) than I learned **JavaScript**, because they are so similar. I admit that **JavaScript** is a fascinating language, but it also has quite a few drawbacks when we look at it today:
