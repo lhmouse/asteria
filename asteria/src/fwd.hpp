@@ -162,27 +162,6 @@ using G_function  = rcptr<Abstract_Function>;
 using G_array     = cow_vector<Value>;
 using G_object    = cow_hashmap<phsh_string, Value, phsh_string::hash>;
 
-// Aliases for bindings (shorter but less readable)
-using Global = Global_Context;
-using Null = G_null;
-
-using Bval = G_boolean;
-using Ival = G_integer;
-using Rval = G_real;
-using Sval = G_string;
-using Pval = G_opaque;
-using Fval = G_function;
-using Aval = G_array;
-using Oval = G_object;
-
-using Bopt = opt<G_boolean>;
-using Iopt = opt<G_integer>;
-using Ropt = opt<G_real>;
-using Sopt = opt<G_string>;
-using Popt = opt<G_opaque>;
-using Fopt = opt<G_function>;
-using Aopt = opt<G_array>;
-using Oopt = opt<G_object>;
 
 // Stack frame types
 enum Frame_Type : uint8_t
@@ -348,6 +327,28 @@ using Compiler_Options = Compiler_Options_v2;
 // This value is initialized statically and never destroyed.
 extern const unsigned char null_value_storage[];
 static const Value& null_value = reinterpret_cast<const Value&>(null_value_storage);
+
+// Aliases for bindings (shorter but less readable)
+using Global = Global_Context;
+using Null = G_null;
+
+using Bval = G_boolean;
+using Ival = G_integer;
+using Rval = G_real;
+using Sval = G_string;
+using Pval = G_opaque;
+using Fval = G_function;
+using Aval = G_array;
+using Oval = G_object;
+
+using Bopt = opt<G_boolean>;
+using Iopt = opt<G_integer>;
+using Ropt = opt<G_real>;
+using Sopt = opt<G_string>;
+using Popt = opt<G_opaque>;
+using Fopt = opt<G_function>;
+using Aopt = opt<G_array>;
+using Oopt = opt<G_object>;
 
 }  // namespace Asteria
 
