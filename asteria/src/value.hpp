@@ -46,40 +46,58 @@ class Value
         this->m_stor = ::rocket::forward<XValT>(xval);
         return *this;
       }
+    // conversion from pointers
     template<typename XValT> Value(const XValT* opt)
       {
-        if(opt)
-          this->m_stor = *opt;
+        this->do_check_assign<const XValT&>(opt, opt);
       }
     template<typename XValT> Value& operator=(const XValT* opt)
       {
-        this->m_stor = nullptr;
-        if(opt)
-          this->m_stor = *opt;
-        return *this;
+        return this->do_check_assign<const XValT&>(opt, opt);
       }
+    // conversion from optional values
     template<typename XValT> Value(const opt<XValT>& opt)
       {
-        if(opt)
-          this->m_stor = *opt;
+        this->do_check_assign<const XValT&>(opt, opt);
       }
     template<typename XValT> Value& operator=(const opt<XValT>& opt)
       {
-        this->m_stor = nullptr;
-        if(opt)
-          this->m_stor = *opt;
-        return *this;
+        return this->do_check_assign<const XValT&>(opt, opt);
       }
     template<typename XValT> Value(opt<XValT>&& opt) noexcept
       {
-        if(opt)
-          this->m_stor = ::rocket::move(*opt);
+        this->do_check_assign<XValT&&>(opt, opt);
       }
     template<typename XValT> Value& operator=(opt<XValT>&& opt) noexcept
       {
-        this->m_stor = nullptr;
-        if(opt)
-          this->m_stor = ::rocket::move(*opt);
+        return this->do_check_assign<XValT&&>(opt, opt);
+      }
+    // conversion from `G_function` and `G_opaque`
+    template<typename XValT> Value(const rcptr<XValT>& ptr)
+      {
+        this->do_check_assign<const rcptr<XValT>&>(ptr, ::std::addressof(ptr));
+      }
+    template<typename XValT> Value& operator=(const rcptr<XValT>& ptr)
+      {
+        return this->do_check_assign<const rcptr<XValT>&>(ptr, ::std::addressof(ptr));
+      }
+    template<typename XValT> Value(rcptr<XValT>&& ptr)
+      {
+        this->do_check_assign<rcptr<XValT>&&>(ptr, ::std::addressof(ptr));
+      }
+    template<typename XValT> Value& operator=(rcptr<XValT>&& ptr)
+      {
+        return this->do_check_assign<rcptr<XValT>&&>(ptr, ::std::addressof(ptr));
+      }
+
+  private:
+    template<typename XValT,  // non-deducible
+             typename ChkT, typename PtrT> Value& do_check_assign(ChkT& chk, PtrT&& ptr)
+      {
+        if(chk)
+          this->m_stor = ::rocket::forward<XValT>(*ptr);
+        else
+          this->m_stor = nullptr;
         return *this;
       }
 
