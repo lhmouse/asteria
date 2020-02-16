@@ -7,10 +7,11 @@
 |:-----------|:--------------------------|:----------------------------------------------------------------|
 |**GCC 9**   |:1st_place_medal:Primary   |                                                                 |
 |**GCC 8**   |:1st_place_medal:Primary   |                                                                 |
-|**Clang 7** |:2nd_place_medal:Secondary |Unknown warning options. A number of meaningless warnings.       |
 |**GCC 7**   |:2nd_place_medal:Secondary |Faulty strict overflow warnings.                                 |
 |**GCC 6**   |:1st_place_medal:Primary   |                                                                 |
 |**GCC 5**   |:2nd_place_medal:Secondary |**5.4** not supported due to faulty `std::regex` constructor.    |
+|**Clang 8** |:2nd_place_medal:Secondary |Unknown warning options. A number of meaningless warnings.       |
+|**Clang 7** |:2nd_place_medal:Secondary |Unknown warning options. A number of meaningless warnings.       |
 |**MSVC 19** |:no_entry:Abandoned        |Little build system support. Internal compiler errors.           |
 
 ![GNU nano for the win!](https://raw.githubusercontent.com/lhmouse/poseidon/master/gnu-nano-ftw.png)
@@ -18,7 +19,7 @@
 # How to Build
 
 ```sh
-$ autoreconf -i     # requires Autoconf and Automake
+$ autoreconf -i  # requires autoconf, automake and libtool
 $ ./configure
 $ make -j$(nproc)
 ```
