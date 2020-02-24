@@ -1,5 +1,5 @@
 // This file is part of Asteria.
-// Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
+// Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
 #ifndef ASTERIA_ABSTRACT_FUNCTION_HPP_
 #define ASTERIA_ABSTRACT_FUNCTION_HPP_
