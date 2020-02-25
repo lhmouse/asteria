@@ -467,6 +467,20 @@
 
 	* Returns a new `string` after the conversion.
 
+`std.string.translate(text, inputs, [outputs])`
+
+	* Performs bytewise translation on the given string. For every
+	  byte in `text` that is also found in `inputs`, if there is a
+	  corresponding replacement byte in `outputs` with the same
+	  subscript, it is replaced with the latter; if no replacement
+	  exists, because `outputs` is shorter than `inputs` or is null,
+	  it is deleted. If `outputs` is longer than `inputs`, excess
+	  bytes are ignored. Bytes that do not exist in `inputs` are left
+	  intact. This function returns a new `string` without modifying
+	  `text`.
+
+	* Returns the translated `string`.
+
 `std.string.explode(text, [delim], [limit])`
 
 	* Breaks `text` down into segments, separated by `delim`. If
@@ -558,19 +572,6 @@
 
 	* Throws an exception if the string is invalid.
 
-`std.string.translate(text, inputs, [outputs])`
-
-	* Performs bytewise translation on the given string. For every
-	  byte in `text` that is also found in `inputs`, if there is a
-	  corresponding replacement byte in `outputs` with the same
-	  subscript, it is replaced with the latter; if no replacement
-	  exists, because `outputs` is shorter than `inputs` or is null,
-	  it is deleted. If `outputs` is longer than `inputs`, excess
-	  bytes are ignored. Bytes that do not exist in `inputs` are left
-	  intact. This function returns a new `string` without modifying
-	  `text`.
-
-	* Returns the translated `string`.
 
 `std.string.utf8_validate(text)`
 
