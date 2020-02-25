@@ -54,10 +54,8 @@ Sval std_string_implode(Aval segments, Sopt delim = nullopt);
 
 Sval std_string_hex_encode(Sval data, Bopt lowercase = nullopt, Sopt delim = nullopt);
 Sval std_string_hex_decode(Sval text);
-
 Sval std_string_base32_encode(Sval data, Bopt lowercase = nullopt);
 Sval std_string_base32_decode(Sval text);
-
 Sval std_string_base64_encode(Sval data);
 Sval std_string_base64_decode(Sval text);
 
@@ -69,27 +67,21 @@ Aval std_string_utf8_decode(Sval text, Bopt permissive = nullopt);
 Sval std_string_pack_8(Ival value);
 Sval std_string_pack_8(Aval values);
 Aval std_string_unpack_8(Sval text);
-
 Sval std_string_pack_16be(Ival value);
 Sval std_string_pack_16be(Aval values);
 Aval std_string_unpack_16be(Sval text);
-
 Sval std_string_pack_16le(Ival value);
 Sval std_string_pack_16le(Aval values);
 Aval std_string_unpack_16le(Sval text);
-
 Sval std_string_pack_32be(Ival value);
 Sval std_string_pack_32be(Aval values);
 Aval std_string_unpack_32be(Sval text);
-
 Sval std_string_pack_32le(Ival value);
 Sval std_string_pack_32le(Aval values);
 Aval std_string_unpack_32le(Sval text);
-
 Sval std_string_pack_64be(Ival value);
 Sval std_string_pack_64be(Aval values);
 Aval std_string_unpack_64be(Sval text);
-
 Sval std_string_pack_64le(Ival value);
 Sval std_string_pack_64le(Aval values);
 Aval std_string_unpack_64le(Sval text);
