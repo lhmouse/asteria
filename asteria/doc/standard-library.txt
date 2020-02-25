@@ -506,7 +506,7 @@
 	  bytes. Whitespaces can be used to delimit bytes; they shall not
 	  occur between digits in the same byte. Consequently, the total
 	  number of non-whitespace characters must be a multiple of two.
-	  Invalid characters cause parse errors.
+	  Invalid characters cause decode errors.
 
 	* Returns a `string` containing decoded bytes. If `text` is empty
 	  or consists of only whitespaces, an empty `string` is returned.
@@ -530,7 +530,7 @@
 	  Whitespaces can be used to delimit encoding units; they shall
 	  not occur between characters in the same unit. Consequently,
 	  the number of non-whitespace characters must be a multiple of
-	  eight. Invalid characters cause parse errors.
+	  eight. Invalid characters cause decode errors.
 
 	* Returns a `string` containing decoded bytes. If `text` is empty
 	  or consists of only whitespaces, an empty `string` is returned.
@@ -551,7 +551,7 @@
 	  Whitespaces can be used to delimit encoding units; they shall
 	  not occur between characters in the same unit. Consequently,
 	  the number of non-whitespace characters must be a multiple of
-	  four. Invalid characters cause parse errors.
+	  four. Invalid characters cause decode errors.
 
 	* Returns a `string` containing decoded bytes. If `text` is empty
 	  or consists of only whitespaces, an empty `string` is returned.
