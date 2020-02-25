@@ -256,6 +256,19 @@ int main()
           catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         assert std.string.base64_decode("") == "";
 
+        assert std.string.url_encode("") == "";
+        assert std.string.url_encode("abcdАВГД甲乙丙丁") == "abcd%D0%90%D0%92%D0%93%D0%94%E7%94%B2%E4%B9%99%E4%B8%99%E4%B8%81";
+        assert std.string.url_encode(" \t`~!@#$%^&*()_+-={}|[]\\:\";\'<>?,./") == "%20%09%60~%21%40%23%24%25%5E%26%2A%28%29_%2B-%3D%7B%7D%7C%5B%5D%5C%3A%22%3B%27%3C%3E%3F%2C.%2F";
+        assert std.string.url_encode(" \t`~!@#$%^&*()_+-={}|[]\\:\";\'<>?,./", true) == "%20%09%60~%21%40%23%24%25%5e%26%2a%28%29_%2b-%3d%7b%7d%7c%5b%5d%5c%3a%22%3b%27%3c%3e%3f%2c.%2f";
+
+        assert std.string.url_decode("") == "";
+        assert std.string.url_decode("abcd1234%D0%90%D0%92%D0%93%D0%94%E7%94%B2%E4%B9%99%E4%B8%99%E4%B8%81") == "abcd1234АВГД甲乙丙丁";
+        assert std.string.url_decode(":/?#[]@!$&'()*+,;=-._~") == ":/?#[]@!$&'()*+,;=-._~";
+        try { std.string.url_decode("not valid");  assert false;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
+        try { std.string.url_decode("无效的");  assert false;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
+
         assert std.string.translate("hello", "el") == "ho";
         assert std.string.translate("hello", "el", "a") == "hao";
 

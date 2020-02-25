@@ -572,6 +572,29 @@
 
 	* Throws an exception if the string is invalid.
 
+`std.string.url_encode(data, [lowercase])`
+
+	* Encodes bytes in `data` according to IETF RFC 3986. Every byte
+	  that is not a letter, digit, `-`, `.`, `_` or `~` is encoded as
+	  a `%` followed by two hexadecimal digits. If `lowercase` is set
+	  to `true`, lowercase letters are used to represent values
+	  through `10` to `15`; otherwise, uppercase letters are used.
+
+	* Returns the encoded `string`. If `data` is empty, an empty
+	  `string` is returned.
+
+`std.string.url_decode(text)`
+
+	* Decodes percent-encode sequences from `text` and converts them
+	  to bytes according to IETF RFC 3986. For convenience reasons,
+	  both reserved and unreserved characters are copied verbatim.
+	  Characters that are neither reserved nor unreserved (such as
+	  ASCII control characters or non-ASCII characters) cause decode
+	  errors.
+
+	* Returns a `string` containing decoded bytes.
+
+	* Throws an exception if the string contains invalid characters.
 
 `std.string.utf8_validate(text)`
 
