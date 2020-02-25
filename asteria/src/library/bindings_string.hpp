@@ -61,6 +61,7 @@ Sval std_string_base32_decode(Sval text);
 Sval std_string_base64_encode(Sval data);
 Sval std_string_base64_decode(Sval text);
 
+Bval std_string_utf8_validate(Sval text);
 Sval std_string_utf8_encode(Ival code_point, Bopt permissive = nullopt);
 Sval std_string_utf8_encode(Aval code_points, Bopt permissive = nullopt);
 Aval std_string_utf8_decode(Sval text, Bopt permissive = nullopt);

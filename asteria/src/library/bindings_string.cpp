@@ -1136,6 +1136,19 @@ Sval std_string_base64_decode(Sval text)
     return ::rocket::move(data);
   }
 
+Bval std_string_utf8_validate(Sval text)
+  {
+    size_t offset = 0;
+    while(offset < text.size()) {
+      // Try decoding a code point.
+      char32_t cp;
+      if(!utf8_decode(cp, text, offset))
+        // This sequence is invalid.
+        return false;
+    }
+    return true;
+  }
+
 Sval std_string_utf8_encode(Ival code_point, Bopt permissive)
   {
     Sval text;
@@ -1144,9 +1157,8 @@ Sval std_string_utf8_encode(Ival code_point, Bopt permissive)
     auto cp = static_cast<char32_t>(::rocket::clamp(code_point, -1, INT32_MAX));
     if(!utf8_encode(text, cp)) {
       // This comparison with `true` is by intention, because it may be unset.
-      if(permissive != true) {
+      if(permissive != true)
         ASTERIA_THROW("invalid UTF code point (value `$1`)", code_point);
-      }
       // Encode the replacement character.
       utf8_encode(text, 0xFFFD);
     }
@@ -1163,9 +1175,8 @@ Sval std_string_utf8_encode(Aval code_points, Bopt permissive)
       auto cp = static_cast<char32_t>(::rocket::clamp(code_point, -1, INT32_MAX));
       if(!utf8_encode(text, cp)) {
         // This comparison with `true` is by intention, because it may be unset.
-        if(permissive != true) {
+        if(permissive != true)
           ASTERIA_THROW("invalid UTF code point (value `$1`)", code_point);
-        }
         // Encode the replacement character.
         utf8_encode(text, 0xFFFD);
       }
@@ -1177,15 +1188,14 @@ Aval std_string_utf8_decode(Sval text, Bopt permissive)
   {
     Aval code_points;
     code_points.reserve(text.size());
-    // Decode code points repeatedly.
     size_t offset = 0;
     while(offset < text.size()) {
+      // Try decoding a code point.
       char32_t cp;
       if(!utf8_decode(cp, text, offset)) {
         // This comparison with `true` is by intention, because it may be unset.
-        if(permissive != true) {
+        if(permissive != true)
           ASTERIA_THROW("invalid UTF-8 string");
-        }
         // Re-interpret it as an isolated byte.
         cp = text[offset++] & 0xFF;
       }
@@ -2615,6 +2625,33 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           if(reader.I().g(text).F()) {
             // Call the binding function.
             return std_string_base64_decode(::rocket::move(text));
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
+    //===================================================================
+    // `std.string.utf8_validate()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("utf8_validate"),
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+        // Description
+        ::rocket::sref(
+          "\n"
+          "`std.string.utf8_validate(text)`\n"
+          "\n"
+          "  * Checks whether `text` is a valid UTF-8 `string`.\n"
+          "\n"
+          "  * Returns `true` if `text` is valid, or `false` otherwise.\n"
+        ),
+        // Definition
+        [](cow_vector<Reference>&& args) -> Value {
+          Argument_Reader reader(::rocket::sref("std.string.utf8_validate"), ::rocket::ref(args));
+          // Parse arguments.
+          Sval text;
+          if(reader.I().g(text).F()) {
+            // Call the binding function.
+            return std_string_utf8_validate(::rocket::move(text));
           }
           // Fail.
           reader.throw_no_matching_function_call();

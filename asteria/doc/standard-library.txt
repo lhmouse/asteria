@@ -572,6 +572,12 @@
 
 	* Returns the translated `string`.
 
+`std.string.utf8_validate(text)`
+
+	* Checks whether `text` is a valid UTF-8 `string`.
+
+	* Returns `true` if `text` is valid, or `false` otherwise.
+
 `std.string.utf8_encode(code_points, [permissive])`
 
 	* Encodes code points from `code_points` into an UTF-8 `string`.

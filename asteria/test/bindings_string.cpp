@@ -259,6 +259,10 @@ int main()
         assert std.string.translate("hello", "el") == "ho";
         assert std.string.translate("hello", "el", "a") == "hao";
 
+        assert std.string.utf8_validate("abcdАВГД甲乙丙丁") == true;
+        assert std.string.utf8_validate("\xC0\x80\x61") == false;
+        assert std.string.utf8_validate("\xFF\xFE\x62") == false;
+
         assert std.string.utf8_encode(30002) == "甲";
         try { std.string.utf8_encode(0xFFFFFF);  assert false;  }
           catch(e) { assert std.string.find(e, "assertion failure") == null;  }
