@@ -2611,12 +2611,12 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
         // Description
         ::rocket::sref(
           "\n"
-          "`std.string.base32_encode(text, [uppercase])`\n"
+          "`std.string.base32_encode(text, [lowercase])`\n"
           "\n"
           "  * Encodes all bytes in `text` according to the base32 encoding\n"
-          "    specified by IETF RFC 4648. If `uppercase` is set to `true`,\n"
-          "    uppercase letters are used to represent values through `0` to\n"
-          "    `25`; otherwise, lowercase letters are used. The length of\n"
+          "    specified by IETF RFC 4648. If `lowercase` is set to `true`,\n"
+          "    lowercase letters are used to represent values through `0` to\n"
+          "    `25`; otherwise, uppercase letters are used. The length of\n"
           "    encoded data is always a multiple of 8; padding characters\n"
           "    are mandatory.\n"
           "\n"

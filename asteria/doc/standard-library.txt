@@ -503,12 +503,12 @@
 	* Returns a `string` containing all segments. If `segments` is
 	  empty, an empty `string` is returned.
 
-`std.string.hex_encode(data, [uppercase], [delim])`
+`std.string.hex_encode(data, [lowercase], [delim])`
 
 	* Encodes all bytes in `data` as 2-digit hexadecimal numbers and
-	  concatenates them. If `uppercase` is set to `true`, hexadecimal
-	  digits above `9` are encoded as `ABCDEF`; otherwise they are
-	  encoded as `abcdef`. If `delim` is specified, it is inserted
+	  concatenates them. If `lowercase` is set to `true`, hexadecimal
+	  digits above `9` are encoded as `abcdef`; otherwise they are
+	  encoded as `ABCDEF`. If `delim` is specified, it is inserted
 	  between adjacent bytes.
 
 	* Returns the encoded `string`. If `data` is empty, an empty
@@ -527,12 +527,12 @@
 
 	* Throws an exception if the string is invalid.
 
-`std.string.base32_encode(data, [uppercase])`
+`std.string.base32_encode(data, [lowercase])`
 
 	* Encodes all bytes in `data` according to the base32 encoding
-	  specified by IETF RFC 4648. If `uppercase` is set to `true`,
-	  uppercase letters are used to represent values through `0` to
-	  `25`; otherwise, lowercase letters are used. The length of
+	  specified by IETF RFC 4648. If `lowercase` is set to `true`,
+	  lowercase letters are used to represent values through `0` to
+	  `25`; otherwise, uppercase letters are used. The length of
 	  encoded data is always a multiple of 8; padding characters
 	  are mandatory.
 
