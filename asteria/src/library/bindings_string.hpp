@@ -58,8 +58,11 @@ Sval std_string_base32_encode(Sval data, Bopt lowercase = nullopt);
 Sval std_string_base32_decode(Sval text);
 Sval std_string_base64_encode(Sval data);
 Sval std_string_base64_decode(Sval text);
+
 Sval std_string_url_encode(Sval data, Bopt lowercase = nullopt);
 Sval std_string_url_decode(Sval text);
+Sval std_string_url_encode_query(Sval data, Bopt lowercase = nullopt);
+Sval std_string_url_decode_query(Sval text);
 
 Bval std_string_utf8_validate(Sval text);
 Sval std_string_utf8_encode(Ival code_point, Bopt permissive = nullopt);

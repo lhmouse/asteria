@@ -229,12 +229,12 @@ constexpr char s_spaces[] = " \f\n\r\t\v";
 
 // http://www.faqs.org/rfcs/rfc3986.html
 // * Bit 0 indicates whether the character is a reserved character.
-// * Bit 1 indicates whether the character is allowed in queries.
+// * Bit 1 indicates whether the character is allowed unencoded in queries.
 constexpr char s_url_chars[256] =
   {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 3, 0, 1, 3, 0, 3, 3, 3, 3, 3, 3, 3, 2, 2, 3,
+    0, 3, 0, 1, 3, 0, 3, 3, 3, 3, 3, 1, 3, 2, 2, 3,
     2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 0, 3, 0, 3,
     3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
     2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0, 1, 0, 2,
@@ -272,6 +272,89 @@ const char* do_xstrchr(const char* str, char c) noexcept
       if(*p == c)
         return p;
     return nullptr;
+  }
+
+template<bool queryT> Sval do_url_encode(const Sval& data, bool rlowerc)
+  {
+    Sval text = data;
+    // Only modify the string as needed, without causing copies on write.
+    size_t nread = 0;
+    while(nread != text.size()) {
+      // Check whether this character has no special meaning.
+      char c = text[nread++];
+      if(queryT) {
+        // This is the only special case.
+        if(c == ' ') {
+          text.mut(nread - 1) = '+';
+          continue;
+        }
+        if(do_is_url_query_char(c))
+          continue;
+      }
+      else {
+        if(do_is_url_unreserved_char(c))
+          continue;
+      }
+      // Escape it.
+      uint32_t b;
+      char rep[3] = { '%' };
+      b = (((c >> 3) & 0x1E) + rlowerc) & 0xFF;
+      rep[1] = s_base16_table[b];
+      b = (((c << 1) & 0x1E) + rlowerc) & 0xFF;
+      rep[2] = s_base16_table[b];
+      // Replace this character with the escape string.
+      text.replace(nread - 1, 1, rep, 3);
+      nread += 2;
+    }
+    return text;
+  }
+
+template<bool queryT> Sval do_url_decode(const Sval& text)
+  {
+    Sval data = text;
+    // Only modify the string as needed, without causing copies on write.
+    size_t nread = 0;
+    while(nread != data.size()) {
+      // Look for a character.
+      char c = data[nread++];
+      if(queryT) {
+        // This is the only special case.
+        if(c == '+') {
+          data.mut(nread - 1) = ' ';
+          continue;
+        }
+      }
+      if(c != '%') {
+        if(do_is_url_invalid_char(c)) {
+          ASTERIA_THROW("invalid character in URL (character `$1`)", c);
+        }
+        continue;
+      }
+      // Two hexadecimal characters shall follow.
+      if(data.size() - nread < 2) {
+        ASTERIA_THROW("no hexadecimal digit after `%`");
+      }
+      // Parse the first digit.
+      uint32_t reg = 0;
+      c = data[nread++];
+      const char* pos = do_xstrchr(s_base16_table, c);
+      if(!pos) {
+        ASTERIA_THROW("invalid hexadecimal digit (character `$1`)", c);
+      }
+      reg |= static_cast<uint32_t>(pos - s_base16_table) / 2;
+      // Parse the second digit.
+      reg <<= 4;
+      c = data[nread++];
+      pos = do_xstrchr(s_base16_table, c);
+      if(!pos) {
+        ASTERIA_THROW("invalid hexadecimal digit (character `$1`)", c);
+      }
+      reg |= static_cast<uint32_t>(pos - s_base16_table) / 2;
+      // Replace this sequence with the decoded byte.
+      data.replace(nread - 3, 3, 1, static_cast<char>(reg));
+      nread -= 2;
+    }
+    return data;
   }
 
 template<bool bigendT, typename WordT> Sval& do_pack_one_impl(Sval& text, const Ival& value)
@@ -1177,71 +1260,22 @@ Sval std_string_base64_decode(Sval text)
 
 Sval std_string_url_encode(Sval data, Bopt lowercase)
   {
-    Sval text = data;
-    bool rlowerc = lowercase == true;
-    // Only modify the string as needed, without causing copies on write.
-    size_t nread = 0;
-    while(nread != text.size()) {
-      // Check whether this character has no special meaning.
-      char c = text[nread++];
-      if(do_is_url_unreserved_char(c)) {
-        // Preserve this char as it is safe.
-        continue;
-      }
-      // Escape it.
-      uint32_t b;
-      char rep[3] = { '%' };
-      b = (((c >> 3) & 0x1E) + rlowerc) & 0xFF;
-      rep[1] = s_base16_table[b];
-      b = (((c << 1) & 0x1E) + rlowerc) & 0xFF;
-      rep[2] = s_base16_table[b];
-      // Replace this character with the escape string.
-      text.replace(nread - 1, 1, rep, 3);
-      nread += 2;
-    }
-    return text;
+    return do_url_encode<0>(data, lowercase == true);
   }
 
 Sval std_string_url_decode(Sval text)
   {
-    Sval data = text;
-    // Only modify the string as needed, without causing copies on write.
-    size_t nread = 0;
-    while(nread != data.size()) {
-      // Look for a character.
-      char c = data[nread++];
-      if(c != '%') {
-        if(do_is_url_invalid_char(c)) {
-          ASTERIA_THROW("invalid character in URL (character `$1`)", c);
-        }
-        // Copy this character verbatim.
-        continue;
-      }
-      // Two hexadecimal characters shall follow.
-      if(data.size() - nread < 2) {
-        ASTERIA_THROW("no hexadecimal digit after `%`");
-      }
-      // Parse the first digit.
-      uint32_t reg = 0;
-      c = data[nread++];
-      const char* pos = do_xstrchr(s_base16_table, c);
-      if(!pos) {
-        ASTERIA_THROW("invalid hexadecimal digit (character `$1`)", c);
-      }
-      reg |= static_cast<uint32_t>(pos - s_base16_table) / 2;
-      // Parse the second digit.
-      reg <<= 4;
-      c = data[nread++];
-      pos = do_xstrchr(s_base16_table, c);
-      if(!pos) {
-        ASTERIA_THROW("invalid hexadecimal digit (character `$1`)", c);
-      }
-      reg |= static_cast<uint32_t>(pos - s_base16_table) / 2;
-      // Replace this sequence with the decoded byte.
-      data.replace(nread - 3, 3, 1, static_cast<char>(reg));
-      nread -= 2;
-    }
-    return data;
+    return do_url_decode<0>(text);
+  }
+
+Sval std_string_url_encode_query(Sval data, Bopt lowercase)
+  {
+    return do_url_encode<1>(data, lowercase == true);
+  }
+
+Sval std_string_url_decode_query(Sval text)
+  {
+    return do_url_decode<1>(text);
   }
 
 Bval std_string_utf8_validate(Sval text)
@@ -2800,6 +2834,69 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           if(reader.I().g(text).F()) {
             // Call the binding function.
             return std_string_url_decode(::rocket::move(text));
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
+    //===================================================================
+    // `std.string.url_encode_query()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("url_encode_query"),
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+        // Description
+        ::rocket::sref(
+          "\n"
+          "`std.string.url_encode_query(data, [lowercase])`\n"
+          "\n"
+          "  * Encodes bytes in `data` according to IETF RFC 3986. This\n"
+          "    function behaves like `url_encode()`, except that characters\n"
+          "    that are allowed unencoded in query strings are not encoded,\n"
+          "    and spaces are encoded as `+` instead of the long form `%20`.\n"
+          "\n"
+          "  * Returns the encoded `string`. If `data` is empty, an empty\n"
+          "    `string` is returned.\n"
+        ),
+        // Definition
+        [](cow_vector<Reference>&& args) -> Value {
+          Argument_Reader reader(::rocket::sref("std.string.url_encode"), ::rocket::ref(args));
+          // Parse arguments.
+          Sval data;
+          Bopt lowercase;
+          if(reader.I().g(data).g(lowercase).F()) {
+            // Call the binding function.
+            return std_string_url_encode_query(::rocket::move(data), ::rocket::move(lowercase));
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
+    //===================================================================
+    // `std.string.url_decode_query()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("url_decode_query"),
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+        // Description
+        ::rocket::sref(
+          "\n"
+          "`std.string.url_decode_query(text)`\n"
+          "\n"
+          "  * Decodes percent-encode sequences from `text` and converts them\n"
+          "    to bytes according to IETF RFC 3986. This function behaves like\n"
+          "    `url_decode()`, except that `+` is decoded as a space.\n"
+          "\n"
+          "  * Returns a `string` containing decoded bytes.\n"
+          "\n"
+          "  * Throws an exception if the string contains invalid characters.\n"
+        ),
+        // Definition
+        [](cow_vector<Reference>&& args) -> Value {
+          Argument_Reader reader(::rocket::sref("std.string.url_decode"), ::rocket::ref(args));
+          // Parse arguments.
+          Sval text;
+          if(reader.I().g(text).F()) {
+            // Call the binding function.
+            return std_string_url_decode_query(::rocket::move(text));
           }
           // Fail.
           reader.throw_no_matching_function_call();

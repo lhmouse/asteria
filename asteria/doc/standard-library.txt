@@ -596,6 +596,26 @@
 
 	* Throws an exception if the string contains invalid characters.
 
+`std.string.url_encode_query(data, [lowercase])`
+
+	* Encodes bytes in `data` according to IETF RFC 3986. This
+	  function behaves like `url_encode()`, except that characters
+	  that are allowed unencoded in query strings are not encoded,
+	  and spaces are encoded as `+` instead of the long form `%20`.
+
+	* Returns the encoded `string`. If `data` is empty, an empty
+	  `string` is returned.
+
+`std.string.url_decode_query(text)`
+
+	* Decodes percent-encode sequences from `text` and converts them
+	  to bytes according to IETF RFC 3986. This function behaves like
+	  `url_decode()`, except that `+` is decoded as a space.
+
+	* Returns a `string` containing decoded bytes.
+
+	* Throws an exception if the string contains invalid characters.
+
 `std.string.utf8_validate(text)`
 
 	* Checks whether `text` is a valid UTF-8 `string`.
