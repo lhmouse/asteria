@@ -185,6 +185,7 @@ inline Sval do_get_padding(const Sopt& padding)
     return *padding;
   }
 
+// These are strings of single characters.
 constexpr char s_char_table[][2] =
   {
     "\x00", "\x01", "\x02", "\x03", "\x04", "\x05", "\x06", "\x07",
@@ -226,13 +227,16 @@ constexpr char s_base32_table[] = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvW
 constexpr char s_base64_table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/==";
 constexpr char s_spaces[] = " \f\n\r\t\v";
 
+// http://www.faqs.org/rfcs/rfc3986.html
+// * Bit 0 indicates whether the character is a reserved character.
+// * Bit 1 indicates whether the character is allowed in queries.
 constexpr char s_url_chars[256] =
   {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1,
-    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 0, 1, 0, 1,
-    1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    0, 3, 0, 1, 3, 0, 3, 3, 3, 3, 3, 3, 3, 2, 2, 3,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 0, 3, 0, 3,
+    3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
     2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0, 1, 0, 2,
     0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
     2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 2, 0,
@@ -251,14 +255,14 @@ constexpr bool do_is_url_invalid_char(char c) noexcept
     return s_url_chars[uint8_t(c)] == 0;
   }
 
-//constexpr bool do_is_url_reserved_char(char c) noexcept
-//  {
-//    return s_url_chars[uint8_t(c)] == 1;
-//  }
-
 constexpr bool do_is_url_unreserved_char(char c) noexcept
   {
     return s_url_chars[uint8_t(c)] == 2;
+  }
+
+constexpr bool do_is_url_query_char(char c) noexcept
+  {
+    return s_url_chars[uint8_t(c)] & 2;
   }
 
 const char* do_xstrchr(const char* str, char c) noexcept
