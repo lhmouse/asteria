@@ -84,8 +84,7 @@ template<typename charT, typename traitsT>
       // The placeholder shall contain a valid index.
       size_t index = 0;
       switch(ch) {
-        {{
-      case '{':
+      case '{': {
           // Look for the terminator.
           for(;;) {
             if(bp == ep) {
@@ -111,7 +110,7 @@ template<typename charT, typename traitsT>
             index = index * 10 + static_cast<size_t>(ch - '0');
           }
           break;
-        }{
+        }
       case '0':
       case '1':
       case '2':
@@ -121,11 +120,11 @@ template<typename charT, typename traitsT>
       case '6':
       case '7':
       case '8':
-      case '9':
+      case '9': {
           // Accept a single decimal digit.
           index = static_cast<size_t>(ch - '0');
           break;
-        }}
+        }
       default:
         noadl::sprintf_and_throw<invalid_argument>("format: invalid placeholder (sequence `$%c`)", (int)ch);
       }
