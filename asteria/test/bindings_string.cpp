@@ -271,8 +271,8 @@ int main()
 
         assert std.string.url_encode_query("") == "";
         assert std.string.url_encode_query("abcdАВГД甲乙丙丁") == "abcd%D0%90%D0%92%D0%93%D0%94%E7%94%B2%E4%B9%99%E4%B8%99%E4%B8%81";
-        assert std.string.url_encode_query(" \t`~!@#$%^&*()_+-={}|[]\\:\";\'<>?,./") == "+%09%60~!@%23$%25%5E&*()_%2B-=%7B%7D%7C%5B%5D%5C:%22;\'%3C%3E?,./";
-        assert std.string.url_encode_query(" \t`~!@#$%^&*()_+-={}|[]\\:\";\'<>?,./", true) == "+%09%60~!@%23$%25%5e&*()_%2b-=%7b%7d%7c%5b%5d%5c:%22;\'%3c%3e?,./";
+        assert std.string.url_encode_query(" \t`~!@#$%^&*()_+-={}|[]\\:\";\'<>?,./") == "+%09%60~!@%23$%25%5E&*()_%2B-%3D%7B%7D%7C%5B%5D%5C:%22;\'%3C%3E?,./";
+        assert std.string.url_encode_query(" \t`~!@#$%^&*()_+-={}|[]\\:\";\'<>?,./", true) == "+%09%60~!@%23$%25%5e&*()_%2b-%3d%7b%7d%7c%5b%5d%5c:%22;\'%3c%3e?,./";
 
         assert std.string.url_decode_query("") == "";
         assert std.string.url_decode_query("abcd1234%D0%90%D0%92%D0%93%D0%94%E7%94%B2%E4%B9%99%E4%B8%99%E4%B8%81") == "abcd1234АВГД甲乙丙丁";
