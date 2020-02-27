@@ -64,8 +64,8 @@ class Global_Context : public Abstract_Context
     void initialize(API_Version version = api_version_latest);
 
     // These are interfaces of the global garbage collector.
-    const Collector* get_collector_opt(GC_Generation gc_gen) const;
-    Collector* open_collector_opt(GC_Generation gc_gen);
+    const Collector& get_collector(GC_Generation gc_gen) const;
+    Collector& open_collector(GC_Generation gc_gen);
     rcptr<Variable> create_variable(GC_Generation gc_hint = gc_generation_newest);
     size_t collect_variables(GC_Generation gc_limit = gc_generation_oldest);
 

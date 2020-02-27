@@ -13,65 +13,59 @@ namespace Asteria {
 
 Iopt std_gc_tracked_count(Global& global, Ival generation)
   {
-    if((generation < gc_generation_newest) || (generation > gc_generation_oldest)) {
+    auto gc_gen = static_cast<GC_Generation>(::rocket::clamp(generation,
+                                                             static_cast<Ival>(gc_generation_newest),
+                                                             static_cast<Ival>(gc_generation_oldest)));
+    if(gc_gen != generation) {
       return nullopt;
     }
-    auto gc_gen = static_cast<GC_Generation>(generation);
     // Get the collector.
-    auto qcoll = global.get_collector_opt(gc_gen);
-    if(!qcoll) {
-      return nullopt;
-    }
+    const auto& coll = global.get_collector(gc_gen);
     // Get the current number of variables being tracked.
-    auto count = qcoll->count_tracked_variables();
+    auto count = coll.count_tracked_variables();
     return Ival(count);
   }
 
 Iopt std_gc_get_threshold(Global& global, Ival generation)
   {
-    if((generation < gc_generation_newest) || (generation > gc_generation_oldest)) {
+    auto gc_gen = static_cast<GC_Generation>(::rocket::clamp(generation,
+                                                             static_cast<Ival>(gc_generation_newest),
+                                                             static_cast<Ival>(gc_generation_oldest)));
+    if(gc_gen != generation) {
       return nullopt;
     }
-    auto gc_gen = static_cast<GC_Generation>(generation);
     // Get the collector.
-    auto qcoll = global.get_collector_opt(gc_gen);
-    if(!qcoll) {
-      return nullopt;
-    }
+    const auto& coll = global.get_collector(gc_gen);
     // Get the current threshold.
-    auto thres = qcoll->get_threshold();
+    auto thres = coll.get_threshold();
     return Ival(thres);
   }
 
 Iopt std_gc_set_threshold(Global& global, Ival generation, Ival threshold)
   {
-    if((generation < gc_generation_newest) || (generation > gc_generation_oldest)) {
+    auto gc_gen = static_cast<GC_Generation>(::rocket::clamp(generation,
+                                                             static_cast<Ival>(gc_generation_newest),
+                                                             static_cast<Ival>(gc_generation_oldest)));
+    if(gc_gen != generation) {
       return nullopt;
     }
-    auto gc_gen = static_cast<GC_Generation>(generation);
     // Get the collector.
-    auto qcoll = global.open_collector_opt(gc_gen);
-    if(!qcoll) {
-      return nullopt;
-    }
+    auto rthres_new = static_cast<uint32_t>(::rocket::clamp(threshold, 0, INT32_MAX));
+    auto& coll = global.open_collector(static_cast<GC_Generation>(generation));
     // Set the threshold and return its old value.
-    auto thres = qcoll->get_threshold();
-    qcoll->set_threshold(static_cast<uint32_t>(::rocket::clamp(threshold, 0, UINT32_MAX)));
+    auto thres = coll.get_threshold();
+    coll.set_threshold(rthres_new);
     return Ival(thres);
   }
 
 Ival std_gc_collect(Global& global, Iopt generation_limit)
   {
     auto gc_limit = gc_generation_oldest;
-    // Get the maximum generation to collect when `generation_limit` is specified.
+    // Unlike others, this function does not fail if `generation_limit` is out of range.
     if(generation_limit) {
-      // Clamp the generation. Unlike others, this function does not fail if `generation_limit` is out of range.
-      if(*generation_limit < gc_generation_newest) {
-        gc_limit = gc_generation_newest;
-      }
-      else if(*generation_limit < gc_generation_oldest) {
-        gc_limit = static_cast<GC_Generation>(*generation_limit);
-      }
+      gc_limit = static_cast<GC_Generation>(::rocket::clamp(*generation_limit,
+                                                            static_cast<Ival>(gc_generation_newest),
+                                                            static_cast<Ival>(gc_generation_oldest)));
     }
     // Perform garbage collection up to the generation specified.
     auto nvars = global.collect_variables(gc_limit);

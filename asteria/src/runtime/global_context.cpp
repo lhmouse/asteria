@@ -147,18 +147,18 @@ void Global_Context::initialize(API_Version version)
     this->m_vstd = vstd;
   }
 
-const Collector* Global_Context::get_collector_opt(GC_Generation gc_gen) const
+const Collector& Global_Context::get_collector(GC_Generation gc_gen) const
   {
     auto gcoll = ::rocket::dynamic_pointer_cast<Generational_Collector>(this->m_gcoll);
     ROCKET_ASSERT(gcoll);
-    return ::std::addressof(gcoll->get_collector(gc_gen));
+    return gcoll->get_collector(gc_gen);
   }
 
-Collector* Global_Context::open_collector_opt(GC_Generation gc_gen)
+Collector& Global_Context::open_collector(GC_Generation gc_gen)
   {
     auto gcoll = ::rocket::dynamic_pointer_cast<Generational_Collector>(this->m_gcoll);
     ROCKET_ASSERT(gcoll);
-    return ::std::addressof(gcoll->open_collector(gc_gen));
+    return gcoll->open_collector(gc_gen);
   }
 
 rcptr<Variable> Global_Context::create_variable(GC_Generation gc_hint)
