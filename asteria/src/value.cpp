@@ -47,7 +47,7 @@ bool Value::test() const noexcept
         return this->m_stor.as<gtype_integer>() != 0;
       }
     case gtype_real: {
-        return ::std::fpclassify(this->m_stor.as<gtype_integer>()) != FP_ZERO;
+        return ::std::fpclassify(this->m_stor.as<gtype_real>()) != FP_ZERO;
       }
     case gtype_string: {
         return this->m_stor.as<gtype_string>().size() != 0;
