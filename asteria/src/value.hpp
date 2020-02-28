@@ -31,74 +31,301 @@ class Value
     Xvariant m_stor;
 
   public:
-    Value() noexcept
-      :
-        m_stor()  // Initialize to `null`.
+    Value(nullptr_t = nullptr) noexcept
       {
       }
-    ASTERIA_VARIANT_CONSTRUCTOR(Value, Xvariant, XValT, xval)
+    Value(bool xval) noexcept
       :
-        m_stor(::rocket::forward<XValT>(xval))
+        m_stor(G_boolean(xval))
       {
       }
-    ASTERIA_VARIANT_ASSIGNMENT(Value, Xvariant, XValT, xval)
+    Value(signed char xval) noexcept
+      :
+        m_stor(G_integer(xval))
       {
-        this->m_stor = ::rocket::forward<XValT>(xval);
+      }
+    Value(signed short xval) noexcept
+      :
+        m_stor(G_integer(xval))
+      {
+      }
+    Value(signed xval) noexcept
+      :
+        m_stor(G_integer(xval))
+      {
+      }
+    Value(signed long xval) noexcept
+      :
+        m_stor(G_integer(xval))
+      {
+      }
+    Value(signed long long xval) noexcept
+      :
+        m_stor(G_integer(xval))
+      {
+      }
+    Value(float xval) noexcept
+      :
+        m_stor(G_real(xval))
+      {
+      }
+    Value(double xval) noexcept
+      :
+        m_stor(G_real(xval))
+      {
+      }
+    Value(cow_string xval) noexcept
+      :
+        m_stor(G_string(::rocket::move(xval)))
+      {
+      }
+    Value(cow_string::shallow_type xval) noexcept
+      :
+        m_stor(G_string(xval))
+      {
+      }
+    template<typename OpaqueT,
+             ROCKET_ENABLE_IF(::std::is_base_of<Abstract_Opaque,
+                        OpaqueT>::value)> Value(rcptr<OpaqueT> xval) noexcept
+      {
+        // Note `xval` may be a null pointer, in which case we set `*this` to `null`.
+        // The pointer itself is being moved, not the object that it points to.
+        this->do_assign_opt<rcptr<OpaqueT>&&>(xval, ::std::addressof(xval));
+      }
+    template<typename FunctionT,  // TODO: Use a dedicated type for functions.
+             ROCKET_ENABLE_IF(::std::is_base_of<Abstract_Function,
+                        FunctionT>::value)> Value(rcptr<FunctionT> xval) noexcept
+      {
+        // Note `xval` may be a null pointer, in which case we set `*this` to `null`.
+        this->do_assign_opt<rcptr<FunctionT>&&>(xval, ::std::addressof(xval));
+      }
+    Value(cow_vector<Value> xval) noexcept
+      :
+        m_stor(G_array(::rocket::move(xval)))
+      {
+      }
+    Value(cow_hashmap<phsh_string, Value, phsh_string::hash> xval) noexcept
+      :
+        m_stor(G_object(::rocket::move(xval)))
+      {
+      }
+    Value(const opt<bool>& xval) noexcept
+      {
+        this->do_assign_opt<G_boolean>(xval, xval);
+      }
+    Value(const opt<signed char>& xval) noexcept
+      {
+        this->do_assign_opt<G_integer>(xval, xval);
+      }
+    Value(const opt<signed short>& xval) noexcept
+      {
+        this->do_assign_opt<G_integer>(xval, xval);
+      }
+    Value(const opt<signed>& xval) noexcept
+      {
+        this->do_assign_opt<G_integer>(xval, xval);
+      }
+    Value(const opt<signed long>& xval) noexcept
+      {
+        this->do_assign_opt<G_integer>(xval, xval);
+      }
+    Value(const opt<signed long long>& xval) noexcept
+      {
+        this->do_assign_opt<G_integer>(xval, xval);
+      }
+    Value(const opt<float>& xval) noexcept
+      {
+        this->do_assign_opt<G_real>(xval, xval);
+      }
+    Value(const opt<double>& xval) noexcept
+      {
+        this->do_assign_opt<G_real>(xval, xval);
+      }
+    Value(const opt<cow_string>& xval) noexcept
+      {
+        this->do_assign_opt<const G_string&>(xval, xval);
+      }
+    Value(opt<cow_string>&& xval) noexcept
+      {
+        this->do_assign_opt<G_string&&>(xval, xval);
+      }
+    Value(const opt<cow_vector<Value>>& xval) noexcept
+      {
+        this->do_assign_opt<const G_array&>(xval, xval);
+      }
+    Value(opt<cow_vector<Value>>&& xval) noexcept
+      {
+        this->do_assign_opt<G_array&&>(xval, xval);
+      }
+    Value(const opt<cow_hashmap<phsh_string, Value, phsh_string::hash>>& xval) noexcept
+      {
+        this->do_assign_opt<const G_object&>(xval, xval);
+      }
+    Value(opt<cow_hashmap<phsh_string, Value, phsh_string::hash>>&& xval) noexcept
+      {
+        this->do_assign_opt<G_object&&>(xval, xval);
+      }
+    Value& operator=(nullptr_t) noexcept
+      {
+        this->m_stor = G_null();
         return *this;
       }
-    // conversion from pointers
-    template<typename XValT> Value(const XValT* opt)
+    Value& operator=(bool xval) noexcept
       {
-        this->do_check_assign<const XValT&>(opt, opt);
+        this->m_stor = G_boolean(xval);
+        return *this;
       }
-    template<typename XValT> Value& operator=(const XValT* opt)
+    Value& operator=(signed char xval) noexcept
       {
-        return this->do_check_assign<const XValT&>(opt, opt);
+        this->m_stor = G_integer(xval);
+        return *this;
       }
-    // conversion from optional values
-    template<typename XValT> Value(const opt<XValT>& opt)
+    Value& operator=(signed short xval) noexcept
       {
-        this->do_check_assign<const XValT&>(opt, opt);
+        this->m_stor = G_integer(xval);
+        return *this;
       }
-    template<typename XValT> Value& operator=(const opt<XValT>& opt)
+    Value& operator=(signed xval) noexcept
       {
-        return this->do_check_assign<const XValT&>(opt, opt);
+        this->m_stor = G_integer(xval);
+        return *this;
       }
-    template<typename XValT> Value(opt<XValT>&& opt) noexcept
+    Value& operator=(signed long xval) noexcept
       {
-        this->do_check_assign<XValT&&>(opt, opt);
+        this->m_stor = G_integer(xval);
+        return *this;
       }
-    template<typename XValT> Value& operator=(opt<XValT>&& opt) noexcept
+    Value& operator=(signed long long xval) noexcept
       {
-        return this->do_check_assign<XValT&&>(opt, opt);
+        this->m_stor = G_integer(xval);
+        return *this;
       }
-    // conversion from `G_function` and `G_opaque`
-    template<typename XValT> Value(const rcptr<XValT>& ptr)
+    Value& operator=(float xval) noexcept
       {
-        this->do_check_assign<const rcptr<XValT>&>(ptr, ::std::addressof(ptr));
+        this->m_stor = G_real(xval);
+        return *this;
       }
-    template<typename XValT> Value& operator=(const rcptr<XValT>& ptr)
+    Value& operator=(double xval) noexcept
       {
-        return this->do_check_assign<const rcptr<XValT>&>(ptr, ::std::addressof(ptr));
+        this->m_stor = G_real(xval);
+        return *this;
       }
-    template<typename XValT> Value(rcptr<XValT>&& ptr)
+    Value& operator=(cow_string xval) noexcept
       {
-        this->do_check_assign<rcptr<XValT>&&>(ptr, ::std::addressof(ptr));
+        this->m_stor = G_string(::rocket::move(xval));
+        return *this;
       }
-    template<typename XValT> Value& operator=(rcptr<XValT>&& ptr)
+    Value& operator=(cow_string::shallow_type xval) noexcept
       {
-        return this->do_check_assign<rcptr<XValT>&&>(ptr, ::std::addressof(ptr));
+        this->m_stor = G_string(xval);
+        return *this;
+      }
+    template<typename OpaqueT,
+             ROCKET_ENABLE_IF(::std::is_base_of<Abstract_Opaque,
+                        OpaqueT>::value)> Value& operator=(rcptr<OpaqueT> xval) noexcept
+      {
+        // Note `xval` may be a null pointer, in which case we set `*this` to `null`.
+        // The pointer itself is being moved, not the object that it points to.
+        this->do_assign_opt<rcptr<OpaqueT>&&>(xval, ::std::addressof(xval));
+        return *this;
+      }
+    template<typename FunctionT,  // TODO: Use a dedicated type for functions.
+             ROCKET_ENABLE_IF(::std::is_base_of<Abstract_Function,
+                        FunctionT>::value)> Value& operator=(rcptr<FunctionT> xval) noexcept
+      {
+        // Note `xval` may be a null pointer, in which case we set `*this` to `null`.
+        this->do_assign_opt<rcptr<FunctionT>&&>(xval, ::std::addressof(xval));
+        return *this;
+      }
+    Value& operator=(cow_vector<Value> xval) noexcept
+      {
+        this->m_stor = G_array(::rocket::move(xval));
+        return *this;
+      }
+    Value& operator=(cow_hashmap<phsh_string, Value, phsh_string::hash> xval) noexcept
+      {
+        this->m_stor = G_object(::rocket::move(xval));
+        return *this;
+      }
+    Value& operator=(const opt<bool>& xval) noexcept
+      {
+        this->do_assign_opt<G_boolean>(xval, xval);
+        return *this;
+      }
+    Value& operator=(const opt<signed char>& xval) noexcept
+      {
+        this->do_assign_opt<G_integer>(xval, xval);
+        return *this;
+      }
+    Value& operator=(const opt<signed short>& xval) noexcept
+      {
+        this->do_assign_opt<G_integer>(xval, xval);
+        return *this;
+      }
+    Value& operator=(const opt<signed>& xval) noexcept
+      {
+        this->do_assign_opt<G_integer>(xval, xval);
+        return *this;
+      }
+    Value& operator=(const opt<signed long>& xval) noexcept
+      {
+        this->do_assign_opt<G_integer>(xval, xval);
+        return *this;
+      }
+    Value& operator=(const opt<signed long long>& xval) noexcept
+      {
+        this->do_assign_opt<G_integer>(xval, xval);
+        return *this;
+      }
+    Value& operator=(const opt<float>& xval) noexcept
+      {
+        this->do_assign_opt<G_real>(xval, xval);
+        return *this;
+      }
+    Value& operator=(const opt<double>& xval) noexcept
+      {
+        this->do_assign_opt<G_real>(xval, xval);
+        return *this;
+      }
+    Value& operator=(const opt<cow_string>& xval) noexcept
+      {
+        this->do_assign_opt<const G_string&>(xval, xval);
+        return *this;
+      }
+    Value& operator=(opt<cow_string>&& xval) noexcept
+      {
+        this->do_assign_opt<G_string&&>(xval, xval);
+        return *this;
+      }
+    Value& operator=(const opt<cow_vector<Value>>& xval) noexcept
+      {
+        this->do_assign_opt<const G_array&>(xval, xval);
+        return *this;
+      }
+    Value& operator=(opt<cow_vector<Value>>&& xval) noexcept
+      {
+        this->do_assign_opt<G_array&&>(xval, xval);
+        return *this;
+      }
+    Value& operator=(const opt<cow_hashmap<phsh_string, Value, phsh_string::hash>>& xval) noexcept
+      {
+        this->do_assign_opt<const G_object&>(xval, xval);
+        return *this;
+      }
+    Value& operator=(opt<cow_hashmap<phsh_string, Value, phsh_string::hash>>&& xval) noexcept
+      {
+        this->do_assign_opt<G_object&&>(xval, xval);
+        return *this;
       }
 
   private:
-    template<typename XValT,  // non-deducible
-             typename ChkT, typename PtrT> Value& do_check_assign(ChkT& chk, PtrT&& ptr)
+    template<typename CastT,  // how to forward the value (may be an rvalue reference type)
+             typename ChkT, typename PtrT> void do_assign_opt(ChkT&& chk, PtrT&& ptr)
       {
         if(chk)
-          this->m_stor = ::rocket::forward<XValT>(*ptr);
+          this->m_stor = static_cast<CastT>(*ptr);
         else
-          this->m_stor = nullptr;
-        return *this;
+          this->m_stor = G_null();
       }
 
   public:
