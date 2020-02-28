@@ -89,10 +89,11 @@ cow_string do_stringify(const Reference& ref) noexcept
 cow_string do_stringify(const exception& stdex) noexcept
   try {
     ::rocket::tinyfmt_str fmt;
-    // Print the description.
+    // Write the exception message verbatim.
     fmt << stdex.what();
-    // Print the exception type.
-    fmt << "\n[exception class `" << typeid(stdex).name() << "`]";
+    // Append the dynamic type of the exception object that has been caught.
+    ::rocket::format(fmt, "\n[exception class `$1`]",
+                          typeid(stdex).name());
     return do_xindent(fmt.extract_string());
   }
   catch(exception& other) {
@@ -102,16 +103,21 @@ cow_string do_stringify(const exception& stdex) noexcept
 cow_string do_stringify(const Parser_Error& except) noexcept
   try {
     ::rocket::tinyfmt_str fmt;
-    // Print the description.
-    fmt << "ERROR " << except.status() << ": " << describe_parser_status(except.status());
-    // Print the source location.
-    if(except.line() <= 0)
-      fmt << "\n[end of input encountered]";
+    // Write the description of this error.
+    ::rocket::format(fmt, "ERROR $1: $2",
+                          except.status(),
+                          describe_parser_status(except.status()));
+    // Append the source location of the error.
+    if(except.line() >= 0)
+      ::rocket::format(fmt, "\n[unexpected token at line $1, offset $2, length $3]",
+                            except.line(),
+                            except.offset(),
+                            except.length());
     else
-      fmt << "\n[line " << except.line() << ", offset " << except.offset() << ", length "
-          << except.length() << "]";
-    // Print the exception type.
-    fmt << "\n[exception class `" << typeid(except).name() << "`]";
+      fmt << "\n[end of input encountered]";
+    // Append the dynamic type of the exception object that has been caught.
+    ::rocket::format(fmt, "\n[exception class `$1`]",
+                          typeid(except).name());
     return do_xindent(fmt.extract_string());
   }
   catch(exception& other) {
@@ -121,20 +127,30 @@ cow_string do_stringify(const Parser_Error& except) noexcept
 cow_string do_stringify(const Runtime_Error& except) noexcept
   try {
     ::rocket::tinyfmt_str fmt;
-    // Print the description.
-    if(except.value().is_string())
-      fmt << except.value().as_string();
+    // If the exception value is a string, write it verbatim.
+    // Otherwise print it like `std.debug.dump()`.
+    const auto& val = except.value();
+    if(val.is_string())
+      fmt << val.as_string();
     else
-      fmt << except.value();
-    // Print the backtrace.
-    fmt << "\n[backtrace:";
-    for(unsigned long i = 0;  i < except.count_frames();  ++i) {
-      const auto& f = except.frame(i);
-      fmt << "\n  #" << i << " <" << f.what_type() << "> at '" << f.sloc() << "': " << f.value();
+      fmt << val;
+    // Append backtrace frames.
+    size_t nframes = except.count_frames();
+    if(nframes != 0) {
+      fmt << "\n[backtrace:";
+      for(size_t i = 0;  i < except.count_frames();  ++i)
+        ::rocket::format(fmt, "\n  #$1 <$2> at '$3': $4",
+                              i,
+                              except.frame(i).what_type(),
+                              except.frame(i).sloc(),
+                              except.frame(i).value());
+      fmt << "\n  -- end of backtrace]";
     }
-    fmt << "\n  -- end of backtrace]";
-    // Print the exception type.
-    fmt << "\n[exception class `" << typeid(except).name() << "`]";
+    else
+      fmt << "\n[no backtrace available]";
+    // Append the dynamic type of the exception object that has been caught.
+    ::rocket::format(fmt, "\n[exception class `$1`]",
+                          typeid(except).name());
     return do_xindent(fmt.extract_string());
   }
   catch(exception& other) {
