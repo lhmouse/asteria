@@ -68,7 +68,7 @@ void create_bindings_debug(Oval& result, API_Version /*version*/)
           "    or `null` otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.debug.print"), ::rocket::ref(args));
           // Parse variadic arguments.
           Sval templ;
@@ -101,7 +101,7 @@ void create_bindings_debug(Oval& result, API_Version /*version*/)
           "    or `null` otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.debug.dump"), ::rocket::ref(args));
           // Parse arguments.
           Value value;

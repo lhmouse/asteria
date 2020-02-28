@@ -1636,7 +1636,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the specified substring of `text`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.slice"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -1680,7 +1680,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns a `string` with the subrange replaced.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.replace"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -1722,7 +1722,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    `text2`, or zero if `text1` compares equal to `text2`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.compare"), ::rocket::ref(args));
           // Parse arguments.
           Sval text1;
@@ -1753,7 +1753,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.starts_with"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -1783,7 +1783,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.ends_with"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -1833,7 +1833,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    non-negative, or `null` otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.find"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -1893,7 +1893,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    non-negative, or `null` otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.rfind"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -1956,7 +1956,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    contain `pattern`, it is returned intact.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.find_and_replace"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -2018,7 +2018,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    non-negative; or `null` if no such byte exists.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.find_any_of"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -2077,7 +2077,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    non-negative; or `null` if no such byte exists.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.rfind_any_of"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -2136,7 +2136,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    non-negative; or `null` if no such byte exists.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.find_not_of"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -2195,7 +2195,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    non-negative; or `null` if no such byte exists.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.rfind_not_of"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -2236,7 +2236,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the reversed `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.reverse"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -2266,7 +2266,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the trimmed `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.trim"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -2297,7 +2297,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the trimmed `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.ltrim"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -2328,7 +2328,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the trimmed `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.rtrim"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -2361,7 +2361,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Throws an exception if `padding` is empty.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.lpad"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -2395,7 +2395,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Throws an exception if `padding` is empty.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.rpad"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -2426,7 +2426,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns a new `string` after the conversion.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.to_upper"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -2455,7 +2455,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns a new `string` after the conversion.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.to_lower"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -2490,7 +2490,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the translated `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.translate"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -2526,7 +2526,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Throws an exception if `limit` is negative or zero.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.explode"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -2558,7 +2558,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    empty, an empty `string` is returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.implode"), ::rocket::ref(args));
           // Parse arguments.
           Aval segments;
@@ -2591,7 +2591,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    `string` is returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.hex_encode"), ::rocket::ref(args));
           // Parse arguments.
           Sval data;
@@ -2627,7 +2627,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Throws an exception if the string is invalid.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.hex_decode"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -2659,7 +2659,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the encoded `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.base32_encode"), ::rocket::ref(args));
           // Parse arguments.
           Sval data;
@@ -2694,7 +2694,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Throws an exception if the string is invalid.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.base32_decode"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -2723,7 +2723,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the encoded `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.base64_encode"), ::rocket::ref(args));
           // Parse arguments.
           Sval data;
@@ -2758,7 +2758,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Throws an exception if the string is invalid.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.base64_decode"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -2790,7 +2790,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    `string` is returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.url_encode"), ::rocket::ref(args));
           // Parse arguments.
           Sval data;
@@ -2825,7 +2825,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Throws an exception if the string contains invalid characters.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.url_decode"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -2856,7 +2856,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    `string` is returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.url_encode"), ::rocket::ref(args));
           // Parse arguments.
           Sval data;
@@ -2888,7 +2888,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Throws an exception if the string contains invalid characters.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.url_decode"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -2915,7 +2915,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns `true` if `text` is valid, or `false` otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.utf8_validate"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -2949,7 +2949,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Throws an exception on failure.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.utf8_encode"), ::rocket::ref(args));
           // Parse arguments.
           Ival code_point;
@@ -2989,7 +2989,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Throws an exception on failure.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.utf8_decode"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -3019,7 +3019,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the packed `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.pack_8"), ::rocket::ref(args));
           // Parse arguments.
           Ival value;
@@ -3053,7 +3053,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns an `array` containing unpacked integers.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.unpack_8"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -3083,7 +3083,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the packed `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.pack_16be"), ::rocket::ref(args));
           // Parse arguments.
           Ival value;
@@ -3121,7 +3121,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    of 2.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.unpack_16be"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -3151,7 +3151,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the packed `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.pack_16le"), ::rocket::ref(args));
           // Parse arguments.
           Ival value;
@@ -3189,7 +3189,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    of 2.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.unpack_16le"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -3219,7 +3219,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the packed `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.pack_32be"), ::rocket::ref(args));
           // Parse arguments.
           Ival value;
@@ -3257,7 +3257,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    of 4.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.unpack_32be"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -3287,7 +3287,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the packed `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.pack_32le"), ::rocket::ref(args));
           // Parse arguments.
           Ival value;
@@ -3325,7 +3325,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    of 4.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.unpack_32le"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -3354,7 +3354,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the packed `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.pack_64be"), ::rocket::ref(args));
           // Parse arguments.
           Ival value;
@@ -3391,7 +3391,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    of 8.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.unpack_64be"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -3421,7 +3421,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "  * Returns the packed `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.pack_64le"), ::rocket::ref(args));
           // Parse arguments.
           Ival value;
@@ -3459,7 +3459,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    of 8.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.unpack_64le"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;
@@ -3499,7 +3499,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "   argument.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.format"), ::rocket::ref(args));
           // Parse arguments.
           Sval templ;
@@ -3563,7 +3563,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    expression.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.regex_find"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -3663,7 +3663,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    expression.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.regex_match"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -3737,7 +3737,7 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
           "    expression.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.string.regex_replace"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.

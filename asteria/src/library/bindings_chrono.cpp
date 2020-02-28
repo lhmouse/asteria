@@ -271,7 +271,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
           "    represented as an `integer`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.chrono.utc_now"), ::rocket::ref(args));
           // Parse arguments.
           if(reader.I().F()) {
@@ -298,7 +298,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
           "    in the local time zone, represented as an `integer`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.chrono.local_now"), ::rocket::ref(args));
           // Parse arguments.
           if(reader.I().F()) {
@@ -328,7 +328,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
           "    point, represented as a `real`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.chrono.hires_now"), ::rocket::ref(args));
           // Parse arguments.
           if(reader.I().F()) {
@@ -358,7 +358,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
           "    point, represented as an `integer`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.chrono.steady_now"), ::rocket::ref(args));
           // Parse arguments.
           if(reader.I().F()) {
@@ -386,7 +386,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
           "    in the local time zone, represented as an `integer`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.chrono.local_from_utc"), ::rocket::ref(args));
           // Parse arguments.
           Ival time_utc;
@@ -416,7 +416,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
           "    represented as an `integer`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.chrono.utc_from_local"), ::rocket::ref(args));
           // Parse arguments.
           Ival time_local;
@@ -445,7 +445,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
           "    fractional part. By default, no fractional part is added.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.chrono.utc_format"), ::rocket::ref(args));
           // Parse arguments.
           Ival time_point;
@@ -478,7 +478,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
           "    otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.chrono.utc_parse"), ::rocket::ref(args));
           // Parse arguments.
           Sval time_str;

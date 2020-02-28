@@ -92,7 +92,7 @@ void create_bindings_gc(Oval& result, API_Version /*version*/)
           "    is not valid, `null` is returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value  {
           Argument_Reader reader(::rocket::sref("std.gc.tracked_count"), ::rocket::ref(args));
           // Parse arguments.
           Ival generation;
@@ -121,7 +121,7 @@ void create_bindings_gc(Oval& result, API_Version /*version*/)
           "    returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value  {
           Argument_Reader reader(::rocket::sref("std.gc.get_threshold"), ::rocket::ref(args));
           // Parse arguments.
           Ival generation;
@@ -155,7 +155,7 @@ void create_bindings_gc(Oval& result, API_Version /*version*/)
           "    valid, `null` is returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value  {
           Argument_Reader reader(::rocket::sref("std.gc.set_threshold"), ::rocket::ref(args));
           // Parse arguments.
           Ival generation;
@@ -186,7 +186,7 @@ void create_bindings_gc(Oval& result, API_Version /*version*/)
           "    total.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value  {
           Argument_Reader reader(::rocket::sref("std.gc.collect"), ::rocket::ref(args));
           // Parse arguments.
           Iopt generation_limit;

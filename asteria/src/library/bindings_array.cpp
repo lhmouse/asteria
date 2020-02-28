@@ -828,7 +828,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "  * Returns the specified subarray of `data`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.slice"), ::rocket::ref(args));
           // Parse arguments.
           Aval data;
@@ -872,7 +872,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "  * Returns a `array` with the subrange replaced.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.replace"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -930,7 +930,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "    otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.find"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -992,7 +992,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "    one is found, or `null` otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.find_if"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -1054,7 +1054,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "    one is found, or `null` otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.find_if_not"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -1117,7 +1117,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "    otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.rfind"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -1179,7 +1179,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "    one is found, or `null` otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.rfind_if"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -1242,7 +1242,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "    one is found, or `null` otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.rfind_if_not"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -1303,7 +1303,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "    always non-negative.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.count"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -1366,7 +1366,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "    always non-negative.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.count_if"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -1431,7 +1431,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "    always non-negative.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.count_if_not"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -1483,7 +1483,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "    otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.is_sorted"), ::rocket::ref(args));
           // Parse arguments.
           Aval data;
@@ -1520,7 +1520,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "    exception will be thrown or not.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.binary_search"), ::rocket::ref(args));
           // Parse arguments.
           Aval data;
@@ -1561,7 +1561,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "    exception will be thrown or not.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.lower_bound"), ::rocket::ref(args));
           // Parse arguments.
           Aval data;
@@ -1602,7 +1602,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "    exception will be thrown or not.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.upper_bound"), ::rocket::ref(args));
           // Parse arguments.
           Aval data;
@@ -1642,7 +1642,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "    exception will be thrown or not.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.lower_bound"), ::rocket::ref(args));
           // Parse arguments.
           Aval data;
@@ -1685,7 +1685,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "    will be thrown or not.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.sort"), ::rocket::ref(args));
           // Parse arguments.
           Aval data;
@@ -1722,7 +1722,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "    will be thrown or not.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.sortu"), ::rocket::ref(args));
           // Parse arguments.
           Aval data;
@@ -1754,7 +1754,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "    empty.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.max_of"), ::rocket::ref(args));
           // Parse arguments.
           Aval data;
@@ -1786,7 +1786,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "    empty.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.min_of"), ::rocket::ref(args));
           // Parse arguments.
           Aval data;
@@ -1815,7 +1815,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "  * Returns the reversed `array`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.reverse"), ::rocket::ref(args));
           // Parse arguments.
           Aval data;
@@ -1848,7 +1848,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "  * Returns an `array` containing all values generated.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.generate"), ::rocket::ref(args));
           // Parse arguments.
           Fval generator;
@@ -1881,7 +1881,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "  * Returns the shuffled `array`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.shuffle"), ::rocket::ref(args));
           // Parse arguments.
           Aval data;
@@ -1911,7 +1911,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "    `null`, `null` is returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.copy_keys"), ::rocket::ref(args));
           // Parse arguments.
           Oopt source;
@@ -1940,7 +1940,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "    `null`, `null` is returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.copy_values"), ::rocket::ref(args));
           // Parse arguments.
           Oopt source;

@@ -673,7 +673,7 @@ void create_bindings_json(Oval& result, API_Version /*version*/)
           "  * Returns the formatted text as a `string`.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.json.format"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -724,7 +724,7 @@ void create_bindings_json(Oval& result, API_Version /*version*/)
           "  * Throws an exception if the string is invalid.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.json.parse"), ::rocket::ref(args));
           // Parse arguments.
           Sval text;

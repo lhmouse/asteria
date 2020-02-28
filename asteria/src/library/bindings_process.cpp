@@ -96,7 +96,7 @@ void create_bindings_process(Oval& result, API_Version /*version*/)
           "    exit status could not be retrieved.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.process.execute"), ::rocket::ref(args));
           // Parse arguments.
           Sval cmd;
@@ -131,7 +131,7 @@ void create_bindings_process(Oval& result, API_Version /*version*/)
           "  * Throws an exception on failure.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args) -> Value {
+        [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.process.daemonize"), ::rocket::ref(args));
           // Parse arguments.
           if(reader.I().F()) {
