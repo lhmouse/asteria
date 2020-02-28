@@ -75,18 +75,20 @@ using ::rocket::xswap;
 using ::rocket::swap;
 using ::rocket::nullopt;
 
-// Low-level Data Structure
+// Base
+class Rcbase;
+class Source_Location;
+class Value;
+class Abstract_Opaque;
+class Abstract_Function;
+class Recursion_Sentry;
+
+// Low-level data structures
 class Variable_HashSet;
 class Reference_Dictionary;
 class AVMC_Queue;
 
 // Runtime
-class Rcbase;
-class Source_Location;
-class Recursion_Sentry;
-class Value;
-class Abstract_Opaque;
-class Abstract_Function;
 class Abstract_Hooks;
 class Runtime_Error;
 class Reference_Root;
