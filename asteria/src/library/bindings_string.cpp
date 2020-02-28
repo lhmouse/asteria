@@ -332,18 +332,16 @@ template<bool queryT> Sval do_url_decode(const Sval& text)
       }
       // Two hexadecimal characters shall follow.
       if(data.size() - nread < 2) {
-        ASTERIA_THROW("no hexadecimal digit after `%`");
+        ASTERIA_THROW("no enough hexadecimal digits after `%`");
       }
       // Parse the first digit.
-      uint32_t reg = 0;
       c = data[nread++];
       const char* pos = do_xstrchr(s_base16_table, c);
       if(!pos) {
         ASTERIA_THROW("invalid hexadecimal digit (character `$1`)", c);
       }
-      reg |= static_cast<uint32_t>(pos - s_base16_table) / 2;
+      uint32_t reg = static_cast<uint32_t>(pos - s_base16_table) / 2 * 16;
       // Parse the second digit.
-      reg <<= 4;
       c = data[nread++];
       pos = do_xstrchr(s_base16_table, c);
       if(!pos) {
