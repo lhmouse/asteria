@@ -68,6 +68,10 @@ template<typename charT, typename traitsT>
       {
         return this->get_tinybuf().putn(s, n), *this;
       }
+    basic_tinyfmt& puts(const char_type* s)
+      {
+        return this->get_tinybuf().puts(s), *this;
+      }
   };
 
 template<typename charT, typename traitsT>
@@ -94,7 +98,7 @@ template<typename charT, typename traitsT>
   {
     // Insert the sequence as is.
     auto& buf = fmt.get_tinybuf();
-    buf.putn(s, traitsT::length(s));
+    buf.puts(s);
     return fmt;
   }
 

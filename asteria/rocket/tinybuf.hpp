@@ -263,6 +263,10 @@ template<typename charT, typename traitsT>
         this->m_pcur += k;
         return *this;
       }
+    basic_tinybuf& puts(const char_type* s)
+      {
+        return this->putn(s, traits_type::length(s));
+      }
 
     basic_tinybuf& swap(basic_tinybuf& other) noexcept
       {
