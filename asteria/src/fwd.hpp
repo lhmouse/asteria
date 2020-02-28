@@ -162,7 +162,6 @@ using G_function  = rcptr<Abstract_Function>;
 using G_array     = cow_vector<Value>;
 using G_object    = cow_hashmap<phsh_string, Value, phsh_string::hash>;
 
-
 // Stack frame types
 enum Frame_Type : uint8_t
   {
