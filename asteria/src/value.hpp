@@ -74,12 +74,12 @@ class Value
         m_stor(G_real(xval))
       {
       }
-    Value(cow_string xval) noexcept
+    Value(G_string xval) noexcept
       :
-        m_stor(G_string(::rocket::move(xval)))
+        m_stor(::rocket::move(xval))
       {
       }
-    Value(cow_string::shallow_type xval) noexcept
+    Value(G_string::shallow_type xval) noexcept
       :
         m_stor(G_string(xval))
       {
@@ -99,14 +99,14 @@ class Value
         // Note `xval` may be a null pointer, in which case we set `*this` to `null`.
         this->do_assign_opt<rcptr<FunctionT>&&>(xval, ::std::addressof(xval));
       }
-    Value(cow_vector<Value> xval) noexcept
+    Value(G_array xval) noexcept
       :
-        m_stor(G_array(::rocket::move(xval)))
+        m_stor(::rocket::move(xval))
       {
       }
-    Value(cow_hashmap<phsh_string, Value, phsh_string::hash> xval) noexcept
+    Value(G_object xval) noexcept
       :
-        m_stor(G_object(::rocket::move(xval)))
+        m_stor(::rocket::move(xval))
       {
       }
     Value(const opt<bool>& xval) noexcept
@@ -141,27 +141,27 @@ class Value
       {
         this->do_assign_opt<G_real>(xval, xval);
       }
-    Value(const opt<cow_string>& xval) noexcept
+    Value(const opt<G_string>& xval) noexcept
       {
         this->do_assign_opt<const G_string&>(xval, xval);
       }
-    Value(opt<cow_string>&& xval) noexcept
+    Value(opt<G_string>&& xval) noexcept
       {
         this->do_assign_opt<G_string&&>(xval, xval);
       }
-    Value(const opt<cow_vector<Value>>& xval) noexcept
+    Value(const opt<G_array>& xval) noexcept
       {
         this->do_assign_opt<const G_array&>(xval, xval);
       }
-    Value(opt<cow_vector<Value>>&& xval) noexcept
+    Value(opt<G_array>&& xval) noexcept
       {
         this->do_assign_opt<G_array&&>(xval, xval);
       }
-    Value(const opt<cow_hashmap<phsh_string, Value, phsh_string::hash>>& xval) noexcept
+    Value(const opt<G_object>& xval) noexcept
       {
         this->do_assign_opt<const G_object&>(xval, xval);
       }
-    Value(opt<cow_hashmap<phsh_string, Value, phsh_string::hash>>&& xval) noexcept
+    Value(opt<G_object>&& xval) noexcept
       {
         this->do_assign_opt<G_object&&>(xval, xval);
       }
@@ -210,12 +210,12 @@ class Value
         this->m_stor = G_real(xval);
         return *this;
       }
-    Value& operator=(cow_string xval) noexcept
+    Value& operator=(G_string xval) noexcept
       {
-        this->m_stor = G_string(::rocket::move(xval));
+        this->m_stor = ::rocket::move(xval);
         return *this;
       }
-    Value& operator=(cow_string::shallow_type xval) noexcept
+    Value& operator=(G_string::shallow_type xval) noexcept
       {
         this->m_stor = G_string(xval);
         return *this;
@@ -237,14 +237,14 @@ class Value
         this->do_assign_opt<rcptr<FunctionT>&&>(xval, ::std::addressof(xval));
         return *this;
       }
-    Value& operator=(cow_vector<Value> xval) noexcept
+    Value& operator=(G_array xval) noexcept
       {
-        this->m_stor = G_array(::rocket::move(xval));
+        this->m_stor = ::rocket::move(xval);
         return *this;
       }
-    Value& operator=(cow_hashmap<phsh_string, Value, phsh_string::hash> xval) noexcept
+    Value& operator=(G_object xval) noexcept
       {
-        this->m_stor = G_object(::rocket::move(xval));
+        this->m_stor = ::rocket::move(xval);
         return *this;
       }
     Value& operator=(const opt<bool>& xval) noexcept
@@ -287,32 +287,32 @@ class Value
         this->do_assign_opt<G_real>(xval, xval);
         return *this;
       }
-    Value& operator=(const opt<cow_string>& xval) noexcept
+    Value& operator=(const opt<G_string>& xval) noexcept
       {
         this->do_assign_opt<const G_string&>(xval, xval);
         return *this;
       }
-    Value& operator=(opt<cow_string>&& xval) noexcept
+    Value& operator=(opt<G_string>&& xval) noexcept
       {
         this->do_assign_opt<G_string&&>(xval, xval);
         return *this;
       }
-    Value& operator=(const opt<cow_vector<Value>>& xval) noexcept
+    Value& operator=(const opt<G_array>& xval) noexcept
       {
         this->do_assign_opt<const G_array&>(xval, xval);
         return *this;
       }
-    Value& operator=(opt<cow_vector<Value>>&& xval) noexcept
+    Value& operator=(opt<G_array>&& xval) noexcept
       {
         this->do_assign_opt<G_array&&>(xval, xval);
         return *this;
       }
-    Value& operator=(const opt<cow_hashmap<phsh_string, Value, phsh_string::hash>>& xval) noexcept
+    Value& operator=(const opt<G_object>& xval) noexcept
       {
         this->do_assign_opt<const G_object&>(xval, xval);
         return *this;
       }
-    Value& operator=(opt<cow_hashmap<phsh_string, Value, phsh_string::hash>>&& xval) noexcept
+    Value& operator=(opt<G_object>&& xval) noexcept
       {
         this->do_assign_opt<G_object&&>(xval, xval);
         return *this;
