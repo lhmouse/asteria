@@ -418,6 +418,7 @@ class Value
       }
     G_opaque& open_opaque()
       {
+        // TODO: Use a dedicated type for opaque objects.
         auto& altr = this->m_stor.as<gtype_opaque>();
         if(ROCKET_UNEXPECT(altr.use_count() > 1)) {
           // Copy the opaque object as needed.
