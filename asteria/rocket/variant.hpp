@@ -41,10 +41,9 @@ template<typename... alternativesT> class variant
 #ifdef ROCKET_DEBUG
         ::std::memset(this->m_stor, '*', sizeof(m_stor));
 #endif
-        constexpr auto index_new = size_t(0);
         // Value-initialize the first alternative in place.
-        noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)));
-        this->m_index = index_new;
+        noadl::construct_at(static_cast<typename alternative_at<0>::type*>(static_cast<void*>(this->m_stor)));
+        this->m_index = 0;
       }
     template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<typename decay<paramT>::type>::value)>
         variant(paramT&& param) noexcept(is_nothrow_constructible<typename decay<paramT>::type, paramT&&>::value)
