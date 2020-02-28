@@ -30,7 +30,7 @@ enum Exit_Code : uint8_t
     exit_runtime_error      = 4,
   };
 
-[[noreturn]] int do_quick_exit(Exit_Code code) noexcept
+[[noreturn]] int do_exit(Exit_Code code) noexcept
   {
     ::fflush(nullptr);
     ::quick_exit(static_cast<int>(code));
@@ -328,7 +328,7 @@ void do_parse_command_line(int argc, char** argv)
           long val = ::strtol(optarg, &ep, 10);
           if((*ep != 0) || (val < 0) || (val > 99)) {
             ::fprintf(stderr, "%s: invalid optimization level -- '%s'\n", argv[0], optarg);
-            do_quick_exit(exit_invalid_argument);
+            do_exit(exit_invalid_argument);
           }
           optimize = val;
           break;
@@ -344,17 +344,17 @@ void do_parse_command_line(int argc, char** argv)
       default:
         // `getopt()` will have written an error message to standard error.
         ::fprintf(stderr, "Try `%s -h` for help.\n", argv[0]);
-        do_quick_exit(exit_invalid_argument);
+        do_exit(exit_invalid_argument);
       }
     }
     // Check for early exit conditions.
     if(help) {
       do_print_help(argv[0]);
-      do_quick_exit(exit_success);
+      do_exit(exit_success);
     }
     if(version) {
       do_print_version();
-      do_quick_exit(exit_success);
+      do_exit(exit_success);
     }
     // If more arguments follow, they denote the script to execute.
     if(optind < argc) {
@@ -412,11 +412,11 @@ void do_prepare_REPL_input()
     // Check for exit condition.
     if(::ferror(stdin)) {
       ::fprintf(stderr, "! error reading standard input\n");
-      do_quick_exit(exit_unspecified);
+      do_exit(exit_unspecified);
     }
     if(::feof(stdin)) {
       ::fprintf(stderr, "* have a nice day :)\n");
-      do_quick_exit(exit_success);
+      do_exit(exit_success);
     }
     ::fputc('\n', stderr);
   }
@@ -591,7 +591,7 @@ int do_REP_single()
     catch(Parser_Error& except) {
       // Report the error and exit.
       ::fprintf(stderr, "! parser error: %s\n", do_stringify(except).c_str());
-      do_quick_exit(exit_parser_error);
+      do_exit(exit_parser_error);
     }
 
     // Execute the script.
@@ -620,7 +620,7 @@ int do_REP_single()
       // If an exception was thrown, print something informative.
       ::fprintf(stderr, "! unhandled exception: %s\n", do_stringify(stdex).c_str());
     }
-    do_quick_exit(status);
+    do_exit(status);
   }
 
 }  // namespace
@@ -648,5 +648,5 @@ int main(int argc, char** argv)
   catch(exception& stdex) {
     // Print a message followed by the backtrace if it is available. There isn't much we can do.
     ::fprintf(stderr, "! unhandled exception: %s\n", do_stringify(stdex).c_str());
-    do_quick_exit(exit_unspecified);
+    do_exit(exit_unspecified);
   }
