@@ -167,10 +167,9 @@ template<typename IterT, typename PredT>
 Aval::iterator& do_merge_range(Aval::iterator& opos, Global& global, cow_vector<Reference>& args,
                                const Fopt& comparator, Aval::iterator ibegin, Aval::iterator iend, bool unique)
   {
-    for(auto ipos = ibegin;  ipos != iend;  ++ipos) {
+    for(auto ipos = ibegin;  ipos != iend;  ++ipos)
       if(!unique || (do_compare(global, args, comparator, ipos[0], opos[-1]) != compare_equal))
         *(opos++) = ::rocket::move(*ipos);
-    }
     return opos;
   }
 
@@ -185,15 +184,9 @@ Aval::iterator do_merge_blocks(Aval& output, Global& global, cow_vector<Referenc
     auto opos = output.mut_begin();
     auto ipos = input.mut_begin();
     auto iend = input.mut_end();
-    for(;;) {
-      // Get the block of the first block to merge.
+    while(iend - ipos > bsize) {
+      // Get the range of the first block to merge.
       bpos[0] = ipos;
-      if(iend - ipos <= bsize) {
-        // Copy all remaining elements.
-        ROCKET_ASSERT(opos != output.begin());
-        do_merge_range(opos, global, args, comparator, ipos, iend, unique);
-        break;
-      }
       ipos += bsize;
       bend[0] = ipos;
       // Get the range of the second block to merge.
@@ -238,6 +231,9 @@ Aval::iterator do_merge_blocks(Aval& output, Global& global, cow_vector<Referenc
       bi ^= 1;
       do_merge_range(opos, global, args, comparator, bpos[bi], bend[bi], unique);
     }
+    // Copy all remaining elements.
+    ROCKET_ASSERT(opos != output.begin());
+    do_merge_range(opos, global, args, comparator, ipos, iend, unique);
     return opos;
   }
 
