@@ -17,7 +17,7 @@ Ival std_chrono_utc_now()
     ::clock_gettime(CLOCK_REALTIME, &ts);
     // We return the time in milliseconds rather than seconds.
     auto secs = static_cast<int64_t>(ts.tv_sec);
-    auto msecs = ts.tv_nsec / 1'000'000;
+    auto msecs = static_cast<int64_t>(ts.tv_nsec / 1'000'000);
     return secs * 1000 + msecs;
   }
 
@@ -30,7 +30,7 @@ Ival std_chrono_local_now()
     ::localtime_r(&(ts.tv_sec), &tr);
     // We return the time in milliseconds rather than seconds.
     auto secs = static_cast<int64_t>(ts.tv_sec) + tr.tm_gmtoff;
-    auto msecs = ts.tv_nsec / 1'000'000;
+    auto msecs = static_cast<int64_t>(ts.tv_nsec / 1'000'000);
     return secs * 1000 + msecs;
   }
 
@@ -54,56 +54,50 @@ Ival std_chrono_steady_now()
     // We return the time in milliseconds rather than seconds.
     // Add a random offset to the result to help debugging.
     auto secs = static_cast<int64_t>(ts.tv_sec);
-    auto msecs = ts.tv_nsec / 1'000'000;
+    auto msecs = static_cast<int64_t>(ts.tv_nsec / 1'000'000);
     return secs * 1000 + msecs + 3210987654321;
   }
 
 Ival std_chrono_local_from_utc(Ival time_utc)
   {
     // Handle special time values.
-    if(time_utc <= -11644473600000) {
+    if(time_utc <= -11644473600000)
       return INT64_MIN;
-    }
-    if(time_utc >= 253370764800000) {
+    if(time_utc >= 253370764800000)
       return INT64_MAX;
-    }
     // Calculate the local time.
     ::time_t tp = 0;
     ::tm tr;
     ::localtime_r(&tp, &tr);
-    Ival time_local = time_utc + tr.tm_gmtoff * 1000;
+    auto time_local = time_utc + tr.tm_gmtoff * 1000;
     // Ensure the value is within the range of finite values.
-    if(time_local <= -11644473600000) {
+    if(time_local <= -11644473600000)
       return INT64_MIN;
-    }
-    if(time_local >= 253370764800000) {
+    if(time_local >= 253370764800000)
       return INT64_MAX;
-    }
-    return time_local;
+    else
+      return time_local;
   }
 
 Ival std_chrono_utc_from_local(Ival time_local)
   {
     // Handle special time values.
-    if(time_local <= -11644473600000) {
+    if(time_local <= -11644473600000)
       return INT64_MIN;
-    }
-    if(time_local >= 253370764800000) {
+    if(time_local >= 253370764800000)
       return INT64_MAX;
-    }
     // Calculate the local time.
     ::time_t tp = 0;
     ::tm tr;
     ::localtime_r(&tp, &tr);
-    Ival time_utc = time_local - tr.tm_gmtoff * 1000;
+    auto time_utc = time_local - tr.tm_gmtoff * 1000;
     // Ensure the value is within the range of finite values.
-    if(time_utc <= -11644473600000) {
+    if(time_utc <= -11644473600000)
       return INT64_MIN;
-    }
-    if(time_utc >= 253370764800000) {
+    if(time_utc >= 253370764800000)
       return INT64_MAX;
-    }
-    return time_utc;
+    else
+      return time_utc;
   }
 
 Sval std_chrono_utc_format(Ival time_point, Bopt with_ms)
@@ -167,15 +161,13 @@ Ival std_chrono_utc_parse(Sval time_str)
     // Trim leading and trailing spaces. Fail if the string becomes empty.
     static constexpr char s_spaces[] = " \f\n\r\t\v";
     size_t off = time_str.find_first_not_of(s_spaces);
-    if(off == Sval::npos) {
+    if(off == Sval::npos)
       ASTERIA_THROW("blank time string");
-    }
     // The shortest form is '1234-67-90 23:56:89' which contains 19 characters.
     const char* p = time_str.data() + off;
     off = time_str.find_last_not_of(s_spaces) + 1;
-    if(time_str.data() + off - p < 19) {
+    if(time_str.data() + off - p < 19)
       ASTERIA_THROW("invalid time string");
-    }
     // Declare the timepoint value as two parts: 'yyyy-mm-dd HH:MM:SS' and '.sss'.
     ::tm tr = { };
     double msecs = 0;
@@ -235,21 +227,17 @@ Ival std_chrono_utc_parse(Sval time_str)
       msecs = (msecs - tr.tm_sec) * 1000 + 0.01;
     }
     // Ensure all characters have been consumed.
-    if(p != ep) {
+    if(p != ep)
       ASTERIA_THROW("invalid time string (trailing characters in `$1`)", time_str);
-    }
     // Handle special time values.
-    if(tr.tm_year + 1900 < 1600) {
+    if(tr.tm_year + 1900 < 1600)
       return INT64_MIN;
-    }
-    if(tr.tm_year + 1900 > 9998) {
+    if(tr.tm_year + 1900 > 9998)
       return INT64_MAX;
-    }
     // Assemble all parts.
     ::time_t tp = ::timegm(&tr);
-    if(tp == ::time_t(-1)) {
+    if(tp == ::time_t(-1))
       ASTERIA_THROW("error assembling time");
-    }
     return static_cast<int64_t>(tp) * 1000 + static_cast<int64_t>(msecs);
   }
 
