@@ -65,11 +65,13 @@ Ival std_chrono_local_from_utc(Ival time_utc)
       return INT64_MIN;
     if(time_utc >= 253370764800000)
       return INT64_MAX;
+
     // Calculate the local time.
     ::time_t tp = 0;
     ::tm tr;
     ::localtime_r(&tp, &tr);
     int64_t time_local = time_utc + tr.tm_gmtoff * 1000;
+
     // Ensure the value is within the range of finite values.
     if(time_local <= -11644473600000)
       return INT64_MIN;
@@ -86,11 +88,13 @@ Ival std_chrono_utc_from_local(Ival time_local)
       return INT64_MIN;
     if(time_local >= 253370764800000)
       return INT64_MAX;
+
     // Calculate the local time.
     ::time_t tp = 0;
     ::tm tr;
     ::localtime_r(&tp, &tr);
     int64_t time_utc = time_local - tr.tm_gmtoff * 1000;
+
     // Ensure the value is within the range of finite values.
     if(time_utc <= -11644473600000)
       return INT64_MIN;
