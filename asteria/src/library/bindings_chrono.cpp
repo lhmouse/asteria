@@ -109,16 +109,13 @@ Sval std_chrono_utc_format(Ival time_point, Bopt with_ms)
     // No millisecond part is added by default.
     bool pms = with_ms.value_or(false);
     // Handle special time points.
-    if(time_point <= -11644473600000) {
-      static constexpr char s_min_str[][24] = { "1601-01-01 00:00:00",
-                                                "1601-01-01 00:00:00.000" };
-      return ::rocket::sref(s_min_str[pms]);
-    }
-    if(time_point >= 253370764800000) {
-      static constexpr char s_max_str[][24] = { "9999-01-01 00:00:00",
-                                                "9999-01-01 00:00:00.000" };
-      return ::rocket::sref(s_max_str[pms]);
-    }
+    static constexpr char s_limits[2][2][24] = { "1601-01-01 00:00:00", "1601-01-01 00:00:00.000",
+                                                 "9999-01-01 00:00:00", "9999-01-01 00:00:00.000" };
+    if(time_point <= -11644473600000)
+      return ::rocket::sref(s_limits[0][pms]);
+    if(time_point >= 253370764800000)
+      return ::rocket::sref(s_limits[1][pms]);
+
     // Split the timepoint into second and millisecond parts.
     double secs = (static_cast<double>(time_point) + 0.01) / 1000;
     double intg = ::std::floor(secs);
@@ -174,7 +171,7 @@ Ival std_chrono_utc_parse(Sval time_str)
       ASTERIA_THROW("invalid time string");
     // Declare the timepoint value as two parts: 'yyyy-mm-dd HH:MM:SS' and '.sss'.
     ::tm tr = { };
-    double msecs = 0;
+    int64_t msecs = 0;
     // Parse individual parts.
     ::rocket::ascii_numget numg;
     uint64_t temp = 0;
@@ -226,9 +223,10 @@ Ival std_chrono_utc_parse(Sval time_str)
       // Parse the second and millisecond parts as a whole.
       p -= 2;
       // 'SS.sss'
-      if(!numg.parse_F(p, ep, 10) || !numg.cast_F(msecs, 0, 60) || (p != ep))
+      double fval;
+      if(!numg.parse_F(p, ep, 10) || !numg.cast_F(fval, 0, 60) || (p != ep))
         ASTERIA_THROW("invalid time string (reading milliseconds in `$1`)", time_str);
-      msecs = (msecs - tr.tm_sec) * 1000 + 0.01;
+      msecs = static_cast<int64_t>((fval - tr.tm_sec) * 1000 + 0.01);
     }
     // Ensure all characters have been consumed.
     if(p != ep)
@@ -242,7 +240,8 @@ Ival std_chrono_utc_parse(Sval time_str)
     ::time_t tp = ::timegm(&tr);
     if(tp == ::time_t(-1))
       ASTERIA_THROW("error assembling time");
-    return static_cast<int64_t>(tp) * 1000 + static_cast<int64_t>(msecs);
+    int64_t secs = static_cast<int64_t>(tp);
+    return secs * 1000 + msecs;
   }
 
 void create_bindings_chrono(Oval& result, API_Version /*version*/)
