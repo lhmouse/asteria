@@ -16,8 +16,8 @@ Ival std_chrono_utc_now()
     ::timespec ts;
     ::clock_gettime(CLOCK_REALTIME, &ts);
     // We return the time in milliseconds rather than seconds.
-    auto secs = static_cast<int64_t>(ts.tv_sec);
-    auto msecs = static_cast<int64_t>(ts.tv_nsec / 1'000'000);
+    int64_t secs = static_cast<int64_t>(ts.tv_sec);
+    int64_t msecs = static_cast<int64_t>(ts.tv_nsec / 1'000'000);
     return secs * 1000 + msecs;
   }
 
@@ -29,8 +29,8 @@ Ival std_chrono_local_now()
     ::tm tr;
     ::localtime_r(&(ts.tv_sec), &tr);
     // We return the time in milliseconds rather than seconds.
-    auto secs = static_cast<int64_t>(ts.tv_sec) + tr.tm_gmtoff;
-    auto msecs = static_cast<int64_t>(ts.tv_nsec / 1'000'000);
+    int64_t secs = static_cast<int64_t>(ts.tv_sec) + tr.tm_gmtoff;
+    int64_t msecs = static_cast<int64_t>(ts.tv_nsec / 1'000'000);
     return secs * 1000 + msecs;
   }
 
@@ -41,8 +41,8 @@ Rval std_chrono_hires_now()
     ::clock_gettime(CLOCK_MONOTONIC, &ts);
     // We return the time in milliseconds rather than seconds.
     // Add a random offset to the result to help debugging.
-    auto secs = static_cast<double>(ts.tv_sec);
-    auto msecs = static_cast<double>(ts.tv_nsec) / 1'000'000.0;
+    double secs = static_cast<double>(ts.tv_sec);
+    double msecs = static_cast<double>(ts.tv_nsec) / 1'000'000.0;
     return secs * 1000 + msecs + 1234567890123;
   }
 
@@ -53,8 +53,8 @@ Ival std_chrono_steady_now()
     ::clock_gettime(CLOCK_MONOTONIC_COARSE, &ts);
     // We return the time in milliseconds rather than seconds.
     // Add a random offset to the result to help debugging.
-    auto secs = static_cast<int64_t>(ts.tv_sec);
-    auto msecs = static_cast<int64_t>(ts.tv_nsec / 1'000'000);
+    int64_t secs = static_cast<int64_t>(ts.tv_sec);
+    int64_t msecs = static_cast<int64_t>(ts.tv_nsec / 1'000'000);
     return secs * 1000 + msecs + 3210987654321;
   }
 
@@ -69,7 +69,7 @@ Ival std_chrono_local_from_utc(Ival time_utc)
     ::time_t tp = 0;
     ::tm tr;
     ::localtime_r(&tp, &tr);
-    auto time_local = time_utc + tr.tm_gmtoff * 1000;
+    int64_t time_local = time_utc + tr.tm_gmtoff * 1000;
     // Ensure the value is within the range of finite values.
     if(time_local <= -11644473600000)
       return INT64_MIN;
@@ -90,7 +90,7 @@ Ival std_chrono_utc_from_local(Ival time_local)
     ::time_t tp = 0;
     ::tm tr;
     ::localtime_r(&tp, &tr);
-    auto time_utc = time_local - tr.tm_gmtoff * 1000;
+    int64_t time_utc = time_local - tr.tm_gmtoff * 1000;
     // Ensure the value is within the range of finite values.
     if(time_utc <= -11644473600000)
       return INT64_MIN;
