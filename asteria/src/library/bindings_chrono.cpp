@@ -298,10 +298,13 @@ Ival std_chrono_utc_parse(Sval time_str)
     temp += mday - 1;
 
     // Convert all parts into milliseconds and sum them up.
-    temp *=        86400'000;
-    temp += hour *  3600'000;
-    temp += min  *    60'000;
-    temp += sec  *     1'000;
+    temp *= 24;
+    temp += hour;
+    temp *= 60;
+    temp += min;
+    temp *= 60;
+    temp += sec;
+    temp *= 1000;
     temp += msec;
     // Shift the timestamp back.
     return static_cast<int64_t>(temp) + s_timestamp_1600_03_01;
