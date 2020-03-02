@@ -17,6 +17,9 @@ constexpr int64_t s_timestamp_max = 253370764800'000;
 constexpr char s_strings_min[][24] = { "1601-01-01 00:00:00", "1601-01-01 00:00:00.000" };
 constexpr char s_strings_max[][24] = { "9999-01-01 00:00:00", "9999-01-01 00:00:00.000" };
 
+constexpr int64_t s_timestamp_1600_03_01 = -11670912000'000;
+constexpr uint8_t s_month_days[] = { 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31, 29 };  // from March
+
 constexpr char s_spaces[] = " \f\n\r\t\v";
 
 }  // namespace
@@ -172,84 +175,123 @@ Ival std_chrono_utc_parse(Sval time_str)
     size_t off = time_str.find_first_not_of(s_spaces);
     if(off == Sval::npos)
       ASTERIA_THROW("blank time string");
-    // The shortest form is '1234-67-90 23:56:89' which contains 19 characters.
-    const char* p = time_str.data() + off;
+    // Get the start and end of the non-empty sequence.
+    const char* bp = time_str.c_str() + off;
     off = time_str.find_last_not_of(s_spaces) + 1;
-    if(time_str.data() + off - p < 19)
-      ASTERIA_THROW("invalid time string");
-    // Declare the timepoint value as two parts: 'yyyy-mm-dd HH:MM:SS' and '.sss'.
-    ::tm tr = { };
-    int64_t msecs = 0;
+    const char* ep = time_str.c_str() + off;
+
     // Parse individual parts.
     ::rocket::ascii_numget numg;
-    uint64_t temp = 0;
-    auto xget = [&](int& val, size_t w, unsigned min, unsigned max, unsigned sub)
-      {
-        const char* ep = p + w;
-        if(!numg.parse_U(p, ep, 10) || !numg.cast_U(temp, min, max) || (p != ep))
-          return false;
-        val = static_cast<int>(temp - sub);
-        return true;
-      };
-    // 'yyyy'
-    if(!xget(tr.tm_year, 4, 0, 9999, 1900))
-      ASTERIA_THROW("invalid time string (reading year in `$1`)", time_str);
-    // '-' or '/'
-    if(!::rocket::is_any_of(*(p++), { '-', '/' }))
-      ASTERIA_THROW("invalid time string (expecting year-month separator in `$1`)", time_str);
-    // 'mm'
-    if(!xget(tr.tm_mon, 2, 1, 12, 1))
-      ASTERIA_THROW("invalid time string (reading month in `$1`)", time_str);
-    // '-' or '/'
-    if(!::rocket::is_any_of(*(p++), { '-', '/' }))
-      ASTERIA_THROW("invalid time string (expecting month-day separator in `$1`)", time_str);
-    // 'dd'
-    if(!xget(tr.tm_mday, 2, 1, 31, 0))
-      ASTERIA_THROW("invalid time string (reading day of month in `$1`)", time_str);
-    // ' ' or 'T'
-    if(!::rocket::is_any_of(*(p++), { ' ', 'T' }))
-      ASTERIA_THROW("invalid time string (expecting date-time separator in `$1`)", time_str);
-    // 'HH'
-    if(!xget(tr.tm_hour, 2, 0, 23, 0))
-      ASTERIA_THROW("invalid time string (reading hours in `$1`)", time_str);
-    // ':'
-    if(!::rocket::is_any_of(*(p++), { ':' }))
-      ASTERIA_THROW("invalid time string (expecting hour-minute separator in `$1`)", time_str);
-    // 'MM'
-    if(!xget(tr.tm_min, 2, 0, 59, 0))
-      ASTERIA_THROW("invalid time string (reading minutes in `$1`)", time_str);
-    // ':'
-    if(!::rocket::is_any_of(*(p++), { ':' }))
-      ASTERIA_THROW("invalid time string (expecting minute-second separator in `$1`)", time_str);
-    // 'SS'
-    // Note leap seconds.
-    if(!xget(tr.tm_sec, 2, 0, 60, 0))
-      ASTERIA_THROW("invalid time string (reading seconds in `$1`)", time_str);
-    // Check for the millisecond part.
-    const char* ep = time_str.data() + off;
-    if(*p == '.') {
-      // Parse the second and millisecond parts as a whole.
-      p -= 2;
-      // 'SS.sss'
-      double fval;
-      if(!numg.parse_F(p, ep, 10) || !numg.cast_F(fval, 0, 60) || (p != ep))
-        ASTERIA_THROW("invalid time string (reading milliseconds in `$1`)", time_str);
-      msecs = static_cast<int64_t>((fval - tr.tm_sec) * 1000 + 0.01);
+    uint64_t year = 0;
+    uint64_t month = 0;
+    uint64_t mday = 0;
+    uint64_t hour = 0;
+    uint64_t min = 0;
+    uint64_t sec = 0;
+    uint64_t msec = 0;
+
+    // Parse the year as at most four digits.
+    if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(year, 0, 9999))
+      ASTERIA_THROW("invalid date-time string (expecting year in `$1`)", time_str);
+    // Parse the year-month separator, which may be a dash or slash.
+    if((bp == ep) || !::rocket::is_any_of(*(bp++), { '-', '/' }))
+      ASTERIA_THROW("invalid date-time string (expecting year-month separator in `$1`)", time_str);
+    // Parse the month as at most two digits.
+    if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(month, 1, 12))
+      ASTERIA_THROW("invalid date-time string (expecting month in `$1`)", time_str);
+    // Parse the month-day separator, which may be a dash or slash.
+    if((bp == ep) || !::rocket::is_any_of(*(bp++), { '-', '/' }))
+      ASTERIA_THROW("invalid date-time string (expecting month-day separator in `$1`)", time_str);
+    // Get the maximum value of the day of month.
+    uint8_t mday_max;
+    size_t mon_sh = (month + 9) % 12;
+    if(mon_sh != 11)
+      mday_max = s_month_days[mon_sh];
+    else if((year % 100 == 0) ? (year % 400 == 0) : (year % 4 == 0))
+      mday_max = 29;
+    else
+      mday_max = 28;
+    // Parse the day of month as at most two digits.
+    if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(mday, 1, mday_max))
+      ASTERIA_THROW("invalid date-time string (expecting day of month in `$1`)", time_str);
+
+    // The subday part is optional.
+    if(bp != ep) {
+      // Parse the day-hour separator, which may be a space or the letter `T`.
+      if(!::rocket::is_any_of(*(bp++), { ' ', '\t', 'T' }))
+        ASTERIA_THROW("invalid date-time string (expecting day-hour separator in `$1`)", time_str);
+
+      // Parse the number of hours as at most two digits.
+      if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(hour, 0, 59))
+        ASTERIA_THROW("invalid date-time string (expecting hours in `$1`)", time_str);
+      // Parse the hour-minute separator, which shall by a colon.
+      if(!::rocket::is_any_of(*(bp++), { ':' }))
+        ASTERIA_THROW("invalid date-time string (expecting hour-minute separator in `$1`)", time_str);
+      // Parse the number of minutes as at most two digits.
+      if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(min, 0, 59))
+        ASTERIA_THROW("invalid date-time string (expecting minutes in `$1`)", time_str);
+      // Parse the minute-second separator, which shall by a colon.
+      if(!::rocket::is_any_of(*(bp++), { ':' }))
+        ASTERIA_THROW("invalid date-time string (expecting minute-second separator in `$1`)", time_str);
+      // Parse the number of seconds as at most two digits. Note leap seconds.
+      if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(sec, 0, 60))
+        ASTERIA_THROW("invalid date-time string (expecting seconds in `$1`)", time_str);
+
+      // The subsecond part is optional.
+      if(bp != ep) {
+        // Parse the second-subsecond separator, which shall by a dot.
+        if(!::rocket::is_any_of(*(bp++), { '.' }))
+          ASTERIA_THROW("invalid date-time string (expecting second-subsecond separator in `$1`)", time_str);
+        // Parse at most three digits. Excess digits are ignored.
+        uint32_t weight = 100;
+        while(bp != ep) {
+          uint32_t dval = static_cast<uint32_t>(*(bp++) - '0');
+          if(dval > 9)
+            ASTERIA_THROW("invalid date-time string (invalid subsecond digit in `$1`)", time_str);
+          msec += dval * weight;
+          weight /= 10;
+        }
+      }
     }
+
     // Ensure all characters have been consumed.
-    if(p != ep)
-      ASTERIA_THROW("invalid time string (trailing characters in `$1`)", time_str);
+    if(bp != ep)
+      ASTERIA_THROW("invalid date-time string (excess characters in `$1`)", time_str);
     // Handle special time values.
-    if(tr.tm_year + 1900 < 1600)
+    if(year <= 1600)
       return INT64_MIN;
-    if(tr.tm_year + 1900 > 9998)
+    if(year >= 9999)
       return INT64_MAX;
-    // Assemble all parts.
-    ::time_t tp = ::timegm(&tr);
-    if(tp == ::time_t(-1))
-      ASTERIA_THROW("error assembling time");
-    int64_t secs = static_cast<int64_t>(tp);
-    return secs * 1000 + msecs;
+
+    // Calculate the number of days since 1600-03-01.
+    if(month < 3)
+      year -= 1;
+    // There are 146097 days in every 400 years.
+    uint64_t temp = (year - 1600) / 400 * 146097;
+    year %= 400;
+    // There are 36524 days in every 100 years.
+    temp += year / 100 * 36524;
+    year %= 100;
+    // There are 1461 days in every 4 years.
+    temp += year / 4 * 1461;
+    year %= 4;
+    // There are 365 days in every year.
+    // Note we count from 03-01. The extra day of a leap year will be appended to the end.
+    temp += year * 365;
+    // Accumulate months.
+    for(size_t i = 0;  i < mon_sh;  ++i)
+      temp += s_month_days[i];
+    // Accumulate days in the last month.
+    temp += mday - 1;
+
+    // Convert all parts into milliseconds and sum them up.
+    temp *=        86400'000;
+    temp += hour *  3600'000;
+    temp += min  *    60'000;
+    temp += sec  *     1'000;
+    temp += msec;
+    // Shift the timestamp back.
+    return static_cast<int64_t>(temp) + s_timestamp_1600_03_01;
   }
 
 void create_bindings_chrono(Oval& result, API_Version /*version*/)
