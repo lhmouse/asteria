@@ -9,6 +9,17 @@
 #include <time.h>
 
 namespace Asteria {
+namespace {
+
+constexpr int64_t s_timestamp_min = -11644473600'000;
+constexpr int64_t s_timestamp_max = 253370764800'000;
+
+constexpr char s_strings_min[][24] = { "1601-01-01 00:00:00", "1601-01-01 00:00:00.000" };
+constexpr char s_strings_max[][24] = { "9999-01-01 00:00:00", "9999-01-01 00:00:00.000" };
+
+constexpr char s_spaces[] = " \f\n\r\t\v";
+
+}  // namespace
 
 Ival std_chrono_utc_now()
   {
@@ -17,7 +28,7 @@ Ival std_chrono_utc_now()
     ::clock_gettime(CLOCK_REALTIME, &ts);
     // We return the time in milliseconds rather than seconds.
     int64_t secs = static_cast<int64_t>(ts.tv_sec);
-    int64_t msecs = static_cast<int64_t>(ts.tv_nsec / 1'000'000);
+    int64_t msecs = static_cast<int64_t>(ts.tv_nsec / 1000'000);
     return secs * 1000 + msecs;
   }
 
@@ -30,7 +41,7 @@ Ival std_chrono_local_now()
     ::localtime_r(&(ts.tv_sec), &tr);
     // We return the time in milliseconds rather than seconds.
     int64_t secs = static_cast<int64_t>(ts.tv_sec) + tr.tm_gmtoff;
-    int64_t msecs = static_cast<int64_t>(ts.tv_nsec / 1'000'000);
+    int64_t msecs = static_cast<int64_t>(ts.tv_nsec / 1000'000);
     return secs * 1000 + msecs;
   }
 
@@ -42,7 +53,7 @@ Rval std_chrono_hires_now()
     // We return the time in milliseconds rather than seconds.
     // Add a random offset to the result to help debugging.
     double secs = static_cast<double>(ts.tv_sec);
-    double msecs = static_cast<double>(ts.tv_nsec) / 1'000'000.0;
+    double msecs = static_cast<double>(ts.tv_nsec) / 1000'000.0;
     return secs * 1000 + msecs + 1234567890123;
   }
 
@@ -54,16 +65,16 @@ Ival std_chrono_steady_now()
     // We return the time in milliseconds rather than seconds.
     // Add a random offset to the result to help debugging.
     int64_t secs = static_cast<int64_t>(ts.tv_sec);
-    int64_t msecs = static_cast<int64_t>(ts.tv_nsec / 1'000'000);
+    int64_t msecs = static_cast<int64_t>(ts.tv_nsec / 1000'000);
     return secs * 1000 + msecs + 3210987654321;
   }
 
 Ival std_chrono_local_from_utc(Ival time_utc)
   {
     // Handle special time values.
-    if(time_utc <= -11644473600000)
+    if(time_utc <= s_timestamp_min)
       return INT64_MIN;
-    if(time_utc >= 253370764800000)
+    if(time_utc >= s_timestamp_max)
       return INT64_MAX;
 
     // Calculate the local time.
@@ -73,9 +84,9 @@ Ival std_chrono_local_from_utc(Ival time_utc)
     int64_t time_local = time_utc + tr.tm_gmtoff * 1000;
 
     // Ensure the value is within the range of finite values.
-    if(time_local <= -11644473600000)
+    if(time_local <= s_timestamp_min)
       return INT64_MIN;
-    if(time_local >= 253370764800000)
+    if(time_local >= s_timestamp_max)
       return INT64_MAX;
     else
       return time_local;
@@ -84,9 +95,9 @@ Ival std_chrono_local_from_utc(Ival time_utc)
 Ival std_chrono_utc_from_local(Ival time_local)
   {
     // Handle special time values.
-    if(time_local <= -11644473600000)
+    if(time_local <= s_timestamp_min)
       return INT64_MIN;
-    if(time_local >= 253370764800000)
+    if(time_local >= s_timestamp_max)
       return INT64_MAX;
 
     // Calculate the local time.
@@ -96,9 +107,9 @@ Ival std_chrono_utc_from_local(Ival time_local)
     int64_t time_utc = time_local - tr.tm_gmtoff * 1000;
 
     // Ensure the value is within the range of finite values.
-    if(time_utc <= -11644473600000)
+    if(time_utc <= s_timestamp_min)
       return INT64_MIN;
-    if(time_utc >= 253370764800000)
+    if(time_utc >= s_timestamp_max)
       return INT64_MAX;
     else
       return time_utc;
@@ -109,12 +120,10 @@ Sval std_chrono_utc_format(Ival time_point, Bopt with_ms)
     // No millisecond part is added by default.
     bool pms = with_ms.value_or(false);
     // Handle special time points.
-    static constexpr char s_limits[2][2][24] = { "1601-01-01 00:00:00", "1601-01-01 00:00:00.000",
-                                                 "9999-01-01 00:00:00", "9999-01-01 00:00:00.000" };
-    if(time_point <= -11644473600000)
-      return ::rocket::sref(s_limits[0][pms]);
-    if(time_point >= 253370764800000)
-      return ::rocket::sref(s_limits[1][pms]);
+    if(time_point <= s_timestamp_min)
+      return ::rocket::sref(s_strings_min[pms]);
+    if(time_point >= s_timestamp_max)
+      return ::rocket::sref(s_strings_max[pms]);
 
     // Split the timepoint into second and millisecond parts.
     double secs = (static_cast<double>(time_point) + 0.01) / 1000;
@@ -160,7 +169,6 @@ Sval std_chrono_utc_format(Ival time_point, Bopt with_ms)
 Ival std_chrono_utc_parse(Sval time_str)
   {
     // Trim leading and trailing spaces. Fail if the string becomes empty.
-    static constexpr char s_spaces[] = " \f\n\r\t\v";
     size_t off = time_str.find_first_not_of(s_spaces);
     if(off == Sval::npos)
       ASTERIA_THROW("blank time string");
