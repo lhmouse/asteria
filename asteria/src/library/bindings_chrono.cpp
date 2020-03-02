@@ -209,7 +209,7 @@ Ival std_chrono_utc_parse(Sval time_str)
     }
     // Get the maximum value of the day of month.
     uint8_t mday_max;
-    size_t mon_sh = (month + 9) % 12;
+    size_t mon_sh = static_cast<size_t>(month + 9) % 12;
     if(mon_sh != 11)
       mday_max = s_month_days[mon_sh];
     else if((year % 100 == 0) ? (year % 400 == 0) : (year % 4 == 0))
@@ -291,6 +291,7 @@ Ival std_chrono_utc_parse(Sval time_str)
     // There are 365 days in every year.
     // Note we count from 03-01. The extra day of a leap year will be appended to the end.
     temp += year * 365;
+
     // Accumulate months.
     for(size_t i = 0;  i < mon_sh;  ++i)
       temp += s_month_days[i];
