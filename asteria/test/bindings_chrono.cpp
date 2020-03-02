@@ -39,8 +39,8 @@ int main()
         try { t = std.chrono.utc_parse(s);  assert false;  }
           catch(e) { assert std.string.find(e, "assertion failure") == null;  }
 
-        t = std.chrono.utc_now();
-        for(var i = 0;  i < 36500;  ++i) {
+        t = 631152000000;  // 1990-01-01 00:00:00 GMT
+        for(var i = 0;  i < 365 * 420;  ++i) {
           t += 86400`000;
           s = std.chrono.utc_format(t, true);
           assert std.chrono.utc_parse(s) == t;
