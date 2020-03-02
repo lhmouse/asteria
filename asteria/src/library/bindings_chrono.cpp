@@ -128,45 +128,103 @@ Sval std_chrono_utc_format(Ival time_point, Bopt with_ms)
     if(time_point >= s_timestamp_max)
       return ::rocket::sref(s_strings_max[pms]);
 
-    // Split the timepoint into second and millisecond parts.
-    double secs = (static_cast<double>(time_point) + 0.01) / 1000;
-    double intg = ::std::floor(secs);
-    // Note that the number of seconds shall be rounded towards negative infinity.
-    ::time_t tp = static_cast<::time_t>(intg);
-    ::tm tr;
-    ::gmtime_r(&tp, &tr);
-    // Combine all parts into a single number.
+    // Convert the timestamp to the number of milliseconds since 1600-03-01.
+    uint64_t temp = static_cast<uint64_t>(time_point - s_timestamp_1600_03_01);
+    // Get subday parts.
+    uint64_t msec = temp % 1000;
+    temp /= 1000;
+    uint64_t sec = temp % 60;
+    temp /= 60;
+    uint64_t min = temp % 60;
+    temp /= 60;
+    uint64_t hour = temp % 24;
+    temp /= 24;
+
+    // There are 146097 days in every 400 years.
+    uint64_t y400 = temp / 146097;
+    temp %= 146097;
+    // There are 36524 days in every 100 years.
+    uint64_t y100 = temp / 36524;
+    temp %= 36524;
+    if(y100 == 4)  // leap
+      y100 -= 1, temp += 36524;
+    // There are 1461 days in every 4 years.
+    uint64_t y4 = temp / 1461;
+    temp %= 1461;
+    // There are 365 days in every year.
+    // Note we count from 03-01. The extra day of a leap year will be appended to the end.
+    uint64_t year = temp / 365;
+    temp %= 365;
+    if(year == 4)  // leap
+      year -= 1, temp += 365;
+    // Sum them up to get the number of years.
+    year += y400 * 400;
+    year += y100 * 100;
+    year += y4   *   4;
+    year += 1600;
+
+    // Calculate the shifted month index, which counts from March.
+    size_t mon_sh = 0;
+    for(;;) {
+      uint32_t k = s_month_days[mon_sh];
+      if(temp < k)
+        break;
+      temp -= k;
+      mon_sh += 1;
+    }
+    uint64_t month = (mon_sh + 2) % 12 + 1;
+    // Note our 'years' start from March.
+    if(month < 3)
+      year += 1;
+    // `temp` now contains the number of days in the last month.
+    uint64_t mday = temp + 1;
+
+    // Pack these parts into a BCD integer which looks like `20200215041314789`.
+    temp = year;
+    temp *= 100;
+    temp += month;
+    temp *= 100;
+    temp += mday;
+    temp *= 100;
+    temp += hour;
+    temp *= 100;
+    temp += min;
+    temp *= 100;
+    temp += sec;
+    temp *= 1000;
+    temp += msec;
+    // Format it now.
     ::rocket::ascii_numput nump;
-    uint64_t temp = 0;
-    // 'yyyy'
-    temp += static_cast<uint64_t>(static_cast<unsigned>(tr.tm_year + 1900))
-            * 1'00'00'00'00'00'000;
-    // 'mm'
-    temp += static_cast<uint64_t>(static_cast<unsigned>(tr.tm_mon + 1))
-            *    1'00'00'00'00'000;
-    // 'dd'
-    temp += static_cast<uint64_t>(static_cast<unsigned>(tr.tm_mday))
-            *       1'00'00'00'000;
-    // 'HH'
-    temp += static_cast<uint64_t>(static_cast<unsigned>(tr.tm_hour))
-            *          1'00'00'000;
-    // 'MM'
-    temp += static_cast<uint64_t>(static_cast<unsigned>(tr.tm_min))
-            *             1'00'000;
-    // 'SS'
-    temp += static_cast<uint64_t>(static_cast<unsigned>(tr.tm_sec))
-            *                1'000;
-    // 'sss'
-    temp += static_cast<uint64_t>(static_cast<int64_t>((secs - intg) * 1000));
-    // Compose the string.
-    const char* p = nump.put_DU(temp, 17).data();
-    char tstr[] =
-      {
-        *(p++), *(p++), *(p++), *(p++), '-', *(p++), *(p++), '-', *(p++), *(p++),  // 'yyyy-mm-dd'  10
-        ' ',            *(p++), *(p++), ':', *(p++), *(p++), ':', *(p++), *(p++),  // ' HH:MM:SS'    9
-        '.',            *(p++), *(p++), *(p++)                                     // '.sss'         4
-      };
-    return cow_string(tstr, pms ? 23 : 19);
+    const char* bp = nump.put_DU(temp).data();
+
+    // Copy individual parts out.
+    cow_string time_str;
+    time_str.reserve(sizeof(s_strings_max[0]));
+    // `yyyy-mm-dd HH:MM:SS`
+    time_str.append(bp, 4);
+    bp += 4;
+    time_str.push_back('-');
+    time_str.append(bp, 2);
+    bp += 2;
+    time_str.push_back('-');
+    time_str.append(bp, 2);
+    bp += 2;
+    time_str.push_back(' ');
+    time_str.append(bp, 2);
+    bp += 2;
+    time_str.push_back(':');
+    time_str.append(bp, 2);
+    bp += 2;
+    time_str.push_back(':');
+    time_str.append(bp, 2);
+    bp += 2;
+    // Append the subsecond part if it is requested.
+    if(pms) {
+      time_str.push_back('.');
+      time_str.append(bp, 3);
+      bp += 3;
+    }
+    return time_str;
   }
 
 Ival std_chrono_utc_parse(Sval time_str)
@@ -277,6 +335,7 @@ Ival std_chrono_utc_parse(Sval time_str)
       return INT64_MAX;
 
     // Calculate the number of days since 1600-03-01.
+    // Note our 'years' start from March.
     if(month < 3)
       year -= 1;
     // There are 146097 days in every 400 years.
