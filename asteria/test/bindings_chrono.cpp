@@ -38,6 +38,14 @@ int main()
         s = "invalid";
         try { t = std.chrono.utc_parse(s);  assert false;  }
           catch(e) { assert std.string.find(e, "assertion failure") == null;  }
+
+        t = std.chrono.utc_now();
+        for(var i = 0;  i < 36500;  ++i) {
+          t += 86400`000;
+          s = std.chrono.utc_format(t, true);
+          assert std.chrono.utc_parse(s) == t;
+        }
+
       )__"), tinybuf::open_read);
 
     Simple_Script code(cbuf, ::rocket::sref(__FILE__));
