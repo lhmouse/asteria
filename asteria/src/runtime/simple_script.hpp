@@ -39,13 +39,9 @@ class Simple_Script
         return this->m_opts = opts, *this;
       }
 
-    bool empty() const noexcept
-      {
-        return this->m_cptr == nullptr;
-      }
     explicit operator bool () const noexcept
       {
-        return this->m_cptr != nullptr;
+        return bool(this->m_cptr);
       }
     Simple_Script& clear() noexcept
       {
@@ -57,12 +53,6 @@ class Simple_Script
     Simple_Script& reload_file(const cow_string& path);
     Simple_Script& reload_stdin();
 
-    // Get the stored function.
-    const rcptr<Abstract_Function>& get_function_opt() const noexcept
-      {
-        return this->m_cptr;
-      }
-    // These are convenience wrappers.
     Reference execute(Global_Context& global, cow_vector<Reference>&& args = nullopt) const;
     Reference execute(Global_Context& global, cow_vector<Value>&& vals) const;
   };

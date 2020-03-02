@@ -14,8 +14,10 @@
 
 #include <initializer_list>  // ::std::initializer_list<>
 #include <utility>  // ::std::pair<>, ::std::move(), ::std::forward(), ::std::integer_sequence<>
-#include <cstddef>  // nullptr_t
-#include <cstdint>  // uint8_t, int64_t
+#include <stdexcept>
+#include <typeinfo>
+#include <cstddef>
+#include <cstdint>
 #include <climits>
 #include "../rocket/preprocessor_utilities.h"
 #include "../rocket/cow_string.hpp"
@@ -66,6 +68,7 @@ using ::std::uintmax_t;
 using ::std::ptrdiff_t;
 using ::std::size_t;
 using ::std::exception;
+using ::std::type_info;
 
 using ::rocket::cbegin;
 using ::rocket::cend;
