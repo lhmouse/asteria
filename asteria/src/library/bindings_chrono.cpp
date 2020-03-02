@@ -173,12 +173,13 @@ Ival std_chrono_utc_parse(Sval time_str)
   {
     // Trim leading and trailing spaces. Fail if the string becomes empty.
     size_t off = time_str.find_first_not_of(s_spaces);
-    if(off == Sval::npos)
+    if(off == Sval::npos) {
       ASTERIA_THROW("blank time string");
+    }
     // Get the start and end of the non-empty sequence.
-    const char* bp = time_str.c_str() + off;
+    const char* bp = time_str.data() + off;
     off = time_str.find_last_not_of(s_spaces) + 1;
-    const char* ep = time_str.c_str() + off;
+    const char* ep = time_str.data() + off;
 
     // Parse individual parts.
     ::rocket::ascii_numget numg;
@@ -191,17 +192,21 @@ Ival std_chrono_utc_parse(Sval time_str)
     uint64_t msec = 0;
 
     // Parse the year as at most four digits.
-    if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(year, 0, 9999))
+    if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(year, 0, 9999)) {
       ASTERIA_THROW("invalid date-time string (expecting year in `$1`)", time_str);
+    }
     // Parse the year-month separator, which may be a dash or slash.
-    if((bp == ep) || !::rocket::is_any_of(*(bp++), { '-', '/' }))
+    if((bp == ep) || !::rocket::is_any_of(*(bp++), { '-', '/' })) {
       ASTERIA_THROW("invalid date-time string (expecting year-month separator in `$1`)", time_str);
+    }
     // Parse the month as at most two digits.
-    if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(month, 1, 12))
+    if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(month, 1, 12)) {
       ASTERIA_THROW("invalid date-time string (expecting month in `$1`)", time_str);
+    }
     // Parse the month-day separator, which may be a dash or slash.
-    if((bp == ep) || !::rocket::is_any_of(*(bp++), { '-', '/' }))
+    if((bp == ep) || !::rocket::is_any_of(*(bp++), { '-', '/' })) {
       ASTERIA_THROW("invalid date-time string (expecting month-day separator in `$1`)", time_str);
+    }
     // Get the maximum value of the day of month.
     uint8_t mday_max;
     size_t mon_sh = (month + 9) % 12;
@@ -212,36 +217,41 @@ Ival std_chrono_utc_parse(Sval time_str)
     else
       mday_max = 28;
     // Parse the day of month as at most two digits.
-    if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(mday, 1, mday_max))
+    if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(mday, 1, mday_max)) {
       ASTERIA_THROW("invalid date-time string (expecting day of month in `$1`)", time_str);
-
+    }
     // The subday part is optional.
     if(bp != ep) {
       // Parse the day-hour separator, which may be a space or the letter `T`.
-      if(!::rocket::is_any_of(*(bp++), { ' ', '\t', 'T' }))
+      if(!::rocket::is_any_of(*(bp++), { ' ', '\t', 'T' })) {
         ASTERIA_THROW("invalid date-time string (expecting day-hour separator in `$1`)", time_str);
-
+      }
       // Parse the number of hours as at most two digits.
-      if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(hour, 0, 59))
+      if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(hour, 0, 59)) {
         ASTERIA_THROW("invalid date-time string (expecting hours in `$1`)", time_str);
+      }
       // Parse the hour-minute separator, which shall by a colon.
-      if(!::rocket::is_any_of(*(bp++), { ':' }))
+      if(!::rocket::is_any_of(*(bp++), { ':' })) {
         ASTERIA_THROW("invalid date-time string (expecting hour-minute separator in `$1`)", time_str);
+      }
       // Parse the number of minutes as at most two digits.
-      if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(min, 0, 59))
+      if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(min, 0, 59)) {
         ASTERIA_THROW("invalid date-time string (expecting minutes in `$1`)", time_str);
+      }
       // Parse the minute-second separator, which shall by a colon.
-      if(!::rocket::is_any_of(*(bp++), { ':' }))
+      if(!::rocket::is_any_of(*(bp++), { ':' })) {
         ASTERIA_THROW("invalid date-time string (expecting minute-second separator in `$1`)", time_str);
+      }
       // Parse the number of seconds as at most two digits. Note leap seconds.
-      if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(sec, 0, 60))
+      if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(sec, 0, 60)) {
         ASTERIA_THROW("invalid date-time string (expecting seconds in `$1`)", time_str);
-
+      }
       // The subsecond part is optional.
       if(bp != ep) {
         // Parse the second-subsecond separator, which shall by a dot.
-        if(!::rocket::is_any_of(*(bp++), { '.' }))
+        if(!::rocket::is_any_of(*(bp++), { '.' })) {
           ASTERIA_THROW("invalid date-time string (expecting second-subsecond separator in `$1`)", time_str);
+        }
         // Parse at most three digits. Excess digits are ignored.
         uint32_t weight = 100;
         while(bp != ep) {
@@ -251,12 +261,15 @@ Ival std_chrono_utc_parse(Sval time_str)
           msec += dval * weight;
           weight /= 10;
         }
+        if(weight == 100)
+          ASTERIA_THROW("invalid date-time string (no digits after decimal point in `$1`)", time_str);
       }
     }
 
     // Ensure all characters have been consumed.
-    if(bp != ep)
+    if(bp != ep) {
       ASTERIA_THROW("invalid date-time string (excess characters in `$1`)", time_str);
+    }
     // Handle special time values.
     if(year <= 1600)
       return INT64_MIN;
