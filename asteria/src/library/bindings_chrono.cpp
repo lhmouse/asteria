@@ -147,7 +147,7 @@ Sval std_chrono_utc_format(Ival time_point, Bopt with_ms)
     uint64_t y100 = temp / 36524;
     temp %= 36524;
     if(y100 == 4)  // leap
-      y100 -= 1, temp += 36524;
+      y100 = 3, temp = 36524;
     // There are 1461 days in every 4 years.
     uint64_t y4 = temp / 1461;
     temp %= 1461;
@@ -156,7 +156,7 @@ Sval std_chrono_utc_format(Ival time_point, Bopt with_ms)
     uint64_t year = temp / 365;
     temp %= 365;
     if(year == 4)  // leap
-      year -= 1, temp += 365;
+      year = 3, temp = 365;
     // Sum them up to get the number of years.
     year += y400 * 400;
     year += y100 * 100;
@@ -164,12 +164,10 @@ Sval std_chrono_utc_format(Ival time_point, Bopt with_ms)
     year += 1600;
 
     // Calculate the shifted month index, which counts from March.
+    uint8_t mday_max;
     size_t mon_sh = 0;
-    for(;;) {
-      uint32_t k = s_month_days[mon_sh];
-      if(temp < k)
-        break;
-      temp -= k;
+    while(temp >= (mday_max = s_month_days[mon_sh])) {
+      temp -= mday_max;
       mon_sh += 1;
     }
     uint64_t month = (mon_sh + 2) % 12 + 1;
@@ -352,8 +350,10 @@ Ival std_chrono_utc_parse(Sval time_str)
     temp += year * 365;
 
     // Accumulate months.
-    for(size_t i = 0;  i < mon_sh;  ++i)
-      temp += s_month_days[i];
+    while(mon_sh != 0) {
+      mon_sh -= 1;
+      temp += s_month_days[mon_sh];
+    }
     // Accumulate days in the last month.
     temp += mday - 1;
 
