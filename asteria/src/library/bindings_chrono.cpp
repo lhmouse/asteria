@@ -29,6 +29,7 @@ Ival std_chrono_utc_now()
     // Get UTC time from the system.
     ::timespec ts;
     ::clock_gettime(CLOCK_REALTIME, &ts);
+
     // We return the time in milliseconds rather than seconds.
     int64_t secs = static_cast<int64_t>(ts.tv_sec);
     int64_t msecs = static_cast<int64_t>(ts.tv_nsec / 1000'000);
@@ -42,6 +43,7 @@ Ival std_chrono_local_now()
     ::clock_gettime(CLOCK_REALTIME, &ts);
     ::tm tr;
     ::localtime_r(&(ts.tv_sec), &tr);
+
     // We return the time in milliseconds rather than seconds.
     int64_t secs = static_cast<int64_t>(ts.tv_sec) + tr.tm_gmtoff;
     int64_t msecs = static_cast<int64_t>(ts.tv_nsec / 1000'000);
@@ -53,6 +55,7 @@ Rval std_chrono_hires_now()
     // Get the time since the system was started.
     ::timespec ts;
     ::clock_gettime(CLOCK_MONOTONIC, &ts);
+
     // We return the time in milliseconds rather than seconds.
     // Add a random offset to the result to help debugging.
     double secs = static_cast<double>(ts.tv_sec);
@@ -65,6 +68,7 @@ Ival std_chrono_steady_now()
     // Get the time since the system was started.
     ::timespec ts;
     ::clock_gettime(CLOCK_MONOTONIC_COARSE, &ts);
+
     // We return the time in milliseconds rather than seconds.
     // Add a random offset to the result to help debugging.
     int64_t secs = static_cast<int64_t>(ts.tv_sec);
