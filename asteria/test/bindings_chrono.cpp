@@ -40,8 +40,8 @@ int main()
           catch(e) { assert std.string.find(e, "assertion failure") == null;  }
 
         t = 631152000000;  // 1990-01-01 00:00:00 GMT
-        for(var i = 0;  i < 365 * 420;  ++i) {
-          t += 86400`000;
+        for(var i = 0;  i < 365 * 500;  ++i) {
+          t += 86345`678;
           s = std.chrono.utc_format(t, true);
           assert std.chrono.utc_parse(s) == t;
         }
