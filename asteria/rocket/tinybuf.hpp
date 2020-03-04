@@ -214,6 +214,16 @@ template<typename charT, typename traitsT>
           // Try populating the get area and discard the first character.
           return this->do_call_underflow(false);
       }
+    basic_tinybuf& putc(char_type c)
+      {
+        if(ROCKET_EXPECT(this->m_pcur != this->m_pend))
+          // Append a character to the put area.
+          return traits_type::assign(this->m_pcur++[0], c), *this;
+        else
+          // Evict data from the put area followed by the character specified.
+          return this->do_call_overflow(::std::addressof(c), 1);
+      }
+
     size_type getn(char_type* s, size_type n)
       {
         if(n == 0) {
@@ -223,10 +233,8 @@ template<typename charT, typename traitsT>
         auto k = static_cast<size_type>(this->m_gend - this->m_gcur);
         if(ROCKET_UNEXPECT(k == 0)) {
           // If the get area is empty, try populating it.
-          if(traits_type::is_eof(this->do_call_underflow(true))) {
-            // Report EOF.
+          if(traits_type::is_eof(this->do_call_underflow(true)))
             return 0;
-          }
           k = static_cast<size_type>(this->m_gend - this->m_gcur);
           ROCKET_ASSERT(k != 0);
         }
@@ -236,15 +244,6 @@ template<typename charT, typename traitsT>
         traits_type::copy(s, this->m_gcur, k);
         this->m_gcur += k;
         return k;
-      }
-    basic_tinybuf& putc(char_type c)
-      {
-        if(ROCKET_EXPECT(this->m_pcur != this->m_pend))
-          // Append a character to the put area.
-          return traits_type::assign(this->m_pcur++[0], c), *this;
-        else
-          // Evict data from the put area followed by the character specified.
-          return this->do_call_overflow(::std::addressof(c), 1);
       }
     basic_tinybuf& putn(const char_type* s, size_type n)
       {
