@@ -33,34 +33,34 @@ const char* describe_frame_type(Frame_Type type) noexcept
     }
   }
 
-const char* describe_gtype(Gtype gtype) noexcept
+const char* describe_vtype(Vtype vtype) noexcept
   {
-    switch(gtype) {
-    case gtype_null: {
+    switch(vtype) {
+    case vtype_null: {
         return "null";
       }
-    case gtype_boolean: {
+    case vtype_boolean: {
         return "boolean";
       }
-    case gtype_integer: {
+    case vtype_integer: {
         return "integer";
       }
-    case gtype_real: {
+    case vtype_real: {
         return "real";
       }
-    case gtype_string: {
+    case vtype_string: {
         return "string";
       }
-    case gtype_opaque: {
+    case vtype_opaque: {
         return "opaque";
       }
-    case gtype_function: {
+    case vtype_function: {
         return "function";
       }
-    case gtype_array: {
+    case vtype_array: {
         return "array";
       }
-    case gtype_object: {
+    case vtype_object: {
         return "object";
       }
     default:

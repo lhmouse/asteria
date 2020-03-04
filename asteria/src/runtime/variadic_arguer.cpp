@@ -24,12 +24,12 @@ Reference& Variadic_Arguer::invoke_ptc_aware(Reference& self, Global_Context& /*
   {
     Argument_Reader reader(::rocket::sref("<built-in>.__varg"), ::rocket::ref(args));
     // Extract arguments.
-    opt<G_integer> qindex;
+    opt<V_integer> qindex;
     if(reader.I().g(qindex).F()) {
       auto nvargs = this->m_vargs.size();
       if(!qindex) {
         // Return the number of variadic arguments if `index` is `null` or absent.
-        Reference_Root::S_constant xref = { G_integer(nvargs) };
+        Reference_Root::S_constant xref = { V_integer(nvargs) };
         return self = ::rocket::move(xref);
       }
       // Return the argument at `index`.

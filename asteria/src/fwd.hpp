@@ -157,15 +157,15 @@ using tinybuf = ::rocket::tinybuf;
 using tinyfmt = ::rocket::tinyfmt;
 
 // Fundamental types
-using G_null      = nullptr_t;
-using G_boolean   = bool;
-using G_integer   = int64_t;
-using G_real      = double;
-using G_string    = cow_string;
-using G_opaque    = rcptr<Abstract_Opaque>;
-using G_function  = rcptr<Abstract_Function>;
-using G_array     = cow_vector<Value>;
-using G_object    = cow_hashmap<phsh_string, Value, phsh_string::hash>;
+using V_null      = nullptr_t;
+using V_boolean   = bool;
+using V_integer   = int64_t;
+using V_real      = double;
+using V_string    = cow_string;
+using V_opaque    = rcptr<Abstract_Opaque>;
+using V_function  = rcptr<Abstract_Function>;
+using V_array     = cow_vector<Value>;
+using V_object    = cow_hashmap<phsh_string, Value, phsh_string::hash>;
 
 // Stack frame types
 enum Frame_Type : uint8_t
@@ -189,20 +189,20 @@ enum GC_Generation : uint8_t
   };
 
 // Indices of fundamental types
-enum Gtype : uint8_t
+enum Vtype : uint8_t
   {
-    gtype_null      = 0,
-    gtype_boolean   = 1,
-    gtype_integer   = 2,
-    gtype_real      = 3,
-    gtype_string    = 4,
-    gtype_opaque    = 5,
-    gtype_function  = 6,
-    gtype_array     = 7,
-    gtype_object    = 8,
+    vtype_null      = 0,
+    vtype_boolean   = 1,
+    vtype_integer   = 2,
+    vtype_real      = 3,
+    vtype_string    = 4,
+    vtype_opaque    = 5,
+    vtype_function  = 6,
+    vtype_array     = 7,
+    vtype_object    = 8,
   };
 
-ROCKET_PURE_FUNCTION extern const char* describe_gtype(Gtype gtype) noexcept;
+ROCKET_PURE_FUNCTION extern const char* describe_vtype(Vtype vtype) noexcept;
 
 // Value comparison results
 enum Compare : uint8_t
@@ -334,25 +334,25 @@ static const Value& null_value = reinterpret_cast<const Value&>(null_value_stora
 
 // Aliases for bindings (shorter but less readable)
 using Global = Global_Context;
-using Null = G_null;
+using Null = V_null;
 
-using Bval = G_boolean;
-using Ival = G_integer;
-using Rval = G_real;
-using Sval = G_string;
-using Pval = G_opaque;
-using Fval = G_function;
-using Aval = G_array;
-using Oval = G_object;
+using Bval = V_boolean;
+using Ival = V_integer;
+using Rval = V_real;
+using Sval = V_string;
+using Pval = V_opaque;
+using Fval = V_function;
+using Aval = V_array;
+using Oval = V_object;
 
-using Bopt = opt<G_boolean>;
-using Iopt = opt<G_integer>;
-using Ropt = opt<G_real>;
-using Sopt = opt<G_string>;
-using Popt = opt<G_opaque>;
-using Fopt = opt<G_function>;
-using Aopt = opt<G_array>;
-using Oopt = opt<G_object>;
+using Bopt = opt<V_boolean>;
+using Iopt = opt<V_integer>;
+using Ropt = opt<V_real>;
+using Sopt = opt<V_string>;
+using Popt = opt<V_opaque>;
+using Fopt = opt<V_function>;
+using Aopt = opt<V_array>;
+using Oopt = opt<V_object>;
 
 }  // namespace Asteria
 

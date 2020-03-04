@@ -11,11 +11,11 @@ int main()
     auto var = ::rocket::make_refcnt<Variable>();
     ASTERIA_TEST_CHECK(!var->is_initialized());
 
-    var->initialize(G_real(123.456), false);
+    var->initialize(V_real(123.456), false);
     ASTERIA_TEST_CHECK(var->is_initialized());
     ASTERIA_TEST_CHECK(var->get_value().is_real());
 
-    var->open_value() = G_string(::rocket::sref("hello"));
+    var->open_value() = V_string(::rocket::sref("hello"));
     ASTERIA_TEST_CHECK(var->is_initialized());
     ASTERIA_TEST_CHECK(var->get_value().is_string());
 

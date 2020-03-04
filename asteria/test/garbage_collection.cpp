@@ -43,7 +43,7 @@ int main()
     {
       Global_Context global;
       var = global.create_variable();
-      var->initialize(G_string("meow"), true);
+      var->initialize(V_string("meow"), true);
 
       ::rocket::tinybuf_str cbuf;
       cbuf.set_string(::rocket::sref(

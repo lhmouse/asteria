@@ -47,8 +47,8 @@ class Argument_Reader
   private:
     template<typename HandlerT> inline void do_fail(HandlerT&& handler);
 
-    inline void do_record_parameter_optional(Gtype gtype);
-    inline void do_record_parameter_required(Gtype gtype);
+    inline void do_record_parameter_optional(Vtype vtype);
+    inline void do_record_parameter_required(Vtype vtype);
     inline void do_record_parameter_generic();
     inline void do_record_parameter_variadic();
     inline void do_record_parameter_finish();

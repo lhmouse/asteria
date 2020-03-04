@@ -15,15 +15,15 @@ class Value
   public:
     using Xvariant = variant<
       ROCKET_CDR(
-      , G_null      // 0,
-      , G_boolean   // 1,
-      , G_integer   // 2,
-      , G_real      // 3,
-      , G_string    // 4,
-      , G_opaque    // 5,
-      , G_function  // 6,
-      , G_array     // 7,
-      , G_object    // 8,
+      , V_null      // 0,
+      , V_boolean   // 1,
+      , V_integer   // 2,
+      , V_real      // 3,
+      , V_string    // 4,
+      , V_opaque    // 5,
+      , V_function  // 6,
+      , V_array     // 7,
+      , V_object    // 8,
       )>;
     static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
 
@@ -36,52 +36,52 @@ class Value
       }
     Value(bool xval) noexcept
       :
-        m_stor(G_boolean(xval))
+        m_stor(V_boolean(xval))
       {
       }
     Value(signed char xval) noexcept
       :
-        m_stor(G_integer(xval))
+        m_stor(V_integer(xval))
       {
       }
     Value(signed short xval) noexcept
       :
-        m_stor(G_integer(xval))
+        m_stor(V_integer(xval))
       {
       }
     Value(signed xval) noexcept
       :
-        m_stor(G_integer(xval))
+        m_stor(V_integer(xval))
       {
       }
     Value(signed long xval) noexcept
       :
-        m_stor(G_integer(xval))
+        m_stor(V_integer(xval))
       {
       }
     Value(signed long long xval) noexcept
       :
-        m_stor(G_integer(xval))
+        m_stor(V_integer(xval))
       {
       }
     Value(float xval) noexcept
       :
-        m_stor(G_real(xval))
+        m_stor(V_real(xval))
       {
       }
     Value(double xval) noexcept
       :
-        m_stor(G_real(xval))
+        m_stor(V_real(xval))
       {
       }
-    Value(G_string xval) noexcept
+    Value(V_string xval) noexcept
       :
         m_stor(::rocket::move(xval))
       {
       }
-    Value(G_string::shallow_type xval) noexcept
+    Value(V_string::shallow_type xval) noexcept
       :
-        m_stor(G_string(xval))
+        m_stor(V_string(xval))
       {
       }
     template<typename OpaqueT,
@@ -99,125 +99,125 @@ class Value
         // Note `xval` may be a null pointer, in which case we set `*this` to `null`.
         this->do_assign_opt<rcptr<FunctionT>&&>(xval, ::std::addressof(xval));
       }
-    Value(G_array xval) noexcept
+    Value(V_array xval) noexcept
       :
         m_stor(::rocket::move(xval))
       {
       }
-    Value(G_object xval) noexcept
+    Value(V_object xval) noexcept
       :
         m_stor(::rocket::move(xval))
       {
       }
     Value(const opt<bool>& xval) noexcept
       {
-        this->do_assign_opt<G_boolean>(xval, xval);
+        this->do_assign_opt<V_boolean>(xval, xval);
       }
     Value(const opt<signed char>& xval) noexcept
       {
-        this->do_assign_opt<G_integer>(xval, xval);
+        this->do_assign_opt<V_integer>(xval, xval);
       }
     Value(const opt<signed short>& xval) noexcept
       {
-        this->do_assign_opt<G_integer>(xval, xval);
+        this->do_assign_opt<V_integer>(xval, xval);
       }
     Value(const opt<signed>& xval) noexcept
       {
-        this->do_assign_opt<G_integer>(xval, xval);
+        this->do_assign_opt<V_integer>(xval, xval);
       }
     Value(const opt<signed long>& xval) noexcept
       {
-        this->do_assign_opt<G_integer>(xval, xval);
+        this->do_assign_opt<V_integer>(xval, xval);
       }
     Value(const opt<signed long long>& xval) noexcept
       {
-        this->do_assign_opt<G_integer>(xval, xval);
+        this->do_assign_opt<V_integer>(xval, xval);
       }
     Value(const opt<float>& xval) noexcept
       {
-        this->do_assign_opt<G_real>(xval, xval);
+        this->do_assign_opt<V_real>(xval, xval);
       }
     Value(const opt<double>& xval) noexcept
       {
-        this->do_assign_opt<G_real>(xval, xval);
+        this->do_assign_opt<V_real>(xval, xval);
       }
-    Value(const opt<G_string>& xval) noexcept
+    Value(const opt<V_string>& xval) noexcept
       {
-        this->do_assign_opt<const G_string&>(xval, xval);
+        this->do_assign_opt<const V_string&>(xval, xval);
       }
-    Value(opt<G_string>&& xval) noexcept
+    Value(opt<V_string>&& xval) noexcept
       {
-        this->do_assign_opt<G_string&&>(xval, xval);
+        this->do_assign_opt<V_string&&>(xval, xval);
       }
-    Value(const opt<G_array>& xval) noexcept
+    Value(const opt<V_array>& xval) noexcept
       {
-        this->do_assign_opt<const G_array&>(xval, xval);
+        this->do_assign_opt<const V_array&>(xval, xval);
       }
-    Value(opt<G_array>&& xval) noexcept
+    Value(opt<V_array>&& xval) noexcept
       {
-        this->do_assign_opt<G_array&&>(xval, xval);
+        this->do_assign_opt<V_array&&>(xval, xval);
       }
-    Value(const opt<G_object>& xval) noexcept
+    Value(const opt<V_object>& xval) noexcept
       {
-        this->do_assign_opt<const G_object&>(xval, xval);
+        this->do_assign_opt<const V_object&>(xval, xval);
       }
-    Value(opt<G_object>&& xval) noexcept
+    Value(opt<V_object>&& xval) noexcept
       {
-        this->do_assign_opt<G_object&&>(xval, xval);
+        this->do_assign_opt<V_object&&>(xval, xval);
       }
     Value& operator=(nullptr_t) noexcept
       {
-        this->m_stor = G_null();
+        this->m_stor = V_null();
         return *this;
       }
     Value& operator=(bool xval) noexcept
       {
-        this->m_stor = G_boolean(xval);
+        this->m_stor = V_boolean(xval);
         return *this;
       }
     Value& operator=(signed char xval) noexcept
       {
-        this->m_stor = G_integer(xval);
+        this->m_stor = V_integer(xval);
         return *this;
       }
     Value& operator=(signed short xval) noexcept
       {
-        this->m_stor = G_integer(xval);
+        this->m_stor = V_integer(xval);
         return *this;
       }
     Value& operator=(signed xval) noexcept
       {
-        this->m_stor = G_integer(xval);
+        this->m_stor = V_integer(xval);
         return *this;
       }
     Value& operator=(signed long xval) noexcept
       {
-        this->m_stor = G_integer(xval);
+        this->m_stor = V_integer(xval);
         return *this;
       }
     Value& operator=(signed long long xval) noexcept
       {
-        this->m_stor = G_integer(xval);
+        this->m_stor = V_integer(xval);
         return *this;
       }
     Value& operator=(float xval) noexcept
       {
-        this->m_stor = G_real(xval);
+        this->m_stor = V_real(xval);
         return *this;
       }
     Value& operator=(double xval) noexcept
       {
-        this->m_stor = G_real(xval);
+        this->m_stor = V_real(xval);
         return *this;
       }
-    Value& operator=(G_string xval) noexcept
+    Value& operator=(V_string xval) noexcept
       {
         this->m_stor = ::rocket::move(xval);
         return *this;
       }
-    Value& operator=(G_string::shallow_type xval) noexcept
+    Value& operator=(V_string::shallow_type xval) noexcept
       {
-        this->m_stor = G_string(xval);
+        this->m_stor = V_string(xval);
         return *this;
       }
     template<typename OpaqueT,
@@ -237,84 +237,84 @@ class Value
         this->do_assign_opt<rcptr<FunctionT>&&>(xval, ::std::addressof(xval));
         return *this;
       }
-    Value& operator=(G_array xval) noexcept
+    Value& operator=(V_array xval) noexcept
       {
         this->m_stor = ::rocket::move(xval);
         return *this;
       }
-    Value& operator=(G_object xval) noexcept
+    Value& operator=(V_object xval) noexcept
       {
         this->m_stor = ::rocket::move(xval);
         return *this;
       }
     Value& operator=(const opt<bool>& xval) noexcept
       {
-        this->do_assign_opt<G_boolean>(xval, xval);
+        this->do_assign_opt<V_boolean>(xval, xval);
         return *this;
       }
     Value& operator=(const opt<signed char>& xval) noexcept
       {
-        this->do_assign_opt<G_integer>(xval, xval);
+        this->do_assign_opt<V_integer>(xval, xval);
         return *this;
       }
     Value& operator=(const opt<signed short>& xval) noexcept
       {
-        this->do_assign_opt<G_integer>(xval, xval);
+        this->do_assign_opt<V_integer>(xval, xval);
         return *this;
       }
     Value& operator=(const opt<signed>& xval) noexcept
       {
-        this->do_assign_opt<G_integer>(xval, xval);
+        this->do_assign_opt<V_integer>(xval, xval);
         return *this;
       }
     Value& operator=(const opt<signed long>& xval) noexcept
       {
-        this->do_assign_opt<G_integer>(xval, xval);
+        this->do_assign_opt<V_integer>(xval, xval);
         return *this;
       }
     Value& operator=(const opt<signed long long>& xval) noexcept
       {
-        this->do_assign_opt<G_integer>(xval, xval);
+        this->do_assign_opt<V_integer>(xval, xval);
         return *this;
       }
     Value& operator=(const opt<float>& xval) noexcept
       {
-        this->do_assign_opt<G_real>(xval, xval);
+        this->do_assign_opt<V_real>(xval, xval);
         return *this;
       }
     Value& operator=(const opt<double>& xval) noexcept
       {
-        this->do_assign_opt<G_real>(xval, xval);
+        this->do_assign_opt<V_real>(xval, xval);
         return *this;
       }
-    Value& operator=(const opt<G_string>& xval) noexcept
+    Value& operator=(const opt<V_string>& xval) noexcept
       {
-        this->do_assign_opt<const G_string&>(xval, xval);
+        this->do_assign_opt<const V_string&>(xval, xval);
         return *this;
       }
-    Value& operator=(opt<G_string>&& xval) noexcept
+    Value& operator=(opt<V_string>&& xval) noexcept
       {
-        this->do_assign_opt<G_string&&>(xval, xval);
+        this->do_assign_opt<V_string&&>(xval, xval);
         return *this;
       }
-    Value& operator=(const opt<G_array>& xval) noexcept
+    Value& operator=(const opt<V_array>& xval) noexcept
       {
-        this->do_assign_opt<const G_array&>(xval, xval);
+        this->do_assign_opt<const V_array&>(xval, xval);
         return *this;
       }
-    Value& operator=(opt<G_array>&& xval) noexcept
+    Value& operator=(opt<V_array>&& xval) noexcept
       {
-        this->do_assign_opt<G_array&&>(xval, xval);
+        this->do_assign_opt<V_array&&>(xval, xval);
         return *this;
       }
-    Value& operator=(const opt<G_object>& xval) noexcept
+    Value& operator=(const opt<V_object>& xval) noexcept
       {
-        this->do_assign_opt<const G_object&>(xval, xval);
+        this->do_assign_opt<const V_object&>(xval, xval);
         return *this;
       }
-    Value& operator=(opt<G_object>&& xval) noexcept
+    Value& operator=(opt<V_object>&& xval) noexcept
       {
-        this->do_assign_opt<G_object&&>(xval, xval);
+        this->do_assign_opt<V_object&&>(xval, xval);
         return *this;
       }
 
@@ -325,104 +325,104 @@ class Value
         if(chk)
           this->m_stor = static_cast<CastT>(*ptr);
         else
-          this->m_stor = G_null();
+          this->m_stor = V_null();
       }
 
   public:
-    Gtype gtype() const noexcept
+    Vtype vtype() const noexcept
       {
-        return static_cast<Gtype>(this->m_stor.index());
+        return static_cast<Vtype>(this->m_stor.index());
       }
-    const char* what_gtype() const noexcept
+    const char* what_vtype() const noexcept
       {
-        return describe_gtype(static_cast<Gtype>(this->m_stor.index()));
+        return describe_vtype(static_cast<Vtype>(this->m_stor.index()));
       }
 
     bool is_null() const noexcept
       {
-        return this->gtype() == gtype_null;
+        return this->vtype() == vtype_null;
       }
 
     bool is_boolean() const noexcept
       {
-        return this->gtype() == gtype_boolean;
+        return this->vtype() == vtype_boolean;
       }
-    G_boolean as_boolean() const
+    V_boolean as_boolean() const
       {
-        return this->m_stor.as<gtype_boolean>();
+        return this->m_stor.as<vtype_boolean>();
       }
-    G_boolean& open_boolean()
+    V_boolean& open_boolean()
       {
-        return this->m_stor.as<gtype_boolean>();
+        return this->m_stor.as<vtype_boolean>();
       }
 
     bool is_integer() const noexcept
       {
-        return this->gtype() == gtype_integer;
+        return this->vtype() == vtype_integer;
       }
-    G_integer as_integer() const
+    V_integer as_integer() const
       {
-        return this->m_stor.as<gtype_integer>();
+        return this->m_stor.as<vtype_integer>();
       }
-    G_integer& open_integer()
+    V_integer& open_integer()
       {
-        return this->m_stor.as<gtype_integer>();
+        return this->m_stor.as<vtype_integer>();
       }
 
     bool is_real() const noexcept
       {
-        return this->gtype() == gtype_real;
+        return this->vtype() == vtype_real;
       }
-    G_real as_real() const
+    V_real as_real() const
       {
-        return this->m_stor.as<gtype_real>();
+        return this->m_stor.as<vtype_real>();
       }
-    G_real& open_real()
+    V_real& open_real()
       {
-        return this->m_stor.as<gtype_real>();
+        return this->m_stor.as<vtype_real>();
       }
 
     bool is_string() const noexcept
       {
-        return this->gtype() == gtype_string;
+        return this->vtype() == vtype_string;
       }
-    const G_string& as_string() const
+    const V_string& as_string() const
       {
-        return this->m_stor.as<gtype_string>();
+        return this->m_stor.as<vtype_string>();
       }
-    G_string& open_string()
+    V_string& open_string()
       {
-        return this->m_stor.as<gtype_string>();
+        return this->m_stor.as<vtype_string>();
       }
 
     bool is_function() const noexcept
       {
-        return this->gtype() == gtype_function;
+        return this->vtype() == vtype_function;
       }
-    const G_function& as_function() const
+    const V_function& as_function() const
       {
-        return this->m_stor.as<gtype_function>();
+        return this->m_stor.as<vtype_function>();
       }
-    G_function& open_function()
+    V_function& open_function()
       {
-        return this->m_stor.as<gtype_function>();
+        return this->m_stor.as<vtype_function>();
       }
 
     bool is_opaque() const noexcept
       {
-        return this->gtype() == gtype_opaque;
+        return this->vtype() == vtype_opaque;
       }
-    const G_opaque& as_opaque() const
+    const V_opaque& as_opaque() const
       {
-        return this->m_stor.as<gtype_opaque>();
+        return this->m_stor.as<vtype_opaque>();
       }
-    G_opaque& open_opaque()
+    V_opaque& open_opaque()
       {
         // TODO: Use a dedicated type for opaque objects.
-        auto& altr = this->m_stor.as<gtype_opaque>();
+        auto& altr = this->m_stor.as<vtype_opaque>();
         if(ROCKET_UNEXPECT(altr.use_count() > 1)) {
           // Copy the opaque object as needed.
-          G_opaque qown;
+          V_opaque qown;
           auto qnew = altr->clone_opt(qown);
           ROCKET_ASSERT(qnew == qown.get());
           // Replace the current instance.
@@ -434,28 +434,28 @@ class Value
 
     bool is_array() const noexcept
       {
-        return this->gtype() == gtype_array;
+        return this->vtype() == vtype_array;
       }
-    const G_array& as_array() const
+    const V_array& as_array() const
       {
-        return this->m_stor.as<gtype_array>();
+        return this->m_stor.as<vtype_array>();
       }
-    G_array& open_array()
+    V_array& open_array()
       {
-        return this->m_stor.as<gtype_array>();
+        return this->m_stor.as<vtype_array>();
       }
 
     bool is_object() const noexcept
       {
-        return this->gtype() == gtype_object;
+        return this->vtype() == vtype_object;
       }
-    const G_object& as_object() const
+    const V_object& as_object() const
       {
-        return this->m_stor.as<gtype_object>();
+        return this->m_stor.as<vtype_object>();
       }
-    G_object& open_object()
+    V_object& open_object()
       {
-        return this->m_stor.as<gtype_object>();
+        return this->m_stor.as<vtype_object>();
       }
 
     Value& swap(Value& other) noexcept
@@ -466,24 +466,24 @@ class Value
 
     bool is_convertible_to_real() const noexcept
       {
-        if(this->gtype() == gtype_integer) {
+        if(this->vtype() == vtype_integer) {
           return true;
         }
-        return this->gtype() == gtype_real;
+        return this->vtype() == vtype_real;
       }
-    G_real convert_to_real() const
+    V_real convert_to_real() const
       {
-        if(this->gtype() == gtype_integer) {
-          return G_real(this->m_stor.as<gtype_integer>());
+        if(this->vtype() == vtype_integer) {
+          return V_real(this->m_stor.as<vtype_integer>());
         }
-        return this->m_stor.as<gtype_real>();
+        return this->m_stor.as<vtype_real>();
       }
-    G_real& mutate_into_real()
+    V_real& mutate_into_real()
       {
-        if(this->gtype() == gtype_integer) {
-          return this->m_stor.emplace<gtype_real>(G_real(this->m_stor.as<gtype_integer>()));
+        if(this->vtype() == vtype_integer) {
+          return this->m_stor.emplace<vtype_real>(V_real(this->m_stor.as<vtype_integer>()));
         }
-        return this->m_stor.as<gtype_real>();
+        return this->m_stor.as<vtype_real>();
       }
 
     ROCKET_PURE_FUNCTION bool test() const noexcept;

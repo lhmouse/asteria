@@ -24,7 +24,7 @@
 namespace Asteria {
 namespace {
 
-using Module_Initializer = void (G_object& result, API_Version version);
+using Module_Initializer = void (V_object& result, API_Version version);
 
 // N.B. Please keep this list sorted by the `version` member.
 struct Module
@@ -126,7 +126,7 @@ void Global_Context::initialize(API_Version version)
     // Get the range of modules to initialize.
     // This also determines the maximum version number of the library, which will be referenced
     // as `yend[-1].version`.
-    G_object ostd;
+    V_object ostd;
     auto bptr = begin(s_modules);
     auto eptr = ::std::upper_bound(bptr, end(s_modules), version, Module_Comparator());
     // Initialize library modules.
@@ -135,7 +135,7 @@ void Global_Context::initialize(API_Version version)
       auto pair = ostd.try_emplace(::rocket::sref(q->name));
       if(pair.second) {
         ROCKET_ASSERT(pair.first->second.is_null());
-        pair.first->second = G_object();
+        pair.first->second = V_object();
       }
       q->init(pair.first->second.open_object(), eptr[-1].version);
     }

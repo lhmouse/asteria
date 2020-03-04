@@ -15,23 +15,23 @@ template<typename HandlerT> void Argument_Reader::do_fail(HandlerT&& handler)
     this->m_state.succeeded = false;
   }
 
-void Argument_Reader::do_record_parameter_required(Gtype gtype)
+void Argument_Reader::do_record_parameter_required(Vtype vtype)
   {
     if(this->m_state.finished) {
       ASTERIA_THROW("argument reader finished and disposed");
     }
     // Record a parameter and increment the number of parameters in total.
-    this->m_state.history << ", " << describe_gtype(gtype);
+    this->m_state.history << ", " << describe_vtype(vtype);
     this->m_state.nparams++;
   }
 
-void Argument_Reader::do_record_parameter_optional(Gtype gtype)
+void Argument_Reader::do_record_parameter_optional(Vtype vtype)
   {
     if(this->m_state.finished) {
       ASTERIA_THROW("argument reader finished and disposed");
     }
     // Record a parameter and increment the number of parameters in total.
-    this->m_state.history << ", [" << describe_gtype(gtype) << ']';
+    this->m_state.history << ", [" << describe_vtype(vtype) << ']';
     this->m_state.nparams++;
   }
 
@@ -154,7 +154,7 @@ bool Argument_Reader::F()
 
 Argument_Reader& Argument_Reader::g(Bval& xval)
   {
-    this->do_record_parameter_required(gtype_boolean);
+    this->do_record_parameter_required(vtype_boolean);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -166,7 +166,7 @@ Argument_Reader& Argument_Reader::g(Bval& xval)
     if(!val.is_boolean()) {
       // If the val doesn't have the desired type, fail.
       this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `boolean`, got `$2`)",
-                                       karg - this->m_args->data() + 1, val.what_gtype());  });
+                                       karg - this->m_args->data() + 1, val.what_vtype());  });
       return *this;
     }
     // Copy the value.
@@ -176,7 +176,7 @@ Argument_Reader& Argument_Reader::g(Bval& xval)
 
 Argument_Reader& Argument_Reader::g(Ival& xval)
   {
-    this->do_record_parameter_required(gtype_integer);
+    this->do_record_parameter_required(vtype_integer);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -188,7 +188,7 @@ Argument_Reader& Argument_Reader::g(Ival& xval)
     if(!val.is_integer()) {
       // If the val doesn't have the desired type, fail.
       this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `integer`, got `$2`)",
-                                       karg - this->m_args->data() + 1, val.what_gtype());  });
+                                       karg - this->m_args->data() + 1, val.what_vtype());  });
       return *this;
     }
     // Copy the value.
@@ -198,7 +198,7 @@ Argument_Reader& Argument_Reader::g(Ival& xval)
 
 Argument_Reader& Argument_Reader::g(Rval& xval)
   {
-    this->do_record_parameter_required(gtype_real);
+    this->do_record_parameter_required(vtype_real);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -210,7 +210,7 @@ Argument_Reader& Argument_Reader::g(Rval& xval)
     if(!val.is_convertible_to_real()) {
       // If the val doesn't have the desired type, fail.
       this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `integer` or `real`, got `$2`)",
-                                       karg - this->m_args->data() + 1, val.what_gtype());  });
+                                       karg - this->m_args->data() + 1, val.what_vtype());  });
       return *this;
     }
     // Copy the value.
@@ -220,7 +220,7 @@ Argument_Reader& Argument_Reader::g(Rval& xval)
 
 Argument_Reader& Argument_Reader::g(Sval& xval)
   {
-    this->do_record_parameter_required(gtype_string);
+    this->do_record_parameter_required(vtype_string);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -232,7 +232,7 @@ Argument_Reader& Argument_Reader::g(Sval& xval)
     if(!val.is_string()) {
       // If the val doesn't have the desired type, fail.
       this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `string`, got `$2`)",
-                                       karg - this->m_args->data() + 1, val.what_gtype());  });
+                                       karg - this->m_args->data() + 1, val.what_vtype());  });
       return *this;
     }
     // Copy the value.
@@ -242,7 +242,7 @@ Argument_Reader& Argument_Reader::g(Sval& xval)
 
 Argument_Reader& Argument_Reader::g(Pval& xval)
   {
-    this->do_record_parameter_required(gtype_opaque);
+    this->do_record_parameter_required(vtype_opaque);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -254,7 +254,7 @@ Argument_Reader& Argument_Reader::g(Pval& xval)
     if(!val.is_opaque()) {
       // If the val doesn't have the desired type, fail.
       this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `opaque`, got `$2`)",
-                                       karg - this->m_args->data() + 1, val.what_gtype());  });
+                                       karg - this->m_args->data() + 1, val.what_vtype());  });
       return *this;
     }
     // Copy the value.
@@ -264,7 +264,7 @@ Argument_Reader& Argument_Reader::g(Pval& xval)
 
 Argument_Reader& Argument_Reader::g(Fval& xval)
   {
-    this->do_record_parameter_required(gtype_function);
+    this->do_record_parameter_required(vtype_function);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -276,7 +276,7 @@ Argument_Reader& Argument_Reader::g(Fval& xval)
     if(!val.is_function()) {
       // If the val doesn't have the desired type, fail.
       this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `function`, got `$2`)",
-                                       karg - this->m_args->data() + 1, val.what_gtype());  });
+                                       karg - this->m_args->data() + 1, val.what_vtype());  });
       return *this;
     }
     // Copy the value.
@@ -286,7 +286,7 @@ Argument_Reader& Argument_Reader::g(Fval& xval)
 
 Argument_Reader& Argument_Reader::g(Aval& xval)
   {
-    this->do_record_parameter_required(gtype_array);
+    this->do_record_parameter_required(vtype_array);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -298,7 +298,7 @@ Argument_Reader& Argument_Reader::g(Aval& xval)
     if(!val.is_array()) {
       // If the val doesn't have the desired type, fail.
       this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `array`, got `$2`)",
-                                       karg - this->m_args->data() + 1, val.what_gtype());  });
+                                       karg - this->m_args->data() + 1, val.what_vtype());  });
       return *this;
     }
     // Copy the value.
@@ -308,7 +308,7 @@ Argument_Reader& Argument_Reader::g(Aval& xval)
 
 Argument_Reader& Argument_Reader::g(Oval& xval)
   {
-    this->do_record_parameter_required(gtype_object);
+    this->do_record_parameter_required(vtype_object);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -320,7 +320,7 @@ Argument_Reader& Argument_Reader::g(Oval& xval)
     if(!val.is_object()) {
       // If the val doesn't have the desired type, fail.
       this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `object`, got `$2`)",
-                                       karg - this->m_args->data() + 1, val.what_gtype());  });
+                                       karg - this->m_args->data() + 1, val.what_vtype());  });
       return *this;
     }
     // Copy the value.
@@ -358,7 +358,7 @@ Argument_Reader& Argument_Reader::g(Value& val)
 
 Argument_Reader& Argument_Reader::g(Bopt& xopt)
   {
-    this->do_record_parameter_optional(gtype_boolean);
+    this->do_record_parameter_optional(vtype_boolean);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -375,7 +375,7 @@ Argument_Reader& Argument_Reader::g(Bopt& xopt)
     if(!val.is_boolean()) {
       // If the val doesn't have the desired type, fail.
       this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `boolean` or `null`, got `$2`)",
-                                       karg - this->m_args->data() + 1, val.what_gtype());  });
+                                       karg - this->m_args->data() + 1, val.what_vtype());  });
       return *this;
     }
     // Copy the value.
@@ -385,7 +385,7 @@ Argument_Reader& Argument_Reader::g(Bopt& xopt)
 
 Argument_Reader& Argument_Reader::g(Iopt& xopt)
   {
-    this->do_record_parameter_optional(gtype_integer);
+    this->do_record_parameter_optional(vtype_integer);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -402,7 +402,7 @@ Argument_Reader& Argument_Reader::g(Iopt& xopt)
     if(!val.is_integer()) {
       // If the val doesn't have the desired type, fail.
       this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `integer` or `null`, got `$2`)",
-                                       karg - this->m_args->data() + 1, val.what_gtype());  });
+                                       karg - this->m_args->data() + 1, val.what_vtype());  });
       return *this;
     }
     // Copy the value.
@@ -412,7 +412,7 @@ Argument_Reader& Argument_Reader::g(Iopt& xopt)
 
 Argument_Reader& Argument_Reader::g(Ropt& xopt)
   {
-    this->do_record_parameter_optional(gtype_real);
+    this->do_record_parameter_optional(vtype_real);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -429,7 +429,7 @@ Argument_Reader& Argument_Reader::g(Ropt& xopt)
     if(!val.is_convertible_to_real()) {
       // If the val doesn't have the desired type, fail.
       this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `integer`, `real` or `null`, got `$2`)",
-                                       karg - this->m_args->data() + 1, val.what_gtype());  });
+                                       karg - this->m_args->data() + 1, val.what_vtype());  });
       return *this;
     }
     // Copy the value.
@@ -439,7 +439,7 @@ Argument_Reader& Argument_Reader::g(Ropt& xopt)
 
 Argument_Reader& Argument_Reader::g(Sopt& xopt)
   {
-    this->do_record_parameter_optional(gtype_string);
+    this->do_record_parameter_optional(vtype_string);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -456,7 +456,7 @@ Argument_Reader& Argument_Reader::g(Sopt& xopt)
     if(!val.is_string()) {
       // If the val doesn't have the desired type, fail.
       this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `string` or `null`, got `$2`)",
-                                       karg - this->m_args->data() + 1, val.what_gtype());  });
+                                       karg - this->m_args->data() + 1, val.what_vtype());  });
       return *this;
     }
     // Copy the value.
@@ -466,7 +466,7 @@ Argument_Reader& Argument_Reader::g(Sopt& xopt)
 
 Argument_Reader& Argument_Reader::g(Popt& xopt)
   {
-    this->do_record_parameter_optional(gtype_opaque);
+    this->do_record_parameter_optional(vtype_opaque);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -483,7 +483,7 @@ Argument_Reader& Argument_Reader::g(Popt& xopt)
     if(!val.is_opaque()) {
       // If the val doesn't have the desired type, fail.
       this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `opaque` or `null`, got `$2`)",
-                                       karg - this->m_args->data() + 1, val.what_gtype());  });
+                                       karg - this->m_args->data() + 1, val.what_vtype());  });
       return *this;
     }
     // Copy the value.
@@ -493,7 +493,7 @@ Argument_Reader& Argument_Reader::g(Popt& xopt)
 
 Argument_Reader& Argument_Reader::g(Fopt& xopt)
   {
-    this->do_record_parameter_optional(gtype_function);
+    this->do_record_parameter_optional(vtype_function);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -510,7 +510,7 @@ Argument_Reader& Argument_Reader::g(Fopt& xopt)
     if(!val.is_function()) {
       // If the val doesn't have the desired type, fail.
       this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `function` or `null`, got `$2`)",
-                                       karg - this->m_args->data() + 1, val.what_gtype());  });
+                                       karg - this->m_args->data() + 1, val.what_vtype());  });
       return *this;
     }
     // Copy the value.
@@ -520,7 +520,7 @@ Argument_Reader& Argument_Reader::g(Fopt& xopt)
 
 Argument_Reader& Argument_Reader::g(Aopt& xopt)
   {
-    this->do_record_parameter_optional(gtype_array);
+    this->do_record_parameter_optional(vtype_array);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -537,7 +537,7 @@ Argument_Reader& Argument_Reader::g(Aopt& xopt)
     if(!val.is_array()) {
       // If the val doesn't have the desired type, fail.
       this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `array` or `null`, got `$2`)",
-                                       karg - this->m_args->data() + 1, val.what_gtype());  });
+                                       karg - this->m_args->data() + 1, val.what_vtype());  });
       return *this;
     }
     // Copy the value.
@@ -547,7 +547,7 @@ Argument_Reader& Argument_Reader::g(Aopt& xopt)
 
 Argument_Reader& Argument_Reader::g(Oopt& xopt)
   {
-    this->do_record_parameter_optional(gtype_object);
+    this->do_record_parameter_optional(vtype_object);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -564,7 +564,7 @@ Argument_Reader& Argument_Reader::g(Oopt& xopt)
     if(!val.is_object()) {
       // If the val doesn't have the desired type, fail.
       this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `object` or `null`, got `$2`)",
-                                       karg - this->m_args->data() + 1, val.what_gtype());  });
+                                       karg - this->m_args->data() + 1, val.what_vtype());  });
       return *this;
     }
     // Copy the value.
@@ -579,7 +579,7 @@ void Argument_Reader::throw_no_matching_function_call() const
     if(!this->m_args->empty()) {
       size_t k = 0;
       for(;;) {
-        args << this->m_args.get()[k].read().what_gtype();
+        args << this->m_args.get()[k].read().what_vtype();
         // Seek to the next argument.
         if(++k == this->m_args->size())
           break;

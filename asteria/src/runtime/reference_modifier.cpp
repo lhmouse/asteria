@@ -96,7 +96,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
             return nullptr;
           }
           // Create elements as needed.
-          parent = G_array();
+          parent = V_array();
         }
         else if(!parent.is_array()) {
           ASTERIA_THROW("integer subscript applied to non-array (parent `$1`, index `$2`)", parent, altr.index);
@@ -127,14 +127,14 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
             return nullptr;
           }
           // Create members as needed.
-          parent = G_object();
+          parent = V_object();
         }
         else if(!parent.is_object()) {
           ASTERIA_THROW("string subscript applied to non-object (parent `$1`, key `$2`)", parent, altr.key);
         }
         auto& obj = parent.open_object();
         // Return a pointer to the value with the given key if it is found; create a value otherwise.
-        G_object::iterator q;
+        V_object::iterator q;
         if(!create_new) {
           q = obj.find_mut(altr.key);
           if(q == obj.end()) {
@@ -154,7 +154,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
             return nullptr;
           }
           // Create elements as needed.
-          parent = G_array();
+          parent = V_array();
         }
         else if(!parent.is_array()) {
           ASTERIA_THROW("head subscript applied to non-array (parent `$1`)", parent);
@@ -171,7 +171,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
             return nullptr;
           }
           // Create elements as needed.
-          parent = G_array();
+          parent = V_array();
         }
         else if(!parent.is_array()) {
           ASTERIA_THROW("tail subscript applied to non-array (parent `$1`)", parent);
