@@ -278,6 +278,20 @@ template<typename charT, typename traitsT, typename allocT>
         return *this;
       }
 
+    basic_linear_buffer& putc(value_type c)
+      {
+        this->reserve(1);
+        traits_type::assign(this->mut_end()[0], c);
+        this->accept(1);
+        return *this;
+      }
+    basic_linear_buffer& putn(size_type n, value_type c)
+      {
+        this->reserve(n);
+        traits_type::assign(this->mut_end(), n, c);
+        this->accept(n);
+        return *this;
+      }
     basic_linear_buffer& putn(const value_type* s, size_type n)
       {
         this->reserve(n);
@@ -285,10 +299,9 @@ template<typename charT, typename traitsT, typename allocT>
         this->accept(n);
         return *this;
       }
-    basic_linear_buffer& putc(value_type c)
+    basic_linear_buffer& puts(const value_type* s)
       {
-        this->putn(::std::addressof(c), 1);
-        return *this;
+        return this->putn(s, traits_type::length(s));
       }
 
     basic_linear_buffer& swap(basic_linear_buffer& other)
