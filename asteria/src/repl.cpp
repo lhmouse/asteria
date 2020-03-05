@@ -583,6 +583,9 @@ int do_REP_single()
     // This also makes I/O functions fail immediately, instead of attempting to try again.
     do_trap_sigint();
 
+    // Set up runtime hooks. This is sticky.
+    global.set_hooks(::rocket::make_refcnt<REPL_Hooks>());
+
     // In interactive mode (a.k.a. REPL mode), read user inputs in lines.
     // Outputs from the script go into standard output. Others go into standard error.
     for(;;) {
@@ -648,8 +651,6 @@ int main(int argc, char** argv)
     // Note that this function shall not return in case of errors.
     do_parse_command_line(argc, argv);
 
-    // Set up runtime hooks. This is sticky.
-    global.set_hooks(::rocket::make_refcnt<REPL_Hooks>());
     // Protect against stack overflows.
     global.set_recursion_base(&argc);
 
