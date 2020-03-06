@@ -1257,7 +1257,7 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
   };
 
 template<typename charT, typename traitsT, typename allocT>
-    const charT basic_cow_string<charT, traitsT, allocT>::null_char[1] = { 0 };
+    const charT basic_cow_string<charT, traitsT, allocT>::null_char[1] = { };
 
 template<typename charT, typename traitsT, typename allocT>
     struct basic_cow_string<charT, traitsT, allocT>::hash
