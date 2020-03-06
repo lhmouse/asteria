@@ -211,7 +211,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Calculates `base` raised to the power `y`. If `base` is absent,\n"
           "    `e` is assumed. This function is equivalent to `pow(base, y)`.\n"
           "\n"
-          "  * Returns the power as a `real`.\n"
+          "  * Returns the power as a real.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -240,7 +240,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Calculates `exp(y) - 1` without losing precision when `y` is\n"
           "    close to zero.\n"
           "\n"
-          "  * Returns the result as a `real`.\n"
+          "  * Returns the result as a real.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -269,7 +269,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "    `x` is `1` or `y` is `0`, the result is always `1`, even when\n"
           "    the other argument is an infinity or NaN.\n"
           "\n"
-          "  * Returns the power as a `real`.\n"
+          "  * Returns the power as a real.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -298,7 +298,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Calculates the logarithm of `x` to `base`. If `base` is absent,\n"
           "    `e` is assumed.\n"
           "\n"
-          "  * Returns the logarithm as a `real`.\n"
+          "  * Returns the logarithm as a real.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -327,7 +327,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Calculates `log(1 + x)` without losing precision when `x` is\n"
           "    close to zero.\n"
           "\n"
-          "  * Returns the result as a `real`.\n"
+          "  * Returns the result as a real.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -354,7 +354,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "\n"
           "  * Calculates the sine of `x` in radians.\n"
           "\n"
-          "  * Returns the result as a `real`.\n"
+          "  * Returns the result as a real.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -381,7 +381,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "\n"
           "  * Calculates the cosine of `x` in radians.\n"
           "\n"
-          "  * Returns the result as a `real`.\n"
+          "  * Returns the result as a real.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -408,7 +408,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "\n"
           "  * Calculates the tangent of `x` in radians.\n"
           "\n"
-          "  * Returns the result as a `real`.\n"
+          "  * Returns the result as a real.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -435,7 +435,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "\n"
           "  * Calculates the inverse sine of `x` in radians.\n"
           "\n"
-          "  * Returns the result as a `real`.\n"
+          "  * Returns the result as a real.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -462,7 +462,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "\n"
           "  * Calculates the inverse cosine of `x` in radians.\n"
           "\n"
-          "  * Returns the result as a `real`.\n"
+          "  * Returns the result as a real.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -489,7 +489,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "\n"
           "  * Calculates the inverse tangent of `x` in radians.\n"
           "\n"
-          "  * Returns the result as a `real`.\n"
+          "  * Returns the result as a real.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -516,7 +516,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "\n"
           "  * Calculates the angle of the vector `<x,y>` in radians.\n"
           "\n"
-          "  * Returns the result as a `real`.\n"
+          "  * Returns the result as a real.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -548,7 +548,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "    positive infinity; otherwise, if any argument is a NaN, this\n"
           "    function returns a NaN.\n"
           "\n"
-          "  * Returns the length as a `real`.\n"
+          "  * Returns the length as a real.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -575,7 +575,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "\n"
           "  * Calculates the hyperbolic sine of `x`.\n"
           "\n"
-          "  * Returns the result as a `real`.\n"
+          "  * Returns the result as a real.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -602,7 +602,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "\n"
           "  * Calculates the hyperbolic cosine of `x`.\n"
           "\n"
-          "  * Returns the result as a `real`.\n"
+          "  * Returns the result as a real.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -629,7 +629,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "\n"
           "  * Calculates the hyperbolic tangent of `x`.\n"
           "\n"
-          "  * Returns the result as a `real`.\n"
+          "  * Returns the result as a real.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -656,7 +656,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "\n"
           "  * Calculates the inverse hyperbolic sine of `x`.\n"
           "\n"
-          "  * Returns the result as a `real`.\n"
+          "  * Returns the result as a real.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -683,7 +683,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "\n"
           "  * Calculates the inverse hyperbolic cosine of `x`.\n"
           "\n"
-          "  * Returns the result as a `real`.\n"
+          "  * Returns the result as a real.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -710,7 +710,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "\n"
           "  * Calculates the inverse hyperbolic tangent of `x`.\n"
           "\n"
-          "  * Returns the result as a `real`.\n"
+          "  * Returns the result as a real.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -737,7 +737,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "\n"
           "  * Calculates the error function of `x`.\n"
           "\n"
-          "  * Returns the result as a `real`.\n"
+          "  * Returns the result as a real.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -764,7 +764,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "\n"
           "  * Calculates the complementary error function of `x`.\n"
           "\n"
-          "  * Returns the result as a `real`.\n"
+          "  * Returns the result as a real.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -791,7 +791,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "\n"
           "  * Calculates the Gamma function of `x`.\n"
           "\n"
-          "  * Returns the result as a `real`.\n"
+          "  * Returns the result as a real.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -819,7 +819,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
           "  * Calculates the natural logarithm of the absolute value of the\n"
           "    Gamma function of `x`.\n"
           "\n"
-          "  * Returns the result as a `real`.\n"
+          "  * Returns the result as a real.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {

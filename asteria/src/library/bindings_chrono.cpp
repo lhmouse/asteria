@@ -389,7 +389,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
           "  * Retrieves the wall clock time in UTC.\n"
           "\n"
           "  * Returns the number of milliseconds since the Unix epoch,\n"
-          "    represented as an `integer`.\n"
+          "    represented as an integer.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -416,7 +416,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
           "  * Retrieves the wall clock time in the local time zone.\n"
           "\n"
           "  * Returns the number of milliseconds since `1970-01-01 00:00:00`\n"
-          "    in the local time zone, represented as an `integer`.\n"
+          "    in the local time zone, represented as an integer.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -446,7 +446,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
           "    quite heavyweight.\n"
           "\n"
           "  * Returns the number of milliseconds since an unspecified time\n"
-          "    point, represented as a `real`.\n"
+          "    point, represented as a real.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -476,7 +476,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
           "    have poor accuracy.\n"
           "\n"
           "  * Returns the number of milliseconds since an unspecified time\n"
-          "    point, represented as an `integer`.\n"
+          "    point, represented as an integer.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -504,7 +504,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
           "    the number of milliseconds since the Unix epoch.\n"
           "\n"
           "  * Returns the number of milliseconds since `1970-01-01 00:00:00`\n"
-          "    in the local time zone, represented as an `integer`.\n"
+          "    in the local time zone, represented as an integer.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -534,7 +534,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
           "    the local time zone.\n"
           "\n"
           "  * Returns the number of milliseconds since the Unix epoch,\n"
-          "    represented as an `integer`.\n"
+          "    represented as an integer.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {

@@ -17,8 +17,8 @@
 `std.gc.tracked_count(generation)`
 
 	* Gets the number of variables that are being tracked by the
-	  the collector for `generation`. Valid values for `generation`
-	  are `0`, `1` and `2`. This value is only informative.
+	  collector for `generation`. Valid values for `generation` are
+	  `0`, `1` and `2`. This value is only informative.
 
 	* Returns the number of variables being tracked. If `generation`
 	  is not valid, `null` is returned.
@@ -36,7 +36,7 @@
 	* Sets the threshold of the collector for `generation` to
 	  `threshold`. Valid values for `generation` are `0`, `1` and
 	  `2`. Valid values for `threshold` range from `0` to an
-	  unspecified positive `integer`; overlarge values are capped
+	  unspecified positive integer; overlarge values are capped
 	  silently without failure. A larger `threshold` makes garbage
 	  collection run less often but slower. Setting `threshold` to
 	  `0` ensures all unreachable variables be collected immediately.
@@ -57,8 +57,8 @@
 
 `std.debug.print(templ, ...)`
 
-	* Compose a `string` in the same way as `std.string.format()`,
-	  but instead of returning it, write it to standard error. A line
+	* Compose a string in the same way as `std.string.format()`, but
+	  instead of returning it, write it to standard error. A line
 	  break is appended to terminate the line.
 
 	* Returns the number of bytes written if the operation succeeds,
@@ -82,14 +82,14 @@
 	* Retrieves the wall clock time in UTC.
 
 	* Returns the number of milliseconds since the Unix epoch,
-	  represented as an `integer`.
+	  represented as an integer.
 
 `std.chrono.local_now()`
 
 	* Retrieves the wall clock time in the local time zone.
 
 	* Returns the number of milliseconds since `1970-01-01 00:00:00`
-	  in the local time zone, represented as an `integer`.
+	  in the local time zone, represented as an integer.
 
 `std.chrono.hires_now()`
 
@@ -99,7 +99,7 @@
 	  quite heavyweight.
 
 	* Returns the number of milliseconds since an unspecified time
-	  point, represented as a `real`.
+	  point, represented as a real.
 
 `std.chrono.steady_now()`
 
@@ -109,7 +109,7 @@
 	  have poor accuracy.
 
 	* Returns the number of milliseconds since an unspecified time
-	  point, represented as an `integer`.
+	  point, represented as an integer.
 
 `std.chrono.local_from_utc(time_utc)`
 
@@ -117,7 +117,7 @@
 	  the number of milliseconds since the Unix epoch.
 
 	* Returns the number of milliseconds since `1970-01-01 00:00:00`
-	  in the local time zone, represented as an `integer`.
+	  in the local time zone, represented as an integer.
 
 `std.chrono.utc_from_local(time_local)`
 
@@ -126,7 +126,7 @@
 	  the local time zone.
 
 	* Returns the number of milliseconds since the Unix epoch,
-	  represented as an `integer`.
+	  represented as an integer.
 
 `std.chrono.utc_format(time_point, [with_ms])`
 
@@ -136,7 +136,7 @@
 	  If `with_ms` is set to `true`, the string will have a 3-digit
 	  fractional part. By default, no fractional part is added.
 
-	* Returns a `string` representing the time point.
+	* Returns a string representing the time point.
 
 `std.chrono.utc_parse(time_str)`
 
@@ -156,9 +156,9 @@
 	* Copies a subrange of `text` to create a new byte string. Bytes
 	  are copied from `from` if it is non-negative, or from
 	  `lengthof(text) + from` otherwise. If `length` is set to an
-	  `integer`, no more than this number of bytes will be copied. If
+	  integer, no more than this number of bytes will be copied. If
 	  it is absent, all bytes from `from` to the end of `text` will
-	  be copied. If `from` is outside `text`, an empty `string` is
+	  be copied. If `from` is outside `text`, an empty string is
 	  returned.
 
 	* Returns the specified substring of `text`.
@@ -168,9 +168,9 @@
 	* Replaces all bytes from `from` to the end of `text` with
 	  `replacement` and returns the new byte string. If `from` is
 	  negative, it specifies an offset from the end of `text`. This
-	  function returns a new `string` without modifying `text`.
+	  function returns a new string without modifying `text`.
 
-	* Returns a `string` with the subrange replaced.
+	* Returns a string with the subrange replaced.
 
 `std.string.replace_slice(text, from, [length], replacement)`
 
@@ -180,26 +180,26 @@
 	  end of `text`. `length` specifies the maximum number of bytes
 	  to replace. If it is set to `null`, this function is equivalent
 	  to `replace_slice(text, from, replacement)`. This function
-	  returns a new `string` without modifying `text`.
+	  returns a new string without modifying `text`.
 
-	* Returns a `string` with the subrange replaced.
+	* Returns a string with the subrange replaced.
 
 `std.string.compare(text1, text2, [length])`
 
 	* Performs lexicographical comparison on two byte strings. If
-	  `length` is set to an `integer`, no more than this number of
+	  `length` is set to an integer, no more than this number of
 	  bytes are compared. This function behaves like the `strncmp()`
 	  function in C, except that null characters do not terminate
 	  strings.
 
-	* Returns a positive `integer` if `text1` compares greater than
-	  `text2`, a negative `integer` if `text1` compares less than
+	* Returns a positive integer if `text1` compares greater than
+	  `text2`, a negative integer if `text1` compares less than
 	  `text2`, or zero if `text1` compares equal to `text2`.
 
 `std.string.starts_with(text, prefix)`
 
 	* Checks whether `prefix` is a prefix of `text`. The empty
-	  `string` is considered to be a prefix of any string.
+	  string is considered to be a prefix of any string.
 
 	* Returns `true` if `prefix` is a prefix of `text`, or `false`
 	  otherwise.
@@ -207,7 +207,7 @@
 `std.string.ends_with(text, suffix)`
 
 	* Checks whether `suffix` is a suffix of `text`. The empty
-	  `string` is considered to be a suffix of any string.
+	  string is considered to be a suffix of any string.
 
 	* Returns `true` if `suffix` is a suffix of `text`, or `false`
 	  otherwise.
@@ -269,7 +269,7 @@
 `std.string.find_and_replace(text, pattern, replacement)`
 
 	* Searches `text` and replaces all occurrences of `pattern` with
-	  `replacement`. This function returns a new `string` without
+	  `replacement`. This function returns a new string without
 	  modifying `text`.
 
 	* Returns the string with `pattern` replaced. If `text` does not
@@ -280,7 +280,7 @@
 	* Searches `text` and replaces all occurrences of `pattern` with
 	  `replacement`. The search operation is performed on the same
 	  subrange that would be returned by `slice(text, from)`. This
-	  function returns a new `string` without modifying `text`.
+	  function returns a new string without modifying `text`.
 
 	* Returns the string with `pattern` replaced. If `text` does not
 	  contain `pattern`, it is returned intact.
@@ -290,7 +290,7 @@
 	* Searches `text` and replaces all occurrences of `pattern` with
 	  `replacement`. The search operation is performed on the same
 	  subrange that would be returned by `slice(text, from, length)`.
-	  This function returns a new `string` without modifying `text`.
+	  This function returns a new string without modifying `text`.
 
 	* Returns the string with `pattern` replaced. If `text` does not
 	  contain `pattern`, it is returned intact.
@@ -397,35 +397,35 @@
 
 `std.string.reverse(text)`
 
-	* Reverses a byte string. This function returns a new `string`
+	* Reverses a byte string. This function returns a new string
 	  without modifying `text`.
 
-	* Returns the reversed `string`.
+	* Returns the reversed string.
 
 `std.string.trim(text, [reject])`
 
 	* Removes the longest prefix and suffix consisting solely bytes
 	  from `reject`. If `reject` is empty, no byte is removed. If
 	  `reject` is not specified, spaces and tabs are removed. This
-	  function returns a new `string` without modifying `text`.
+	  function returns a new string without modifying `text`.
 
-	* Returns the trimmed `string`.
+	* Returns the trimmed string.
 
 `std.string.ltrim(text, [reject])`
 
 	* Removes the longest prefix consisting solely bytes from
 	  `reject`. If `reject` is empty, no byte is removed. If `reject`
 	  is not specified, spaces and tabs are removed. This function
-	  returns a new `string` without modifying `text`.
+	  returns a new string without modifying `text`.
 
-	* Returns the trimmed `string`.
+	* Returns the trimmed string.
 
 `std.string.rtrim(text, [reject])`
 
 	* Removes the longest suffix consisting solely bytes from
 	  `reject`. If `reject` is empty, no byte is removed. If `reject`
 	  is not specified, spaces and tabs are removed. This function
-	  returns a new `string` without modifying `text`.
+	  returns a new string without modifying `text`.
 
 	* Returns the trimmed string.
 
@@ -433,8 +433,8 @@
 
 	* Prepends `text` with `padding` repeatedly, until its length
 	  would exceed `length`. The default value of `padding` is a
-	  `string` consisting of a space. This function returns a new
-	  `string` without modifying `text`.
+	  string consisting of a space. This function returns a new
+	  string without modifying `text`.
 
 	* Returns the padded string.
 
@@ -444,8 +444,8 @@
 
 	* Appends `text` with `padding` repeatedly, until its length
 	  would exceed `length`. The default value of `padding` is a
-	  `string` consisting of a space. This function returns a new
-	  `string` without modifying `text`.
+	  string consisting of a space. This function returns a new
+	  string without modifying `text`.
 
 	* Returns the padded string.
 
@@ -454,18 +454,18 @@
 `std.string.to_upper(text)`
 
 	* Converts all lowercase English letters in `text` to their
-	  uppercase counterparts. This function returns a new `string`
+	  uppercase counterparts. This function returns a new string
 	  without modifying `text`.
 
-	* Returns a new `string` after the conversion.
+	* Returns a new string after the conversion.
 
 `std.string.to_lower(text)`
 
 	* Converts all uppercase English letters in `text` to their
-	  lowercase counterparts. This function returns a new `string`
+	  lowercase counterparts. This function returns a new string
 	  without modifying `text`.
 
-	* Returns a new `string` after the conversion.
+	* Returns a new string after the conversion.
 
 `std.string.translate(text, inputs, [outputs])`
 
@@ -476,32 +476,32 @@
 	  exists, because `outputs` is shorter than `inputs` or is null,
 	  it is deleted. If `outputs` is longer than `inputs`, excess
 	  bytes are ignored. Bytes that do not exist in `inputs` are left
-	  intact. This function returns a new `string` without modifying
+	  intact. This function returns a new string without modifying
 	  `text`.
 
-	* Returns the translated `string`.
+	* Returns the translated string.
 
 `std.string.explode(text, [delim], [limit])`
 
 	* Breaks `text` down into segments, separated by `delim`. If
-	  `delim` is `null` or an empty `string`, every byte becomes a
-	  segment. If `limit` is set to a positive `integer`, there will
-	  be no more segments than this number; the last segment will
+	  `delim` is `null` or an empty string, every byte becomes a
+	  segment. If `limit` is set to a positive integer, there will be
+	  no more segments than this number; the vert last segment will
 	  contain all the remaining bytes of the `text`.
 
-	* Returns an `array` containing the broken-down segments. If
-	  `text` is empty, an empty `array` is returned.
+	* Returns an array containing the broken-down segments. If `text`
+	  is empty, an empty array is returned.
 
 	* Throws an exception if `limit` is negative or zero.
 
 `std.string.implode(segments, [delim])`
 
 	* Concatenates elements of an array, `segments`, to create a new
-	  `string`. All segments shall be `string`s. If `delim` is
+	  string. All segments shall be strings. If `delim` is
 	  specified, it is inserted between adjacent segments.
 
-	* Returns a `string` containing all segments. If `segments` is
-	  empty, an empty `string` is returned.
+	* Returns a string containing all segments. If `segments` is
+	  empty, an empty string is returned.
 
 `std.string.hex_encode(data, [lowercase], [delim])`
 
@@ -511,8 +511,8 @@
 	  encoded as `ABCDEF`. If `delim` is specified, it is inserted
 	  between adjacent bytes.
 
-	* Returns the encoded `string`. If `data` is empty, an empty
-	  `string` is returned.
+	* Returns the encoded string. If `data` is empty, an empty
+	  string is returned.
 
 `std.string.hex_decode(text)`
 
@@ -522,8 +522,8 @@
 	  number of non-whitespace characters must be a multiple of two.
 	  Invalid characters cause decode errors.
 
-	* Returns a `string` containing decoded bytes. If `text` is empty
-	  or consists of only whitespaces, an empty `string` is returned.
+	* Returns a string containing decoded bytes. If `text` is empty
+	  or consists of only whitespaces, an empty string is returned.
 
 	* Throws an exception if the string is invalid.
 
@@ -533,10 +533,10 @@
 	  specified by IETF RFC 4648. If `lowercase` is set to `true`,
 	  lowercase letters are used to represent values through `0` to
 	  `25`; otherwise, uppercase letters are used. The length of
-	  encoded data is always a multiple of 8; padding characters
-	  are mandatory.
+	  encoded data is always a multiple of 8; padding characters are
+	  mandatory.
 
-	* Returns the encoded `string`.
+	* Returns the encoded string.
 
 `std.string.base32_decode(text)`
 
@@ -546,8 +546,8 @@
 	  the number of non-whitespace characters must be a multiple of
 	  eight. Invalid characters cause decode errors.
 
-	* Returns a `string` containing decoded bytes. If `text` is empty
-	  or consists of only whitespaces, an empty `string` is returned.
+	* Returns a string containing decoded bytes. If `text` is empty
+	  or consists of only whitespaces, an empty string is returned.
 
 	* Throws an exception if the string is invalid.
 
@@ -557,7 +557,7 @@
 	  specified by IETF RFC 4648. The length of encoded data is
 	  always a multiple of 4; padding characters are mandatory.
 
-	* Returns the encoded `string`.
+	* Returns the encoded string.
 
 `std.string.base64_decode(text)`
 
@@ -567,8 +567,8 @@
 	  the number of non-whitespace characters must be a multiple of
 	  four. Invalid characters cause decode errors.
 
-	* Returns a `string` containing decoded bytes. If `text` is empty
-	  or consists of only whitespaces, an empty `string` is returned.
+	* Returns a string containing decoded bytes. If `text` is empty
+	  or consists of only whitespaces, an empty string is returned.
 
 	* Throws an exception if the string is invalid.
 
@@ -580,8 +580,8 @@
 	  to `true`, lowercase letters are used to represent values
 	  through `10` to `15`; otherwise, uppercase letters are used.
 
-	* Returns the encoded `string`. If `data` is empty, an empty
-	  `string` is returned.
+	* Returns the encoded string. If `data` is empty, an empty
+	  string is returned.
 
 `std.string.url_decode(text)`
 
@@ -592,7 +592,7 @@
 	  ASCII control characters or non-ASCII characters) cause decode
 	  errors.
 
-	* Returns a `string` containing decoded bytes.
+	* Returns a string containing decoded bytes.
 
 	* Throws an exception if the string contains invalid characters.
 
@@ -603,8 +603,8 @@
 	  that are allowed unencoded in query strings are not encoded,
 	  and spaces are encoded as `+` instead of the long form `%20`.
 
-	* Returns the encoded `string`. If `data` is empty, an empty
-	  `string` is returned.
+	* Returns the encoded string. If `data` is empty, an empty
+	  string is returned.
 
 `std.string.url_decode_query(text)`
 
@@ -612,185 +612,184 @@
 	  to bytes according to IETF RFC 3986. This function behaves like
 	  `url_decode()`, except that `+` is decoded as a space.
 
-	* Returns a `string` containing decoded bytes.
+	* Returns a string containing decoded bytes.
 
 	* Throws an exception if the string contains invalid characters.
 
 `std.string.utf8_validate(text)`
 
-	* Checks whether `text` is a valid UTF-8 `string`.
+	* Checks whether `text` is a valid UTF-8 string.
 
 	* Returns `true` if `text` is valid, or `false` otherwise.
 
 `std.string.utf8_encode(code_points, [permissive])`
 
-	* Encodes code points from `code_points` into an UTF-8 `string`.
-	  `code_points` can be either an `integer` or an `array` of
-	  `integer`s. When an invalid code point is encountered, if
+	* Encodes code points from `code_points` into an UTF-8 string.
+	  `code_points` can be either an integer or an array of
+	  integers. When an invalid code point is encountered, if
 	  `permissive` is set to `true`, it is replaced with the
 	  replacement character `"\uFFFD"` and consequently encoded as
 	  `"\xEF\xBF\xBD"`; otherwise this function fails.
 
-	* Returns the encoded `string`.
+	* Returns the encoded string.
 
 	* Throws an exception on failure.
 
 `std.string.utf8_decode(text, [permissive])`
 
-	* Decodes `text`, which is expected to be a `string` containing
-	  UTF-8 code units, into an `array` of code points, represented
-	  as `integer`s. When an invalid code sequence is encountered, if
+	* Decodes `text`, which is expected to be a string containing
+	  UTF-8 code units, into an array of code points, represented as
+	  integers. When an invalid code sequence is encountered, if
 	  `permissive` is set to `true`, all code units of it are
 	  re-interpreted as isolated bytes according to ISO/IEC 8859-1;
 	  otherwise this function fails.
 
-	* Returns an `array` containing decoded code points.
+	* Returns an array containing decoded code points.
 
 	* Throws an exception on failure.
 
 `std.string.pack_8(values)`
 
-	* Packs a series of 8-bit integers into a `string`. `values` can
-	  be either an `integer` or an `array` of `integer`s, all of
-	  which are truncated to 8 bits then copied into a `string`.
+	* Packs a series of 8-bit integers into a string. `values` can be
+	  either an integer or an array of integers, all of which are
+	  truncated to 8 bits then copied into a string.
 
-	* Returns the packed `string`.
+	* Returns the packed string.
 
 `std.string.unpack_8(text)`
 
-	* Unpacks 8-bit integers from a `string`. The contents of `text`
+	* Unpacks 8-bit integers from a string. The contents of `text`
 	  are re-interpreted as contiguous signed 8-bit integers, all of
-	  which are sign-extended to 64 bits then copied into an `array`.
+	  which are sign-extended to 64 bits then copied into an array.
 
-	* Returns an `array` containing unpacked integers.
+	* Returns an array containing unpacked integers.
 
 `std.string.pack_16be(values)`
 
-	* Packs a series of 16-bit integers into a `string`. `values` can
-	  be either an `integer` or an `array` of `integers`, all of
-	  which are truncated to 16 bits then copied into a `string` in
-	  the big-endian byte order.
+	* Packs a series of 16-bit integers into a string. `values` can
+	  be either an integer or an array of `integers`, all of which
+	  are truncated to 16 bits then copied into a string in the
+	  big-endian byte order.
 
-	* Returns the packed `string`.
+	* Returns the packed string.
 
 `std.string.unpack_16be(text)`
 
-	* Unpacks 16-bit integers from a `string`. The contents of `text`
+	* Unpacks 16-bit integers from a string. The contents of `text`
 	  are re-interpreted as contiguous signed 16-bit integers in the
 	  big-endian byte order, all of which are sign-extended to 64
-	  bits then copied into an `array`.
+	  bits then copied into an array.
 
-	* Returns an `array` containing unpacked integers.
+	* Returns an array containing unpacked integers.
 
 	* Throws an exception if the length of `text` is not a multiple
 	  of 2.
 
 `std.string.pack_16le(values)`
 
-	* Packs a series of 16-bit integers into a `string`. `values` can
-	  be either an `integer` or an `array` of `integers`, all of
-	  which are truncated to 16 bits then copied into a `string` in
-	  the little-endian byte order.
+	* Packs a series of 16-bit integers into a string. `values` can
+	  be either an integer or an array of `integers`, all of which
+	  are truncated to 16 bits then copied into a string in the
+	  little-endian byte order.
 
-	* Returns the packed `string`.
+	* Returns the packed string.
 
 `std.string.unpack_16le(text)`
 
-	* Unpacks 16-bit integers from a `string`. The contents of `text`
+	* Unpacks 16-bit integers from a string. The contents of `text`
 	  are re-interpreted as contiguous signed 16-bit integers in the
 	  little-endian byte order, all of which are sign-extended to 64
-	  bits then copied into an `array`.
+	  bits then copied into an array.
 
-	* Returns an `array` containing unpacked integers.
+	* Returns an array containing unpacked integers.
 
 	* Throws an exception if the length of `text` is not a multiple
 	  of 2.
 
 `std.string.pack_32be(values)`
 
-	* Packs a series of 32-bit integers into a `string`. `values` can
-	  be either an `integer` or an `array` of `integers`, all of
-	  which are truncated to 32 bits then copied into a `string` in
-	  the big-endian byte order.
+	* Packs a series of 32-bit integers into a string. `values` can
+	  be either an integer or an array of `integers`, all of which
+	  are truncated to 32 bits then copied into a string in the
+	  big-endian byte order.
 
-	* Returns the packed `string`.
+	* Returns the packed string.
 
 `std.string.unpack_32be(text)`
 
-	* Unpacks 32-bit integers from a `string`. The contents of `text`
+	* Unpacks 32-bit integers from a string. The contents of `text`
 	  are re-interpreted as contiguous signed 32-bit integers in the
 	  big-endian byte order, all of which are sign-extended to 64
-	  bits then copied into an `array`.
+	  bits then copied into an array.
 
-	* Returns an `array` containing unpacked integers.
+	* Returns an array containing unpacked integers.
 
 	* Throws an exception if the length of `text` is not a multiple
 	  of 4.
 
 `std.string.pack_32le(values)`
 
-	* Packs a series of 32-bit integers into a `string`. `values` can
-	  be either an `integer` or an `array` of `integers`, all of
-	  which are truncated to 32 bits then copied into a `string` in
-	  the little-endian byte order.
+	* Packs a series of 32-bit integers into a string. `values` can
+	  be either an integer or an array of `integers`, all of which
+	  are truncated to 32 bits then copied into a string in the
+	  little-endian byte order.
 
-	* Returns the packed `string`.
+	* Returns the packed string.
 
 `std.string.unpack_32le(text)`
 
-	* Unpacks 32-bit integers from a `string`. The contents of `text`
+	* Unpacks 32-bit integers from a string. The contents of `text`
 	  are re-interpreted as contiguous signed 32-bit integers in the
 	  little-endian byte order, all of which are sign-extended to 64
-	  bits then copied into an `array`.
+	  bits then copied into an array.
 
-	* Returns an `array` containing unpacked integers.
+	* Returns an array containing unpacked integers.
 
 	* Throws an exception if the length of `text` is not a multiple
 	  of 4.
 
 `std.string.pack_64be(values)`
 
-	* Packs a series of 64-bit integers into a `string`. `values` can
-	  be either an `integer` or an `array` of `integers`, all of
-	  which are copied into a `string` in the big-endian byte order.
+	* Packs a series of 64-bit integers into a string. `values` can
+	  be either an integer or an array of `integers`, all of which
+	  are copied into a string in the big-endian byte order.
 
-	* Returns the packed `string`.
+	* Returns the packed string.
 
 `std.string.unpack_64be(text)`
 
-	* Unpacks 64-bit integers from a `string`. The contents of `text`
+	* Unpacks 64-bit integers from a string. The contents of `text`
 	  are re-interpreted as contiguous signed 64-bit integers in the
-	  big-endian byte order, all of which are copied into an `array`.
+	  big-endian byte order, all of which are copied into an array.
 
-	* Returns an `array` containing unpacked integers.
+	* Returns an array containing unpacked integers.
 
 	* Throws an exception if the length of `text` is not a multiple
 	  of 8.
 
 `std.string.pack_64le(values)`
 
-	* Packs a series of 64-bit integers into a `string`. `values` can
-	  be either an `integer` or an `array` of `integers`, all of
-	  which are copied into a `string` in the little-endian byte
-	  order.
+	* Packs a series of 64-bit integers into a string. `values` can
+	  be either an integer or an array of `integers`, all of which
+	  are copied into a string in the little-endian byte order.
 
-	* Returns the packed `string`.
+	* Returns the packed string.
 
 `std.string.unpack_64le(text)`
 
-	* Unpacks 64-bit integers from a `string`. The contents of `text`
+	* Unpacks 64-bit integers from a string. The contents of `text`
 	  are re-interpreted as contiguous signed 64-bit integers in the
 	  little-endian byte order, all of which are copied into an
-	  `array`.
+	  array.
 
-	* Returns an `array` containing unpacked integers.
+	* Returns an array containing unpacked integers.
 
 	* Throws an exception if the length of `text` is not a multiple
 	  of 8.
 
 `std.string.format(templ, ...)`
 
-	* Compose a `string` according to the template string `templ`, as
+	* Compose a string according to the template string `templ`, as
 	  follows:
 
 	  * A sequence of `$$` is replaced with a literal `$`.
@@ -801,7 +800,7 @@
 	    behaves the same as `${N}`.
 	  * All other characters are copied verbatim.
 
-	* Returns the composed `string`.
+	* Returns the composed string.
 
 	* Throws an exception if `templ` contains invalid placeholder
 	  sequences, or when a placeholder sequence has no corresponding
@@ -812,7 +811,7 @@
 	* Searches `text` for the first occurrence of the regular
 	  expression `pattern`.
 
-	* Returns an `array` of two `integer`s, the first of which
+	* Returns an array of two integers, the first of which
 	  specifies the subscript of the matching sequence and the second
 	  of which specifies its length. If `pattern` is not found, this
 	  function returns `null`.
@@ -826,7 +825,7 @@
 	  expression `pattern`. The search operation is performed on the
 	  same subrange that would be returned by `slice(text, from)`.
 
-	* Returns an `array` of two `integer`s, the first of which
+	* Returns an array of two integers, the first of which
 	  specifies the subscript of the matching sequence and the second
 	  of which specifies its length. If `pattern` is not found, this
 	  function returns `null`.
@@ -841,7 +840,7 @@
 	  same subrange that would be returned by
 	  `slice(text, from, length)`.
 
-	* Returns an `array` of two `integer`s, the first of which
+	* Returns an array of two integers, the first of which
 	  specifies the subscript of the matching sequence and the second
 	  of which specifies its length. If `pattern` is not found, this
 	  function returns `null`.
@@ -854,7 +853,7 @@
 	* Checks whether the regular expression `patterm` matches the
 	  entire sequence `text`.
 
-	* Returns an `array` of optional `string`s. The first element
+	* Returns an array of optional strings. The first element
 	  contains a copy of `text`. All the other elements hold
 	  substrings that match positional capturing groups. If a group
 	  matches nothing, the corresponding element is `null`. The total
@@ -869,7 +868,7 @@
 	* Checks whether the regular expression `patterm` matches the
 	  subrange that would be returned by `slice(text, from)`.
 
-	* Returns an `array` of optional `string`s. The first element
+	* Returns an array of optional strings. The first element
 	  contains a copy of `text`. All the other elements hold
 	  substrings that match positional capturing groups. If a group
 	  matches nothing, the corresponding element is `null`. The total
@@ -884,7 +883,7 @@
 	* Checks whether the regular expression `patterm` matches the
 	  subrange that would be returned by `slice(text, from, length)`.
 
-	* Returns an `array` of optional `string`s. The first element
+	* Returns an array of optional strings. The first element
 	  contains a copy of `text`. All the other elements hold
 	  substrings that match positional capturing groups. If a group
 	  matches nothing, the corresponding element is `null`. The total
@@ -898,7 +897,7 @@
 
 	* Searches `text` and replaces all matches of the regular
 	  expression `pattern` with `replacement`. This function returns
-	  a new `string` without modifying `text`.
+	  a new string without modifying `text`.
 
 	* Returns the string with `pattern` replaced. If `text` does not
 	  contain `pattern`, it is returned intact.
@@ -911,7 +910,7 @@
 	* Searches `text` and replaces all matches of the regular
 	  expression `pattern` with `replacement`. The search operation
 	  is performed on the same subrange that would be returned by
-	  `slice(text, from)`. This function returns a new `string`
+	  `slice(text, from)`. This function returns a new string
 	  without modifying `text`.
 
 	* Returns the string with `pattern` replaced. If `text` does not
@@ -926,7 +925,7 @@
 	  expression `pattern` with `replacement`. The search operation
 	  is performed on the same subrange that would be returned by
 	  `slice(text, from, length)`. This function returns a new
-	  `string` without modifying `text`.
+	  string without modifying `text`.
 
 	* Returns the string with `pattern` replaced. If `text` does not
 	  contain `pattern`, it is returned intact.
@@ -938,12 +937,12 @@
 
 `std.array.slice(data, from, [length])`
 
-	* Copies a subrange of `data` to create a new `array`. Elements
-	  are copied from `from` if it is non-negative, or from
+	* Copies a subrange of `data` to create a new array. Elements are
+	  copied from `from` if it is non-negative, or from
 	  `lengthof(data) + from` otherwise. If `length` is set to an
-	  `integer`, no more than this number of elements will be copied.
+	  integer, no more than this number of elements will be copied.
 	  If it is absent, all elements from `from` to the end of `data`
-	  will be copied. If `from` is outside `data`, an empty `array`
+	  will be copied. If `from` is outside `data`, an empty array
 	  is returned.
 
 	* Returns the specified subarray of `data`.
@@ -951,23 +950,23 @@
 `std.array.replace_slice(data, from, replacement)`
 
 	* Replaces all elements from `from` to the end of `data` with
-	  `replacement` and returns the new `array`. If `from` is
-	  negative, it specifies an offset from the end of `data`. This
-	  function returns a new `array` without modifying `data`.
+	  `replacement` and returns the new array. If `from` is negative,
+	  it specifies an offset from the end of `data`. This function
+	  returns a new array without modifying `data`.
 
-	* Returns a `array` with the subrange replaced.
+	* Returns a array with the subrange replaced.
 
 `std.array.replace_slice(data, from, [length], replacement)`
 
 	* Replaces a subrange of `data` with `replacement` to create a
-	  new `array`. `from` specifies the start of the subrange to
+	  new array. `from` specifies the start of the subrange to
 	  replace. If `from` is negative, it specifies an offset from the
 	  end of `data`. `length` specifies the maximum number of
 	  elements to replace. If it is set to `null`, this function is
 	  equivalent to `replace_slice(data, from, replacement)`. This
-	  function returns a new `array` without modifying `data`.
+	  function returns a new array without modifying `data`.
 
-	* Returns a `array` with the subrange replaced.
+	* Returns a array with the subrange replaced.
 
 `std.array.find(data, target)`
 
@@ -1002,8 +1001,8 @@
 	* Finds the first element, namely `x`, in `data`, for which
 	  `predictor(x)` yields logically true.
 
-	* Returns the subscript of such an element as an `integer`, if
-	  one is found, or `null` otherwise.
+	* Returns the subscript of such an element as an integer, if one
+	  is found, or `null` otherwise.
 
 `std.array.find_if(data, from, predictor)`
 
@@ -1012,8 +1011,8 @@
 	  performed on the same subrange that would be returned by
 	  `slice(data, from)`.
 
-	* Returns the subscript of such an element as an `integer`, if
-	  one is found, or `null` otherwise.
+	* Returns the subscript of such an element as an integer, if one
+	  is found, or `null` otherwise.
 
 `std.array.find_if(data, from, [length], predictor)`
 
@@ -1022,16 +1021,16 @@
 	  performed on the same subrange that would be returned by
 	  `slice(data, from, length)`.
 
-	* Returns the subscript of such an element as an `integer`, if
-	  one is found, or `null` otherwise.
+	* Returns the subscript of such an element as an integer, if one
+	  is found, or `null` otherwise.
 
 `std.array.find_if_not(data, predictor)`
 
 	* Finds the first element, namely `x`, in `data`, for which
 	  `predictor(x)` yields logically false.
 
-	* Returns the subscript of such an element as an `integer`, if
-	  one is found, or `null` otherwise.
+	* Returns the subscript of such an element as an integer, if one
+	  is found, or `null` otherwise.
 
 `std.array.find_if_not(data, from, predictor)`
 
@@ -1040,8 +1039,8 @@
 	  performed on the same subrange that would be returned by
 	  `slice(data, from)`.
 
-	* Returns the subscript of such an element as an `integer`, if
-	  one is found, or `null` otherwise.
+	* Returns the subscript of such an element as an integer, if one
+	  is found, or `null` otherwise.
 
 `std.array.find_if_not(data, from, [length], predictor)`
 
@@ -1050,8 +1049,8 @@
 	  performed on the same subrange that would be returned by
 	  `slice(data, from, length)`.
 
-	* Returns the subscript of such an element as an `integer`, if
-	  one is found, or `null` otherwise.
+	* Returns the subscript of such an element as an integer, if one
+	  is found, or `null` otherwise.
 
 `std.array.rfind(data, target)`
 
@@ -1086,8 +1085,8 @@
 	* Finds the last element, namely `x`, in `data`, for which
 	  `predictor(x)` yields logically true.
 
-	* Returns the subscript of such an element as an `integer`, if
-	  one is found, or `null` otherwise.
+	* Returns the subscript of such an element as an integer, if one
+	  is found, or `null` otherwise.
 
 `std.array.rfind_if(data, from, predictor)`
 
@@ -1096,8 +1095,8 @@
 	  performed on the same subrange that would be returned by
 	  `slice(data, from)`.
 
-	* Returns the subscript of such an element as an `integer`, if
-	  one is found, or `null` otherwise.
+	* Returns the subscript of such an element as an integer, if one
+	  is found, or `null` otherwise.
 
 `std.array.rfind_if(data, from, [length], predictor)`
 
@@ -1106,16 +1105,16 @@
 	  performed on the same subrange that would be returned by
 	  `slice(data, from, length)`.
 
-	* Returns the subscript of such an element as an `integer`, if
-	  one is found, or `null` otherwise.
+	* Returns the subscript of such an element as an integer, if one
+	  is found, or `null` otherwise.
 
 `std.array.rfind_if_not(data, predictor)`
 
 	* Finds the last element, namely `x`, in `data`, for which
 	  `predictor(x)` yields logically false.
 
-	* Returns the subscript of such an element as an `integer`, if
-	  one is found, or `null` otherwise.
+	* Returns the subscript of such an element as an integer, if one
+	  is found, or `null` otherwise.
 
 `std.array.rfind_if_not(data, from, predictor)`
 
@@ -1124,8 +1123,8 @@
 	  performed on the same subrange that would be returned by
 	  `slice(data, from)`.
 
-	* Returns the subscript of such an element as an `integer`, if
-	  one is found, or `null` otherwise.
+	* Returns the subscript of such an element as an integer, if one
+	  is found, or `null` otherwise.
 
 `std.array.rfind_if_not(data, from, [length], predictor)`
 
@@ -1134,15 +1133,15 @@
 	  performed on the same subrange that would be returned by
 	  `slice(data, from, length)`.
 
-	* Returns the subscript of such an element as an `integer`, if
-	  one is found, or `null` otherwise.
+	* Returns the subscript of such an element as an integer, if one
+	  is found, or `null` otherwise.
 
 `std.array.count(data, target)`
 
 	* Searches `data` for `target` and figures the total number of
 	  occurrences.
 
-	* Returns the number of occurrences as an `integer`, which is
+	* Returns the number of occurrences as an integer, which is
 	  always non-negative.
 
 `std.array.count(data, from, target)`
@@ -1151,7 +1150,7 @@
 	  occurrences. The search operation is performed on the same
 	  subrange that would be returned by `slice(data, from)`.
 
-	* Returns the number of occurrences as an `integer`, which is
+	* Returns the number of occurrences as an integer, which is
 	  always non-negative.
 
 `std.array.count(data, from, [length], target)`
@@ -1160,7 +1159,7 @@
 	  occurrences. The search operation is performed on the same
 	  subrange that would be returned by `slice(data, from, length)`.
 
-	* Returns the number of occurrences as an `integer`, which is
+	* Returns the number of occurrences as an integer, which is
 	  always non-negative.
 
 `std.array.count_if(data, target, predictor)`
@@ -1169,7 +1168,7 @@
 	  `predictor(x)` yields logically true, and figures the total
 	  number of such occurrences.
 
-	* Returns the number of occurrences as an `integer`, which is
+	* Returns the number of occurrences as an integer, which is
 	  always non-negative.
 
 `std.array.count_if(data, from, target, predictor)`
@@ -1179,7 +1178,7 @@
 	  number of elements. The search operation is performed on the
 	  same subrange that would be returned by `slice(data, from)`.
 
-	* Returns the number of occurrences as an `integer`, which is
+	* Returns the number of occurrences as an integer, which is
 	  always non-negative.
 
 `std.array.count_if(data, from, [length], target, predictor)`
@@ -1190,7 +1189,7 @@
 	  same subrange that would be returned by `slice(data, from,
 	  length)`.
 
-	* Returns the number of occurrences as an `integer`, which is
+	* Returns the number of occurrences as an integer, which is
 	  always non-negative.
 
 `std.array.count_if_not(data, target, predictor)`
@@ -1199,7 +1198,7 @@
 	  `predictor(x)` yields logically false, and figures the total
 	  number of such occurrences.
 
-	* Returns the number of occurrences as an `integer`, which is
+	* Returns the number of occurrences as an integer, which is
 	  always non-negative.
 
 `std.array.count_if_not(data, from, target, predictor)`
@@ -1209,7 +1208,7 @@
 	  number of elements. The search operation is performed on the
 	  same subrange that would be returned by `slice(data, from)`.
 
-	* Returns the number of occurrences as an `integer`, which is
+	* Returns the number of occurrences as an integer, which is
 	  always non-negative.
 
 `std.array.count_if_not(data, from, [length], target, predictor)`
@@ -1220,7 +1219,7 @@
 	  same subrange that would be returned by `slice(data, from,
 	  length)`.
 
-	* Returns the number of occurrences as an `integer`, which is
+	* Returns the number of occurrences as an integer, which is
 	  always non-negative.
 
 `std.array.is_sorted(data, [comparator])`
@@ -1228,13 +1227,13 @@
 	* Checks whether `data` is sorted. That is, there is no pair of
 	  adjacent elements in `data` such that the first one is greater
 	  than or unordered with the second one. Elements are compared
-	  using `comparator`, which shall be a binary `function` that
-	  returns a negative `integer` or `real` if the first argument is
-	  less than the second one, a positive `integer` or `real` if the
+	  using `comparator`, which shall be a binary function that
+	  returns a negative integer or real if the first argument is
+	  less than the second one, a positive integer or real if the
 	  first argument is greater than the second one, or `0` if the
 	  arguments are equal; other values indicate that the arguments
 	  are unordered. If no `comparator` is provided, the built-in
-	  3-way comparison operator is used. An `array` that contains no
+	  3-way comparison operator is used. An array that contains no
 	  elements is considered to have been sorted.
 
 	* Returns `true` if `data` is sorted or empty, or `false`
@@ -1248,8 +1247,8 @@
 	  `is_sorted(data, comparator)` shall yield `true` prior to this
 	  call, otherwise the effect is undefined.
 
-	* Returns the subscript of such an element as an `integer`, if
-	  one is found, or `null` otherwise.
+	* Returns the subscript of such an element as an integer, if one
+	  is found, or `null` otherwise.
 
 	* Throws an exception if `data` has not been sorted properly. Be
 	  advised that in this case there is no guarantee whether an
@@ -1264,7 +1263,7 @@
 	  function call `is_sorted(data, comparator)` shall yield `true`
 	  prior to this call, otherwise the effect is undefined.
 
-	* Returns the subscript of such an element as an `integer`. This
+	* Returns the subscript of such an element as an integer. This
 	  function returns `lengthof(data)` if all elements are less than
 	  `target`.
 
@@ -1281,7 +1280,7 @@
 	  function call `is_sorted(data, comparator)` shall yield `true`
 	  prior to this call, otherwise the effect is undefined.
 
-	* Returns the subscript of such an element as an `integer`. This
+	* Returns the subscript of such an element as an integer. This
 	  function returns `lengthof(data)` if all elements are less than
 	  or equal to `target`.
 
@@ -1295,11 +1294,11 @@
 	  a single function call. This function is equivalent to calling
 	  `lower_bound(data, target, comparator)` and
 	  `upper_bound(data, target, comparator)` respectively then
-	  storing the start and length in an `array`.
+	  storing the start and length in an array.
 
-	* Returns an `array` of two `integer`s, the first of which
-	  specifies the lower bound and the second of which specifies
-	  the number of elements in the range.
+	* Returns an array of two integers, the first of which specifies
+	  the lower bound and the second of which specifies the number
+	  of elements in the range.
 
 	* Throws an exception if `data` has not been sorted properly. Be
 	  advised that in this case there is no guarantee whether an
@@ -1311,9 +1310,9 @@
 	  user-defined `comparator`s is the same as the `is_sorted()`
 	  function. The algorithm shall finish in `O(n log n)` time where
 	  `n` is the number of elements in `data`, and shall be stable.
-	  This function returns a new `array` without modifying `data`.
+	  This function returns a new array without modifying `data`.
 
-	* Returns the sorted `array`.
+	* Returns the sorted array.
 
 	* Throws an exception if any elements are unordered. Be advised
 	  that in this case there is no guarantee whether an exception
@@ -1326,9 +1325,9 @@
 	  user-defined `comparator`s is the same as the `is_sorted()`
 	  function. The algorithm shall finish in `O(n log n)` time where
 	  `n` is the number of elements in `data`. This function returns
-	  a new `array` without modifying `data`.
+	  a new array without modifying `data`.
 
-	* Returns the sorted `array` with no duplicate elements.
+	* Returns the sorted array with no duplicate elements.
 
 	* Throws an exception if any elements are unordered. Be advised
 	  that in this case there is no guarantee whether an exception
@@ -1356,130 +1355,130 @@
 
 `std.array.reverse(data)`
 
-	* Reverses an `array`. This function returns a new `array`
-	  without modifying `data`.
+	* Reverses an array. This function returns a new array without
+	  modifying `data`.
 
-	* Returns the reversed `array`.
+	* Returns the reversed array.
 
 `std.array.generate(generator, length)`
 
 	* Calls `generator` repeatedly up to `length` times and returns
-	  an `array` consisting of all values returned. `generator` shall
+	  an array consisting of all values returned. `generator` shall
 	  be a binary function. The first argument will be the number of
 	  elements having been generated; the second argument is the
 	  previous element generated, or `null` in the case of the first
 	  element.
 
-	* Returns an `array` containing all values generated.
+	* Returns an array containing all values generated.
 
 `std.array.shuffle(data, [seed])`
 
 	* Shuffles elements in `data` randomly. If `seed` is set to an
-	  `integer`, the internal pseudo random number generator will be
+	  integer, the internal pseudo random number generator will be
 	  initialized with it and will produce the same series of numbers
 	  for a specific `seed` value. If it is absent, an unspecified
 	  seed is generated when this function is called. This function
-	  returns a new `array` without modifying `data`.
+	  returns a new array without modifying `data`.
 
-	* Returns the shuffled `array`.
+	* Returns the shuffled array.
 
 `std.array.copy_keys([source])`
 
-	* Copies all keys from `source`, which shall be an `object`, to
-	  create an `array`.
+	* Copies all keys from `source`, which shall be an object, to
+	  create an array.
 
-	* Returns an `array` of all keys in `source`. If `source` is
+	* Returns an array of all keys in `source`. If `source` is
 	  `null`, `null` is returned.
 
 `std.array.copy_values([source])`
 
-	* Copies all values from `source`, which shall be an `object`, to
-	  create an `array`.
+	* Copies all values from `source`, which shall be an object, to
+	  create an array.
 
-	* Returns an `array` of all values in `source`. If `source` is
+	* Returns an array of all values in `source`. If `source` is
 	  `null`, `null` is returned.
 
 ### `std.numeric`
 
 `std.numeric.integer_max`
 
-	* Denotes the maximum value of an `integer`; that is, the value
+	* Denotes the maximum value of an integer; that is, the value
 	  `+0x7FFFFFFFFFFFFFFF`.
 
 `std.numeric.integer_min`
 
-	* Denotes the minimum value of an `integer`; that is, the value
+	* Denotes the minimum value of an integer; that is, the value
 	  `-0x8000000000000000`.
 
 `std.numeric.real_max`
 
-	* Denotes the maximum finite value of a `real`; that is, the
+	* Denotes the maximum finite value of a real; that is, the
 	  value `+0x1FFFFFFFFFFFFFp+1023`.
 
 `std.numeric.real_min`
 
-	* Denotes the minimum finite value of a `real`; that is, the
+	* Denotes the minimum finite value of a real; that is, the
 	  value `-0x1FFFFFFFFFFFFFp+1023`.
 
 `std.numeric.real_epsilon`
 
-	* Denotes the minimum finite value of a `real` such that
+	* Denotes the minimum finite value of a real such that
 	  `1 + real_epsilon > 1`; that is, `+0x1p-52`.
 
 `std.numeric.size_max`
 
-	* Denotes the maximum length of a `string` or `array`. This value
-	  is implementation-dependent. Please be advised that there is no
-	  guarantee that allocation of a `string` containing this number
+	* Denotes the maximum length of a string or array. This value is
+	  implementation-dependent. Please be advised that there is no
+	  guarantee that allocation of a string containing this number
 	  of bytes will actually succeed or not.
 
 `std.numeric.abs(value)`
 
-	* Gets the absolute value of `value`, which may be an `integer`
-	  or `real`. Negative `integer`s are negated, which might cause
-	  an exception to be thrown due to overflow. Sign bits of `real`s
-	  are removed, which works on infinities and NaNs and does not
+	* Gets the absolute value of `value`, which may be an integer or
+	  real. Negative integers are negated, which might cause an
+	  exception to be thrown due to overflow. Sign bits of reals are
+	  removed, which works on infinities and NaNs and does not
 	  result in exceptions.
 
 	* Return the absolute value.
 
-	* Throws an exception if `value` is the `integer` `-0x1p63`.
+	* Throws an exception if `value` is the integer `-0x1p63`.
 
 `std.numeric.sign(value)`
 
 	* Propagates the sign bit of the number `value`, which may be an
-	  `integer` or `real`, to all bits of an `integer`. Be advised
-	  that `-0.0` is distinct from `0.0` despite the equality.
+	  integer or real, to all bits of an integer. Be advised that
+	  `-0.0` is distinct from `0.0` despite the equality.
 
 	* Returns `-1` if `value` is negative, or `0` otherwise.
 
 `std.numeric.is_finite(value)`
 
 	* Checks whether `value` is a finite number. `value` may be an
-	  `integer` or `real`. Be adviced that this functions returns
-	  `true` for `integer`s for consistency; `integer`s do not
-	  support infinities or NaNs.
+	  integer or real. Be adviced that this functions returns `true`
+	  for integers for consistency; integers do not support
+	  infinities or NaNs.
 
-	* Returns `true` if `value` is an `integer` or is a `real` that
+	* Returns `true` if `value` is an integer or is a real that
 	  is neither an infinity or a NaN, or `false` otherwise.
 
 `std.numeric.is_infinity(value)`
 
 	* Checks whether `value` is an infinity. `value` may be an
-	  `integer` or `real`. Be adviced that this functions returns
-	  `false` for `integer`s for consistency; `integer`s do not
-	  support infinities.
+	  integer or real. Be adviced that this functions returns `false`
+	  for integers for consistency; integers do not support
+	  infinities.
 
-	* Returns `true` if `value` is a `real` that denotes an infinity;
+	* Returns `true` if `value` is a real that denotes an infinity;
 	  or `false` otherwise.
 
 `std.numeric.is_nan(value)`
 
-	* Checks whether `value` is a NaN. `value` may be an `integer` or
-	  `real`. Be adviced that this functions returns `false` for
-	  `integer`s for consistency; `integer`s do not support NaNs.
+	* Checks whether `value` is a NaN. `value` may be an integer or
+	  real. Be adviced that this functions returns `false` for
+	  integers for consistency; integers do not support NaNs.
 
-	* Returns `true` if `value` is a `real` denoting a NaN, or
+	* Returns `true` if `value` is a real denoting a NaN, or
 	  `false` otherwise.
 
 `std.numeric.clamp(value, lower, upper)`
@@ -1488,116 +1487,115 @@
 
 	* Returns `lower` if `value < lower`, `upper` if `value > upper`,
 	  or `value` otherwise, including when `value` is a NaN. The
-	  returned value is of type `integer` if all arguments are of
-	  type `integer`; otherwise it is of type `real`.
+	  returned value is an integer if all arguments are integers;
+	  otherwise it is a real.
 
 	* Throws an exception if `lower` is not less than or equal to
 	  `upper`.
 
 `std.numeric.round(value)`
 
-	* Rounds `value`, which may be an `integer` or `real`, to the
-	  nearest integer; halfway values are rounded away from zero. If
-	  `value` is an `integer`, it is returned intact.
+	* Rounds `value`, which may be an integer or real, to the nearest
+	  integer; halfway values are rounded away from zero. If `value`
+	  is an integer, it is returned intact.
 
 	* Returns the rounded value.
 
 `std.numeric.floor(value)`
 
-	* Rounds `value`, which may be an `integer` or `real`, to the
-	  nearest integer towards negative infinity. If `value` is an
-	  `integer`, it is returned intact.
+	* Rounds `value`, which may be an integer or real, to the nearest
+	  integer towards negative infinity. If `value` is an integer, it
+	  is returned intact.
 
 	* Returns the rounded value.
 
 `std.numeric.ceil(value)`
 
-	* Rounds `value`, which may be an `integer` or `real`, to the
-	  nearest integer towards positive infinity. If `value` is an
-	  `integer`, it is returned intact.
+	* Rounds `value`, which may be an integer or real, to the nearest
+	  integer towards positive infinity. If `value` is an integer,
+	  it is returned intact.
 
 	* Returns the rounded value.
 
 `std.numeric.trunc(value)`
 
-	* Rounds `value`, which may be an `integer` or `real`, to the
-	  nearest integer towards zero. If `value` is an `integer`, it is
-	  returned intact.
+	* Rounds `value`, which may be an integer or real, to the nearest
+	  integer towards zero. If `value` is an integer, it is returned
+	  intact.
 
 	* Returns the rounded value.
 
 `std.numeric.iround(value)`
 
-	* Rounds `value`, which may be an `integer` or `real`, to the
-	  nearest integer; halfway values are rounded away from zero. If
-	  `value` is an `integer`, it is returned intact. If `value` is a
-	  `real`, it is converted to an `integer`.
+	* Rounds `value`, which may be an integer or real, to the nearest
+	  integer; halfway values are rounded away from zero. If `value`
+	  is an integer, it is returned intact. If `value` is a real, it
+	  is converted to an integer.
 
-	* Returns the rounded value as an `integer`.
+	* Returns the rounded value as an integer.
 
 	* Throws an exception if the result cannot be represented as an
-	  `integer`.
+	  integer.
 
 `std.numeric.ifloor(value)`
 
-	* Rounds `value`, which may be an `integer` or `real`, to the
-	  nearest integer towards negative infinity. If `value` is an
-	  `integer`, it is returned intact. If `value` is a `real`, it is
-	  converted to an `integer`.
+	* Rounds `value`, which may be an integer or real, to the nearest
+	  integer towards negative infinity. If `value` is an integer, it
+	  is returned intact. If `value` is a real, it is converted to an
+	  integer.
 
-	* Returns the rounded value as an `integer`.
+	* Returns the rounded value as an integer.
 
 	* Throws an exception if the result cannot be represented as an
-	  `integer`.
+	  integer.
 
 `std.numeric.iceil(value)`
 
-	* Rounds `value`, which may be an `integer` or `real`, to the
-	  nearest integer towards positive infinity. If `value` is an
-	  `integer`, it is returned intact. If `value` is a `real`, it is
-	  converted to an `integer`.
+	* Rounds `value`, which may be an integer or real, to the nearest
+	  integer towards positive infinity. If `value` is an integer, it
+	  is returned intact. If `value` is a real, it is converted to an
+	  integer.
 
-	* Returns the rounded value as an `integer`.
+	* Returns the rounded value as an integer.
 
 	* Throws an exception if the result cannot be represented as an
-	  `integer`.
+	  integer.
 
 `std.numeric.itrunc(value)`
 
-	* Rounds `value`, which may be an `integer` or `real`, to the
-	  nearest integer towards zero. If `value` is an `integer`, it is
-	  returned intact. If `value` is a `real`, it is converted to an
-	  `integer`.
+	* Rounds `value`, which may be an integer or real, to the nearest
+	  integer towards zero. If `value` is an integer, it is returned
+	  intact. If `value` is a real, it is converted to an integer.
 
-	* Returns the rounded value as an `integer`.
+	* Returns the rounded value as an integer.
 
 	* Throws an exception if the result cannot be represented as an
-	  `integer`.
+	  integer.
 
 `std.numeric.random([limit])`
 
-	* Generates a random `real` value whose sign agrees with `limit`
+	* Generates a random real value whose sign agrees with `limit`
 	  and whose absolute value is less than `limit`. If `limit` is
 	  absent, `1` is assumed.
 
-	* Returns a random `real` value.
+	* Returns a random real value.
 
 	* Throws an exception if `limit` is zero or non-finite.
 
 `std.numeric.sqrt(x)`
 
 	* Calculates the square root of `x` which may be of either the
-	  `integer` or the `real` type. The result is always exact.
+	  integer or the real type. The result is always a real.
 
-	* Returns the square root of `x` as a `real`.
+	* Returns the square root of `x` as a real.
 
 `std.numeric.fma(x, y, z)`
 
 	* Performs fused multiply-add operation on `x`, `y` and `z`. This
 	  functions calculates `x * y + z` without intermediate rounding
-	  operations. The result is always exact.
+	  operations.
 
-	* Returns the value of `x * y + z` as a `real`.
+	* Returns the value of `x * y + z` as a real.
 
 `std.numeric.remainder(x, y)`
 
@@ -1605,7 +1603,7 @@
 	  by `y`. The remainder is defined to be `x - q * y` where `q` is
 	  the quotient of division of `x` by `y` rounding to nearest.
 
-	* Returns the remainder as a `real`.
+	* Returns the remainder as a real.
 
 `std.numeric.frexp(x)`
 
@@ -1615,22 +1613,22 @@
 	  within the range `[0.5,1.0)`. If `x` is non-finite, `exp` is
 	  unspecified.
 
-	* Returns an `array` having two elements, whose first element is
-	  `frac` that is of type `real` and whose second element is `exp`
-	  that is of type `integer`.
+	* Returns an array having two elements, whose first element is
+	  `frac` that is of type real and whose second element is `exp`
+	  that is of type integer.
 
 `std.numeric.ldexp(frac, exp)`
 
-	* Composes `frac` and `exp` to make a `real` number `x`, as if by
+	* Composes `frac` and `exp` to make a real number `x`, as if by
 	  multiplying `frac` with `pow(2,exp)`. `exp` shall be of type
-	  `integer`. This function is the inverse of `frexp()`.
+	  integer. This function is the inverse of `frexp()`.
 
-	* Returns the product as a `real`.
+	* Returns the product as a real.
 
 `std.numeric.addm(x, y)`
 
 	* Adds `y` to `x` using modular arithmetic. `x` and `y` must be
-	  of the `integer` type. The result is reduced to be congruent to
+	  of the integer type. The result is reduced to be congruent to
 	  the sum of `x` and `y` modulo `0x1p64` in infinite precision.
 	  This function will not cause overflow exceptions to be thrown.
 
@@ -1639,7 +1637,7 @@
 `std.numeric.subm(x, y)`
 
 	* Subtracts `y` from `x` using modular arithmetic. `x` and `y`
-	  must be of the `integer` type. The result is reduced to be
+	  must be of the integer type. The result is reduced to be
 	  congruent to the difference of `x` and `y` modulo `0x1p64` in
 	  infinite precision. This function will not cause overflow
 	  exceptions to be thrown.
@@ -1649,7 +1647,7 @@
 `std.numeric.mulm(x, y)`
 
 	* Multiplies `x` by `y` using modular arithmetic. `x` and `y`
-	  must be of the `integer` type. The result is reduced to be
+	  must be of the integer type. The result is reduced to be
 	  congruent to the product of `x` and `y` modulo `0x1p64` in
 	  infinite precision. This function will not cause overflow
 	  exceptions to be thrown.
@@ -1659,10 +1657,10 @@
 `std.numeric.adds(x, y)`
 
 	* Adds `y` to `x` using saturating arithmetic. `x` and `y` may be
-	  `integer` or `real` values. The result is limited within the
+	  integer or real values. The result is limited within the
 	  range of representable values of its type, hence will not cause
 	  overflow exceptions to be thrown. When either argument is of
-	  type `real` which supports infinities, this function is
+	  type real which supports infinities, this function is
 	  equivalent to the built-in addition operator.
 
 	* Returns the saturated sum of `x` and `y`.
@@ -1670,10 +1668,10 @@
 `std.numeric.subs(x, y)`
 
 	* Subtracts `y` from `x` using saturating arithmetic. `x` and `y`
-	  may be `integer` or `real` values. The result is limited within
-	  the range of representable values of its type, hence will not
-	  cause overflow exceptions to be thrown. When either argument is
-	  of type `real` which supports infinities, this function is
+	  may be integer or real values. The result is limited within the
+	  range of representable values of its type, hence will not cause
+	  overflow exceptions to be thrown. When either argument is of
+	  type real which supports infinities, this function is
 	  equivalent to the built-in subtraction operator.
 
 	* Returns the saturated difference of `x` and `y`.
@@ -1681,10 +1679,10 @@
 `std.numeric.muls(x, y)`
 
 	* Multiplies `x` by `y` using saturating arithmetic. `x` and `y`
-	  may be `integer` or `real` values. The result is limited within
-	  the range of representable values of its type, hence will not
-	  cause overflow exceptions to be thrown. When either argument is
-	  of type `real` which supports infinities, this function is
+	  may be integer or real values. The result is limited within the
+	  range of representable values of its type, hence will not cause
+	  overflow exceptions to be thrown. When either argument is of
+	  type real which supports infinities, this function is
 	  equivalent to the built-in multiplication operator.
 
 	* Returns the saturated product of `x` and `y`.
@@ -1692,30 +1690,30 @@
 `std.numeric.lzcnt(x)`
 
 	* Counts the number of leading zero bits in `x`, which shall be
-	  of type `integer`.
+	  of type integer.
 
-	* Returns the bit count as an `integer`. If `x` is zero, `64` is
+	* Returns the bit count as an integer. If `x` is zero, `64` is
 	  returned.
 
 `std.numeric.tzcnt(x)`
 
 	* Counts the number of trailing zero bits in `x`, which shall be
-	  of type `integer`.
+	  of type integer.
 
-	* Returns the bit count as an `integer`. If `x` is zero, `64` is
+	* Returns the bit count as an integer. If `x` is zero, `64` is
 	  returned.
 
 `std.numeric.popcnt(x)`
 
 	* Counts the number of one bits in `x`, which shall be of type
-	  `integer`.
+	  integer.
 
-	* Returns the bit count as an `integer`.
+	* Returns the bit count as an integer.
 
 `std.numeric.rotl(m, x, n)`
 
 	* Rotates the rightmost `m` bits of `x` to the left by `n`; all
-	  arguments must be of type `integer`. This has the effect of
+	  arguments must be of type integer. This has the effect of
 	  shifting `x` by `n` to the left then filling the vacuum in the
 	  right with the last `n` bits that have just been shifted past
 	  the left boundary. `n` is modulo `m` so rotating by a negative
@@ -1723,14 +1721,14 @@
 	  absolute value to the right. All other bits are zeroed. If `m`
 	  is zero, zero is returned.
 
-	* Returns the rotated value as an `integer`.
+	* Returns the rotated value as an integer.
 
 	* Throws an exception if `m` is negative or greater than `64`.
 
 `std.numeric.rotr(m, x, n)`
 
 	* Rotates the rightmost `m` bits of `x` to the right by `n`; all
-	  arguments must be of type `integer`. This has the effect of
+	  arguments must be of type integer. This has the effect of
 	  shifting `x` by `n` to the right then filling the vacuum in the
 	  left with the last `n` bits that have just been shifted past
 	  the right boundary. `n` is modulo `m` so rotating by a negative
@@ -1738,25 +1736,25 @@
 	  absolute value to the left. All other bits are zeroed. If `m`
 	  is zero, zero is returned.
 
-	* Returns the rotated value as an `integer`.
+	* Returns the rotated value as an integer.
 
 	* Throws an exception if `m` is negative or greater than `64`.
 
 `std.numeric.format(value, [base], [ebase])`
 
-	* Converts an `integer` or `real` to a `string` in `base`. This
+	* Converts an integer or real to a string in `base`. This
 	  function writes as many digits as possible to ensure precision.
 	  No plus sign precedes the significant figures. If `base` is
 	  absent, `10` is assumed. If `ebase` is specified, an exponent
 	  is appended to the significand as follows: If `value` is of
-	  type `integer`, the significand is kept as short as possible;
-	  otherwise (when `value` is of type `real`), it is written in
+	  type integer, the significand is kept as short as possible;
+	  otherwise (when `value` is of type real), it is written in
 	  scientific notation. In both cases, the exponent comprises at
 	  least two digits with an explicit sign. If `ebase` is absent,
 	  no exponent appears. The result is exact as long as `base` is a
 	  power of two.
 
-	* Returns a `string` converted from `value`.
+	* Returns a string converted from `value`.
 
 	* Throws an exception if `base` is neither `2` nor `10` nor `16`,
 	  or if `ebase` is neither `2` nor `10`, or if `base` is not `10`
@@ -1764,7 +1762,7 @@
 
 `std.numeric.parse_integer(text)`
 
-	* Parses `text` for an `integer`. `text` shall be a `string`. All
+	* Parses `text` for an integer. `text` shall be a string. All
 	  leading and trailing blank characters are stripped from `text`.
 	  If it becomes empty, this function fails; otherwise, it shall
 	  match one of the following extended regular expressions:
@@ -1778,15 +1776,15 @@
 
 	  If the string does not match any of the above, this function
 	  fails. If the result is outside the range of representable
-	  values of type `integer`, this function fails.
+	  values of type integer, this function fails.
 
-	* Returns the `integer` value converted from `text`.
+	* Returns the integer value converted from `text`.
 
 	* Throws an exception on failure.
 
 `std.numeric.parse_real(text, [saturating])`
 
-	* Parses `text` for a `real`. `text` shall be a `string`. All
+	* Parses `text` for a real. `text` shall be a string. All
 	  leading and trailing blank characters are stripped from `text`.
 	  If it becomes empty, this function fails; otherwise, it shall
 	  match any of the following extended regular expressions:
@@ -1804,11 +1802,11 @@
 
 	  If the string does not match any of the above, this function
 	  fails. If the absolute value of the result is too small to fit
-	  in a `real`, a signed zero is returned. When the absolute value
+	  in a real, a signed zero is returned. When the absolute value
 	  is too large, if `saturating` is set to `true`, a signed
 	  infinity is returned; otherwise this function fails.
 
-	* Returns the `real` value converted from `text`.
+	* Returns the real value converted from `text`.
 
 	* Throws an exception on failure.
 
@@ -1834,14 +1832,14 @@
 	* Calculates `base` raised to the power `y`. If `base` is absent,
 	  `e` is assumed. This function is equivalent to `pow(base, y)`.
 
-	* Returns the power as a `real`.
+	* Returns the power as a real.
 
 `std.math.expm1(y)`
 
 	* Calculates `exp(y) - 1` without losing precision when `y` is
 	  close to zero.
 
-	* Returns the result as a `real`.
+	* Returns the result as a real.
 
 `std.math.pow(x, y)`
 
@@ -1849,63 +1847,63 @@
 	  `x` is `1` or `y` is `0`, the result is always `1`, even when
 	  the other argument is an infinity or NaN.
 
-	* Returns the power as a `real`.
+	* Returns the power as a real.
 
 `std.math.log(x, [base])`
 
 	* Calculates the logarithm of `x` to `base`. If `base` is absent,
 	  `e` is assumed.
 
-	* Returns the logarithm as a `real`.
+	* Returns the logarithm as a real.
 
 `std.math.log1p(x)`
 
 	* Calculates `log(1 + x)` without losing precision when `x` is
 	  close to zero.
 
-	* Returns the result as a `real`.
+	* Returns the result as a real.
 
 `std.math.sin(x)`
 
 	* Calculates the sine of `x` in radians.
 
-	* Returns the result as a `real`.
+	* Returns the result as a real.
 
 `std.math.cos(x)`
 
 	* Calculates the cosine of `x` in radians.
 
-	* Returns the result as a `real`.
+	* Returns the result as a real.
 
 `std.math.tan(x)`
 
 	* Calculates the tangent of `x` in radians.
 
-	* Returns the result as a `real`.
+	* Returns the result as a real.
 
 `std.math.asin(x)`
 
 	* Calculates the inverse sine of `x` in radians.
 
-	* Returns the result as a `real`.
+	* Returns the result as a real.
 
 `std.math.acos(x)`
 
 	* Calculates the inverse cosine of `x` in radians.
 
-	* Returns the result as a `real`.
+	* Returns the result as a real.
 
 `std.math.atan(x)`
 
 	* Calculates the inverse tangent of `x` in radians.
 
-	* Returns the result as a `real`.
+	* Returns the result as a real.
 
 `std.math.atan2(y, x)`
 
 	* Calculates the angle of the vector `<x,y>` in radians.
 
-	* Returns the result as a `real`.
+	* Returns the result as a real.
 
 `std.math.hypot(...)`
 
@@ -1915,68 +1913,68 @@
 	  positive infinity; otherwise, if any argument is a NaN, this
 	  function returns a NaN.
 
-	* Returns the length as a `real`.
+	* Returns the length as a real.
 
 `std.math.sinh(x)`
 
 	* Calculates the hyperbolic sine of `x`.
 
-	* Returns the result as a `real`.
+	* Returns the result as a real.
 
 `std.math.cosh(x)`
 
 	* Calculates the hyperbolic cosine of `x`.
 
-	* Returns the result as a `real`.
+	* Returns the result as a real.
 
 `std.math.tanh(x)`
 
 	* Calculates the hyperbolic tangent of `x`.
 
-	* Returns the result as a `real`.
+	* Returns the result as a real.
 
 `std.math.asinh(x)`
 
 	* Calculates the inverse hyperbolic sine of `x`.
 
-	* Returns the result as a `real`.
+	* Returns the result as a real.
 
 `std.math.acosh(x)`
 
 	* Calculates the inverse hyperbolic cosine of `x`.
 
-	* Returns the result as a `real`.
+	* Returns the result as a real.
 
 `std.math.atanh(x)`
 
 	* Calculates the inverse hyperbolic tangent of `x`.
 
-	* Returns the result as a `real`.
+	* Returns the result as a real.
 
 `std.math.erf(x)`
 
 	* Calculates the error function of `x`.
 
-	* Returns the result as a `real`.
+	* Returns the result as a real.
 
 `std.math.cerf(x)`
 
 	* Calculates the complementary error function of `x`.
 
-	* Returns the result as a `real`.
+	* Returns the result as a real.
 
 `std.math.gamma(x)`
 
 	* Calculates the Gamma function of `x`.
 
-	* Returns the result as a `real`.
+	* Returns the result as a real.
 
 `std.math.lgamma(x)`
 
 	* Calculates the natural logarithm of the absolute value of the
 	  Gamma function of `x`.
 
-	* Returns the result as a `real`.
+	* Returns the result as a real.
 
 ### `std.filesystem`
 
@@ -1984,7 +1982,7 @@
 
 	* Gets the absolute path of the current working directory.
 
-	* Returns a `string` containing the path to the current working
+	* Returns a string containing the path to the current working
 	  directory.
 
 `std.filesystem.get_information(path)`
@@ -1992,11 +1990,11 @@
 	* Retrieves information of the file or directory designated by
 	  `path`.
 
-	* Returns an `object` consisting of the following members (names
-	  that start with `b_` are `boolean` flags; names that start with
-	  `i_` are IDs as `integer`s; names that start with `n_` are
-	  plain `integer`s; names that start with `t_` are timestamps in
-	  UTC as `integer`s):
+	* Returns an object consisting of the following members (names
+	  that start with `b_` are boolean values; names that start with
+	  `i_` are IDs as integers; names that start with `n_` are
+	  plain integers; names that start with `t_` are timestamps in
+	  UTC as integers):
 
 	  * `i_dev`   unique device id on this machine.
 	  * `i_file`  unique file id on this device.
@@ -2021,8 +2019,8 @@
 
 `std.filesystem.remove_recursive(path)`
 
-	* Removes the file or directory at `path`. If `path` designates
-	  a directory, all of its contents are removed recursively.
+	* Removes the file or directory at `path`. If `path` designates a
+	  directory, all of its contents are removed recursively.
 
 	* Returns the number of files and directories that have been
 	  successfully removed in total. If `path` does not reference an
@@ -2035,12 +2033,12 @@
 
 	* Lists the contents of the directory at `path`.
 
-	* Returns an `object` containing all entries of the directory at
+	* Returns an object containing all entries of the directory at
 	  `path`, including the special subdirectories '.' and '..'. For
 	  each element, its key specifies the filename and the value is
-	  an `object` consisting of the following members (names that
-	  start with `b_` are `boolean` flags; names that start with `i_`
-	  are IDs as `integer`s):
+	  an object consisting of the following members (names that
+	  start with `b_` are boolean values; names that start with `i_`
+	  are IDs as integers):
 
 	  * `b_dir`   whether this is a directory.
 	  * `b_sym`   whether this is a symbolic link.
@@ -2054,8 +2052,8 @@
 `std.filesystem.directory_create(path)`
 
 	* Creates a directory at `path`. Its parent directory must exist
-	  and must be accessible. This function does not fail if either
-	  a directory or a symbolic link to a directory already exists on
+	  and must be accessible. This function does not fail if either a
+	  directory or a symbolic link to a directory already exists on
 	  `path`.
 
 	* Returns `true` if a new directory has been created, or `false`
@@ -2069,8 +2067,8 @@
 	* Removes the directory at `path`. The directory must be empty.
 	  This function fails if `path` does not designate a directory.
 
-	* Returns `true` if a directory has been removed successfully,
-	  or `false` if no such directory exists.
+	* Returns `true` if a directory has been removed successfully, or
+	  `false` if no such directory exists.
 
 	* Throws an exception if `path` designates a non-directory, or
 	  some other errors occur.
@@ -2083,8 +2081,8 @@
 	  `limit` is specified, no more than this number of bytes will be
 	  read.
 
-	* Returns the bytes that have been read as a `string`, or `null`
-	  if the file does not exist.
+	* Returns the bytes that have been read as a string, or `null` if
+	  the file does not exist.
 
 	* Throws an exception if `offset` is negative, or a read error
 	  occurs.
@@ -2093,9 +2091,9 @@
 
 	* Reads the file at `path` in binary mode and invokes `callback`
 	  with the data read repeatedly. `callback` shall be a binary
-	  `function` whose first argument is the absolute offset of the
+	  function whose first argument is the absolute offset of the
 	  data block that has been read, and whose second argument is the
-	  bytes read and stored in a `string`. Data may be transferred in
+	  bytes read and stored in a string. Data may be transferred in
 	  multiple blocks of variable sizes; the caller shall make no
 	  assumption about the number of times that `callback` will be
 	  called or the size of each individual block. The read operation
@@ -2105,7 +2103,7 @@
 	  read.
 
 	* Returns the number of bytes that have been read and processed
-	  as an `integer`, or `null` if the file does not exist.
+	  as an integer, or `null` if the file does not exist.
 
 	* Throws an exception if `offset` is negative, or a read error
 	  occurs.
@@ -2166,15 +2164,15 @@
 	* Creates a CRC-32 hasher according to ISO/IEC 3309. The divisor
 	  is `0x04C11DB7` (or `0xEDB88320` in reverse form).
 
-	* Returns the hasher as an `object` consisting of the following
+	* Returns the hasher as an object consisting of the following
 	  members:
 
 	  * `write(data)`
 	  * `finish()`
 
 	  The function `write()` is used to put data into the hasher,
-	  which shall be of type `string`. After all data have been put,
-	  the function `finish()` extracts the checksum as an `integer`
+	  which shall be of type string. After all data have been put,
+	  the function `finish()` extracts the checksum as an integer
 	  (whose high-order 32 bits are always zeroes), then resets the
 	  hasher, making it suitable for further data as if it had just
 	  been created.
@@ -2182,7 +2180,7 @@
 `std.checksum.crc32(data)`
 
 	* Calculates the CRC-32 checksum of `data` which must be of type
-	  `string`, as if this function was defined as
+	  string, as if this function was defined as
 
 	  ```
 	    std.checksum.crc32 = func(data) {
@@ -2195,7 +2193,7 @@
 	  This function is expected to be both more efficient and easier
 	  to use.
 
-	* Returns the CRC-32 checksum as an `integer`. The high-order 32
+	* Returns the CRC-32 checksum as an integer. The high-order 32
 	  bits are always zeroes.
 
 `std.checksum.fnv1a32_new()`
@@ -2204,15 +2202,15 @@
 	  32-bit FNV-1a variant. The FNV prime is `16777619` and the FNV
 	  offset basis is `2166136261`.
 
-	* Returns the hasher as an `object` consisting of the following
+	* Returns the hasher as an object consisting of the following
 	  members:
 
 	  * `write(data)`
 	  * `finish()`
 
 	  The function `write()` is used to put data into the hasher,
-	  which shall be of type `string`. After all data have been put,
-	  the function `finish()` extracts the checksum as an `integer`
+	  which shall be of type string. After all data have been put,
+	  the function `finish()` extracts the checksum as an integer
 	  (whose high-order 32 bits are always zeroes), then resets the
 	  hasher, making it suitable for further data as if it had just
 	  been created.
@@ -2220,7 +2218,7 @@
 `std.checksum.fnv1a32(data)`
 
 	* Calculates the 32-bit FNV-1a checksum of `data` which must be
-	  of type `string`, as if this function was defined as
+	  of type string, as if this function was defined as
 
 	  ```
 	    std.checksum.fnv1a32 = func(data) {
@@ -2233,30 +2231,29 @@
 	  This function is expected to be both more efficient and easier
 	  to use.
 
-	* Returns the 32-bit FNV-1a checksum as an `integer`. The
+	* Returns the 32-bit FNV-1a checksum as an integer. The
 	  high-order 32 bits are always zeroes.
 
 `std.checksum.md5_new()`
 
 	* Creates an MD5 hasher.
 
-	* Returns the hasher as an `object` consisting of the following
+	* Returns the hasher as an object consisting of the following
 	  members:
 
 	  * `write(data)`
 	  * `finish()`
 
 	  The function `write()` is used to put data into the hasher,
-	  which shall be of type `string`. After all data have been put,
-	  the function `finish()` extracts the checksum as a `string` of
-	  32 hexadecimal digits in uppercase, then resets the hasher,
-	  making it suitable for further data as if it had just been
-	  created.
+	  which shall be of type string. After all data have been put,
+	  the function `finish()` extracts the checksum as a string of 32
+	  hexadecimal digits in uppercase, then resets the hasher, making
+	  it suitable for further data as if it had just been created.
 
 `std.checksum.md5(data)`
 
 	* Calculates the MD5 checksum of `data` which must be of type
-	  `string`, as if this function was defined as
+	  string, as if this function was defined as
 
 	  ```
 	    std.checksum.md5 = func(data) {
@@ -2269,30 +2266,29 @@
 	  This function is expected to be both more efficient and easier
 	  to use.
 
-	* Returns the MD5 checksum as a `string` of 32 hexadecimal digits
+	* Returns the MD5 checksum as a string of 32 hexadecimal digits
 	  in uppercase.
 
 `std.checksum.sha1_new()`
 
 	* Creates an SHA-1 hasher.
 
-	* Returns the hasher as an `object` consisting of the following
+	* Returns the hasher as an object consisting of the following
 	  members:
 
 	  * `write(data)`
 	  * `finish()`
 
 	  The function `write()` is used to put data into the hasher,
-	  which shall be of type `string`. After all data have been put,
-	  the function `finish()` extracts the checksum as a `string` of
-	  40 hexadecimal digits in uppercase, then resets the hasher,
-	  making it suitable for further data as if it had just been
-	  created.
+	  which shall be of type string. After all data have been put,
+	  the function `finish()` extracts the checksum as a string of 40
+	  hexadecimal digits in uppercase, then resets the hasher, making
+	  it suitable for further data as if it had just been created.
 
 `std.checksum.sha1(data)`
 
 	* Calculates the SHA-1 checksum of `data` which must be of type
-	  `string`, as if this function was defined as
+	  string, as if this function was defined as
 
 	  ```
 	    std.checksum.sha1 = func(data) {
@@ -2305,30 +2301,29 @@
 	  This function is expected to be both more efficient and easier
 	  to use.
 
-	* Returns the SHA-1 checksum as a `string` of 40 hexadecimal
+	* Returns the SHA-1 checksum as a string of 40 hexadecimal
 	  digits in uppercase.
 
 `std.checksum.sha256_new()`
 
 	* Creates an SHA-256 hasher.
 
-	* Returns the hasher as an `object` consisting of the following
+	* Returns the hasher as an object consisting of the following
 	  members:
 
 	  * `write(data)`
 	  * `finish()`
 
 	  The function `write()` is used to put data into the hasher,
-	  which shall be of type `string`. After all data have been put,
-	  the function `finish()` extracts the checksum as a `string` of
-	  64 hexadecimal digits in uppercase, then resets the hasher,
-	  making it suitable for further data as if it had just been
-	  created.
+	  which shall be of type string. After all data have been put,
+	  the function `finish()` extracts the checksum as a string of 64
+	  hexadecimal digits in uppercase, then resets the hasher, making
+	  it suitable for further data as if it had just been created.
 
 `std.checksum.sha256(data)`
 
 	* Calculates the SHA-256 checksum of `data` which must be of type
-	  `string`, as if this function was defined as
+	  string, as if this function was defined as
 
 	  ```
 	    std.checksum.sha256 = func(data) {
@@ -2341,33 +2336,33 @@
 	  This function is expected to be both more efficient and easier
 	  to use.
 
-	* Returns the SHA-256 checksum as a `string` of 64 hexadecimal
+	* Returns the SHA-256 checksum as a string of 64 hexadecimal
 	  digits in uppercase.
 
 ### `std.json`
 
 `std.json.format(value, [indent])`
 
-	* Converts a value to a `string` in the JSON format, according to
+	* Converts a value to a string in the JSON format, according to
 	  IETF RFC 7159. This function generates text that conforms to
 	  JSON strictly; values whose types cannot be represented in JSON
-	  are discarded if they are found in an `object` and censored to
-	  `null` otherwise. If `indent` is set to a `string`, it is used
-	  as each level of indention following a line break, unless it is
+	  are discarded if they are found in an object and censored to
+	  `null` otherwise. If `indent` is set to a string, it is used as
+	  each level of indention following a line break, unless it is
 	  empty, in which case no line break is inserted. If `indent` is
-	  set to an `integer`, it is clamped between `0` and `10`
-	  inclusively and this function behaves as if a `string`
-	  consisting of this number of spaces was set. Its default value
-	  is an empty `string`.
+	  set to an integer, it is clamped between `0` and `10`
+	  inclusively and this function behaves as if a string consisting
+	  of this number of spaces was set. Its default value is an empty
+	  string.
 
-	* Returns the formatted text as a `string`.
+	* Returns the formatted text as a string.
 
 `std.json.parse(text)`
 
-	* Parses a `string` containing data encoded in the JSON format
-	  and converts it to a value. This function reuses the tokenizer
-	  of Asteria and allows quite a few extensions, some of which
-	  are also supported by JSON5:
+	* Parses a string containing data encoded in the JSON format and
+	  converts it to a value. This function reuses the tokenizer of
+	  Asteria and allows quite a few extensions, some of which are
+	  also supported by JSON5:
 
 	  * Single-line and multiple-line comments are allowed.
 	  * Binary and hexadecimal numbers are allowed.
@@ -2379,7 +2374,7 @@
 	  * Element lists of arrays and objects may end in commas.
 	  * Object keys may be unquoted if they are valid identifiers.
 
-	  Be advised that numbers are always parsed as `real`s.
+	  Be advised that numbers are always parsed as reals.
 
 	* Returns the parsed value.
 
@@ -2391,14 +2386,14 @@
 
 	* Launches the program denoted by `cmd`, awaits its termination,
 	  and returns its exit status. If `argv` is provided, it shall be
-	  an `array` of `string`s, which specify arguments passed to the
-	  program. If `envp` is provided, it shall also be an `array` of
-	  `string`s, which specify environment variables passed to the
+	  an array of strings, which specify arguments passed to the
+	  program. If `envp` is provided, it shall also be an array of
+	  strings, which specify environment variables passed to the
 	  program.
 
-	* Returns the exit status as an `integer`. If the process exits
-	  due to a signal, the exit status is `128+N` where `N` is the
-	  signal number.
+	* Returns the exit status as an integer. If the process exits due
+	  to a signal, the exit status is `128+N` where `N` is the signal
+	  number.
 
 	* Throws an exception if the program could not be launched or its
 	  exit status could not be retrieved.
