@@ -78,12 +78,33 @@ using ::rocket::xswap;
 using ::rocket::swap;
 using ::rocket::nullopt;
 
+// Aliases
+using cow_string = ::rocket::cow_string;
+using cow_wstring = ::rocket::cow_wstring;
+using cow_u16string = ::rocket::cow_u16string;
+using cow_u32string = ::rocket::cow_u32string;
+using phsh_string = ::rocket::prehashed_string;
+using tinybuf = ::rocket::tinybuf;
+using tinyfmt = ::rocket::tinyfmt;
+
+template<typename E, typename D = ::std::default_delete<const E>> using uptr = ::rocket::unique_ptr<E, D>;
+template<typename E> using rcptr = ::rocket::refcnt_ptr<E>;
+template<typename E> using cow_vector = ::rocket::cow_vector<E>;
+template<typename K, typename V, typename H> using cow_hashmap = ::rocket::cow_hashmap<K, V, H, ::std::equal_to<void>>;
+template<typename E, size_t k> using sso_vector = ::rocket::static_vector<E, k>;
+template<typename... P> using variant = ::rocket::variant<P...>;
+template<typename T> using opt = ::rocket::optional<T>;
+template<typename F, typename S> using pair = ::std::pair<F, S>;
+template<typename F, typename S> using cow_bivector = ::rocket::cow_vector<::std::pair<F, S>>;
+template<typename E, size_t... k> using array = ::rocket::array<E, k...>;
+template<typename E> using ref_to = ::rocket::reference_wrapper<E>;
+
 // Base
 class Rcbase;
-class Source_Location;
-class Value;
 class Abstract_Opaque;
 class Abstract_Function;
+class Value;
+class Source_Location;
 class Recursion_Sentry;
 
 // Low-level data structures
@@ -134,27 +155,6 @@ class Statement_Sequence;
 // Library
 class Argument_Reader;
 class Simple_Binding_Wrapper;
-
-template<typename E, typename D = ::std::default_delete<const E>> using uptr = ::rocket::unique_ptr<E, D>;
-template<typename E> using rcptr = ::rocket::refcnt_ptr<E>;
-template<typename E> using cow_vector = ::rocket::cow_vector<E>;
-template<typename K, typename V, typename H> using cow_hashmap = ::rocket::cow_hashmap<K, V, H, ::std::equal_to<void>>;
-template<typename E, size_t k> using sso_vector = ::rocket::static_vector<E, k>;
-template<typename... P> using variant = ::rocket::variant<P...>;
-template<typename T> using opt = ::rocket::optional<T>;
-template<typename F, typename S> using pair = ::std::pair<F, S>;
-template<typename F, typename S> using cow_bivector = ::rocket::cow_vector<::std::pair<F, S>>;
-template<typename E, size_t... k> using array = ::rocket::array<E, k...>;
-template<typename E> using ref_to = ::rocket::reference_wrapper<E>;
-
-// Aliases
-using cow_string = ::rocket::cow_string;
-using cow_wstring = ::rocket::cow_wstring;
-using cow_u16string = ::rocket::cow_u16string;
-using cow_u32string = ::rocket::cow_u32string;
-using phsh_string = ::rocket::prehashed_string;
-using tinybuf = ::rocket::tinybuf;
-using tinyfmt = ::rocket::tinyfmt;
 
 // Fundamental types
 using V_null      = nullptr_t;
