@@ -7,32 +7,6 @@
 
 namespace Asteria {
 
-const char* describe_frame_type(Frame_Type type) noexcept
-  {
-    switch(type) {
-    case frame_type_native: {
-        return "native";
-      }
-    case frame_type_throw: {
-        return "throw";
-      }
-    case frame_type_catch: {
-        return "catch";
-      }
-    case frame_type_call: {
-        return "call";
-      }
-    case frame_type_func: {
-        return "function";
-      }
-    case frame_type_defer: {
-        return "defer";
-      }
-    default:
-      return "<unknown frame type>";
-    }
-  }
-
 const char* describe_vtype(Vtype vtype) noexcept
   {
     switch(vtype) {
@@ -65,6 +39,32 @@ const char* describe_vtype(Vtype vtype) noexcept
       }
     default:
       return "<unknown data type>";
+    }
+  }
+
+const char* describe_frame_type(Frame_Type type) noexcept
+  {
+    switch(type) {
+    case frame_type_native: {
+        return "native";
+      }
+    case frame_type_throw: {
+        return "throw";
+      }
+    case frame_type_catch: {
+        return "catch";
+      }
+    case frame_type_call: {
+        return "call";
+      }
+    case frame_type_func: {
+        return "function";
+      }
+    case frame_type_defer: {
+        return "defer";
+      }
+    default:
+      return "<unknown frame type>";
     }
   }
 

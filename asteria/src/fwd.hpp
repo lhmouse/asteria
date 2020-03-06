@@ -92,6 +92,8 @@ class Reference_Dictionary;
 class AVMC_Queue;
 
 // Runtime
+enum AIR_Status : uint8_t;
+enum PTC_Aware : uint8_t;
 class Abstract_Hooks;
 class Runtime_Error;
 class Reference_Root;
@@ -114,10 +116,13 @@ class Instantiated_Function;
 class AIR_Node;
 class Backtrace_Frame;
 class Simple_Script;
-enum AIR_Status : uint8_t;
-enum PTC_Aware : uint8_t;
 
 // Compiler
+enum Punctuator : uint8_t;
+enum Keyword : uint8_t;
+enum Jump_Target : uint8_t;
+enum Precedence : uint8_t;
+enum Xop : uint8_t;
 class Parser_Error;
 class Token;
 class Token_Stream;
@@ -125,11 +130,6 @@ class Expression_Unit;
 class Statement;
 class Infix_Element;
 class Statement_Sequence;
-enum Punctuator : uint8_t;
-enum Keyword : uint8_t;
-enum Jump_Target : uint8_t;
-enum Precedence : uint8_t;
-enum Xop : uint8_t;
 
 // Library
 class Argument_Reader;
@@ -167,27 +167,6 @@ using V_function  = rcptr<Abstract_Function>;
 using V_array     = cow_vector<Value>;
 using V_object    = cow_hashmap<phsh_string, Value, phsh_string::hash>;
 
-// Stack frame types
-enum Frame_Type : uint8_t
-  {
-    frame_type_native  = 0,  // The frame could not be determined.
-    frame_type_throw   = 1,  // An exception was thrown here.
-    frame_type_catch   = 2,  // An exception was caught here.
-    frame_type_call    = 3,  // An exception propagated across a function call.
-    frame_type_func    = 4,  // An exception propagated across a function boundary.
-    frame_type_defer   = 5,  // A new exception was thrown here.
-  };
-
-ROCKET_PURE_FUNCTION extern const char* describe_frame_type(Frame_Type type) noexcept;
-
-// Garbage collection generations
-enum GC_Generation : uint8_t
-  {
-    gc_generation_newest  = 0,
-    gc_generation_middle  = 1,
-    gc_generation_oldest  = 2,
-  };
-
 // Indices of fundamental types
 enum Vtype : uint8_t
   {
@@ -211,6 +190,27 @@ enum Compare : uint8_t
     compare_less       = 1,  // The LHS operand is less than the RHS operand.
     compare_equal      = 2,  // The LHS operand is equal to the RHS operand.
     compare_greater    = 3,  // The LHS operand is greater than the RHS operand.
+  };
+
+// Stack frame types
+enum Frame_Type : uint8_t
+  {
+    frame_type_native  = 0,  // The frame could not be determined.
+    frame_type_throw   = 1,  // An exception was thrown here.
+    frame_type_catch   = 2,  // An exception was caught here.
+    frame_type_call    = 3,  // An exception propagated across a function call.
+    frame_type_func    = 4,  // An exception propagated across a function boundary.
+    frame_type_defer   = 5,  // A new exception was thrown here.
+  };
+
+ROCKET_PURE_FUNCTION extern const char* describe_frame_type(Frame_Type type) noexcept;
+
+// Garbage collection generations
+enum GC_Generation : uint8_t
+  {
+    gc_generation_newest  = 0,
+    gc_generation_middle  = 1,
+    gc_generation_oldest  = 2,
   };
 
 // Parser status codes
