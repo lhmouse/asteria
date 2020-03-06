@@ -188,9 +188,6 @@ const char* describe_parser_status(Parser_Status status) noexcept
     case parser_status_too_many_elements: {
         return "max number of elements exceeded";
       }
-    case parser_status_closed_parenthesis_or_argument_expected: {
-        return "`)` or expression expected";
-      }
     case parser_status_closed_bracket_expected: {
         return "`]` expected";
       }

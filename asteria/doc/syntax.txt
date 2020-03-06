@@ -92,9 +92,7 @@ expression-statement ::=
 if-statement ::=
 	"if" negation-opt "(" expression ")" statement else-branch-opt
 negation-opt ::=
-	negation | ""
-negation ::=
-	"!" | "not"
+	"!" | "not" | ""
 else-branch-opt ::=
 	"else" statement | ""
 switch-statement ::=
@@ -134,7 +132,9 @@ continue-target-opt ::=
 throw-statement ::=
 	"throw" expression ";"
 return-statement ::=
-	"return" reference-specifier-opt expression-opt ";"
+	"return" ( argument | "" ) ";"
+argument ::=
+	reference-specifier-opt expression | expression
 reference-specifier-opt ::=
 	"&" | ""
 assert-statement ::=
@@ -203,10 +203,10 @@ postfix-operator ::=
 	"++" | "--" | "[^]" | "[$]"
 postfix-function-call ::=
 	"(" argument-list-opt ")"
+argument-list-opt ::=
+	argument-list | ""
 argument-list ::=
 	argument ( "," argument-list | "" )
-argument ::=
-	reference-specifier-opt expression
 postfix-subscript ::=
 	"[" expression "]"
 postfix-member-access ::=

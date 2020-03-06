@@ -528,9 +528,9 @@ opt<cow_vector<phsh_string>> do_accept_parameter_list_opt(Token_Stream& tstrm)
     if(!qname) {
       return nullopt;
     }
-    params.emplace_back(::rocket::move(*qname));
-    // This code looks so ugly...
     for(;;) {
+      params.emplace_back(::rocket::move(*qname));
+      // The code above looks so ugly...
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
       if(!kpunct) {
         break;
@@ -544,7 +544,6 @@ opt<cow_vector<phsh_string>> do_accept_parameter_list_opt(Token_Stream& tstrm)
       if(!qname) {
         do_throw_parser_error(parser_status_parameter_or_ellipsis_expected, tstrm);
       }
-      params.emplace_back(::rocket::move(*qname));
     }
     return ::rocket::move(params);
   }
@@ -619,9 +618,7 @@ opt<Statement> do_accept_if_statement_opt(Token_Stream& tstrm)
     // if-statement ::=
     //   "if" negation-opt "(" expression ")" statement else-branch-opt
     // negation-opt ::=
-    //   negation | ""
-    // negation ::=
-    //   "!" | "not"
+    //   "!" | "not" | ""
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_if });
     if(!qkwrd) {
       return nullopt;
@@ -1022,13 +1019,23 @@ opt<Statement> do_accept_throw_statement_opt(Token_Stream& tstrm)
     return ::rocket::move(xstmt);
   }
 
-opt<bool> do_accept_reference_specifier_opt(Token_Stream& tstrm)
+opt<bool> do_accept_argument_opt(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
+    // argument ::=
+    //   reference-specifier expression | expression
     // reference-specifier-opt ::=
     //   "&" | ""
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_andb });
     if(kpunct) {
-      return true;
+      bool succ = do_accept_expression(units, tstrm);
+      if(!succ) {
+        do_throw_parser_error(parser_status_expression_expected, tstrm);
+      }
+      return true;  // by ref
+    }
+    bool succ = do_accept_expression(units, tstrm);
+    if(succ) {
+      return false;  // by value
     }
     return nullopt;
   }
@@ -1036,24 +1043,22 @@ opt<bool> do_accept_reference_specifier_opt(Token_Stream& tstrm)
 opt<Statement> do_accept_return_statement_opt(Token_Stream& tstrm)
   {
     // return-statement ::=
-    //   "return" reference-specifier-opt expression-opt ";"
+    //   "return" ( argument | "" ) ";"
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_return });
     if(!qkwrd) {
       return nullopt;
     }
-    auto qref = do_accept_reference_specifier_opt(tstrm);
+    auto sloc = do_tell_source_location(tstrm);
+    cow_vector<Expression_Unit> units;
+    auto qref = do_accept_argument_opt(units, tstrm);
     if(!qref) {
       qref.emplace();
-    }
-    auto kexpr = do_accept_expression_opt(tstrm);
-    if(!kexpr) {
-      kexpr.emplace();
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct) {
       do_throw_parser_error(parser_status_semicolon_expected, tstrm);
     }
-    Statement::S_return xstmt = { *qref, ::rocket::move(*kexpr) };
+    Statement::S_return xstmt = { *qref, { ::rocket::move(sloc), ::rocket::move(units) } };
     return ::rocket::move(xstmt);
   }
 
@@ -1716,46 +1721,52 @@ bool do_accept_postfix_operator(cow_vector<Expression_Unit>& units, Token_Stream
     return false;
   }
 
+opt<uint32_t> do_accept_argument_list_opt(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+  {
+    // argument-list-opt ::=
+    //   argument-list | ""
+    // argument-list ::=
+    //   argument ( "," argument-list | "" )
+    uint32_t nargs = 0;
+    auto qref = do_accept_argument_opt(units, tstrm);
+    if(!qref) {
+      return nullopt;
+    }
+    for(;;) {
+      Expression_Unit::S_argument_finish xunit = { *qref };
+      units.emplace_back(::rocket::move(xunit));
+      nargs += 1;
+      // The code above looks so ugly...
+      auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
+      if(!kpunct) {
+        break;
+      }
+      qref = do_accept_argument_opt(units, tstrm);
+      if(!qref) {
+        do_throw_parser_error(parser_status_expression_expected, tstrm);
+      }
+    }
+    return nargs;
+  }
+
 bool do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // postfix-function-call ::=
     //   "(" argument-list-opt ")"
-    // argument-list ::=
-    //   argument ( "," argument-list | "" )
-    // argument ::=
-    //   reference-specifier-opt expression
     auto sloc = do_tell_source_location(tstrm);
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct) {
       return false;
     }
-    uint32_t nargs = 0;
-    for(;;) {
-      auto qref = do_accept_reference_specifier_opt(tstrm);
-      if(!qref) {
-        qref.emplace();
-      }
-      bool succ = do_accept_expression(units, tstrm);
-      if(!succ) {
-        if(*kpunct == punctuator_comma)
-          do_throw_parser_error(parser_status_expression_expected, tstrm);
-        break;
-      }
-      nargs += 1;
-      // Mark the end of this argument.
-      Expression_Unit::S_argument_finish xunit = { *qref };
-      units.emplace_back(::rocket::move(xunit));
-      // Look for the separator.
-      kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
-      if(!kpunct) {
-        break;
-      }
+    auto knargs = do_accept_argument_list_opt(units, tstrm);
+    if(!knargs) {
+      knargs.emplace();
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct) {
-      do_throw_parser_error(parser_status_closed_parenthesis_or_argument_expected, tstrm);
+      do_throw_parser_error(parser_status_closed_parenthesis_expected, tstrm);
     }
-    Expression_Unit::S_function_call xunit = { ::rocket::move(sloc), nargs };
+    Expression_Unit::S_function_call xunit = { ::rocket::move(sloc), *knargs };
     units.emplace_back(::rocket::move(xunit));
     return true;
   }
