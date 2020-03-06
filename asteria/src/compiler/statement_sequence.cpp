@@ -515,64 +515,44 @@ opt<Statement> do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
 opt<cow_vector<phsh_string>> do_accept_parameter_list_opt(Token_Stream& tstrm)
   {
     // parameter-list-opt ::=
-    //   identifier parameter-list-carriage-opt | "..." | ""
-    // parameter-list-carriage-opt ::=
-    //   "," ( identifier comma-parameter-list-opt | "..." ) | ""
-    auto qname = do_accept_identifier_opt(tstrm);
-    if(qname) {
-      cow_vector<phsh_string> names;
-      for(;;) {
-        names.emplace_back(::rocket::move(*qname));
-        // Look for the separator.
-        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
-        if(!kpunct) {
-          break;
-        }
-        qname = do_accept_identifier_opt(tstrm);
-        if(!qname) {
-          // The parameter list may end with an ellipsis.
-          kpunct = do_accept_punctuator_opt(tstrm, { punctuator_ellipsis });
-          if(kpunct) {
-            names.emplace_back(::rocket::sref("..."));
-            break;
-          }
-          do_throw_parser_error(parser_status_parameter_or_ellipsis_expected, tstrm);
-        }
-      }
-      return ::rocket::move(names);
-    }
+    //   parameter-list | ""
+    // parameter-list ::=
+    //   "..." | identifier ( "," parameter-list | "" )
+    cow_vector<phsh_string> params;
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_ellipsis });
     if(kpunct) {
-      cow_vector<phsh_string> names;
-      names.emplace_back(::rocket::sref("..."));
-      return ::rocket::move(names);
+      params.emplace_back(::rocket::sref("..."));
+      return ::rocket::move(params);
     }
-    return nullopt;
-  }
-
-opt<cow_vector<phsh_string>> do_accept_parameter_list_declaration_opt(Token_Stream& tstrm)
-  {
-    // parameter-list-declaration ::=
-    //   "(" parameter-list-opt ")"
-    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
-    if(!kpunct) {
+    auto qname = do_accept_identifier_opt(tstrm);
+    if(!qname) {
       return nullopt;
     }
-    auto qnames = do_accept_parameter_list_opt(tstrm);
-    if(!qnames) {
-      qnames.emplace();
+    params.emplace_back(::rocket::move(*qname));
+    // This code looks so ugly...
+    for(;;) {
+      kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
+      if(!kpunct) {
+        break;
+      }
+      kpunct = do_accept_punctuator_opt(tstrm, { punctuator_ellipsis });
+      if(kpunct) {
+        params.emplace_back(::rocket::sref("..."));
+        return ::rocket::move(params);
+      }
+      qname = do_accept_identifier_opt(tstrm);
+      if(!qname) {
+        do_throw_parser_error(parser_status_parameter_or_ellipsis_expected, tstrm);
+      }
+      params.emplace_back(::rocket::move(*qname));
     }
-    kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
-    if(!kpunct) {
-      do_throw_parser_error(parser_status_closed_parenthesis_expected, tstrm);
-    }
-    return ::rocket::move(*qnames);
+    return ::rocket::move(params);
   }
 
 opt<Statement> do_accept_function_definition_opt(Token_Stream& tstrm)
   {
     // function-definition ::=
-    //   "func" identifier parameter-declaration block
+    //   "func" identifier "(" parameter-list-opt ")" block
     auto sloc = do_tell_source_location(tstrm);
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_func });
     if(!qkwrd) {
@@ -582,9 +562,17 @@ opt<Statement> do_accept_function_definition_opt(Token_Stream& tstrm)
     if(!qname) {
       do_throw_parser_error(parser_status_identifier_expected, tstrm);
     }
-    auto kparams = do_accept_parameter_list_declaration_opt(tstrm);
-    if(!kparams) {
+    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
+    if(!kpunct) {
       do_throw_parser_error(parser_status_open_parenthesis_expected, tstrm);
+    }
+    auto kparams = do_accept_parameter_list_opt(tstrm);
+    if(!kparams) {
+      kparams.emplace();
+    }
+    kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
+    if(!kpunct) {
+      do_throw_parser_error(parser_status_closed_parenthesis_expected, tstrm);
     }
     auto qbody = do_accept_block_opt(tstrm);
     if(!qbody) {
@@ -1441,23 +1429,31 @@ opt<Statement::S_block> do_accept_closure_body_opt(Token_Stream& tstrm)
 bool do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // closure-function ::=
-    //   "func" parameter-declaration closure-body
+    //   "func" "(" parameter-list-opt ")" closure-body
     auto sloc = do_tell_source_location(tstrm);
     auto uniq = do_get_unique_id(tstrm);
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_func });
     if(!qkwrd) {
       return false;
     }
-    auto kparams = do_accept_parameter_list_declaration_opt(tstrm);
-    if(!kparams) {
+    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
+    if(!kpunct) {
       do_throw_parser_error(parser_status_open_parenthesis_expected, tstrm);
+    }
+    auto kparams = do_accept_parameter_list_opt(tstrm);
+    if(!kparams) {
+      kparams.emplace();
+    }
+    kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
+    if(!kpunct) {
+      do_throw_parser_error(parser_status_closed_parenthesis_expected, tstrm);
     }
     auto qblock = do_accept_closure_body_opt(tstrm);
     if(!qblock) {
       do_throw_parser_error(parser_status_open_brace_or_equal_initializer_expected, tstrm);
     }
     Expression_Unit::S_closure_function xunit = { ::rocket::move(sloc), uniq, rocket::move(*kparams),
-                                          ::rocket::move(qblock->stmts) };
+                                                  ::rocket::move(qblock->stmts) };
     units.emplace_back(::rocket::move(xunit));
     return true;
   }

@@ -80,13 +80,11 @@ equal-initializer ::=
 immutable-variable-definition ::=
 	"const" variable-declarator equal-initailizer ( "," identifier equal-initializer | "" ) ";"
 function-definition ::=
-	"func" identifier parameter-list-declaration block
-parameter-list-declaration ::=
-	"(" parameter-list-opt ")"
+	"func" identifier "(" parameter-list-opt ")" block
 parameter-list-opt ::=
-	identifier parameter-list-carriage-opt | "..." | ""
-parameter-list-carriage-opt ::=
-	"," ( identifier comma-parameter-list-opt | "..." ) | ""
+	parameter-list | ""
+parameter-list ::=
+	"..." | identifier ( "," parameter-list | "" )
 
 expression-statement ::=
 	expression ";"
@@ -175,7 +173,7 @@ primary-expression ::=
 global-identifier ::=
 	"__global" identifier
 closure-function ::=
-	"func" parameter-list-declaration closure-body
+	"func" "(" parameter-list-opt ")" closure-body
 closure-body ::=
 	block | equal-initializer
 unnamed-array ::=
