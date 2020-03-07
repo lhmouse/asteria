@@ -52,17 +52,15 @@ cow_string do_stringify(const Value& val) noexcept
     return do_xindent(fmt.extract_string());
   }
   catch(exception& stdex) {
-    return ::rocket::sref("<invalid value>");
+    return ::rocket::sref("<bad value>");
   }
 
 cow_string do_stringify(const Reference& ref) noexcept
   try {
-    if(ref.is_void()) {
+    if(ref.is_void())
       return ::rocket::sref("<void>");
-    }
-    if(ref.is_tail_call()) {
+    if(ref.is_tail_call())
       return ::rocket::sref("<tail call>");
-    }
     ::rocket::tinyfmt_str fmt;
     // Print the value category.
     if(auto var = ref.get_variable_opt())
@@ -82,7 +80,7 @@ cow_string do_stringify(const Reference& ref) noexcept
     return do_xindent(fmt.extract_string());
   }
   catch(exception& stdex) {
-    return ::rocket::sref("<invalid reference>");
+    return ::rocket::sref("<bad reference>");
   }
 
 cow_string do_stringify(const exception& stdex) noexcept
@@ -96,7 +94,7 @@ cow_string do_stringify(const exception& stdex) noexcept
     return do_xindent(fmt.extract_string());
   }
   catch(exception& other) {
-    return ::rocket::sref("<invalid exception>");
+    return ::rocket::sref("<bad exception>");
   }
 
 cow_string do_stringify(const Parser_Error& except) noexcept
@@ -120,7 +118,7 @@ cow_string do_stringify(const Parser_Error& except) noexcept
     return do_xindent(fmt.extract_string());
   }
   catch(exception& other) {
-    return ::rocket::sref("<invalid exception>");
+    return ::rocket::sref("<bad exception>");
   }
 
 cow_string do_stringify(const Runtime_Error& except) noexcept
@@ -153,7 +151,7 @@ cow_string do_stringify(const Runtime_Error& except) noexcept
     return do_xindent(fmt.extract_string());
   }
   catch(exception& other) {
-    return ::rocket::sref("<invalid exception>");
+    return ::rocket::sref("<bad exception>");
   }
 
 // Define command-line options here.
@@ -546,6 +544,10 @@ int do_REP_single()
     // Execute the script as a function, which returns a `Reference`.
     try {
       const auto ref = script.execute(global, ::rocket::move(cmdline.args));
+      if(!ref.is_void()) {
+        // Ensure it is dereferenceable.
+        static_cast<void>(ref.read());
+      }
       // Print the result.
       ::fprintf(stderr, "* result #%lu: %s\n", index, do_stringify(ref).c_str());
     }
@@ -616,11 +618,7 @@ int do_REP_single()
     Exit_Code status = exit_runtime_error;
     try {
       const auto ref = script.execute(global, ::rocket::move(cmdline.args));
-      if(ref.is_void()) {
-        // If the script returned no value, exit with zero.
-        status = exit_success;
-      }
-      else {
+      if(!ref.is_void()) {
         // If the script returned an `integer`, forward its lower 8 bits.
         // Any other value indicates failure.
         const auto& val = ref.read();
@@ -628,6 +626,10 @@ int do_REP_single()
           status = static_cast<Exit_Code>(val.as_integer());
         else
           status = exit_unspecified;
+      }
+      else {
+        // If the script returned no value, exit with zero.
+        status = exit_success;
       }
     }
     catch(Runtime_Error& except) {
