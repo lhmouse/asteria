@@ -37,11 +37,9 @@ enum Exit_Code : uint8_t
 
 cow_string do_xindent(cow_string&& str)
   {
-    size_t bp = 0;
-    while((bp = str.find('\n', bp)) != cow_string::npos) {
-      str.replace(bp, 1, "\n\t");
-      bp += 2;
-    }
+    size_t bp = SIZE_MAX;
+    while((bp = str.find('\n', ++bp)) != cow_string::npos)
+      str.insert(++bp, 1, '\t');
     return ::rocket::move(str);
   }
 
