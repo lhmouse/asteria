@@ -607,7 +607,7 @@ void Argument_Reader::throw_no_matching_function_call() const
           break;
         ovlds << ",\n  ";
       }
-      ovlds << ']';
+      ovlds << "\n  -- end of list of overloads]";
     }
     // Throw the exception now.
     ASTERIA_THROW("no matching function call for `$1($2)`$3", this->m_name, args, ovlds);
