@@ -20,7 +20,7 @@ class Tail_Call_Arguments final : public Tail_Call_Arguments_Fwd
     rcptr<Variadic_Arguer> m_zvarg;
     PTC_Aware m_ptc;
 
-    // These are deferreed expressions.
+    // These are deferred expressions.
     cow_bivector<Source_Location, AVMC_Queue> m_defer;
 
     // This is the target function.
