@@ -403,7 +403,7 @@ void do_REPL_help()
       //        1         2         3         4         5         6         7      |
       // 34567890123456789012345678901234567890123456789012345678901234567890123456|
       "* commands:\n"
-      "  ,help   show this message\n"
+      "  :help    show this message\n"
       // 34567890123456789012345678901234567890123456789012345678901234567890123456|
       //        1         2         3         4         5         6         7      |
     );
@@ -459,7 +459,7 @@ int do_REP_single()
           if(!escape)
             break;
           // REPL commands can't straddle multiple lines.
-          if(!code.empty() && (code.front() == ','))
+          if(!code.empty() && (code.front() == ':'))
             break;
         }
         else {
@@ -499,7 +499,7 @@ int do_REP_single()
     if(code.empty()) {
       return 0;
     }
-    if(code.front() == ',') {
+    if(code.front() == ':') {
       // Erase the initiator and process the remaining.
       code.erase(0, 1);
       do_handle_REPL_command(::rocket::move(code));
@@ -570,7 +570,7 @@ int do_REP_single()
       "\n"
       "  Global locale is now `%s`.\n"
       "\n"
-      "  All REPL commands start with a comma. Type `,help` for instructions.\n"
+      "  All REPL commands start with a `:`. Type `:help` for instructions.\n"
       "  Multiple lines may be joined together using trailing backslashes.\n"
       // 34567890123456789012345678901234567890123456789012345678901234567890123456|
       //        1         2         3         4         5         6         7      |
