@@ -235,7 +235,6 @@ void do_print_help(const char* self)
       // 34567890123456789012345678901234567890123456789012345678901234567890123456|
       "Usage: %s [OPTIONS] [[--] FILE [ARGUMENTS]...]\n"
       "\n"
-      "OPTIONS\n"
       "  -h      show help message then exit\n"
       "  -I      suppress interactive mode [default = auto]\n"
       "  -i      force interactive mode [default = auto]\n"
@@ -246,7 +245,7 @@ void do_print_help(const char* self)
       "\n"
       "Source code is read from standard input if no FILE is specified or `-` is\n"
       "given as FILE, and from FILE otherwise. ARGUMENTS following FILE are passed\n"
-      "to the script as `string`s verbatim, which can be retrieved via `__varg`.\n"
+      "to the script as strings verbatim, which can be retrieved via `__varg`.\n"
       "\n"
       "If neither `-I` or `-i` is set, interactive mode is enabled when no FILE is\n"
       "specified and standard input is connected to a terminal, and is disabled\n"
