@@ -778,25 +778,19 @@ Aval std_array_shuffle(Aval data, Iopt seed)
     return res;
   }
 
-Aopt std_array_copy_keys(Oopt source)
+Aval std_array_copy_keys(Oval source)
   {
-    if(!source) {
-      return nullopt;
-    }
     Aval res;
-    res.reserve(source->size());
-    ::rocket::for_each(*source, [&](const auto& p) { res.emplace_back(Sval(p.first));  });
+    res.reserve(source.size());
+    ::rocket::for_each(source, [&](const auto& p) { res.emplace_back(Sval(p.first));  });
     return res;
   }
 
-Aopt std_array_copy_values(Oopt source)
+Aval std_array_copy_values(Oval source)
   {
-    if(!source) {
-      return nullopt;
-    }
     Aval res;
-    res.reserve(source->size());
-    ::rocket::for_each(*source, [&](const auto& p) { res.emplace_back(p.second);  });
+    res.reserve(source.size());
+    ::rocket::for_each(source, [&](const auto& p) { res.emplace_back(p.second);  });
     return res;
   }
 
@@ -1897,19 +1891,18 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
         // Description
         ::rocket::sref(
           "\n"
-          "`std.array.copy_keys([source])`\n"
+          "`std.array.copy_keys(source)`\n"
           "\n"
           "  * Copies all keys from `source`, which shall be an object, to\n"
           "    create an array.\n"
           "\n"
-          "  * Returns an array of all keys in `source`. If `source` is\n"
-          "    `null`, `null` is returned.\n"
+          "  * Returns an array of all keys in `source`.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.copy_keys"), ::rocket::ref(args));
           // Parse arguments.
-          Oopt source;
+          Oval source;
           if(reader.I().g(source).F()) {
             // Call the binding function.
             return std_array_copy_keys(::rocket::move(source));
@@ -1926,19 +1919,18 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
         // Description
         ::rocket::sref(
           "\n"
-          "`std.array.copy_values([source])`\n"
+          "`std.array.copy_values(source)`\n"
           "\n"
           "  * Copies all values from `source`, which shall be an object, to\n"
           "    create an array.\n"
           "\n"
-          "  * Returns an array of all values in `source`. If `source` is\n"
-          "    `null`, `null` is returned.\n"
+          "  * Returns an array of all values in `source`.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
           Argument_Reader reader(::rocket::sref("std.array.copy_values"), ::rocket::ref(args));
           // Parse arguments.
-          Oopt source;
+          Oval source;
           if(reader.I().g(source).F()) {
             // Call the binding function.
             return std_array_copy_values(::rocket::move(source));

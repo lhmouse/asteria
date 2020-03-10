@@ -1383,21 +1383,19 @@
 
 	* Returns the shuffled array.
 
-`std.array.copy_keys([source])`
+`std.array.copy_keys(source)`
 
 	* Copies all keys from `source`, which shall be an object, to
 	  create an array.
 
-	* Returns an array of all keys in `source`. If `source` is
-	  `null`, `null` is returned.
+	* Returns an array of all keys in `source`.
 
-`std.array.copy_values([source])`
+`std.array.copy_values(source)`
 
 	* Copies all values from `source`, which shall be an object, to
 	  create an array.
 
-	* Returns an array of all values in `source`. If `source` is
-	  `null`, `null` is returned.
+	* Returns an array of all values in `source`.
 
 ### `std.numeric`
 

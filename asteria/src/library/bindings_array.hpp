@@ -58,8 +58,8 @@ Aval std_array_reverse(Aval data);
 Aval std_array_generate(Global& global, Fval generator, Ival length);
 Aval std_array_shuffle(Aval data, Iopt seed = nullopt);
 
-Aopt std_array_copy_keys(Oopt source);
-Aopt std_array_copy_values(Oopt source);
+Aval std_array_copy_keys(Oval source);
+Aval std_array_copy_values(Oval source);
 
 // Create an object that is to be referenced as `std.array`.
 void create_bindings_array(Oval& result, API_Version version);

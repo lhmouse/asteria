@@ -199,11 +199,9 @@ int main()
         assert std.array.generate(func(x,v) = x + (v ?? 1), 10) == [1,2,4,7,11,16,22,29,37,46];
         assert std.array.shuffle([1,2,3,4,5], 42) == std.array.shuffle([1,2,3,4,5], 42);
 
-        assert std.array.copy_keys(null) == null;
         assert std.array.sort(std.array.copy_keys({a:1,b:2,c:3,d:4})) == ['a','b','c','d'];
-
-        assert std.array.copy_values(null) == null;
         assert std.array.sort(std.array.copy_values({a:1,b:2,c:3,d:4})) == [1,2,3,4];
+
       )__"), tinybuf::open_read);
 
     Simple_Script code(cbuf, ::rocket::sref(__FILE__));
