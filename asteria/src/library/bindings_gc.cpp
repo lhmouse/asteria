@@ -86,10 +86,11 @@ void create_bindings_gc(Oval& result, API_Version /*version*/)
           "\n"
           "  * Gets the number of variables that are being tracked by the\n"
           "    collector for `generation`. Valid values for `generation` are\n"
-          "    `0`, `1` and `2`. This value is only informative.\n"
+          "    `0`, `1` and `2`.\n"
           "\n"
-          "  * Returns the number of variables being tracked. If `generation`\n"
-          "    is not valid, `null` is returned.\n"
+          "  * Returns the number of variables being tracked. This value is\n"
+          "    only informative. If `generation` is not valid, `null` is\n"
+          "    returned.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value  {

@@ -18,10 +18,11 @@
 
 	* Gets the number of variables that are being tracked by the
 	  collector for `generation`. Valid values for `generation` are
-	  `0`, `1` and `2`. This value is only informative.
+	  `0`, `1` and `2`.
 
-	* Returns the number of variables being tracked. If `generation`
-	  is not valid, `null` is returned.
+	* Returns the number of variables being tracked. This value is
+	  only informative. If `generation` is not valid, `null` is
+	  returned.
 
 `std.gc.get_threshold(generation)`
 
