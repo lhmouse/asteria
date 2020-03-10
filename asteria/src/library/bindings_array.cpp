@@ -59,8 +59,7 @@ Slice do_slice(const Aval& data, const Ival& from, const Iopt& length)
     return do_slice(data, data.begin(), rfrom + *length);
   }
 
-template<typename IterT>
-    opt<IterT> do_find_opt(IterT begin, IterT end, const Value& target)
+template<typename IterT> opt<IterT> do_find_opt(IterT begin, IterT end, const Value& target)
   {
     for(auto it = ::rocket::move(begin);  it != end;  ++it) {
       // Compare the value using the builtin 3-way comparison operator.
@@ -77,8 +76,8 @@ Reference_Root::S_temporary do_make_temporary(const Value& value)
     return xref;
   }
 
-template<typename IterT>
-    opt<IterT> do_find_if_opt(Global& global, IterT begin, IterT end, const Fval& pred, bool match)
+template<typename IterT> opt<IterT> do_find_if_opt(Global& global, IterT begin, IterT end,
+                                                   const Fval& pred, bool match)
   {
     cow_vector<Reference> args;
     for(auto it = ::rocket::move(begin);  it != end;  ++it) {
@@ -853,7 +852,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "    it specifies an offset from the end of `data`. This function\n"
           "    returns a new array without modifying `data`.\n"
           "\n"
-          "  * Returns an array with the subrange replaced.\n"
+          "  * Returns a new array with the subrange replaced.\n"
           "\n"
           "`std.array.replace_slice(data, from, [length], replacement)`\n"
           "\n"
@@ -865,7 +864,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "    equivalent to `replace_slice(data, from, replacement)`. This\n"
           "    function returns a new array without modifying `data`.\n"
           "\n"
-          "  * Returns an array with the subrange replaced.\n"
+          "  * Returns a new array with the subrange replaced.\n"
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Value  {
@@ -1334,7 +1333,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "\n"
           "`std.array.count_if(data, target, predictor)`\n"
           "\n"
-          "  * Searches every element, namely `x`, in `data`, for which\n"
+          "  * Searches `data` for every element, namely `x`, such that\n"
           "    `predictor(x)` yields logically true, and figures the total\n"
           "    number of such occurrences.\n"
           "\n"
@@ -1343,7 +1342,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "\n"
           "`std.array.count_if(data, from, target, predictor)`\n"
           "\n"
-          "  * Searches every element, namely `x`, in `data`, for which\n"
+          "  * Searches `data` for every element, namely `x`, such that\n"
           "    `predictor(x)` yields logically true, and figures the total\n"
           "    number of elements. The search operation is performed on the\n"
           "    same subrange that would be returned by `slice(data, from)`.\n"
@@ -1353,7 +1352,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "\n"
           "`std.array.count_if(data, from, [length], target, predictor)`\n"
           "\n"
-          "  * Searches every element, namely `x`, in `data`, for which\n"
+          "  * Searches `data` for every element, namely `x`, such that\n"
           "    `predictor(x)` yields logically true, and figures the total\n"
           "    number of elements. The search operation is performed on the\n"
           "    same subrange that would be returned by `slice(data, from,\n"
@@ -1398,7 +1397,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "\n"
           "`std.array.count_if_not(data, target, predictor)`\n"
           "\n"
-          "  * Searches every element, namely `x`, in `data`, for which\n"
+          "  * Searches on every element, namely `x`, in `data`, such that\n"
           "    `predictor(x)` yields logically false, and figures the total\n"
           "    number of such occurrences.\n"
           "\n"
@@ -1407,7 +1406,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "\n"
           "`std.array.count_if_not(data, from, target, predictor)`\n"
           "\n"
-          "  * Searches every element, namely `x`, in `data`, for which\n"
+          "  * Searches on every element, namely `x`, in `data`, such that\n"
           "    `predictor(x)` yields logically false, and figures the total\n"
           "    number of elements. The search operation is performed on the\n"
           "    same subrange that would be returned by `slice(data, from)`.\n"
@@ -1417,7 +1416,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           "\n"
           "`std.array.count_if_not(data, from, [length], target, predictor)`\n"
           "\n"
-          "  * Searches every element, namely `x`, in `data`, for which\n"
+          "  * Searches on every element, namely `x`, in `data`, such that\n"
           "    `predictor(x)` yields logically false, and figures the total\n"
           "    number of elements. The search operation is performed on the\n"
           "    same subrange that would be returned by `slice(data, from,\n"
