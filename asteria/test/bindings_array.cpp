@@ -201,6 +201,17 @@ int main()
         assert std.array.shuffle([1,2,3,4,5], 42) == std.array.shuffle([1,2,3,4,5], 42);
         assert std.array.sort(std.array.shuffle([1,2,3,4,5])) == [1,2,3,4,5];
 
+        assert std.array.rotate([], 0) == [];
+        assert std.array.rotate([1,2,3,4], 0) == [1,2,3,4];
+        assert std.array.rotate([], 9) == [];
+        assert std.array.rotate([1], 9) == [1];
+        assert std.array.rotate([1,2,3,4], 9) == [4,1,2,3];
+        assert std.array.rotate([1,2,3,4,5], 9) == [2,3,4,5,1];
+        assert std.array.rotate([], -9) == [];
+        assert std.array.rotate([1], -9) == [1];
+        assert std.array.rotate([1,2,3,4], -9) == [2,3,4,1];
+        assert std.array.rotate([1,2,3,4,5], -9) == [5,1,2,3,4];
+
         assert std.array.sort(std.array.copy_keys({a:1,b:2,c:3,d:4})) == ['a','b','c','d'];
         assert std.array.sort(std.array.copy_values({a:1,b:2,c:3,d:4})) == [1,2,3,4];
 

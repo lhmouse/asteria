@@ -1383,6 +1383,15 @@
 
 	* Returns the shuffled array.
 
+`std.array.rotate(data, shift)`
+
+	* Rotates elements in `data` by `shift`. That is, unless `data`
+	  is empty, the element at subscript `x` is moved to subscript
+	  `(x + shift) % lengthof(data)`. No element is added or removed.
+
+	* Returns the rotated array. If `data` is empty, an empty array
+	  is returned.
+
 `std.array.copy_keys(source)`
 
 	* Copies all keys from `source`, which shall be an object, to

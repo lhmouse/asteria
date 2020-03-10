@@ -57,6 +57,7 @@ Value std_array_min_of(Global& global, Aval data, Fopt comparator = nullopt);
 Aval std_array_reverse(Aval data);
 Aval std_array_generate(Global& global, Fval generator, Ival length);
 Aval std_array_shuffle(Aval data, Iopt seed = nullopt);
+Aval std_array_rotate(Aval data, Ival shift);
 
 Aval std_array_copy_keys(Oval source);
 Aval std_array_copy_values(Oval source);

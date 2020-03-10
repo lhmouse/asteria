@@ -773,6 +773,23 @@ Aval std_array_shuffle(Aval data, Iopt seed)
     return ::rocket::move(data);
   }
 
+Aval std_array_rotate(Aval data, Ival shift)
+  {
+    if(data.size() <= 1) {
+      // Use reference counting as our advantage.
+      return ::rocket::move(data);
+    }
+    int64_t seek = shift % data.ssize();
+    if(seek == 0) {
+      // Use reference counting as our advantage.
+      return ::rocket::move(data);
+    }
+    // Rotate it.
+    seek = ((~seek >> 63) & data.ssize()) - seek;
+    ::rocket::rotate(data.mut_data(), 0, static_cast<size_t>(seek), data.size());
+    return ::rocket::move(data);
+  }
+
 Aval std_array_copy_keys(Oval source)
   {
     Aval data;
@@ -1873,6 +1890,37 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
           if(reader.I().g(data).g(seed).F()) {
             // Call the binding function.
             return std_array_shuffle(::rocket::move(data), ::rocket::move(seed));
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
+    //===================================================================
+    // `std.array.rotate()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("rotate"),
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+        // Description
+        ::rocket::sref(
+          "\n"
+          "`std.array.rotate(data, shift)`\n"
+          "\n"
+          "  * Rotates elements in `data` by `shift`. That is, unless `data`\n"
+          "    is empty, the element at subscript `x` is moved to subscript\n"
+          "    `(x + shift) % lengthof(data)`. No element is added or removed.\n"
+          "\n"
+          "  * Returns the rotated array. If `data` is empty, an empty array\n"
+          "    is returned.\n"
+        ),
+        // Definition
+        [](cow_vector<Reference>&& args) -> Value  {
+          Argument_Reader reader(::rocket::sref("std.array.rotate"), ::rocket::ref(args));
+          // Parse arguments.
+          Aval data;
+          Ival shift;
+          if(reader.I().g(data).g(shift).F()) {
+            // Call the binding function.
+            return std_array_rotate(::rocket::move(data), ::rocket::move(shift));
           }
           // Fail.
           reader.throw_no_matching_function_call();
