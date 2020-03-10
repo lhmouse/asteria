@@ -42,6 +42,16 @@ Ival std_array_count_if_not(Global& global, Aval data, Fval predictor);
 Ival std_array_count_if_not(Global& global, Aval data, Ival from, Fval predictor);
 Ival std_array_count_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor);
 
+Aval std_array_exclude(Aval data, Value target);
+Aval std_array_exclude(Aval data, Ival from, Value target);
+Aval std_array_exclude(Aval data, Ival from, Iopt length, Value target);
+Aval std_array_exclude_if(Global& global, Aval data, Fval predictor);
+Aval std_array_exclude_if(Global& global, Aval data, Ival from, Fval predictor);
+Aval std_array_exclude_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor);
+Aval std_array_exclude_if_not(Global& global, Aval data, Fval predictor);
+Aval std_array_exclude_if_not(Global& global, Aval data, Ival from, Fval predictor);
+Aval std_array_exclude_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor);
+
 Bval std_array_is_sorted(Global& global, Aval data, Fopt comparator = nullopt);
 Iopt std_array_binary_search(Global& global, Aval data, Value target, Fopt comparator = nullopt);
 Ival std_array_lower_bound(Global& global, Aval data, Value target, Fopt comparator = nullopt);

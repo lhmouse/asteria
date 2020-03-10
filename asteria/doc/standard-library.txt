@@ -1223,6 +1223,88 @@
 	* Returns the number of occurrences as an integer, which is
 	  always non-negative.
 
+`std.array.exclude(data, target)`
+
+	* Removes every element from `data` which compares equal to
+	  `target` to create a new array. This function returns a new
+	  array without modifying `data`.
+
+	* Returns a new array with all occurrences removed.
+
+`std.array.exclude(data, from, target)`
+
+	* Removes every element from `data` which both compares equal
+	  to `target` and is within the same subrange that would be
+	  returned by `slice(data, from)` to create a new array. This
+	  function returns a new array without modifying `data`.
+
+	* Returns a new array with all occurrences removed.
+
+`std.array.exclude(data, from, [length], target)`
+
+	* Removes every element from `data` which both compares equal
+	  to `target` and is within the same subrange that would be
+	  returned by `slice(data, from, length)` to create a new array.
+	  This function returns a new array without modifying `data`.
+
+	* Returns a new array with all occurrences removed.
+
+`std.array.exclude_if(data, target, predictor)`
+
+	* Removes every element from `data`, namely `x`, such that
+	  `predictor(x)` yields logically false, to create a new array.
+	  This function returns a new array without modifying `data`.
+
+	* Returns a new array with all occurrences removed.
+
+`std.array.exclude_if(data, from, target, predictor)`
+
+	* Removes every element from `data`, namely `x`, such that
+	  both `predictor(x)` yields logically false and `x` is within
+	  the subrange that would be returned by `slice(data, from)`,
+	  to create a new array. This function returns a new array
+	  without modifying `data`.
+
+	* Returns a new array with all occurrences removed.
+
+`std.array.exclude_if(data, from, [length], target, predictor)`
+
+	* Removes every element from `data`, namely `x`, such that
+	  both `predictor(x)` yields logically false and `x` is within
+	  the subrange that would be returned by `slice(data, from,
+	  length)`, to create a new array. This function returns a new
+	  array without modifying `data`.
+
+	* Returns a new array with all occurrences removed.
+
+`std.array.exclude_if_not(data, target, predictor)`
+
+	* Removes every element from `data`, namely `x`, such that
+	  `predictor(x)` yields logically true, to create a new array.
+	  This function returns a new array without modifying `data`.
+
+	* Returns a new array with all occurrences removed.
+
+`std.array.exclude_if_not(data, from, target, predictor)`
+
+	* Removes every element from `data`, namely `x`, such that
+	  both `predictor(x)` yields logically true and `x` is within
+	  the subrange that would be returned by `slice(data, from)`,
+	  to create a new array. This function returns a new array
+	  without modifying `data`.
+
+	* Returns a new array with all occurrences removed.
+
+`std.array.exclude_if_not(data, from, [length], target, predictor)`
+
+	* Removes every element from `data`, namely `x`, such that
+	  both `predictor(x)` yields logically true and `x` is within
+	  the subrange that would be returned by `slice(data, from,
+	  length)`, to create a new array. This function returns a new
+	  array without modifying `data`.
+
+	* Returns a new array with all occurrences removed.
+
 `std.array.is_sorted(data, [comparator])`
 
 	* Checks whether `data` is sorted. That is, there is no pair of

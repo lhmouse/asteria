@@ -596,6 +596,141 @@ Ival std_array_count_if_not(Global& global, Aval data, Ival from, Iopt length, F
     return count;
   }
 
+Aval std_array_exclude(Aval data, Value target)
+  {
+    auto range = ::std::make_pair(data.begin(), data.end());
+    ptrdiff_t dist = data.end() - range.second;
+    for(;;) {
+      auto qit = do_find_opt(range.first, range.second, target);
+      if(!qit) {
+        break;
+      }
+      range.first = data.erase(*qit);
+      range.second = data.end() - dist;
+    }
+    return ::rocket::move(data);
+  }
+
+Aval std_array_exclude(Aval data, Ival from, Value target)
+  {
+    auto range = do_slice(data, from, nullopt);
+    ptrdiff_t dist = data.end() - range.second;
+    for(;;) {
+      auto qit = do_find_opt(range.first, range.second, target);
+      if(!qit) {
+        break;
+      }
+      range.first = data.erase(*qit);
+      range.second = data.end() - dist;
+    }
+    return ::rocket::move(data);
+  }
+
+Aval std_array_exclude(Aval data, Ival from, Iopt length, Value target)
+  {
+    auto range = do_slice(data, from, length);
+    ptrdiff_t dist = data.end() - range.second;
+    for(;;) {
+      auto qit = do_find_opt(range.first, range.second, target);
+      if(!qit) {
+        break;
+      }
+      range.first = data.erase(*qit);
+      range.second = data.end() - dist;
+    }
+    return ::rocket::move(data);
+  }
+
+Aval std_array_exclude_if(Global& global, Aval data, Fval predictor)
+  {
+    auto range = ::std::make_pair(data.begin(), data.end());
+    ptrdiff_t dist = data.end() - range.second;
+    for(;;) {
+      auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
+      if(!qit) {
+        break;
+      }
+      range.first = data.erase(*qit);
+      range.second = data.end() - dist;
+    }
+    return ::rocket::move(data);
+  }
+
+Aval std_array_exclude_if(Global& global, Aval data, Ival from, Fval predictor)
+  {
+    auto range = do_slice(data, from, nullopt);
+    ptrdiff_t dist = data.end() - range.second;
+    for(;;) {
+      auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
+      if(!qit) {
+        break;
+      }
+      range.first = data.erase(*qit);
+      range.second = data.end() - dist;
+    }
+    return ::rocket::move(data);
+  }
+
+Aval std_array_exclude_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
+  {
+    auto range = do_slice(data, from, length);
+    ptrdiff_t dist = data.end() - range.second;
+    for(;;) {
+      auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
+      if(!qit) {
+        break;
+      }
+      range.first = data.erase(*qit);
+      range.second = data.end() - dist;
+    }
+    return ::rocket::move(data);
+  }
+
+Aval std_array_exclude_if_not(Global& global, Aval data, Fval predictor)
+  {
+    auto range = ::std::make_pair(data.begin(), data.end());
+    ptrdiff_t dist = data.end() - range.second;
+    for(;;) {
+      auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
+      if(!qit) {
+        break;
+      }
+      range.first = data.erase(*qit);
+      range.second = data.end() - dist;
+    }
+    return ::rocket::move(data);
+  }
+
+Aval std_array_exclude_if_not(Global& global, Aval data, Ival from, Fval predictor)
+  {
+    auto range = do_slice(data, from, nullopt);
+    ptrdiff_t dist = data.end() - range.second;
+    for(;;) {
+      auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
+      if(!qit) {
+        break;
+      }
+      range.first = data.erase(*qit);
+      range.second = data.end() - dist;
+    }
+    return ::rocket::move(data);
+  }
+
+Aval std_array_exclude_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
+  {
+    auto range = do_slice(data, from, length);
+    ptrdiff_t dist = data.end() - range.second;
+    for(;;) {
+      auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
+      if(!qit) {
+        break;
+      }
+      range.first = data.erase(*qit);
+      range.second = data.end() - dist;
+    }
+    return ::rocket::move(data);
+  }
+
 Bval std_array_is_sorted(Global& global, Aval data, Fopt comparator)
   {
     if(data.size() <= 1) {
