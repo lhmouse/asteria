@@ -197,7 +197,9 @@ int main()
         assert std.array.reverse([0,1,2,3,4]) == [4,3,2,1,0];
 
         assert std.array.generate(func(x,v) = x + (v ?? 1), 10) == [1,2,4,7,11,16,22,29,37,46];
+
         assert std.array.shuffle([1,2,3,4,5], 42) == std.array.shuffle([1,2,3,4,5], 42);
+        assert std.array.sort(std.array.shuffle([1,2,3,4,5])) == [1,2,3,4,5];
 
         assert std.array.sort(std.array.copy_keys({a:1,b:2,c:3,d:4})) == ['a','b','c','d'];
         assert std.array.sort(std.array.copy_values({a:1,b:2,c:3,d:4})) == [1,2,3,4];
