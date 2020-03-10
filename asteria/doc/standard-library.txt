@@ -1741,7 +1741,7 @@
 
 `std.numeric.format(value, [base], [ebase])`
 
-	* Converts an integer or real to a string in `base`. This
+	* Converts an integer or real number to a string in `base`. This
 	  function writes as many digits as possible to ensure precision.
 	  No plus sign precedes the significant figures. If `base` is
 	  absent, `10` is assumed. If `ebase` is specified, an exponent
@@ -1783,7 +1783,7 @@
 
 `std.numeric.parse_real(text, [saturating])`
 
-	* Parses `text` for a real. `text` shall be a string. All
+	* Parses `text` for a real number. `text` shall be a string. All
 	  leading and trailing blank characters are stripped from `text`.
 	  If it becomes empty, this function fails; otherwise, it shall
 	  match any of the following extended regular expressions:
