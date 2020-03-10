@@ -653,43 +653,41 @@ Aval std_array_sort(Global& global, Aval data, Fopt comparator)
   {
     if(data.size() <= 1) {
       // Use reference counting as our advantage.
-      return data;
+      return ::rocket::move(data);
     }
     // The Merge Sort algorithm requires `O(n)` space.
-    Aval res = data;
     Aval temp(data.size());
     // Merge blocks of exponential sizes.
     cow_vector<Reference> args;
     ptrdiff_t bsize = 1;
-    while(bsize < res.ssize()) {
-      do_merge_blocks(temp, global, args, comparator, ::rocket::move(res), bsize, false);
-      res.swap(temp);
+    while(bsize < data.ssize()) {
+      do_merge_blocks(temp, global, args, comparator, ::rocket::move(data), bsize, false);
+      data.swap(temp);
       bsize *= 2;
     }
-    return res;
+    return ::rocket::move(data);
   }
 
 Aval std_array_sortu(Global& global, Aval data, Fopt comparator)
   {
     if(data.size() <= 1) {
       // Use reference counting as our advantage.
-      return data;
+      return ::rocket::move(data);
     }
     // The Merge Sort algorithm requires `O(n)` space.
-    Aval res = data;
-    Aval temp(res.size());
+    Aval temp(data.size());
     // Merge blocks of exponential sizes.
     cow_vector<Reference> args;
     ptrdiff_t bsize = 1;
-    while(bsize * 2 < res.ssize()) {
-      do_merge_blocks(temp, global, args, comparator, ::rocket::move(res), bsize, false);
-      res.swap(temp);
+    while(bsize * 2 < data.ssize()) {
+      do_merge_blocks(temp, global, args, comparator, ::rocket::move(data), bsize, false);
+      data.swap(temp);
       bsize *= 2;
     }
-    auto epos = do_merge_blocks(temp, global, args, comparator, ::rocket::move(res), bsize, true);
+    auto epos = do_merge_blocks(temp, global, args, comparator, ::rocket::move(data), bsize, true);
     temp.erase(epos, temp.end());
-    res.swap(temp);
-    return res;
+    data.swap(temp);
+    return ::rocket::move(data);
   }
 
 Value std_array_max_of(Global& global, Aval data, Fopt comparator)
@@ -729,37 +727,36 @@ Value std_array_min_of(Global& global, Aval data, Fopt comparator)
 Aval std_array_reverse(Aval data)
   {
     // This is an easy matter, isn't it?
-    return Aval(data.rbegin(), data.rend());
+    return Aval(::std::make_move_iterator(data.rbegin()), ::std::make_move_iterator(data.rend()));
   }
 
 Aval std_array_generate(Global& global, Fval generator, Ival length)
   {
-    Aval res;
-    res.reserve(static_cast<size_t>(length));
+    Aval data;
+    data.reserve(static_cast<size_t>(length));
     cow_vector<Reference> args;
     for(int64_t i = 0;  i < length;  ++i) {
       // Set up arguments for the user-defined generator.
       args.resize(2, Reference_Root::S_void());
       args.mut(0) = do_make_temporary(i);
-      args.mut(1) = do_make_temporary(res.empty() ? null_value : res.back());
+      args.mut(1) = do_make_temporary(data.empty() ? null_value : data.back());
       // Call the generator function and push the return value.
       auto self = generator->invoke(global, ::rocket::move(args));
-      res.emplace_back(self.read());
+      data.emplace_back(self.read());
     }
-    return res;
+    return data;
   }
 
 Aval std_array_shuffle(Aval data, Iopt seed)
   {
     if(data.size() <= 1) {
       // Use reference counting as our advantage.
-      return data;
+      return ::rocket::move(data);
     }
     // Create a linear congruential generator.
     uint64_t lcg = seed ? static_cast<uint64_t>(*seed) : generate_random_seed();
     // Shuffle elements.
-    Aval res = data;
-    for(size_t i = 0;  i < res.size();  ++i) {
+    for(size_t i = 0;  i < data.size();  ++i) {
       // These arguments are the same as glibc's `drand48()` function.
       //   https://en.wikipedia.org/wiki/Linear_congruential_generator#Parameters_in_common_use
       lcg *= 0x5DEECE66D;     // a
@@ -768,30 +765,28 @@ Aval std_array_shuffle(Aval data, Iopt seed)
       // N.B. Conversion from an unsigned type to a floating-point type would result in performance penalty.
       // ratio <= [0.0, 1.0)
       double ratio = static_cast<double>(static_cast<int64_t>(lcg)) * 0x1p-48;
-      // k <= [0, res.size())
+      // k <= [0, data.size())
       size_t k = static_cast<size_t>(static_cast<int64_t>(ratio * static_cast<double>(data.ssize())));
-      if(k == i) {
-        continue;
-      }
-      swap(res.mut(k), res.mut(i));
+      if(k != i)
+        swap(data.mut(k), data.mut(i));
     }
-    return res;
+    return ::rocket::move(data);
   }
 
 Aval std_array_copy_keys(Oval source)
   {
-    Aval res;
-    res.reserve(source.size());
-    ::rocket::for_each(source, [&](const auto& p) { res.emplace_back(Sval(p.first));  });
-    return res;
+    Aval data;
+    data.reserve(source.size());
+    ::rocket::for_each(source, [&](const auto& p) { data.emplace_back(Sval(p.first));  });
+    return data;
   }
 
 Aval std_array_copy_values(Oval source)
   {
-    Aval res;
-    res.reserve(source.size());
-    ::rocket::for_each(source, [&](const auto& p) { res.emplace_back(p.second);  });
-    return res;
+    Aval data;
+    data.reserve(source.size());
+    ::rocket::for_each(source, [&](const auto& p) { data.emplace_back(p.second);  });
+    return data;
   }
 
 void create_bindings_array(Oval& result, API_Version /*version*/)
