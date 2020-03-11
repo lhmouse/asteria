@@ -144,6 +144,8 @@ template<typename RealT> constexpr rcptr<RealT> unerase_cast(const rcfwdp<RealT>
 
 class Abstract_Opaque;
 class Abstract_Function;
+
+// Core
 class Value;
 class Source_Location;
 class Recursion_Sentry;
