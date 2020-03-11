@@ -103,39 +103,13 @@ template<typename E> using ref_to = ::rocket::reference_wrapper<E>;
 struct Rcbase : virtual ::rocket::refcnt_base<Rcbase>
   {
     virtual ~Rcbase();
-
-    bool unique() const noexcept
-      {
-        return ::rocket::refcnt_base<Rcbase>::unique();
-      }
-    long use_count() const noexcept
-      {
-        return ::rocket::refcnt_base<Rcbase>::use_count();
-      }
-
-    template<typename TargetT> rcptr<const TargetT> share_this() const
-      {
-        auto ptr = ::rocket::static_or_dynamic_cast<const TargetT*>(this);
-        if(!ptr)
-          this->do_throw_bad_cast(typeid(TargetT), typeid(*this));
-        this->add_reference();
-        return rcptr<const TargetT>(ptr);
-      }
-    template<typename TargetT> rcptr<TargetT> share_this()
-      {
-        auto ptr = ::rocket::static_or_dynamic_cast<TargetT*>(this);
-        if(!ptr)
-          this->do_throw_bad_cast(typeid(TargetT), typeid(*this));
-        this->add_reference();
-        return rcptr<TargetT>(ptr);
-      }
   };
 
 template<typename RealT> struct Rcfwd : Rcbase
   {
   };
 
-template<typename E> using rcfwdp = rcptr<Rcfwd<E>>;
+template<typename RealT> using rcfwdp = rcptr<Rcfwd<RealT>>;
 
 template<typename RealT> constexpr rcptr<RealT> unerase_cast(const rcfwdp<RealT>& ptr) noexcept
   {
