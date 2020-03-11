@@ -69,7 +69,7 @@ struct Module_Comparator
 
 Global_Context::~Global_Context()
   {
-    auto gcoll = ::rocket::dynamic_pointer_cast<Generational_Collector>(this->m_gcoll);
+    auto gcoll = unerase_cast(this->m_gcoll);
     ROCKET_ASSERT(gcoll);
     gcoll->wipe_out_variables();
   }
@@ -100,7 +100,7 @@ void Global_Context::initialize(API_Version version)
     this->clear_named_references();
     this->m_vstd.reset();
     // Perform a level-2 garbage collection.
-    auto gcoll = ::rocket::dynamic_pointer_cast<Generational_Collector>(this->m_gcoll);
+    auto gcoll = unerase_cast(this->m_gcoll);
     try {
       if(gcoll)
         gcoll->collect_variables(gc_generation_oldest);
@@ -114,7 +114,7 @@ void Global_Context::initialize(API_Version version)
     this->m_gcoll = gcoll;
 
     // Initialize the global random numbger generator.
-    auto prng = ::rocket::dynamic_pointer_cast<Random_Number_Generator>(this->m_prng);
+    auto prng = unerase_cast(this->m_prng);
     if(!prng)
       prng = ::rocket::make_refcnt<Random_Number_Generator>();
     this->m_prng = prng;
@@ -142,70 +142,70 @@ void Global_Context::initialize(API_Version version)
     auto vstd = gcoll->create_variable(gc_generation_oldest);
     vstd->initialize(::rocket::move(ostd), true);
     // Set the `std` reference now.
-    Reference_Root::S_variable xref = { vstd };
+    Reference_root::S_variable xref = { vstd };
     this->open_named_reference(::rocket::sref("std")) = ::rocket::move(xref);
     this->m_vstd = vstd;
   }
 
 const Collector& Global_Context::get_collector(GC_Generation gc_gen) const
   {
-    auto gcoll = ::rocket::dynamic_pointer_cast<Generational_Collector>(this->m_gcoll);
+    auto gcoll = unerase_cast(this->m_gcoll);
     ROCKET_ASSERT(gcoll);
     return gcoll->get_collector(gc_gen);
   }
 
 Collector& Global_Context::open_collector(GC_Generation gc_gen)
   {
-    auto gcoll = ::rocket::dynamic_pointer_cast<Generational_Collector>(this->m_gcoll);
+    auto gcoll = unerase_cast(this->m_gcoll);
     ROCKET_ASSERT(gcoll);
     return gcoll->open_collector(gc_gen);
   }
 
 rcptr<Variable> Global_Context::create_variable(GC_Generation gc_hint)
   {
-    auto gcoll = ::rocket::dynamic_pointer_cast<Generational_Collector>(this->m_gcoll);
+    auto gcoll = unerase_cast(this->m_gcoll);
     ROCKET_ASSERT(gcoll);
     return gcoll->create_variable(gc_hint);
   }
 
 size_t Global_Context::collect_variables(GC_Generation gc_limit)
   {
-    auto gcoll = ::rocket::dynamic_pointer_cast<Generational_Collector>(this->m_gcoll);
+    auto gcoll = unerase_cast(this->m_gcoll);
     ROCKET_ASSERT(gcoll);
     return gcoll->collect_variables(gc_limit);
   }
 
 uint32_t Global_Context::get_random_uint32() noexcept
   {
-    auto prng = ::rocket::dynamic_pointer_cast<Random_Number_Generator>(this->m_prng);
+    auto prng = unerase_cast(this->m_prng);
     ROCKET_ASSERT(prng);
     return prng->bump();
   }
 
 const Value& Global_Context::get_std_member(const phsh_string& name) const
   {
-    auto vstd = ::rocket::dynamic_pointer_cast<Variable>(this->m_vstd);
+    auto vstd = unerase_cast(this->m_vstd);
     ROCKET_ASSERT(vstd);
     return vstd->get_value().as_object().get_or(name, null_value);
   }
 
 Value& Global_Context::open_std_member(const phsh_string& name)
   {
-    auto vstd = ::rocket::dynamic_pointer_cast<Variable>(this->m_vstd);
+    auto vstd = unerase_cast(this->m_vstd);
     ROCKET_ASSERT(vstd);
     return vstd->open_value().open_object().try_emplace(name).first->second;
   }
 
 bool Global_Context::remove_std_member(const phsh_string& name)
   {
-    auto vstd = ::rocket::dynamic_pointer_cast<Variable>(this->m_vstd);
+    auto vstd = unerase_cast(this->m_vstd);
     ROCKET_ASSERT(vstd);
     return vstd->open_value().open_object().erase(name);
   }
 
 rcptr<Abstract_Hooks> Global_Context::get_hooks_opt() const noexcept
   {
-    return ::rocket::dynamic_pointer_cast<Abstract_Hooks>(this->m_hooks_opt);
+    return unerase_cast(this->m_hooks_opt);
   }
 
 Global_Context& Global_Context::set_hooks(rcptr<Abstract_Hooks> hooks_opt) noexcept

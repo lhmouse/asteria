@@ -150,7 +150,7 @@ void Reference_Dictionary::do_attach(Reference_Dictionary::Bucket* qbkt, const p
     ROCKET_ASSERT(!*qbkt);
     this->do_list_attach(qbkt);
     ::rocket::construct_at(qbkt->kstor, name);
-    ::rocket::construct_at(qbkt->vstor, Reference_Root::S_void());
+    ::rocket::construct_at(qbkt->vstor, Reference_root::S_void());
     ROCKET_ASSERT(*qbkt);
     this->m_stor.size++;
   }

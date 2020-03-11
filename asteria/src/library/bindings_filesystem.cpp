@@ -409,9 +409,9 @@ Iopt std_filesystem_file_stream(Global& global, Sval path, Fval callback, Iopt o
 
       // Prepare arguments for the user-defined function.
       args.clear().reserve(2);
-      Reference_Root::S_temporary xref_offset = { roffset };
+      Reference_root::S_temporary xref_offset = { roffset };
       args.emplace_back(::rocket::move(xref_offset));
-      Reference_Root::S_temporary xref_data = { ::rocket::move(data) };
+      Reference_root::S_temporary xref_data = { ::rocket::move(data) };
       args.emplace_back(::rocket::move(xref_data));
       // Call the function but discard its return value.
       callback->invoke(global, ::rocket::move(args));

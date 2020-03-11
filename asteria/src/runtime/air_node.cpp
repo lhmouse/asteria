@@ -11,7 +11,8 @@
 #include "instantiated_function.hpp"
 #include "runtime_error.hpp"
 #include "variable_callback.hpp"
-#include "tail_call_arguments.hpp"
+#include "variable.hpp"
+#include "ptc_arguments.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -62,13 +63,13 @@ template<typename XValT> Reference& do_set_temporary(Evaluation_Stack& stack, bo
       return ref;
     }
     // Replace the top reference with a temporary reference to the value.
-    Reference_Root::S_temporary xref = { ::rocket::forward<XValT>(xval) };
+    Reference_root::S_temporary xref = { ::rocket::forward<XValT>(xval) };
     return ref = ::rocket::move(xref);
   }
 
 Reference& do_declare(Executive_Context& ctx, const phsh_string& name)
   {
-    return ctx.open_named_reference(name) = Reference_Root::S_void();
+    return ctx.open_named_reference(name) = Reference_root::S_void();
   }
 
 AIR_Status do_execute_block(const AVMC_Queue& queue, Executive_Context& ctx)
@@ -277,7 +278,7 @@ struct Pv_defer
 
 struct Pv_ref
   {
-    Reference ref = Reference_Root::S_void();
+    Reference ref = Reference_root::S_void();
 
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const
       {
@@ -354,7 +355,7 @@ AIR_Status do_declare_variable(Executive_Context& ctx, ParamU /*pu*/, const void
     // Allocate an uninitialized variable.
     auto var = ctx.global().create_variable();
     // Inject the variable into the current context.
-    Reference_Root::S_variable xref = { ::rocket::move(var) };
+    Reference_root::S_variable xref = { ::rocket::move(var) };
     ctx.open_named_reference(name) = xref;
     // Call the hook function if any.
     if(qhooks) {
@@ -527,7 +528,7 @@ AIR_Status do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const vo
     // Allocate an uninitialized variable for the key.
     const auto vkey = ctx_for.global().create_variable();
     // Inject the variable into the current context.
-    Reference_Root::S_variable xref = { vkey };
+    Reference_root::S_variable xref = { vkey };
     ctx_for.open_named_reference(name_key) = xref;
     // Create the mapped reference.
     auto& mapped = do_declare(ctx_for, name_mapped);
@@ -547,7 +548,7 @@ AIR_Status do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const vo
         // Set the key which is the subscript of the mapped element in the array.
         vkey->initialize(i, true);
         // Set the mapped reference.
-        Reference_Modifier::S_array_index xmod = { i };
+        Reference_modifier::S_array_index xmod = { i };
         mapped.zoom_in(::rocket::move(xmod));
         // Execute the loop body.
         status = do_execute_block(queue_body, ctx_for);
@@ -565,7 +566,7 @@ AIR_Status do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const vo
         // Set the key which is the key of this element in the object.
         vkey->initialize(it->first.rdstr(), true);
         // Set the mapped reference.
-        Reference_Modifier::S_object_key xmod = { it->first.rdstr() };
+        Reference_modifier::S_object_key xmod = { it->first.rdstr() };
         mapped.zoom_in(::rocket::move(xmod));
         // Execute the loop body.
         status = do_execute_block(queue_body, ctx_for);
@@ -645,7 +646,7 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
       Executive_Context ctx_catch(::rocket::ref(ctx), nullptr);
       ASTERIA_RUNTIME_TRY {
         // Set the exception reference.
-        Reference_Root::S_temporary xref_except = { except.value() };
+        Reference_root::S_temporary xref_except = { except.value() };
         ctx_catch.open_named_reference(name_except) = ::rocket::move(xref_except);
         // Set backtrace frames.
         V_array backtrace;
@@ -660,7 +661,7 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
           // Append this frame.
           backtrace.emplace_back(::rocket::move(r));
         }
-        Reference_Root::S_constant xref = { ::rocket::move(backtrace) };
+        Reference_root::S_constant xref = { ::rocket::move(backtrace) };
         ctx_catch.open_named_reference(::rocket::sref("__backtrace")) = ::rocket::move(xref);
         status = queue_catch.execute(ctx_catch);
       }
@@ -718,7 +719,7 @@ AIR_Status do_glvalue_to_rvalue(Executive_Context& ctx, ParamU /*pu*/, const voi
       return air_status_next;
     }
     // Convert the result to an rvalue.
-    Reference_Root::S_temporary xref = { self.read() };
+    Reference_root::S_temporary xref = { self.read() };
     self = ::rocket::move(xref);
     return air_status_next;
   }
@@ -729,7 +730,7 @@ AIR_Status do_push_immediate(Executive_Context& ctx, ParamU /*pu*/, const void* 
     const auto& val = do_pcast<Value>(pv)[0];
 
     // Push a constant.
-    Reference_Root::S_constant xref = { val };
+    Reference_root::S_constant xref = { val };
     ctx.stack().push(::rocket::move(xref));
     return air_status_next;
   }
@@ -799,7 +800,7 @@ AIR_Status do_define_function(Executive_Context& ctx, ParamU /*pu*/, const void*
     // Instantiate the function.
     auto qtarget = ::rocket::make_refcnt<Instantiated_Function>(params, ::rocket::move(zvarg), pair.second);
     // Push the function as a temporary.
-    Reference_Root::S_temporary xref = { V_function(::rocket::move(qtarget)) };
+    Reference_root::S_temporary xref = { V_function(::rocket::move(qtarget)) };
     ctx.stack().push(::rocket::move(xref));
     return air_status_next;
   }
@@ -864,15 +865,15 @@ ROCKET_NOINLINE Reference& do_invoke_nontail(Reference& self, const Source_Locat
     return self;
   }
 
-ROCKET_NOINLINE Reference& do_wrap_tail_call(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
-                                             const rcptr<Abstract_Function>& target, PTC_Aware ptc,
-                                             cow_vector<Reference>&& args)
+ROCKET_NOINLINE Reference& do_wrap_ptc(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
+                                       const rcptr<Abstract_Function>& target, PTC_Aware ptc,
+                                       cow_vector<Reference>&& args)
   {
     // Pack arguments for this proper tail call.
-    auto tca = ::rocket::make_refcnt<Tail_Call_Arguments>(sloc, ctx.zvarg(), ptc, target,
+    auto tca = ::rocket::make_refcnt<PTC_Arguments>(sloc, ctx.zvarg(), ptc, target,
                                               ::rocket::move(args.insert(args.size(), ::rocket::move(self))));
     // Return it.
-    Reference_Root::S_tail_call xref = { ::rocket::move(tca) };
+    Reference_root::S_tail_call xref = { ::rocket::move(tca) };
     return self = ::rocket::move(xref);
   }
 
@@ -888,7 +889,7 @@ AIR_Status do_function_call_common(Reference& self, const Source_Location& sloc,
     }
     // Wrap proper tail calls.
     // The result will be unpacked outside this scope.
-    do_wrap_tail_call(self, sloc, ctx, target, ptc, ::rocket::move(args));
+    do_wrap_ptc(self, sloc, ctx, target, ptc, ::rocket::move(args));
     // Force `air_status_return_ref` if control flow reaches the end of a function.
     // Otherwise a null reference is returned instead of this PTC wrapper, which can then never be unpacked.
     return air_status_return_ref;
@@ -911,7 +912,7 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
     }
     // Pop arguments off the stack backwards.
     cow_vector<Reference> args;
-    args.resize(nargs, Reference_Root::S_void());
+    args.resize(nargs, Reference_root::S_void());
     for(size_t i = args.size() - 1;  i != SIZE_MAX;  --i) {
       // Get an argument. Ensure it is dereferenceable.
       auto& arg = ctx.stack().open_top();
@@ -935,7 +936,7 @@ AIR_Status do_member_access(Executive_Context& ctx, ParamU /*pu*/, const void* p
     const auto& name = do_pcast<Pv_name>(pv)->name;
 
     // Append a modifier to the reference at the top.
-    Reference_Modifier::S_object_key xmod = { name };
+    Reference_modifier::S_object_key xmod = { name };
     ctx.stack().open_top().zoom_in(::rocket::move(xmod));
     return air_status_next;
   }
@@ -954,7 +955,7 @@ AIR_Status do_push_unnamed_array(Executive_Context& ctx, ParamU pu, const void* 
       ctx.stack().pop();
     }
     // Push the array as a temporary.
-    Reference_Root::S_temporary xref = { ::rocket::move(array) };
+    Reference_root::S_temporary xref = { ::rocket::move(array) };
     ctx.stack().push(::rocket::move(xref));
     return air_status_next;
   }
@@ -974,7 +975,7 @@ AIR_Status do_push_unnamed_object(Executive_Context& ctx, ParamU /*pu*/, const v
       ctx.stack().pop();
     }
     // Push the object as a temporary.
-    Reference_Root::S_temporary xref = { ::rocket::move(object) };
+    Reference_root::S_temporary xref = { ::rocket::move(object) };
     ctx.stack().push(::rocket::move(xref));
     return air_status_next;
   }
@@ -1445,12 +1446,12 @@ AIR_Status do_apply_xop_SUBSCR(Executive_Context& ctx, ParamU /*pu*/, const void
     // Append a reference modifier. `assign` is ignored.
     if(rhs.is_integer()) {
       auto& reg = rhs.open_integer();
-      Reference_Modifier::S_array_index xmod = { ::rocket::move(reg) };
+      Reference_modifier::S_array_index xmod = { ::rocket::move(reg) };
       lref.zoom_in(::rocket::move(xmod));
     }
     else if(rhs.is_string()) {
       auto& reg = rhs.open_string();
-      Reference_Modifier::S_object_key xmod = { ::rocket::move(reg) };
+      Reference_modifier::S_object_key xmod = { ::rocket::move(reg) };
       lref.zoom_in(::rocket::move(xmod));
     }
     else {
@@ -2381,7 +2382,7 @@ AIR_Status do_apply_xop_HEAD(Executive_Context& ctx, ParamU /*pu*/, const void* 
   {
     // This operator is unary.
     auto& lref = ctx.stack().open_top();
-    Reference_Modifier::S_array_head xmod = { };
+    Reference_modifier::S_array_head xmod = { };
     lref.zoom_in(::rocket::move(xmod));
     return air_status_next;
   }
@@ -2390,7 +2391,7 @@ AIR_Status do_apply_xop_TAIL(Executive_Context& ctx, ParamU /*pu*/, const void* 
   {
     // This operator is unary.
     auto& lref = ctx.stack().open_top();
-    Reference_Modifier::S_array_tail xmod = { };
+    Reference_modifier::S_array_tail xmod = { };
     lref.zoom_in(::rocket::move(xmod));
     return air_status_next;
   }
@@ -2473,7 +2474,7 @@ AIR_Status do_define_null_variable(Executive_Context& ctx, ParamU pu, const void
     // Allocate an uninitialized variable.
     auto var = ctx.global().create_variable();
     // Inject the variable into the current context.
-    Reference_Root::S_variable xref = { var };
+    Reference_root::S_variable xref = { var };
     ctx.open_named_reference(name) = ::rocket::move(xref);
     // Call the hook function if any.
     if(qhooks) {
@@ -2522,10 +2523,10 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
       auto source = ::rocket::move(value.open_array());
       ctx.stack().pop();
       // Convert all elements to temporaries.
-      args.assign(source.size(), Reference_Root::S_void());
+      args.assign(source.size(), Reference_root::S_void());
       for(size_t i = 0;  i < args.size();  ++i) {
         // Make a reference to temporary.
-        Reference_Root::S_temporary xref = { ::rocket::move(source.mut(i)) };
+        Reference_root::S_temporary xref = { ::rocket::move(source.mut(i)) };
         args.mut(i) = ::rocket::move(xref);
       }
     }
@@ -2549,7 +2550,7 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
       args.assign(static_cast<size_t>(nvargs), gself);
       for(size_t i = 0;  i < args.size();  ++i) {
         // Initialize the argument list for the generator.
-        Reference_Root::S_constant xref = { V_integer(i) };
+        Reference_root::S_constant xref = { V_integer(i) };
         gargs.clear().emplace_back(::rocket::move(xref));
         // Generate an argument. Ensure it is dereferenceable.
         do_invoke_nontail(args.mut(i), sloc, ctx, generator, ::rocket::move(gargs));

@@ -5,7 +5,7 @@
 #include "executive_context.hpp"
 #include "air_node.hpp"
 #include "runtime_error.hpp"
-#include "tail_call_arguments.hpp"
+#include "ptc_arguments.hpp"
 #include "../llds/avmc_queue.hpp"
 #include "../utilities.hpp"
 
@@ -36,7 +36,7 @@ void Executive_Context::do_bind_parameters(const cow_vector<phsh_string>& params
       }
       // Set the parameter.
       if(ROCKET_UNEXPECT(i >= args.size()))
-        this->open_named_reference(name) = Reference_Root::S_constant();
+        this->open_named_reference(name) = Reference_root::S_constant();
       else
         this->open_named_reference(name) = ::rocket::move(args.mut(i));
     }
@@ -144,7 +144,7 @@ Reference* Executive_Context::do_lazy_lookup_opt(const phsh_string& name)
     if(name == "__func") {
       auto& ref = this->open_named_reference(::rocket::sref("__func"));
       // Copy the function name as a constant.
-      Reference_Root::S_constant xref = { this->m_zvarg.get()->func() };
+      Reference_root::S_constant xref = { this->m_zvarg.get()->func() };
       ref = ::rocket::move(xref);
       return &ref;
     }
@@ -161,7 +161,7 @@ Reference* Executive_Context::do_lazy_lookup_opt(const phsh_string& name)
       auto varg = this->m_args.empty() ? rcptr<Abstract_Function>(this->m_zvarg.get())
                                        : ::rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg.get()),
                                                                                 ::rocket::move(this->m_args));
-      Reference_Root::S_constant xref = { ::rocket::move(varg) };
+      Reference_root::S_constant xref = { ::rocket::move(varg) };
       ref = ::rocket::move(xref);
       return &ref;
     }

@@ -1,18 +1,17 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_RUNTIME_TAIL_CALL_ARGUMENTS_HPP_
-#define ASTERIA_RUNTIME_TAIL_CALL_ARGUMENTS_HPP_
+#ifndef ASTERIA_RUNTIME_PTC_ARGUMENTS_HPP_
+#define ASTERIA_RUNTIME_PTC_ARGUMENTS_HPP_
 
 #include "../fwd.hpp"
-#include "tail_call_arguments_fwd.hpp"
 #include "variadic_arguer.hpp"
 #include "../source_location.hpp"
 #include "../abstract_function.hpp"
 
 namespace Asteria {
 
-class Tail_Call_Arguments final : public Tail_Call_Arguments_Fwd
+class PTC_Arguments final : public Rcfwd<PTC_Arguments>
   {
   private:
     // These describe characteristics of the function call.
@@ -30,18 +29,18 @@ class Tail_Call_Arguments final : public Tail_Call_Arguments_Fwd
     cow_vector<Reference> m_args_self;
 
   public:
-    Tail_Call_Arguments(const Source_Location& sloc, const rcptr<Variadic_Arguer>& zvarg, PTC_Aware ptc,
-                        const rcptr<Abstract_Function>& target, cow_vector<Reference>&& args_self)
+    PTC_Arguments(const Source_Location& sloc, const rcptr<Variadic_Arguer>& zvarg, PTC_Aware ptc,
+                  const rcptr<Abstract_Function>& target, cow_vector<Reference>&& args_self)
       :
         m_sloc(sloc), m_zvarg(zvarg), m_ptc(ptc),
         m_target(target), m_args_self(::rocket::move(args_self))
       {
       }
-    ~Tail_Call_Arguments() override;
+    ~PTC_Arguments() override;
 
-    Tail_Call_Arguments(const Tail_Call_Arguments&)
+    PTC_Arguments(const PTC_Arguments&)
       = delete;
-    Tail_Call_Arguments& operator=(const Tail_Call_Arguments&)
+    PTC_Arguments& operator=(const PTC_Arguments&)
       = delete;
 
   public:

@@ -8,7 +8,8 @@
 #include "evaluation_stack.hpp"
 #include "executive_context.hpp"
 #include "runtime_error.hpp"
-#include "tail_call_arguments.hpp"
+#include "variable.hpp"
+#include "ptc_arguments.hpp"
 #include "enums.hpp"
 #include "../utilities.hpp"
 
@@ -16,7 +17,7 @@ namespace Asteria {
 namespace {
 
 Runtime_Error& do_unpack_frames(Runtime_Error& except, Global_Context& global, Evaluation_Stack& stack,
-                                cow_vector<rcptr<Tail_Call_Arguments>>&& frames)
+                                cow_vector<rcptr<PTC_Arguments>>&& frames)
   {
     while(frames.size()) {
       auto tca = ::rocket::move(frames.mut_back());
@@ -48,9 +49,9 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
   {
     // The function call shall yield an rvalue unless all wrapped calls return by reference.
     PTC_Aware ptc_conj = ptc_aware_by_ref;
-    rcptr<Tail_Call_Arguments> tca;
+    rcptr<PTC_Arguments> tca;
     // We must rebuild the backtrace using this queue if an exception is thrown.
-    cow_vector<rcptr<Tail_Call_Arguments>> frames;
+    cow_vector<rcptr<PTC_Arguments>> frames;
     Evaluation_Stack stack;
 
     // Unpack all frames recursively.
@@ -113,11 +114,11 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
     // Process the result.
     if(ptc_conj == ptc_aware_void) {
       // Return `void`.
-      self = Reference_Root::S_void();
+      self = Reference_root::S_void();
     }
     else if((ptc_conj == ptc_aware_by_val) && self.is_glvalue()) {
       // Convert the result to an rvalue if it shouldn't be passed by reference.
-      Reference_Root::S_temporary xref = { self.read() };
+      Reference_root::S_temporary xref = { self.read() };
       self = ::rocket::move(xref);
     }
     return self;

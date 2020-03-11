@@ -25,7 +25,7 @@ Variable_Callback& Simple_Binding_Wrapper::enumerate_variables(Variable_Callback
 Reference& Simple_Binding_Wrapper::invoke_ptc_aware(Reference& self, Global& global,
                                                     cow_vector<Reference>&& args) const
   {
-    Reference_Root::S_temporary xref = { (*(this->m_proc))(::rocket::move(args), ::rocket::move(self),
+    Reference_root::S_temporary xref = { (*(this->m_proc))(::rocket::move(args), ::rocket::move(self),
                                                            global, this->m_pval) };
     return self = ::rocket::move(xref);
   }

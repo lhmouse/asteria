@@ -5,11 +5,10 @@
 #define ASTERIA_RUNTIME_ABSTRACT_HOOKS_HPP_
 
 #include "../fwd.hpp"
-#include "../rcbase.hpp"
 
 namespace Asteria {
 
-class Abstract_Hooks : public virtual Rcbase
+class Abstract_Hooks : public Rcfwd<Abstract_Hooks>
   {
   public:
     Abstract_Hooks() noexcept

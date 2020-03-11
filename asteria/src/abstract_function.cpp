@@ -19,7 +19,7 @@ Reference& Abstract_Function::invoke(Reference& self, Global_Context& global, co
 
 Reference Abstract_Function::invoke(Global_Context& global, cow_vector<Reference>&& args) const
   {
-    Reference self = Reference_Root::S_constant();
+    Reference self = Reference_root::S_constant();
     this->invoke(self, global, ::rocket::move(args));
     return self;
   }

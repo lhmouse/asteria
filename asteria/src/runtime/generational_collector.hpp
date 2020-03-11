@@ -5,13 +5,12 @@
 #define ASTERIA_RUNTIME_GENERATIONAL_COLLECTOR_HPP_
 
 #include "../fwd.hpp"
-#include "../rcbase.hpp"
 #include "collector.hpp"
 #include "../llds/variable_hashset.hpp"
 
 namespace Asteria {
 
-class Generational_Collector final : public virtual Rcbase
+class Generational_Collector final : public Rcfwd<Generational_Collector>
   {
   private:
     // Mind the order of construction and destruction.

@@ -10,7 +10,7 @@
 
 namespace Asteria {
 
-class Runtime_Error : public exception
+class Runtime_Error : public virtual exception
   {
   private:
     Value m_value;

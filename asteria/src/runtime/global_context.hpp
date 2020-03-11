@@ -6,7 +6,6 @@
 
 #include "../fwd.hpp"
 #include "abstract_context.hpp"
-#include "../rcbase.hpp"
 #include "../recursion_sentry.hpp"
 
 namespace Asteria {
@@ -14,12 +13,12 @@ namespace Asteria {
 class Global_Context : public Abstract_Context
   {
   private:
-    rcptr<Rcbase> m_gcoll;  // the global garbage collector
-    rcptr<Rcbase> m_hooks_opt;
+    rcfwdp<Generational_Collector> m_gcoll;  // the global garbage collector
+    rcfwdp<Abstract_Hooks> m_hooks_opt;
     Recursion_Sentry m_sentry;
 
-    rcptr<Rcbase> m_prng;  // the global pseudo random number generator
-    rcptr<Rcbase> m_vstd;  // the `std` variable
+    rcfwdp<Random_Number_Generator> m_prng;  // the global pseudo random number generator
+    rcfwdp<Variable> m_vstd;  // the `std` variable
 
   public:
     explicit Global_Context(API_Version version = api_version_latest)

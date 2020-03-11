@@ -13,8 +13,8 @@ namespace Asteria {
 class Reference
   {
   public:
-    using Root      = Reference_Root;
-    using Modifier  = Reference_Modifier;
+    using Root      = Reference_root;
+    using Modifier  = Reference_modifier;
 
   private:
     Root m_root;
@@ -136,22 +136,19 @@ class Reference
         return this->do_unset(this->m_mods.data(), this->m_mods.size(), last);
       }
 
-    rcptr<Variable> get_variable_opt() const noexcept
+    template<class T = Variable> rcptr<T> get_variable_opt() const noexcept
       {
         if(ROCKET_UNEXPECT(!this->is_variable()))
           return nullptr;
         else
-          return this->m_root.as_variable();
+          return unerase_cast<T>(this->m_root.as_variable());
       }
-    // This must be a template as `Tail_Call_Arguments` is incomplete.
-    template<typename XArgsT = Tail_Call_Arguments,
-                        ROCKET_ENABLE_IF(::std::is_same<XArgsT, Tail_Call_Arguments>::value)>
-        rcptr<XArgsT> get_tail_call_opt() const
+    template<class T = PTC_Arguments> rcptr<T> get_tail_call_opt() const noexcept
       {
         if(ROCKET_UNEXPECT(!this->is_tail_call()))
           return nullptr;
         else
-          return ::rocket::static_pointer_cast<XArgsT>(this->m_root.as_tail_call_fwd());
+          return unerase_cast<T>(this->m_root.as_tail_call());
       }
     Reference& finish_call(Global_Context& global)
       {

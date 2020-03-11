@@ -70,9 +70,9 @@ template<typename IterT> opt<IterT> do_find_opt(IterT begin, IterT end, const Va
     return nullopt;
   }
 
-Reference_Root::S_temporary do_make_temporary(const Value& value)
+Reference_root::S_temporary do_make_temporary(const Value& value)
   {
-    Reference_Root::S_temporary xref = { value };
+    Reference_root::S_temporary xref = { value };
     return xref;
   }
 
@@ -82,7 +82,7 @@ template<typename IterT> opt<IterT> do_find_if_opt(Global& global, IterT begin, 
     cow_vector<Reference> args;
     for(auto it = ::rocket::move(begin);  it != end;  ++it) {
       // Set up arguments for the user-defined predictor.
-      args.resize(1, Reference_Root::S_void());
+      args.resize(1, Reference_root::S_void());
       args.mut(0) = do_make_temporary(*it);
       // Call the predictor function and check the return value.
       auto self = pred->invoke(global, ::rocket::move(args));
@@ -97,7 +97,7 @@ Compare do_compare(Global& global, cow_vector<Reference>& args,
                    const Fval& comparator, const Value& lhs, const Value& rhs)
   {
     // Set up arguments for the user-defined comparator.
-    args.resize(2, Reference_Root::S_void());
+    args.resize(2, Reference_root::S_void());
     args.mut(0) = do_make_temporary(lhs);
     args.mut(1) = do_make_temporary(rhs);
     // Call the predictor function and compare the result with `0`.
@@ -872,7 +872,7 @@ Aval std_array_generate(Global& global, Fval generator, Ival length)
     cow_vector<Reference> args;
     for(int64_t i = 0;  i < length;  ++i) {
       // Set up arguments for the user-defined generator.
-      args.resize(2, Reference_Root::S_void());
+      args.resize(2, Reference_root::S_void());
       args.mut(0) = do_make_temporary(i);
       args.mut(1) = do_make_temporary(data.empty() ? null_value : data.back());
       // Call the generator function and push the return value.

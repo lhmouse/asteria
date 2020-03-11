@@ -99,8 +99,49 @@ template<typename F, typename S> using cow_bivector = ::rocket::cow_vector<::std
 template<typename E, size_t... k> using array = ::rocket::array<E, k...>;
 template<typename E> using ref_to = ::rocket::reference_wrapper<E>;
 
-// Base
-class Rcbase;
+// Type erasure
+struct Rcbase : virtual ::rocket::refcnt_base<Rcbase>
+  {
+    virtual ~Rcbase();
+
+    bool unique() const noexcept
+      {
+        return ::rocket::refcnt_base<Rcbase>::unique();
+      }
+    long use_count() const noexcept
+      {
+        return ::rocket::refcnt_base<Rcbase>::use_count();
+      }
+
+    template<typename TargetT> rcptr<const TargetT> share_this() const
+      {
+        auto ptr = ::rocket::static_or_dynamic_cast<const TargetT*>(this);
+        if(!ptr)
+          this->do_throw_bad_cast(typeid(TargetT), typeid(*this));
+        this->add_reference();
+        return rcptr<const TargetT>(ptr);
+      }
+    template<typename TargetT> rcptr<TargetT> share_this()
+      {
+        auto ptr = ::rocket::static_or_dynamic_cast<TargetT*>(this);
+        if(!ptr)
+          this->do_throw_bad_cast(typeid(TargetT), typeid(*this));
+        this->add_reference();
+        return rcptr<TargetT>(ptr);
+      }
+  };
+
+template<typename RealT> struct Rcfwd : Rcbase
+  {
+  };
+
+template<typename E> using rcfwdp = rcptr<Rcfwd<E>>;
+
+template<typename RealT> constexpr rcptr<RealT> unerase_cast(const rcfwdp<RealT>& ptr) noexcept
+  {
+    return ::rocket::static_pointer_cast<RealT>(ptr);
+  }
+
 class Abstract_Opaque;
 class Abstract_Function;
 class Value;
@@ -117,14 +158,13 @@ enum AIR_Status : uint8_t;
 enum PTC_Aware : uint8_t;
 class Abstract_Hooks;
 class Runtime_Error;
-class Reference_Root;
-class Reference_Modifier;
+class Reference_root;
+class Reference_modifier;
 class Reference;
 class Evaluation_Stack;
 class Variable;
 class Variable_Callback;
-class Tail_Call_Arguments_Fwd;
-class Tail_Call_Arguments;
+class PTC_Arguments;
 class Collector;
 class Abstract_Context;
 class Analytic_Context;

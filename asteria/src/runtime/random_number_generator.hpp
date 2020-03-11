@@ -5,11 +5,10 @@
 #define ASTERIA_RUNTIME_RANDOM_NUMBER_GENERATOR_HPP_
 
 #include "../fwd.hpp"
-#include "../rcbase.hpp"
 
 namespace Asteria {
 
-class Random_Number_Generator final : public virtual Rcbase
+class Random_Number_Generator final : public Rcfwd<Random_Number_Generator>
   {
   private:
     // This implements the ISAAC PRNG that is both very fast and cryptographically secure.

@@ -913,17 +913,17 @@ class SHA256_Hasher final : public Abstract_Opaque
 
 Pval std_checksum_crc32_new_private()
   {
-    return Pval(::rocket::make_refcnt<CRC32_Hasher>());
+    return ::rocket::make_refcnt<CRC32_Hasher>();
   }
 
 Ival std_checksum_crc32_new_write(Pval& h, Sval data)
   {
-    return h->share_this<CRC32_Hasher>()->write(data);
+    return dynamic_cast<CRC32_Hasher&>(*h).write(data);
   }
 
 Ival std_checksum_crc32_new_finish(Pval& h)
   {
-    return h->share_this<CRC32_Hasher>()->finish();
+    return dynamic_cast<CRC32_Hasher&>(*h).finish();
   }
 
 Oval std_checksum_crc32_new()
@@ -943,7 +943,7 @@ Oval std_checksum_crc32_new()
         [](cow_vector<Reference>&& args, Reference&& self) -> Value  {
           Argument_Reader reader(::rocket::sref("std.checksum.crc32_new().write"), ::rocket::ref(args));
           // Get the hasher.
-          Reference_Modifier::S_object_key xmod = { ::rocket::sref("$h") };
+          Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
           self.zoom_in(::rocket::move(xmod));
           // Parse arguments.
           Sval data;
@@ -963,7 +963,7 @@ Oval std_checksum_crc32_new()
         [](cow_vector<Reference>&& args, Reference&& self) -> Value  {
           Argument_Reader reader(::rocket::sref("std.checksum.crc32_new().finish"), ::rocket::ref(args));
           // Get the hasher.
-          Reference_Modifier::S_object_key xmod = { ::rocket::sref("$h") };
+          Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
           self.zoom_in(::rocket::move(xmod));
           // Parse arguments.
           if(reader.I().F()) {
@@ -988,17 +988,17 @@ Ival std_checksum_crc32(Sval data)
 
 Pval std_checksum_fnv1a32_new_private()
   {
-    return Pval(::rocket::make_refcnt<FNV1a32_Hasher>());
+    return ::rocket::make_refcnt<FNV1a32_Hasher>();
   }
 
 Ival std_checksum_fnv1a32_new_write(Pval& h, Sval data)
   {
-    return h->share_this<FNV1a32_Hasher>()->write(data);
+    return dynamic_cast<FNV1a32_Hasher&>(*h).write(data);
   }
 
 Ival std_checksum_fnv1a32_new_finish(Pval& h)
   {
-    return h->share_this<FNV1a32_Hasher>()->finish();
+    return dynamic_cast<FNV1a32_Hasher&>(*h).finish();
   }
 
 Oval std_checksum_fnv1a32_new()
@@ -1018,7 +1018,7 @@ Oval std_checksum_fnv1a32_new()
         [](cow_vector<Reference>&& args, Reference&& self) -> Value  {
           Argument_Reader reader(::rocket::sref("std.checksum.fnv1a32_new().write"), ::rocket::ref(args));
           // Get the hasher.
-          Reference_Modifier::S_object_key xmod = { ::rocket::sref("$h") };
+          Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
           self.zoom_in(::rocket::move(xmod));
           // Parse arguments.
           Sval data;
@@ -1038,7 +1038,7 @@ Oval std_checksum_fnv1a32_new()
         [](cow_vector<Reference>&& args, Reference&& self) -> Value  {
           Argument_Reader reader(::rocket::sref("std.checksum.fnv1a32_new().finish"), ::rocket::ref(args));
           // Get the hasher.
-          Reference_Modifier::S_object_key xmod = { ::rocket::sref("$h") };
+          Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
           self.zoom_in(::rocket::move(xmod));
           // Parse arguments.
           if(reader.I().F()) {
@@ -1063,17 +1063,17 @@ Ival std_checksum_fnv1a32(Sval data)
 
 Pval std_checksum_md5_new_private()
   {
-    return Pval(::rocket::make_refcnt<MD5_Hasher>());
+    return ::rocket::make_refcnt<MD5_Hasher>();
   }
 
 Ival std_checksum_md5_new_write(Pval& h, Sval data)
   {
-    return h->share_this<MD5_Hasher>()->write(data);
+    return dynamic_cast<MD5_Hasher&>(*h).write(data);
   }
 
 Sval std_checksum_md5_new_finish(Pval& h)
   {
-    return h->share_this<MD5_Hasher>()->finish();
+    return dynamic_cast<MD5_Hasher&>(*h).finish();
   }
 
 Oval std_checksum_md5_new()
@@ -1093,7 +1093,7 @@ Oval std_checksum_md5_new()
         [](cow_vector<Reference>&& args, Reference&& self) -> Value  {
           Argument_Reader reader(::rocket::sref("std.checksum.md5_new().write"), ::rocket::ref(args));
           // Get the hasher.
-          Reference_Modifier::S_object_key xmod = { ::rocket::sref("$h") };
+          Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
           self.zoom_in(::rocket::move(xmod));
           // Parse arguments.
           Sval data;
@@ -1113,7 +1113,7 @@ Oval std_checksum_md5_new()
         [](cow_vector<Reference>&& args, Reference&& self) -> Value  {
           Argument_Reader reader(::rocket::sref("std.checksum.md5_new().finish"), ::rocket::ref(args));
           // Get the hasher.
-          Reference_Modifier::S_object_key xmod = { ::rocket::sref("$h") };
+          Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
           self.zoom_in(::rocket::move(xmod));
           // Parse arguments.
           if(reader.I().F()) {
@@ -1138,17 +1138,17 @@ Sval std_checksum_md5(Sval data)
 
 Pval std_checksum_sha1_new_private()
   {
-    return Pval(::rocket::make_refcnt<SHA1_Hasher>());
+    return ::rocket::make_refcnt<SHA1_Hasher>();
   }
 
 Ival std_checksum_sha1_new_write(Pval& h, Sval data)
   {
-    return h->share_this<SHA1_Hasher>()->write(data);
+    return dynamic_cast<SHA1_Hasher&>(*h).write(data);
   }
 
 Sval std_checksum_sha1_new_finish(Pval& h)
   {
-    return h->share_this<SHA1_Hasher>()->finish();
+    return dynamic_cast<SHA1_Hasher&>(*h).finish();
   }
 
 Oval std_checksum_sha1_new()
@@ -1168,7 +1168,7 @@ Oval std_checksum_sha1_new()
         [](cow_vector<Reference>&& args, Reference&& self) -> Value  {
           Argument_Reader reader(::rocket::sref("std.checksum.sha1_new().write"), ::rocket::ref(args));
           // Get the hasher.
-          Reference_Modifier::S_object_key xmod = { ::rocket::sref("$h") };
+          Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
           self.zoom_in(::rocket::move(xmod));
           // Parse arguments.
           Sval data;
@@ -1188,7 +1188,7 @@ Oval std_checksum_sha1_new()
         [](cow_vector<Reference>&& args, Reference&& self) -> Value  {
           Argument_Reader reader(::rocket::sref("std.checksum.sha1_new().finish"), ::rocket::ref(args));
           // Get the hasher.
-          Reference_Modifier::S_object_key xmod = { ::rocket::sref("$h") };
+          Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
           self.zoom_in(::rocket::move(xmod));
           // Parse arguments.
           if(reader.I().F()) {
@@ -1213,17 +1213,17 @@ Sval std_checksum_sha1(Sval data)
 
 Pval std_checksum_sha256_new_private()
   {
-    return Pval(::rocket::make_refcnt<SHA256_Hasher>());
+    return ::rocket::make_refcnt<SHA256_Hasher>();
   }
 
 Ival std_checksum_sha256_new_write(Pval& h, Sval data)
   {
-    return h->share_this<SHA256_Hasher>()->write(data);
+    return dynamic_cast<SHA256_Hasher&>(*h).write(data);
   }
 
 Sval std_checksum_sha256_new_finish(Pval& h)
   {
-    return h->share_this<SHA256_Hasher>()->finish();
+    return dynamic_cast<SHA256_Hasher&>(*h).finish();
   }
 
 Oval std_checksum_sha256_new()
@@ -1243,7 +1243,7 @@ Oval std_checksum_sha256_new()
         [](cow_vector<Reference>&& args, Reference&& self) -> Value  {
           Argument_Reader reader(::rocket::sref("std.checksum.sha256_new().write"), ::rocket::ref(args));
           // Get the hasher.
-          Reference_Modifier::S_object_key xmod = { ::rocket::sref("$h") };
+          Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
           self.zoom_in(::rocket::move(xmod));
           // Parse arguments.
           Sval data;
@@ -1263,7 +1263,7 @@ Oval std_checksum_sha256_new()
         [](cow_vector<Reference>&& args, Reference&& self) -> Value  {
           Argument_Reader reader(::rocket::sref("std.checksum.sha256_new().finish"), ::rocket::ref(args));
           // Get the hasher.
-          Reference_Modifier::S_object_key xmod = { ::rocket::sref("$h") };
+          Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
           self.zoom_in(::rocket::move(xmod));
           // Parse arguments.
           if(reader.I().F()) {

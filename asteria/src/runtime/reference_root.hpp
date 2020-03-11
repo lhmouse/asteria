@@ -6,13 +6,11 @@
 
 #include "../fwd.hpp"
 #include "../value.hpp"
-#include "variable.hpp"
-#include "tail_call_arguments_fwd.hpp"
 #include "../source_location.hpp"
 
 namespace Asteria {
 
-class Reference_Root
+class Reference_root
   {
   public:
     struct S_void
@@ -28,11 +26,11 @@ class Reference_Root
       };
     struct S_variable
       {
-        rcptr<Variable> var;
+        rcfwdp<Variable> var;
       };
     struct S_tail_call
       {
-        rcptr<Tail_Call_Arguments_Fwd> tca;  // note type erasure
+        rcfwdp<PTC_Arguments> tca;
       };
 
     enum Index : uint8_t
@@ -57,12 +55,12 @@ class Reference_Root
     Xvariant m_stor;
 
   public:
-    ASTERIA_VARIANT_CONSTRUCTOR(Reference_Root, Xvariant, XRootT, xroot)
+    ASTERIA_VARIANT_CONSTRUCTOR(Reference_root, Xvariant, XRootT, xroot)
       :
         m_stor(::rocket::forward<XRootT>(xroot))
       {
       }
-    ASTERIA_VARIANT_ASSIGNMENT(Reference_Root, Xvariant, XRootT, xroot)
+    ASTERIA_VARIANT_ASSIGNMENT(Reference_root, Xvariant, XRootT, xroot)
       {
         this->m_stor = ::rocket::forward<XRootT>(xroot);
         return *this;
@@ -101,7 +99,7 @@ class Reference_Root
       {
         return this->index() == index_variable;
       }
-    const rcptr<Variable>& as_variable() const
+    const rcfwdp<Variable>& as_variable() const
       {
         return this->m_stor.as<index_variable>().var;
       }
@@ -110,12 +108,12 @@ class Reference_Root
       {
         return this->index() == index_tail_call;
       }
-    const rcptr<Tail_Call_Arguments_Fwd>& as_tail_call_fwd() const
+    const rcfwdp<PTC_Arguments>& as_tail_call() const
       {
         return this->m_stor.as<index_tail_call>().tca;
       }
 
-    Reference_Root& swap(Reference_Root& other) noexcept
+    Reference_root& swap(Reference_root& other) noexcept
       {
         this->m_stor.swap(other.m_stor);
         return *this;
@@ -126,7 +124,7 @@ class Reference_Root
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const;
   };
 
-inline void swap(Reference_Root& lhs, Reference_Root& rhs) noexcept
+inline void swap(Reference_root& lhs, Reference_root& rhs) noexcept
   {
     lhs.swap(rhs);
   }

@@ -8,7 +8,7 @@
 
 namespace Asteria {
 
-const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
+const Value* Reference_modifier::apply_const_opt(const Value& parent) const
   {
     switch(this->index()) {
     case index_array_index: {
@@ -85,7 +85,7 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
     }
   }
 
-Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) const
+Value* Reference_modifier::apply_mutable_opt(Value& parent, bool create_new) const
   {
     switch(this->index()) {
     case index_array_index: {
@@ -186,7 +186,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
     }
   }
 
-Value Reference_Modifier::apply_and_erase(Value& parent) const
+Value Reference_modifier::apply_and_erase(Value& parent) const
   {
     switch(this->index()) {
     case index_array_index: {

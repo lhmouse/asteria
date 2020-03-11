@@ -29,7 +29,7 @@ Reference& Variadic_Arguer::invoke_ptc_aware(Reference& self, Global_Context& /*
       auto nvargs = this->m_vargs.size();
       if(!qindex) {
         // Return the number of variadic arguments if `index` is `null` or absent.
-        Reference_Root::S_constant xref = { V_integer(nvargs) };
+        Reference_root::S_constant xref = { V_integer(nvargs) };
         return self = ::rocket::move(xref);
       }
       // Return the argument at `index`.
@@ -37,7 +37,7 @@ Reference& Variadic_Arguer::invoke_ptc_aware(Reference& self, Global_Context& /*
       auto nadd = w.nprepend | w.nappend;
       if(nadd != 0) {
         // Return a `null`.
-        return self = Reference_Root::S_constant();
+        return self = Reference_root::S_constant();
       }
       return self = this->m_vargs.at(w.rindex);
     }

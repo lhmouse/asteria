@@ -5,12 +5,13 @@
 #include "reference_root.hpp"
 #include "reference.hpp"
 #include "variable_callback.hpp"
-#include "tail_call_arguments.hpp"
+#include "variable.hpp"
+#include "ptc_arguments.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
 
-const Value& Reference_Root::dereference_const() const
+const Value& Reference_root::dereference_const() const
   {
     switch(this->index()) {
     case index_void: {
@@ -23,7 +24,10 @@ const Value& Reference_Root::dereference_const() const
         return this->m_stor.as<index_temporary>().val;
       }
     case index_variable: {
-        const auto& var = this->m_stor.as<index_variable>().var;
+        auto var = unerase_cast(this->m_stor.as<index_variable>().var);
+        if(!var) {
+          return null_value;
+        }
         if(!var->is_initialized()) {
           ASTERIA_THROW("attempt to read from an uninitialized variable");
         }
@@ -37,7 +41,7 @@ const Value& Reference_Root::dereference_const() const
     }
   }
 
-Value& Reference_Root::dereference_mutable() const
+Value& Reference_root::dereference_mutable() const
   {
     switch(this->index()) {
     case index_void: {
@@ -50,7 +54,10 @@ Value& Reference_Root::dereference_mutable() const
         ASTERIA_THROW("attempt to modify a temporary `$1`", this->m_stor.as<index_temporary>().val);
       }
     case index_variable: {
-        const auto& var = this->m_stor.as<index_variable>().var;
+        auto var = unerase_cast(this->m_stor.as<index_variable>().var);
+        if(!var) {
+          ASTERIA_THROW("attempt to dereference a moved-away reference");
+        }
         if(!var->is_initialized()) {
           ASTERIA_THROW("attempt to modify an uninitialized variable");
         }
@@ -67,7 +74,7 @@ Value& Reference_Root::dereference_mutable() const
     }
   }
 
-Variable_Callback& Reference_Root::enumerate_variables(Variable_Callback& callback) const
+Variable_Callback& Reference_root::enumerate_variables(Variable_Callback& callback) const
   {
     switch(this->index()) {
     case index_void: {
@@ -80,15 +87,21 @@ Variable_Callback& Reference_Root::enumerate_variables(Variable_Callback& callba
         return this->m_stor.as<index_temporary>().val.enumerate_variables(callback);
       }
     case index_variable: {
-        const auto& var = this->m_stor.as<index_variable>().var;
+        auto var = unerase_cast(this->m_stor.as<index_variable>().var);
+        if(!var) {
+          return callback;
+        }
         if(!callback.process(var)) {
           return callback;
         }
         return var->enumerate_variables(callback);
       }
     case index_tail_call: {
-        return ::rocket::static_pointer_cast<Tail_Call_Arguments>(
-                              this->m_stor.as<index_tail_call>().tca)->enumerate_variables(callback);
+        auto ptc = unerase_cast(this->m_stor.as<index_tail_call>().tca);
+        if(!ptc) {
+          return callback;
+        }
+        return ptc->enumerate_variables(callback);
       }
     default:
       ASTERIA_TERMINATE("invalid reference root type enumeration (index `$1`)", this->index());

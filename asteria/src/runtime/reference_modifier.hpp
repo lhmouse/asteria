@@ -8,7 +8,7 @@
 
 namespace Asteria {
 
-class Reference_Modifier
+class Reference_modifier
   {
   public:
     struct S_array_index
@@ -46,12 +46,12 @@ class Reference_Modifier
     Xvariant m_stor;
 
   public:
-    ASTERIA_VARIANT_CONSTRUCTOR(Reference_Modifier, Xvariant, XModT, xmod)
+    ASTERIA_VARIANT_CONSTRUCTOR(Reference_modifier, Xvariant, XModT, xmod)
       :
         m_stor(::rocket::forward<XModT>(xmod))
       {
       }
-    ASTERIA_VARIANT_ASSIGNMENT(Reference_Modifier, Xvariant, XModT, xmod)
+    ASTERIA_VARIANT_ASSIGNMENT(Reference_modifier, Xvariant, XModT, xmod)
       {
         this->m_stor = ::rocket::forward<XModT>(xmod);
         return *this;
@@ -63,7 +63,7 @@ class Reference_Modifier
         return static_cast<Index>(this->m_stor.index());
       }
 
-    Reference_Modifier& swap(Reference_Modifier& other) noexcept
+    Reference_modifier& swap(Reference_modifier& other) noexcept
       {
         this->m_stor.swap(other.m_stor);
         return *this;
@@ -74,7 +74,7 @@ class Reference_Modifier
     Value apply_and_erase(Value& parent) const;
   };
 
-inline void swap(Reference_Modifier& lhs, Reference_Modifier& rhs) noexcept
+inline void swap(Reference_modifier& lhs, Reference_modifier& rhs) noexcept
   {
     lhs.swap(rhs);
   }

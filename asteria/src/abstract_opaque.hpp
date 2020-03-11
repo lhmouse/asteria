@@ -5,11 +5,10 @@
 #define ASTERIA_ABSTRACT_OPAQUE_HPP_
 
 #include "fwd.hpp"
-#include "rcbase.hpp"
 
 namespace Asteria {
 
-class Abstract_Opaque : public virtual Rcbase
+class Abstract_Opaque : public Rcfwd<Abstract_Opaque>
   {
   public:
     Abstract_Opaque() noexcept

@@ -80,7 +80,7 @@ Reference Simple_Script::execute(Global_Context& global, cow_vector<Value>&& val
     cow_vector<Reference> args;
     args.reserve(vals.size());
     for(size_t i = 0;  i < args.size();  ++i) {
-      Reference_Root::S_temporary xref = { ::rocket::move(vals.mut(i)) };
+      Reference_root::S_temporary xref = { ::rocket::move(vals.mut(i)) };
       args.emplace_back(::rocket::move(xref));
     }
     return this->execute(global, ::rocket::move(args));

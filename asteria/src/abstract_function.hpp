@@ -5,11 +5,10 @@
 #define ASTERIA_ABSTRACT_FUNCTION_HPP_
 
 #include "fwd.hpp"
-#include "rcbase.hpp"
 
 namespace Asteria {
 
-class Abstract_Function : public virtual Rcbase
+class Abstract_Function : public Rcfwd<Abstract_Function>
   {
   public:
     Abstract_Function() noexcept

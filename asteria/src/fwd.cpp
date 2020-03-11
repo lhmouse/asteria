@@ -7,6 +7,10 @@
 
 namespace Asteria {
 
+Rcbase::~Rcbase()
+  {
+  }
+
 const char* describe_vtype(Vtype vtype) noexcept
   {
     switch(vtype) {

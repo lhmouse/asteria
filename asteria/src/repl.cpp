@@ -4,6 +4,7 @@
 #include "precompiled.hpp"
 #include "utilities.hpp"
 #include "runtime/reference.hpp"
+#include "runtime/variable.hpp"
 #include "runtime/global_context.hpp"
 #include "runtime/simple_script.hpp"
 #include "runtime/runtime_error.hpp"

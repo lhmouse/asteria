@@ -116,7 +116,6 @@ pkginclude_HEADERS =  \
   asteria/src/precompiled.hpp  \
   asteria/src/fwd.hpp  \
   asteria/src/utilities.hpp  \
-  asteria/src/rcbase.hpp  \
   asteria/src/abstract_opaque.hpp  \
   asteria/src/abstract_function.hpp  \
   asteria/src/recursion_sentry.hpp  \
@@ -138,8 +137,7 @@ pkginclude_runtime_HEADERS =  \
   asteria/src/runtime/reference.hpp  \
   asteria/src/runtime/variable.hpp  \
   asteria/src/runtime/variable_callback.hpp  \
-  asteria/src/runtime/tail_call_arguments_fwd.hpp  \
-  asteria/src/runtime/tail_call_arguments.hpp  \
+  asteria/src/runtime/ptc_arguments.hpp  \
   asteria/src/runtime/collector.hpp  \
   asteria/src/runtime/backtrace_frame.hpp  \
   asteria/src/runtime/runtime_error.hpp  \
@@ -186,7 +184,6 @@ pkginclude_library_HEADERS =  \
 lib_libasteria_la_SOURCES =  \
   asteria/src/fwd.cpp  \
   asteria/src/utilities.cpp  \
-  asteria/src/rcbase.cpp  \
   asteria/src/abstract_opaque.cpp  \
   asteria/src/abstract_function.cpp  \
   asteria/src/recursion_sentry.cpp  \
@@ -202,8 +199,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/runtime/reference.cpp  \
   asteria/src/runtime/variable.cpp  \
   asteria/src/runtime/variable_callback.cpp  \
-  asteria/src/runtime/tail_call_arguments_fwd.cpp  \
-  asteria/src/runtime/tail_call_arguments.cpp  \
+  asteria/src/runtime/ptc_arguments.cpp  \
   asteria/src/runtime/collector.cpp  \
   asteria/src/runtime/backtrace_frame.cpp  \
   asteria/src/runtime/runtime_error.cpp  \
