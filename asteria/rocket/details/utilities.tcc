@@ -94,12 +94,35 @@ template<typename integerT, integerT valueT, typename firstT, typename... remain
 
 // `static_or_dynamic_cast()`
 template<typename targetT, typename sourceT, typename = void>
-   struct can_static_cast_aux : false_type
+    struct can_static_cast
+      : false_type
   {
   };
 template<typename targetT, typename sourceT>
-   struct can_static_cast_aux<targetT, sourceT,
-     decltype(static_cast<void>(static_cast<targetT>(::std::declval<sourceT>())))> : true_type
+    struct can_static_cast<targetT, sourceT,
+              typename make_void<decltype(
+                      static_cast<targetT>(::std::declval<sourceT>()))>::type>
+      : true_type
+  {
+  };
+
+template<typename targetT, typename sourceT, typename = void>
+    struct can_dynamic_cast
+      : false_type
+  {
+  };
+template<typename targetT, typename sourceT>
+    struct can_dynamic_cast<targetT, sourceT,
+              typename make_void<decltype(
+                      dynamic_cast<targetT>(::std::declval<sourceT>()))>::type>
+      : true_type
+  {
+  };
+
+template<typename targetT, typename sourceT>
+    struct use_static_cast_aux
+      : integral_constant<bool,
+           can_static_cast<targetT, sourceT>::value || !can_dynamic_cast<targetT, sourceT>::value>
   {
   };
 

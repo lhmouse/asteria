@@ -454,15 +454,10 @@ template<typename pointerT>
   }
 
 template<typename targetT, typename sourceT>
-    struct can_static_cast : details_utilities::can_static_cast_aux<targetT, sourceT>
-  {
-  };
-
-template<typename targetT, typename sourceT>
     constexpr targetT static_or_dynamic_cast(sourceT&& src)
   {
     return details_utilities::static_or_dynamic_cast_aux<targetT, sourceT>(
-                  details_utilities::can_static_cast_aux<targetT, sourceT&&>(), noadl::forward<sourceT>(src));
+                  details_utilities::use_static_cast_aux<targetT, sourceT>(), noadl::forward<sourceT>(src));
   }
 
 }  // namespace rocket
