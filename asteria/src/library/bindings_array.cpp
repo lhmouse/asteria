@@ -463,7 +463,7 @@ Iopt std_array_rfind_if_not(Global& global, Aval data, Ival from, Iopt length, F
 
 Ival std_array_count(Aval data, Value target)
   {
-    Ival count = 0;
+    int64_t count = 0;
     auto range = ::std::make_pair(data.begin(), data.end());
     for(;;) {
       auto qit = do_find_opt(range.first, range.second, target);
@@ -478,7 +478,7 @@ Ival std_array_count(Aval data, Value target)
 
 Ival std_array_count(Aval data, Ival from, Value target)
   {
-    Ival count = 0;
+    int64_t count = 0;
     auto range = do_slice(data, from, nullopt);
     for(;;) {
       auto qit = do_find_opt(range.first, range.second, target);
@@ -493,7 +493,7 @@ Ival std_array_count(Aval data, Ival from, Value target)
 
 Ival std_array_count(Aval data, Ival from, Iopt length, Value target)
   {
-    Ival count = 0;
+    int64_t count = 0;
     auto range = do_slice(data, from, length);
     for(;;) {
       auto qit = do_find_opt(range.first, range.second, target);
@@ -508,7 +508,7 @@ Ival std_array_count(Aval data, Ival from, Iopt length, Value target)
 
 Ival std_array_count_if(Global& global, Aval data, Fval predictor)
   {
-    Ival count = 0;
+    int64_t count = 0;
     auto range = ::std::make_pair(data.begin(), data.end());
     for(;;) {
       auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
@@ -523,7 +523,7 @@ Ival std_array_count_if(Global& global, Aval data, Fval predictor)
 
 Ival std_array_count_if(Global& global, Aval data, Ival from, Fval predictor)
   {
-    Ival count = 0;
+    int64_t count = 0;
     auto range = do_slice(data, from, nullopt);
     for(;;) {
       auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
@@ -538,7 +538,7 @@ Ival std_array_count_if(Global& global, Aval data, Ival from, Fval predictor)
 
 Ival std_array_count_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
   {
-    Ival count = 0;
+    int64_t count = 0;
     auto range = do_slice(data, from, length);
     for(;;) {
       auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
@@ -553,7 +553,7 @@ Ival std_array_count_if(Global& global, Aval data, Ival from, Iopt length, Fval 
 
 Ival std_array_count_if_not(Global& global, Aval data, Fval predictor)
   {
-    Ival count = 0;
+    int64_t count = 0;
     auto range = ::std::make_pair(data.begin(), data.end());
     for(;;) {
       auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
@@ -568,7 +568,7 @@ Ival std_array_count_if_not(Global& global, Aval data, Fval predictor)
 
 Ival std_array_count_if_not(Global& global, Aval data, Ival from, Fval predictor)
   {
-    Ival count = 0;
+    int64_t count = 0;
     auto range = do_slice(data, from, nullopt);
     for(;;) {
       auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
@@ -583,7 +583,7 @@ Ival std_array_count_if_not(Global& global, Aval data, Ival from, Fval predictor
 
 Ival std_array_count_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
   {
-    Ival count = 0;
+    int64_t count = 0;
     auto range = do_slice(data, from, length);
     for(;;) {
       auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
@@ -1453,6 +1453,192 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
             // Call the binding function.
             return std_array_count_if_not(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                                                   ::rocket::move(predictor));
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
+    //===================================================================
+    // `std.array.exclude()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("exclude"),
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+        // Description
+        ::rocket::sref(
+          "\n"
+          "`std.array.exclude(data, target)`\n"
+          "\n"
+          "  * Removes every element from `data` which compares equal to\n"
+          "    `target` to create a new array. This function returns a new\n"
+          "    array without modifying `data`.\n"
+          "\n"
+          "  * Returns a new array with all occurrences removed.\n"
+          "\n"
+          "`std.array.exclude(data, from, target)`\n"
+          "\n"
+          "  * Removes every element from `data` which both compares equal\n"
+          "    to `target` and is within the same subrange that would be\n"
+          "    returned by `slice(data, from)` to create a new array. This\n"
+          "    function returns a new array without modifying `data`.\n"
+          "\n"
+          "  * Returns a new array with all occurrences removed.\n"
+          "\n"
+          "`std.array.exclude(data, from, [length], target)`\n"
+          "\n"
+          "  * Removes every element from `data` which both compares equal\n"
+          "    to `target` and is within the same subrange that would be\n"
+          "    returned by `slice(data, from, length)` to create a new array.\n"
+          "    This function returns a new array without modifying `data`.\n"
+          "\n"
+          "  * Returns a new array with all occurrences removed.\n"
+        ),
+        // Definition
+        [](cow_vector<Reference>&& args) -> Value  {
+          Argument_Reader reader(::rocket::sref("std.array.exclude"), ::rocket::ref(args));
+          Argument_Reader::State state;
+          // Parse arguments.
+          Aval data;
+          Value target;
+          if(reader.I().g(data).S(state).g(target).F()) {
+            // Call the binding function.
+            return std_array_exclude(::rocket::move(data), ::rocket::move(target));
+          }
+          Ival from;
+          if(reader.L(state).g(from).S(state).g(target).F()) {
+            // Call the binding function.
+            return std_array_exclude(::rocket::move(data), ::rocket::move(from), ::rocket::move(target));
+          }
+          Iopt length;
+          if(reader.L(state).g(length).g(target).F()) {
+            // Call the binding function.
+            return std_array_exclude(::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
+                                     ::rocket::move(target));
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
+    //===================================================================
+    // `std.array.exclude_if()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("exclude_if"),
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+        // Description
+        ::rocket::sref(
+          "\n"
+          "`std.array.exclude_if(data, target, predictor)`\n"
+          "\n"
+          "  * Removes every element from `data`, namely `x`, such that\n"
+          "    `predictor(x)` yields logically false, to create a new array.\n"
+          "    This function returns a new array without modifying `data`.\n"
+          "\n"
+          "  * Returns a new array with all occurrences removed.\n"
+          "\n"
+          "`std.array.exclude_if(data, from, target, predictor)`\n"
+          "\n"
+          "  * Removes every element from `data`, namely `x`, such that\n"
+          "    both `predictor(x)` yields logically false and `x` is within\n"
+          "    the subrange that would be returned by `slice(data, from)`,\n"
+          "    to create a new array. This function returns a new array\n"
+          "    without modifying `data`.\n"
+          "\n"
+          "  * Returns a new array with all occurrences removed.\n"
+          "\n"
+          "`std.array.exclude_if(data, from, [length], target, predictor)`\n"
+          "\n"
+          "  * Removes every element from `data`, namely `x`, such that\n"
+          "    both `predictor(x)` yields logically false and `x` is within\n"
+          "    the subrange that would be returned by `slice(data, from,\n"
+          "    length)`, to create a new array. This function returns a new\n"
+          "    array without modifying `data`.\n"
+          "\n"
+          "  * Returns a new array with all occurrences removed.\n"
+        ),
+        // Definition
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value  {
+          Argument_Reader reader(::rocket::sref("std.array.exclude_if"), ::rocket::ref(args));
+          Argument_Reader::State state;
+          // Parse arguments.
+          Aval data;
+          Fval predictor;
+          if(reader.I().g(data).S(state).g(predictor).F()) {
+            // Call the binding function.
+            return std_array_exclude_if(global, ::rocket::move(data), ::rocket::move(predictor));
+          }
+          Ival from;
+          if(reader.L(state).g(from).S(state).g(predictor).F()) {
+            // Call the binding function.
+            return std_array_exclude_if(global, ::rocket::move(data),  ::rocket::move(from),
+                                                ::rocket::move(predictor));
+          }
+          Iopt length;
+          if(reader.L(state).g(length).g(predictor).F()) {
+            // Call the binding function.
+            return std_array_exclude_if(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
+                                                ::rocket::move(predictor));
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
+    //===================================================================
+    // `std.array.exclude_if_not()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("exclude_if_not"),
+      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
+        // Description
+        ::rocket::sref(
+          "\n"
+          "`std.array.exclude_if_not(data, target, predictor)`\n"
+          "\n"
+          "  * Removes every element from `data`, namely `x`, such that\n"
+          "    `predictor(x)` yields logically true, to create a new array.\n"
+          "    This function returns a new array without modifying `data`.\n"
+          "\n"
+          "  * Returns a new array with all occurrences removed.\n"
+          "\n"
+          "`std.array.exclude_if_not(data, from, target, predictor)`\n"
+          "\n"
+          "  * Removes every element from `data`, namely `x`, such that\n"
+          "    both `predictor(x)` yields logically true and `x` is within\n"
+          "    the subrange that would be returned by `slice(data, from)`,\n"
+          "    to create a new array. This function returns a new array\n"
+          "    without modifying `data`.\n"
+          "\n"
+          "  * Returns a new array with all occurrences removed.\n"
+          "\n"
+          "`std.array.exclude_if_not(data, from, [length], target, predictor)`\n"
+          "\n"
+          "  * Removes every element from `data`, namely `x`, such that\n"
+          "    both `predictor(x)` yields logically true and `x` is within\n"
+          "    the subrange that would be returned by `slice(data, from,\n"
+          "    length)`, to create a new array. This function returns a new\n"
+          "    array without modifying `data`.\n"
+          "\n"
+          "  * Returns a new array with all occurrences removed.\n"
+        ),
+        // Definition
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value  {
+          Argument_Reader reader(::rocket::sref("std.array.exclude_if_not"), ::rocket::ref(args));
+          Argument_Reader::State state;
+          // Parse arguments.
+          Aval data;
+          Fval predictor;
+          if(reader.I().g(data).S(state).g(predictor).F()) {
+            // Call the binding function.
+            return std_array_exclude_if_not(global, ::rocket::move(data), ::rocket::move(predictor));
+          }
+          Ival from;
+          if(reader.L(state).g(from).S(state).g(predictor).F()) {
+            // Call the binding function.
+            return std_array_exclude_if_not(global, ::rocket::move(data), ::rocket::move(from),
+                                                    ::rocket::move(predictor));
+          }
+          Iopt length;
+          if(reader.L(state).g(length).g(predictor).F()) {
+            // Call the binding function.
+            return std_array_exclude_if_not(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
+                                                    ::rocket::move(predictor));
           }
           // Fail.
           reader.throw_no_matching_function_call();
