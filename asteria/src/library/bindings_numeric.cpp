@@ -6,7 +6,7 @@
 #include "argument_reader.hpp"
 #include "simple_binding_wrapper.hpp"
 #include "../runtime/global_context.hpp"
-#include "../runtime/collector.hpp"
+#include "../runtime/random_number_generator.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {

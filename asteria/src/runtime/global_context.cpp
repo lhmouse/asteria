@@ -3,10 +3,10 @@
 
 #include "../precompiled.hpp"
 #include "global_context.hpp"
-#include "random_number_generator.hpp"
 #include "generational_collector.hpp"
-#include "abstract_hooks.hpp"
+#include "random_number_generator.hpp"
 #include "variable.hpp"
+#include "abstract_hooks.hpp"
 #include "../library/bindings_version.hpp"
 #include "../library/bindings_gc.hpp"
 #include "../library/bindings_debug.hpp"
@@ -87,74 +87,6 @@ const Abstract_Context* Global_Context::do_get_parent_opt() const noexcept
 Reference* Global_Context::do_lazy_lookup_opt(const phsh_string& /*name*/)
   {
     return nullptr;
-  }
-
-const Collector& Global_Context::get_collector(GC_Generation gc_gen) const
-  {
-    auto gcoll = unerase_cast(this->m_gcoll);
-    ROCKET_ASSERT(gcoll);
-    return gcoll->get_collector(gc_gen);
-  }
-
-Collector& Global_Context::open_collector(GC_Generation gc_gen)
-  {
-    auto gcoll = unerase_cast(this->m_gcoll);
-    ROCKET_ASSERT(gcoll);
-    return gcoll->open_collector(gc_gen);
-  }
-
-rcptr<Variable> Global_Context::create_variable(GC_Generation gc_hint)
-  {
-    auto gcoll = unerase_cast(this->m_gcoll);
-    ROCKET_ASSERT(gcoll);
-    return gcoll->create_variable(gc_hint);
-  }
-
-size_t Global_Context::collect_variables(GC_Generation gc_limit)
-  {
-    auto gcoll = unerase_cast(this->m_gcoll);
-    ROCKET_ASSERT(gcoll);
-    return gcoll->collect_variables(gc_limit);
-  }
-
-uint32_t Global_Context::get_random_uint32() noexcept
-  {
-    auto prng = unerase_cast(this->m_prng);
-    ROCKET_ASSERT(prng);
-    return prng->bump();
-  }
-
-const Value& Global_Context::get_std_member(const phsh_string& name) const
-  {
-    auto vstd = unerase_cast(this->m_vstd);
-    ROCKET_ASSERT(vstd);
-    return vstd->get_value().as_object().get_or(name, null_value);
-  }
-
-Value& Global_Context::open_std_member(const phsh_string& name)
-  {
-    auto vstd = unerase_cast(this->m_vstd);
-    ROCKET_ASSERT(vstd);
-    return vstd->open_value().open_object().try_emplace(name).first->second;
-  }
-
-bool Global_Context::remove_std_member(const phsh_string& name)
-  {
-    auto vstd = unerase_cast(this->m_vstd);
-    ROCKET_ASSERT(vstd);
-    return vstd->open_value().open_object().erase(name);
-  }
-
-rcptr<Abstract_Hooks> Global_Context::get_hooks_opt() const noexcept
-  {
-    auto hooks = unerase_cast(this->m_hooks_opt);
-    return hooks;
-  }
-
-Global_Context& Global_Context::set_hooks(rcptr<Abstract_Hooks> hooks_opt) noexcept
-  {
-    this->m_hooks_opt = ::rocket::move(hooks_opt);
-    return *this;
   }
 
 API_Version Global_Context::max_api_version() const noexcept

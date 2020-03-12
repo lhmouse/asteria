@@ -4,6 +4,7 @@
 #include "test_utilities.hpp"
 #include "../src/runtime/simple_script.hpp"
 #include "../src/runtime/global_context.hpp"
+#include "../src/runtime/generational_collector.hpp"
 #include "../src/runtime/variable.hpp"
 
 using namespace Asteria;

@@ -6,7 +6,6 @@
 #include "argument_reader.hpp"
 #include "simple_binding_wrapper.hpp"
 #include "../runtime/global_context.hpp"
-#include "../runtime/collector.hpp"
 #include "../compiler/token_stream.hpp"
 #include "../compiler/enums.hpp"
 #include "../utilities.hpp"

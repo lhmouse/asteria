@@ -13,9 +13,9 @@ namespace Asteria {
 class Global_Context : public Abstract_Context
   {
   private:
-    rcfwdp<Generational_Collector> m_gcoll;  // the global garbage collector
-    rcfwdp<Abstract_Hooks> m_hooks_opt;
     Recursion_Sentry m_sentry;
+    rcfwdp<Generational_Collector> m_gcoll;  // the global garbage collector
+    rcfwdp<Abstract_Hooks> m_hooks;
 
     rcfwdp<Random_Number_Generator> m_prng;  // the global pseudo random number generator
     rcfwdp<Variable> m_vstd;  // the `std` variable
@@ -57,22 +57,68 @@ class Global_Context : public Abstract_Context
       }
 
     // These are interfaces of the global garbage collector.
-    const Collector& get_collector(GC_Generation gc_gen) const;
-    Collector& open_collector(GC_Generation gc_gen);
-    rcptr<Variable> create_variable(GC_Generation gc_hint = gc_generation_newest);
-    size_t collect_variables(GC_Generation gc_limit = gc_generation_oldest);
+    ASTERIA_INCOMPLET(Generational_Collector) const Collector& get_collector(GC_Generation gc_gen) const
+      {
+        auto gcoll = unerase_cast<Generational_Collector>(this->m_gcoll);
+        ROCKET_ASSERT(gcoll);
+        return gcoll->get_collector(gc_gen);
+      }
+    ASTERIA_INCOMPLET(Generational_Collector) Collector& open_collector(GC_Generation gc_gen)
+      {
+        auto gcoll = unerase_cast<Generational_Collector>(this->m_gcoll);
+        ROCKET_ASSERT(gcoll);
+        return gcoll->open_collector(gc_gen);
+      }
+    ASTERIA_INCOMPLET(Generational_Collector) rcptr<Variable> create_variable(GC_Generation gc_hint = gc_generation_newest)
+      {
+        auto gcoll = unerase_cast<Generational_Collector>(this->m_gcoll);
+        ROCKET_ASSERT(gcoll);
+        return gcoll->create_variable(gc_hint);
+      }
+    ASTERIA_INCOMPLET(Generational_Collector) size_t collect_variables(GC_Generation gc_limit = gc_generation_oldest)
+      {
+        auto gcoll = unerase_cast<Generational_Collector>(this->m_gcoll);
+        ROCKET_ASSERT(gcoll);
+        return gcoll->collect_variables(gc_limit);
+      }
 
     // These are interfaces of the PRNG.
-    uint32_t get_random_uint32() noexcept;
+    ASTERIA_INCOMPLET(Random_Number_Generator) uint32_t get_random_uint32() noexcept
+      {
+        auto prng = unerase_cast<Random_Number_Generator>(this->m_prng);
+        ROCKET_ASSERT(prng);
+        return prng->bump();
+      }
 
     // These are interfaces of the standard library.
-    const Value& get_std_member(const phsh_string& name) const;
-    Value& open_std_member(const phsh_string& name);
-    bool remove_std_member(const phsh_string& name);
+    ASTERIA_INCOMPLET(Variable) const Value& get_std_member(const phsh_string& name) const
+      {
+        auto vstd = unerase_cast<Variable>(this->m_vstd);
+        ROCKET_ASSERT(vstd);
+        return vstd->get_value().as_object().get_or(name, null_value);
+      }
+    ASTERIA_INCOMPLET(Variable) Value& open_std_member(const phsh_string& name)
+      {
+        auto vstd = unerase_cast<Variable>(this->m_vstd);
+        ROCKET_ASSERT(vstd);
+        return vstd->open_value().open_object().try_emplace(name).first->second;
+      }
+    ASTERIA_INCOMPLET(Variable) bool remove_std_member(const phsh_string& name)
+      {
+        auto vstd = unerase_cast<Variable>(this->m_vstd);
+        ROCKET_ASSERT(vstd);
+        return vstd->open_value().open_object().erase(name);
+      }
 
     // These are interfaces of the hook dispatcher.
-    rcptr<Abstract_Hooks> get_hooks_opt() const noexcept;
-    Global_Context& set_hooks(rcptr<Abstract_Hooks> hooks_opt) noexcept;
+    ASTERIA_INCOMPLET(Abstract_Hooks) rcptr<Abstract_Hooks> get_hooks_opt() const noexcept
+      {
+        return unerase_cast(this->m_hooks);
+      }
+    ASTERIA_INCOMPLET(Abstract_Hooks) Global_Context& set_hooks(rcptr<Abstract_Hooks> hooks_opt) noexcept
+      {
+        return this->m_hooks = ::rocket::move(hooks_opt), *this;
+      }
 
     // Get the maximum API version that is supported when this library is built.
     // N.B. This function must not be inlined for this reason.

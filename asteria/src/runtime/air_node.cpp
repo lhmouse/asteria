@@ -9,6 +9,7 @@
 #include "abstract_hooks.hpp"
 #include "analytic_context.hpp"
 #include "instantiated_function.hpp"
+#include "generational_collector.hpp"
 #include "runtime_error.hpp"
 #include "variable_callback.hpp"
 #include "variable.hpp"
