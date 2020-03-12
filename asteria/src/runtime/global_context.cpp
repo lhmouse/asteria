@@ -205,12 +205,14 @@ bool Global_Context::remove_std_member(const phsh_string& name)
 
 rcptr<Abstract_Hooks> Global_Context::get_hooks_opt() const noexcept
   {
-    return unerase_cast(this->m_hooks_opt);
+    auto hooks = unerase_cast(this->m_hooks_opt);
+    return hooks;
   }
 
 Global_Context& Global_Context::set_hooks(rcptr<Abstract_Hooks> hooks_opt) noexcept
   {
-    return this->m_hooks_opt = ::rocket::move(hooks_opt), *this;
+    this->m_hooks_opt = ::rocket::move(hooks_opt);
+    return *this;
   }
 
 }  // namespace Asteria
