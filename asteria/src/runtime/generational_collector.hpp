@@ -56,8 +56,8 @@ class Generational_Collector final : public Rcfwd<Generational_Collector>
         return this->*(this->do_locate(gc_gen));
       }
 
-    rcptr<Variable> create_variable(GC_Generation gc_hint);
-    size_t collect_variables(GC_Generation gc_limit);
+    rcptr<Variable> create_variable(GC_Generation gc_hint = gc_generation_newest);
+    size_t collect_variables(GC_Generation gc_limit = gc_generation_oldest);
     Generational_Collector& wipe_out_variables() noexcept;
   };
 

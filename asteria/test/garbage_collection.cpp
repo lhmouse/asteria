@@ -44,7 +44,7 @@ int main()
     bcnt.store(0, ::std::memory_order_relaxed);
     {
       Global_Context global;
-      var = global.create_variable();
+      var = global.generational_collector()->create_variable();
       var->initialize(V_string("meow"), true);
 
       ::rocket::tinybuf_str cbuf;

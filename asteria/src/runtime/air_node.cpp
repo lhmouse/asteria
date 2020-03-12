@@ -354,7 +354,7 @@ AIR_Status do_declare_variable(Executive_Context& ctx, ParamU /*pu*/, const void
     const auto& qhooks = ctx.global().get_hooks_opt();
 
     // Allocate an uninitialized variable.
-    auto var = ctx.global().create_variable();
+    auto var = ctx.global().generational_collector()->create_variable();
     // Inject the variable into the current context.
     Reference_root::S_variable xref = { ::rocket::move(var) };
     ctx.open_named_reference(name) = xref;
@@ -527,7 +527,7 @@ AIR_Status do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const vo
     // We have to create an outer context due to the fact that the key and mapped references outlast every iteration.
     Executive_Context ctx_for(::rocket::ref(ctx), nullptr);
     // Allocate an uninitialized variable for the key.
-    const auto vkey = ctx_for.global().create_variable();
+    const auto vkey = ctx_for.global().generational_collector()->create_variable();
     // Inject the variable into the current context.
     Reference_root::S_variable xref = { vkey };
     ctx_for.open_named_reference(name_key) = xref;
@@ -2473,7 +2473,7 @@ AIR_Status do_define_null_variable(Executive_Context& ctx, ParamU pu, const void
     const auto& qhooks = ctx.global().get_hooks_opt();
 
     // Allocate an uninitialized variable.
-    auto var = ctx.global().create_variable();
+    auto var = ctx.global().generational_collector()->create_variable();
     // Inject the variable into the current context.
     Reference_root::S_variable xref = { var };
     ctx.open_named_reference(name) = ::rocket::move(xref);

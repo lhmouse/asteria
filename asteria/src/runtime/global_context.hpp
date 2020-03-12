@@ -6,6 +6,7 @@
 
 #include "../fwd.hpp"
 #include "abstract_context.hpp"
+#include "abstract_hooks.hpp"
 #include "../recursion_sentry.hpp"
 
 namespace Asteria {
@@ -14,11 +15,11 @@ class Global_Context : public Abstract_Context
   {
   private:
     Recursion_Sentry m_sentry;
-    rcfwdp<Generational_Collector> m_gcoll;  // the global garbage collector
-    rcfwdp<Abstract_Hooks> m_hooks;
+    rcptr<Abstract_Hooks> m_qhooks;
 
-    rcfwdp<Random_Number_Generator> m_prng;  // the global pseudo random number generator
-    rcfwdp<Variable> m_vstd;  // the `std` variable
+    rcfwdp<Generational_Collector> m_gcoll;
+    rcfwdp<Random_Number_Generator> m_prng;
+    rcfwdp<Variable> m_vstd;
 
   public:
     explicit Global_Context(API_Version version = api_version_latest)
@@ -56,68 +57,28 @@ class Global_Context : public Abstract_Context
         return this->m_sentry.set_base(base), *this;
       }
 
-    // These are interfaces of the global garbage collector.
-    ASTERIA_INCOMPLET(Generational_Collector) const Collector& get_collector(GC_Generation gc_gen) const
+    // This helps debugging and profiling.
+    rcptr<Abstract_Hooks> get_hooks_opt() const noexcept
       {
-        auto gcoll = unerase_cast<Generational_Collector>(this->m_gcoll);
-        ROCKET_ASSERT(gcoll);
-        return gcoll->get_collector(gc_gen);
+        return this->m_qhooks;
       }
-    ASTERIA_INCOMPLET(Generational_Collector) Collector& open_collector(GC_Generation gc_gen)
+    Global_Context& set_hooks(rcptr<Abstract_Hooks> hooks_opt) noexcept
       {
-        auto gcoll = unerase_cast<Generational_Collector>(this->m_gcoll);
-        ROCKET_ASSERT(gcoll);
-        return gcoll->open_collector(gc_gen);
-      }
-    ASTERIA_INCOMPLET(Generational_Collector) rcptr<Variable> create_variable(GC_Generation gc_hint = gc_generation_newest)
-      {
-        auto gcoll = unerase_cast<Generational_Collector>(this->m_gcoll);
-        ROCKET_ASSERT(gcoll);
-        return gcoll->create_variable(gc_hint);
-      }
-    ASTERIA_INCOMPLET(Generational_Collector) size_t collect_variables(GC_Generation gc_limit = gc_generation_oldest)
-      {
-        auto gcoll = unerase_cast<Generational_Collector>(this->m_gcoll);
-        ROCKET_ASSERT(gcoll);
-        return gcoll->collect_variables(gc_limit);
+        return this->m_qhooks = ::rocket::move(hooks_opt), *this;
       }
 
-    // These are interfaces of the PRNG.
-    ASTERIA_INCOMPLET(Random_Number_Generator) uint32_t get_random_uint32() noexcept
+    // These are interfaces for individual global components.
+    ASTERIA_INCOMPLET(Generational_Collector) rcptr<Generational_Collector> generational_collector() const noexcept
       {
-        auto prng = unerase_cast<Random_Number_Generator>(this->m_prng);
-        ROCKET_ASSERT(prng);
-        return prng->bump();
+        return unerase_cast<Generational_Collector>(this->m_gcoll);
       }
-
-    // These are interfaces of the standard library.
-    ASTERIA_INCOMPLET(Variable) const Value& get_std_member(const phsh_string& name) const
+    ASTERIA_INCOMPLET(Random_Number_Generator) rcptr<Random_Number_Generator> random_number_generator() const noexcept
       {
-        auto vstd = unerase_cast<Variable>(this->m_vstd);
-        ROCKET_ASSERT(vstd);
-        return vstd->get_value().as_object().get_or(name, null_value);
+        return unerase_cast<Random_Number_Generator>(this->m_prng);
       }
-    ASTERIA_INCOMPLET(Variable) Value& open_std_member(const phsh_string& name)
+    ASTERIA_INCOMPLET(Variable) rcptr<Variable> std_variable() const noexcept
       {
-        auto vstd = unerase_cast<Variable>(this->m_vstd);
-        ROCKET_ASSERT(vstd);
-        return vstd->open_value().open_object().try_emplace(name).first->second;
-      }
-    ASTERIA_INCOMPLET(Variable) bool remove_std_member(const phsh_string& name)
-      {
-        auto vstd = unerase_cast<Variable>(this->m_vstd);
-        ROCKET_ASSERT(vstd);
-        return vstd->open_value().open_object().erase(name);
-      }
-
-    // These are interfaces of the hook dispatcher.
-    ASTERIA_INCOMPLET(Abstract_Hooks) rcptr<Abstract_Hooks> get_hooks_opt() const noexcept
-      {
-        return unerase_cast(this->m_hooks);
-      }
-    ASTERIA_INCOMPLET(Abstract_Hooks) Global_Context& set_hooks(rcptr<Abstract_Hooks> hooks_opt) noexcept
-      {
-        return this->m_hooks = ::rocket::move(hooks_opt), *this;
+        return unerase_cast<Variable>(this->m_vstd);
       }
 
     // Get the maximum API version that is supported when this library is built.

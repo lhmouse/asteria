@@ -271,23 +271,25 @@ Ival std_numeric_itrunc(Rval value)
 
 Rval std_numeric_random(Global& global, Ropt limit)
   {
+    auto prng = global.random_number_generator();
+
     // Generate a random `double` in the range [0.0,1.0).
-    int64_t high = global.get_random_uint32();
-    int64_t low = global.get_random_uint32();
-    double ratio = static_cast<double>((high << 21) ^ low) * 0x1p-53;
+    int64_t ireg = prng->bump();
+    ireg <<= 21;
+    ireg ^= prng->bump();
+    double ratio = static_cast<double>(ireg) * 0x1p-53;
+
     // If a limit is specified, magnify the value.
     // The default magnitude is 1.0 so no action is taken.
     if(!limit) {
       return ratio;
     }
     switch(::std::fpclassify(*limit)) {
-    case FP_ZERO: {
-        ASTERIA_THROW("random number limit shall not be zero");
-      }
+    case FP_ZERO:
+      ASTERIA_THROW("random number limit shall not be zero");
     case FP_INFINITE:
-    case FP_NAN: {
-        ASTERIA_THROW("random number limit shall be finite (limit `$1`)", *limit);
-      }
+    case FP_NAN:
+      ASTERIA_THROW("random number limit shall be finite (limit `$1`)", *limit);
     }
     return *limit * ratio;
   }
