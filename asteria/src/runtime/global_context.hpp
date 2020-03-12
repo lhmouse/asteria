@@ -56,12 +56,6 @@ class Global_Context : public Abstract_Context
         return this->m_sentry.set_base(base), *this;
       }
 
-    // Get the maximum API version that is supported when this library is built.
-    // N.B. This function must not be inlined for this reason.
-    API_Version max_api_version() const noexcept;
-    // Clear all references, perform a full garbage collection, then reload the standard library.
-    void initialize(API_Version version = api_version_latest);
-
     // These are interfaces of the global garbage collector.
     const Collector& get_collector(GC_Generation gc_gen) const;
     Collector& open_collector(GC_Generation gc_gen);
@@ -79,6 +73,12 @@ class Global_Context : public Abstract_Context
     // These are interfaces of the hook dispatcher.
     rcptr<Abstract_Hooks> get_hooks_opt() const noexcept;
     Global_Context& set_hooks(rcptr<Abstract_Hooks> hooks_opt) noexcept;
+
+    // Get the maximum API version that is supported when this library is built.
+    // N.B. This function must not be inlined for this reason.
+    API_Version max_api_version() const noexcept;
+    // Clear all references, perform a full garbage collection, then reload the standard library.
+    void initialize(API_Version version = api_version_latest);
   };
 
 }  // namespace Asteria
