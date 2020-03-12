@@ -331,6 +331,15 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         ROCKET_ASSERT(cnt > 0);
         return this->data()[cnt - 1];
       }
+    // N.B. This is a non-standard extension.
+    const value_type* get_ptr(size_type pos) const noexcept
+      {
+        auto cnt = this->size();
+        if(pos >= cnt) {
+          return nullptr;
+        }
+        return this->data() + pos;
+      }
 
     // There is no `at()` overload that returns a non-const reference. This is the consequent overload which does that.
     // N.B. This is a non-standard extension.
@@ -361,6 +370,15 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         auto cnt = this->size();
         ROCKET_ASSERT(cnt > 0);
         return this->mut_data()[cnt - 1];
+      }
+    // N.B. This is a non-standard extension.
+    value_type* mut_ptr(size_type pos) noexcept
+      {
+        auto cnt = this->size();
+        if(pos >= cnt) {
+          return nullptr;
+        }
+        return this->mut_data() + pos;
       }
 
     // N.B. This is a non-standard extension.
