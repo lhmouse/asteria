@@ -136,19 +136,19 @@ class Reference
         return this->do_unset(this->m_mods.data(), this->m_mods.size(), last);
       }
 
-    template<class T = Variable> rcptr<T> get_variable_opt() const noexcept
+    ASTERIA_INCOMPLET(Variable) rcptr<Variable> get_variable_opt() const noexcept
       {
         if(ROCKET_UNEXPECT(!this->is_variable()))
           return nullptr;
         else
-          return unerase_cast<T>(this->m_root.as_variable());
+          return unerase_cast<Variable>(this->m_root.as_variable());
       }
-    template<class T = PTC_Arguments> rcptr<T> get_tail_call_opt() const noexcept
+    ASTERIA_INCOMPLET(PTC_Arguments) rcptr<PTC_Arguments> get_tail_call_opt() const noexcept
       {
         if(ROCKET_UNEXPECT(!this->is_tail_call()))
           return nullptr;
         else
-          return unerase_cast<T>(this->m_root.as_tail_call());
+          return unerase_cast<PTC_Arguments>(this->m_root.as_tail_call());
       }
     Reference& finish_call(Global_Context& global)
       {
