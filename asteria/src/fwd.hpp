@@ -44,7 +44,7 @@ namespace Asteria {
 #define ASTERIA_VARIANT_CONSTRUCTOR(C, V, T, t)   template<typename T, ASTERIA_SFINAE_CONSTRUCT(V, T&&)> C(T&& t)
 #define ASTERIA_VARIANT_ASSIGNMENT(C, V, T, t)    template<typename T, ASTERIA_SFINAE_ASSIGN(V, T&&)> C& operator=(T&& t)
 
-#define ASTERIA_INCOMPLET(T)       template<typename T##_1 = T, typename T = T##_1>
+#define ASTERIA_INCOMPLET(T)       template<typename T##_1_ = T, typename T = T##_1_>
 
 #define ASTERIA_VOID_T(...)        typename ::rocket::make_void<__VA_ARGS__>::type
 #define ASTERIA_VOID_OF(...)       typename ::rocket::make_void<decltype(__VA_ARGS__)>::type
