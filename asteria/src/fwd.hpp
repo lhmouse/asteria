@@ -101,26 +101,6 @@ template<typename F, typename S> using cow_bivector = ::rocket::cow_vector<::std
 template<typename E, size_t... k> using array = ::rocket::array<E, k...>;
 template<typename E> using ref_to = ::rocket::reference_wrapper<E>;
 
-// Type erasure
-struct Rcbase : virtual ::rocket::refcnt_base<Rcbase>
-  {
-    virtual ~Rcbase();
-  };
-
-template<typename RealT> struct Rcfwd : Rcbase
-  {
-  };
-
-template<typename RealT> using rcfwdp = rcptr<Rcfwd<RealT>>;
-
-template<typename RealT> constexpr rcptr<RealT> unerase_cast(const rcfwdp<RealT>& ptr) noexcept
-  {
-    return ::rocket::static_pointer_cast<RealT>(ptr);
-  }
-
-class Abstract_Opaque;
-class Abstract_Function;
-
 // Core
 class Value;
 class Source_Location;
@@ -171,8 +151,288 @@ class Statement;
 class Infix_Element;
 class Statement_Sequence;
 
-// Library
-class Simple_Binding_Wrapper;
+// Type erasure
+struct Rcbase : virtual ::rocket::refcnt_base<Rcbase>
+  {
+    virtual ~Rcbase();
+  };
+
+template<typename RealT> struct Rcfwd : Rcbase
+  {
+  };
+
+template<typename RealT> using rcfwdp = rcptr<Rcfwd<RealT>>;
+
+template<typename RealT> constexpr rcptr<RealT> unerase_cast(const rcfwdp<RealT>& ptr) noexcept
+  {
+    return ::rocket::static_pointer_cast<RealT>(ptr);
+  }
+
+// Opaque (user-defined) type support
+struct Abstract_Opaque : public Rcbase
+  {
+    ~Abstract_Opaque() override;
+
+    // This function is called to convert this object to a human-readble string.
+    virtual tinyfmt& describe(tinyfmt& fmt) const = 0;
+
+    // This function is called during garbage collection to mark variables that are not
+    // directly reachable. Although strong exception safety is guaranteed, it is discouraged
+    // to throw exceptions in this function, as it prevents garbage collection from running.
+    virtual Variable_Callback& enumerate_variables(Variable_Callback& callback) const = 0;
+
+    // This function is called when a mutable reference is requested and the current instance
+    // is shared. If this function returns a null pointer, the shared instance is used. If this
+    // function returns a non-null pointer, it replaces the current value. Derived classes that
+    // are not copyable should throw an exception in this function.
+    virtual Abstract_Opaque* clone_opt(rcptr<Abstract_Opaque>& output) const = 0;
+  };
+
+inline tinyfmt& operator<<(tinyfmt& fmt, const Abstract_Opaque& opaq)
+  {
+    return opaq.describe(fmt);
+  }
+
+struct Abstract_Function : public Rcbase
+  {
+    ~Abstract_Function() override;
+
+    // This function is called to convert this object to a human-readble string.
+    virtual tinyfmt& describe(tinyfmt& fmt) const = 0;
+
+    // This function is called during garbage collection to mark variables that are not
+    // directly reachable. Although strong exception safety is guaranteed, it is discouraged
+    // to throw exceptions in this function, as it prevents garbage collection from running.
+    virtual Variable_Callback& enumerate_variables(Variable_Callback& callback) const = 0;
+
+    // This function may return a proper tail call wrapper.
+    virtual Reference& invoke_ptc_aware(Reference& self, Global_Context& global, cow_vector<Reference>&& args) const = 0;
+  };
+
+inline tinyfmt& operator<<(tinyfmt& fmt, const Abstract_Function& func)
+  {
+    return func.describe(fmt);
+  }
+
+class cow_opaque
+  {
+  private:
+    rcptr<Abstract_Opaque> m_sptr;
+
+  public:
+    constexpr cow_opaque(nullptr_t = nullptr) noexcept
+      {
+      }
+    template<typename OpaqueT> constexpr cow_opaque(rcptr<OpaqueT> sptr) noexcept
+      :
+        m_sptr(::rocket::move(sptr))
+      {
+      }
+
+  private:
+    [[noreturn]] void do_throw_null_pointer() const;
+
+  public:
+    bool unique() const noexcept
+      {
+        return this->m_sptr.unique();
+      }
+    long use_count() const noexcept
+      {
+        return this->m_sptr.use_count();
+      }
+    cow_opaque& reset() noexcept
+      {
+        this->m_sptr = nullptr;
+        return *this;
+      }
+
+    explicit constexpr operator bool () const noexcept
+      {
+        return bool(this->m_sptr);
+      }
+    const type_info& type() const noexcept
+      {
+        return typeid(*(this->m_sptr.get()));
+      }
+
+    tinyfmt& describe(tinyfmt& fmt) const
+      {
+        auto ptr = this->m_sptr.get();
+        if(!ptr) {
+          return fmt << "<null opaque pointer>";
+        }
+        return ptr->describe(fmt);
+      }
+    Variable_Callback& enumerate_variables(Variable_Callback& callback) const
+      {
+        auto ptr = this->m_sptr.get();
+        if(!ptr) {
+          return callback;
+        }
+        return ptr->enumerate_variables(callback);
+      }
+
+    template<typename OpaqueT> rcptr<const OpaqueT> cast_opt() const
+      {
+        auto ptr = this->m_sptr.get();
+        if(!ptr) {
+          this->do_throw_null_pointer();
+        }
+        auto tsptr = ::rocket::dynamic_pointer_cast<const OpaqueT>(this->m_sptr);
+        return tsptr;
+      }
+    template<typename OpaqueT> rcptr<OpaqueT> open_opt()
+      {
+        auto ptr = this->m_sptr.get();
+        if(!ptr) {
+          this->do_throw_null_pointer();
+        }
+        auto tsptr = ::rocket::dynamic_pointer_cast<OpaqueT>(this->m_sptr);
+        if(!tsptr) {
+          return tsptr;
+        }
+        // Clone the existent instance if it is shared.
+        // If the overriding function returns a null pointer, the shared instance is used.
+        // Note the covariance of the return type of `clone_opt()`.
+        rcptr<Abstract_Opaque> sptr2;
+        auto tptr2 = tsptr->clone_opt(sptr2);
+        if(!tptr2) {
+          return tsptr;
+        }
+        // Take ownership of the clone.
+        // Don't introduce a dependent name here.
+        ROCKET_ASSERT(tptr2 == sptr2.get());
+        this->m_sptr.swap(sptr2);
+        ptr = tptr2;
+        ptr->add_reference();
+        tsptr.reset(tptr2);
+        return tsptr;
+      }
+  };
+
+inline tinyfmt& operator<<(tinyfmt& fmt, const cow_opaque& opaq)
+  {
+    return opaq.describe(fmt);
+  }
+
+// Function type support
+using simple_function_3 = Value (cow_vector<Reference>&& args,  // required if takes arguments
+                                 Reference&& self,              // required if is a member function
+                                 Global_Context& global);       // required if contains static data
+
+using simple_function_0 = Value ();
+using simple_function_1 = Value (cow_vector<Reference>&&);
+using simple_function_2 = Value (cow_vector<Reference>&&, Reference&&);
+
+class cow_function
+  {
+  private:
+    simple_function_3* m_fptr = nullptr;
+    const char* m_desc = nullptr;
+    rcptr<const Abstract_Function> m_sptr;
+
+  public:
+    constexpr cow_function(nullptr_t = nullptr) noexcept
+      {
+      }
+    constexpr cow_function(simple_function_3* fptr, const char* desc) noexcept
+      :
+        m_fptr(fptr), m_desc(desc)
+      {
+      }
+    cow_function(simple_function_0* fptr, const char* desc) noexcept
+      :
+        m_fptr((simple_function_3*)(intptr_t)fptr), m_desc(desc)
+      {
+      }
+    cow_function(simple_function_1* fptr, const char* desc) noexcept
+      :
+        m_fptr((simple_function_3*)(intptr_t)fptr), m_desc(desc)
+      {
+      }
+    cow_function(simple_function_2* fptr, const char* desc) noexcept
+      :
+        m_fptr((simple_function_3*)(intptr_t)fptr), m_desc(desc)
+      {
+      }
+    template<typename FunctionT> constexpr cow_function(rcptr<FunctionT> sptr) noexcept
+      :
+        m_sptr(::rocket::move(sptr))
+      {
+      }
+
+  private:
+    [[noreturn]] void do_throw_null_pointer() const;
+
+  public:
+    bool unique() const noexcept
+      {
+        return this->m_sptr.unique();
+      }
+    long use_count() const noexcept
+      {
+        return this->m_sptr.use_count();
+      }
+    cow_function& reset() noexcept
+      {
+        this->m_fptr = nullptr;
+        this->m_desc = nullptr;
+        this->m_sptr = nullptr;
+        return *this;
+      }
+
+    explicit constexpr operator bool () const noexcept
+      {
+        auto fptr = this->m_fptr;
+        if(fptr) {
+          return true;  // static
+        }
+        return bool(this->m_sptr);  // dynamic
+      }
+    const type_info& type() const noexcept
+      {
+        auto fptr = this->m_fptr;
+        if(fptr) {
+          return typeid(*fptr);  // static
+        }
+        return typeid(*(this->m_sptr.get()));  // dynamic
+      }
+
+    tinyfmt& describe(tinyfmt& fmt) const
+      {
+        auto fptr = this->m_fptr;
+        if(fptr) {
+          return fmt << this->m_desc << " (" << (void*)(intptr_t)fptr << ")";  // static
+        }
+        auto ptr = this->m_sptr.get();
+        if(!ptr) {
+          return fmt << "<null function pointer>";
+        }
+        return ptr->describe(fmt);  // dynamic
+      }
+    Variable_Callback& enumerate_variables(Variable_Callback& callback) const
+      {
+        auto fptr = this->m_fptr;
+        if(fptr) {
+          return callback;  // static - nothing to do
+        }
+        auto ptr = this->m_sptr.get();
+        if(!ptr) {
+          return callback;
+        }
+        return ptr->enumerate_variables(callback);  // dynamic
+      }
+
+    Reference& invoke_ptc_aware(Reference& self, Global_Context& global, cow_vector<Reference>&& args = { }) const;
+    Reference& invoke(Reference& self, Global_Context& global, cow_vector<Reference>&& args = { }) const;
+    Reference invoke(Global_Context& global, cow_vector<Reference>&& args = { }) const;
+  };
+
+inline tinyfmt& operator<<(tinyfmt& fmt, const cow_function& func)
+  {
+    return func.describe(fmt);
+  }
 
 // Fundamental types
 using V_null      = nullptr_t;
@@ -180,8 +440,8 @@ using V_boolean   = bool;
 using V_integer   = int64_t;
 using V_real      = double;
 using V_string    = cow_string;
-using V_opaque    = rcptr<Abstract_Opaque>;
-using V_function  = rcptr<Abstract_Function>;
+using V_opaque    = cow_opaque;
+using V_function  = cow_function;
 using V_array     = cow_vector<Value>;
 using V_object    = cow_hashmap<phsh_string, Value, phsh_string::hash>;
 
@@ -366,8 +626,8 @@ using Bopt = opt<V_boolean>;
 using Iopt = opt<V_integer>;
 using Ropt = opt<V_real>;
 using Sopt = opt<V_string>;
-using Popt = opt<V_opaque>;
-using Fopt = opt<V_function>;
+using Popt = V_opaque;
+using Fopt = V_function;
 using Aopt = opt<V_array>;
 using Oopt = opt<V_object>;
 

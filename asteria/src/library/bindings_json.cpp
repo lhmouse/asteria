@@ -3,7 +3,6 @@
 
 #include "../precompiled.hpp"
 #include "bindings_json.hpp"
-#include "simple_binding_wrapper.hpp"
 #include "../runtime/argument_reader.hpp"
 #include "../runtime/global_context.hpp"
 #include "../compiler/token_stream.hpp"
@@ -651,89 +650,85 @@ void create_bindings_json(Oval& result, API_Version /*version*/)
     // `std.json.format()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("format"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.json.format(value, [indent])`\n"
-          "\n"
-          "  * Converts a value to a string in the JSON format, according to\n"
-          "    IETF RFC 7159. This function generates text that conforms to\n"
-          "    JSON strictly; values whose types cannot be represented in JSON\n"
-          "    are discarded if they are found in an object and censored to\n"
-          "    `null` otherwise. If `indent` is set to a string, it is used as\n"
-          "    each level of indention following a line break, unless it is\n"
-          "    empty, in which case no line break is inserted. If `indent` is\n"
-          "    set to an integer, it is clamped between `0` and `10`\n"
-          "    inclusively and this function behaves as if a string consisting\n"
-          "    of this number of spaces was set. Its default value is an empty\n"
-          "    string.\n"
-          "\n"
-          "  * Returns the formatted text as a string.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.json.format"), ::rocket::ref(args));
-          Argument_Reader::State state;
-          // Parse arguments.
-          Value value;
-          Sopt sindent;
-          if(reader.I().g(value).S(state).g(sindent).F()) {
-            // Call the binding function.
-            return std_json_format(::rocket::move(value), ::rocket::move(sindent));
-          }
-          Ival nindent;
-          if(reader.L(state).g(nindent).F()) {
-            // Call the binding function.
-            return std_json_format(::rocket::move(value), ::rocket::move(nindent));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.json.format"), ::rocket::ref(args));
+    Argument_Reader::State state;
+    // Parse arguments.
+    Value value;
+    Sopt sindent;
+    if(reader.I().o(value).S(state).o(sindent).F()) {
+      // Call the binding function.
+      return std_json_format(::rocket::move(value), ::rocket::move(sindent));
+    }
+    Ival nindent;
+    if(reader.L(state).v(nindent).F()) {
+      // Call the binding function.
+      return std_json_format(::rocket::move(value), ::rocket::move(nindent));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.json.format(value, [indent])`
+
+  * Converts a value to a string in the JSON format, according to
+    IETF RFC 7159. This function generates text that conforms to
+    JSON strictly; values whose types cannot be represented in JSON
+    are discarded if they are found in an object and censored to
+    `null` otherwise. If `indent` is set to a string, it is used as
+    each level of indention following a line break, unless it is
+    empty, in which case no line break is inserted. If `indent` is
+    set to an integer, it is clamped between `0` and `10`
+    inclusively and this function behaves as if a string consisting
+    of this number of spaces was set. Its default value is an empty
+    string.
+
+  * Returns the formatted text as a string.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.json.parse()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("parse"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.json.parse(text)`\n"
-          "\n"
-          "  * Parses a string containing data encoded in the JSON format and\n"
-          "    converts it to a value. This function reuses the tokenizer of\n"
-          "    Asteria and allows quite a few extensions, some of which are\n"
-          "    also supported by JSON5:\n"
-          "\n"
-          "    * Single-line and multiple-line comments are allowed.\n"
-          "    * Binary and hexadecimal numbers are allowed.\n"
-          "    * Numbers can have binary exponents.\n"
-          "    * Infinities and NaNs are allowed.\n"
-          "    * Numbers can start with plus signs.\n"
-          "    * Strings and object keys may be single-quoted.\n"
-          "    * Escape sequences (including UTF-32) are allowed in strings.\n"
-          "    * Element lists of arrays and objects may end in commas.\n"
-          "    * Object keys may be unquoted if they are valid identifiers.\n"
-          "\n"
-          "    Be advised that numbers are always parsed as reals.\n"
-          "\n"
-          "  * Returns the parsed value.\n"
-          "\n"
-          "  * Throws an exception if the string is invalid.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.json.parse"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          if(reader.I().g(text).F()) {
-            // Call the binding function.
-            return std_json_parse(::rocket::move(text));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.json.parse"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      // Call the binding function.
+      return std_json_parse(::rocket::move(text));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.json.parse(text)`
+
+  * Parses a string containing data encoded in the JSON format and
+    converts it to a value. This function reuses the tokenizer of
+    Asteria and allows quite a few extensions, some of which are
+    also supported by JSON5:
+
+    * Single-line and multiple-line comments are allowed.
+    * Binary and hexadecimal numbers are allowed.
+    * Numbers can have binary exponents.
+    * Infinities and NaNs are allowed.
+    * Numbers can start with plus signs.
+    * Strings and object keys may be single-quoted.
+    * Escape sequences (including UTF-32) are allowed in strings.
+    * Element lists of arrays and objects may end in commas.
+    * Object keys may be unquoted if they are valid identifiers.
+
+    Be advised that numbers are always parsed as reals.
+
+  * Returns the parsed value.
+
+  * Throws an exception if the string is invalid.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // End of `std.json`

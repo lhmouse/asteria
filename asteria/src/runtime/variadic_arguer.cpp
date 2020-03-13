@@ -24,8 +24,8 @@ Reference& Variadic_Arguer::invoke_ptc_aware(Reference& self, Global_Context& /*
   {
     Argument_Reader reader(::rocket::sref("<built-in>.__varg"), ::rocket::ref(args));
     // Extract arguments.
-    opt<V_integer> qindex;
-    if(reader.I().g(qindex).F()) {
+    Iopt qindex;
+    if(reader.I().o(qindex).F()) {
       auto nvargs = this->m_vargs.size();
       if(!qindex) {
         // Return the number of variadic arguments if `index` is `null` or absent.

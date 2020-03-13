@@ -110,27 +110,27 @@ class Argument_Reader
 
     // Get a REQUIRED argument.
     // The argument must exist and must be of the desired type; otherwise the operation fails.
-    Argument_Reader& g(Bval& xval);
-    Argument_Reader& g(Ival& xval);
-    Argument_Reader& g(Rval& xval);  // This function converts `integer`s to `real`s implicitly.
-    Argument_Reader& g(Sval& xval);
-    Argument_Reader& g(Pval& xval);
-    Argument_Reader& g(Fval& xval);
-    Argument_Reader& g(Aval& xval);
-    Argument_Reader& g(Oval& xval);
+    Argument_Reader& v(Bval& xval);
+    Argument_Reader& v(Ival& xval);
+    Argument_Reader& v(Rval& xval);  // This function converts `integer`s to `real`s implicitly.
+    Argument_Reader& v(Sval& xval);
+    Argument_Reader& v(Pval& xval);
+    Argument_Reader& v(Fval& xval);
+    Argument_Reader& v(Aval& xval);
+    Argument_Reader& v(Oval& xval);
     // Get an OPTIONAL argument.
     // The argument must exist and must be of the desired type or `null`; otherwise the operation fails.
     // `g` stands for `get` or `go`.
-    Argument_Reader& g(Reference& ref);
-    Argument_Reader& g(Value& val);
-    Argument_Reader& g(Bopt& xopt);
-    Argument_Reader& g(Iopt& xopt);
-    Argument_Reader& g(Ropt& xopt);  // This function converts `integer`s to `real`s implicitly.
-    Argument_Reader& g(Sopt& xopt);
-    Argument_Reader& g(Popt& xopt);
-    Argument_Reader& g(Fopt& xopt);
-    Argument_Reader& g(Aopt& xopt);
-    Argument_Reader& g(Oopt& xopt);
+    Argument_Reader& o(Reference& ref);
+    Argument_Reader& o(Value& val);
+    Argument_Reader& o(Bopt& xopt);
+    Argument_Reader& o(Iopt& xopt);
+    Argument_Reader& o(Ropt& xopt);  // This function converts `integer`s to `real`s implicitly.
+    Argument_Reader& o(Sopt& xopt);
+    Argument_Reader& o(Popt& xopt);
+    Argument_Reader& o(Fopt& xopt);
+    Argument_Reader& o(Aopt& xopt);
+    Argument_Reader& o(Oopt& xopt);
 
     // Throw an exception saying there are no viable overloads.
     [[noreturn]] void throw_no_matching_function_call() const;

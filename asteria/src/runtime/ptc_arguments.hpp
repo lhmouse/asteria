@@ -7,7 +7,6 @@
 #include "../fwd.hpp"
 #include "variadic_arguer.hpp"
 #include "../source_location.hpp"
-#include "../abstract_function.hpp"
 
 namespace Asteria {
 
@@ -23,14 +22,14 @@ class PTC_Arguments final : public Rcfwd<PTC_Arguments>
     cow_bivector<Source_Location, AVMC_Queue> m_defer;
 
     // This is the target function.
-    rcptr<Abstract_Function> m_target;
+    cow_function m_target;
     // The last reference is `self`.
     // We can't store a `Reference` directly as the class `Reference` is incomplete here.
     cow_vector<Reference> m_args_self;
 
   public:
     PTC_Arguments(const Source_Location& sloc, const rcptr<Variadic_Arguer>& zvarg, PTC_Aware ptc,
-                  const rcptr<Abstract_Function>& target, cow_vector<Reference>&& args_self)
+                  const cow_function& target, cow_vector<Reference>&& args_self)
       :
         m_sloc(sloc), m_zvarg(zvarg), m_ptc(ptc),
         m_target(target), m_args_self(::rocket::move(args_self))
@@ -66,7 +65,7 @@ class PTC_Arguments final : public Rcfwd<PTC_Arguments>
         return this->m_defer;
       }
 
-    const rcptr<Abstract_Function>& get_target() const noexcept
+    const cow_function& get_target() const noexcept
       {
         return this->m_target;
       }

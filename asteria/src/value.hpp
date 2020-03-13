@@ -5,8 +5,6 @@
 #define ASTERIA_VALUE_HPP_
 
 #include "fwd.hpp"
-#include "abstract_opaque.hpp"
-#include "abstract_function.hpp"
 
 namespace Asteria {
 
@@ -79,34 +77,51 @@ class Value
         m_stor(::rocket::move(xval))
       {
       }
-    Value(V_string::shallow_type xval) noexcept
+    Value(cow_string::shallow_type xval) noexcept
       :
         m_stor(V_string(xval))
       {
       }
-    template<typename OpaqueT,
-             ROCKET_ENABLE_IF(::std::is_base_of<Abstract_Opaque,
-                        OpaqueT>::value)> Value(rcptr<OpaqueT> xval) noexcept
+    Value(V_opaque xval) noexcept
       {
-        // Note `xval` may be a null pointer, in which case we set `*this` to `null`.
-        // The pointer itself is being moved, not the object that it points to.
-        this->do_xassign<rcptr<OpaqueT>&&>(xval, ::std::addressof(xval));
+        // Note it is the pointer that is being moved, not the object that it points to.
+        this->do_xassign<V_opaque&&>(xval, ::std::addressof(xval));
       }
-    template<typename FunctionT,  // TODO: Use a dedicated type for functions.
-             ROCKET_ENABLE_IF(::std::is_base_of<Abstract_Function,
-                        FunctionT>::value)> Value(rcptr<FunctionT> xval) noexcept
+    template<typename OpaqueT, ASTERIA_SFINAE_CONVERT(OpaqueT*,
+                          Abstract_Opaque*)> Value(rcptr<OpaqueT> xval) noexcept
       {
-        // Note `xval` may be a null pointer, in which case we set `*this` to `null`.
-        this->do_xassign<rcptr<FunctionT>&&>(xval, ::std::addressof(xval));
+        // Note it is the pointer that is being moved, not the object that it points to.
+        this->do_xassign<V_opaque>(xval, ::std::addressof(xval));
+      }
+    Value(V_function xval) noexcept
+      {
+        // Note it is the pointer that is being moved, not the object that it points to.
+        this->do_xassign<V_function&&>(xval, ::std::addressof(xval));
+      }
+    template<typename FunctionT, ASTERIA_SFINAE_CONVERT(FunctionT*,
+                          Abstract_Function*)> Value(rcptr<FunctionT> xval) noexcept
+      {
+        // Note it is the pointer that is being moved, not the object that it points to.
+        this->do_xassign<V_function>(xval, ::std::addressof(xval));
       }
     Value(V_array xval) noexcept
       :
         m_stor(::rocket::move(xval))
       {
       }
+    Value(initializer_list<V_array::value_type> list)
+      :
+        m_stor(V_array(list))
+      {
+      }
     Value(V_object xval) noexcept
       :
         m_stor(::rocket::move(xval))
+      {
+      }
+    Value(initializer_list<V_object::value_type> list)
+      :
+        m_stor(V_object(list))
       {
       }
     Value(const opt<bool>& xval) noexcept
@@ -215,26 +230,35 @@ class Value
         this->m_stor = ::rocket::move(xval);
         return *this;
       }
-    Value& operator=(V_string::shallow_type xval) noexcept
+    Value& operator=(cow_string::shallow_type xval) noexcept
       {
         this->m_stor = V_string(xval);
         return *this;
       }
-    template<typename OpaqueT,
-             ROCKET_ENABLE_IF(::std::is_base_of<Abstract_Opaque,
-                        OpaqueT>::value)> Value& operator=(rcptr<OpaqueT> xval) noexcept
+    Value& operator=(V_opaque xval) noexcept
       {
-        // Note `xval` may be a null pointer, in which case we set `*this` to `null`.
-        // The pointer itself is being moved, not the object that it points to.
-        this->do_xassign<rcptr<OpaqueT>&&>(xval, ::std::addressof(xval));
+        // Note it is the pointer that is being moved, not the object that it points to.
+        this->do_xassign<V_opaque&&>(xval, ::std::addressof(xval));
         return *this;
       }
-    template<typename FunctionT,  // TODO: Use a dedicated type for functions.
-             ROCKET_ENABLE_IF(::std::is_base_of<Abstract_Function,
-                        FunctionT>::value)> Value& operator=(rcptr<FunctionT> xval) noexcept
+    template<typename OpaqueT, ASTERIA_SFINAE_CONVERT(OpaqueT*,
+                          Abstract_Opaque*)> Value& operator=(rcptr<OpaqueT> xval) noexcept
       {
-        // Note `xval` may be a null pointer, in which case we set `*this` to `null`.
-        this->do_xassign<rcptr<FunctionT>&&>(xval, ::std::addressof(xval));
+        // Note it is the pointer that is being moved, not the object that it points to.
+        this->do_xassign<V_opaque>(xval, ::std::addressof(xval));
+        return *this;
+      }
+    Value& operator=(V_function xval) noexcept
+      {
+        // Note it is the pointer that is being moved, not the object that it points to.
+        this->do_xassign<V_function&&>(xval, ::std::addressof(xval));
+        return *this;
+      }
+    template<typename FunctionT, ASTERIA_SFINAE_CONVERT(FunctionT*,
+                          Abstract_Function*)> Value& operator=(rcptr<FunctionT> xval) noexcept
+      {
+        // Note it is the pointer that is being moved, not the object that it points to.
+        this->do_xassign<V_function>(xval, ::std::addressof(xval));
         return *this;
       }
     Value& operator=(V_array xval) noexcept
@@ -319,8 +343,7 @@ class Value
       }
 
   private:
-    template<typename CastT,  // how to forward the value (may be an rvalue reference type)
-             typename ChkT, typename PtrT> void do_xassign(ChkT&& chk, PtrT&& ptr)
+    template<typename CastT, typename ChkT, typename PtrT> void do_xassign(ChkT&& chk, PtrT&& ptr)
       {
         if(chk)
           this->m_stor = static_cast<CastT>(*ptr);
@@ -418,18 +441,7 @@ class Value
       }
     V_opaque& open_opaque()
       {
-        // TODO: Use a dedicated type for opaque objects.
-        auto& altr = this->m_stor.as<vtype_opaque>();
-        if(ROCKET_UNEXPECT(altr.use_count() > 1)) {
-          // Copy the opaque object as needed.
-          V_opaque qown;
-          auto qnew = altr->clone_opt(qown);
-          ROCKET_ASSERT(qnew == qown.get());
-          // Replace the current instance.
-          if(qown)
-            altr = ::rocket::move(qown);
-        }
-        return altr;
+        return this->m_stor.as<vtype_opaque>();
       }
 
     bool is_array() const noexcept

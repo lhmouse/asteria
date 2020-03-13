@@ -3,7 +3,6 @@
 
 #include "../precompiled.hpp"
 #include "bindings_numeric.hpp"
-#include "simple_binding_wrapper.hpp"
 #include "../runtime/argument_reader.hpp"
 #include "../runtime/global_context.hpp"
 #include "../runtime/random_number_generator.hpp"
@@ -680,1212 +679,1144 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
     // `std.numeric.abs()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("abs"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.abs(value)`\n"
-          "\n"
-          "  * Gets the absolute value of `value`, which may be an integer or\n"
-          "    real. Negative integers are negated, which might cause an\n"
-          "    exception to be thrown due to overflow. Sign bits of reals are\n"
-          "    removed, which works on infinities and NaNs and does not\n"
-          "    result in exceptions.\n"
-          "\n"
-          "  * Return the absolute value.\n"
-          "\n"
-          "  * Throws an exception if `value` is the integer `-0x1p63`.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.abs"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival ivalue;
-          if(reader.I().g(ivalue).F()) {
-            // Call the binding function.
-            return std_numeric_abs(::rocket::move(ivalue));
-          }
-          Rval rvalue;
-          if(reader.I().g(rvalue).F()) {
-            // Call the binding function.
-            return std_numeric_abs(::rocket::move(rvalue));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.abs"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival ivalue;
+    if(reader.I().v(ivalue).F()) {
+      // Call the binding function.
+      return std_numeric_abs(::rocket::move(ivalue));
+    }
+    Rval rvalue;
+    if(reader.I().v(rvalue).F()) {
+      // Call the binding function.
+      return std_numeric_abs(::rocket::move(rvalue));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.abs(value)`
+
+  * Gets the absolute value of `value`, which may be an integer or
+    real. Negative integers are negated, which might cause an
+    exception to be thrown due to overflow. Sign bits of reals are
+    removed, which works on infinities and NaNs and does not
+    result in exceptions.
+
+  * Return the absolute value.
+
+  * Throws an exception if `value` is the integer `-0x1p63`.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.sign()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("sign"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.sign(value)`\n"
-          "\n"
-          "  * Propagates the sign bit of the number `value`, which may be an\n"
-          "    integer or real, to all bits of an integer. Be advised that\n"
-          "    `-0.0` is distinct from `0.0` despite the equality.\n"
-          "\n"
-          "  * Returns `-1` if `value` is negative, or `0` otherwise.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.sign"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival ivalue;
-          if(reader.I().g(ivalue).F()) {
-            // Call the binding function.
-            return std_numeric_sign(::rocket::move(ivalue));
-          }
-          Rval rvalue;
-          if(reader.I().g(rvalue).F()) {
-            // Call the binding function.
-            return std_numeric_sign(::rocket::move(rvalue));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.sign"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival ivalue;
+    if(reader.I().v(ivalue).F()) {
+      // Call the binding function.
+      return std_numeric_sign(::rocket::move(ivalue));
+    }
+    Rval rvalue;
+    if(reader.I().v(rvalue).F()) {
+      // Call the binding function.
+      return std_numeric_sign(::rocket::move(rvalue));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.sign(value)`
+
+  * Propagates the sign bit of the number `value`, which may be an
+    integer or real, to all bits of an integer. Be advised that
+    `-0.0` is distinct from `0.0` despite the equality.
+
+  * Returns `-1` if `value` is negative, or `0` otherwise.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.is_finite()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("is_finite"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.is_finite(value)`\n"
-          "\n"
-          "  * Checks whether `value` is a finite number. `value` may be an\n"
-          "    integer or real. Be adviced that this functions returns `true`\n"
-          "    for integers for consistency; integers do not support\n"
-          "    infinities or NaNs.\n"
-          "\n"
-          "  * Returns `true` if `value` is an integer or is a real that\n"
-          "    is neither an infinity or a NaN, or `false` otherwise.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.is_finite"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival ivalue;
-          if(reader.I().g(ivalue).F()) {
-            // Call the binding function.
-            return std_numeric_is_finite(::rocket::move(ivalue));
-          }
-          Rval rvalue;
-          if(reader.I().g(rvalue).F()) {
-            // Call the binding function.
-            return std_numeric_is_finite(::rocket::move(rvalue));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.is_finite"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival ivalue;
+    if(reader.I().v(ivalue).F()) {
+      // Call the binding function.
+      return std_numeric_is_finite(::rocket::move(ivalue));
+    }
+    Rval rvalue;
+    if(reader.I().v(rvalue).F()) {
+      // Call the binding function.
+      return std_numeric_is_finite(::rocket::move(rvalue));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.is_finite(value)`
+
+  * Checks whether `value` is a finite number. `value` may be an
+    integer or real. Be adviced that this functions returns `true`
+    for integers for consistency; integers do not support
+    infinities or NaNs.
+
+  * Returns `true` if `value` is an integer or is a real that
+    is neither an infinity or a NaN, or `false` otherwise.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.is_infinity()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("is_infinity"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.is_infinity(value)`\n"
-          "\n"
-          "  * Checks whether `value` is an infinity. `value` may be an\n"
-          "    integer or real. Be adviced that this functions returns `false`\n"
-          "    for integers for consistency; integers do not support\n"
-          "    infinities.\n"
-          "\n"
-          "  * Returns `true` if `value` is a real that denotes an infinity;\n"
-          "    or `false` otherwise.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.is_infinity"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival ivalue;
-          if(reader.I().g(ivalue).F()) {
-            // Call the binding function.
-            return std_numeric_is_infinity(::rocket::move(ivalue));
-          }
-          Rval rvalue;
-          if(reader.I().g(rvalue).F()) {
-            // Call the binding function.
-            return std_numeric_is_infinity(::rocket::move(rvalue));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.is_infinity"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival ivalue;
+    if(reader.I().v(ivalue).F()) {
+      // Call the binding function.
+      return std_numeric_is_infinity(::rocket::move(ivalue));
+    }
+    Rval rvalue;
+    if(reader.I().v(rvalue).F()) {
+      // Call the binding function.
+      return std_numeric_is_infinity(::rocket::move(rvalue));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.is_infinity(value)`
+
+  * Checks whether `value` is an infinity. `value` may be an
+    integer or real. Be adviced that this functions returns `false`
+    for integers for consistency; integers do not support
+    infinities.
+
+  * Returns `true` if `value` is a real that denotes an infinity;
+    or `false` otherwise.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.is_nan()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("is_nan"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.is_nan(value)`\n"
-          "\n"
-          "  * Checks whether `value` is a NaN. `value` may be an integer or\n"
-          "    real. Be adviced that this functions returns `false` for\n"
-          "    integers for consistency; integers do not support NaNs.\n"
-          "\n"
-          "  * Returns `true` if `value` is a real denoting a NaN, or\n"
-          "    `false` otherwise.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.is_nan"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival ivalue;
-          if(reader.I().g(ivalue).F()) {
-            // Call the binding function.
-            return std_numeric_is_nan(::rocket::move(ivalue));
-          }
-          Rval rvalue;
-          if(reader.I().g(rvalue).F()) {
-            // Call the binding function.
-            return std_numeric_is_nan(::rocket::move(rvalue));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.is_nan"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival ivalue;
+    if(reader.I().v(ivalue).F()) {
+      // Call the binding function.
+      return std_numeric_is_nan(::rocket::move(ivalue));
+    }
+    Rval rvalue;
+    if(reader.I().v(rvalue).F()) {
+      // Call the binding function.
+      return std_numeric_is_nan(::rocket::move(rvalue));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.is_nan(value)`
+
+  * Checks whether `value` is a NaN. `value` may be an integer or
+    real. Be adviced that this functions returns `false` for
+    integers for consistency; integers do not support NaNs.
+
+  * Returns `true` if `value` is a real denoting a NaN, or
+    `false` otherwise.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.clamp()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("clamp"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.clamp(value, lower, upper)`\n"
-          "\n"
-          "  * Limits `value` between `lower` and `upper`.\n"
-          "\n"
-          "  * Returns `lower` if `value < lower`, `upper` if `value > upper`,\n"
-          "    or `value` otherwise, including when `value` is a NaN. The\n"
-          "    returned value is an integer if all arguments are integers;\n"
-          "    otherwise it is a real.\n"
-          "\n"
-          "  * Throws an exception if `lower` is not less than or equal to\n"
-          "    `upper`.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.clamp"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival ivalue;
-          Ival ilower;
-          Ival iupper;
-          if(reader.I().g(ivalue).g(ilower).g(iupper).F()) {
-            // Call the binding function.
-            return std_numeric_clamp(::rocket::move(ivalue), ::rocket::move(ilower), ::rocket::move(iupper));
-          }
-          Rval rvalue;
-          Rval flower;
-          Rval fupper;
-          if(reader.I().g(rvalue).g(flower).g(fupper).F()) {
-            // Call the binding function.
-            return std_numeric_clamp(::rocket::move(rvalue), ::rocket::move(flower), ::rocket::move(fupper));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.clamp"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival ivalue;
+    Ival ilower;
+    Ival iupper;
+    if(reader.I().v(ivalue).v(ilower).v(iupper).F()) {
+      // Call the binding function.
+      return std_numeric_clamp(::rocket::move(ivalue), ::rocket::move(ilower), ::rocket::move(iupper));
+    }
+    Rval rvalue;
+    Rval flower;
+    Rval fupper;
+    if(reader.I().v(rvalue).v(flower).v(fupper).F()) {
+      // Call the binding function.
+      return std_numeric_clamp(::rocket::move(rvalue), ::rocket::move(flower), ::rocket::move(fupper));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.clamp(value, lower, upper)`
+
+  * Limits `value` between `lower` and `upper`.
+
+  * Returns `lower` if `value < lower`, `upper` if `value > upper`,
+    or `value` otherwise, including when `value` is a NaN. The
+    returned value is an integer if all arguments are integers;
+    otherwise it is a real.
+
+  * Throws an exception if `lower` is not less than or equal to
+    `upper`.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.round()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("round"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.round(value)`\n"
-          "\n"
-          "  * Rounds `value`, which may be an integer or real, to the nearest\n"
-          "    integer; halfway values are rounded away from zero. If `value`\n"
-          "    is an integer, it is returned intact.\n"
-          "\n"
-          "  * Returns the rounded value.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.round"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival ivalue;
-          if(reader.I().g(ivalue).F()) {
-            // Call the binding function.
-            return std_numeric_round(::rocket::move(ivalue));
-          }
-          Rval rvalue;
-          if(reader.I().g(rvalue).F()) {
-            // Call the binding function.
-            return std_numeric_round(::rocket::move(rvalue));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.round"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival ivalue;
+    if(reader.I().v(ivalue).F()) {
+      // Call the binding function.
+      return std_numeric_round(::rocket::move(ivalue));
+    }
+    Rval rvalue;
+    if(reader.I().v(rvalue).F()) {
+      // Call the binding function.
+      return std_numeric_round(::rocket::move(rvalue));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.round(value)`
+
+  * Rounds `value`, which may be an integer or real, to the nearest
+    integer; halfway values are rounded away from zero. If `value`
+    is an integer, it is returned intact.
+
+  * Returns the rounded value.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.floor()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("floor"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.floor(value)`\n"
-          "\n"
-          "  * Rounds `value`, which may be an integer or real, to the nearest\n"
-          "    integer towards negative infinity. If `value` is an integer,\n"
-          "    it is returned intact.\n"
-          "\n"
-          "  * Returns the rounded value.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.floor"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival ivalue;
-          if(reader.I().g(ivalue).F()) {
-            // Call the binding function.
-            return std_numeric_floor(::rocket::move(ivalue));
-          }
-          Rval rvalue;
-          if(reader.I().g(rvalue).F()) {
-            // Call the binding function.
-            return std_numeric_floor(::rocket::move(rvalue));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.floor"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival ivalue;
+    if(reader.I().v(ivalue).F()) {
+      // Call the binding function.
+      return std_numeric_floor(::rocket::move(ivalue));
+    }
+    Rval rvalue;
+    if(reader.I().v(rvalue).F()) {
+      // Call the binding function.
+      return std_numeric_floor(::rocket::move(rvalue));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.floor(value)`
+
+  * Rounds `value`, which may be an integer or real, to the nearest
+    integer towards negative infinity. If `value` is an integer, it
+    is returned intact.
+
+  * Returns the rounded value.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.ceil()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("ceil"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.ceil(value)`\n"
-          "\n"
-          "  * Rounds `value`, which may be an integer or real, to the nearest\n"
-          "    integer towards positive infinity. If `value` is an integer, it\n"
-          "    is returned intact.\n"
-          "\n"
-          "  * Returns the rounded value.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.ceil"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival ivalue;
-          if(reader.I().g(ivalue).F()) {
-            // Call the binding function.
-            return std_numeric_ceil(::rocket::move(ivalue));
-          }
-          Rval rvalue;
-          if(reader.I().g(rvalue).F()) {
-            // Call the binding function.
-            return std_numeric_ceil(::rocket::move(rvalue));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.ceil"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival ivalue;
+    if(reader.I().v(ivalue).F()) {
+      // Call the binding function.
+      return std_numeric_ceil(::rocket::move(ivalue));
+    }
+    Rval rvalue;
+    if(reader.I().v(rvalue).F()) {
+      // Call the binding function.
+      return std_numeric_ceil(::rocket::move(rvalue));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.ceil(value)`
+
+  * Rounds `value`, which may be an integer or real, to the nearest
+    integer towards positive infinity. If `value` is an integer,
+    it is returned intact.
+
+  * Returns the rounded value.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.trunc()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("trunc"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.trunc(value)`\n"
-          "\n"
-          "  * Rounds `value`, which may be an integer or real, to the nearest\n"
-          "    integer towards zero. If `value` is an integer, it is returned\n"
-          "    intact.\n"
-          "\n"
-          "  * Returns the rounded value.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.trunc"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival ivalue;
-          if(reader.I().g(ivalue).F()) {
-            // Call the binding function.
-            return std_numeric_trunc(::rocket::move(ivalue));
-          }
-          Rval rvalue;
-          if(reader.I().g(rvalue).F()) {
-            // Call the binding function.
-            return std_numeric_trunc(::rocket::move(rvalue));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.trunc"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival ivalue;
+    if(reader.I().v(ivalue).F()) {
+      // Call the binding function.
+      return std_numeric_trunc(::rocket::move(ivalue));
+    }
+    Rval rvalue;
+    if(reader.I().v(rvalue).F()) {
+      // Call the binding function.
+      return std_numeric_trunc(::rocket::move(rvalue));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.trunc(value)`
+
+  * Rounds `value`, which may be an integer or real, to the nearest
+    integer towards zero. If `value` is an integer, it is returned
+    intact.
+
+  * Returns the rounded value.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.iround()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("iround"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.iround(value)`\n"
-          "\n"
-          "  * Rounds `value`, which may be an integer or real, to the nearest\n"
-          "    integer; halfway values are rounded away from zero. If `value`\n"
-          "    is an integer, it is returned intact. If `value` is a real, it\n"
-          "    is converted to an integer.\n"
-          "\n"
-          "  * Returns the rounded value as an integer.\n"
-          "\n"
-          "  * Throws an exception if the result cannot be represented as an\n"
-          "    integer.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.iround"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival ivalue;
-          if(reader.I().g(ivalue).F()) {
-            // Call the binding function.
-            return std_numeric_iround(::rocket::move(ivalue));
-          }
-          Rval rvalue;
-          if(reader.I().g(rvalue).F()) {
-            // Call the binding function.
-            return std_numeric_iround(::rocket::move(rvalue));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.iround"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival ivalue;
+    if(reader.I().v(ivalue).F()) {
+      // Call the binding function.
+      return std_numeric_iround(::rocket::move(ivalue));
+    }
+    Rval rvalue;
+    if(reader.I().v(rvalue).F()) {
+      // Call the binding function.
+      return std_numeric_iround(::rocket::move(rvalue));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.iround(value)`
+
+  * Rounds `value`, which may be an integer or real, to the nearest
+    integer; halfway values are rounded away from zero. If `value`
+    is an integer, it is returned intact. If `value` is a real, it
+    is converted to an integer.
+
+  * Returns the rounded value as an integer.
+
+  * Throws an exception if the result cannot be represented as an
+    integer.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.ifloor()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("ifloor"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.ifloor(value)`\n"
-          "\n"
-          "  * Rounds `value`, which may be an integer or real, to the nearest\n"
-          "    integer towards negative infinity. If `value` is an integer, it\n"
-          "    is returned intact. If `value` is a real, it is converted to an\n"
-          "    integer.\n"
-          "\n"
-          "  * Returns the rounded value as an integer.\n"
-          "\n"
-          "  * Throws an exception if the result cannot be represented as an\n"
-          "    integer.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.ifloor"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival ivalue;
-          if(reader.I().g(ivalue).F()) {
-            // Call the binding function.
-            return std_numeric_ifloor(::rocket::move(ivalue));
-          }
-          Rval rvalue;
-          if(reader.I().g(rvalue).F()) {
-            // Call the binding function.
-            return std_numeric_ifloor(::rocket::move(rvalue));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.ifloor"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival ivalue;
+    if(reader.I().v(ivalue).F()) {
+      // Call the binding function.
+      return std_numeric_ifloor(::rocket::move(ivalue));
+    }
+    Rval rvalue;
+    if(reader.I().v(rvalue).F()) {
+      // Call the binding function.
+      return std_numeric_ifloor(::rocket::move(rvalue));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.ifloor(value)`
+
+  * Rounds `value`, which may be an integer or real, to the nearest
+    integer towards negative infinity. If `value` is an integer, it
+    is returned intact. If `value` is a real, it is converted to an
+    integer.
+
+  * Returns the rounded value as an integer.
+
+  * Throws an exception if the result cannot be represented as an
+    integer.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.iceil()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("iceil"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.iceil(value)`\n"
-          "\n"
-          "  * Rounds `value`, which may be an integer or real, to the	\n"
-          "    integer towards positive infinity. If `value` is an integer, it\n"
-          "    is returned intact. If `value` is a real, it is converted to an\n"
-          "    integer.\n"
-          "\n"
-          "  * Returns the rounded value as an integer.\n"
-          "\n"
-          "  * Throws an exception if the result cannot be represented as an\n"
-          "    integer.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.iceil"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival ivalue;
-          if(reader.I().g(ivalue).F()) {
-            // Call the binding function.
-            return std_numeric_iceil(::rocket::move(ivalue));
-          }
-          Rval rvalue;
-          if(reader.I().g(rvalue).F()) {
-            // Call the binding function.
-            return std_numeric_iceil(::rocket::move(rvalue));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.iceil"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival ivalue;
+    if(reader.I().v(ivalue).F()) {
+      // Call the binding function.
+      return std_numeric_iceil(::rocket::move(ivalue));
+    }
+    Rval rvalue;
+    if(reader.I().v(rvalue).F()) {
+      // Call the binding function.
+      return std_numeric_iceil(::rocket::move(rvalue));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.iceil(value)`
+
+  * Rounds `value`, which may be an integer or real, to the nearest
+    integer towards positive infinity. If `value` is an integer, it
+    is returned intact. If `value` is a real, it is converted to an
+    integer.
+
+  * Returns the rounded value as an integer.
+
+  * Throws an exception if the result cannot be represented as an
+    integer.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.itrunc()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("itrunc"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.itrunc(value)`\n"
-          "\n"
-          "  * Rounds `value`, which may be an integer or real, to the nearest\n"
-          "    integer towards zero. If `value` is an integer, it is returned\n"
-          "    intact. If `value` is a real, it is converted to an integer.\n"
-          "\n"
-          "  * Returns the rounded value as an integer.\n"
-          "\n"
-          "  * Throws an exception if the result cannot be represented as an\n"
-          "    integer.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.itrunc"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival ivalue;
-          if(reader.I().g(ivalue).F()) {
-            // Call the binding function.
-            return std_numeric_itrunc(::rocket::move(ivalue));
-          }
-          Rval rvalue;
-          if(reader.I().g(rvalue).F()) {
-            // Call the binding function.
-            return std_numeric_itrunc(::rocket::move(rvalue));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.itrunc"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival ivalue;
+    if(reader.I().v(ivalue).F()) {
+      // Call the binding function.
+      return std_numeric_itrunc(::rocket::move(ivalue));
+    }
+    Rval rvalue;
+    if(reader.I().v(rvalue).F()) {
+      // Call the binding function.
+      return std_numeric_itrunc(::rocket::move(rvalue));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.itrunc(value)`
+
+  * Rounds `value`, which may be an integer or real, to the nearest
+    integer towards zero. If `value` is an integer, it is returned
+    intact. If `value` is a real, it is converted to an integer.
+
+  * Returns the rounded value as an integer.
+
+  * Throws an exception if the result cannot be represented as an
+    integer.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.random()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("random"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.random([limit])`\n"
-          "\n"
-          "  * Generates a random real value whose sign agrees with `limit`\n"
-          "    and whose absolute value is less than `limit`. If `limit` is\n"
-          "    absent, `1` is assumed.\n"
-          "\n"
-          "  * Returns a random real value.\n"
-          "\n"
-          "  * Throws an exception if `limit` is zero or non-finite.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.random"), ::rocket::ref(args));
-          // Parse arguments.
-          Ropt limit;
-          if(reader.I().g(limit).F()) {
-            // Call the binding function.
-            return std_numeric_random(global, ::rocket::move(limit));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.random"), ::rocket::ref(args));
+    // Parse arguments.
+    Ropt limit;
+    if(reader.I().o(limit).F()) {
+      // Call the binding function.
+      return std_numeric_random(global, ::rocket::move(limit));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.random([limit])`
+
+  * Generates a random real value whose sign agrees with `limit`
+    and whose absolute value is less than `limit`. If `limit` is
+    absent, `1` is assumed.
+
+  * Returns a random real value.
+
+  * Throws an exception if `limit` is zero or non-finite.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.sqrt()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("sqrt"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.sqrt(x)`\n"
-          "\n"
-          "  * Calculates the square root of `x` which may be of either the\n"
-          "    integer or the real type. The result is always a real.\n"
-          "\n"
-          "  * Returns the square root of `x` as a real.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.sqrt"), ::rocket::ref(args));
-          // Parse arguments.
-          Rval x;
-          if(reader.I().g(x).F()) {
-            // Call the binding function.
-            return std_numeric_sqrt(::rocket::move(x));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.sqrt"), ::rocket::ref(args));
+    // Parse arguments.
+    Rval x;
+    if(reader.I().v(x).F()) {
+      // Call the binding function.
+      return std_numeric_sqrt(::rocket::move(x));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.sqrt(x)`
+
+  * Calculates the square root of `x` which may be of either the
+    integer or the real type. The result is always a real.
+
+  * Returns the square root of `x` as a real.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.fma()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("fma"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.fma(x, y, z)`\n"
-          "\n"
-          "  * Performs fused multiply-add operation on `x`, `y` and `z`. This\n"
-          "    functions calculates `x * y + z` without intermediate rounding\n"
-          "    operations.\n"
-          "\n"
-          "  * Returns the value of `x * y + z` as a real.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.fma"), ::rocket::ref(args));
-          // Parse arguments.
-          Rval x;
-          Rval y;
-          Rval z;
-          if(reader.I().g(x).g(y).g(z).F()) {
-            // Call the binding function.
-            return std_numeric_fma(::rocket::move(x), ::rocket::move(y), ::rocket::move(z));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.fma"), ::rocket::ref(args));
+    // Parse arguments.
+    Rval x;
+    Rval y;
+    Rval z;
+    if(reader.I().v(x).v(y).v(z).F()) {
+      // Call the binding function.
+      return std_numeric_fma(::rocket::move(x), ::rocket::move(y), ::rocket::move(z));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.fma(x, y, z)`
+
+  * Performs fused multiply-add operation on `x`, `y` and `z`. This
+    functions calculates `x * y + z` without intermediate rounding
+    operations.
+
+  * Returns the value of `x * y + z` as a real.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.remainder()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("remainder"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.remainder(x, y)`\n"
-          "\n"
-          "  * Calculates the IEEE floating-point remainder of division of `x`\n"
-          "    by `y`. The remainder is defined to be `x - q * y` where `q` is\n"
-          "    the quotient of division of `x` by `y` rounding to nearest.\n"
-          "\n"
-          "  * Returns the remainder as a real.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.remainder"), ::rocket::ref(args));
-          // Parse arguments.
-          Rval x;
-          Rval y;
-          if(reader.I().g(x).g(y).F()) {
-            // Call the binding function.
-            return std_numeric_remainder(::rocket::move(x), ::rocket::move(y));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.remainder"), ::rocket::ref(args));
+    // Parse arguments.
+    Rval x;
+    Rval y;
+    if(reader.I().v(x).v(y).F()) {
+      // Call the binding function.
+      return std_numeric_remainder(::rocket::move(x), ::rocket::move(y));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.remainder(x, y)`
+
+  * Calculates the IEEE floating-point remainder of division of `x`
+    by `y`. The remainder is defined to be `x - q * y` where `q` is
+    the quotient of division of `x` by `y` rounding to nearest.
+
+  * Returns the remainder as a real.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.frexp()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("frexp"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.frexp(x)`\n"
-          "\n"
-          "  * Decomposes `x` into normalized fractional and exponent parts\n"
-          "    such that `x = frac * pow(2,exp)` where `frac` and `exp` denote\n"
-          "    the fraction and the exponent respectively and `frac` is always\n"
-          "    within the range `[0.5,1.0)`. If `x` is non-finite, `exp` is\n"
-          "    unspecified.\n"
-          "\n"
-          "  * Returns an array having two elements, whose first element is\n"
-          "    `frac` that is of type real and whose second element is `exp`\n"
-          "    that is of type integer.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.frexp"), ::rocket::ref(args));
-          // Parse arguments.
-          Rval x;
-          if(reader.I().g(x).F()) {
-            // Call the binding function.
-            auto pair = std_numeric_frexp(::rocket::move(x));
-            // This function returns a `pair`, but we would like to return an array so convert it.
-            Aval rval(2);
-            rval.mut(0) = ::rocket::move(pair.first);
-            rval.mut(1) = ::rocket::move(pair.second);
-            return ::rocket::move(rval);
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.frexp"), ::rocket::ref(args));
+    // Parse arguments.
+    Rval x;
+    if(reader.I().v(x).F()) {
+      // Call the binding function.
+      auto pair = std_numeric_frexp(::rocket::move(x));
+      // This function returns a `pair`, but we would like to return an array so convert it.
+      Aval rval(2);
+      rval.mut(0) = ::rocket::move(pair.first);
+      rval.mut(1) = ::rocket::move(pair.second);
+      return ::rocket::move(rval);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.frexp(x)`
+
+  * Decomposes `x` into normalized fractional and exponent parts
+    such that `x = frac * pow(2,exp)` where `frac` and `exp` denote
+    the fraction and the exponent respectively and `frac` is always
+    within the range `[0.5,1.0)`. If `x` is non-finite, `exp` is
+    unspecified.
+
+  * Returns an array having two elements, whose first element is
+    `frac` that is of type real and whose second element is `exp`
+    that is of type integer.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.ldexp()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("ldexp"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.ldexp(frac, exp)`\n"
-          "\n"
-          "  * Composes `frac` and `exp` to make a real number `x`, as if by\n"
-          "    multiplying `frac` with `pow(2,exp)`. `exp` shall be of type\n"
-          "    integer. This function is the inverse of `frexp()`.\n"
-          "\n"
-          "  * Returns the product as a real.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.ldexp"), ::rocket::ref(args));
-          // Parse arguments.
-          Rval frac;
-          Ival exp;
-          if(reader.I().g(frac).g(exp).F()) {
-            // Call the binding function.
-            return std_numeric_ldexp(::rocket::move(frac), ::rocket::move(exp));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.ldexp"), ::rocket::ref(args));
+    // Parse arguments.
+    Rval frac;
+    Ival exp;
+    if(reader.I().v(frac).v(exp).F()) {
+      // Call the binding function.
+      return std_numeric_ldexp(::rocket::move(frac), ::rocket::move(exp));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.ldexp(frac, exp)`
+
+  * Composes `frac` and `exp` to make a real number `x`, as if by
+    multiplying `frac` with `pow(2,exp)`. `exp` shall be of type
+    integer. This function is the inverse of `frexp()`.
+
+  * Returns the product as a real.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.addm()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("addm"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.addm(x, y)`\n"
-          "\n"
-          "  * Adds `y` to `x` using modular arithmetic. `x` and `y` must be\n"
-          "    of the integer type. The result is reduced to be congruent to\n"
-          "    the sum of `x` and `y` modulo `0x1p64` in infinite precision.\n"
-          "    This function will not cause overflow exceptions to be thrown.\n"
-          "\n"
-          "  * Returns the reduced sum of `x` and `y`.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.addm"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival x;
-          Ival y;
-          if(reader.I().g(x).g(y).F()) {
-            // Call the binding function.
-            return std_numeric_addm(::rocket::move(x), ::rocket::move(y));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.addm"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival x;
+    Ival y;
+    if(reader.I().v(x).v(y).F()) {
+      // Call the binding function.
+      return std_numeric_addm(::rocket::move(x), ::rocket::move(y));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.addm(x, y)`
+
+  * Adds `y` to `x` using modular arithmetic. `x` and `y` must be
+    of the integer type. The result is reduced to be congruent to
+    the sum of `x` and `y` modulo `0x1p64` in infinite precision.
+    This function will not cause overflow exceptions to be thrown.
+
+  * Returns the reduced sum of `x` and `y`.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.subm()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("subm"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.subm(x, y)`\n"
-          "\n"
-          "  * Subtracts `y` from `x` using modular arithmetic. `x` and `y`\n"
-          "    must be of the integer type. The result is reduced to be\n"
-          "    congruent to the difference of `x` and `y` modulo `0x1p64` in\n"
-          "    infinite precision. This function will not cause overflow\n"
-          "    exceptions to be thrown.\n"
-          "\n"
-          "  * Returns the reduced difference of `x` and `y`.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.subm"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival x;
-          Ival y;
-          if(reader.I().g(x).g(y).F()) {
-            // Call the binding function.
-            return std_numeric_subm(::rocket::move(x), ::rocket::move(y));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.subm"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival x;
+    Ival y;
+    if(reader.I().v(x).v(y).F()) {
+      // Call the binding function.
+      return std_numeric_subm(::rocket::move(x), ::rocket::move(y));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.subm(x, y)`
+
+  * Subtracts `y` from `x` using modular arithmetic. `x` and `y`
+    must be of the integer type. The result is reduced to be
+    congruent to the difference of `x` and `y` modulo `0x1p64` in
+    infinite precision. This function will not cause overflow
+    exceptions to be thrown.
+
+  * Returns the reduced difference of `x` and `y`.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.mulm()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("mulm"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.mulm(x, y)`\n"
-          "\n"
-          "  * Multiplies `x` by `y` using modular arithmetic. `x` and `y`\n"
-          "    must be of the integer type. The result is reduced to be\n"
-          "    congruent to the product of `x` and `y` modulo `0x1p64` in\n"
-          "    infinite precision. This function will not cause overflow\n"
-          "    exceptions to be thrown.\n"
-          "\n"
-          "  * Returns the reduced product of `x` and `y`.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.mulm"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival x;
-          Ival y;
-          if(reader.I().g(x).g(y).F()) {
-            // Call the binding function.
-            return std_numeric_mulm(::rocket::move(x), ::rocket::move(y));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.mulm"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival x;
+    Ival y;
+    if(reader.I().v(x).v(y).F()) {
+      // Call the binding function.
+      return std_numeric_mulm(::rocket::move(x), ::rocket::move(y));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.mulm(x, y)`
+
+  * Multiplies `x` by `y` using modular arithmetic. `x` and `y`
+    must be of the integer type. The result is reduced to be
+    congruent to the product of `x` and `y` modulo `0x1p64` in
+    infinite precision. This function will not cause overflow
+    exceptions to be thrown.
+
+  * Returns the reduced product of `x` and `y`.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.adds()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("adds"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.adds(x, y)`\n"
-          "\n"
-          "  * Adds `y` to `x` using saturating arithmetic. `x` and `y` may be\n"
-          "    integer or real values. The result is limited within the\n"
-          "    range of representable values of its type, hence will not cause\n"
-          "    overflow exceptions to be thrown. When either argument is of\n"
-          "    type real which supports infinities, this function is\n"
-          "    equivalent to the built-in addition operator.\n"
-          "\n"
-          "  * Returns the saturated sum of `x` and `y`.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.adds"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival ix;
-          Ival iy;
-          if(reader.I().g(ix).g(iy).F()) {
-            // Call the binding function.
-            return std_numeric_adds(::rocket::move(ix), ::rocket::move(iy));
-          }
-          Rval fx;
-          Rval fy;
-          if(reader.I().g(fx).g(fy).F()) {
-            // Call the binding function.
-            return std_numeric_adds(::rocket::move(fx), ::rocket::move(fy));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.adds"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival ix;
+    Ival iy;
+    if(reader.I().v(ix).v(iy).F()) {
+      // Call the binding function.
+      return std_numeric_adds(::rocket::move(ix), ::rocket::move(iy));
+    }
+    Rval fx;
+    Rval fy;
+    if(reader.I().v(fx).v(fy).F()) {
+      // Call the binding function.
+      return std_numeric_adds(::rocket::move(fx), ::rocket::move(fy));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.adds(x, y)`
+
+  * Adds `y` to `x` using saturating arithmetic. `x` and `y` may be
+    integer or real values. The result is limited within the
+    range of representable values of its type, hence will not cause
+    overflow exceptions to be thrown. When either argument is of
+    type real which supports infinities, this function is
+    equivalent to the built-in addition operator.
+
+  * Returns the saturated sum of `x` and `y`.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.subs()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("subs"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.subs(x, y)`\n"
-          "\n"
-          "  * Subtracts `y` from `x` using saturating arithmetic. `x` and `y`\n"
-          "    may be integer or real values. The result is limited within the\n"
-          "    range of representable values of its type, hence will not cause\n"
-          "    overflow exceptions to be thrown. When either argument is of\n"
-          "    type real which supports infinities, this function is\n"
-          "    equivalent to the built-in subtraction operator.\n"
-          "\n"
-          "  * Returns the saturated difference of `x` and `y`.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.subs"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival ix;
-          Ival iy;
-          if(reader.I().g(ix).g(iy).F()) {
-            // Call the binding function.
-            return std_numeric_subs(::rocket::move(ix), ::rocket::move(iy));
-          }
-          Rval fx;
-          Rval fy;
-          if(reader.I().g(fx).g(fy).F()) {
-            // Call the binding function.
-            return std_numeric_subs(::rocket::move(fx), ::rocket::move(fy));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.subs"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival ix;
+    Ival iy;
+    if(reader.I().v(ix).v(iy).F()) {
+      // Call the binding function.
+      return std_numeric_subs(::rocket::move(ix), ::rocket::move(iy));
+    }
+    Rval fx;
+    Rval fy;
+    if(reader.I().v(fx).v(fy).F()) {
+      // Call the binding function.
+      return std_numeric_subs(::rocket::move(fx), ::rocket::move(fy));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.subs(x, y)`
+
+  * Subtracts `y` from `x` using saturating arithmetic. `x` and `y`
+    may be integer or real values. The result is limited within the
+    range of representable values of its type, hence will not cause
+    overflow exceptions to be thrown. When either argument is of
+    type real which supports infinities, this function is
+    equivalent to the built-in subtraction operator.
+
+  * Returns the saturated difference of `x` and `y`.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.muls()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("muls"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.muls(x, y)`\n"
-          "\n"
-          "  * Multiplies `x` by `y` using saturating arithmetic. `x` and `y`\n"
-          "    may be integer or real values. The result is limited within the\n"
-          "    range of representable values of its type, hence will not cause\n"
-          "    overflow exceptions to be thrown. When either argument is of\n"
-          "    type real which supports infinities, this function is\n"
-          "    equivalent to the built-in multiplication operator.\n"
-          "\n"
-          "  * Returns the saturated product of `x` and `y`.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.muls"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival ix;
-          Ival iy;
-          if(reader.I().g(ix).g(iy).F()) {
-            // Call the binding function.
-            return std_numeric_muls(::rocket::move(ix), ::rocket::move(iy));
-          }
-          Rval fx;
-          Rval fy;
-          if(reader.I().g(fx).g(fy).F()) {
-            // Call the binding function.
-            return std_numeric_muls(::rocket::move(fx), ::rocket::move(fy));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.muls"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival ix;
+    Ival iy;
+    if(reader.I().v(ix).v(iy).F()) {
+      // Call the binding function.
+      return std_numeric_muls(::rocket::move(ix), ::rocket::move(iy));
+    }
+    Rval fx;
+    Rval fy;
+    if(reader.I().v(fx).v(fy).F()) {
+      // Call the binding function.
+      return std_numeric_muls(::rocket::move(fx), ::rocket::move(fy));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.muls(x, y)`
+
+  * Multiplies `x` by `y` using saturating arithmetic. `x` and `y`
+    may be integer or real values. The result is limited within the
+    range of representable values of its type, hence will not cause
+    overflow exceptions to be thrown. When either argument is of
+    type real which supports infinities, this function is
+    equivalent to the built-in multiplication operator.
+
+  * Returns the saturated product of `x` and `y`.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.lzcnt()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("lzcnt"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.lzcnt(x)`\n"
-          "\n"
-          "  * Counts the number of leading zero bits in `x`, which shall be\n"
-          "    of type integer.\n"
-          "\n"
-          "  * Returns the bit count as an integer. If `x` is zero, `64` is\n"
-          "    returned.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.lzcnt"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival x;
-          if(reader.I().g(x).F()) {
-            // Call the binding function.
-            return std_numeric_lzcnt(::rocket::move(x));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.lzcnt"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival x;
+    if(reader.I().v(x).F()) {
+      // Call the binding function.
+      return std_numeric_lzcnt(::rocket::move(x));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.lzcnt(x)`
+
+  * Counts the number of leading zero bits in `x`, which shall be
+    of type integer.
+
+  * Returns the bit count as an integer. If `x` is zero, `64` is
+    returned.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.tzcnt()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("tzcnt"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.tzcnt(x)`\n"
-          "\n"
-          "  * Counts the number of trailing zero bits in `x`, which shall be\n"
-          "    of type integer.\n"
-          "\n"
-          "  * Returns the bit count as an integer. If `x` is zero, `64` is\n"
-          "    returned.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.tzcnt"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival x;
-          if(reader.I().g(x).F()) {
-            // Call the binding function.
-            return std_numeric_tzcnt(::rocket::move(x));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.tzcnt"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival x;
+    if(reader.I().v(x).F()) {
+      // Call the binding function.
+      return std_numeric_tzcnt(::rocket::move(x));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.tzcnt(x)`
+
+  * Counts the number of trailing zero bits in `x`, which shall be
+    of type integer.
+
+  * Returns the bit count as an integer. If `x` is zero, `64` is
+    returned.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.popcnt()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("popcnt"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.popcnt(x)`\n"
-          "\n"
-          "  * Counts the number of one bits in `x`, which shall be of type\n"
-          "    integer.\n"
-          "\n"
-          "  * Returns the bit count as an integer.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.popcnt"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival x;
-          if(reader.I().g(x).F()) {
-            // Call the binding function.
-            return std_numeric_popcnt(::rocket::move(x));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.popcnt"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival x;
+    if(reader.I().v(x).F()) {
+      // Call the binding function.
+      return std_numeric_popcnt(::rocket::move(x));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.popcnt(x)`
+
+  * Counts the number of one bits in `x`, which shall be of type
+    integer.
+
+  * Returns the bit count as an integer.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.rotl()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("rotl"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.rotl(m, x, n)`\n"
-          "\n"
-          "  * Rotates the rightmost `m` bits of `x` to the left by `n`; all\n"
-          "    arguments must be of type integer. This has the effect of\n"
-          "    shifting `x` by `n` to the left then filling the vacuum in the\n"
-          "    right with the last `n` bits that have just been shifted past\n"
-          "    the left boundary. `n` is modulo `m` so rotating by a negative\n"
-          "    count to the left has the same effect as rotating by its\n"
-          "    absolute value to the right. All other bits are zeroed. If `m`\n"
-          "    is zero, zero is returned.\n"
-          "\n"
-          "  * Returns the rotated value as an integer.\n"
-          "\n"
-          "  * Throws an exception if `m` is negative or greater than `64`.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.rotl"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival m;
-          Ival x;
-          Ival n;
-          if(reader.I().g(m).g(x).g(n).F()) {
-            // Call the binding function.
-            return std_numeric_rotl(::rocket::move(m), ::rocket::move(x), ::rocket::move(n));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.rotl"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival m;
+    Ival x;
+    Ival n;
+    if(reader.I().v(m).v(x).v(n).F()) {
+      // Call the binding function.
+      return std_numeric_rotl(::rocket::move(m), ::rocket::move(x), ::rocket::move(n));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.rotl(m, x, n)`
+
+  * Rotates the rightmost `m` bits of `x` to the left by `n`; all
+    arguments must be of type integer. This has the effect of
+    shifting `x` by `n` to the left then filling the vacuum in the
+    right with the last `n` bits that have just been shifted past
+    the left boundary. `n` is modulo `m` so rotating by a negative
+    count to the left has the same effect as rotating by its
+    absolute value to the right. All other bits are zeroed. If `m`
+    is zero, zero is returned.
+
+  * Returns the rotated value as an integer.
+
+  * Throws an exception if `m` is negative or greater than `64`.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.rotr()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("rotr"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.rotr(m, x, n)`\n"
-          "\n"
-          "  * Rotates the rightmost `m` bits of `x` to the right by `n`; all\n"
-          "    arguments must be of type integer. This has the effect of\n"
-          "    shifting `x` by `n` to the right then filling the vacuum in the\n"
-          "    left with the last `n` bits that have just been shifted past\n"
-          "    the right boundary. `n` is modulo `m` so rotating by a negative\n"
-          "    count to the right has the same effect as rotating by its\n"
-          "    absolute value to the left. All other bits are zeroed. If `m`\n"
-          "    is zero, zero is returned.\n"
-          "\n"
-          "  * Returns the rotated value as an integer.\n"
-          "\n"
-          "  * Throws an exception if `m` is negative or greater than `64`.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.rotr"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival m;
-          Ival x;
-          Ival n;
-          if(reader.I().g(m).g(x).g(n).F()) {
-            // Call the binding function.
-            return std_numeric_rotr(::rocket::move(m), ::rocket::move(x), ::rocket::move(n));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.rotr"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival m;
+    Ival x;
+    Ival n;
+    if(reader.I().v(m).v(x).v(n).F()) {
+      // Call the binding function.
+      return std_numeric_rotr(::rocket::move(m), ::rocket::move(x), ::rocket::move(n));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.rotr(m, x, n)`
+
+  * Rotates the rightmost `m` bits of `x` to the right by `n`; all
+    arguments must be of type integer. This has the effect of
+    shifting `x` by `n` to the right then filling the vacuum in the
+    left with the last `n` bits that have just been shifted past
+    the right boundary. `n` is modulo `m` so rotating by a negative
+    count to the right has the same effect as rotating by its
+    absolute value to the left. All other bits are zeroed. If `m`
+    is zero, zero is returned.
+
+  * Returns the rotated value as an integer.
+
+  * Throws an exception if `m` is negative or greater than `64`.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.format()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("format"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.format(value, [base], [exp_base])`\n"
-          "\n"
-          "  * Converts an integer or real number to a string in `base`. This\n"
-          "    function writes as many digits as possible to ensure precision.\n"
-          "    No plus sign precedes the significant figures. If `base` is\n"
-          "    absent, `10` is assumed. If `ebase` is specified, an exponent\n"
-          "    is appended to the significand as follows: If `value` is of\n"
-          "    type integer, the significand is kept as short as possible;\n"
-          "    otherwise (when `value` is of type real), it is written in\n"
-          "    scientific notation. In both cases, the exponent comprises at\n"
-          "    least two digits with an explicit sign. If `ebase` is absent,\n"
-          "    no exponent appears. The result is exact as long as `base` is a\n"
-          "    power of two.\n"
-          "\n"
-          "  * Returns a string converted from `value`.\n"
-          "\n"
-          "  * Throws an exception if `base` is neither `2` nor `10` nor `16`,\n"
-          "    or if `ebase` is neither `2` nor `10`, or if `base` is not `10`\n"
-          "    but `ebase` is `10`.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.format"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival ivalue;
-          Iopt base;
-          Iopt ebase;
-          if(reader.I().g(ivalue).g(base).g(ebase).F()) {
-            // Call the binding function.
-            return std_numeric_format(::rocket::move(ivalue), ::rocket::move(base), ::rocket::move(ebase));
-          }
-          Rval fvalue;
-          if(reader.I().g(fvalue).g(base).g(ebase).F()) {
-            // Call the binding function.
-            return std_numeric_format(::rocket::move(fvalue), ::rocket::move(base), ::rocket::move(ebase));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.format"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival ivalue;
+    Iopt base;
+    Iopt ebase;
+    if(reader.I().v(ivalue).o(base).o(ebase).F()) {
+      // Call the binding function.
+      return std_numeric_format(::rocket::move(ivalue), ::rocket::move(base), ::rocket::move(ebase));
+    }
+    Rval fvalue;
+    if(reader.I().v(fvalue).o(base).o(ebase).F()) {
+      // Call the binding function.
+      return std_numeric_format(::rocket::move(fvalue), ::rocket::move(base), ::rocket::move(ebase));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.format(value, [base], [ebase])`
+
+  * Converts an integer or real number to a string in `base`. This
+    function writes as many digits as possible to ensure precision.
+    No plus sign precedes the significant figures. If `base` is
+    absent, `10` is assumed. If `ebase` is specified, an exponent
+    is appended to the significand as follows: If `value` is of
+    type integer, the significand is kept as short as possible;
+    otherwise (when `value` is of type real), it is written in
+    scientific notation. In both cases, the exponent comprises at
+    least two digits with an explicit sign. If `ebase` is absent,
+    no exponent appears. The result is exact as long as `base` is a
+    power of two.
+
+  * Returns a string converted from `value`.
+
+  * Throws an exception if `base` is neither `2` nor `10` nor `16`,
+    or if `ebase` is neither `2` nor `10`, or if `base` is not `10`
+    but `ebase` is `10`.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.parse_integer()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("parse_integer"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.parse_integer(text)`\n"
-          "\n"
-          "  * Parses `text` for an integer. `text` shall be a string. All\n"
-          "    leading and trailing blank characters are stripped from `text`.\n"
-          "    If it becomes empty, this function fails; otherwise, it shall\n"
-          "    match one of the following extended regular expressions:\n"
-          "\n"
-          "    * Binary (base-2):\n"
-          "      `[+-]?0[bB][01]+`\n"
-          "    * Hexadecimal (base-16):\n"
-          "      `[+-]?0[xX][0-9a-fA-F]+`\n"
-          "    * Decimal (base-10):\n"
-          "      `[+-]?[0-9]+`\n"
-          "\n"
-          "    If the string does not match any of the above, this function\n"
-          "    fails. If the result is outside the range of representable\n"
-          "    values of type integer, this function fails.\n"
-          "\n"
-          "  * Returns the integer value converted from `text`.\n"
-          "\n"
-          "  * Throws an exception on failure.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.parse_integer"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          if(reader.I().g(text).F()) {
-            // Call the binding function.
-            return std_numeric_parse_integer(::rocket::move(text));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.parse_integer"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      // Call the binding function.
+      return std_numeric_parse_integer(::rocket::move(text));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.parse_integer(text)`
+
+  * Parses `text` for an integer. `text` shall be a string. All
+    leading and trailing blank characters are stripped from `text`.
+    If it becomes empty, this function fails; otherwise, it shall
+    match one of the following extended regular expressions:
+
+    * Binary (base-2):
+      `[+-]?0[bB][01]+`
+    * Hexadecimal (base-16):
+      `[+-]?0[xX][0-9a-fA-F]+`
+    * Decimal (base-10):
+      `[+-]?[0-9]+`
+
+    If the string does not match any of the above, this function
+    fails. If the result is outside the range of representable
+    values of type integer, this function fails.
+
+  * Returns the integer value converted from `text`.
+
+  * Throws an exception on failure.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.numeric.parse_real()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("parse_real"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.numeric.parse_real(text, [saturating])`\n"
-          "\n"
-          "  * Parses `text` for a real number. `text` shall be a string. All\n"
-          "    leading and trailing blank characters are stripped from `text`.\n"
-          "    If it becomes empty, this function fails; otherwise, it shall\n"
-          "    match any of the following extended regular expressions:\n"
-          "\n"
-          "    * Infinities:\n"
-          "      `[+-]?infinity`\n"
-          "    * NaNs:\n"
-          "      `[+-]?nan`\n"
-          "    * Binary (base-2):\n"
-          "      `[+-]?0[bB][01]+(\\.[01]+)?([epEP][-+]?[0-9]+)?`\n"
-          "    * Hexadecimal (base-16):\n"
-          "      `[+-]?0x[0-9a-fA-F]+(\\.[0-9a-fA-F]+)?([epEP][-+]?[0-9]+)?`\n"
-          "    * Decimal (base-10):\n"
-          "      `[+-]?[0-9]+(\\.[0-9]+)?([eE][-+]?[0-9]+)?`\n"
-          "\n"
-          "    If the string does not match any of the above, this function\n"
-          "    fails. If the absolute value of the result is too small to fit\n"
-          "    in a real, a signed zero is returned. When the absolute value\n"
-          "    is too large, if `saturating` is set to `true`, a signed\n"
-          "    infinity is returned; otherwise this function fails.\n"
-          "\n"
-          "  * Returns the real value converted from `text`.\n"
-          "\n"
-          "  * Throws an exception on failure.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.numeric.parse_real"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          Bopt saturating;
-          if(reader.I().g(text).g(saturating).F()) {
-            // Call the binding function.
-            return std_numeric_parse_real(::rocket::move(text), ::rocket::move(saturating));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.numeric.parse_real"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    Bopt saturating;
+    if(reader.I().v(text).o(saturating).F()) {
+      // Call the binding function.
+      return std_numeric_parse_real(::rocket::move(text), ::rocket::move(saturating));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.numeric.parse_real(text, [saturating])`
+
+  * Parses `text` for a real number. `text` shall be a string. All
+    leading and trailing blank characters are stripped from `text`.
+    If it becomes empty, this function fails; otherwise, it shall
+    match any of the following extended regular expressions:
+
+    * Infinities:
+      `[+-]?infinity`
+    * NaNs:
+      `[+-]?nan`
+    * Binary (base-2):
+      `[+-]?0[bB][01]+(\.[01]+)?([epEP][-+]?[0-9]+)?`
+    * Hexadecimal (base-16):
+      `[+-]?0x[0-9a-fA-F]+(\.[0-9a-fA-F]+)?([epEP][-+]?[0-9]+)?`
+    * Decimal (base-10):
+      `[+-]?[0-9]+(\.[0-9]+)?([eE][-+]?[0-9]+)?`
+
+    If the string does not match any of the above, this function
+    fails. If the absolute value of the result is too small to fit
+    in a real, a signed zero is returned. When the absolute value
+    is too large, if `saturating` is set to `true`, a signed
+    infinity is returned; otherwise this function fails.
+
+  * Returns the real value converted from `text`.
+
+  * Throws an exception on failure.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // End of `std.numeric`

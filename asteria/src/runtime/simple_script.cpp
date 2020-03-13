@@ -42,7 +42,7 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
     }
     // TODO: Insert optimization passes.
     // Instantiate the function.
-    this->m_cptr = ::rocket::make_refcnt<Instantiated_Function>(this->m_params, ::rocket::move(zvarg), code_body);
+    this->m_func = ::rocket::make_refcnt<Instantiated_Function>(this->m_params, ::rocket::move(zvarg), code_body);
     return *this;
   }
 
@@ -69,10 +69,10 @@ Simple_Script& Simple_Script::reload_stdin()
 
 Reference Simple_Script::execute(Global_Context& global, cow_vector<Reference>&& args) const
   {
-    if(!this->m_cptr) {
+    if(!this->m_func) {
       ASTERIA_THROW("no script loaded");
     }
-    return this->m_cptr->invoke(global, ::rocket::move(args));
+    return this->m_func.invoke(global, ::rocket::move(args));
   }
 
 Reference Simple_Script::execute(Global_Context& global, cow_vector<Value>&& vals) const

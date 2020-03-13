@@ -3,7 +3,6 @@
 
 #include "../precompiled.hpp"
 #include "bindings_filesystem.hpp"
-#include "simple_binding_wrapper.hpp"
 #include "../runtime/argument_reader.hpp"
 #include "../runtime/global_context.hpp"
 #include "../utilities.hpp"
@@ -414,7 +413,7 @@ Iopt std_filesystem_file_stream(Global& global, Sval path, Fval callback, Iopt o
       Reference_root::S_temporary xref_data = { ::rocket::move(data) };
       args.emplace_back(::rocket::move(xref_data));
       // Call the function but discard its return value.
-      callback->invoke(global, ::rocket::move(args));
+      callback.invoke(global, ::rocket::move(args));
       // Read the next block.
       roffset += nread;
       ntotal += nread;
@@ -524,465 +523,441 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
     // `std.filesystem.get_working_directory()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("get_working_directory"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.filesystem.get_working_directory()`\n"
-          "\n"
-          "  * Gets the absolute path of the current working directory.\n"
-          "\n"
-          "  * Returns a string containing the path to the current working\n"
-          "    directory.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.filesystem.get_working_directory"), ::rocket::ref(args));
-          // Parse arguments.
-          if(reader.I().F()) {
-            // Call the binding function.
-            return std_filesystem_get_working_directory();
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.filesystem.get_working_directory"), ::rocket::ref(args));
+    // Parse arguments.
+    if(reader.I().F()) {
+      // Call the binding function.
+      return std_filesystem_get_working_directory();
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.filesystem.get_working_directory()`
+
+  * Gets the absolute path of the current working directory.
+
+  * Returns a string containing the path to the current working
+    directory.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.filesystem.get_information()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("get_information"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.filesystem.get_information(path)`\n"
-          "\n"
-          "  * Retrieves information of the file or directory designated by\n"
-          "    `path`.\n"
-          "\n"
-          "  * Returns an object consisting of the following members (names\n"
-          "    that start with `b_` are boolean values; names that start with\n"
-          "    `i_` are IDs as integers; names that start with `n_` are\n"
-          "    plain integers; names that start with `t_` are timestamps in\n"
-          "    UTC as integers):\n"
-          "\n"
-          "    * `i_dev`   unique device id on this machine.\n"
-          "    * `i_file`  unique file id on this device.\n"
-          "    * `n_ref`   number of hard links to this file.\n"
-          "    * `b_dir`   whether this is a directory.\n"
-          "    * `b_sym`   whether this is a symbolic link.\n"
-          "    * `n_size`  number of bytes this file contains.\n"
-          "    * `n_ocup`  number of bytes this file occupies.\n"
-          "    * `t_accs`  timestamp of last access.\n"
-          "    * `t_mod`   timestamp of last modification.\n"
-          "\n"
-          "    On failure, `null` is returned.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.filesystem.get_information"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval path;
-          if(reader.I().g(path).F()) {
-            // Call the binding function.
-            return std_filesystem_get_information(::rocket::move(path));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.filesystem.get_information"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval path;
+    if(reader.I().v(path).F()) {
+      // Call the binding function.
+      return std_filesystem_get_information(::rocket::move(path));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.filesystem.get_information(path)`
+
+  * Retrieves information of the file or directory designated by
+    `path`.
+
+  * Returns an object consisting of the following members (names
+    that start with `b_` are boolean values; names that start with
+    `i_` are IDs as integers; names that start with `n_` are
+    plain integers; names that start with `t_` are timestamps in
+    UTC as integers):
+
+    * `i_dev`   unique device id on this machine.
+    * `i_file`  unique file id on this device.
+    * `n_ref`   number of hard links to this file.
+    * `b_dir`   whether this is a directory.
+    * `b_sym`   whether this is a symbolic link.
+    * `n_size`  number of bytes this file contains.
+    * `n_ocup`  number of bytes this file occupies.
+    * `t_accs`  timestamp of last access.
+    * `t_mod`   timestamp of last modification.
+
+    On failure, `null` is returned.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.filesystem.remove_recursive()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("remove_recursive"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.filesystem.remove_recursive(path)`\n"
-          "\n"
-          "  * Removes the file or directory at `path`. If `path` designates a\n"
-          "    directory, all of its contents are removed recursively.\n"
-          "\n"
-          "  * Returns the number of files and directories that have been\n"
-          "    successfully removed in total. If `path` does not reference an\n"
-          "    existent file or directory, `0` is returned.\n"
-          "\n"
-          "  * Throws an exception if the file or directory at `path` cannot\n"
-          "    be removed.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.filesystem.remove_recursive"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval path;
-          if(reader.I().g(path).F()) {
-            // Call the binding function.
-            return std_filesystem_remove_recursive(::rocket::move(path));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.filesystem.remove_recursive"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval path;
+    if(reader.I().v(path).F()) {
+      // Call the binding function.
+      return std_filesystem_remove_recursive(::rocket::move(path));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.filesystem.move_from(path_new, path_old)`
+
+  * Moves (renames) the file or directory at `path_old` to
+    `path_new`.
+
+  * Returns `true`.
+
+  * Throws an exception on failure.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.filesystem.move_from(path_new, path_old)`
     //===================================================================
     result.insert_or_assign(::rocket::sref("move_from"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.filesystem.move_from(path_new, path_old)`\n"
-          "\n"
-          "  * Moves (renames) the file or directory at `path_old` to\n"
-          "    `path_new`.\n"
-          "\n"
-          "  * Returns `true`.\n"
-          "\n"
-          "  * Throws an exception on failure.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.filesystem.move_from"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval path_new;
-          Sval path_old;
-          if(reader.I().g(path_new).g(path_old).F()) {
-            // Call the binding function.
-            std_filesystem_move_from(path_new, path_old);
-            return true;
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.filesystem.move_from"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval path_new;
+    Sval path_old;
+    if(reader.I().v(path_new).v(path_old).F()) {
+      // Call the binding function.
+      std_filesystem_move_from(path_new, path_old);
+      return true;
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.filesystem.remove_recursive(path)`
+
+  * Removes the file or directory at `path`. If `path` designates a
+    directory, all of its contents are removed recursively.
+
+  * Returns the number of files and directories that have been
+    successfully removed in total. If `path` does not reference an
+    existent file or directory, `0` is returned.
+
+  * Throws an exception if the file or directory at `path` cannot
+    be removed.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.filesystem.directory_list()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("directory_list"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.filesystem.directory_list(path)`\n"
-          "\n"
-          "  * Lists the contents of the directory at `path`.\n"
-          "\n"
-          "  * Returns an object containing all entries of the directory at\n"
-          "    `path`, including the special subdirectories '.' and '..'. For\n"
-          "    each element, its key specifies the filename and the value is\n"
-          "    an object consisting of the following members (names that\n"
-          "    start with `b_` are boolean values; names that start with `i_`\n"
-          "    are IDs as integers):\n"
-          "\n"
-          "    * `b_dir`   whether this is a directory.\n"
-          "    * `b_sym`   whether this is a symbolic link.\n"
-          "\n"
-          "    If `path` references a non-existent directory, `null` is\n"
-          "    returned.\n"
-          "\n"
-          "  * Throws an exception if `path` designates a non-directory, or\n"
-          "    some other errors occur.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.filesystem.directory_list"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval path;
-          if(reader.I().g(path).F()) {
-            // Call the binding function.
-            return std_filesystem_directory_list(::rocket::move(path));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.filesystem.directory_list"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval path;
+    if(reader.I().v(path).F()) {
+      // Call the binding function.
+      return std_filesystem_directory_list(::rocket::move(path));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.filesystem.directory_list(path)`
+
+  * Lists the contents of the directory at `path`.
+
+  * Returns an object containing all entries of the directory at
+    `path`, including the special subdirectories '.' and '..'. For
+    each element, its key specifies the filename and the value is
+    an object consisting of the following members (names that
+    start with `b_` are boolean values; names that start with `i_`
+    are IDs as integers):
+
+    * `b_dir`   whether this is a directory.
+    * `b_sym`   whether this is a symbolic link.
+
+    If `path` references a non-existent directory, `null` is
+    returned.
+
+  * Throws an exception if `path` designates a non-directory, or
+    some other errors occur.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.filesystem.directory_create()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("directory_create"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.filesystem.directory_create(path)`\n"
-          "\n"
-          "  * Creates a directory at `path`. Its parent directory must exist\n"
-          "    and must be accessible. This function does not fail if either a\n"
-          "    directory or a symbolic link to a directory already exists on\n"
-          "    `path`.\n"
-          "\n"
-          "  * Returns `true` if a new directory has been created, or `false`\n"
-          "    if a directory already exists.\n"
-          "\n"
-          "  * Throws an exception if `path` designates a non-directory, or\n"
-          "    some other errors occur.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.filesystem.directory_create"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval path;
-          if(reader.I().g(path).F()) {
-            // Call the binding function.
-            return std_filesystem_directory_create(::rocket::move(path));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.filesystem.directory_create"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval path;
+    if(reader.I().v(path).F()) {
+      // Call the binding function.
+      return std_filesystem_directory_create(::rocket::move(path));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.filesystem.directory_create(path)`
+
+  * Creates a directory at `path`. Its parent directory must exist
+    and must be accessible. This function does not fail if either a
+    directory or a symbolic link to a directory already exists on
+    `path`.
+
+  * Returns `true` if a new directory has been created, or `false`
+    if a directory already exists.
+
+  * Throws an exception if `path` designates a non-directory, or
+    some other errors occur.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.filesystem.directory_remove()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("directory_remove"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.filesystem.directory_remove(path)`\n"
-          "\n"
-          "  * Removes the directory at `path`. The directory must be empty.\n"
-          "    This function fails if `path` does not designate a directory.\n"
-          "\n"
-          "  * Returns `true` if a directory has been removed successfully, or\n"
-          "    `false` if no such directory exists.\n"
-          "\n"
-          "  * Throws an exception if `path` designates a non-directory, or\n"
-          "    some other errors occur.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.filesystem.directory_remove"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval path;
-          if(reader.I().g(path).F()) {
-            // Call the binding function.
-            return std_filesystem_directory_remove(::rocket::move(path));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.filesystem.directory_remove"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval path;
+    if(reader.I().v(path).F()) {
+      // Call the binding function.
+      return std_filesystem_directory_remove(::rocket::move(path));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.filesystem.directory_remove(path)`
+
+  * Removes the directory at `path`. The directory must be empty.
+    This function fails if `path` does not designate a directory.
+
+  * Returns `true` if a directory has been removed successfully, or
+    `false` if no such directory exists.
+
+  * Throws an exception if `path` designates a non-directory, or
+    some other errors occur.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.filesystem.file_read()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("file_read"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.filesystem.file_read(path, [offset], [limit])`\n"
-          "\n"
-          "  * Reads the file at `path` in binary mode. The read operation\n"
-          "    starts from the byte offset that is denoted by `offset` if it\n"
-          "    is specified, or from the beginning of the file otherwise. If\n"
-          "    `limit` is specified, no more than this number of bytes will be\n"
-          "    read.\n"
-          "\n"
-          "  * Returns the bytes that have been read as a string, or `null` if\n"
-          "    the file does not exist.\n"
-          "\n"
-          "  * Throws an exception if `offset` is negative, or a read error\n"
-          "    occurs.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.filesystem.file_read"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval path;
-          Iopt offset;
-          Iopt limit;
-          if(reader.I().g(path).g(offset).g(limit).F()) {
-            // Call the binding function.
-            return std_filesystem_file_read(::rocket::move(path), ::rocket::move(offset), ::rocket::move(limit));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.filesystem.file_read"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval path;
+    Iopt offset;
+    Iopt limit;
+    if(reader.I().v(path).o(offset).o(limit).F()) {
+      // Call the binding function.
+      return std_filesystem_file_read(::rocket::move(path), ::rocket::move(offset), ::rocket::move(limit));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.filesystem.file_read(path, [offset], [limit])`
+
+  * Reads the file at `path` in binary mode. The read operation
+    starts from the byte offset that is denoted by `offset` if it
+    is specified, or from the beginning of the file otherwise. If
+    `limit` is specified, no more than this number of bytes will be
+    read.
+
+  * Returns the bytes that have been read as a string, or `null` if
+    the file does not exist.
+
+  * Throws an exception if `offset` is negative, or a read error
+    occurs.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.filesystem.file_stream()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("file_stream"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.filesystem.file_stream(path, callback, [offset], [limit])`\n"
-          "\n"
-          "  * Reads the file at `path` in binary mode and invokes `callback`\n"
-          "    with the data read repeatedly. `callback` shall be a binary\n"
-          "    function whose first argument is the absolute offset of the\n"
-          "    data block that has been read, and whose second argument is the\n"
-          "    bytes read and stored in a string. Data may be transferred in\n"
-          "    multiple blocks of variable sizes; the caller shall make no\n"
-          "    assumption about the number of times that `callback` will be\n"
-          "    called or the size of each individual block. The read operation\n"
-          "    starts from the byte offset that is denoted by `offset` if it\n"
-          "    is specified, or from the beginning of the file otherwise. If\n"
-          "    `limit` is specified, no more than this number of bytes will be\n"
-          "    read.\n"
-          "\n"
-          "  * Returns `true` if all data have been processed successfully, or\n"
-          "    `null` if the file does not exist.\n"
-          "\n"
-          "  * Throws an exception if `offset` is negative, or a read error\n"
-          "    occurs.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.filesystem.file_stream"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval path;
-          Fval callback;
-          Iopt offset;
-          Iopt limit;
-          if(reader.I().g(path).g(callback).g(offset).g(limit).F()) {
-            // Call the binding function.
-            return std_filesystem_file_stream(global, path, callback, offset, limit);
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.filesystem.file_stream"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval path;
+    Fval callback;
+    Iopt offset;
+    Iopt limit;
+    if(reader.I().v(path).v(callback).o(offset).o(limit).F()) {
+      // Call the binding function.
+      return std_filesystem_file_stream(global, path, callback, offset, limit);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.filesystem.file_stream(path, callback, [offset], [limit])`
+
+  * Reads the file at `path` in binary mode and invokes `callback`
+    with the data read repeatedly. `callback` shall be a binary
+    function whose first argument is the absolute offset of the
+    data block that has been read, and whose second argument is the
+    bytes read and stored in a string. Data may be transferred in
+    multiple blocks of variable sizes; the caller shall make no
+    assumption about the number of times that `callback` will be
+    called or the size of each individual block. The read operation
+    starts from the byte offset that is denoted by `offset` if it
+    is specified, or from the beginning of the file otherwise. If
+    `limit` is specified, no more than this number of bytes will be
+    read.
+
+  * Returns the number of bytes that have been read and processed
+    as an integer, or `null` if the file does not exist.
+
+  * Throws an exception if `offset` is negative, or a read error
+    occurs.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.filesystem.file_write()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("file_write"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.filesystem.file_write(path, data, [offset])`\n"
-          "\n"
-          "  * Writes the file at `path` in binary mode. The write operation\n"
-          "    starts from the byte offset that is denoted by `offset` if it\n"
-          "    is specified, or from the beginning of the file otherwise. The\n"
-          "    file is truncated to this length before the write operation;\n"
-          "    any existent contents after the write point are discarded. This\n"
-          "    function fails if the data can only be written partially.\n"
-          "\n"
-          "  * Returns `true` if all data have been written successfully.\n"
-          "\n"
-          "  * Throws an exception if `offset` is negative, or a write error\n"
-          "    occurs.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.filesystem.file_write"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval path;
-          Sval data;
-          Iopt offset;
-          if(reader.I().g(path).g(data).g(offset).F()) {
-            // Call the binding function.
-            std_filesystem_file_write(path, data, offset);
-            return true;
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.filesystem.file_write"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval path;
+    Sval data;
+    Iopt offset;
+    if(reader.I().v(path).v(data).o(offset).F()) {
+      // Call the binding function.
+      std_filesystem_file_write(path, data, offset);
+      return true;
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.filesystem.file_write(path, data, [offset])`
+
+  * Writes the file at `path` in binary mode. The write operation
+    starts from the byte offset that is denoted by `offset` if it
+    is specified, or from the beginning of the file otherwise. The
+    file is truncated to this length before the write operation;
+    any existent contents after the write point are discarded. This
+    function fails if the data can only be written partially.
+
+  * Returns `true` if all data have been written successfully.
+
+  * Throws an exception if `offset` is negative, or a write error
+    occurs.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.filesystem.file_append()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("file_append"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.filesystem.file_append(path, data)`\n"
-          "\n"
-          "  * Writes the file at `path` in binary mode. The write operation\n"
-          "    starts from the end of the file; existent contents of the file\n"
-          "    are left intact. If `exclusive` is `true` and a file exists on\n"
-          "    `path`, this function fails. This function also fails if the\n"
-          "    data can only be written partially.\n"
-          "\n"
-          "  * Returns `true` if all data have been written successfully.\n"
-          "\n"
-          "  * Throws an exception if `offset` is negative, or a write error\n"
-          "    occurs.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.filesystem.file_append"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval path;
-          Sval data;
-          Bopt exclusive;
-          if(reader.I().g(path).g(data).g(exclusive).F()) {
-            // Call the binding function.
-            std_filesystem_file_append(path, data, exclusive);
-            return true;
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.filesystem.file_append"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval path;
+    Sval data;
+    Bopt exclusive;
+    if(reader.I().v(path).v(data).o(exclusive).F()) {
+      // Call the binding function.
+      std_filesystem_file_append(path, data, exclusive);
+      return true;
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.filesystem.file_append(path, data, [exclusive])`
+
+  * Writes the file at `path` in binary mode. The write operation
+    starts from the end of the file; existent contents of the file
+    are left intact. If `exclusive` is `true` and a file exists on
+    `path`, this function fails. This function also fails if the
+    data can only be written partially.
+
+  * Returns `true` if all data have been written successfully.
+
+  * Throws an exception if `offset` is negative, or a write error
+    occurs.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.filesystem.file_copy_from(path_new, path_old)`
     //===================================================================
     result.insert_or_assign(::rocket::sref("file_copy_from"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.filesystem.file_copy_from(path_new, path_old)`\n"
-          "\n"
-          "  * Copies the file `path_old` to `path_new`. If `path_old` is a\n"
-          "    symbolic link, it is the target that will be copied, rather\n"
-          "    than the symbolic link itself. This function fails if\n"
-          "    `path_old` designates a directory.\n"
-          "\n"
-          "  * Returns `true` on success, or `null` on failure.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.filesystem.file_copy_from"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval path_new;
-          Sval path_old;
-          if(reader.I().g(path_new).g(path_old).F()) {
-            // Call the binding function.
-            std_filesystem_file_copy_from(path_new, path_old);
-            return true;
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.filesystem.file_copy_from"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval path_new;
+    Sval path_old;
+    if(reader.I().v(path_new).v(path_old).F()) {
+      // Call the binding function.
+      std_filesystem_file_copy_from(path_new, path_old);
+      return true;
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.filesystem.file_copy_from(path_new, path_old)`
+
+  * Copies the file `path_old` to `path_new`. If `path_old` is a
+    symbolic link, it is the target that will be copied, rather
+    than the symbolic link itself. This function fails if
+    `path_old` designates a directory.
+
+  * Returns `true`.
+
+  * Throws an exception on failure.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.filesystem.file_remove()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("file_remove"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.filesystem.file_remove(path)`\n"
-          "\n"
-          "  * Removes the file at `path`. This function fails if `path`\n"
-          "    designates a directory.\n"
-          "\n"
-          "  * Returns `true` if a file has been removed successfully, or\n"
-          "    `false` if no such file exists.\n"
-          "\n"
-          "  * Throws an exception if `path` designates a directory, or some\n"
-          "    other errors occur.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.filesystem.file_remove"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval path;
-          if(reader.I().g(path).F()) {
-            // Call the binding function.
-            return std_filesystem_file_remove(path);
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.filesystem.file_remove"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval path;
+    if(reader.I().v(path).F()) {
+      // Call the binding function.
+      return std_filesystem_file_remove(path);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.filesystem.file_remove(path)`
+
+  * Removes the file at `path`. This function fails if `path`
+    designates a directory.
+
+  * Returns `true` if a file has been removed successfully, or
+    `false` if no such file exists.
+
+  * Throws an exception if `path` designates a directory, or some
+    other errors occur.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // End of `std.filesystem`

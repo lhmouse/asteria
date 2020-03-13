@@ -17,7 +17,7 @@ void Abstract_Hooks::on_variable_declare(const Source_Location& /*sloc*/, const 
   }
 
 void Abstract_Hooks::on_function_call(const Source_Location& /*sloc*/, const cow_string& /*inside*/,
-                                      const rcptr<Abstract_Function>& /*target*/)
+                                      const cow_function& /*target*/)
   {
   }
 

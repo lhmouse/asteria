@@ -3,7 +3,6 @@
 
 #include "../precompiled.hpp"
 #include "bindings_debug.hpp"
-#include "simple_binding_wrapper.hpp"
 #include "../runtime/argument_reader.hpp"
 #include "../utilities.hpp"
 
@@ -22,8 +21,9 @@ Iopt std_debug_print(Sval templ, cow_vector<Value> values)
     // Prepare inserters.
     cow_vector<::rocket::formatter> insts;
     insts.reserve(values.size());
-    for(size_t i = 0;  i < values.size();  ++i)
+    for(size_t i = 0;  i < values.size();  ++i) {
       insts.push_back({ do_print_value, values.data() + i });
+    }
     // Compose the string into a stream.
     ::rocket::tinyfmt_str fmt;
     vformat(fmt, templ.data(), templ.size(), insts.data(), insts.size());
@@ -54,65 +54,61 @@ void create_bindings_debug(Oval& result, API_Version /*version*/)
     // `std.debug.print()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("print"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.debug.print(...)`\n"
-          "\n"
-          "  * Compose a string in the same way as `std.string.format()`, but\n"
-          "    instead of returning it, write it to standard error. A line\n"
-          "    break is appended to terminate the line.\n"
-          "\n"
-          "  * Returns the number of bytes written if the operation succeeds,\n"
-          "    or `null` otherwise.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.debug.print"), ::rocket::ref(args));
-          // Parse variadic arguments.
-          Sval templ;
-          cow_vector<Value> values;
-          if(reader.I().g(templ).F(values)) {
-            // Call the binding function.
-            return std_debug_print(templ, values);
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.debug.print"), ::rocket::ref(args));
+    // Parse variadic arguments.
+    Sval templ;
+    cow_vector<Value> values;
+    if(reader.I().v(templ).F(values)) {
+      // Call the binding function.
+      return std_debug_print(templ, values);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.debug.print(templ, ...)`
+
+  * Compose a string in the same way as `std.string.format()`, but
+    instead of returning it, write it to standard error. A line
+    break is appended to terminate the line.
+
+  * Returns the number of bytes written if the operation succeeds,
+    or `null` otherwise.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.debug.dump()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("dump"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.debug.dump(value, [indent])`\n"
-          "\n"
-          "  * Prints the value to standard error with detailed information.\n"
-          "    `indent` specifies the number of spaces to use as a single\n"
-          "    level of indent. Its value is clamped between `0` and `10`\n"
-          "    inclusively. If it is set to `0`, no line break is inserted and\n"
-          "    output lines are not indented. It has a default value of `2`.\n"
-          "\n"
-          "  * Returns the number of bytes written if the operation succeeds,\n"
-          "    or `null` otherwise.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.debug.dump"), ::rocket::ref(args));
-          // Parse arguments.
-          Value value;
-          Iopt indent;
-          if(reader.I().g(value).g(indent).F()) {
-            // Call the binding function.
-            return std_debug_dump(value, indent);
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.debug.dump"), ::rocket::ref(args));
+    // Parse arguments.
+    Value value;
+    Iopt indent;
+    if(reader.I().o(value).o(indent).F()) {
+      // Call the binding function.
+      return std_debug_dump(value, indent);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.debug.dump(value, [indent])`
+
+  * Prints the value to standard error with detailed information.
+    `indent` specifies the number of spaces to use as a single
+    level of indent. Its value is clamped between `0` and `10`
+    inclusively. If it is set to `0`, no line break is inserted and
+    output lines are not indented. It has a default value of `2`.
+
+  * Returns the number of bytes written if the operation succeeds,
+    or `null` otherwise.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // End of `std.debug`

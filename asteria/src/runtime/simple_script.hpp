@@ -5,7 +5,6 @@
 #define ASTERIA_RUNTIME_SIMPLE_SCRIPT_HPP_
 
 #include "../fwd.hpp"
-#include "../abstract_function.hpp"
 
 namespace Asteria {
 
@@ -14,7 +13,7 @@ class Simple_Script
   private:
     cow_vector<phsh_string> m_params;  // constant
     Compiler_Options m_opts = { };
-    rcptr<Abstract_Function> m_cptr;  // note type erasure
+    cow_function m_func;  // note type erasure
 
   public:
     Simple_Script() noexcept
@@ -41,11 +40,11 @@ class Simple_Script
 
     explicit operator bool () const noexcept
       {
-        return bool(this->m_cptr);
+        return bool(this->m_func);
       }
     Simple_Script& clear() noexcept
       {
-        return this->m_cptr.reset(), *this;
+        return this->m_func.reset(), *this;
       }
 
     Simple_Script& reload(tinybuf& cbuf, const cow_string& name = ::rocket::sref("<unnamed>"));

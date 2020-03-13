@@ -239,13 +239,13 @@ tinyfmt& Value::print(tinyfmt& fmt, bool escape) const
     case vtype_opaque: {
         const auto& altr = this->m_stor.as<vtype_opaque>();
         // <opaque> [[`my opaque`]]
-        fmt << "<opaque> [[`" << *altr << "`]]";
+        fmt << "<opaque> [[`" << altr << "`]]";
         return fmt;
       }
     case vtype_function: {
         const auto& altr = this->m_stor.as<vtype_function>();
         // <function> [[`my function`]]
-        fmt << "<function> [[`" << *altr << "`]]";
+        fmt << "<function> [[`" << altr << "`]]";
         return fmt;
       }
     case vtype_array: {
@@ -305,13 +305,13 @@ tinyfmt& Value::dump(tinyfmt& fmt, size_t indent, size_t hanging) const
     case vtype_opaque: {
         const auto& altr = this->m_stor.as<vtype_opaque>();
         // opaque("typeid") [[`my opaque`]]
-        fmt << "opaque(" << quote(typeid(*altr).name()) << ") [[`" << *altr << "`]]";
+        fmt << "opaque(" << quote(altr.type().name()) << ") [[`" << altr << "`]]";
         return fmt;
       }
     case vtype_function: {
         const auto& altr = this->m_stor.as<vtype_function>();
         // function("typeid") [[`my function`]]
-        fmt << "function(" << quote(typeid(*altr).name()) << ") [[`" << *altr << "`]]";
+        fmt << "function(" << quote(altr.type().name()) << ") [[`" << altr << "`]]";
         return fmt;
       }
     case vtype_array: {
@@ -364,19 +364,19 @@ Variable_Callback& Value::enumerate_variables(Variable_Callback& callback) const
         return callback;
       }
     case vtype_opaque: {
-        return this->m_stor.as<vtype_opaque>()->enumerate_variables(callback);
+        return this->m_stor.as<vtype_opaque>().enumerate_variables(callback);
       }
     case vtype_function: {
-        return this->m_stor.as<vtype_function>()->enumerate_variables(callback);
+        return this->m_stor.as<vtype_function>().enumerate_variables(callback);
       }
     case vtype_array: {
         ::rocket::for_each(this->m_stor.as<vtype_array>(),
-                           [&](const auto& elem) { elem.enumerate_variables(callback);  });
+                     [&](const auto& elem) { elem.enumerate_variables(callback);  });
         return callback;
       }
     case vtype_object: {
         ::rocket::for_each(this->m_stor.as<vtype_object>(),
-                           [&](const auto& pair) { pair.second.enumerate_variables(callback);  });
+                     [&](const auto& pair) { pair.second.enumerate_variables(callback);  });
         return callback;
       }
     default:

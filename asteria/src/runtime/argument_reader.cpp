@@ -152,7 +152,7 @@ bool Argument_Reader::F()
     return true;
   }
 
-Argument_Reader& Argument_Reader::g(Bval& xval)
+Argument_Reader& Argument_Reader::v(Bval& xval)
   {
     this->do_record_parameter_required(vtype_boolean);
     // Get the next argument.
@@ -174,7 +174,7 @@ Argument_Reader& Argument_Reader::g(Bval& xval)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Ival& xval)
+Argument_Reader& Argument_Reader::v(Ival& xval)
   {
     this->do_record_parameter_required(vtype_integer);
     // Get the next argument.
@@ -196,7 +196,7 @@ Argument_Reader& Argument_Reader::g(Ival& xval)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Rval& xval)
+Argument_Reader& Argument_Reader::v(Rval& xval)
   {
     this->do_record_parameter_required(vtype_real);
     // Get the next argument.
@@ -218,7 +218,7 @@ Argument_Reader& Argument_Reader::g(Rval& xval)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Sval& xval)
+Argument_Reader& Argument_Reader::v(Sval& xval)
   {
     this->do_record_parameter_required(vtype_string);
     // Get the next argument.
@@ -240,7 +240,7 @@ Argument_Reader& Argument_Reader::g(Sval& xval)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Pval& xval)
+Argument_Reader& Argument_Reader::v(Pval& xval)
   {
     this->do_record_parameter_required(vtype_opaque);
     // Get the next argument.
@@ -262,7 +262,7 @@ Argument_Reader& Argument_Reader::g(Pval& xval)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Fval& xval)
+Argument_Reader& Argument_Reader::v(Fval& xval)
   {
     this->do_record_parameter_required(vtype_function);
     // Get the next argument.
@@ -284,7 +284,7 @@ Argument_Reader& Argument_Reader::g(Fval& xval)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Aval& xval)
+Argument_Reader& Argument_Reader::v(Aval& xval)
   {
     this->do_record_parameter_required(vtype_array);
     // Get the next argument.
@@ -306,7 +306,7 @@ Argument_Reader& Argument_Reader::g(Aval& xval)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Oval& xval)
+Argument_Reader& Argument_Reader::v(Oval& xval)
   {
     this->do_record_parameter_required(vtype_object);
     // Get the next argument.
@@ -328,7 +328,7 @@ Argument_Reader& Argument_Reader::g(Oval& xval)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Reference& ref)
+Argument_Reader& Argument_Reader::o(Reference& ref)
   {
     this->do_record_parameter_generic();
     // Get the next argument.
@@ -342,7 +342,7 @@ Argument_Reader& Argument_Reader::g(Reference& ref)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Value& val)
+Argument_Reader& Argument_Reader::o(Value& val)
   {
     this->do_record_parameter_generic();
     // Get the next argument.
@@ -356,7 +356,7 @@ Argument_Reader& Argument_Reader::g(Value& val)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Bopt& xopt)
+Argument_Reader& Argument_Reader::o(Bopt& xopt)
   {
     this->do_record_parameter_optional(vtype_boolean);
     // Get the next argument.
@@ -383,7 +383,7 @@ Argument_Reader& Argument_Reader::g(Bopt& xopt)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Iopt& xopt)
+Argument_Reader& Argument_Reader::o(Iopt& xopt)
   {
     this->do_record_parameter_optional(vtype_integer);
     // Get the next argument.
@@ -410,7 +410,7 @@ Argument_Reader& Argument_Reader::g(Iopt& xopt)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Ropt& xopt)
+Argument_Reader& Argument_Reader::o(Ropt& xopt)
   {
     this->do_record_parameter_optional(vtype_real);
     // Get the next argument.
@@ -437,7 +437,7 @@ Argument_Reader& Argument_Reader::g(Ropt& xopt)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Sopt& xopt)
+Argument_Reader& Argument_Reader::o(Sopt& xopt)
   {
     this->do_record_parameter_optional(vtype_string);
     // Get the next argument.
@@ -464,7 +464,7 @@ Argument_Reader& Argument_Reader::g(Sopt& xopt)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Popt& xopt)
+Argument_Reader& Argument_Reader::o(Popt& xopt)
   {
     this->do_record_parameter_optional(vtype_opaque);
     // Get the next argument.
@@ -491,7 +491,7 @@ Argument_Reader& Argument_Reader::g(Popt& xopt)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Fopt& xopt)
+Argument_Reader& Argument_Reader::o(Fopt& xopt)
   {
     this->do_record_parameter_optional(vtype_function);
     // Get the next argument.
@@ -518,7 +518,7 @@ Argument_Reader& Argument_Reader::g(Fopt& xopt)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Aopt& xopt)
+Argument_Reader& Argument_Reader::o(Aopt& xopt)
   {
     this->do_record_parameter_optional(vtype_array);
     // Get the next argument.
@@ -545,7 +545,7 @@ Argument_Reader& Argument_Reader::g(Aopt& xopt)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Oopt& xopt)
+Argument_Reader& Argument_Reader::o(Oopt& xopt)
   {
     this->do_record_parameter_optional(vtype_object);
     // Get the next argument.

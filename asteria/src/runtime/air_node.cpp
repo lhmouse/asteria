@@ -840,7 +840,7 @@ AIR_Status do_coalescence(Executive_Context& ctx, ParamU pu, const void* pv)
   }
 
 ROCKET_NOINLINE Reference& do_invoke_nontail(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
-                                             const rcptr<Abstract_Function>& target, cow_vector<Reference>&& args)
+                                             const cow_function& target, cow_vector<Reference>&& args)
   {
     // Call the hook function if any.
     const auto& inside = ctx.zvarg()->func();
@@ -850,7 +850,7 @@ ROCKET_NOINLINE Reference& do_invoke_nontail(Reference& self, const Source_Locat
     }
     // Perform a non-tail call.
     ASTERIA_RUNTIME_TRY {
-      target->invoke(self, ctx.global(), ::rocket::move(args));
+      target.invoke(self, ctx.global(), ::rocket::move(args));
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
       // Append the current frame and rethrow the exception.
@@ -869,19 +869,19 @@ ROCKET_NOINLINE Reference& do_invoke_nontail(Reference& self, const Source_Locat
   }
 
 ROCKET_NOINLINE Reference& do_wrap_ptc(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
-                                       const rcptr<Abstract_Function>& target, PTC_Aware ptc,
+                                       const cow_function& target, PTC_Aware ptc,
                                        cow_vector<Reference>&& args)
   {
     // Pack arguments for this proper tail call.
     auto tca = ::rocket::make_refcnt<PTC_Arguments>(sloc, ctx.zvarg(), ptc, target,
-                                              ::rocket::move(args.insert(args.size(), ::rocket::move(self))));
+                                        ::rocket::move(args.insert(args.size(), ::rocket::move(self))));
     // Return it.
     Reference_root::S_tail_call xref = { ::rocket::move(tca) };
     return self = ::rocket::move(xref);
   }
 
 AIR_Status do_function_call_common(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
-                                   const rcptr<Abstract_Function>& target, PTC_Aware ptc,
+                                   const cow_function& target, PTC_Aware ptc,
                                    cow_vector<Reference>&& args)
   {
     if(ROCKET_EXPECT(ptc == ptc_aware_none)) {

@@ -116,8 +116,6 @@ pkginclude_HEADERS =  \
   asteria/src/precompiled.hpp  \
   asteria/src/fwd.hpp  \
   asteria/src/utilities.hpp  \
-  asteria/src/abstract_opaque.hpp  \
-  asteria/src/abstract_function.hpp  \
   asteria/src/recursion_sentry.hpp  \
   asteria/src/value.hpp  \
   asteria/src/source_location.hpp
@@ -167,7 +165,6 @@ pkginclude_compiler_HEADERS =  \
 
 pkginclude_librarydir = ${pkgincludedir}/library
 pkginclude_library_HEADERS =  \
-  asteria/src/library/simple_binding_wrapper.hpp  \
   asteria/src/library/bindings_version.hpp  \
   asteria/src/library/bindings_gc.hpp  \
   asteria/src/library/bindings_debug.hpp  \
@@ -184,8 +181,6 @@ pkginclude_library_HEADERS =  \
 lib_libasteria_la_SOURCES =  \
   asteria/src/fwd.cpp  \
   asteria/src/utilities.cpp  \
-  asteria/src/abstract_opaque.cpp  \
-  asteria/src/abstract_function.cpp  \
   asteria/src/recursion_sentry.cpp  \
   asteria/src/value.cpp  \
   asteria/src/source_location.cpp  \
@@ -223,7 +218,6 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/compiler/statement.cpp  \
   asteria/src/compiler/infix_element.cpp  \
   asteria/src/compiler/statement_sequence.cpp  \
-  asteria/src/library/simple_binding_wrapper.cpp  \
   asteria/src/library/bindings_version.cpp  \
   asteria/src/library/bindings_gc.cpp  \
   asteria/src/library/bindings_debug.cpp  \

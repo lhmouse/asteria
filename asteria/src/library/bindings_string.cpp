@@ -3,7 +3,6 @@
 
 #include "../precompiled.hpp"
 #include "bindings_string.hpp"
-#include "simple_binding_wrapper.hpp"
 #include "../runtime/argument_reader.hpp"
 #include "../utilities.hpp"
 #include <regex>
@@ -1619,2150 +1618,2041 @@ void create_bindings_string(Oval& result, API_Version /*version*/)
     // `std.string.slice()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("slice"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.slice(text, from, [length])`\n"
-          "\n"
-          "  * Copies a subrange of `text` to create a new byte string. Bytes\n"
-          "    are copied from `from` if it is non-negative, or from\n"
-          "    `lengthof(text) + from` otherwise. If `length` is set to an\n"
-          "    integer, no more than this number of bytes will be copied. If\n"
-          "    it is absent, all bytes from `from` to the end of `text` will\n"
-          "    be copied. If `from` is outside `text`, an empty string is\n"
-          "    returned.\n"
-          "\n"
-          "  * Returns the specified substring of `text`.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.slice"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          Ival from;
-          Iopt length;
-          if(reader.I().g(text).g(from).g(length).F()) {
-            // Call the binding function.
-            return std_string_slice(::rocket::move(text), ::rocket::move(from), ::rocket::move(length));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.slice"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    Ival from;
+    Iopt length;
+    if(reader.I().v(text).v(from).o(length).F()) {
+      // Call the binding function.
+      return std_string_slice(::rocket::move(text), ::rocket::move(from), ::rocket::move(length));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.slice(text, from, [length])`
+
+  * Copies a subrange of `text` to create a new byte string. Bytes
+    are copied from `from` if it is non-negative, or from
+    `lengthof(text) + from` otherwise. If `length` is set to an
+    integer, no more than this number of bytes will be copied. If
+    it is absent, all bytes from `from` to the end of `text` will
+    be copied. If `from` is outside `text`, an empty string is
+    returned.
+
+  * Returns the specified substring of `text`.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.replace_slice()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("replace_slice"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.replace_slice(text, from, replacement)`\n"
-          "\n"
-          "  * Replaces all bytes from `from` to the end of `text` with\n"
-          "    `replacement` and returns the new byte string. If `from` is\n"
-          "    negative, it specifies an offset from the end of `text`. This\n"
-          "    function returns a new string without modifying `text`.\n"
-          "\n"
-          "  * Returns a string with the subrange replaced.\n"
-          "\n"
-          "`std.string.replace_slice(text, from, [length], replacement)`\n"
-          "\n"
-          "  * Replaces a subrange of `text` with `replacement` to create a\n"
-          "    new byte string. `from` specifies the start of the subrange to\n"
-          "    replace. If `from` is negative, it specifies an offset from the\n"
-          "    end of `text`. `length` specifies the maximum number of bytes\n"
-          "    to replace. If it is set to `null`, this function is equivalent\n"
-          "    to `replace_slice(text, from, replacement)`. This function\n"
-          "    returns a new string without modifying `text`.\n"
-          "\n"
-          "  * Returns a string with the subrange replaced.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.replace"), ::rocket::ref(args));
-          Argument_Reader::State state;
-          // Parse arguments.
-          Sval text;
-          Ival from;
-          Sval replacement;
-          if(reader.I().g(text).g(from).S(state).g(replacement).F()) {
-            // Call the binding function.
-            return std_string_replace_slice(::rocket::move(text), ::rocket::move(from), ::rocket::move(replacement));
-          }
-          Iopt length;
-          if(reader.L(state).g(length).g(replacement).F()) {
-            // Call the binding function.
-            return std_string_replace_slice(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
-                                            ::rocket::move(replacement));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.replace"), ::rocket::ref(args));
+    Argument_Reader::State state;
+    // Parse arguments.
+    Sval text;
+    Ival from;
+    Sval replacement;
+    if(reader.I().v(text).v(from).S(state).v(replacement).F()) {
+      // Call the binding function.
+      return std_string_replace_slice(::rocket::move(text), ::rocket::move(from), ::rocket::move(replacement));
+    }
+    Iopt length;
+    if(reader.L(state).o(length).v(replacement).F()) {
+      // Call the binding function.
+      return std_string_replace_slice(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
+                                      ::rocket::move(replacement));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.replace_slice(text, from, replacement)`
+
+  * Replaces all bytes from `from` to the end of `text` with
+    `replacement` and returns the new byte string. If `from` is
+    negative, it specifies an offset from the end of `text`. This
+    function returns a new string without modifying `text`.
+
+  * Returns a string with the subrange replaced.
+
+`std.string.replace_slice(text, from, [length], replacement)`
+
+  * Replaces a subrange of `text` with `replacement` to create a
+    new byte string. `from` specifies the start of the subrange to
+    replace. If `from` is negative, it specifies an offset from the
+    end of `text`. `length` specifies the maximum number of bytes
+    to replace. If it is set to `null`, this function is equivalent
+    to `replace_slice(text, from, replacement)`. This function
+    returns a new string without modifying `text`.
+
+  * Returns a string with the subrange replaced.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.compare()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("compare"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.compare(text1, text2, [length])`\n"
-          "\n"
-          "  * Performs lexicographical comparison on two byte strings. If\n"
-          "    `length` is set to an integer, no more than this number of\n"
-          "    bytes are compared. This function behaves like the `strncmp()`\n"
-          "    function in C, except that null characters do not terminate\n"
-          "    strings.\n"
-          "\n"
-          "  * Returns a positive integer if `text1` compares greater than\n"
-          "    `text2`, a negative integer if `text1` compares less than\n"
-          "    `text2`, or zero if `text1` compares equal to `text2`.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.compare"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text1;
-          Sval text2;
-          Iopt length;
-          if(reader.I().g(text1).g(text2).g(length).F()) {
-            // Call the binding function.
-            return std_string_compare(::rocket::move(text1), ::rocket::move(text2), ::rocket::move(length));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.compare"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text1;
+    Sval text2;
+    Iopt length;
+    if(reader.I().v(text1).v(text2).o(length).F()) {
+      // Call the binding function.
+      return std_string_compare(::rocket::move(text1), ::rocket::move(text2), ::rocket::move(length));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.compare(text1, text2, [length])`
+
+  * Performs lexicographical comparison on two byte strings. If
+    `length` is set to an integer, no more than this number of
+    bytes are compared. This function behaves like the `strncmp()`
+    function in C, except that null characters do not terminate
+    strings.
+
+  * Returns a positive integer if `text1` compares greater than
+    `text2`, a negative integer if `text1` compares less than
+    `text2`, or zero if `text1` compares equal to `text2`.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.starts_with()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("starts_with"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.starts_with(text, prefix)`\n"
-          "\n"
-          "  * Checks whether `prefix` is a prefix of `text`. The empty\n"
-          "    string is considered to be a prefix of any string.\n"
-          "\n"
-          "  * Returns `true` if `prefix` is a prefix of `text`, or `false`\n"
-          "    otherwise.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.starts_with"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          Sval prefix;
-          if(reader.I().g(text).g(prefix).F()) {
-            // Call the binding function.
-            return std_string_starts_with(::rocket::move(text), ::rocket::move(prefix));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.starts_with"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    Sval prefix;
+    if(reader.I().v(text).v(prefix).F()) {
+      // Call the binding function.
+      return std_string_starts_with(::rocket::move(text), ::rocket::move(prefix));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.starts_with(text, prefix)`
+
+  * Checks whether `prefix` is a prefix of `text`. The empty
+    string is considered to be a prefix of any string.
+
+  * Returns `true` if `prefix` is a prefix of `text`, or `false`
+    otherwise.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.ends_with()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("ends_with"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.ends_with(text, suffix)`\n"
-          "\n"
-          "  * Checks whether `suffix` is a suffix of `text`. The empty\n"
-          "    string is considered to be a suffix of any string.\n"
-          "\n"
-          "  * Returns `true` if `suffix` is a suffix of `text`, or `false`\n"
-          "    otherwise.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.ends_with"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          Sval suffix;
-          if(reader.I().g(text).g(suffix).F()) {
-            // Call the binding function.
-            return std_string_ends_with(::rocket::move(text), ::rocket::move(suffix));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.ends_with"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    Sval suffix;
+    if(reader.I().v(text).v(suffix).F()) {
+      // Call the binding function.
+      return std_string_ends_with(::rocket::move(text), ::rocket::move(suffix));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.ends_with(text, suffix)`
+
+  * Checks whether `suffix` is a suffix of `text`. The empty
+    string is considered to be a suffix of any string.
+
+  * Returns `true` if `suffix` is a suffix of `text`, or `false`
+    otherwise.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.find()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("find"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.find(text, pattern)`\n"
-          "\n"
-          "  * Searches `text` for the first occurrence of `pattern`.\n"
-          "\n"
-          "  * Returns the subscript of the first byte of the first match of\n"
-          "    `pattern` in `text` if one is found, which is always\n"
-          "    non-negative, or `null` otherwise.\n"
-          "\n"
-          "`std.string.find(text, from, pattern)`\n"
-          "\n"
-          "  * Searches `text` for the first occurrence of `pattern`. The\n"
-          "    search operation is performed on the same subrange that would\n"
-          "    be returned by `slice(text, from)`.\n"
-          "\n"
-          "  * Returns the subscript of the first byte of the first match of\n"
-          "    `pattern` in `text` if one is found, which is always\n"
-          "    non-negative, or `null` otherwise.\n"
-          "\n"
-          "`std.string.find(text, from, [length], pattern)`\n"
-          "\n"
-          "  * Searches `text` for the first occurrence of `pattern`. The\n"
-          "    search operation is performed on the same subrange that would\n"
-          "    be returned by `slice(text, from, length)`.\n"
-          "\n"
-          "  * Returns the subscript of the first byte of the first match of\n"
-          "    `pattern` in `text` if one is found, which is always\n"
-          "    non-negative, or `null` otherwise.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.find"), ::rocket::ref(args));
-          Argument_Reader::State state;
-          // Parse arguments.
-          Sval text;
-          Sval pattern;
-          if(reader.I().g(text).S(state).g(pattern).F()) {
-            // Call the binding function.
-            return std_string_find(::rocket::move(text), ::rocket::move(pattern));
-          }
-          Ival from;
-          if(reader.L(state).g(from).S(state).g(pattern).F()) {
-            // Call the binding function.
-            return std_string_find(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern));
-          }
-          Iopt length;
-          if(reader.L(state).g(length).g(pattern).F()) {
-            // Call the binding function.
-            return std_string_find(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
-                                   ::rocket::move(pattern));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.find"), ::rocket::ref(args));
+    Argument_Reader::State state;
+    // Parse arguments.
+    Sval text;
+    Sval pattern;
+    if(reader.I().v(text).S(state).v(pattern).F()) {
+      // Call the binding function.
+      return std_string_find(::rocket::move(text), ::rocket::move(pattern));
+    }
+    Ival from;
+    if(reader.L(state).v(from).S(state).v(pattern).F()) {
+      // Call the binding function.
+      return std_string_find(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern));
+    }
+    Iopt length;
+    if(reader.L(state).o(length).v(pattern).F()) {
+      // Call the binding function.
+      return std_string_find(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
+                             ::rocket::move(pattern));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.find(text, pattern)`
+
+  * Searches `text` for the first occurrence of `pattern`.
+
+  * Returns the subscript of the first byte of the first match of
+    `pattern` in `text` if one is found, which is always
+    non-negative, or `null` otherwise.
+
+`std.string.find(text, from, pattern)`
+
+  * Searches `text` for the first occurrence of `pattern`. The
+    search operation is performed on the same subrange that would
+    be returned by `slice(text, from)`.
+
+  * Returns the subscript of the first byte of the first match of
+    `pattern` in `text` if one is found, which is always
+    non-negative, or `null` otherwise.
+
+`std.string.find(text, from, [length], pattern)`
+
+  * Searches `text` for the first occurrence of `pattern`. The
+    search operation is performed on the same subrange that would
+    be returned by `slice(text, from, length)`.
+
+  * Returns the subscript of the first byte of the first match of
+    `pattern` in `text` if one is found, which is always
+    non-negative, or `null` otherwise.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.rfind()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("rfind"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.rfind(text, pattern)`\n"
-          "\n"
-          "  * Searches `text` for the last occurrence of `pattern`.\n"
-          "\n"
-          "  * Returns the subscript of the first byte of the last match of\n"
-          "    `pattern` in `text` if one is found, which is always\n"
-          "    non-negative, or `null` otherwise.\n"
-          "\n"
-          "`std.string.rfind(text, from, pattern)`\n"
-          "\n"
-          "  * Searches `text` for the last occurrence of `pattern`. The\n"
-          "    search operation is performed on the same subrange that would\n"
-          "    be returned by `slice(text, from)`.\n"
-          "\n"
-          "  * Returns the subscript of the first byte of the last match of\n"
-          "    `pattern` in `text` if one is found, which is always\n"
-          "    non-negative, or `null` otherwise.\n"
-          "\n"
-          "`std.string.rfind(text, from, [length], pattern)`\n"
-          "\n"
-          "  * Searches `text` for the last occurrence of `pattern`.\n"
-          "\n"
-          "  * Returns the subscript of the first byte of the last match of\n"
-          "    `pattern` in `text` if one is found, which is always\n"
-          "    non-negative, or `null` otherwise.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.rfind"), ::rocket::ref(args));
-          Argument_Reader::State state;
-          // Parse arguments.
-          Sval text;
-          Sval pattern;
-          if(reader.I().g(text).S(state).g(pattern).F()) {
-            // Call the binding function.
-            return std_string_rfind(::rocket::move(text), ::rocket::move(pattern));
-          }
-          Ival from;
-          if(reader.L(state).g(from).S(state).g(pattern).F()) {
-            // Call the binding function.
-            return std_string_rfind(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern));
-          }
-          Iopt length;
-          if(reader.L(state).g(length).g(pattern).F()) {
-            // Call the binding function.
-            return std_string_rfind(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
-                                    ::rocket::move(pattern));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.rfind"), ::rocket::ref(args));
+    Argument_Reader::State state;
+    // Parse arguments.
+    Sval text;
+    Sval pattern;
+    if(reader.I().v(text).S(state).v(pattern).F()) {
+      // Call the binding function.
+      return std_string_rfind(::rocket::move(text), ::rocket::move(pattern));
+    }
+    Ival from;
+    if(reader.L(state).v(from).S(state).v(pattern).F()) {
+      // Call the binding function.
+      return std_string_rfind(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern));
+    }
+    Iopt length;
+    if(reader.L(state).o(length).v(pattern).F()) {
+      // Call the binding function.
+      return std_string_rfind(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
+                              ::rocket::move(pattern));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.rfind(text, pattern)`
+
+  * Searches `text` for the last occurrence of `pattern`.
+
+  * Returns the subscript of the first byte of the last match of
+    `pattern` in `text` if one is found, which is always
+    non-negative, or `null` otherwise.
+
+`std.string.rfind(text, from, pattern)`
+
+  * Searches `text` for the last occurrence of `pattern`. The
+    search operation is performed on the same subrange that would
+    be returned by `slice(text, from)`.
+
+  * Returns the subscript of the first byte of the last match of
+    `pattern` in `text` if one is found, which is always
+    non-negative, or `null` otherwise.
+
+`std.string.rfind(text, from, [length], pattern)`
+
+  * Searches `text` for the last occurrence of `pattern`.
+
+  * Returns the subscript of the first byte of the last match of
+    `pattern` in `text` if one is found, which is always
+    non-negative, or `null` otherwise.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.find_and_replace()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("find_and_replace"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.find_and_replace(text, pattern, replacement)`\n"
-          "\n"
-          "  * Searches `text` and replaces all occurrences of `pattern` with\n"
-          "    `replacement`. This function returns a new string without\n"
-          "    modifying `text`.\n"
-          "\n"
-          "  * Returns the string with `pattern` replaced. If `text` does not\n"
-          "    contain `pattern`, it is returned intact.\n"
-          "\n"
-          "`std.string.find_and_replace(text, from, pattern, replacement)`\n"
-          "\n"
-          "  * Searches `text` and replaces all occurrences of `pattern` with\n"
-          "    `replacement`. The search operation is performed on the same\n"
-          "    subrange that would be returned by `slice(text, from)`. This\n"
-          "    function returns a new string without modifying `text`.\n"
-          "\n"
-          "  * Returns the string with `pattern` replaced. If `text` does not\n"
-          "    contain `pattern`, it is returned intact.\n"
-          "\n"
-          "`std.string.find_and_replace(text, from, [length], pattern, replacement)`\n"
-          "\n"
-          "  * Searches `text` and replaces all occurrences of `pattern` with\n"
-          "    `replacement`. The search operation is performed on the same\n"
-          "    subrange that would be returned by `slice(text, from, length)`.\n"
-          "    This function returns a new string without modifying `text`.\n"
-          "\n"
-          "  * Returns the string with `pattern` replaced. If `text` does not\n"
-          "    contain `pattern`, it is returned intact.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.find_and_replace"), ::rocket::ref(args));
-          Argument_Reader::State state;
-          // Parse arguments.
-          Sval text;
-          Sval pattern;
-          Sval replacement;
-          if(reader.I().g(text).S(state).g(pattern).g(replacement).F()) {
-            // Call the binding function.
-            return std_string_find_and_replace(::rocket::move(text), ::rocket::move(pattern),
-                                               ::rocket::move(replacement));
-          }
-          Ival from;
-          if(reader.L(state).g(from).S(state).g(pattern).g(replacement).F()) {
-            // Call the binding function.
-            return std_string_find_and_replace(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern),
-                                               ::rocket::move(replacement));
-          }
-          Iopt length;
-          if(reader.L(state).g(length).g(pattern).g(replacement).F()) {
-            // Call the binding function.
-            return std_string_find_and_replace(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
-                                               ::rocket::move(pattern), ::rocket::move(replacement));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.find_and_replace"), ::rocket::ref(args));
+    Argument_Reader::State state;
+    // Parse arguments.
+    Sval text;
+    Sval pattern;
+    Sval replacement;
+    if(reader.I().v(text).S(state).v(pattern).v(replacement).F()) {
+      // Call the binding function.
+      return std_string_find_and_replace(::rocket::move(text), ::rocket::move(pattern),
+                                         ::rocket::move(replacement));
+    }
+    Ival from;
+    if(reader.L(state).v(from).S(state).v(pattern).v(replacement).F()) {
+      // Call the binding function.
+      return std_string_find_and_replace(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern),
+                                         ::rocket::move(replacement));
+    }
+    Iopt length;
+    if(reader.L(state).o(length).v(pattern).v(replacement).F()) {
+      // Call the binding function.
+      return std_string_find_and_replace(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
+                                         ::rocket::move(pattern), ::rocket::move(replacement));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.find_and_replace(text, pattern, replacement)`
+
+  * Searches `text` and replaces all occurrences of `pattern` with
+    `replacement`. This function returns a new string without
+    modifying `text`.
+
+  * Returns the string with `pattern` replaced. If `text` does not
+    contain `pattern`, it is returned intact.
+
+`std.string.find_and_replace(text, from, pattern, replacement)`
+
+  * Searches `text` and replaces all occurrences of `pattern` with
+    `replacement`. The search operation is performed on the same
+    subrange that would be returned by `slice(text, from)`. This
+    function returns a new string without modifying `text`.
+
+  * Returns the string with `pattern` replaced. If `text` does not
+    contain `pattern`, it is returned intact.
+
+`std.string.find_and_replace(text, from, [length], pattern, replacement)`
+
+  * Searches `text` and replaces all occurrences of `pattern` with
+    `replacement`. The search operation is performed on the same
+    subrange that would be returned by `slice(text, from, length)`.
+    This function returns a new string without modifying `text`.
+
+  * Returns the string with `pattern` replaced. If `text` does not
+    contain `pattern`, it is returned intact.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.find_any_of()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("find_any_of"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.find_any_of(text, accept)`\n"
-          "\n"
-          "  * Searches `text` for bytes that exist in `accept`.\n"
-          "\n"
-          "  * Returns the subscript of the first byte found, which is always\n"
-          "    non-negative; or `null` if no such byte exists.\n"
-          "\n"
-          "`std.string.find_any_of(text, from, accept)`\n"
-          "\n"
-          "  * Searches `text` for bytes that exist in `accept`. The search\n"
-          "    operation is performed on the same subrange that would be\n"
-          "    returned by `slice(text, from)`.\n"
-          "\n"
-          "  * Returns the subscript of the first byte found, which is always\n"
-          "    non-negative; or `null` if no such byte exists.\n"
-          "\n"
-          "`std.string.find_any_of(text, from, [length], accept)`\n"
-          "\n"
-          "  * Searches `text` for bytes that exist in `accept`. The search\n"
-          "    operation is performed on the same subrange that would be\n"
-          "    returned by `slice(text, from, length)`.\n"
-          "\n"
-          "  * Returns the subscript of the first byte found, which is always\n"
-          "    non-negative; or `null` if no such byte exists.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.find_any_of"), ::rocket::ref(args));
-          Argument_Reader::State state;
-          // Parse arguments.
-          Sval text;
-          Sval accept;
-          if(reader.I().g(text).S(state).g(accept).F()) {
-            // Call the binding function.
-            return std_string_find_any_of(::rocket::move(text), ::rocket::move(accept));
-          }
-          Ival from;
-          if(reader.L(state).g(from).S(state).g(accept).F()) {
-            // Call the binding function.
-            return std_string_find_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
-          }
-          Iopt length;
-          if(reader.L(state).g(length).g(accept).F()) {
-            // Call the binding function.
-            return std_string_find_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
-                                          ::rocket::move(accept));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.find_any_of"), ::rocket::ref(args));
+    Argument_Reader::State state;
+    // Parse arguments.
+    Sval text;
+    Sval accept;
+    if(reader.I().v(text).S(state).v(accept).F()) {
+      // Call the binding function.
+      return std_string_find_any_of(::rocket::move(text), ::rocket::move(accept));
+    }
+    Ival from;
+    if(reader.L(state).v(from).S(state).v(accept).F()) {
+      // Call the binding function.
+      return std_string_find_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
+    }
+    Iopt length;
+    if(reader.L(state).o(length).v(accept).F()) {
+      // Call the binding function.
+      return std_string_find_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
+                                    ::rocket::move(accept));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.find_any_of(text, accept)`
+
+  * Searches `text` for bytes that exist in `accept`.
+
+  * Returns the subscript of the first byte found, which is always
+    non-negative; or `null` if no such byte exists.
+
+`std.string.find_any_of(text, from, accept)`
+
+  * Searches `text` for bytes that exist in `accept`. The search
+    operation is performed on the same subrange that would be
+    returned by `slice(text, from)`.
+
+  * Returns the subscript of the first byte found, which is always
+    non-negative; or `null` if no such byte exists.
+
+`std.string.find_any_of(text, from, [length], accept)`
+
+  * Searches `text` for bytes that exist in `accept`. The search
+    operation is performed on the same subrange that would be
+    returned by `slice(text, from, length)`.
+
+  * Returns the subscript of the first byte found, which is always
+    non-negative; or `null` if no such byte exists.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.rfind_any_of()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("rfind_any_of"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.rfind_any_of(text, accept)`\n"
-          "\n"
-          "  * Searches `text` for bytes that exist in `accept`.\n"
-          "\n"
-          "  * Returns the subscript of the last byte found, which is always\n"
-          "    non-negative; or `null` if no such byte exists.\n"
-          "\n"
-          "`std.string.rfind_any_of(text, from, accept)`\n"
-          "\n"
-          "  * Searches `text` for bytes that exist in `accept`. The search\n"
-          "    operation is performed on the same subrange that would be\n"
-          "    returned by `slice(text, from)`.\n"
-          "\n"
-          "  * Returns the subscript of the last byte found, which is always\n"
-          "    non-negative; or `null` if no such byte exists.\n"
-          "\n"
-          "`std.string.rfind_any_of(text, from, [length], accept)`\n"
-          "\n"
-          "  * Searches `text` for bytes that exist in `accept`. The search\n"
-          "    operation is performed on the same subrange that would be\n"
-          "    returned by `slice(text, from, length)`.\n"
-          "\n"
-          "  * Returns the subscript of the last byte found, which is always\n"
-          "    non-negative; or `null` if no such byte exists.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.rfind_any_of"), ::rocket::ref(args));
-          Argument_Reader::State state;
-          // Parse arguments.
-          Sval text;
-          Sval accept;
-          if(reader.I().g(text).S(state).g(accept).F()) {
-            // Call the binding function.
-            return std_string_rfind_any_of(::rocket::move(text), ::rocket::move(accept));
-          }
-          Ival from;
-          if(reader.L(state).g(from).S(state).g(accept).F()) {
-            // Call the binding function.
-            return std_string_rfind_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
-          }
-          Iopt length;
-          if(reader.L(state).g(length).g(accept).F()) {
-            // Call the binding function.
-            return std_string_rfind_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
-                                           ::rocket::move(accept));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.rfind_any_of"), ::rocket::ref(args));
+    Argument_Reader::State state;
+    // Parse arguments.
+    Sval text;
+    Sval accept;
+    if(reader.I().v(text).S(state).v(accept).F()) {
+      // Call the binding function.
+      return std_string_rfind_any_of(::rocket::move(text), ::rocket::move(accept));
+    }
+    Ival from;
+    if(reader.L(state).v(from).S(state).v(accept).F()) {
+      // Call the binding function.
+      return std_string_rfind_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
+    }
+    Iopt length;
+    if(reader.L(state).o(length).v(accept).F()) {
+      // Call the binding function.
+      return std_string_rfind_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
+                                     ::rocket::move(accept));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.rfind_any_of(text, accept)`
+
+  * Searches `text` for bytes that exist in `accept`.
+
+  * Returns the subscript of the last byte found, which is always
+    non-negative; or `null` if no such byte exists.
+
+`std.string.rfind_any_of(text, from, accept)`
+
+  * Searches `text` for bytes that exist in `accept`. The search
+    operation is performed on the same subrange that would be
+    returned by `slice(text, from)`.
+
+  * Returns the subscript of the last byte found, which is always
+    non-negative; or `null` if no such byte exists.
+
+`std.string.rfind_any_of(text, from, [length], accept)`
+
+  * Searches `text` for bytes that exist in `accept`. The search
+    operation is performed on the same subrange that would be
+    returned by `slice(text, from, length)`.
+
+  * Returns the subscript of the last byte found, which is always
+    non-negative; or `null` if no such byte exists.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.find_not_of()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("find_not_of"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.find_not_of(text, reject)`\n"
-          "\n"
-          "  * Searches `text` for bytes that does not exist in `reject`.\n"
-          "\n"
-          "  * Returns the subscript of the first byte found, which is always\n"
-          "    non-negative; or `null` if no such byte exists.\n"
-          "\n"
-          "`std.string.find_not_of(text, from, reject)`\n"
-          "\n"
-          "  * Searches `text` for bytes that does not exist in `reject`. The\n"
-          "    search operation is performed on the same subrange that would\n"
-          "    be returned by `slice(text, from)`.\n"
-          "\n"
-          "  * Returns the subscript of the first byte found, which is always\n"
-          "    non-negative; or `null` if no such byte exists.\n"
-          "\n"
-          "`std.string.find_not_of(text, from, [length], reject)`\n"
-          "\n"
-          "  * Searches `text` for bytes that does not exist in `reject`. The\n"
-          "    search operation is performed on the same subrange that would\n"
-          "    be returned by `slice(text, from, length)`.\n"
-          "\n"
-          "  * Returns the subscript of the first byte found, which is always\n"
-          "    non-negative; or `null` if no such byte exists.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.find_not_of"), ::rocket::ref(args));
-          Argument_Reader::State state;
-          // Parse arguments.
-          Sval text;
-          Sval accept;
-          if(reader.I().g(text).S(state).g(accept).F()) {
-            // Call the binding function.
-            return std_string_find_not_of(::rocket::move(text), ::rocket::move(accept));
-          }
-          Ival from;
-          if(reader.L(state).g(from).S(state).g(accept).F()) {
-            // Call the binding function.
-            return std_string_find_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
-          }
-          Iopt length;
-          if(reader.L(state).g(length).g(accept).F()) {
-            // Call the binding function.
-            return std_string_find_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
-                                          ::rocket::move(accept));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.find_not_of"), ::rocket::ref(args));
+    Argument_Reader::State state;
+    // Parse arguments.
+    Sval text;
+    Sval accept;
+    if(reader.I().v(text).S(state).v(accept).F()) {
+      // Call the binding function.
+      return std_string_find_not_of(::rocket::move(text), ::rocket::move(accept));
+    }
+    Ival from;
+    if(reader.L(state).v(from).S(state).v(accept).F()) {
+      // Call the binding function.
+      return std_string_find_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
+    }
+    Iopt length;
+    if(reader.L(state).o(length).v(accept).F()) {
+      // Call the binding function.
+      return std_string_find_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
+                                    ::rocket::move(accept));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.find_not_of(text, reject)`
+
+  * Searches `text` for bytes that does not exist in `reject`.
+
+  * Returns the subscript of the first byte found, which is always
+    non-negative; or `null` if no such byte exists.
+
+`std.string.find_not_of(text, from, reject)`
+
+  * Searches `text` for bytes that does not exist in `reject`. The
+    search operation is performed on the same subrange that would
+    be returned by `slice(text, from)`.
+
+  * Returns the subscript of the first byte found, which is always
+    non-negative; or `null` if no such byte exists.
+
+`std.string.find_not_of(text, from, [length], reject)`
+
+  * Searches `text` for bytes that does not exist in `reject`. The
+    search operation is performed on the same subrange that would
+    be returned by `slice(text, from, length)`.
+
+  * Returns the subscript of the first byte found, which is always
+    non-negative; or `null` if no such byte exists.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.rfind_not_of()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("rfind_not_of"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.rfind_not_of(text, reject)`\n"
-          "\n"
-          "  * Searches `text` for bytes that does not exist in `reject`.\n"
-          "\n"
-          "  * Returns the subscript of the last byte found, which is always\n"
-          "    non-negative; or `null` if no such byte exists.\n"
-          "\n"
-          "`std.string.rfind_not_of(text, from, reject)`\n"
-          "\n"
-          "  * Searches `text` for bytes that does not exist in `reject`. The\n"
-          "    search operation is performed on the same subrange that would\n"
-          "    be returned by `slice(text, from)`.\n"
-          "\n"
-          "  * Returns the subscript of the last byte found, which is always\n"
-          "    non-negative; or `null` if no such byte exists.\n"
-          "\n"
-          "`std.string.rfind_not_of(text, from, [length], reject)`\n"
-          "\n"
-          "  * Searches `text` for bytes that does not exist in `reject`. The\n"
-          "    search operation is performed on the same subrange that would\n"
-          "    be returned by `slice(text, from, length)`.\n"
-          "\n"
-          "  * Returns the subscript of the last byte found, which is always\n"
-          "    non-negative; or `null` if no such byte exists.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.rfind_not_of"), ::rocket::ref(args));
-          Argument_Reader::State state;
-          // Parse arguments.
-          Sval text;
-          Sval accept;
-          if(reader.I().g(text).S(state).g(accept).F()) {
-            // Call the binding function.
-            return std_string_rfind_not_of(::rocket::move(text), ::rocket::move(accept));
-          }
-          Ival from;
-          if(reader.L(state).g(from).S(state).g(accept).F()) {
-            // Call the binding function.
-            return std_string_rfind_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
-          }
-          Iopt length;
-          if(reader.L(state).g(length).g(accept).F()) {
-            // Call the binding function.
-            return std_string_rfind_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
-                                           ::rocket::move(accept));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.rfind_not_of"), ::rocket::ref(args));
+    Argument_Reader::State state;
+    // Parse arguments.
+    Sval text;
+    Sval accept;
+    if(reader.I().v(text).S(state).v(accept).F()) {
+      // Call the binding function.
+      return std_string_rfind_not_of(::rocket::move(text), ::rocket::move(accept));
+    }
+    Ival from;
+    if(reader.L(state).v(from).S(state).v(accept).F()) {
+      // Call the binding function.
+      return std_string_rfind_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
+    }
+    Iopt length;
+    if(reader.L(state).o(length).v(accept).F()) {
+      // Call the binding function.
+      return std_string_rfind_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
+                                     ::rocket::move(accept));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.rfind_not_of(text, reject)`
+
+  * Searches `text` for bytes that does not exist in `reject`.
+
+  * Returns the subscript of the last byte found, which is always
+    non-negative; or `null` if no such byte exists.
+
+`std.string.rfind_not_of(text, from, reject)`
+
+  * Searches `text` for bytes that does not exist in `reject`. The
+    search operation is performed on the same subrange that would
+    be returned by `slice(text, from)`.
+
+  * Returns the subscript of the last byte found, which is always
+    non-negative; or `null` if no such byte exists.
+
+`std.string.rfind_not_of(text, from, [length], reject)`
+
+  * Searches `text` for bytes that does not exist in `reject`. The
+    search operation is performed on the same subrange that would
+    be returned by `slice(text, from, length)`.
+
+  * Returns the subscript of the last byte found, which is always
+    non-negative; or `null` if no such byte exists.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.reverse()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("reverse"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.reverse(text)`\n"
-          "\n"
-          "  * Reverses a byte string. This function returns a new string\n"
-          "    without modifying `text`.\n"
-          "\n"
-          "  * Returns the reversed string.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.reverse"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          if(reader.I().g(text).F()) {
-            // Call the binding function.
-            return std_string_reverse(::rocket::move(text));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.reverse"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      // Call the binding function.
+      return std_string_reverse(::rocket::move(text));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.reverse(text)`
+
+  * Reverses a byte string. This function returns a new string
+    without modifying `text`.
+
+  * Returns the reversed string.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.trim()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("trim"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.trim(text, [reject])`\n"
-          "\n"
-          "  * Removes the longest prefix and suffix consisting solely bytes\n"
-          "    from `reject`. If `reject` is empty, no byte is removed. If\n"
-          "    `reject` is not specified, spaces and tabs are removed. This\n"
-          "    function returns a new string without modifying `text`.\n"
-          "\n"
-          "  * Returns the trimmed string.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.trim"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          Sopt reject;
-          if(reader.I().g(text).g(reject).F()) {
-            // Call the binding function.
-            return std_string_trim(::rocket::move(text), ::rocket::move(reject));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.trim"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    Sopt reject;
+    if(reader.I().v(text).o(reject).F()) {
+      // Call the binding function.
+      return std_string_trim(::rocket::move(text), ::rocket::move(reject));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.trim(text, [reject])`
+
+  * Removes the longest prefix and suffix consisting solely bytes
+    from `reject`. If `reject` is empty, no byte is removed. If
+    `reject` is not specified, spaces and tabs are removed. This
+    function returns a new string without modifying `text`.
+
+  * Returns the trimmed string.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.ltrim()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("ltrim"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.ltrim(text, [reject])`\n"
-          "\n"
-          "  * Removes the longest prefix consisting solely bytes from\n"
-          "    `reject`. If `reject` is empty, no byte is removed. If `reject`\n"
-          "    is not specified, spaces and tabs are removed. This function\n"
-          "    returns a new string without modifying `text`.\n"
-          "\n"
-          "  * Returns the trimmed string.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.ltrim"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          Sopt reject;
-          if(reader.I().g(text).g(reject).F()) {
-            // Call the binding function.
-            return std_string_ltrim(::rocket::move(text), ::rocket::move(reject));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.ltrim"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    Sopt reject;
+    if(reader.I().v(text).o(reject).F()) {
+      // Call the binding function.
+      return std_string_ltrim(::rocket::move(text), ::rocket::move(reject));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.ltrim(text, [reject])`
+
+  * Removes the longest prefix consisting solely bytes from
+    `reject`. If `reject` is empty, no byte is removed. If `reject`
+    is not specified, spaces and tabs are removed. This function
+    returns a new string without modifying `text`.
+
+  * Returns the trimmed string.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.rtrim()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("rtrim"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.rtrim(text, [reject])`\n"
-          "\n"
-          "  * Removes the longest suffix consisting solely bytes from\n"
-          "    `reject`. If `reject` is empty, no byte is removed. If `reject`\n"
-          "    is not specified, spaces and tabs are removed. This function\n"
-          "    returns a new string without modifying `text`.\n"
-          "\n"
-          "  * Returns the trimmed string.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.rtrim"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          Sopt reject;
-          if(reader.I().g(text).g(reject).F()) {
-            // Call the binding function.
-            return std_string_rtrim(::rocket::move(text), ::rocket::move(reject));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.rtrim"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    Sopt reject;
+    if(reader.I().v(text).o(reject).F()) {
+      // Call the binding function.
+      return std_string_rtrim(::rocket::move(text), ::rocket::move(reject));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.rtrim(text, [reject])`
+
+  * Removes the longest suffix consisting solely bytes from
+    `reject`. If `reject` is empty, no byte is removed. If `reject`
+    is not specified, spaces and tabs are removed. This function
+    returns a new string without modifying `text`.
+
+  * Returns the trimmed string.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.lpad()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("lpad"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.lpad(text, length, [padding])`\n"
-          "\n"
-          "  * Prepends `text` with `padding` repeatedly, until its length\n"
-          "    would exceed `length`. The default value of `padding` is a\n"
-          "    string consisting of a space. This function returns a new\n"
-          "    string without modifying `text`.\n"
-          "\n"
-          "  * Returns the padded string.\n"
-          "\n"
-          "  * Throws an exception if `padding` is empty.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.lpad"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          Ival length;
-          Sopt padding;
-          if(reader.I().g(text).g(length).g(padding).F()) {
-            // Call the binding function.
-            return std_string_lpad(::rocket::move(text), ::rocket::move(length), ::rocket::move(padding));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.lpad"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    Ival length;
+    Sopt padding;
+    if(reader.I().v(text).v(length).o(padding).F()) {
+      // Call the binding function.
+      return std_string_lpad(::rocket::move(text), ::rocket::move(length), ::rocket::move(padding));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.lpad(text, length, [padding])`
+
+  * Prepends `text` with `padding` repeatedly, until its length
+    would exceed `length`. The default value of `padding` is a
+    string consisting of a space. This function returns a new
+    string without modifying `text`.
+
+  * Returns the padded string.
+
+  * Throws an exception if `padding` is empty.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.rpad()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("rpad"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.rpad(text, length, [padding])`\n"
-          "\n"
-          "  * Appends `text` with `padding` repeatedly, until its length\n"
-          "    would exceed `length`. The default value of `padding` is a\n"
-          "    string consisting of a space. This function returns a new\n"
-          "    string without modifying `text`.\n"
-          "\n"
-          "  * Returns the padded string.\n"
-          "\n"
-          "  * Throws an exception if `padding` is empty.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.rpad"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          Ival length;
-          Sopt padding;
-          if(reader.I().g(text).g(length).g(padding).F()) {
-            // Call the binding function.
-            return std_string_rpad(::rocket::move(text), ::rocket::move(length), ::rocket::move(padding));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.rpad"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    Ival length;
+    Sopt padding;
+    if(reader.I().v(text).v(length).o(padding).F()) {
+      // Call the binding function.
+      return std_string_rpad(::rocket::move(text), ::rocket::move(length), ::rocket::move(padding));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.rpad(text, length, [padding])`
+
+  * Appends `text` with `padding` repeatedly, until its length
+    would exceed `length`. The default value of `padding` is a
+    string consisting of a space. This function returns a new
+    string without modifying `text`.
+
+  * Returns the padded string.
+
+  * Throws an exception if `padding` is empty.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.to_upper()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("to_upper"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.to_upper(text)`\n"
-          "\n"
-          "  * Converts all lowercase English letters in `text` to their\n"
-          "    uppercase counterparts. This function returns a new string\n"
-          "    without modifying `text`.\n"
-          "\n"
-          "  * Returns a new string after the conversion.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.to_upper"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          if(reader.I().g(text).F()) {
-            // Call the binding function.
-            return std_string_to_upper(::rocket::move(text));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.to_upper"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      // Call the binding function.
+      return std_string_to_upper(::rocket::move(text));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.to_upper(text)`
+
+  * Converts all lowercase English letters in `text` to their
+    uppercase counterparts. This function returns a new string
+    without modifying `text`.
+
+  * Returns a new string after the conversion.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.to_lower()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("to_lower"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.to_lower(text)`\n"
-          "\n"
-          "  * Converts all lowercase English letters in `text` to their\n"
-          "    uppercase counterparts. This function returns a new string\n"
-          "    without modifying `text`.\n"
-          "\n"
-          "  * Returns a new string after the conversion.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.to_lower"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          if(reader.I().g(text).F()) {
-            // Call the binding function.
-            return std_string_to_lower(::rocket::move(text));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.to_lower"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      // Call the binding function.
+      return std_string_to_lower(::rocket::move(text));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.to_lower(text)`
+
+  * Converts all uppercase English letters in `text` to their
+    lowercase counterparts. This function returns a new string
+    without modifying `text`.
+
+  * Returns a new string after the conversion.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.translate()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("translate"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.translate(text, inputs, [outputs])`\n"
-          "\n"
-          "  * Performs bytewise translation on the given string. For every\n"
-          "    byte in `text` that is also found in `inputs`, if there is a\n"
-          "    corresponding replacement byte in `outputs` with the same\n"
-          "    subscript, it is replaced with the latter; if no replacement\n"
-          "    exists, because `outputs` is shorter than `inputs` or is null,\n"
-          "    it is deleted. If `outputs` is longer than `inputs`, excess\n"
-          "    bytes are ignored. Bytes that do not exist in `inputs` are left\n"
-          "    intact. This function returns a new string without modifying\n"
-          "    `text`.\n"
-          "\n"
-          "  * Returns the translated string.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.translate"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          Sval inputs;
-          Sopt outputs;
-          if(reader.I().g(text).g(inputs).g(outputs).F()) {
-            // Call the binding function.
-            return std_string_translate(::rocket::move(text), ::rocket::move(inputs), ::rocket::move(outputs));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.translate"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    Sval inputs;
+    Sopt outputs;
+    if(reader.I().v(text).v(inputs).o(outputs).F()) {
+      // Call the binding function.
+      return std_string_translate(::rocket::move(text), ::rocket::move(inputs), ::rocket::move(outputs));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.translate(text, inputs, [outputs])`
+
+  * Performs bytewise translation on the given string. For every
+    byte in `text` that is also found in `inputs`, if there is a
+    corresponding replacement byte in `outputs` with the same
+    subscript, it is replaced with the latter; if no replacement
+    exists, because `outputs` is shorter than `inputs` or is null,
+    it is deleted. If `outputs` is longer than `inputs`, excess
+    bytes are ignored. Bytes that do not exist in `inputs` are left
+    intact. This function returns a new string without modifying
+    `text`.
+
+  * Returns the translated string.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.explode()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("explode"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.explode(text, [delim], [limit])`\n"
-          "\n"
-          "  * Breaks `text` down into segments, separated by `delim`. If\n"
-          "    `delim` is `null` or an empty string, every byte becomes a\n"
-          "    segment. If `limit` is set to a positive integer, there will be\n"
-          "    no more segments than this number; the very last segment will\n"
-          "    contain all the remaining bytes of the `text`.\n"
-          "\n"
-          "  * Returns an array containing the broken-down segments. If `text`\n"
-          "    is empty, an empty array is returned.\n"
-          "\n"
-          "  * Throws an exception if `limit` is negative or zero.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.explode"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          Sopt delim;
-          Iopt limit;
-          if(reader.I().g(text).g(delim).g(limit).F()) {
-            // Call the binding function.
-            return std_string_explode(::rocket::move(text), ::rocket::move(delim), ::rocket::move(limit));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.explode"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    Sopt delim;
+    Iopt limit;
+    if(reader.I().v(text).o(delim).o(limit).F()) {
+      // Call the binding function.
+      return std_string_explode(::rocket::move(text), ::rocket::move(delim), ::rocket::move(limit));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.explode(text, [delim], [limit])`
+
+  * Breaks `text` down into segments, separated by `delim`. If
+    `delim` is `null` or an empty string, every byte becomes a
+    segment. If `limit` is set to a positive integer, there will be
+    no more segments than this number; the vert last segment will
+    contain all the remaining bytes of the `text`.
+
+  * Returns an array containing the broken-down segments. If `text`
+    is empty, an empty array is returned.
+
+  * Throws an exception if `limit` is negative or zero.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.implode()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("implode"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.implode(segments, [delim])`\n"
-          "\n"
-          "  * Concatenates elements of an array, `segments`, to create a new\n"
-          "    string. All segments shall be strings. If `delim` is\n"
-          "    specified, it is inserted between adjacent segments.\n"
-          "\n"
-          "  * Returns a string containing all segments. If `segments` is\n"
-          "    empty, an empty string is returned.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.implode"), ::rocket::ref(args));
-          // Parse arguments.
-          Aval segments;
-          Sopt delim;
-          if(reader.I().g(segments).g(delim).F()) {
-            // Call the binding function.
-            return std_string_implode(::rocket::move(segments), ::rocket::move(delim));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.implode"), ::rocket::ref(args));
+    // Parse arguments.
+    Aval segments;
+    Sopt delim;
+    if(reader.I().v(segments).o(delim).F()) {
+      // Call the binding function.
+      return std_string_implode(::rocket::move(segments), ::rocket::move(delim));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.implode(segments, [delim])`
+
+  * Concatenates elements of an array, `segments`, to create a new
+    string. All segments shall be strings. If `delim` is
+    specified, it is inserted between adjacent segments.
+
+  * Returns a string containing all segments. If `segments` is
+    empty, an empty string is returned.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.hex_encode()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("hex_encode"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.hex_encode(data, [lowercase], [delim])`\n"
-          "\n"
-          "  * Encodes all bytes in `data` as 2-digit hexadecimal numbers and\n"
-          "    concatenates them. If `lowercase` is set to `true`, hexadecimal\n"
-          "    digits above `9` are encoded as `abcdef`; otherwise they are\n"
-          "    encoded as `ABCDEF`. If `delim` is specified, it is inserted\n"
-          "    between adjacent bytes.\n"
-          "\n"
-          "  * Returns the encoded string. If `data` is empty, an empty\n"
-          "    string is returned.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.hex_encode"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval data;
-          Bopt lowercase;
-          Sopt delim;
-          if(reader.I().g(data).g(lowercase).g(delim).F()) {
-            // Call the binding function.
-            return std_string_hex_encode(::rocket::move(data), ::rocket::move(lowercase), ::rocket::move(delim));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.hex_encode"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval data;
+    Bopt lowercase;
+    Sopt delim;
+    if(reader.I().v(data).o(lowercase).o(delim).F()) {
+      // Call the binding function.
+      return std_string_hex_encode(::rocket::move(data), ::rocket::move(lowercase), ::rocket::move(delim));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.hex_encode(data, [lowercase], [delim])`
+
+  * Encodes all bytes in `data` as 2-digit hexadecimal numbers and
+    concatenates them. If `lowercase` is set to `true`, hexadecimal
+    digits above `9` are encoded as `abcdef`; otherwise they are
+    encoded as `ABCDEF`. If `delim` is specified, it is inserted
+    between adjacent bytes.
+
+  * Returns the encoded string. If `data` is empty, an empty
+    string is returned.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.hex_decode()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("hex_decode"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.hex_decode(text)`\n"
-          "\n"
-          "  * Decodes all hexadecimal digits from `text` and converts them to\n"
-          "    bytes. Whitespaces can be used to delimit bytes; they shall not\n"
-          "    occur between digits in the same byte. Consequently, the total\n"
-          "    number of non-whitespace characters must be a multiple of two.\n"
-          "    Invalid characters cause decode errors.\n"
-          "\n"
-          "  * Returns a string containing decoded bytes. If `text` is empty\n"
-          "    or consists of only whitespaces, an empty string is returned.\n"
-          "\n"
-          "  * Throws an exception if the string is invalid.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.hex_decode"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          if(reader.I().g(text).F()) {
-            // Call the binding function.
-            return std_string_hex_decode(::rocket::move(text));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.hex_decode"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      // Call the binding function.
+      return std_string_hex_decode(::rocket::move(text));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.hex_decode(text)`
+
+  * Decodes all hexadecimal digits from `text` and converts them to
+    bytes. Whitespaces can be used to delimit bytes; they shall not
+    occur between digits in the same byte. Consequently, the total
+    number of non-whitespace characters must be a multiple of two.
+    Invalid characters cause decode errors.
+
+  * Returns a string containing decoded bytes. If `text` is empty
+    or consists of only whitespaces, an empty string is returned.
+
+  * Throws an exception if the string is invalid.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.base32_encode()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("base32_encode"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.base32_encode(text, [lowercase])`\n"
-          "\n"
-          "  * Encodes all bytes in `text` according to the base32 encoding\n"
-          "    specified by IETF RFC 4648. If `lowercase` is set to `true`,\n"
-          "    lowercase letters are used to represent values through `0` to\n"
-          "    `25`; otherwise, uppercase letters are used. The length of\n"
-          "    encoded data is always a multiple of 8; padding characters are\n"
-          "    mandatory.\n"
-          "\n"
-          "  * Returns the encoded string.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.base32_encode"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval data;
-          Bopt lowercase;
-          if(reader.I().g(data).g(lowercase).F()) {
-            // Call the binding function.
-            return std_string_base32_encode(::rocket::move(data), ::rocket::move(lowercase));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.base32_encode"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval data;
+    Bopt lowercase;
+    if(reader.I().v(data).o(lowercase).F()) {
+      // Call the binding function.
+      return std_string_base32_encode(::rocket::move(data), ::rocket::move(lowercase));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.base32_encode(data, [lowercase])`
+
+  * Encodes all bytes in `data` according to the base32 encoding
+    specified by IETF RFC 4648. If `lowercase` is set to `true`,
+    lowercase letters are used to represent values through `0` to
+    `25`; otherwise, uppercase letters are used. The length of
+    encoded data is always a multiple of 8; padding characters are
+    mandatory.
+
+  * Returns the encoded string.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.base32_decode()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("base32_decode"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.base32_decode(dstr)`\n"
-          "\n"
-          "  * Decodes data encoded in base32, as specified by IETF RFC 4648.\n"
-          "    Whitespaces can be used to delimit encoding units; they shall\n"
-          "    not occur between characters in the same unit. Consequently,\n"
-          "    the number of non-whitespace characters must be a multiple of\n"
-          "    eight. Invalid characters cause decode errors.\n"
-          "\n"
-          "  * Returns a string containing decoded bytes. If `dstr` is empty\n"
-          "    or consists of only whitespaces, an empty string is returned.\n"
-          "\n"
-          "  * Throws an exception if the string is invalid.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.base32_decode"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          if(reader.I().g(text).F()) {
-            // Call the binding function.
-            return std_string_base32_decode(::rocket::move(text));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.base32_decode"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      // Call the binding function.
+      return std_string_base32_decode(::rocket::move(text));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.base32_decode(text)`
+
+  * Decodes data encoded in base32, as specified by IETF RFC 4648.
+    Whitespaces can be used to delimit encoding units; they shall
+    not occur between characters in the same unit. Consequently,
+    the number of non-whitespace characters must be a multiple of
+    eight. Invalid characters cause decode errors.
+
+  * Returns a string containing decoded bytes. If `text` is empty
+    or consists of only whitespaces, an empty string is returned.
+
+  * Throws an exception if the string is invalid.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.base64_encode()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("base64_encode"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.base64_encode(text)`\n"
-          "\n"
-          "  * Encodes all bytes in `text` according to the base64 encoding\n"
-          "    specified by IETF RFC 4648. The length of encoded data is\n"
-          "    always a multiple of 4; padding characters are mandatory.\n"
-          "\n"
-          "  * Returns the encoded string.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.base64_encode"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval data;
-          if(reader.I().g(data).F()) {
-            // Call the binding function.
-            return std_string_base64_encode(::rocket::move(data));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.base64_encode"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval data;
+    if(reader.I().v(data).F()) {
+      // Call the binding function.
+      return std_string_base64_encode(::rocket::move(data));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.base64_encode(data)`
+
+  * Encodes all bytes in `data` according to the base64 encoding
+    specified by IETF RFC 4648. The length of encoded data is
+    always a multiple of 4; padding characters are mandatory.
+
+  * Returns the encoded string.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.base64_decode()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("base64_decode"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.base64_decode(dstr)`\n"
-          "\n"
-          "  * Decodes data encoded in base64, as specified by IETF RFC 4648.\n"
-          "    Whitespaces can be used to delimit encoding units; they shall\n"
-          "    not occur between characters in the same unit. Consequently,\n"
-          "    the number of non-whitespace characters must be a multiple of\n"
-          "    four. Invalid characters cause decode errors.\n"
-          "    Decodes base64-encoded data. Whitespaces can be used to\n"
-          "\n"
-          "  * Returns a string containing decoded bytes. If `dstr` is empty\n"
-          "    or consists of only whitespaces, an empty string is returned.\n"
-          "\n"
-          "  * Throws an exception if the string is invalid.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.base64_decode"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          if(reader.I().g(text).F()) {
-            // Call the binding function.
-            return std_string_base64_decode(::rocket::move(text));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.base64_decode"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      // Call the binding function.
+      return std_string_base64_decode(::rocket::move(text));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.base64_decode(text)`
+
+  * Decodes data encoded in base64, as specified by IETF RFC 4648.
+    Whitespaces can be used to delimit encoding units; they shall
+    not occur between characters in the same unit. Consequently,
+    the number of non-whitespace characters must be a multiple of
+    four. Invalid characters cause decode errors.
+
+  * Returns a string containing decoded bytes. If `text` is empty
+    or consists of only whitespaces, an empty string is returned.
+
+  * Throws an exception if the string is invalid.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.url_encode()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("url_encode"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.url_encode(data, [lowercase])`\n"
-          "\n"
-          "  * Encodes bytes in `data` according to IETF RFC 3986. Every byte\n"
-          "    that is not a letter, digit, `-`, `.`, `_` or `~` is encoded as\n"
-          "    a `%` followed by two hexadecimal digits. If `lowercase` is set\n"
-          "    to `true`, lowercase letters are used to represent values\n"
-          "    through `10` to `15`; otherwise, uppercase letters are used.\n"
-          "\n"
-          "  * Returns the encoded string. If `data` is empty, an empty\n"
-          "    string is returned.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.url_encode"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval data;
-          Bopt lowercase;
-          if(reader.I().g(data).g(lowercase).F()) {
-            // Call the binding function.
-            return std_string_url_encode(::rocket::move(data), ::rocket::move(lowercase));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.url_encode"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval data;
+    Bopt lowercase;
+    if(reader.I().v(data).o(lowercase).F()) {
+      // Call the binding function.
+      return std_string_url_encode(::rocket::move(data), ::rocket::move(lowercase));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.url_encode(data, [lowercase])`
+
+  * Encodes bytes in `data` according to IETF RFC 3986. Every byte
+    that is not a letter, digit, `-`, `.`, `_` or `~` is encoded as
+    a `%` followed by two hexadecimal digits. If `lowercase` is set
+    to `true`, lowercase letters are used to represent values
+    through `10` to `15`; otherwise, uppercase letters are used.
+
+  * Returns the encoded string. If `data` is empty, an empty
+    string is returned.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.url_decode()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("url_decode"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.url_decode(text)`\n"
-          "\n"
-          "  * Decodes percent-encode sequences from `text` and converts them\n"
-          "    to bytes according to IETF RFC 3986. For convenience reasons,\n"
-          "    both reserved and unreserved characters are copied verbatim.\n"
-          "    Characters that are neither reserved nor unreserved (such as\n"
-          "    ASCII control characters or non-ASCII characters) cause decode\n"
-          "    errors.\n"
-          "\n"
-          "  * Returns a string containing decoded bytes.\n"
-          "\n"
-          "  * Throws an exception if the string contains invalid characters.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.url_decode"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          if(reader.I().g(text).F()) {
-            // Call the binding function.
-            return std_string_url_decode(::rocket::move(text));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.url_decode"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      // Call the binding function.
+      return std_string_url_decode(::rocket::move(text));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.url_decode(text)`
+
+  * Decodes percent-encode sequences from `text` and converts them
+    to bytes according to IETF RFC 3986. For convenience reasons,
+    both reserved and unreserved characters are copied verbatim.
+    Characters that are neither reserved nor unreserved (such as
+    ASCII control characters or non-ASCII characters) cause decode
+    errors.
+
+  * Returns a string containing decoded bytes.
+
+  * Throws an exception if the string contains invalid characters.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.url_encode_query()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("url_encode_query"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.url_encode_query(data, [lowercase])`\n"
-          "\n"
-          "  * Encodes bytes in `data` according to IETF RFC 3986. This\n"
-          "    function behaves like `url_encode()`, except that characters\n"
-          "    that are allowed unencoded in query strings are not encoded,\n"
-          "    and spaces are encoded as `+` instead of the long form `%20`.\n"
-          "\n"
-          "  * Returns the encoded string. If `data` is empty, an empty\n"
-          "    string is returned.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.url_encode"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval data;
-          Bopt lowercase;
-          if(reader.I().g(data).g(lowercase).F()) {
-            // Call the binding function.
-            return std_string_url_encode_query(::rocket::move(data), ::rocket::move(lowercase));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.url_encode"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval data;
+    Bopt lowercase;
+    if(reader.I().v(data).o(lowercase).F()) {
+      // Call the binding function.
+      return std_string_url_encode_query(::rocket::move(data), ::rocket::move(lowercase));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.url_encode_query(data, [lowercase])`
+
+  * Encodes bytes in `data` according to IETF RFC 3986. This
+    function behaves like `url_encode()`, except that characters
+    that are allowed unencoded in query strings are not encoded,
+    and spaces are encoded as `+` instead of the long form `%20`.
+
+  * Returns the encoded string. If `data` is empty, an empty
+    string is returned.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.url_decode_query()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("url_decode_query"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.url_decode_query(text)`\n"
-          "\n"
-          "  * Decodes percent-encode sequences from `text` and converts them\n"
-          "    to bytes according to IETF RFC 3986. This function behaves like\n"
-          "    `url_decode()`, except that `+` is decoded as a space.\n"
-          "\n"
-          "  * Returns a string containing decoded bytes.\n"
-          "\n"
-          "  * Throws an exception if the string contains invalid characters.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.url_decode"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          if(reader.I().g(text).F()) {
-            // Call the binding function.
-            return std_string_url_decode_query(::rocket::move(text));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.url_decode"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      // Call the binding function.
+      return std_string_url_decode_query(::rocket::move(text));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.url_decode_query(text)`
+
+  * Decodes percent-encode sequences from `text` and converts them
+    to bytes according to IETF RFC 3986. This function behaves like
+    `url_decode()`, except that `+` is decoded as a space.
+
+  * Returns a string containing decoded bytes.
+
+  * Throws an exception if the string contains invalid characters.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.utf8_validate()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("utf8_validate"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.utf8_validate(text)`\n"
-          "\n"
-          "  * Checks whether `text` is a valid UTF-8 string.\n"
-          "\n"
-          "  * Returns `true` if `text` is valid, or `false` otherwise.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.utf8_validate"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          if(reader.I().g(text).F()) {
-            // Call the binding function.
-            return std_string_utf8_validate(::rocket::move(text));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.utf8_validate"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      // Call the binding function.
+      return std_string_utf8_validate(::rocket::move(text));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.utf8_validate(text)`
+
+  * Checks whether `text` is a valid UTF-8 string.
+
+  * Returns `true` if `text` is valid, or `false` otherwise.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.utf8_encode()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("utf8_encode"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.utf8_encode(code_points, [permissive])`\n"
-          "\n"
-          "  * Encodes code points from `code_points` into an UTF-8 string.\n"
-          "  `code_points` can be either an integer or an array of\n"
-          "  integers. When an invalid code point is encountered, if\n"
-          "  `permissive` is set to `true`, it is replaced with the\n"
-          "  replacement character `\"\\uFFFD\"` and consequently encoded as\n"
-          "  `\"\\xEF\\xBF\\xBD\"`; otherwise this function fails.\n"
-          "\n"
-          "  * Returns the encoded string.\n"
-          "\n"
-          "  * Throws an exception on failure.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.utf8_encode"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival code_point;
-          Bopt permissive;
-          if(reader.I().g(code_point).g(permissive).F()) {
-            // Call the binding function.
-            return std_string_utf8_encode(::rocket::move(code_point), ::rocket::move(permissive));
-          }
-          Aval code_points;
-          if(reader.I().g(code_points).g(permissive).F()) {
-            // Call the binding function.
-            return std_string_utf8_encode(::rocket::move(code_points), ::rocket::move(permissive));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.utf8_encode"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival code_point;
+    Bopt permissive;
+    if(reader.I().v(code_point).o(permissive).F()) {
+      // Call the binding function.
+      return std_string_utf8_encode(::rocket::move(code_point), ::rocket::move(permissive));
+    }
+    Aval code_points;
+    if(reader.I().v(code_points).o(permissive).F()) {
+      // Call the binding function.
+      return std_string_utf8_encode(::rocket::move(code_points), ::rocket::move(permissive));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.utf8_encode(code_points, [permissive])`
+
+  * Encodes code points from `code_points` into an UTF-8 string.
+    `code_points` can be either an integer or an array of
+    integers. When an invalid code point is encountered, if
+    `permissive` is set to `true`, it is replaced with the
+    replacement character `"\uFFFD"` and consequently encoded as
+    `"\xEF\xBF\xBD"`; otherwise this function fails.
+
+  * Returns the encoded string.
+
+  * Throws an exception on failure.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.utf8_decode()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("utf8_decode"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.utf8_decode(text, [permissive])`\n"
-          "\n"
-          "  * Decodes `text`, which is expected to be a string containing\n"
-          "    UTF-8 code units, into an array of code points, represented as\n"
-          "    integers. When an invalid code sequence is encountered, if\n"
-          "    `permissive` is set to `true`, all code units of it are\n"
-          "    re-interpreted as isolated bytes according to ISO/IEC 8859-1;\n"
-          "    otherwise this function fails.\n"
-          "\n"
-          "  * Returns an array containing decoded code points.\n"
-          "\n"
-          "  * Throws an exception on failure.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.utf8_decode"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          Bopt permissive;
-          if(reader.I().g(text).g(permissive).F()) {
-            // Call the binding function.
-            return std_string_utf8_decode(::rocket::move(text), ::rocket::move(permissive));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.utf8_decode"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    Bopt permissive;
+    if(reader.I().v(text).o(permissive).F()) {
+      // Call the binding function.
+      return std_string_utf8_decode(::rocket::move(text), ::rocket::move(permissive));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.utf8_decode(text, [permissive])`
+
+  * Decodes `text`, which is expected to be a string containing
+    UTF-8 code units, into an array of code points, represented as
+    integers. When an invalid code sequence is encountered, if
+    `permissive` is set to `true`, all code units of it are
+    re-interpreted as isolated bytes according to ISO/IEC 8859-1;
+    otherwise this function fails.
+
+  * Returns an array containing decoded code points.
+
+  * Throws an exception on failure.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.pack_8()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("pack_8"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.pack_8(values)`\n"
-          "\n"
-          "  * Packs a series of 8-bit integers into a string. `values` can be\n"
-          "    either an integer or an array of integers, all of which are\n"
-          "    truncated to 8 bits then copied into a string.\n"
-          "\n"
-          "  * Returns the packed string.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.pack_8"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival value;
-          if(reader.I().g(value).F()) {
-            // Call the binding function.
-            return std_string_pack_8(::rocket::move(value));
-          }
-          Aval values;
-          if(reader.I().g(values).F()) {
-            // Call the binding function.
-            return std_string_pack_8(::rocket::move(values));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.pack_8"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival value;
+    if(reader.I().v(value).F()) {
+      // Call the binding function.
+      return std_string_pack_8(::rocket::move(value));
+    }
+    Aval values;
+    if(reader.I().v(values).F()) {
+      // Call the binding function.
+      return std_string_pack_8(::rocket::move(values));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.pack_8(values)`
+
+  * Packs a series of 8-bit integers into a string. `values` can be
+    either an integer or an array of integers, all of which are
+    truncated to 8 bits then copied into a string.
+
+  * Returns the packed string.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.unpack_8()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("unpack_8"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.unpack_8(text)`\n"
-          "\n"
-          "  * Unpacks 8-bit integers from a string. The contents of `text`\n"
-          "    are re-interpreted as contiguous signed 8-bit integers, all of\n"
-          "    which are sign-extended to 64 bits then copied into an array.\n"
-          "\n"
-          "  * Returns an array containing unpacked integers.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.unpack_8"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          if(reader.I().g(text).F()) {
-            // Call the binding function.
-            return std_string_unpack_8(::rocket::move(text));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.unpack_8"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      // Call the binding function.
+      return std_string_unpack_8(::rocket::move(text));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.unpack_8(text)`
+
+  * Unpacks 8-bit integers from a string. The contents of `text`
+    are re-interpreted as contiguous signed 8-bit integers, all of
+    which are sign-extended to 64 bits then copied into an array.
+
+  * Returns an array containing unpacked integers.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.pack_16be()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("pack_16be"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.pack_16be(values)`\n"
-          "\n"
-          "  * Packs a series of 16-bit integers into a string. `values` can\n"
-          "    be either an integer or an array of `integers`, all of which\n"
-          "    are truncated to 16 bits then copied into a string in the\n"
-          "    big-endian byte order.\n"
-          "\n"
-          "  * Returns the packed string.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.pack_16be"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival value;
-          if(reader.I().g(value).F()) {
-            // Call the binding function.
-            return std_string_pack_16be(::rocket::move(value));
-          }
-          Aval values;
-          if(reader.I().g(values).F()) {
-            // Call the binding function.
-            return std_string_pack_16be(::rocket::move(values));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.pack_16be"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival value;
+    if(reader.I().v(value).F()) {
+      // Call the binding function.
+      return std_string_pack_16be(::rocket::move(value));
+    }
+    Aval values;
+    if(reader.I().v(values).F()) {
+      // Call the binding function.
+      return std_string_pack_16be(::rocket::move(values));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.pack_16be(values)`
+
+  * Packs a series of 16-bit integers into a string. `values` can
+    be either an integer or an array of `integers`, all of which
+    are truncated to 16 bits then copied into a string in the
+    big-endian byte order.
+
+  * Returns the packed string.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.unpack_16be()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("unpack_16be"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.unpack_16be(text)`\n"
-          "\n"
-          "  * Unpacks 16-bit integers from a string. The contents of `text`\n"
-          "    are re-interpreted as contiguous signed 16-bit integers in the\n"
-          "    big-endian byte order, all of which are sign-extended to 64\n"
-          "    bits then copied into an array.\n"
-          "\n"
-          "  * Returns an array containing unpacked integers.\n"
-          "\n"
-          "  * Throws an exception if the length of `text` is not a multiple\n"
-          "    of 2.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.unpack_16be"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          if(reader.I().g(text).F()) {
-            // Call the binding function.
-            return std_string_unpack_16be(::rocket::move(text));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.unpack_16be"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      // Call the binding function.
+      return std_string_unpack_16be(::rocket::move(text));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.unpack_16be(text)`
+
+  * Unpacks 16-bit integers from a string. The contents of `text`
+    are re-interpreted as contiguous signed 16-bit integers in the
+    big-endian byte order, all of which are sign-extended to 64
+    bits then copied into an array.
+
+  * Returns an array containing unpacked integers.
+
+  * Throws an exception if the length of `text` is not a multiple
+    of 2.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.pack_16le()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("pack_16le"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.pack_16le(values)`\n"
-          "\n"
-          "  * Packs a series of 16-bit integers into a string. `values` can\n"
-          "    be either an integer or an array of `integers`, all of which\n"
-          "    are truncated to 16 bits then copied into a string in the\n"
-          "    little-endian byte order.\n"
-          "\n"
-          "  * Returns the packed string.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.pack_16le"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival value;
-          if(reader.I().g(value).F()) {
-            // Call the binding function.
-            return std_string_pack_16le(::rocket::move(value));
-          }
-          Aval values;
-          if(reader.I().g(values).F()) {
-            // Call the binding function.
-            return std_string_pack_16le(::rocket::move(values));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.pack_16le"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival value;
+    if(reader.I().v(value).F()) {
+      // Call the binding function.
+      return std_string_pack_16le(::rocket::move(value));
+    }
+    Aval values;
+    if(reader.I().v(values).F()) {
+      // Call the binding function.
+      return std_string_pack_16le(::rocket::move(values));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.pack_16le(values)`
+
+  * Packs a series of 16-bit integers into a string. `values` can
+    be either an integer or an array of `integers`, all of which
+    are truncated to 16 bits then copied into a string in the
+    little-endian byte order.
+
+  * Returns the packed string.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.unpack_16le()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("unpack_16le"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.unpack_16le(text)`\n"
-          "\n"
-          "  * Unpacks 16-bit integers from a string. The contents of `text`\n"
-          "    are re-interpreted as contiguous signed 16-bit integers in the\n"
-          "    little-endian byte order, all of which are sign-extended to 64\n"
-          "    bits then copied into an array.\n"
-          "\n"
-          "  * Returns an array containing unpacked integers.\n"
-          "\n"
-          "  * Throws an exception if the length of `text` is not a multiple\n"
-          "    of 2.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.unpack_16le"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          if(reader.I().g(text).F()) {
-            // Call the binding function.
-            return std_string_unpack_16le(::rocket::move(text));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.unpack_16le"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      // Call the binding function.
+      return std_string_unpack_16le(::rocket::move(text));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.unpack_16le(text)`
+
+  * Unpacks 16-bit integers from a string. The contents of `text`
+    are re-interpreted as contiguous signed 16-bit integers in the
+    little-endian byte order, all of which are sign-extended to 64
+    bits then copied into an array.
+
+  * Returns an array containing unpacked integers.
+
+  * Throws an exception if the length of `text` is not a multiple
+    of 2.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.pack_32be()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("pack_32be"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.pack_32be(values)`\n"
-          "\n"
-          "  * Packs a series of 32-bit integers into a string. `values` can\n"
-          "    be either an integer or an array of `integers`, all of which\n"
-          "    are truncated to 32 bits then copied into a string in the\n"
-          "    big-endian byte order.\n"
-          "\n"
-          "  * Returns the packed string.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.pack_32be"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival value;
-          if(reader.I().g(value).F()) {
-            // Call the binding function.
-            return std_string_pack_32be(::rocket::move(value));
-          }
-          Aval values;
-          if(reader.I().g(values).F()) {
-            // Call the binding function.
-            return std_string_pack_32be(::rocket::move(values));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.pack_32be"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival value;
+    if(reader.I().v(value).F()) {
+      // Call the binding function.
+      return std_string_pack_32be(::rocket::move(value));
+    }
+    Aval values;
+    if(reader.I().v(values).F()) {
+      // Call the binding function.
+      return std_string_pack_32be(::rocket::move(values));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.pack_32be(values)`
+
+  * Packs a series of 32-bit integers into a string. `values` can
+    be either an integer or an array of `integers`, all of which
+    are truncated to 32 bits then copied into a string in the
+    big-endian byte order.
+
+  * Returns the packed string.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.unpack_32be()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("unpack_32be"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.unpack_32be(text)`\n"
-          "\n"
-          "  * Unpacks 32-bit integers from a string. The contents of `text`\n"
-          "    are re-interpreted as contiguous signed 32-bit integers in the\n"
-          "    big-endian byte order, all of which are sign-extended to 64\n"
-          "    bits then copied into an array.\n"
-          "\n"
-          "  * Returns an array containing unpacked integers.\n"
-          "\n"
-          "  * Throws an exception if the length of `text` is not a multiple\n"
-          "    of 4.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.unpack_32be"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          if(reader.I().g(text).F()) {
-            // Call the binding function.
-            return std_string_unpack_32be(::rocket::move(text));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.unpack_32be"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      // Call the binding function.
+      return std_string_unpack_32be(::rocket::move(text));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.unpack_32be(text)`
+
+  * Unpacks 32-bit integers from a string. The contents of `text`
+    are re-interpreted as contiguous signed 32-bit integers in the
+    big-endian byte order, all of which are sign-extended to 64
+    bits then copied into an array.
+
+  * Returns an array containing unpacked integers.
+
+  * Throws an exception if the length of `text` is not a multiple
+    of 4.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.pack_32le()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("pack_32le"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.pack_32le(values)`\n"
-          "\n"
-          "  * Packs a series of 32-bit integers into a string. `values` can\n"
-          "    be either an integer or an array of `integers`, all of which\n"
-          "    are truncated to 32 bits then copied into a string in the\n"
-          "    little-endian byte order.\n"
-          "\n"
-          "  * Returns the packed string.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.pack_32le"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival value;
-          if(reader.I().g(value).F()) {
-            // Call the binding function.
-            return std_string_pack_32le(::rocket::move(value));
-          }
-          Aval values;
-          if(reader.I().g(values).F()) {
-            // Call the binding function.
-            return std_string_pack_32le(::rocket::move(values));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.pack_32le"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival value;
+    if(reader.I().v(value).F()) {
+      // Call the binding function.
+      return std_string_pack_32le(::rocket::move(value));
+    }
+    Aval values;
+    if(reader.I().v(values).F()) {
+      // Call the binding function.
+      return std_string_pack_32le(::rocket::move(values));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.pack_32le(values)`
+
+  * Packs a series of 32-bit integers into a string. `values` can
+    be either an integer or an array of `integers`, all of which
+    are truncated to 32 bits then copied into a string in the
+    little-endian byte order.
+
+  * Returns the packed string.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.unpack_32le()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("unpack_32le"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.unpack_32le(text)`\n"
-          "\n"
-          "  * Unpacks 32-bit integers from a string. The contents of `text`\n"
-          "    are re-interpreted as contiguous signed 32-bit integers in the\n"
-          "    little-endian byte order, all of which are sign-extended to 64\n"
-          "    bits then copied into an array.\n"
-          "\n"
-          "  * Returns an array containing unpacked integers.\n"
-          "\n"
-          "  * Throws an exception if the length of `text` is not a multiple\n"
-          "    of 4.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.unpack_32le"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          if(reader.I().g(text).F()) {
-            // Call the binding function.
-            return std_string_unpack_32le(::rocket::move(text));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.unpack_32le"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      // Call the binding function.
+      return std_string_unpack_32le(::rocket::move(text));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.unpack_32le(text)`
+
+  * Unpacks 32-bit integers from a string. The contents of `text`
+    are re-interpreted as contiguous signed 32-bit integers in the
+    little-endian byte order, all of which are sign-extended to 64
+    bits then copied into an array.
+
+  * Returns an array containing unpacked integers.
+
+  * Throws an exception if the length of `text` is not a multiple
+    of 4.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.pack_64be()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("pack_64be"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.pack_64be(values)`\n"
-          "\n"
-          "  * Packs a series of 64-bit integers into a string. `values` can\n"
-          "    be either an integer or an array of `integers`, all of which\n"
-          "    are copied into a string in the big-endian byte order.\n"
-          "\n"
-          "  * Returns the packed string.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.pack_64be"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival value;
-          if(reader.I().g(value).F()) {
-            // Call the binding function.
-            return std_string_pack_64be(::rocket::move(value));
-          }
-          Aval values;
-          if(reader.I().g(values).F()) {
-            // Call the binding function.
-            return std_string_pack_64be(::rocket::move(values));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.pack_64be"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival value;
+    if(reader.I().v(value).F()) {
+      // Call the binding function.
+      return std_string_pack_64be(::rocket::move(value));
+    }
+    Aval values;
+    if(reader.I().v(values).F()) {
+      // Call the binding function.
+      return std_string_pack_64be(::rocket::move(values));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.pack_64be(values)`
+
+  * Packs a series of 64-bit integers into a string. `values` can
+    be either an integer or an array of `integers`, all of which
+    are copied into a string in the big-endian byte order.
+
+  * Returns the packed string.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.unpack_64be()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("unpack_64be"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.unpack_64be(text)`\n"
-          "\n"
-          "  * Unpacks 64-bit integers from a string. The contents of `text`\n"
-          "    are re-interpreted as contiguous signed 64-bit integers in the\n"
-          "    big-endian byte order, all of which are copied into an array.\n"
-          "\n"
-          "  * Returns an array containing unpacked integers.\n"
-          "\n"
-          "  * Throws an exception if the length of `text` is not a multiple\n"
-          "    of 8.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.unpack_64be"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          if(reader.I().g(text).F()) {
-            // Call the binding function.
-            return std_string_unpack_64be(::rocket::move(text));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.unpack_64be"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      // Call the binding function.
+      return std_string_unpack_64be(::rocket::move(text));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.unpack_64be(text)`
+
+  * Unpacks 64-bit integers from a string. The contents of `text`
+    are re-interpreted as contiguous signed 64-bit integers in the
+    big-endian byte order, all of which are copied into an array.
+
+  * Returns an array containing unpacked integers.
+
+  * Throws an exception if the length of `text` is not a multiple
+    of 8.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.pack_64le()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("pack_64le"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.pack_64le(values)`\n"
-          "\n"
-          "  * Packs a series of 64-bit integers into a string. `values` can\n"
-          "    be either an integer or an array of `integers`, all of which\n"
-          "    are copied into a string in the little-endian byte order.\n"
-          "\n"
-          "  * Returns the packed string.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.pack_64le"), ::rocket::ref(args));
-          // Parse arguments.
-          Ival value;
-          if(reader.I().g(value).F()) {
-            // Call the binding function.
-            return std_string_pack_64le(::rocket::move(value));
-          }
-          Aval values;
-          if(reader.I().g(values).F()) {
-            // Call the binding function.
-            return std_string_pack_64le(::rocket::move(values));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.pack_64le"), ::rocket::ref(args));
+    // Parse arguments.
+    Ival value;
+    if(reader.I().v(value).F()) {
+      // Call the binding function.
+      return std_string_pack_64le(::rocket::move(value));
+    }
+    Aval values;
+    if(reader.I().v(values).F()) {
+      // Call the binding function.
+      return std_string_pack_64le(::rocket::move(values));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.pack_64le(values)`
+
+  * Packs a series of 64-bit integers into a string. `values` can
+    be either an integer or an array of `integers`, all of which
+    are copied into a string in the little-endian byte order.
+
+  * Returns the packed string.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.unpack_64le()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("unpack_64le"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.unpack_64le(text)`\n"
-          "\n"
-          "  * Unpacks 64-bit integers from a string. The contents of `text`\n"
-          "    are re-interpreted as contiguous signed 64-bit integers in the\n"
-          "    little-endian byte order, all of which are copied into an\n"
-          "    array.\n"
-          "\n"
-          "  * Returns an array containing unpacked integers.\n"
-          "\n"
-          "  * Throws an exception if the length of `text` is not a multiple\n"
-          "    of 8.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.unpack_64le"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval text;
-          if(reader.I().g(text).F()) {
-            // Call the binding function.
-            return std_string_unpack_64le(::rocket::move(text));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.unpack_64le"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      // Call the binding function.
+      return std_string_unpack_64le(::rocket::move(text));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.unpack_64le(text)`
+
+  * Unpacks 64-bit integers from a string. The contents of `text`
+    are re-interpreted as contiguous signed 64-bit integers in the
+    little-endian byte order, all of which are copied into an
+    array.
+
+  * Returns an array containing unpacked integers.
+
+  * Throws an exception if the length of `text` is not a multiple
+    of 8.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.format()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("format"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.format(templ, ...)`\n"
-          "\n"
-          " * Compose a string according to the template string `templ`, as\n"
-          "   follows:\n"
-          "\n"
-          "   * A sequence of `$$` is replaced with a literal `$`.\n"
-          "   * A sequence of `${NNN}`, where `NNN` is at most three decimal\n"
-          "     numerals, is replaced with the NNN-th argument. If `NNN` is\n"
-          "     zero, it is replaced with `templ` itself.\n"
-          "   * A sequence of `$N`, where `N` is a single decimal numeral,\n"
-          "     behaves the same as `${N}`.\n"
-          "   * All other characters are copied verbatim.\n"
-          "\n"
-          " * Returns the composed string.\n"
-          "\n"
-          " * Throws an exception if `templ` contains invalid placeholder\n"
-          "   sequences, or when a placeholder sequence has no corresponding\n"
-          "   argument.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.format"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval templ;
-          cow_vector<Value> values;
-          if(reader.I().g(templ).F(values)) {
-            // Call the binding function.
-            return std_string_format(::rocket::move(templ), ::rocket::move(values));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.format"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval templ;
+    cow_vector<Value> values;
+    if(reader.I().v(templ).F(values)) {
+      // Call the binding function.
+      return std_string_format(::rocket::move(templ), ::rocket::move(values));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.format(templ, ...)`
+
+  * Compose a string according to the template string `templ`, as
+    follows:
+
+    * A sequence of `$$` is replaced with a literal `$`.
+    * A sequence of `${NNN}`, where `NNN` is at most three decimal
+      numerals, is replaced with the NNN-th argument. If `NNN` is
+      zero, it is replaced with `templ` itself.
+    * A sequence of `$N`, where `N` is a single decimal numeral,
+      behaves the same as `${N}`.
+    * All other characters are copied verbatim.
+
+  * Returns the composed string.
+
+  * Throws an exception if `templ` contains invalid placeholder
+    sequences, or when a placeholder sequence has no corresponding
+    argument.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.regex_find()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("regex_find"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.regex_find(text, pattern)`\n"
-          "\n"
-          "  * Searches `text` for the first occurrence of the regular\n"
-          "    expression `pattern`.\n"
-          "\n"
-          "  * Returns an array of two integers, the first of which\n"
-          "    specifies the subscript of the matching sequence and the second\n"
-          "    of which specifies its length. If `pattern` is not found, this\n"
-          "    function returns `null`.\n"
-          "\n"
-          "  * Throws an exception if `pattern` is not a valid regular\n"
-          "    expression.\n"
-          "\n"
-          "`std.string.regex_find(text, from, pattern)`\n"
-          "\n"
-          "  * Searches `text` for the first occurrence of the regular\n"
-          "    expression `pattern`. The search operation is performed on the\n"
-          "    same subrange that would be returned by `slice(text, from)`.\n"
-          "\n"
-          "  * Returns an array of two integers, the first of which\n"
-          "    specifies the subscript of the matching sequence and the second\n"
-          "    of which specifies its length. If `pattern` is not found, this\n"
-          "    function returns `null`.\n"
-          "\n"
-          "  * Throws an exception if `pattern` is not a valid regular\n"
-          "    expression.\n"
-          "\n"
-          "`std.string.regex_find(text, from, [length], pattern)`\n"
-          "\n"
-          "  * Searches `text` for the first occurrence of the regular\n"
-          "    expression `pattern`. The search operation is performed on the\n"
-          "    same subrange that would be returned by\n"
-          "    `slice(text, from, length)`.\n"
-          "\n"
-          "  * Returns an array of two integers, the first of which\n"
-          "    specifies the subscript of the matching sequence and the second\n"
-          "    of which specifies its length. If `pattern` is not found, this\n"
-          "    function returns `null`.\n"
-          "\n"
-          "  * Throws an exception if `pattern` is not a valid regular\n"
-          "    expression.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.regex_find"), ::rocket::ref(args));
-          Argument_Reader::State state;
-          // Parse arguments.
-          Sval text;
-          Sval pattern;
-          if(reader.I().g(text).S(state).g(pattern).F()) {
-            // Call the binding function.
-            auto kpair = std_string_regex_find(::rocket::move(text), ::rocket::move(pattern));
-            if(!kpair)
-              return nullptr;
-            // This function returns a `pair`, but we would like to return an array so convert it.
-            Aval rval(2);
-            rval.mut(0) = ::rocket::move(kpair->first);
-            rval.mut(1) = ::rocket::move(kpair->second);
-            return ::rocket::move(rval);
-          }
-          Ival from;
-          if(reader.L(state).g(from).S(state).g(pattern).F()) {
-            // Call the binding function.
-            auto kpair = std_string_regex_find(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern));
-            if(!kpair)
-              return nullptr;
-            // This function returns a `pair`, but we would like to return an array so convert it.
-            Aval rval(2);
-            rval.mut(0) = ::rocket::move(kpair->first);
-            rval.mut(1) = ::rocket::move(kpair->second);
-            return ::rocket::move(rval);
-          }
-          Iopt length;
-          if(reader.L(state).g(length).g(pattern).F()) {
-            // Call the binding function.
-            auto kpair = std_string_regex_find(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
-                                               ::rocket::move(pattern));
-            if(!kpair)
-              return nullptr;
-            // This function returns a `pair`, but we would like to return an array so convert it.
-            Aval rval(2);
-            rval.mut(0) = ::rocket::move(kpair->first);
-            rval.mut(1) = ::rocket::move(kpair->second);
-            return ::rocket::move(rval);
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.regex_find"), ::rocket::ref(args));
+    Argument_Reader::State state;
+    // Parse arguments.
+    Sval text;
+    Sval pattern;
+    if(reader.I().v(text).S(state).v(pattern).F()) {
+      // Call the binding function.
+      auto kpair = std_string_regex_find(::rocket::move(text), ::rocket::move(pattern));
+      if(!kpair)
+        return nullptr;
+      // This function returns a `pair`, but we would like to return an array so convert it.
+      Aval rval(2);
+      rval.mut(0) = ::rocket::move(kpair->first);
+      rval.mut(1) = ::rocket::move(kpair->second);
+      return ::rocket::move(rval);
+    }
+    Ival from;
+    if(reader.L(state).v(from).S(state).v(pattern).F()) {
+      // Call the binding function.
+      auto kpair = std_string_regex_find(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern));
+      if(!kpair)
+        return nullptr;
+      // This function returns a `pair`, but we would like to return an array so convert it.
+      Aval rval(2);
+      rval.mut(0) = ::rocket::move(kpair->first);
+      rval.mut(1) = ::rocket::move(kpair->second);
+      return ::rocket::move(rval);
+    }
+    Iopt length;
+    if(reader.L(state).o(length).v(pattern).F()) {
+      // Call the binding function.
+      auto kpair = std_string_regex_find(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
+                                         ::rocket::move(pattern));
+      if(!kpair)
+        return nullptr;
+      // This function returns a `pair`, but we would like to return an array so convert it.
+      Aval rval(2);
+      rval.mut(0) = ::rocket::move(kpair->first);
+      rval.mut(1) = ::rocket::move(kpair->second);
+      return ::rocket::move(rval);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.regex_find(text, pattern)`
+
+  * Searches `text` for the first occurrence of the regular
+    expression `pattern`.
+
+  * Returns an array of two integers, the first of which
+    specifies the subscript of the matching sequence and the second
+    of which specifies its length. If `pattern` is not found, this
+    function returns `null`.
+
+  * Throws an exception if `pattern` is not a valid regular
+    expression.
+
+`std.string.regex_find(text, from, pattern)`
+
+  * Searches `text` for the first occurrence of the regular
+    expression `pattern`. The search operation is performed on the
+    same subrange that would be returned by `slice(text, from)`.
+
+  * Returns an array of two integers, the first of which
+    specifies the subscript of the matching sequence and the second
+    of which specifies its length. If `pattern` is not found, this
+    function returns `null`.
+
+  * Throws an exception if `pattern` is not a valid regular
+    expression.
+
+`std.string.regex_find(text, from, [length], pattern)`
+
+  * Searches `text` for the first occurrence of the regular
+    expression `pattern`. The search operation is performed on the
+    same subrange that would be returned by
+    `slice(text, from, length)`.
+
+  * Returns an array of two integers, the first of which
+    specifies the subscript of the matching sequence and the second
+    of which specifies its length. If `pattern` is not found, this
+    function returns `null`.
+
+  * Throws an exception if `pattern` is not a valid regular
+    expression.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.regex_match()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("regex_match"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.regex_match(text, pattern)`\n"
-          "\n"
-          "  * Checks whether the regular expression `patterm` matches the\n"
-          "    entire sequence `text`.\n"
-          "\n"
-          "  * Returns an array of optional strings. The first element\n"
-          "    contains a copy of `text`. All the other elements hold\n"
-          "    substrings that match positional capturing groups. If a group\n"
-          "    matches nothing, the corresponding element is `null`. The total\n"
-          "    number of elements equals the number of capturing groups plus\n"
-          "    one. If `text` does not match `pattern`, `null` is returned.\n"
-          "\n"
-          "  * Throws an exception if `pattern` is not a valid regular\n"
-          "    expression.\n"
-          "\n"
-          "`std.string.regex_match(text, from, pattern)`\n"
-          "\n"
-          "  * Checks whether the regular expression `patterm` matches the\n"
-          "    subrange that would be returned by `slice(text, from)`.\n"
-          "\n"
-          "  * Returns an array of optional strings. The first element\n"
-          "    contains a copy of `text`. All the other elements hold\n"
-          "    substrings that match positional capturing groups. If a group\n"
-          "    matches nothing, the corresponding element is `null`. The total\n"
-          "    number of elements equals the number of capturing groups plus\n"
-          "    one. If `text` does not match `pattern`, `null` is returned.\n"
-          "\n"
-          "  * Throws an exception if `pattern` is not a valid regular\n"
-          "    expression.\n"
-          "\n"
-          "`std.string.regex_match(text, from, [length], pattern)`\n"
-          "\n"
-          "  * Checks whether the regular expression `patterm` matches the\n"
-          "    subrange that would be returned by `slice(text, from, length)`.\n"
-          "\n"
-          "  * Returns an array of optional strings. The first element\n"
-          "    contains a copy of `text`. All the other elements hold\n"
-          "    substrings that match positional capturing groups. If a group\n"
-          "    matches nothing, the corresponding element is `null`. The total\n"
-          "    number of elements equals the number of capturing groups plus\n"
-          "    one. If `text` does not match `pattern`, `null` is returned.\n"
-          "\n"
-          "  * Throws an exception if `pattern` is not a valid regular\n"
-          "    expression.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.regex_match"), ::rocket::ref(args));
-          Argument_Reader::State state;
-          // Parse arguments.
-          Sval text;
-          Sval pattern;
-          if(reader.I().g(text).S(state).g(pattern).F()) {
-            // Call the binding function.
-            return std_string_regex_match(::rocket::move(text), ::rocket::move(pattern));
-          }
-          Ival from;
-          if(reader.L(state).g(from).S(state).g(pattern).F()) {
-            // Call the binding function.
-            return std_string_regex_match(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern));
-          }
-          Iopt length;
-          if(reader.L(state).g(length).g(pattern).F()) {
-            // Call the binding function.
-            return std_string_regex_match(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
-                                          ::rocket::move(pattern));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.regex_match"), ::rocket::ref(args));
+    Argument_Reader::State state;
+    // Parse arguments.
+    Sval text;
+    Sval pattern;
+    if(reader.I().v(text).S(state).v(pattern).F()) {
+      // Call the binding function.
+      return std_string_regex_match(::rocket::move(text), ::rocket::move(pattern));
+    }
+    Ival from;
+    if(reader.L(state).v(from).S(state).v(pattern).F()) {
+      // Call the binding function.
+      return std_string_regex_match(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern));
+    }
+    Iopt length;
+    if(reader.L(state).o(length).v(pattern).F()) {
+      // Call the binding function.
+      return std_string_regex_match(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
+                                    ::rocket::move(pattern));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.regex_match(text, pattern)`
+
+  * Checks whether the regular expression `patterm` matches the
+    entire sequence `text`.
+
+  * Returns an array of optional strings. The first element
+    contains a copy of `text`. All the other elements hold
+    substrings that match positional capturing groups. If a group
+    matches nothing, the corresponding element is `null`. The total
+    number of elements equals the number of capturing groups plus
+    one. If `text` does not match `pattern`, `null` is returned.
+
+  * Throws an exception if `pattern` is not a valid regular
+    expression.
+
+`std.string.regex_match(text, from, pattern)`
+
+  * Checks whether the regular expression `patterm` matches the
+    subrange that would be returned by `slice(text, from)`.
+
+  * Returns an array of optional strings. The first element
+    contains a copy of `text`. All the other elements hold
+    substrings that match positional capturing groups. If a group
+    matches nothing, the corresponding element is `null`. The total
+    number of elements equals the number of capturing groups plus
+    one. If `text` does not match `pattern`, `null` is returned.
+
+  * Throws an exception if `pattern` is not a valid regular
+    expression.
+
+`std.string.regex_match(text, from, [length], pattern)`
+
+  * Checks whether the regular expression `patterm` matches the
+    subrange that would be returned by `slice(text, from, length)`.
+
+  * Returns an array of optional strings. The first element
+    contains a copy of `text`. All the other elements hold
+    substrings that match positional capturing groups. If a group
+    matches nothing, the corresponding element is `null`. The total
+    number of elements equals the number of capturing groups plus
+    one. If `text` does not match `pattern`, `null` is returned.
+
+  * Throws an exception if `pattern` is not a valid regular
+    expression.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.string.regex_replace()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("regex_replace"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.string.regex_replace(text, pattern, replacement)`\n"
-          "\n"
-          "  * Searches `text` and replaces all matches of the regular\n"
-          "    expression `pattern` with `replacement`. This function returns\n"
-          "    a new string without modifying `text`.\n"
-          "\n"
-          "  * Returns the string with `pattern` replaced. If `text` does not\n"
-          "    contain `pattern`, it is returned intact.\n"
-          "\n"
-          "  * Throws an exception if `pattern` is not a valid regular\n"
-          "    expression.\n"
-          "\n"
-          "`std.string.regex_replace(text, from, pattern, replacement)`\n"
-          "\n"
-          "  * Searches `text` and replaces all matches of the regular\n"
-          "    expression `pattern` with `replacement`. The search operation\n"
-          "    is performed on the same subrange that would be returned by\n"
-          "    `slice(text, from)`. This function returns a new string\n"
-          "    without modifying `text`.\n"
-          "\n"
-          "  * Returns the string with `pattern` replaced. If `text` does not\n"
-          "    contain `pattern`, it is returned intact.\n"
-          "\n"
-          "  * Throws an exception if either `pattern` or `replacement` is not\n"
-          "    a valid regular expression.\n"
-          "\n"
-          "`std.string.regex_replace(text, from, [length], pattern, replacement)`\n"
-          "\n"
-          "  * Searches `text` and replaces all matches of the regular\n"
-          "    expression `pattern` with `replacement`. The search operation\n"
-          "    is performed on the same subrange that would be returned by\n"
-          "    `slice(text, from, length)`. This function returns a new\n"
-          "    string without modifying `text`.\n"
-          "\n"
-          "  * Returns the string with `pattern` replaced. If `text` does not\n"
-          "    contain `pattern`, it is returned intact.\n"
-          "\n"
-          "  * Throws an exception if `pattern` is not a valid regular\n"
-          "    expression.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.string.regex_replace"), ::rocket::ref(args));
-          Argument_Reader::State state;
-          // Parse arguments.
-          Sval text;
-          Sval pattern;
-          Sval replacement;
-          if(reader.I().g(text).S(state).g(pattern).g(replacement).F()) {
-            // Call the binding function.
-            return std_string_regex_replace(::rocket::move(text), ::rocket::move(pattern),
-                                               ::rocket::move(replacement));
-          }
-          Ival from;
-          if(reader.L(state).g(from).S(state).g(pattern).g(replacement).F()) {
-            // Call the binding function.
-            return std_string_regex_replace(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern),
-                                               ::rocket::move(replacement));
-          }
-          Iopt length;
-          if(reader.L(state).g(length).g(pattern).g(replacement).F()) {
-            // Call the binding function.
-            return std_string_regex_replace(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
-                                            ::rocket::move(pattern), ::rocket::move(replacement));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.string.regex_replace"), ::rocket::ref(args));
+    Argument_Reader::State state;
+    // Parse arguments.
+    Sval text;
+    Sval pattern;
+    Sval replacement;
+    if(reader.I().v(text).S(state).v(pattern).v(replacement).F()) {
+      // Call the binding function.
+      return std_string_regex_replace(::rocket::move(text), ::rocket::move(pattern),
+                                         ::rocket::move(replacement));
+    }
+    Ival from;
+    if(reader.L(state).v(from).S(state).v(pattern).v(replacement).F()) {
+      // Call the binding function.
+      return std_string_regex_replace(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern),
+                                         ::rocket::move(replacement));
+    }
+    Iopt length;
+    if(reader.L(state).o(length).v(pattern).v(replacement).F()) {
+      // Call the binding function.
+      return std_string_regex_replace(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
+                                      ::rocket::move(pattern), ::rocket::move(replacement));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.regex_replace(text, pattern, replacement)`
+
+  * Searches `text` and replaces all matches of the regular
+    expression `pattern` with `replacement`. This function returns
+    a new string without modifying `text`.
+
+  * Returns the string with `pattern` replaced. If `text` does not
+    contain `pattern`, it is returned intact.
+
+  * Throws an exception if `pattern` is not a valid regular
+    expression.
+
+`std.string.regex_replace(text, from, pattern, replacement)`
+
+  * Searches `text` and replaces all matches of the regular
+    expression `pattern` with `replacement`. The search operation
+    is performed on the same subrange that would be returned by
+    `slice(text, from)`. This function returns a new string
+    without modifying `text`.
+
+  * Returns the string with `pattern` replaced. If `text` does not
+    contain `pattern`, it is returned intact.
+
+  * Throws an exception if either `pattern` or `replacement` is not
+    a valid regular expression.
+
+`std.string.regex_replace(text, from, [length], pattern, replacement)`
+
+  * Searches `text` and replaces all matches of the regular
+    expression `pattern` with `replacement`. The search operation
+    is performed on the same subrange that would be returned by
+    `slice(text, from, length)`. This function returns a new
+    string without modifying `text`.
+
+  * Returns the string with `pattern` replaced. If `text` does not
+    contain `pattern`, it is returned intact.
+
+  * Throws an exception if `pattern` is not a valid regular
+    expression.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // End of `std.string`

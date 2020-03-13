@@ -2261,11 +2261,11 @@
 	  * `finish()`
 
 	  The function `write()` is used to put data into the hasher,
-	  which shall be of type string. After all data have been put,
-	  the function `finish()` extracts the checksum as an integer
-	  (whose high-order 32 bits are always zeroes), then resets the
-	  hasher, making it suitable for further data as if it had just
-	  been created.
+	  which shall be a byte string. After all data have been put, the
+	  function `finish()` extracts the checksum as an integer (whose
+	  high-order 32 bits are always zeroes), then resets the hasher,
+	  making it suitable for further data as if it had just been
+	  created.
 
 `std.checksum.crc32(data)`
 
@@ -2273,11 +2273,11 @@
 	  string, as if this function was defined as
 
 	  ```
-	    std.checksum.crc32 = func(data) {
-	      var h = this.crc32_new();
-	      h.write(data);
-	      return h.finish();
-	    };
+	  std.checksum.crc32 = func(data) {
+	    var h = this.crc32_new();
+	    h.write(data);
+	    return h.finish();
+	  };
 	  ```
 
 	  This function is expected to be both more efficient and easier
@@ -2299,23 +2299,23 @@
 	  * `finish()`
 
 	  The function `write()` is used to put data into the hasher,
-	  which shall be of type string. After all data have been put,
-	  the function `finish()` extracts the checksum as an integer
-	  (whose high-order 32 bits are always zeroes), then resets the
-	  hasher, making it suitable for further data as if it had just
-	  been created.
+	  which shall be a byte string. After all data have been put, the
+	  function `finish()` extracts the checksum as an integer whose
+	  high-order 32 bits are always zeroes), then resets the hasher,
+	  making it suitable for further data as if it had just been
+	  created.
 
 `std.checksum.fnv1a32(data)`
 
 	* Calculates the 32-bit FNV-1a checksum of `data` which must be
-	  of type string, as if this function was defined as
+	  a byte string, as if this function was defined as
 
 	  ```
-	    std.checksum.fnv1a32 = func(data) {
-	      var h = this.fnv1a32_new();
-	      h.write(data);
-	      return h.finish();
-	    };
+	  std.checksum.fnv1a32 = func(data) {
+	    var h = this.fnv1a32_new();
+	    h.write(data);
+	    return h.finish();
+	  };
 	  ```
 
 	  This function is expected to be both more efficient and easier
@@ -2335,8 +2335,8 @@
 	  * `finish()`
 
 	  The function `write()` is used to put data into the hasher,
-	  which shall be of type string. After all data have been put,
-	  the function `finish()` extracts the checksum as a string of 32
+	  which shall be a byte string. After all data have been put, the
+	  function `finish()` extracts the checksum as a string of 32
 	  hexadecimal digits in uppercase, then resets the hasher, making
 	  it suitable for further data as if it had just been created.
 
@@ -2346,11 +2346,11 @@
 	  string, as if this function was defined as
 
 	  ```
-	    std.checksum.md5 = func(data) {
-	      var h = this.md5_new();
-	      h.write(data);
-	      return h.finish();
-	    };
+	  std.checksum.md5 = func(data) {
+	    var h = this.md5_new();
+	    h.write(data);
+	    return h.finish();
+	  };
 	  ```
 
 	  This function is expected to be both more efficient and easier
@@ -2370,8 +2370,8 @@
 	  * `finish()`
 
 	  The function `write()` is used to put data into the hasher,
-	  which shall be of type string. After all data have been put,
-	  the function `finish()` extracts the checksum as a string of 40
+	  which shall be a byte string. After all data have been put, the
+	  function `finish()` extracts the checksum as a string of 40
 	  hexadecimal digits in uppercase, then resets the hasher, making
 	  it suitable for further data as if it had just been created.
 
@@ -2381,11 +2381,11 @@
 	  string, as if this function was defined as
 
 	  ```
-	    std.checksum.sha1 = func(data) {
-	      var h = this.sha1_new();
-	      h.write(data);
-	      return h.finish();
-	    };
+	  std.checksum.sha1 = func(data) {
+	    var h = this.sha1_new();
+	    h.write(data);
+	    return h.finish();
+	  };
 	  ```
 
 	  This function is expected to be both more efficient and easier
@@ -2405,8 +2405,8 @@
 	  * `finish()`
 
 	  The function `write()` is used to put data into the hasher,
-	  which shall be of type string. After all data have been put,
-	  the function `finish()` extracts the checksum as a string of 64
+	  which shall be a byte string. After all data have been put, the
+	  function `finish()` extracts the checksum as a string of 64
 	  hexadecimal digits in uppercase, then resets the hasher, making
 	  it suitable for further data as if it had just been created.
 
@@ -2416,11 +2416,11 @@
 	  string, as if this function was defined as
 
 	  ```
-	    std.checksum.sha256 = func(data) {
-	      var h = this.sha256_new();
-	      h.write(data);
-	      return h.finish();
-	    };
+	  std.checksum.sha256 = func(data) {
+	    var h = this.sha256_new();
+	    h.write(data);
+	    return h.finish();
+	  };
 	  ```
 
 	  This function is expected to be both more efficient and easier

@@ -3,7 +3,6 @@
 
 #include "../precompiled.hpp"
 #include "bindings_process.hpp"
-#include "simple_binding_wrapper.hpp"
 #include "../runtime/argument_reader.hpp"
 #include "../utilities.hpp"
 #include <spawn.h>  // ::posix_spawnp()
@@ -75,73 +74,66 @@ void create_bindings_process(Oval& result, API_Version /*version*/)
     // `std.process.execute()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("execute"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.process.execute(cmd, [argv], [envp])`\n"
-          "\n"
-          "  * Launches the program denoted by `cmd`, awaits its termination,\n"
-          "    and returns its exit status. If `argv` is provided, it shall be\n"
-          "    an array of strings, which specify arguments passed to the\n"
-          "    program. If `envp` is provided, it shall also be an array of\n"
-          "    strings, which specify environment variables passed to the\n"
-          "    program.\n"
-          "\n"
-          "  * Returns the exit status as an integer. If the process exits due\n"
-          "    to a signal, the exit status is `128+N` where `N` is the signal\n"
-          "    number.\n"
-          "\n"
-          "  * Throws an exception if the program could not be launched or its\n"
-          "    exit status could not be retrieved.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.process.execute"), ::rocket::ref(args));
-          // Parse arguments.
-          Sval cmd;
-          Aopt argv;
-          Aopt envp;
-          if(reader.I().g(cmd).g(argv).g(envp).F()) {
-            // Call the binding function.
-            return std_process_execute(::rocket::move(cmd), ::rocket::move(argv),
-                                                            ::rocket::move(envp));
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.process.execute"), ::rocket::ref(args));
+    // Parse arguments.
+    Sval cmd;
+    Aopt argv;
+    Aopt envp;
+    if(reader.I().v(cmd).o(argv).o(envp).F()) {
+      // Call the binding function.
+      return std_process_execute(::rocket::move(cmd), ::rocket::move(argv),
+                                                      ::rocket::move(envp));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.process.execute(cmd, [argv], [envp])`
+
+  * Launches the program denoted by `cmd`, awaits its termination,
+    and returns its exit status. If `argv` is provided, it shall be
+    an array of strings, which specify arguments passed to the
+    program. If `envp` is provided, it shall also be an array of
+    strings, which specify environment variables passed to the
+    program.
+
+  * Returns the exit status as an integer. If the process exits due
+    to a signal, the exit status is `128+N` where `N` is the signal
+    number.
+
+  * Throws an exception if the program could not be launched or its
+    exit status could not be retrieved.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // `std.process.daemonize()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("daemonize"),
-      Fval(::rocket::make_refcnt<Simple_Binding_Wrapper>(
-        // Description
-        ::rocket::sref(
-          "\n"
-          "`std.process.daemonize()`\n"
-          "\n"
-          "  * Detaches the current process from its controlling terminal and\n"
-          "    makes it run in the background.\n"
-          "\n"
-          "  * Detaches the current process from its controlling terminal and\n"
-          "    continues in the background. The calling process terminates on\n"
-          "    success so this function never returns.\n"
-          "\n"
-          "  * Throws an exception on failure.\n"
-        ),
-        // Definition
-        [](cow_vector<Reference>&& args) -> Value  {
-          Argument_Reader reader(::rocket::sref("std.process.daemonize"), ::rocket::ref(args));
-          // Parse arguments.
-          if(reader.I().F()) {
-            // Call the binding function.
-            std_process_daemonize();
-            return true;
-          }
-          // Fail.
-          reader.throw_no_matching_function_call();
-        })
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::sref("std.process.daemonize"), ::rocket::ref(args));
+    // Parse arguments.
+    if(reader.I().F()) {
+      // Call the binding function.
+      std_process_daemonize();
+      return true;
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.process.daemonize()`
+
+  * Detaches the current process from its controlling terminal and
+    continues in the background. The calling process terminates on
+    success so this function never returns.
+
+  * Throws an exception on failure.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
     // End of `std.process`

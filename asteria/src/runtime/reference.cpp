@@ -87,7 +87,7 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
       }
       // Perform a non-tail call.
       ASTERIA_RUNTIME_TRY {
-        target->invoke_ptc_aware(self, global, ::rocket::move(args));
+        target.invoke_ptc_aware(self, global, ::rocket::move(args));
       }
       ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
         do_unpack_frames(except, global, stack, ::rocket::move(frames));
