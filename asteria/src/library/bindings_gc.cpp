@@ -18,10 +18,9 @@ Iopt std_gc_tracked_count(Global& global, Ival generation)
     if(gc_gen != generation) {
       return nullopt;
     }
-    // Get the collector.
-    const auto& coll = global.generational_collector()->get_collector(gc_gen);
     // Get the current number of variables being tracked.
-    size_t count = coll.count_tracked_variables();
+    auto gcoll = global.generational_collector();
+    size_t count = gcoll->get_collector(gc_gen).count_tracked_variables();
     return static_cast<int64_t>(count);
   }
 
@@ -32,10 +31,9 @@ Iopt std_gc_get_threshold(Global& global, Ival generation)
     if(gc_gen != generation) {
       return nullopt;
     }
-    // Get the collector.
-    const auto& coll = global.generational_collector()->get_collector(gc_gen);
     // Get the current threshold.
-    uint32_t thres = coll.get_threshold();
+    auto gcoll = global.generational_collector();
+    uint32_t thres = gcoll->get_collector(gc_gen).get_threshold();
     return static_cast<int64_t>(thres);
   }
 
@@ -46,11 +44,11 @@ Iopt std_gc_set_threshold(Global& global, Ival generation, Ival threshold)
     if(gc_gen != generation) {
       return nullopt;
     }
-    // Get the collector.
-    auto& coll = global.generational_collector()->open_collector(gc_gen);
+    uint32_t thres_new = static_cast<uint32_t>(::rocket::clamp(threshold, 0, INT32_MAX));
     // Set the threshold and return its old value.
-    uint32_t thres = coll.get_threshold();
-    coll.set_threshold(static_cast<uint32_t>(::rocket::clamp(threshold, 0, INT32_MAX)));
+    auto gcoll = global.generational_collector();
+    uint32_t thres = gcoll->get_collector(gc_gen).get_threshold();
+    gcoll->open_collector(gc_gen).set_threshold(thres_new);
     return static_cast<int64_t>(thres);
   }
 
@@ -63,7 +61,8 @@ Ival std_gc_collect(Global& global, Iopt generation_limit)
                        static_cast<Ival>(gc_generation_newest), static_cast<Ival>(gc_generation_oldest)));
     }
     // Perform garbage collection up to the generation specified.
-    size_t nvars = global.generational_collector()->collect_variables(gc_limit);
+    auto gcoll = global.generational_collector();
+    size_t nvars = gcoll->collect_variables(gc_limit);
     return static_cast<int64_t>(nvars);
   }
 
