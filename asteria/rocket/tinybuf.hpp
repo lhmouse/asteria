@@ -264,6 +264,11 @@ template<typename charT, typename traitsT>
       }
     basic_tinybuf& puts(const char_type* s)
       {
+        static constexpr char_type s_null[] = { '(', 'n', 'u', 'l', 'l', ')' };
+        if(!s) {
+          // Don't result in a segfault at least.
+          return this->putn(s_null, traits_type::length(s_null));
+        }
         return this->putn(s, traits_type::length(s));
       }
 
