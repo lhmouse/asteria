@@ -155,6 +155,7 @@ class Instantiated_Function;
 class AIR_Node;
 class Backtrace_Frame;
 class Simple_Script;
+class Argument_Reader;
 
 // Compiler
 enum Punctuator : uint8_t;
@@ -171,7 +172,6 @@ class Infix_Element;
 class Statement_Sequence;
 
 // Library
-class Argument_Reader;
 class Simple_Binding_Wrapper;
 
 // Fundamental types

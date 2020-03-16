@@ -1,11 +1,11 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_LIBRARY_ARGUMENT_READER_HPP_
-#define ASTERIA_LIBRARY_ARGUMENT_READER_HPP_
+#ifndef ASTERIA_RUNTIME_ARGUMENT_READER_HPP_
+#define ASTERIA_RUNTIME_ARGUMENT_READER_HPP_
 
 #include "../fwd.hpp"
-#include "../runtime/reference.hpp"
+#include "reference.hpp"
 #include "../value.hpp"
 
 namespace Asteria {

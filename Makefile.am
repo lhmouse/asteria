@@ -151,7 +151,8 @@ pkginclude_runtime_HEADERS =  \
   asteria/src/runtime/evaluation_stack.hpp  \
   asteria/src/runtime/instantiated_function.hpp  \
   asteria/src/runtime/air_node.hpp  \
-  asteria/src/runtime/simple_script.hpp
+  asteria/src/runtime/simple_script.hpp  \
+  asteria/src/runtime/argument_reader.hpp
 
 pkginclude_compilerdir = ${pkgincludedir}/compiler
 pkginclude_compiler_HEADERS =  \
@@ -166,7 +167,6 @@ pkginclude_compiler_HEADERS =  \
 
 pkginclude_librarydir = ${pkgincludedir}/library
 pkginclude_library_HEADERS =  \
-  asteria/src/library/argument_reader.hpp  \
   asteria/src/library/simple_binding_wrapper.hpp  \
   asteria/src/library/bindings_version.hpp  \
   asteria/src/library/bindings_gc.hpp  \
@@ -214,6 +214,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/runtime/instantiated_function.cpp  \
   asteria/src/runtime/air_node.cpp  \
   asteria/src/runtime/simple_script.cpp  \
+  asteria/src/runtime/argument_reader.cpp  \
   asteria/src/compiler/enums.cpp  \
   asteria/src/compiler/parser_error.cpp  \
   asteria/src/compiler/token.cpp  \
@@ -222,7 +223,6 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/compiler/statement.cpp  \
   asteria/src/compiler/infix_element.cpp  \
   asteria/src/compiler/statement_sequence.cpp  \
-  asteria/src/library/argument_reader.cpp  \
   asteria/src/library/simple_binding_wrapper.cpp  \
   asteria/src/library/bindings_version.cpp  \
   asteria/src/library/bindings_gc.cpp  \

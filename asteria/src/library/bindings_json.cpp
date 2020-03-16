@@ -3,8 +3,8 @@
 
 #include "../precompiled.hpp"
 #include "bindings_json.hpp"
-#include "argument_reader.hpp"
 #include "simple_binding_wrapper.hpp"
+#include "../runtime/argument_reader.hpp"
 #include "../runtime/global_context.hpp"
 #include "../compiler/token_stream.hpp"
 #include "../compiler/enums.hpp"

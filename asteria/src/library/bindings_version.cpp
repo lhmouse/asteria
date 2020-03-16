@@ -3,8 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "bindings_version.hpp"
-#include "argument_reader.hpp"
-#include "simple_binding_wrapper.hpp"
+#include "../value.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {

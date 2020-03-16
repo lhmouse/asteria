@@ -3,8 +3,8 @@
 
 #include "../precompiled.hpp"
 #include "bindings_gc.hpp"
-#include "argument_reader.hpp"
 #include "simple_binding_wrapper.hpp"
+#include "../runtime/argument_reader.hpp"
 #include "../runtime/global_context.hpp"
 #include "../runtime/generational_collector.hpp"
 #include "../utilities.hpp"
