@@ -9,7 +9,7 @@
 namespace Asteria {
 
 Iopt std_debug_print(Sval templ, cow_vector<Value> values);
-Iopt std_debug_dump(Value value, Iopt indent = nullopt);
+Iopt std_debug_dump(Value value, Iopt indent = { });
 
 // Create an object that is to be referenced as `std.debug`.
 void create_bindings_debug(Oval& result, API_Version version);

@@ -53,7 +53,7 @@ class Simple_Script
     Simple_Script& reload_file(const cow_string& path);
     Simple_Script& reload_stdin();
 
-    Reference execute(Global_Context& global, cow_vector<Reference>&& args = nullopt) const;
+    Reference execute(Global_Context& global, cow_vector<Reference>&& args = { }) const;
     Reference execute(Global_Context& global, cow_vector<Value>&& vals) const;
   };
 

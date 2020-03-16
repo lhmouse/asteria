@@ -8,7 +8,7 @@
 
 namespace Asteria {
 
-Ival std_process_execute(Sval path, Aopt argv = nullopt, Aopt envp = nullopt);
+Ival std_process_execute(Sval path, Aopt argv = { }, Aopt envp = { });
 void std_process_daemonize();
 
 // Create an object that is to be referenced as `std.process`.
