@@ -22,8 +22,8 @@ class Argument_Reader
       };
 
   private:
-    cow_string m_name;
     ref_to<const cow_vector<Reference>> m_args;
+    cow_string m_name;
     bool m_throw_on_failure;
 
     // `m_ovlds` contains all overloads that have been tested so far.
@@ -32,9 +32,9 @@ class Argument_Reader
     State m_state;
 
   public:
-    Argument_Reader(const cow_string& name, ref_to<const cow_vector<Reference>> args) noexcept
+    Argument_Reader(ref_to<const cow_vector<Reference>> args, const cow_string& name) noexcept
       :
-        m_name(name), m_args(args), m_throw_on_failure(false),
+        m_args(args), m_name(name), m_throw_on_failure(false),
         m_ovlds(), m_state()
       {
       }
@@ -57,10 +57,6 @@ class Argument_Reader
     inline opt<size_t> do_check_finish_opt() const;
 
   public:
-    const cow_string& get_name() const noexcept
-      {
-        return this->m_name;
-      }
     size_t count_arguments() const noexcept
       {
         return this->m_args->size();
@@ -68,6 +64,10 @@ class Argument_Reader
     const Reference& get_argument(size_t index) const
       {
         return this->m_args->at(index);
+      }
+    const cow_string& get_name() const noexcept
+      {
+        return this->m_name;
       }
 
     bool does_throw_on_failure() const noexcept

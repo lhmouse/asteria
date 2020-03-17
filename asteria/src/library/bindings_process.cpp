@@ -77,7 +77,7 @@ void create_bindings_process(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.process.execute"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.process.execute"));
     // Parse arguments.
     Sval cmd;
     Aopt argv;
@@ -115,7 +115,7 @@ void create_bindings_process(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.process.daemonize"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.process.daemonize"));
     // Parse arguments.
     if(reader.I().F()) {
       // Call the binding function.

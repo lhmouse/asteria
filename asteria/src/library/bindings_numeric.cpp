@@ -682,7 +682,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.abs"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.abs"));
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
@@ -718,7 +718,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.sign"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.sign"));
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
@@ -750,7 +750,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.is_finite"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.is_finite"));
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
@@ -784,7 +784,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.is_infinity"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.is_infinity"));
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
@@ -818,7 +818,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.is_nan"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.is_nan"));
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
@@ -851,7 +851,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.clamp"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.clamp"));
     // Parse arguments.
     Ival ivalue;
     Ival ilower;
@@ -891,7 +891,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.round"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.round"));
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
@@ -923,7 +923,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.floor"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.floor"));
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
@@ -955,7 +955,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.ceil"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.ceil"));
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
@@ -987,7 +987,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.trunc"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.trunc"));
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
@@ -1019,7 +1019,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.iround"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.iround"));
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
@@ -1055,7 +1055,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.ifloor"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.ifloor"));
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
@@ -1091,7 +1091,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.iceil"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.iceil"));
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
@@ -1127,7 +1127,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.itrunc"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.itrunc"));
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
@@ -1162,7 +1162,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.random"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.random"));
     // Parse arguments.
     Ropt limit;
     if(reader.I().o(limit).F()) {
@@ -1191,7 +1191,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.sqrt"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.sqrt"));
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
@@ -1217,7 +1217,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.fma"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.fma"));
     // Parse arguments.
     Rval x;
     Rval y;
@@ -1246,7 +1246,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.remainder"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.remainder"));
     // Parse arguments.
     Rval x;
     Rval y;
@@ -1274,7 +1274,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.frexp"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.frexp"));
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
@@ -1310,7 +1310,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.ldexp"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.ldexp"));
     // Parse arguments.
     Rval frac;
     Ival exp;
@@ -1338,7 +1338,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.addm"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.addm"));
     // Parse arguments.
     Ival x;
     Ival y;
@@ -1367,7 +1367,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.subm"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.subm"));
     // Parse arguments.
     Ival x;
     Ival y;
@@ -1397,7 +1397,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.mulm"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.mulm"));
     // Parse arguments.
     Ival x;
     Ival y;
@@ -1427,7 +1427,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.adds"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.adds"));
     // Parse arguments.
     Ival ix;
     Ival iy;
@@ -1464,7 +1464,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.subs"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.subs"));
     // Parse arguments.
     Ival ix;
     Ival iy;
@@ -1501,7 +1501,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.muls"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.muls"));
     // Parse arguments.
     Ival ix;
     Ival iy;
@@ -1538,7 +1538,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.lzcnt"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.lzcnt"));
     // Parse arguments.
     Ival x;
     if(reader.I().v(x).F()) {
@@ -1565,7 +1565,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.tzcnt"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.tzcnt"));
     // Parse arguments.
     Ival x;
     if(reader.I().v(x).F()) {
@@ -1592,7 +1592,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.popcnt"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.popcnt"));
     // Parse arguments.
     Ival x;
     if(reader.I().v(x).F()) {
@@ -1618,7 +1618,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.rotl"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.rotl"));
     // Parse arguments.
     Ival m;
     Ival x;
@@ -1654,7 +1654,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.rotr"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.rotr"));
     // Parse arguments.
     Ival m;
     Ival x;
@@ -1690,7 +1690,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.format"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.format"));
     // Parse arguments.
     Ival ivalue;
     Iopt base;
@@ -1736,7 +1736,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.parse_integer"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.parse_integer"));
     // Parse arguments.
     Sval text;
     if(reader.I().v(text).F()) {
@@ -1777,7 +1777,7 @@ void create_bindings_numeric(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.numeric.parse_real"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.parse_real"));
     // Parse arguments.
     Sval text;
     Bopt saturating;

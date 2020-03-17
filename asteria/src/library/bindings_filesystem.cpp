@@ -526,7 +526,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.filesystem.get_working_directory"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.get_working_directory"));
     // Parse arguments.
     if(reader.I().F()) {
       // Call the binding function.
@@ -551,7 +551,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.filesystem.get_information"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.get_information"));
     // Parse arguments.
     Sval path;
     if(reader.I().v(path).F()) {
@@ -593,7 +593,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.filesystem.remove_recursive"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.remove_recursive"));
     // Parse arguments.
     Sval path;
     if(reader.I().v(path).F()) {
@@ -621,7 +621,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.filesystem.move_from"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.move_from"));
     // Parse arguments.
     Sval path_new;
     Sval path_old;
@@ -654,7 +654,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.filesystem.directory_list"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.directory_list"));
     // Parse arguments.
     Sval path;
     if(reader.I().v(path).F()) {
@@ -693,7 +693,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.filesystem.directory_create"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.directory_create"));
     // Parse arguments.
     Sval path;
     if(reader.I().v(path).F()) {
@@ -725,7 +725,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.filesystem.directory_remove"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.directory_remove"));
     // Parse arguments.
     Sval path;
     if(reader.I().v(path).F()) {
@@ -755,7 +755,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.filesystem.file_read"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.file_read"));
     // Parse arguments.
     Sval path;
     Iopt offset;
@@ -790,7 +790,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.filesystem.file_stream"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.file_stream"));
     // Parse arguments.
     Sval path;
     Fval callback;
@@ -833,7 +833,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.filesystem.file_write"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.file_write"));
     // Parse arguments.
     Sval path;
     Sval data;
@@ -869,7 +869,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.filesystem.file_append"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.file_append"));
     // Parse arguments.
     Sval path;
     Sval data;
@@ -904,7 +904,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.filesystem.file_copy_from"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.file_copy_from"));
     // Parse arguments.
     Sval path_new;
     Sval path_old;
@@ -936,7 +936,7 @@ void create_bindings_filesystem(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.filesystem.file_remove"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.file_remove"));
     // Parse arguments.
     Sval path;
     if(reader.I().v(path).F()) {

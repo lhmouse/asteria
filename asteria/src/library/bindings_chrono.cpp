@@ -382,7 +382,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.chrono.utc_now"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.utc_now"));
     // Parse arguments.
     if(reader.I().F()) {
       // Call the binding function.
@@ -407,7 +407,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.chrono.local_now"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.local_now"));
     // Parse arguments.
     if(reader.I().F()) {
       // Call the binding function.
@@ -432,7 +432,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.chrono.hires_now"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.hires_now"));
     // Parse arguments.
     if(reader.I().F()) {
       // Call the binding function.
@@ -460,7 +460,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.chrono.steady_now"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.steady_now"));
     // Parse arguments.
     if(reader.I().F()) {
       // Call the binding function.
@@ -488,7 +488,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.chrono.local_from_utc"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.local_from_utc"));
     // Parse arguments.
     Ival time_utc;
     if(reader.I().v(time_utc).F()) {
@@ -515,7 +515,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.chrono.utc_from_local"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.utc_from_local"));
     // Parse arguments.
     Ival time_local;
     if(reader.I().v(time_local).F()) {
@@ -543,7 +543,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.chrono.utc_format"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.utc_format"));
     // Parse arguments.
     Ival time_point;
     Bopt with_ms;
@@ -573,7 +573,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.chrono.utc_parse"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.utc_parse"));
     // Parse arguments.
     Sval time_str;
     if(reader.I().v(time_str).F()) {

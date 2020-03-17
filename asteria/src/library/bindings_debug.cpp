@@ -57,7 +57,7 @@ void create_bindings_debug(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.debug.print"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.debug.print"));
     // Parse variadic arguments.
     Sval templ;
     cow_vector<Value> values;
@@ -86,7 +86,7 @@ void create_bindings_debug(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.debug.dump"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.debug.dump"));
     // Parse arguments.
     Value value;
     Iopt indent;

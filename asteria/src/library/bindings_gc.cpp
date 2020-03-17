@@ -74,8 +74,8 @@ void create_bindings_gc(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.gc.tracked_count"),
-                           ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args),
+                           ::rocket::sref("std.gc.tracked_count"));
     // Parse arguments.
     Ival generation;
     if(reader.I().v(generation).F()) {
@@ -104,8 +104,8 @@ void create_bindings_gc(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.gc.get_threshold"),
-                           ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args),
+                           ::rocket::sref("std.gc.get_threshold"));
     // Parse arguments.
     Ival generation;
     if(reader.I().v(generation).F()) {
@@ -132,7 +132,7 @@ void create_bindings_gc(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.gc.set_threshold"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.gc.set_threshold"));
     // Parse arguments.
     Ival generation;
     Ival threshold;
@@ -165,7 +165,7 @@ void create_bindings_gc(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.gc.collect"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.gc.collect"));
     // Parse arguments.
     Iopt generation_limit;
     if(reader.I().o(generation_limit).F()) {

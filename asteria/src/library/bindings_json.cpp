@@ -653,7 +653,7 @@ void create_bindings_json(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.json.format"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.json.format"));
     Argument_Reader::State state;
     // Parse arguments.
     Value value;
@@ -695,7 +695,7 @@ void create_bindings_json(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.json.parse"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.json.parse"));
     // Parse arguments.
     Sval text;
     if(reader.I().v(text).F()) {

@@ -203,7 +203,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.math.exp"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.exp"));
     // Parse arguments.
     Rval y;
     Ropt base;
@@ -230,7 +230,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.math.expm1"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.expm1"));
     // Parse arguments.
     Rval y;
     if(reader.I().v(y).F()) {
@@ -256,7 +256,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.math.pow"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.pow"));
     // Parse arguments.
     Rval x;
     Rval y;
@@ -284,7 +284,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.math.log"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.log"));
     // Parse arguments.
     Rval y;
     Ropt base;
@@ -311,7 +311,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.math.log1p"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.log1p"));
     // Parse arguments.
     Rval y;
     if(reader.I().v(y).F()) {
@@ -337,7 +337,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.math.sin"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.sin"));
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
@@ -362,7 +362,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.math.cos"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.cos"));
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
@@ -387,7 +387,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.math.tan"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.tan"));
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
@@ -412,7 +412,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.math.asin"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.asin"));
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
@@ -437,7 +437,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.math.acos"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.acos"));
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
@@ -462,7 +462,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.math.atan"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.atan"));
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
@@ -487,7 +487,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.math.atan2"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.atan2"));
     // Parse arguments.
     Rval y;
     Rval x;
@@ -513,7 +513,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.math.hypot"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.hypot"));
     // Parse variadic arguments.
     cow_vector<Value> values;
     if(reader.I().F(values)) {
@@ -542,7 +542,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.math.sinh"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.sinh"));
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
@@ -567,7 +567,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.math.cosh"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.cosh"));
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
@@ -592,7 +592,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.math.tanh"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.tanh"));
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
@@ -617,7 +617,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.math.asinh"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.asinh"));
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
@@ -642,7 +642,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.math.acosh"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.acosh"));
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
@@ -667,7 +667,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.math.atanh"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.atanh"));
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
@@ -692,7 +692,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.math.erf"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.erf"));
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
@@ -717,7 +717,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.math.cerf"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.cerf"));
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
@@ -742,7 +742,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.math.gamma"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.gamma"));
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
@@ -767,7 +767,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::sref("std.math.lgamma"), ::rocket::ref(args));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.lgamma"));
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
