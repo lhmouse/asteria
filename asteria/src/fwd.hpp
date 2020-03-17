@@ -403,7 +403,7 @@ class cow_function
       {
         auto fptr = this->m_fptr;
         if(fptr) {
-          return fmt << this->m_desc << " (" << (void*)(intptr_t)fptr << ")";  // static
+          return fmt << this->m_desc << " (native function @ " << (void*)(intptr_t)fptr << ")";  // static
         }
         auto ptr = this->m_sptr.get();
         if(!ptr) {
