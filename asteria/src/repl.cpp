@@ -36,12 +36,18 @@ enum Exit_Code : uint8_t
     ::quick_exit(static_cast<int>(code));
   }
 
+void do_freopen_chk(::FILE* fp, const char* mode) noexcept
+  {
+    if(!::freopen(nullptr, mode, fp))
+      ::abort();
+  }
+
 void do_reset_std_streams() noexcept
   {
     ::fflush(nullptr);
-    ::freopen(nullptr, "r", stdin);
-    ::freopen(nullptr, "w", stdout);
-    ::freopen(nullptr, "w", stderr);
+    do_freopen_chk(stdin, "r");
+    do_freopen_chk(stdout, "a");
+    do_freopen_chk(stderr, "a");
     ::setbuf(stderr, nullptr);
   }
 
