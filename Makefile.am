@@ -165,18 +165,18 @@ pkginclude_compiler_HEADERS =  \
 
 pkginclude_librarydir = ${pkgincludedir}/library
 pkginclude_library_HEADERS =  \
-  asteria/src/library/bindings_version.hpp  \
-  asteria/src/library/bindings_gc.hpp  \
-  asteria/src/library/bindings_debug.hpp  \
-  asteria/src/library/bindings_chrono.hpp  \
-  asteria/src/library/bindings_string.hpp  \
-  asteria/src/library/bindings_array.hpp  \
-  asteria/src/library/bindings_numeric.hpp  \
-  asteria/src/library/bindings_math.hpp  \
-  asteria/src/library/bindings_filesystem.hpp  \
-  asteria/src/library/bindings_checksum.hpp  \
-  asteria/src/library/bindings_json.hpp  \
-  asteria/src/library/bindings_process.hpp
+  asteria/src/library/version.hpp  \
+  asteria/src/library/gc.hpp  \
+  asteria/src/library/debug.hpp  \
+  asteria/src/library/chrono.hpp  \
+  asteria/src/library/string.hpp  \
+  asteria/src/library/array.hpp  \
+  asteria/src/library/numeric.hpp  \
+  asteria/src/library/math.hpp  \
+  asteria/src/library/filesystem.hpp  \
+  asteria/src/library/checksum.hpp  \
+  asteria/src/library/json.hpp  \
+  asteria/src/library/process.hpp
 
 lib_libasteria_la_SOURCES =  \
   asteria/src/fwd.cpp  \
@@ -218,18 +218,18 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/compiler/statement.cpp  \
   asteria/src/compiler/infix_element.cpp  \
   asteria/src/compiler/statement_sequence.cpp  \
-  asteria/src/library/bindings_version.cpp  \
-  asteria/src/library/bindings_gc.cpp  \
-  asteria/src/library/bindings_debug.cpp  \
-  asteria/src/library/bindings_chrono.cpp  \
-  asteria/src/library/bindings_string.cpp  \
-  asteria/src/library/bindings_array.cpp  \
-  asteria/src/library/bindings_numeric.cpp  \
-  asteria/src/library/bindings_math.cpp  \
-  asteria/src/library/bindings_filesystem.cpp  \
-  asteria/src/library/bindings_checksum.cpp  \
-  asteria/src/library/bindings_json.cpp  \
-  asteria/src/library/bindings_process.cpp
+  asteria/src/library/version.cpp  \
+  asteria/src/library/gc.cpp  \
+  asteria/src/library/debug.cpp  \
+  asteria/src/library/chrono.cpp  \
+  asteria/src/library/string.cpp  \
+  asteria/src/library/array.cpp  \
+  asteria/src/library/numeric.cpp  \
+  asteria/src/library/math.cpp  \
+  asteria/src/library/filesystem.cpp  \
+  asteria/src/library/checksum.cpp  \
+  asteria/src/library/json.cpp  \
+  asteria/src/library/process.cpp
 
 lib_libasteria_la_CXXFLAGS =  \
   ${AM_CXXFLAGS} -include .pch.hpp
@@ -267,15 +267,15 @@ check_PROGRAMS =  \
   asteria/test/variadic_function_call.test  \
   asteria/test/defer.test  \
   asteria/test/defer_ptc.test  \
-  asteria/test/bindings_chrono.test  \
-  asteria/test/bindings_string.test  \
-  asteria/test/bindings_array.test  \
-  asteria/test/bindings_numeric.test  \
-  asteria/test/bindings_math.test  \
-  asteria/test/bindings_filesystem.test  \
-  asteria/test/bindings_checksum.test  \
-  asteria/test/bindings_json.test  \
-  asteria/test/bindings_process.test  \
+  asteria/test/chrono.test  \
+  asteria/test/string.test  \
+  asteria/test/array.test  \
+  asteria/test/numeric.test  \
+  asteria/test/math.test  \
+  asteria/test/filesystem.test  \
+  asteria/test/checksum.test  \
+  asteria/test/json.test  \
+  asteria/test/process.test  \
   asteria/test/github_65.test  \
   asteria/test/github_71.test  \
   asteria/test/github_78.test  \

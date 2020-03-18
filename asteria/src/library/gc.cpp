@@ -2,7 +2,7 @@
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
 #include "../precompiled.hpp"
-#include "bindings_gc.hpp"
+#include "gc.hpp"
 #include "../runtime/argument_reader.hpp"
 #include "../runtime/global_context.hpp"
 #include "../runtime/generational_collector.hpp"

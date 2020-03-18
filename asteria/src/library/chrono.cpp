@@ -2,7 +2,7 @@
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
 #include "../precompiled.hpp"
-#include "bindings_chrono.hpp"
+#include "chrono.hpp"
 #include "../runtime/argument_reader.hpp"
 #include "../utilities.hpp"
 #include <time.h>  // ::clock_gettime(), ::timespec

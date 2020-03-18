@@ -2,7 +2,7 @@
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
 #include "../precompiled.hpp"
-#include "bindings_json.hpp"
+#include "json.hpp"
 #include "../runtime/argument_reader.hpp"
 #include "../runtime/global_context.hpp"
 #include "../compiler/token_stream.hpp"

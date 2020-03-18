@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_LIBRARY_BINDINGS_MATH_HPP_
-#define ASTERIA_LIBRARY_BINDINGS_MATH_HPP_
+#ifndef ASTERIA_LIBRARY_MATH_HPP_
+#define ASTERIA_LIBRARY_MATH_HPP_
 
 #include "../fwd.hpp"
 

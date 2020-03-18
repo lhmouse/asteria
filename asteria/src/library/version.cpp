@@ -2,7 +2,7 @@
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
 #include "../precompiled.hpp"
-#include "bindings_version.hpp"
+#include "version.hpp"
 #include "../value.hpp"
 #include "../utilities.hpp"
 

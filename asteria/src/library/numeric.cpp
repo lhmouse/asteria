@@ -2,7 +2,7 @@
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
 #include "../precompiled.hpp"
-#include "bindings_numeric.hpp"
+#include "numeric.hpp"
 #include "../runtime/argument_reader.hpp"
 #include "../runtime/global_context.hpp"
 #include "../runtime/random_number_generator.hpp"

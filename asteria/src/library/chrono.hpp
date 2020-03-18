@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_LIBRARY_BINDINGS_CHRONO_HPP_
-#define ASTERIA_LIBRARY_BINDINGS_CHRONO_HPP_
+#ifndef ASTERIA_LIBRARY_CHRONO_HPP_
+#define ASTERIA_LIBRARY_CHRONO_HPP_
 
 #include "../fwd.hpp"
 
