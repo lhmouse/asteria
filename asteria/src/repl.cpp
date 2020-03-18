@@ -36,6 +36,15 @@ enum Exit_Code : uint8_t
     ::quick_exit(static_cast<int>(code));
   }
 
+void do_reset_std_streams() noexcept
+  {
+    ::fflush(nullptr);
+    ::freopen(nullptr, "r", stdin);
+    ::freopen(nullptr, "w", stdout);
+    ::freopen(nullptr, "w", stderr);
+    ::setbuf(stderr, nullptr);
+  }
+
 cow_string do_xindent(cow_string&& str)
   {
     size_t bp = SIZE_MAX;
@@ -435,6 +444,7 @@ void do_prepare_REPL_input()
 int do_REP_single()
   {
     // Read the next snippet.
+    do_reset_std_streams();
     code.clear();
     interrupted = 0;
 
@@ -491,8 +501,6 @@ int do_REP_single()
       escape = false;
     }
     if(interrupted) {
-      // Discard this snippet. Recover the stream so we can read the next one.
-      (void)!::freopen(nullptr, "r", stdin);
       ::fprintf(stderr, "! interrupted\n");
       return SIGINT;
     }
@@ -539,6 +547,10 @@ int do_REP_single()
         return SIGPIPE;
       }
     }
+
+    // Reset orientation of standard streams.
+    do_reset_std_streams();
+
     // Execute the script as a function, which returns a `Reference`.
     try {
       const auto ref = script.execute(global, ::rocket::move(cmdline.args));
@@ -614,6 +626,9 @@ int do_REP_single()
       ::fprintf(stderr, "! parser error: %s\n", do_stringify(except).c_str());
       do_exit(exit_parser_error);
     }
+
+    // Reset orientation of standard streams.
+    do_reset_std_streams();
 
     // Execute the script.
     try {
