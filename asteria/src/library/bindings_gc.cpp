@@ -10,7 +10,7 @@
 
 namespace Asteria {
 
-Iopt std_gc_tracked_count(Global& global, Ival generation)
+Iopt gc_tracked_count(Global& global, Ival generation)
   {
     auto gc_gen = static_cast<GC_Generation>(::rocket::clamp(generation,
                         static_cast<Ival>(gc_generation_newest), static_cast<Ival>(gc_generation_oldest)));
@@ -23,7 +23,7 @@ Iopt std_gc_tracked_count(Global& global, Ival generation)
     return static_cast<int64_t>(count);
   }
 
-Iopt std_gc_get_threshold(Global& global, Ival generation)
+Iopt gc_get_threshold(Global& global, Ival generation)
   {
     auto gc_gen = static_cast<GC_Generation>(::rocket::clamp(generation,
                         static_cast<Ival>(gc_generation_newest), static_cast<Ival>(gc_generation_oldest)));
@@ -36,7 +36,7 @@ Iopt std_gc_get_threshold(Global& global, Ival generation)
     return static_cast<int64_t>(thres);
   }
 
-Iopt std_gc_set_threshold(Global& global, Ival generation, Ival threshold)
+Iopt gc_set_threshold(Global& global, Ival generation, Ival threshold)
   {
     auto gc_gen = static_cast<GC_Generation>(::rocket::clamp(generation,
                         static_cast<Ival>(gc_generation_newest), static_cast<Ival>(gc_generation_oldest)));
@@ -51,7 +51,7 @@ Iopt std_gc_set_threshold(Global& global, Ival generation, Ival threshold)
     return static_cast<int64_t>(thres);
   }
 
-Ival std_gc_collect(Global& global, Iopt generation_limit)
+Ival gc_collect(Global& global, Iopt generation_limit)
   {
     auto gc_limit = gc_generation_oldest;
     // Unlike others, this function does not fail if `generation_limit` is out of range.
@@ -80,7 +80,7 @@ void create_bindings_gc(Oval& result, API_Version /*version*/)
     Ival generation;
     if(reader.I().v(generation).F()) {
       // Call the binding function.
-      return std_gc_tracked_count(global, ::rocket::move(generation));
+      return gc_tracked_count(global, ::rocket::move(generation));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -110,7 +110,7 @@ void create_bindings_gc(Oval& result, API_Version /*version*/)
     Ival generation;
     if(reader.I().v(generation).F()) {
       // Call the binding function.
-      return std_gc_get_threshold(global, ::rocket::move(generation));
+      return gc_get_threshold(global, ::rocket::move(generation));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -138,7 +138,7 @@ void create_bindings_gc(Oval& result, API_Version /*version*/)
     Ival threshold;
     if(reader.I().v(generation).v(threshold).F()) {
       // Call the binding function.
-      return std_gc_set_threshold(global, ::rocket::move(generation), ::rocket::move(threshold));
+      return gc_set_threshold(global, ::rocket::move(generation), ::rocket::move(threshold));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -170,7 +170,7 @@ void create_bindings_gc(Oval& result, API_Version /*version*/)
     Iopt generation_limit;
     if(reader.I().o(generation_limit).F()) {
       // Call the binding function.
-      return std_gc_collect(global, ::rocket::move(generation_limit));
+      return gc_collect(global, ::rocket::move(generation_limit));
     }
     // Fail.
     reader.throw_no_matching_function_call();

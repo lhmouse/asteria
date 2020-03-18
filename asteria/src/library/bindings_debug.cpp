@@ -16,7 +16,7 @@ tinyfmt& do_print_value(tinyfmt& fmt, const void* ptr)
 
 }  // namespace
 
-Iopt std_debug_print(Sval templ, cow_vector<Value> values)
+Iopt debug_print(Sval templ, cow_vector<Value> values)
   {
     // Prepare inserters.
     cow_vector<::rocket::formatter> insts;
@@ -34,7 +34,7 @@ Iopt std_debug_print(Sval templ, cow_vector<Value> values)
     return static_cast<int64_t>(nput);
   }
 
-Iopt std_debug_dump(Value value, Iopt indent)
+Iopt debug_dump(Value value, Iopt indent)
   {
     // Clamp the suggested indent so we don't produce overlong lines.
     size_t rindent = static_cast<size_t>(::rocket::clamp(indent.value_or(2), 0, 10));
@@ -63,7 +63,7 @@ void create_bindings_debug(Oval& result, API_Version /*version*/)
     cow_vector<Value> values;
     if(reader.I().v(templ).F(values)) {
       // Call the binding function.
-      return std_debug_print(templ, values);
+      return debug_print(templ, values);
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -92,7 +92,7 @@ void create_bindings_debug(Oval& result, API_Version /*version*/)
     Iopt indent;
     if(reader.I().o(value).o(indent).F()) {
       // Call the binding function.
-      return std_debug_dump(value, indent);
+      return debug_dump(value, indent);
     }
     // Fail.
     reader.throw_no_matching_function_call();

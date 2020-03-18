@@ -909,12 +909,12 @@ class SHA256_Hasher final : public Abstract_Opaque
 
 }  // namespace
 
-Pval std_checksum_crc32_new_private()
+Pval checksum_crc32_new_private()
   {
     return ::rocket::make_refcnt<CRC32_Hasher>();
   }
 
-Ival std_checksum_crc32_new_write(Pval& h, Sval data)
+Ival checksum_crc32_new_write(Pval& h, Sval data)
   {
     auto qh = h.open_opt<CRC32_Hasher>();
     if(!qh) {
@@ -923,7 +923,7 @@ Ival std_checksum_crc32_new_write(Pval& h, Sval data)
     return qh->write(data);
   }
 
-Ival std_checksum_crc32_new_finish(Pval& h)
+Ival checksum_crc32_new_finish(Pval& h)
   {
     auto qh = h.open_opt<CRC32_Hasher>();
     if(!qh) {
@@ -932,14 +932,14 @@ Ival std_checksum_crc32_new_finish(Pval& h)
     return qh->finish();
   }
 
-Oval std_checksum_crc32_new()
+Oval checksum_crc32_new()
   {
     Oval result;
     //===================================================================
     // * private data
     //===================================================================
     result.insert_or_assign(::rocket::sref("$h"),
-      std_checksum_crc32_new_private());
+      checksum_crc32_new_private());
     //===================================================================
     // `.write(data)`
     //===================================================================
@@ -955,7 +955,7 @@ Oval std_checksum_crc32_new()
     Sval data;
     if(reader.I().v(data).F()) {
       // Call the binding function.
-      return std_checksum_crc32_new_write(self.open().open_opaque(), ::rocket::move(data));
+      return checksum_crc32_new_write(self.open().open_opaque(), ::rocket::move(data));
     }
     reader.throw_no_matching_function_call();
   },
@@ -977,7 +977,7 @@ std.checksum.crc32_new().write
     // Parse arguments.
     if(reader.I().F()) {
       // Call the binding function.
-      return std_checksum_crc32_new_finish(self.open().open_opaque());
+      return checksum_crc32_new_finish(self.open().open_opaque());
     }
     reader.throw_no_matching_function_call();
   },
@@ -991,19 +991,19 @@ std.checksum.crc32_new().finish
     return result;
   }
 
-Ival std_checksum_crc32(Sval data)
+Ival checksum_crc32(Sval data)
   {
     CRC32_Hasher h;
     h.write(data);
     return h.finish();
   }
 
-Pval std_checksum_fnv1a32_new_private()
+Pval checksum_fnv1a32_new_private()
   {
     return ::rocket::make_refcnt<FNV1a32_Hasher>();
   }
 
-Ival std_checksum_fnv1a32_new_write(Pval& h, Sval data)
+Ival checksum_fnv1a32_new_write(Pval& h, Sval data)
   {
     auto qh = h.open_opt<FNV1a32_Hasher>();
     if(!qh) {
@@ -1012,7 +1012,7 @@ Ival std_checksum_fnv1a32_new_write(Pval& h, Sval data)
     return qh->write(data);
   }
 
-Ival std_checksum_fnv1a32_new_finish(Pval& h)
+Ival checksum_fnv1a32_new_finish(Pval& h)
   {
     auto qh = h.open_opt<FNV1a32_Hasher>();
     if(!qh) {
@@ -1021,14 +1021,14 @@ Ival std_checksum_fnv1a32_new_finish(Pval& h)
     return qh->finish();
   }
 
-Oval std_checksum_fnv1a32_new()
+Oval checksum_fnv1a32_new()
   {
     Oval result;
     //===================================================================
     // * private data
     //===================================================================
     result.insert_or_assign(::rocket::sref("$h"),
-      std_checksum_fnv1a32_new_private());
+      checksum_fnv1a32_new_private());
     //===================================================================
     // `.write(data)`
     //===================================================================
@@ -1044,7 +1044,7 @@ Oval std_checksum_fnv1a32_new()
     Sval data;
     if(reader.I().v(data).F()) {
       // Call the binding function.
-      return std_checksum_fnv1a32_new_write(self.open().open_opaque(), ::rocket::move(data));
+      return checksum_fnv1a32_new_write(self.open().open_opaque(), ::rocket::move(data));
     }
     reader.throw_no_matching_function_call();
   },
@@ -1066,7 +1066,7 @@ std.checksum.fnv1a32_new().write
     // Parse arguments.
     if(reader.I().F()) {
       // Call the binding function.
-      return std_checksum_fnv1a32_new_finish(self.open().open_opaque());
+      return checksum_fnv1a32_new_finish(self.open().open_opaque());
     }
     reader.throw_no_matching_function_call();
   },
@@ -1080,19 +1080,19 @@ std.checksum.fnv1a32_new().finish
     return result;
   }
 
-Ival std_checksum_fnv1a32(Sval data)
+Ival checksum_fnv1a32(Sval data)
   {
     FNV1a32_Hasher h;
     h.write(data);
     return h.finish();
   }
 
-Pval std_checksum_md5_new_private()
+Pval checksum_md5_new_private()
   {
     return ::rocket::make_refcnt<MD5_Hasher>();
   }
 
-Ival std_checksum_md5_new_write(Pval& h, Sval data)
+Ival checksum_md5_new_write(Pval& h, Sval data)
   {
     auto qh = h.open_opt<MD5_Hasher>();
     if(!qh) {
@@ -1101,7 +1101,7 @@ Ival std_checksum_md5_new_write(Pval& h, Sval data)
     return qh->write(data);
   }
 
-Sval std_checksum_md5_new_finish(Pval& h)
+Sval checksum_md5_new_finish(Pval& h)
   {
     auto qh = h.open_opt<MD5_Hasher>();
     if(!qh) {
@@ -1110,14 +1110,14 @@ Sval std_checksum_md5_new_finish(Pval& h)
     return qh->finish();
   }
 
-Oval std_checksum_md5_new()
+Oval checksum_md5_new()
   {
     Oval result;
     //===================================================================
     // * private data
     //===================================================================
     result.insert_or_assign(::rocket::sref("$h"),
-      std_checksum_md5_new_private());
+      checksum_md5_new_private());
     //===================================================================
     // `.write(data)`
     //===================================================================
@@ -1133,7 +1133,7 @@ Oval std_checksum_md5_new()
     Sval data;
     if(reader.I().v(data).F()) {
       // Call the binding function.
-      return std_checksum_md5_new_write(self.open().open_opaque(), ::rocket::move(data));
+      return checksum_md5_new_write(self.open().open_opaque(), ::rocket::move(data));
     }
     reader.throw_no_matching_function_call();
   },
@@ -1155,7 +1155,7 @@ std.checksum.md5_new().write
     // Parse arguments.
     if(reader.I().F()) {
       // Call the binding function.
-      return std_checksum_md5_new_finish(self.open().open_opaque());
+      return checksum_md5_new_finish(self.open().open_opaque());
     }
     reader.throw_no_matching_function_call();
   },
@@ -1169,19 +1169,19 @@ std.checksum.md5_new().finish
     return result;
   }
 
-Sval std_checksum_md5(Sval data)
+Sval checksum_md5(Sval data)
   {
     MD5_Hasher h;
     h.write(data);
     return h.finish();
   }
 
-Pval std_checksum_sha1_new_private()
+Pval checksum_sha1_new_private()
   {
     return ::rocket::make_refcnt<SHA1_Hasher>();
   }
 
-Ival std_checksum_sha1_new_write(Pval& h, Sval data)
+Ival checksum_sha1_new_write(Pval& h, Sval data)
   {
     auto qh = h.open_opt<SHA1_Hasher>();
     if(!qh) {
@@ -1190,7 +1190,7 @@ Ival std_checksum_sha1_new_write(Pval& h, Sval data)
     return qh->write(data);
   }
 
-Sval std_checksum_sha1_new_finish(Pval& h)
+Sval checksum_sha1_new_finish(Pval& h)
   {
     auto qh = h.open_opt<SHA1_Hasher>();
     if(!qh) {
@@ -1199,14 +1199,14 @@ Sval std_checksum_sha1_new_finish(Pval& h)
     return qh->finish();
   }
 
-Oval std_checksum_sha1_new()
+Oval checksum_sha1_new()
   {
     Oval result;
     //===================================================================
     // * private data
     //===================================================================
     result.insert_or_assign(::rocket::sref("$h"),
-      std_checksum_sha1_new_private());
+      checksum_sha1_new_private());
     //===================================================================
     // `.write(data)`
     //===================================================================
@@ -1222,7 +1222,7 @@ Oval std_checksum_sha1_new()
     Sval data;
     if(reader.I().v(data).F()) {
       // Call the binding function.
-      return std_checksum_sha1_new_write(self.open().open_opaque(), ::rocket::move(data));
+      return checksum_sha1_new_write(self.open().open_opaque(), ::rocket::move(data));
     }
     reader.throw_no_matching_function_call();
   },
@@ -1244,7 +1244,7 @@ std.checksum.sha1_new().write
     // Parse arguments.
     if(reader.I().F()) {
       // Call the binding function.
-      return std_checksum_sha1_new_finish(self.open().open_opaque());
+      return checksum_sha1_new_finish(self.open().open_opaque());
     }
     reader.throw_no_matching_function_call();
   },
@@ -1258,19 +1258,19 @@ std.checksum.sha1_new().finish
     return result;
   }
 
-Sval std_checksum_sha1(Sval data)
+Sval checksum_sha1(Sval data)
   {
     SHA1_Hasher h;
     h.write(data);
     return h.finish();
   }
 
-Pval std_checksum_sha256_new_private()
+Pval checksum_sha256_new_private()
   {
     return ::rocket::make_refcnt<SHA256_Hasher>();
   }
 
-Ival std_checksum_sha256_new_write(Pval& h, Sval data)
+Ival checksum_sha256_new_write(Pval& h, Sval data)
   {
     auto qh = h.open_opt<SHA256_Hasher>();
     if(!qh) {
@@ -1279,7 +1279,7 @@ Ival std_checksum_sha256_new_write(Pval& h, Sval data)
     return qh->write(data);
   }
 
-Sval std_checksum_sha256_new_finish(Pval& h)
+Sval checksum_sha256_new_finish(Pval& h)
   {
     auto qh = h.open_opt<SHA256_Hasher>();
     if(!qh) {
@@ -1288,14 +1288,14 @@ Sval std_checksum_sha256_new_finish(Pval& h)
     return qh->finish();
   }
 
-Oval std_checksum_sha256_new()
+Oval checksum_sha256_new()
   {
     Oval result;
     //===================================================================
     // * private data
     //===================================================================
     result.insert_or_assign(::rocket::sref("$h"),
-      std_checksum_sha256_new_private());
+      checksum_sha256_new_private());
     //===================================================================
     // `.write(data)`
     //===================================================================
@@ -1311,7 +1311,7 @@ Oval std_checksum_sha256_new()
     Sval data;
     if(reader.I().v(data).F()) {
       // Call the binding function.
-      return std_checksum_sha256_new_write(self.open().open_opaque(), ::rocket::move(data));
+      return checksum_sha256_new_write(self.open().open_opaque(), ::rocket::move(data));
     }
     reader.throw_no_matching_function_call();
   },
@@ -1333,7 +1333,7 @@ std.checksum.sha256_new().write
     // Parse arguments.
     if(reader.I().F()) {
       // Call the binding function.
-      return std_checksum_sha256_new_finish(self.open().open_opaque());
+      return checksum_sha256_new_finish(self.open().open_opaque());
     }
     reader.throw_no_matching_function_call();
   },
@@ -1347,7 +1347,7 @@ std.checksum.sha256_new().finish
     return result;
   }
 
-Sval std_checksum_sha256(Sval data)
+Sval checksum_sha256(Sval data)
   {
     SHA256_Hasher h;
     h.write(data);
@@ -1367,7 +1367,7 @@ void create_bindings_checksum(Oval& result, API_Version /*version*/)
     // Parse arguments.
     if(reader.I().F()) {
       // Call the binding function.
-      return std_checksum_crc32_new();
+      return checksum_crc32_new();
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1404,7 +1404,7 @@ void create_bindings_checksum(Oval& result, API_Version /*version*/)
     Sval data;
     if(reader.I().v(data).F()) {
       // Call the binding function.
-      return std_checksum_crc32(::rocket::move(data));
+      return checksum_crc32(::rocket::move(data));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1441,7 +1441,7 @@ void create_bindings_checksum(Oval& result, API_Version /*version*/)
     // Parse arguments.
     if(reader.I().F()) {
       // Call the binding function.
-      return std_checksum_fnv1a32_new();
+      return checksum_fnv1a32_new();
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1479,7 +1479,7 @@ void create_bindings_checksum(Oval& result, API_Version /*version*/)
     Sval data;
     if(reader.I().v(data).F()) {
       // Call the binding function.
-      return std_checksum_fnv1a32(::rocket::move(data));
+      return checksum_fnv1a32(::rocket::move(data));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1516,7 +1516,7 @@ void create_bindings_checksum(Oval& result, API_Version /*version*/)
     // Parse arguments.
     if(reader.I().F()) {
       // Call the binding function.
-      return std_checksum_md5_new();
+      return checksum_md5_new();
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1551,7 +1551,7 @@ void create_bindings_checksum(Oval& result, API_Version /*version*/)
     Sval data;
     if(reader.I().v(data).F()) {
       // Call the binding function.
-      return std_checksum_md5(::rocket::move(data));
+      return checksum_md5(::rocket::move(data));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1588,7 +1588,7 @@ void create_bindings_checksum(Oval& result, API_Version /*version*/)
     // Parse arguments.
     if(reader.I().F()) {
       // Call the binding function.
-      return std_checksum_sha1_new();
+      return checksum_sha1_new();
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1623,7 +1623,7 @@ void create_bindings_checksum(Oval& result, API_Version /*version*/)
     Sval data;
     if(reader.I().v(data).F()) {
       // Call the binding function.
-      return std_checksum_sha1(::rocket::move(data));
+      return checksum_sha1(::rocket::move(data));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1660,7 +1660,7 @@ void create_bindings_checksum(Oval& result, API_Version /*version*/)
     // Parse arguments.
     if(reader.I().F()) {
       // Call the binding function.
-      return std_checksum_sha256_new();
+      return checksum_sha256_new();
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1695,7 +1695,7 @@ void create_bindings_checksum(Oval& result, API_Version /*version*/)
     Sval data;
     if(reader.I().v(data).F()) {
       // Call the binding function.
-      return std_checksum_sha256(::rocket::move(data));
+      return checksum_sha256(::rocket::move(data));
     }
     // Fail.
     reader.throw_no_matching_function_call();
