@@ -598,6 +598,9 @@ int do_REP_single()
 
 [[noreturn]] int do_single_noreturn()
   {
+    // Return this if an exception is thrown.
+    Exit_Code status = exit_runtime_error;
+
     // Consume all data from standard input.
     script.set_options(options);
     try {
@@ -613,21 +616,20 @@ int do_REP_single()
     }
 
     // Execute the script.
-    Exit_Code status = exit_runtime_error;
     try {
       const auto ref = script.execute(global, ::rocket::move(cmdline.args));
-      if(!ref.is_void()) {
+      if(ref.is_void()) {
+        // If the script returned no value, exit with zero.
+        status = exit_success;
+      }
+      else {
         // If the script returned an `integer`, forward its lower 8 bits.
         // Any other value indicates failure.
         const auto& val = ref.read();
         if(val.is_integer())
-          status = static_cast<Exit_Code>(val.as_integer());
+          status = static_cast<Exit_Code>(val.as_integer() & 0xFF);
         else
           status = exit_unspecified;
-      }
-      else {
-        // If the script returned no value, exit with zero.
-        status = exit_success;
       }
     }
     catch(Runtime_Error& except) {
