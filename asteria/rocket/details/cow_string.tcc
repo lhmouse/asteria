@@ -550,13 +550,12 @@ template<typename charT, typename traitsT> class basic_hasher
       }
     void do_append(const unsigned char* s, size_t n) noexcept
       {
-        auto reg = this->m_reg;
-        for(size_t i = 0; i < n; ++i) {
+        char32_t reg = this->m_reg;
+        for(size_t i = 0; i < n; ++i)
           reg = (reg ^ s[i]) * 0x1000193;
-        }
         this->m_reg = reg;
       }
-    size_t do_finish() noexcept
+    char32_t do_finish() noexcept
       {
         return this->m_reg;
       }
@@ -569,14 +568,13 @@ template<typename charT, typename traitsT> class basic_hasher
        }
      basic_hasher& append(const charT* sz) noexcept
        {
-         for(auto s = sz; !traitsT::eq(*s, charT()); ++s) {
+         for(auto s = sz; !traitsT::eq(*s, charT()); ++s)
            this->do_append(reinterpret_cast<const unsigned char*>(s), sizeof(charT));
-         }
          return *this;
        }
      size_t finish() noexcept
        {
-         auto r = this->do_finish();
+         char32_t r = this->do_finish();
          this->do_init();
          return r;
        }
