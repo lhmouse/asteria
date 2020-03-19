@@ -507,6 +507,7 @@ int do_REP_single()
       escape = false;
     }
     if(interrupted) {
+      ::clearerr(stdin);
       ::fprintf(stderr, "! interrupted\n");
       return SIGINT;
     }
