@@ -74,8 +74,7 @@ void create_bindings_gc(V_object& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value
   {
-    Argument_Reader reader(::rocket::ref(args),
-                           ::rocket::sref("std.gc.tracked_count"));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.gc.tracked_count"));
     // Parse arguments.
     Ival generation;
     if(reader.I().v(generation).F()) {
@@ -104,8 +103,7 @@ void create_bindings_gc(V_object& result, API_Version /*version*/)
       Fval(
 [](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value
   {
-    Argument_Reader reader(::rocket::ref(args),
-                           ::rocket::sref("std.gc.get_threshold"));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.gc.get_threshold"));
     // Parse arguments.
     Ival generation;
     if(reader.I().v(generation).F()) {
