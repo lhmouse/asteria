@@ -517,7 +517,7 @@ bool std_filesystem_file_remove(Sval path)
     return false;
   }
 
-void create_bindings_filesystem(Oval& result, API_Version /*version*/)
+void create_bindings_filesystem(V_object& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.filesystem.get_working_directory()`

@@ -625,7 +625,7 @@ Rval std_numeric_parse_real(Sval text, Bopt saturating)
     return value;
   }
 
-void create_bindings_numeric(Oval& result, API_Version /*version*/)
+void create_bindings_numeric(V_object& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.numeric.integer_max`

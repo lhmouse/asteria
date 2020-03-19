@@ -39,7 +39,7 @@ Oval std_checksum_sha256_new();
 Sval std_checksum_sha256(Sval data);
 
 // Create an object that is to be referenced as `std.checksum`.
-void create_bindings_checksum(Oval& result, API_Version version);
+void create_bindings_checksum(V_object& result, API_Version version);
 
 }  // namespace Asteria
 

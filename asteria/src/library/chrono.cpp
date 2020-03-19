@@ -373,7 +373,7 @@ Ival std_chrono_utc_parse(Sval time_str)
     return static_cast<int64_t>(temp) + s_timestamp_1600_03_01;
   }
 
-void create_bindings_chrono(Oval& result, API_Version /*version*/)
+void create_bindings_chrono(V_object& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.chrono.utc_now()`

@@ -644,7 +644,7 @@ Value std_json_parse(Sval text)
     return ::rocket::move(*qvalue);
   }
 
-void create_bindings_json(Oval& result, API_Version /*version*/)
+void create_bindings_json(V_object& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.json.format()`

@@ -48,7 +48,7 @@ Iopt std_debug_dump(Value value, Iopt indent)
     return static_cast<int64_t>(nput);
   }
 
-void create_bindings_debug(Oval& result, API_Version /*version*/)
+void create_bindings_debug(V_object& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.debug.print()`

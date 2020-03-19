@@ -937,7 +937,7 @@ Aval std_array_copy_values(Oval source)
     return data;
   }
 
-void create_bindings_array(Oval& result, API_Version /*version*/)
+void create_bindings_array(V_object& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.array.slice()`

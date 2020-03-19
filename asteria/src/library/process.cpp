@@ -68,7 +68,7 @@ void std_process_daemonize()
       throw_system_error("daemon");
   }
 
-void create_bindings_process(Oval& result, API_Version /*version*/)
+void create_bindings_process(V_object& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.process.execute()`

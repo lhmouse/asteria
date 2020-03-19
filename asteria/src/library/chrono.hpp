@@ -19,7 +19,7 @@ Sval std_chrono_utc_format(Ival time_point, Bopt with_ms = { });
 Ival std_chrono_utc_parse(Sval time_str);
 
 // Initialize an object that is to be referenced as `std.chrono`.
-void create_bindings_chrono(Oval& result, API_Version version);
+void create_bindings_chrono(V_object& result, API_Version version);
 
 }  // namespace Asteria
 

@@ -104,7 +104,7 @@ Sval std_string_regex_replace(Sval text, Ival from, Sval pattern, Sval replaceme
 Sval std_string_regex_replace(Sval text, Ival from, Iopt length, Sval pattern, Sval replacement);
 
 // Create an object that is to be referenced as `std.string`.
-void create_bindings_string(Oval& result, API_Version version);
+void create_bindings_string(V_object& result, API_Version version);
 
 }  // namespace Asteria
 

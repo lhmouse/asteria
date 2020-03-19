@@ -1354,7 +1354,7 @@ Sval std_checksum_sha256(Sval data)
     return h.finish();
   }
 
-void create_bindings_checksum(Oval& result, API_Version /*version*/)
+void create_bindings_checksum(V_object& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.checksum.crc32_new()`

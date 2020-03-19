@@ -26,7 +26,7 @@ void std_filesystem_file_copy_from(Sval path_new, Sval path_old);
 Bval std_filesystem_file_remove(Sval path);
 
 // Create an object that is to be referenced as `std.filesystem`.
-void create_bindings_filesystem(Oval& result, API_Version version);
+void create_bindings_filesystem(V_object& result, API_Version version);
 
 }  // namespace Asteria
 

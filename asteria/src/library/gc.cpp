@@ -65,7 +65,7 @@ Ival std_gc_collect(Global& global, Iopt generation_limit)
     return static_cast<int64_t>(nvars);
   }
 
-void create_bindings_gc(Oval& result, API_Version /*version*/)
+void create_bindings_gc(V_object& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.gc.tracked_count()`

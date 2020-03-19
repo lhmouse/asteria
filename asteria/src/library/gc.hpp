@@ -14,7 +14,7 @@ Iopt std_gc_set_threshold(Global& global, Ival generation, Ival threshold);
 Ival std_gc_collect(Global& global, Iopt generation_limit);
 
 // Create an object that is to be referenced as `std.gc`.
-void create_bindings_gc(Oval& result, API_Version version);
+void create_bindings_gc(V_object& result, API_Version version);
 
 }  // namespace Asteria
 

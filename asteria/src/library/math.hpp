@@ -37,7 +37,7 @@ Rval std_math_gamma(Rval x);
 Rval std_math_lgamma(Rval x);
 
 // Create an object that is to be referenced as `std.math`.
-void create_bindings_math(Oval& result, API_Version version);
+void create_bindings_math(V_object& result, API_Version version);
 
 }  // namespace Asteria
 

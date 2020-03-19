@@ -1612,7 +1612,7 @@ Sval std_string_regex_replace(Sval text, Ival from, Iopt length, Sval pattern, S
     return res;
   }
 
-void create_bindings_string(Oval& result, API_Version /*version*/)
+void create_bindings_string(V_object& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.string.slice()`

@@ -13,7 +13,7 @@ Sval std_json_format(Value value, Ival indent);
 Value std_json_parse(Sval text);
 
 // Create an object that is to be referenced as `std.json`.
-void create_bindings_json(Oval& result, API_Version version);
+void create_bindings_json(V_object& result, API_Version version);
 
 }  // namespace Asteria
 

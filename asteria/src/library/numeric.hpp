@@ -74,7 +74,7 @@ Ival std_numeric_parse_integer(Sval text);
 Rval std_numeric_parse_real(Sval text, Bopt saturating = { });
 
 // Create an object that is to be referenced as `std.numeric`.
-void create_bindings_numeric(Oval& result, API_Version version);
+void create_bindings_numeric(V_object& result, API_Version version);
 
 }  // namespace Asteria
 

@@ -73,7 +73,7 @@ Aval std_array_copy_keys(Oval source);
 Aval std_array_copy_values(Oval source);
 
 // Create an object that is to be referenced as `std.array`.
-void create_bindings_array(Oval& result, API_Version version);
+void create_bindings_array(V_object& result, API_Version version);
 
 }  // namespace Asteria
 

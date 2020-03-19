@@ -170,7 +170,7 @@ Rval std_math_lgamma(Rval x)
     return ::std::lgamma(x);
   }
 
-void create_bindings_math(Oval& result, API_Version /*version*/)
+void create_bindings_math(V_object& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.math.e`
