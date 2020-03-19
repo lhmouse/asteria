@@ -92,7 +92,8 @@ using tinyfmt = ::rocket::tinyfmt;
 template<typename E, typename D = ::std::default_delete<const E>> using uptr = ::rocket::unique_ptr<E, D>;
 template<typename E> using rcptr = ::rocket::refcnt_ptr<E>;
 template<typename E> using cow_vector = ::rocket::cow_vector<E>;
-template<typename K, typename V, typename H> using cow_hashmap = ::rocket::cow_hashmap<K, V, H, ::std::equal_to<void>>;
+template<typename E> using cow_dictionary = ::rocket::cow_hashmap<::rocket::prehashed_string, E,
+                                                ::rocket::prehashed_string::hash, ::std::equal_to<void>>;
 template<typename E, size_t k> using sso_vector = ::rocket::static_vector<E, k>;
 template<typename... P> using variant = ::rocket::variant<P...>;
 template<typename T> using opt = ::rocket::optional<T>;
@@ -443,7 +444,7 @@ using V_string    = cow_string;
 using V_opaque    = cow_opaque;
 using V_function  = cow_function;
 using V_array     = cow_vector<Value>;
-using V_object    = cow_hashmap<phsh_string, Value, phsh_string::hash>;
+using V_object    = cow_dictionary<Value>;
 
 // Indices of fundamental types
 enum Vtype : uint8_t
