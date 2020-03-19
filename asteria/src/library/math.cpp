@@ -16,7 +16,7 @@ constexpr Rval s_const_lb10 = 3.321928094887362347870319429489390175864831393024
 
 }  // namespace
 
-Rval math_exp(Rval y, Ropt base)
+Rval std_math_exp(Rval y, Ropt base)
   {
     if(!base) {
       return ::std::exp(y);
@@ -30,17 +30,17 @@ Rval math_exp(Rval y, Ropt base)
     return ::std::pow(*base, y);
   }
 
-Rval math_expm1(Rval y)
+Rval std_math_expm1(Rval y)
   {
     return ::std::expm1(y);
   }
 
-Rval math_pow(Rval x, Rval y)
+Rval std_math_pow(Rval x, Rval y)
   {
     return ::std::pow(x, y);
   }
 
-Rval math_log(Rval x, Ropt base)
+Rval std_math_log(Rval x, Ropt base)
   {
     if(!base) {
       return ::std::log(x);
@@ -57,47 +57,47 @@ Rval math_log(Rval x, Ropt base)
     return ::std::log2(x) / ::std::log2(*base);
   }
 
-Rval math_log1p(Rval x)
+Rval std_math_log1p(Rval x)
   {
     return ::std::log1p(x);
   }
 
-Rval math_sin(Rval x)
+Rval std_math_sin(Rval x)
   {
     return ::std::sin(x);
   }
 
-Rval math_cos(Rval x)
+Rval std_math_cos(Rval x)
   {
     return ::std::cos(x);
   }
 
-Rval math_tan(Rval x)
+Rval std_math_tan(Rval x)
   {
     return ::std::tan(x);
   }
 
-Rval math_asin(Rval x)
+Rval std_math_asin(Rval x)
   {
     return ::std::asin(x);
   }
 
-Rval math_acos(Rval x)
+Rval std_math_acos(Rval x)
   {
     return ::std::acos(x);
   }
 
-Rval math_atan(Rval x)
+Rval std_math_atan(Rval x)
   {
     return ::std::atan(x);
   }
 
-Rval math_atan2(Rval y, Rval x)
+Rval std_math_atan2(Rval y, Rval x)
   {
     return ::std::atan2(y, x);
   }
 
-Rval math_hypot(cow_vector<Value> values)
+Rval std_math_hypot(cow_vector<Value> values)
   {
     switch(values.size()) {
     case 0: {
@@ -120,52 +120,52 @@ Rval math_hypot(cow_vector<Value> values)
     }
   }
 
-Rval math_sinh(Rval x)
+Rval std_math_sinh(Rval x)
   {
     return ::std::sinh(x);
   }
 
-Rval math_cosh(Rval x)
+Rval std_math_cosh(Rval x)
   {
     return ::std::cosh(x);
   }
 
-Rval math_tanh(Rval x)
+Rval std_math_tanh(Rval x)
   {
     return ::std::tanh(x);
   }
 
-Rval math_asinh(Rval x)
+Rval std_math_asinh(Rval x)
   {
     return ::std::asinh(x);
   }
 
-Rval math_acosh(Rval x)
+Rval std_math_acosh(Rval x)
   {
     return ::std::acosh(x);
   }
 
-Rval math_atanh(Rval x)
+Rval std_math_atanh(Rval x)
   {
     return ::std::atanh(x);
   }
 
-Rval math_erf(Rval x)
+Rval std_math_erf(Rval x)
   {
     return ::std::erf(x);
   }
 
-Rval math_cerf(Rval x)
+Rval std_math_cerf(Rval x)
   {
     return ::std::erfc(x);
   }
 
-Rval math_gamma(Rval x)
+Rval std_math_gamma(Rval x)
   {
     return ::std::tgamma(x);
   }
 
-Rval math_lgamma(Rval x)
+Rval std_math_lgamma(Rval x)
   {
     return ::std::lgamma(x);
   }
@@ -209,7 +209,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
     Ropt base;
     if(reader.I().v(y).o(base).F()) {
       // Call the binding function.
-      return math_exp(::rocket::move(y), ::rocket::move(base));
+      return std_math_exp(::rocket::move(y), ::rocket::move(base));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -235,7 +235,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
     Rval y;
     if(reader.I().v(y).F()) {
       // Call the binding function.
-      return math_expm1(::rocket::move(y));
+      return std_math_expm1(::rocket::move(y));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -262,7 +262,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
     Rval y;
     if(reader.I().v(x).v(y).F()) {
       // Call the binding function.
-      return math_pow(::rocket::move(x), ::rocket::move(y));
+      return std_math_pow(::rocket::move(x), ::rocket::move(y));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -290,7 +290,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
     Ropt base;
     if(reader.I().v(y).o(base).F()) {
       // Call the binding function.
-      return math_log(::rocket::move(y), ::rocket::move(base));
+      return std_math_log(::rocket::move(y), ::rocket::move(base));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -316,7 +316,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
     Rval y;
     if(reader.I().v(y).F()) {
       // Call the binding function.
-      return math_log1p(::rocket::move(y));
+      return std_math_log1p(::rocket::move(y));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -342,7 +342,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
     Rval x;
     if(reader.I().v(x).F()) {
       // Call the binding function.
-      return math_sin(::rocket::move(x));
+      return std_math_sin(::rocket::move(x));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -367,7 +367,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
     Rval x;
     if(reader.I().v(x).F()) {
       // Call the binding function.
-      return math_cos(::rocket::move(x));
+      return std_math_cos(::rocket::move(x));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -392,7 +392,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
     Rval x;
     if(reader.I().v(x).F()) {
       // Call the binding function.
-      return math_tan(::rocket::move(x));
+      return std_math_tan(::rocket::move(x));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -417,7 +417,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
     Rval x;
     if(reader.I().v(x).F()) {
       // Call the binding function.
-      return math_asin(::rocket::move(x));
+      return std_math_asin(::rocket::move(x));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -442,7 +442,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
     Rval x;
     if(reader.I().v(x).F()) {
       // Call the binding function.
-      return math_acos(::rocket::move(x));
+      return std_math_acos(::rocket::move(x));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -467,7 +467,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
     Rval x;
     if(reader.I().v(x).F()) {
       // Call the binding function.
-      return math_atan(::rocket::move(x));
+      return std_math_atan(::rocket::move(x));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -493,7 +493,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
     Rval x;
     if(reader.I().v(y).v(x).F()) {
       // Call the binding function.
-      return math_atan2(::rocket::move(y), ::rocket::move(x));
+      return std_math_atan2(::rocket::move(y), ::rocket::move(x));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -518,7 +518,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
     cow_vector<Value> values;
     if(reader.I().F(values)) {
       // Call the binding function.
-      return math_hypot(::rocket::move(values));
+      return std_math_hypot(::rocket::move(values));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -547,7 +547,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
     Rval x;
     if(reader.I().v(x).F()) {
       // Call the binding function.
-      return math_sinh(::rocket::move(x));
+      return std_math_sinh(::rocket::move(x));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -572,7 +572,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
     Rval x;
     if(reader.I().v(x).F()) {
       // Call the binding function.
-      return math_cosh(::rocket::move(x));
+      return std_math_cosh(::rocket::move(x));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -597,7 +597,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
     Rval x;
     if(reader.I().v(x).F()) {
       // Call the binding function.
-      return math_tanh(::rocket::move(x));
+      return std_math_tanh(::rocket::move(x));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -622,7 +622,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
     Rval x;
     if(reader.I().v(x).F()) {
       // Call the binding function.
-      return math_asinh(::rocket::move(x));
+      return std_math_asinh(::rocket::move(x));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -647,7 +647,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
     Rval x;
     if(reader.I().v(x).F()) {
       // Call the binding function.
-      return math_acosh(::rocket::move(x));
+      return std_math_acosh(::rocket::move(x));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -672,7 +672,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
     Rval x;
     if(reader.I().v(x).F()) {
       // Call the binding function.
-      return math_atanh(::rocket::move(x));
+      return std_math_atanh(::rocket::move(x));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -697,7 +697,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
     Rval x;
     if(reader.I().v(x).F()) {
       // Call the binding function.
-      return math_erf(::rocket::move(x));
+      return std_math_erf(::rocket::move(x));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -722,7 +722,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
     Rval x;
     if(reader.I().v(x).F()) {
       // Call the binding function.
-      return math_cerf(::rocket::move(x));
+      return std_math_cerf(::rocket::move(x));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -747,7 +747,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
     Rval x;
     if(reader.I().v(x).F()) {
       // Call the binding function.
-      return math_gamma(::rocket::move(x));
+      return std_math_gamma(::rocket::move(x));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -772,7 +772,7 @@ void create_bindings_math(Oval& result, API_Version /*version*/)
     Rval x;
     if(reader.I().v(x).F()) {
       // Call the binding function.
-      return math_lgamma(::rocket::move(x));
+      return std_math_lgamma(::rocket::move(x));
     }
     // Fail.
     reader.throw_no_matching_function_call();

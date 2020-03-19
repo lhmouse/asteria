@@ -21,7 +21,7 @@ namespace {
 
 }  // namespace
 
-Ival process_execute(Sval cmd, Aopt argv, Aopt envp)
+Ival std_process_execute(Sval cmd, Aopt argv, Aopt envp)
   {
     cow_vector<const char*> ptrs = { cmd.c_str(), nullptr };
     size_t eoff = 1;  // beginning of environment variables
@@ -62,7 +62,7 @@ Ival process_execute(Sval cmd, Aopt argv, Aopt envp)
     }
   }
 
-void process_daemonize()
+void std_process_daemonize()
   {
     if(::daemon(1, 0) != 0)
       throw_system_error("daemon");
@@ -84,7 +84,7 @@ void create_bindings_process(Oval& result, API_Version /*version*/)
     Aopt envp;
     if(reader.I().v(cmd).o(argv).o(envp).F()) {
       // Call the binding function.
-      return process_execute(::rocket::move(cmd), ::rocket::move(argv),
+      return std_process_execute(::rocket::move(cmd), ::rocket::move(argv),
                                                       ::rocket::move(envp));
     }
     // Fail.
@@ -119,7 +119,7 @@ void create_bindings_process(Oval& result, API_Version /*version*/)
     // Parse arguments.
     if(reader.I().F()) {
       // Call the binding function.
-      process_daemonize();
+      std_process_daemonize();
       return true;
     }
     // Fail.

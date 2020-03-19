@@ -599,21 +599,21 @@ opt<Value> do_json_parse_nonrecursive_opt(Token_Stream& tstrm)
 
 }  // namespace
 
-Sval json_format(Value value, Sopt indent)
+Sval std_json_format(Value value, Sopt indent)
   {
     // No line break is inserted if `indent` is null or empty.
     return (!indent || indent->empty()) ? do_format_nonrecursive(value, Indenter_none())
                                         : do_format_nonrecursive(value, Indenter_string(*indent));
   }
 
-Sval json_format(Value value, Ival indent)
+Sval std_json_format(Value value, Ival indent)
   {
     // No line break is inserted if `indent` is non-positive.
     return (indent <= 0) ? do_format_nonrecursive(value, Indenter_none())
                          : do_format_nonrecursive(value, Indenter_spaces(indent));
   }
 
-Value json_parse(Sval text)
+Value std_json_parse(Sval text)
   {
     // We reuse the lexer of Asteria here, allowing quite a few extensions e.g. binary numeric
     // literals and comments.
@@ -660,12 +660,12 @@ void create_bindings_json(Oval& result, API_Version /*version*/)
     Sopt sindent;
     if(reader.I().o(value).S(state).o(sindent).F()) {
       // Call the binding function.
-      return json_format(::rocket::move(value), ::rocket::move(sindent));
+      return std_json_format(::rocket::move(value), ::rocket::move(sindent));
     }
     Ival nindent;
     if(reader.L(state).v(nindent).F()) {
       // Call the binding function.
-      return json_format(::rocket::move(value), ::rocket::move(nindent));
+      return std_json_format(::rocket::move(value), ::rocket::move(nindent));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -700,7 +700,7 @@ void create_bindings_json(Oval& result, API_Version /*version*/)
     Sval text;
     if(reader.I().v(text).F()) {
       // Call the binding function.
-      return json_parse(::rocket::move(text));
+      return std_json_parse(::rocket::move(text));
     }
     // Fail.
     reader.throw_no_matching_function_call();

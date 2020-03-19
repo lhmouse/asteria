@@ -23,7 +23,7 @@ constexpr char s_spaces[] = " \f\n\r\t\v";
 
 }  // namespace
 
-Ival chrono_utc_now()
+Ival std_chrono_utc_now()
   {
     // Get UTC time from the system.
     ::timespec ts;
@@ -35,7 +35,7 @@ Ival chrono_utc_now()
     return secs * 1000 + msecs;
   }
 
-Ival chrono_local_now()
+Ival std_chrono_local_now()
   {
     // Get local time and GMT offset from the system.
     ::timespec ts;
@@ -49,7 +49,7 @@ Ival chrono_local_now()
     return secs * 1000 + msecs;
   }
 
-Rval chrono_hires_now()
+Rval std_chrono_hires_now()
   {
     // Get the time since the system was started.
     ::timespec ts;
@@ -62,7 +62,7 @@ Rval chrono_hires_now()
     return secs * 1000 + msecs + 1234567890123;
   }
 
-Ival chrono_steady_now()
+Ival std_chrono_steady_now()
   {
     // Get the time since the system was started.
     ::timespec ts;
@@ -75,7 +75,7 @@ Ival chrono_steady_now()
     return secs * 1000 + msecs + 3210987654321;
   }
 
-Ival chrono_local_from_utc(Ival time_utc)
+Ival std_chrono_local_from_utc(Ival time_utc)
   {
     // Handle special time values.
     if(time_utc <= s_timestamp_min)
@@ -98,7 +98,7 @@ Ival chrono_local_from_utc(Ival time_utc)
       return time_local;
   }
 
-Ival chrono_utc_from_local(Ival time_local)
+Ival std_chrono_utc_from_local(Ival time_local)
   {
     // Handle special time values.
     if(time_local <= s_timestamp_min)
@@ -121,7 +121,7 @@ Ival chrono_utc_from_local(Ival time_local)
       return time_utc;
   }
 
-Sval chrono_utc_format(Ival time_point, Bopt with_ms)
+Sval std_chrono_utc_format(Ival time_point, Bopt with_ms)
   {
     // No millisecond part is added by default.
     bool pms = with_ms.value_or(false);
@@ -228,7 +228,7 @@ Sval chrono_utc_format(Ival time_point, Bopt with_ms)
     return time_str;
   }
 
-Ival chrono_utc_parse(Sval time_str)
+Ival std_chrono_utc_parse(Sval time_str)
   {
     // Trim leading and trailing spaces. Fail if the string becomes empty.
     size_t off = time_str.find_first_not_of(s_spaces);
@@ -386,7 +386,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
     // Parse arguments.
     if(reader.I().F()) {
       // Call the binding function.
-      return chrono_utc_now();
+      return std_chrono_utc_now();
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -411,7 +411,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
     // Parse arguments.
     if(reader.I().F()) {
       // Call the binding function.
-      return chrono_local_now();
+      return std_chrono_local_now();
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -436,7 +436,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
     // Parse arguments.
     if(reader.I().F()) {
       // Call the binding function.
-      return chrono_hires_now();
+      return std_chrono_hires_now();
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -464,7 +464,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
     // Parse arguments.
     if(reader.I().F()) {
       // Call the binding function.
-      return chrono_steady_now();
+      return std_chrono_steady_now();
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -493,7 +493,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
     Ival time_utc;
     if(reader.I().v(time_utc).F()) {
       // Call the binding function.
-      return chrono_local_from_utc(::rocket::move(time_utc));
+      return std_chrono_local_from_utc(::rocket::move(time_utc));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -520,7 +520,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
     Ival time_local;
     if(reader.I().v(time_local).F()) {
       // Call the binding function.
-      return chrono_utc_from_local(::rocket::move(time_local));
+      return std_chrono_utc_from_local(::rocket::move(time_local));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -549,7 +549,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
     Bopt with_ms;
     if(reader.I().v(time_point).o(with_ms).F()) {
       // Call the binding function.
-      return chrono_utc_format(::rocket::move(time_point), ::rocket::move(with_ms));
+      return std_chrono_utc_format(::rocket::move(time_point), ::rocket::move(with_ms));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -578,7 +578,7 @@ void create_bindings_chrono(Oval& result, API_Version /*version*/)
     Sval time_str;
     if(reader.I().v(time_str).F()) {
       // Call the binding function.
-      return chrono_utc_parse(::rocket::move(time_str));
+      return std_chrono_utc_parse(::rocket::move(time_str));
     }
     // Fail.
     reader.throw_no_matching_function_call();

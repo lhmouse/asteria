@@ -234,7 +234,7 @@ Aval::iterator do_merge_blocks(Aval& output, Global& global, cow_vector<Referenc
 
 }  // namespace
 
-Aval array_slice(Aval data, Ival from, Iopt length)
+Aval std_array_slice(Aval data, Ival from, Iopt length)
   {
     auto range = do_slice(data, from, length);
     if((range.first == data.begin()) && (range.second == data.end())) {
@@ -244,7 +244,7 @@ Aval array_slice(Aval data, Ival from, Iopt length)
     return Aval(range.first, range.second);
   }
 
-Aval array_replace_slice(Aval data, Ival from, Aval replacement)
+Aval std_array_replace_slice(Aval data, Ival from, Aval replacement)
   {
     auto range = do_slice(data, from, nullopt);
     // Append segments.
@@ -256,7 +256,7 @@ Aval array_replace_slice(Aval data, Ival from, Aval replacement)
     return res;
   }
 
-Aval array_replace_slice(Aval data, Ival from, Iopt length, Aval replacement)
+Aval std_array_replace_slice(Aval data, Ival from, Iopt length, Aval replacement)
   {
     auto range = do_slice(data, from, length);
     // Append segments.
@@ -268,7 +268,7 @@ Aval array_replace_slice(Aval data, Ival from, Iopt length, Aval replacement)
     return res;
   }
 
-Iopt array_find(Aval data, Value target)
+Iopt std_array_find(Aval data, Value target)
   {
     auto range = ::std::make_pair(data.begin(), data.end());
     auto qit = do_find_opt(range.first, range.second, target);
@@ -278,7 +278,7 @@ Iopt array_find(Aval data, Value target)
     return *qit - data.begin();
   }
 
-Iopt array_find(Aval data, Ival from, Value target)
+Iopt std_array_find(Aval data, Ival from, Value target)
   {
     auto range = do_slice(data, from, nullopt);
     auto qit = do_find_opt(range.first, range.second, target);
@@ -288,7 +288,7 @@ Iopt array_find(Aval data, Ival from, Value target)
     return *qit - data.begin();
   }
 
-Iopt array_find(Aval data, Ival from, Iopt length, Value target)
+Iopt std_array_find(Aval data, Ival from, Iopt length, Value target)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_opt(range.first, range.second, target);
@@ -298,7 +298,7 @@ Iopt array_find(Aval data, Ival from, Iopt length, Value target)
     return *qit - data.begin();
   }
 
-Iopt array_find_if(Global& global, Aval data, Fval predictor)
+Iopt std_array_find_if(Global& global, Aval data, Fval predictor)
   {
     auto range = ::std::make_pair(data.begin(), data.end());
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
@@ -308,7 +308,7 @@ Iopt array_find_if(Global& global, Aval data, Fval predictor)
     return *qit - data.begin();
   }
 
-Iopt array_find_if(Global& global, Aval data, Ival from, Fval predictor)
+Iopt std_array_find_if(Global& global, Aval data, Ival from, Fval predictor)
   {
     auto range = do_slice(data, from, nullopt);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
@@ -318,7 +318,7 @@ Iopt array_find_if(Global& global, Aval data, Ival from, Fval predictor)
     return *qit - data.begin();
   }
 
-Iopt array_find_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
+Iopt std_array_find_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
@@ -328,7 +328,7 @@ Iopt array_find_if(Global& global, Aval data, Ival from, Iopt length, Fval predi
     return *qit - data.begin();
   }
 
-Iopt array_find_if_not(Global& global, Aval data, Fval predictor)
+Iopt std_array_find_if_not(Global& global, Aval data, Fval predictor)
   {
     auto range = ::std::make_pair(data.begin(), data.end());
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
@@ -338,7 +338,7 @@ Iopt array_find_if_not(Global& global, Aval data, Fval predictor)
     return *qit - data.begin();
   }
 
-Iopt array_find_if_not(Global& global, Aval data, Ival from, Fval predictor)
+Iopt std_array_find_if_not(Global& global, Aval data, Ival from, Fval predictor)
   {
     auto range = do_slice(data, from, nullopt);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
@@ -348,7 +348,7 @@ Iopt array_find_if_not(Global& global, Aval data, Ival from, Fval predictor)
     return *qit - data.begin();
   }
 
-Iopt array_find_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
+Iopt std_array_find_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
@@ -358,7 +358,7 @@ Iopt array_find_if_not(Global& global, Aval data, Ival from, Iopt length, Fval p
     return *qit - data.begin();
   }
 
-Iopt array_rfind(Aval data, Value target)
+Iopt std_array_rfind(Aval data, Value target)
   {
     auto range = ::std::make_pair(data.begin(), data.end());
     auto qit = do_find_opt(::std::make_reverse_iterator(range.second),
@@ -369,7 +369,7 @@ Iopt array_rfind(Aval data, Value target)
     return data.rend() - *qit - 1;
   }
 
-Iopt array_rfind(Aval data, Ival from, Value target)
+Iopt std_array_rfind(Aval data, Ival from, Value target)
   {
     auto range = do_slice(data, from, nullopt);
     auto qit = do_find_opt(::std::make_reverse_iterator(range.second),
@@ -380,7 +380,7 @@ Iopt array_rfind(Aval data, Ival from, Value target)
     return data.rend() - *qit - 1;
   }
 
-Iopt array_rfind(Aval data, Ival from, Iopt length, Value target)
+Iopt std_array_rfind(Aval data, Ival from, Iopt length, Value target)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_opt(::std::make_reverse_iterator(range.second),
@@ -391,7 +391,7 @@ Iopt array_rfind(Aval data, Ival from, Iopt length, Value target)
     return data.rend() - *qit - 1;
   }
 
-Iopt array_rfind_if(Global& global, Aval data, Fval predictor)
+Iopt std_array_rfind_if(Global& global, Aval data, Fval predictor)
   {
     auto range = ::std::make_pair(data.begin(), data.end());
     auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second),
@@ -402,7 +402,7 @@ Iopt array_rfind_if(Global& global, Aval data, Fval predictor)
     return data.rend() - *qit - 1;
   }
 
-Iopt array_rfind_if(Global& global, Aval data, Ival from, Fval predictor)
+Iopt std_array_rfind_if(Global& global, Aval data, Ival from, Fval predictor)
   {
     auto range = do_slice(data, from, nullopt);
     auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second),
@@ -413,7 +413,7 @@ Iopt array_rfind_if(Global& global, Aval data, Ival from, Fval predictor)
     return data.rend() - *qit - 1;
   }
 
-Iopt array_rfind_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
+Iopt std_array_rfind_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second),
@@ -424,7 +424,7 @@ Iopt array_rfind_if(Global& global, Aval data, Ival from, Iopt length, Fval pred
     return data.rend() - *qit - 1;
   }
 
-Iopt array_rfind_if_not(Global& global, Aval data, Fval predictor)
+Iopt std_array_rfind_if_not(Global& global, Aval data, Fval predictor)
   {
     auto range = ::std::make_pair(data.begin(), data.end());
     auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second),
@@ -435,7 +435,7 @@ Iopt array_rfind_if_not(Global& global, Aval data, Fval predictor)
     return data.rend() - *qit - 1;
   }
 
-Iopt array_rfind_if_not(Global& global, Aval data, Ival from, Fval predictor)
+Iopt std_array_rfind_if_not(Global& global, Aval data, Ival from, Fval predictor)
   {
     auto range = do_slice(data, from, nullopt);
     auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second),
@@ -446,7 +446,7 @@ Iopt array_rfind_if_not(Global& global, Aval data, Ival from, Fval predictor)
     return data.rend() - *qit - 1;
   }
 
-Iopt array_rfind_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
+Iopt std_array_rfind_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second),
@@ -457,7 +457,7 @@ Iopt array_rfind_if_not(Global& global, Aval data, Ival from, Iopt length, Fval 
     return data.rend() - *qit - 1;
   }
 
-Ival array_count(Aval data, Value target)
+Ival std_array_count(Aval data, Value target)
   {
     int64_t count = 0;
     auto range = ::std::make_pair(data.begin(), data.end());
@@ -472,7 +472,7 @@ Ival array_count(Aval data, Value target)
     return count;
   }
 
-Ival array_count(Aval data, Ival from, Value target)
+Ival std_array_count(Aval data, Ival from, Value target)
   {
     int64_t count = 0;
     auto range = do_slice(data, from, nullopt);
@@ -487,7 +487,7 @@ Ival array_count(Aval data, Ival from, Value target)
     return count;
   }
 
-Ival array_count(Aval data, Ival from, Iopt length, Value target)
+Ival std_array_count(Aval data, Ival from, Iopt length, Value target)
   {
     int64_t count = 0;
     auto range = do_slice(data, from, length);
@@ -502,7 +502,7 @@ Ival array_count(Aval data, Ival from, Iopt length, Value target)
     return count;
   }
 
-Ival array_count_if(Global& global, Aval data, Fval predictor)
+Ival std_array_count_if(Global& global, Aval data, Fval predictor)
   {
     int64_t count = 0;
     auto range = ::std::make_pair(data.begin(), data.end());
@@ -517,7 +517,7 @@ Ival array_count_if(Global& global, Aval data, Fval predictor)
     return count;
   }
 
-Ival array_count_if(Global& global, Aval data, Ival from, Fval predictor)
+Ival std_array_count_if(Global& global, Aval data, Ival from, Fval predictor)
   {
     int64_t count = 0;
     auto range = do_slice(data, from, nullopt);
@@ -532,7 +532,7 @@ Ival array_count_if(Global& global, Aval data, Ival from, Fval predictor)
     return count;
   }
 
-Ival array_count_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
+Ival std_array_count_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
   {
     int64_t count = 0;
     auto range = do_slice(data, from, length);
@@ -547,7 +547,7 @@ Ival array_count_if(Global& global, Aval data, Ival from, Iopt length, Fval pred
     return count;
   }
 
-Ival array_count_if_not(Global& global, Aval data, Fval predictor)
+Ival std_array_count_if_not(Global& global, Aval data, Fval predictor)
   {
     int64_t count = 0;
     auto range = ::std::make_pair(data.begin(), data.end());
@@ -562,7 +562,7 @@ Ival array_count_if_not(Global& global, Aval data, Fval predictor)
     return count;
   }
 
-Ival array_count_if_not(Global& global, Aval data, Ival from, Fval predictor)
+Ival std_array_count_if_not(Global& global, Aval data, Ival from, Fval predictor)
   {
     int64_t count = 0;
     auto range = do_slice(data, from, nullopt);
@@ -577,7 +577,7 @@ Ival array_count_if_not(Global& global, Aval data, Ival from, Fval predictor)
     return count;
   }
 
-Ival array_count_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
+Ival std_array_count_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
   {
     int64_t count = 0;
     auto range = do_slice(data, from, length);
@@ -592,7 +592,7 @@ Ival array_count_if_not(Global& global, Aval data, Ival from, Iopt length, Fval 
     return count;
   }
 
-Aval array_exclude(Aval data, Value target)
+Aval std_array_exclude(Aval data, Value target)
   {
     auto range = ::std::make_pair(data.begin(), data.end());
     ptrdiff_t dist = data.end() - range.second;
@@ -607,7 +607,7 @@ Aval array_exclude(Aval data, Value target)
     return ::rocket::move(data);
   }
 
-Aval array_exclude(Aval data, Ival from, Value target)
+Aval std_array_exclude(Aval data, Ival from, Value target)
   {
     auto range = do_slice(data, from, nullopt);
     ptrdiff_t dist = data.end() - range.second;
@@ -622,7 +622,7 @@ Aval array_exclude(Aval data, Ival from, Value target)
     return ::rocket::move(data);
   }
 
-Aval array_exclude(Aval data, Ival from, Iopt length, Value target)
+Aval std_array_exclude(Aval data, Ival from, Iopt length, Value target)
   {
     auto range = do_slice(data, from, length);
     ptrdiff_t dist = data.end() - range.second;
@@ -637,7 +637,7 @@ Aval array_exclude(Aval data, Ival from, Iopt length, Value target)
     return ::rocket::move(data);
   }
 
-Aval array_exclude_if(Global& global, Aval data, Fval predictor)
+Aval std_array_exclude_if(Global& global, Aval data, Fval predictor)
   {
     auto range = ::std::make_pair(data.begin(), data.end());
     ptrdiff_t dist = data.end() - range.second;
@@ -652,7 +652,7 @@ Aval array_exclude_if(Global& global, Aval data, Fval predictor)
     return ::rocket::move(data);
   }
 
-Aval array_exclude_if(Global& global, Aval data, Ival from, Fval predictor)
+Aval std_array_exclude_if(Global& global, Aval data, Ival from, Fval predictor)
   {
     auto range = do_slice(data, from, nullopt);
     ptrdiff_t dist = data.end() - range.second;
@@ -667,7 +667,7 @@ Aval array_exclude_if(Global& global, Aval data, Ival from, Fval predictor)
     return ::rocket::move(data);
   }
 
-Aval array_exclude_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
+Aval std_array_exclude_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
   {
     auto range = do_slice(data, from, length);
     ptrdiff_t dist = data.end() - range.second;
@@ -682,7 +682,7 @@ Aval array_exclude_if(Global& global, Aval data, Ival from, Iopt length, Fval pr
     return ::rocket::move(data);
   }
 
-Aval array_exclude_if_not(Global& global, Aval data, Fval predictor)
+Aval std_array_exclude_if_not(Global& global, Aval data, Fval predictor)
   {
     auto range = ::std::make_pair(data.begin(), data.end());
     ptrdiff_t dist = data.end() - range.second;
@@ -697,7 +697,7 @@ Aval array_exclude_if_not(Global& global, Aval data, Fval predictor)
     return ::rocket::move(data);
   }
 
-Aval array_exclude_if_not(Global& global, Aval data, Ival from, Fval predictor)
+Aval std_array_exclude_if_not(Global& global, Aval data, Ival from, Fval predictor)
   {
     auto range = do_slice(data, from, nullopt);
     ptrdiff_t dist = data.end() - range.second;
@@ -712,7 +712,7 @@ Aval array_exclude_if_not(Global& global, Aval data, Ival from, Fval predictor)
     return ::rocket::move(data);
   }
 
-Aval array_exclude_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
+Aval std_array_exclude_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
   {
     auto range = do_slice(data, from, length);
     ptrdiff_t dist = data.end() - range.second;
@@ -727,7 +727,7 @@ Aval array_exclude_if_not(Global& global, Aval data, Ival from, Iopt length, Fva
     return ::rocket::move(data);
   }
 
-Bval array_is_sorted(Global& global, Aval data, Fopt comparator)
+Bval std_array_is_sorted(Global& global, Aval data, Fopt comparator)
   {
     if(data.size() <= 1) {
       // If `data` contains no more than 2 elements, it is considered sorted.
@@ -743,7 +743,7 @@ Bval array_is_sorted(Global& global, Aval data, Fopt comparator)
     return true;
   }
 
-Iopt array_binary_search(Global& global, Aval data, Value target, Fopt comparator)
+Iopt std_array_binary_search(Global& global, Aval data, Value target, Fopt comparator)
   {
     cow_vector<Reference> args;
     auto pair = do_bsearch(global, args, data.begin(), data.end(), comparator, target);
@@ -753,7 +753,7 @@ Iopt array_binary_search(Global& global, Aval data, Value target, Fopt comparato
     return pair.first - data.begin();
   }
 
-Ival array_lower_bound(Global& global, Aval data, Value target, Fopt comparator)
+Ival std_array_lower_bound(Global& global, Aval data, Value target, Fopt comparator)
   {
     cow_vector<Reference> args;
     auto lpos = do_bound(global, args, data.begin(), data.end(), comparator, target,
@@ -761,7 +761,7 @@ Ival array_lower_bound(Global& global, Aval data, Value target, Fopt comparator)
     return lpos - data.begin();
   }
 
-Ival array_upper_bound(Global& global, Aval data, Value target, Fopt comparator)
+Ival std_array_upper_bound(Global& global, Aval data, Value target, Fopt comparator)
   {
     cow_vector<Reference> args;
     auto upos = do_bound(global, args, data.begin(), data.end(), comparator, target,
@@ -769,7 +769,7 @@ Ival array_upper_bound(Global& global, Aval data, Value target, Fopt comparator)
     return upos - data.begin();
   }
 
-pair<Ival, Ival> array_equal_range(Global& global, Aval data, Value target, Fopt comparator)
+pair<Ival, Ival> std_array_equal_range(Global& global, Aval data, Value target, Fopt comparator)
   {
     cow_vector<Reference> args;
     auto pair = do_bsearch(global, args, data.begin(), data.end(), comparator, target);
@@ -780,7 +780,7 @@ pair<Ival, Ival> array_equal_range(Global& global, Aval data, Value target, Fopt
     return ::std::make_pair(lpos - data.begin(), upos - lpos);
   }
 
-Aval array_sort(Global& global, Aval data, Fopt comparator)
+Aval std_array_sort(Global& global, Aval data, Fopt comparator)
   {
     if(data.size() <= 1) {
       // Use reference counting as our advantage.
@@ -799,7 +799,7 @@ Aval array_sort(Global& global, Aval data, Fopt comparator)
     return ::rocket::move(data);
   }
 
-Aval array_sortu(Global& global, Aval data, Fopt comparator)
+Aval std_array_sortu(Global& global, Aval data, Fopt comparator)
   {
     if(data.size() <= 1) {
       // Use reference counting as our advantage.
@@ -821,7 +821,7 @@ Aval array_sortu(Global& global, Aval data, Fopt comparator)
     return ::rocket::move(data);
   }
 
-Value array_max_of(Global& global, Aval data, Fopt comparator)
+Value std_array_max_of(Global& global, Aval data, Fopt comparator)
   {
     auto qmax = data.begin();
     if(qmax == data.end()) {
@@ -838,7 +838,7 @@ Value array_max_of(Global& global, Aval data, Fopt comparator)
     return *qmax;
   }
 
-Value array_min_of(Global& global, Aval data, Fopt comparator)
+Value std_array_min_of(Global& global, Aval data, Fopt comparator)
   {
     auto qmin = data.begin();
     if(qmin == data.end()) {
@@ -855,13 +855,13 @@ Value array_min_of(Global& global, Aval data, Fopt comparator)
     return *qmin;
   }
 
-Aval array_reverse(Aval data)
+Aval std_array_reverse(Aval data)
   {
     // This is an easy matter, isn't it?
     return Aval(::std::make_move_iterator(data.rbegin()), ::std::make_move_iterator(data.rend()));
   }
 
-Aval array_generate(Global& global, Fval generator, Ival length)
+Aval std_array_generate(Global& global, Fval generator, Ival length)
   {
     Aval data;
     data.reserve(static_cast<size_t>(length));
@@ -878,7 +878,7 @@ Aval array_generate(Global& global, Fval generator, Ival length)
     return data;
   }
 
-Aval array_shuffle(Aval data, Iopt seed)
+Aval std_array_shuffle(Aval data, Iopt seed)
   {
     if(data.size() <= 1) {
       // Use reference counting as our advantage.
@@ -904,7 +904,7 @@ Aval array_shuffle(Aval data, Iopt seed)
     return ::rocket::move(data);
   }
 
-Aval array_rotate(Aval data, Ival shift)
+Aval std_array_rotate(Aval data, Ival shift)
   {
     if(data.size() <= 1) {
       // Use reference counting as our advantage.
@@ -921,7 +921,7 @@ Aval array_rotate(Aval data, Ival shift)
     return ::rocket::move(data);
   }
 
-Aval array_copy_keys(Oval source)
+Aval std_array_copy_keys(Oval source)
   {
     Aval data;
     data.reserve(source.size());
@@ -929,7 +929,7 @@ Aval array_copy_keys(Oval source)
     return data;
   }
 
-Aval array_copy_values(Oval source)
+Aval std_array_copy_values(Oval source)
   {
     Aval data;
     data.reserve(source.size());
@@ -953,7 +953,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Iopt length;
     if(reader.I().v(data).v(from).o(length).F()) {
       // Call the binding function.
-      return array_slice(::rocket::move(data), ::rocket::move(from), ::rocket::move(length));
+      return std_array_slice(::rocket::move(data), ::rocket::move(from), ::rocket::move(length));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -987,12 +987,12 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Aval replacement;
     if(reader.I().v(data).v(from).S(state).v(replacement).F()) {
       // Call the binding function.
-      return array_replace_slice(::rocket::move(data), ::rocket::move(from), ::rocket::move(replacement));
+      return std_array_replace_slice(::rocket::move(data), ::rocket::move(from), ::rocket::move(replacement));
     }
     Iopt length;
     if(reader.L(state).o(length).v(replacement).F()) {
       // Call the binding function.
-      return array_replace_slice(::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
+      return std_array_replace_slice(::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                                      ::rocket::move(replacement));
     }
     // Fail.
@@ -1035,17 +1035,17 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Value target;
     if(reader.I().v(data).S(state).o(target).F()) {
       // Call the binding function.
-      return array_find(::rocket::move(data), ::rocket::move(target));
+      return std_array_find(::rocket::move(data), ::rocket::move(target));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).o(target).F()) {
       // Call the binding function.
-      return array_find(::rocket::move(data), ::rocket::move(from), ::rocket::move(target));
+      return std_array_find(::rocket::move(data), ::rocket::move(from), ::rocket::move(target));
     }
     Iopt length;
     if(reader.L(state).o(length).o(target).F()) {
       // Call the binding function.
-      return array_find(::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
+      return std_array_find(::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                             ::rocket::move(target));
     }
     // Fail.
@@ -1095,17 +1095,17 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
       // Call the binding function.
-      return array_find_if(global, ::rocket::move(data), ::rocket::move(predictor));
+      return std_array_find_if(global, ::rocket::move(data), ::rocket::move(predictor));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
       // Call the binding function.
-      return array_find_if(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(predictor));
+      return std_array_find_if(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(predictor));
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
       // Call the binding function.
-      return array_find_if(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
+      return std_array_find_if(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                                        ::rocket::move(predictor));
     }
     // Fail.
@@ -1155,18 +1155,18 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
       // Call the binding function.
-      return array_find_if_not(global, ::rocket::move(data), ::rocket::move(predictor));
+      return std_array_find_if_not(global, ::rocket::move(data), ::rocket::move(predictor));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
       // Call the binding function.
-      return array_find_if_not(global, ::rocket::move(data), ::rocket::move(from),
+      return std_array_find_if_not(global, ::rocket::move(data), ::rocket::move(from),
                                            ::rocket::move(predictor));
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
       // Call the binding function.
-      return array_find_if_not(global, ::rocket::move(data), ::rocket::move(from),
+      return std_array_find_if_not(global, ::rocket::move(data), ::rocket::move(from),
                                            ::rocket::move(length), ::rocket::move(predictor));
     }
     // Fail.
@@ -1216,17 +1216,17 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Value target;
     if(reader.I().v(data).S(state).o(target).F()) {
       // Call the binding function.
-      return array_rfind(::rocket::move(data), ::rocket::move(target));
+      return std_array_rfind(::rocket::move(data), ::rocket::move(target));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).o(target).F()) {
       // Call the binding function.
-      return array_rfind(::rocket::move(data), ::rocket::move(from), ::rocket::move(target));
+      return std_array_rfind(::rocket::move(data), ::rocket::move(from), ::rocket::move(target));
     }
     Iopt length;
     if(reader.L(state).o(length).o(target).F()) {
       // Call the binding function.
-      return array_rfind(::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
+      return std_array_rfind(::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                              ::rocket::move(target));
     }
     // Fail.
@@ -1276,18 +1276,18 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
       // Call the binding function.
-      return array_rfind_if(global, ::rocket::move(data), ::rocket::move(predictor));
+      return std_array_rfind_if(global, ::rocket::move(data), ::rocket::move(predictor));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
       // Call the binding function.
-      return array_rfind_if(global, ::rocket::move(data), ::rocket::move(from),
+      return std_array_rfind_if(global, ::rocket::move(data), ::rocket::move(from),
                                         ::rocket::move(predictor));
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
       // Call the binding function.
-      return array_rfind_if(global, ::rocket::move(data), ::rocket::move(from),
+      return std_array_rfind_if(global, ::rocket::move(data), ::rocket::move(from),
                                         ::rocket::move(length), ::rocket::move(predictor));
     }
     // Fail.
@@ -1337,18 +1337,18 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
       // Call the binding function.
-      return array_rfind_if_not(global, ::rocket::move(data), ::rocket::move(predictor));
+      return std_array_rfind_if_not(global, ::rocket::move(data), ::rocket::move(predictor));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
       // Call the binding function.
-      return array_rfind_if_not(global, ::rocket::move(data), ::rocket::move(from),
+      return std_array_rfind_if_not(global, ::rocket::move(data), ::rocket::move(from),
                                             ::rocket::move(predictor));
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
       // Call the binding function.
-      return array_rfind_if_not(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
+      return std_array_rfind_if_not(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                                             ::rocket::move(predictor));
     }
     // Fail.
@@ -1398,17 +1398,17 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Value target;
     if(reader.I().v(data).S(state).o(target).F()) {
       // Call the binding function.
-      return array_count(::rocket::move(data), ::rocket::move(target));
+      return std_array_count(::rocket::move(data), ::rocket::move(target));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).o(target).F()) {
       // Call the binding function.
-      return array_count(::rocket::move(data), ::rocket::move(from), ::rocket::move(target));
+      return std_array_count(::rocket::move(data), ::rocket::move(from), ::rocket::move(target));
     }
     Iopt length;
     if(reader.L(state).o(length).o(target).F()) {
       // Call the binding function.
-      return array_count(::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
+      return std_array_count(::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                              ::rocket::move(target));
     }
     // Fail.
@@ -1456,18 +1456,18 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
       // Call the binding function.
-      return array_count_if(global, ::rocket::move(data), ::rocket::move(predictor));
+      return std_array_count_if(global, ::rocket::move(data), ::rocket::move(predictor));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
       // Call the binding function.
-      return array_count_if(global, ::rocket::move(data),  ::rocket::move(from),
+      return std_array_count_if(global, ::rocket::move(data),  ::rocket::move(from),
                                         ::rocket::move(predictor));
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
       // Call the binding function.
-      return array_count_if(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
+      return std_array_count_if(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                                         ::rocket::move(predictor));
     }
     // Fail.
@@ -1519,18 +1519,18 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
       // Call the binding function.
-      return array_count_if_not(global, ::rocket::move(data), ::rocket::move(predictor));
+      return std_array_count_if_not(global, ::rocket::move(data), ::rocket::move(predictor));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
       // Call the binding function.
-      return array_count_if_not(global, ::rocket::move(data), ::rocket::move(from),
+      return std_array_count_if_not(global, ::rocket::move(data), ::rocket::move(from),
                                             ::rocket::move(predictor));
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
       // Call the binding function.
-      return array_count_if_not(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
+      return std_array_count_if_not(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                                             ::rocket::move(predictor));
     }
     // Fail.
@@ -1582,17 +1582,17 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Value target;
     if(reader.I().v(data).S(state).o(target).F()) {
       // Call the binding function.
-      return array_exclude(::rocket::move(data), ::rocket::move(target));
+      return std_array_exclude(::rocket::move(data), ::rocket::move(target));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).o(target).F()) {
       // Call the binding function.
-      return array_exclude(::rocket::move(data), ::rocket::move(from), ::rocket::move(target));
+      return std_array_exclude(::rocket::move(data), ::rocket::move(from), ::rocket::move(target));
     }
     Iopt length;
     if(reader.L(state).o(length).o(target).F()) {
       // Call the binding function.
-      return array_exclude(::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
+      return std_array_exclude(::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                                ::rocket::move(target));
     }
     // Fail.
@@ -1640,18 +1640,18 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
       // Call the binding function.
-      return array_exclude_if(global, ::rocket::move(data), ::rocket::move(predictor));
+      return std_array_exclude_if(global, ::rocket::move(data), ::rocket::move(predictor));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
       // Call the binding function.
-      return array_exclude_if(global, ::rocket::move(data),  ::rocket::move(from),
+      return std_array_exclude_if(global, ::rocket::move(data),  ::rocket::move(from),
                                           ::rocket::move(predictor));
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
       // Call the binding function.
-      return array_exclude_if(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
+      return std_array_exclude_if(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                                           ::rocket::move(predictor));
     }
     // Fail.
@@ -1701,18 +1701,18 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
       // Call the binding function.
-      return array_exclude_if_not(global, ::rocket::move(data), ::rocket::move(predictor));
+      return std_array_exclude_if_not(global, ::rocket::move(data), ::rocket::move(predictor));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
       // Call the binding function.
-      return array_exclude_if_not(global, ::rocket::move(data), ::rocket::move(from),
+      return std_array_exclude_if_not(global, ::rocket::move(data), ::rocket::move(from),
                                               ::rocket::move(predictor));
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
       // Call the binding function.
-      return array_exclude_if_not(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
+      return std_array_exclude_if_not(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                                               ::rocket::move(predictor));
     }
     // Fail.
@@ -1761,7 +1761,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Fopt comparator;
     if(reader.I().v(data).o(comparator).F()) {
       // Call the binding function.
-      return array_is_sorted(global, ::rocket::move(data), ::rocket::move(comparator));
+      return std_array_is_sorted(global, ::rocket::move(data), ::rocket::move(comparator));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1799,7 +1799,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Fopt comparator;
     if(reader.I().v(data).o(target).o(comparator).F()) {
       // Call the binding function.
-      return array_binary_search(global, ::rocket::move(data), ::rocket::move(target),
+      return std_array_binary_search(global, ::rocket::move(data), ::rocket::move(target),
                                              ::rocket::move(comparator));
     }
     // Fail.
@@ -1836,7 +1836,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Fopt comparator;
     if(reader.I().v(data).o(target).o(comparator).F()) {
       // Call the binding function.
-      return array_lower_bound(global, ::rocket::move(data), ::rocket::move(target),
+      return std_array_lower_bound(global, ::rocket::move(data), ::rocket::move(target),
                                            ::rocket::move(comparator));
     }
     // Fail.
@@ -1875,7 +1875,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Fopt comparator;
     if(reader.I().v(data).o(target).o(comparator).F()) {
       // Call the binding function.
-      return array_upper_bound(global, ::rocket::move(data), ::rocket::move(target),
+      return std_array_upper_bound(global, ::rocket::move(data), ::rocket::move(target),
                                            ::rocket::move(comparator));
     }
     // Fail.
@@ -1914,7 +1914,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Fopt comparator;
     if(reader.I().v(data).o(target).o(comparator).F()) {
       // Call the binding function.
-      auto pair = array_equal_range(global, ::rocket::move(data), ::rocket::move(target),
+      auto pair = std_array_equal_range(global, ::rocket::move(data), ::rocket::move(target),
                                                 ::rocket::move(comparator));
       // This function returns a `pair`, but we would like to return an array so convert it.
       Aval rval(2);
@@ -1956,7 +1956,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Fopt comparator;
     if(reader.I().v(data).o(comparator).F()) {
       // Call the binding function.
-      return array_sort(global, ::rocket::move(data), ::rocket::move(comparator));
+      return std_array_sort(global, ::rocket::move(data), ::rocket::move(comparator));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1990,7 +1990,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Fopt comparator;
     if(reader.I().v(data).o(comparator).F()) {
       // Call the binding function.
-      return array_sortu(global, ::rocket::move(data), ::rocket::move(comparator));
+      return std_array_sortu(global, ::rocket::move(data), ::rocket::move(comparator));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -2025,7 +2025,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Fopt comparator;
     if(reader.I().v(data).o(comparator).F()) {
       // Call the binding function.
-      return array_max_of(global, ::rocket::move(data), ::rocket::move(comparator));
+      return std_array_max_of(global, ::rocket::move(data), ::rocket::move(comparator));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -2055,7 +2055,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Fopt comparator;
     if(reader.I().v(data).o(comparator).F()) {
       // Call the binding function.
-      return array_min_of(global, ::rocket::move(data), ::rocket::move(comparator));
+      return std_array_min_of(global, ::rocket::move(data), ::rocket::move(comparator));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -2085,7 +2085,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Fopt comparator;
     if(reader.I().v(data).o(comparator).F()) {
       // Call the binding function.
-      return array_reverse(::rocket::move(data));
+      return std_array_reverse(::rocket::move(data));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -2112,7 +2112,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Ival length;
     if(reader.I().v(generator).v(length).F()) {
       // Call the binding function.
-      return array_generate(global, ::rocket::move(generator), ::rocket::move(length));
+      return std_array_generate(global, ::rocket::move(generator), ::rocket::move(length));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -2143,7 +2143,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Iopt seed;
     if(reader.I().v(data).o(seed).F()) {
       // Call the binding function.
-      return array_shuffle(::rocket::move(data), ::rocket::move(seed));
+      return std_array_shuffle(::rocket::move(data), ::rocket::move(seed));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -2174,7 +2174,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Ival shift;
     if(reader.I().v(data).v(shift).F()) {
       // Call the binding function.
-      return array_rotate(::rocket::move(data), ::rocket::move(shift));
+      return std_array_rotate(::rocket::move(data), ::rocket::move(shift));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -2202,7 +2202,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Oval source;
     if(reader.I().v(source).F()) {
       // Call the binding function.
-      return array_copy_keys(::rocket::move(source));
+      return std_array_copy_keys(::rocket::move(source));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -2228,7 +2228,7 @@ void create_bindings_array(Oval& result, API_Version /*version*/)
     Oval source;
     if(reader.I().v(source).F()) {
       // Call the binding function.
-      return array_copy_values(::rocket::move(source));
+      return std_array_copy_values(::rocket::move(source));
     }
     // Fail.
     reader.throw_no_matching_function_call();
