@@ -24,18 +24,16 @@ class Argument_Reader
   private:
     ref_to<const cow_vector<Reference>> m_args;
     cow_string m_name;
-    bool m_throw_on_failure;
 
     // `m_ovlds` contains all overloads that have been tested so far.
     cow_string m_ovlds;
     // `m_state` can be copied elsewhere and back; any further operations will resume from that point.
-    State m_state;
+    State m_state = { };
 
   public:
     Argument_Reader(ref_to<const cow_vector<Reference>> args, const cow_string& name) noexcept
       :
-        m_args(args), m_name(name), m_throw_on_failure(false),
-        m_ovlds(), m_state()
+        m_args(args), m_name(name)
       {
       }
 
@@ -45,8 +43,6 @@ class Argument_Reader
       = delete;
 
   private:
-    template<typename HandlerT> inline void do_fail(HandlerT&& handler);
-
     inline void do_record_parameter_optional(Vtype vtype);
     inline void do_record_parameter_required(Vtype vtype);
     inline void do_record_parameter_generic();
@@ -68,15 +64,6 @@ class Argument_Reader
     const cow_string& get_name() const noexcept
       {
         return this->m_name;
-      }
-
-    bool does_throw_on_failure() const noexcept
-      {
-        return this->m_throw_on_failure;
-      }
-    Argument_Reader& set_throw_on_failure(bool throw_on_failure = true) noexcept
-      {
-        return this->m_throw_on_failure = throw_on_failure, *this;
       }
 
     // `S` stands for `save` or `store`.
