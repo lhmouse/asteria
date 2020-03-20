@@ -69,6 +69,7 @@ using ::std::intmax_t;
 using ::std::uintmax_t;
 using ::std::ptrdiff_t;
 using ::std::size_t;
+using ::std::wint_t;
 using ::std::exception;
 using ::std::type_info;
 
