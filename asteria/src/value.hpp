@@ -72,7 +72,7 @@ class Value
         m_stor(V_real(xval))
       {
       }
-    Value(V_string xval) noexcept
+    Value(cow_string xval) noexcept
       :
         m_stor(::rocket::move(xval))
       {
@@ -82,7 +82,7 @@ class Value
         m_stor(V_string(xval))
       {
       }
-    Value(V_opaque xval) noexcept
+    Value(cow_opaque xval) noexcept
       {
         // Note it is the pointer that is being moved, not the object that it points to.
         this->do_xassign<V_opaque&&>(xval, ::std::addressof(xval));
@@ -93,7 +93,7 @@ class Value
         // Note it is the pointer that is being moved, not the object that it points to.
         this->do_xassign<V_opaque>(xval, ::std::addressof(xval));
       }
-    Value(V_function xval) noexcept
+    Value(cow_function xval) noexcept
       {
         // Note it is the pointer that is being moved, not the object that it points to.
         this->do_xassign<V_function&&>(xval, ::std::addressof(xval));
@@ -104,24 +104,24 @@ class Value
         // Note it is the pointer that is being moved, not the object that it points to.
         this->do_xassign<V_function>(xval, ::std::addressof(xval));
       }
-    Value(V_array xval) noexcept
+    Value(cow_vector<Value> xval) noexcept
       :
         m_stor(::rocket::move(xval))
       {
       }
-    Value(initializer_list<V_array::value_type> list)
-      :
-        m_stor(V_array(list))
-      {
-      }
-    Value(V_object xval) noexcept
+    Value(cow_dictionary<Value> xval) noexcept
       :
         m_stor(::rocket::move(xval))
       {
       }
-    Value(initializer_list<V_object::value_type> list)
+    Value(initializer_list<Value> list)
       :
-        m_stor(V_object(list))
+        m_stor(V_array(list.begin(), list.end()))
+      {
+      }
+    template<typename KeyT> Value(initializer_list<pair<KeyT, Value>> list)
+      :
+        m_stor(V_object(list.begin(), list.end()))
       {
       }
     Value(const opt<bool>& xval) noexcept
@@ -156,27 +156,27 @@ class Value
       {
         this->do_xassign<V_real>(xval, xval);
       }
-    Value(const opt<V_string>& xval) noexcept
+    Value(const opt<cow_string>& xval) noexcept
       {
         this->do_xassign<const V_string&>(xval, xval);
       }
-    Value(opt<V_string>&& xval) noexcept
+    Value(opt<cow_string>&& xval) noexcept
       {
         this->do_xassign<V_string&&>(xval, xval);
       }
-    Value(const opt<V_array>& xval) noexcept
+    Value(const opt<cow_vector<Value>>& xval) noexcept
       {
         this->do_xassign<const V_array&>(xval, xval);
       }
-    Value(opt<V_array>&& xval) noexcept
+    Value(opt<cow_vector<Value>>&& xval) noexcept
       {
         this->do_xassign<V_array&&>(xval, xval);
       }
-    Value(const opt<V_object>& xval) noexcept
+    Value(const opt<cow_dictionary<Value>>& xval) noexcept
       {
         this->do_xassign<const V_object&>(xval, xval);
       }
-    Value(opt<V_object>&& xval) noexcept
+    Value(opt<cow_dictionary<Value>>&& xval) noexcept
       {
         this->do_xassign<V_object&&>(xval, xval);
       }
@@ -225,9 +225,9 @@ class Value
         this->m_stor = V_real(xval);
         return *this;
       }
-    Value& operator=(V_string xval) noexcept
+    Value& operator=(cow_string xval) noexcept
       {
-        this->m_stor = ::rocket::move(xval);
+        this->m_stor = V_string(::rocket::move(xval));
         return *this;
       }
     Value& operator=(cow_string::shallow_type xval) noexcept
@@ -235,7 +235,7 @@ class Value
         this->m_stor = V_string(xval);
         return *this;
       }
-    Value& operator=(V_opaque xval) noexcept
+    Value& operator=(cow_opaque xval) noexcept
       {
         // Note it is the pointer that is being moved, not the object that it points to.
         this->do_xassign<V_opaque&&>(xval, ::std::addressof(xval));
@@ -248,7 +248,7 @@ class Value
         this->do_xassign<V_opaque>(xval, ::std::addressof(xval));
         return *this;
       }
-    Value& operator=(V_function xval) noexcept
+    Value& operator=(cow_function xval) noexcept
       {
         // Note it is the pointer that is being moved, not the object that it points to.
         this->do_xassign<V_function&&>(xval, ::std::addressof(xval));
@@ -261,14 +261,28 @@ class Value
         this->do_xassign<V_function>(xval, ::std::addressof(xval));
         return *this;
       }
-    Value& operator=(V_array xval) noexcept
+    Value& operator=(cow_vector<Value> xval) noexcept
       {
         this->m_stor = ::rocket::move(xval);
         return *this;
       }
-    Value& operator=(V_object xval) noexcept
+    Value& operator=(cow_dictionary<Value> xval) noexcept
       {
         this->m_stor = ::rocket::move(xval);
+        return *this;
+      }
+    Value& operator=(initializer_list<Value> list)
+      {
+        if(this->m_stor.index() != vtype_array)
+          this->m_stor.emplace<V_array>();
+        this->m_stor.as<vtype_array>().assign(list.begin(), list.end());
+        return *this;
+      }
+    template<typename KeyT> Value& operator=(initializer_list<pair<KeyT, Value>> list)
+      {
+        if(this->m_stor.index() != vtype_object)
+          this->m_stor.emplace<V_object>();
+        this->m_stor.as<vtype_object>().assign(list.begin(), list.end());
         return *this;
       }
     Value& operator=(const opt<bool>& xval) noexcept
@@ -311,32 +325,32 @@ class Value
         this->do_xassign<V_real>(xval, xval);
         return *this;
       }
-    Value& operator=(const opt<V_string>& xval) noexcept
+    Value& operator=(const opt<cow_string>& xval) noexcept
       {
         this->do_xassign<const V_string&>(xval, xval);
         return *this;
       }
-    Value& operator=(opt<V_string>&& xval) noexcept
+    Value& operator=(opt<cow_string>&& xval) noexcept
       {
         this->do_xassign<V_string&&>(xval, xval);
         return *this;
       }
-    Value& operator=(const opt<V_array>& xval) noexcept
+    Value& operator=(const opt<cow_vector<Value>>& xval) noexcept
       {
         this->do_xassign<const V_array&>(xval, xval);
         return *this;
       }
-    Value& operator=(opt<V_array>&& xval) noexcept
+    Value& operator=(opt<cow_vector<Value>>&& xval) noexcept
       {
         this->do_xassign<V_array&&>(xval, xval);
         return *this;
       }
-    Value& operator=(const opt<V_object>& xval) noexcept
+    Value& operator=(const opt<cow_dictionary<Value>>& xval) noexcept
       {
         this->do_xassign<const V_object&>(xval, xval);
         return *this;
       }
-    Value& operator=(opt<V_object>&& xval) noexcept
+    Value& operator=(opt<cow_dictionary<Value>>&& xval) noexcept
       {
         this->do_xassign<V_object&&>(xval, xval);
         return *this;
