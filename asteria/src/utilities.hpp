@@ -91,6 +91,10 @@ Wrapped_Index wrap_index(int64_t index, size_t size) noexcept;
 // Note that all bits in the result are filled.
 uint64_t generate_random_seed() noexcept;
 
+// The second overload takes the error code from `errno`.
+[[noreturn]] void throw_system_error(const char* func, int err);
+[[noreturn]] void throw_system_error(const char* func);
+
 }  // namespace Asteria
 
 #endif

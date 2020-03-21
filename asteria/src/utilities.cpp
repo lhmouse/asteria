@@ -5,6 +5,8 @@
 #include "utilities.hpp"
 #include <time.h>  // ::timespec, ::clock_gettime(), ::localtime()
 #include <stdio.h>  // ::fwrite(), stderr
+#include <errno.h>  // errno
+#include <string.h>  // ::strerror_r()
 
 namespace Asteria {
 
@@ -373,6 +375,18 @@ uint64_t generate_random_seed() noexcept
       source >>= 8;
     }
     return seed;
+  }
+
+void throw_system_error(const char* func, int err)
+  {
+    char sbuf[256];
+    const char* msg = ::strerror_r(err, sbuf, sizeof(sbuf));
+    ASTERIA_THROW("`$1()` failed (errno was `$2`: $3)", func, err, msg);
+  }
+
+void throw_system_error(const char* func)
+  {
+    throw_system_error(func, errno);
   }
 
 }  // namespace Asteria

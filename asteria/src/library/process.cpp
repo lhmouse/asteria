@@ -10,16 +10,6 @@
 #include <unistd.h>  // ::daemon()
 
 namespace Asteria {
-namespace {
-
-[[noreturn]] ROCKET_NOINLINE void throw_system_error(const char* name, int err = errno)
-  {
-    char sbuf[256];
-    const char* msg = ::strerror_r(err, sbuf, sizeof(sbuf));
-    ASTERIA_THROW("`$1()` failed (errno was `$2`: $3)", name, err, msg);
-  }
-
-}  // namespace
 
 Ival std_process_execute(Sval cmd, Aopt argv, Aopt envp)
   {
