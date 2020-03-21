@@ -659,12 +659,10 @@ void create_bindings_json(V_object& result, API_Version /*version*/)
     Value value;
     Sopt sindent;
     if(reader.I().o(value).S(state).o(sindent).F()) {
-      // Call the binding function.
       return std_json_format(::rocket::move(value), ::rocket::move(sindent));
     }
     Ival nindent;
     if(reader.L(state).v(nindent).F()) {
-      // Call the binding function.
       return std_json_format(::rocket::move(value), ::rocket::move(nindent));
     }
     // Fail.
@@ -699,7 +697,6 @@ void create_bindings_json(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval text;
     if(reader.I().v(text).F()) {
-      // Call the binding function.
       return std_json_parse(::rocket::move(text));
     }
     // Fail.

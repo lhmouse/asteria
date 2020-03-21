@@ -529,7 +529,6 @@ void create_bindings_filesystem(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.get_working_directory"));
     // Parse arguments.
     if(reader.I().F()) {
-      // Call the binding function.
       return std_filesystem_get_working_directory();
     }
     // Fail.
@@ -555,7 +554,6 @@ void create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval path;
     if(reader.I().v(path).F()) {
-      // Call the binding function.
       return std_filesystem_get_information(::rocket::move(path));
     }
     // Fail.
@@ -597,7 +595,6 @@ void create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval path;
     if(reader.I().v(path).F()) {
-      // Call the binding function.
       return std_filesystem_remove_recursive(::rocket::move(path));
     }
     // Fail.
@@ -626,7 +623,6 @@ void create_bindings_filesystem(V_object& result, API_Version /*version*/)
     Sval path_new;
     Sval path_old;
     if(reader.I().v(path_new).v(path_old).F()) {
-      // Call the binding function.
       std_filesystem_move_from(path_new, path_old);
       return true;
     }
@@ -658,7 +654,6 @@ void create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval path;
     if(reader.I().v(path).F()) {
-      // Call the binding function.
       return std_filesystem_directory_list(::rocket::move(path));
     }
     // Fail.
@@ -697,7 +692,6 @@ void create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval path;
     if(reader.I().v(path).F()) {
-      // Call the binding function.
       return std_filesystem_directory_create(::rocket::move(path));
     }
     // Fail.
@@ -729,7 +723,6 @@ void create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval path;
     if(reader.I().v(path).F()) {
-      // Call the binding function.
       return std_filesystem_directory_remove(::rocket::move(path));
     }
     // Fail.
@@ -761,7 +754,6 @@ void create_bindings_filesystem(V_object& result, API_Version /*version*/)
     Iopt offset;
     Iopt limit;
     if(reader.I().v(path).o(offset).o(limit).F()) {
-      // Call the binding function.
       return std_filesystem_file_read(::rocket::move(path), ::rocket::move(offset), ::rocket::move(limit));
     }
     // Fail.
@@ -797,7 +789,6 @@ void create_bindings_filesystem(V_object& result, API_Version /*version*/)
     Iopt offset;
     Iopt limit;
     if(reader.I().v(path).v(callback).o(offset).o(limit).F()) {
-      // Call the binding function.
       return std_filesystem_file_stream(global, path, callback, offset, limit);
     }
     // Fail.
@@ -839,7 +830,6 @@ void create_bindings_filesystem(V_object& result, API_Version /*version*/)
     Sval data;
     Iopt offset;
     if(reader.I().v(path).v(data).o(offset).F()) {
-      // Call the binding function.
       std_filesystem_file_write(path, data, offset);
       return true;
     }
@@ -875,7 +865,6 @@ void create_bindings_filesystem(V_object& result, API_Version /*version*/)
     Sval data;
     Bopt exclusive;
     if(reader.I().v(path).v(data).o(exclusive).F()) {
-      // Call the binding function.
       std_filesystem_file_append(path, data, exclusive);
       return true;
     }
@@ -909,7 +898,6 @@ void create_bindings_filesystem(V_object& result, API_Version /*version*/)
     Sval path_new;
     Sval path_old;
     if(reader.I().v(path_new).v(path_old).F()) {
-      // Call the binding function.
       std_filesystem_file_copy_from(path_new, path_old);
       return true;
     }
@@ -940,7 +928,6 @@ void create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval path;
     if(reader.I().v(path).F()) {
-      // Call the binding function.
       return std_filesystem_file_remove(path);
     }
     // Fail.

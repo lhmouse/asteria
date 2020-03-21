@@ -78,7 +78,6 @@ void create_bindings_gc(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival generation;
     if(reader.I().v(generation).F()) {
-      // Call the binding function.
       return std_gc_tracked_count(global, ::rocket::move(generation));
     }
     // Fail.
@@ -107,7 +106,6 @@ void create_bindings_gc(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival generation;
     if(reader.I().v(generation).F()) {
-      // Call the binding function.
       return std_gc_get_threshold(global, ::rocket::move(generation));
     }
     // Fail.
@@ -135,7 +133,6 @@ void create_bindings_gc(V_object& result, API_Version /*version*/)
     Ival generation;
     Ival threshold;
     if(reader.I().v(generation).v(threshold).F()) {
-      // Call the binding function.
       return std_gc_set_threshold(global, ::rocket::move(generation), ::rocket::move(threshold));
     }
     // Fail.
@@ -167,7 +164,6 @@ void create_bindings_gc(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Iopt generation_limit;
     if(reader.I().o(generation_limit).F()) {
-      // Call the binding function.
       return std_gc_collect(global, ::rocket::move(generation_limit));
     }
     // Fail.

@@ -208,7 +208,6 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     Rval y;
     Ropt base;
     if(reader.I().v(y).o(base).F()) {
-      // Call the binding function.
       return std_math_exp(::rocket::move(y), ::rocket::move(base));
     }
     // Fail.
@@ -234,7 +233,6 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Rval y;
     if(reader.I().v(y).F()) {
-      // Call the binding function.
       return std_math_expm1(::rocket::move(y));
     }
     // Fail.
@@ -261,7 +259,6 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     Rval x;
     Rval y;
     if(reader.I().v(x).v(y).F()) {
-      // Call the binding function.
       return std_math_pow(::rocket::move(x), ::rocket::move(y));
     }
     // Fail.
@@ -289,7 +286,6 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     Rval y;
     Ropt base;
     if(reader.I().v(y).o(base).F()) {
-      // Call the binding function.
       return std_math_log(::rocket::move(y), ::rocket::move(base));
     }
     // Fail.
@@ -315,7 +311,6 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Rval y;
     if(reader.I().v(y).F()) {
-      // Call the binding function.
       return std_math_log1p(::rocket::move(y));
     }
     // Fail.
@@ -341,7 +336,6 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
-      // Call the binding function.
       return std_math_sin(::rocket::move(x));
     }
     // Fail.
@@ -366,7 +360,6 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
-      // Call the binding function.
       return std_math_cos(::rocket::move(x));
     }
     // Fail.
@@ -391,7 +384,6 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
-      // Call the binding function.
       return std_math_tan(::rocket::move(x));
     }
     // Fail.
@@ -416,7 +408,6 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
-      // Call the binding function.
       return std_math_asin(::rocket::move(x));
     }
     // Fail.
@@ -441,7 +432,6 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
-      // Call the binding function.
       return std_math_acos(::rocket::move(x));
     }
     // Fail.
@@ -466,7 +456,6 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
-      // Call the binding function.
       return std_math_atan(::rocket::move(x));
     }
     // Fail.
@@ -492,7 +481,6 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     Rval y;
     Rval x;
     if(reader.I().v(y).v(x).F()) {
-      // Call the binding function.
       return std_math_atan2(::rocket::move(y), ::rocket::move(x));
     }
     // Fail.
@@ -517,7 +505,6 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse variadic arguments.
     cow_vector<Value> values;
     if(reader.I().F(values)) {
-      // Call the binding function.
       return std_math_hypot(::rocket::move(values));
     }
     // Fail.
@@ -546,7 +533,6 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
-      // Call the binding function.
       return std_math_sinh(::rocket::move(x));
     }
     // Fail.
@@ -571,7 +557,6 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
-      // Call the binding function.
       return std_math_cosh(::rocket::move(x));
     }
     // Fail.
@@ -596,7 +581,6 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
-      // Call the binding function.
       return std_math_tanh(::rocket::move(x));
     }
     // Fail.
@@ -621,7 +605,6 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
-      // Call the binding function.
       return std_math_asinh(::rocket::move(x));
     }
     // Fail.
@@ -646,7 +629,6 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
-      // Call the binding function.
       return std_math_acosh(::rocket::move(x));
     }
     // Fail.
@@ -671,7 +653,6 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
-      // Call the binding function.
       return std_math_atanh(::rocket::move(x));
     }
     // Fail.
@@ -696,7 +677,6 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
-      // Call the binding function.
       return std_math_erf(::rocket::move(x));
     }
     // Fail.
@@ -721,7 +701,6 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
-      // Call the binding function.
       return std_math_cerf(::rocket::move(x));
     }
     // Fail.
@@ -746,7 +725,6 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
-      // Call the binding function.
       return std_math_gamma(::rocket::move(x));
     }
     // Fail.
@@ -771,7 +749,6 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
-      // Call the binding function.
       return std_math_lgamma(::rocket::move(x));
     }
     // Fail.

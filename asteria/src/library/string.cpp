@@ -1627,7 +1627,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Ival from;
     Iopt length;
     if(reader.I().v(text).v(from).o(length).F()) {
-      // Call the binding function.
       return std_string_slice(::rocket::move(text), ::rocket::move(from), ::rocket::move(length));
     }
     // Fail.
@@ -1661,12 +1660,10 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Ival from;
     Sval replacement;
     if(reader.I().v(text).v(from).S(state).v(replacement).F()) {
-      // Call the binding function.
       return std_string_replace_slice(::rocket::move(text), ::rocket::move(from), ::rocket::move(replacement));
     }
     Iopt length;
     if(reader.L(state).o(length).v(replacement).F()) {
-      // Call the binding function.
       return std_string_replace_slice(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
                                       ::rocket::move(replacement));
     }
@@ -1709,7 +1706,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval text2;
     Iopt length;
     if(reader.I().v(text1).v(text2).o(length).F()) {
-      // Call the binding function.
       return std_string_compare(::rocket::move(text1), ::rocket::move(text2), ::rocket::move(length));
     }
     // Fail.
@@ -1741,7 +1737,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval text;
     Sval prefix;
     if(reader.I().v(text).v(prefix).F()) {
-      // Call the binding function.
       return std_string_starts_with(::rocket::move(text), ::rocket::move(prefix));
     }
     // Fail.
@@ -1769,7 +1764,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval text;
     Sval suffix;
     if(reader.I().v(text).v(suffix).F()) {
-      // Call the binding function.
       return std_string_ends_with(::rocket::move(text), ::rocket::move(suffix));
     }
     // Fail.
@@ -1798,17 +1792,14 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval text;
     Sval pattern;
     if(reader.I().v(text).S(state).v(pattern).F()) {
-      // Call the binding function.
       return std_string_find(::rocket::move(text), ::rocket::move(pattern));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(pattern).F()) {
-      // Call the binding function.
       return std_string_find(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern));
     }
     Iopt length;
     if(reader.L(state).o(length).v(pattern).F()) {
-      // Call the binding function.
       return std_string_find(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
                              ::rocket::move(pattern));
     }
@@ -1858,17 +1849,14 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval text;
     Sval pattern;
     if(reader.I().v(text).S(state).v(pattern).F()) {
-      // Call the binding function.
       return std_string_rfind(::rocket::move(text), ::rocket::move(pattern));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(pattern).F()) {
-      // Call the binding function.
       return std_string_rfind(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern));
     }
     Iopt length;
     if(reader.L(state).o(length).v(pattern).F()) {
-      // Call the binding function.
       return std_string_rfind(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
                               ::rocket::move(pattern));
     }
@@ -1917,19 +1905,16 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval pattern;
     Sval replacement;
     if(reader.I().v(text).S(state).v(pattern).v(replacement).F()) {
-      // Call the binding function.
       return std_string_find_and_replace(::rocket::move(text), ::rocket::move(pattern),
                                          ::rocket::move(replacement));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(pattern).v(replacement).F()) {
-      // Call the binding function.
       return std_string_find_and_replace(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern),
                                          ::rocket::move(replacement));
     }
     Iopt length;
     if(reader.L(state).o(length).v(pattern).v(replacement).F()) {
-      // Call the binding function.
       return std_string_find_and_replace(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
                                          ::rocket::move(pattern), ::rocket::move(replacement));
     }
@@ -1980,17 +1965,14 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval text;
     Sval accept;
     if(reader.I().v(text).S(state).v(accept).F()) {
-      // Call the binding function.
       return std_string_find_any_of(::rocket::move(text), ::rocket::move(accept));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(accept).F()) {
-      // Call the binding function.
       return std_string_find_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
     }
     Iopt length;
     if(reader.L(state).o(length).v(accept).F()) {
-      // Call the binding function.
       return std_string_find_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
                                     ::rocket::move(accept));
     }
@@ -2037,17 +2019,14 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval text;
     Sval accept;
     if(reader.I().v(text).S(state).v(accept).F()) {
-      // Call the binding function.
       return std_string_rfind_any_of(::rocket::move(text), ::rocket::move(accept));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(accept).F()) {
-      // Call the binding function.
       return std_string_rfind_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
     }
     Iopt length;
     if(reader.L(state).o(length).v(accept).F()) {
-      // Call the binding function.
       return std_string_rfind_any_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
                                      ::rocket::move(accept));
     }
@@ -2094,17 +2073,14 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval text;
     Sval accept;
     if(reader.I().v(text).S(state).v(accept).F()) {
-      // Call the binding function.
       return std_string_find_not_of(::rocket::move(text), ::rocket::move(accept));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(accept).F()) {
-      // Call the binding function.
       return std_string_find_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
     }
     Iopt length;
     if(reader.L(state).o(length).v(accept).F()) {
-      // Call the binding function.
       return std_string_find_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
                                     ::rocket::move(accept));
     }
@@ -2151,17 +2127,14 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval text;
     Sval accept;
     if(reader.I().v(text).S(state).v(accept).F()) {
-      // Call the binding function.
       return std_string_rfind_not_of(::rocket::move(text), ::rocket::move(accept));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(accept).F()) {
-      // Call the binding function.
       return std_string_rfind_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(accept));
     }
     Iopt length;
     if(reader.L(state).o(length).v(accept).F()) {
-      // Call the binding function.
       return std_string_rfind_not_of(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
                                      ::rocket::move(accept));
     }
@@ -2206,7 +2179,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval text;
     if(reader.I().v(text).F()) {
-      // Call the binding function.
       return std_string_reverse(::rocket::move(text));
     }
     // Fail.
@@ -2233,7 +2205,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval text;
     Sopt reject;
     if(reader.I().v(text).o(reject).F()) {
-      // Call the binding function.
       return std_string_trim(::rocket::move(text), ::rocket::move(reject));
     }
     // Fail.
@@ -2262,7 +2233,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval text;
     Sopt reject;
     if(reader.I().v(text).o(reject).F()) {
-      // Call the binding function.
       return std_string_ltrim(::rocket::move(text), ::rocket::move(reject));
     }
     // Fail.
@@ -2291,7 +2261,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval text;
     Sopt reject;
     if(reader.I().v(text).o(reject).F()) {
-      // Call the binding function.
       return std_string_rtrim(::rocket::move(text), ::rocket::move(reject));
     }
     // Fail.
@@ -2321,7 +2290,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Ival length;
     Sopt padding;
     if(reader.I().v(text).v(length).o(padding).F()) {
-      // Call the binding function.
       return std_string_lpad(::rocket::move(text), ::rocket::move(length), ::rocket::move(padding));
     }
     // Fail.
@@ -2353,7 +2321,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Ival length;
     Sopt padding;
     if(reader.I().v(text).v(length).o(padding).F()) {
-      // Call the binding function.
       return std_string_rpad(::rocket::move(text), ::rocket::move(length), ::rocket::move(padding));
     }
     // Fail.
@@ -2383,7 +2350,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval text;
     if(reader.I().v(text).F()) {
-      // Call the binding function.
       return std_string_to_upper(::rocket::move(text));
     }
     // Fail.
@@ -2410,7 +2376,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval text;
     if(reader.I().v(text).F()) {
-      // Call the binding function.
       return std_string_to_lower(::rocket::move(text));
     }
     // Fail.
@@ -2439,7 +2404,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval inputs;
     Sopt outputs;
     if(reader.I().v(text).v(inputs).o(outputs).F()) {
-      // Call the binding function.
       return std_string_translate(::rocket::move(text), ::rocket::move(inputs), ::rocket::move(outputs));
     }
     // Fail.
@@ -2474,7 +2438,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sopt delim;
     Iopt limit;
     if(reader.I().v(text).o(delim).o(limit).F()) {
-      // Call the binding function.
       return std_string_explode(::rocket::move(text), ::rocket::move(delim), ::rocket::move(limit));
     }
     // Fail.
@@ -2507,7 +2470,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Aval segments;
     Sopt delim;
     if(reader.I().v(segments).o(delim).F()) {
-      // Call the binding function.
       return std_string_implode(::rocket::move(segments), ::rocket::move(delim));
     }
     // Fail.
@@ -2537,7 +2499,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Bopt lowercase;
     Sopt delim;
     if(reader.I().v(data).o(lowercase).o(delim).F()) {
-      // Call the binding function.
       return std_string_hex_encode(::rocket::move(data), ::rocket::move(lowercase), ::rocket::move(delim));
     }
     // Fail.
@@ -2567,7 +2528,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval text;
     if(reader.I().v(text).F()) {
-      // Call the binding function.
       return std_string_hex_decode(::rocket::move(text));
     }
     // Fail.
@@ -2600,7 +2560,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval data;
     Bopt lowercase;
     if(reader.I().v(data).o(lowercase).F()) {
-      // Call the binding function.
       return std_string_base32_encode(::rocket::move(data), ::rocket::move(lowercase));
     }
     // Fail.
@@ -2630,7 +2589,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval text;
     if(reader.I().v(text).F()) {
-      // Call the binding function.
       return std_string_base32_decode(::rocket::move(text));
     }
     // Fail.
@@ -2662,7 +2620,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      // Call the binding function.
       return std_string_base64_encode(::rocket::move(data));
     }
     // Fail.
@@ -2689,7 +2646,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval text;
     if(reader.I().v(text).F()) {
-      // Call the binding function.
       return std_string_base64_decode(::rocket::move(text));
     }
     // Fail.
@@ -2722,7 +2678,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval data;
     Bopt lowercase;
     if(reader.I().v(data).o(lowercase).F()) {
-      // Call the binding function.
       return std_string_url_encode(::rocket::move(data), ::rocket::move(lowercase));
     }
     // Fail.
@@ -2752,7 +2707,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval text;
     if(reader.I().v(text).F()) {
-      // Call the binding function.
       return std_string_url_decode(::rocket::move(text));
     }
     // Fail.
@@ -2785,7 +2739,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval data;
     Bopt lowercase;
     if(reader.I().v(data).o(lowercase).F()) {
-      // Call the binding function.
       return std_string_url_encode_query(::rocket::move(data), ::rocket::move(lowercase));
     }
     // Fail.
@@ -2814,7 +2767,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval text;
     if(reader.I().v(text).F()) {
-      // Call the binding function.
       return std_string_url_decode_query(::rocket::move(text));
     }
     // Fail.
@@ -2843,7 +2795,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval text;
     if(reader.I().v(text).F()) {
-      // Call the binding function.
       return std_string_utf8_validate(::rocket::move(text));
     }
     // Fail.
@@ -2869,12 +2820,10 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Ival code_point;
     Bopt permissive;
     if(reader.I().v(code_point).o(permissive).F()) {
-      // Call the binding function.
       return std_string_utf8_encode(::rocket::move(code_point), ::rocket::move(permissive));
     }
     Aval code_points;
     if(reader.I().v(code_points).o(permissive).F()) {
-      // Call the binding function.
       return std_string_utf8_encode(::rocket::move(code_points), ::rocket::move(permissive));
     }
     // Fail.
@@ -2907,7 +2856,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval text;
     Bopt permissive;
     if(reader.I().v(text).o(permissive).F()) {
-      // Call the binding function.
       return std_string_utf8_decode(::rocket::move(text), ::rocket::move(permissive));
     }
     // Fail.
@@ -2939,12 +2887,10 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival value;
     if(reader.I().v(value).F()) {
-      // Call the binding function.
       return std_string_pack_8(::rocket::move(value));
     }
     Aval values;
     if(reader.I().v(values).F()) {
-      // Call the binding function.
       return std_string_pack_8(::rocket::move(values));
     }
     // Fail.
@@ -2971,7 +2917,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval text;
     if(reader.I().v(text).F()) {
-      // Call the binding function.
       return std_string_unpack_8(::rocket::move(text));
     }
     // Fail.
@@ -2998,12 +2943,10 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival value;
     if(reader.I().v(value).F()) {
-      // Call the binding function.
       return std_string_pack_16be(::rocket::move(value));
     }
     Aval values;
     if(reader.I().v(values).F()) {
-      // Call the binding function.
       return std_string_pack_16be(::rocket::move(values));
     }
     // Fail.
@@ -3031,7 +2974,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval text;
     if(reader.I().v(text).F()) {
-      // Call the binding function.
       return std_string_unpack_16be(::rocket::move(text));
     }
     // Fail.
@@ -3062,12 +3004,10 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival value;
     if(reader.I().v(value).F()) {
-      // Call the binding function.
       return std_string_pack_16le(::rocket::move(value));
     }
     Aval values;
     if(reader.I().v(values).F()) {
-      // Call the binding function.
       return std_string_pack_16le(::rocket::move(values));
     }
     // Fail.
@@ -3095,7 +3035,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval text;
     if(reader.I().v(text).F()) {
-      // Call the binding function.
       return std_string_unpack_16le(::rocket::move(text));
     }
     // Fail.
@@ -3126,12 +3065,10 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival value;
     if(reader.I().v(value).F()) {
-      // Call the binding function.
       return std_string_pack_32be(::rocket::move(value));
     }
     Aval values;
     if(reader.I().v(values).F()) {
-      // Call the binding function.
       return std_string_pack_32be(::rocket::move(values));
     }
     // Fail.
@@ -3159,7 +3096,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval text;
     if(reader.I().v(text).F()) {
-      // Call the binding function.
       return std_string_unpack_32be(::rocket::move(text));
     }
     // Fail.
@@ -3190,12 +3126,10 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival value;
     if(reader.I().v(value).F()) {
-      // Call the binding function.
       return std_string_pack_32le(::rocket::move(value));
     }
     Aval values;
     if(reader.I().v(values).F()) {
-      // Call the binding function.
       return std_string_pack_32le(::rocket::move(values));
     }
     // Fail.
@@ -3223,7 +3157,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval text;
     if(reader.I().v(text).F()) {
-      // Call the binding function.
       return std_string_unpack_32le(::rocket::move(text));
     }
     // Fail.
@@ -3254,12 +3187,10 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival value;
     if(reader.I().v(value).F()) {
-      // Call the binding function.
       return std_string_pack_64be(::rocket::move(value));
     }
     Aval values;
     if(reader.I().v(values).F()) {
-      // Call the binding function.
       return std_string_pack_64be(::rocket::move(values));
     }
     // Fail.
@@ -3286,7 +3217,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval text;
     if(reader.I().v(text).F()) {
-      // Call the binding function.
       return std_string_unpack_64be(::rocket::move(text));
     }
     // Fail.
@@ -3316,12 +3246,10 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival value;
     if(reader.I().v(value).F()) {
-      // Call the binding function.
       return std_string_pack_64le(::rocket::move(value));
     }
     Aval values;
     if(reader.I().v(values).F()) {
-      // Call the binding function.
       return std_string_pack_64le(::rocket::move(values));
     }
     // Fail.
@@ -3348,7 +3276,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval text;
     if(reader.I().v(text).F()) {
-      // Call the binding function.
       return std_string_unpack_64le(::rocket::move(text));
     }
     // Fail.
@@ -3380,7 +3307,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval templ;
     cow_vector<Value> values;
     if(reader.I().v(templ).F(values)) {
-      // Call the binding function.
       return std_string_format(::rocket::move(templ), ::rocket::move(values));
     }
     // Fail.
@@ -3420,7 +3346,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval text;
     Sval pattern;
     if(reader.I().v(text).S(state).v(pattern).F()) {
-      // Call the binding function.
       auto kpair = std_string_regex_find(::rocket::move(text), ::rocket::move(pattern));
       if(!kpair)
         return nullptr;
@@ -3432,7 +3357,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(pattern).F()) {
-      // Call the binding function.
       auto kpair = std_string_regex_find(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern));
       if(!kpair)
         return nullptr;
@@ -3444,7 +3368,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     }
     Iopt length;
     if(reader.L(state).o(length).v(pattern).F()) {
-      // Call the binding function.
       auto kpair = std_string_regex_find(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
                                          ::rocket::move(pattern));
       if(!kpair)
@@ -3515,17 +3438,14 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval text;
     Sval pattern;
     if(reader.I().v(text).S(state).v(pattern).F()) {
-      // Call the binding function.
       return std_string_regex_match(::rocket::move(text), ::rocket::move(pattern));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(pattern).F()) {
-      // Call the binding function.
       return std_string_regex_match(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern));
     }
     Iopt length;
     if(reader.L(state).o(length).v(pattern).F()) {
-      // Call the binding function.
       return std_string_regex_match(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
                                     ::rocket::move(pattern));
     }
@@ -3593,19 +3513,16 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval pattern;
     Sval replacement;
     if(reader.I().v(text).S(state).v(pattern).v(replacement).F()) {
-      // Call the binding function.
       return std_string_regex_replace(::rocket::move(text), ::rocket::move(pattern),
                                          ::rocket::move(replacement));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(pattern).v(replacement).F()) {
-      // Call the binding function.
       return std_string_regex_replace(::rocket::move(text), ::rocket::move(from), ::rocket::move(pattern),
                                          ::rocket::move(replacement));
     }
     Iopt length;
     if(reader.L(state).o(length).v(pattern).v(replacement).F()) {
-      // Call the binding function.
       return std_string_regex_replace(::rocket::move(text), ::rocket::move(from), ::rocket::move(length),
                                       ::rocket::move(pattern), ::rocket::move(replacement));
     }

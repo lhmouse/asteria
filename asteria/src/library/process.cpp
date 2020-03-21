@@ -83,7 +83,6 @@ void create_bindings_process(V_object& result, API_Version /*version*/)
     Aopt argv;
     Aopt envp;
     if(reader.I().v(cmd).o(argv).o(envp).F()) {
-      // Call the binding function.
       return std_process_execute(::rocket::move(cmd), ::rocket::move(argv),
                                                       ::rocket::move(envp));
     }
@@ -118,7 +117,6 @@ void create_bindings_process(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.process.daemonize"));
     // Parse arguments.
     if(reader.I().F()) {
-      // Call the binding function.
       std_process_daemonize();
       return true;
     }

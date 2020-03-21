@@ -952,7 +952,6 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Ival from;
     Iopt length;
     if(reader.I().v(data).v(from).o(length).F()) {
-      // Call the binding function.
       return std_array_slice(::rocket::move(data), ::rocket::move(from), ::rocket::move(length));
     }
     // Fail.
@@ -986,12 +985,10 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Ival from;
     Aval replacement;
     if(reader.I().v(data).v(from).S(state).v(replacement).F()) {
-      // Call the binding function.
       return std_array_replace_slice(::rocket::move(data), ::rocket::move(from), ::rocket::move(replacement));
     }
     Iopt length;
     if(reader.L(state).o(length).v(replacement).F()) {
-      // Call the binding function.
       return std_array_replace_slice(::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                                      ::rocket::move(replacement));
     }
@@ -1034,17 +1031,14 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Value target;
     if(reader.I().v(data).S(state).o(target).F()) {
-      // Call the binding function.
       return std_array_find(::rocket::move(data), ::rocket::move(target));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).o(target).F()) {
-      // Call the binding function.
       return std_array_find(::rocket::move(data), ::rocket::move(from), ::rocket::move(target));
     }
     Iopt length;
     if(reader.L(state).o(length).o(target).F()) {
-      // Call the binding function.
       return std_array_find(::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                             ::rocket::move(target));
     }
@@ -1094,17 +1088,14 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      // Call the binding function.
       return std_array_find_if(global, ::rocket::move(data), ::rocket::move(predictor));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      // Call the binding function.
       return std_array_find_if(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(predictor));
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      // Call the binding function.
       return std_array_find_if(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                                        ::rocket::move(predictor));
     }
@@ -1154,18 +1145,15 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      // Call the binding function.
       return std_array_find_if_not(global, ::rocket::move(data), ::rocket::move(predictor));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      // Call the binding function.
       return std_array_find_if_not(global, ::rocket::move(data), ::rocket::move(from),
                                            ::rocket::move(predictor));
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      // Call the binding function.
       return std_array_find_if_not(global, ::rocket::move(data), ::rocket::move(from),
                                            ::rocket::move(length), ::rocket::move(predictor));
     }
@@ -1215,17 +1203,14 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Value target;
     if(reader.I().v(data).S(state).o(target).F()) {
-      // Call the binding function.
       return std_array_rfind(::rocket::move(data), ::rocket::move(target));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).o(target).F()) {
-      // Call the binding function.
       return std_array_rfind(::rocket::move(data), ::rocket::move(from), ::rocket::move(target));
     }
     Iopt length;
     if(reader.L(state).o(length).o(target).F()) {
-      // Call the binding function.
       return std_array_rfind(::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                              ::rocket::move(target));
     }
@@ -1275,18 +1260,15 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      // Call the binding function.
       return std_array_rfind_if(global, ::rocket::move(data), ::rocket::move(predictor));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      // Call the binding function.
       return std_array_rfind_if(global, ::rocket::move(data), ::rocket::move(from),
                                         ::rocket::move(predictor));
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      // Call the binding function.
       return std_array_rfind_if(global, ::rocket::move(data), ::rocket::move(from),
                                         ::rocket::move(length), ::rocket::move(predictor));
     }
@@ -1336,18 +1318,15 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      // Call the binding function.
       return std_array_rfind_if_not(global, ::rocket::move(data), ::rocket::move(predictor));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      // Call the binding function.
       return std_array_rfind_if_not(global, ::rocket::move(data), ::rocket::move(from),
                                             ::rocket::move(predictor));
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      // Call the binding function.
       return std_array_rfind_if_not(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                                             ::rocket::move(predictor));
     }
@@ -1397,17 +1376,14 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Value target;
     if(reader.I().v(data).S(state).o(target).F()) {
-      // Call the binding function.
       return std_array_count(::rocket::move(data), ::rocket::move(target));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).o(target).F()) {
-      // Call the binding function.
       return std_array_count(::rocket::move(data), ::rocket::move(from), ::rocket::move(target));
     }
     Iopt length;
     if(reader.L(state).o(length).o(target).F()) {
-      // Call the binding function.
       return std_array_count(::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                              ::rocket::move(target));
     }
@@ -1455,18 +1431,15 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      // Call the binding function.
       return std_array_count_if(global, ::rocket::move(data), ::rocket::move(predictor));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      // Call the binding function.
       return std_array_count_if(global, ::rocket::move(data),  ::rocket::move(from),
                                         ::rocket::move(predictor));
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      // Call the binding function.
       return std_array_count_if(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                                         ::rocket::move(predictor));
     }
@@ -1518,18 +1491,15 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      // Call the binding function.
       return std_array_count_if_not(global, ::rocket::move(data), ::rocket::move(predictor));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      // Call the binding function.
       return std_array_count_if_not(global, ::rocket::move(data), ::rocket::move(from),
                                             ::rocket::move(predictor));
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      // Call the binding function.
       return std_array_count_if_not(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                                             ::rocket::move(predictor));
     }
@@ -1581,17 +1551,14 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Value target;
     if(reader.I().v(data).S(state).o(target).F()) {
-      // Call the binding function.
       return std_array_exclude(::rocket::move(data), ::rocket::move(target));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).o(target).F()) {
-      // Call the binding function.
       return std_array_exclude(::rocket::move(data), ::rocket::move(from), ::rocket::move(target));
     }
     Iopt length;
     if(reader.L(state).o(length).o(target).F()) {
-      // Call the binding function.
       return std_array_exclude(::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                                ::rocket::move(target));
     }
@@ -1639,18 +1606,15 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      // Call the binding function.
       return std_array_exclude_if(global, ::rocket::move(data), ::rocket::move(predictor));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      // Call the binding function.
       return std_array_exclude_if(global, ::rocket::move(data),  ::rocket::move(from),
                                           ::rocket::move(predictor));
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      // Call the binding function.
       return std_array_exclude_if(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                                           ::rocket::move(predictor));
     }
@@ -1700,18 +1664,15 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      // Call the binding function.
       return std_array_exclude_if_not(global, ::rocket::move(data), ::rocket::move(predictor));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      // Call the binding function.
       return std_array_exclude_if_not(global, ::rocket::move(data), ::rocket::move(from),
                                               ::rocket::move(predictor));
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      // Call the binding function.
       return std_array_exclude_if_not(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
                                               ::rocket::move(predictor));
     }
@@ -1760,7 +1721,6 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fopt comparator;
     if(reader.I().v(data).o(comparator).F()) {
-      // Call the binding function.
       return std_array_is_sorted(global, ::rocket::move(data), ::rocket::move(comparator));
     }
     // Fail.
@@ -1798,7 +1758,6 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Value target;
     Fopt comparator;
     if(reader.I().v(data).o(target).o(comparator).F()) {
-      // Call the binding function.
       return std_array_binary_search(global, ::rocket::move(data), ::rocket::move(target),
                                              ::rocket::move(comparator));
     }
@@ -1835,7 +1794,6 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Value target;
     Fopt comparator;
     if(reader.I().v(data).o(target).o(comparator).F()) {
-      // Call the binding function.
       return std_array_lower_bound(global, ::rocket::move(data), ::rocket::move(target),
                                            ::rocket::move(comparator));
     }
@@ -1874,7 +1832,6 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Value target;
     Fopt comparator;
     if(reader.I().v(data).o(target).o(comparator).F()) {
-      // Call the binding function.
       return std_array_upper_bound(global, ::rocket::move(data), ::rocket::move(target),
                                            ::rocket::move(comparator));
     }
@@ -1913,7 +1870,6 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Value target;
     Fopt comparator;
     if(reader.I().v(data).o(target).o(comparator).F()) {
-      // Call the binding function.
       auto pair = std_array_equal_range(global, ::rocket::move(data), ::rocket::move(target),
                                                 ::rocket::move(comparator));
       // This function returns a `pair`, but we would like to return an array so convert it.
@@ -1955,7 +1911,6 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fopt comparator;
     if(reader.I().v(data).o(comparator).F()) {
-      // Call the binding function.
       return std_array_sort(global, ::rocket::move(data), ::rocket::move(comparator));
     }
     // Fail.
@@ -1989,7 +1944,6 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fopt comparator;
     if(reader.I().v(data).o(comparator).F()) {
-      // Call the binding function.
       return std_array_sortu(global, ::rocket::move(data), ::rocket::move(comparator));
     }
     // Fail.
@@ -2024,7 +1978,6 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fopt comparator;
     if(reader.I().v(data).o(comparator).F()) {
-      // Call the binding function.
       return std_array_max_of(global, ::rocket::move(data), ::rocket::move(comparator));
     }
     // Fail.
@@ -2054,7 +2007,6 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fopt comparator;
     if(reader.I().v(data).o(comparator).F()) {
-      // Call the binding function.
       return std_array_min_of(global, ::rocket::move(data), ::rocket::move(comparator));
     }
     // Fail.
@@ -2084,7 +2036,6 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fopt comparator;
     if(reader.I().v(data).o(comparator).F()) {
-      // Call the binding function.
       return std_array_reverse(::rocket::move(data));
     }
     // Fail.
@@ -2111,7 +2062,6 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Fval generator;
     Ival length;
     if(reader.I().v(generator).v(length).F()) {
-      // Call the binding function.
       return std_array_generate(global, ::rocket::move(generator), ::rocket::move(length));
     }
     // Fail.
@@ -2142,7 +2092,6 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Iopt seed;
     if(reader.I().v(data).o(seed).F()) {
-      // Call the binding function.
       return std_array_shuffle(::rocket::move(data), ::rocket::move(seed));
     }
     // Fail.
@@ -2173,7 +2122,6 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Ival shift;
     if(reader.I().v(data).v(shift).F()) {
-      // Call the binding function.
       return std_array_rotate(::rocket::move(data), ::rocket::move(shift));
     }
     // Fail.
@@ -2201,7 +2149,6 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Oval source;
     if(reader.I().v(source).F()) {
-      // Call the binding function.
       return std_array_copy_keys(::rocket::move(source));
     }
     // Fail.
@@ -2227,7 +2174,6 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Oval source;
     if(reader.I().v(source).F()) {
-      // Call the binding function.
       return std_array_copy_values(::rocket::move(source));
     }
     // Fail.

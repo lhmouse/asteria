@@ -686,12 +686,10 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      // Call the binding function.
       return std_numeric_abs(::rocket::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      // Call the binding function.
       return std_numeric_abs(::rocket::move(rvalue));
     }
     // Fail.
@@ -722,12 +720,10 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      // Call the binding function.
       return std_numeric_sign(::rocket::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      // Call the binding function.
       return std_numeric_sign(::rocket::move(rvalue));
     }
     // Fail.
@@ -754,12 +750,10 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      // Call the binding function.
       return std_numeric_is_finite(::rocket::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      // Call the binding function.
       return std_numeric_is_finite(::rocket::move(rvalue));
     }
     // Fail.
@@ -788,12 +782,10 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      // Call the binding function.
       return std_numeric_is_infinity(::rocket::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      // Call the binding function.
       return std_numeric_is_infinity(::rocket::move(rvalue));
     }
     // Fail.
@@ -822,12 +814,10 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      // Call the binding function.
       return std_numeric_is_nan(::rocket::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      // Call the binding function.
       return std_numeric_is_nan(::rocket::move(rvalue));
     }
     // Fail.
@@ -857,14 +847,12 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Ival ilower;
     Ival iupper;
     if(reader.I().v(ivalue).v(ilower).v(iupper).F()) {
-      // Call the binding function.
       return std_numeric_clamp(::rocket::move(ivalue), ::rocket::move(ilower), ::rocket::move(iupper));
     }
     Rval rvalue;
     Rval flower;
     Rval fupper;
     if(reader.I().v(rvalue).v(flower).v(fupper).F()) {
-      // Call the binding function.
       return std_numeric_clamp(::rocket::move(rvalue), ::rocket::move(flower), ::rocket::move(fupper));
     }
     // Fail.
@@ -895,12 +883,10 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      // Call the binding function.
       return std_numeric_round(::rocket::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      // Call the binding function.
       return std_numeric_round(::rocket::move(rvalue));
     }
     // Fail.
@@ -927,12 +913,10 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      // Call the binding function.
       return std_numeric_floor(::rocket::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      // Call the binding function.
       return std_numeric_floor(::rocket::move(rvalue));
     }
     // Fail.
@@ -959,12 +943,10 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      // Call the binding function.
       return std_numeric_ceil(::rocket::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      // Call the binding function.
       return std_numeric_ceil(::rocket::move(rvalue));
     }
     // Fail.
@@ -991,12 +973,10 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      // Call the binding function.
       return std_numeric_trunc(::rocket::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      // Call the binding function.
       return std_numeric_trunc(::rocket::move(rvalue));
     }
     // Fail.
@@ -1023,12 +1003,10 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      // Call the binding function.
       return std_numeric_iround(::rocket::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      // Call the binding function.
       return std_numeric_iround(::rocket::move(rvalue));
     }
     // Fail.
@@ -1059,12 +1037,10 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      // Call the binding function.
       return std_numeric_ifloor(::rocket::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      // Call the binding function.
       return std_numeric_ifloor(::rocket::move(rvalue));
     }
     // Fail.
@@ -1095,12 +1071,10 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      // Call the binding function.
       return std_numeric_iceil(::rocket::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      // Call the binding function.
       return std_numeric_iceil(::rocket::move(rvalue));
     }
     // Fail.
@@ -1131,12 +1105,10 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      // Call the binding function.
       return std_numeric_itrunc(::rocket::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      // Call the binding function.
       return std_numeric_itrunc(::rocket::move(rvalue));
     }
     // Fail.
@@ -1166,7 +1138,6 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ropt limit;
     if(reader.I().o(limit).F()) {
-      // Call the binding function.
       return std_numeric_random(global, ::rocket::move(limit));
     }
     // Fail.
@@ -1195,7 +1166,6 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
-      // Call the binding function.
       return std_numeric_sqrt(::rocket::move(x));
     }
     // Fail.
@@ -1223,7 +1193,6 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Rval y;
     Rval z;
     if(reader.I().v(x).v(y).v(z).F()) {
-      // Call the binding function.
       return std_numeric_fma(::rocket::move(x), ::rocket::move(y), ::rocket::move(z));
     }
     // Fail.
@@ -1251,7 +1220,6 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Rval x;
     Rval y;
     if(reader.I().v(x).v(y).F()) {
-      // Call the binding function.
       return std_numeric_remainder(::rocket::move(x), ::rocket::move(y));
     }
     // Fail.
@@ -1278,7 +1246,6 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
-      // Call the binding function.
       auto pair = std_numeric_frexp(::rocket::move(x));
       // This function returns a `pair`, but we would like to return an array so convert it.
       Aval rval(2);
@@ -1315,7 +1282,6 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Rval frac;
     Ival exp;
     if(reader.I().v(frac).v(exp).F()) {
-      // Call the binding function.
       return std_numeric_ldexp(::rocket::move(frac), ::rocket::move(exp));
     }
     // Fail.
@@ -1343,7 +1309,6 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Ival x;
     Ival y;
     if(reader.I().v(x).v(y).F()) {
-      // Call the binding function.
       return std_numeric_addm(::rocket::move(x), ::rocket::move(y));
     }
     // Fail.
@@ -1372,7 +1337,6 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Ival x;
     Ival y;
     if(reader.I().v(x).v(y).F()) {
-      // Call the binding function.
       return std_numeric_subm(::rocket::move(x), ::rocket::move(y));
     }
     // Fail.
@@ -1402,7 +1366,6 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Ival x;
     Ival y;
     if(reader.I().v(x).v(y).F()) {
-      // Call the binding function.
       return std_numeric_mulm(::rocket::move(x), ::rocket::move(y));
     }
     // Fail.
@@ -1432,13 +1395,11 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Ival ix;
     Ival iy;
     if(reader.I().v(ix).v(iy).F()) {
-      // Call the binding function.
       return std_numeric_adds(::rocket::move(ix), ::rocket::move(iy));
     }
     Rval fx;
     Rval fy;
     if(reader.I().v(fx).v(fy).F()) {
-      // Call the binding function.
       return std_numeric_adds(::rocket::move(fx), ::rocket::move(fy));
     }
     // Fail.
@@ -1469,13 +1430,11 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Ival ix;
     Ival iy;
     if(reader.I().v(ix).v(iy).F()) {
-      // Call the binding function.
       return std_numeric_subs(::rocket::move(ix), ::rocket::move(iy));
     }
     Rval fx;
     Rval fy;
     if(reader.I().v(fx).v(fy).F()) {
-      // Call the binding function.
       return std_numeric_subs(::rocket::move(fx), ::rocket::move(fy));
     }
     // Fail.
@@ -1506,13 +1465,11 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Ival ix;
     Ival iy;
     if(reader.I().v(ix).v(iy).F()) {
-      // Call the binding function.
       return std_numeric_muls(::rocket::move(ix), ::rocket::move(iy));
     }
     Rval fx;
     Rval fy;
     if(reader.I().v(fx).v(fy).F()) {
-      // Call the binding function.
       return std_numeric_muls(::rocket::move(fx), ::rocket::move(fy));
     }
     // Fail.
@@ -1542,7 +1499,6 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival x;
     if(reader.I().v(x).F()) {
-      // Call the binding function.
       return std_numeric_lzcnt(::rocket::move(x));
     }
     // Fail.
@@ -1569,7 +1525,6 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival x;
     if(reader.I().v(x).F()) {
-      // Call the binding function.
       return std_numeric_tzcnt(::rocket::move(x));
     }
     // Fail.
@@ -1596,7 +1551,6 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival x;
     if(reader.I().v(x).F()) {
-      // Call the binding function.
       return std_numeric_popcnt(::rocket::move(x));
     }
     // Fail.
@@ -1624,7 +1578,6 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Ival x;
     Ival n;
     if(reader.I().v(m).v(x).v(n).F()) {
-      // Call the binding function.
       return std_numeric_rotl(::rocket::move(m), ::rocket::move(x), ::rocket::move(n));
     }
     // Fail.
@@ -1660,7 +1613,6 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Ival x;
     Ival n;
     if(reader.I().v(m).v(x).v(n).F()) {
-      // Call the binding function.
       return std_numeric_rotr(::rocket::move(m), ::rocket::move(x), ::rocket::move(n));
     }
     // Fail.
@@ -1696,12 +1648,10 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Iopt base;
     Iopt ebase;
     if(reader.I().v(ivalue).o(base).o(ebase).F()) {
-      // Call the binding function.
       return std_numeric_format(::rocket::move(ivalue), ::rocket::move(base), ::rocket::move(ebase));
     }
     Rval fvalue;
     if(reader.I().v(fvalue).o(base).o(ebase).F()) {
-      // Call the binding function.
       return std_numeric_format(::rocket::move(fvalue), ::rocket::move(base), ::rocket::move(ebase));
     }
     // Fail.
@@ -1740,7 +1690,6 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval text;
     if(reader.I().v(text).F()) {
-      // Call the binding function.
       return std_numeric_parse_integer(::rocket::move(text));
     }
     // Fail.
@@ -1782,7 +1731,6 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Sval text;
     Bopt saturating;
     if(reader.I().v(text).o(saturating).F()) {
-      // Call the binding function.
       return std_numeric_parse_real(::rocket::move(text), ::rocket::move(saturating));
     }
     // Fail.

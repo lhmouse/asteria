@@ -385,7 +385,6 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.utc_now"));
     // Parse arguments.
     if(reader.I().F()) {
-      // Call the binding function.
       return std_chrono_utc_now();
     }
     // Fail.
@@ -410,7 +409,6 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.local_now"));
     // Parse arguments.
     if(reader.I().F()) {
-      // Call the binding function.
       return std_chrono_local_now();
     }
     // Fail.
@@ -435,7 +433,6 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.hires_now"));
     // Parse arguments.
     if(reader.I().F()) {
-      // Call the binding function.
       return std_chrono_hires_now();
     }
     // Fail.
@@ -463,7 +460,6 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.steady_now"));
     // Parse arguments.
     if(reader.I().F()) {
-      // Call the binding function.
       return std_chrono_steady_now();
     }
     // Fail.
@@ -492,7 +488,6 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival time_utc;
     if(reader.I().v(time_utc).F()) {
-      // Call the binding function.
       return std_chrono_local_from_utc(::rocket::move(time_utc));
     }
     // Fail.
@@ -519,7 +514,6 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival time_local;
     if(reader.I().v(time_local).F()) {
-      // Call the binding function.
       return std_chrono_utc_from_local(::rocket::move(time_local));
     }
     // Fail.
@@ -548,7 +542,6 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
     Ival time_point;
     Bopt with_ms;
     if(reader.I().v(time_point).o(with_ms).F()) {
-      // Call the binding function.
       return std_chrono_utc_format(::rocket::move(time_point), ::rocket::move(with_ms));
     }
     // Fail.
@@ -577,7 +570,6 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval time_str;
     if(reader.I().v(time_str).F()) {
-      // Call the binding function.
       return std_chrono_utc_parse(::rocket::move(time_str));
     }
     // Fail.

@@ -62,7 +62,6 @@ void create_bindings_debug(V_object& result, API_Version /*version*/)
     Sval templ;
     cow_vector<Value> values;
     if(reader.I().v(templ).F(values)) {
-      // Call the binding function.
       return std_debug_print(templ, values);
     }
     // Fail.
@@ -91,7 +90,6 @@ void create_bindings_debug(V_object& result, API_Version /*version*/)
     Value value;
     Iopt indent;
     if(reader.I().o(value).o(indent).F()) {
-      // Call the binding function.
       return std_debug_dump(value, indent);
     }
     // Fail.
