@@ -95,6 +95,8 @@ uint64_t generate_random_seed() noexcept;
 [[noreturn]] void throw_system_error(const char* func, int err);
 [[noreturn]] void throw_system_error(const char* func);
 
+#define ASTERIA_THROW_SYSTEM_ERROR(...)       (::Asteria::throw_system_error(__VA_ARGS__))
+
 }  // namespace Asteria
 
 #endif

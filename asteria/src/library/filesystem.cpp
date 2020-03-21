@@ -44,7 +44,7 @@ int64_t do_remove_recursive(const Sval& path)
       case rmdisp_rmdir: {
           // This is an empty directory. Remove it.
           if(::rmdir(elem.path.c_str()) != 0)
-            throw_system_error("rmdir");
+            ASTERIA_THROW_SYSTEM_ERROR("rmdir");
           // An element has been removed.
           nremoved++;
           break;
@@ -52,7 +52,7 @@ int64_t do_remove_recursive(const Sval& path)
       case rmdisp_unlink: {
           // This is a plain file. Unlink it.
           if(::unlink(elem.path.c_str()) != 0)
-            throw_system_error("unlink");
+            ASTERIA_THROW_SYSTEM_ERROR("unlink");
           // An element has been removed.
           nremoved++;
           break;
@@ -65,7 +65,7 @@ int64_t do_remove_recursive(const Sval& path)
           // Append all entries.
           ::rocket::unique_posix_dir dp(::opendir(elem.path.c_str()), ::closedir);
           if(!dp)
-            throw_system_error("opendir");
+            ASTERIA_THROW_SYSTEM_ERROR("opendir");
           // Write entries.
           struct ::dirent* next;
           while((next = ::readdir(dp)) != nullptr) {
@@ -91,7 +91,7 @@ int64_t do_remove_recursive(const Sval& path)
               // If the file type is unknown, ask for it.
               struct ::stat stb;
               if(::lstat(child.c_str(), &stb) != 0)
-                throw_system_error("lstat");
+                ASTERIA_THROW_SYSTEM_ERROR("lstat");
               // Check whether the child path denotes a directory.
               if(S_ISDIR(stb.st_mode))
                 disp = rmdisp_expand;
@@ -137,7 +137,7 @@ Sval std_filesystem_get_working_directory()
     while(::getcwd(cwd.mut_data(), cwd.size()) == nullptr) {
       // Resize the buffer if it isn't large enough.
       if(errno != ERANGE)
-        throw_system_error("getcwd");
+        ASTERIA_THROW_SYSTEM_ERROR("getcwd");
 #ifdef ROCKET_DEBUG
       cwd.append(1, '*');
 #else
@@ -198,7 +198,7 @@ Oopt std_filesystem_get_information(Sval path)
 void std_filesystem_move_from(Sval path_new, Sval path_old)
   {
     if(::rename(path_old.c_str(), path_new.c_str()) != 0)
-      throw_system_error("rename");
+      ASTERIA_THROW_SYSTEM_ERROR("rename");
   }
 
 Ival std_filesystem_remove_recursive(Sval path)
@@ -215,7 +215,7 @@ Ival std_filesystem_remove_recursive(Sval path)
     case ENOTDIR: {
         // This is something not a directory.
         if(::unlink(path.c_str()) != 0)
-          throw_system_error("unlink");
+          ASTERIA_THROW_SYSTEM_ERROR("unlink");
         // A file has been removed.
         return 1;
       }
@@ -225,7 +225,7 @@ Ival std_filesystem_remove_recursive(Sval path)
         return do_remove_recursive(path);
       }
     default:
-      throw_system_error("rmdir");
+      ASTERIA_THROW_SYSTEM_ERROR("rmdir");
     }
   }
 
@@ -234,7 +234,7 @@ Oopt std_filesystem_directory_list(Sval path)
     ::rocket::unique_posix_dir dp(::opendir(path.c_str()), closedir);
     if(!dp) {
       if(errno != ENOENT)
-        throw_system_error("opendir");
+        ASTERIA_THROW_SYSTEM_ERROR("opendir");
       // The path denotes a non-existent directory.
       return nullopt;
     }
@@ -271,7 +271,7 @@ Oopt std_filesystem_directory_list(Sval path)
         // Identify the entry.
         struct ::stat stb;
         if(::lstat(child.c_str(), &stb) != 0)
-          throw_system_error("lstat");
+          ASTERIA_THROW_SYSTEM_ERROR("lstat");
         // Check whether the child path denotes a directory or symlink.
         entry.try_emplace(::rocket::sref("b_dir"),
           Bval(
@@ -295,14 +295,14 @@ Bval std_filesystem_directory_create(Sval path)
       return true;
     }
     if(errno != EEXIST)
-      throw_system_error("mkdir");
+      ASTERIA_THROW_SYSTEM_ERROR("mkdir");
 
     // Check whether a directory or a symlink to a directory already exists.
     struct ::stat stb;
     if(::stat(path.c_str(), &stb) != 0)
-      throw_system_error("stat");
+      ASTERIA_THROW_SYSTEM_ERROR("stat");
     if(!S_ISDIR(stb.st_mode))
-      throw_system_error("mkdir", EEXIST);
+      ASTERIA_THROW_SYSTEM_ERROR("mkdir", EEXIST);
 
     // A directory already exists.
     return false;
@@ -315,7 +315,7 @@ Bval std_filesystem_directory_remove(Sval path)
       return true;
     }
     if(errno != ENOENT)
-      throw_system_error("rmdir");
+      ASTERIA_THROW_SYSTEM_ERROR("rmdir");
 
     // The directory does not exist.
     return false;
@@ -332,7 +332,7 @@ Sopt std_filesystem_file_read(Sval path, Iopt offset, Iopt limit)
     ::rocket::unique_posix_fd fd(::open(path.c_str(), O_RDONLY), ::close);
     if(!fd) {
       if(errno != ENOENT)
-        throw_system_error("open");
+        ASTERIA_THROW_SYSTEM_ERROR("open");
       // The path denotes a non-existent file.
       return nullopt;
     }
@@ -344,12 +344,12 @@ Sopt std_filesystem_file_read(Sval path, Iopt offset, Iopt limit)
     if(offset) {
       nread = ::pread(fd, data.mut_data(), data.size(), roffset);
       if(nread < 0)
-        throw_system_error("pread");
+        ASTERIA_THROW_SYSTEM_ERROR("pread");
     }
     else {
       nread = ::read(fd, data.mut_data(), data.size());
       if(nread < 0)
-        throw_system_error("read");
+        ASTERIA_THROW_SYSTEM_ERROR("read");
     }
     data.erase(static_cast<size_t>(nread));
     return ::rocket::move(data);
@@ -368,7 +368,7 @@ Iopt std_filesystem_file_stream(Global& global, Sval path, Fval callback, Iopt o
     ::rocket::unique_posix_fd fd(::open(path.c_str(), O_RDONLY), ::close);
     if(!fd) {
       if(errno != ENOENT)
-        throw_system_error("open");
+        ASTERIA_THROW_SYSTEM_ERROR("open");
       // The path denotes a non-existent file.
       return nullopt;
     }
@@ -387,12 +387,12 @@ Iopt std_filesystem_file_stream(Global& global, Sval path, Fval callback, Iopt o
       if(offset) {
         nread = ::pread(fd, data.mut_data(), data.size(), roffset);
         if(nread < 0)
-          throw_system_error("pread");
+          ASTERIA_THROW_SYSTEM_ERROR("pread");
       }
       else {
         nread = ::read(fd, data.mut_data(), data.size());
         if(nread < 0)
-          throw_system_error("read");
+          ASTERIA_THROW_SYSTEM_ERROR("read");
       }
       data.erase(static_cast<size_t>(nread));
       // Check for EOF.
@@ -428,19 +428,19 @@ void std_filesystem_file_write(Sval path, Sval data, Iopt offset)
     // Open the file for writing.
     ::rocket::unique_posix_fd fd(::open(path.c_str(), flags, 0666), ::close);
     if(!fd)
-      throw_system_error("open");
+      ASTERIA_THROW_SYSTEM_ERROR("open");
     // Set the file pointer when an offset is specified, even when it is an explicit zero.
     if(offset) {
       // If `roffset` is not zero, truncate the file there.
       // This also ensures it is a normal file (not a pipe or socket whatsoever).
       // Otherwise, the file will have been truncate at creation.
       if(::ftruncate(fd, roffset) != 0)
-        throw_system_error("ftruncate");
+        ASTERIA_THROW_SYSTEM_ERROR("ftruncate");
     }
     // Write all data.
     ::ssize_t nwrtn = loop_write(fd, data.data(), data.size());
     if(nwrtn < data.ssize())
-      throw_system_error("write");
+      ASTERIA_THROW_SYSTEM_ERROR("write");
   }
 
 void std_filesystem_file_append(Sval path, Sval data, Bopt exclusive)
@@ -451,11 +451,11 @@ void std_filesystem_file_append(Sval path, Sval data, Bopt exclusive)
     // Open the file for writing.
     ::rocket::unique_posix_fd fd(::open(path.c_str(), flags, 0666), ::close);
     if(!fd)
-      throw_system_error("open");
+      ASTERIA_THROW_SYSTEM_ERROR("open");
     // Write all data.
     ::ssize_t nwrtn = loop_write(fd, data.data(), data.size());
     if(nwrtn < data.ssize())
-      throw_system_error("write");
+      ASTERIA_THROW_SYSTEM_ERROR("write");
   }
 
 void std_filesystem_file_copy_from(Sval path_new, Sval path_old)
@@ -463,17 +463,17 @@ void std_filesystem_file_copy_from(Sval path_new, Sval path_old)
     // Open the old file.
     ::rocket::unique_posix_fd fd_old(::open(path_old.c_str(), O_RDONLY), ::close);
     if(!fd_old)
-      throw_system_error("open");
+      ASTERIA_THROW_SYSTEM_ERROR("open");
     // Get the file mode and preferred I/O block size.
     struct ::stat stb_old;
     if(::fstat(fd_old, &stb_old) != 0)
-      throw_system_error("fstat");
+      ASTERIA_THROW_SYSTEM_ERROR("fstat");
     // We always overwrite the destination file.
     int flags = O_WRONLY | O_CREAT | O_TRUNC | O_APPEND;
     // Create the new file, discarding its contents.
     ::rocket::unique_posix_fd fd_new(::open(path_new.c_str(), flags, 0200), ::close);
     if(!fd_new)
-      throw_system_error("open");
+      ASTERIA_THROW_SYSTEM_ERROR("open");
 
     // Copy data in blocks.
     ::ssize_t nread, nwrtn;
@@ -483,18 +483,18 @@ void std_filesystem_file_copy_from(Sval path_new, Sval path_old)
       // Read some bytes.
       nread = ::read(fd_old, buff.mut_data(), buff.size());
       if(nread < 0)
-        throw_system_error("read");
+        ASTERIA_THROW_SYSTEM_ERROR("read");
       // Check for EOF.
       if(nread == 0)
         break;
       // Write them all.
       nwrtn = loop_write(fd_new, buff.data(), static_cast<size_t>(nread));
       if(nwrtn < nread)
-        throw_system_error("write");
+        ASTERIA_THROW_SYSTEM_ERROR("write");
     }
     // Set the file mode. This must be at the last.
     if(::fchmod(fd_new, stb_old.st_mode) != 0)
-      throw_system_error("fchmod");
+      ASTERIA_THROW_SYSTEM_ERROR("fchmod");
   }
 
 bool std_filesystem_file_remove(Sval path)
@@ -504,7 +504,7 @@ bool std_filesystem_file_remove(Sval path)
       return true;
     }
     if(errno != ENOENT)
-      throw_system_error("unlink");
+      ASTERIA_THROW_SYSTEM_ERROR("unlink");
 
     // The file does not exist.
     return false;
