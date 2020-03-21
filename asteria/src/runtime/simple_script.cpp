@@ -72,7 +72,9 @@ Reference Simple_Script::execute(Global_Context& global, cow_vector<Reference>&&
     if(!this->m_func) {
       ASTERIA_THROW("no script loaded");
     }
-    return this->m_func.invoke(global, ::rocket::move(args));
+    auto ref = this->m_func.invoke(global, ::rocket::move(args));
+    ::fflush(nullptr);
+    return ref;
   }
 
 Reference Simple_Script::execute(Global_Context& global, cow_vector<Value>&& vals) const
