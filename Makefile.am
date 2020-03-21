@@ -176,7 +176,8 @@ pkginclude_library_HEADERS =  \
   asteria/src/library/filesystem.hpp  \
   asteria/src/library/checksum.hpp  \
   asteria/src/library/json.hpp  \
-  asteria/src/library/process.hpp
+  asteria/src/library/process.hpp  \
+  asteria/src/library/io.hpp
 
 lib_libasteria_la_SOURCES =  \
   asteria/src/fwd.cpp  \
@@ -229,7 +230,8 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/library/filesystem.cpp  \
   asteria/src/library/checksum.cpp  \
   asteria/src/library/json.cpp  \
-  asteria/src/library/process.cpp
+  asteria/src/library/process.cpp  \
+  asteria/src/library/io.cpp
 
 lib_libasteria_la_CXXFLAGS =  \
   ${AM_CXXFLAGS} -include .pch.hpp

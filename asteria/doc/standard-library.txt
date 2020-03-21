@@ -2495,3 +2495,82 @@
 	  success so this function never returns.
 
 	* Throws an exception on failure.
+
+### `std.io`
+
+`std.io.getc()`
+
+	* Reads a UTF code point from standard input.
+
+	* Returns the code point that has been read as an integer. If the
+	  end of input is encountered, `null` is returned.
+
+	* Throws an exception if standard input is binary-oriented, or if
+	  a read error occurs.
+
+`std.io.getln()`
+
+	* Reads a UTF-8 string from standard input, which is terminated
+	  by either a LF character or the end of input. The terminating
+	  LF, if any, is not included in the returned string.
+
+	* Returns the line that has been read as a string. If the end of
+	  input is encountered, `null` is returned.
+
+	* Throws an exception if standard input is binary-oriented, or if
+	  a read error occurs, or if source data cannot be converted to a
+	  valid UTF code point sequence.
+
+`std.io.putc(value)`
+
+	* Writes a UTF-8 string to standard output. `value` may be either
+	  an integer representing a UTF code point or a UTF-8 string.
+
+	* Returns the number of UTF code points that have been written.
+
+	* Throws an exception if standard output is binary-oriented, or
+	  if source data cannot be converted to a valid UTF code point
+	  sequence, or if a write error occurs.
+
+`std.io.putln(text)`
+
+	* Writes a UTF-8 string to standard output, followed by a LF,
+	  then flushes the stream automatically. `text` shall be a UTF-8
+	  string.
+
+	* Returns the number of UTF code points that have been written,
+	  including the terminating LF.
+
+	* Throws an exception if standard output is binary-oriented, or
+	  if source data cannot be converted to a valid UTF code point
+	  sequence, or if a write error occurs.
+
+`std.io.read([limit])`
+
+	* Reads a series of bytes from standard input. If `limit` is set,
+	  no more than this number of bytes will be read.
+
+	* Returns the bytes that have been read as a string. If the end
+	  of input is encountered, `null` is returned.
+
+	* Throws an exception if standard input is text-oriented, or if
+	  a read error occurs, or if source data cannot be converted to a
+	  valid UTF code point sequence.
+
+`std.io.write(data)`
+
+	* Writes a series of bytes to standard output. `data` shall be a
+	  byte string.
+
+	* Returns the number of bytes that have been written.
+
+	* Throws an exception if standard output is text-oriented, or if
+	  a write error occurs.
+
+`std.io.flush()`
+
+	* Forces buffered data on standard output to be delivered to its
+	  underlying device. This function may be called regardless of
+	  the orientation of standard output.
+
+	* Throws an exception if a write error occurs.
