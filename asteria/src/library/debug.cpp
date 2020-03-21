@@ -7,23 +7,18 @@
 #include "../utilities.hpp"
 
 namespace Asteria {
-namespace {
-
-tinyfmt& do_print_value(tinyfmt& fmt, const void* ptr)
-  {
-    return static_cast<const Value*>(ptr)->print(fmt);
-  }
-
-}  // namespace
 
 Iopt std_debug_print(Sval templ, cow_vector<Value> values)
   {
     // Prepare inserters.
     cow_vector<::rocket::formatter> insts;
     insts.reserve(values.size());
-    for(size_t i = 0;  i < values.size();  ++i) {
-      insts.push_back({ do_print_value, values.data() + i });
-    }
+    for(size_t i = 0;  i < values.size();  ++i)
+      insts.push_back({
+        [](tinyfmt& fmt, const void* ptr) -> tinyfmt&
+          { return static_cast<const Value*>(ptr)->print(fmt);  },
+        values.data() + i
+      });
     // Compose the string into a stream.
     ::rocket::tinyfmt_str fmt;
     vformat(fmt, templ.data(), templ.size(), insts.data(), insts.size());
