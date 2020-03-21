@@ -19,6 +19,7 @@
 #include "../library/checksum.hpp"
 #include "../library/json.hpp"
 #include "../library/process.hpp"
+#include "../library/io.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -47,6 +48,7 @@ constexpr s_modules[] =
     { api_version_0001_0000,  "checksum",    create_bindings_checksum    },
     { api_version_0001_0000,  "json",        create_bindings_json        },
     { api_version_0001_0000,  "process",     create_bindings_process     },
+    { api_version_0001_0000,  "io",          create_bindings_io          },
   };
 
 struct Module_Comparator
