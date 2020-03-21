@@ -35,14 +35,14 @@ Ival std_process_execute(Sval cmd, Aopt argv, Aopt envp)
     // Launch the program.
     ::pid_t pid;
     if(::posix_spawnp(&pid, cmd.c_str(), nullptr, nullptr, pargv, penvp) != 0)
-      throw_system_error("posix_spawnp");
+      ASTERIA_THROW_SYSTEM_ERROR("posix_spawnp");
 
     // Await its termination.
     for(;;) {
       // Note: `waitpid()` may return if the child has been stopped or continued.
       int wstat;
       if(::waitpid(pid, &wstat, 0) == -1)
-        throw_system_error("waitpid");
+        ASTERIA_THROW_SYSTEM_ERROR("waitpid");
       // Check whether the process has terminated normally.
       if(WIFEXITED(wstat))
         return WEXITSTATUS(wstat);
@@ -55,7 +55,7 @@ Ival std_process_execute(Sval cmd, Aopt argv, Aopt envp)
 void std_process_daemonize()
   {
     if(::daemon(1, 0) != 0)
-      throw_system_error("daemon");
+      ASTERIA_THROW_SYSTEM_ERROR("daemon");
   }
 
 void create_bindings_process(V_object& result, API_Version /*version*/)
