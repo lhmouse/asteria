@@ -435,7 +435,7 @@ void do_handle_REPL_command(cow_string&& cmd)
 
 void do_prepare_REPL_input()
   {
-    // Check for exit condition.
+    // Check for exit conditions.
     if(::ferror(stdin)) {
       ::fprintf(stderr, "! error reading standard input\n");
       do_exit(exit_unspecified);
@@ -444,6 +444,7 @@ void do_prepare_REPL_input()
       ::fprintf(stderr, "* have a nice day :)\n");
       do_exit(exit_success);
     }
+    // Force-move the caret to the next line.
     ::fputc('\n', stderr);
   }
 
@@ -464,7 +465,7 @@ int do_REP_single()
       // Read a character. Break upon read errors.
       int ch = ::fgetc(stdin);
       if(ch == EOF) {
-        // Force-move the cursor to the next line.
+        // Force-move the caret to the next line.
         ::fputc('\n', stderr);
         break;
       }
