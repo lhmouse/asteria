@@ -1509,12 +1509,12 @@ Sval std_string_format(Sval templ, cow_vector<Value> values)
     // Prepare inserters.
     cow_vector<::rocket::formatter> insts;
     insts.reserve(values.size());
-    for(size_t i = 0;  i < values.size();  ++i) {
+    for(size_t i = 0;  i < values.size();  ++i)
       insts.push_back({
-        [](tinyfmt& fmt, const void* ptr) -> tinyfmt& { return static_cast<const Value*>(ptr)->print(fmt);  },
+        [](tinyfmt& fmt, const void* ptr) -> tinyfmt&
+          { return static_cast<const Value*>(ptr)->print(fmt);  },
         values.data() + i
       });
-    }
     // Compose the string into a stream.
     ::rocket::tinyfmt_str fmt;
     vformat(fmt, templ.data(), templ.size(), insts.data(), insts.size());
