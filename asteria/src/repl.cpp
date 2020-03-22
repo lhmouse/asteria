@@ -36,21 +36,6 @@ enum Exit_Code : uint8_t
     ::quick_exit(static_cast<int>(code));
   }
 
-void do_freopen_chk(::FILE* fp, const char* mode) noexcept
-  {
-    if(!::freopen(nullptr, mode, fp))
-      ::abort();
-  }
-
-void do_reset_std_streams() noexcept
-  {
-    ::fflush(nullptr);
-    do_freopen_chk(stdin, "r");
-    do_freopen_chk(stdout, "a");
-    do_freopen_chk(stderr, "a");
-    ::setbuf(stderr, nullptr);
-  }
-
 cow_string do_xindent(cow_string&& str)
   {
     size_t bp = SIZE_MAX;
@@ -317,12 +302,10 @@ void do_parse_command_line(int argc, char** argv)
 
     if(argc > 1) {
       // Rewrite some common options before calling `getopt()`.
-      if(::strcmp(argv[1], "--help") == 0) {
+      if(::strcmp(argv[1], "--help") == 0)
         ::strcpy(argv[1], "-h");
-      }
-      else if(::strcmp(argv[1], "--version") == 0) {
+      else if(::strcmp(argv[1], "--version") == 0)
         ::strcpy(argv[1], "-V");
-      }
     }
     for(;;) {
       int ch = ::getopt(argc, argv, "+hIiO::Vv");
@@ -433,25 +416,19 @@ void do_handle_REPL_command(cow_string&& cmd)
     ::fprintf(stderr, "! unknown command: %s\n", cmd.c_str());
   }
 
-void do_prepare_REPL_input()
-  {
-    // Check for exit conditions.
-    if(::ferror(stdin)) {
-      ::fprintf(stderr, "! error reading standard input\n");
-      do_exit(exit_unspecified);
-    }
-    if(::feof(stdin)) {
-      ::fprintf(stderr, "* have a nice day :)\n");
-      do_exit(exit_success);
-    }
-    // Force-move the caret to the next line.
-    ::fputc('\n', stderr);
-  }
-
 int do_REP_single()
   {
+    // Reset standard streams.
+    if(!::freopen(nullptr, "r", stdin)) {
+      ::fprintf(stderr, "! could not reopen standard input (errno was `%d`)\n", errno);
+      ::abort();
+    }
+    if(!::freopen(nullptr, "w", stdout)) {
+      ::fprintf(stderr, "! could not reopen standard output (errno was `%d`)\n", errno);
+      ::abort();
+    }
     // Read the next snippet.
-    do_reset_std_streams();
+    ::fputc('\n', stderr);
     code.clear();
     interrupted = 0;
 
@@ -508,11 +485,22 @@ int do_REP_single()
       escape = false;
     }
     if(interrupted) {
-      ::clearerr(stdin);
+      // Discard this snippet and read the next one.
       ::fprintf(stderr, "! interrupted\n");
       return SIGINT;
     }
+    if(::ferror(stdin)) {
+      // Discard the last (partial) snippet in case of read errors.
+      ::fprintf(stderr, "! error reading standard input\n");
+      do_exit(exit_unspecified);
+    }
+    if(::feof(stdin) && code.empty()) {
+      // Exit normally.
+      ::fprintf(stderr, "* have a nice day :)\n");
+      do_exit(exit_success);
+    }
     if(code.empty()) {
+      // Do nothing.
       return 0;
     }
     if(code.front() == ':') {
@@ -555,9 +543,6 @@ int do_REP_single()
         return SIGPIPE;
       }
     }
-
-    // Reset orientation of standard streams.
-    do_reset_std_streams();
 
     // Execute the script as a function, which returns a `Reference`.
     try {
@@ -608,12 +593,8 @@ int do_REP_single()
 
     // In interactive mode (a.k.a. REPL mode), read user inputs in lines.
     // Outputs from the script go into standard output. Others go into standard error.
-    for(;;) {
-      // Check for EOF conditions. This function does not return in case of EOF or errors.
-      do_prepare_REPL_input();
-      // Read a snippet and execute it.
+    for(;;)
       do_REP_single();
-    }
   }
 
 [[noreturn]] int do_single_noreturn()
@@ -634,9 +615,6 @@ int do_REP_single()
       ::fprintf(stderr, "! parser error: %s\n", do_stringify(except).c_str());
       do_exit(exit_parser_error);
     }
-
-    // Reset orientation of standard streams.
-    do_reset_std_streams();
 
     // Execute the script.
     try {
