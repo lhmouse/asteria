@@ -219,7 +219,7 @@ Sopt std_io_read(Iopt limit)
       return nullopt;
     }
     // Return the byte string verbatim.
-    return ::rocket::move(data);
+    return ::rocket::move(data.erase(ntotal));
   }
 
 Iopt std_io_write(Sval data)
