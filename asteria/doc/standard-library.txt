@@ -2535,8 +2535,8 @@
 `std.io.putln(text)`
 
 	* Writes a UTF-8 string to standard output, followed by a LF,
-	  then flushes the stream automatically. `text` shall be a UTF-8
-	  string.
+	  which may flush the stream automatically. `text` shall be a
+	  UTF-8 string.
 
 	* Returns the number of UTF code points that have been written,
 	  including the terminating LF.

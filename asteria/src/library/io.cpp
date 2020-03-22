@@ -191,11 +191,9 @@ Iopt std_io_putln(Sval value)
 
     // Write the string itself.
     size_t ncps = do_write_utf8_common(fp, value);
-    // Append a line feed and flush the stream.
+    // Append a line feed and flush.
     if(::fputwc_unlocked(L'\n', fp) == WEOF)
       ASTERIA_THROW_SYSTEM_ERROR("fputwc_unlocked");
-    if(::fflush_unlocked(fp) == EOF)
-      ASTERIA_THROW_SYSTEM_ERROR("fflush_unlocked");
     // Return the number of code points that have been written.
     // The implicit LF also counts.
     return static_cast<int64_t>(ncps + 1);
@@ -361,8 +359,8 @@ void create_bindings_io(V_object& result, API_Version /*version*/)
 `std.io.putln(text)`
 
   * Writes a UTF-8 string to standard output, followed by a LF,
-    then flushes the stream automatically. `text` shall be a UTF-8
-    string.
+    which may flush the stream automatically. `text` shall be a
+    UTF-8 string.
 
   * Returns the number of UTF code points that have been written,
     including the terminating LF.
