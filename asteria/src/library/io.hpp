@@ -13,6 +13,7 @@ Sopt std_io_getln();
 Iopt std_io_putc(Ival value);
 Iopt std_io_putc(Sval value);
 Iopt std_io_putln(Sval value);
+Iopt std_io_putf(Sval templ, cow_vector<Value> values);
 
 Sopt std_io_read(Iopt limit);
 Iopt std_io_write(Sval data);

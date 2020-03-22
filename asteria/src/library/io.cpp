@@ -199,6 +199,29 @@ Iopt std_io_putln(Sval value)
     return static_cast<int64_t>(ncps + 1);
   }
 
+Iopt std_io_putf(Sval templ, cow_vector<Value> values)
+  {
+    // Lock standard output for writing.
+    const Locked_Stream_text fp(stdout);
+
+    // Prepare inserters.
+    cow_vector<::rocket::formatter> insts;
+    insts.reserve(values.size());
+    for(size_t i = 0;  i < values.size();  ++i)
+      insts.push_back({
+        [](tinyfmt& fmt, const void* ptr) -> tinyfmt&
+          { return static_cast<const Value*>(ptr)->print(fmt);  },
+        values.data() + i
+      });
+    // Compose the string into a stream.
+    ::rocket::tinyfmt_str fmt;
+    vformat(fmt, templ.data(), templ.size(), insts.data(), insts.size());
+    // Write the string now.
+    size_t ncps = do_write_utf8_common(fp, fmt.get_string());
+    // Return the number of code points that have been written.
+    return static_cast<int64_t>(ncps);
+  }
+
 Sopt std_io_read(Iopt limit)
   {
     // Lock standard input for reading.
@@ -368,6 +391,36 @@ void create_bindings_io(V_object& result, API_Version /*version*/)
   * Throws an exception if standard output is binary-oriented, or
     if source data cannot be converted to a valid UTF code point
     sequence, or if a write error occurs.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+      ));
+    //===================================================================
+    // `std.io.putf()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("putf"),
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.putf"));
+    // Parse arguments.
+    Sval templ;
+    cow_vector<Value> values;
+    if(reader.I().v(templ).F(values)) {
+      return std_io_putf(rocket::move(templ), ::rocket::move(values));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.io.putf(templ, ...)`
+
+ * Compose a string in the same way as `std.string.format()`, but
+   instead of returning it, write it to standard output.
+
+ * Returns the number of UTF code points that have been written.
+
+ * Throws an exception if standard output is binary-oriented, or
+   if source data cannot be converted to a valid UTF code point
+   sequence, or if a write error occurs.
 )'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
