@@ -9,10 +9,6 @@
 namespace Asteria {
 namespace {
 
-// We assume wide I/O functions operate in UTF-32 code units.
-// Note this is not true on Windows.
-static_assert(sizeof(wchar_t) >= 4, "`wchar_t` does not seem to be in UTF-32");
-
 class Locked_FP
   {
   private:
