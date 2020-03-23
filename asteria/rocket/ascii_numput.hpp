@@ -27,7 +27,7 @@ class ascii_numput
         this->clear();
       }
     template<typename valueT, ROCKET_ENABLE_IF(is_scalar<valueT>::value)>
-        explicit ascii_numput(const valueT& value) noexcept
+                            explicit ascii_numput(const valueT& value) noexcept
       {
         this->put(value);
       }

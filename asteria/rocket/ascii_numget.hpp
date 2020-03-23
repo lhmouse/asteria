@@ -47,7 +47,7 @@ class ascii_numget
         this->clear();
       }
     template<typename valueT, ROCKET_ENABLE_IF(is_scalar<valueT>::value)>
-        ascii_numget(valueT& value, const char*& bptr, const char* eptr)
+                     ascii_numget(valueT& value, const char*& bptr, const char* eptr)
       {
         this->get(value, bptr, eptr);
       }
