@@ -1,7 +1,7 @@
 ### "Hello world!"
 
 ```
-std.debug.print("hello world!");
+std.io.putln("hello world!");
 ```
 
 ### Plain Functions
@@ -10,35 +10,34 @@ std.debug.print("hello world!");
 func add(x, y) {
   return x + y;
 }
-
-std.debug.print("add(1,2) = ", add(1,2));
+std.io.putf("add(1,2) = $1\n", add(1,2));
 ```
 
 ### Functions Taking Variadic Arguments
 
 ```
 func pargs(a, b, ...) {
-  std.debug.print("named argument `a` = ", a);
-  std.debug.print("named argument `b` = ", b);
+  std.io.putf("named argument `a` = $1\n", a);
+  std.io.putf("named argument `b` = $1\n", b);
 
-  std.debug.print("variadic argument count = ", __varg());
+  std.io.putf("variadic argument count = $1\n", __varg());
   for(var i = 0; i != __varg(); ++i)
-    std.debug.print("variadic argument [", i, "] = ", __varg(i));
+    std.io.putf("variadic argument [$1] = $2\n", i, __varg(i));
 }
 
-std.debug.print("calling `pargs()`...");
+std.io.putln("calling `pargs()`...");
 pargs();
 
-std.debug.print("calling `pargs(1)`...");
+std.io.putln("calling `pargs(1)`...");
 pargs(1);
 
-std.debug.print("calling `pargs(1, true)`...");
+std.io.putln("calling `pargs(1, true)`...");
 pargs(1, true);
 
-std.debug.print("calling `pargs(1, true, 'hello')`...");
+std.io.putln("calling `pargs(1, true, 'hello')`...");
 pargs(1, true, 'hello');
 
-std.debug.print("calling `pargs(1, true, 'hello', 2.5)`...");
+std.io.putln("calling `pargs(1, true, 'hello', 2.5)`...");
 pargs(1, true, 'hello', 2.5);
 ```
 
@@ -53,8 +52,8 @@ func exchange(x, y) {
 
 var sth = 42;
 var old = exchange(&sth, "other");
-std.debug.print("old = ", old);
-std.debug.print("sth = ", sth);
+std.io.putf("old = $1\n", old);
+std.io.putf("sth = $1\n", sth);
 ```
 
 ### Functions Returning by Reference
@@ -66,9 +65,9 @@ func get() {
   return& sth;
 }
 
-std.debug.print("sth = ", sth);
+std.io.putf("sth = $1\n", sth);
 get() = "other";
-std.debug.print("sth = ", sth);
+std.io.putf("sth = $1\n", sth);
 ```
 
 ### Exception Handling
@@ -82,7 +81,7 @@ try {
   mul(0x1p60, 10000);  // This overflows.
 }
 catch(e) {
-  std.debug.print("Caught exception: ", e);
+  std.io.putf("Caught exception: $1\n", e);
   std.debug.dump(__backtrace);
 }
 ```
@@ -103,9 +102,9 @@ func seq3(x) {
 // Excess variables are initialized to `null`.
 var [ a1, a2, a3 ] = seq3(100);
 
-std.debug.print("a1 = ", a1);
-std.debug.print("a2 = ", a2);
-std.debug.print("a3 = ", a3);
+std.io.putf("a1 = $1\n", a1);
+std.io.putf("a2 = $1\n", a2);
+std.io.putf("a3 = $1\n", a3);
 ```
 
 ### Structured Binding for Objects
@@ -123,9 +122,9 @@ func access() {
 // Variables whose names do not exist are initialized to `null`.
 var { value, result, error } = access();
 
-std.debug.print("value  = ", value);
-std.debug.print("result = ", result);
-std.debug.print("error  = ", error);
+std.io.putf("value  = $1\n", value);
+std.io.putf("result = $1\n", result);
+std.io.putf("error  = $1\n", error);
 
 ```
 
@@ -148,7 +147,7 @@ try {
   disp(2);
 }
 catch(e) {
-  std.debug.print("Caught exception: ", e);
+  std.io.putf("Caught exception: $1\n", e);
   std.debug.dump(__backtrace);
 }
 ```
