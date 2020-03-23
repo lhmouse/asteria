@@ -30,7 +30,7 @@ void do_xput_U_bkwd(char*& bp, const uint64_t& value, uint8_t base, size_t preci
     // Write digits backwards.
     while(ireg != 0) {
       // Shift a digit out.
-      uint8_t dval = static_cast<uint8_t>(ireg % base);
+      uint8_t dval = uint8_t(ireg % base);
       ireg /= base;
       // Write this digit.
       *(--bp) = do_pdigit_X(dval);
@@ -79,7 +79,7 @@ void do_xput_M_bin(char*& ep, const uint64_t& mant, const char* rdxp) noexcept
     uint64_t ireg = mant;
     while(ireg != 0) {
       // Shift a digit out.
-      uint8_t dval = static_cast<uint8_t>(ireg >> 63);
+      uint8_t dval = uint8_t(ireg >> 63);
       ireg <<= 1;
       // Insert a decimal point before `rdxp`.
       if(ep == rdxp)
@@ -100,7 +100,7 @@ void do_xput_M_hex(char*& ep, const uint64_t& mant, const char* rdxp) noexcept
     uint64_t ireg = mant;
     while(ireg != 0) {
       // Shift a digit out.
-      uint8_t dval = static_cast<uint8_t>(ireg >> 60);
+      uint8_t dval = uint8_t(ireg >> 60);
       ireg <<= 4;
       // Insert a decimal point before `rdxp`.
       if(ep == rdxp)
@@ -908,7 +908,7 @@ void do_xput_M_dec(char*& ep, const uint64_t& mant, const char* rdxp) noexcept
       // Shift a digit out.
       uint64_t quo = ireg / 100'000'000'000'000'000;
       ireg %= 100'000'000'000'000'000;
-      uint8_t dval = static_cast<uint8_t>(quo);
+      uint8_t dval = (uint8_t)quo;
       ireg *= 10;
       // Insert a decimal point before `rdxp`.
       if(ep == rdxp)
