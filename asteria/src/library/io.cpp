@@ -70,13 +70,16 @@ struct Locked_Stream_binary : public Locked_FP
 
 int do_recover(const Locked_FP& fp)
   {
-    int err = errno;
-    // If the preceding operation failed for these non-fatal errors, clear the error bit.
-    // This makes such operations retryable.
-    // But note that we always throw an exception despite such recovery.
-    if(::ferror_unlocked(fp) && ::rocket::is_any_of(err, { EINTR, EAGAIN, EWOULDBLOCK }))
-      ::clearerr_unlocked(fp);
-    // Forward the error number verbatim, so we need not fetch it again.
+    // Note `errno` is meaningful only when an error has occurred. EOF is not an error.
+    int err = 0;
+    if(ROCKET_UNEXPECT(::ferror_unlocked(fp))) {
+      // If the preceding operation failed for these non-fatal errors, clear the error bit.
+      // This makes such operations retryable.
+      // But note that we always throw an exception despite such recovery.
+      err = errno;
+      if(::rocket::is_any_of(err, { EINTR, EAGAIN, EWOULDBLOCK }))
+        ::clearerr_unlocked(fp);
+    }
     return err;
   }
 
