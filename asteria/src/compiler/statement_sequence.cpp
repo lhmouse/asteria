@@ -2075,19 +2075,16 @@ Statement_Sequence& Statement_Sequence::reload(Token_Stream& tstrm, const Compil
     // Destroy the contents of `*this` and reuse their storage, if any.
     stmts.swap(this->m_stmts);
     stmts.clear();
+
     // document ::=
     //   statement-list-opt
-    for(;;) {
-      auto qstmt = do_accept_statement_opt(tstrm);
-      if(!qstmt) {
-        break;
-      }
+    while(auto qstmt = do_accept_statement_opt(tstrm))
       stmts.emplace_back(::rocket::move(*qstmt));
-    }
-    auto qtok = tstrm.peek_opt();
-    if(qtok) {
+
+    // If there are any non-statement tokens left in the stream, fail.
+    if(!tstrm.empty())
       do_throw_parser_error(tstrm, parser_status_statement_expected);
-    }
+
     // Succeed.
     this->m_stmts = ::rocket::move(stmts);
     return *this;

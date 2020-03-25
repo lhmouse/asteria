@@ -764,15 +764,17 @@ Token_Stream& Token_Stream::reload(tinybuf& cbuf, const cow_string& file, const 
     // Destroy the contents of `*this` and reuse their storage, if any.
     tokens.swap(this->m_rtoks);
     tokens.clear();
+
     // Save the position of an unterminated block comment.
     Tack bcomm;
     // Read source code line by line.
     Line_Reader reader(::rocket::ref(cbuf), file);
+
     while(reader.advance()) {
       // Discard the first line if it looks like a shebang.
-      if((reader.line() == 1) && (reader.navail() >= 2) && (::std::memcmp(reader.data(), "#!", 2) == 0)) {
+      if((reader.line() == 1) && (reader.navail() >= 2) && (::std::memcmp(reader.data(), "#!", 2) == 0))
         continue;
-      }
+
       // Ensure this line is a valid UTF-8 string.
       while(reader.navail() != 0) {
         // Decode a code point.
@@ -790,6 +792,7 @@ Token_Stream& Token_Stream::reload(tinybuf& cbuf, const cow_string& file, const 
         reader.consume(u8len);
       }
       reader.rewind();
+
       // Break this line down into tokens.
       while(reader.navail() != 0) {
         // Are we inside a block comment?
@@ -834,11 +837,12 @@ Token_Stream& Token_Stream::reload(tinybuf& cbuf, const cow_string& file, const 
         }
       }
       reader.rewind();
+
     }
-    if(bcomm) {
+    if(bcomm)
       // A block comment may straddle multiple lines. We just mark the first line here.
       throw Parser_Error(parser_status_block_comment_unclosed, bcomm.line(), bcomm.offset(), bcomm.length());
-    }
+
     // Reverse the token sequence now.
     ::std::reverse(tokens.mut_begin(), tokens.mut_end());
     // Succeed.
