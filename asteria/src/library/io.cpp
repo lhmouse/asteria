@@ -9,26 +9,26 @@
 namespace Asteria {
 namespace {
 
-class Locked_FP
+class IOF_Sentry
   {
   private:
     ::FILE* m_fp;
 
   public:
-    explicit Locked_FP(::FILE* fp) noexcept
+    explicit IOF_Sentry(::FILE* fp) noexcept
       :
         m_fp(fp)
       {
         ::flockfile(this->m_fp);
       }
-    ~Locked_FP()
+    ~IOF_Sentry()
       {
         ::funlockfile(this->m_fp);
       }
 
-    Locked_FP(const Locked_FP&)
+    IOF_Sentry(const IOF_Sentry&)
       = delete;
-    Locked_FP& operator=(const Locked_FP&)
+    IOF_Sentry& operator=(const IOF_Sentry&)
       = delete;
 
   public:
@@ -38,37 +38,7 @@ class Locked_FP
       }
   };
 
-struct Locked_Stream_text : public Locked_FP
-  {
-    explicit Locked_Stream_text(::FILE* fp)
-      :
-        Locked_FP(fp)
-      {
-        // Fail if the error bit has been set.
-        if(::ferror_unlocked(*this))
-          ASTERIA_THROW("standard I/O failure (stream error bit set)");
-        // Make the stream wide-oriented.
-        if(::fwide(*this, +1) < 0)
-          ASTERIA_THROW("invalid text operation on binary-oriented stream");
-      }
-  };
-
-struct Locked_Stream_binary : public Locked_FP
-  {
-    explicit Locked_Stream_binary(::FILE* fp)
-      :
-        Locked_FP(fp)
-      {
-        // Fail if the error bit has been set.
-        if(::ferror_unlocked(*this))
-          ASTERIA_THROW("standard I/O failure (stream error bit set)");
-        // Make the stream narrow-oriented.
-        if(::fwide(*this, -1) > 0)
-          ASTERIA_THROW("invalid binary operation on text-oriented stream");
-      }
-  };
-
-int do_recover(const Locked_FP& fp)
+int do_recover(const IOF_Sentry& fp)
   {
     int err = 0;
     // Note `errno` is meaningful only when an error has occurred. EOF is not an error.
@@ -83,7 +53,7 @@ int do_recover(const Locked_FP& fp)
     return err;
   }
 
-size_t do_write_utf8_common(const Locked_FP& fp, const cow_string& text)
+size_t do_write_utf8_common(const IOF_Sentry& fp, const cow_string& text)
   {
     size_t ncps = 0;
     size_t off = 0;
@@ -106,7 +76,13 @@ size_t do_write_utf8_common(const Locked_FP& fp, const cow_string& text)
 Iopt std_io_getc()
   {
     // Lock standard input for reading.
-    const Locked_Stream_text fp(stdin);
+    const IOF_Sentry fp(stdin);
+
+    // Check stream status.
+    if(::ferror_unlocked(fp))
+      ASTERIA_THROW("standard input failure (error bit set)");
+    if(::fwide(fp, +1) < 0)
+      ASTERIA_THROW("invalid text read from binary-oriented input");
 
     // Read a UTF code point.
     wint_t wch = ::fgetwc_unlocked(fp);
@@ -124,7 +100,13 @@ Iopt std_io_getc()
 Sopt std_io_getln()
   {
     // Lock standard input for reading.
-    const Locked_Stream_text fp(stdin);
+    const IOF_Sentry fp(stdin);
+
+    // Check stream status.
+    if(::ferror_unlocked(fp))
+      ASTERIA_THROW("standard input failure (error bit set)");
+    if(::fwide(fp, +1) < 0)
+      ASTERIA_THROW("invalid text read from binary-oriented input");
 
     // Read a UTF-8 string.
     cow_string u8str;
@@ -155,7 +137,13 @@ Sopt std_io_getln()
 Iopt std_io_putc(Ival value)
   {
     // Lock standard output for writing.
-    const Locked_Stream_text fp(stdout);
+    const IOF_Sentry fp(stdout);
+
+    // Check stream status.
+    if(::ferror_unlocked(fp))
+      ASTERIA_THROW("standard output failure (error bit set)");
+    if(::fwide(fp, +1) < 0)
+      ASTERIA_THROW("invalid text write to binary-oriented output");
 
     // Validate the code point.
     char32_t cp = static_cast<uint32_t>(value);
@@ -179,7 +167,13 @@ Iopt std_io_putc(Ival value)
 Iopt std_io_putc(Sval value)
   {
     // Lock standard output for writing.
-    const Locked_Stream_text fp(stdout);
+    const IOF_Sentry fp(stdout);
+
+    // Check stream status.
+    if(::ferror_unlocked(fp))
+      ASTERIA_THROW("standard output failure (error bit set)");
+    if(::fwide(fp, +1) < 0)
+      ASTERIA_THROW("invalid text write to binary-oriented output");
 
     // Write only the string.
     size_t ncps = do_write_utf8_common(fp, value);
@@ -190,7 +184,13 @@ Iopt std_io_putc(Sval value)
 Iopt std_io_putln(Sval value)
   {
     // Lock standard output for writing.
-    const Locked_Stream_text fp(stdout);
+    const IOF_Sentry fp(stdout);
+
+    // Check stream status.
+    if(::ferror_unlocked(fp))
+      ASTERIA_THROW("standard output failure (error bit set)");
+    if(::fwide(fp, +1) < 0)
+      ASTERIA_THROW("invalid text write to binary-oriented output");
 
     // Write the string itself.
     size_t ncps = do_write_utf8_common(fp, value);
@@ -205,7 +205,13 @@ Iopt std_io_putln(Sval value)
 Iopt std_io_putf(Sval templ, cow_vector<Value> values)
   {
     // Lock standard output for writing.
-    const Locked_Stream_text fp(stdout);
+    const IOF_Sentry fp(stdout);
+
+    // Check stream status.
+    if(::ferror_unlocked(fp))
+      ASTERIA_THROW("standard output failure (error bit set)");
+    if(::fwide(fp, +1) < 0)
+      ASTERIA_THROW("invalid text write to binary-oriented output");
 
     // Prepare inserters.
     cow_vector<::rocket::formatter> insts;
@@ -228,7 +234,13 @@ Iopt std_io_putf(Sval templ, cow_vector<Value> values)
 Sopt std_io_read(Iopt limit)
   {
     // Lock standard input for reading.
-    const Locked_Stream_binary fp(stdin);
+    const IOF_Sentry fp(stdin);
+
+    // Check stream status.
+    if(::ferror_unlocked(fp))
+      ASTERIA_THROW("standard input failure (error bit set)");
+    if(::fwide(fp, -1) > 0)
+      ASTERIA_THROW("invalid binary read from text-oriented input");
 
     // If no limit is given, use a hard-coded value.
     size_t rlimit = (size_t)::rocket::clamp(limit.value_or(INT32_MAX), 0, 0x10'00000);
@@ -249,11 +261,18 @@ Sopt std_io_read(Iopt limit)
 Iopt std_io_write(Sval data)
   {
     // Lock standard output for writing.
-    const Locked_Stream_binary fp(stdout);
+    const IOF_Sentry fp(stdout);
+
+    // Check stream status.
+    if(::ferror_unlocked(fp))
+      ASTERIA_THROW("standard output failure (error bit set)");
+    if(::fwide(fp, -1) > 0)
+      ASTERIA_THROW("invalid binary write to text-oriented output");
 
     // Don't pass zero to `fwrite()`
     if(data.empty())
       return 0;
+
     // Write the byte string verbatim.
     size_t ntotal = ::fwrite_unlocked(data.data(), 1, data.size(), fp);
     if(ntotal == 0) {
@@ -266,7 +285,7 @@ Iopt std_io_write(Sval data)
 void std_io_flush()
   {
     // Lock standard output for writing.
-    const Locked_Stream_binary fp(stdout);
+    const IOF_Sentry fp(stdout);
 
     // Flush standard output only.
     if(::fflush_unlocked(fp) == EOF)
