@@ -165,6 +165,17 @@ struct Command_Line_Options
     cow_vector<Value> args;
   };
 
+// We want to detect Ctrl-C.
+volatile ::sig_atomic_t interrupted;
+
+void do_trap_sigint()
+  {
+    // Trap Ctrl-C. Failure to set the signal handler is ignored.
+    struct ::sigaction sigx = { };
+    sigx.sa_handler = [](int) { interrupted = 1;  };
+    ::sigaction(SIGINT, &sigx, nullptr);
+  }
+
 // These may also be automatic objects. They are declared here for convenience.
 Command_Line_Options cmdline;
 Compiler_Options options;
@@ -173,7 +184,6 @@ Global_Context global;
 
 unsigned long index;  // snippet index
 cow_string code;  // snippet
-volatile ::sig_atomic_t interrupted;   // ... except this one, of course.
 cow_string heredoc;
 
 // These hooks help debugging
@@ -384,15 +394,6 @@ void do_parse_command_line(int argc, char** argv)
     cmdline.interactive = interactive ? *interactive : (!path && ::isatty(STDIN_FILENO));
     cmdline.path = path.move_value_or(::rocket::sref("-"));
     cmdline.args = ::rocket::move(args);
-  }
-
-void do_trap_sigint()
-  {
-    // Trap Ctrl-C. Failure to set the signal handler is ignored.
-    struct ::sigaction sa = { };
-    sa.sa_handler = [](int) { interrupted = 1;  };
-    sa.sa_flags = 0;  // non-restartable
-    ::sigaction(SIGINT, &sa, nullptr);
   }
 
 void do_REPL_help()
