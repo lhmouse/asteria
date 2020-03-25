@@ -73,8 +73,8 @@ void create_bindings_process(V_object& result, API_Version /*version*/)
     Aopt argv;
     Aopt envp;
     if(reader.I().v(cmd).o(argv).o(envp).F()) {
-      return std_process_execute(::rocket::move(cmd), ::rocket::move(argv),
-                                                      ::rocket::move(envp));
+      return std_process_execute(::std::move(cmd), ::std::move(argv),
+                                                      ::std::move(envp));
     }
     // Fail.
     reader.throw_no_matching_function_call();

@@ -296,19 +296,19 @@ template<typename targetT, typename sourceT>
 template<typename targetT, typename sourceT>
     inline refcnt_ptr<targetT> static_pointer_cast(refcnt_ptr<sourceT>&& sptr) noexcept
   {
-    return details_refcnt_ptr::pointer_cast_aux<targetT>(noadl::move(sptr),
+    return details_refcnt_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
                                [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });
   }
 template<typename targetT, typename sourceT>
     inline refcnt_ptr<targetT> dynamic_pointer_cast(refcnt_ptr<sourceT>&& sptr) noexcept
   {
-    return details_refcnt_ptr::pointer_cast_aux<targetT>(noadl::move(sptr),
+    return details_refcnt_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
                                [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });
   }
 template<typename targetT, typename sourceT>
     inline refcnt_ptr<targetT> const_pointer_cast(refcnt_ptr<sourceT>&& sptr) noexcept
   {
-    return details_refcnt_ptr::pointer_cast_aux<targetT>(noadl::move(sptr),
+    return details_refcnt_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
                                [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });
   }
 
@@ -322,7 +322,7 @@ template<typename charT, typename traitsT, typename elementT>
 template<typename elementT, typename... paramsT>
     inline refcnt_ptr<elementT> make_refcnt(paramsT&&... params)
   {
-    return refcnt_ptr<elementT>(new elementT(noadl::forward<paramsT>(params)...));
+    return refcnt_ptr<elementT>(new elementT(::std::forward<paramsT>(params)...));
   }
 
 }  // namespace rocket

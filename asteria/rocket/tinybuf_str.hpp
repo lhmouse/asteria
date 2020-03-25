@@ -56,7 +56,7 @@ template<typename charT, typename traitsT, typename allocT>
       :
         basic_tinybuf_str(alloc)
       {
-        this->set_string(noadl::forward<xstrT>(xstr), mode);
+        this->set_string(::std::forward<xstrT>(xstr), mode);
       }
     ~basic_tinybuf_str() override;
 
@@ -178,7 +178,7 @@ template<typename charT, typename traitsT, typename allocT>
       {
         this->do_purge_areas();
         // Set the new string and mode.
-        this->m_stor = noadl::forward<xstrT>(xstr);
+        this->m_stor = ::std::forward<xstrT>(xstr);
         this->m_goff = 0;
         this->m_mapp = tinybuf_base::has_mode(mode, tinybuf_base::open_append);
       }

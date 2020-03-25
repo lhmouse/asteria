@@ -33,7 +33,7 @@ void Runtime_Error::do_compose_message()
   {
     // Reuse the string.
     ::rocket::tinyfmt_str fmt;
-    fmt.set_string(::rocket::move(this->m_what));
+    fmt.set_string(::std::move(this->m_what));
     fmt.clear_string();
     // Write the value. Strings are written as is. ALl other values are prettified.
     fmt << "asteria runtime error: ";

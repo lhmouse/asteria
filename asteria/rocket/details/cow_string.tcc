@@ -79,7 +79,7 @@ template<typename allocT, typename traitsT>
       }
     explicit constexpr storage_handle(allocator_type&& alloc) noexcept
       :
-        allocator_base(noadl::move(alloc)),
+        allocator_base(::std::move(alloc)),
         m_ptr()
       {
       }
@@ -517,7 +517,7 @@ constexpr append;
 template<typename stringT, typename... paramsT>
     void tagged_append(stringT* str, append_tag, paramsT&&... params)
   {
-    str->append(noadl::forward<paramsT>(params)...);
+    str->append(::std::forward<paramsT>(params)...);
   }
 
 struct push_back_tag
@@ -528,7 +528,7 @@ constexpr push_back;
 template<typename stringT, typename... paramsT>
     void tagged_append(stringT* str, push_back_tag, paramsT&&... params)
   {
-    str->push_back(noadl::forward<paramsT>(params)...);
+    str->push_back(::std::forward<paramsT>(params)...);
   }
 
 // Implement the FNV-1a hash algorithm.

@@ -160,12 +160,12 @@ class Statement
   public:
     ASTERIA_VARIANT_CONSTRUCTOR(Statement, Xvariant, XStmtT, xstmt)
       :
-        m_stor(::rocket::forward<XStmtT>(xstmt))
+        m_stor(::std::forward<XStmtT>(xstmt))
       {
       }
     ASTERIA_VARIANT_ASSIGNMENT(Statement, Xvariant, XStmtT, xstmt)
       {
-        this->m_stor = ::rocket::forward<XStmtT>(xstmt);
+        this->m_stor = ::std::forward<XStmtT>(xstmt);
         return *this;
       }
 

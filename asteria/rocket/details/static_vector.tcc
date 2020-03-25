@@ -34,7 +34,7 @@ template<typename allocT, size_t capacityT>
       }
     explicit storage_handle(allocator_type&& alloc) noexcept
       :
-        allocator_base(noadl::move(alloc)),
+        allocator_base(::std::move(alloc)),
         m_nelem(0)
       {
 #ifdef ROCKET_DEBUG
@@ -121,7 +121,7 @@ template<typename allocT, size_t capacityT>
         ROCKET_ASSERT(this->size() < this->capacity());
         auto ebase = this->m_ebase;
         size_t nelem = this->m_nelem;
-        allocator_traits<allocator_type>::construct(this->as_allocator(), ebase + nelem, noadl::forward<paramsT>(params)...);
+        allocator_traits<allocator_type>::construct(this->as_allocator(), ebase + nelem, ::std::forward<paramsT>(params)...);
         this->m_nelem = static_cast<decltype(m_nelem)>(++nelem);
         return ebase + nelem - 1;
       }
@@ -345,7 +345,7 @@ constexpr append;
 
 template<typename vectorT, typename... paramsT> void tagged_append(vectorT* vec, append_tag, paramsT&&... params)
   {
-    vec->append(noadl::forward<paramsT>(params)...);
+    vec->append(::std::forward<paramsT>(params)...);
   }
 
 struct emplace_back_tag
@@ -355,7 +355,7 @@ constexpr emplace_back;
 
 template<typename vectorT, typename... paramsT> void tagged_append(vectorT* vec, emplace_back_tag, paramsT&&... params)
   {
-    vec->emplace_back(noadl::forward<paramsT>(params)...);
+    vec->emplace_back(::std::forward<paramsT>(params)...);
   }
 
 struct push_back_tag
@@ -365,7 +365,7 @@ constexpr push_back;
 
 template<typename vectorT, typename... paramsT> void tagged_append(vectorT* vec, push_back_tag, paramsT&&... params)
   {
-    vec->push_back(noadl::forward<paramsT>(params)...);
+    vec->push_back(::std::forward<paramsT>(params)...);
   }
 
 }  // namespace details_static_vector

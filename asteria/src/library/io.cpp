@@ -255,7 +255,7 @@ Sopt std_io_read(Iopt limit)
       return nullopt;
     }
     // Return the byte string verbatim.
-    return ::rocket::move(data.erase(ntotal));
+    return ::std::move(data.erase(ntotal));
   }
 
 Iopt std_io_write(Sval data)
@@ -362,11 +362,11 @@ void create_bindings_io(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      return std_io_putc(::rocket::move(ivalue));
+      return std_io_putc(::std::move(ivalue));
     }
     Sval svalue;
     if(reader.I().v(svalue).F()) {
-      return std_io_putc(::rocket::move(svalue));
+      return std_io_putc(::std::move(svalue));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -395,7 +395,7 @@ void create_bindings_io(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval text;
     if(reader.I().v(text).F()) {
-      return std_io_putln(::rocket::move(text));
+      return std_io_putln(::std::move(text));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -427,7 +427,7 @@ void create_bindings_io(V_object& result, API_Version /*version*/)
     Sval templ;
     cow_vector<Value> values;
     if(reader.I().v(templ).F(values)) {
-      return std_io_putf(rocket::move(templ), ::rocket::move(values));
+      return std_io_putf(::std::move(templ), ::std::move(values));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -456,7 +456,7 @@ void create_bindings_io(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Iopt limit;
     if(reader.I().o(limit).F()) {
-      return std_io_read(::rocket::move(limit));
+      return std_io_read(::std::move(limit));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -486,7 +486,7 @@ void create_bindings_io(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      return std_io_write(::rocket::move(data));
+      return std_io_write(::std::move(data));
     }
     // Fail.
     reader.throw_no_matching_function_call();

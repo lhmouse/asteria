@@ -46,7 +46,7 @@ template<typename charT, typename traitsT,
       }
     template<typename xstrT> explicit basic_tinyfmt_str(xstrT&& xstr, open_mode mode = tinybuf_base::open_write)
       :
-        m_buf(noadl::forward<xstrT>(xstr), mode)
+        m_buf(::std::forward<xstrT>(xstr), mode)
       {
       }
     ~basic_tinyfmt_str() override;
@@ -80,7 +80,7 @@ template<typename charT, typename traitsT,
       }
     template<typename xstrT> basic_tinyfmt_str& set_string(xstrT&& xstr, open_mode mode = tinybuf_base::open_write)
       {
-        return this->m_buf.set_string(noadl::forward<xstrT>(xstr), mode), *this;
+        return this->m_buf.set_string(::std::forward<xstrT>(xstr), mode), *this;
       }
     string_type extract_string(open_mode mode = tinybuf_base::open_write)
       {

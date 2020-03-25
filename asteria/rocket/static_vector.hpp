@@ -69,15 +69,15 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
       }
     static_vector(static_vector&& other) noexcept(is_nothrow_move_constructible<value_type>::value)
       :
-        m_sth(noadl::move(other.m_sth.as_allocator()))
+        m_sth(::std::move(other.m_sth.as_allocator()))
       {
-        this->assign(noadl::move(other));
+        this->assign(::std::move(other));
       }
     static_vector(static_vector&& other, const allocator_type& alloc) noexcept(is_nothrow_move_constructible<value_type>::value)
       :
         m_sth(alloc)
       {
-        this->assign(noadl::move(other));
+        this->assign(::std::move(other));
       }
     static_vector(nullopt_t = nullopt_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
       :
@@ -108,7 +108,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
       :
         static_vector(alloc)
       {
-        this->assign(noadl::move(first), noadl::move(last));
+        this->assign(::std::move(first), ::std::move(last));
       }
     static_vector(initializer_list<value_type> init, const allocator_type& alloc = allocator_type())
       :
@@ -132,7 +132,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
                                                                          is_nothrow_move_constructible<value_type>>::value)
       {
         noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        this->assign(noadl::move(other));
+        this->assign(::std::move(other));
         return *this;
       }
     static_vector& operator=(initializer_list<value_type> init)
@@ -172,7 +172,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
       {
         auto cnt_old = this->size();
         ROCKET_ASSERT(tpos <= cnt_old);
-        details_static_vector::tagged_append(this, noadl::forward<paramsT>(params)...);
+        details_static_vector::tagged_append(this, ::std::forward<paramsT>(params)...);
         auto cnt_add = this->size() - cnt_old;
         auto ptr = this->m_sth.mut_data();
         noadl::rotate(ptr, tpos, cnt_old, cnt_old + cnt_add);
@@ -404,12 +404,12 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         }
         auto dist = noadl::estimate_distance(first, last);
         if(dist == 0) {
-          noadl::ranged_do_while(noadl::move(first), noadl::move(last),
+          noadl::ranged_do_while(::std::move(first), ::std::move(last),
                                  [&](const inputT& it) { this->emplace_back(*it);  });
           return *this;
         }
         this->do_reserve_more(dist);
-        noadl::ranged_do_while(noadl::move(first), noadl::move(last),
+        noadl::ranged_do_while(::std::move(first), ::std::move(last),
                                [&](const inputT& it) { this->m_sth.emplace_back_unchecked(*it);  });
         return *this;
       }
@@ -417,7 +417,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
     template<typename... paramsT> reference emplace_back(paramsT&&... params)
       {
         this->do_reserve_more(1);
-        auto ptr = this->m_sth.emplace_back_unchecked(noadl::forward<paramsT>(params)...);
+        auto ptr = this->m_sth.emplace_back_unchecked(::std::forward<paramsT>(params)...);
         return *ptr;
       }
     // N.B. The return type is a non-standard extension.
@@ -438,7 +438,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
     reference push_back(value_type&& value)
       {
         this->do_reserve_more(1);
-        auto ptr = this->m_sth.emplace_back_unchecked(noadl::move(value));
+        auto ptr = this->m_sth.emplace_back_unchecked(::std::move(value));
         return *ptr;
       }
 
@@ -451,7 +451,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
     // N.B. This is a non-standard extension.
     static_vector& insert(size_type tpos, value_type&& value)
       {
-        this->do_insert_no_bound_check(tpos + this->do_clamp_subvec(tpos, 0), details_static_vector::push_back, noadl::move(value));
+        this->do_insert_no_bound_check(tpos + this->do_clamp_subvec(tpos, 0), details_static_vector::push_back, ::std::move(value));
         return *this;
       }
     // N.B. This is a non-standard extension.
@@ -469,7 +469,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
     // N.B. This is a non-standard extension.
     template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)> static_vector& insert(size_type tpos, inputT first, inputT last)
       {
-        this->do_insert_no_bound_check(tpos + this->do_clamp_subvec(tpos, 0), details_static_vector::append, noadl::move(first), noadl::move(last));
+        this->do_insert_no_bound_check(tpos + this->do_clamp_subvec(tpos, 0), details_static_vector::append, ::std::move(first), ::std::move(last));
         return *this;
       }
     iterator insert(const_iterator tins, const value_type& value)
@@ -481,7 +481,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
     iterator insert(const_iterator tins, value_type&& value)
       {
         auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
-        auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::push_back, noadl::move(value));
+        auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::push_back, ::std::move(value));
         return iterator(this->m_sth, ptr);
       }
     // N.B. The parameter pack is a non-standard extension.
@@ -500,7 +500,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
     template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)> iterator insert(const_iterator tins, inputT first, inputT last)
       {
         auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
-        auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::append, noadl::move(first), noadl::move(last));
+        auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::append, ::std::move(first), ::std::move(last));
         return iterator(this->m_sth, ptr);
       }
 
@@ -566,12 +566,12 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         // Move-assign the initial sequence.
         auto ncomm = noadl::min(this->size(), other.size());
         for(size_type i = 0; i != ncomm; ++i) {
-          this->m_sth.mut_data()[i] = noadl::move(other.m_sth.mut_data()[i]);
+          this->m_sth.mut_data()[i] = ::std::move(other.m_sth.mut_data()[i]);
         }
         if(ncomm < other.size()) {
           // Move-construct remaining elements from `other` if is longer.
           for(size_type i = ncomm; i != other.size(); ++i)
-            this->m_sth.emplace_back_unchecked(noadl::move(other.m_sth.mut_data()[i]));
+            this->m_sth.emplace_back_unchecked(::std::move(other.m_sth.mut_data()[i]));
         }
         else {
           // Truncate `*this` if it is longer.
@@ -598,7 +598,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
     template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)> static_vector& assign(inputT first, inputT last)
       {
         this->clear();
-        this->append(noadl::move(first), noadl::move(last));
+        this->append(::std::move(first), ::std::move(last));
         return *this;
       }
 
@@ -614,14 +614,14 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         if(ncomm < other.size()) {
           // Move-construct remaining elements from `other` if is longer.
           for(size_type i = ncomm; i != other.size(); ++i)
-            this->m_sth.emplace_back_unchecked(noadl::move(other.m_sth.mut_data()[i]));
+            this->m_sth.emplace_back_unchecked(::std::move(other.m_sth.mut_data()[i]));
           // Truncate `other`.
           other.m_sth.pop_back_n_unchecked(other.size() - ncomm);
         }
         else {
           // Move-construct remaining elements from `*this` if it is longer.
           for(size_type i = ncomm; i != this->size(); ++i)
-            other.m_sth.emplace_back_unchecked(noadl::move(this->m_sth.mut_data()[i]));
+            other.m_sth.emplace_back_unchecked(::std::move(this->m_sth.mut_data()[i]));
           // Truncate `*this`.
           this->m_sth.pop_back_n_unchecked(this->size() - ncomm);
         }

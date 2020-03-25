@@ -116,7 +116,7 @@ template<typename elementT> class stored_pointer
 template<typename targetT, typename sourceT, typename casterT>
     refcnt_ptr<targetT> pointer_cast_aux(const refcnt_ptr<sourceT>& sptr, casterT&& caster)
   {
-    refcnt_ptr<targetT> dptr(noadl::forward<casterT>(caster)(sptr.get()));
+    refcnt_ptr<targetT> dptr(::std::forward<casterT>(caster)(sptr.get()));
     if(dptr)
       dptr.get()->reference_counter_base::add_reference();
     return dptr;
@@ -124,7 +124,7 @@ template<typename targetT, typename sourceT, typename casterT>
 template<typename targetT, typename sourceT, typename casterT>
     refcnt_ptr<targetT> pointer_cast_aux(refcnt_ptr<sourceT>&& sptr, casterT&& caster)
   {
-    refcnt_ptr<targetT> dptr(noadl::forward<casterT>(caster)(sptr.get()));
+    refcnt_ptr<targetT> dptr(::std::forward<casterT>(caster)(sptr.get()));
     if(dptr)
       sptr.release();
     return dptr;

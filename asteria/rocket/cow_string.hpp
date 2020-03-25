@@ -158,15 +158,15 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       }
     basic_cow_string(basic_cow_string&& other) noexcept
       :
-        m_sth(noadl::move(other.m_sth.as_allocator()))
+        m_sth(::std::move(other.m_sth.as_allocator()))
       {
-        this->assign(noadl::move(other));
+        this->assign(::std::move(other));
       }
     basic_cow_string(basic_cow_string&& other, const allocator_type& alloc) noexcept
       :
         m_sth(alloc)
       {
-        this->assign(noadl::move(other));
+        this->assign(::std::move(other));
       }
     constexpr basic_cow_string(nullopt_t = nullopt_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
       :
@@ -203,7 +203,7 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       :
         basic_cow_string(alloc)
       {
-        this->assign(noadl::move(first), noadl::move(last));
+        this->assign(::std::move(first), ::std::move(last));
       }
     basic_cow_string(initializer_list<value_type> init, const allocator_type& alloc = allocator_type())
       :
@@ -230,7 +230,7 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
     basic_cow_string& operator=(basic_cow_string&& other) noexcept
       {
         noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        this->assign(noadl::move(other));
+        this->assign(::std::move(other));
         return *this;
       }
     basic_cow_string& operator=(initializer_list<value_type> init)
@@ -318,7 +318,7 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       {
         auto len_old = this->size();
         ROCKET_ASSERT(tpos <= len_old);
-        details_cow_string::tagged_append(this, noadl::forward<paramsT>(params)...);
+        details_cow_string::tagged_append(this, ::std::forward<paramsT>(params)...);
         auto len_add = this->size() - len_old;
         auto len_sfx = len_old - (tpos + tn);
         this->do_reserve_more(len_sfx);
@@ -373,7 +373,7 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
         if(from > rlen) {
           return npos;
         }
-        return this->do_xfind_if(from, rlen, +1, noadl::move(pred));
+        return this->do_xfind_if(from, rlen, +1, ::std::move(pred));
       }
     template<typename predT>
         size_type do_find_backwards_if(size_type to, size_type n, predT pred) const
@@ -384,9 +384,9 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
         }
         auto rlen = len - n;
         if(to > rlen) {
-          return this->do_xfind_if(rlen, 0, -1, noadl::move(pred));
+          return this->do_xfind_if(rlen, 0, -1, ::std::move(pred));
         }
-        return this->do_xfind_if(to, 0, -1, noadl::move(pred));
+        return this->do_xfind_if(to, 0, -1, ::std::move(pred));
       }
 
   public:
@@ -699,9 +699,9 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
         basic_cow_string other(this->m_sth.as_allocator());
         other.reserve(this->size() + noadl::estimate_distance(first, last));
         other.append(this->data(), this->size());
-        noadl::ranged_do_while(noadl::move(first), noadl::move(last),
+        noadl::ranged_do_while(::std::move(first), ::std::move(last),
                                [&](const inputT& it) { other.push_back(*it);  });
-        this->assign(noadl::move(other));
+        this->assign(::std::move(other));
         return *this;
       }
     // N.B. The return type is a non-standard extension.
@@ -769,7 +769,7 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       }
     basic_cow_string& assign(basic_cow_string&& other) noexcept
       {
-        this->m_sth.share_with(noadl::move(other.m_sth));
+        this->m_sth.share_with(::std::move(other.m_sth));
         this->m_ptr = ::std::exchange(other.m_ptr, null_char);
         this->m_len = ::std::exchange(other.m_len, size_type(0));
         return *this;
@@ -803,7 +803,7 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       }
     template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)> basic_cow_string& assign(inputT first, inputT last)
       {
-        this->do_replace_no_bound_check(0, this->size(), details_cow_string::append, noadl::move(first), noadl::move(last));
+        this->do_replace_no_bound_check(0, this->size(), details_cow_string::append, ::std::move(first), ::std::move(last));
         return *this;
       }
 
@@ -870,7 +870,7 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       {
         auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
         auto ptr = this->do_replace_no_bound_check(tpos, 0, details_cow_string::append,
-                                                   noadl::move(first), noadl::move(last));
+                                                   ::std::move(first), ::std::move(last));
         return iterator(this, ptr);
       }
     iterator insert(const_iterator tins, value_type ch)
@@ -942,7 +942,7 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       {
         auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
         auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
-        this->do_replace_no_bound_check(tpos, tn, details_cow_string::append, noadl::move(first), noadl::move(last));
+        this->do_replace_no_bound_check(tpos, tn, details_cow_string::append, ::std::move(first), ::std::move(last));
         return *this;
       }
     // N.B. This is a non-standard extension.
@@ -1299,9 +1299,9 @@ template<typename charT, typename traitsT, typename allocT>
   {
     auto ntotal = lhs.size() + rhs.size();
     if(ROCKET_EXPECT((ntotal <= lhs.capacity()) || (ntotal > rhs.capacity())))
-      return noadl::move(lhs.append(rhs));
+      return ::std::move(lhs.append(rhs));
     else
-      return noadl::move(rhs.insert(0, lhs));
+      return ::std::move(rhs.insert(0, lhs));
   }
 
 template<typename charT, typename traitsT, typename allocT>
@@ -1342,13 +1342,13 @@ template<typename charT, typename traitsT, typename allocT>
     inline basic_cow_string<charT, traitsT, allocT> operator+(basic_cow_string<charT, traitsT, allocT>&& lhs,
                                                               const charT* rhs)
   {
-    return noadl::move(lhs.append(rhs));
+    return ::std::move(lhs.append(rhs));
   }
 template<typename charT, typename traitsT, typename allocT>
     inline basic_cow_string<charT, traitsT, allocT> operator+(basic_cow_string<charT, traitsT, allocT>&& lhs,
                                                               charT rhs)
   {
-    return noadl::move(lhs.append(1, rhs));
+    return ::std::move(lhs.append(1, rhs));
   }
 
 template<typename charT, typename traitsT, typename allocT>
@@ -1356,14 +1356,14 @@ template<typename charT, typename traitsT, typename allocT>
                                                               basic_cow_string<charT, traitsT, allocT>&& rhs)
   {
     // Prepend `lhs` to `rhs`.
-    return noadl::move(rhs.insert(0, lhs));
+    return ::std::move(rhs.insert(0, lhs));
   }
 template<typename charT, typename traitsT, typename allocT>
     inline basic_cow_string<charT, traitsT, allocT> operator+(charT lhs,
                                                               basic_cow_string<charT, traitsT, allocT>&& rhs)
   {
     // Prepend `lhs` to `rhs`.
-    return noadl::move(rhs.insert(0, 1, lhs));
+    return ::std::move(rhs.insert(0, 1, lhs));
   }
 
 template<typename charT, typename traitsT, typename allocT>

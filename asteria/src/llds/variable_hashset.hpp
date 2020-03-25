@@ -161,7 +161,7 @@ class Variable_HashSet
           return nullptr;
         }
         // Detach this variable and return it.
-        auto var = ::rocket::move(qbkt->kstor[0]);
+        auto var = ::std::move(qbkt->kstor[0]);
         this->do_detach(qbkt);
         return var;
       }

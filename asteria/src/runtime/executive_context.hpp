@@ -43,7 +43,7 @@ class Executive_Context : public Abstract_Context
       :
         m_parent_opt(nullptr),
         m_global(xglobal), m_stack(xstack), m_zvarg(xzvarg),
-        m_self(Reference_root::S_void()), m_defer(::rocket::move(defer))
+        m_self(Reference_root::S_void()), m_defer(::std::move(defer))
       {
       }
     Executive_Context(ref_to<Global_Context> xglobal, ref_to<Evaluation_Stack> xstack,
@@ -52,9 +52,9 @@ class Executive_Context : public Abstract_Context
       :
         m_parent_opt(nullptr),
         m_global(xglobal), m_stack(xstack), m_zvarg(xzvarg),
-        m_self(::rocket::move(self))
+        m_self(::std::move(self))
       {
-        this->do_bind_parameters(params, ::rocket::move(args));
+        this->do_bind_parameters(params, ::std::move(args));
       }
     ~Executive_Context() override;
 

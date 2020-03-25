@@ -57,12 +57,12 @@ class Reference_root
   public:
     ASTERIA_VARIANT_CONSTRUCTOR(Reference_root, Xvariant, XRootT, xroot)
       :
-        m_stor(::rocket::forward<XRootT>(xroot))
+        m_stor(::std::forward<XRootT>(xroot))
       {
       }
     ASTERIA_VARIANT_ASSIGNMENT(Reference_root, Xvariant, XRootT, xroot)
       {
-        this->m_stor = ::rocket::forward<XRootT>(xroot);
+        this->m_stor = ::std::forward<XRootT>(xroot);
         return *this;
       }
 

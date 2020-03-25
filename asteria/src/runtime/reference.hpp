@@ -23,13 +23,13 @@ class Reference
   public:
     ASTERIA_VARIANT_CONSTRUCTOR(Reference, Root, XRootT, xroot)
       :
-        m_root(::rocket::forward<XRootT>(xroot)),
+        m_root(::std::forward<XRootT>(xroot)),
         m_mods()
       {
       }
     ASTERIA_VARIANT_ASSIGNMENT(Reference, Root, XRootT, xroot)
       {
-        this->m_root = ::rocket::forward<XRootT>(xroot);
+        this->m_root = ::std::forward<XRootT>(xroot);
         this->m_mods.clear();
         return *this;
       }
@@ -81,7 +81,7 @@ class Reference
     template<typename XModT> Reference& zoom_in(XModT&& xmod)
       {
         // Append a modifier.
-        this->m_mods.emplace_back(::rocket::forward<XModT>(xmod));
+        this->m_mods.emplace_back(::std::forward<XModT>(xmod));
         return *this;
       }
     Reference& zoom_out()

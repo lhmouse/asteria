@@ -142,10 +142,10 @@ void Global_Context::initialize(API_Version version)
       q->init(pair.first->second.open_object(), eptr[-1].version);
     }
     auto vstd = gcoll->create_variable(gc_generation_oldest);
-    vstd->initialize(::rocket::move(ostd), true);
+    vstd->initialize(::std::move(ostd), true);
     // Set the `std` reference now.
     Reference_root::S_variable xref = { vstd };
-    this->open_named_reference(::rocket::sref("std")) = ::rocket::move(xref);
+    this->open_named_reference(::rocket::sref("std")) = ::std::move(xref);
     this->m_vstd = vstd;
   }
 

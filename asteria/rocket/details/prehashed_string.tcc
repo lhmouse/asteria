@@ -25,7 +25,7 @@ template<typename stringT, typename hashT>
     template<typename... paramsT> explicit string_storage(const hasher& hf, paramsT&&... params)
       :
         hasher_base(hf),
-        m_str(noadl::forward<paramsT>(params)...), m_hval(this->as_hasher()(this->m_str))
+        m_str(::std::forward<paramsT>(params)...), m_hval(this->as_hasher()(this->m_str))
       {
       }
 
@@ -61,7 +61,7 @@ template<typename stringT, typename hashT>
 
     template<typename... paramsT> void assign(paramsT&&... params)
       {
-        this->m_str.assign(noadl::forward<paramsT>(params)...);
+        this->m_str.assign(::std::forward<paramsT>(params)...);
         this->m_hval = this->as_hasher()(this->m_str);
       }
     void assign(const string_storage& other)
@@ -71,7 +71,7 @@ template<typename stringT, typename hashT>
       }
     void assign(string_storage&& other)
       {
-        this->m_str = noadl::move(other.m_str);
+        this->m_str = ::std::move(other.m_str);
         this->m_hval = this->as_hasher()(this->m_str);
       }
     void exchange_with(string_storage& other)

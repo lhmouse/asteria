@@ -54,7 +54,7 @@ template<typename... alternativesT> class variant
         constexpr auto index_new = index_of<typename decay<paramT>::type>::value;
         // Copy/move-initialize the alternative in place.
         noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)),
-                            noadl::forward<paramT>(param));
+                            ::std::forward<paramT>(param));
         this->m_index = index_new;
       }
     variant(const variant& other) noexcept(conjunction<is_nothrow_copy_constructible<alternativesT>...>::value)
@@ -121,14 +121,14 @@ template<typename... alternativesT> class variant
         constexpr auto index_new = index_of<paramT>::value;
         if(index_old == index_new) {
           // Move-assign the alternative in place.
-          *static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)) = noadl::move(param);
+          *static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)) = ::std::move(param);
         }
         else {
           // Destroy the old alternative.
           details_variant::dispatch_destroy<alternativesT...>(index_old, this->m_stor);
           // Move-construct the alternative in place.
           noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)),
-                              noadl::move(param));
+                              ::std::move(param));
           this->m_index = index_new;
         }
         return *this;
@@ -269,13 +269,13 @@ template<typename... alternativesT> class variant
       {
         static constexpr void (*const s_jump_table[])(const void*, visitorT&&) =
           { details_variant::wrapped_visit<const alternativesT>... };
-        s_jump_table[this->m_index](this->m_stor, noadl::forward<visitorT>(visitor));
+        s_jump_table[this->m_index](this->m_stor, ::std::forward<visitorT>(visitor));
       }
     template<typename visitorT> void visit(visitorT&& visitor)
       {
         static constexpr void (*const s_jump_table[])(void*, visitorT&&) =
           { details_variant::wrapped_visit<alternativesT>... };
-        s_jump_table[this->m_index](this->m_stor, noadl::forward<visitorT>(visitor));
+        s_jump_table[this->m_index](this->m_stor, ::std::forward<visitorT>(visitor));
       }
 
     // 23.7.3.4, modifiers
@@ -290,7 +290,7 @@ template<typename... alternativesT> class variant
           details_variant::dispatch_destroy<alternativesT...>(index_old, this->m_stor);
           // Construct the alternative in place.
           noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)),
-                              noadl::forward<paramsT>(params)...);
+                              ::std::forward<paramsT>(params)...);
           this->m_index = index_new;
         }
         else {
@@ -300,7 +300,7 @@ template<typename... alternativesT> class variant
           try {
             // Construct the alternative in place.
             noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)),
-                                noadl::forward<paramsT>(params)...);
+                                ::std::forward<paramsT>(params)...);
             this->m_index = index_new;
           }
           catch(...) {
@@ -315,7 +315,7 @@ template<typename... alternativesT> class variant
     template<typename targetT, typename... paramsT>
         targetT& emplace(paramsT&&... params) noexcept(is_nothrow_constructible<targetT, paramsT&&...>::value)
       {
-        return this->emplace<index_of<targetT>::value>(noadl::forward<paramsT>(params)...);
+        return this->emplace<index_of<targetT>::value>(::std::forward<paramsT>(params)...);
       }
 
     // 23.7.3.6, swap

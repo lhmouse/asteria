@@ -55,7 +55,7 @@ template<typename stringT, typename hashT> class basic_prehashed_string
                              noexcept(conjunction<is_nothrow_constructible<string_type, paramsT&&...>,
                                                   is_nothrow_copy_constructible<hasher>>::value)
       :
-        m_sth(hf, noadl::forward<paramsT>(params)...)
+        m_sth(hf, ::std::forward<paramsT>(params)...)
       {
       }
     explicit basic_prehashed_string(const string_type& str, const hasher& hf = hasher())
@@ -69,7 +69,7 @@ template<typename stringT, typename hashT> class basic_prehashed_string
                              noexcept(conjunction<is_nothrow_move_constructible<string_type>,
                                                   is_nothrow_copy_constructible<hasher>>::value)
       :
-        m_sth(hf, noadl::move(str))
+        m_sth(hf, ::std::move(str))
       {
       }
     template<typename xstringT, ROCKET_ENABLE_IF(is_convertible<xstringT&, string_type>::value)>
@@ -85,7 +85,7 @@ template<typename stringT, typename hashT> class basic_prehashed_string
                              noexcept(conjunction<is_nothrow_constructible<string_type, xstringT&&>,
                                                   is_nothrow_copy_constructible<hasher>>::value)
       :
-        m_sth(hf, noadl::forward<xstringT>(xstr))
+        m_sth(hf, ::std::forward<xstringT>(xstr))
       {
       }
     basic_prehashed_string(initializer_list<value_type> init, const hasher& hf = hasher())
@@ -109,7 +109,7 @@ template<typename stringT, typename hashT> class basic_prehashed_string
       :
         m_sth(other.m_sth.as_hasher())
       {
-        this->m_sth.assign(noadl::move(other.m_sth));
+        this->m_sth.assign(::std::move(other.m_sth));
       }
     basic_prehashed_string& operator=(initializer_list<value_type> init)
       {
@@ -125,7 +125,7 @@ template<typename stringT, typename hashT> class basic_prehashed_string
     basic_prehashed_string& operator=(basic_prehashed_string&& other)
                              noexcept(is_nothrow_move_assignable<string_type>::value)
       {
-        this->m_sth.assign(noadl::move(other.m_sth));
+        this->m_sth.assign(::std::move(other.m_sth));
         return *this;
       }
 
@@ -227,7 +227,7 @@ template<typename stringT, typename hashT> class basic_prehashed_string
 
     template<typename... paramsT> basic_prehashed_string& assign(paramsT&&... params)
       {
-        this->m_sth.assign(noadl::forward<paramsT>(params)...);
+        this->m_sth.assign(::std::forward<paramsT>(params)...);
         return *this;
       }
     basic_prehashed_string& assign(initializer_list<value_type> init)

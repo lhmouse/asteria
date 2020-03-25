@@ -22,21 +22,21 @@ class Variadic_Arguer final : public Abstract_Function
         Variadic_Arguer(const Source_Location& xsloc, const cow_string& xfunc, XVargsT&&... xvargs)
       :
         m_sloc(xsloc), m_func(xfunc),
-        m_vargs(::rocket::forward<XVargsT>(xvargs)...)
+        m_vargs(::std::forward<XVargsT>(xvargs)...)
       {
       }
     template<typename... XVargsT>
         Variadic_Arguer(const cow_string& xfile, long xline, const cow_string& xfunc, XVargsT&&... xvargs)
       :
         m_sloc(xfile, xline), m_func(xfunc),
-        m_vargs(::rocket::forward<XVargsT>(xvargs)...)
+        m_vargs(::std::forward<XVargsT>(xvargs)...)
       {
       }
     template<typename... XVargsT>
         Variadic_Arguer(const Variadic_Arguer& other, XVargsT&&... xvargs)
       :
         m_sloc(other.m_sloc), m_func(other.m_func),
-        m_vargs(::rocket::forward<XVargsT>(xvargs)...)
+        m_vargs(::std::forward<XVargsT>(xvargs)...)
       {
       }
 

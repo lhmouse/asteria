@@ -64,7 +64,7 @@ class Global_Context : public Abstract_Context
       }
     Global_Context& set_hooks(rcptr<Abstract_Hooks> hooks_opt) noexcept
       {
-        return this->m_qhooks = ::rocket::move(hooks_opt), *this;
+        return this->m_qhooks = ::std::move(hooks_opt), *this;
       }
 
     // These are interfaces for individual global components.

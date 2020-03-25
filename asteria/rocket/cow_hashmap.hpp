@@ -84,16 +84,16 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     cow_hashmap(cow_hashmap&& other) noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
                                                           is_nothrow_copy_constructible<key_equal>>::value)
       :
-        m_sth(noadl::move(other.m_sth.as_allocator()), other.m_sth.as_hasher(), other.m_sth.as_key_equal())
+        m_sth(::std::move(other.m_sth.as_allocator()), other.m_sth.as_hasher(), other.m_sth.as_key_equal())
       {
-        this->assign(noadl::move(other));
+        this->assign(::std::move(other));
       }
     cow_hashmap(cow_hashmap&& other, const allocator_type& alloc) noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
                                                                                        is_nothrow_copy_constructible<key_equal>>::value)
       :
         m_sth(alloc, other.m_sth.as_hasher(), other.m_sth.as_key_equal())
       {
-        this->assign(noadl::move(other));
+        this->assign(::std::move(other));
       }
     constexpr cow_hashmap(nullopt_t = nullopt_t()) noexcept(conjunction<is_nothrow_constructible<hasher>, is_nothrow_copy_constructible<hasher>,
                                                                       is_nothrow_constructible<key_equal>, is_nothrow_copy_constructible<key_equal>,
@@ -115,7 +115,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       :
         cow_hashmap(res_arg, hf, eq, alloc)
       {
-        this->assign(noadl::move(first), noadl::move(last));
+        this->assign(::std::move(first), ::std::move(last));
       }
     cow_hashmap(initializer_list<value_type> init, size_type res_arg = 0,
                 const hasher& hf = hasher(), const key_equal& eq = key_equal(), const allocator_type& alloc = allocator_type())
@@ -135,7 +135,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       :
         cow_hashmap(res_arg, hf, alloc)
       {
-        this->assign(noadl::move(first), noadl::move(last));
+        this->assign(::std::move(first), ::std::move(last));
       }
     cow_hashmap(initializer_list<value_type> init, size_type res_arg, const hasher& hf, const allocator_type& alloc)
       :
@@ -154,7 +154,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       :
         cow_hashmap(res_arg, alloc)
       {
-        this->assign(noadl::move(first), noadl::move(last));
+        this->assign(::std::move(first), ::std::move(last));
       }
     cow_hashmap(initializer_list<value_type> init, size_type res_arg, const allocator_type& alloc)
       :
@@ -176,7 +176,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     cow_hashmap& operator=(cow_hashmap&& other) noexcept
       {
         noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        this->assign(noadl::move(other));
+        this->assign(::std::move(other));
         return *this;
       }
     cow_hashmap& operator=(initializer_list<value_type> init)
@@ -390,7 +390,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     // N.B. This is a non-standard extension.
     template<typename ykeyT, typename yvalueT> pair<iterator, bool> insert(pair<ykeyT, yvalueT>&& value)
       {
-        return this->try_emplace(noadl::move(value.first), noadl::move(value.second));
+        return this->try_emplace(::std::move(value.first), ::std::move(value.second));
       }
     // N.B. The return type is a non-standard extension.
     template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
@@ -401,12 +401,12 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         }
         auto dist = noadl::estimate_distance(first, last);
         if(dist == 0) {
-          noadl::ranged_do_while(noadl::move(first), noadl::move(last),
+          noadl::ranged_do_while(::std::move(first), ::std::move(last),
                                  [&](const inputT& it) { this->insert(*it);  });
           return *this;
         }
         this->do_reserve_more(dist);
-        noadl::ranged_do_while(noadl::move(first), noadl::move(last),
+        noadl::ranged_do_while(::std::move(first), ::std::move(last),
                                [&](const inputT& it) { this->m_sth.keyed_emplace_unchecked(it->first, *it);  });
         return *this;
       }
@@ -425,36 +425,36 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     // N.B. The hint is ignored.
     template<typename ykeyT, typename yvalueT> iterator insert(const_iterator /*hint*/, pair<ykeyT, yvalueT>&& value)
       {
-        return this->insert(noadl::move(value)).first;
+        return this->insert(::std::move(value)).first;
       }
 
     template<typename ykeyT, typename... paramsT> pair<iterator, bool> try_emplace(ykeyT&& key, paramsT&&... params)
       {
         this->do_reserve_more(1);
         auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
-                                                               ::std::forward_as_tuple(noadl::forward<ykeyT>(key)),
-                                                               ::std::forward_as_tuple(noadl::forward<paramsT>(params)...));
+                                                               ::std::forward_as_tuple(::std::forward<ykeyT>(key)),
+                                                               ::std::forward_as_tuple(::std::forward<paramsT>(params)...));
         return ::std::make_pair(iterator(this->m_sth, result.first), result.second);
       }
     // N.B. The hint is ignored.
     template<typename ykeyT, typename... paramsT> iterator try_emplace(const_iterator /*hint*/, ykeyT&& key, paramsT&&... params)
       {
-        return this->try_emplace(noadl::forward<ykeyT>(key), noadl::forward<paramsT>(params)...).first;
+        return this->try_emplace(::std::forward<ykeyT>(key), ::std::forward<paramsT>(params)...).first;
       }
 
     template<typename ykeyT, typename yvalueT> pair<iterator, bool> insert_or_assign(ykeyT&& key, yvalueT&& yvalue)
       {
         this->do_reserve_more(1);
-        auto result = this->m_sth.keyed_emplace_unchecked(key, noadl::forward<ykeyT>(key), noadl::forward<yvalueT>(yvalue));
+        auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::forward<ykeyT>(key), ::std::forward<yvalueT>(yvalue));
         if(!result.second) {
-          result.first->get()->second = noadl::forward<yvalueT>(yvalue);
+          result.first->get()->second = ::std::forward<yvalueT>(yvalue);
         }
         return ::std::make_pair(iterator(this->m_sth, result.first), result.second);
       }
     // N.B. The hint is ignored.
     template<typename ykeyT, typename yvalueT> iterator insert_or_assign(const_iterator /*hint*/, ykeyT&& key, yvalueT&& yvalue)
       {
-        return this->insert_or_assign(noadl::forward<ykeyT>(key), noadl::forward<yvalueT>(yvalue)).first;
+        return this->insert_or_assign(::std::forward<ykeyT>(key), ::std::forward<yvalueT>(yvalue)).first;
       }
 
     // N.B. This function may throw `std::bad_alloc`.
@@ -521,7 +521,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         auto ptr = this->do_get_table();
         size_type tpos;
         if(!this->m_sth.index_of(tpos, key)) {
-          return noadl::forward<ydefaultT>(ydef);
+          return ::std::forward<ydefaultT>(ydef);
         }
         return ptr[tpos]->second;
       }
@@ -532,9 +532,9 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         auto ptr = this->do_mut_table();
         size_type tpos;
         if(!this->m_sth.index_of(tpos, key)) {
-          return noadl::forward<ydefaultT>(ydef);
+          return ::std::forward<ydefaultT>(ydef);
         }
-        return noadl::move(ptr[tpos]->second);
+        return ::std::move(ptr[tpos]->second);
       }
 
     // 26.5.4.3, element access
@@ -588,7 +588,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     // N.B. This function is a non-standard extension.
     cow_hashmap& assign(cow_hashmap&& other) noexcept
       {
-        this->m_sth.share_with(noadl::move(other.m_sth));
+        this->m_sth.share_with(::std::move(other.m_sth));
         return *this;
       }
     // N.B. This function is a non-standard extension.
@@ -602,7 +602,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)> cow_hashmap& assign(inputT first, inputT last)
       {
         this->clear();
-        this->insert(noadl::move(first), noadl::move(last));
+        this->insert(::std::move(first), ::std::move(last));
         return *this;
       }
 

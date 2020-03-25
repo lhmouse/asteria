@@ -20,7 +20,7 @@ Runtime_Error& do_unpack_frames(Runtime_Error& except, Global_Context& global, E
                                 cow_vector<rcptr<PTC_Arguments>>&& frames)
   {
     while(frames.size()) {
-      auto tca = ::rocket::move(frames.mut_back());
+      auto tca = ::std::move(frames.mut_back());
       frames.pop_back();
       // Unpack arguments.
       const auto& sloc = tca->sloc();
@@ -36,7 +36,7 @@ Runtime_Error& do_unpack_frames(Runtime_Error& except, Global_Context& global, E
       // Evaluate deferred expressions if any.
       if(tca->get_defer_stack().size()) {
         Executive_Context ctx(::rocket::ref(global), ::rocket::ref(stack), ::rocket::ref(tca->zvarg()),
-                              ::rocket::move(tca->open_defer_stack()));
+                              ::std::move(tca->open_defer_stack()));
         ctx.on_scope_exit(except);
       }
       // Push the caller.
@@ -78,8 +78,8 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
       }
       // Get the `this` reference and all the other arguments.
       const auto& target = tca->get_target();
-      auto args = ::rocket::move(tca->open_arguments_and_self());
-      self = ::rocket::move(args.mut_back());
+      auto args = ::std::move(tca->open_arguments_and_self());
+      self = ::std::move(args.mut_back());
       args.pop_back();
       // Call the hook function if any.
       if(qhooks) {
@@ -87,27 +87,27 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
       }
       // Perform a non-tail call.
       ASTERIA_RUNTIME_TRY {
-        target.invoke_ptc_aware(self, global, ::rocket::move(args));
+        target.invoke_ptc_aware(self, global, ::std::move(args));
       }
       ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
-        do_unpack_frames(except, global, stack, ::rocket::move(frames));
+        do_unpack_frames(except, global, stack, ::std::move(frames));
         throw;
       }
     }
     // Check for deferred expressions.
     while(frames.size()) {
-      tca = ::rocket::move(frames.mut_back());
+      tca = ::std::move(frames.mut_back());
       frames.pop_back();
       // Evaluate deferred expressions if any.
       ASTERIA_RUNTIME_TRY {
         if(tca->get_defer_stack().size()) {
           Executive_Context ctx(::rocket::ref(global), ::rocket::ref(stack), ::rocket::ref(tca->zvarg()),
-                                ::rocket::move(tca->open_defer_stack()));
+                                ::std::move(tca->open_defer_stack()));
           ctx.on_scope_exit(air_status_next);
         }
       }
       ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
-        do_unpack_frames(except, global, stack, ::rocket::move(frames));
+        do_unpack_frames(except, global, stack, ::std::move(frames));
         throw;
       }
     }
@@ -119,7 +119,7 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
     else if((ptc_conj == ptc_aware_by_val) && self.is_glvalue()) {
       // Convert the result to an rvalue if it shouldn't be passed by reference.
       Reference_root::S_temporary xref = { self.read() };
-      self = ::rocket::move(xref);
+      self = ::std::move(xref);
     }
     return self;
   }

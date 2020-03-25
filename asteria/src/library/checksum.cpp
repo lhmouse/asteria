@@ -950,11 +950,11 @@ Oval std_checksum_crc32_new()
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.crc32_new().write"));
     // Get the hasher.
     Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
-    self.zoom_in(::rocket::move(xmod));
+    self.zoom_in(::std::move(xmod));
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      return std_checksum_crc32_new_write(self.open().open_opaque(), ::rocket::move(data));
+      return std_checksum_crc32_new_write(self.open().open_opaque(), ::std::move(data));
     }
     reader.throw_no_matching_function_call();
   },
@@ -972,7 +972,7 @@ std.checksum.crc32_new().write
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.crc32_new().finish"));
     // Get the hasher.
     Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
-    self.zoom_in(::rocket::move(xmod));
+    self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
       return std_checksum_crc32_new_finish(self.open().open_opaque());
@@ -1037,11 +1037,11 @@ Oval std_checksum_fnv1a32_new()
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.fnv1a32_new().write"));
     // Get the hasher.
     Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
-    self.zoom_in(::rocket::move(xmod));
+    self.zoom_in(::std::move(xmod));
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      return std_checksum_fnv1a32_new_write(self.open().open_opaque(), ::rocket::move(data));
+      return std_checksum_fnv1a32_new_write(self.open().open_opaque(), ::std::move(data));
     }
     reader.throw_no_matching_function_call();
   },
@@ -1059,7 +1059,7 @@ std.checksum.fnv1a32_new().write
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.fnv1a32_new().finish"));
     // Get the hasher.
     Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
-    self.zoom_in(::rocket::move(xmod));
+    self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
       return std_checksum_fnv1a32_new_finish(self.open().open_opaque());
@@ -1124,11 +1124,11 @@ Oval std_checksum_md5_new()
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.md5_new().write"));
     // Get the hasher.
     Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
-    self.zoom_in(::rocket::move(xmod));
+    self.zoom_in(::std::move(xmod));
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      return std_checksum_md5_new_write(self.open().open_opaque(), ::rocket::move(data));
+      return std_checksum_md5_new_write(self.open().open_opaque(), ::std::move(data));
     }
     reader.throw_no_matching_function_call();
   },
@@ -1146,7 +1146,7 @@ std.checksum.md5_new().write
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.md5_new().finish"));
     // Get the hasher.
     Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
-    self.zoom_in(::rocket::move(xmod));
+    self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
       return std_checksum_md5_new_finish(self.open().open_opaque());
@@ -1211,11 +1211,11 @@ Oval std_checksum_sha1_new()
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha1_new().write"));
     // Get the hasher.
     Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
-    self.zoom_in(::rocket::move(xmod));
+    self.zoom_in(::std::move(xmod));
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      return std_checksum_sha1_new_write(self.open().open_opaque(), ::rocket::move(data));
+      return std_checksum_sha1_new_write(self.open().open_opaque(), ::std::move(data));
     }
     reader.throw_no_matching_function_call();
   },
@@ -1233,7 +1233,7 @@ std.checksum.sha1_new().write
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha1_new().finish"));
     // Get the hasher.
     Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
-    self.zoom_in(::rocket::move(xmod));
+    self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
       return std_checksum_sha1_new_finish(self.open().open_opaque());
@@ -1298,11 +1298,11 @@ Oval std_checksum_sha256_new()
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha256_new().write"));
     // Get the hasher.
     Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
-    self.zoom_in(::rocket::move(xmod));
+    self.zoom_in(::std::move(xmod));
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      return std_checksum_sha256_new_write(self.open().open_opaque(), ::rocket::move(data));
+      return std_checksum_sha256_new_write(self.open().open_opaque(), ::std::move(data));
     }
     reader.throw_no_matching_function_call();
   },
@@ -1320,7 +1320,7 @@ std.checksum.sha256_new().write
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha256_new().finish"));
     // Get the hasher.
     Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
-    self.zoom_in(::rocket::move(xmod));
+    self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
       return std_checksum_sha256_new_finish(self.open().open_opaque());
@@ -1392,7 +1392,7 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      return std_checksum_crc32(::rocket::move(data));
+      return std_checksum_crc32(::std::move(data));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1465,7 +1465,7 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      return std_checksum_fnv1a32(::rocket::move(data));
+      return std_checksum_fnv1a32(::std::move(data));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1535,7 +1535,7 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      return std_checksum_md5(::rocket::move(data));
+      return std_checksum_md5(::std::move(data));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1605,7 +1605,7 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      return std_checksum_sha1(::rocket::move(data));
+      return std_checksum_sha1(::std::move(data));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1675,7 +1675,7 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      return std_checksum_sha256(::rocket::move(data));
+      return std_checksum_sha256(::std::move(data));
     }
     // Fail.
     reader.throw_no_matching_function_call();

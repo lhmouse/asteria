@@ -686,11 +686,11 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      return std_numeric_abs(::rocket::move(ivalue));
+      return std_numeric_abs(::std::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      return std_numeric_abs(::rocket::move(rvalue));
+      return std_numeric_abs(::std::move(rvalue));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -720,11 +720,11 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      return std_numeric_sign(::rocket::move(ivalue));
+      return std_numeric_sign(::std::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      return std_numeric_sign(::rocket::move(rvalue));
+      return std_numeric_sign(::std::move(rvalue));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -750,11 +750,11 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      return std_numeric_is_finite(::rocket::move(ivalue));
+      return std_numeric_is_finite(::std::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      return std_numeric_is_finite(::rocket::move(rvalue));
+      return std_numeric_is_finite(::std::move(rvalue));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -782,11 +782,11 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      return std_numeric_is_infinity(::rocket::move(ivalue));
+      return std_numeric_is_infinity(::std::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      return std_numeric_is_infinity(::rocket::move(rvalue));
+      return std_numeric_is_infinity(::std::move(rvalue));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -814,11 +814,11 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      return std_numeric_is_nan(::rocket::move(ivalue));
+      return std_numeric_is_nan(::std::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      return std_numeric_is_nan(::rocket::move(rvalue));
+      return std_numeric_is_nan(::std::move(rvalue));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -847,13 +847,13 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Ival ilower;
     Ival iupper;
     if(reader.I().v(ivalue).v(ilower).v(iupper).F()) {
-      return std_numeric_clamp(::rocket::move(ivalue), ::rocket::move(ilower), ::rocket::move(iupper));
+      return std_numeric_clamp(::std::move(ivalue), ::std::move(ilower), ::std::move(iupper));
     }
     Rval rvalue;
     Rval flower;
     Rval fupper;
     if(reader.I().v(rvalue).v(flower).v(fupper).F()) {
-      return std_numeric_clamp(::rocket::move(rvalue), ::rocket::move(flower), ::rocket::move(fupper));
+      return std_numeric_clamp(::std::move(rvalue), ::std::move(flower), ::std::move(fupper));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -883,11 +883,11 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      return std_numeric_round(::rocket::move(ivalue));
+      return std_numeric_round(::std::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      return std_numeric_round(::rocket::move(rvalue));
+      return std_numeric_round(::std::move(rvalue));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -913,11 +913,11 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      return std_numeric_floor(::rocket::move(ivalue));
+      return std_numeric_floor(::std::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      return std_numeric_floor(::rocket::move(rvalue));
+      return std_numeric_floor(::std::move(rvalue));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -943,11 +943,11 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      return std_numeric_ceil(::rocket::move(ivalue));
+      return std_numeric_ceil(::std::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      return std_numeric_ceil(::rocket::move(rvalue));
+      return std_numeric_ceil(::std::move(rvalue));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -973,11 +973,11 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      return std_numeric_trunc(::rocket::move(ivalue));
+      return std_numeric_trunc(::std::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      return std_numeric_trunc(::rocket::move(rvalue));
+      return std_numeric_trunc(::std::move(rvalue));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1003,11 +1003,11 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      return std_numeric_iround(::rocket::move(ivalue));
+      return std_numeric_iround(::std::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      return std_numeric_iround(::rocket::move(rvalue));
+      return std_numeric_iround(::std::move(rvalue));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1037,11 +1037,11 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      return std_numeric_ifloor(::rocket::move(ivalue));
+      return std_numeric_ifloor(::std::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      return std_numeric_ifloor(::rocket::move(rvalue));
+      return std_numeric_ifloor(::std::move(rvalue));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1071,11 +1071,11 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      return std_numeric_iceil(::rocket::move(ivalue));
+      return std_numeric_iceil(::std::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      return std_numeric_iceil(::rocket::move(rvalue));
+      return std_numeric_iceil(::std::move(rvalue));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1105,11 +1105,11 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival ivalue;
     if(reader.I().v(ivalue).F()) {
-      return std_numeric_itrunc(::rocket::move(ivalue));
+      return std_numeric_itrunc(::std::move(ivalue));
     }
     Rval rvalue;
     if(reader.I().v(rvalue).F()) {
-      return std_numeric_itrunc(::rocket::move(rvalue));
+      return std_numeric_itrunc(::std::move(rvalue));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1138,7 +1138,7 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ropt limit;
     if(reader.I().o(limit).F()) {
-      return std_numeric_random(global, ::rocket::move(limit));
+      return std_numeric_random(global, ::std::move(limit));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1166,7 +1166,7 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
-      return std_numeric_sqrt(::rocket::move(x));
+      return std_numeric_sqrt(::std::move(x));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1193,7 +1193,7 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Rval y;
     Rval z;
     if(reader.I().v(x).v(y).v(z).F()) {
-      return std_numeric_fma(::rocket::move(x), ::rocket::move(y), ::rocket::move(z));
+      return std_numeric_fma(::std::move(x), ::std::move(y), ::std::move(z));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1220,7 +1220,7 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Rval x;
     Rval y;
     if(reader.I().v(x).v(y).F()) {
-      return std_numeric_remainder(::rocket::move(x), ::rocket::move(y));
+      return std_numeric_remainder(::std::move(x), ::std::move(y));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1246,12 +1246,12 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Rval x;
     if(reader.I().v(x).F()) {
-      auto pair = std_numeric_frexp(::rocket::move(x));
+      auto pair = std_numeric_frexp(::std::move(x));
       // This function returns a `pair`, but we would like to return an array so convert it.
       Aval rval(2);
-      rval.mut(0) = ::rocket::move(pair.first);
-      rval.mut(1) = ::rocket::move(pair.second);
-      return ::rocket::move(rval);
+      rval.mut(0) = ::std::move(pair.first);
+      rval.mut(1) = ::std::move(pair.second);
+      return rval;
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1282,7 +1282,7 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Rval frac;
     Ival exp;
     if(reader.I().v(frac).v(exp).F()) {
-      return std_numeric_ldexp(::rocket::move(frac), ::rocket::move(exp));
+      return std_numeric_ldexp(::std::move(frac), ::std::move(exp));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1309,7 +1309,7 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Ival x;
     Ival y;
     if(reader.I().v(x).v(y).F()) {
-      return std_numeric_addm(::rocket::move(x), ::rocket::move(y));
+      return std_numeric_addm(::std::move(x), ::std::move(y));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1337,7 +1337,7 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Ival x;
     Ival y;
     if(reader.I().v(x).v(y).F()) {
-      return std_numeric_subm(::rocket::move(x), ::rocket::move(y));
+      return std_numeric_subm(::std::move(x), ::std::move(y));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1366,7 +1366,7 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Ival x;
     Ival y;
     if(reader.I().v(x).v(y).F()) {
-      return std_numeric_mulm(::rocket::move(x), ::rocket::move(y));
+      return std_numeric_mulm(::std::move(x), ::std::move(y));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1395,12 +1395,12 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Ival ix;
     Ival iy;
     if(reader.I().v(ix).v(iy).F()) {
-      return std_numeric_adds(::rocket::move(ix), ::rocket::move(iy));
+      return std_numeric_adds(::std::move(ix), ::std::move(iy));
     }
     Rval fx;
     Rval fy;
     if(reader.I().v(fx).v(fy).F()) {
-      return std_numeric_adds(::rocket::move(fx), ::rocket::move(fy));
+      return std_numeric_adds(::std::move(fx), ::std::move(fy));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1430,12 +1430,12 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Ival ix;
     Ival iy;
     if(reader.I().v(ix).v(iy).F()) {
-      return std_numeric_subs(::rocket::move(ix), ::rocket::move(iy));
+      return std_numeric_subs(::std::move(ix), ::std::move(iy));
     }
     Rval fx;
     Rval fy;
     if(reader.I().v(fx).v(fy).F()) {
-      return std_numeric_subs(::rocket::move(fx), ::rocket::move(fy));
+      return std_numeric_subs(::std::move(fx), ::std::move(fy));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1465,12 +1465,12 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Ival ix;
     Ival iy;
     if(reader.I().v(ix).v(iy).F()) {
-      return std_numeric_muls(::rocket::move(ix), ::rocket::move(iy));
+      return std_numeric_muls(::std::move(ix), ::std::move(iy));
     }
     Rval fx;
     Rval fy;
     if(reader.I().v(fx).v(fy).F()) {
-      return std_numeric_muls(::rocket::move(fx), ::rocket::move(fy));
+      return std_numeric_muls(::std::move(fx), ::std::move(fy));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1499,7 +1499,7 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival x;
     if(reader.I().v(x).F()) {
-      return std_numeric_lzcnt(::rocket::move(x));
+      return std_numeric_lzcnt(::std::move(x));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1525,7 +1525,7 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival x;
     if(reader.I().v(x).F()) {
-      return std_numeric_tzcnt(::rocket::move(x));
+      return std_numeric_tzcnt(::std::move(x));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1551,7 +1551,7 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival x;
     if(reader.I().v(x).F()) {
-      return std_numeric_popcnt(::rocket::move(x));
+      return std_numeric_popcnt(::std::move(x));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1578,7 +1578,7 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Ival x;
     Ival n;
     if(reader.I().v(m).v(x).v(n).F()) {
-      return std_numeric_rotl(::rocket::move(m), ::rocket::move(x), ::rocket::move(n));
+      return std_numeric_rotl(::std::move(m), ::std::move(x), ::std::move(n));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1613,7 +1613,7 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Ival x;
     Ival n;
     if(reader.I().v(m).v(x).v(n).F()) {
-      return std_numeric_rotr(::rocket::move(m), ::rocket::move(x), ::rocket::move(n));
+      return std_numeric_rotr(::std::move(m), ::std::move(x), ::std::move(n));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1648,11 +1648,11 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Iopt base;
     Iopt ebase;
     if(reader.I().v(ivalue).o(base).o(ebase).F()) {
-      return std_numeric_format(::rocket::move(ivalue), ::rocket::move(base), ::rocket::move(ebase));
+      return std_numeric_format(::std::move(ivalue), ::std::move(base), ::std::move(ebase));
     }
     Rval fvalue;
     if(reader.I().v(fvalue).o(base).o(ebase).F()) {
-      return std_numeric_format(::rocket::move(fvalue), ::rocket::move(base), ::rocket::move(ebase));
+      return std_numeric_format(::std::move(fvalue), ::std::move(base), ::std::move(ebase));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1690,7 +1690,7 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval text;
     if(reader.I().v(text).F()) {
-      return std_numeric_parse_integer(::rocket::move(text));
+      return std_numeric_parse_integer(::std::move(text));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1731,7 +1731,7 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Sval text;
     Bopt saturating;
     if(reader.I().v(text).o(saturating).F()) {
-      return std_numeric_parse_real(::rocket::move(text), ::rocket::move(saturating));
+      return std_numeric_parse_real(::std::move(text), ::std::move(saturating));
     }
     // Fail.
     reader.throw_no_matching_function_call();

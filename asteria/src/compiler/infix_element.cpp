@@ -108,30 +108,30 @@ Infix_Element& Infix_Element::extract(cow_vector<Expression_Unit>& units)
     case index_ternary: {
         auto& altr = this->m_stor.as<index_ternary>();
         // Construct a branch unit from both branches, then append it to `units`.
-        Expression_Unit::S_branch xunit = { ::rocket::move(altr.branch_true),
-                                            ::rocket::move(altr.branch_false), altr.assign };
-        units.emplace_back(::rocket::move(xunit));
+        Expression_Unit::S_branch xunit = { ::std::move(altr.branch_true),
+                                            ::std::move(altr.branch_false), altr.assign };
+        units.emplace_back(::std::move(xunit));
         return *this;
       }
     case index_logical_and: {
         auto& altr = this->m_stor.as<index_logical_and>();
         // Construct a branch unit from the TRUE branch and an empty FALSE branch, then append it to `units`.
-        Expression_Unit::S_branch xunit = { ::rocket::move(altr.branch_true), nullopt, altr.assign };
-        units.emplace_back(::rocket::move(xunit));
+        Expression_Unit::S_branch xunit = { ::std::move(altr.branch_true), nullopt, altr.assign };
+        units.emplace_back(::std::move(xunit));
         return *this;
       }
     case index_logical_or: {
         auto& altr = this->m_stor.as<index_logical_or>();
         // Construct a branch unit from an empty TRUE branch and the FALSE branch, then append it to `units`.
-        Expression_Unit::S_branch xunit = { nullopt, ::rocket::move(altr.branch_false), altr.assign };
-        units.emplace_back(::rocket::move(xunit));
+        Expression_Unit::S_branch xunit = { nullopt, ::std::move(altr.branch_false), altr.assign };
+        units.emplace_back(::std::move(xunit));
         return *this;
       }
     case index_coalescence: {
         auto& altr = this->m_stor.as<index_coalescence>();
         // Construct a branch unit from the NULL branch, then append it to `units`.
-        Expression_Unit::S_coalescence xunit = { ::rocket::move(altr.branch_null), altr.assign };
-        units.emplace_back(::rocket::move(xunit));
+        Expression_Unit::S_coalescence xunit = { ::std::move(altr.branch_null), altr.assign };
+        units.emplace_back(::std::move(xunit));
         return *this;
       }
     case index_general: {
@@ -143,7 +143,7 @@ Infix_Element& Infix_Element::extract(cow_vector<Expression_Unit>& units)
                      ::std::make_move_iterator(altr.rhs.mut_end()));
         // Append the operator itself.
         Expression_Unit::S_operator_rpn xunit = { altr.xop, altr.assign };
-        units.emplace_back(::rocket::move(xunit));
+        units.emplace_back(::std::move(xunit));
         return *this;
       }
     default:

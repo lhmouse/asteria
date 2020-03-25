@@ -25,7 +25,7 @@ template<typename allocT> class final_wrapper
       }
     explicit constexpr final_wrapper(allocT&& alloc) noexcept
       :
-        m_alloc(noadl::move(alloc))
+        m_alloc(::std::move(alloc))
       {
       }
 
@@ -72,7 +72,7 @@ constexpr propagate_move;
 template<typename allocT>
     void propagate(propagate_move_tag, allocT& lhs, allocT& rhs) noexcept
   {
-    lhs = noadl::move(rhs);
+    lhs = ::std::move(rhs);
   }
 
 // propagate_on_container_swap

@@ -237,7 +237,7 @@ template<typename XTokenT> bool do_push_token(cow_vector<Token>& tokens, Line_Re
                                               XTokenT&& xtoken)
   {
     tokens.emplace_back(reader.file(), reader.line(), reader.offset(), tlen,
-                        ::rocket::forward<XTokenT>(xtoken));
+                        ::std::forward<XTokenT>(xtoken));
     reader.consume(tlen);
     return true;
   }
@@ -391,7 +391,7 @@ bool do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, b
       if(!numg) {
         do_throw_parser_error(parser_status_numeric_literal_invalid, reader, tlen);
       }
-      return do_push_token(tokens, reader, tlen, ::rocket::move(xtoken));
+      return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
     }
     else {
       // Try casting the value to a `real`.
@@ -407,7 +407,7 @@ bool do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, b
       if(!numg) {
         do_throw_parser_error(parser_status_numeric_literal_invalid, reader, tlen);
       }
-      return do_push_token(tokens, reader, tlen, ::rocket::move(xtoken));
+      return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
     }
   }
 
@@ -513,7 +513,7 @@ bool do_accept_punctuator(cow_vector<Token>& tokens, Line_Reader& reader)
       if((tlen <= reader.navail()) && (::std::memcmp(reader.data(), cur.first, tlen) == 0)) {
         // A punctuator has been found.
         Token::S_punctuator xtoken = { cur.second };
-        return do_push_token(tokens, reader, tlen, ::rocket::move(xtoken));
+        return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
       }
       range.second--;
     }
@@ -649,8 +649,8 @@ bool do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, ch
         do_throw_parser_error(parser_status_escape_sequence_unknown, reader, tlen);
       }
     }
-    Token::S_string_literal xtoken = { ::rocket::move(val) };
-    return do_push_token(tokens, reader, tlen, ::rocket::move(xtoken));
+    Token::S_string_literal xtoken = { ::std::move(val) };
+    return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
   }
 
 struct Keyword_Element
@@ -732,7 +732,7 @@ bool do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Line_Reader& rea
     if(keywords_as_identifiers) {
       // Do not check for identifiers.
       Token::S_identifier xtoken = { cow_string(reader.data(), tlen) };
-      return do_push_token(tokens, reader, tlen, ::rocket::move(xtoken));
+      return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
     }
 #ifdef ROCKET_DEBUG
     ROCKET_ASSERT(::std::is_sorted(begin(s_keywords), end(s_keywords), Prefix_Comparator()));
@@ -742,13 +742,13 @@ bool do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Line_Reader& rea
       if(range.first == range.second) {
         // No matching keyword has been found so far.
         Token::S_identifier xtoken = { cow_string(reader.data(), tlen) };
-        return do_push_token(tokens, reader, tlen, ::rocket::move(xtoken));
+        return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
       }
       const auto& cur = range.first[0];
       if((::std::strlen(cur.first) == tlen) && (::std::memcmp(reader.data(), cur.first, tlen) == 0)) {
         // A keyword has been found.
         Token::S_keyword xtoken = { cur.second };
-        return do_push_token(tokens, reader, tlen, ::rocket::move(xtoken));
+        return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
       }
       range.first++;
     }
@@ -846,7 +846,7 @@ Token_Stream& Token_Stream::reload(tinybuf& cbuf, const cow_string& file, const 
     // Reverse the token sequence now.
     ::std::reverse(tokens.mut_begin(), tokens.mut_end());
     // Succeed.
-    this->m_rtoks = ::rocket::move(tokens);
+    this->m_rtoks = ::std::move(tokens);
     return *this;
   }
 

@@ -74,7 +74,7 @@ class Value
       }
     Value(cow_string xval) noexcept
       :
-        m_stor(::rocket::move(xval))
+        m_stor(::std::move(xval))
       {
       }
     Value(cow_string::shallow_type xval) noexcept
@@ -106,12 +106,12 @@ class Value
       }
     Value(cow_vector<Value> xval) noexcept
       :
-        m_stor(::rocket::move(xval))
+        m_stor(::std::move(xval))
       {
       }
     Value(cow_dictionary<Value> xval) noexcept
       :
-        m_stor(::rocket::move(xval))
+        m_stor(::std::move(xval))
       {
       }
     Value(initializer_list<Value> list)
@@ -227,7 +227,7 @@ class Value
       }
     Value& operator=(cow_string xval) noexcept
       {
-        this->m_stor = V_string(::rocket::move(xval));
+        this->m_stor = V_string(::std::move(xval));
         return *this;
       }
     Value& operator=(cow_string::shallow_type xval) noexcept
@@ -263,12 +263,12 @@ class Value
       }
     Value& operator=(cow_vector<Value> xval) noexcept
       {
-        this->m_stor = ::rocket::move(xval);
+        this->m_stor = ::std::move(xval);
         return *this;
       }
     Value& operator=(cow_dictionary<Value> xval) noexcept
       {
-        this->m_stor = ::rocket::move(xval);
+        this->m_stor = ::std::move(xval);
         return *this;
       }
     Value& operator=(initializer_list<Value> list)

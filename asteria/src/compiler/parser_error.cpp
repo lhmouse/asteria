@@ -15,7 +15,7 @@ void Parser_Error::do_compose_message()
   {
     // Reuse the string.
     ::rocket::tinyfmt_str fmt;
-    fmt.set_string(::rocket::move(this->m_what));
+    fmt.set_string(::std::move(this->m_what));
     fmt.clear_string();
     // Write the status code in digital form.
     format(fmt, "asteria parser error: ERROR $1: $2",

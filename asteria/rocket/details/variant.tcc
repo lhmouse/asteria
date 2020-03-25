@@ -73,7 +73,7 @@ template<typename... alternativesT> void dispatch_copy_construct(size_t rindex, 
 
 template<typename alternativeT> void wrapped_move_construct(void* dptr, void* sptr)
   {
-    noadl::construct_at(static_cast<alternativeT*>(dptr), noadl::move(*static_cast<alternativeT*>(sptr)));
+    noadl::construct_at(static_cast<alternativeT*>(dptr), ::std::move(*static_cast<alternativeT*>(sptr)));
   }
 template<typename... alternativesT> void dispatch_move_construct(size_t rindex, void* dptr, void* sptr)
   {
@@ -109,7 +109,7 @@ template<typename... alternativesT> void dispatch_copy_assign(size_t rindex, voi
 
 template<typename alternativeT> void wrapped_move_assign(void* dptr, void* sptr)
   {
-    *static_cast<alternativeT*>(dptr) = noadl::move(*static_cast<alternativeT*>(sptr));
+    *static_cast<alternativeT*>(dptr) = ::std::move(*static_cast<alternativeT*>(sptr));
   }
 template<typename... alternativesT> void dispatch_move_assign(size_t rindex, void* dptr, void* sptr)
   {
@@ -143,7 +143,7 @@ template<typename... alternativesT> void dispatch_destroy(size_t rindex, void* d
 
 template<typename alternativeT> void wrapped_move_construct_then_destroy(void* dptr, void* sptr)
   {
-    noadl::construct_at(static_cast<alternativeT*>(dptr), noadl::move(*static_cast<alternativeT*>(sptr)));
+    noadl::construct_at(static_cast<alternativeT*>(dptr), ::std::move(*static_cast<alternativeT*>(sptr)));
     noadl::destroy_at(static_cast<alternativeT*>(sptr));
   }
 template<typename... alternativesT> void dispatch_move_construct_then_destroy(size_t rindex, void* dptr, void* sptr)
@@ -183,7 +183,7 @@ template<typename... alternativesT> void dispatch_swap(size_t rindex, void* dptr
 
 template<typename alternativeT, typename voidT, typename visitorT> void wrapped_visit(voidT* sptr, visitorT&& visitor)
   {
-    return noadl::forward<visitorT>(visitor)(*static_cast<alternativeT*>(sptr));
+    return ::std::forward<visitorT>(visitor)(*static_cast<alternativeT*>(sptr));
   }
 
 }  // namespace details_variant

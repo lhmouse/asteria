@@ -38,7 +38,7 @@ void Executive_Context::do_bind_parameters(const cow_vector<phsh_string>& params
       if(ROCKET_UNEXPECT(i >= args.size()))
         this->open_named_reference(name) = Reference_root::S_constant();
       else
-        this->open_named_reference(name) = ::rocket::move(args.mut(i));
+        this->open_named_reference(name) = ::std::move(args.mut(i));
     }
     if((elps == SIZE_MAX) && (args.size() > params.size())) {
       // Disallow exceess arguments if the function is not variadic.
@@ -48,7 +48,7 @@ void Executive_Context::do_bind_parameters(const cow_vector<phsh_string>& params
     // Stash variadic arguments for lazy initialization.
     // If all arguments are positional, `args` may be reused for the evaluation stack, so don't move it at all.
     if(!args.empty())
-      this->m_args = ::rocket::move(args);
+      this->m_args = ::std::move(args);
   }
 
 void Executive_Context::do_defer_expression(const Source_Location& sloc, const cow_vector<AIR_Node>& code)
@@ -58,7 +58,7 @@ void Executive_Context::do_defer_expression(const Source_Location& sloc, const c
     ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(queue, 0);  });  // 1st pass
     ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(queue, 1);  });  // 2nd pass
     // Append it.
-    this->m_defer.emplace_back(sloc, ::rocket::move(queue));
+    this->m_defer.emplace_back(sloc, ::std::move(queue));
   }
 
 void Executive_Context::do_on_scope_exit_void()
@@ -66,7 +66,7 @@ void Executive_Context::do_on_scope_exit_void()
     // Execute all deferred expressions backwards.
     while(this->m_defer.size()) {
       // Pop an expression.
-      auto pair = ::rocket::move(this->m_defer.mut_back());
+      auto pair = ::std::move(this->m_defer.mut_back());
       this->m_defer.pop_back();
       // Execute it. If an exception is thrown, append a frame and rethrow it.
       ASTERIA_RUNTIME_TRY {
@@ -104,7 +104,7 @@ void Executive_Context::do_on_scope_exit_return()
     this->do_on_scope_exit_void();
     // Restore the return reference.
     this->m_stack->clear();
-    this->m_stack->push(::rocket::move(this->m_self));
+    this->m_stack->push(::std::move(this->m_self));
   }
 
 void Executive_Context::do_on_scope_exit_exception(Runtime_Error& except)
@@ -112,7 +112,7 @@ void Executive_Context::do_on_scope_exit_exception(Runtime_Error& except)
     // Execute all deferred expressions backwards.
     while(this->m_defer.size()) {
       // Pop an expression.
-      auto pair = ::rocket::move(this->m_defer.mut_back());
+      auto pair = ::std::move(this->m_defer.mut_back());
       this->m_defer.pop_back();
       // Execute it. If an exception is thrown, replace `except` with it.
       ASTERIA_RUNTIME_TRY {
@@ -145,13 +145,13 @@ Reference* Executive_Context::do_lazy_lookup_opt(const phsh_string& name)
       auto& ref = this->open_named_reference(::rocket::sref("__func"));
       // Copy the function name as a constant.
       Reference_root::S_constant xref = { this->m_zvarg.get()->func() };
-      ref = ::rocket::move(xref);
+      ref = ::std::move(xref);
       return &ref;
     }
     if(name == "__this") {
       auto& ref = this->open_named_reference(::rocket::sref("__this"));
       // Copy the `this` reference.
-      ref = ::rocket::move(this->m_self);
+      ref = ::std::move(this->m_self);
       return &ref;
     }
     if(name == "__varg") {
@@ -160,10 +160,10 @@ Reference* Executive_Context::do_lazy_lookup_opt(const phsh_string& name)
       // Allocate a new one otherwise.
       auto varg = this->m_zvarg.get();
       if(ROCKET_UNEXPECT(this->m_args.size()))
-        varg = ::rocket::make_refcnt<Variadic_Arguer>(*varg, ::rocket::move(this->m_args));
+        varg = ::rocket::make_refcnt<Variadic_Arguer>(*varg, ::std::move(this->m_args));
       // Set the `__varg` function.
-      Reference_root::S_constant xref = { ::rocket::move(varg) };
-      ref = ::rocket::move(xref);
+      Reference_root::S_constant xref = { ::std::move(varg) };
+      ref = ::std::move(xref);
       return &ref;
     }
     return nullptr;

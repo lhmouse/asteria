@@ -70,15 +70,15 @@ template<typename valueT, typename allocT> class cow_vector
       }
     cow_vector(cow_vector&& other) noexcept
       :
-        m_sth(noadl::move(other.m_sth.as_allocator()))
+        m_sth(::std::move(other.m_sth.as_allocator()))
       {
-        this->assign(noadl::move(other));
+        this->assign(::std::move(other));
       }
     cow_vector(cow_vector&& other, const allocator_type& alloc) noexcept
       :
         m_sth(alloc)
       {
-        this->assign(noadl::move(other));
+        this->assign(::std::move(other));
       }
     constexpr cow_vector(nullopt_t = nullopt_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
       :
@@ -110,7 +110,7 @@ template<typename valueT, typename allocT> class cow_vector
       :
         cow_vector(alloc)
       {
-        this->assign(noadl::move(first), noadl::move(last));
+        this->assign(::std::move(first), ::std::move(last));
       }
     cow_vector(initializer_list<value_type> init, const allocator_type& alloc = allocator_type())
       :
@@ -132,7 +132,7 @@ template<typename valueT, typename allocT> class cow_vector
     cow_vector& operator=(cow_vector&& other) noexcept
       {
         noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        this->assign(noadl::move(other));
+        this->assign(::std::move(other));
         return *this;
       }
     cow_vector& operator=(initializer_list<value_type> init)
@@ -204,7 +204,7 @@ template<typename valueT, typename allocT> class cow_vector
       {
         auto cnt_old = this->size();
         ROCKET_ASSERT(tpos <= cnt_old);
-        details_cow_vector::tagged_append(this, noadl::forward<paramsT>(params)...);
+        details_cow_vector::tagged_append(this, ::std::forward<paramsT>(params)...);
         auto cnt_add = this->size() - cnt_old;
         this->do_reserve_more(0);
         auto ptr = this->m_sth.mut_data_unchecked();
@@ -462,12 +462,12 @@ template<typename valueT, typename allocT> class cow_vector
         }
         auto dist = noadl::estimate_distance(first, last);
         if(dist == 0) {
-          noadl::ranged_do_while(noadl::move(first), noadl::move(last),
+          noadl::ranged_do_while(::std::move(first), ::std::move(last),
                                  [&](const inputT& it) { this->emplace_back(*it);  });
           return *this;
         }
         this->do_reserve_more(dist);
-        noadl::ranged_do_while(noadl::move(first), noadl::move(last),
+        noadl::ranged_do_while(::std::move(first), ::std::move(last),
                                [&](const inputT& it) { this->m_sth.emplace_back_unchecked(*it);  });
         return *this;
       }
@@ -475,7 +475,7 @@ template<typename valueT, typename allocT> class cow_vector
     template<typename... paramsT> reference emplace_back(paramsT&&... params)
       {
         this->do_reserve_more(1);
-        auto ptr = this->m_sth.emplace_back_unchecked(noadl::forward<paramsT>(params)...);
+        auto ptr = this->m_sth.emplace_back_unchecked(::std::forward<paramsT>(params)...);
         return *ptr;
       }
     // N.B. The return type is a non-standard extension.
@@ -496,7 +496,7 @@ template<typename valueT, typename allocT> class cow_vector
     reference push_back(value_type&& value)
       {
         this->do_reserve_more(1);
-        auto ptr = this->m_sth.emplace_back_unchecked(noadl::move(value));
+        auto ptr = this->m_sth.emplace_back_unchecked(::std::move(value));
         return *ptr;
       }
 
@@ -509,7 +509,7 @@ template<typename valueT, typename allocT> class cow_vector
     // N.B. This is a non-standard extension.
     cow_vector& insert(size_type tpos, value_type&& value)
       {
-        this->do_insert_no_bound_check(tpos + this->do_clamp_subvec(tpos, 0), details_cow_vector::push_back, noadl::move(value));
+        this->do_insert_no_bound_check(tpos + this->do_clamp_subvec(tpos, 0), details_cow_vector::push_back, ::std::move(value));
         return *this;
       }
     // N.B. This is a non-standard extension.
@@ -527,7 +527,7 @@ template<typename valueT, typename allocT> class cow_vector
     // N.B. This is a non-standard extension.
     template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)> cow_vector& insert(size_type tpos, inputT first, inputT last)
       {
-        this->do_insert_no_bound_check(tpos + this->do_clamp_subvec(tpos, 0), details_cow_vector::append, noadl::move(first), noadl::move(last));
+        this->do_insert_no_bound_check(tpos + this->do_clamp_subvec(tpos, 0), details_cow_vector::append, ::std::move(first), ::std::move(last));
         return *this;
       }
     iterator insert(const_iterator tins, const value_type& value)
@@ -539,7 +539,7 @@ template<typename valueT, typename allocT> class cow_vector
     iterator insert(const_iterator tins, value_type&& value)
       {
         auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
-        auto ptr = this->do_insert_no_bound_check(tpos, details_cow_vector::push_back, noadl::move(value));
+        auto ptr = this->do_insert_no_bound_check(tpos, details_cow_vector::push_back, ::std::move(value));
         return iterator(this->m_sth, ptr);
       }
     // N.B. The parameter pack is a non-standard extension.
@@ -558,7 +558,7 @@ template<typename valueT, typename allocT> class cow_vector
     template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)> iterator insert(const_iterator tins, inputT first, inputT last)
       {
         auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
-        auto ptr = this->do_insert_no_bound_check(tpos, details_cow_vector::append, noadl::move(first), noadl::move(last));
+        auto ptr = this->do_insert_no_bound_check(tpos, details_cow_vector::append, ::std::move(first), ::std::move(last));
         return iterator(this->m_sth, ptr);
       }
 
@@ -621,7 +621,7 @@ template<typename valueT, typename allocT> class cow_vector
     // N.B. The return type is a non-standard extension.
     cow_vector& assign(cow_vector&& other) noexcept
       {
-        this->m_sth.share_with(noadl::move(other.m_sth));
+        this->m_sth.share_with(::std::move(other.m_sth));
         return *this;
       }
     // N.B. The parameter pack is a non-standard extension.
@@ -643,7 +643,7 @@ template<typename valueT, typename allocT> class cow_vector
     template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)> cow_vector& assign(inputT first, inputT last)
       {
         this->clear();
-        this->append(noadl::move(first), noadl::move(last));
+        this->append(::std::move(first), ::std::move(last));
         return *this;
       }
 

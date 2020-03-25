@@ -46,9 +46,6 @@ namespace Asteria {
 
 #define ASTERIA_INCOMPLET(T)       template<typename T##_1_ = T, typename T = T##_1_>
 
-#define ASTERIA_VOID_T(...)        typename ::rocket::make_void<__VA_ARGS__>::type
-#define ASTERIA_VOID_OF(...)       typename ::rocket::make_void<decltype(__VA_ARGS__)>::type
-
 // `using`-directives
 using ::std::initializer_list;
 using ::std::integer_sequence;
@@ -227,7 +224,7 @@ class cow_opaque
       }
     template<typename OpaqueT> constexpr cow_opaque(rcptr<OpaqueT> sptr) noexcept
       :
-        m_sptr(::rocket::move(sptr))
+        m_sptr(::std::move(sptr))
       {
       }
 
@@ -360,7 +357,7 @@ class cow_function
       }
     template<typename FunctionT> constexpr cow_function(rcptr<FunctionT> sptr) noexcept
       :
-        m_sptr(::rocket::move(sptr))
+        m_sptr(::std::move(sptr))
       {
       }
 

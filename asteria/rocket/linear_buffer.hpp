@@ -60,7 +60,7 @@ template<typename charT, typename traitsT, typename allocT>
       }
     basic_linear_buffer(basic_linear_buffer&& other) noexcept
       :
-        m_stor(noadl::move(other.m_stor.as_allocator()))
+        m_stor(::std::move(other.m_stor.as_allocator()))
       {
         // Steal the buffer from `other`.
         this->do_exchange_with(other);

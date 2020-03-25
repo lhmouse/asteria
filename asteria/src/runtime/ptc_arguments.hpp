@@ -32,7 +32,7 @@ class PTC_Arguments final : public Rcfwd<PTC_Arguments>
                   const cow_function& target, cow_vector<Reference>&& args_self)
       :
         m_sloc(sloc), m_zvarg(zvarg), m_ptc(ptc),
-        m_target(target), m_args_self(::rocket::move(args_self))
+        m_target(target), m_args_self(::std::move(args_self))
       {
       }
     ~PTC_Arguments() override;

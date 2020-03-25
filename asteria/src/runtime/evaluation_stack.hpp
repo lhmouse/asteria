@@ -50,14 +50,14 @@ class Evaluation_Stack
         // This may throw allocation failure if `refs` is not unique.
         // Reuse the storage of `refs` and initialize the stack to empty.
         this->m_etop = refs.mut_data();
-        this->m_refs = ::rocket::move(refs);
+        this->m_refs = ::std::move(refs);
         ROCKET_ASSERT(this->m_etop == this->m_refs.data());
         return *this;
       }
     Evaluation_Stack& unreserve(cow_vector<Reference>& refs) noexcept
       {
         // This is the inverse of `reserve()`.
-        refs = ::rocket::move(this->m_refs);
+        refs = ::std::move(this->m_refs);
         this->m_refs.clear();
         this->m_etop = nullptr;
         return *this;
@@ -77,12 +77,12 @@ class Evaluation_Stack
       {
         if(ROCKET_EXPECT(this->size() < this->m_refs.size())) {
           // Overwrite the next element.
-          this->m_etop[0] = ::rocket::forward<XRefT>(xref);
+          this->m_etop[0] = ::std::forward<XRefT>(xref);
           this->m_etop += 1;
         }
         else {
           // Push a new element.
-          this->m_refs.emplace_back(::rocket::forward<XRefT>(xref));
+          this->m_refs.emplace_back(::std::forward<XRefT>(xref));
           this->m_etop = this->m_refs.mut_data() + this->m_refs.size();
         }
         return this->m_etop[-1];

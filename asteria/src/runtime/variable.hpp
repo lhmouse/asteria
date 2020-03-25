@@ -58,7 +58,7 @@ class Variable final : public Rcfwd<Variable>
       }
     template<typename XValT> Variable& initialize(XValT&& xval, bool immut)
       {
-        this->m_value = ::rocket::forward<XValT>(xval);
+        this->m_value = ::std::forward<XValT>(xval);
         this->m_immut = immut;
         this->m_alive = true;
         return *this;

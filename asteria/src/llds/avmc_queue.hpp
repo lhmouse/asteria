@@ -141,7 +141,7 @@ class AVMC_Queue
                 // Construct the bound parameter using perfect forwarding.
                 ::rocket::construct_at(
                   static_cast<typename ::rocket::remove_cvref<XNodeT>::type*>(paramv),
-                  ::rocket::forward<XNodeT>(*(typename ::std::remove_reference<XNodeT>::type*)source));
+                  ::std::forward<XNodeT>(*(typename ::std::remove_reference<XNodeT>::type*)source));
               }
             static void destroy(ParamU /*paramu*/, void* paramv) noexcept
               {
@@ -198,13 +198,13 @@ class AVMC_Queue
       {
         // Append a node with a parameter of type `remove_cvref_t<XNodeT>`.
         this->do_dispatch_append<execT, nullptr>(::std::is_trivial<typename ::std::remove_reference<XNodeT>::type>(),
-                                                 paramu, ::rocket::forward<XNodeT>(xnode));
+                                                 paramu, ::std::forward<XNodeT>(xnode));
         return *this;
       }
     template<Executor execT, Enumerator enumT, typename XNodeT> AVMC_Queue& append(ParamU paramu, XNodeT&& xnode)
       {
         // Append a node with a parameter of type `remove_cvref_t<XNodeT>`.
-        this->do_dispatch_append<execT, enumT>(::std::false_type(), paramu, ::rocket::forward<XNodeT>(xnode));
+        this->do_dispatch_append<execT, enumT>(::std::false_type(), paramu, ::std::forward<XNodeT>(xnode));
         return *this;
       }
     AVMC_Queue& append_trivial(Executor* exec, ParamU paramu, const void* data, size_t size)

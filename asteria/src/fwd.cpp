@@ -35,19 +35,19 @@ Reference& cow_function::invoke_ptc_aware(Reference& self, Global_Context& globa
   {
     auto fptr = this->m_fptr;
     if(fptr) {
-      Reference_root::S_temporary xref = { (*fptr)(::rocket::move(args), ::rocket::move(self), global) };
-      return self = ::rocket::move(xref);  // static
+      Reference_root::S_temporary xref = { (*fptr)(::std::move(args), ::std::move(self), global) };
+      return self = ::std::move(xref);  // static
     }
     auto ptr = this->m_sptr.get();
     if(!ptr) {
       this->do_throw_null_pointer();
     }
-    return ptr->invoke_ptc_aware(self, global, ::rocket::move(args));  // dynamic
+    return ptr->invoke_ptc_aware(self, global, ::std::move(args));  // dynamic
   }
 
 Reference& cow_function::invoke(Reference& self, Global_Context& global, cow_vector<Reference>&& args) const
   {
-    this->invoke_ptc_aware(self, global, ::rocket::move(args));
+    this->invoke_ptc_aware(self, global, ::std::move(args));
     self.finish_call(global);
     return self;
   }
@@ -55,7 +55,7 @@ Reference& cow_function::invoke(Reference& self, Global_Context& global, cow_vec
 Reference cow_function::invoke(Global_Context& global, cow_vector<Reference>&& args) const
   {
     Reference self = Reference_root::S_constant();
-    this->invoke_ptc_aware(self, global, ::rocket::move(args));
+    this->invoke_ptc_aware(self, global, ::std::move(args));
     self.finish_call(global);
     return self;
   }

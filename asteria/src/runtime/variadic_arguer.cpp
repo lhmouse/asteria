@@ -30,7 +30,7 @@ Reference& Variadic_Arguer::invoke_ptc_aware(Reference& self, Global_Context& /*
       if(!qindex) {
         // Return the number of variadic arguments if `index` is `null` or absent.
         Reference_root::S_constant xref = { V_integer(nvargs) };
-        return self = ::rocket::move(xref);
+        return self = ::std::move(xref);
       }
       // Return the argument at `index`.
       auto w = wrap_index(*qindex, nvargs);

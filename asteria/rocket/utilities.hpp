@@ -133,86 +133,65 @@ using ::std::swap;
 
 namespace noadl = ::rocket;
 
+#include "details/utilities.tcc"
+
 #define ROCKET_ENABLE_IF(...)            typename ::std::enable_if<+bool(__VA_ARGS__)>::type* = nullptr
 #define ROCKET_DISABLE_IF(...)           typename ::std::enable_if<!bool(__VA_ARGS__)>::type* = nullptr
 
-template<typename... unusedT> struct make_void
-  {
-    using type = void;
-  };
-
-#define ROCKET_ENABLE_IF_HAS_TYPE(...)       typename ::rocket::make_void<typename __VA_ARGS__>::type* = nullptr
+#define ROCKET_ENABLE_IF_HAS_TYPE(...)       typename ::std::conditional<1, void, typename __VA_ARGS__>::type* = nullptr
 #define ROCKET_ENABLE_IF_HAS_VALUE(...)      typename ::std::enable_if<!sizeof((__VA_ARGS__)) || true>::type* = nullptr
 
-// The argument must be a non-const lvalue.
-template<typename argT, ROCKET_DISABLE_IF(is_same<const argT, argT>::value)>
-    ROCKET_ARTIFICIAL_FUNCTION constexpr argT&& move(argT& arg) noexcept
-  {
-    return static_cast<typename remove_reference<argT>::type&&>(arg);
-  }
-
-// The argument must be an lvalue.
-template<typename targetT, typename argT, ROCKET_ENABLE_IF(is_reference<argT>::value)>
-    ROCKET_ARTIFICIAL_FUNCTION constexpr targetT&& forward(argT&& arg) noexcept
-  {
-    return static_cast<targetT&&>(arg);
-  }
-
-#include "details/utilities.tcc"
-
-template<typename lhsT, typename rhsT>
-    struct is_lvalue_assignable : is_assignable<typename add_lvalue_reference<lhsT>::type, rhsT>
+template<typename lhsT, typename rhsT> struct is_lvalue_assignable
+    : is_assignable<typename add_lvalue_reference<lhsT>::type, rhsT>
   {
   };
 
-template<typename typeT>
-    struct remove_cvref : remove_cv<typename remove_reference<typeT>::type>
+template<typename typeT> struct remove_cvref
+    : remove_cv<typename remove_reference<typeT>::type>
   {
   };
 
-template<typename typeT>
-    struct is_nothrow_swappable : integral_constant<bool, noexcept(swap(::std::declval<typeT&>(),
-                                                                        ::std::declval<typeT&>()))>
+template<typename typeT> struct is_nothrow_swappable
+    : integral_constant<bool, noexcept(swap(::std::declval<typeT&>(), ::std::declval<typeT&>()))>
   {
   };
 
-template<typename typeT>
-    ROCKET_ARTIFICIAL_FUNCTION inline void xswap(typeT& lhs, typeT& rhs) noexcept(noexcept(swap(lhs, rhs)))
+template<typename typeT> inline void xswap(typeT& lhs, typeT& rhs) noexcept(noexcept(swap(lhs, rhs)))
   {
     swap(lhs, rhs);
   }
 
 template<typename firstT, typename secondT, typename... restT>
-    struct select_type : select_type<typename select_type<firstT, secondT>::type,
-                                     restT...>
+    struct select_type
+      : select_type<typename select_type<firstT, secondT>::type, restT...>
   {
   };
 template<typename firstT, typename secondT>
-    struct select_type<firstT, secondT> : enable_if<1, decltype(1 ? ::std::declval<firstT ()>()()
-                                                                  : ::std::declval<secondT ()>()())>
+    struct select_type<firstT, secondT>
+      : enable_if<true, decltype(1 ? ::std::declval<firstT ()>()() : ::std::declval<secondT ()>()())>
   {
   };
 
 template<typename lhsT, typename rhsT>
     constexpr typename select_type<lhsT&&, rhsT&&>::type min(lhsT&& lhs, rhsT&& rhs)
   {
-    return (rhs < lhs) ? noadl::forward<rhsT>(rhs)
-                       : noadl::forward<lhsT>(lhs);
+    return (rhs < lhs) ? ::std::forward<rhsT>(rhs)
+                       : ::std::forward<lhsT>(lhs);
   }
 
 template<typename lhsT, typename rhsT>
     constexpr typename select_type<lhsT&&, rhsT&&>::type max(lhsT&& lhs, rhsT&& rhs)
   {
-    return (lhs < rhs) ? noadl::forward<rhsT>(rhs)
-                       : noadl::forward<lhsT>(lhs);
+    return (lhs < rhs) ? ::std::forward<rhsT>(rhs)
+                       : ::std::forward<lhsT>(lhs);
   }
 
-template<typename testT, typename lowerT, typename upperT>
-    constexpr typename select_type<testT&&, lowerT&&, upperT&&>::type clamp(testT&& test, lowerT&& lower, upperT&& upper)
+template<typename xvT, typename loT, typename upT>
+    constexpr typename select_type<xvT&&, loT&&, upT&&>::type clamp(xvT&& xv, loT&& lo, upT&& up)
   {
-    return (test < lower) ? noadl::forward<lowerT>(lower)
-                          : (upper < test) ? noadl::forward<upperT>(upper)
-                                           : noadl::forward<testT>(test);
+    return (xv < lo) ?             ::std::forward<loT>(lo)
+                     : (up < xv) ? ::std::forward<upT>(up)
+                                 : ::std::forward<xvT>(xv);
   }
 
 template<typename typeT, typename = void>
@@ -221,7 +200,8 @@ template<typename typeT, typename = void>
   {
   };
 template<typename typeT>
-    struct is_input_iterator<typeT, typename make_void<typename iterator_traits<typeT>::iterator_category>::type>
+    struct is_input_iterator<typeT, typename conditional<1, void,
+                                        typename iterator_traits<typeT>::iterator_category>::type>
       : integral_constant<bool, true>
   {
   };
@@ -229,16 +209,16 @@ template<typename typeT>
 template<typename firstT, typename lastT, typename funcT, typename... paramsT>
     void ranged_for(firstT first, lastT last, funcT&& func, const paramsT&... params)
   {
-    for(auto qit = noadl::move(first); qit != last; ++qit)
-      noadl::forward<funcT>(func)(qit, params...);
+    for(auto qit = ::std::move(first); qit != last; ++qit)
+      ::std::forward<funcT>(func)(qit, params...);
   }
 
 template<typename firstT, typename lastT, typename funcT, typename... paramsT>
     void ranged_do_while(firstT first, lastT last, funcT&& func, const paramsT&... params)
   {
-    auto qit = noadl::move(first);
+    auto qit = ::std::move(first);
     do {
-      noadl::forward<funcT>(func)(qit, params...);
+      ::std::forward<funcT>(func)(qit, params...);
     } while(++qit != last);
   }
 
@@ -264,7 +244,7 @@ template<typename iteratorT>
     constexpr size_t estimate_distance(iteratorT first, iteratorT last)
   {
     return details_utilities::estimate_distance_aux(typename iterator_traits<iteratorT>::iterator_category(),
-                                                    noadl::move(first), noadl::move(last));
+                                                    ::std::move(first), ::std::move(last));
   }
 
 template<typename elementT, typename... paramsT>
@@ -274,7 +254,7 @@ template<typename elementT, typename... paramsT>
 #ifdef ROCKET_DEBUG
     ::std::memset(static_cast<void*>(ptr), 0xAA, sizeof(elementT));
 #endif
-    return ::new(static_cast<void*>(ptr)) elementT(noadl::forward<paramsT>(params)...);
+    return ::new(static_cast<void*>(ptr)) elementT(::std::forward<paramsT>(params)...);
   }
 
 template<typename elementT>
@@ -357,61 +337,61 @@ template<typename elementT> void rotate(elementT* ptr, size_t begin, size_t seek
 template<typename containerT, typename callbackT>
     void for_each(containerT&& cont, callbackT&& callback)
   {
-    return details_utilities::for_each_nonconstexpr(noadl::forward<containerT>(cont),
-                                                    noadl::forward<callbackT>(callback));
+    return details_utilities::for_each_nonconstexpr(::std::forward<containerT>(cont),
+                                                    ::std::forward<callbackT>(callback));
   }
 template<typename elementT, typename callbackT>
     void for_each(initializer_list<elementT> init, callbackT&& callback)
   {
-    return details_utilities::for_each_nonconstexpr(init, noadl::forward<callbackT>(callback));
+    return details_utilities::for_each_nonconstexpr(init, ::std::forward<callbackT>(callback));
   }
 
 template<typename containerT, typename callbackT>
     constexpr bool any_of(containerT&& cont, callbackT&& callback)
   {
-    return details_utilities::any_of_nonconstexpr(noadl::forward<containerT>(cont),
-                                                  noadl::forward<callbackT>(callback));
+    return details_utilities::any_of_nonconstexpr(::std::forward<containerT>(cont),
+                                                  ::std::forward<callbackT>(callback));
   }
 template<typename elementT, typename callbackT>
     constexpr bool any_of(initializer_list<elementT> init, callbackT&& callback)
   {
-    return details_utilities::any_of_nonconstexpr(init, noadl::forward<callbackT>(callback));
+    return details_utilities::any_of_nonconstexpr(init, ::std::forward<callbackT>(callback));
   }
 
 template<typename containerT, typename callbackT>
     constexpr bool none_of(containerT&& cont, callbackT&& callback)
   {
-    return details_utilities::none_of_nonconstexpr(noadl::forward<containerT>(cont),
-                                                   noadl::forward<callbackT>(callback));
+    return details_utilities::none_of_nonconstexpr(::std::forward<containerT>(cont),
+                                                   ::std::forward<callbackT>(callback));
   }
 template<typename elementT, typename callbackT>
     constexpr bool none_of(initializer_list<elementT> init, callbackT&& callback)
   {
-    return details_utilities::none_of_nonconstexpr(init, noadl::forward<callbackT>(callback));
+    return details_utilities::none_of_nonconstexpr(init, ::std::forward<callbackT>(callback));
   }
 
 template<typename targetT, typename containerT>
     constexpr bool is_any_of(targetT&& targ, containerT&& cont)
   {
-    return details_utilities::is_any_of_nonconstexpr(noadl::forward<targetT>(targ),
-                                                     noadl::forward<containerT>(cont));
+    return details_utilities::is_any_of_nonconstexpr(::std::forward<targetT>(targ),
+                                                     ::std::forward<containerT>(cont));
   }
 template<typename targetT, typename elementT>
     constexpr bool is_any_of(targetT&& targ, initializer_list<elementT> init)
   {
-    return details_utilities::is_any_of_nonconstexpr(noadl::forward<targetT>(targ), init);
+    return details_utilities::is_any_of_nonconstexpr(::std::forward<targetT>(targ), init);
   }
 
 template<typename targetT, typename containerT>
     constexpr bool is_none_of(targetT&& targ, containerT&& cont)
   {
-    return details_utilities::is_none_of_nonconstexpr(noadl::forward<targetT>(targ),
-                                                      noadl::forward<containerT>(cont));
+    return details_utilities::is_none_of_nonconstexpr(::std::forward<targetT>(targ),
+                                                      ::std::forward<containerT>(cont));
   }
 template<typename targetT, typename elementT>
     constexpr bool is_none_of(targetT&& targ, initializer_list<elementT> init)
   {
-    return details_utilities::is_none_of_nonconstexpr(noadl::forward<targetT>(targ), init);
+    return details_utilities::is_none_of_nonconstexpr(::std::forward<targetT>(targ), init);
   }
 
 template<typename enumT>
@@ -457,7 +437,7 @@ template<typename targetT, typename sourceT>
     constexpr targetT static_or_dynamic_cast(sourceT&& src)
   {
     return details_utilities::static_or_dynamic_cast_aux<targetT, sourceT>(
-                  details_utilities::use_static_cast_aux<targetT, sourceT>(), noadl::forward<sourceT>(src));
+                  details_utilities::use_static_cast_aux<targetT, sourceT>(), ::std::forward<sourceT>(src));
   }
 
 }  // namespace rocket

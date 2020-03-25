@@ -143,7 +143,7 @@ template<typename charT, typename traitsT, typename valueT,
 template<typename charT, typename traitsT, typename xvalueT>
     basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>&& fmt, xvalueT&& xvalue)
   {
-    return fmt << noadl::forward<xvalueT>(xvalue);
+    return fmt << ::std::forward<xvalueT>(xvalue);
   }
 
 extern template tinyfmt&  operator<<(tinyfmt&,  char);

@@ -60,7 +60,7 @@ void Variable_HashSet::do_xrelocate_but(Variable_HashSet::Bucket* qxcld) noexcep
         auto qbkt = &rb;
         // Transfer ownership of the old variable, then detach the bucket.
         ROCKET_ASSERT(*qbkt);
-        auto var = ::rocket::move(qbkt->kstor[0]);
+        auto var = ::std::move(qbkt->kstor[0]);
         ::rocket::destroy_at(qbkt->kstor);
         this->do_list_detach(qbkt);
         // Find a new bucket for the variable using linear probing.
@@ -71,7 +71,7 @@ void Variable_HashSet::do_xrelocate_but(Variable_HashSet::Bucket* qxcld) noexcep
         // Insert the variable into the new bucket.
         ROCKET_ASSERT(!*qbkt);
         this->do_list_attach(qbkt);
-        ::rocket::construct_at(qbkt->kstor, ::rocket::move(var));
+        ::rocket::construct_at(qbkt->kstor, ::std::move(var));
         // Keep probing until an empty bucket is found.
         return false;
       });
@@ -122,7 +122,7 @@ void Variable_HashSet::do_rehash(size_t nbkt)
       auto qbkt = ::std::exchange(next, next->next);
       // Transfer ownership of the old variable, then destroy the bucket.
       ROCKET_ASSERT(*qbkt);
-      auto var = ::rocket::move(qbkt->kstor[0]);
+      auto var = ::std::move(qbkt->kstor[0]);
       ::rocket::destroy_at(qbkt->kstor);
       qbkt->prev = nullptr;
       // Find a new bucket for the variable using linear probing.
@@ -133,7 +133,7 @@ void Variable_HashSet::do_rehash(size_t nbkt)
       // Insert the variable into the new bucket.
       ROCKET_ASSERT(!*qbkt);
       this->do_list_attach(qbkt);
-      ::rocket::construct_at(qbkt->kstor, ::rocket::move(var));
+      ::rocket::construct_at(qbkt->kstor, ::std::move(var));
     }
     // Deallocate the old table.
     if(bold) {

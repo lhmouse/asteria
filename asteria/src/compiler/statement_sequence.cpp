@@ -281,7 +281,7 @@ opt<cow_vector<phsh_string>> do_accept_identifier_list_opt(Token_Stream& tstrm)
     }
     cow_vector<phsh_string> names;
     for(;;) {
-      names.emplace_back(::rocket::move(*qname));
+      names.emplace_back(::std::move(*qname));
       // Look for the separator.
       auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
       if(!kpunct) {
@@ -292,7 +292,7 @@ opt<cow_vector<phsh_string>> do_accept_identifier_list_opt(Token_Stream& tstrm)
         do_throw_parser_error(tstrm, parser_status_identifier_expected);
       }
     }
-    return ::rocket::move(names);
+    return names;
   }
 
 opt<cow_vector<phsh_string>> do_accept_variable_declarator_opt(Token_Stream& tstrm)
@@ -307,8 +307,8 @@ opt<cow_vector<phsh_string>> do_accept_variable_declarator_opt(Token_Stream& tst
     if(qname) {
       // Accept a single identifier.
       cow_vector<phsh_string> names;
-      names.emplace_back(::rocket::move(*qname));
-      return ::rocket::move(names);
+      names.emplace_back(::std::move(*qname));
+      return names;
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_op });
     if(kpunct) {
@@ -325,7 +325,7 @@ opt<cow_vector<phsh_string>> do_accept_variable_declarator_opt(Token_Stream& tst
       // Make the list different from a plain, sole one.
       qnames->insert(0, ::rocket::sref("["));
       qnames->emplace_back(::rocket::sref("]"));
-      return ::rocket::move(qnames);
+      return qnames;
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
     if(kpunct) {
@@ -342,7 +342,7 @@ opt<cow_vector<phsh_string>> do_accept_variable_declarator_opt(Token_Stream& tst
       // Make the list different from a plain, sole one.
       qnames->insert(0, ::rocket::sref("{"));
       qnames->emplace_back(::rocket::sref("}"));
-      return ::rocket::move(qnames);
+      return qnames;
     }
     return nullopt;
   }
@@ -364,8 +364,8 @@ opt<Statement::S_expression> do_accept_expression_opt(Token_Stream& tstrm)
     if(!succ) {
       return nullopt;
     }
-    Statement::S_expression xexpr = { ::rocket::move(sloc), ::rocket::move(units) };
-    return ::rocket::move(xexpr);
+    Statement::S_expression xexpr = { ::std::move(sloc), ::std::move(units) };
+    return xexpr;
   }
 
 opt<Statement::S_block> do_accept_block_opt(Token_Stream& tstrm)
@@ -387,14 +387,14 @@ opt<Statement::S_block> do_accept_block_opt(Token_Stream& tstrm)
       if(!qstmt) {
         break;
       }
-      body.emplace_back(::rocket::move(*qstmt));
+      body.emplace_back(::std::move(*qstmt));
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
     if(!kpunct) {
       do_throw_parser_error(tstrm, parser_status_closed_brace_or_statement_expected);
     }
-    Statement::S_block xstmt = { ::rocket::move(sloc), ::rocket::move(body) };
-    return ::rocket::move(xstmt);
+    Statement::S_block xstmt = { ::std::move(sloc), ::std::move(body) };
+    return xstmt;
   }
 
 opt<Statement> do_accept_block_statement_opt(Token_Stream& tstrm)
@@ -403,7 +403,7 @@ opt<Statement> do_accept_block_statement_opt(Token_Stream& tstrm)
     if(!qblock) {
       return nullopt;
     }
-    return ::rocket::move(*qblock);
+    return ::std::move(*qblock);
   }
 
 opt<Statement::S_expression> do_accept_equal_initializer_opt(Token_Stream& tstrm)
@@ -428,8 +428,8 @@ opt<Statement> do_accept_null_statement_opt(Token_Stream& tstrm)
     if(!kpunct) {
       return nullopt;
     }
-    Statement::S_expression xstmt = { ::rocket::move(sloc), nullopt };
-    return ::rocket::move(xstmt);
+    Statement::S_expression xstmt = { ::std::move(sloc), nullopt };
+    return xstmt;
   }
 
 opt<Statement> do_accept_variable_definition_opt(Token_Stream& tstrm)
@@ -455,9 +455,9 @@ opt<Statement> do_accept_variable_definition_opt(Token_Stream& tstrm)
       if(!qinit) {
         qinit.emplace();
       }
-      slocs.emplace_back(::rocket::move(sloc));
-      decls.emplace_back(::rocket::move(*qdecl));
-      inits.emplace_back(::rocket::move(*qinit));
+      slocs.emplace_back(::std::move(sloc));
+      decls.emplace_back(::std::move(*qdecl));
+      inits.emplace_back(::std::move(*qinit));
       // Look for the separator.
       auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
       if(!kpunct) {
@@ -468,8 +468,8 @@ opt<Statement> do_accept_variable_definition_opt(Token_Stream& tstrm)
     if(!kpunct) {
       do_throw_parser_error(tstrm, parser_status_semicolon_expected);
     }
-    Statement::S_variables xstmt = { false, ::rocket::move(slocs), ::rocket::move(decls), ::rocket::move(inits) };
-    return ::rocket::move(xstmt);
+    Statement::S_variables xstmt = { false, ::std::move(slocs), ::std::move(decls), ::std::move(inits) };
+    return xstmt;
   }
 
 opt<Statement> do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
@@ -495,9 +495,9 @@ opt<Statement> do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
       if(!qinit) {
         do_throw_parser_error(tstrm, parser_status_equals_sign_expected);
       }
-      slocs.emplace_back(::rocket::move(sloc));
-      decls.emplace_back(::rocket::move(*qdecl));
-      inits.emplace_back(::rocket::move(*qinit));
+      slocs.emplace_back(::std::move(sloc));
+      decls.emplace_back(::std::move(*qdecl));
+      inits.emplace_back(::std::move(*qinit));
       // Look for the separator.
       auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
       if(!kpunct) {
@@ -508,8 +508,8 @@ opt<Statement> do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
     if(!kpunct) {
       do_throw_parser_error(tstrm, parser_status_semicolon_expected);
     }
-    Statement::S_variables xstmt = { true, ::rocket::move(slocs), ::rocket::move(decls), ::rocket::move(inits) };
-    return ::rocket::move(xstmt);
+    Statement::S_variables xstmt = { true, ::std::move(slocs), ::std::move(decls), ::std::move(inits) };
+    return xstmt;
   }
 
 opt<cow_vector<phsh_string>> do_accept_parameter_list_opt(Token_Stream& tstrm)
@@ -522,14 +522,14 @@ opt<cow_vector<phsh_string>> do_accept_parameter_list_opt(Token_Stream& tstrm)
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_ellipsis });
     if(kpunct) {
       params.emplace_back(::rocket::sref("..."));
-      return ::rocket::move(params);
+      return params;
     }
     auto qname = do_accept_identifier_opt(tstrm);
     if(!qname) {
       return nullopt;
     }
     for(;;) {
-      params.emplace_back(::rocket::move(*qname));
+      params.emplace_back(::std::move(*qname));
       // The code above looks so ugly...
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
       if(!kpunct) {
@@ -538,14 +538,14 @@ opt<cow_vector<phsh_string>> do_accept_parameter_list_opt(Token_Stream& tstrm)
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_ellipsis });
       if(kpunct) {
         params.emplace_back(::rocket::sref("..."));
-        return ::rocket::move(params);
+        return params;
       }
       qname = do_accept_identifier_opt(tstrm);
       if(!qname) {
         do_throw_parser_error(tstrm, parser_status_parameter_or_ellipsis_expected);
       }
     }
-    return ::rocket::move(params);
+    return params;
   }
 
 opt<Statement> do_accept_function_definition_opt(Token_Stream& tstrm)
@@ -577,9 +577,9 @@ opt<Statement> do_accept_function_definition_opt(Token_Stream& tstrm)
     if(!qbody) {
       do_throw_parser_error(tstrm, parser_status_open_brace_expected);
     }
-    Statement::S_function xstmt = { ::rocket::move(sloc), ::rocket::move(*qname), ::rocket::move(*kparams),
-                                    ::rocket::move(qbody->stmts) };
-    return ::rocket::move(xstmt);
+    Statement::S_function xstmt = { ::std::move(sloc), ::std::move(*qname), ::std::move(*kparams),
+                                    ::std::move(qbody->stmts) };
+    return xstmt;
   }
 
 opt<Statement> do_accept_expression_statement_opt(Token_Stream& tstrm)
@@ -594,8 +594,8 @@ opt<Statement> do_accept_expression_statement_opt(Token_Stream& tstrm)
     if(!kpunct) {
       do_throw_parser_error(tstrm, parser_status_semicolon_expected);
     }
-    Statement::S_expression xstmt = { ::rocket::move(*kexpr) };
-    return ::rocket::move(xstmt);
+    Statement::S_expression xstmt = { ::std::move(*kexpr) };
+    return xstmt;
   }
 
 opt<Statement::S_block> do_accept_else_branch_opt(Token_Stream& tstrm)
@@ -610,7 +610,7 @@ opt<Statement::S_block> do_accept_else_branch_opt(Token_Stream& tstrm)
     if(!qblock) {
       do_throw_parser_error(tstrm, parser_status_statement_expected);
     }
-    return ::rocket::move(*qblock);
+    return ::std::move(*qblock);
   }
 
 opt<Statement> do_accept_if_statement_opt(Token_Stream& tstrm)
@@ -647,8 +647,8 @@ opt<Statement> do_accept_if_statement_opt(Token_Stream& tstrm)
     if(!qbfalse) {
       qbfalse.emplace();
     }
-    Statement::S_if xstmt = { *kneg, ::rocket::move(*qcond), ::rocket::move(*qbtrue), ::rocket::move(*qbfalse) };
-    return ::rocket::move(xstmt);
+    Statement::S_if xstmt = { *kneg, ::std::move(*qcond), ::std::move(*qbtrue), ::std::move(*qbfalse) };
+    return xstmt;
   }
 
 opt<Statement> do_accept_switch_statement_opt(Token_Stream& tstrm)
@@ -698,7 +698,7 @@ opt<Statement> do_accept_switch_statement_opt(Token_Stream& tstrm)
         if(!qlabel) {
           do_throw_parser_error(tstrm, parser_status_expression_expected);
         }
-        label = ::rocket::move(*qlabel);
+        label = ::std::move(*qlabel);
       }
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
       if(!kpunct) {
@@ -708,15 +708,15 @@ opt<Statement> do_accept_switch_statement_opt(Token_Stream& tstrm)
       if(!qblock) {
         qblock.emplace();
       }
-      labels.emplace_back(::rocket::move(label));
-      bodies.emplace_back(::rocket::move(*qblock));
+      labels.emplace_back(::std::move(label));
+      bodies.emplace_back(::std::move(*qblock));
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
     if(!kpunct) {
       do_throw_parser_error(tstrm, parser_status_closed_brace_or_switch_clause_expected);
     }
-    Statement::S_switch xstmt = { ::rocket::move(*qctrl), ::rocket::move(labels), ::rocket::move(bodies) };
-    return ::rocket::move(xstmt);
+    Statement::S_switch xstmt = { ::std::move(*qctrl), ::std::move(labels), ::std::move(bodies) };
+    return xstmt;
   }
 
 opt<Statement> do_accept_do_while_statement_opt(Token_Stream& tstrm)
@@ -755,8 +755,8 @@ opt<Statement> do_accept_do_while_statement_opt(Token_Stream& tstrm)
     if(!kpunct) {
       do_throw_parser_error(tstrm, parser_status_semicolon_expected);
     }
-    Statement::S_do_while xstmt = { ::rocket::move(*qblock), *kneg, ::rocket::move(*qcond) };
-    return ::rocket::move(xstmt);
+    Statement::S_do_while xstmt = { ::std::move(*qblock), *kneg, ::std::move(*qcond) };
+    return xstmt;
   }
 
 opt<Statement> do_accept_while_statement_opt(Token_Stream& tstrm)
@@ -787,8 +787,8 @@ opt<Statement> do_accept_while_statement_opt(Token_Stream& tstrm)
     if(!qblock) {
       do_throw_parser_error(tstrm, parser_status_statement_expected);
     }
-    Statement::S_while xstmt = { *kneg, ::rocket::move(*qcond), ::rocket::move(*qblock) };
-    return ::rocket::move(xstmt);
+    Statement::S_while xstmt = { *kneg, ::std::move(*qcond), ::std::move(*qblock) };
+    return xstmt;
   }
 
 opt<Statement> do_accept_for_complement_range_opt(Token_Stream& tstrm)
@@ -827,17 +827,17 @@ opt<Statement> do_accept_for_complement_range_opt(Token_Stream& tstrm)
     if(!qblock) {
       do_throw_parser_error(tstrm, parser_status_statement_expected);
     }
-    Statement::S_for_each xstmt = { ::rocket::move(*qkname), ::rocket::move(*qmname), ::rocket::move(*qinit),
-                                    ::rocket::move(*qblock) };
-    return ::rocket::move(xstmt);
+    Statement::S_for_each xstmt = { ::std::move(*qkname), ::std::move(*qmname), ::std::move(*qinit),
+                                    ::std::move(*qblock) };
+    return xstmt;
   }
 
 Statement::S_block do_blockify_statement(Source_Location&& sloc, Statement&& stmt)
   {
     cow_vector<Statement> stmts;
-    stmts.emplace_back(::rocket::move(stmt));
+    stmts.emplace_back(::std::move(stmt));
     // Make a block consisting of a single statement.
-    Statement::S_block xblock = { ::rocket::move(sloc), ::rocket::move(stmts) };
+    Statement::S_block xblock = { ::std::move(sloc), ::std::move(stmts) };
     return xblock;
   }
 
@@ -848,15 +848,15 @@ opt<Statement::S_block> do_accept_for_initializer_opt(Token_Stream& tstrm)
     auto sloc = do_tell_source_location(tstrm);
     auto qinit = do_accept_null_statement_opt(tstrm);
     if(qinit) {
-      return do_blockify_statement(::rocket::move(sloc), ::rocket::move(*qinit));
+      return do_blockify_statement(::std::move(sloc), ::std::move(*qinit));
     }
     qinit = do_accept_variable_definition_opt(tstrm);
     if(qinit) {
-      return do_blockify_statement(::rocket::move(sloc), ::rocket::move(*qinit));
+      return do_blockify_statement(::std::move(sloc), ::std::move(*qinit));
     }
     qinit = do_accept_immutable_variable_definition_opt(tstrm);
     if(qinit) {
-      return do_blockify_statement(::rocket::move(sloc), ::rocket::move(*qinit));
+      return do_blockify_statement(::std::move(sloc), ::std::move(*qinit));
     }
     return nullopt;
   }
@@ -889,9 +889,9 @@ opt<Statement> do_accept_for_complement_triplet_opt(Token_Stream& tstrm)
     if(!qblock) {
       do_throw_parser_error(tstrm, parser_status_statement_expected);
     }
-    Statement::S_for xstmt = { ::rocket::move(*qinit), ::rocket::move(*qcond), ::rocket::move(*kstep),
-                               ::rocket::move(*qblock) };
-    return ::rocket::move(xstmt);
+    Statement::S_for xstmt = { ::std::move(*qinit), ::std::move(*qcond), ::std::move(*kstep),
+                               ::std::move(*qblock) };
+    return xstmt;
   }
 
 opt<Statement> do_accept_for_complement_opt(Token_Stream& tstrm)
@@ -923,7 +923,7 @@ opt<Statement> do_accept_for_statement_opt(Token_Stream& tstrm)
     if(!qcompl) {
       do_throw_parser_error(tstrm, parser_status_for_statement_initializer_expected);
     }
-    return ::rocket::move(*qcompl);
+    return ::std::move(*qcompl);
   }
 
 opt<Jump_Target> do_accept_break_target_opt(Token_Stream& tstrm)
@@ -960,8 +960,8 @@ opt<Statement> do_accept_break_statement_opt(Token_Stream& tstrm)
     if(!kpunct) {
       do_throw_parser_error(tstrm, parser_status_semicolon_expected);
     }
-    Statement::S_break xstmt = { ::rocket::move(sloc), *qtarget };
-    return ::rocket::move(xstmt);
+    Statement::S_break xstmt = { ::std::move(sloc), *qtarget };
+    return xstmt;
   }
 
 opt<Jump_Target> do_accept_continue_target_opt(Token_Stream& tstrm)
@@ -995,8 +995,8 @@ opt<Statement> do_accept_continue_statement_opt(Token_Stream& tstrm)
     if(!kpunct) {
       do_throw_parser_error(tstrm, parser_status_semicolon_expected);
     }
-    Statement::S_continue xstmt = { ::rocket::move(sloc), *qtarget };
-    return ::rocket::move(xstmt);
+    Statement::S_continue xstmt = { ::std::move(sloc), *qtarget };
+    return xstmt;
   }
 
 opt<Statement> do_accept_throw_statement_opt(Token_Stream& tstrm)
@@ -1015,8 +1015,8 @@ opt<Statement> do_accept_throw_statement_opt(Token_Stream& tstrm)
     if(!kpunct) {
       do_throw_parser_error(tstrm, parser_status_semicolon_expected);
     }
-    Statement::S_throw xstmt = { ::rocket::move(*kexpr) };
-    return ::rocket::move(xstmt);
+    Statement::S_throw xstmt = { ::std::move(*kexpr) };
+    return xstmt;
   }
 
 opt<bool> do_accept_argument_opt(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
@@ -1058,8 +1058,8 @@ opt<Statement> do_accept_return_statement_opt(Token_Stream& tstrm)
     if(!kpunct) {
       do_throw_parser_error(tstrm, parser_status_semicolon_expected);
     }
-    Statement::S_return xstmt = { *qref, { ::rocket::move(sloc), ::rocket::move(units) } };
-    return ::rocket::move(xstmt);
+    Statement::S_return xstmt = { *qref, { ::std::move(sloc), ::std::move(units) } };
+    return xstmt;
   }
 
 opt<cow_string> do_accept_assert_message_opt(Token_Stream& tstrm)
@@ -1074,7 +1074,7 @@ opt<cow_string> do_accept_assert_message_opt(Token_Stream& tstrm)
     if(!kmsg) {
       do_throw_parser_error(tstrm, parser_status_string_literal_expected);
     }
-    return ::rocket::move(*kmsg);
+    return ::std::move(*kmsg);
   }
 
 opt<Statement> do_accept_assert_statement_opt(Token_Stream& tstrm)
@@ -1101,8 +1101,8 @@ opt<Statement> do_accept_assert_statement_opt(Token_Stream& tstrm)
     if(!kpunct) {
       do_throw_parser_error(tstrm, parser_status_semicolon_expected);
     }
-    Statement::S_assert xstmt = { *kneg, ::rocket::move(*kexpr), ::rocket::move(*kmsg) };
-    return ::rocket::move(xstmt);
+    Statement::S_assert xstmt = { *kneg, ::std::move(*kexpr), ::std::move(*kmsg) };
+    return xstmt;
   }
 
 opt<Statement> do_accept_try_statement_opt(Token_Stream& tstrm)
@@ -1139,9 +1139,9 @@ opt<Statement> do_accept_try_statement_opt(Token_Stream& tstrm)
     if(!qbcatch) {
       do_throw_parser_error(tstrm, parser_status_statement_expected);
     }
-    Statement::S_try xstmt = { ::rocket::move(*qbtry), ::rocket::move(sloc), ::rocket::move(*kexcept),
-                               ::rocket::move(*qbcatch) };
-    return ::rocket::move(xstmt);
+    Statement::S_try xstmt = { ::std::move(*qbtry), ::std::move(sloc), ::std::move(*kexcept),
+                               ::std::move(*qbcatch) };
+    return xstmt;
   }
 
 opt<Statement> do_accept_defer_statement_opt(Token_Stream& tstrm)
@@ -1160,8 +1160,8 @@ opt<Statement> do_accept_defer_statement_opt(Token_Stream& tstrm)
     if(!kpunct) {
       do_throw_parser_error(tstrm, parser_status_semicolon_expected);
     }
-    Statement::S_defer xstmt = { ::rocket::move(*kexpr) };
-    return ::rocket::move(xstmt);
+    Statement::S_defer xstmt = { ::std::move(*kexpr) };
+    return xstmt;
   }
 
 opt<Statement> do_accept_nonblock_statement_opt(Token_Stream& tstrm)
@@ -1255,7 +1255,7 @@ opt<Statement::S_block> do_accept_statement_as_block_opt(Token_Stream& tstrm)
     auto sloc = do_tell_source_location(tstrm);
     auto qstmt = do_accept_nonblock_statement_opt(tstrm);
     if(qstmt) {
-      return do_blockify_statement(::rocket::move(sloc), ::rocket::move(*qstmt));
+      return do_blockify_statement(::std::move(sloc), ::std::move(*qstmt));
     }
     return nullopt;
   }
@@ -1330,7 +1330,7 @@ bool do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream&
       // Return the prefix operator and discard this token.
       tstrm.shift();
       Expression_Unit::S_operator_rpn xunit = { qcnf->xop, false };
-      units.emplace_back(::rocket::move(xunit));
+      units.emplace_back(::std::move(xunit));
       return true;
     }
     if(qtok->is_punctuator()) {
@@ -1341,7 +1341,7 @@ bool do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream&
       // Return the prefix operator and discard this token.
       tstrm.shift();
       Expression_Unit::S_operator_rpn xunit = { qcnf->xop, false };
-      units.emplace_back(::rocket::move(xunit));
+      units.emplace_back(::std::move(xunit));
       return true;
     }
     return false;
@@ -1358,16 +1358,16 @@ bool do_accept_named_reference(cow_vector<Expression_Unit>& units, Token_Stream&
     // Replace special names. This is what macros in C do.
     if(*qname == "__file") {
       Expression_Unit::S_literal xunit = { V_string(sloc.file()) };
-      units.emplace_back(::rocket::move(xunit));
+      units.emplace_back(::std::move(xunit));
       return true;
     }
     if(*qname == "__line") {
       Expression_Unit::S_literal xunit = { V_integer(sloc.line()) };
-      units.emplace_back(::rocket::move(xunit));
+      units.emplace_back(::std::move(xunit));
       return true;
     }
-    Expression_Unit::S_named_reference xunit = { ::rocket::move(*qname) };
-    units.emplace_back(::rocket::move(xunit));
+    Expression_Unit::S_named_reference xunit = { ::std::move(*qname) };
+    units.emplace_back(::std::move(xunit));
     return true;
   }
 
@@ -1383,8 +1383,8 @@ bool do_accept_global_reference(cow_vector<Expression_Unit>& units, Token_Stream
     if(!qname) {
       do_throw_parser_error(tstrm, parser_status_identifier_expected);
     }
-    Expression_Unit::S_global_reference xunit = { ::rocket::move(*qname) };
-    units.emplace_back(::rocket::move(xunit));
+    Expression_Unit::S_global_reference xunit = { ::std::move(*qname) };
+    units.emplace_back(::std::move(xunit));
     return true;
   }
 
@@ -1395,8 +1395,8 @@ bool do_accept_literal(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
     if(!qval) {
       return false;
     }
-    Expression_Unit::S_literal xunit = { ::rocket::move(*qval) };
-    units.emplace_back(::rocket::move(xunit));
+    Expression_Unit::S_literal xunit = { ::std::move(*qval) };
+    units.emplace_back(::std::move(xunit));
     return true;
   }
 
@@ -1408,7 +1408,7 @@ bool do_accept_this(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
       return false;
     }
     Expression_Unit::S_named_reference xunit = { ::rocket::sref("__this") };
-    units.emplace_back(::rocket::move(xunit));
+    units.emplace_back(::std::move(xunit));
     return true;
   }
 
@@ -1425,8 +1425,8 @@ opt<Statement::S_block> do_accept_closure_body_opt(Token_Stream& tstrm)
     if(qinit) {
       // In the case of an `equal-initializer`, behave as if it was a `return-statement`.
       // Note that the result is returned by value.
-      Statement::S_return xstmt = { false, ::rocket::move(*qinit) };
-      return do_blockify_statement(::rocket::move(sloc), ::rocket::move(xstmt));
+      Statement::S_return xstmt = { false, ::std::move(*qinit) };
+      return do_blockify_statement(::std::move(sloc), ::std::move(xstmt));
     }
     return nullopt;
   }
@@ -1457,9 +1457,9 @@ bool do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream
     if(!qblock) {
       do_throw_parser_error(tstrm, parser_status_open_brace_or_equal_initializer_expected);
     }
-    Expression_Unit::S_closure_function xunit = { ::rocket::move(sloc), uniq, rocket::move(*kparams),
-                                                  ::rocket::move(qblock->stmts) };
-    units.emplace_back(::rocket::move(xunit));
+    Expression_Unit::S_closure_function xunit = { ::std::move(sloc), uniq, ::std::move(*kparams),
+                                                  ::std::move(qblock->stmts) };
+    units.emplace_back(::std::move(xunit));
     return true;
   }
 
@@ -1499,7 +1499,7 @@ bool do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& t
                                                  : parser_status_closed_bracket_or_expression_expected);
     }
     Expression_Unit::S_unnamed_array xunit = { nelems };
-    units.emplace_back(::rocket::move(xunit));
+    units.emplace_back(::std::move(xunit));
     return true;
   }
 
@@ -1531,7 +1531,7 @@ bool do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& 
       if(!succ) {
         do_throw_parser_error(tstrm, parser_status_expression_expected);
       }
-      keys.emplace_back(::rocket::move(*qkey));
+      keys.emplace_back(::std::move(*qkey));
       // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
       comma_allowed = !kpunct;
@@ -1544,8 +1544,8 @@ bool do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& 
       do_throw_parser_error(tstrm, comma_allowed ? parser_status_closed_brace_or_comma_expected
                                                  : parser_status_closed_brace_or_json5_key_expected);
     }
-    Expression_Unit::S_unnamed_object xunit = { ::rocket::move(keys) };
-    units.emplace_back(::rocket::move(xunit));
+    Expression_Unit::S_unnamed_object xunit = { ::std::move(keys) };
+    units.emplace_back(::std::move(xunit));
     return true;
   }
 
@@ -1605,7 +1605,7 @@ bool do_accept_fused_multiply_add(cow_vector<Expression_Unit>& units, Token_Stre
       do_throw_parser_error(tstrm, parser_status_closed_parenthesis_expected);
     }
     Expression_Unit::S_operator_rpn xunit = { xop_fma, false };
-    units.emplace_back(::rocket::move(xunit));
+    units.emplace_back(::std::move(xunit));
     return true;
   }
 
@@ -1638,8 +1638,8 @@ bool do_accept_variadic_function_call(cow_vector<Expression_Unit>& units, Token_
     if(!kpunct) {
       do_throw_parser_error(tstrm, parser_status_closed_parenthesis_expected);
     }
-    Expression_Unit::S_variadic_call xunit = { ::rocket::move(sloc) };
-    units.emplace_back(::rocket::move(xunit));
+    Expression_Unit::S_variadic_call xunit = { ::std::move(sloc) };
+    units.emplace_back(::std::move(xunit));
     return true;
   }
 
@@ -1715,7 +1715,7 @@ bool do_accept_postfix_operator(cow_vector<Expression_Unit>& units, Token_Stream
       // Return the postfix operator and discard this token.
       tstrm.shift();
       Expression_Unit::S_operator_rpn xunit = { qcnf->xop, false };
-      units.emplace_back(::rocket::move(xunit));
+      units.emplace_back(::std::move(xunit));
       return true;
     }
     return false;
@@ -1734,7 +1734,7 @@ opt<uint32_t> do_accept_argument_list_opt(cow_vector<Expression_Unit>& units, To
     }
     for(;;) {
       Expression_Unit::S_argument_finish xunit = { *qref };
-      units.emplace_back(::rocket::move(xunit));
+      units.emplace_back(::std::move(xunit));
       nargs += 1;
       // The code above looks so ugly...
       auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
@@ -1766,8 +1766,8 @@ bool do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_S
     if(!kpunct) {
       do_throw_parser_error(tstrm, parser_status_closed_parenthesis_expected);
     }
-    Expression_Unit::S_function_call xunit = { ::rocket::move(sloc), *knargs };
-    units.emplace_back(::rocket::move(xunit));
+    Expression_Unit::S_function_call xunit = { ::std::move(sloc), *knargs };
+    units.emplace_back(::std::move(xunit));
     return true;
   }
 
@@ -1788,7 +1788,7 @@ bool do_accept_postfix_subscript(cow_vector<Expression_Unit>& units, Token_Strea
       do_throw_parser_error(tstrm, parser_status_closed_bracket_expected);
     }
     Expression_Unit::S_operator_rpn xunit = { xop_subscr, false };
-    units.emplace_back(::rocket::move(xunit));
+    units.emplace_back(::std::move(xunit));
     return true;
   }
 
@@ -1804,8 +1804,8 @@ bool do_accept_postfix_member_access(cow_vector<Expression_Unit>& units, Token_S
     if(!qkey) {
       do_throw_parser_error(tstrm, parser_status_identifier_expected);
     }
-    Expression_Unit::S_member_access xunit = { ::rocket::move(*qkey) };
-    units.emplace_back(::rocket::move(xunit));
+    Expression_Unit::S_member_access xunit = { ::std::move(*qkey) };
+    units.emplace_back(::std::move(xunit));
     return true;
   }
 
@@ -1857,8 +1857,8 @@ opt<Infix_Element> do_accept_infix_head_opt(Token_Stream& tstrm)
     if(!succ) {
       return nullopt;
     }
-    Infix_Element::S_head xelem = { ::rocket::move(units) };
-    return ::rocket::move(xelem);
+    Infix_Element::S_head xelem = { ::std::move(units) };
+    return xelem;
   }
 
 opt<Infix_Element> do_accept_infix_operator_ternary_opt(Token_Stream& tstrm)
@@ -1877,8 +1877,8 @@ opt<Infix_Element> do_accept_infix_operator_ternary_opt(Token_Stream& tstrm)
     if(!kpunct) {
       do_throw_parser_error(tstrm, parser_status_colon_expected);
     }
-    Infix_Element::S_ternary xelem = { *kpunct == punctuator_quest_eq, ::rocket::move(btrue), nullopt };
-    return ::rocket::move(xelem);
+    Infix_Element::S_ternary xelem = { *kpunct == punctuator_quest_eq, ::std::move(btrue), nullopt };
+    return xelem;
   }
 
 opt<Infix_Element> do_accept_infix_operator_logical_and_opt(Token_Stream& tstrm)
@@ -1894,7 +1894,7 @@ opt<Infix_Element> do_accept_infix_operator_logical_and_opt(Token_Stream& tstrm)
       kpunct.emplace(punctuator_andl);
     }
     Infix_Element::S_logical_and xelem = { *kpunct == punctuator_andl_eq, nullopt };
-    return ::rocket::move(xelem);
+    return xelem;
   }
 
 opt<Infix_Element> do_accept_infix_operator_logical_or_opt(Token_Stream& tstrm)
@@ -1910,7 +1910,7 @@ opt<Infix_Element> do_accept_infix_operator_logical_or_opt(Token_Stream& tstrm)
       kpunct.emplace(punctuator_orl);
     }
     Infix_Element::S_logical_or xelem = { *kpunct == punctuator_orl_eq, nullopt };
-    return ::rocket::move(xelem);
+    return xelem;
   }
 
 opt<Infix_Element> do_accept_infix_operator_coalescence_opt(Token_Stream& tstrm)
@@ -1922,7 +1922,7 @@ opt<Infix_Element> do_accept_infix_operator_coalescence_opt(Token_Stream& tstrm)
       return nullopt;
     }
     Infix_Element::S_coalescence xelem = { *kpunct == punctuator_coales_eq, nullopt };
-    return ::rocket::move(xelem);
+    return xelem;
   }
 
 struct Infix_Operator_Element
@@ -1990,7 +1990,7 @@ opt<Infix_Element> do_accept_infix_operator_general_opt(Token_Stream& tstrm)
       // Return the infix operator and discard this token.
       tstrm.shift();
       Infix_Element::S_general xelem = { qcnf->xop, qcnf->assign, nullopt };
-      return ::rocket::move(xelem);
+      return xelem;
     }
     return nullopt;
   }
@@ -2035,7 +2035,7 @@ bool do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstr
       return false;
     }
     cow_vector<Infix_Element> stack;
-    stack.emplace_back(::rocket::move(*qelem));
+    stack.emplace_back(::std::move(*qelem));
     for(;;) {
       auto qnext = do_accept_infix_operator_opt(tstrm);
       if(!qnext) {
@@ -2050,15 +2050,15 @@ bool do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstr
         // Collapse elements that have no lower precedence and group from left to right.
         auto preced_next = qnext->tell_precedence();
         while((stack.size() >= 2) && (stack.back().tell_precedence() <= preced_next)) {
-          qelem = ::rocket::move(stack.mut_back());
+          qelem = ::std::move(stack.mut_back());
           stack.pop_back();
           qelem->extract(stack.mut_back().open_junction());
         }
       }
-      stack.emplace_back(::rocket::move(*qnext));
+      stack.emplace_back(::std::move(*qnext));
     }
     while(stack.size() >= 2) {
-      qelem = ::rocket::move(stack.mut_back());
+      qelem = ::std::move(stack.mut_back());
       stack.pop_back();
       qelem->extract(stack.mut_back().open_junction());
     }
@@ -2079,14 +2079,14 @@ Statement_Sequence& Statement_Sequence::reload(Token_Stream& tstrm, const Compil
     // document ::=
     //   statement-list-opt
     while(auto qstmt = do_accept_statement_opt(tstrm))
-      stmts.emplace_back(::rocket::move(*qstmt));
+      stmts.emplace_back(::std::move(*qstmt));
 
     // If there are any non-statement tokens left in the stream, fail.
     if(!tstrm.empty())
       do_throw_parser_error(tstrm, parser_status_statement_expected);
 
     // Succeed.
-    this->m_stmts = ::rocket::move(stmts);
+    this->m_stmts = ::std::move(stmts);
     return *this;
   }
 

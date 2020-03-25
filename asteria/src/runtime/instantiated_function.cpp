@@ -23,7 +23,7 @@ ROCKET_NOINLINE Reference& do_handle_status(Reference& self, Evaluation_Stack& s
       }
     case air_status_return_ref: {
         // Return the reference at the top of `stack`.
-        self = ::rocket::move(stack.open_top());
+        self = ::std::move(stack.open_top());
         break;
       }
     case air_status_break_unspec:
@@ -71,8 +71,8 @@ Reference& Instantiated_Function::invoke_ptc_aware(Reference& self, Global_Conte
     // Create the stack and context for this function.
     Evaluation_Stack stack;
     Executive_Context ctx_func(::rocket::ref(global), ::rocket::ref(stack), ::rocket::ref(this->m_zvarg),
-                               this->m_params, ::rocket::move(self), ::rocket::move(args));
-    stack.reserve(::rocket::move(args));
+                               this->m_params, ::std::move(self), ::std::move(args));
+    stack.reserve(::std::move(args));
     // Execute the function body.
     AIR_Status status;
     ASTERIA_RUNTIME_TRY {

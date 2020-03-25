@@ -46,7 +46,7 @@ template<typename FuncT> struct Variable_Walker final : Variable_Callback
 
     explicit Variable_Walker(FuncT&& xfunc)
       :
-        func(::rocket::forward<FuncT>(xfunc))
+        func(::std::forward<FuncT>(xfunc))
       {
       }
     bool process(const rcptr<Variable>& var) override
@@ -58,9 +58,9 @@ template<typename FuncT> struct Variable_Walker final : Variable_Callback
 template<typename ContT, typename FuncT> FuncT&& do_traverse(const ContT& cont, FuncT&& func)
   {
     // The callback has to be an lvalue.
-    Variable_Walker<FuncT&&> walker(::rocket::forward<FuncT>(func));
+    Variable_Walker<FuncT&&> walker(::std::forward<FuncT>(func));
     cont.enumerate_variables(walker);
-    return ::rocket::forward<FuncT>(walker.func);
+    return ::std::forward<FuncT>(walker.func);
   }
 
 struct Variable_Wiper final : Variable_Callback
@@ -68,7 +68,7 @@ struct Variable_Wiper final : Variable_Callback
     bool process(const rcptr<Variable>& var) override
       {
         // Don't modify variables in place which might have side effects.
-        auto value = ::rocket::move(var->open_value());
+        auto value = ::std::move(var->open_value());
         var->uninitialize();
         // Uninitialize all children.
         value.enumerate_variables(*this);

@@ -46,26 +46,26 @@ template<typename elementT, typename deleterT> class unique_ptr
       :
         unique_ptr()
       {
-        this->reset(noadl::move(ptr));
+        this->reset(::std::move(ptr));
       }
     unique_ptr(pointer ptr, const deleter_type& del) noexcept
       :
         unique_ptr(del)
       {
-        this->reset(noadl::move(ptr));
+        this->reset(::std::move(ptr));
       }
     template<typename yelementT, typename ydeleterT,
              ROCKET_ENABLE_IF(conjunction<is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer, pointer>,
                                           is_convertible<typename unique_ptr<yelementT, ydeleterT>::deleter_type, deleter_type>>::value)>
         unique_ptr(unique_ptr<yelementT, ydeleterT>&& other) noexcept
       :
-        unique_ptr(noadl::move(other.m_sth.as_deleter()))
+        unique_ptr(::std::move(other.m_sth.as_deleter()))
       {
         this->reset(other.m_sth.release());
       }
     unique_ptr(unique_ptr&& other) noexcept
       :
-        unique_ptr(noadl::move(other.m_sth.as_deleter()))
+        unique_ptr(::std::move(other.m_sth.as_deleter()))
       {
         this->reset(other.m_sth.release());
       }
@@ -78,7 +78,7 @@ template<typename elementT, typename deleterT> class unique_ptr
     // 23.11.1.2.3, assignment
     unique_ptr& operator=(unique_ptr&& other) noexcept
       {
-        this->m_sth.as_deleter() = noadl::move(other.m_sth.as_deleter());
+        this->m_sth.as_deleter() = ::std::move(other.m_sth.as_deleter());
         this->reset(other.m_sth.release());
         return *this;
       }
@@ -87,7 +87,7 @@ template<typename elementT, typename deleterT> class unique_ptr
                                           is_convertible<typename unique_ptr<yelementT, ydeleterT>::deleter_type, deleter_type>>::value)>
         unique_ptr& operator=(unique_ptr<yelementT, ydeleterT>&& other) noexcept
       {
-        this->m_sth.as_deleter() = noadl::move(other.m_sth.as_deleter());
+        this->m_sth.as_deleter() = ::std::move(other.m_sth.as_deleter());
         this->reset(other.m_sth.release());
         return *this;
       }
@@ -135,7 +135,7 @@ template<typename elementT, typename deleterT> class unique_ptr
     // N.B. The return type differs from `std::unique_ptr`.
     unique_ptr& reset(pointer ptr_new = pointer()) noexcept
       {
-        this->m_sth.reset(noadl::move(ptr_new));
+        this->m_sth.reset(::std::move(ptr_new));
         return *this;
       }
 
@@ -216,19 +216,19 @@ template<typename elementT, typename deleterT>
 template<typename targetT, typename sourceT>
     inline unique_ptr<targetT> static_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
   {
-    return details_unique_ptr::pointer_cast_aux<targetT>(noadl::move(sptr),
+    return details_unique_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
                                [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });
   }
 template<typename targetT, typename sourceT>
     inline unique_ptr<targetT> dynamic_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
   {
-    return details_unique_ptr::pointer_cast_aux<targetT>(noadl::move(sptr),
+    return details_unique_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
                                [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });
   }
 template<typename targetT, typename sourceT>
     inline unique_ptr<targetT> const_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
   {
-    return details_unique_ptr::pointer_cast_aux<targetT>(noadl::move(sptr),
+    return details_unique_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
                                [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });
   }
 
@@ -242,7 +242,7 @@ template<typename charT, typename traitsT, typename elementT, typename deleterT>
 template<typename elementT, typename... paramsT>
     inline unique_ptr<elementT> make_unique(paramsT&&... params)
   {
-    return unique_ptr<elementT>(new elementT(noadl::forward<paramsT>(params)...));
+    return unique_ptr<elementT>(new elementT(::std::forward<paramsT>(params)...));
   }
 
 }  // namespace rocket

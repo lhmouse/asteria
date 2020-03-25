@@ -269,7 +269,7 @@ template<typename allocT, typename hashT, typename eqT>
       }
     constexpr storage_handle(allocator_type&& alloc, const hasher& hf, const key_equal& eq)
       :
-        allocator_base(noadl::move(alloc)),
+        allocator_base(::std::move(alloc)),
         conditional<is_same<hashT, allocT>::value,
                     ebo_placeholder<0>, hasher_base>::type(hf),
         conditional<is_same<eqT, allocT>::value || is_same<eqT, hashT>::value,
@@ -568,7 +568,7 @@ template<typename allocT, typename hashT, typename eqT>
         // Allocate a new element.
         auto eptr = allocator_traits<allocator_type>::allocate(ptr->alloc, size_t(1));
         try {
-          allocator_traits<allocator_type>::construct(ptr->alloc, noadl::unfancy(eptr), noadl::forward<paramsT>(params)...);
+          allocator_traits<allocator_type>::construct(ptr->alloc, noadl::unfancy(eptr), ::std::forward<paramsT>(params)...);
         }
         catch(...) {
           allocator_traits<allocT>::deallocate(ptr->alloc, eptr, size_t(1));

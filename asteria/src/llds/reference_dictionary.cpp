@@ -57,9 +57,9 @@ void Reference_Dictionary::do_xrelocate_but(Reference_Dictionary::Bucket* qxcld)
         auto qbkt = &rb;
         // Move the old name and reference out, then destroy the bucket.
         ROCKET_ASSERT(*qbkt);
-        auto name = ::rocket::move(qbkt->kstor[0]);
+        auto name = ::std::move(qbkt->kstor[0]);
         ::rocket::destroy_at(qbkt->kstor);
-        auto refr = ::rocket::move(qbkt->vstor[0]);
+        auto refr = ::std::move(qbkt->vstor[0]);
         ::rocket::destroy_at(qbkt->vstor);
         this->do_list_detach(qbkt);
         // Find a new bucket for the name using linear probing.
@@ -70,8 +70,8 @@ void Reference_Dictionary::do_xrelocate_but(Reference_Dictionary::Bucket* qxcld)
         // Insert the reference into the new bucket.
         ROCKET_ASSERT(!*qbkt);
         this->do_list_attach(qbkt);
-        ::rocket::construct_at(qbkt->kstor, ::rocket::move(name));
-        ::rocket::construct_at(qbkt->vstor, ::rocket::move(refr));
+        ::rocket::construct_at(qbkt->kstor, ::std::move(name));
+        ::rocket::construct_at(qbkt->vstor, ::std::move(refr));
         // Keep probing until an empty bucket is found.
         return false;
       });
@@ -122,9 +122,9 @@ void Reference_Dictionary::do_rehash(size_t nbkt)
       auto qbkt = ::std::exchange(next, next->next);
       // Move the old name and reference out, then destroy the bucket.
       ROCKET_ASSERT(*qbkt);
-      auto name = ::rocket::move(qbkt->kstor[0]);
+      auto name = ::std::move(qbkt->kstor[0]);
       ::rocket::destroy_at(qbkt->kstor);
-      auto refr = ::rocket::move(qbkt->vstor[0]);
+      auto refr = ::std::move(qbkt->vstor[0]);
       ::rocket::destroy_at(qbkt->vstor);
       qbkt->prev = nullptr;
       // Find a new bucket for the name using linear probing.
@@ -135,8 +135,8 @@ void Reference_Dictionary::do_rehash(size_t nbkt)
       // Insert the reference into the new bucket.
       ROCKET_ASSERT(!*qbkt);
       this->do_list_attach(qbkt);
-      ::rocket::construct_at(qbkt->kstor, ::rocket::move(name));
-      ::rocket::construct_at(qbkt->vstor, ::rocket::move(refr));
+      ::rocket::construct_at(qbkt->kstor, ::std::move(name));
+      ::rocket::construct_at(qbkt->vstor, ::std::move(refr));
     }
     // Deallocate the old table.
     if(bold) {

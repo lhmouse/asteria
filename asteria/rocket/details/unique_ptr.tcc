@@ -8,12 +8,14 @@
 namespace details_unique_ptr {
 
 template<typename elementT, typename deleterT, typename = void>
-    struct pointer_of : enable_if<1, elementT*>
+    struct pointer_of
+      : enable_if<1, elementT*>
   {
   };
 template<typename elementT, typename deleterT>
     struct pointer_of<elementT, deleterT,
-                      typename make_void<typename deleterT::pointer>::type> : enable_if<1, typename deleterT::pointer>
+                          typename enable_if<1, typename deleterT::pointer>::type>
+      : enable_if<1, typename deleterT::pointer>
   {
   };
 
@@ -45,7 +47,7 @@ template<typename pointerT, typename deleterT>
       }
     explicit constexpr stored_pointer(deleter_type&& del) noexcept
       :
-        deleter_base(noadl::move(del)),
+        deleter_base(::std::move(del)),
         m_ptr()
       {
       }
@@ -83,7 +85,7 @@ template<typename pointerT, typename deleterT>
       }
     void reset(pointer ptr_new) noexcept
       {
-        auto ptr = ::std::exchange(this->m_ptr, noadl::move(ptr_new));
+        auto ptr = ::std::exchange(this->m_ptr, ::std::move(ptr_new));
         if(ptr)
           this->as_deleter()(ptr);
       }
@@ -96,7 +98,7 @@ template<typename pointerT, typename deleterT>
 template<typename targetT, typename sourceT, typename casterT>
     unique_ptr<targetT> pointer_cast_aux(unique_ptr<sourceT>&& uptr, casterT&& caster)
   {
-    unique_ptr<targetT> dptr(noadl::forward<casterT>(caster)(uptr.get()));
+    unique_ptr<targetT> dptr(::std::forward<casterT>(caster)(uptr.get()));
     if(dptr)
       uptr.release();
     return dptr;

@@ -32,7 +32,7 @@ template<typename allocT, typename traitsT>
       }
     explicit constexpr basic_storage(allocator_type&& alloc) noexcept
       :
-        allocator_base(noadl::move(alloc))
+        allocator_base(::std::move(alloc))
       {
       }
     ~basic_storage()
@@ -111,7 +111,7 @@ template<typename allocT, typename traitsT>
           }
           pbuf = pbuf_new;
           // Set up the new buffer.
-          this->m_ptr = noadl::move(ptr_new);
+          this->m_ptr = ::std::move(ptr_new);
           this->m_cap = cap_new;
         }
         // In either case, the string has been moved to the beginning of the buffer.

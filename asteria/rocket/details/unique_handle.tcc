@@ -35,7 +35,7 @@ template<typename handleT, typename closerT>
       }
     explicit constexpr stored_handle(closer_type&& cl) noexcept
       :
-        closer_base(noadl::move(cl)),
+        closer_base(::std::move(cl)),
         m_hv(this->as_closer().null())
       {
       }
@@ -69,9 +69,9 @@ template<typename handleT, typename closerT>
       }
     void reset(handle_type hv_new) noexcept
       {
-        auto hv_old = ::std::exchange(this->m_hv, noadl::move(hv_new));
+        auto hv_old = ::std::exchange(this->m_hv, ::std::move(hv_new));
         if(!this->as_closer().is_null(hv_old))
-          this->as_closer().close(noadl::move(hv_old));
+          this->as_closer().close(::std::move(hv_old));
       }
     void exchange_with(stored_handle& other) noexcept
       {

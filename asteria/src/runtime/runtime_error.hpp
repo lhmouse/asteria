@@ -23,7 +23,7 @@ class Runtime_Error : public virtual exception
     template<typename XValT, ASTERIA_SFINAE_CONSTRUCT(Value, XValT&&)>
                                                Runtime_Error(const Source_Location& sloc, XValT&& xval)
       :
-        m_value(::rocket::forward<XValT>(xval))
+        m_value(::std::forward<XValT>(xval))
       {
         this->do_backtrace();
         this->do_insert_frame(frame_type_throw, sloc, this->m_value);
@@ -45,7 +45,7 @@ class Runtime_Error : public virtual exception
       {
         // Insert the frame.
         size_t ipos = this->m_ipos;
-        this->m_frames.insert(ipos, Backtrace_Frame(::rocket::forward<ParamsT>(params)...));
+        this->m_frames.insert(ipos, Backtrace_Frame(::std::forward<ParamsT>(params)...));
         this->m_ipos = ipos + 1;
         // Rebuild the message using new frames.
         this->do_compose_message();
@@ -73,7 +73,7 @@ class Runtime_Error : public virtual exception
     template<typename XValT> Runtime_Error& push_frame_throw(const Source_Location& sloc, XValT&& xval)
       {
         // Start a new backtrace.
-        this->m_value = ::rocket::forward<XValT>(xval);
+        this->m_value = ::std::forward<XValT>(xval);
         this->m_ipos = 0;
         // Append the first frame to the current backtrace.
         this->do_insert_frame(frame_type_throw, sloc, this->m_value);

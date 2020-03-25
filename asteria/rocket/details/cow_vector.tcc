@@ -124,7 +124,7 @@ template<typename pointerT, typename allocT,
         auto cap = basic_storage<allocT>::max_nelem_for_nblk(ptr->nblk);
         ROCKET_ASSERT(cnt <= cap - nelem);
         for(size_t i = off; i != off + cnt; ++i) {
-          allocator_traits<allocT>::construct(ptr->alloc, ptr->data + nelem, noadl::move(ptr_old->data[i]));
+          allocator_traits<allocT>::construct(ptr->alloc, ptr->data + nelem, ::std::move(ptr_old->data[i]));
           ptr->nelem = ++nelem;
         }
       }
@@ -183,7 +183,7 @@ template<typename allocT>
       }
     explicit constexpr storage_handle(allocator_type&& alloc) noexcept
       :
-        allocator_base(noadl::move(alloc)),
+        allocator_base(::std::move(alloc)),
         m_ptr()
       {
       }
@@ -404,7 +404,7 @@ template<typename allocT>
         auto ptr = this->m_ptr;
         ROCKET_ASSERT(ptr);
         auto nelem = ptr->nelem;
-        allocator_traits<allocator_type>::construct(ptr->alloc, ptr->data + nelem, noadl::forward<paramsT>(params)...);
+        allocator_traits<allocator_type>::construct(ptr->alloc, ptr->data + nelem, ::std::forward<paramsT>(params)...);
         ptr->nelem = ++nelem;
         return ptr->data + nelem - 1;
       }
@@ -633,7 +633,7 @@ constexpr append;
 
 template<typename vectorT, typename... paramsT> void tagged_append(vectorT* vec, append_tag, paramsT&&... params)
   {
-    vec->append(noadl::forward<paramsT>(params)...);
+    vec->append(::std::forward<paramsT>(params)...);
   }
 
 struct emplace_back_tag
@@ -643,7 +643,7 @@ constexpr emplace_back;
 
 template<typename vectorT, typename... paramsT> void tagged_append(vectorT* vec, emplace_back_tag, paramsT&&... params)
   {
-    vec->emplace_back(noadl::forward<paramsT>(params)...);
+    vec->emplace_back(::std::forward<paramsT>(params)...);
   }
 
 struct push_back_tag
@@ -653,7 +653,7 @@ constexpr push_back;
 
 template<typename vectorT, typename... paramsT> void tagged_append(vectorT* vec, push_back_tag, paramsT&&... params)
   {
-    vec->push_back(noadl::forward<paramsT>(params)...);
+    vec->push_back(::std::forward<paramsT>(params)...);
   }
 
 }  // namespace details_cow_vector

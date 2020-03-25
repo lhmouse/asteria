@@ -37,7 +37,7 @@ template<typename valueT> class optional
       :
         m_stor()
       {
-        this->m_stor.emplace_back(noadl::forward<yvalueT>(yvalue));
+        this->m_stor.emplace_back(::std::forward<yvalueT>(yvalue));
       }
     template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<const typename optional<yvalueT>::value_type&, value_type>::value)>
         optional(const optional<yvalueT>& other)
@@ -55,7 +55,7 @@ template<typename valueT> class optional
         m_stor()
       {
         if(!other.m_stor.empty())
-          this->m_stor.emplace_back(noadl::move(other.m_stor.front()));
+          this->m_stor.emplace_back(::std::move(other.m_stor.front()));
       }
     // 19.6.3.3, assignment
     optional& operator=(nullopt_t) noexcept
@@ -68,9 +68,9 @@ template<typename valueT> class optional
                     noexcept(conjunction<is_nothrow_constructible<value_type, yvalueT&&>, is_nothrow_assignable<value_type, yvalueT&&>>::value)
       {
         if(!this->m_stor.empty())
-          this->m_stor.mut_front() = noadl::forward<yvalueT>(yvalue);
+          this->m_stor.mut_front() = ::std::forward<yvalueT>(yvalue);
         else
-          this->m_stor.emplace_back(noadl::forward<yvalueT>(yvalue));
+          this->m_stor.emplace_back(::std::forward<yvalueT>(yvalue));
         return *this;
       }
     template<typename yvalueT, ROCKET_ENABLE_IF(is_assignable<value_type, const typename optional<yvalueT>::value_type&>::value)>
@@ -94,9 +94,9 @@ template<typename valueT> class optional
         if(other.m_stor.empty())
           this->m_stor.clear();
         else if(!this->m_stor.empty())
-          this->m_stor.mut_front() = noadl::move(other.m_stor.front());
+          this->m_stor.mut_front() = ::std::move(other.m_stor.front());
         else
-          this->m_stor.emplace_back(noadl::move(other.m_stor.front()));
+          this->m_stor.emplace_back(::std::move(other.m_stor.front()));
         return *this;
       }
 
@@ -139,19 +139,19 @@ template<typename valueT> class optional
     template<typename dvalueT>
         typename select_type<const_reference, dvalueT&&>::type value_or(dvalueT&& dvalue) const
       {
-        return this->m_stor.empty() ? noadl::forward<dvalueT>(dvalue) : this->m_stor.front();
+        return this->m_stor.empty() ? ::std::forward<dvalueT>(dvalue) : this->m_stor.front();
       }
     // N.B. The return type differs from `std::variant`.
     template<typename dvalueT>
         typename select_type<reference, dvalueT&&>::type value_or(dvalueT&& dvalue)
       {
-        return this->m_stor.empty() ? noadl::forward<dvalueT>(dvalue) : this->m_stor.mut_front();
+        return this->m_stor.empty() ? ::std::forward<dvalueT>(dvalue) : this->m_stor.mut_front();
       }
     // N.B. This is a non-standard extension.
     template<typename dvalueT>
         typename select_type<value_type&&, dvalueT&&>::type move_value_or(dvalueT&& dvalue)
       {
-        return this->m_stor.empty() ? noadl::forward<dvalueT>(dvalue) : noadl::move(this->m_stor.mut_front());
+        return this->m_stor.empty() ? ::std::forward<dvalueT>(dvalue) : ::std::move(this->m_stor.mut_front());
       }
 
     constexpr const_reference operator*() const
@@ -178,12 +178,12 @@ template<typename valueT> class optional
       }
     template<typename... paramsT> reference emplace(paramsT&&... params)
       {
-        return this->m_stor.clear(), this->m_stor.emplace_back(noadl::forward<paramsT>(params)...);
+        return this->m_stor.clear(), this->m_stor.emplace_back(::std::forward<paramsT>(params)...);
       }
     // N.B. This is a non-standard extension.
     template<typename... paramsT> reference value_or_emplace(paramsT&&... params)
       {
-        return this->m_stor.empty() ? this->m_stor.emplace_back(noadl::forward<paramsT>(params)...) : this->m_stor.mut_front();
+        return this->m_stor.empty() ? this->m_stor.emplace_back(::std::forward<paramsT>(params)...) : this->m_stor.mut_front();
       }
 
     // 19.6.3.4, swap

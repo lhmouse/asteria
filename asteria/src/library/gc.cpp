@@ -78,7 +78,7 @@ void create_bindings_gc(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival generation;
     if(reader.I().v(generation).F()) {
-      return std_gc_tracked_count(global, ::rocket::move(generation));
+      return std_gc_tracked_count(global, ::std::move(generation));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -106,7 +106,7 @@ void create_bindings_gc(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival generation;
     if(reader.I().v(generation).F()) {
-      return std_gc_get_threshold(global, ::rocket::move(generation));
+      return std_gc_get_threshold(global, ::std::move(generation));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -133,7 +133,7 @@ void create_bindings_gc(V_object& result, API_Version /*version*/)
     Ival generation;
     Ival threshold;
     if(reader.I().v(generation).v(threshold).F()) {
-      return std_gc_set_threshold(global, ::rocket::move(generation), ::rocket::move(threshold));
+      return std_gc_set_threshold(global, ::std::move(generation), ::std::move(threshold));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -164,7 +164,7 @@ void create_bindings_gc(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Iopt generation_limit;
     if(reader.I().o(generation_limit).F()) {
-      return std_gc_collect(global, ::rocket::move(generation_limit));
+      return std_gc_collect(global, ::std::move(generation_limit));
     }
     // Fail.
     reader.throw_no_matching_function_call();

@@ -60,10 +60,10 @@ Slice do_slice(const Aval& data, const Ival& from, const Iopt& length)
 
 template<typename IterT> opt<IterT> do_find_opt(IterT begin, IterT end, const Value& target)
   {
-    for(auto it = ::rocket::move(begin);  it != end;  ++it) {
+    for(auto it = ::std::move(begin);  it != end;  ++it) {
       // Compare the value using the builtin 3-way comparison operator.
       if(it->compare(target) == compare_equal)
-        return ::rocket::move(it);
+        return it;
     }
     // Fail to find an element.
     return nullopt;
@@ -79,14 +79,14 @@ template<typename IterT> opt<IterT> do_find_if_opt(Global& global, IterT begin, 
                                                    const Fval& pred, bool match)
   {
     cow_vector<Reference> args;
-    for(auto it = ::rocket::move(begin);  it != end;  ++it) {
+    for(auto it = ::std::move(begin);  it != end;  ++it) {
       // Set up arguments for the user-defined predictor.
       args.resize(1, Reference_root::S_void());
       args.mut(0) = do_make_temporary(*it);
       // Call the predictor function and check the return value.
-      auto self = pred.invoke(global, ::rocket::move(args));
+      auto self = pred.invoke(global, ::std::move(args));
       if(self.read().test() == match)
-        return ::rocket::move(it);
+        return it;
     }
     // Fail to find an element.
     return nullopt;
@@ -104,7 +104,7 @@ Compare do_compare(Global& global, cow_vector<Reference>& args,
     args.mut(0) = do_make_temporary(lhs);
     args.mut(1) = do_make_temporary(rhs);
     // Call the predictor function and compare the result with `0`.
-    auto self = kcomp.invoke(global, ::rocket::move(args));
+    auto self = kcomp.invoke(global, ::std::move(args));
     return self.read().compare(Ival(0));
   }
 
@@ -112,12 +112,12 @@ template<typename IterT>
     pair<IterT, bool> do_bsearch(Global& global, cow_vector<Reference>& args, IterT begin, IterT end,
                                  const Fopt& kcomp, const Value& target)
   {
-    auto bpos = ::rocket::move(begin);
-    auto epos = ::rocket::move(end);
+    auto bpos = ::std::move(begin);
+    auto epos = ::std::move(end);
     for(;;) {
       auto dist = epos - bpos;
       if(dist <= 0) {
-        return { ::rocket::move(bpos), false };
+        return { ::std::move(bpos), false };
       }
       auto mpos = bpos + dist / 2;
       // Compare `target` with the element in the middle.
@@ -126,7 +126,7 @@ template<typename IterT>
         ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)", target, *mpos);
       }
       if(cmp == compare_equal) {
-        return { ::rocket::move(mpos), true };
+        return { ::std::move(mpos), true };
       }
       if(cmp == compare_less)
         epos = mpos;
@@ -139,12 +139,12 @@ template<typename IterT, typename PredT>
     IterT do_bound(Global& global, cow_vector<Reference>& args, IterT begin, IterT end,
                    const Fopt& kcomp, const Value& target, PredT&& pred)
   {
-    auto bpos = ::rocket::move(begin);
-    auto epos = ::rocket::move(end);
+    auto bpos = ::std::move(begin);
+    auto epos = ::std::move(end);
     for(;;) {
       auto dist = epos - bpos;
       if(dist <= 0) {
-        return ::rocket::move(bpos);
+        return bpos;
       }
       auto mpos = bpos + dist / 2;
       // Compare `target` with the element in the middle.
@@ -164,7 +164,7 @@ Aval::iterator& do_merge_range(Aval::iterator& opos, Global& global, cow_vector<
   {
     for(auto ipos = ibegin;  ipos != iend;  ++ipos)
       if(!unique || (do_compare(global, args, kcomp, ipos[0], opos[-1]) != compare_equal))
-        *(opos++) = ::rocket::move(*ipos);
+        *(opos++) = ::std::move(*ipos);
     return opos;
   }
 
@@ -202,7 +202,7 @@ Aval::iterator do_merge_blocks(Aval& output, Global& global, cow_vector<Referenc
         bool discard = unique && (opos != output.begin())
                               && (do_compare(global, args, kcomp, *(bpos[bi]), opos[-1]) == compare_equal);
         if(!discard) {
-          *(opos++) = ::rocket::move(*(bpos[bi]));
+          *(opos++) = ::std::move(*(bpos[bi]));
         }
         bpos[bi]++;
         // When uniqueness is requested, if elements from the two blocks are equal, discard the one from
@@ -467,7 +467,7 @@ Ival std_array_count(Aval data, Value target)
         break;
       }
       ++count;
-      range.first = ::rocket::move(++*qit);
+      range.first = ::std::move(++*qit);
     }
     return count;
   }
@@ -482,7 +482,7 @@ Ival std_array_count(Aval data, Ival from, Value target)
         break;
       }
       ++count;
-      range.first = ::rocket::move(++*qit);
+      range.first = ::std::move(++*qit);
     }
     return count;
   }
@@ -497,7 +497,7 @@ Ival std_array_count(Aval data, Ival from, Iopt length, Value target)
         break;
       }
       ++count;
-      range.first = ::rocket::move(++*qit);
+      range.first = ::std::move(++*qit);
     }
     return count;
   }
@@ -512,7 +512,7 @@ Ival std_array_count_if(Global& global, Aval data, Fval predictor)
         break;
       }
       ++count;
-      range.first = ::rocket::move(++*qit);
+      range.first = ::std::move(++*qit);
     }
     return count;
   }
@@ -527,7 +527,7 @@ Ival std_array_count_if(Global& global, Aval data, Ival from, Fval predictor)
         break;
       }
       ++count;
-      range.first = ::rocket::move(++*qit);
+      range.first = ::std::move(++*qit);
     }
     return count;
   }
@@ -542,7 +542,7 @@ Ival std_array_count_if(Global& global, Aval data, Ival from, Iopt length, Fval 
         break;
       }
       ++count;
-      range.first = ::rocket::move(++*qit);
+      range.first = ::std::move(++*qit);
     }
     return count;
   }
@@ -557,7 +557,7 @@ Ival std_array_count_if_not(Global& global, Aval data, Fval predictor)
         break;
       }
       ++count;
-      range.first = ::rocket::move(++*qit);
+      range.first = ::std::move(++*qit);
     }
     return count;
   }
@@ -572,7 +572,7 @@ Ival std_array_count_if_not(Global& global, Aval data, Ival from, Fval predictor
         break;
       }
       ++count;
-      range.first = ::rocket::move(++*qit);
+      range.first = ::std::move(++*qit);
     }
     return count;
   }
@@ -587,7 +587,7 @@ Ival std_array_count_if_not(Global& global, Aval data, Ival from, Iopt length, F
         break;
       }
       ++count;
-      range.first = ::rocket::move(++*qit);
+      range.first = ::std::move(++*qit);
     }
     return count;
   }
@@ -604,7 +604,7 @@ Aval std_array_exclude(Aval data, Value target)
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
-    return ::rocket::move(data);
+    return data;
   }
 
 Aval std_array_exclude(Aval data, Ival from, Value target)
@@ -619,7 +619,7 @@ Aval std_array_exclude(Aval data, Ival from, Value target)
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
-    return ::rocket::move(data);
+    return data;
   }
 
 Aval std_array_exclude(Aval data, Ival from, Iopt length, Value target)
@@ -634,7 +634,7 @@ Aval std_array_exclude(Aval data, Ival from, Iopt length, Value target)
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
-    return ::rocket::move(data);
+    return data;
   }
 
 Aval std_array_exclude_if(Global& global, Aval data, Fval predictor)
@@ -649,7 +649,7 @@ Aval std_array_exclude_if(Global& global, Aval data, Fval predictor)
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
-    return ::rocket::move(data);
+    return data;
   }
 
 Aval std_array_exclude_if(Global& global, Aval data, Ival from, Fval predictor)
@@ -664,7 +664,7 @@ Aval std_array_exclude_if(Global& global, Aval data, Ival from, Fval predictor)
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
-    return ::rocket::move(data);
+    return data;
   }
 
 Aval std_array_exclude_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
@@ -679,7 +679,7 @@ Aval std_array_exclude_if(Global& global, Aval data, Ival from, Iopt length, Fva
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
-    return ::rocket::move(data);
+    return data;
   }
 
 Aval std_array_exclude_if_not(Global& global, Aval data, Fval predictor)
@@ -694,7 +694,7 @@ Aval std_array_exclude_if_not(Global& global, Aval data, Fval predictor)
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
-    return ::rocket::move(data);
+    return data;
   }
 
 Aval std_array_exclude_if_not(Global& global, Aval data, Ival from, Fval predictor)
@@ -709,7 +709,7 @@ Aval std_array_exclude_if_not(Global& global, Aval data, Ival from, Fval predict
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
-    return ::rocket::move(data);
+    return data;
   }
 
 Aval std_array_exclude_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
@@ -724,7 +724,7 @@ Aval std_array_exclude_if_not(Global& global, Aval data, Ival from, Iopt length,
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
-    return ::rocket::move(data);
+    return data;
   }
 
 Bval std_array_is_sorted(Global& global, Aval data, Fopt comparator)
@@ -784,7 +784,7 @@ Aval std_array_sort(Global& global, Aval data, Fopt comparator)
   {
     if(data.size() <= 1) {
       // Use reference counting as our advantage.
-      return ::rocket::move(data);
+      return data;
     }
     // The Merge Sort algorithm requires `O(n)` space.
     Aval temp(data.size());
@@ -792,18 +792,18 @@ Aval std_array_sort(Global& global, Aval data, Fopt comparator)
     cow_vector<Reference> args;
     ptrdiff_t bsize = 1;
     while(bsize < data.ssize()) {
-      do_merge_blocks(temp, global, args, comparator, ::rocket::move(data), bsize, false);
+      do_merge_blocks(temp, global, args, comparator, ::std::move(data), bsize, false);
       data.swap(temp);
       bsize *= 2;
     }
-    return ::rocket::move(data);
+    return data;
   }
 
 Aval std_array_sortu(Global& global, Aval data, Fopt comparator)
   {
     if(data.size() <= 1) {
       // Use reference counting as our advantage.
-      return ::rocket::move(data);
+      return data;
     }
     // The Merge Sort algorithm requires `O(n)` space.
     Aval temp(data.size());
@@ -811,14 +811,14 @@ Aval std_array_sortu(Global& global, Aval data, Fopt comparator)
     cow_vector<Reference> args;
     ptrdiff_t bsize = 1;
     while(bsize * 2 < data.ssize()) {
-      do_merge_blocks(temp, global, args, comparator, ::rocket::move(data), bsize, false);
+      do_merge_blocks(temp, global, args, comparator, ::std::move(data), bsize, false);
       data.swap(temp);
       bsize *= 2;
     }
-    auto epos = do_merge_blocks(temp, global, args, comparator, ::rocket::move(data), bsize, true);
+    auto epos = do_merge_blocks(temp, global, args, comparator, ::std::move(data), bsize, true);
     temp.erase(epos, temp.end());
     data.swap(temp);
-    return ::rocket::move(data);
+    return data;
   }
 
 Value std_array_max_of(Global& global, Aval data, Fopt comparator)
@@ -872,7 +872,7 @@ Aval std_array_generate(Global& global, Fval generator, Ival length)
       args.mut(0) = do_make_temporary(i);
       args.mut(1) = do_make_temporary(data.empty() ? null_value : data.back());
       // Call the generator function and push the return value.
-      auto self = generator.invoke(global, ::rocket::move(args));
+      auto self = generator.invoke(global, ::std::move(args));
       data.emplace_back(self.read());
     }
     return data;
@@ -882,7 +882,7 @@ Aval std_array_shuffle(Aval data, Iopt seed)
   {
     if(data.size() <= 1) {
       // Use reference counting as our advantage.
-      return ::rocket::move(data);
+      return data;
     }
     // Create a linear congruential generator.
     uint64_t lcg = seed ? static_cast<uint64_t>(*seed) : generate_random_seed();
@@ -901,24 +901,24 @@ Aval std_array_shuffle(Aval data, Iopt seed)
       if(k != i)
         swap(data.mut(k), data.mut(i));
     }
-    return ::rocket::move(data);
+    return data;
   }
 
 Aval std_array_rotate(Aval data, Ival shift)
   {
     if(data.size() <= 1) {
       // Use reference counting as our advantage.
-      return ::rocket::move(data);
+      return data;
     }
     int64_t seek = shift % data.ssize();
     if(seek == 0) {
       // Use reference counting as our advantage.
-      return ::rocket::move(data);
+      return data;
     }
     // Rotate it.
     seek = ((~seek >> 63) & data.ssize()) - seek;
     ::rocket::rotate(data.mut_data(), 0, static_cast<size_t>(seek), data.size());
-    return ::rocket::move(data);
+    return data;
   }
 
 Aval std_array_copy_keys(Oval source)
@@ -952,7 +952,7 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Ival from;
     Iopt length;
     if(reader.I().v(data).v(from).o(length).F()) {
-      return std_array_slice(::rocket::move(data), ::rocket::move(from), ::rocket::move(length));
+      return std_array_slice(::std::move(data), ::std::move(from), ::std::move(length));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -985,12 +985,12 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Ival from;
     Aval replacement;
     if(reader.I().v(data).v(from).S(state).v(replacement).F()) {
-      return std_array_replace_slice(::rocket::move(data), ::rocket::move(from), ::rocket::move(replacement));
+      return std_array_replace_slice(::std::move(data), ::std::move(from), ::std::move(replacement));
     }
     Iopt length;
     if(reader.L(state).o(length).v(replacement).F()) {
-      return std_array_replace_slice(::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
-                                     ::rocket::move(replacement));
+      return std_array_replace_slice(::std::move(data), ::std::move(from), ::std::move(length),
+                                     ::std::move(replacement));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1031,16 +1031,16 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Value target;
     if(reader.I().v(data).S(state).o(target).F()) {
-      return std_array_find(::rocket::move(data), ::rocket::move(target));
+      return std_array_find(::std::move(data), ::std::move(target));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).o(target).F()) {
-      return std_array_find(::rocket::move(data), ::rocket::move(from), ::rocket::move(target));
+      return std_array_find(::std::move(data), ::std::move(from), ::std::move(target));
     }
     Iopt length;
     if(reader.L(state).o(length).o(target).F()) {
-      return std_array_find(::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
-                            ::rocket::move(target));
+      return std_array_find(::std::move(data), ::std::move(from), ::std::move(length),
+                            ::std::move(target));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1088,16 +1088,16 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      return std_array_find_if(global, ::rocket::move(data), ::rocket::move(predictor));
+      return std_array_find_if(global, ::std::move(data), ::std::move(predictor));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      return std_array_find_if(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(predictor));
+      return std_array_find_if(global, ::std::move(data), ::std::move(from), ::std::move(predictor));
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      return std_array_find_if(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
-                                       ::rocket::move(predictor));
+      return std_array_find_if(global, ::std::move(data), ::std::move(from), ::std::move(length),
+                                       ::std::move(predictor));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1145,17 +1145,17 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      return std_array_find_if_not(global, ::rocket::move(data), ::rocket::move(predictor));
+      return std_array_find_if_not(global, ::std::move(data), ::std::move(predictor));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      return std_array_find_if_not(global, ::rocket::move(data), ::rocket::move(from),
-                                           ::rocket::move(predictor));
+      return std_array_find_if_not(global, ::std::move(data), ::std::move(from),
+                                           ::std::move(predictor));
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      return std_array_find_if_not(global, ::rocket::move(data), ::rocket::move(from),
-                                           ::rocket::move(length), ::rocket::move(predictor));
+      return std_array_find_if_not(global, ::std::move(data), ::std::move(from),
+                                           ::std::move(length), ::std::move(predictor));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1203,16 +1203,16 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Value target;
     if(reader.I().v(data).S(state).o(target).F()) {
-      return std_array_rfind(::rocket::move(data), ::rocket::move(target));
+      return std_array_rfind(::std::move(data), ::std::move(target));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).o(target).F()) {
-      return std_array_rfind(::rocket::move(data), ::rocket::move(from), ::rocket::move(target));
+      return std_array_rfind(::std::move(data), ::std::move(from), ::std::move(target));
     }
     Iopt length;
     if(reader.L(state).o(length).o(target).F()) {
-      return std_array_rfind(::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
-                             ::rocket::move(target));
+      return std_array_rfind(::std::move(data), ::std::move(from), ::std::move(length),
+                             ::std::move(target));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1260,17 +1260,17 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      return std_array_rfind_if(global, ::rocket::move(data), ::rocket::move(predictor));
+      return std_array_rfind_if(global, ::std::move(data), ::std::move(predictor));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      return std_array_rfind_if(global, ::rocket::move(data), ::rocket::move(from),
-                                        ::rocket::move(predictor));
+      return std_array_rfind_if(global, ::std::move(data), ::std::move(from),
+                                        ::std::move(predictor));
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      return std_array_rfind_if(global, ::rocket::move(data), ::rocket::move(from),
-                                        ::rocket::move(length), ::rocket::move(predictor));
+      return std_array_rfind_if(global, ::std::move(data), ::std::move(from),
+                                        ::std::move(length), ::std::move(predictor));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1318,17 +1318,17 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      return std_array_rfind_if_not(global, ::rocket::move(data), ::rocket::move(predictor));
+      return std_array_rfind_if_not(global, ::std::move(data), ::std::move(predictor));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      return std_array_rfind_if_not(global, ::rocket::move(data), ::rocket::move(from),
-                                            ::rocket::move(predictor));
+      return std_array_rfind_if_not(global, ::std::move(data), ::std::move(from),
+                                            ::std::move(predictor));
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      return std_array_rfind_if_not(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
-                                            ::rocket::move(predictor));
+      return std_array_rfind_if_not(global, ::std::move(data), ::std::move(from), ::std::move(length),
+                                            ::std::move(predictor));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1376,16 +1376,16 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Value target;
     if(reader.I().v(data).S(state).o(target).F()) {
-      return std_array_count(::rocket::move(data), ::rocket::move(target));
+      return std_array_count(::std::move(data), ::std::move(target));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).o(target).F()) {
-      return std_array_count(::rocket::move(data), ::rocket::move(from), ::rocket::move(target));
+      return std_array_count(::std::move(data), ::std::move(from), ::std::move(target));
     }
     Iopt length;
     if(reader.L(state).o(length).o(target).F()) {
-      return std_array_count(::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
-                             ::rocket::move(target));
+      return std_array_count(::std::move(data), ::std::move(from), ::std::move(length),
+                             ::std::move(target));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1431,17 +1431,17 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      return std_array_count_if(global, ::rocket::move(data), ::rocket::move(predictor));
+      return std_array_count_if(global, ::std::move(data), ::std::move(predictor));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      return std_array_count_if(global, ::rocket::move(data),  ::rocket::move(from),
-                                        ::rocket::move(predictor));
+      return std_array_count_if(global, ::std::move(data),  ::std::move(from),
+                                        ::std::move(predictor));
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      return std_array_count_if(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
-                                        ::rocket::move(predictor));
+      return std_array_count_if(global, ::std::move(data), ::std::move(from), ::std::move(length),
+                                        ::std::move(predictor));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1491,17 +1491,17 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      return std_array_count_if_not(global, ::rocket::move(data), ::rocket::move(predictor));
+      return std_array_count_if_not(global, ::std::move(data), ::std::move(predictor));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      return std_array_count_if_not(global, ::rocket::move(data), ::rocket::move(from),
-                                            ::rocket::move(predictor));
+      return std_array_count_if_not(global, ::std::move(data), ::std::move(from),
+                                            ::std::move(predictor));
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      return std_array_count_if_not(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
-                                            ::rocket::move(predictor));
+      return std_array_count_if_not(global, ::std::move(data), ::std::move(from), ::std::move(length),
+                                            ::std::move(predictor));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1551,16 +1551,16 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Value target;
     if(reader.I().v(data).S(state).o(target).F()) {
-      return std_array_exclude(::rocket::move(data), ::rocket::move(target));
+      return std_array_exclude(::std::move(data), ::std::move(target));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).o(target).F()) {
-      return std_array_exclude(::rocket::move(data), ::rocket::move(from), ::rocket::move(target));
+      return std_array_exclude(::std::move(data), ::std::move(from), ::std::move(target));
     }
     Iopt length;
     if(reader.L(state).o(length).o(target).F()) {
-      return std_array_exclude(::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
-                               ::rocket::move(target));
+      return std_array_exclude(::std::move(data), ::std::move(from), ::std::move(length),
+                               ::std::move(target));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1606,17 +1606,17 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      return std_array_exclude_if(global, ::rocket::move(data), ::rocket::move(predictor));
+      return std_array_exclude_if(global, ::std::move(data), ::std::move(predictor));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      return std_array_exclude_if(global, ::rocket::move(data),  ::rocket::move(from),
-                                          ::rocket::move(predictor));
+      return std_array_exclude_if(global, ::std::move(data),  ::std::move(from),
+                                          ::std::move(predictor));
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      return std_array_exclude_if(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
-                                          ::rocket::move(predictor));
+      return std_array_exclude_if(global, ::std::move(data), ::std::move(from), ::std::move(length),
+                                          ::std::move(predictor));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1664,17 +1664,17 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      return std_array_exclude_if_not(global, ::rocket::move(data), ::rocket::move(predictor));
+      return std_array_exclude_if_not(global, ::std::move(data), ::std::move(predictor));
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      return std_array_exclude_if_not(global, ::rocket::move(data), ::rocket::move(from),
-                                              ::rocket::move(predictor));
+      return std_array_exclude_if_not(global, ::std::move(data), ::std::move(from),
+                                              ::std::move(predictor));
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      return std_array_exclude_if_not(global, ::rocket::move(data), ::rocket::move(from), ::rocket::move(length),
-                                              ::rocket::move(predictor));
+      return std_array_exclude_if_not(global, ::std::move(data), ::std::move(from), ::std::move(length),
+                                              ::std::move(predictor));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1721,7 +1721,7 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fopt comparator;
     if(reader.I().v(data).o(comparator).F()) {
-      return std_array_is_sorted(global, ::rocket::move(data), ::rocket::move(comparator));
+      return std_array_is_sorted(global, ::std::move(data), ::std::move(comparator));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1758,8 +1758,8 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Value target;
     Fopt comparator;
     if(reader.I().v(data).o(target).o(comparator).F()) {
-      return std_array_binary_search(global, ::rocket::move(data), ::rocket::move(target),
-                                             ::rocket::move(comparator));
+      return std_array_binary_search(global, ::std::move(data), ::std::move(target),
+                                             ::std::move(comparator));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1794,8 +1794,8 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Value target;
     Fopt comparator;
     if(reader.I().v(data).o(target).o(comparator).F()) {
-      return std_array_lower_bound(global, ::rocket::move(data), ::rocket::move(target),
-                                           ::rocket::move(comparator));
+      return std_array_lower_bound(global, ::std::move(data), ::std::move(target),
+                                           ::std::move(comparator));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1832,8 +1832,8 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Value target;
     Fopt comparator;
     if(reader.I().v(data).o(target).o(comparator).F()) {
-      return std_array_upper_bound(global, ::rocket::move(data), ::rocket::move(target),
-                                           ::rocket::move(comparator));
+      return std_array_upper_bound(global, ::std::move(data), ::std::move(target),
+                                           ::std::move(comparator));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1870,13 +1870,13 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Value target;
     Fopt comparator;
     if(reader.I().v(data).o(target).o(comparator).F()) {
-      auto pair = std_array_equal_range(global, ::rocket::move(data), ::rocket::move(target),
-                                                ::rocket::move(comparator));
+      auto pair = std_array_equal_range(global, ::std::move(data), ::std::move(target),
+                                                ::std::move(comparator));
       // This function returns a `pair`, but we would like to return an array so convert it.
       Aval rval(2);
-      rval.mut(0) = ::rocket::move(pair.first);
-      rval.mut(1) = ::rocket::move(pair.second);
-      return ::rocket::move(rval);
+      rval.mut(0) = ::std::move(pair.first);
+      rval.mut(1) = ::std::move(pair.second);
+      return rval;
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1911,7 +1911,7 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fopt comparator;
     if(reader.I().v(data).o(comparator).F()) {
-      return std_array_sort(global, ::rocket::move(data), ::rocket::move(comparator));
+      return std_array_sort(global, ::std::move(data), ::std::move(comparator));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1944,7 +1944,7 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fopt comparator;
     if(reader.I().v(data).o(comparator).F()) {
-      return std_array_sortu(global, ::rocket::move(data), ::rocket::move(comparator));
+      return std_array_sortu(global, ::std::move(data), ::std::move(comparator));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1978,7 +1978,7 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fopt comparator;
     if(reader.I().v(data).o(comparator).F()) {
-      return std_array_max_of(global, ::rocket::move(data), ::rocket::move(comparator));
+      return std_array_max_of(global, ::std::move(data), ::std::move(comparator));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -2007,7 +2007,7 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fopt comparator;
     if(reader.I().v(data).o(comparator).F()) {
-      return std_array_min_of(global, ::rocket::move(data), ::rocket::move(comparator));
+      return std_array_min_of(global, ::std::move(data), ::std::move(comparator));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -2036,7 +2036,7 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fopt comparator;
     if(reader.I().v(data).o(comparator).F()) {
-      return std_array_reverse(::rocket::move(data));
+      return std_array_reverse(::std::move(data));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -2062,7 +2062,7 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Fval generator;
     Ival length;
     if(reader.I().v(generator).v(length).F()) {
-      return std_array_generate(global, ::rocket::move(generator), ::rocket::move(length));
+      return std_array_generate(global, ::std::move(generator), ::std::move(length));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -2092,7 +2092,7 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Iopt seed;
     if(reader.I().v(data).o(seed).F()) {
-      return std_array_shuffle(::rocket::move(data), ::rocket::move(seed));
+      return std_array_shuffle(::std::move(data), ::std::move(seed));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -2122,7 +2122,7 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Ival shift;
     if(reader.I().v(data).v(shift).F()) {
-      return std_array_rotate(::rocket::move(data), ::rocket::move(shift));
+      return std_array_rotate(::std::move(data), ::std::move(shift));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -2149,7 +2149,7 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Oval source;
     if(reader.I().v(source).F()) {
-      return std_array_copy_keys(::rocket::move(source));
+      return std_array_copy_keys(::std::move(source));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -2174,7 +2174,7 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Oval source;
     if(reader.I().v(source).F()) {
-      return std_array_copy_values(::rocket::move(source));
+      return std_array_copy_values(::std::move(source));
     }
     // Fail.
     reader.throw_no_matching_function_call();

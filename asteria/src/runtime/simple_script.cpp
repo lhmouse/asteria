@@ -65,7 +65,7 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
     }
     // TODO: Insert optimization passes.
     // Instantiate the function.
-    this->m_func = ::rocket::make_refcnt<Instantiated_Function>(this->m_params, ::rocket::move(zvarg), code_body);
+    this->m_func = ::rocket::make_refcnt<Instantiated_Function>(this->m_params, ::std::move(zvarg), code_body);
     return *this;
   }
 
@@ -96,7 +96,7 @@ Reference Simple_Script::execute(Global_Context& global, cow_vector<Reference>&&
       ASTERIA_THROW("no script loaded");
     }
     const StdIO_Sentry iocerb;
-    return this->m_func.invoke(global, ::rocket::move(args));
+    return this->m_func.invoke(global, ::std::move(args));
   }
 
 Reference Simple_Script::execute(Global_Context& global, cow_vector<Value>&& vals) const
@@ -104,10 +104,10 @@ Reference Simple_Script::execute(Global_Context& global, cow_vector<Value>&& val
     cow_vector<Reference> args;
     args.reserve(vals.size());
     for(size_t i = 0;  i < args.size();  ++i) {
-      Reference_root::S_temporary xref = { ::rocket::move(vals.mut(i)) };
-      args.emplace_back(::rocket::move(xref));
+      Reference_root::S_temporary xref = { ::std::move(vals.mut(i)) };
+      args.emplace_back(::std::move(xref));
     }
-    return this->execute(global, ::rocket::move(args));
+    return this->execute(global, ::std::move(args));
   }
 
 }  // namespace Asteria

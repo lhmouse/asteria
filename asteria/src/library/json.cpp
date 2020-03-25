@@ -234,7 +234,7 @@ Sval do_format_nonrecursive(const Value& value, Indenter& indent)
           indent.break_line(fmt);
           // Decend into the array.
           S_xformat_array ctxa = { ::rocket::ref(array), cur };
-          stack.emplace_back(::rocket::move(ctxa));
+          stack.emplace_back(::std::move(ctxa));
           qvalue = ::std::addressof(*cur);
           continue;
         }
@@ -255,7 +255,7 @@ Sval do_format_nonrecursive(const Value& value, Indenter& indent)
           fmt << ':';
           // Decend into the object.
           S_xformat_object ctxo = { ::rocket::ref(object), cur };
-          stack.emplace_back(::rocket::move(ctxo));
+          stack.emplace_back(::std::move(ctxo));
           qvalue = ::std::addressof(cur->second);
           continue;
         }
@@ -334,7 +334,7 @@ Sopt do_accept_identifier_opt(Token_Stream& tstrm, initializer_list<const char*>
       if(::rocket::is_any_of(name, accept)) {
         tstrm.shift();
         // A match has been found.
-        return ::rocket::move(name);
+        return name;
       }
     }
     return nullopt;
@@ -414,7 +414,7 @@ Sopt do_accept_string_opt(Token_Stream& tstrm)
       auto val = qtok->as_string_literal();
       tstrm.shift();
       // This string literal can be copied as is in UTF-8.
-      return Sval(::rocket::move(val));
+      return Sval(::std::move(val));
     }
     return nullopt;
   }
@@ -429,7 +429,7 @@ opt<Value> do_accept_scalar_opt(Token_Stream& tstrm)
     auto qstr = do_accept_string_opt(tstrm);
     if(qstr) {
       // Accept a `String`.
-      return ::rocket::move(*qstr);
+      return ::std::move(*qstr);
     }
     qstr = do_accept_identifier_opt(tstrm, { "true", "false", "Infinity", "NaN", "null" });
     if(qstr) {
@@ -465,13 +465,13 @@ Sopt do_accept_key_opt(Token_Stream& tstrm)
       auto name = qtok->as_identifier();
       tstrm.shift();
       // Identifiers are allowed unquoted in JSON5.
-      return Sval(::rocket::move(name));
+      return Sval(::std::move(name));
     }
     if(qtok->is_string_literal()) {
       auto val = qtok->as_string_literal();
       tstrm.shift();
       // This string literal can be copied as is in UTF-8.
-      return Sval(::rocket::move(val));
+      return Sval(::std::move(val));
     }
     return nullopt;
   }
@@ -501,7 +501,7 @@ opt<Value> do_json_parse_nonrecursive_opt(Token_Stream& tstrm)
         if(!kpunct) {
           // Descend into the new array.
           S_xparse_array ctxa = { nullopt };
-          stack.emplace_back(::rocket::move(ctxa));
+          stack.emplace_back(::std::move(ctxa));
           continue;
         }
         // Accept an empty array.
@@ -521,8 +521,8 @@ opt<Value> do_json_parse_nonrecursive_opt(Token_Stream& tstrm)
             return nullopt;
           }
           // Descend into a new object.
-          S_xparse_object ctxo = { nullopt, ::rocket::move(*qkey) };
-          stack.emplace_back(::rocket::move(ctxo));
+          S_xparse_object ctxo = { nullopt, ::std::move(*qkey) };
+          stack.emplace_back(::std::move(ctxo));
           continue;
         }
         // Accept an empty object.
@@ -534,18 +534,18 @@ opt<Value> do_json_parse_nonrecursive_opt(Token_Stream& tstrm)
         if(!qvalue) {
           return nullopt;
         }
-        value = ::rocket::move(*qvalue);
+        value = ::std::move(*qvalue);
       }
       // Insert the value into its parent array or object.
       for(;;) {
         if(stack.empty()) {
           // Accept the root value.
-          return ::rocket::move(value);
+          return value;
         }
         if(stack.back().index() == 0) {
           auto& ctxa = stack.mut_back().as<0>();
           // Append the value to its parent array.
-          ctxa.array.emplace_back(::rocket::move(value));
+          ctxa.array.emplace_back(::std::move(value));
           // Look for the next element.
           kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl, punctuator_comma });
           if(!kpunct) {
@@ -560,12 +560,12 @@ opt<Value> do_json_parse_nonrecursive_opt(Token_Stream& tstrm)
             // An extra comma is allowed in JSON5.
           }
           // Pop the array.
-          value = ::rocket::move(ctxa.array);
+          value = ::std::move(ctxa.array);
         }
         else {
           auto& ctxo = stack.mut_back().as<1>();
           // Insert the value into its parent object.
-          ctxo.object.insert_or_assign(::rocket::move(ctxo.key), ::rocket::move(value));
+          ctxo.object.insert_or_assign(::std::move(ctxo.key), ::std::move(value));
           // Look for the next element.
           kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl, punctuator_comma });
           if(!kpunct) {
@@ -583,14 +583,14 @@ opt<Value> do_json_parse_nonrecursive_opt(Token_Stream& tstrm)
               if(!kpunct) {
                 return nullopt;
               }
-              ctxo.key = ::rocket::move(*qkey);
+              ctxo.key = ::std::move(*qkey);
               // The next value is expected to follow the colon.
               break;
             }
             // An extra comma is allowed in JSON5.
           }
           // Pop the object.
-          value = ::rocket::move(ctxo.object);
+          value = ::std::move(ctxo.object);
         }
         stack.pop_back();
       }
@@ -641,7 +641,7 @@ Value std_json_parse(Sval text)
     if(qtok) {
       ASTERIA_THROW("invalid JSON string: excess text at the end");
     }
-    return ::rocket::move(*qvalue);
+    return ::std::move(*qvalue);
   }
 
 void create_bindings_json(V_object& result, API_Version /*version*/)
@@ -659,11 +659,11 @@ void create_bindings_json(V_object& result, API_Version /*version*/)
     Value value;
     Sopt sindent;
     if(reader.I().o(value).S(state).o(sindent).F()) {
-      return std_json_format(::rocket::move(value), ::rocket::move(sindent));
+      return std_json_format(::std::move(value), ::std::move(sindent));
     }
     Ival nindent;
     if(reader.L(state).v(nindent).F()) {
-      return std_json_format(::rocket::move(value), ::rocket::move(nindent));
+      return std_json_format(::std::move(value), ::std::move(nindent));
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -697,7 +697,7 @@ void create_bindings_json(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Sval text;
     if(reader.I().v(text).F()) {
-      return std_json_parse(::rocket::move(text));
+      return std_json_parse(::std::move(text));
     }
     // Fail.
     reader.throw_no_matching_function_call();

@@ -35,7 +35,7 @@ bool do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code, const Abstract_Con
         continue;
       }
       dirty |= true;
-      code.mut(i) = ::rocket::move(*qnode);
+      code.mut(i) = ::std::move(*qnode);
     }
     return dirty;
   }
@@ -49,7 +49,7 @@ bool do_rebind_nodes(bool& dirty, cow_vector<cow_vector<AIR_Node>>& code, const 
           continue;
         }
         dirty |= true;
-        code.mut(i).mut(k) = ::rocket::move(*qnode);
+        code.mut(i).mut(k) = ::std::move(*qnode);
       }
     }
     return dirty;
@@ -60,12 +60,12 @@ template<typename XValT> Reference& do_set_temporary(Evaluation_Stack& stack, bo
     auto& ref = stack.open_top();
     if(assign) {
       // Write the value to the top refernce.
-      ref.open() = ::rocket::forward<XValT>(xval);
+      ref.open() = ::std::forward<XValT>(xval);
       return ref;
     }
     // Replace the top reference with a temporary reference to the value.
-    Reference_root::S_temporary xref = { ::rocket::forward<XValT>(xval) };
-    return ref = ::rocket::move(xref);
+    Reference_root::S_temporary xref = { ::std::forward<XValT>(xval) };
+    return ref = ::std::move(xref);
   }
 
 Reference& do_declare(Executive_Context& ctx, const phsh_string& name)
@@ -144,7 +144,9 @@ template<typename ParamV, typename = void> struct AVMC_Appender : ParamV
   };
 
 // This is the trait struct for parameter types that do not implement `enumerate_variables()`.
-template<typename ParamV> struct AVMC_Appender<ParamV, ASTERIA_VOID_T(typename ParamV::nonenumerable)> : ParamV
+template<typename ParamV> struct AVMC_Appender<ParamV,
+               typename ::std::conditional<1, void,
+                                 typename ParamV::nonenumerable>::type> : ParamV
   {
     ParamU pu;
 
@@ -357,14 +359,14 @@ AIR_Status do_declare_variable(Executive_Context& ctx, ParamU /*pu*/, const void
     // Allocate an uninitialized variable.
     auto var = gcoll->create_variable();
     // Inject the variable into the current context.
-    Reference_root::S_variable xref = { ::rocket::move(var) };
+    Reference_root::S_variable xref = { ::std::move(var) };
     ctx.open_named_reference(name) = xref;
     // Call the hook function if any.
     if(qhooks) {
       qhooks->on_variable_declare(sloc, inside, name);
     }
     // Push a copy of the reference onto the stack.
-    ctx.stack().push(::rocket::move(xref));
+    ctx.stack().push(::std::move(xref));
     return air_status_next;
   }
 
@@ -382,7 +384,7 @@ AIR_Status do_initialize_variable(Executive_Context& ctx, ParamU pu, const void*
     ctx.stack().pop();
     // Initialize it.
     ROCKET_ASSERT(var && !var->is_initialized());
-    var->initialize(::rocket::move(val), immutable);
+    var->initialize(::std::move(val), immutable);
     return air_status_next;
   }
 
@@ -540,7 +542,7 @@ AIR_Status do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const vo
     auto status = queue_init.execute(ctx_for);
     ROCKET_ASSERT(status == air_status_next);
     // Set the range up, which isn't going to change even if the argument got modified by the loop body.
-    mapped = ::rocket::move(ctx_for.stack().open_top());
+    mapped = ::std::move(ctx_for.stack().open_top());
     const auto range = mapped.read();
     if(range.is_null()) {
       // Do nothing.
@@ -552,7 +554,7 @@ AIR_Status do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const vo
         vkey->initialize(i, true);
         // Set the mapped reference.
         Reference_modifier::S_array_index xmod = { i };
-        mapped.zoom_in(::rocket::move(xmod));
+        mapped.zoom_in(::std::move(xmod));
         // Execute the loop body.
         status = do_execute_block(queue_body, ctx_for);
         if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
@@ -570,7 +572,7 @@ AIR_Status do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const vo
         vkey->initialize(it->first.rdstr(), true);
         // Set the mapped reference.
         Reference_modifier::S_object_key xmod = { it->first.rdstr() };
-        mapped.zoom_in(::rocket::move(xmod));
+        mapped.zoom_in(::std::move(xmod));
         // Execute the loop body.
         status = do_execute_block(queue_body, ctx_for);
         if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
@@ -650,7 +652,7 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
       ASTERIA_RUNTIME_TRY {
         // Set the exception reference.
         Reference_root::S_temporary xref_except = { except.value() };
-        ctx_catch.open_named_reference(name_except) = ::rocket::move(xref_except);
+        ctx_catch.open_named_reference(name_except) = ::std::move(xref_except);
         // Set backtrace frames.
         V_array backtrace;
         for(size_t i = 0;  i < except.count_frames();  ++i) {
@@ -662,10 +664,10 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
           r.try_emplace(::rocket::sref("line"), V_integer(f.line()));
           r.try_emplace(::rocket::sref("value"), f.value());
           // Append this frame.
-          backtrace.emplace_back(::rocket::move(r));
+          backtrace.emplace_back(::std::move(r));
         }
-        Reference_root::S_constant xref = { ::rocket::move(backtrace) };
-        ctx_catch.open_named_reference(::rocket::sref("__backtrace")) = ::rocket::move(xref);
+        Reference_root::S_constant xref = { ::std::move(backtrace) };
+        ctx_catch.open_named_reference(::rocket::sref("__backtrace")) = ::std::move(xref);
         status = queue_catch.execute(ctx_catch);
       }
       ASTERIA_RUNTIME_CATCH(Runtime_Error& nested) {
@@ -723,7 +725,7 @@ AIR_Status do_glvalue_to_rvalue(Executive_Context& ctx, ParamU /*pu*/, const voi
     }
     // Convert the result to an rvalue.
     Reference_root::S_temporary xref = { self.read() };
-    self = ::rocket::move(xref);
+    self = ::std::move(xref);
     return air_status_next;
   }
 
@@ -734,7 +736,7 @@ AIR_Status do_push_immediate(Executive_Context& ctx, ParamU /*pu*/, const void* 
 
     // Push a constant.
     Reference_root::S_constant xref = { val };
-    ctx.stack().push(::rocket::move(xref));
+    ctx.stack().push(::std::move(xref));
     return air_status_next;
   }
 
@@ -801,10 +803,10 @@ AIR_Status do_define_function(Executive_Context& ctx, ParamU /*pu*/, const void*
     auto pair = ::std::make_pair(false, code_body);
     do_rebind_nodes(pair.first, pair.second, ctx_func);
     // Instantiate the function.
-    auto qtarget = ::rocket::make_refcnt<Instantiated_Function>(params, ::rocket::move(zvarg), pair.second);
+    auto qtarget = ::rocket::make_refcnt<Instantiated_Function>(params, ::std::move(zvarg), pair.second);
     // Push the function as a temporary.
-    Reference_root::S_temporary xref = { V_function(::rocket::move(qtarget)) };
-    ctx.stack().push(::rocket::move(xref));
+    Reference_root::S_temporary xref = { V_function(::std::move(qtarget)) };
+    ctx.stack().push(::std::move(xref));
     return air_status_next;
   }
 
@@ -850,7 +852,7 @@ ROCKET_NOINLINE Reference& do_invoke_nontail(Reference& self, const Source_Locat
     }
     // Perform a non-tail call.
     ASTERIA_RUNTIME_TRY {
-      target.invoke(self, ctx.global(), ::rocket::move(args));
+      target.invoke(self, ctx.global(), ::std::move(args));
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
       // Append the current frame and rethrow the exception.
@@ -874,10 +876,10 @@ ROCKET_NOINLINE Reference& do_wrap_ptc(Reference& self, const Source_Location& s
   {
     // Pack arguments for this proper tail call.
     auto tca = ::rocket::make_refcnt<PTC_Arguments>(sloc, ctx.zvarg(), ptc, target,
-                                        ::rocket::move(args.insert(args.size(), ::rocket::move(self))));
+                                        ::std::move(args.insert(args.size(), ::std::move(self))));
     // Return it.
-    Reference_root::S_tail_call xref = { ::rocket::move(tca) };
-    return self = ::rocket::move(xref);
+    Reference_root::S_tail_call xref = { ::std::move(tca) };
+    return self = ::std::move(xref);
   }
 
 AIR_Status do_function_call_common(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
@@ -886,13 +888,13 @@ AIR_Status do_function_call_common(Reference& self, const Source_Location& sloc,
   {
     if(ROCKET_EXPECT(ptc == ptc_aware_none)) {
       // Perform plain calls.
-      do_invoke_nontail(self, sloc, ctx, target, ::rocket::move(args));
+      do_invoke_nontail(self, sloc, ctx, target, ::std::move(args));
       // Discard `self`.
       return air_status_next;
     }
     // Wrap proper tail calls.
     // The result will be unpacked outside this scope.
-    do_wrap_ptc(self, sloc, ctx, target, ptc, ::rocket::move(args));
+    do_wrap_ptc(self, sloc, ctx, target, ptc, ::std::move(args));
     // Force `air_status_return_ref` if control flow reaches the end of a function.
     // Otherwise a null reference is returned instead of this PTC wrapper, which can then never be unpacked.
     return air_status_return_ref;
@@ -921,7 +923,7 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
       auto& arg = ctx.stack().open_top();
       static_cast<void>(arg.read());
       // Set the argument as is.
-      args.mut(i) = ::rocket::move(arg);
+      args.mut(i) = ::std::move(arg);
       ctx.stack().pop();
     }
     // Copy the target, which shall be of type `function`.
@@ -930,7 +932,7 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
       ASTERIA_THROW("attempt to call a non-function (value `$1`)", value);
     }
     return do_function_call_common(ctx.stack().open_top().zoom_out(),sloc, ctx,
-                                   value.as_function(), ptc, ::rocket::move(args));
+                                   value.as_function(), ptc, ::std::move(args));
   }
 
 AIR_Status do_member_access(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
@@ -940,7 +942,7 @@ AIR_Status do_member_access(Executive_Context& ctx, ParamU /*pu*/, const void* p
 
     // Append a modifier to the reference at the top.
     Reference_modifier::S_object_key xmod = { name };
-    ctx.stack().open_top().zoom_in(::rocket::move(xmod));
+    ctx.stack().open_top().zoom_in(::std::move(xmod));
     return air_status_next;
   }
 
@@ -958,8 +960,8 @@ AIR_Status do_push_unnamed_array(Executive_Context& ctx, ParamU pu, const void* 
       ctx.stack().pop();
     }
     // Push the array as a temporary.
-    Reference_root::S_temporary xref = { ::rocket::move(array) };
-    ctx.stack().push(::rocket::move(xref));
+    Reference_root::S_temporary xref = { ::std::move(array) };
+    ctx.stack().push(::std::move(xref));
     return air_status_next;
   }
 
@@ -978,8 +980,8 @@ AIR_Status do_push_unnamed_object(Executive_Context& ctx, ParamU /*pu*/, const v
       ctx.stack().pop();
     }
     // Push the object as a temporary.
-    Reference_root::S_temporary xref = { ::rocket::move(object) };
-    ctx.stack().push(::rocket::move(xref));
+    Reference_root::S_temporary xref = { ::std::move(object) };
+    ctx.stack().push(::std::move(xref));
     return air_status_next;
   }
 
@@ -1405,12 +1407,12 @@ AIR_Status do_apply_xop_INC_POST(Executive_Context& ctx, ParamU /*pu*/, const vo
     // Increment the operand and return the old value. `assign` is ignored.
     if(lhs.is_integer()) {
       auto& reg = lhs.open_integer();
-      do_set_temporary(ctx.stack(), false, ::rocket::move(lhs));
+      do_set_temporary(ctx.stack(), false, ::std::move(lhs));
       reg = do_operator_ADD(reg, V_integer(1));
     }
     else if(lhs.is_real()) {
       auto& reg = lhs.open_real();
-      do_set_temporary(ctx.stack(), false, ::rocket::move(lhs));
+      do_set_temporary(ctx.stack(), false, ::std::move(lhs));
       reg = do_operator_ADD(reg, V_real(1));
     }
     else {
@@ -1426,12 +1428,12 @@ AIR_Status do_apply_xop_DEC_POST(Executive_Context& ctx, ParamU /*pu*/, const vo
     // Decrement the operand and return the old value. `assign` is ignored.
     if(lhs.is_integer()) {
       auto& reg = lhs.open_integer();
-      do_set_temporary(ctx.stack(), false, ::rocket::move(lhs));
+      do_set_temporary(ctx.stack(), false, ::std::move(lhs));
       reg = do_operator_SUB(reg, V_integer(1));
     }
     else if(lhs.is_real()) {
       auto& reg = lhs.open_real();
-      do_set_temporary(ctx.stack(), false, ::rocket::move(lhs));
+      do_set_temporary(ctx.stack(), false, ::std::move(lhs));
       reg = do_operator_SUB(reg, V_real(1));
     }
     else {
@@ -1449,13 +1451,13 @@ AIR_Status do_apply_xop_SUBSCR(Executive_Context& ctx, ParamU /*pu*/, const void
     // Append a reference modifier. `assign` is ignored.
     if(rhs.is_integer()) {
       auto& reg = rhs.open_integer();
-      Reference_modifier::S_array_index xmod = { ::rocket::move(reg) };
-      lref.zoom_in(::rocket::move(xmod));
+      Reference_modifier::S_array_index xmod = { ::std::move(reg) };
+      lref.zoom_in(::std::move(xmod));
     }
     else if(rhs.is_string()) {
       auto& reg = rhs.open_string();
-      Reference_modifier::S_object_key xmod = { ::rocket::move(reg) };
-      lref.zoom_in(::rocket::move(xmod));
+      Reference_modifier::S_object_key xmod = { ::std::move(reg) };
+      lref.zoom_in(::std::move(xmod));
     }
     else {
       ASTERIA_THROW("subscript value not valid (subscript was `$1`)", rhs);
@@ -1472,7 +1474,7 @@ AIR_Status do_apply_xop_POS(Executive_Context& ctx, ParamU pu, const void* /*pv*
     auto rhs = ctx.stack().get_top().read();
     // Copy the operand to create a temporary value, then return it.
     // N.B. This is one of the few operators that work on all types.
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -1495,7 +1497,7 @@ AIR_Status do_apply_xop_NEG(Executive_Context& ctx, ParamU pu, const void* /*pv*
     else {
       ASTERIA_THROW("prefix negation not applicable (operand was `$1`)", rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -1518,7 +1520,7 @@ AIR_Status do_apply_xop_NOTB(Executive_Context& ctx, ParamU pu, const void* /*pv
     else {
       ASTERIA_THROW("prefix bitwise NOT not applicable (operand was `$1`)", rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -1581,7 +1583,7 @@ AIR_Status do_apply_xop_UNSET(Executive_Context& ctx, ParamU pu, const void* /*p
     // This operator is unary.
     auto rhs = ctx.stack().get_top().unset();
     // Unset the reference and return the old value.
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -1650,7 +1652,7 @@ AIR_Status do_apply_xop_SQRT(Executive_Context& ctx, ParamU pu, const void* /*pv
     else {
       ASTERIA_THROW("prefix `__sqrt` not applicable (operand was `$1`)", rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -1673,7 +1675,7 @@ AIR_Status do_apply_xop_ISNAN(Executive_Context& ctx, ParamU pu, const void* /*p
     else {
       ASTERIA_THROW("prefix `__isnan` not applicable (operand was `$1`)", rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -1696,7 +1698,7 @@ AIR_Status do_apply_xop_ISINF(Executive_Context& ctx, ParamU pu, const void* /*p
     else {
       ASTERIA_THROW("prefix `__isinf` not applicable (operand was `$1`)", rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -1719,7 +1721,7 @@ AIR_Status do_apply_xop_ABS(Executive_Context& ctx, ParamU pu, const void* /*pv*
     else {
       ASTERIA_THROW("prefix `__abs` not applicable (operand was `$1`)", rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -1742,7 +1744,7 @@ AIR_Status do_apply_xop_SIGN(Executive_Context& ctx, ParamU pu, const void* /*pv
     else {
       ASTERIA_THROW("prefix `__sign` not applicable (operand was `$1`)", rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -1765,7 +1767,7 @@ AIR_Status do_apply_xop_ROUND(Executive_Context& ctx, ParamU pu, const void* /*p
     else {
       ASTERIA_THROW("prefix `__round` not applicable (operand was `$1`)", rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -1788,7 +1790,7 @@ AIR_Status do_apply_xop_FLOOR(Executive_Context& ctx, ParamU pu, const void* /*p
     else {
       ASTERIA_THROW("prefix `__floor` not applicable (operand was `$1`)", rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -1811,7 +1813,7 @@ AIR_Status do_apply_xop_CEIL(Executive_Context& ctx, ParamU pu, const void* /*pv
     else {
       ASTERIA_THROW("prefix `__ceil` not applicable (operand was `$1`)", rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -1834,7 +1836,7 @@ AIR_Status do_apply_xop_TRUNC(Executive_Context& ctx, ParamU pu, const void* /*p
     else {
       ASTERIA_THROW("prefix `__trunc` not applicable (operand was `$1`)", rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -1857,7 +1859,7 @@ AIR_Status do_apply_xop_IROUND(Executive_Context& ctx, ParamU pu, const void* /*
     else {
       ASTERIA_THROW("prefix `__iround` not applicable (operand was `$1`)", rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -1880,7 +1882,7 @@ AIR_Status do_apply_xop_IFLOOR(Executive_Context& ctx, ParamU pu, const void* /*
     else {
       ASTERIA_THROW("prefix `__ifloor` not applicable (operand was `$1`)", rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -1903,7 +1905,7 @@ AIR_Status do_apply_xop_ICEIL(Executive_Context& ctx, ParamU pu, const void* /*p
     else {
       ASTERIA_THROW("prefix `__iceil` not applicable (operand was `$1`)", rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -1926,7 +1928,7 @@ AIR_Status do_apply_xop_ITRUNC(Executive_Context& ctx, ParamU pu, const void* /*
     else {
       ASTERIA_THROW("prefix `__itrunc` not applicable (operand was `$1`)", rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -2035,7 +2037,7 @@ AIR_Status do_apply_xop_ADD(Executive_Context& ctx, ParamU pu, const void* /*pv*
     else {
       ASTERIA_THROW("infix addition not defined (operands were `$1` and `$2`)", lhs, rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -2065,7 +2067,7 @@ AIR_Status do_apply_xop_SUB(Executive_Context& ctx, ParamU pu, const void* /*pv*
     else {
       ASTERIA_THROW("infix subtraction not defined (operands were `$1` and `$2`)", lhs, rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -2105,7 +2107,7 @@ AIR_Status do_apply_xop_MUL(Executive_Context& ctx, ParamU pu, const void* /*pv*
     else {
       ASTERIA_THROW("infix multiplication not defined (operands were `$1` and `$2`)", lhs, rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -2130,7 +2132,7 @@ AIR_Status do_apply_xop_DIV(Executive_Context& ctx, ParamU pu, const void* /*pv*
     else {
       ASTERIA_THROW("infix division not defined (operands were `$1` and `$2`)", lhs, rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -2155,7 +2157,7 @@ AIR_Status do_apply_xop_MOD(Executive_Context& ctx, ParamU pu, const void* /*pv*
     else {
       ASTERIA_THROW("infix modulo not defined (operands were `$1` and `$2`)", lhs, rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -2183,7 +2185,7 @@ AIR_Status do_apply_xop_SLL(Executive_Context& ctx, ParamU pu, const void* /*pv*
     else {
       ASTERIA_THROW("infix logical left shift not defined (operands were `$1` and `$2`)", lhs, rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -2211,7 +2213,7 @@ AIR_Status do_apply_xop_SRL(Executive_Context& ctx, ParamU pu, const void* /*pv*
     else {
       ASTERIA_THROW("infix logical right shift not defined (operands were `$1` and `$2`)", lhs, rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -2239,7 +2241,7 @@ AIR_Status do_apply_xop_SLA(Executive_Context& ctx, ParamU pu, const void* /*pv*
     else {
       ASTERIA_THROW("infix arithmetic left shift not defined (operands were `$1` and `$2`)", lhs, rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -2266,7 +2268,7 @@ AIR_Status do_apply_xop_SRA(Executive_Context& ctx, ParamU pu, const void* /*pv*
     else {
       ASTERIA_THROW("infix arithmetic right shift not defined (operands were `$1` and `$2`)", lhs, rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -2292,7 +2294,7 @@ AIR_Status do_apply_xop_ANDB(Executive_Context& ctx, ParamU pu, const void* /*pv
     else {
       ASTERIA_THROW("infix bitwise AND not defined (operands were `$1` and `$2`)", lhs, rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -2318,7 +2320,7 @@ AIR_Status do_apply_xop_ORB(Executive_Context& ctx, ParamU pu, const void* /*pv*
     else {
       ASTERIA_THROW("infix bitwise OR not defined (operands were `$1` and `$2`)", lhs, rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -2344,7 +2346,7 @@ AIR_Status do_apply_xop_XORB(Executive_Context& ctx, ParamU pu, const void* /*pv
     else {
       ASTERIA_THROW("infix bitwise XOR not defined (operands were `$1` and `$2`)", lhs, rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -2354,7 +2356,7 @@ AIR_Status do_apply_xop_ASSIGN(Executive_Context& ctx, ParamU /*pu*/, const void
     auto rhs = ctx.stack().get_top().read();
     ctx.stack().pop();
     // Copy the value to the LHS operand which is write-only. `assign` is ignored.
-    do_set_temporary(ctx.stack(), true, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), true, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -2377,7 +2379,7 @@ AIR_Status do_apply_xop_FMA(Executive_Context& ctx, ParamU pu, const void* /*pv*
     else {
       ASTERIA_THROW("fused multiply-add not defined (operands were `$1`, `$2` and `$3`)", lhs, mid, rhs);
     }
-    do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
+    do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
   }
 
@@ -2386,7 +2388,7 @@ AIR_Status do_apply_xop_HEAD(Executive_Context& ctx, ParamU /*pu*/, const void* 
     // This operator is unary.
     auto& lref = ctx.stack().open_top();
     Reference_modifier::S_array_head xmod = { };
-    lref.zoom_in(::rocket::move(xmod));
+    lref.zoom_in(::std::move(xmod));
     return air_status_next;
   }
 
@@ -2395,7 +2397,7 @@ AIR_Status do_apply_xop_TAIL(Executive_Context& ctx, ParamU /*pu*/, const void* 
     // This operator is unary.
     auto& lref = ctx.stack().open_top();
     Reference_modifier::S_array_tail xmod = { };
-    lref.zoom_in(::rocket::move(xmod));
+    lref.zoom_in(::std::move(xmod));
     return air_status_next;
   }
 
@@ -2415,7 +2417,7 @@ AIR_Status do_unpack_struct_array(Executive_Context& ctx, ParamU pu, const void*
       if(!val.is_array()) {
         ASTERIA_THROW("invalid argument for structured array binding (initializer was `$1`)", val);
       }
-      arr = ::rocket::move(val.open_array());
+      arr = ::std::move(val.open_array());
     }
     for(size_t i = nelems - 1;  i != SIZE_MAX;  --i) {
       // Get the variable back.
@@ -2425,7 +2427,7 @@ AIR_Status do_unpack_struct_array(Executive_Context& ctx, ParamU pu, const void*
       ROCKET_ASSERT(var && !var->is_initialized());
       auto qinit = arr.mut_ptr(i);
       if(qinit)
-        var->initialize(::rocket::move(*qinit), immutable);
+        var->initialize(::std::move(*qinit), immutable);
       else
         var->initialize(nullptr, immutable);
     }
@@ -2448,7 +2450,7 @@ AIR_Status do_unpack_struct_object(Executive_Context& ctx, ParamU pu, const void
       if(!val.is_object()) {
         ASTERIA_THROW("invalid argument for structured object binding (initializer was `$1`)", val);
       }
-      obj = ::rocket::move(val.open_object());
+      obj = ::std::move(val.open_object());
     }
     for(auto it = keys.rbegin();  it != keys.rend();  ++it) {
       // Get the variable back.
@@ -2458,7 +2460,7 @@ AIR_Status do_unpack_struct_object(Executive_Context& ctx, ParamU pu, const void
       ROCKET_ASSERT(var && !var->is_initialized());
       auto qinit = obj.mut_ptr(*it);
       if(qinit)
-        var->initialize(::rocket::move(*qinit), immutable);
+        var->initialize(::std::move(*qinit), immutable);
       else
         var->initialize(nullptr, immutable);
     }
@@ -2479,7 +2481,7 @@ AIR_Status do_define_null_variable(Executive_Context& ctx, ParamU pu, const void
     auto var = gcoll->create_variable();
     // Inject the variable into the current context.
     Reference_root::S_variable xref = { var };
-    ctx.open_named_reference(name) = ::rocket::move(xref);
+    ctx.open_named_reference(name) = ::std::move(xref);
     // Call the hook function if any.
     if(qhooks) {
       qhooks->on_variable_declare(sloc, inside, name);
@@ -2524,22 +2526,22 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
       // Leave `args` empty.
     }
     else if(value.is_array()) {
-      auto source = ::rocket::move(value.open_array());
+      auto source = ::std::move(value.open_array());
       ctx.stack().pop();
       // Convert all elements to temporaries.
       args.assign(source.size(), Reference_root::S_void());
       for(size_t i = 0;  i < args.size();  ++i) {
         // Make a reference to temporary.
-        Reference_root::S_temporary xref = { ::rocket::move(source.mut(i)) };
-        args.mut(i) = ::rocket::move(xref);
+        Reference_root::S_temporary xref = { ::std::move(source.mut(i)) };
+        args.mut(i) = ::std::move(xref);
       }
     }
     else if(value.is_function()) {
-      const auto generator = ::rocket::move(value.open_function());
+      const auto generator = ::std::move(value.open_function());
       auto gself = ctx.stack().open_top().zoom_out();
       // Pass an empty argument list to get the number of arguments to generate.
       cow_vector<Reference> gargs;
-      do_invoke_nontail(ctx.stack().open_top(), sloc, ctx, generator, ::rocket::move(gargs));
+      do_invoke_nontail(ctx.stack().open_top(), sloc, ctx, generator, ::std::move(gargs));
       value = ctx.stack().get_top().read();
       ctx.stack().pop();
       // Verify the argument count.
@@ -2555,9 +2557,9 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
       for(size_t i = 0;  i < args.size();  ++i) {
         // Initialize the argument list for the generator.
         Reference_root::S_constant xref = { V_integer(i) };
-        gargs.clear().emplace_back(::rocket::move(xref));
+        gargs.clear().emplace_back(::std::move(xref));
         // Generate an argument. Ensure it is dereferenceable.
-        do_invoke_nontail(args.mut(i), sloc, ctx, generator, ::rocket::move(gargs));
+        do_invoke_nontail(args.mut(i), sloc, ctx, generator, ::std::move(gargs));
         static_cast<void>(args[i].read());
       }
     }
@@ -2570,7 +2572,7 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
       ASTERIA_THROW("attempt to call a non-function (value `$1`)", value);
     }
     return do_function_call_common(ctx.stack().open_top().zoom_out(),sloc, ctx,
-                                   value.as_function(), ptc, ::rocket::move(args));
+                                   value.as_function(), ptc, ::std::move(args));
   }
 
 AIR_Status do_defer_expression(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
@@ -2606,7 +2608,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         if(!pair.first) {
           return nullopt;
         }
-        return ::rocket::move(pair.second);
+        return ::std::move(pair.second);
       }
 
     case index_declare_variable:
@@ -2625,7 +2627,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         if(!pair.first) {
           return nullopt;
         }
-        return ::rocket::move(pair.second);
+        return ::std::move(pair.second);
       }
 
     case index_switch_statement: {
@@ -2638,7 +2640,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         if(!pair.first) {
           return nullopt;
         }
-        return ::rocket::move(pair.second);
+        return ::std::move(pair.second);
       }
 
     case index_do_while_statement: {
@@ -2651,7 +2653,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         if(!pair.first) {
           return nullopt;
         }
-        return ::rocket::move(pair.second);
+        return ::std::move(pair.second);
       }
 
     case index_while_statement: {
@@ -2664,7 +2666,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         if(!pair.first) {
           return nullopt;
         }
-        return ::rocket::move(pair.second);
+        return ::std::move(pair.second);
       }
 
     case index_for_each_statement: {
@@ -2678,7 +2680,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         if(!pair.first) {
           return nullopt;
         }
-        return ::rocket::move(pair.second);
+        return ::std::move(pair.second);
       }
 
     case index_for_statement: {
@@ -2694,7 +2696,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         if(!pair.first) {
           return nullopt;
         }
-        return ::rocket::move(pair.second);
+        return ::std::move(pair.second);
       }
 
     case index_try_statement: {
@@ -2707,7 +2709,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         if(!pair.first) {
           return nullopt;
         }
-        return ::rocket::move(pair.second);
+        return ::std::move(pair.second);
       }
 
     case index_throw_statement:
@@ -2737,7 +2739,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         }
         // Bind it now.
         S_push_bound_reference xnode = { *qref };
-        return ::rocket::move(xnode);
+        return xnode;
       }
 
     case index_push_bound_reference: {
@@ -2754,7 +2756,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         if(!pair.first) {
           return nullopt;
         }
-        return ::rocket::move(pair.second);
+        return ::std::move(pair.second);
       }
 
     case index_branch_expression: {
@@ -2766,7 +2768,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         if(!pair.first) {
           return nullopt;
         }
-        return ::rocket::move(pair.second);
+        return ::std::move(pair.second);
       }
 
     case index_coalescence: {
@@ -2777,7 +2779,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         if(!pair.first) {
           return nullopt;
         }
-        return ::rocket::move(pair.second);
+        return ::std::move(pair.second);
       }
 
     case index_function_call:
@@ -2802,7 +2804,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         if(!pair.first) {
           return nullopt;
         }
-        return ::rocket::move(pair.second);
+        return ::std::move(pair.second);
       }
 
     default:

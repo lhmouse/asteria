@@ -205,7 +205,7 @@ Value Reference_modifier::apply_and_erase(Value& parent) const
         if(nadd != 0) {
           return nullptr;
         }
-        auto elem = ::rocket::move(arr.mut(w.rindex));
+        auto elem = ::std::move(arr.mut(w.rindex));
         arr.erase(w.rindex, 1);
         return elem;
       }
@@ -225,7 +225,7 @@ Value Reference_modifier::apply_and_erase(Value& parent) const
         if(q == obj.end()) {
           return nullptr;
         }
-        auto elem = ::rocket::move(q->second);
+        auto elem = ::std::move(q->second);
         obj.erase(q);
         return elem;
       }
@@ -243,7 +243,7 @@ Value Reference_modifier::apply_and_erase(Value& parent) const
         if(arr.empty()) {
           return nullptr;
         }
-        auto elem = ::rocket::move(arr.mut_front());
+        auto elem = ::std::move(arr.mut_front());
         arr.erase(0, 1);
         return elem;
       }
@@ -261,7 +261,7 @@ Value Reference_modifier::apply_and_erase(Value& parent) const
         if(arr.empty()) {
           return nullptr;
         }
-        auto elem = ::rocket::move(arr.mut_back());
+        auto elem = ::std::move(arr.mut_back());
         arr.pop_back();
         return elem;
       }

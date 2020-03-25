@@ -41,7 +41,7 @@ cow_string do_xindent(cow_string&& str)
     size_t bp = SIZE_MAX;
     while((bp = str.find('\n', ++bp)) != cow_string::npos)
       str.insert(++bp, 1, '\t');
-    return ::rocket::move(str);
+    return str;
   }
 
 cow_string do_stringify(const Value& val) noexcept
@@ -393,7 +393,7 @@ void do_parse_command_line(int argc, char** argv)
     // connected to a terminal.
     cmdline.interactive = interactive ? *interactive : (!path && ::isatty(STDIN_FILENO));
     cmdline.path = path.move_value_or(::rocket::sref("-"));
-    cmdline.args = ::rocket::move(args);
+    cmdline.args = ::std::move(args);
   }
 
 void do_REPL_help()
@@ -507,7 +507,7 @@ int do_REP_single()
     if(code.front() == ':') {
       // Erase the initiator and process the remaining.
       code.erase(0, 1);
-      do_handle_REPL_command(::rocket::move(code));
+      do_handle_REPL_command(::std::move(code));
       return 0;
     }
 
@@ -547,7 +547,7 @@ int do_REP_single()
 
     // Execute the script as a function, which returns a `Reference`.
     try {
-      const auto ref = script.execute(global, ::rocket::move(cmdline.args));
+      const auto ref = script.execute(global, ::std::move(cmdline.args));
       if(!ref.is_void()) {
         // Ensure it is dereferenceable.
         static_cast<void>(ref.read());
@@ -619,7 +619,7 @@ int do_REP_single()
 
     // Execute the script.
     try {
-      const auto ref = script.execute(global, ::rocket::move(cmdline.args));
+      const auto ref = script.execute(global, ::std::move(cmdline.args));
       if(ref.is_void()) {
         // If the script returned no value, exit with zero.
         status = exit_success;
