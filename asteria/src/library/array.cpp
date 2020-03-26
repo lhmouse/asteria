@@ -63,7 +63,7 @@ template<typename IterT> opt<IterT> do_find_opt(IterT begin, IterT end, const Va
     for(auto it = ::std::move(begin);  it != end;  ++it) {
       // Compare the value using the builtin 3-way comparison operator.
       if(it->compare(target) == compare_equal)
-        return it;
+        return ::std::move(it);
     }
     // Fail to find an element.
     return nullopt;
@@ -86,7 +86,7 @@ template<typename IterT> opt<IterT> do_find_if_opt(Global& global, IterT begin, 
       // Call the predictor function and check the return value.
       auto self = pred.invoke(global, ::std::move(args));
       if(self.read().test() == match)
-        return it;
+        return ::std::move(it);
     }
     // Fail to find an element.
     return nullopt;
@@ -144,7 +144,7 @@ template<typename IterT, typename PredT>
     for(;;) {
       auto dist = epos - bpos;
       if(dist <= 0) {
-        return bpos;
+        return ::std::move(bpos);
       }
       auto mpos = bpos + dist / 2;
       // Compare `target` with the element in the middle.
@@ -604,7 +604,7 @@ Aval std_array_exclude(Aval data, Value target)
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
-    return data;
+    return ::std::move(data);
   }
 
 Aval std_array_exclude(Aval data, Ival from, Value target)
@@ -619,7 +619,7 @@ Aval std_array_exclude(Aval data, Ival from, Value target)
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
-    return data;
+    return ::std::move(data);
   }
 
 Aval std_array_exclude(Aval data, Ival from, Iopt length, Value target)
@@ -634,7 +634,7 @@ Aval std_array_exclude(Aval data, Ival from, Iopt length, Value target)
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
-    return data;
+    return ::std::move(data);
   }
 
 Aval std_array_exclude_if(Global& global, Aval data, Fval predictor)
@@ -649,7 +649,7 @@ Aval std_array_exclude_if(Global& global, Aval data, Fval predictor)
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
-    return data;
+    return ::std::move(data);
   }
 
 Aval std_array_exclude_if(Global& global, Aval data, Ival from, Fval predictor)
@@ -664,7 +664,7 @@ Aval std_array_exclude_if(Global& global, Aval data, Ival from, Fval predictor)
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
-    return data;
+    return ::std::move(data);
   }
 
 Aval std_array_exclude_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
@@ -679,7 +679,7 @@ Aval std_array_exclude_if(Global& global, Aval data, Ival from, Iopt length, Fva
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
-    return data;
+    return ::std::move(data);
   }
 
 Aval std_array_exclude_if_not(Global& global, Aval data, Fval predictor)
@@ -694,7 +694,7 @@ Aval std_array_exclude_if_not(Global& global, Aval data, Fval predictor)
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
-    return data;
+    return ::std::move(data);
   }
 
 Aval std_array_exclude_if_not(Global& global, Aval data, Ival from, Fval predictor)
@@ -709,7 +709,7 @@ Aval std_array_exclude_if_not(Global& global, Aval data, Ival from, Fval predict
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
-    return data;
+    return ::std::move(data);
   }
 
 Aval std_array_exclude_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
@@ -724,7 +724,7 @@ Aval std_array_exclude_if_not(Global& global, Aval data, Ival from, Iopt length,
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
-    return data;
+    return ::std::move(data);
   }
 
 Bval std_array_is_sorted(Global& global, Aval data, Fopt comparator)
@@ -784,7 +784,7 @@ Aval std_array_sort(Global& global, Aval data, Fopt comparator)
   {
     if(data.size() <= 1) {
       // Use reference counting as our advantage.
-      return data;
+      return ::std::move(data);
     }
     // The Merge Sort algorithm requires `O(n)` space.
     Aval temp(data.size());
@@ -796,14 +796,14 @@ Aval std_array_sort(Global& global, Aval data, Fopt comparator)
       data.swap(temp);
       bsize *= 2;
     }
-    return data;
+    return ::std::move(data);
   }
 
 Aval std_array_sortu(Global& global, Aval data, Fopt comparator)
   {
     if(data.size() <= 1) {
       // Use reference counting as our advantage.
-      return data;
+      return ::std::move(data);
     }
     // The Merge Sort algorithm requires `O(n)` space.
     Aval temp(data.size());
@@ -818,7 +818,7 @@ Aval std_array_sortu(Global& global, Aval data, Fopt comparator)
     auto epos = do_merge_blocks(temp, global, args, comparator, ::std::move(data), bsize, true);
     temp.erase(epos, temp.end());
     data.swap(temp);
-    return data;
+    return ::std::move(data);
   }
 
 Value std_array_max_of(Global& global, Aval data, Fopt comparator)
@@ -882,7 +882,7 @@ Aval std_array_shuffle(Aval data, Iopt seed)
   {
     if(data.size() <= 1) {
       // Use reference counting as our advantage.
-      return data;
+      return ::std::move(data);
     }
     // Create a linear congruential generator.
     uint64_t lcg = seed ? static_cast<uint64_t>(*seed) : generate_random_seed();
@@ -901,24 +901,24 @@ Aval std_array_shuffle(Aval data, Iopt seed)
       if(k != i)
         swap(data.mut(k), data.mut(i));
     }
-    return data;
+    return ::std::move(data);
   }
 
 Aval std_array_rotate(Aval data, Ival shift)
   {
     if(data.size() <= 1) {
       // Use reference counting as our advantage.
-      return data;
+      return ::std::move(data);
     }
     int64_t seek = shift % data.ssize();
     if(seek == 0) {
       // Use reference counting as our advantage.
-      return data;
+      return ::std::move(data);
     }
     // Rotate it.
     seek = ((~seek >> 63) & data.ssize()) - seek;
     ::rocket::rotate(data.mut_data(), 0, static_cast<size_t>(seek), data.size());
-    return data;
+    return ::std::move(data);
   }
 
 Aval std_array_copy_keys(Oval source)
@@ -1876,7 +1876,7 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
       Aval rval(2);
       rval.mut(0) = ::std::move(pair.first);
       rval.mut(1) = ::std::move(pair.second);
-      return rval;
+      return ::std::move(rval);
     }
     // Fail.
     reader.throw_no_matching_function_call();

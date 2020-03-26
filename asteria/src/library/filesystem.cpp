@@ -192,7 +192,7 @@ Oopt std_filesystem_get_information(Sval path)
       Ival(
         int64_t(stb.st_mtim.tv_sec) * 1000 + stb.st_mtim.tv_nsec / 1000000  // timestamp of last modification
       ));
-    return stat;
+    return ::std::move(stat);
   }
 
 void std_filesystem_move_from(Sval path_new, Sval path_old)
@@ -285,7 +285,7 @@ Oopt std_filesystem_directory_list(Sval path)
       // Insert the entry.
       entries.try_emplace(::std::move(name), ::std::move(entry));
     }
-    return entries;
+    return ::std::move(entries);
   }
 
 Bval std_filesystem_directory_create(Sval path)
@@ -352,7 +352,7 @@ Sopt std_filesystem_file_read(Sval path, Iopt offset, Iopt limit)
         ASTERIA_THROW_SYSTEM_ERROR("read");
     }
     data.erase(static_cast<size_t>(nread));
-    return data;
+    return ::std::move(data);
   }
 
 Iopt std_filesystem_file_stream(Global& global, Sval path, Fval callback, Iopt offset, Iopt limit)

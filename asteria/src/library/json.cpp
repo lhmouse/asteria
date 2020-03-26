@@ -334,7 +334,7 @@ Sopt do_accept_identifier_opt(Token_Stream& tstrm, initializer_list<const char*>
       if(::rocket::is_any_of(name, accept)) {
         tstrm.shift();
         // A match has been found.
-        return name;
+        return ::std::move(name);
       }
     }
     return nullopt;
@@ -540,7 +540,7 @@ opt<Value> do_json_parse_nonrecursive_opt(Token_Stream& tstrm)
       for(;;) {
         if(stack.empty()) {
           // Accept the root value.
-          return value;
+          return ::std::move(value);
         }
         if(stack.back().index() == 0) {
           auto& ctxa = stack.mut_back().as<0>();

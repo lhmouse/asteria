@@ -41,7 +41,7 @@ cow_string do_xindent(cow_string&& str)
     size_t bp = SIZE_MAX;
     while((bp = str.find('\n', ++bp)) != cow_string::npos)
       str.insert(++bp, 1, '\t');
-    return str;
+    return ::std::move(str);
   }
 
 cow_string do_stringify(const Value& val) noexcept

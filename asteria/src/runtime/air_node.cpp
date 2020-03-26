@@ -2739,7 +2739,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         }
         // Bind it now.
         S_push_bound_reference xnode = { *qref };
-        return xnode;
+        return ::std::move(xnode);
       }
 
     case index_push_bound_reference: {

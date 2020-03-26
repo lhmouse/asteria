@@ -160,7 +160,7 @@ template<typename IterT>
     // Search the range.
     for(auto it = begin;  it != end;  ++it) {
       if(table[uint8_t(*it)] == match)
-        return it;
+        return ::std::move(it);
     }
     return nullopt;
   }
@@ -1035,7 +1035,7 @@ Sval std_string_hex_decode(Sval text)
     if(reg != 1) {
       ASTERIA_THROW("unpaired hexadecimal digit");
     }
-    return data;
+    return ::std::move(data);
   }
 
 Sval std_string_base32_encode(Sval data, Bopt lowercase)
@@ -1144,7 +1144,7 @@ Sval std_string_base32_decode(Sval text)
     if(reg != 1) {
       ASTERIA_THROW("incomplete base32 group");
     }
-    return data;
+    return ::std::move(data);
   }
 
 Sval std_string_base64_encode(Sval data)
@@ -1252,7 +1252,7 @@ Sval std_string_base64_decode(Sval text)
     if(reg != 1) {
       ASTERIA_THROW("incomplete base64 group");
     }
-    return data;
+    return ::std::move(data);
   }
 
 Sval std_string_url_encode(Sval data, Bopt lowercase)
@@ -1301,7 +1301,7 @@ Sval std_string_utf8_encode(Ival code_point, Bopt permissive)
       // Encode the replacement character.
       utf8_encode(text, 0xFFFD);
     }
-    return text;
+    return ::std::move(text);
   }
 
 Sval std_string_utf8_encode(Aval code_points, Bopt permissive)
@@ -1320,7 +1320,7 @@ Sval std_string_utf8_encode(Aval code_points, Bopt permissive)
         utf8_encode(text, 0xFFFD);
       }
     }
-    return text;
+    return ::std::move(text);
   }
 
 Aval std_string_utf8_decode(Sval text, Bopt permissive)
@@ -1340,7 +1340,7 @@ Aval std_string_utf8_decode(Sval text, Bopt permissive)
       }
       code_points.emplace_back(Ival(cp));
     }
-    return code_points;
+    return ::std::move(code_points);
   }
 
 Sval std_string_pack_8(Ival value)
@@ -3353,7 +3353,7 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
       Aval rval(2);
       rval.mut(0) = ::std::move(kpair->first);
       rval.mut(1) = ::std::move(kpair->second);
-      return rval;
+      return ::std::move(rval);
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(pattern).F()) {
@@ -3364,7 +3364,7 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
       Aval rval(2);
       rval.mut(0) = ::std::move(kpair->first);
       rval.mut(1) = ::std::move(kpair->second);
-      return rval;
+      return ::std::move(rval);
     }
     Iopt length;
     if(reader.L(state).o(length).v(pattern).F()) {
@@ -3376,7 +3376,7 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
       Aval rval(2);
       rval.mut(0) = ::std::move(kpair->first);
       rval.mut(1) = ::std::move(kpair->second);
-      return rval;
+      return ::std::move(rval);
     }
     // Fail.
     reader.throw_no_matching_function_call();

@@ -1251,7 +1251,7 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
       Aval rval(2);
       rval.mut(0) = ::std::move(pair.first);
       rval.mut(1) = ::std::move(pair.second);
-      return rval;
+      return ::std::move(rval);
     }
     // Fail.
     reader.throw_no_matching_function_call();
