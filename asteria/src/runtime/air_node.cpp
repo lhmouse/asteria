@@ -1400,6 +1400,59 @@ ROCKET_PURE_FUNCTION V_string do_operator_SRA(const cow_string& lhs, int64_t rhs
     return res;
   }
 
+ROCKET_PURE_FUNCTION V_string do_operator_NOT(cow_string&& rhs)
+  {
+    // The length of the result is the same as the operand.
+    auto tp = reinterpret_cast<uint8_t*>(rhs.mut_data());
+
+    // Flip every byte in the string.
+    for(size_t i = 0;  i < rhs.size();  ++i)
+      tp[i] = static_cast<uint8_t>(-1 ^ tp[i]);
+    return ::std::move(rhs);
+  }
+
+ROCKET_PURE_FUNCTION V_string do_operator_AND(const cow_string& lhs, cow_string&& rhs)
+  {
+    // The length of the result is the shorter from both operands.
+    auto sp = reinterpret_cast<const uint8_t*>(lhs.data());
+    if(rhs.size() > lhs.size())
+      rhs.erase(lhs.size());
+    auto tp = reinterpret_cast<uint8_t*>(rhs.mut_data());
+
+    // Bitwise-AND every pair of bytes from both strings.
+    for(size_t i = 0;  i < rhs.size();  ++i)
+      tp[i] = static_cast<uint8_t>(sp[i] & tp[i]);
+    return ::std::move(rhs);
+  }
+
+ROCKET_PURE_FUNCTION V_string do_operator_OR(const cow_string& lhs, cow_string&& rhs)
+  {
+    // The length of the result is the longer from both operands.
+    auto sp = reinterpret_cast<const uint8_t*>(lhs.data());
+    if(rhs.size() < lhs.size())
+      rhs.append(lhs.size() - rhs.size(), 0);
+    auto tp = reinterpret_cast<uint8_t*>(rhs.mut_data());
+
+    // Bitwise-OR every pair of bytes from both strings.
+    for(size_t i = 0;  i < lhs.size();  ++i)
+      tp[i] = static_cast<uint8_t>(sp[i] | tp[i]);
+    return ::std::move(rhs);
+  }
+
+ROCKET_PURE_FUNCTION V_string do_operator_XOR(const cow_string& lhs, cow_string&& rhs)
+  {
+    // The length of the result is the longer from both operands.
+    auto sp = reinterpret_cast<const uint8_t*>(lhs.data());
+    if(rhs.size() < lhs.size())
+      rhs.append(lhs.size() - rhs.size(), 0);
+    auto tp = reinterpret_cast<uint8_t*>(rhs.mut_data());
+
+    // Bitwise-XOR every pair of bytes from both strings.
+    for(size_t i = 0;  i < lhs.size();  ++i)
+      tp[i] = static_cast<uint8_t>(sp[i] ^ tp[i]);
+    return ::std::move(rhs);
+  }
+
 AIR_Status do_apply_xop_INC_POST(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // This operator is unary.
@@ -1516,6 +1569,10 @@ AIR_Status do_apply_xop_NOTB(Executive_Context& ctx, ParamU pu, const void* /*pv
     else if(rhs.is_integer()) {
       auto& reg = rhs.open_integer();
       reg = do_operator_NOT(reg);
+    }
+    else if(rhs.is_string()) {
+      auto& reg = rhs.open_string();
+      reg = do_operator_NOT(::std::move(reg));
     }
     else {
       ASTERIA_THROW("prefix bitwise NOT not applicable (operand was `$1`)", rhs);
@@ -2291,6 +2348,12 @@ AIR_Status do_apply_xop_ANDB(Executive_Context& ctx, ParamU pu, const void* /*pv
       auto& reg = rhs.open_integer();
       reg = do_operator_AND(lhs.as_integer(), reg);
     }
+    else if(lhs.is_string() && rhs.is_string()) {
+      // For the `string` type, return bitwise AND'd result of bytes from operands.
+      // The result contains no more bytes than either operand.
+      auto& reg = rhs.open_string();
+      reg = do_operator_AND(lhs.as_string(), ::std::move(reg));
+    }
     else {
       ASTERIA_THROW("infix bitwise AND not defined (operands were `$1` and `$2`)", lhs, rhs);
     }
@@ -2317,6 +2380,12 @@ AIR_Status do_apply_xop_ORB(Executive_Context& ctx, ParamU pu, const void* /*pv*
       auto& reg = rhs.open_integer();
       reg = do_operator_OR(lhs.as_integer(), reg);
     }
+    else if(lhs.is_string() && rhs.is_string()) {
+      // For the `string` type, return bitwise OR'd result of bytes from operands.
+      // The result contains no fewer bytes than either operand.
+      auto& reg = rhs.open_string();
+      reg = do_operator_OR(lhs.as_string(), ::std::move(reg));
+    }
     else {
       ASTERIA_THROW("infix bitwise OR not defined (operands were `$1` and `$2`)", lhs, rhs);
     }
@@ -2342,6 +2411,12 @@ AIR_Status do_apply_xop_XORB(Executive_Context& ctx, ParamU pu, const void* /*pv
       // For the `integer` type, return bitwise XOR'd result of both operands.
       auto& reg = rhs.open_integer();
       reg = do_operator_XOR(lhs.as_integer(), reg);
+    }
+    else if(lhs.is_string() && rhs.is_string()) {
+      // For the `string` type, return bitwise XOR'd result of bytes from operands.
+      // The result contains no fewer bytes than either operand.
+      auto& reg = rhs.open_string();
+      reg = do_operator_XOR(lhs.as_string(), ::std::move(reg));
     }
     else {
       ASTERIA_THROW("infix bitwise XOR not defined (operands were `$1` and `$2`)", lhs, rhs);

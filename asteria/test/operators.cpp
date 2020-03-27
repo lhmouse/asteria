@@ -394,6 +394,25 @@ int main()
         assert __isnan __fma(nan, 6, 7);
         assert __isnan __fma(5, nan, 7);
         assert __isnan __fma(5, 6, nan);
+
+        assert ~"" == "";
+        assert ~"\x01\x23\x45\x67\x89" == "\xFE\xDC\xBA\x98\x76";
+
+        assert ("" & "") == "";
+        assert ("987654321" & "abcdefghi") == "! #$%$# !";
+        assert ("987654321" & "abcdefg") == "! #$%$#";
+        assert ("987654" & "abcdefghi") == "! #$%$";
+
+        assert ("" | "") == "";
+        assert ("987654321" | "abcdefghi") == "yzwvuvwzy";
+        assert ("987654321" | "abcdefg") == "yzwvuvw21";
+        assert ("987654" | "abcdefghi") == "yzwvuvghi";
+
+        assert ("" ^ "") == "";
+        assert ("987654321" ^ "abcdefghi") == "XZTRPRTZX";
+        assert ("987654321" ^ "abcdefg") == "XZTRPRT21";
+        assert ("987654" ^ "abcdefghi") == "XZTRPRghi";
+
       )__"), tinybuf::open_read);
     Simple_Script code(cbuf, ::rocket::sref(__FILE__));
     Global_Context global;
