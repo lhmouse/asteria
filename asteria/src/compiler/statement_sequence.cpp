@@ -308,7 +308,7 @@ opt<cow_vector<phsh_string>> do_accept_variable_declarator_opt(Token_Stream& tst
       // Accept a single identifier.
       cow_vector<phsh_string> names;
       names.emplace_back(::std::move(*qname));
-      return ::std::move(names);
+      return names;
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_op });
     if(kpunct) {
@@ -325,7 +325,7 @@ opt<cow_vector<phsh_string>> do_accept_variable_declarator_opt(Token_Stream& tst
       // Make the list different from a plain, sole one.
       qnames->insert(0, ::rocket::sref("["));
       qnames->emplace_back(::rocket::sref("]"));
-      return ::std::move(qnames);
+      return qnames;
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
     if(kpunct) {
@@ -342,7 +342,7 @@ opt<cow_vector<phsh_string>> do_accept_variable_declarator_opt(Token_Stream& tst
       // Make the list different from a plain, sole one.
       qnames->insert(0, ::rocket::sref("{"));
       qnames->emplace_back(::rocket::sref("}"));
-      return ::std::move(qnames);
+      return qnames;
     }
     return nullopt;
   }

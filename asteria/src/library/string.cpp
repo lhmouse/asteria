@@ -1035,7 +1035,7 @@ Sval std_string_hex_decode(Sval text)
     if(reg != 1) {
       ASTERIA_THROW("unpaired hexadecimal digit");
     }
-    return ::std::move(data);
+    return data;
   }
 
 Sval std_string_base32_encode(Sval data, Bopt lowercase)
@@ -1144,7 +1144,7 @@ Sval std_string_base32_decode(Sval text)
     if(reg != 1) {
       ASTERIA_THROW("incomplete base32 group");
     }
-    return ::std::move(data);
+    return data;
   }
 
 Sval std_string_base64_encode(Sval data)
@@ -1252,7 +1252,7 @@ Sval std_string_base64_decode(Sval text)
     if(reg != 1) {
       ASTERIA_THROW("incomplete base64 group");
     }
-    return ::std::move(data);
+    return data;
   }
 
 Sval std_string_url_encode(Sval data, Bopt lowercase)
@@ -1301,7 +1301,7 @@ Sval std_string_utf8_encode(Ival code_point, Bopt permissive)
       // Encode the replacement character.
       utf8_encode(text, 0xFFFD);
     }
-    return ::std::move(text);
+    return text;
   }
 
 Sval std_string_utf8_encode(Aval code_points, Bopt permissive)
@@ -1320,7 +1320,7 @@ Sval std_string_utf8_encode(Aval code_points, Bopt permissive)
         utf8_encode(text, 0xFFFD);
       }
     }
-    return ::std::move(text);
+    return text;
   }
 
 Aval std_string_utf8_decode(Sval text, Bopt permissive)
@@ -1340,7 +1340,7 @@ Aval std_string_utf8_decode(Sval text, Bopt permissive)
       }
       code_points.emplace_back(Ival(cp));
     }
-    return ::std::move(code_points);
+    return code_points;
   }
 
 Sval std_string_pack_8(Ival value)

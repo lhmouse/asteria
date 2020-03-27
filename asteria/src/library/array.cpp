@@ -144,7 +144,7 @@ template<typename IterT, typename PredT>
     for(;;) {
       auto dist = epos - bpos;
       if(dist <= 0) {
-        return ::std::move(bpos);
+        return bpos;
       }
       auto mpos = bpos + dist / 2;
       // Compare `target` with the element in the middle.
