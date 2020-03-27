@@ -41,10 +41,10 @@ Iopt std_string_rfind_not_of(Sval text, Ival from, Iopt length, Sval reject);
 
 Sval std_string_reverse(Sval text);
 Sval std_string_trim(Sval text, Sopt reject = { });
-Sval std_string_ltrim(Sval text, Sopt reject = { });
-Sval std_string_rtrim(Sval text, Sopt reject = { });
-Sval std_string_lpad(Sval text, Ival length, Sopt padding = { });
-Sval std_string_rpad(Sval text, Ival length, Sopt padding = { });
+Sval std_string_triml(Sval text, Sopt reject = { });
+Sval std_string_trimr(Sval text, Sopt reject = { });
+Sval std_string_padl(Sval text, Ival length, Sopt padding = { });
+Sval std_string_padr(Sval text, Ival length, Sopt padding = { });
 Sval std_string_to_upper(Sval text);
 Sval std_string_to_lower(Sval text);
 Sval std_string_translate(Sval text, Sval inputs, Sopt outputs = { });

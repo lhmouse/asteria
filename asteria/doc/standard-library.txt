@@ -412,7 +412,7 @@
 
 	* Returns the trimmed string.
 
-`std.string.ltrim(text, [reject])`
+`std.string.triml(text, [reject])`
 
 	* Removes the longest prefix consisting solely bytes from
 	  `reject`. If `reject` is empty, no byte is removed. If `reject`
@@ -421,7 +421,7 @@
 
 	* Returns the trimmed string.
 
-`std.string.rtrim(text, [reject])`
+`std.string.trimr(text, [reject])`
 
 	* Removes the longest suffix consisting solely bytes from
 	  `reject`. If `reject` is empty, no byte is removed. If `reject`
@@ -430,7 +430,7 @@
 
 	* Returns the trimmed string.
 
-`std.string.lpad(text, length, [padding])`
+`std.string.padl(text, length, [padding])`
 
 	* Prepends `text` with `padding` repeatedly, until its length
 	  would exceed `length`. The default value of `padding` is a
@@ -441,7 +441,7 @@
 
 	* Throws an exception if `padding` is empty.
 
-`std.string.rpad(text, length, [padding])`
+`std.string.padr(text, length, [padding])`
 
 	* Appends `text` with `padding` repeatedly, until its length
 	  would exceed `length`. The default value of `padding` is a

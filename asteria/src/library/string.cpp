@@ -767,7 +767,7 @@ Sval std_string_trim(Sval text, Sopt reject)
     return text.substr(start, end + 1 - start);
   }
 
-Sval std_string_ltrim(Sval text, Sopt reject)
+Sval std_string_triml(Sval text, Sopt reject)
   {
     auto rchars = do_get_reject(reject);
     if(rchars.length() == 0) {
@@ -788,7 +788,7 @@ Sval std_string_ltrim(Sval text, Sopt reject)
     return text.substr(start);
   }
 
-Sval std_string_rtrim(Sval text, Sopt reject)
+Sval std_string_trimr(Sval text, Sopt reject)
   {
     auto rchars = do_get_reject(reject);
     if(rchars.length() == 0) {
@@ -809,7 +809,7 @@ Sval std_string_rtrim(Sval text, Sopt reject)
     return text.substr(0, end + 1);
   }
 
-Sval std_string_lpad(Sval text, Ival length, Sopt padding)
+Sval std_string_padl(Sval text, Ival length, Sopt padding)
   {
     Sval res = text;
     auto rpadding = do_get_padding(padding);
@@ -825,7 +825,7 @@ Sval std_string_lpad(Sval text, Ival length, Sopt padding)
     return res;
   }
 
-Sval std_string_rpad(Sval text, Ival length, Sopt padding)
+Sval std_string_padr(Sval text, Ival length, Sopt padding)
   {
     Sval res = text;
     auto rpadding = do_get_padding(padding);
@@ -2222,24 +2222,24 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
 )'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
-    // `std.string.ltrim()`
+    // `std.string.triml()`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("ltrim"),
+    result.insert_or_assign(::rocket::sref("triml"),
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.ltrim"));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.triml"));
     // Parse arguments.
     Sval text;
     Sopt reject;
     if(reader.I().v(text).o(reject).F()) {
-      return std_string_ltrim(::std::move(text), ::std::move(reject));
+      return std_string_triml(::std::move(text), ::std::move(reject));
     }
     // Fail.
     reader.throw_no_matching_function_call();
   },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.ltrim(text, [reject])`
+`std.string.triml(text, [reject])`
 
   * Removes the longest prefix consisting solely bytes from
     `reject`. If `reject` is empty, no byte is removed. If `reject`
@@ -2250,24 +2250,24 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
 )'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
-    // `std.string.rtrim()`
+    // `std.string.trimr()`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("rtrim"),
+    result.insert_or_assign(::rocket::sref("trimr"),
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.rtrim"));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.trimr"));
     // Parse arguments.
     Sval text;
     Sopt reject;
     if(reader.I().v(text).o(reject).F()) {
-      return std_string_rtrim(::std::move(text), ::std::move(reject));
+      return std_string_trimr(::std::move(text), ::std::move(reject));
     }
     // Fail.
     reader.throw_no_matching_function_call();
   },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.rtrim(text, [reject])`
+`std.string.trimr(text, [reject])`
 
   * Removes the longest suffix consisting solely bytes from
     `reject`. If `reject` is empty, no byte is removed. If `reject`
@@ -2278,25 +2278,25 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
 )'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
-    // `std.string.lpad()`
+    // `std.string.padl()`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("lpad"),
+    result.insert_or_assign(::rocket::sref("padl"),
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.lpad"));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.padl"));
     // Parse arguments.
     Sval text;
     Ival length;
     Sopt padding;
     if(reader.I().v(text).v(length).o(padding).F()) {
-      return std_string_lpad(::std::move(text), ::std::move(length), ::std::move(padding));
+      return std_string_padl(::std::move(text), ::std::move(length), ::std::move(padding));
     }
     // Fail.
     reader.throw_no_matching_function_call();
   },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.lpad(text, length, [padding])`
+`std.string.padl(text, length, [padding])`
 
   * Prepends `text` with `padding` repeatedly, until its length
     would exceed `length`. The default value of `padding` is a
@@ -2309,25 +2309,25 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
 )'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
-    // `std.string.rpad()`
+    // `std.string.padr()`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("rpad"),
+    result.insert_or_assign(::rocket::sref("padr"),
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.rpad"));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.padr"));
     // Parse arguments.
     Sval text;
     Ival length;
     Sopt padding;
     if(reader.I().v(text).v(length).o(padding).F()) {
-      return std_string_rpad(::std::move(text), ::std::move(length), ::std::move(padding));
+      return std_string_padr(::std::move(text), ::std::move(length), ::std::move(padding));
     }
     // Fail.
     reader.throw_no_matching_function_call();
   },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.rpad(text, length, [padding])`
+`std.string.padr(text, length, [padding])`
 
   * Appends `text` with `padding` repeatedly, until its length
     would exceed `length`. The default value of `padding` is a
