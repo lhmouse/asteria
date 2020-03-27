@@ -985,27 +985,27 @@ AIR_Status do_push_unnamed_object(Executive_Context& ctx, ParamU /*pu*/, const v
     return air_status_next;
   }
 
-ROCKET_PURE_FUNCTION V_boolean do_operator_NOT(const V_boolean& rhs)
+ROCKET_PURE_FUNCTION V_boolean do_operator_NOT(bool rhs)
   {
     return !rhs;
   }
 
-ROCKET_PURE_FUNCTION V_boolean do_operator_AND(const V_boolean& lhs, const V_boolean& rhs)
+ROCKET_PURE_FUNCTION V_boolean do_operator_AND(bool lhs, bool rhs)
   {
     return lhs & rhs;
   }
 
-ROCKET_PURE_FUNCTION V_boolean do_operator_OR(const V_boolean& lhs, const V_boolean& rhs)
+ROCKET_PURE_FUNCTION V_boolean do_operator_OR(bool lhs, bool rhs)
   {
     return lhs | rhs;
   }
 
-ROCKET_PURE_FUNCTION V_boolean do_operator_XOR(const V_boolean& lhs, const V_boolean& rhs)
+ROCKET_PURE_FUNCTION V_boolean do_operator_XOR(bool lhs, bool rhs)
   {
     return lhs ^ rhs;
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_NEG(const V_integer& rhs)
+ROCKET_PURE_FUNCTION V_integer do_operator_NEG(int64_t rhs)
   {
     if(rhs == INT64_MIN) {
       ASTERIA_THROW("integer negation overflow (operand was `$1`)", rhs);
@@ -1013,22 +1013,22 @@ ROCKET_PURE_FUNCTION V_integer do_operator_NEG(const V_integer& rhs)
     return -rhs;
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_SQRT(const V_integer& rhs)
+ROCKET_PURE_FUNCTION V_real do_operator_SQRT(int64_t rhs)
   {
     return ::std::sqrt(V_real(rhs));
   }
 
-ROCKET_PURE_FUNCTION V_boolean do_operator_ISINF(const V_integer& /*rhs*/)
+ROCKET_PURE_FUNCTION V_boolean do_operator_ISINF(int64_t /*rhs*/)
   {
     return false;
   }
 
-ROCKET_PURE_FUNCTION V_boolean do_operator_ISNAN(const V_integer& /*rhs*/)
+ROCKET_PURE_FUNCTION V_boolean do_operator_ISNAN(int64_t /*rhs*/)
   {
     return false;
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_ABS(const V_integer& rhs)
+ROCKET_PURE_FUNCTION V_integer do_operator_ABS(int64_t rhs)
   {
     if(rhs == INT64_MIN) {
       ASTERIA_THROW("integer absolute value overflow (operand was `$1`)", rhs);
@@ -1036,12 +1036,12 @@ ROCKET_PURE_FUNCTION V_integer do_operator_ABS(const V_integer& rhs)
     return ::std::abs(rhs);
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_SIGN(const V_integer& rhs)
+ROCKET_PURE_FUNCTION V_integer do_operator_SIGN(int64_t rhs)
   {
     return rhs >> 63;
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_ADD(const V_integer& lhs, const V_integer& rhs)
+ROCKET_PURE_FUNCTION V_integer do_operator_ADD(int64_t lhs, int64_t rhs)
   {
     if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)) {
       ASTERIA_THROW("integer addition overflow (operands were `$1` and `$2`)", lhs, rhs);
@@ -1049,7 +1049,7 @@ ROCKET_PURE_FUNCTION V_integer do_operator_ADD(const V_integer& lhs, const V_int
     return lhs + rhs;
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_SUB(const V_integer& lhs, const V_integer& rhs)
+ROCKET_PURE_FUNCTION V_integer do_operator_SUB(int64_t lhs, int64_t rhs)
   {
     if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs)) {
       ASTERIA_THROW("integer subtraction overflow (operands were `$1` and `$2`)", lhs, rhs);
@@ -1057,7 +1057,7 @@ ROCKET_PURE_FUNCTION V_integer do_operator_SUB(const V_integer& lhs, const V_int
     return lhs - rhs;
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_MUL(const V_integer& lhs, const V_integer& rhs)
+ROCKET_PURE_FUNCTION V_integer do_operator_MUL(int64_t lhs, int64_t rhs)
   {
     if((lhs == 0) || (rhs == 0)) {
       return 0;
@@ -1082,7 +1082,7 @@ ROCKET_PURE_FUNCTION V_integer do_operator_MUL(const V_integer& lhs, const V_int
     return alhs * srhs;
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_DIV(const V_integer& lhs, const V_integer& rhs)
+ROCKET_PURE_FUNCTION V_integer do_operator_DIV(int64_t lhs, int64_t rhs)
   {
     if(rhs == 0) {
       ASTERIA_THROW("integer divided by zero (operands were `$1` and `$2`)", lhs, rhs);
@@ -1093,7 +1093,7 @@ ROCKET_PURE_FUNCTION V_integer do_operator_DIV(const V_integer& lhs, const V_int
     return lhs / rhs;
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_MOD(const V_integer& lhs, const V_integer& rhs)
+ROCKET_PURE_FUNCTION V_integer do_operator_MOD(int64_t lhs, int64_t rhs)
   {
     if(rhs == 0) {
       ASTERIA_THROW("integer divided by zero (operands were `$1` and `$2`)", lhs, rhs);
@@ -1104,7 +1104,7 @@ ROCKET_PURE_FUNCTION V_integer do_operator_MOD(const V_integer& lhs, const V_int
     return lhs % rhs;
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_SLL(const V_integer& lhs, const V_integer& rhs)
+ROCKET_PURE_FUNCTION V_integer do_operator_SLL(int64_t lhs, int64_t rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1115,7 +1115,7 @@ ROCKET_PURE_FUNCTION V_integer do_operator_SLL(const V_integer& lhs, const V_int
     return V_integer(static_cast<uint64_t>(lhs) << rhs);
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_SRL(const V_integer& lhs, const V_integer& rhs)
+ROCKET_PURE_FUNCTION V_integer do_operator_SRL(int64_t lhs, int64_t rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1126,7 +1126,7 @@ ROCKET_PURE_FUNCTION V_integer do_operator_SRL(const V_integer& lhs, const V_int
     return V_integer(static_cast<uint64_t>(lhs) >> rhs);
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_SLA(const V_integer& lhs, const V_integer& rhs)
+ROCKET_PURE_FUNCTION V_integer do_operator_SLA(int64_t lhs, int64_t rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1146,7 +1146,7 @@ ROCKET_PURE_FUNCTION V_integer do_operator_SLA(const V_integer& lhs, const V_int
     return V_integer(static_cast<uint64_t>(lhs) << rhs);
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_SRA(const V_integer& lhs, const V_integer& rhs)
+ROCKET_PURE_FUNCTION V_integer do_operator_SRA(int64_t lhs, int64_t rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1157,77 +1157,77 @@ ROCKET_PURE_FUNCTION V_integer do_operator_SRA(const V_integer& lhs, const V_int
     return lhs >> rhs;
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_NOT(const V_integer& rhs)
+ROCKET_PURE_FUNCTION V_integer do_operator_NOT(int64_t rhs)
   {
     return ~rhs;
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_AND(const V_integer& lhs, const V_integer& rhs)
+ROCKET_PURE_FUNCTION V_integer do_operator_AND(int64_t lhs, int64_t rhs)
   {
     return lhs & rhs;
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_OR(const V_integer& lhs, const V_integer& rhs)
+ROCKET_PURE_FUNCTION V_integer do_operator_OR(int64_t lhs, int64_t rhs)
   {
     return lhs | rhs;
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_XOR(const V_integer& lhs, const V_integer& rhs)
+ROCKET_PURE_FUNCTION V_integer do_operator_XOR(int64_t lhs, int64_t rhs)
   {
     return lhs ^ rhs;
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_NEG(const V_real& rhs)
+ROCKET_PURE_FUNCTION V_real do_operator_NEG(double rhs)
   {
     return -rhs;
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_SQRT(const V_real& rhs)
+ROCKET_PURE_FUNCTION V_real do_operator_SQRT(double rhs)
   {
     return ::std::sqrt(rhs);
   }
 
-ROCKET_PURE_FUNCTION V_boolean do_operator_ISINF(const V_real& rhs)
+ROCKET_PURE_FUNCTION V_boolean do_operator_ISINF(double rhs)
   {
     return ::std::isinf(rhs);
   }
 
-ROCKET_PURE_FUNCTION V_boolean do_operator_ISNAN(const V_real& rhs)
+ROCKET_PURE_FUNCTION V_boolean do_operator_ISNAN(double rhs)
   {
     return ::std::isnan(rhs);
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_ABS(const V_real& rhs)
+ROCKET_PURE_FUNCTION V_real do_operator_ABS(double rhs)
   {
     return ::std::fabs(rhs);
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_SIGN(const V_real& rhs)
+ROCKET_PURE_FUNCTION V_integer do_operator_SIGN(double rhs)
   {
     return ::std::signbit(rhs) ? -1 : 0;
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_ROUND(const V_real& rhs)
+ROCKET_PURE_FUNCTION V_real do_operator_ROUND(double rhs)
   {
     return ::std::round(rhs);
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_FLOOR(const V_real& rhs)
+ROCKET_PURE_FUNCTION V_real do_operator_FLOOR(double rhs)
   {
     return ::std::floor(rhs);
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_CEIL(const V_real& rhs)
+ROCKET_PURE_FUNCTION V_real do_operator_CEIL(double rhs)
   {
     return ::std::ceil(rhs);
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_TRUNC(const V_real& rhs)
+ROCKET_PURE_FUNCTION V_real do_operator_TRUNC(double rhs)
   {
     return ::std::trunc(rhs);
   }
 
-V_integer do_cast_to_integer(const V_real& value)
+V_integer do_cast_to_integer(double value)
   {
     if(!::std::islessequal(-0x1p63, value) || !::std::islessequal(value, 0x1p63 - 0x1p10)) {
       ASTERIA_THROW("value not representable as an `integer` (operand was `$1`)", value);
@@ -1235,57 +1235,57 @@ V_integer do_cast_to_integer(const V_real& value)
     return V_integer(value);
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_IROUND(const V_real& rhs)
+ROCKET_PURE_FUNCTION V_integer do_operator_IROUND(double rhs)
   {
     return do_cast_to_integer(::std::round(rhs));
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_IFLOOR(const V_real& rhs)
+ROCKET_PURE_FUNCTION V_integer do_operator_IFLOOR(double rhs)
   {
     return do_cast_to_integer(::std::floor(rhs));
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_ICEIL(const V_real& rhs)
+ROCKET_PURE_FUNCTION V_integer do_operator_ICEIL(double rhs)
   {
     return do_cast_to_integer(::std::ceil(rhs));
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_ITRUNC(const V_real& rhs)
+ROCKET_PURE_FUNCTION V_integer do_operator_ITRUNC(double rhs)
   {
     return do_cast_to_integer(::std::trunc(rhs));
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_ADD(const V_real& lhs, const V_real& rhs)
+ROCKET_PURE_FUNCTION V_real do_operator_ADD(double lhs, double rhs)
   {
     return lhs + rhs;
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_SUB(const V_real& lhs, const V_real& rhs)
+ROCKET_PURE_FUNCTION V_real do_operator_SUB(double lhs, double rhs)
   {
     return lhs - rhs;
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_MUL(const V_real& lhs, const V_real& rhs)
+ROCKET_PURE_FUNCTION V_real do_operator_MUL(double lhs, double rhs)
   {
     return lhs * rhs;
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_DIV(const V_real& lhs, const V_real& rhs)
+ROCKET_PURE_FUNCTION V_real do_operator_DIV(double lhs, double rhs)
   {
     return lhs / rhs;
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_MOD(const V_real& lhs, const V_real& rhs)
+ROCKET_PURE_FUNCTION V_real do_operator_MOD(double lhs, double rhs)
   {
     return ::std::fmod(lhs, rhs);
   }
 
-ROCKET_PURE_FUNCTION V_string do_operator_ADD(const V_string& lhs, const V_string& rhs)
+ROCKET_PURE_FUNCTION V_string do_operator_ADD(const cow_string& lhs, const cow_string& rhs)
   {
     return lhs + rhs;
   }
 
-V_string do_duplicate_string(const V_string& source, uint64_t count)
+V_string do_duplicate_string(const cow_string& source, uint64_t count)
   {
     V_string res;
     auto nchars = source.size();
@@ -1319,7 +1319,7 @@ V_string do_duplicate_string(const V_string& source, uint64_t count)
     return res;
   }
 
-ROCKET_PURE_FUNCTION V_string do_operator_MUL(const V_string& lhs, const V_integer& rhs)
+ROCKET_PURE_FUNCTION V_string do_operator_MUL(const cow_string& lhs, int64_t rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative duplicate count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1327,7 +1327,7 @@ ROCKET_PURE_FUNCTION V_string do_operator_MUL(const V_string& lhs, const V_integ
     return do_duplicate_string(lhs, static_cast<uint64_t>(rhs));
   }
 
-ROCKET_PURE_FUNCTION V_string do_operator_MUL(const V_integer& lhs, const V_string& rhs)
+ROCKET_PURE_FUNCTION V_string do_operator_MUL(int64_t lhs, const cow_string& rhs)
   {
     if(lhs < 0) {
       ASTERIA_THROW("negative duplicate count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1335,7 +1335,7 @@ ROCKET_PURE_FUNCTION V_string do_operator_MUL(const V_integer& lhs, const V_stri
     return do_duplicate_string(rhs, static_cast<uint64_t>(lhs));
   }
 
-ROCKET_PURE_FUNCTION V_string do_operator_SLL(const V_string& lhs, const V_integer& rhs)
+ROCKET_PURE_FUNCTION V_string do_operator_SLL(const cow_string& lhs, int64_t rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1352,7 +1352,7 @@ ROCKET_PURE_FUNCTION V_string do_operator_SLL(const V_string& lhs, const V_integ
     return res;
   }
 
-ROCKET_PURE_FUNCTION V_string do_operator_SRL(const V_string& lhs, const V_integer& rhs)
+ROCKET_PURE_FUNCTION V_string do_operator_SRL(const cow_string& lhs, int64_t rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1369,7 +1369,7 @@ ROCKET_PURE_FUNCTION V_string do_operator_SRL(const V_string& lhs, const V_integ
     return res;
   }
 
-ROCKET_PURE_FUNCTION V_string do_operator_SLA(const V_string& lhs, const V_integer& rhs)
+ROCKET_PURE_FUNCTION V_string do_operator_SLA(const cow_string& lhs, int64_t rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1385,7 +1385,7 @@ ROCKET_PURE_FUNCTION V_string do_operator_SLA(const V_string& lhs, const V_integ
     return res;
   }
 
-ROCKET_PURE_FUNCTION V_string do_operator_SRA(const V_string& lhs, const V_integer& rhs)
+ROCKET_PURE_FUNCTION V_string do_operator_SRA(const cow_string& lhs, int64_t rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
