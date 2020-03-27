@@ -86,20 +86,17 @@ template<typename charT, typename traitsT>
       switch(ch) {
       case '{': {
           // Look for the terminator.
-          for(;;) {
-            if(bp == ep) {
-              noadl::sprintf_and_throw<invalid_argument>("format: incomplete placeholder (no matching `}`)");
-            }
-            if(*(bp++) == '}')
-              break;
+          bp = traitsT::find(bp, static_cast<size_t>(ep - bp), traitsT::to_char_type('}'));
+          if(!bp) {
+            noadl::sprintf_and_throw<invalid_argument>("format: incomplete placeholder (no matching `}`)");
           }
-          // Parse the argument index. Note that `bp` points past the terminating `}`.
-          ptrdiff_t ndigs = bp - 1 - pp;
+          // Parse the argument index.
+          ptrdiff_t ndigs = bp++ - pp;
           if(ndigs < 1) {
             noadl::sprintf_and_throw<invalid_argument>("format: missing argument index");
           }
           if(ndigs > 3) {
-            noadl::sprintf_and_throw<invalid_argument>("format: too many digits (`%td` > `%d`)", ndigs, 3);
+            noadl::sprintf_and_throw<invalid_argument>("format: too many digits (`%td` > `3`)", ndigs);
           }
           // Collect digits.
           while(--ndigs >= 0) {
