@@ -1,18 +1,18 @@
 |CI            |Category                   |Build on OS     |Host OS         |Build Status     |Remarks          |
 |:-------------|:--------------------------|:---------------|:---------------|:----------------|:----------------|
 |[**Travis CI**](https://travis-ci.org/lhmouse/asteria) |:1st_place_medal:Primary   |Linux (Ubuntu)  |Linux (Ubuntu)  |[![Build Status](https://travis-ci.org/lhmouse/asteria.svg?branch=master)](https://travis-ci.org/lhmouse/asteria) |       |
-|[**AppVeyor**](https://ci.appveyor.com/project/lhmouse/asteria) |:2nd_place_medal:Secondary |Windows (MSYS2) |Windows (MSYS2) |[![Build Status](https://ci.appveyor.com/api/projects/status/github/lhmouse/asteria?branch=master&svg=true)](https://ci.appveyor.com/project/lhmouse/asteria) |Standard I/O not in UTF-32.  |
+|[**AppVeyor**](https://ci.appveyor.com/project/lhmouse/asteria) |:2nd_place_medal:Secondary |Windows (MSYS2) |Windows (MSYS2) |[![Build Status](https://ci.appveyor.com/api/projects/status/github/lhmouse/asteria?branch=master&svg=true)](https://ci.appveyor.com/project/lhmouse/asteria) |Standard I/O not in **UTF-32**.  |
 
-|Compiler    |Category                   |Remarks                                                          |
-|:-----------|:--------------------------|:----------------------------------------------------------------|
-|**GCC 9**   |:1st_place_medal:Primary   |                                                                 |
-|**GCC 8**   |:1st_place_medal:Primary   |                                                                 |
-|**GCC 7**   |:2nd_place_medal:Secondary |Faulty strict overflow warnings.                                 |
-|**GCC 6**   |:1st_place_medal:Primary   |                                                                 |
-|**GCC 5**   |:2nd_place_medal:Secondary |**5.4** not supported due to faulty `std::regex` constructor.    |
-|**Clang 8** |:2nd_place_medal:Secondary |Unknown warning options. A number of meaningless warnings.       |
-|**Clang 7** |:2nd_place_medal:Secondary |Unknown warning options. A number of meaningless warnings.       |
-|**MSVC 19** |:no_entry:Abandoned        |Little build system support. Internal compiler errors.           |
+|Compiler    |Category                   |Remarks          |
+|:-----------|:--------------------------|:----------------|
+|**GCC 9**   |:1st_place_medal:Primary   |                 |
+|**GCC 8**   |:1st_place_medal:Primary   |                 |
+|**GCC 7**   |:2nd_place_medal:Secondary |Faulty strict overflow warnings.    |
+|**GCC 6**   |:1st_place_medal:Primary   |                 |
+|**GCC 5**   |:2nd_place_medal:Secondary |Only **5.5** is supported due to faulty `std::regex` constructor.   |
+|**Clang 8** |:2nd_place_medal:Secondary |Unknown warning options. A number of meaningless warnings.  |
+|**Clang 7** |:2nd_place_medal:Secondary |Unknown warning options. A number of meaningless warnings.  |
+|**MSVC 19** |:no_entry:Abandoned        |Little build system support. Internal compiler errors.   |
 
 ![GNU nano for the win!](https://raw.githubusercontent.com/lhmouse/poseidon/master/gnu-nano-ftw.png)
 
