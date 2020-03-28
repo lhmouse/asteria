@@ -1,9 +1,9 @@
-|CI            |Category                   |Build on OS     |Host OS         |Build Status     |
-|:-------------|:--------------------------|:---------------|:---------------|:----------------|
-|[**Travis CI**](https://travis-ci.org/lhmouse/asteria) |:1st_place_medal:Primary   |Linux (Ubuntu)  |Linux (Ubuntu)  |[![Build Status](https://travis-ci.org/lhmouse/asteria.svg?branch=master)](https://travis-ci.org/lhmouse/asteria) |
-|[**AppVeyor**](https://ci.appveyor.com/project/lhmouse/asteria) |:2nd_place_medal:Secondary |Windows (MSYS2) |Windows (MSYS2) |[![Build Status](https://ci.appveyor.com/api/projects/status/github/lhmouse/asteria?branch=master&svg=true)](https://ci.appveyor.com/project/lhmouse/asteria) |
+|CI            |Category                   |Build on OS     |Host OS         |Build Status     |Remarks          |
+|:-------------|:--------------------------|:---------------|:---------------|:----------------|:----------------|
+|[**Travis CI**](https://travis-ci.org/lhmouse/asteria) |:1st_place_medal:Primary   |Linux (Ubuntu)  |Linux (Ubuntu)  |[![Build Status](https://travis-ci.org/lhmouse/asteria.svg?branch=master)](https://travis-ci.org/lhmouse/asteria) |       |
+|[**AppVeyor**](https://ci.appveyor.com/project/lhmouse/asteria) |:2nd_place_medal:Secondary |Windows (MSYS2) |Windows (MSYS2) |[![Build Status](https://ci.appveyor.com/api/projects/status/github/lhmouse/asteria?branch=master&svg=true)](https://ci.appveyor.com/project/lhmouse/asteria) |Standard I/O not in UTF-32.  |
 
-|Compiler    |Category                   |Comments                                                         |
+|Compiler    |Category                   |Remarks                                                          |
 |:-----------|:--------------------------|:----------------------------------------------------------------|
 |**GCC 9**   |:1st_place_medal:Primary   |                                                                 |
 |**GCC 8**   |:1st_place_medal:Primary   |                                                                 |
