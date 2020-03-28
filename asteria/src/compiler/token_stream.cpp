@@ -772,7 +772,7 @@ Token_Stream& Token_Stream::reload(tinybuf& cbuf, const cow_string& file, const 
 
     while(reader.advance()) {
       // Discard the first line if it looks like a shebang.
-      if((reader.line() == 1) && (reader.navail() >= 2) && (::std::memcmp(reader.data(), "#!", 2) == 0))
+      if((reader.line() == 1) && (::std::strncmp(reader.data(), "#!", 2) == 0))
         continue;
 
       // Ensure this line is a valid UTF-8 string.
@@ -791,6 +791,8 @@ Token_Stream& Token_Stream::reload(tinybuf& cbuf, const cow_string& file, const 
         // Accept this code point.
         reader.consume(u8len);
       }
+
+      // Re-scan this line from the beginning.
       reader.rewind();
 
       // Break this line down into tokens.
@@ -832,12 +834,9 @@ Token_Stream& Token_Stream::reload(tinybuf& cbuf, const cow_string& file, const 
                          do_accept_string_literal(tokens, reader, '\"', true) ||
                          do_accept_string_literal(tokens, reader, '\'', opts.escapable_single_quotes) ||
                          do_accept_identifier_or_keyword(tokens, reader, opts.keywords_as_identifiers);
-        if(!token_got) {
+        if(!token_got)
           do_throw_parser_error(parser_status_token_character_unrecognized, reader, 1);
-        }
       }
-      reader.rewind();
-
     }
     if(bcomm)
       // A block comment may straddle multiple lines. We just mark the first line here.
