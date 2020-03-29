@@ -12,25 +12,25 @@ int main()
     ::rocket::tinybuf_str cbuf;
     cbuf.set_string(::rocket::sref(
       R"__(
-        assert std.process.execute('true') == 0;
-        assert std.process.execute('false') != 0;
+        assert std.system.execute('true') == 0;
+        assert std.system.execute('false') != 0;
 
         try {
           // note this may or may not throw
-          var status = std.process.execute('./nonexistent-command');
+          var status = std.system.execute('./nonexistent-command');
           assert status != 0;
         }
         catch(e)
           assert std.string.find(e, "assertion failure") == null;
 
-        assert std.process.execute('bash',
+        assert std.system.execute('bash',
           [ 'bash', '-c', 'kill -1 $$' ]) == 129;
-        assert std.process.execute('bash',
+        assert std.system.execute('bash',
           [ 'bash', '-c', 'kill -9 $$' ]) == 137;
 
-        assert std.process.execute('bash',
+        assert std.system.execute('bash',
           [ 'bash', '-c', 'test $VAR == yes' ], [ 'VAR=yes' ]) == 0;
-        assert std.process.execute('bash',
+        assert std.system.execute('bash',
           [ 'bash', '-c', 'test $VAR == yes' ], [ 'VAR=no' ]) != 0;
 
       )__"), tinybuf::open_read);

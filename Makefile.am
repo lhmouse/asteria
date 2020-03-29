@@ -168,7 +168,7 @@ pkginclude_compiler_HEADERS =  \
 pkginclude_librarydir = ${pkgincludedir}/library
 pkginclude_library_HEADERS =  \
   asteria/src/library/version.hpp  \
-  asteria/src/library/gc.hpp  \
+  asteria/src/library/system.hpp  \
   asteria/src/library/debug.hpp  \
   asteria/src/library/chrono.hpp  \
   asteria/src/library/string.hpp  \
@@ -178,7 +178,6 @@ pkginclude_library_HEADERS =  \
   asteria/src/library/filesystem.hpp  \
   asteria/src/library/checksum.hpp  \
   asteria/src/library/json.hpp  \
-  asteria/src/library/process.hpp  \
   asteria/src/library/io.hpp
 
 lib_libasteria_la_SOURCES =  \
@@ -222,7 +221,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/compiler/infix_element.cpp  \
   asteria/src/compiler/statement_sequence.cpp  \
   asteria/src/library/version.cpp  \
-  asteria/src/library/gc.cpp  \
+  asteria/src/library/system.cpp  \
   asteria/src/library/debug.cpp  \
   asteria/src/library/chrono.cpp  \
   asteria/src/library/string.cpp  \
@@ -232,7 +231,6 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/library/filesystem.cpp  \
   asteria/src/library/checksum.cpp  \
   asteria/src/library/json.cpp  \
-  asteria/src/library/process.cpp  \
   asteria/src/library/io.cpp
 
 lib_libasteria_la_CXXFLAGS =  \
@@ -271,6 +269,7 @@ check_PROGRAMS =  \
   asteria/test/variadic_function_call.test  \
   asteria/test/defer.test  \
   asteria/test/defer_ptc.test  \
+  asteria/test/system.test  \
   asteria/test/chrono.test  \
   asteria/test/string.test  \
   asteria/test/array.test  \
@@ -279,7 +278,6 @@ check_PROGRAMS =  \
   asteria/test/filesystem.test  \
   asteria/test/checksum.test  \
   asteria/test/json.test  \
-  asteria/test/process.test  \
   asteria/test/github_65.test  \
   asteria/test/github_71.test  \
   asteria/test/github_78.test  \

@@ -8,7 +8,7 @@
 #include "variable.hpp"
 #include "abstract_hooks.hpp"
 #include "../library/version.hpp"
-#include "../library/gc.hpp"
+#include "../library/system.hpp"
 #include "../library/debug.hpp"
 #include "../library/chrono.hpp"
 #include "../library/string.hpp"
@@ -18,7 +18,6 @@
 #include "../library/filesystem.hpp"
 #include "../library/checksum.hpp"
 #include "../library/json.hpp"
-#include "../library/process.hpp"
 #include "../library/io.hpp"
 #include "../utilities.hpp"
 
@@ -37,7 +36,7 @@ struct Module
 constexpr s_modules[] =
   {
     { api_version_none,       "version",     create_bindings_version     },
-    { api_version_0001_0000,  "gc",          create_bindings_gc          },
+    { api_version_0001_0000,  "system",      create_bindings_system      },
     { api_version_0001_0000,  "debug",       create_bindings_debug       },
     { api_version_0001_0000,  "chrono",      create_bindings_chrono      },
     { api_version_0001_0000,  "string",      create_bindings_string      },
@@ -47,7 +46,6 @@ constexpr s_modules[] =
     { api_version_0001_0000,  "filesystem",  create_bindings_filesystem  },
     { api_version_0001_0000,  "checksum",    create_bindings_checksum    },
     { api_version_0001_0000,  "json",        create_bindings_json        },
-    { api_version_0001_0000,  "process",     create_bindings_process     },
     { api_version_0001_0000,  "io",          create_bindings_io          },
   };
 

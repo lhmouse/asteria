@@ -14,7 +14,7 @@
 
 ### `std.gc`
 
-`std.gc.tracked_count(generation)`
+`std.system.gc_count_variables(generation)`
 
 	* Gets the number of variables that are being tracked by the
 	  collector for `generation`. Valid values for `generation` are
@@ -24,7 +24,7 @@
 	  only informative. If `generation` is not valid, `null` is
 	  returned.
 
-`std.gc.get_threshold(generation)`
+`std.system.gc_get_threshold(generation)`
 
 	* Gets the threshold of the collector for `generation`. Valid
 	  values for `generation` are `0`, `1` and `2`.
@@ -32,7 +32,7 @@
 	* Returns the threshold. If `generation` is not valid, `null` is
 	  returned.
 
-`std.gc.set_threshold(generation, threshold)`
+`std.system.gc_set_threshold(generation, threshold)`
 
 	* Sets the threshold of the collector for `generation` to
 	  `threshold`. Valid values for `generation` are `0`, `1` and
@@ -45,7 +45,7 @@
 	* Returns the threshold before the call. If `generation` is not
 	  valid, `null` is returned.
 
-`std.gc.collect([generation_limit])`
+`std.system.gc_collect([generation_limit])`
 
 	* Performs garbage collection on all generations including and
 	  up to `generation_limit`. If it is absent, all generations are
@@ -53,6 +53,30 @@
 
 	* Returns the number of variables that have been collected in
 	  total.
+
+`std.system.execute(cmd, [argv], [envp])`
+
+	* Launches the program denoted by `cmd`, awaits its termination,
+	  and returns its exit status. If `argv` is provided, it shall be
+	  an array of strings, which specify arguments passed to the
+	  program. If `envp` is provided, it shall also be an array of
+	  strings, which specify environment variables passed to the
+	  program.
+
+	* Returns the exit status as an integer. If the process exits due
+	  to a signal, the exit status is `128+N` where `N` is the signal
+	  number.
+
+	* Throws an exception if the program could not be launched or its
+	  exit status could not be retrieved.
+
+`std.system.daemonize()`
+
+	* Detaches the current process from its controlling terminal and
+	  continues in the background. The calling process terminates on
+	  success so this function never returns.
+
+	* Throws an exception on failure.
 
 ### `std.debug`
 
@@ -2469,32 +2493,6 @@
 	* Returns the parsed value.
 
 	* Throws an exception if the string is invalid.
-
-### `std.process`
-
-`std.process.execute(cmd, [argv], [envp])`
-
-	* Launches the program denoted by `cmd`, awaits its termination,
-	  and returns its exit status. If `argv` is provided, it shall be
-	  an array of strings, which specify arguments passed to the
-	  program. If `envp` is provided, it shall also be an array of
-	  strings, which specify environment variables passed to the
-	  program.
-
-	* Returns the exit status as an integer. If the process exits due
-	  to a signal, the exit status is `128+N` where `N` is the signal
-	  number.
-
-	* Throws an exception if the program could not be launched or its
-	  exit status could not be retrieved.
-
-`std.process.daemonize()`
-
-	* Detaches the current process from its controlling terminal and
-	  continues in the background. The calling process terminates on
-	  success so this function never returns.
-
-	* Throws an exception on failure.
 
 ### `std.io`
 
