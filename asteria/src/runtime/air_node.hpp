@@ -217,7 +217,7 @@ class AIR_Node
         index_variadic_call          = 31,
         index_defer_expression       = 32,
       };
-    using Xvariant = variant<
+    using Storage = variant<
       ROCKET_CDR(
       , S_clear_stack            //  0,
       , S_execute_block          //  1,
@@ -253,18 +253,18 @@ class AIR_Node
       , S_variadic_call          // 31,
       , S_defer_expression       // 32,
       )>;
-    static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
+    static_assert(::std::is_nothrow_copy_assignable<Storage>::value, "");
 
   private:
-    Xvariant m_stor;
+    Storage m_stor;
 
   public:
-    ASTERIA_VARIANT_CONSTRUCTOR(AIR_Node, Xvariant, XNodeT, xnode)
+    ASTERIA_VARIANT_CONSTRUCTOR(AIR_Node, Storage, XNodeT, xnode)
       :
         m_stor(::std::forward<XNodeT>(xnode))
       {
       }
-    ASTERIA_VARIANT_ASSIGNMENT(AIR_Node, Xvariant, XNodeT, xnode)
+    ASTERIA_VARIANT_ASSIGNMENT(AIR_Node, Storage, XNodeT, xnode)
       {
         this->m_stor = ::std::forward<XNodeT>(xnode);
         return *this;

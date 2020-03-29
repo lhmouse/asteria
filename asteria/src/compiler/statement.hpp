@@ -132,7 +132,7 @@ class Statement
         index_assert      = 15,
         index_defer       = 16,
       };
-    using Xvariant = variant<
+    using Storage = variant<
       ROCKET_CDR(
       , S_expression  //  0,
       , S_block       //  1,
@@ -152,18 +152,18 @@ class Statement
       , S_assert      // 15,
       , S_defer       // 16,
       )>;
-    static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
+    static_assert(::std::is_nothrow_copy_assignable<Storage>::value, "");
 
   private:
-    Xvariant m_stor;
+    Storage m_stor;
 
   public:
-    ASTERIA_VARIANT_CONSTRUCTOR(Statement, Xvariant, XStmtT, xstmt)
+    ASTERIA_VARIANT_CONSTRUCTOR(Statement, Storage, XStmtT, xstmt)
       :
         m_stor(::std::forward<XStmtT>(xstmt))
       {
       }
-    ASTERIA_VARIANT_ASSIGNMENT(Statement, Xvariant, XStmtT, xstmt)
+    ASTERIA_VARIANT_ASSIGNMENT(Statement, Storage, XStmtT, xstmt)
       {
         this->m_stor = ::std::forward<XStmtT>(xstmt);
         return *this;

@@ -90,7 +90,7 @@ class Expression_Unit
         index_variadic_call     = 11,
         index_argument_finish   = 12,
       };
-    using Xvariant = variant<
+    using Storage = variant<
       ROCKET_CDR(
       , S_literal           //  0,
       , S_named_reference   //  1,
@@ -106,18 +106,18 @@ class Expression_Unit
       , S_variadic_call     // 11,
       , S_argument_finish   // 12,
       )>;
-    static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
+    static_assert(::std::is_nothrow_copy_assignable<Storage>::value, "");
 
   private:
-    Xvariant m_stor;
+    Storage m_stor;
 
   public:
-    ASTERIA_VARIANT_CONSTRUCTOR(Expression_Unit, Xvariant, XUnitT, xunit)
+    ASTERIA_VARIANT_CONSTRUCTOR(Expression_Unit, Storage, XUnitT, xunit)
       :
         m_stor(::std::forward<XUnitT>(xunit))
       {
       }
-    ASTERIA_VARIANT_ASSIGNMENT(Expression_Unit, Xvariant, XUnitT, xunit)
+    ASTERIA_VARIANT_ASSIGNMENT(Expression_Unit, Storage, XUnitT, xunit)
       {
         this->m_stor = ::std::forward<XUnitT>(xunit);
         return *this;

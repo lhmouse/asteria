@@ -41,7 +41,7 @@ class Reference_root
         index_variable   = 3,
         index_tail_call  = 4,
       };
-    using Xvariant = variant<
+    using Storage = variant<
       ROCKET_CDR(
       , S_void       // 0,
       , S_constant   // 1,
@@ -49,18 +49,18 @@ class Reference_root
       , S_variable   // 3,
       , S_tail_call  // 4,
       )>;
-    static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
+    static_assert(::std::is_nothrow_copy_assignable<Storage>::value, "");
 
   private:
-    Xvariant m_stor;
+    Storage m_stor;
 
   public:
-    ASTERIA_VARIANT_CONSTRUCTOR(Reference_root, Xvariant, XRootT, xroot)
+    ASTERIA_VARIANT_CONSTRUCTOR(Reference_root, Storage, XRootT, xroot)
       :
         m_stor(::std::forward<XRootT>(xroot))
       {
       }
-    ASTERIA_VARIANT_ASSIGNMENT(Reference_root, Xvariant, XRootT, xroot)
+    ASTERIA_VARIANT_ASSIGNMENT(Reference_root, Storage, XRootT, xroot)
       {
         this->m_stor = ::std::forward<XRootT>(xroot);
         return *this;

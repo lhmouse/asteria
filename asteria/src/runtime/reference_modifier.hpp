@@ -33,25 +33,25 @@ class Reference_modifier
         index_array_head   = 2,
         index_array_tail   = 3,
       };
-    using Xvariant = variant<
+    using Storage = variant<
       ROCKET_CDR(
       , S_array_index  // 0,
       , S_object_key   // 1,
       , S_array_head   // 2,
       , S_array_tail   // 3,
       )>;
-    static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
+    static_assert(::std::is_nothrow_copy_assignable<Storage>::value, "");
 
   private:
-    Xvariant m_stor;
+    Storage m_stor;
 
   public:
-    ASTERIA_VARIANT_CONSTRUCTOR(Reference_modifier, Xvariant, XModT, xmod)
+    ASTERIA_VARIANT_CONSTRUCTOR(Reference_modifier, Storage, XModT, xmod)
       :
         m_stor(::std::forward<XModT>(xmod))
       {
       }
-    ASTERIA_VARIANT_ASSIGNMENT(Reference_modifier, Xvariant, XModT, xmod)
+    ASTERIA_VARIANT_ASSIGNMENT(Reference_modifier, Storage, XModT, xmod)
       {
         this->m_stor = ::std::forward<XModT>(xmod);
         return *this;

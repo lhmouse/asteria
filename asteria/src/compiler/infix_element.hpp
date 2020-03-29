@@ -52,7 +52,7 @@ class Infix_Element
         index_coalescence  = 4,
         index_general      = 5,
       };
-    using Xvariant = variant<
+    using Storage = variant<
       ROCKET_CDR(
       , S_head         // 0,
       , S_ternary      // 1,
@@ -61,18 +61,18 @@ class Infix_Element
       , S_coalescence  // 4,
       , S_general      // 5,
       )>;
-    static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
+    static_assert(::std::is_nothrow_copy_assignable<Storage>::value, "");
 
   private:
-    Xvariant m_stor;
+    Storage m_stor;
 
   public:
-    ASTERIA_VARIANT_CONSTRUCTOR(Infix_Element, Xvariant, XElemT, xelem)
+    ASTERIA_VARIANT_CONSTRUCTOR(Infix_Element, Storage, XElemT, xelem)
       :
         m_stor(::std::forward<XElemT>(xelem))
       {
       }
-    ASTERIA_VARIANT_ASSIGNMENT(Infix_Element, Xvariant, XElemT, xelem)
+    ASTERIA_VARIANT_ASSIGNMENT(Infix_Element, Storage, XElemT, xelem)
       {
         this->m_stor = ::std::forward<XElemT>(xelem);
         return *this;

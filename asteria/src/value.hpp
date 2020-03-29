@@ -11,7 +11,7 @@ namespace Asteria {
 class Value
   {
   public:
-    using Xvariant = variant<
+    using Storage = variant<
       ROCKET_CDR(
       , V_null      // 0,
       , V_boolean   // 1,
@@ -23,10 +23,10 @@ class Value
       , V_array     // 7,
       , V_object    // 8,
       )>;
-    static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
+    static_assert(::std::is_nothrow_copy_assignable<Storage>::value, "");
 
   private:
-    Xvariant m_stor;
+    Storage m_stor;
 
   public:
     Value(nullptr_t = nullptr) noexcept
