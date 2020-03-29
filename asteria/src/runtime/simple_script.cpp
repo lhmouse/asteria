@@ -35,14 +35,14 @@ struct StdIO_Sentry
 
 }  // namespace
 
-Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
+Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name, const Compiler_Options& opts)
   {
     // Tokenize the character stream.
     Token_Stream tstrm;
-    tstrm.reload(cbuf, name, this->m_opts);
+    tstrm.reload(cbuf, name, opts);
     // Parse tokens.
     Statement_Sequence stmtq;
-    stmtq.reload(tstrm, this->m_opts);
+    stmtq.reload(tstrm, opts);
 
     // Initialize the parameter list. This is the same for all scripts so we only do this once.
     if(ROCKET_UNEXPECT(this->m_params.empty())) {
@@ -58,10 +58,10 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
       Analytic_Context ctx_func(nullptr, this->m_params);
       // Generate code with regard to proper tail calls.
       for(size_t i = 0;  i < epos;  ++i) {
-        stmtq.at(i).generate_code(code_body, nullptr, ctx_func, this->m_opts,
+        stmtq.at(i).generate_code(code_body, nullptr, ctx_func, opts,
                                   stmtq.at(i + 1).is_empty_return() ? ptc_aware_void : ptc_aware_none);
       }
-      stmtq.at(epos).generate_code(code_body, nullptr, ctx_func, this->m_opts, ptc_aware_void);
+      stmtq.at(epos).generate_code(code_body, nullptr, ctx_func, opts, ptc_aware_void);
     }
     // TODO: Insert optimization passes.
     // Instantiate the function.
@@ -69,25 +69,25 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
     return *this;
   }
 
-Simple_Script& Simple_Script::reload_string(const cow_string& code, const cow_string& name)
+Simple_Script& Simple_Script::reload_string(const cow_string& code, const cow_string& name, const Compiler_Options& opts)
   {
     ::rocket::tinybuf_str cbuf;
     cbuf.set_string(code, tinybuf::open_read);
-    return this->reload(cbuf, name);
+    return this->reload(cbuf, name, opts);
   }
 
-Simple_Script& Simple_Script::reload_file(const cow_string& path)
+Simple_Script& Simple_Script::reload_file(const cow_string& path, const Compiler_Options& opts)
   {
     ::rocket::tinybuf_file cbuf;
     cbuf.open(path.c_str(), tinybuf::open_read);
-    return this->reload(cbuf, path);
+    return this->reload(cbuf, path, opts);
   }
 
-Simple_Script& Simple_Script::reload_stdin()
+Simple_Script& Simple_Script::reload_stdin(const Compiler_Options& opts)
   {
     ::rocket::tinybuf_file cbuf;
     cbuf.reset(stdin, nullptr);
-    return this->reload(cbuf, ::rocket::sref("<stdin>"));
+    return this->reload(cbuf, ::rocket::sref("<stdin>"), opts);
   }
 
 Reference Simple_Script::execute(Global_Context& global, cow_vector<Reference>&& args) const

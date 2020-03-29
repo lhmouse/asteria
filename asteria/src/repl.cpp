@@ -178,7 +178,6 @@ void do_trap_sigint()
 
 // These may also be automatic objects. They are declared here for convenience.
 Command_Line_Options cmdline;
-Compiler_Options options;
 Simple_Script script;
 Global_Context global;
 
@@ -518,9 +517,8 @@ int do_REP_single()
 
     // The snippet might be a statement list or an expression.
     // First, try parsing it as the former.
-    script.set_options(options);
     try {
-      script.reload_string(code, cmdline.path);
+      script.reload_string(code, cmdline.path, global.get_options());
     }
     catch(Parser_Error& except) {
       // We only want to make another attempt in the case of absence of a semicolon at the end.
@@ -604,12 +602,11 @@ int do_REP_single()
     Exit_Code status = exit_runtime_error;
 
     // Consume all data from standard input.
-    script.set_options(options);
     try {
       if(cmdline.path == "-")
-        script.reload_stdin();
+        script.reload_stdin(global.get_options());
       else
-        script.reload_file(cmdline.path);
+        script.reload_file(cmdline.path, global.get_options());
     }
     catch(Parser_Error& except) {
       // Report the error and exit.
