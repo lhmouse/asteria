@@ -586,8 +586,8 @@ template<> struct Compiler_Options_fragment<1>
     bool no_proper_tail_calls : 1;
     // Suppress all optimization techniques.
     bool no_optimization : 1;
-    // Do not generate code for single-step traps other than on function calls.
-    bool no_plain_single_step_traps : 1;
+    // Generate calls to single-step hooks for every expression, not just function calls.
+    bool verbose_single_step_traps : 1;
 
     // Note: Please keep this struct as compact as possible.
   };

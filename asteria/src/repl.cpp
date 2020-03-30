@@ -589,6 +589,7 @@ int do_REP_single()
 
     // Set up runtime hooks. This is sticky.
     global.set_hooks(::rocket::make_refcnt<REPL_Hooks>());
+    global.open_options().verbose_single_step_traps = true;
 
     // In interactive mode (a.k.a. REPL mode), read user inputs in lines.
     // Outputs from the script go into standard output. Others go into standard error.
@@ -602,8 +603,10 @@ int do_REP_single()
     Exit_Code status = exit_runtime_error;
 
     // Set up runtime hooks if verbosity is requested.
-    if(cmdline.verbose)
+    if(cmdline.verbose) {
       global.set_hooks(::rocket::make_refcnt<REPL_Hooks>());
+      global.open_options().verbose_single_step_traps = true;
+    }
 
     // Consume all data from standard input.
     try {

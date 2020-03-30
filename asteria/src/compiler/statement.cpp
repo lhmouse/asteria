@@ -58,7 +58,7 @@ cow_vector<AIR_Node>& do_generate_expression(cow_vector<AIR_Node>& code, const C
                                              const Statement::S_expression& expr)
   {
     // Generate a single-step trap unless disabled.
-    if(!opts.no_plain_single_step_traps) {
+    if(opts.verbose_single_step_traps) {
       AIR_Node::S_single_step_trap xnode = { expr.sloc };
       code.emplace_back(::std::move(xnode));
     }
@@ -104,7 +104,7 @@ cow_vector<AIR_Node>& do_generate_block(cow_vector<AIR_Node>& code, const Compil
                                         const Analytic_Context& ctx, const Statement::S_block& block)
   {
     // Generate a single-step trap unless disabled.
-    if(!opts.no_plain_single_step_traps) {
+    if(opts.verbose_single_step_traps) {
       AIR_Node::S_single_step_trap xnode = { block.sloc };
       code.emplace_back(::std::move(xnode));
     }
