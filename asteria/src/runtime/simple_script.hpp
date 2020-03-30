@@ -18,7 +18,7 @@ class Simple_Script
     Simple_Script() noexcept
       {
       }
-    Simple_Script(tinybuf& cbuf, const cow_string& name, const Compiler_Options& opts = { })
+    Simple_Script(tinybuf& cbuf, const cow_string& name, const Compiler_Options& opts)
       {
         this->reload(cbuf, name, opts);
       }
@@ -33,7 +33,7 @@ class Simple_Script
         return this->m_func.reset(), *this;
       }
 
-    Simple_Script& reload(tinybuf& cbuf, const cow_string& name, const Compiler_Options& opts = { });
+    Simple_Script& reload(tinybuf& cbuf, const cow_string& name, const Compiler_Options& opts);
 
     Simple_Script& reload_string(const cow_string& code, const cow_string& name, const Compiler_Options& opts = { });
     Simple_Script& reload_file(const cow_string& path, const Compiler_Options& opts = { });
