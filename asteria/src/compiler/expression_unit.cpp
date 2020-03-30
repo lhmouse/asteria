@@ -15,15 +15,12 @@ namespace {
 cow_vector<AIR_Node> do_generate_code_branch(const Compiler_Options& opts, PTC_Aware ptc,
                                              const Analytic_Context& ctx, const cow_vector<Expression_Unit>& units)
   {
-    cow_vector<AIR_Node> code;
     // Expression units other than the last one cannot be PTC'd.
-    size_t epos = units.size() - 1;
-    if(epos != SIZE_MAX) {
-      for(size_t i = 0;  i < epos;  ++i) {
-        units[i].generate_code(code, opts, ctx, ptc_aware_none);
-      }
-      units[epos].generate_code(code, opts, ctx, ptc);
-    }
+    cow_vector<AIR_Node> code;
+    for(size_t i = 0;  i < units.size();  ++i)
+      units[i].generate_code(code, opts, ctx,
+                   (i + 1 == units.size()) ? ptc     // last expression unit
+                                           : ptc_aware_none);
     return code;
   }
 
@@ -75,27 +72,18 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         ::rocket::tinyfmt_str fmt;
         fmt << "<closure>._" << altr.unique_id << '(';
         // Append the parameter list. Parameters are separated by commas.
-        size_t epos = altr.params.size() - 1;
-        if(epos != SIZE_MAX) {
-          for(size_t i = 0;  i < epos;  ++i) {
-            fmt << altr.params[i] << ", ";
-          }
-          fmt << altr.params[epos];
-        }
+        for(size_t i = 0;  i < altr.params.size();  ++i)
+          ((i == 0) ? fmt : (fmt << ", ")) << altr.params[i];
         fmt << ')';
         auto func = fmt.extract_string();
         // Generate code for the body.
         cow_vector<AIR_Node> code_body;
-        epos = altr.body.size() - 1;
-        if(epos != SIZE_MAX) {
-          Analytic_Context ctx_func(::std::addressof(ctx), altr.params);
-          // Generate code with regard to proper tail calls.
-          for(size_t i = 0;  i < epos;  ++i) {
-            altr.body[i].generate_code(code_body, nullptr, ctx_func, opts,
-                                       altr.body[i + 1].is_empty_return() ? ptc_aware_void : ptc_aware_none);
-          }
-          altr.body[epos].generate_code(code_body, nullptr, ctx_func, opts, ptc_aware_void);
-        }
+        Analytic_Context ctx_func(::std::addressof(ctx), altr.params);
+        for(size_t i = 0;  i < altr.body.size();  ++i)
+          altr.body[i].generate_code(code_body, nullptr, ctx_func, opts,
+                         ((i + 1 == altr.body.size()) || altr.body.at(i + 1).is_empty_return())
+                              ? ptc_aware_void     // last or preceding empty return
+                              : ptc_aware_none);
         // TODO: Insert optimization passes.
         // Encode arguments.
         AIR_Node::S_define_function xnode = { altr.sloc, ::std::move(func), altr.params,

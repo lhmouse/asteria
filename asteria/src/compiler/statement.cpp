@@ -45,14 +45,11 @@ cow_vector<AIR_Node>& do_generate_subexpression(cow_vector<AIR_Node>& code, cons
                                                 PTC_Aware ptc, const Analytic_Context& ctx,
                                                 const Statement::S_expression& expr)
   {
-    size_t epos = expr.units.size() - 1;
-    if(epos != SIZE_MAX) {
-      // Expression units other than the last one cannot be PTC'd.
-      for(size_t i = 0;  i < epos;  ++i) {
-        expr.units[i].generate_code(code, opts, ctx, ptc_aware_none);
-      }
-      expr.units[epos].generate_code(code, opts, ctx, ptc);
-    }
+    // Expression units other than the last one cannot be PTC'd.
+    for(size_t i = 0;  i < expr.units.size();  ++i)
+      expr.units[i].generate_code(code, opts, ctx,
+                   (i + 1 == expr.units.size()) ? ptc     // last expression unit
+                                                : ptc_aware_none);
     return code;
   }
 
@@ -85,15 +82,12 @@ cow_vector<AIR_Node>& do_generate_statement_list(cow_vector<AIR_Node>& code, cow
                                                  Analytic_Context& ctx, const Compiler_Options& opts, PTC_Aware ptc,
                                                  const Statement::S_block& block)
   {
-    size_t epos = block.stmts.size() - 1;
-    if(epos != SIZE_MAX) {
-      // Statements other than the last one cannot be the end of function.
-      for(size_t i = 0;  i < epos;  ++i) {
-        block.stmts[i].generate_code(code, names_opt, ctx, opts,
-                                     block.stmts[i+1].is_empty_return() ? ptc_aware_void : ptc_aware_none);
-      }
-      block.stmts[epos].generate_code(code, names_opt, ctx, opts, ptc);
-    }
+    // Statements other than the last one cannot be the end of function.
+    for(size_t i = 0;  i < block.stmts.size();  ++i)
+      block.stmts[i].generate_code(code, names_opt, ctx, opts,
+                     (i + 1 == block.stmts.size())               ? ptc  // last statement
+                       : block.stmts.at(i + 1).is_empty_return() ? ptc_aware_void  // preceding empty return
+                                                                 : ptc_aware_none);
     return code;
   }
 
@@ -236,27 +230,18 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         ::rocket::tinyfmt_str fmt;
         fmt << altr.name << '(';
         // Append the parameter list. Parameters are separated by commas.
-        size_t epos = altr.params.size() - 1;
-        if(epos != SIZE_MAX) {
-          for(size_t i = 0;  i < epos;  ++i) {
-            fmt << altr.params[i] << ", ";
-          }
-          fmt << altr.params[epos];
-        }
+        for(size_t i = 0;  i < altr.params.size();  ++i)
+          ((i == 0) ? fmt : (fmt << ", ")) << altr.params[i];
         fmt << ')';
         auto func = fmt.extract_string();
         // Generate code for the body.
         cow_vector<AIR_Node> code_body;
-        epos = altr.body.size() - 1;
-        if(epos != SIZE_MAX) {
-          Analytic_Context ctx_func(::std::addressof(ctx), altr.params);
-          // Generate code with regard to proper tail calls.
-          for(size_t i = 0;  i < epos;  ++i) {
-            altr.body[i].generate_code(code_body, nullptr, ctx_func, opts,
-                                       altr.body[i + 1].is_empty_return() ? ptc_aware_void : ptc_aware_none);
-          }
-          altr.body[epos].generate_code(code_body, nullptr, ctx_func, opts, ptc_aware_void);
-        }
+        Analytic_Context ctx_func(::std::addressof(ctx), altr.params);
+        for(size_t i = 0;  i < altr.body.size();  ++i)
+          altr.body[i].generate_code(code_body, nullptr, ctx_func, opts,
+                         ((i + 1 == altr.body.size()) || altr.body.at(i + 1).is_empty_return())
+                              ? ptc_aware_void     // last or preceding empty return
+                              : ptc_aware_none);
         // TODO: Insert optimization passes.
         // Encode arguments.
         AIR_Node::S_define_function xnode_defn = { altr.sloc, ::std::move(func), altr.params,

@@ -53,16 +53,12 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name, cons
     // Generate IR nodes for the function body.
     // TODO: Move this elsewhere.
     cow_vector<AIR_Node> code_body;
-    size_t epos = stmtq.size() - 1;
-    if(epos != SIZE_MAX) {
-      Analytic_Context ctx_func(nullptr, this->m_params);
-      // Generate code with regard to proper tail calls.
-      for(size_t i = 0;  i < epos;  ++i) {
-        stmtq.at(i).generate_code(code_body, nullptr, ctx_func, opts,
-                                  stmtq.at(i + 1).is_empty_return() ? ptc_aware_void : ptc_aware_none);
-      }
-      stmtq.at(epos).generate_code(code_body, nullptr, ctx_func, opts, ptc_aware_void);
-    }
+    Analytic_Context ctx_func(nullptr, this->m_params);
+    for(size_t i = 0;  i < stmtq.size();  ++i)
+      stmtq.at(i).generate_code(code_body, nullptr, ctx_func, opts,
+                     ((i + 1 == stmtq.size()) || stmtq.at(i + 1).is_empty_return())
+                          ? ptc_aware_void     // last or preceding empty return
+                          : ptc_aware_none);
     // TODO: Insert optimization passes.
     // Instantiate the function.
     this->m_func = ::rocket::make_refcnt<Instantiated_Function>(this->m_params, ::std::move(zvarg), code_body);
