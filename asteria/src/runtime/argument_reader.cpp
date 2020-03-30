@@ -551,42 +551,43 @@ Argument_Reader& Argument_Reader::o(Oopt& xopt)
 void Argument_Reader::throw_no_matching_function_call() const
   {
     // Create a message containing all arguments.
-    cow_string args;
-    if(!this->m_args->empty()) {
+    cow_string args_str;
+    const auto& args = this->m_args.get();
+    if(!args.empty()) {
       size_t k = 0;
       for(;;) {
-        args << this->m_args.get()[k].read().what_vtype();
+        args_str << args[k].read().what_vtype();
         // Seek to the next argument.
-        if(++k == this->m_args->size())
+        if(++k == args.size())
           break;
-        args << ", ";
+        args_str << ", ";
       }
     }
     // Append the list of overloads.
-    cow_string ovlds;
-    if(!this->m_ovlds.empty()) {
-      ovlds << "\n[list of overloads:\n  ";
+    cow_string ovlds_str;
+    const auto& ovlds = this->m_ovlds;
+    if(!ovlds.empty()) {
+      ovlds_str << "\n[list of overloads:\n  ";
       size_t k = 0;
       for(;;) {
-        ovlds << '`' << this->m_name << '(';
+        ovlds_str << '`' << this->m_name << '(';
         // Get the current parameter list.
-        const char* s = this->m_ovlds.data() + k;
-        size_t n = ::std::strlen(s);
-        // If the parameter list is not empty, it always start with a ", ".
-        if(n != 0) {
-          ovlds.append(s + 2, n - 2);
-          k += n;
-        }
-        ovlds << ')' << '`';
+        const char* sparams = ovlds.data() + k;
+        size_t nchars = ::std::strlen(sparams);
+        // If the parameter list is not empty, it always start with a ", " so skip it.
+        if(nchars != 0)
+          ovlds_str.append(sparams + 2, nchars - 2);
+        k += nchars;
+        ovlds_str << ')' << '`';
         // Seek to the next overload.
-        if(++k == this->m_ovlds.size())
+        if(++k == ovlds.size())
           break;
-        ovlds << ",\n  ";
+        ovlds_str << ",\n  ";
       }
-      ovlds << "\n  -- end of list of overloads]";
+      ovlds_str << "\n  -- end of list of overloads]";
     }
     // Throw the exception now.
-    ASTERIA_THROW("no matching function call for `$1($2)`$3", this->m_name, args, ovlds);
+    ASTERIA_THROW("no matching function call for `$1($2)`$3", this->m_name, args_str, ovlds_str);
   }
 
 }  // namespace Asteria
