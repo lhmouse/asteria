@@ -35,7 +35,7 @@ ptrdiff_t write_log_to_stderr(const char* file, long line, cow_string&& msg) noe
         << ':'
         << nump.put_DU(static_cast<uint64_t>(tr.tm_sec), 2)
         << '.'
-        << nump.put_DU(static_cast<uint64_t>(ts.tv_nsec / 1000000), 3);
+        << nump.put_DU(static_cast<uint64_t>(ts.tv_nsec), 9);
     // Append the file name and line number, followed by a LF.
     fmt << " @ " << file << ':' << line << "\n\t";
 
