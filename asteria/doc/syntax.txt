@@ -5,11 +5,9 @@ document ::=
 identifier ::=
 	PCRE([A-Za-z_][A-Za-z_0-9]*)
 literal ::=
-	null-literal | boolean-literal | string-literal | numeric-literal | nan-literal | infinity-literal
-null-literal ::=
-	"null"
-boolean-litearl ::=
-	"false" | "true"
+	keyword-literal | string-literal | numeric-literal
+keyword-literal ::=
+	"null" | "false" | "true" | "nan" | "infinity"
 string-literal ::=
 	( escape-string-literal | noescape-string-literal ) string-literal-add-opt
 escape-string-literal ::=
@@ -34,10 +32,6 @@ decimal-exponent-suffix ::=
 	PCRE([eE][-+]?([0-9]`?)+)
 binary-exponent-suffix ::=
 	PCRE([pP][-+]?([0-9]`?)+)
-nan-literal ::=
-	"nan"
-infinity-literal ::=
-	"infinity"
 
 
 statement ::=

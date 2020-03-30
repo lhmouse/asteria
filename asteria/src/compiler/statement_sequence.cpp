@@ -193,7 +193,7 @@ struct Literal_Element
     Keyword kwrd;
     Value_Generator& vgen;
   }
-const s_literal_table[] =
+constexpr s_literal_table[] =
   {
     { keyword_null,      do_generate_null      },
     { keyword_false,     do_generate_false     },
@@ -207,18 +207,12 @@ constexpr bool operator==(const Literal_Element& lhs, Keyword rhs) noexcept
     return lhs.kwrd == rhs;
   }
 
-opt<Value> do_accept_literal_value_opt(Token_Stream& tstrm)
+opt<Value> do_accept_literal_opt(Token_Stream& tstrm)
   {
     // literal ::=
-    //   null-literal | boolean-literal | string-literal | numeric-literal | nan-literal | infinity-literal
-    // null-literal ::=
-    //   "null"
-    // boolean-litearl ::=
-    //   "false" | "true"
-    // nan-literal ::=
-    //   "nan"
-    // infinity-literal ::=
-    //   "infinity"
+    //   keyword-literal | string-literal | numeric-literal
+    // keyword-literal ::=
+    //   "null" | "false" | "true" | "nan" | "infinity"
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
       return nullopt;
@@ -1391,7 +1385,7 @@ bool do_accept_global_reference(cow_vector<Expression_Unit>& units, Token_Stream
 bool do_accept_literal(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // Get a literal as a `Value`.
-    auto qval = do_accept_literal_value_opt(tstrm);
+    auto qval = do_accept_literal_opt(tstrm);
     if(!qval) {
       return false;
     }
