@@ -601,6 +601,10 @@ int do_REP_single()
     // Return this if an exception is thrown.
     Exit_Code status = exit_runtime_error;
 
+    // Set up runtime hooks if verbosity is requested.
+    if(cmdline.verbose)
+      global.set_hooks(::rocket::make_refcnt<REPL_Hooks>());
+
     // Consume all data from standard input.
     try {
       if(cmdline.path == "-")
