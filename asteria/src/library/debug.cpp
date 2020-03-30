@@ -8,7 +8,7 @@
 
 namespace Asteria {
 
-Iopt std_debug_printf(Sval templ, cow_vector<Value> values)
+Iopt std_debug_logf(Sval templ, cow_vector<Value> values)
   {
     // Prepare inserters.
     cow_vector<::rocket::formatter> insts;
@@ -46,24 +46,24 @@ Iopt std_debug_dump(Value value, Iopt indent)
 void create_bindings_debug(V_object& result, API_Version /*version*/)
   {
     //===================================================================
-    // `std.debug.printf()`
+    // `std.debug.logf()`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("printf"),
+    result.insert_or_assign(::rocket::sref("logf"),
       Fval(
 [](cow_vector<Reference>&& args) -> Value
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.debug.printf"));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.debug.logf"));
     // Parse variadic arguments.
     Sval templ;
     cow_vector<Value> values;
     if(reader.I().v(templ).F(values)) {
-      return std_debug_printf(templ, values);
+      return std_debug_logf(templ, values);
     }
     // Fail.
     reader.throw_no_matching_function_call();
   },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.debug.printf(templ, ...)`
+`std.debug.logf(templ, ...)`
 
   * Compose a string in the same way as `std.string.format()`, but
     instead of returning it, write it to standard error. A line

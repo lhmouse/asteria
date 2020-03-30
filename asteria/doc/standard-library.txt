@@ -80,7 +80,7 @@
 
 ### `std.debug`
 
-`std.debug.printf(templ, ...)`
+`std.debug.logf(templ, ...)`
 
 	* Compose a string in the same way as `std.string.format()`, but
 	  instead of returning it, write it to standard error. A line

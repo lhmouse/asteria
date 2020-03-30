@@ -13,7 +13,7 @@ int main()
     cbuf.set_string(::rocket::sref(
       R"__(
         func recur(n) {
-          std.debug.printf("recur($1)", n + 1);
+          std.debug.logf("recur($1)", n + 1);
           return recur(n + 1) + 1;
         }
         return recur(0);

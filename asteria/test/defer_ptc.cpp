@@ -32,7 +32,7 @@ int main()
         st[$] = v.value;
       }
       // print the backtrace
-      std.debug.printf("backtrace: $1", st);
+      std.debug.logf("backtrace: $1", st);
       return& st;
     }
 
