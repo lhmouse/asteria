@@ -49,9 +49,9 @@ cow_vector<AIR_Node>& do_generate_subexpression(cow_vector<AIR_Node>& code, cons
     if(epos != SIZE_MAX) {
       // Expression units other than the last one cannot be PTC'd.
       for(size_t i = 0;  i < epos;  ++i) {
-        expr.units[i].generate_code(code, opts, ptc_aware_none, ctx);
+        expr.units[i].generate_code(code, opts, ctx, ptc_aware_none);
       }
-      expr.units[epos].generate_code(code, opts, ptc, ctx);
+      expr.units[epos].generate_code(code, opts, ctx, ptc);
     }
     return code;
   }

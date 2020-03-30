@@ -20,9 +20,9 @@ cow_vector<AIR_Node> do_generate_code_branch(const Compiler_Options& opts, PTC_A
     size_t epos = units.size() - 1;
     if(epos != SIZE_MAX) {
       for(size_t i = 0;  i < epos;  ++i) {
-        units[i].generate_code(code, opts, ptc_aware_none, ctx);
+        units[i].generate_code(code, opts, ctx, ptc_aware_none);
       }
-      units[epos].generate_code(code, opts, ptc, ctx);
+      units[epos].generate_code(code, opts, ctx, ptc);
     }
     return code;
   }
@@ -30,7 +30,7 @@ cow_vector<AIR_Node> do_generate_code_branch(const Compiler_Options& opts, PTC_A
 }  // namespace
 
 cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
-                                                     PTC_Aware ptc, const Analytic_Context& ctx) const
+                                                     const Analytic_Context& ctx, PTC_Aware ptc) const
   {
     switch(this->index()) {
     case index_literal: {

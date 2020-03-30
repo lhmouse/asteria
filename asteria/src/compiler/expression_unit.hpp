@@ -136,7 +136,7 @@ class Expression_Unit
       }
 
     cow_vector<AIR_Node>& generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
-                                        PTC_Aware ptc, const Analytic_Context& ctx) const;
+                                        const Analytic_Context& ctx, PTC_Aware ptc) const;
   };
 
 inline void swap(Expression_Unit& lhs, Expression_Unit& rhs) noexcept
