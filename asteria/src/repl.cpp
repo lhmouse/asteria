@@ -178,8 +178,8 @@ void do_trap_sigint()
 
 // These may also be automatic objects. They are declared here for convenience.
 Command_Line_Options cmdline;
-Simple_Script script;
 Global_Context global;
+Simple_Script script;
 
 unsigned long index;  // snippet index
 cow_string code;  // snippet
@@ -518,7 +518,7 @@ int do_REP_single()
     // The snippet might be a statement list or an expression.
     // First, try parsing it as the former.
     try {
-      script.reload_string(code, cmdline.path, global.get_options());
+      script.reload_string(code, cmdline.path);
     }
     catch(Parser_Error& except) {
       // We only want to make another attempt in the case of absence of a semicolon at the end.
@@ -589,7 +589,7 @@ int do_REP_single()
 
     // Set up runtime hooks. This is sticky.
     global.set_hooks(::rocket::make_refcnt<REPL_Hooks>());
-    global.open_options().verbose_single_step_traps = true;
+    script.open_options().verbose_single_step_traps = true;
 
     // In interactive mode (a.k.a. REPL mode), read user inputs in lines.
     // Outputs from the script go into standard output. Others go into standard error.
@@ -605,15 +605,15 @@ int do_REP_single()
     // Set up runtime hooks if verbosity is requested.
     if(cmdline.verbose) {
       global.set_hooks(::rocket::make_refcnt<REPL_Hooks>());
-      global.open_options().verbose_single_step_traps = true;
+      script.open_options().verbose_single_step_traps = true;
     }
 
     // Consume all data from standard input.
     try {
       if(cmdline.path == "-")
-        script.reload_stdin(global.get_options());
+        script.reload_stdin();
       else
-        script.reload_file(cmdline.path, global.get_options());
+        script.reload_file(cmdline.path);
     }
     catch(Parser_Error& except) {
       // Report the error and exit.

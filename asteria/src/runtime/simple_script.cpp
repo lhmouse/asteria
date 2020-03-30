@@ -35,14 +35,14 @@ struct StdIO_Sentry
 
 }  // namespace
 
-Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name, const Compiler_Options& opts)
+Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
   {
     // Tokenize the character stream.
     Token_Stream tstrm;
-    tstrm.reload(cbuf, name, opts);
+    tstrm.reload(cbuf, name, this->m_opts);
     // Parse tokens.
     Statement_Sequence stmtq;
-    stmtq.reload(tstrm, opts);
+    stmtq.reload(tstrm, this->m_opts);
 
     // Initialize the parameter list. This is the same for all scripts so we only do this once.
     if(ROCKET_UNEXPECT(this->m_params.empty())) {
@@ -55,7 +55,7 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name, cons
     cow_vector<AIR_Node> code_body;
     Analytic_Context ctx_func(nullptr, this->m_params);
     for(size_t i = 0;  i < stmtq.size();  ++i)
-      stmtq.at(i).generate_code(code_body, nullptr, ctx_func, opts,
+      stmtq.at(i).generate_code(code_body, nullptr, ctx_func, this->m_opts,
                      ((i + 1 == stmtq.size()) || stmtq.at(i + 1).is_empty_return())
                           ? ptc_aware_void     // last or preceding empty return
                           : ptc_aware_none);
@@ -65,14 +65,14 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name, cons
     return *this;
   }
 
-Simple_Script& Simple_Script::reload_string(const cow_string& code, const cow_string& name, const Compiler_Options& opts)
+Simple_Script& Simple_Script::reload_string(const cow_string& code, const cow_string& name)
   {
     ::rocket::tinybuf_str cbuf;
     cbuf.set_string(code, tinybuf::open_read);
-    return this->reload(cbuf, name, opts);
+    return this->reload(cbuf, name);
   }
 
-Simple_Script& Simple_Script::reload_file(const cow_string& path, const Compiler_Options& opts)
+Simple_Script& Simple_Script::reload_file(const cow_string& path)
   {
     // Resolve the path to an absolute one.
     ::rocket::unique_ptr<char, void (&)(void*)> abspath(::realpath(path.c_str(), nullptr), ::free);
@@ -81,15 +81,15 @@ Simple_Script& Simple_Script::reload_file(const cow_string& path, const Compiler
     // Open the file denoted by this path.
     ::rocket::tinybuf_file cbuf;
     cbuf.open(abspath.get(), tinybuf::open_read);
-    return this->reload(cbuf, path, opts);
+    return this->reload(cbuf, cow_string(abspath.get()));
   }
 
-Simple_Script& Simple_Script::reload_stdin(const Compiler_Options& opts)
+Simple_Script& Simple_Script::reload_stdin()
   {
     // Initialize a stream using `stdin`.
     ::rocket::tinybuf_file cbuf;
     cbuf.reset(stdin, nullptr);
-    return this->reload(cbuf, ::rocket::sref("<stdin>"), opts);
+    return this->reload(cbuf, ::rocket::sref("<stdin>"));
   }
 
 Reference Simple_Script::execute(Global_Context& global, cow_vector<Reference>&& args) const

@@ -14,7 +14,6 @@ namespace Asteria {
 class Global_Context : public Abstract_Context
   {
   private:
-    Compiler_Options m_options = { };
     Recursion_Sentry m_sentry;
     rcptr<Abstract_Hooks> m_qhooks;
 
@@ -42,20 +41,6 @@ class Global_Context : public Abstract_Context
     const Abstract_Context* get_parent_opt() const noexcept
       {
         return nullptr;
-      }
-
-    // This provides access to global options.
-    const Compiler_Options& get_options() const noexcept
-      {
-        return this->m_options;
-      }
-    Compiler_Options& open_options() noexcept
-      {
-        return this->m_options;
-      }
-    Global_Context& set_options(const Compiler_Options& options) noexcept
-      {
-        return this->m_options = options, *this;
       }
 
     // This provides stack overflow protection.
