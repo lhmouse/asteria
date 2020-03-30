@@ -74,13 +74,19 @@ Simple_Script& Simple_Script::reload_string(const cow_string& code, const cow_st
 
 Simple_Script& Simple_Script::reload_file(const cow_string& path, const Compiler_Options& opts)
   {
+    // Resolve the path to an absolute one.
+    ::rocket::unique_ptr<char, void (&)(void*)> abspath(::realpath(path.c_str(), nullptr), ::free);
+    if(!abspath)
+      ASTERIA_THROW_SYSTEM_ERROR("realpath");
+    // Open the file denoted by this path.
     ::rocket::tinybuf_file cbuf;
-    cbuf.open(path.c_str(), tinybuf::open_read);
+    cbuf.open(abspath.get(), tinybuf::open_read);
     return this->reload(cbuf, path, opts);
   }
 
 Simple_Script& Simple_Script::reload_stdin(const Compiler_Options& opts)
   {
+    // Initialize a stream using `stdin`.
     ::rocket::tinybuf_file cbuf;
     cbuf.reset(stdin, nullptr);
     return this->reload(cbuf, ::rocket::sref("<stdin>"), opts);
