@@ -167,8 +167,10 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
           // 1. Single:  var    a  = init();
           // 2. Array:   var [a,b] = init();
           // 3. Object:  var {a,b} = init();
-          bool sb_arr = false, sb_obj = false;
-          size_t bpos = 0, epos = 1;
+          size_t bpos = 0;
+          size_t epos = 1;
+          bool sb_arr = false;
+          bool sb_obj = false;
           ROCKET_ASSERT(!altr.decls[i].empty());
           if((altr.decls[i].front() == "[") && (altr.decls[i].back() == "]")) {
             bpos = 1;
