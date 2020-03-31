@@ -2,7 +2,7 @@
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
 #include "test_utilities.hpp"
-#include "../src/runtime/simple_script.hpp"
+#include "../src/simple_script.hpp"
 #include "../src/runtime/global_context.hpp"
 
 using namespace Asteria;

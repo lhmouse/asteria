@@ -120,7 +120,8 @@ pkginclude_HEADERS =  \
   asteria/src/utilities.hpp  \
   asteria/src/recursion_sentry.hpp  \
   asteria/src/value.hpp  \
-  asteria/src/source_location.hpp
+  asteria/src/source_location.hpp  \
+  asteria/src/simple_script.hpp
 
 pkginclude_lldsdir = ${pkgincludedir}/llds
 pkginclude_llds_HEADERS =  \
@@ -151,7 +152,6 @@ pkginclude_runtime_HEADERS =  \
   asteria/src/runtime/evaluation_stack.hpp  \
   asteria/src/runtime/instantiated_function.hpp  \
   asteria/src/runtime/air_node.hpp  \
-  asteria/src/runtime/simple_script.hpp  \
   asteria/src/runtime/argument_reader.hpp
 
 pkginclude_compilerdir = ${pkgincludedir}/compiler
@@ -186,6 +186,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/recursion_sentry.cpp  \
   asteria/src/value.cpp  \
   asteria/src/source_location.cpp  \
+  asteria/src/simple_script.cpp  \
   asteria/src/llds/variable_hashset.cpp  \
   asteria/src/llds/reference_dictionary.cpp  \
   asteria/src/llds/avmc_queue.cpp  \
@@ -210,7 +211,6 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/runtime/evaluation_stack.cpp  \
   asteria/src/runtime/instantiated_function.cpp  \
   asteria/src/runtime/air_node.cpp  \
-  asteria/src/runtime/simple_script.cpp  \
   asteria/src/runtime/argument_reader.cpp  \
   asteria/src/compiler/enums.cpp  \
   asteria/src/compiler/parser_error.cpp  \

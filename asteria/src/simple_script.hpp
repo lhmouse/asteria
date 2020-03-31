@@ -1,10 +1,10 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_RUNTIME_SIMPLE_SCRIPT_HPP_
-#define ASTERIA_RUNTIME_SIMPLE_SCRIPT_HPP_
+#ifndef ASTERIA_SIMPLE_SCRIPT_HPP_
+#define ASTERIA_SIMPLE_SCRIPT_HPP_
 
-#include "../fwd.hpp"
+#include "fwd.hpp"
 
 namespace Asteria {
 

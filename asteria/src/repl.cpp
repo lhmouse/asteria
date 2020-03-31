@@ -2,14 +2,14 @@
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
 #include "precompiled.hpp"
-#include "utilities.hpp"
 #include "runtime/reference.hpp"
 #include "runtime/variable.hpp"
 #include "runtime/global_context.hpp"
-#include "runtime/simple_script.hpp"
 #include "runtime/runtime_error.hpp"
 #include "runtime/abstract_hooks.hpp"
 #include "compiler/parser_error.hpp"
+#include "simple_script.hpp"
+#include "utilities.hpp"
 #include <locale.h>
 #include <unistd.h>
 #include <signal.h>
