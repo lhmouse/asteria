@@ -293,8 +293,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
           do_generate_expression(code_labels.emplace_back(), opts, ptc_aware_none, ctx_body, altr.labels[i]);
           // Generate code for the clause and accumulate names.
           // This cannot be PTC'd.
-          do_generate_statement_list(code_bodies.emplace_back(), &names, ctx_body, opts, ptc_aware_none,
-                                     altr.bodies[i]);
+          do_generate_statement_list(code_bodies.emplace_back(), &names, ctx_body, opts, ptc_aware_none, altr.bodies[i]);
           names_added.emplace_back(names);
         }
 
