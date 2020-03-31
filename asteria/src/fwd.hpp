@@ -19,6 +19,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <climits>
+#include <cstdio>
 #include "../rocket/preprocessor_utilities.h"
 #include "../rocket/cow_string.hpp"
 #include "../rocket/cow_vector.hpp"
@@ -166,6 +167,29 @@ template<typename RealT> constexpr rcptr<RealT> unerase_cast(const rcfwdp<RealT>
   {
     return ::rocket::static_pointer_cast<RealT>(ptr);
   }
+
+// Standard I/O synchronization
+struct StdIO_Sentry
+  {
+    StdIO_Sentry() noexcept
+      {
+        // Discard unread data. Clear EOF and error bits. Clear orientation.
+        if(!::freopen(nullptr, "r", stdin))
+          ::abort();
+        // Flush buffered data. clear error bit. Clear orientation.
+        if(!::freopen(nullptr, "w", stdout))
+          ::abort();
+      }
+    ~StdIO_Sentry()
+      {
+        ::fflush(nullptr);
+      }
+
+    StdIO_Sentry(const StdIO_Sentry&)
+      = delete;
+    StdIO_Sentry& operator=(const StdIO_Sentry&)
+      = delete;
+  };
 
 // Opaque (user-defined) type support
 struct Abstract_Opaque : public Rcbase

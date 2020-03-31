@@ -9,29 +9,6 @@
 #include "../utilities.hpp"
 
 namespace Asteria {
-namespace {
-
-struct StdIO_Sentry
-  {
-    StdIO_Sentry()
-      {
-        if(!::freopen(nullptr, "r", stdin))
-          ::std::terminate();
-        if(!::freopen(nullptr, "w", stdout))
-          ::std::terminate();
-      }
-    ~StdIO_Sentry()
-      {
-        ::fflush(nullptr);
-      }
-
-    StdIO_Sentry(const StdIO_Sentry&)
-      = delete;
-    StdIO_Sentry& operator=(const StdIO_Sentry&)
-      = delete;
-  };
-
-}  // namespace
 
 Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
   {
@@ -83,10 +60,10 @@ Simple_Script& Simple_Script::reload_stdin()
 
 Reference Simple_Script::execute(Global_Context& global, cow_vector<Reference>&& args) const
   {
-    if(!this->m_func) {
+    if(!this->m_func)
       ASTERIA_THROW("no script loaded");
-    }
-    const StdIO_Sentry iocerb;
+    // Execute the script as a plain function.
+    const StdIO_Sentry sentry;
     return this->m_func.invoke(global, ::std::move(args));
   }
 
