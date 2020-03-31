@@ -69,6 +69,7 @@ Reference Simple_Script::execute(Global_Context& global, cow_vector<Reference>&&
 
 Reference Simple_Script::execute(Global_Context& global, cow_vector<Value>&& vals) const
   {
+    // Convert all arguments to references to temporaries.
     cow_vector<Reference> args;
     args.reserve(vals.size());
     for(size_t i = 0;  i < args.size();  ++i) {
