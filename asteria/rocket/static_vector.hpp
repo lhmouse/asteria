@@ -247,20 +247,20 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
       }
 
     // 26.3.11.3, capacity
-    bool empty() const noexcept
+    constexpr bool empty() const noexcept
       {
         return this->m_sth.empty();
       }
-    size_type size() const noexcept
+    constexpr size_type size() const noexcept
       {
         return this->m_sth.size();
       }
     // N.B. This is a non-standard extension.
-    difference_type ssize() const noexcept
+    constexpr difference_type ssize() const noexcept
       {
         return static_cast<difference_type>(this->size());
       }
-    size_type max_size() const noexcept
+    constexpr size_type max_size() const noexcept
       {
         return this->m_sth.max_size();
       }

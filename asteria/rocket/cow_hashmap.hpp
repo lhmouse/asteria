@@ -291,24 +291,24 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       }
 
     // capacity
-    bool empty() const noexcept
+    constexpr bool empty() const noexcept
       {
         return this->m_sth.empty();
       }
-    size_type size() const noexcept
+    constexpr size_type size() const noexcept
       {
         return this->m_sth.element_count();
       }
     // N.B. This is a non-standard extension.
-    difference_type ssize() const noexcept
+    constexpr difference_type ssize() const noexcept
       {
         return static_cast<difference_type>(this->size());
       }
-    size_type max_size() const noexcept
+    constexpr size_type max_size() const noexcept
       {
         return this->m_sth.max_size();
       }
-    size_type capacity() const noexcept
+    constexpr size_type capacity() const noexcept
       {
         return this->m_sth.capacity();
       }
@@ -360,12 +360,12 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
 
     // hash policy
     // N.B. This is a non-standard extension.
-    size_type bucket_count() const noexcept
+    constexpr size_type bucket_count() const noexcept
       {
         return this->m_sth.bucket_count();
       }
     // N.B. The return type differs from `std::unordered_map`.
-    double load_factor() const noexcept
+    constexpr double load_factor() const noexcept
       {
         return static_cast<double>(static_cast<difference_type>(this->size()))
                / static_cast<double>(static_cast<difference_type>(this->bucket_count()));

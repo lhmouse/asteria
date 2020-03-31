@@ -451,24 +451,24 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       }
 
     // 24.3.2.4, capacity
-    bool empty() const noexcept
+    constexpr bool empty() const noexcept
       {
         return this->m_len == 0;
       }
-    size_type size() const noexcept
+    constexpr size_type size() const noexcept
       {
         return this->m_len;
       }
-    size_type length() const noexcept
+    constexpr size_type length() const noexcept
       {
         return this->m_len;
       }
     // N.B. This is a non-standard extension.
-    difference_type ssize() const noexcept
+    constexpr difference_type ssize() const noexcept
       {
         return static_cast<difference_type>(this->size());
       }
-    size_type max_size() const noexcept
+    constexpr size_type max_size() const noexcept
       {
         return this->m_sth.max_size();
       }
@@ -485,7 +485,7 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
         ROCKET_ASSERT(this->size() == n);
         return *this;
       }
-    size_type capacity() const noexcept
+    constexpr size_type capacity() const noexcept
       {
         return this->m_sth.capacity();
       }
