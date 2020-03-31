@@ -127,25 +127,12 @@ int64_t do_remove_recursive(const Sval& path)
 
 Sval std_filesystem_get_working_directory()
   {
-    // Get the current directory, resizing the buffer as needed.
-    Sval cwd;
-#ifdef ROCKET_DEBUG
-    cwd.append(1, '*');
-#else
-    cwd.append(PATH_MAX, '*');
-#endif
-    while(::getcwd(cwd.mut_data(), cwd.size()) == nullptr) {
-      // Resize the buffer if it isn't large enough.
-      if(errno != ERANGE)
-        ASTERIA_THROW_SYSTEM_ERROR("getcwd");
-#ifdef ROCKET_DEBUG
-      cwd.append(1, '*');
-#else
-      cwd.append(cwd.size() / 2, '*');
-#endif
-    }
-    cwd.erase(cwd.find('\0'));
-    return cwd;
+    // Pass a null pointer to request dynamic allocation.
+    // Note this behavior is an extension that exists almost everywhere.
+    ::rocket::unique_ptr<char, void (&)(void*)> qcwd(::getcwd(nullptr, 0), ::free);
+    if(!qcwd)
+      ASTERIA_THROW_SYSTEM_ERROR("getcwd");
+    return Sval(qcwd);
   }
 
 Oopt std_filesystem_get_information(Sval path)
