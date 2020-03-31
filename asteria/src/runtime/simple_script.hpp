@@ -50,7 +50,7 @@ class Simple_Script
     Simple_Script& reload(tinybuf& cbuf, const cow_string& name);
 
     Simple_Script& reload_string(const cow_string& code, const cow_string& name);
-    Simple_Script& reload_file(const cow_string& path);
+    Simple_Script& reload_file(const char* path);
     Simple_Script& reload_stdin();
 
     Reference execute(Global_Context& global, cow_vector<Reference>&& args = { }) const;

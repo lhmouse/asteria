@@ -613,7 +613,7 @@ int do_REP_single()
       if(cmdline.path == "-")
         script.reload_stdin();
       else
-        script.reload_file(cmdline.path);
+        script.reload_file(cmdline.path.c_str());
     }
     catch(Parser_Error& except) {
       // Report the error and exit.
