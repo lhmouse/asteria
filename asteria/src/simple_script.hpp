@@ -16,7 +16,7 @@ class Simple_Script
     cow_function m_func;  // note type erasure
 
   public:
-    Simple_Script() noexcept
+    constexpr Simple_Script() noexcept
       {
       }
     Simple_Script(tinybuf& cbuf, const cow_string& name)
@@ -38,13 +38,17 @@ class Simple_Script
         return this->m_opts = opts, *this;
       }
 
-    explicit operator bool () const noexcept
+    explicit constexpr operator bool () const noexcept
       {
         return bool(this->m_func);
       }
     Simple_Script& clear() noexcept
       {
         return this->m_func.reset(), *this;
+      }
+    constexpr operator const cow_function& () const noexcept
+      {
+        return this->m_func;
       }
 
     Simple_Script& reload(tinybuf& cbuf, const cow_string& name);
