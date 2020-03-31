@@ -5,6 +5,7 @@
 #include "global_context.hpp"
 #include "generational_collector.hpp"
 #include "random_number_generator.hpp"
+#include "module_loader_lock.hpp"
 #include "variable.hpp"
 #include "abstract_hooks.hpp"
 #include "../library/version.hpp"
@@ -99,6 +100,7 @@ void Global_Context::initialize(API_Version version)
     // Tidy old contents.
     this->clear_named_references();
     this->m_vstd.reset();
+
     // Perform a level-2 garbage collection.
     auto gcoll = unerase_cast(this->m_gcoll);
     try {
@@ -118,6 +120,12 @@ void Global_Context::initialize(API_Version version)
     if(!prng)
       prng = ::rocket::make_refcnt<Random_Number_Generator>();
     this->m_prng = prng;
+
+    // Initialize the module loader lock.
+    auto mlock = unerase_cast(this->m_mlock);
+    if(!mlock)
+      mlock = ::rocket::make_refcnt<Module_Loader_Lock>();
+    this->m_mlock = mlock;
 
     // Initialize standard library modules.
 #ifdef ROCKET_DEBUG
