@@ -123,6 +123,7 @@ enum Keyword : uint8_t
     keyword_fma       = 45,  // __fma
     keyword_global    = 46,  // __global
     keyword_vcall     = 47,  // __vcall
+    keyword_import    = 48,  // import
   };
 
 ROCKET_PURE_FUNCTION const char* stringify_keyword(Keyword kwrd) noexcept;

@@ -670,6 +670,7 @@ constexpr s_keywords[] =
     { "for",       keyword_for       },
     { "func",      keyword_func      },
     { "if",        keyword_if        },
+    { "import",    keyword_import    },
     { "infinity",  keyword_infinity  },
     { "lengthof",  keyword_lengthof  },
     { "nan",       keyword_nan       },
