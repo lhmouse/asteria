@@ -2099,6 +2099,16 @@
 	* Returns a string containing the path to the current working
 	  directory.
 
+`std.filesystem.get_real_path(path)`
+
+	* Converts `path` to an absolute one. The result is a canonical
+	  path that contains no symbolic links. The path must be valid
+	  and accessible.
+
+	* Returns a string denoting the absolute path.
+
+	* Throws an exception if `path` is invalid or inaccessible.
+
 `std.filesystem.get_information(path)`
 
 	* Retrieves information of the file or directory designated by

@@ -9,6 +9,7 @@
 namespace Asteria {
 
 Sval std_filesystem_get_working_directory();
+Sval std_filesystem_get_real_path(Sval path);
 
 Oopt std_filesystem_get_information(Sval path);
 void std_filesystem_move_from(Sval path_new, Sval path_old);

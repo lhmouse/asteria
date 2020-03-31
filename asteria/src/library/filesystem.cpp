@@ -135,6 +135,15 @@ Sval std_filesystem_get_working_directory()
     return Sval(qcwd);
   }
 
+Sval std_filesystem_get_real_path(Sval path)
+  {
+    // Pass a null pointer to request dynamic allocation.
+    ::rocket::unique_ptr<char, void (&)(void*)> abspath(::realpath(path.c_str(), nullptr), ::free);
+    if(!abspath)
+      ASTERIA_THROW_SYSTEM_ERROR("realpath");
+    return Sval(abspath);
+  }
+
 Oopt std_filesystem_get_information(Sval path)
   {
     struct ::stat stb;
@@ -521,6 +530,34 @@ void create_bindings_filesystem(V_object& result, API_Version /*version*/)
 
   * Returns a string containing the path to the current working
     directory.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+      ));
+    //===================================================================
+    // `std.filesystem.get_real_path()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("get_real_path"),
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.get_real_path"));
+    // Parse arguments.
+    Sval path;
+    if(reader.I().v(path).F()) {
+      return std_filesystem_get_real_path(::std::move(path));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.filesystem.get_real_path(path)`
+
+  * Converts `path` to an absolute one. The result is a canonical
+    path that contains no symbolic links. The path must be valid
+    and accessible.
+
+  * Returns a string denoting the absolute path.
+
+  * Throws an exception if `path` is invalid or inaccessible.
 )'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================
