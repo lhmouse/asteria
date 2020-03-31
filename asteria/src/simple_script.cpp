@@ -44,10 +44,11 @@ Simple_Script& Simple_Script::reload_file(const char* path)
     ::rocket::unique_ptr<char, void (&)(void*)> abspath(::realpath(path, nullptr), ::free);
     if(!abspath)
       ASTERIA_THROW_SYSTEM_ERROR("realpath");
+
     // Open the file denoted by this path.
     ::rocket::tinybuf_file cbuf;
-    cbuf.open(abspath.get(), tinybuf::open_read);
-    return this->reload(cbuf, cow_string(abspath.get()));
+    cbuf.open(abspath, tinybuf::open_read);
+    return this->reload(cbuf, cow_string(abspath));
   }
 
 Simple_Script& Simple_Script::reload_stdin()
@@ -62,6 +63,7 @@ Reference Simple_Script::execute(Global_Context& global, cow_vector<Reference>&&
   {
     if(!this->m_func)
       ASTERIA_THROW("no script loaded");
+
     // Execute the script as a plain function.
     const StdIO_Sentry sentry;
     return this->m_func.invoke(global, ::std::move(args));
