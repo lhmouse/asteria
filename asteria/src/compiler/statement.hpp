@@ -194,8 +194,8 @@ inline void swap(Statement& lhs, Statement& rhs) noexcept
     lhs.swap(rhs);
   }
 
-extern cow_vector<AIR_Node> do_generate_function(const Compiler_Options& opts, const cow_vector<phsh_string>& params,
-                                                 const Abstract_Context* ctx_opt, const cow_vector<Statement>& stmts);
+cow_vector<AIR_Node> do_generate_function(const Compiler_Options& opts, const cow_vector<phsh_string>& params,
+                                          const Abstract_Context* ctx_opt, const cow_vector<Statement>& stmts);
 
 }  // namespace Asteria
 

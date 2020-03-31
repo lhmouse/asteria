@@ -482,7 +482,7 @@ enum Vtype : uint8_t
     vtype_object    = 8,
   };
 
-ROCKET_PURE_FUNCTION extern const char* describe_vtype(Vtype vtype) noexcept;
+ROCKET_PURE_FUNCTION const char* describe_vtype(Vtype vtype) noexcept;
 
 // Value comparison results
 enum Compare : uint8_t
@@ -504,7 +504,7 @@ enum Frame_Type : uint8_t
     frame_type_defer   = 5,  // A new exception was thrown here.
   };
 
-ROCKET_PURE_FUNCTION extern const char* describe_frame_type(Frame_Type type) noexcept;
+ROCKET_PURE_FUNCTION const char* describe_frame_type(Frame_Type type) noexcept;
 
 // Garbage collection generations
 enum GC_Generation : uint8_t
@@ -565,7 +565,7 @@ enum Parser_Status : uint32_t
     parser_status_closed_brace_or_json5_key_expected         = 3028,
   };
 
-ROCKET_PURE_FUNCTION extern const char* describe_parser_status(Parser_Status status) noexcept;
+ROCKET_PURE_FUNCTION const char* describe_parser_status(Parser_Status status) noexcept;
 
 // API versioning of the standard library
 enum API_Version : uint32_t

@@ -61,7 +61,7 @@ enum Xop : uint8_t
     xop_tail      = 47,  // [$]
   };
 
-ROCKET_PURE_FUNCTION extern const char* describe_xop(Xop xop) noexcept;
+ROCKET_PURE_FUNCTION const char* describe_xop(Xop xop) noexcept;
 
 // IR status codes
 enum AIR_Status : uint8_t

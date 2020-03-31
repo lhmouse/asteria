@@ -70,7 +70,7 @@ enum Punctuator : uint8_t
     punctuator_tail        = 56,  // [$]
   };
 
-ROCKET_PURE_FUNCTION extern const char* stringify_punctuator(Punctuator punct) noexcept;
+ROCKET_PURE_FUNCTION const char* stringify_punctuator(Punctuator punct) noexcept;
 
 // Keywords
 enum Keyword : uint8_t
@@ -125,7 +125,7 @@ enum Keyword : uint8_t
     keyword_vcall     = 47,  // __vcall
   };
 
-ROCKET_PURE_FUNCTION extern const char* stringify_keyword(Keyword kwrd) noexcept;
+ROCKET_PURE_FUNCTION const char* stringify_keyword(Keyword kwrd) noexcept;
 
 // Target of jump statements
 enum Jump_Target : uint8_t
