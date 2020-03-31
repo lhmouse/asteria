@@ -45,11 +45,9 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
     stmtq.reload(tstrm, this->m_opts);
 
     // Initialize the parameter list. This is the same for all scripts so we only do this once.
-    if(ROCKET_UNEXPECT(this->m_params.empty())) {
+    if(ROCKET_UNEXPECT(this->m_params.empty()))
       this->m_params.emplace_back(::rocket::sref("..."));
-    }
-    // Create the zero-ary argument getter.
-    auto zvarg = ::rocket::make_refcnt<Variadic_Arguer>(name, 0, ::rocket::sref("<top level>"));
+
     // Generate IR nodes for the function body.
     // TODO: Move this elsewhere.
     cow_vector<AIR_Node> code_body;
@@ -61,7 +59,10 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
                           : ptc_aware_none);
     // TODO: Insert optimization passes.
     // Instantiate the function.
-    this->m_func = ::rocket::make_refcnt<Instantiated_Function>(this->m_params, ::std::move(zvarg), code_body);
+    this->m_func = ::rocket::make_refcnt<Instantiated_Function>(
+                          this->m_params,
+                          ::rocket::make_refcnt<Variadic_Arguer>(name, 0, ::rocket::sref("<top level>")),
+                          code_body);
     return *this;
   }
 
