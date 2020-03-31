@@ -871,8 +871,7 @@ ROCKET_NOINLINE Reference& do_invoke_nontail(Reference& self, const Source_Locat
   }
 
 ROCKET_NOINLINE Reference& do_wrap_ptc(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
-                                       const cow_function& target, PTC_Aware ptc,
-                                       cow_vector<Reference>&& args)
+                                       const cow_function& target, PTC_Aware ptc, cow_vector<Reference>&& args)
   {
     // Pack arguments for this proper tail call.
     auto tca = ::rocket::make_refcnt<PTC_Arguments>(sloc, ctx.zvarg(), ptc, target,
@@ -883,8 +882,7 @@ ROCKET_NOINLINE Reference& do_wrap_ptc(Reference& self, const Source_Location& s
   }
 
 AIR_Status do_function_call_common(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
-                                   const cow_function& target, PTC_Aware ptc,
-                                   cow_vector<Reference>&& args)
+                                   const cow_function& target, PTC_Aware ptc, cow_vector<Reference>&& args)
   {
     if(ROCKET_EXPECT(ptc == ptc_aware_none)) {
       // Perform plain calls.
@@ -931,8 +929,8 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
     if(!value.is_function()) {
       ASTERIA_THROW("attempt to call a non-function (value `$1`)", value);
     }
-    return do_function_call_common(ctx.stack().open_top().zoom_out(),sloc, ctx,
-                                   value.as_function(), ptc, ::std::move(args));
+    return do_function_call_common(ctx.stack().open_top().zoom_out(),
+                                   sloc, ctx, value.as_function(), ptc, ::std::move(args));
   }
 
 AIR_Status do_member_access(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
@@ -2646,8 +2644,8 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
     if(!value.is_function()) {
       ASTERIA_THROW("attempt to call a non-function (value `$1`)", value);
     }
-    return do_function_call_common(ctx.stack().open_top().zoom_out(),sloc, ctx,
-                                   value.as_function(), ptc, ::std::move(args));
+    return do_function_call_common(ctx.stack().open_top().zoom_out(),
+                                   sloc, ctx, value.as_function(), ptc, ::std::move(args));
   }
 
 AIR_Status do_defer_expression(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
