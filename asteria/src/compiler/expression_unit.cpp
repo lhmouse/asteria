@@ -32,6 +32,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
     switch(this->index()) {
     case index_literal: {
         const auto& altr = this->m_stor.as<index_literal>();
+
         // Encode arguments.
         AIR_Node::S_push_immediate xnode = { altr.val };
         code.emplace_back(::std::move(xnode));
@@ -40,6 +41,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
 
     case index_named_reference: {
         const auto& altr = this->m_stor.as<index_named_reference>();
+
         // Perform early lookup when the expression is defined.
         // If a named reference is found, it will not be replaced or hidden by a later-declared one.
         const Reference* qref;
@@ -68,6 +70,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
 
     case index_closure_function: {
         const auto& altr = this->m_stor.as<index_closure_function>();
+
         // Name the closure.
         ::rocket::tinyfmt_str fmt;
         fmt << "<closure>._" << altr.unique_id << '(';
@@ -75,29 +78,22 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         for(size_t i = 0;  i < altr.params.size();  ++i)
           ((i == 0) ? fmt : (fmt << ", ")) << altr.params[i];
         fmt << ')';
-        auto func = fmt.extract_string();
-        // Generate code for the body.
-        cow_vector<AIR_Node> code_body;
-        Analytic_Context ctx_func(::std::addressof(ctx), altr.params);
-        for(size_t i = 0;  i < altr.body.size();  ++i)
-          altr.body[i].generate_code(code_body, nullptr, ctx_func, opts,
-                         ((i + 1 == altr.body.size()) || altr.body.at(i + 1).is_empty_return())
-                              ? ptc_aware_void     // last or preceding empty return
-                              : ptc_aware_none);
-        // TODO: Insert optimization passes.
+
         // Encode arguments.
-        AIR_Node::S_define_function xnode = { altr.sloc, ::std::move(func), altr.params,
-                                              ::std::move(code_body) };
+        AIR_Node::S_define_function xnode = { altr.sloc, fmt.extract_string(), altr.params,
+                                              do_generate_function(opts, altr.params, &ctx, altr.body) };
         code.emplace_back(::std::move(xnode));
         return code;
       }
 
     case index_branch: {
         const auto& altr = this->m_stor.as<index_branch>();
+
         // Generate code for both branches.
         // Both branches may be PTC'd.
         auto code_true = do_generate_code_branch(opts, ptc, ctx, altr.branch_true);
         auto code_false = do_generate_code_branch(opts, ptc, ctx, altr.branch_false);
+
         // Encode arguments.
         AIR_Node::S_branch_expression xnode = { ::std::move(code_true), ::std::move(code_false), altr.assign };
         code.emplace_back(::std::move(xnode));
@@ -106,6 +102,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
 
     case index_function_call: {
         const auto& altr = this->m_stor.as<index_function_call>();
+
         // Encode arguments.
         AIR_Node::S_function_call xnode = { altr.sloc, altr.nargs, opts.no_proper_tail_calls ? ptc_aware_none : ptc };
         code.emplace_back(::std::move(xnode));
@@ -114,6 +111,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
 
     case index_member_access: {
         const auto& altr = this->m_stor.as<index_member_access>();
+
         // Encode arguments.
         AIR_Node::S_member_access xnode = { altr.name };
         code.emplace_back(::std::move(xnode));
@@ -122,6 +120,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
 
     case index_operator_rpn: {
         const auto& altr = this->m_stor.as<index_operator_rpn>();
+
         // Encode arguments.
         AIR_Node::S_apply_operator xnode = { altr.xop, altr.assign };
         code.emplace_back(::std::move(xnode));
@@ -130,6 +129,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
 
     case index_unnamed_array: {
         const auto& altr = this->m_stor.as<index_unnamed_array>();
+
         // Encode arguments.
         AIR_Node::S_push_unnamed_array xnode = { altr.nelems };
         code.emplace_back(::std::move(xnode));
@@ -138,6 +138,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
 
     case index_unnamed_object: {
         const auto& altr = this->m_stor.as<index_unnamed_object>();
+
         // Encode arguments.
         AIR_Node::S_push_unnamed_object xnode = { altr.keys };
         code.emplace_back(::std::move(xnode));
@@ -146,9 +147,10 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
 
     case index_coalescence: {
         const auto& altr = this->m_stor.as<index_coalescence>();
-        // Generate code for the branch.
-        // This branch may be PTC'd.
+
+        // Generate code for the branch. This branch may be PTC'd.
         auto code_null = do_generate_code_branch(opts, ptc, ctx, altr.branch_null);
+
         // Encode arguments.
         AIR_Node::S_coalescence xnode = { ::std::move(code_null), altr.assign };
         code.emplace_back(::std::move(xnode));
@@ -157,6 +159,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
 
     case index_global_reference: {
         const auto& altr = this->m_stor.as<index_global_reference>();
+
         // This name is always looked up in the global context.
         AIR_Node::S_push_global_reference xnode = { altr.name };
         code.emplace_back(::std::move(xnode));
@@ -165,6 +168,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
 
     case index_variadic_call: {
         const auto& altr = this->m_stor.as<index_variadic_call>();
+
         // Encode arguments.
         AIR_Node::S_variadic_call xnode = { altr.sloc, opts.no_proper_tail_calls ? ptc_aware_none : ptc };
         code.emplace_back(::std::move(xnode));
@@ -173,6 +177,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
 
     case index_argument_finish: {
         const auto& altr = this->m_stor.as<index_argument_finish>();
+
         // Apply glvalue-to-rvalue conversion if the argument is to be passed by value.
         if(!altr.by_ref) {
           // Encode arguments.

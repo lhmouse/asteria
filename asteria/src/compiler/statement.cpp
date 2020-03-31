@@ -133,6 +133,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
     switch(this->index()) {
     case index_expression: {
         const auto& altr = this->m_stor.as<index_expression>();
+
         // Evaluate the expression. Its value is discarded.
         do_generate_expression(code, opts, ptc, ctx, altr);
         return code;
@@ -140,8 +141,10 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
 
     case index_block: {
         const auto& altr = this->m_stor.as<index_block>();
+
         // Generate code for the body. This can be PTC'd.
         auto code_body = do_generate_block(opts, ptc, ctx, altr);
+
         // Encode arguments.
         AIR_Node::S_execute_block xnode = { ::std::move(code_body) };
         code.emplace_back(::std::move(xnode));
@@ -150,6 +153,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
 
     case index_variables: {
         const auto& altr = this->m_stor.as<index_variables>();
+
         // Get the number of variables to declare.
         auto nvars = altr.slocs.size();
         ROCKET_ASSERT(nvars == altr.decls.size());
@@ -221,11 +225,14 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
 
     case index_function: {
         const auto& altr = this->m_stor.as<index_function>();
+
         // Create a dummy reference for further name lookups.
         do_user_declare(names_opt, ctx, altr.name, "function placeholder");
+
         // Declare the function, which is effectively an immutable variable.
         AIR_Node::S_declare_variable xnode_decl = { altr.sloc, altr.name };
         code.emplace_back(::std::move(xnode_decl));
+
         // Prettify the function name.
         ::rocket::tinyfmt_str fmt;
         fmt << altr.name << '(';
@@ -233,20 +240,12 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         for(size_t i = 0;  i < altr.params.size();  ++i)
           ((i == 0) ? fmt : (fmt << ", ")) << altr.params[i];
         fmt << ')';
-        auto func = fmt.extract_string();
-        // Generate code for the body.
-        cow_vector<AIR_Node> code_body;
-        Analytic_Context ctx_func(::std::addressof(ctx), altr.params);
-        for(size_t i = 0;  i < altr.body.size();  ++i)
-          altr.body[i].generate_code(code_body, nullptr, ctx_func, opts,
-                         ((i + 1 == altr.body.size()) || altr.body.at(i + 1).is_empty_return())
-                              ? ptc_aware_void     // last or preceding empty return
-                              : ptc_aware_none);
-        // TODO: Insert optimization passes.
+
         // Encode arguments.
-        AIR_Node::S_define_function xnode_defn = { altr.sloc, ::std::move(func), altr.params,
-                                                   ::std::move(code_body) };
+        AIR_Node::S_define_function xnode_defn = { altr.sloc, fmt.extract_string(), altr.params,
+                                                   do_generate_function(opts, altr.params, &ctx, altr.body) };
         code.emplace_back(::std::move(xnode_defn));
+
         // Initialize the function.
         AIR_Node::S_initialize_variable xnode = { true };
         code.emplace_back(::std::move(xnode));
@@ -255,6 +254,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
 
     case index_if: {
         const auto& altr = this->m_stor.as<index_if>();
+
         // Generate code for the condition.
         ROCKET_ASSERT(!altr.cond.units.empty());
         do_generate_expression(code, opts, ptc_aware_none, ctx, altr.cond);
@@ -263,6 +263,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Both can be PTC'd.
         auto code_true = do_generate_block(opts, ptc, ctx, altr.branch_true);
         auto code_false = do_generate_block(opts, ptc, ctx, altr.branch_false);
+
         // Encode arguments.
         AIR_Node::S_if_statement xnode = { altr.negative, ::std::move(code_true), ::std::move(code_false) };
         code.emplace_back(::std::move(xnode));
@@ -271,6 +272,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
 
     case index_switch: {
         const auto& altr = this->m_stor.as<index_switch>();
+
         // Generate code for the control expression.
         ROCKET_ASSERT(!altr.ctrl.units.empty());
         do_generate_expression(code, opts, ptc_aware_none, ctx, altr.ctrl);
@@ -278,6 +280,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         cow_vector<cow_vector<AIR_Node>> code_labels;
         cow_vector<cow_vector<AIR_Node>> code_bodies;
         cow_vector<cow_vector<phsh_string>> names_added;
+
         // Create a fresh context for the `switch` body.
         // Be advised that all clauses inside a `switch` statement share the same context.
         Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
@@ -294,6 +297,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
                                      altr.bodies[i]);
           names_added.emplace_back(names);
         }
+
         // Encode arguments.
         AIR_Node::S_switch_statement xnode = { ::std::move(code_labels), ::std::move(code_bodies),
                                                ::std::move(names_added) };
@@ -303,12 +307,14 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
 
     case index_do_while: {
         const auto& altr = this->m_stor.as<index_do_while>();
+
         // Generate code for the body.
         // Loop statements cannot be PTC'd.
         auto code_body = do_generate_block(opts, ptc_aware_none, ctx, altr.body);
         // Generate code for the condition.
         ROCKET_ASSERT(!altr.cond.units.empty());
         auto code_cond = do_generate_expression(opts, ptc_aware_none, ctx, altr.cond);
+
         // Encode arguments.
         AIR_Node::S_do_while_statement xnode = { ::std::move(code_body), altr.negative, ::std::move(code_cond) };
         code.emplace_back(::std::move(xnode));
@@ -317,12 +323,14 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
 
     case index_while: {
         const auto& altr = this->m_stor.as<index_while>();
+
         // Generate code for the condition.
         ROCKET_ASSERT(!altr.cond.units.empty());
         auto code_cond = do_generate_expression(opts, ptc_aware_none, ctx, altr.cond);
         // Generate code for the body.
         // Loop statements cannot be PTC'd.
         auto code_body = do_generate_block(opts, ptc_aware_none, ctx, altr.body);
+
         // Encode arguments.
         AIR_Node::S_while_statement xnode = { altr.negative, ::std::move(code_cond), ::std::move(code_body) };
         code.emplace_back(::std::move(xnode));
@@ -331,17 +339,20 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
 
     case index_for_each: {
         const auto& altr = this->m_stor.as<index_for_each>();
+
         // Note that the key and value references outlasts every iteration, so we have to create
         // an outer contexts here.
         Analytic_Context ctx_for(::rocket::ref(ctx), nullptr);
         do_user_declare(names_opt, ctx_for, altr.name_key, "key placeholder");
         do_user_declare(names_opt, ctx_for, altr.name_mapped, "value placeholder");
+
         // Generate code for the range initializer.
         ROCKET_ASSERT(!altr.init.units.empty());
         auto code_init = do_generate_expression(opts, ptc_aware_none, ctx_for, altr.init);
         // Generate code for the body.
         // Loop statements cannot be PTC'd.
         auto code_body = do_generate_block(opts, ptc_aware_none, ctx_for, altr.body);
+
         // Encode arguments.
         AIR_Node::S_for_each_statement xnode = { altr.name_key, altr.name_mapped, ::std::move(code_init),
                                                  ::std::move(code_body) };
@@ -351,6 +362,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
 
     case index_for: {
         const auto& altr = this->m_stor.as<index_for>();
+
         // Note that names declared in the first segment of a for-statement outlasts every iteration,
         // so we have to create an outer contexts here.
         Analytic_Context ctx_for(::rocket::ref(ctx), nullptr);
@@ -361,6 +373,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Generate code for the body.
         // Loop statements cannot be PTC'd.
         auto code_body = do_generate_block(opts, ptc_aware_none, ctx_for, altr.body);
+
         // Encode arguments.
         AIR_Node::S_for_statement xnode = { ::std::move(code_init), ::std::move(code_cond),
                                             ::std::move(code_step), ::std::move(code_body) };
@@ -370,6 +383,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
 
     case index_try: {
         const auto& altr = this->m_stor.as<index_try>();
+
         // Generate code for the `try` body.
         auto code_try = do_generate_block(opts, ptc, ctx, altr.body_try);
         // Create a fresh context for the `catch` clause.
@@ -379,6 +393,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Generate code for the `catch` body.
         // Unlike the `try` body, this may be PTC'd.
         auto code_catch = do_generate_statement_list(nullptr, ctx_catch, opts, ptc, altr.body_catch);
+
         // Encode arguments.
         AIR_Node::S_try_statement xnode = { ::std::move(code_try), altr.sloc, altr.name_except,
                                             ::std::move(code_catch) };
@@ -388,6 +403,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
 
     case index_break: {
         const auto& altr = this->m_stor.as<index_break>();
+
         // Translate jump targets to AIR status codes.
         switch(altr.target) {
         case jump_target_unspec: {
@@ -417,6 +433,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
 
     case index_continue: {
         const auto& altr = this->m_stor.as<index_continue>();
+
         // Translate jump targets to AIR status codes.
         switch(altr.target) {
         case jump_target_unspec: {
@@ -444,6 +461,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
 
     case index_throw: {
         const auto& altr = this->m_stor.as<index_throw>();
+
         // Generate code for the operand.
         ROCKET_ASSERT(!altr.expr.units.empty());
         do_generate_expression(code, opts, ptc_aware_none, ctx, altr.expr);
@@ -455,6 +473,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
 
     case index_return: {
         const auto& altr = this->m_stor.as<index_return>();
+
         // We don't tell empty return statements from non-empty ones here.
         if(altr.expr.units.empty()) {
           // If no expression is provided, return a void reference.
@@ -483,9 +502,11 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
 
     case index_assert: {
         const auto& altr = this->m_stor.as<index_assert>();
+
         // Generate code for the operand.
         ROCKET_ASSERT(!altr.expr.units.empty());
         do_generate_expression(code, opts, ptc_aware_none, ctx, altr.expr);
+
         // Encode arguments.
         AIR_Node::S_assert_statement xnode = { altr.expr.sloc, altr.negative, altr.msg };
         code.emplace_back(::std::move(xnode));
@@ -494,9 +515,11 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
 
     case index_defer: {
         const auto& altr = this->m_stor.as<index_defer>();
+
         // Generate code for the operand.
         ROCKET_ASSERT(!altr.expr.units.empty());
         auto code_body = do_generate_expression(opts, ptc_aware_none, ctx, altr.expr);
+
         // Encode arguments.
         AIR_Node::S_defer_expression xnode = { altr.expr.sloc, ::std::move(code_body) };
         code.emplace_back(::std::move(xnode));
@@ -506,6 +529,22 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
     default:
       ASTERIA_TERMINATE("invalid statement type (index `$1`)", this->index());
     }
+  }
+
+// This is referenced from 'expression_unit.cpp' and '../runtime/simple_script.cpp'.
+cow_vector<AIR_Node> do_generate_function(const Compiler_Options& opts, const cow_vector<phsh_string>& params,
+                                          const Abstract_Context* ctx_opt, const cow_vector<Statement>& stmts)
+  {
+    // Generate code for all statements.
+    cow_vector<AIR_Node> code_body;
+    Analytic_Context ctx_func(ctx_opt, params);
+    for(size_t i = 0;  i < stmts.size();  ++i)
+      stmts[i].generate_code(code_body, nullptr, ctx_func, opts,
+                     ((i + 1 == stmts.size()) || stmts.at(i + 1).is_empty_return())
+                          ? ptc_aware_void     // last or preceding empty return
+                          : ptc_aware_none);
+    // TODO: Insert optimization passes, which may rewrite nodes in `code_body`.
+    return code_body;
   }
 
 }  // namespace Asteria
