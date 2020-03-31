@@ -22,7 +22,7 @@ class Statement_Sequence
   public:
     // These are accessors to the statements in this sequence.
     // Note that the sequence cannot be modified.
-    bool empty() const noexcept
+    constexpr bool empty() const noexcept
       {
         return this->m_stmts.size();
       }
@@ -30,13 +30,17 @@ class Statement_Sequence
       {
         return this->m_stmts.clear(), *this;
       }
-    size_t size() const noexcept
+    constexpr size_t size() const noexcept
       {
         return this->m_stmts.size();
       }
     const Statement& at(size_t index) const
       {
         return this->m_stmts.at(index);
+      }
+    constexpr operator const cow_vector<Statement>& () const noexcept
+      {
+        return this->m_stmts;
       }
 
     // This function parses tokens from the input stream and fills statements into `*this`.

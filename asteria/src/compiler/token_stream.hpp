@@ -17,13 +17,13 @@ class Token_Stream
     cow_vector<Token> m_rtoks;  // Tokens are stored in reverse order.
 
   public:
-    Token_Stream() noexcept
+    constexpr Token_Stream() noexcept
       {
       }
 
   public:
     // These are accessors and modifiers of tokens in this stream.
-    bool empty() const noexcept
+    constexpr bool empty() const noexcept
       {
         return this->m_rtoks.empty();
       }
@@ -31,7 +31,7 @@ class Token_Stream
       {
         return this->m_rtoks.clear(), *this;
       }
-    size_t size() const noexcept
+    constexpr size_t size() const noexcept
       {
         return this->m_rtoks.size();
       }
