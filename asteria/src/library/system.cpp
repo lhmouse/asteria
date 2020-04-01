@@ -128,9 +128,9 @@ Oval std_system_env_get_variables()
   {
     Oval vars;
     const char* const* vpos = ::environ;
-    while(auto str = *(vpos++)) {
+    while(const char* str = *(vpos++)) {
       // The key is terminated by an equals sign.
-      auto equ = ::std::strchr(str, '=');
+      const char* equ = ::std::strchr(str, '=');
       if(ROCKET_UNEXPECT(!equ))
         vars.insert_or_assign(sref(str), sref(""));  // no equals sign?
       else
