@@ -70,20 +70,20 @@ Ival std_system_gc_collect(Global& global, Iopt generation_limit)
 
 Ival std_system_execute(Sval cmd, Aopt argv, Aopt envp)
   {
-    cow_vector<const char*> ptrs = { cmd.c_str(), nullptr };
+    cow_vector<const char*> ptrs = { cmd.safe_c_str(), nullptr };
     size_t eoff = 1;  // beginning of environment variables
 
     // Append arguments. `eoff` will be the offset of the terminating null pointer.
     if(argv) {
       ptrs.clear();
-      ::rocket::for_each(*argv, [&](const Value& arg) { ptrs.emplace_back(arg.as_string().c_str());  });
+      ::rocket::for_each(*argv, [&](const Value& arg) { ptrs.emplace_back(arg.as_string().safe_c_str());  });
       eoff = ptrs.size();
       ptrs.emplace_back(nullptr);
     }
     // Append environment variables.
     if(envp) {
       eoff = ptrs.size();
-      ::rocket::for_each(*envp, [&](const Value& arg) { ptrs.emplace_back(arg.as_string().c_str());  });
+      ::rocket::for_each(*envp, [&](const Value& arg) { ptrs.emplace_back(arg.as_string().safe_c_str());  });
       ptrs.emplace_back(nullptr);
     }
     // Be `const`-friendly.
