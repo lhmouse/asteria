@@ -201,18 +201,6 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     //===================================================================
     result.insert_or_assign(::rocket::sref("exp"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.exp"));
-    // Parse arguments.
-    Rval y;
-    Ropt base;
-    if(reader.I().v(y).o(base).F()) {
-      return std_math_exp(::std::move(y), ::std::move(base));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.exp(y, [base])`
 
@@ -220,24 +208,26 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     `e` is assumed. This function is equivalent to `pow(base, y)`.
 
   * Returns the power as a real.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.exp"));
+    // Parse arguments.
+    Rval y;
+    Ropt base;
+    if(reader.I().v(y).o(base).F()) {
+      Reference_root::S_temporary xref = { std_math_exp(::std::move(y), ::std::move(base)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.math.expm1()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("expm1"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.expm1"));
-    // Parse arguments.
-    Rval y;
-    if(reader.I().v(y).F()) {
-      return std_math_expm1(::std::move(y));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.expm1(y)`
 
@@ -245,25 +235,25 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     close to zero.
 
   * Returns the result as a real.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.expm1"));
+    // Parse arguments.
+    Rval y;
+    if(reader.I().v(y).F()) {
+      Reference_root::S_temporary xref = { std_math_expm1(::std::move(y)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.math.pow()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("pow"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.pow"));
-    // Parse arguments.
-    Rval x;
-    Rval y;
-    if(reader.I().v(x).v(y).F()) {
-      return std_math_pow(::std::move(x), ::std::move(y));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.pow(x, y)`
 
@@ -272,25 +262,26 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     the other argument is an infinity or NaN.
 
   * Returns the power as a real.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.pow"));
+    // Parse arguments.
+    Rval x;
+    Rval y;
+    if(reader.I().v(x).v(y).F()) {
+      Reference_root::S_temporary xref = { std_math_pow(::std::move(x), ::std::move(y)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.math.log()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("log"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.log"));
-    // Parse arguments.
-    Rval y;
-    Ropt base;
-    if(reader.I().v(y).o(base).F()) {
-      return std_math_log(::std::move(y), ::std::move(base));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.log(x, [base])`
 
@@ -298,24 +289,26 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     `e` is assumed.
 
   * Returns the logarithm as a real.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.log"));
+    // Parse arguments.
+    Rval y;
+    Ropt base;
+    if(reader.I().v(y).o(base).F()) {
+      Reference_root::S_temporary xref = { std_math_log(::std::move(y), ::std::move(base)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.math.log1p()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("log1p"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.log1p"));
-    // Parse arguments.
-    Rval y;
-    if(reader.I().v(y).F()) {
-      return std_math_log1p(::std::move(y));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.log1p(x)`
 
@@ -323,193 +316,201 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     close to zero.
 
   * Returns the result as a real.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.log1p"));
+    // Parse arguments.
+    Rval y;
+    if(reader.I().v(y).F()) {
+      Reference_root::S_temporary xref = { std_math_log1p(::std::move(y)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.math.sin()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("sin"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.sin"));
-    // Parse arguments.
-    Rval x;
-    if(reader.I().v(x).F()) {
-      return std_math_sin(::std::move(x));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.sin(x)`
 
   * Calculates the sine of `x` in radians.
 
   * Returns the result as a real.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.sin"));
+    // Parse arguments.
+    Rval x;
+    if(reader.I().v(x).F()) {
+      Reference_root::S_temporary xref = { std_math_sin(::std::move(x)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.math.cos()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("cos"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.cos"));
-    // Parse arguments.
-    Rval x;
-    if(reader.I().v(x).F()) {
-      return std_math_cos(::std::move(x));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.cos(x)`
 
   * Calculates the cosine of `x` in radians.
 
   * Returns the result as a real.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.cos"));
+    // Parse arguments.
+    Rval x;
+    if(reader.I().v(x).F()) {
+      Reference_root::S_temporary xref = { std_math_cos(::std::move(x)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.math.tan()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("tan"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.tan"));
-    // Parse arguments.
-    Rval x;
-    if(reader.I().v(x).F()) {
-      return std_math_tan(::std::move(x));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.tan(x)`
 
   * Calculates the tangent of `x` in radians.
 
   * Returns the result as a real.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.tan"));
+    // Parse arguments.
+    Rval x;
+    if(reader.I().v(x).F()) {
+      Reference_root::S_temporary xref = { std_math_tan(::std::move(x)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.math.asin()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("asin"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.asin"));
-    // Parse arguments.
-    Rval x;
-    if(reader.I().v(x).F()) {
-      return std_math_asin(::std::move(x));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.asin(x)`
 
   * Calculates the inverse sine of `x` in radians.
 
   * Returns the result as a real.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.asin"));
+    // Parse arguments.
+    Rval x;
+    if(reader.I().v(x).F()) {
+      Reference_root::S_temporary xref = { std_math_asin(::std::move(x)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.math.acos()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("acos"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.acos"));
-    // Parse arguments.
-    Rval x;
-    if(reader.I().v(x).F()) {
-      return std_math_acos(::std::move(x));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.acos(x)`
 
   * Calculates the inverse cosine of `x` in radians.
 
   * Returns the result as a real.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.acos"));
+    // Parse arguments.
+    Rval x;
+    if(reader.I().v(x).F()) {
+      Reference_root::S_temporary xref = { std_math_acos(::std::move(x)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.math.atan()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("atan"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.atan"));
-    // Parse arguments.
-    Rval x;
-    if(reader.I().v(x).F()) {
-      return std_math_atan(::std::move(x));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.atan(x)`
 
   * Calculates the inverse tangent of `x` in radians.
 
   * Returns the result as a real.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.atan"));
+    // Parse arguments.
+    Rval x;
+    if(reader.I().v(x).F()) {
+      Reference_root::S_temporary xref = { std_math_atan(::std::move(x)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.math.atan2()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("atan2"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.atan2"));
-    // Parse arguments.
-    Rval y;
-    Rval x;
-    if(reader.I().v(y).v(x).F()) {
-      return std_math_atan2(::std::move(y), ::std::move(x));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.atan2(y, x)`
 
   * Calculates the angle of the vector `<x,y>` in radians.
 
   * Returns the result as a real.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.atan2"));
+    // Parse arguments.
+    Rval y;
+    Rval x;
+    if(reader.I().v(y).v(x).F()) {
+      Reference_root::S_temporary xref = { std_math_atan2(::std::move(y), ::std::move(x)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.math.hypot()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("hypot"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.hypot"));
-    // Parse variadic arguments.
-    cow_vector<Value> values;
-    if(reader.I().F(values)) {
-      return std_math_hypot(::std::move(values));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.hypot(...)`
 
@@ -520,240 +521,250 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     function returns a NaN.
 
   * Returns the length as a real.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.hypot"));
+    // Parse variadic arguments.
+    cow_vector<Value> values;
+    if(reader.I().F(values)) {
+      Reference_root::S_temporary xref = { std_math_hypot(::std::move(values)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.math.sinh()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("sinh"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.sinh"));
-    // Parse arguments.
-    Rval x;
-    if(reader.I().v(x).F()) {
-      return std_math_sinh(::std::move(x));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.sinh(x)`
 
   * Calculates the hyperbolic sine of `x`.
 
   * Returns the result as a real.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.sinh"));
+    // Parse arguments.
+    Rval x;
+    if(reader.I().v(x).F()) {
+      Reference_root::S_temporary xref = { std_math_sinh(::std::move(x)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.math.cosh()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("cosh"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.cosh"));
-    // Parse arguments.
-    Rval x;
-    if(reader.I().v(x).F()) {
-      return std_math_cosh(::std::move(x));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.cosh(x)`
 
   * Calculates the hyperbolic cosine of `x`.
 
   * Returns the result as a real.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.cosh"));
+    // Parse arguments.
+    Rval x;
+    if(reader.I().v(x).F()) {
+      Reference_root::S_temporary xref = { std_math_cosh(::std::move(x)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.math.tanh()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("tanh"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.tanh"));
-    // Parse arguments.
-    Rval x;
-    if(reader.I().v(x).F()) {
-      return std_math_tanh(::std::move(x));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.tanh(x)`
 
   * Calculates the hyperbolic tangent of `x`.
 
   * Returns the result as a real.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.tanh"));
+    // Parse arguments.
+    Rval x;
+    if(reader.I().v(x).F()) {
+      Reference_root::S_temporary xref = { std_math_tanh(::std::move(x)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.math.asinh()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("asinh"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.asinh"));
-    // Parse arguments.
-    Rval x;
-    if(reader.I().v(x).F()) {
-      return std_math_asinh(::std::move(x));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.asinh(x)`
 
   * Calculates the inverse hyperbolic sine of `x`.
 
   * Returns the result as a real.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.asinh"));
+    // Parse arguments.
+    Rval x;
+    if(reader.I().v(x).F()) {
+      Reference_root::S_temporary xref = { std_math_asinh(::std::move(x)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.math.acosh()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("acosh"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.acosh"));
-    // Parse arguments.
-    Rval x;
-    if(reader.I().v(x).F()) {
-      return std_math_acosh(::std::move(x));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.acosh(x)`
 
   * Calculates the inverse hyperbolic cosine of `x`.
 
   * Returns the result as a real.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.acosh"));
+    // Parse arguments.
+    Rval x;
+    if(reader.I().v(x).F()) {
+      Reference_root::S_temporary xref = { std_math_acosh(::std::move(x)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.math.atanh()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("atanh"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.atanh"));
-    // Parse arguments.
-    Rval x;
-    if(reader.I().v(x).F()) {
-      return std_math_atanh(::std::move(x));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.atanh(x)`
 
   * Calculates the inverse hyperbolic tangent of `x`.
 
   * Returns the result as a real.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.atanh"));
+    // Parse arguments.
+    Rval x;
+    if(reader.I().v(x).F()) {
+      Reference_root::S_temporary xref = { std_math_atanh(::std::move(x)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.math.erf()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("erf"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.erf"));
-    // Parse arguments.
-    Rval x;
-    if(reader.I().v(x).F()) {
-      return std_math_erf(::std::move(x));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.erf(x)`
 
   * Calculates the error function of `x`.
 
   * Returns the result as a real.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.erf"));
+    // Parse arguments.
+    Rval x;
+    if(reader.I().v(x).F()) {
+      Reference_root::S_temporary xref = { std_math_erf(::std::move(x)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.math.cerf()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("cerf"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.cerf"));
-    // Parse arguments.
-    Rval x;
-    if(reader.I().v(x).F()) {
-      return std_math_cerf(::std::move(x));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.cerf(x)`
 
   * Calculates the complementary error function of `x`.
 
   * Returns the result as a real.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.cerf"));
+    // Parse arguments.
+    Rval x;
+    if(reader.I().v(x).F()) {
+      Reference_root::S_temporary xref = { std_math_cerf(::std::move(x)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.math.gamma()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("gamma"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.gamma"));
-    // Parse arguments.
-    Rval x;
-    if(reader.I().v(x).F()) {
-      return std_math_gamma(::std::move(x));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.gamma(x)`
 
   * Calculates the Gamma function of `x`.
 
   * Returns the result as a real.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.gamma"));
+    // Parse arguments.
+    Rval x;
+    if(reader.I().v(x).F()) {
+      Reference_root::S_temporary xref = { std_math_gamma(::std::move(x)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.math.lgamma()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("lgamma"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.lgamma"));
-    // Parse arguments.
-    Rval x;
-    if(reader.I().v(x).F()) {
-      return std_math_lgamma(::std::move(x));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.lgamma(x)`
 
@@ -761,7 +772,19 @@ void create_bindings_math(V_object& result, API_Version /*version*/)
     Gamma function of `x`.
 
   * Returns the result as a real.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.lgamma"));
+    // Parse arguments.
+    Rval x;
+    if(reader.I().v(x).F()) {
+      Reference_root::S_temporary xref = { std_math_lgamma(::std::move(x)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // End of `std.math`

@@ -299,16 +299,6 @@ void create_bindings_io(V_object& result, API_Version /*version*/)
     //===================================================================
     result.insert_or_assign(::rocket::sref("getc"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.getc"));
-    // Parse arguments.
-    if(reader.I().F()) {
-      return std_io_getc();
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.io.getc()`
 
@@ -319,23 +309,24 @@ void create_bindings_io(V_object& result, API_Version /*version*/)
 
   * Throws an exception if standard input is binary-oriented, or if
     a read error occurs.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.getc"));
+    // Parse arguments.
+    if(reader.I().F()) {
+      Reference_root::S_temporary xref = { std_io_getc() };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.io.getln()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("getln"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.getln"));
-    // Parse arguments.
-    if(reader.I().F()) {
-      return std_io_getln();
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.io.getln()`
 
@@ -349,28 +340,24 @@ void create_bindings_io(V_object& result, API_Version /*version*/)
   * Throws an exception if standard input is binary-oriented, or if
     a read error occurs, or if source data cannot be converted to a
     valid UTF code point sequence.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.getln"));
+    // Parse arguments.
+    if(reader.I().F()) {
+      Reference_root::S_temporary xref = { std_io_getln() };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.io.putc()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("putc"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.putc"));
-    // Parse arguments.
-    Ival ivalue;
-    if(reader.I().v(ivalue).F()) {
-      return std_io_putc(::std::move(ivalue));
-    }
-    Sval svalue;
-    if(reader.I().v(svalue).F()) {
-      return std_io_putc(::std::move(svalue));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.io.putc(value)`
 
@@ -382,24 +369,30 @@ void create_bindings_io(V_object& result, API_Version /*version*/)
   * Throws an exception if standard output is binary-oriented, or
     if source data cannot be converted to a valid UTF code point
     sequence, or if a write error occurs.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.putc"));
+    // Parse arguments.
+    Ival ivalue;
+    if(reader.I().v(ivalue).F()) {
+      Reference_root::S_temporary xref = { std_io_putc(::std::move(ivalue)) };
+      return self = ::std::move(xref);
+    }
+    Sval svalue;
+    if(reader.I().v(svalue).F()) {
+      Reference_root::S_temporary xref = { std_io_putc(::std::move(svalue)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.io.putln()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("putln"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.putln"));
-    // Parse arguments.
-    Sval text;
-    if(reader.I().v(text).F()) {
-      return std_io_putln(::std::move(text));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.io.putln(text)`
 
@@ -413,25 +406,25 @@ void create_bindings_io(V_object& result, API_Version /*version*/)
   * Throws an exception if standard output is binary-oriented, or
     if source data cannot be converted to a valid UTF code point
     sequence, or if a write error occurs.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.putln"));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      Reference_root::S_temporary xref = { std_io_putln(::std::move(text)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.io.putf()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("putf"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.putf"));
-    // Parse arguments.
-    Sval templ;
-    cow_vector<Value> values;
-    if(reader.I().v(templ).F(values)) {
-      return std_io_putf(::std::move(templ), ::std::move(values));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.io.putf(templ, ...)`
 
@@ -443,24 +436,26 @@ void create_bindings_io(V_object& result, API_Version /*version*/)
  * Throws an exception if standard output is binary-oriented, or
    if source data cannot be converted to a valid UTF code point
    sequence, or if a write error occurs.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.putf"));
+    // Parse arguments.
+    Sval templ;
+    cow_vector<Value> values;
+    if(reader.I().v(templ).F(values)) {
+      Reference_root::S_temporary xref = { std_io_putf(::std::move(templ), ::std::move(values)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.io.read()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("read"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.read"));
-    // Parse arguments.
-    Iopt limit;
-    if(reader.I().o(limit).F()) {
-      return std_io_read(::std::move(limit));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.io.read([limit])`
 
@@ -473,24 +468,25 @@ void create_bindings_io(V_object& result, API_Version /*version*/)
   * Throws an exception if standard input is text-oriented, or if
     a read error occurs, or if source data cannot be converted to a
     valid UTF code point sequence.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.read"));
+    // Parse arguments.
+    Iopt limit;
+    if(reader.I().o(limit).F()) {
+      Reference_root::S_temporary xref = { std_io_read(::std::move(limit)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.io.write()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("write"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.write"));
-    // Parse arguments.
-    Sval data;
-    if(reader.I().v(data).F()) {
-      return std_io_write(::std::move(data));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.io.write(data)`
 
@@ -501,35 +497,45 @@ void create_bindings_io(V_object& result, API_Version /*version*/)
 
   * Throws an exception if standard output is text-oriented, or if
     a write error occurs.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.write"));
+    // Parse arguments.
+    Sval data;
+    if(reader.I().v(data).F()) {
+      Reference_root::S_temporary xref = { std_io_write(::std::move(data)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.io.flush()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("flush"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.io.flush()`
+
+  * Forces buffered data on standard output to be delivered to its
+    underlying device. This function may be called regardless of
+    the orientation of standard output.
+
+  * Throws an exception if a write error occurs.
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.flush"));
     // Parse arguments.
     if(reader.I().F()) {
       std_io_flush();
-      return true;
+      return self = Reference_root::S_void();
     }
     // Fail.
     reader.throw_no_matching_function_call();
-  },
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.io.write(data)`
-
-  * Writes a series of bytes to standard output. `data` shall be a
-    byte string.
-
-  * Returns the number of bytes that have been written.
-
-  * Throws an exception if standard output is text-oriented, or if
-    a write error occurs.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+  }
       ));
     //===================================================================
     // End of `std.io`

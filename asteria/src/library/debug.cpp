@@ -50,18 +50,6 @@ void create_bindings_debug(V_object& result, API_Version /*version*/)
     //===================================================================
     result.insert_or_assign(::rocket::sref("logf"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.debug.logf"));
-    // Parse variadic arguments.
-    Sval templ;
-    cow_vector<Value> values;
-    if(reader.I().v(templ).F(values)) {
-      return std_debug_logf(templ, values);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.debug.logf(templ, ...)`
 
@@ -71,25 +59,26 @@ void create_bindings_debug(V_object& result, API_Version /*version*/)
 
   * Returns the number of bytes written if the operation succeeds,
     or `null` otherwise.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.debug.logf"));
+    // Parse variadic arguments.
+    Sval templ;
+    cow_vector<Value> values;
+    if(reader.I().v(templ).F(values)) {
+      Reference_root::S_temporary xref = { std_debug_logf(templ, values) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.debug.dump()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("dump"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.debug.dump"));
-    // Parse arguments.
-    Value value;
-    Iopt indent;
-    if(reader.I().o(value).o(indent).F()) {
-      return std_debug_dump(value, indent);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.debug.dump(value, [indent])`
 
@@ -101,7 +90,20 @@ void create_bindings_debug(V_object& result, API_Version /*version*/)
 
   * Returns the number of bytes written if the operation succeeds,
     or `null` otherwise.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.debug.dump"));
+    // Parse arguments.
+    Value value;
+    Iopt indent;
+    if(reader.I().o(value).o(indent).F()) {
+      Reference_root::S_temporary xref = { std_debug_dump(value, indent) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // End of `std.debug`

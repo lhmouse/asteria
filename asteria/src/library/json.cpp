@@ -651,23 +651,6 @@ void create_bindings_json(V_object& result, API_Version /*version*/)
     //===================================================================
     result.insert_or_assign(::rocket::sref("format"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.json.format"));
-    Argument_Reader::State state;
-    // Parse arguments.
-    Value value;
-    Sopt sindent;
-    if(reader.I().o(value).S(state).o(sindent).F()) {
-      return std_json_format(::std::move(value), ::std::move(sindent));
-    }
-    Ival nindent;
-    if(reader.L(state).v(nindent).F()) {
-      return std_json_format(::std::move(value), ::std::move(nindent));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.json.format(value, [indent])`
 
@@ -684,24 +667,32 @@ void create_bindings_json(V_object& result, API_Version /*version*/)
     string.
 
   * Returns the formatted text as a string.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.json.format"));
+    Argument_Reader::State state;
+    // Parse arguments.
+    Value value;
+    Sopt sindent;
+    if(reader.I().o(value).S(state).o(sindent).F()) {
+      Reference_root::S_temporary xref = { std_json_format(::std::move(value), ::std::move(sindent)) };
+      return self = ::std::move(xref);
+    }
+    Ival nindent;
+    if(reader.L(state).v(nindent).F()) {
+      Reference_root::S_temporary xref = { std_json_format(::std::move(value), ::std::move(nindent)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.json.parse()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("parse"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.json.parse"));
-    // Parse arguments.
-    Sval text;
-    if(reader.I().v(text).F()) {
-      return std_json_parse(::std::move(text));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.json.parse(text)`
 
@@ -725,7 +716,19 @@ void create_bindings_json(V_object& result, API_Version /*version*/)
   * Returns the parsed value.
 
   * Throws an exception if the string is invalid.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.json.parse"));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      Reference_root::S_temporary xref = { std_json_parse(::std::move(text)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // End of `std.json`

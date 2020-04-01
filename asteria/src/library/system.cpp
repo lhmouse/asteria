@@ -146,17 +146,6 @@ void create_bindings_system(V_object& result, API_Version /*version*/)
     //===================================================================
     result.insert_or_assign(::rocket::sref("gc_count_variables"),
       Fval(
-[](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.gc_count_variables"));
-    // Parse arguments.
-    Ival generation;
-    if(reader.I().v(generation).F()) {
-      return std_system_gc_count_variables(global, ::std::move(generation));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.system.gc_count_variables(generation)`
 
@@ -167,24 +156,25 @@ void create_bindings_system(V_object& result, API_Version /*version*/)
   * Returns the number of variables being tracked. This value is
     only informative. If `generation` is not valid, `null` is
     returned.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.gc_count_variables"));
+    // Parse arguments.
+    Ival generation;
+    if(reader.I().v(generation).F()) {
+      Reference_root::S_temporary xref = { std_system_gc_count_variables(global, ::std::move(generation)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.system.gc_get_threshold()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("gc_get_threshold"),
       Fval(
-[](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.gc_get_threshold"));
-    // Parse arguments.
-    Ival generation;
-    if(reader.I().v(generation).F()) {
-      return std_system_gc_get_threshold(global, ::std::move(generation));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.system.gc_get_threshold(generation)`
 
@@ -193,25 +183,25 @@ void create_bindings_system(V_object& result, API_Version /*version*/)
 
   * Returns the threshold. If `generation` is not valid, `null` is
     returned.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.gc_get_threshold"));
+    // Parse arguments.
+    Ival generation;
+    if(reader.I().v(generation).F()) {
+      Reference_root::S_temporary xref = { std_system_gc_get_threshold(global, ::std::move(generation)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.system.gc_set_threshold()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("gc_set_threshold"),
       Fval(
-[](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.gc_set_threshold"));
-    // Parse arguments.
-    Ival generation;
-    Ival threshold;
-    if(reader.I().v(generation).v(threshold).F()) {
-      return std_system_gc_set_threshold(global, ::std::move(generation), ::std::move(threshold));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.system.gc_set_threshold(generation, threshold)`
 
@@ -225,24 +215,27 @@ void create_bindings_system(V_object& result, API_Version /*version*/)
 
   * Returns the threshold before the call. If `generation` is not
     valid, `null` is returned.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.gc_set_threshold"));
+    // Parse arguments.
+    Ival generation;
+    Ival threshold;
+    if(reader.I().v(generation).v(threshold).F()) {
+      Reference_root::S_temporary xref = { std_system_gc_set_threshold(global, ::std::move(generation),
+                                                                               ::std::move(threshold)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.system.gc_collect()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("gc_collect"),
       Fval(
-[](cow_vector<Reference>&& args, Reference&& /*self*/, Global& global) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.gc_collect"));
-    // Parse arguments.
-    Iopt generation_limit;
-    if(reader.I().o(generation_limit).F()) {
-      return std_system_gc_collect(global, ::std::move(generation_limit));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.system.gc_collect([generation_limit])`
 
@@ -252,26 +245,25 @@ void create_bindings_system(V_object& result, API_Version /*version*/)
 
   * Returns the number of variables that have been collected in
     total.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.gc_collect"));
+    // Parse arguments.
+    Iopt generation_limit;
+    if(reader.I().o(generation_limit).F()) {
+      Reference_root::S_temporary xref = { std_system_gc_collect(global, ::std::move(generation_limit)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.system.execute()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("execute"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.execute"));
-    // Parse arguments.
-    Sval cmd;
-    Aopt argv;
-    Aopt envp;
-    if(reader.I().v(cmd).o(argv).o(envp).F()) {
-      return std_system_execute(::std::move(cmd), ::std::move(argv), ::std::move(envp));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.system.execute(cmd, [argv], [envp])`
 
@@ -288,24 +280,27 @@ void create_bindings_system(V_object& result, API_Version /*version*/)
 
   * Throws an exception if the program could not be launched or its
     exit status could not be retrieved.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.execute"));
+    // Parse arguments.
+    Sval cmd;
+    Aopt argv;
+    Aopt envp;
+    if(reader.I().v(cmd).o(argv).o(envp).F()) {
+      Reference_root::S_temporary xref = { std_system_execute(::std::move(cmd), ::std::move(argv), ::std::move(envp)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.system.daemonize()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("daemonize"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.daemonize"));
-    // Parse arguments.
-    if(reader.I().F()) {
-      std_system_daemonize();
-      return true;
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.system.daemonize()`
 
@@ -314,24 +309,24 @@ void create_bindings_system(V_object& result, API_Version /*version*/)
     success so this function never returns.
 
   * Throws an exception on failure.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.daemonize"));
+    // Parse arguments.
+    if(reader.I().F()) {
+      std_system_daemonize();
+      return self = Reference_root::S_void();
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.system.env_get_variable()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("env_get_variable"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.env_get_variable"));
-    // Parse arguments.
-    Sval name;
-    if(reader.I().v(name).F()) {
-      return std_system_env_get_variable(::std::move(name));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.system.env_get_variable(name)`
 
@@ -341,23 +336,25 @@ void create_bindings_system(V_object& result, API_Version /*version*/)
     or `null` if no such variable exists.
 
   * Throws an exception if `name` is not valid.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.env_get_variable"));
+    // Parse arguments.
+    Sval name;
+    if(reader.I().v(name).F()) {
+      Reference_root::S_temporary xref = { std_system_env_get_variable(::std::move(name)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.system.env_get_variables()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("env_get_variables"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.env_get_variables"));
-    // Parse arguments.
-    if(reader.I().F()) {
-      return std_system_env_get_variables();
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.system.env_get_variables()`
 
@@ -365,7 +362,18 @@ void create_bindings_system(V_object& result, API_Version /*version*/)
 
   * Returns an object of strings which consists of copies of all
     environment variables.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.env_get_variables"));
+    // Parse arguments.
+    if(reader.I().F()) {
+      Reference_root::S_temporary xref = { std_system_env_get_variables() };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // End of `std.system`

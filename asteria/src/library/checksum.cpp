@@ -945,7 +945,10 @@ Oval std_checksum_crc32_new()
     //===================================================================
     result.insert_or_assign(::rocket::sref("write"),
       Fval(
-[](cow_vector<Reference>&& args, Reference&& self) -> Value
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+std.checksum.crc32_new().write
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.crc32_new().write"));
     // Get the hasher.
@@ -954,20 +957,21 @@ Oval std_checksum_crc32_new()
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      return std_checksum_crc32_new_write(self.open().open_opaque(), ::std::move(data));
+      Reference_root::S_temporary xref = { std_checksum_crc32_new_write(self.open().open_opaque(), ::std::move(data)) };
+      return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
-  },
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-std.checksum.crc32_new().write
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+  }
       ));
     //===================================================================
     // `.finish()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("finish"),
       Fval(
-[](cow_vector<Reference>&& args, Reference&& self) -> Value
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+std.checksum.crc32_new().finish
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.crc32_new().finish"));
     // Get the hasher.
@@ -975,13 +979,11 @@ std.checksum.crc32_new().write
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
-      return std_checksum_crc32_new_finish(self.open().open_opaque());
+      Reference_root::S_temporary xref = { std_checksum_crc32_new_finish(self.open().open_opaque()) };
+      return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
-  },
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-std.checksum.crc32_new().finish
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+  }
       ));
     //===================================================================
     // End of `std.checksum.crc32_new()`
@@ -1032,7 +1034,10 @@ Oval std_checksum_fnv1a32_new()
     //===================================================================
     result.insert_or_assign(::rocket::sref("write"),
       Fval(
-[](cow_vector<Reference>&& args, Reference&& self) -> Value
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+std.checksum.fnv1a32_new().write
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.fnv1a32_new().write"));
     // Get the hasher.
@@ -1041,20 +1046,21 @@ Oval std_checksum_fnv1a32_new()
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      return std_checksum_fnv1a32_new_write(self.open().open_opaque(), ::std::move(data));
+      Reference_root::S_temporary xref = { std_checksum_fnv1a32_new_write(self.open().open_opaque(), ::std::move(data)) };
+      return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
-  },
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-std.checksum.fnv1a32_new().write
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+  }
       ));
     //===================================================================
     // `.finish()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("finish"),
       Fval(
-[](cow_vector<Reference>&& args, Reference&& self) -> Value
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+std.checksum.fnv1a32_new().finish
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.fnv1a32_new().finish"));
     // Get the hasher.
@@ -1062,13 +1068,11 @@ std.checksum.fnv1a32_new().write
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
-      return std_checksum_fnv1a32_new_finish(self.open().open_opaque());
+      Reference_root::S_temporary xref = { std_checksum_fnv1a32_new_finish(self.open().open_opaque()) };
+      return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
-  },
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-std.checksum.fnv1a32_new().finish
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+  }
       ));
     //===================================================================
     // End of `std.checksum.fnv1a32_new()`
@@ -1119,7 +1123,10 @@ Oval std_checksum_md5_new()
     //===================================================================
     result.insert_or_assign(::rocket::sref("write"),
       Fval(
-[](cow_vector<Reference>&& args, Reference&& self) -> Value
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+std.checksum.md5_new().write
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.md5_new().write"));
     // Get the hasher.
@@ -1128,20 +1135,21 @@ Oval std_checksum_md5_new()
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      return std_checksum_md5_new_write(self.open().open_opaque(), ::std::move(data));
+      Reference_root::S_temporary xref = { std_checksum_md5_new_write(self.open().open_opaque(), ::std::move(data)) };
+      return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
-  },
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-std.checksum.md5_new().write
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+  }
       ));
     //===================================================================
     // `.finish()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("finish"),
       Fval(
-[](cow_vector<Reference>&& args, Reference&& self) -> Value
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+std.checksum.md5_new().finish
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.md5_new().finish"));
     // Get the hasher.
@@ -1149,13 +1157,11 @@ std.checksum.md5_new().write
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
-      return std_checksum_md5_new_finish(self.open().open_opaque());
+      Reference_root::S_temporary xref = { std_checksum_md5_new_finish(self.open().open_opaque()) };
+      return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
-  },
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-std.checksum.md5_new().finish
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+  }
       ));
     //===================================================================
     // End of `std.checksum.md5_new()`
@@ -1206,7 +1212,10 @@ Oval std_checksum_sha1_new()
     //===================================================================
     result.insert_or_assign(::rocket::sref("write"),
       Fval(
-[](cow_vector<Reference>&& args, Reference&& self) -> Value
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+std.checksum.sha1_new().write
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha1_new().write"));
     // Get the hasher.
@@ -1215,20 +1224,21 @@ Oval std_checksum_sha1_new()
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      return std_checksum_sha1_new_write(self.open().open_opaque(), ::std::move(data));
+      Reference_root::S_temporary xref = { std_checksum_sha1_new_write(self.open().open_opaque(), ::std::move(data)) };
+      return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
-  },
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-std.checksum.sha1_new().write
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+  }
       ));
     //===================================================================
     // `.finish()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("finish"),
       Fval(
-[](cow_vector<Reference>&& args, Reference&& self) -> Value
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+std.checksum.sha1_new().finish
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha1_new().finish"));
     // Get the hasher.
@@ -1236,13 +1246,11 @@ std.checksum.sha1_new().write
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
-      return std_checksum_sha1_new_finish(self.open().open_opaque());
+      Reference_root::S_temporary xref = { std_checksum_sha1_new_finish(self.open().open_opaque()) };
+      return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
-  },
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-std.checksum.sha1_new().finish
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+  }
       ));
     //===================================================================
     // End of `std.checksum.sha1_new()`
@@ -1293,7 +1301,10 @@ Oval std_checksum_sha256_new()
     //===================================================================
     result.insert_or_assign(::rocket::sref("write"),
       Fval(
-[](cow_vector<Reference>&& args, Reference&& self) -> Value
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+std.checksum.sha256_new().write
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha256_new().write"));
     // Get the hasher.
@@ -1302,20 +1313,21 @@ Oval std_checksum_sha256_new()
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      return std_checksum_sha256_new_write(self.open().open_opaque(), ::std::move(data));
+      Reference_root::S_temporary xref = { std_checksum_sha256_new_write(self.open().open_opaque(), ::std::move(data)) };
+      return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
-  },
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-std.checksum.sha256_new().write
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+  }
       ));
     //===================================================================
     // `.finish()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("finish"),
       Fval(
-[](cow_vector<Reference>&& args, Reference&& self) -> Value
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+std.checksum.sha256_new().finish
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha256_new().finish"));
     // Get the hasher.
@@ -1323,13 +1335,11 @@ std.checksum.sha256_new().write
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
-      return std_checksum_sha256_new_finish(self.open().open_opaque());
+      Reference_root::S_temporary xref = { std_checksum_sha256_new_finish(self.open().open_opaque()) };
+      return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
-  },
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-std.checksum.sha256_new().finish
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+  }
       ));
     //===================================================================
     // End of `std.checksum.sha256_new()`
@@ -1351,16 +1361,6 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
     //===================================================================
     result.insert_or_assign(::rocket::sref("crc32_new"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.crc32_new"));
-    // Parse arguments.
-    if(reader.I().F()) {
-      return std_checksum_crc32_new();
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.checksum.crc32_new()`
 
@@ -1379,24 +1379,24 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
     high-order 32 bits are always zeroes), then resets the hasher,
     making it suitable for further data as if it had just been
     created.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.crc32_new"));
+    // Parse arguments.
+    if(reader.I().F()) {
+      Reference_root::S_temporary xref = { std_checksum_crc32_new() };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.checksum.crc32()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("crc32"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.crc32"));
-    // Parse arguments.
-    Sval data;
-    if(reader.I().v(data).F()) {
-      return std_checksum_crc32(::std::move(data));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.checksum.crc32(data)`
 
@@ -1416,23 +1416,25 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
 
   * Returns the CRC-32 checksum as an integer. The high-order 32
     bits are always zeroes.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.crc32"));
+    // Parse arguments.
+    Sval data;
+    if(reader.I().v(data).F()) {
+      Reference_root::S_temporary xref = { std_checksum_crc32(::std::move(data)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.checksum.fnv1a32_new()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("fnv1a32_new"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.fnv1a32_new"));
-    // Parse arguments.
-    if(reader.I().F()) {
-      return std_checksum_fnv1a32_new();
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.checksum.fnv1a32_new()`
 
@@ -1452,24 +1454,24 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
     high-order 32 bits are always zeroes), then resets the hasher,
     making it suitable for further data as if it had just been
     created.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.fnv1a32_new"));
+    // Parse arguments.
+    if(reader.I().F()) {
+      Reference_root::S_temporary xref = { std_checksum_fnv1a32_new() };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.checksum.fnv1a32()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("fnv1a32"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.fnv1a32"));
-    // Parse arguments.
-    Sval data;
-    if(reader.I().v(data).F()) {
-      return std_checksum_fnv1a32(::std::move(data));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.checksum.fnv1a32(data)`
 
@@ -1489,23 +1491,25 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
 
   * Returns the 32-bit FNV-1a checksum as an integer. The
     high-order 32 bits are always zeroes.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.fnv1a32"));
+    // Parse arguments.
+    Sval data;
+    if(reader.I().v(data).F()) {
+      Reference_root::S_temporary xref = { std_checksum_fnv1a32(::std::move(data)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.checksum.md5_new()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("md5_new"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.md5_new"));
-    // Parse arguments.
-    if(reader.I().F()) {
-      return std_checksum_md5_new();
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.checksum.md5_new()`
 
@@ -1522,24 +1526,24 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
     function `finish()` extracts the checksum as a string of 32
     hexadecimal digits in uppercase, then resets the hasher, making
     it suitable for further data as if it had just been created.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.md5_new"));
+    // Parse arguments.
+    if(reader.I().F()) {
+      Reference_root::S_temporary xref = { std_checksum_md5_new() };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.checksum.md5()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("md5"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.md5"));
-    // Parse arguments.
-    Sval data;
-    if(reader.I().v(data).F()) {
-      return std_checksum_md5(::std::move(data));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.checksum.md5(data)`
 
@@ -1559,23 +1563,25 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
 
   * Returns the MD5 checksum as a string of 32 hexadecimal digits
     in uppercase.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.md5"));
+    // Parse arguments.
+    Sval data;
+    if(reader.I().v(data).F()) {
+      Reference_root::S_temporary xref = { std_checksum_md5(::std::move(data)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.checksum.sha1_new()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("sha1_new"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha1_new"));
-    // Parse arguments.
-    if(reader.I().F()) {
-      return std_checksum_sha1_new();
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.checksum.sha1_new()`
 
@@ -1592,24 +1598,24 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
     function `finish()` extracts the checksum as a string of 40
     hexadecimal digits in uppercase, then resets the hasher, making
     it suitable for further data as if it had just been created.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha1_new"));
+    // Parse arguments.
+    if(reader.I().F()) {
+      Reference_root::S_temporary xref = { std_checksum_sha1_new() };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.checksum.sha1()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("sha1"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha1"));
-    // Parse arguments.
-    Sval data;
-    if(reader.I().v(data).F()) {
-      return std_checksum_sha1(::std::move(data));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.checksum.sha1(data)`
 
@@ -1629,23 +1635,25 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
 
   * Returns the SHA-1 checksum as a string of 40 hexadecimal
     digits in uppercase.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha1"));
+    // Parse arguments.
+    Sval data;
+    if(reader.I().v(data).F()) {
+      Reference_root::S_temporary xref = { std_checksum_sha1(::std::move(data)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.checksum.sha256_new()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("sha256_new"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha256_new"));
-    // Parse arguments.
-    if(reader.I().F()) {
-      return std_checksum_sha256_new();
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.checksum.sha256_new()`
 
@@ -1662,24 +1670,24 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
     function `finish()` extracts the checksum as a string of 64
     hexadecimal digits in uppercase, then resets the hasher, making
     it suitable for further data as if it had just been created.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha256_new"));
+    // Parse arguments.
+    if(reader.I().F()) {
+      Reference_root::S_temporary xref = { std_checksum_sha256_new() };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.checksum.sha256()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("sha256"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha256"));
-    // Parse arguments.
-    Sval data;
-    if(reader.I().v(data).F()) {
-      return std_checksum_sha256(::std::move(data));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.checksum.sha256(data)`
 
@@ -1699,7 +1707,19 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
 
   * Returns the SHA-256 checksum as a string of 64 hexadecimal
     digits in uppercase.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha256"));
+    // Parse arguments.
+    Sval data;
+    if(reader.I().v(data).F()) {
+      Reference_root::S_temporary xref = { std_checksum_sha256(::std::move(data)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // End of `std.checksum`

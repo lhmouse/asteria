@@ -2153,8 +2153,6 @@
 	* Moves (renames) the file or directory at `path_old` to
 	  `path_new`.
 
-	* Returns `true`.
-
 	* Throws an exception on failure.
 
 `std.filesystem.remove_recursive(path)`
@@ -2257,8 +2255,6 @@
 	  any existent contents after the write point are discarded. This
 	  function fails if the data can only be written partially.
 
-	* Returns `true` if all data have been written successfully.
-
 	* Throws an exception if `offset` is negative, or a write error
 	  occurs.
 
@@ -2270,8 +2266,6 @@
 	  `path`, this function fails. This function also fails if the
 	  data can only be written partially.
 
-	* Returns `true` if all data have been written successfully.
-
 	* Throws an exception if `offset` is negative, or a write error
 	  occurs.
 
@@ -2281,8 +2275,6 @@
 	  symbolic link, it is the target that will be copied, rather
 	  than the symbolic link itself. This function fails if
 	  `path_old` designates a directory.
-
-	* Returns `true`.
 
 	* Throws an exception on failure.
 

@@ -35,8 +35,7 @@ Reference& cow_function::invoke_ptc_aware(Reference& self, Global_Context& globa
   {
     auto fptr = this->m_fptr;
     if(fptr) {
-      Reference_root::S_temporary xref = { (*fptr)(::std::move(args), ::std::move(self), global) };
-      return self = ::std::move(xref);  // static
+      return (*fptr)(self, ::std::move(args), global);  // static
     }
     auto ptr = this->m_sptr.get();
     if(!ptr) {

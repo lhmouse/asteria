@@ -340,43 +340,24 @@ inline tinyfmt& operator<<(tinyfmt& fmt, const cow_opaque& opaq)
   }
 
 // Function type support
-using simple_function_3 = Value (cow_vector<Reference>&& args,  // required if takes arguments
-                                 Reference&& self,              // required if is a member function
-                                 Global_Context& global);       // required if contains static data
-
-using simple_function_0 = Value ();
-using simple_function_1 = Value (cow_vector<Reference>&&);
-using simple_function_2 = Value (cow_vector<Reference>&&, Reference&&);
+using simple_function = Reference& (Reference& self,  // `this` (input) and return (output) reference
+                                    cow_vector<Reference>&& args,  // positional arguments
+                                    Global_Context& global);
 
 class cow_function
   {
   private:
-    simple_function_3* m_fptr = nullptr;
     const char* m_desc = nullptr;
+    simple_function* m_fptr = nullptr;
     rcptr<const Abstract_Function> m_sptr;
 
   public:
     constexpr cow_function(nullptr_t = nullptr) noexcept
       {
       }
-    constexpr cow_function(simple_function_3* fptr, const char* desc) noexcept
+    constexpr cow_function(const char* desc, simple_function& func) noexcept
       :
-        m_fptr(fptr), m_desc(desc)
-      {
-      }
-    cow_function(simple_function_0* fptr, const char* desc) noexcept
-      :
-        m_fptr((simple_function_3*)(intptr_t)fptr), m_desc(desc)
-      {
-      }
-    cow_function(simple_function_1* fptr, const char* desc) noexcept
-      :
-        m_fptr((simple_function_3*)(intptr_t)fptr), m_desc(desc)
-      {
-      }
-    cow_function(simple_function_2* fptr, const char* desc) noexcept
-      :
-        m_fptr((simple_function_3*)(intptr_t)fptr), m_desc(desc)
+        m_desc(desc), m_fptr(func)
       {
       }
     template<typename FunctionT> constexpr cow_function(rcptr<FunctionT> sptr) noexcept
@@ -400,7 +381,6 @@ class cow_function
     cow_function& reset() noexcept
       {
         this->m_fptr = nullptr;
-        this->m_desc = nullptr;
         this->m_sptr = nullptr;
         return *this;
       }
@@ -442,7 +422,7 @@ class cow_function
         }
         auto ptr = this->m_sptr.get();
         if(!ptr) {
-          return callback;
+          return callback;  // null - nothing to do
         }
         return ptr->enumerate_variables(callback);  // dynamic
       }

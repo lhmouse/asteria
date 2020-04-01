@@ -1619,19 +1619,6 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     //===================================================================
     result.insert_or_assign(::rocket::sref("slice"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.slice"));
-    // Parse arguments.
-    Sval text;
-    Ival from;
-    Iopt length;
-    if(reader.I().v(text).v(from).o(length).F()) {
-      return std_string_slice(::std::move(text), ::std::move(from), ::std::move(length));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.slice(text, from, [length])`
 
@@ -1644,32 +1631,27 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     returned.
 
   * Returns the specified substring of `text`.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.slice"));
+    // Parse arguments.
+    Sval text;
+    Ival from;
+    Iopt length;
+    if(reader.I().v(text).v(from).o(length).F()) {
+      Reference_root::S_temporary xref = { std_string_slice(::std::move(text), ::std::move(from), ::std::move(length)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.replace_slice()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("replace_slice"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.replace"));
-    Argument_Reader::State state;
-    // Parse arguments.
-    Sval text;
-    Ival from;
-    Sval replacement;
-    if(reader.I().v(text).v(from).S(state).v(replacement).F()) {
-      return std_string_replace_slice(::std::move(text), ::std::move(from), ::std::move(replacement));
-    }
-    Iopt length;
-    if(reader.L(state).o(length).v(replacement).F()) {
-      return std_string_replace_slice(::std::move(text), ::std::move(from), ::std::move(length),
-                                      ::std::move(replacement));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.replace_slice(text, from, replacement)`
 
@@ -1691,26 +1673,35 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     returns a new string without modifying `text`.
 
   * Returns a string with the subrange replaced.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.replace"));
+    Argument_Reader::State state;
+    // Parse arguments.
+    Sval text;
+    Ival from;
+    Sval replacement;
+    if(reader.I().v(text).v(from).S(state).v(replacement).F()) {
+      Reference_root::S_temporary xref = { std_string_replace_slice(::std::move(text), ::std::move(from),
+                                                                    ::std::move(replacement)) };
+      return self = ::std::move(xref);
+    }
+    Iopt length;
+    if(reader.L(state).o(length).v(replacement).F()) {
+      Reference_root::S_temporary xref = { std_string_replace_slice(::std::move(text), ::std::move(from),
+                                                                    ::std::move(length), ::std::move(replacement)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.compare()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("compare"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.compare"));
-    // Parse arguments.
-    Sval text1;
-    Sval text2;
-    Iopt length;
-    if(reader.I().v(text1).v(text2).o(length).F()) {
-      return std_string_compare(::std::move(text1), ::std::move(text2), ::std::move(length));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.compare(text1, text2, [length])`
 
@@ -1723,25 +1714,27 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
   * Returns a positive integer if `text1` compares greater than
     `text2`, a negative integer if `text1` compares less than
     `text2`, or zero if `text1` compares equal to `text2`.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.compare"));
+    // Parse arguments.
+    Sval text1;
+    Sval text2;
+    Iopt length;
+    if(reader.I().v(text1).v(text2).o(length).F()) {
+      Reference_root::S_temporary xref = { std_string_compare(::std::move(text1), ::std::move(text2), ::std::move(length)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.starts_with()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("starts_with"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.starts_with"));
-    // Parse arguments.
-    Sval text;
-    Sval prefix;
-    if(reader.I().v(text).v(prefix).F()) {
-      return std_string_starts_with(::std::move(text), ::std::move(prefix));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.starts_with(text, prefix)`
 
@@ -1750,25 +1743,26 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns `true` if `prefix` is a prefix of `text`, or `false`
     otherwise.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.starts_with"));
+    // Parse arguments.
+    Sval text;
+    Sval prefix;
+    if(reader.I().v(text).v(prefix).F()) {
+      Reference_root::S_temporary xref = { std_string_starts_with(::std::move(text), ::std::move(prefix)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.ends_with()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("ends_with"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.ends_with"));
-    // Parse arguments.
-    Sval text;
-    Sval suffix;
-    if(reader.I().v(text).v(suffix).F()) {
-      return std_string_ends_with(::std::move(text), ::std::move(suffix));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.ends_with(text, suffix)`
 
@@ -1777,35 +1771,26 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns `true` if `suffix` is a suffix of `text`, or `false`
     otherwise.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.ends_with"));
+    // Parse arguments.
+    Sval text;
+    Sval suffix;
+    if(reader.I().v(text).v(suffix).F()) {
+      Reference_root::S_temporary xref = { std_string_ends_with(::std::move(text), ::std::move(suffix)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.find()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("find"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.find"));
-    Argument_Reader::State state;
-    // Parse arguments.
-    Sval text;
-    Sval pattern;
-    if(reader.I().v(text).S(state).v(pattern).F()) {
-      return std_string_find(::std::move(text), ::std::move(pattern));
-    }
-    Ival from;
-    if(reader.L(state).v(from).S(state).v(pattern).F()) {
-      return std_string_find(::std::move(text), ::std::move(from), ::std::move(pattern));
-    }
-    Iopt length;
-    if(reader.L(state).o(length).v(pattern).F()) {
-      return std_string_find(::std::move(text), ::std::move(from), ::std::move(length),
-                             ::std::move(pattern));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.find(text, pattern)`
 
@@ -1834,35 +1819,38 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
   * Returns the subscript of the first byte of the first match of
     `pattern` in `text` if one is found, which is always
     non-negative, or `null` otherwise.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.find"));
+    Argument_Reader::State state;
+    // Parse arguments.
+    Sval text;
+    Sval pattern;
+    if(reader.I().v(text).S(state).v(pattern).F()) {
+      Reference_root::S_temporary xref = { std_string_find(::std::move(text), ::std::move(pattern)) };
+      return self = ::std::move(xref);
+    }
+    Ival from;
+    if(reader.L(state).v(from).S(state).v(pattern).F()) {
+      Reference_root::S_temporary xref = { std_string_find(::std::move(text), ::std::move(from), ::std::move(pattern)) };
+      return self = ::std::move(xref);
+    }
+    Iopt length;
+    if(reader.L(state).o(length).v(pattern).F()) {
+      Reference_root::S_temporary xref = { std_string_find(::std::move(text), ::std::move(from), ::std::move(length),
+                             ::std::move(pattern)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.rfind()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("rfind"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.rfind"));
-    Argument_Reader::State state;
-    // Parse arguments.
-    Sval text;
-    Sval pattern;
-    if(reader.I().v(text).S(state).v(pattern).F()) {
-      return std_string_rfind(::std::move(text), ::std::move(pattern));
-    }
-    Ival from;
-    if(reader.L(state).v(from).S(state).v(pattern).F()) {
-      return std_string_rfind(::std::move(text), ::std::move(from), ::std::move(pattern));
-    }
-    Iopt length;
-    if(reader.L(state).o(length).v(pattern).F()) {
-      return std_string_rfind(::std::move(text), ::std::move(from), ::std::move(length),
-                              ::std::move(pattern));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.rfind(text, pattern)`
 
@@ -1889,38 +1877,38 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
   * Returns the subscript of the first byte of the last match of
     `pattern` in `text` if one is found, which is always
     non-negative, or `null` otherwise.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.rfind"));
+    Argument_Reader::State state;
+    // Parse arguments.
+    Sval text;
+    Sval pattern;
+    if(reader.I().v(text).S(state).v(pattern).F()) {
+      Reference_root::S_temporary xref = { std_string_rfind(::std::move(text), ::std::move(pattern)) };
+      return self = ::std::move(xref);
+    }
+    Ival from;
+    if(reader.L(state).v(from).S(state).v(pattern).F()) {
+      Reference_root::S_temporary xref = { std_string_rfind(::std::move(text), ::std::move(from), ::std::move(pattern)) };
+      return self = ::std::move(xref);
+    }
+    Iopt length;
+    if(reader.L(state).o(length).v(pattern).F()) {
+      Reference_root::S_temporary xref = { std_string_rfind(::std::move(text), ::std::move(from), ::std::move(length),
+                              ::std::move(pattern)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.find_and_replace()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("find_and_replace"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.find_and_replace"));
-    Argument_Reader::State state;
-    // Parse arguments.
-    Sval text;
-    Sval pattern;
-    Sval replacement;
-    if(reader.I().v(text).S(state).v(pattern).v(replacement).F()) {
-      return std_string_find_and_replace(::std::move(text), ::std::move(pattern),
-                                         ::std::move(replacement));
-    }
-    Ival from;
-    if(reader.L(state).v(from).S(state).v(pattern).v(replacement).F()) {
-      return std_string_find_and_replace(::std::move(text), ::std::move(from), ::std::move(pattern),
-                                         ::std::move(replacement));
-    }
-    Iopt length;
-    if(reader.L(state).o(length).v(pattern).v(replacement).F()) {
-      return std_string_find_and_replace(::std::move(text), ::std::move(from), ::std::move(length),
-                                         ::std::move(pattern), ::std::move(replacement));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.find_and_replace(text, pattern, replacement)`
 
@@ -1950,35 +1938,41 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns the string with `pattern` replaced. If `text` does not
     contain `pattern`, it is returned intact.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.find_and_replace"));
+    Argument_Reader::State state;
+    // Parse arguments.
+    Sval text;
+    Sval pattern;
+    Sval replacement;
+    if(reader.I().v(text).S(state).v(pattern).v(replacement).F()) {
+      Reference_root::S_temporary xref = { std_string_find_and_replace(::std::move(text), ::std::move(pattern),
+                                         ::std::move(replacement)) };
+      return self = ::std::move(xref);
+    }
+    Ival from;
+    if(reader.L(state).v(from).S(state).v(pattern).v(replacement).F()) {
+      Reference_root::S_temporary xref = { std_string_find_and_replace(::std::move(text), ::std::move(from), ::std::move(pattern),
+                                         ::std::move(replacement)) };
+      return self = ::std::move(xref);
+    }
+    Iopt length;
+    if(reader.L(state).o(length).v(pattern).v(replacement).F()) {
+      Reference_root::S_temporary xref = { std_string_find_and_replace(::std::move(text), ::std::move(from), ::std::move(length),
+                                         ::std::move(pattern), ::std::move(replacement)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.find_any_of()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("find_any_of"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.find_any_of"));
-    Argument_Reader::State state;
-    // Parse arguments.
-    Sval text;
-    Sval accept;
-    if(reader.I().v(text).S(state).v(accept).F()) {
-      return std_string_find_any_of(::std::move(text), ::std::move(accept));
-    }
-    Ival from;
-    if(reader.L(state).v(from).S(state).v(accept).F()) {
-      return std_string_find_any_of(::std::move(text), ::std::move(from), ::std::move(accept));
-    }
-    Iopt length;
-    if(reader.L(state).o(length).v(accept).F()) {
-      return std_string_find_any_of(::std::move(text), ::std::move(from), ::std::move(length),
-                                    ::std::move(accept));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.find_any_of(text, accept)`
 
@@ -2004,35 +1998,38 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns the subscript of the first byte found, which is always
     non-negative; or `null` if no such byte exists.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.find_any_of"));
+    Argument_Reader::State state;
+    // Parse arguments.
+    Sval text;
+    Sval accept;
+    if(reader.I().v(text).S(state).v(accept).F()) {
+      Reference_root::S_temporary xref = { std_string_find_any_of(::std::move(text), ::std::move(accept)) };
+      return self = ::std::move(xref);
+    }
+    Ival from;
+    if(reader.L(state).v(from).S(state).v(accept).F()) {
+      Reference_root::S_temporary xref = { std_string_find_any_of(::std::move(text), ::std::move(from), ::std::move(accept)) };
+      return self = ::std::move(xref);
+    }
+    Iopt length;
+    if(reader.L(state).o(length).v(accept).F()) {
+      Reference_root::S_temporary xref = { std_string_find_any_of(::std::move(text), ::std::move(from), ::std::move(length),
+                                    ::std::move(accept)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.rfind_any_of()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("rfind_any_of"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.rfind_any_of"));
-    Argument_Reader::State state;
-    // Parse arguments.
-    Sval text;
-    Sval accept;
-    if(reader.I().v(text).S(state).v(accept).F()) {
-      return std_string_rfind_any_of(::std::move(text), ::std::move(accept));
-    }
-    Ival from;
-    if(reader.L(state).v(from).S(state).v(accept).F()) {
-      return std_string_rfind_any_of(::std::move(text), ::std::move(from), ::std::move(accept));
-    }
-    Iopt length;
-    if(reader.L(state).o(length).v(accept).F()) {
-      return std_string_rfind_any_of(::std::move(text), ::std::move(from), ::std::move(length),
-                                     ::std::move(accept));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.rfind_any_of(text, accept)`
 
@@ -2058,35 +2055,38 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns the subscript of the last byte found, which is always
     non-negative; or `null` if no such byte exists.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.rfind_any_of"));
+    Argument_Reader::State state;
+    // Parse arguments.
+    Sval text;
+    Sval accept;
+    if(reader.I().v(text).S(state).v(accept).F()) {
+      Reference_root::S_temporary xref = { std_string_rfind_any_of(::std::move(text), ::std::move(accept)) };
+      return self = ::std::move(xref);
+    }
+    Ival from;
+    if(reader.L(state).v(from).S(state).v(accept).F()) {
+      Reference_root::S_temporary xref = { std_string_rfind_any_of(::std::move(text), ::std::move(from), ::std::move(accept)) };
+      return self = ::std::move(xref);
+    }
+    Iopt length;
+    if(reader.L(state).o(length).v(accept).F()) {
+      Reference_root::S_temporary xref = { std_string_rfind_any_of(::std::move(text), ::std::move(from), ::std::move(length),
+                                     ::std::move(accept)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.find_not_of()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("find_not_of"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.find_not_of"));
-    Argument_Reader::State state;
-    // Parse arguments.
-    Sval text;
-    Sval accept;
-    if(reader.I().v(text).S(state).v(accept).F()) {
-      return std_string_find_not_of(::std::move(text), ::std::move(accept));
-    }
-    Ival from;
-    if(reader.L(state).v(from).S(state).v(accept).F()) {
-      return std_string_find_not_of(::std::move(text), ::std::move(from), ::std::move(accept));
-    }
-    Iopt length;
-    if(reader.L(state).o(length).v(accept).F()) {
-      return std_string_find_not_of(::std::move(text), ::std::move(from), ::std::move(length),
-                                    ::std::move(accept));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.find_not_of(text, reject)`
 
@@ -2112,35 +2112,38 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns the subscript of the first byte found, which is always
     non-negative; or `null` if no such byte exists.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.find_not_of"));
+    Argument_Reader::State state;
+    // Parse arguments.
+    Sval text;
+    Sval accept;
+    if(reader.I().v(text).S(state).v(accept).F()) {
+      Reference_root::S_temporary xref = { std_string_find_not_of(::std::move(text), ::std::move(accept)) };
+      return self = ::std::move(xref);
+    }
+    Ival from;
+    if(reader.L(state).v(from).S(state).v(accept).F()) {
+      Reference_root::S_temporary xref = { std_string_find_not_of(::std::move(text), ::std::move(from), ::std::move(accept)) };
+      return self = ::std::move(xref);
+    }
+    Iopt length;
+    if(reader.L(state).o(length).v(accept).F()) {
+      Reference_root::S_temporary xref = { std_string_find_not_of(::std::move(text), ::std::move(from), ::std::move(length),
+                                    ::std::move(accept)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.rfind_not_of()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("rfind_not_of"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.rfind_not_of"));
-    Argument_Reader::State state;
-    // Parse arguments.
-    Sval text;
-    Sval accept;
-    if(reader.I().v(text).S(state).v(accept).F()) {
-      return std_string_rfind_not_of(::std::move(text), ::std::move(accept));
-    }
-    Ival from;
-    if(reader.L(state).v(from).S(state).v(accept).F()) {
-      return std_string_rfind_not_of(::std::move(text), ::std::move(from), ::std::move(accept));
-    }
-    Iopt length;
-    if(reader.L(state).o(length).v(accept).F()) {
-      return std_string_rfind_not_of(::std::move(text), ::std::move(from), ::std::move(length),
-                                     ::std::move(accept));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.rfind_not_of(text, reject)`
 
@@ -2166,24 +2169,38 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns the subscript of the last byte found, which is always
     non-negative; or `null` if no such byte exists.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.rfind_not_of"));
+    Argument_Reader::State state;
+    // Parse arguments.
+    Sval text;
+    Sval accept;
+    if(reader.I().v(text).S(state).v(accept).F()) {
+      Reference_root::S_temporary xref = { std_string_rfind_not_of(::std::move(text), ::std::move(accept)) };
+      return self = ::std::move(xref);
+    }
+    Ival from;
+    if(reader.L(state).v(from).S(state).v(accept).F()) {
+      Reference_root::S_temporary xref = { std_string_rfind_not_of(::std::move(text), ::std::move(from), ::std::move(accept)) };
+      return self = ::std::move(xref);
+    }
+    Iopt length;
+    if(reader.L(state).o(length).v(accept).F()) {
+      Reference_root::S_temporary xref = { std_string_rfind_not_of(::std::move(text), ::std::move(from), ::std::move(length),
+                                     ::std::move(accept)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.reverse()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("reverse"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.reverse"));
-    // Parse arguments.
-    Sval text;
-    if(reader.I().v(text).F()) {
-      return std_string_reverse(::std::move(text));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.reverse(text)`
 
@@ -2191,25 +2208,25 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     without modifying `text`.
 
   * Returns the reversed string.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.reverse"));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      Reference_root::S_temporary xref = { std_string_reverse(::std::move(text)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.trim()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("trim"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.trim"));
-    // Parse arguments.
-    Sval text;
-    Sopt reject;
-    if(reader.I().v(text).o(reject).F()) {
-      return std_string_trim(::std::move(text), ::std::move(reject));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.trim(text, [reject])`
 
@@ -2219,25 +2236,26 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     function returns a new string without modifying `text`.
 
   * Returns the trimmed string.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.trim"));
+    // Parse arguments.
+    Sval text;
+    Sopt reject;
+    if(reader.I().v(text).o(reject).F()) {
+      Reference_root::S_temporary xref = { std_string_trim(::std::move(text), ::std::move(reject)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.triml()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("triml"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.triml"));
-    // Parse arguments.
-    Sval text;
-    Sopt reject;
-    if(reader.I().v(text).o(reject).F()) {
-      return std_string_triml(::std::move(text), ::std::move(reject));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.triml(text, [reject])`
 
@@ -2247,25 +2265,26 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     returns a new string without modifying `text`.
 
   * Returns the trimmed string.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.triml"));
+    // Parse arguments.
+    Sval text;
+    Sopt reject;
+    if(reader.I().v(text).o(reject).F()) {
+      Reference_root::S_temporary xref = { std_string_triml(::std::move(text), ::std::move(reject)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.trimr()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("trimr"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.trimr"));
-    // Parse arguments.
-    Sval text;
-    Sopt reject;
-    if(reader.I().v(text).o(reject).F()) {
-      return std_string_trimr(::std::move(text), ::std::move(reject));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.trimr(text, [reject])`
 
@@ -2275,26 +2294,26 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     returns a new string without modifying `text`.
 
   * Returns the trimmed string.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.trimr"));
+    // Parse arguments.
+    Sval text;
+    Sopt reject;
+    if(reader.I().v(text).o(reject).F()) {
+      Reference_root::S_temporary xref = { std_string_trimr(::std::move(text), ::std::move(reject)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.padl()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("padl"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.padl"));
-    // Parse arguments.
-    Sval text;
-    Ival length;
-    Sopt padding;
-    if(reader.I().v(text).v(length).o(padding).F()) {
-      return std_string_padl(::std::move(text), ::std::move(length), ::std::move(padding));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.padl(text, length, [padding])`
 
@@ -2306,26 +2325,27 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
   * Returns the padded string.
 
   * Throws an exception if `padding` is empty.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.padl"));
+    // Parse arguments.
+    Sval text;
+    Ival length;
+    Sopt padding;
+    if(reader.I().v(text).v(length).o(padding).F()) {
+      Reference_root::S_temporary xref = { std_string_padl(::std::move(text), ::std::move(length), ::std::move(padding)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.padr()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("padr"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.padr"));
-    // Parse arguments.
-    Sval text;
-    Ival length;
-    Sopt padding;
-    if(reader.I().v(text).v(length).o(padding).F()) {
-      return std_string_padr(::std::move(text), ::std::move(length), ::std::move(padding));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.padr(text, length, [padding])`
 
@@ -2337,24 +2357,27 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
   * Returns the padded string.
 
   * Throws an exception if `padding` is empty.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.padr"));
+    // Parse arguments.
+    Sval text;
+    Ival length;
+    Sopt padding;
+    if(reader.I().v(text).v(length).o(padding).F()) {
+      Reference_root::S_temporary xref = { std_string_padr(::std::move(text), ::std::move(length), ::std::move(padding)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.to_upper()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("to_upper"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.to_upper"));
-    // Parse arguments.
-    Sval text;
-    if(reader.I().v(text).F()) {
-      return std_string_to_upper(::std::move(text));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.to_upper(text)`
 
@@ -2363,24 +2386,25 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     without modifying `text`.
 
   * Returns a new string after the conversion.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.to_upper"));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      Reference_root::S_temporary xref = { std_string_to_upper(::std::move(text)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.to_lower()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("to_lower"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.to_lower"));
-    // Parse arguments.
-    Sval text;
-    if(reader.I().v(text).F()) {
-      return std_string_to_lower(::std::move(text));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.to_lower(text)`
 
@@ -2389,26 +2413,25 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     without modifying `text`.
 
   * Returns a new string after the conversion.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.to_lower"));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      Reference_root::S_temporary xref = { std_string_to_lower(::std::move(text)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.translate()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("translate"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.translate"));
-    // Parse arguments.
-    Sval text;
-    Sval inputs;
-    Sopt outputs;
-    if(reader.I().v(text).v(inputs).o(outputs).F()) {
-      return std_string_translate(::std::move(text), ::std::move(inputs), ::std::move(outputs));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.translate(text, inputs, [outputs])`
 
@@ -2423,26 +2446,27 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     `text`.
 
   * Returns the translated string.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.translate"));
+    // Parse arguments.
+    Sval text;
+    Sval inputs;
+    Sopt outputs;
+    if(reader.I().v(text).v(inputs).o(outputs).F()) {
+      Reference_root::S_temporary xref = { std_string_translate(::std::move(text), ::std::move(inputs), ::std::move(outputs)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.explode()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("explode"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.explode"));
-    // Parse arguments.
-    Sval text;
-    Sopt delim;
-    Iopt limit;
-    if(reader.I().v(text).o(delim).o(limit).F()) {
-      return std_string_explode(::std::move(text), ::std::move(delim), ::std::move(limit));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.explode(text, [delim], [limit])`
 
@@ -2456,25 +2480,27 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     is empty, an empty array is returned.
 
   * Throws an exception if `limit` is negative or zero.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.explode"));
+    // Parse arguments.
+    Sval text;
+    Sopt delim;
+    Iopt limit;
+    if(reader.I().v(text).o(delim).o(limit).F()) {
+      Reference_root::S_temporary xref = { std_string_explode(::std::move(text), ::std::move(delim), ::std::move(limit)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.implode()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("implode"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.implode"));
-    // Parse arguments.
-    Aval segments;
-    Sopt delim;
-    if(reader.I().v(segments).o(delim).F()) {
-      return std_string_implode(::std::move(segments), ::std::move(delim));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.implode(segments, [delim])`
 
@@ -2484,26 +2510,26 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns a string containing all segments. If `segments` is
     empty, an empty string is returned.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.implode"));
+    // Parse arguments.
+    Aval segments;
+    Sopt delim;
+    if(reader.I().v(segments).o(delim).F()) {
+      Reference_root::S_temporary xref = { std_string_implode(::std::move(segments), ::std::move(delim)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.hex_encode()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("hex_encode"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.hex_encode"));
-    // Parse arguments.
-    Sval data;
-    Bopt lowercase;
-    Sopt delim;
-    if(reader.I().v(data).o(lowercase).o(delim).F()) {
-      return std_string_hex_encode(::std::move(data), ::std::move(lowercase), ::std::move(delim));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.hex_encode(data, [lowercase], [delim])`
 
@@ -2515,24 +2541,28 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns the encoded string. If `data` is empty, an empty
     string is returned.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.hex_encode"));
+    // Parse arguments.
+    Sval data;
+    Bopt lowercase;
+    Sopt delim;
+    if(reader.I().v(data).o(lowercase).o(delim).F()) {
+      Reference_root::S_temporary xref = { std_string_hex_encode(::std::move(data), ::std::move(lowercase),
+                                                                 ::std::move(delim)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.hex_decode()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("hex_decode"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.hex_decode"));
-    // Parse arguments.
-    Sval text;
-    if(reader.I().v(text).F()) {
-      return std_string_hex_decode(::std::move(text));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.hex_decode(text)`
 
@@ -2546,25 +2576,25 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     or consists of only whitespaces, an empty string is returned.
 
   * Throws an exception if the string is invalid.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.hex_decode"));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      Reference_root::S_temporary xref = { std_string_hex_decode(::std::move(text)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.base32_encode()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("base32_encode"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.base32_encode"));
-    // Parse arguments.
-    Sval data;
-    Bopt lowercase;
-    if(reader.I().v(data).o(lowercase).F()) {
-      return std_string_base32_encode(::std::move(data), ::std::move(lowercase));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.base32_encode(data, [lowercase])`
 
@@ -2576,24 +2606,26 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     mandatory.
 
   * Returns the encoded string.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.base32_encode"));
+    // Parse arguments.
+    Sval data;
+    Bopt lowercase;
+    if(reader.I().v(data).o(lowercase).F()) {
+      Reference_root::S_temporary xref = { std_string_base32_encode(::std::move(data), ::std::move(lowercase)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.base32_decode()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("base32_decode"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.base32_decode"));
-    // Parse arguments.
-    Sval text;
-    if(reader.I().v(text).F()) {
-      return std_string_base32_decode(::std::move(text));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.base32_decode(text)`
 
@@ -2607,24 +2639,25 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     or consists of only whitespaces, an empty string is returned.
 
   * Throws an exception if the string is invalid.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.base32_decode"));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      Reference_root::S_temporary xref = { std_string_base32_decode(::std::move(text)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.base64_encode()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("base64_encode"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.base64_encode"));
-    // Parse arguments.
-    Sval data;
-    if(reader.I().v(data).F()) {
-      return std_string_base64_encode(::std::move(data));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.base64_encode(data)`
 
@@ -2633,24 +2666,25 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     always a multiple of 4; padding characters are mandatory.
 
   * Returns the encoded string.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.base64_encode"));
+    // Parse arguments.
+    Sval data;
+    if(reader.I().v(data).F()) {
+      Reference_root::S_temporary xref = { std_string_base64_encode(::std::move(data)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.base64_decode()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("base64_decode"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.base64_decode"));
-    // Parse arguments.
-    Sval text;
-    if(reader.I().v(text).F()) {
-      return std_string_base64_decode(::std::move(text));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.base64_decode(text)`
 
@@ -2664,25 +2698,25 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     or consists of only whitespaces, an empty string is returned.
 
   * Throws an exception if the string is invalid.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.base64_decode"));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      Reference_root::S_temporary xref = { std_string_base64_decode(::std::move(text)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.url_encode()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("url_encode"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.url_encode"));
-    // Parse arguments.
-    Sval data;
-    Bopt lowercase;
-    if(reader.I().v(data).o(lowercase).F()) {
-      return std_string_url_encode(::std::move(data), ::std::move(lowercase));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.url_encode(data, [lowercase])`
 
@@ -2694,24 +2728,26 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns the encoded string. If `data` is empty, an empty
     string is returned.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.url_encode"));
+    // Parse arguments.
+    Sval data;
+    Bopt lowercase;
+    if(reader.I().v(data).o(lowercase).F()) {
+      Reference_root::S_temporary xref = { std_string_url_encode(::std::move(data), ::std::move(lowercase)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.url_decode()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("url_decode"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.url_decode"));
-    // Parse arguments.
-    Sval text;
-    if(reader.I().v(text).F()) {
-      return std_string_url_decode(::std::move(text));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.url_decode(text)`
 
@@ -2725,25 +2761,25 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
   * Returns a string containing decoded bytes.
 
   * Throws an exception if the string contains invalid characters.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.url_decode"));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      Reference_root::S_temporary xref = { std_string_url_decode(::std::move(text)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.url_encode_query()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("url_encode_query"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.url_encode"));
-    // Parse arguments.
-    Sval data;
-    Bopt lowercase;
-    if(reader.I().v(data).o(lowercase).F()) {
-      return std_string_url_encode_query(::std::move(data), ::std::move(lowercase));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.url_encode_query(data, [lowercase])`
 
@@ -2754,24 +2790,26 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns the encoded string. If `data` is empty, an empty
     string is returned.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.url_encode"));
+    // Parse arguments.
+    Sval data;
+    Bopt lowercase;
+    if(reader.I().v(data).o(lowercase).F()) {
+      Reference_root::S_temporary xref = { std_string_url_encode_query(::std::move(data), ::std::move(lowercase)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.url_decode_query()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("url_decode_query"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.url_decode"));
-    // Parse arguments.
-    Sval text;
-    if(reader.I().v(text).F()) {
-      return std_string_url_decode_query(::std::move(text));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.url_decode_query(text)`
 
@@ -2782,53 +2820,50 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
   * Returns a string containing decoded bytes.
 
   * Throws an exception if the string contains invalid characters.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.url_decode"));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      Reference_root::S_temporary xref = { std_string_url_decode_query(::std::move(text)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.utf8_validate()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("utf8_validate"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.utf8_validate"));
-    // Parse arguments.
-    Sval text;
-    if(reader.I().v(text).F()) {
-      return std_string_utf8_validate(::std::move(text));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.utf8_validate(text)`
 
   * Checks whether `text` is a valid UTF-8 string.
 
   * Returns `true` if `text` is valid, or `false` otherwise.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.utf8_validate"));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      Reference_root::S_temporary xref = { std_string_utf8_validate(::std::move(text)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.utf8_encode()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("utf8_encode"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.utf8_encode"));
-    // Parse arguments.
-    Ival code_point;
-    Bopt permissive;
-    if(reader.I().v(code_point).o(permissive).F()) {
-      return std_string_utf8_encode(::std::move(code_point), ::std::move(permissive));
-    }
-    Aval code_points;
-    if(reader.I().v(code_points).o(permissive).F()) {
-      return std_string_utf8_encode(::std::move(code_points), ::std::move(permissive));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.utf8_encode(code_points, [permissive])`
 
@@ -2842,25 +2877,31 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
   * Returns the encoded string.
 
   * Throws an exception on failure.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.utf8_encode"));
+    // Parse arguments.
+    Ival code_point;
+    Bopt permissive;
+    if(reader.I().v(code_point).o(permissive).F()) {
+      Reference_root::S_temporary xref = { std_string_utf8_encode(::std::move(code_point), ::std::move(permissive)) };
+      return self = ::std::move(xref);
+    }
+    Aval code_points;
+    if(reader.I().v(code_points).o(permissive).F()) {
+      Reference_root::S_temporary xref = { std_string_utf8_encode(::std::move(code_points), ::std::move(permissive)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.utf8_decode()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("utf8_decode"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.utf8_decode"));
-    // Parse arguments.
-    Sval text;
-    Bopt permissive;
-    if(reader.I().v(text).o(permissive).F()) {
-      return std_string_utf8_decode(::std::move(text), ::std::move(permissive));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.utf8_decode(text, [permissive])`
 
@@ -2874,28 +2915,26 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
   * Returns an array containing decoded code points.
 
   * Throws an exception on failure.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.utf8_decode"));
+    // Parse arguments.
+    Sval text;
+    Bopt permissive;
+    if(reader.I().v(text).o(permissive).F()) {
+      Reference_root::S_temporary xref = { std_string_utf8_decode(::std::move(text), ::std::move(permissive)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.pack_8()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("pack_8"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.pack_8"));
-    // Parse arguments.
-    Ival value;
-    if(reader.I().v(value).F()) {
-      return std_string_pack_8(::std::move(value));
-    }
-    Aval values;
-    if(reader.I().v(values).F()) {
-      return std_string_pack_8(::std::move(values));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.pack_8(values)`
 
@@ -2904,24 +2943,30 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     truncated to 8 bits then copied into a string.
 
   * Returns the packed string.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.pack_8"));
+    // Parse arguments.
+    Ival value;
+    if(reader.I().v(value).F()) {
+      Reference_root::S_temporary xref = { std_string_pack_8(::std::move(value)) };
+      return self = ::std::move(xref);
+    }
+    Aval values;
+    if(reader.I().v(values).F()) {
+      Reference_root::S_temporary xref = { std_string_pack_8(::std::move(values)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.unpack_8()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("unpack_8"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.unpack_8"));
-    // Parse arguments.
-    Sval text;
-    if(reader.I().v(text).F()) {
-      return std_string_unpack_8(::std::move(text));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.unpack_8(text)`
 
@@ -2930,28 +2975,25 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     which are sign-extended to 64 bits then copied into an array.
 
   * Returns an array containing unpacked integers.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.unpack_8"));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      Reference_root::S_temporary xref = { std_string_unpack_8(::std::move(text)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.pack_16be()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("pack_16be"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.pack_16be"));
-    // Parse arguments.
-    Ival value;
-    if(reader.I().v(value).F()) {
-      return std_string_pack_16be(::std::move(value));
-    }
-    Aval values;
-    if(reader.I().v(values).F()) {
-      return std_string_pack_16be(::std::move(values));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.pack_16be(values)`
 
@@ -2961,24 +3003,30 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     big-endian byte order.
 
   * Returns the packed string.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.pack_16be"));
+    // Parse arguments.
+    Ival value;
+    if(reader.I().v(value).F()) {
+      Reference_root::S_temporary xref = { std_string_pack_16be(::std::move(value)) };
+      return self = ::std::move(xref);
+    }
+    Aval values;
+    if(reader.I().v(values).F()) {
+      Reference_root::S_temporary xref = { std_string_pack_16be(::std::move(values)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.unpack_16be()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("unpack_16be"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.unpack_16be"));
-    // Parse arguments.
-    Sval text;
-    if(reader.I().v(text).F()) {
-      return std_string_unpack_16be(::std::move(text));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.unpack_16be(text)`
 
@@ -2991,28 +3039,25 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Throws an exception if the length of `text` is not a multiple
     of 2.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.unpack_16be"));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      Reference_root::S_temporary xref = { std_string_unpack_16be(::std::move(text)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.pack_16le()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("pack_16le"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.pack_16le"));
-    // Parse arguments.
-    Ival value;
-    if(reader.I().v(value).F()) {
-      return std_string_pack_16le(::std::move(value));
-    }
-    Aval values;
-    if(reader.I().v(values).F()) {
-      return std_string_pack_16le(::std::move(values));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.pack_16le(values)`
 
@@ -3022,24 +3067,30 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     little-endian byte order.
 
   * Returns the packed string.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.pack_16le"));
+    // Parse arguments.
+    Ival value;
+    if(reader.I().v(value).F()) {
+      Reference_root::S_temporary xref = { std_string_pack_16le(::std::move(value)) };
+      return self = ::std::move(xref);
+    }
+    Aval values;
+    if(reader.I().v(values).F()) {
+      Reference_root::S_temporary xref = { std_string_pack_16le(::std::move(values)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.unpack_16le()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("unpack_16le"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.unpack_16le"));
-    // Parse arguments.
-    Sval text;
-    if(reader.I().v(text).F()) {
-      return std_string_unpack_16le(::std::move(text));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.unpack_16le(text)`
 
@@ -3052,28 +3103,25 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Throws an exception if the length of `text` is not a multiple
     of 2.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.unpack_16le"));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      Reference_root::S_temporary xref = { std_string_unpack_16le(::std::move(text)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.pack_32be()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("pack_32be"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.pack_32be"));
-    // Parse arguments.
-    Ival value;
-    if(reader.I().v(value).F()) {
-      return std_string_pack_32be(::std::move(value));
-    }
-    Aval values;
-    if(reader.I().v(values).F()) {
-      return std_string_pack_32be(::std::move(values));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.pack_32be(values)`
 
@@ -3083,24 +3131,30 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     big-endian byte order.
 
   * Returns the packed string.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.pack_32be"));
+    // Parse arguments.
+    Ival value;
+    if(reader.I().v(value).F()) {
+      Reference_root::S_temporary xref = { std_string_pack_32be(::std::move(value)) };
+      return self = ::std::move(xref);
+    }
+    Aval values;
+    if(reader.I().v(values).F()) {
+      Reference_root::S_temporary xref = { std_string_pack_32be(::std::move(values)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.unpack_32be()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("unpack_32be"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.unpack_32be"));
-    // Parse arguments.
-    Sval text;
-    if(reader.I().v(text).F()) {
-      return std_string_unpack_32be(::std::move(text));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.unpack_32be(text)`
 
@@ -3113,28 +3167,25 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Throws an exception if the length of `text` is not a multiple
     of 4.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.unpack_32be"));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      Reference_root::S_temporary xref = { std_string_unpack_32be(::std::move(text)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.pack_32le()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("pack_32le"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.pack_32le"));
-    // Parse arguments.
-    Ival value;
-    if(reader.I().v(value).F()) {
-      return std_string_pack_32le(::std::move(value));
-    }
-    Aval values;
-    if(reader.I().v(values).F()) {
-      return std_string_pack_32le(::std::move(values));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.pack_32le(values)`
 
@@ -3144,24 +3195,30 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     little-endian byte order.
 
   * Returns the packed string.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.pack_32le"));
+    // Parse arguments.
+    Ival value;
+    if(reader.I().v(value).F()) {
+      Reference_root::S_temporary xref = { std_string_pack_32le(::std::move(value)) };
+      return self = ::std::move(xref);
+    }
+    Aval values;
+    if(reader.I().v(values).F()) {
+      Reference_root::S_temporary xref = { std_string_pack_32le(::std::move(values)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.unpack_32le()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("unpack_32le"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.unpack_32le"));
-    // Parse arguments.
-    Sval text;
-    if(reader.I().v(text).F()) {
-      return std_string_unpack_32le(::std::move(text));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.unpack_32le(text)`
 
@@ -3174,28 +3231,25 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Throws an exception if the length of `text` is not a multiple
     of 4.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.unpack_32le"));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      Reference_root::S_temporary xref = { std_string_unpack_32le(::std::move(text)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.pack_64be()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("pack_64be"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.pack_64be"));
-    // Parse arguments.
-    Ival value;
-    if(reader.I().v(value).F()) {
-      return std_string_pack_64be(::std::move(value));
-    }
-    Aval values;
-    if(reader.I().v(values).F()) {
-      return std_string_pack_64be(::std::move(values));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.pack_64be(values)`
 
@@ -3204,24 +3258,30 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     are copied into a string in the big-endian byte order.
 
   * Returns the packed string.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.pack_64be"));
+    // Parse arguments.
+    Ival value;
+    if(reader.I().v(value).F()) {
+      Reference_root::S_temporary xref = { std_string_pack_64be(::std::move(value)) };
+      return self = ::std::move(xref);
+    }
+    Aval values;
+    if(reader.I().v(values).F()) {
+      Reference_root::S_temporary xref = { std_string_pack_64be(::std::move(values)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.unpack_64be()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("unpack_64be"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.unpack_64be"));
-    // Parse arguments.
-    Sval text;
-    if(reader.I().v(text).F()) {
-      return std_string_unpack_64be(::std::move(text));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.unpack_64be(text)`
 
@@ -3233,28 +3293,25 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Throws an exception if the length of `text` is not a multiple
     of 8.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.unpack_64be"));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      Reference_root::S_temporary xref = { std_string_unpack_64be(::std::move(text)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.pack_64le()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("pack_64le"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.pack_64le"));
-    // Parse arguments.
-    Ival value;
-    if(reader.I().v(value).F()) {
-      return std_string_pack_64le(::std::move(value));
-    }
-    Aval values;
-    if(reader.I().v(values).F()) {
-      return std_string_pack_64le(::std::move(values));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.pack_64le(values)`
 
@@ -3263,24 +3320,30 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     are copied into a string in the little-endian byte order.
 
   * Returns the packed string.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.pack_64le"));
+    // Parse arguments.
+    Ival value;
+    if(reader.I().v(value).F()) {
+      Reference_root::S_temporary xref = { std_string_pack_64le(::std::move(value)) };
+      return self = ::std::move(xref);
+    }
+    Aval values;
+    if(reader.I().v(values).F()) {
+      Reference_root::S_temporary xref = { std_string_pack_64le(::std::move(values)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.unpack_64le()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("unpack_64le"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.unpack_64le"));
-    // Parse arguments.
-    Sval text;
-    if(reader.I().v(text).F()) {
-      return std_string_unpack_64le(::std::move(text));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.unpack_64le(text)`
 
@@ -3293,25 +3356,25 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Throws an exception if the length of `text` is not a multiple
     of 8.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.unpack_64le"));
+    // Parse arguments.
+    Sval text;
+    if(reader.I().v(text).F()) {
+      Reference_root::S_temporary xref = { std_string_unpack_64le(::std::move(text)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.format()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("format"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.format"));
-    // Parse arguments.
-    Sval templ;
-    cow_vector<Value> values;
-    if(reader.I().v(templ).F(values)) {
-      return std_string_format(::std::move(templ), ::std::move(values));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.format(templ, ...)`
 
@@ -3331,56 +3394,26 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
   * Throws an exception if `templ` contains invalid placeholder
     sequences, or when a placeholder sequence has no corresponding
     argument.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.format"));
+    // Parse arguments.
+    Sval templ;
+    cow_vector<Value> values;
+    if(reader.I().v(templ).F(values)) {
+      Reference_root::S_temporary xref = { std_string_format(::std::move(templ), ::std::move(values)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.regex_find()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("regex_find"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.regex_find"));
-    Argument_Reader::State state;
-    // Parse arguments.
-    Sval text;
-    Sval pattern;
-    if(reader.I().v(text).S(state).v(pattern).F()) {
-      auto kpair = std_string_regex_find(::std::move(text), ::std::move(pattern));
-      if(!kpair)
-        return nullptr;
-      // This function returns a `pair`, but we would like to return an array so convert it.
-      Aval rval(2);
-      rval.mut(0) = ::std::move(kpair->first);
-      rval.mut(1) = ::std::move(kpair->second);
-      return ::std::move(rval);
-    }
-    Ival from;
-    if(reader.L(state).v(from).S(state).v(pattern).F()) {
-      auto kpair = std_string_regex_find(::std::move(text), ::std::move(from), ::std::move(pattern));
-      if(!kpair)
-        return nullptr;
-      // This function returns a `pair`, but we would like to return an array so convert it.
-      Aval rval(2);
-      rval.mut(0) = ::std::move(kpair->first);
-      rval.mut(1) = ::std::move(kpair->second);
-      return ::std::move(rval);
-    }
-    Iopt length;
-    if(reader.L(state).o(length).v(pattern).F()) {
-      auto kpair = std_string_regex_find(::std::move(text), ::std::move(from), ::std::move(length),
-                                         ::std::move(pattern));
-      if(!kpair)
-        return nullptr;
-      // This function returns a `pair`, but we would like to return an array so convert it.
-      Aval rval(2);
-      rval.mut(0) = ::std::move(kpair->first);
-      rval.mut(1) = ::std::move(kpair->second);
-      return ::std::move(rval);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.regex_find(text, pattern)`
 
@@ -3423,35 +3456,53 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Throws an exception if `pattern` is not a valid regular
     expression.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.regex_find"));
+    Argument_Reader::State state;
+    // Parse arguments.
+    Sval text;
+    Sval pattern;
+    if(reader.I().v(text).S(state).v(pattern).F()) {
+      auto kpair = std_string_regex_find(::std::move(text), ::std::move(pattern));
+      if(!kpair) {
+        return self = Reference_root::S_temporary();
+      }
+      // This function returns a `pair`, but we would like to return an array so convert it.
+      Reference_root::S_temporary xref = { { kpair->first, kpair->second } };
+      return self = ::std::move(xref);
+    }
+    Ival from;
+    if(reader.L(state).v(from).S(state).v(pattern).F()) {
+      auto kpair = std_string_regex_find(::std::move(text), ::std::move(from), ::std::move(pattern));
+      if(!kpair) {
+        return self = Reference_root::S_temporary();
+      }
+      // This function returns a `pair`, but we would like to return an array so convert it.
+      Reference_root::S_temporary xref = { { kpair->first, kpair->second } };
+      return self = ::std::move(xref);
+    }
+    Iopt length;
+    if(reader.L(state).o(length).v(pattern).F()) {
+      auto kpair = std_string_regex_find(::std::move(text), ::std::move(from), ::std::move(length),
+                                         ::std::move(pattern));
+      if(!kpair) {
+        return self = Reference_root::S_temporary();
+      }
+      // This function returns a `pair`, but we would like to return an array so convert it.
+      Reference_root::S_temporary xref = { { kpair->first, kpair->second } };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.regex_match()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("regex_match"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.regex_match"));
-    Argument_Reader::State state;
-    // Parse arguments.
-    Sval text;
-    Sval pattern;
-    if(reader.I().v(text).S(state).v(pattern).F()) {
-      return std_string_regex_match(::std::move(text), ::std::move(pattern));
-    }
-    Ival from;
-    if(reader.L(state).v(from).S(state).v(pattern).F()) {
-      return std_string_regex_match(::std::move(text), ::std::move(from), ::std::move(pattern));
-    }
-    Iopt length;
-    if(reader.L(state).o(length).v(pattern).F()) {
-      return std_string_regex_match(::std::move(text), ::std::move(from), ::std::move(length),
-                                    ::std::move(pattern));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.regex_match(text, pattern)`
 
@@ -3497,38 +3548,38 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Throws an exception if `pattern` is not a valid regular
     expression.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.regex_match"));
+    Argument_Reader::State state;
+    // Parse arguments.
+    Sval text;
+    Sval pattern;
+    if(reader.I().v(text).S(state).v(pattern).F()) {
+      Reference_root::S_temporary xref = { std_string_regex_match(::std::move(text), ::std::move(pattern)) };
+      return self = ::std::move(xref);
+    }
+    Ival from;
+    if(reader.L(state).v(from).S(state).v(pattern).F()) {
+      Reference_root::S_temporary xref = { std_string_regex_match(::std::move(text), ::std::move(from), ::std::move(pattern)) };
+      return self = ::std::move(xref);
+    }
+    Iopt length;
+    if(reader.L(state).o(length).v(pattern).F()) {
+      Reference_root::S_temporary xref = { std_string_regex_match(::std::move(text), ::std::move(from), ::std::move(length),
+                                    ::std::move(pattern)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // `std.string.regex_replace()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("regex_replace"),
       Fval(
-[](cow_vector<Reference>&& args) -> Value
-  {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.regex_replace"));
-    Argument_Reader::State state;
-    // Parse arguments.
-    Sval text;
-    Sval pattern;
-    Sval replacement;
-    if(reader.I().v(text).S(state).v(pattern).v(replacement).F()) {
-      return std_string_regex_replace(::std::move(text), ::std::move(pattern),
-                                         ::std::move(replacement));
-    }
-    Ival from;
-    if(reader.L(state).v(from).S(state).v(pattern).v(replacement).F()) {
-      return std_string_regex_replace(::std::move(text), ::std::move(from), ::std::move(pattern),
-                                         ::std::move(replacement));
-    }
-    Iopt length;
-    if(reader.L(state).o(length).v(pattern).v(replacement).F()) {
-      return std_string_regex_replace(::std::move(text), ::std::move(from), ::std::move(length),
-                                      ::std::move(pattern), ::std::move(replacement));
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  },
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.string.regex_replace(text, pattern, replacement)`
 
@@ -3569,7 +3620,35 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Throws an exception if `pattern` is not a valid regular
     expression.
-)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.string.regex_replace"));
+    Argument_Reader::State state;
+    // Parse arguments.
+    Sval text;
+    Sval pattern;
+    Sval replacement;
+    if(reader.I().v(text).S(state).v(pattern).v(replacement).F()) {
+      Reference_root::S_temporary xref = { std_string_regex_replace(::std::move(text), ::std::move(pattern),
+                                         ::std::move(replacement)) };
+      return self = ::std::move(xref);
+    }
+    Ival from;
+    if(reader.L(state).v(from).S(state).v(pattern).v(replacement).F()) {
+      Reference_root::S_temporary xref = { std_string_regex_replace(::std::move(text), ::std::move(from), ::std::move(pattern),
+                                         ::std::move(replacement)) };
+      return self = ::std::move(xref);
+    }
+    Iopt length;
+    if(reader.L(state).o(length).v(pattern).v(replacement).F()) {
+      Reference_root::S_temporary xref = { std_string_regex_replace(::std::move(text), ::std::move(from), ::std::move(length),
+                                      ::std::move(pattern), ::std::move(replacement)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
       ));
     //===================================================================
     // End of `std.string`
