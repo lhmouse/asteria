@@ -617,7 +617,7 @@ Value std_json_parse(Sval text)
   {
     // We reuse the lexer of Asteria here, allowing quite a few extensions e.g. binary numeric
     // literals and comments.
-    Compiler_Options opts = { };
+    Compiler_Options opts;
     opts.escapable_single_quotes = true;
     opts.keywords_as_identifiers = true;
     opts.integers_as_reals = true;

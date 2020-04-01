@@ -36,11 +36,6 @@ class CRC32_Hasher final : public Abstract_Opaque
     uint32_t m_reg = UINT32_MAX;
 
   public:
-    CRC32_Hasher() noexcept
-      {
-      }
-
-  public:
     tinyfmt& describe(tinyfmt& fmt) const override
       {
         return fmt << "CRC-32 hasher";
@@ -86,11 +81,6 @@ class FNV1a32_Hasher final : public Abstract_Opaque
     static constexpr uint32_t offset = 2166136261;
 
     uint32_t m_reg = offset;
-
-  public:
-    FNV1a32_Hasher() noexcept
-      {
-      }
 
   public:
     tinyfmt& describe(tinyfmt& fmt) const override
@@ -227,11 +217,6 @@ class MD5_Hasher final : public Abstract_Opaque
     array<uint32_t, 4> m_regs = init();
     uint64_t m_size = 0;
     array<uint8_t, 64> m_chunk;
-
-  public:
-    MD5_Hasher() noexcept
-      {
-      }
 
   private:
     void do_consume_chunk(const uint8_t* p) noexcept
@@ -451,11 +436,6 @@ class SHA1_Hasher final : public Abstract_Opaque
     array<uint32_t, 5> m_regs = init();
     uint64_t m_size = 0;
     array<uint8_t, 64> m_chunk;
-
-  public:
-    SHA1_Hasher() noexcept
-      {
-      }
 
   private:
     void do_consume_chunk(const uint8_t* p) noexcept
@@ -700,11 +680,6 @@ class SHA256_Hasher final : public Abstract_Opaque
     array<uint32_t, 8> m_regs = init();
     uint64_t m_size = 0;
     array<uint8_t, 64> m_chunk;
-
-  public:
-    SHA256_Hasher() noexcept
-      {
-      }
 
   private:
     void do_consume_chunk(const uint8_t* p) noexcept

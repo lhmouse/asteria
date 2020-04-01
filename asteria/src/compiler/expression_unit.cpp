@@ -104,7 +104,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         const auto& altr = this->m_stor.as<index_function_call>();
 
         // Encode arguments.
-        AIR_Node::S_function_call xnode = { altr.sloc, altr.nargs, opts.no_proper_tail_calls ? ptc_aware_none : ptc };
+        AIR_Node::S_function_call xnode = { altr.sloc, altr.nargs, opts.proper_tail_calls ? ptc : ptc_aware_none };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -170,7 +170,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         const auto& altr = this->m_stor.as<index_variadic_call>();
 
         // Encode arguments.
-        AIR_Node::S_variadic_call xnode = { altr.sloc, opts.no_proper_tail_calls ? ptc_aware_none : ptc };
+        AIR_Node::S_variadic_call xnode = { altr.sloc, opts.proper_tail_calls ? ptc : ptc_aware_none };
         code.emplace_back(::std::move(xnode));
         return code;
       }

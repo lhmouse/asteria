@@ -581,19 +581,19 @@ template<uint32_t versionT> struct Compiler_Options_template<versionT, 0>
 template<> struct Compiler_Options_fragment<1>
   {
     // Make single quotes behave similiar to double quotes. [useful when parsing JSON5 text]
-    bool escapable_single_quotes : 1;
+    bool escapable_single_quotes = false;
     // Parse keywords as identifiers. [useful when parsing JSON text]
-    bool keywords_as_identifiers : 1;
+    bool keywords_as_identifiers = false;
     // Parse integer literals as real literals. [useful when parsing JSON text]
-    bool integers_as_reals : 1;
-    // Do not implement proper tail calls. [more commonly known as tail call optimization]
-    bool no_proper_tail_calls : 1;
-    // Suppress all optimization techniques.
-    bool no_optimization : 1;
-    // Generate calls to single-step hooks for every expression, not just function calls.
-    bool verbose_single_step_traps : 1;
+    bool integers_as_reals = false;
 
-    // Note: Please keep this struct as compact as possible.
+    // Enable proper tail calls. [more commonly known as tail call optimization]
+    bool proper_tail_calls = true;
+    // Enable optimization. [master switch]
+    bool optimization = true;
+
+    // Generate calls to single-step hooks for every expression, not just function calls.
+    bool verbose_single_step_traps = false;
   };
 
 template<> struct Compiler_Options_fragment<2>

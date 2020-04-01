@@ -12,7 +12,7 @@ class Simple_Script
   {
   private:
     cow_vector<phsh_string> m_params;  // constant
-    Compiler_Options m_opts = { };
+    Compiler_Options m_opts;  // static
     cow_function m_func;  // note type erasure
 
   public:
