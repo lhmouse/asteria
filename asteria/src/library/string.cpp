@@ -524,26 +524,6 @@ Bval std_string_ends_with(Sval text, Sval suffix)
     return text.ends_with(suffix);
   }
 
-Iopt std_string_find(Sval text, Sval pattern)
-  {
-    auto range = ::std::make_pair(text.begin(), text.end());
-    auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
-    if(!qit) {
-      return nullopt;
-    }
-    return *qit - text.begin();
-  }
-
-Iopt std_string_find(Sval text, Ival from, Sval pattern)
-  {
-    auto range = do_slice(text, from, nullopt);
-    auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
-    if(!qit) {
-      return nullopt;
-    }
-    return *qit - text.begin();
-  }
-
 Iopt std_string_find(Sval text, Ival from, Iopt length, Sval pattern)
   {
     auto range = do_slice(text, from, length);
@@ -552,28 +532,6 @@ Iopt std_string_find(Sval text, Ival from, Iopt length, Sval pattern)
       return nullopt;
     }
     return *qit - text.begin();
-  }
-
-Iopt std_string_rfind(Sval text, Sval pattern)
-  {
-    auto range = ::std::make_pair(text.begin(), text.end());
-    auto qit = do_find_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
-                           pattern.rbegin(), pattern.rend());
-    if(!qit) {
-      return nullopt;
-    }
-    return text.rend() - *qit - pattern.ssize();
-  }
-
-Iopt std_string_rfind(Sval text, Ival from, Sval pattern)
-  {
-    auto range = do_slice(text, from, nullopt);
-    auto qit = do_find_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
-                           pattern.rbegin(), pattern.rend());
-    if(!qit) {
-      return nullopt;
-    }
-    return text.rend() - *qit - pattern.ssize();
   }
 
 Iopt std_string_rfind(Sval text, Ival from, Iopt length, Sval pattern)
@@ -587,26 +545,6 @@ Iopt std_string_rfind(Sval text, Ival from, Iopt length, Sval pattern)
     return text.rend() - *qit - pattern.ssize();
   }
 
-Sval std_string_find_and_replace(Sval text, Sval pattern, Sval replacement)
-  {
-    Sval res;
-    auto range = ::std::make_pair(text.begin(), text.end());
-    do_find_and_replace(res, range.first, range.second, pattern.begin(), pattern.end(),
-                             replacement.begin(), replacement.end());
-    return res;
-  }
-
-Sval std_string_find_and_replace(Sval text, Ival from, Sval pattern, Sval replacement)
-  {
-    Sval res;
-    auto range = do_slice(text, from, nullopt);
-    res.append(text.begin(), range.first);
-    do_find_and_replace(res, range.first, range.second, pattern.begin(), pattern.end(),
-                             replacement.begin(), replacement.end());
-    res.append(range.second, text.end());
-    return res;
-  }
-
 Sval std_string_find_and_replace(Sval text, Ival from, Iopt length, Sval pattern, Sval replacement)
   {
     Sval res;
@@ -618,48 +556,10 @@ Sval std_string_find_and_replace(Sval text, Ival from, Iopt length, Sval pattern
     return res;
   }
 
-Iopt std_string_find_any_of(Sval text, Sval accept)
-  {
-    auto qit = do_find_of_opt(text.begin(), text.end(), accept, true);
-    if(!qit) {
-      return nullopt;
-    }
-    return *qit - text.begin();
-  }
-
-Iopt std_string_find_any_of(Sval text, Ival from, Sval accept)
-  {
-    auto range = do_slice(text, from, nullopt);
-    auto qit = do_find_of_opt(range.first, range.second, accept, true);
-    if(!qit) {
-      return nullopt;
-    }
-    return *qit - text.begin();
-  }
-
 Iopt std_string_find_any_of(Sval text, Ival from, Iopt length, Sval accept)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(range.first, range.second, accept, true);
-    if(!qit) {
-      return nullopt;
-    }
-    return *qit - text.begin();
-  }
-
-Iopt std_string_find_not_of(Sval text, Sval reject)
-  {
-    auto qit = do_find_of_opt(text.begin(), text.end(), reject, false);
-    if(!qit) {
-      return nullopt;
-    }
-    return *qit - text.begin();
-  }
-
-Iopt std_string_find_not_of(Sval text, Ival from, Sval reject)
-  {
-    auto range = do_slice(text, from, nullopt);
-    auto qit = do_find_of_opt(range.first, range.second, reject, false);
     if(!qit) {
       return nullopt;
     }
@@ -676,51 +576,11 @@ Iopt std_string_find_not_of(Sval text, Ival from, Iopt length, Sval reject)
     return *qit - text.begin();
   }
 
-Iopt std_string_rfind_any_of(Sval text, Sval accept)
-  {
-    auto qit = do_find_of_opt(text.rbegin(), text.rend(), accept, true);
-    if(!qit) {
-      return nullopt;
-    }
-    return text.rend() - *qit - 1;
-  }
-
-Iopt std_string_rfind_any_of(Sval text, Ival from, Sval accept)
-  {
-    auto range = do_slice(text, from, nullopt);
-    auto qit = do_find_of_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
-                              accept, true);
-    if(!qit) {
-      return nullopt;
-    }
-    return text.rend() - *qit - 1;
-  }
-
 Iopt std_string_rfind_any_of(Sval text, Ival from, Iopt length, Sval accept)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
                               accept, true);
-    if(!qit) {
-      return nullopt;
-    }
-    return text.rend() - *qit - 1;
-  }
-
-Iopt std_string_rfind_not_of(Sval text, Sval reject)
-  {
-    auto qit = do_find_of_opt(text.rbegin(), text.rend(), reject, false);
-    if(!qit) {
-      return nullopt;
-    }
-    return text.rend() - *qit - 1;
-  }
-
-Iopt std_string_rfind_not_of(Sval text, Ival from, Sval reject)
-  {
-    auto range = do_slice(text, from, nullopt);
-    auto qit = do_find_of_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
-                              reject, false);
     if(!qit) {
       return nullopt;
     }
@@ -1521,26 +1381,6 @@ Sval std_string_format(Sval templ, cow_vector<Value> values)
     return fmt.extract_string();
   }
 
-opt<pair<Ival, Ival>> std_string_regex_find(Sval text, Sval pattern)
-  {
-    auto range = ::std::make_pair(text.begin(), text.end());
-    auto match = do_regex_search(range.first, range.second, do_make_regex(pattern));
-    if(!match.matched) {
-      return nullopt;
-    }
-    return ::std::make_pair(match.first - text.begin(), match.second - match.first);
-  }
-
-opt<pair<Ival, Ival>> std_string_regex_find(Sval text, Ival from, Sval pattern)
-  {
-    auto range = do_slice(text, from, nullopt);
-    auto match = do_regex_search(range.first, range.second, do_make_regex(pattern));
-    if(!match.matched) {
-      return nullopt;
-    }
-    return ::std::make_pair(match.first - text.begin(), match.second - match.first);
-  }
-
 opt<pair<Ival, Ival>> std_string_regex_find(Sval text, Ival from, Iopt length, Sval pattern)
   {
     auto range = do_slice(text, from, length);
@@ -1551,26 +1391,6 @@ opt<pair<Ival, Ival>> std_string_regex_find(Sval text, Ival from, Iopt length, S
     return ::std::make_pair(match.first - text.begin(), match.second - match.first);
   }
 
-Aopt std_string_regex_match(Sval text, Sval pattern)
-  {
-    auto range = ::std::make_pair(text.begin(), text.end());
-    auto matches = do_regex_match(range.first, range.second, do_make_regex(pattern));
-    if(matches.empty()) {
-      return nullopt;
-    }
-    return do_regex_copy_matches(matches);
-  }
-
-Aopt std_string_regex_match(Sval text, Ival from, Sval pattern)
-  {
-    auto range = do_slice(text, from, nullopt);
-    auto matches = do_regex_match(range.first, range.second, do_make_regex(pattern));
-    if(matches.empty()) {
-      return nullopt;
-    }
-    return do_regex_copy_matches(matches);
-  }
-
 Aopt std_string_regex_match(Sval text, Ival from, Iopt length, Sval pattern)
   {
     auto range = do_slice(text, from, length);
@@ -1579,26 +1399,6 @@ Aopt std_string_regex_match(Sval text, Ival from, Iopt length, Sval pattern)
       return nullopt;
     }
     return do_regex_copy_matches(matches);
-  }
-
-Sval std_string_regex_replace(Sval text, Sval pattern, Sval replacement)
-  {
-    Sval res;
-    auto range = ::std::make_pair(text.begin(), text.end());
-    do_regex_replace(res, range.first, range.second, do_make_regex(pattern),
-                          do_make_regex_replacement(replacement));
-    return res;
-  }
-
-Sval std_string_regex_replace(Sval text, Ival from, Sval pattern, Sval replacement)
-  {
-    Sval res;
-    auto range = do_slice(text, from, nullopt);
-    res.append(text.begin(), range.first);
-    do_regex_replace(res, range.first, range.second, do_make_regex(pattern),
-                          do_make_regex_replacement(replacement));
-    res.append(range.second, text.end());
-    return res;
   }
 
 Sval std_string_regex_replace(Sval text, Ival from, Iopt length, Sval pattern, Sval replacement)
@@ -1640,7 +1440,7 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Ival from;
     Iopt length;
     if(reader.I().v(text).v(from).o(length).F()) {
-      Reference_root::S_temporary xref = { std_string_slice(::std::move(text), ::std::move(from), ::std::move(length)) };
+      Reference_root::S_temporary xref = { std_string_slice(::std::move(text), from, length) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1683,14 +1483,14 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Ival from;
     Sval replacement;
     if(reader.I().v(text).v(from).S(state).v(replacement).F()) {
-      Reference_root::S_temporary xref = { std_string_replace_slice(::std::move(text), ::std::move(from),
+      Reference_root::S_temporary xref = { std_string_replace_slice(::std::move(text), from,
                                                                     ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
     Iopt length;
     if(reader.L(state).o(length).v(replacement).F()) {
-      Reference_root::S_temporary xref = { std_string_replace_slice(::std::move(text), ::std::move(from),
-                                                                    ::std::move(length), ::std::move(replacement)) };
+      Reference_root::S_temporary xref = { std_string_replace_slice(::std::move(text), from,
+                                                                    length, ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1723,7 +1523,7 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval text2;
     Iopt length;
     if(reader.I().v(text1).v(text2).o(length).F()) {
-      Reference_root::S_temporary xref = { std_string_compare(::std::move(text1), ::std::move(text2), ::std::move(length)) };
+      Reference_root::S_temporary xref = { std_string_compare(::std::move(text1), ::std::move(text2), length) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1828,18 +1628,20 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval text;
     Sval pattern;
     if(reader.I().v(text).S(state).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_find(::std::move(text), ::std::move(pattern)) };
+      Reference_root::S_temporary xref = { std_string_find(::std::move(text), 0, nullopt,
+                                                           ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_find(::std::move(text), ::std::move(from), ::std::move(pattern)) };
+      Reference_root::S_temporary xref = { std_string_find(::std::move(text), from, nullopt,
+                                                           ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
     Iopt length;
     if(reader.L(state).o(length).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_find(::std::move(text), ::std::move(from), ::std::move(length),
-                             ::std::move(pattern)) };
+      Reference_root::S_temporary xref = { std_string_find(::std::move(text), from, length,
+                                                           ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1886,18 +1688,20 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval text;
     Sval pattern;
     if(reader.I().v(text).S(state).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_rfind(::std::move(text), ::std::move(pattern)) };
+      Reference_root::S_temporary xref = { std_string_rfind(::std::move(text), 0, nullopt,
+                                                            ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_rfind(::std::move(text), ::std::move(from), ::std::move(pattern)) };
+      Reference_root::S_temporary xref = { std_string_rfind(::std::move(text), from, nullopt,
+                                                            ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
     Iopt length;
     if(reader.L(state).o(length).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_rfind(::std::move(text), ::std::move(from), ::std::move(length),
-                              ::std::move(pattern)) };
+      Reference_root::S_temporary xref = { std_string_rfind(::std::move(text), from, length,
+                                                            ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1948,20 +1752,20 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval pattern;
     Sval replacement;
     if(reader.I().v(text).S(state).v(pattern).v(replacement).F()) {
-      Reference_root::S_temporary xref = { std_string_find_and_replace(::std::move(text), ::std::move(pattern),
-                                         ::std::move(replacement)) };
+      Reference_root::S_temporary xref = { std_string_find_and_replace(::std::move(text), 0, nullopt,
+                                                                       ::std::move(pattern), ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(pattern).v(replacement).F()) {
-      Reference_root::S_temporary xref = { std_string_find_and_replace(::std::move(text), ::std::move(from), ::std::move(pattern),
-                                         ::std::move(replacement)) };
+      Reference_root::S_temporary xref = { std_string_find_and_replace(::std::move(text), from, nullopt,
+                                                                       ::std::move(pattern), ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
     Iopt length;
     if(reader.L(state).o(length).v(pattern).v(replacement).F()) {
-      Reference_root::S_temporary xref = { std_string_find_and_replace(::std::move(text), ::std::move(from), ::std::move(length),
-                                         ::std::move(pattern), ::std::move(replacement)) };
+      Reference_root::S_temporary xref = { std_string_find_and_replace(::std::move(text), from, length,
+                                                                       ::std::move(pattern), ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2007,18 +1811,20 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval text;
     Sval accept;
     if(reader.I().v(text).S(state).v(accept).F()) {
-      Reference_root::S_temporary xref = { std_string_find_any_of(::std::move(text), ::std::move(accept)) };
+      Reference_root::S_temporary xref = { std_string_find_any_of(::std::move(text), 0, nullopt,
+                                                                  ::std::move(accept)) };
       return self = ::std::move(xref);
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(accept).F()) {
-      Reference_root::S_temporary xref = { std_string_find_any_of(::std::move(text), ::std::move(from), ::std::move(accept)) };
+      Reference_root::S_temporary xref = { std_string_find_any_of(::std::move(text), from, nullopt,
+                                                                  ::std::move(accept)) };
       return self = ::std::move(xref);
     }
     Iopt length;
     if(reader.L(state).o(length).v(accept).F()) {
-      Reference_root::S_temporary xref = { std_string_find_any_of(::std::move(text), ::std::move(from), ::std::move(length),
-                                    ::std::move(accept)) };
+      Reference_root::S_temporary xref = { std_string_find_any_of(::std::move(text), from, length,
+                                                                  ::std::move(accept)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2064,18 +1870,20 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval text;
     Sval accept;
     if(reader.I().v(text).S(state).v(accept).F()) {
-      Reference_root::S_temporary xref = { std_string_rfind_any_of(::std::move(text), ::std::move(accept)) };
+      Reference_root::S_temporary xref = { std_string_rfind_any_of(::std::move(text), 0, nullopt,
+                                                                   ::std::move(accept)) };
       return self = ::std::move(xref);
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(accept).F()) {
-      Reference_root::S_temporary xref = { std_string_rfind_any_of(::std::move(text), ::std::move(from), ::std::move(accept)) };
+      Reference_root::S_temporary xref = { std_string_rfind_any_of(::std::move(text), from, nullopt,
+                                                                   ::std::move(accept)) };
       return self = ::std::move(xref);
     }
     Iopt length;
     if(reader.L(state).o(length).v(accept).F()) {
-      Reference_root::S_temporary xref = { std_string_rfind_any_of(::std::move(text), ::std::move(from), ::std::move(length),
-                                     ::std::move(accept)) };
+      Reference_root::S_temporary xref = { std_string_rfind_any_of(::std::move(text), from, length,
+                                                                   ::std::move(accept)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2121,18 +1929,20 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval text;
     Sval accept;
     if(reader.I().v(text).S(state).v(accept).F()) {
-      Reference_root::S_temporary xref = { std_string_find_not_of(::std::move(text), ::std::move(accept)) };
+      Reference_root::S_temporary xref = { std_string_find_not_of(::std::move(text), 0, nullopt,
+                                                                  ::std::move(accept)) };
       return self = ::std::move(xref);
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(accept).F()) {
-      Reference_root::S_temporary xref = { std_string_find_not_of(::std::move(text), ::std::move(from), ::std::move(accept)) };
+      Reference_root::S_temporary xref = { std_string_find_not_of(::std::move(text), from, nullopt,
+                                                                  ::std::move(accept)) };
       return self = ::std::move(xref);
     }
     Iopt length;
     if(reader.L(state).o(length).v(accept).F()) {
-      Reference_root::S_temporary xref = { std_string_find_not_of(::std::move(text), ::std::move(from), ::std::move(length),
-                                    ::std::move(accept)) };
+      Reference_root::S_temporary xref = { std_string_find_not_of(::std::move(text), from, length,
+                                                                  ::std::move(accept)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2178,18 +1988,20 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval text;
     Sval accept;
     if(reader.I().v(text).S(state).v(accept).F()) {
-      Reference_root::S_temporary xref = { std_string_rfind_not_of(::std::move(text), ::std::move(accept)) };
+      Reference_root::S_temporary xref = { std_string_rfind_not_of(::std::move(text), 0, nullopt,
+                                                                   ::std::move(accept)) };
       return self = ::std::move(xref);
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(accept).F()) {
-      Reference_root::S_temporary xref = { std_string_rfind_not_of(::std::move(text), ::std::move(from), ::std::move(accept)) };
+      Reference_root::S_temporary xref = { std_string_rfind_not_of(::std::move(text), from, nullopt,
+                                                                   ::std::move(accept)) };
       return self = ::std::move(xref);
     }
     Iopt length;
     if(reader.L(state).o(length).v(accept).F()) {
-      Reference_root::S_temporary xref = { std_string_rfind_not_of(::std::move(text), ::std::move(from), ::std::move(length),
-                                     ::std::move(accept)) };
+      Reference_root::S_temporary xref = { std_string_rfind_not_of(::std::move(text), from, length,
+                                                                   ::std::move(accept)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2334,7 +2146,7 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Ival length;
     Sopt padding;
     if(reader.I().v(text).v(length).o(padding).F()) {
-      Reference_root::S_temporary xref = { std_string_padl(::std::move(text), ::std::move(length), ::std::move(padding)) };
+      Reference_root::S_temporary xref = { std_string_padl(::std::move(text), length, ::std::move(padding)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2366,7 +2178,7 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Ival length;
     Sopt padding;
     if(reader.I().v(text).v(length).o(padding).F()) {
-      Reference_root::S_temporary xref = { std_string_padr(::std::move(text), ::std::move(length), ::std::move(padding)) };
+      Reference_root::S_temporary xref = { std_string_padr(::std::move(text), length, ::std::move(padding)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2455,7 +2267,8 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval inputs;
     Sopt outputs;
     if(reader.I().v(text).v(inputs).o(outputs).F()) {
-      Reference_root::S_temporary xref = { std_string_translate(::std::move(text), ::std::move(inputs), ::std::move(outputs)) };
+      Reference_root::S_temporary xref = { std_string_translate(::std::move(text), ::std::move(inputs),
+                                                                                   ::std::move(outputs)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2489,7 +2302,7 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sopt delim;
     Iopt limit;
     if(reader.I().v(text).o(delim).o(limit).F()) {
-      Reference_root::S_temporary xref = { std_string_explode(::std::move(text), ::std::move(delim), ::std::move(limit)) };
+      Reference_root::S_temporary xref = { std_string_explode(::std::move(text), ::std::move(delim), limit) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2550,8 +2363,7 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Bopt lowercase;
     Sopt delim;
     if(reader.I().v(data).o(lowercase).o(delim).F()) {
-      Reference_root::S_temporary xref = { std_string_hex_encode(::std::move(data), ::std::move(lowercase),
-                                                                 ::std::move(delim)) };
+      Reference_root::S_temporary xref = { std_string_hex_encode(::std::move(data), lowercase, ::std::move(delim)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2614,7 +2426,7 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval data;
     Bopt lowercase;
     if(reader.I().v(data).o(lowercase).F()) {
-      Reference_root::S_temporary xref = { std_string_base32_encode(::std::move(data), ::std::move(lowercase)) };
+      Reference_root::S_temporary xref = { std_string_base32_encode(::std::move(data), lowercase) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2736,7 +2548,7 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval data;
     Bopt lowercase;
     if(reader.I().v(data).o(lowercase).F()) {
-      Reference_root::S_temporary xref = { std_string_url_encode(::std::move(data), ::std::move(lowercase)) };
+      Reference_root::S_temporary xref = { std_string_url_encode(::std::move(data), lowercase) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2798,7 +2610,7 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval data;
     Bopt lowercase;
     if(reader.I().v(data).o(lowercase).F()) {
-      Reference_root::S_temporary xref = { std_string_url_encode_query(::std::move(data), ::std::move(lowercase)) };
+      Reference_root::S_temporary xref = { std_string_url_encode_query(::std::move(data), lowercase) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -3465,7 +3277,7 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval text;
     Sval pattern;
     if(reader.I().v(text).S(state).v(pattern).F()) {
-      auto kpair = std_string_regex_find(::std::move(text), ::std::move(pattern));
+      auto kpair = std_string_regex_find(::std::move(text), 0, nullopt, ::std::move(pattern));
       if(!kpair) {
         return self = Reference_root::S_temporary();
       }
@@ -3475,7 +3287,7 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(pattern).F()) {
-      auto kpair = std_string_regex_find(::std::move(text), ::std::move(from), ::std::move(pattern));
+      auto kpair = std_string_regex_find(::std::move(text), from, nullopt, ::std::move(pattern));
       if(!kpair) {
         return self = Reference_root::S_temporary();
       }
@@ -3485,8 +3297,7 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     }
     Iopt length;
     if(reader.L(state).o(length).v(pattern).F()) {
-      auto kpair = std_string_regex_find(::std::move(text), ::std::move(from), ::std::move(length),
-                                         ::std::move(pattern));
+      auto kpair = std_string_regex_find(::std::move(text), from, length, ::std::move(pattern));
       if(!kpair) {
         return self = Reference_root::S_temporary();
       }
@@ -3557,18 +3368,20 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval text;
     Sval pattern;
     if(reader.I().v(text).S(state).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_regex_match(::std::move(text), ::std::move(pattern)) };
+      Reference_root::S_temporary xref = { std_string_regex_match(::std::move(text), 0, nullopt,
+                                                                  ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_regex_match(::std::move(text), ::std::move(from), ::std::move(pattern)) };
+      Reference_root::S_temporary xref = { std_string_regex_match(::std::move(text), from, nullopt,
+                                                                  ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
     Iopt length;
     if(reader.L(state).o(length).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_regex_match(::std::move(text), ::std::move(from), ::std::move(length),
-                                    ::std::move(pattern)) };
+      Reference_root::S_temporary xref = { std_string_regex_match(::std::move(text), from, length,
+                                                                  ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -3630,20 +3443,20 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval pattern;
     Sval replacement;
     if(reader.I().v(text).S(state).v(pattern).v(replacement).F()) {
-      Reference_root::S_temporary xref = { std_string_regex_replace(::std::move(text), ::std::move(pattern),
-                                         ::std::move(replacement)) };
+      Reference_root::S_temporary xref = { std_string_regex_replace(::std::move(text), 0, nullopt,
+                                                                    ::std::move(pattern), ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(pattern).v(replacement).F()) {
-      Reference_root::S_temporary xref = { std_string_regex_replace(::std::move(text), ::std::move(from), ::std::move(pattern),
-                                         ::std::move(replacement)) };
+      Reference_root::S_temporary xref = { std_string_regex_replace(::std::move(text), from, nullopt,
+                                                                    ::std::move(pattern), ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
     Iopt length;
     if(reader.L(state).o(length).v(pattern).v(replacement).F()) {
-      Reference_root::S_temporary xref = { std_string_regex_replace(::std::move(text), ::std::move(from), ::std::move(length),
-                                      ::std::move(pattern), ::std::move(replacement)) };
+      Reference_root::S_temporary xref = { std_string_regex_replace(::std::move(text), from, length,
+                                                                    ::std::move(pattern), ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
     // Fail.

@@ -268,50 +268,10 @@ Aval std_array_replace_slice(Aval data, Ival from, Iopt length, Aval replacement
     return res;
   }
 
-Iopt std_array_find(Aval data, Value target)
-  {
-    auto range = ::std::make_pair(data.begin(), data.end());
-    auto qit = do_find_opt(range.first, range.second, target);
-    if(!qit) {
-      return nullopt;
-    }
-    return *qit - data.begin();
-  }
-
-Iopt std_array_find(Aval data, Ival from, Value target)
-  {
-    auto range = do_slice(data, from, nullopt);
-    auto qit = do_find_opt(range.first, range.second, target);
-    if(!qit) {
-      return nullopt;
-    }
-    return *qit - data.begin();
-  }
-
 Iopt std_array_find(Aval data, Ival from, Iopt length, Value target)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_opt(range.first, range.second, target);
-    if(!qit) {
-      return nullopt;
-    }
-    return *qit - data.begin();
-  }
-
-Iopt std_array_find_if(Global& global, Aval data, Fval predictor)
-  {
-    auto range = ::std::make_pair(data.begin(), data.end());
-    auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
-    if(!qit) {
-      return nullopt;
-    }
-    return *qit - data.begin();
-  }
-
-Iopt std_array_find_if(Global& global, Aval data, Ival from, Fval predictor)
-  {
-    auto range = do_slice(data, from, nullopt);
-    auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
     if(!qit) {
       return nullopt;
     }
@@ -328,26 +288,6 @@ Iopt std_array_find_if(Global& global, Aval data, Ival from, Iopt length, Fval p
     return *qit - data.begin();
   }
 
-Iopt std_array_find_if_not(Global& global, Aval data, Fval predictor)
-  {
-    auto range = ::std::make_pair(data.begin(), data.end());
-    auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
-    if(!qit) {
-      return nullopt;
-    }
-    return *qit - data.begin();
-  }
-
-Iopt std_array_find_if_not(Global& global, Aval data, Ival from, Fval predictor)
-  {
-    auto range = do_slice(data, from, nullopt);
-    auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
-    if(!qit) {
-      return nullopt;
-    }
-    return *qit - data.begin();
-  }
-
 Iopt std_array_find_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
   {
     auto range = do_slice(data, from, length);
@@ -358,55 +298,11 @@ Iopt std_array_find_if_not(Global& global, Aval data, Ival from, Iopt length, Fv
     return *qit - data.begin();
   }
 
-Iopt std_array_rfind(Aval data, Value target)
-  {
-    auto range = ::std::make_pair(data.begin(), data.end());
-    auto qit = do_find_opt(::std::make_reverse_iterator(range.second),
-                           ::std::make_reverse_iterator(range.first), target);
-    if(!qit) {
-      return nullopt;
-    }
-    return data.rend() - *qit - 1;
-  }
-
-Iopt std_array_rfind(Aval data, Ival from, Value target)
-  {
-    auto range = do_slice(data, from, nullopt);
-    auto qit = do_find_opt(::std::make_reverse_iterator(range.second),
-                           ::std::make_reverse_iterator(range.first), target);
-    if(!qit) {
-      return nullopt;
-    }
-    return data.rend() - *qit - 1;
-  }
-
 Iopt std_array_rfind(Aval data, Ival from, Iopt length, Value target)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_opt(::std::make_reverse_iterator(range.second),
                            ::std::make_reverse_iterator(range.first), target);
-    if(!qit) {
-      return nullopt;
-    }
-    return data.rend() - *qit - 1;
-  }
-
-Iopt std_array_rfind_if(Global& global, Aval data, Fval predictor)
-  {
-    auto range = ::std::make_pair(data.begin(), data.end());
-    auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second),
-                                      ::std::make_reverse_iterator(range.first), predictor, true);
-    if(!qit) {
-      return nullopt;
-    }
-    return data.rend() - *qit - 1;
-  }
-
-Iopt std_array_rfind_if(Global& global, Aval data, Ival from, Fval predictor)
-  {
-    auto range = do_slice(data, from, nullopt);
-    auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second),
-                                      ::std::make_reverse_iterator(range.first), predictor, true);
     if(!qit) {
       return nullopt;
     }
@@ -424,28 +320,6 @@ Iopt std_array_rfind_if(Global& global, Aval data, Ival from, Iopt length, Fval 
     return data.rend() - *qit - 1;
   }
 
-Iopt std_array_rfind_if_not(Global& global, Aval data, Fval predictor)
-  {
-    auto range = ::std::make_pair(data.begin(), data.end());
-    auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second),
-                                      ::std::make_reverse_iterator(range.first), predictor, false);
-    if(!qit) {
-      return nullopt;
-    }
-    return data.rend() - *qit - 1;
-  }
-
-Iopt std_array_rfind_if_not(Global& global, Aval data, Ival from, Fval predictor)
-  {
-    auto range = do_slice(data, from, nullopt);
-    auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second),
-                                      ::std::make_reverse_iterator(range.first), predictor, false);
-    if(!qit) {
-      return nullopt;
-    }
-    return data.rend() - *qit - 1;
-  }
-
 Iopt std_array_rfind_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
   {
     auto range = do_slice(data, from, length);
@@ -457,72 +331,12 @@ Iopt std_array_rfind_if_not(Global& global, Aval data, Ival from, Iopt length, F
     return data.rend() - *qit - 1;
   }
 
-Ival std_array_count(Aval data, Value target)
-  {
-    int64_t count = 0;
-    auto range = ::std::make_pair(data.begin(), data.end());
-    for(;;) {
-      auto qit = do_find_opt(range.first, range.second, target);
-      if(!qit) {
-        break;
-      }
-      ++count;
-      range.first = ::std::move(++*qit);
-    }
-    return count;
-  }
-
-Ival std_array_count(Aval data, Ival from, Value target)
-  {
-    int64_t count = 0;
-    auto range = do_slice(data, from, nullopt);
-    for(;;) {
-      auto qit = do_find_opt(range.first, range.second, target);
-      if(!qit) {
-        break;
-      }
-      ++count;
-      range.first = ::std::move(++*qit);
-    }
-    return count;
-  }
-
 Ival std_array_count(Aval data, Ival from, Iopt length, Value target)
   {
     int64_t count = 0;
     auto range = do_slice(data, from, length);
     for(;;) {
       auto qit = do_find_opt(range.first, range.second, target);
-      if(!qit) {
-        break;
-      }
-      ++count;
-      range.first = ::std::move(++*qit);
-    }
-    return count;
-  }
-
-Ival std_array_count_if(Global& global, Aval data, Fval predictor)
-  {
-    int64_t count = 0;
-    auto range = ::std::make_pair(data.begin(), data.end());
-    for(;;) {
-      auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
-      if(!qit) {
-        break;
-      }
-      ++count;
-      range.first = ::std::move(++*qit);
-    }
-    return count;
-  }
-
-Ival std_array_count_if(Global& global, Aval data, Ival from, Fval predictor)
-  {
-    int64_t count = 0;
-    auto range = do_slice(data, from, nullopt);
-    for(;;) {
-      auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
       if(!qit) {
         break;
       }
@@ -547,36 +361,6 @@ Ival std_array_count_if(Global& global, Aval data, Ival from, Iopt length, Fval 
     return count;
   }
 
-Ival std_array_count_if_not(Global& global, Aval data, Fval predictor)
-  {
-    int64_t count = 0;
-    auto range = ::std::make_pair(data.begin(), data.end());
-    for(;;) {
-      auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
-      if(!qit) {
-        break;
-      }
-      ++count;
-      range.first = ::std::move(++*qit);
-    }
-    return count;
-  }
-
-Ival std_array_count_if_not(Global& global, Aval data, Ival from, Fval predictor)
-  {
-    int64_t count = 0;
-    auto range = do_slice(data, from, nullopt);
-    for(;;) {
-      auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
-      if(!qit) {
-        break;
-      }
-      ++count;
-      range.first = ::std::move(++*qit);
-    }
-    return count;
-  }
-
 Ival std_array_count_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
   {
     int64_t count = 0;
@@ -590,36 +374,6 @@ Ival std_array_count_if_not(Global& global, Aval data, Ival from, Iopt length, F
       range.first = ::std::move(++*qit);
     }
     return count;
-  }
-
-Aval std_array_exclude(Aval data, Value target)
-  {
-    auto range = ::std::make_pair(data.begin(), data.end());
-    ptrdiff_t dist = data.end() - range.second;
-    for(;;) {
-      auto qit = do_find_opt(range.first, range.second, target);
-      if(!qit) {
-        break;
-      }
-      range.first = data.erase(*qit);
-      range.second = data.end() - dist;
-    }
-    return ::std::move(data);
-  }
-
-Aval std_array_exclude(Aval data, Ival from, Value target)
-  {
-    auto range = do_slice(data, from, nullopt);
-    ptrdiff_t dist = data.end() - range.second;
-    for(;;) {
-      auto qit = do_find_opt(range.first, range.second, target);
-      if(!qit) {
-        break;
-      }
-      range.first = data.erase(*qit);
-      range.second = data.end() - dist;
-    }
-    return ::std::move(data);
   }
 
 Aval std_array_exclude(Aval data, Ival from, Iopt length, Value target)
@@ -637,72 +391,12 @@ Aval std_array_exclude(Aval data, Ival from, Iopt length, Value target)
     return ::std::move(data);
   }
 
-Aval std_array_exclude_if(Global& global, Aval data, Fval predictor)
-  {
-    auto range = ::std::make_pair(data.begin(), data.end());
-    ptrdiff_t dist = data.end() - range.second;
-    for(;;) {
-      auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
-      if(!qit) {
-        break;
-      }
-      range.first = data.erase(*qit);
-      range.second = data.end() - dist;
-    }
-    return ::std::move(data);
-  }
-
-Aval std_array_exclude_if(Global& global, Aval data, Ival from, Fval predictor)
-  {
-    auto range = do_slice(data, from, nullopt);
-    ptrdiff_t dist = data.end() - range.second;
-    for(;;) {
-      auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
-      if(!qit) {
-        break;
-      }
-      range.first = data.erase(*qit);
-      range.second = data.end() - dist;
-    }
-    return ::std::move(data);
-  }
-
 Aval std_array_exclude_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
   {
     auto range = do_slice(data, from, length);
     ptrdiff_t dist = data.end() - range.second;
     for(;;) {
       auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
-      if(!qit) {
-        break;
-      }
-      range.first = data.erase(*qit);
-      range.second = data.end() - dist;
-    }
-    return ::std::move(data);
-  }
-
-Aval std_array_exclude_if_not(Global& global, Aval data, Fval predictor)
-  {
-    auto range = ::std::make_pair(data.begin(), data.end());
-    ptrdiff_t dist = data.end() - range.second;
-    for(;;) {
-      auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
-      if(!qit) {
-        break;
-      }
-      range.first = data.erase(*qit);
-      range.second = data.end() - dist;
-    }
-    return ::std::move(data);
-  }
-
-Aval std_array_exclude_if_not(Global& global, Aval data, Ival from, Fval predictor)
-  {
-    auto range = do_slice(data, from, nullopt);
-    ptrdiff_t dist = data.end() - range.second;
-    for(;;) {
-      auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
       if(!qit) {
         break;
       }
@@ -965,7 +659,7 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Ival from;
     Iopt length;
     if(reader.I().v(data).v(from).o(length).F()) {
-      Reference_root::S_temporary xref = { std_array_slice(::std::move(data), ::std::move(from), ::std::move(length)) };
+      Reference_root::S_temporary xref = { std_array_slice(::std::move(data), from, length) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1008,14 +702,14 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Ival from;
     Aval replacement;
     if(reader.I().v(data).v(from).S(state).v(replacement).F()) {
-      Reference_root::S_temporary xref = { std_array_replace_slice(::std::move(data), ::std::move(from),
+      Reference_root::S_temporary xref = { std_array_replace_slice(::std::move(data), from,
                                                                    ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
     Iopt length;
     if(reader.L(state).o(length).v(replacement).F()) {
-      Reference_root::S_temporary xref = { std_array_replace_slice(::std::move(data), ::std::move(from),
-                                                                   ::std::move(length), ::std::move(replacement)) };
+      Reference_root::S_temporary xref = { std_array_replace_slice(::std::move(data), from,
+                                                                   length, ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1064,18 +758,20 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Value target;
     if(reader.I().v(data).S(state).o(target).F()) {
-      Reference_root::S_temporary xref = { std_array_find(::std::move(data), ::std::move(target)) };
+      Reference_root::S_temporary xref = { std_array_find(::std::move(data), 0, nullopt,
+                                                          ::std::move(target)) };
       return self = ::std::move(xref);
     }
     Ival from;
     if(reader.L(state).v(from).S(state).o(target).F()) {
-      Reference_root::S_temporary xref = { std_array_find(::std::move(data), ::std::move(from), ::std::move(target)) };
+      Reference_root::S_temporary xref = { std_array_find(::std::move(data), from, nullopt,
+                                                          ::std::move(target)) };
       return self = ::std::move(xref);
     }
     Iopt length;
     if(reader.L(state).o(length).o(target).F()) {
-      Reference_root::S_temporary xref = { std_array_find(::std::move(data), ::std::move(from),
-                                                          ::std::move(length), ::std::move(target)) };
+      Reference_root::S_temporary xref = { std_array_find(::std::move(data), from, length,
+                                                          ::std::move(target)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1124,19 +820,20 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_find_if(global, ::std::move(data), ::std::move(predictor)) };
+      Reference_root::S_temporary xref = { std_array_find_if(global, ::std::move(data), 0, nullopt,
+                                                                     ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_find_if(global, ::std::move(data), ::std::move(from),
+      Reference_root::S_temporary xref = { std_array_find_if(global, ::std::move(data), from, nullopt,
                                                                      ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_find_if(global, ::std::move(data), ::std::move(from),
-                                                                     ::std::move(length), ::std::move(predictor)) };
+      Reference_root::S_temporary xref = { std_array_find_if(global, ::std::move(data), from, length,
+                                                                     ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1185,19 +882,20 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_find_if_not(global, ::std::move(data), ::std::move(predictor)) };
+      Reference_root::S_temporary xref = { std_array_find_if_not(global, ::std::move(data), 0, nullopt,
+                                                                         ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_find_if_not(global, ::std::move(data), ::std::move(from),
+      Reference_root::S_temporary xref = { std_array_find_if_not(global, ::std::move(data), from, nullopt,
                                                                          ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_find_if_not(global, ::std::move(data), ::std::move(from),
-                                                                         ::std::move(length), ::std::move(predictor)) };
+      Reference_root::S_temporary xref = { std_array_find_if_not(global, ::std::move(data), from, length,
+                                                                         ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1246,18 +944,20 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Value target;
     if(reader.I().v(data).S(state).o(target).F()) {
-      Reference_root::S_temporary xref = { std_array_rfind(::std::move(data), ::std::move(target)) };
+      Reference_root::S_temporary xref = { std_array_rfind(::std::move(data), 0, nullopt,
+                                                           ::std::move(target)) };
       return self = ::std::move(xref);
     }
     Ival from;
     if(reader.L(state).v(from).S(state).o(target).F()) {
-      Reference_root::S_temporary xref = { std_array_rfind(::std::move(data), ::std::move(from), ::std::move(target)) };
+      Reference_root::S_temporary xref = { std_array_rfind(::std::move(data), from, nullopt,
+                                                           ::std::move(target)) };
       return self = ::std::move(xref);
     }
     Iopt length;
     if(reader.L(state).o(length).o(target).F()) {
-      Reference_root::S_temporary xref = { std_array_rfind(::std::move(data), ::std::move(from),
-                                                           ::std::move(length), ::std::move(target)) };
+      Reference_root::S_temporary xref = { std_array_rfind(::std::move(data), from, length,
+                                                           ::std::move(target)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1306,19 +1006,20 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_rfind_if(global, ::std::move(data), ::std::move(predictor)) };
+      Reference_root::S_temporary xref = { std_array_rfind_if(global, ::std::move(data), 0, nullopt,
+                                                                      ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_rfind_if(global, ::std::move(data), ::std::move(from),
-                                        ::std::move(predictor)) };
+      Reference_root::S_temporary xref = { std_array_rfind_if(global, ::std::move(data), from, nullopt,
+                                                                      ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_rfind_if(global, ::std::move(data), ::std::move(from),
-                                        ::std::move(length), ::std::move(predictor)) };
+      Reference_root::S_temporary xref = { std_array_rfind_if(global, ::std::move(data), from, length,
+                                                                      ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1367,19 +1068,20 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_rfind_if_not(global, ::std::move(data), ::std::move(predictor)) };
+      Reference_root::S_temporary xref = { std_array_rfind_if_not(global, ::std::move(data), 0, nullopt,
+                                                                          ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_rfind_if_not(global, ::std::move(data), ::std::move(from),
-                                            ::std::move(predictor)) };
+      Reference_root::S_temporary xref = { std_array_rfind_if_not(global, ::std::move(data), from, nullopt,
+                                                                          ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_rfind_if_not(global, ::std::move(data), ::std::move(from), ::std::move(length),
-                                            ::std::move(predictor)) };
+      Reference_root::S_temporary xref = { std_array_rfind_if_not(global, ::std::move(data), from, length,
+                                                                          ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1426,18 +1128,20 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Value target;
     if(reader.I().v(data).S(state).o(target).F()) {
-      Reference_root::S_temporary xref = { std_array_count(::std::move(data), ::std::move(target)) };
+      Reference_root::S_temporary xref = { std_array_count(::std::move(data), 0, nullopt,
+                                                           ::std::move(target)) };
       return self = ::std::move(xref);
     }
     Ival from;
     if(reader.L(state).v(from).S(state).o(target).F()) {
-      Reference_root::S_temporary xref = { std_array_count(::std::move(data), ::std::move(from), ::std::move(target)) };
+      Reference_root::S_temporary xref = { std_array_count(::std::move(data), from, nullopt,
+                                                           ::std::move(target)) };
       return self = ::std::move(xref);
     }
     Iopt length;
     if(reader.L(state).o(length).o(target).F()) {
-      Reference_root::S_temporary xref = { std_array_count(::std::move(data), ::std::move(from), ::std::move(length),
-                             ::std::move(target)) };
+      Reference_root::S_temporary xref = { std_array_count(::std::move(data), from, length,
+                                                           ::std::move(target)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1488,19 +1192,20 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_count_if(global, ::std::move(data), ::std::move(predictor)) };
+      Reference_root::S_temporary xref = { std_array_count_if(global, ::std::move(data), 0, nullopt,
+                                                                      ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_count_if(global, ::std::move(data),  ::std::move(from),
-                                        ::std::move(predictor)) };
+      Reference_root::S_temporary xref = { std_array_count_if(global, ::std::move(data), from, nullopt,
+                                                                      ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_count_if(global, ::std::move(data), ::std::move(from), ::std::move(length),
-                                        ::std::move(predictor)) };
+      Reference_root::S_temporary xref = { std_array_count_if(global, ::std::move(data), from, length,
+                                                                      ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1551,19 +1256,20 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_count_if_not(global, ::std::move(data), ::std::move(predictor)) };
+      Reference_root::S_temporary xref = { std_array_count_if_not(global, ::std::move(data), 0, nullopt,
+                                                                          ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_count_if_not(global, ::std::move(data), ::std::move(from),
-                                            ::std::move(predictor)) };
+      Reference_root::S_temporary xref = { std_array_count_if_not(global, ::std::move(data), from, nullopt,
+                                                                          ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_count_if_not(global, ::std::move(data), ::std::move(from), ::std::move(length),
-                                            ::std::move(predictor)) };
+      Reference_root::S_temporary xref = { std_array_count_if_not(global, ::std::move(data), from, length,
+                                                                          ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1610,18 +1316,20 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Value target;
     if(reader.I().v(data).S(state).o(target).F()) {
-      Reference_root::S_temporary xref = { std_array_exclude(::std::move(data), ::std::move(target)) };
+      Reference_root::S_temporary xref = { std_array_exclude(::std::move(data), 0, nullopt,
+                                                             ::std::move(target)) };
       return self = ::std::move(xref);
     }
     Ival from;
     if(reader.L(state).v(from).S(state).o(target).F()) {
-      Reference_root::S_temporary xref = { std_array_exclude(::std::move(data), ::std::move(from), ::std::move(target)) };
+      Reference_root::S_temporary xref = { std_array_exclude(::std::move(data), from, nullopt,
+                                                             ::std::move(target)) };
       return self = ::std::move(xref);
     }
     Iopt length;
     if(reader.L(state).o(length).o(target).F()) {
-      Reference_root::S_temporary xref = { std_array_exclude(::std::move(data), ::std::move(from), ::std::move(length),
-                               ::std::move(target)) };
+      Reference_root::S_temporary xref = { std_array_exclude(::std::move(data), from, length,
+                                                             ::std::move(target)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1670,19 +1378,20 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_exclude_if(global, ::std::move(data), ::std::move(predictor)) };
+      Reference_root::S_temporary xref = { std_array_exclude_if(global, ::std::move(data), 0, nullopt,
+                                                                        ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_exclude_if(global, ::std::move(data),  ::std::move(from),
-                                          ::std::move(predictor)) };
+      Reference_root::S_temporary xref = { std_array_exclude_if(global, ::std::move(data), from, nullopt,
+                                                                        ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_exclude_if(global, ::std::move(data), ::std::move(from), ::std::move(length),
-                                          ::std::move(predictor)) };
+      Reference_root::S_temporary xref = { std_array_exclude_if(global, ::std::move(data), from, length,
+                                                                        ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1731,19 +1440,20 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval data;
     Fval predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_exclude_if_not(global, ::std::move(data), ::std::move(predictor)) };
+      Reference_root::S_temporary xref = { std_array_exclude_if_not(global, ::std::move(data), 0, nullopt,
+                                                                            ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     Ival from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_exclude_if_not(global, ::std::move(data), ::std::move(from),
-                                              ::std::move(predictor)) };
+      Reference_root::S_temporary xref = { std_array_exclude_if_not(global, ::std::move(data), from, nullopt,
+                                                                            ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     Iopt length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_exclude_if_not(global, ::std::move(data), ::std::move(from), ::std::move(length),
-                                              ::std::move(predictor)) };
+      Reference_root::S_temporary xref = { std_array_exclude_if_not(global, ::std::move(data), from, length,
+                                                                            ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2122,7 +1832,7 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Fval generator;
     Ival length;
     if(reader.I().v(generator).v(length).F()) {
-      Reference_root::S_temporary xref = { std_array_generate(global, ::std::move(generator), ::std::move(length)) };
+      Reference_root::S_temporary xref = { std_array_generate(global, ::std::move(generator), length) };
       return self = ::std::move(xref);
     }
     // Fail.

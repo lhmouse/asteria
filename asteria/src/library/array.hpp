@@ -12,44 +12,20 @@ Aval std_array_slice(Aval data, Ival from, Iopt length);
 Aval std_array_replace_slice(Aval data, Ival from, Aval replacement);
 Aval std_array_replace_slice(Aval data, Ival from, Iopt length, Aval replacement);
 
-Iopt std_array_find(Aval data, Value target);
-Iopt std_array_find(Aval data, Ival from, Value target);
 Iopt std_array_find(Aval data, Ival from, Iopt length, Value target);
-Iopt std_array_find_if(Global& global, Aval data, Fval predictor);
-Iopt std_array_find_if(Global& global, Aval data, Ival from, Fval predictor);
 Iopt std_array_find_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor);
-Iopt std_array_find_if_not(Global& global, Aval data, Fval predictor);
-Iopt std_array_find_if_not(Global& global, Aval data, Ival from, Fval predictor);
 Iopt std_array_find_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor);
 
-Iopt std_array_rfind(Aval data, Value target);
-Iopt std_array_rfind(Aval data, Ival from, Value target);
 Iopt std_array_rfind(Aval data, Ival from, Iopt length, Value target);
-Iopt std_array_rfind_if(Global& global, Aval data, Fval predictor);
-Iopt std_array_rfind_if(Global& global, Aval data, Ival from, Fval predictor);
 Iopt std_array_rfind_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor);
-Iopt std_array_rfind_if_not(Global& global, Aval data, Fval predictor);
-Iopt std_array_rfind_if_not(Global& global, Aval data, Ival from, Fval predictor);
 Iopt std_array_rfind_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor);
 
-Ival std_array_count(Aval data, Value target);
-Ival std_array_count(Aval data, Ival from, Value target);
 Ival std_array_count(Aval data, Ival from, Iopt length, Value target);
-Ival std_array_count_if(Global& global, Aval data, Fval predictor);
-Ival std_array_count_if(Global& global, Aval data, Ival from, Fval predictor);
 Ival std_array_count_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor);
-Ival std_array_count_if_not(Global& global, Aval data, Fval predictor);
-Ival std_array_count_if_not(Global& global, Aval data, Ival from, Fval predictor);
 Ival std_array_count_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor);
 
-Aval std_array_exclude(Aval data, Value target);
-Aval std_array_exclude(Aval data, Ival from, Value target);
 Aval std_array_exclude(Aval data, Ival from, Iopt length, Value target);
-Aval std_array_exclude_if(Global& global, Aval data, Fval predictor);
-Aval std_array_exclude_if(Global& global, Aval data, Ival from, Fval predictor);
 Aval std_array_exclude_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor);
-Aval std_array_exclude_if_not(Global& global, Aval data, Fval predictor);
-Aval std_array_exclude_if_not(Global& global, Aval data, Ival from, Fval predictor);
 Aval std_array_exclude_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor);
 
 Bval std_array_is_sorted(Global& global, Aval data, Fopt comparator);
