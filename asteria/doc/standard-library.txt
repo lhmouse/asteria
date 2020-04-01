@@ -12,7 +12,7 @@
 	  has been enabled. This member is always set, even when there is
 	  no standard library.
 
-### `std.gc`
+### `std.system`
 
 `std.system.gc_count_variables(generation)`
 
