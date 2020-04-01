@@ -38,7 +38,7 @@ class Simple_Script
         return this->m_opts = opts, *this;
       }
 
-    explicit constexpr operator bool () const noexcept
+    explicit operator bool () const noexcept
       {
         return bool(this->m_func);
       }
@@ -46,7 +46,7 @@ class Simple_Script
       {
         return this->m_func.reset(), *this;
       }
-    constexpr operator const cow_function& () const noexcept
+    operator const cow_function& () const noexcept
       {
         return this->m_func;
       }

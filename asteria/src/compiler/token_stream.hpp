@@ -23,7 +23,7 @@ class Token_Stream
 
   public:
     // These are accessors and modifiers of tokens in this stream.
-    constexpr bool empty() const noexcept
+    bool empty() const noexcept
       {
         return this->m_rtoks.empty();
       }
@@ -31,7 +31,7 @@ class Token_Stream
       {
         return this->m_rtoks.clear(), *this;
       }
-    constexpr size_t size() const noexcept
+    size_t size() const noexcept
       {
         return this->m_rtoks.size();
       }

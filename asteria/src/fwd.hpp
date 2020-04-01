@@ -270,7 +270,7 @@ class cow_opaque
         return *this;
       }
 
-    explicit constexpr operator bool () const noexcept
+    explicit operator bool () const noexcept
       {
         return bool(this->m_sptr);
       }
@@ -385,7 +385,7 @@ class cow_function
         return *this;
       }
 
-    explicit constexpr operator bool () const noexcept
+    explicit operator bool () const noexcept
       {
         auto fptr = this->m_fptr;
         if(fptr) {

@@ -215,7 +215,7 @@ class Tack
       {
         return this->m_length;
       }
-    explicit constexpr operator bool () const noexcept
+    explicit operator bool () const noexcept
       {
         return this->m_line != 0;
       }
