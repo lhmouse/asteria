@@ -240,12 +240,12 @@ class MD5_Hasher final : public Abstract_Opaque
         uint32_t f, g;
         // https://en.wikipedia.org/wiki/MD5
         auto update = [&](uint32_t i, auto&& specx, uint32_t& a, uint32_t& b, uint32_t& c,
-                          uint32_t& d, uint32_t k, uint8_t r)
+                          uint32_t& d, uint32_t k, uint8_t rb)
           {
             specx(i, b, c, d);
             do_load_le(w, p + g * 4);
             w = a + f + k + w;
-            a = b + do_rotl(w, r);
+            a = b + do_rotl(w, rb);
           };
         auto spec0 = [&](uint32_t i, uint32_t& b, uint32_t& c, uint32_t& d)
           {
