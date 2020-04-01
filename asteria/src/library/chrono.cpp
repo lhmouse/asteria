@@ -559,7 +559,8 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
     Ival time_point;
     Bopt with_ms;
     if(reader.I().v(time_point).o(with_ms).F()) {
-      Reference_root::S_temporary xref = { std_chrono_utc_format(::std::move(time_point), ::std::move(with_ms)) };
+      Reference_root::S_temporary xref =
+        { std_chrono_utc_format(::std::move(time_point), ::std::move(with_ms)) };
       return self = ::std::move(xref);
     }
     // Fail.

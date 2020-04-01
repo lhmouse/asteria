@@ -163,7 +163,8 @@ void create_bindings_system(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival generation;
     if(reader.I().v(generation).F()) {
-      Reference_root::S_temporary xref = { std_system_gc_count_variables(global, ::std::move(generation)) };
+      Reference_root::S_temporary xref =
+        { std_system_gc_count_variables(global, ::std::move(generation)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -190,7 +191,8 @@ void create_bindings_system(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival generation;
     if(reader.I().v(generation).F()) {
-      Reference_root::S_temporary xref = { std_system_gc_get_threshold(global, ::std::move(generation)) };
+      Reference_root::S_temporary xref =
+        { std_system_gc_get_threshold(global, ::std::move(generation)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -223,8 +225,8 @@ void create_bindings_system(V_object& result, API_Version /*version*/)
     Ival generation;
     Ival threshold;
     if(reader.I().v(generation).v(threshold).F()) {
-      Reference_root::S_temporary xref = { std_system_gc_set_threshold(global, ::std::move(generation),
-                                                                               ::std::move(threshold)) };
+      Reference_root::S_temporary xref =
+        { std_system_gc_set_threshold(global, ::std::move(generation), ::std::move(threshold)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -252,7 +254,8 @@ void create_bindings_system(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Iopt generation_limit;
     if(reader.I().o(generation_limit).F()) {
-      Reference_root::S_temporary xref = { std_system_gc_collect(global, ::std::move(generation_limit)) };
+      Reference_root::S_temporary xref =
+        { std_system_gc_collect(global, ::std::move(generation_limit)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -289,7 +292,8 @@ void create_bindings_system(V_object& result, API_Version /*version*/)
     Aopt argv;
     Aopt envp;
     if(reader.I().v(cmd).o(argv).o(envp).F()) {
-      Reference_root::S_temporary xref = { std_system_execute(::std::move(cmd), ::std::move(argv), ::std::move(envp)) };
+      Reference_root::S_temporary xref =
+        { std_system_execute(::std::move(cmd), ::std::move(argv), ::std::move(envp)) };
       return self = ::std::move(xref);
     }
     // Fail.

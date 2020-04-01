@@ -957,7 +957,8 @@ std.checksum.crc32_new().write
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      Reference_root::S_temporary xref = { std_checksum_crc32_new_write(self.open().open_opaque(), ::std::move(data)) };
+      Reference_root::S_temporary xref =
+        { std_checksum_crc32_new_write(self.open().open_opaque(), ::std::move(data)) };
       return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
@@ -979,7 +980,8 @@ std.checksum.crc32_new().finish
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_checksum_crc32_new_finish(self.open().open_opaque()) };
+      Reference_root::S_temporary xref =
+        { std_checksum_crc32_new_finish(self.open().open_opaque()) };
       return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
@@ -1046,7 +1048,8 @@ std.checksum.fnv1a32_new().write
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      Reference_root::S_temporary xref = { std_checksum_fnv1a32_new_write(self.open().open_opaque(), ::std::move(data)) };
+      Reference_root::S_temporary xref =
+        { std_checksum_fnv1a32_new_write(self.open().open_opaque(), ::std::move(data)) };
       return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
@@ -1068,7 +1071,8 @@ std.checksum.fnv1a32_new().finish
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_checksum_fnv1a32_new_finish(self.open().open_opaque()) };
+      Reference_root::S_temporary xref =
+        { std_checksum_fnv1a32_new_finish(self.open().open_opaque()) };
       return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
@@ -1135,7 +1139,8 @@ std.checksum.md5_new().write
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      Reference_root::S_temporary xref = { std_checksum_md5_new_write(self.open().open_opaque(), ::std::move(data)) };
+      Reference_root::S_temporary xref =
+        { std_checksum_md5_new_write(self.open().open_opaque(), ::std::move(data)) };
       return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
@@ -1157,7 +1162,8 @@ std.checksum.md5_new().finish
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_checksum_md5_new_finish(self.open().open_opaque()) };
+      Reference_root::S_temporary xref =
+        { std_checksum_md5_new_finish(self.open().open_opaque()) };
       return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
@@ -1224,7 +1230,8 @@ std.checksum.sha1_new().write
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      Reference_root::S_temporary xref = { std_checksum_sha1_new_write(self.open().open_opaque(), ::std::move(data)) };
+      Reference_root::S_temporary xref =
+        { std_checksum_sha1_new_write(self.open().open_opaque(), ::std::move(data)) };
       return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
@@ -1246,7 +1253,8 @@ std.checksum.sha1_new().finish
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_checksum_sha1_new_finish(self.open().open_opaque()) };
+      Reference_root::S_temporary xref =
+        { std_checksum_sha1_new_finish(self.open().open_opaque()) };
       return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
@@ -1313,7 +1321,8 @@ std.checksum.sha256_new().write
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      Reference_root::S_temporary xref = { std_checksum_sha256_new_write(self.open().open_opaque(), ::std::move(data)) };
+      Reference_root::S_temporary xref =
+        { std_checksum_sha256_new_write(self.open().open_opaque(), ::std::move(data)) };
       return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
@@ -1335,7 +1344,8 @@ std.checksum.sha256_new().finish
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_checksum_sha256_new_finish(self.open().open_opaque()) };
+      Reference_root::S_temporary xref =
+        { std_checksum_sha256_new_finish(self.open().open_opaque()) };
       return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();

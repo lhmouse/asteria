@@ -791,8 +791,8 @@ void create_bindings_filesystem(V_object& result, API_Version /*version*/)
     Iopt offset;
     Iopt limit;
     if(reader.I().v(path).o(offset).o(limit).F()) {
-      Reference_root::S_temporary xref = { std_filesystem_file_read(::std::move(path), ::std::move(offset),
-                                                                    ::std::move(limit)) };
+      Reference_root::S_temporary xref =
+        { std_filesystem_file_read(::std::move(path), ::std::move(offset), ::std::move(limit)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -835,7 +835,8 @@ void create_bindings_filesystem(V_object& result, API_Version /*version*/)
     Iopt offset;
     Iopt limit;
     if(reader.I().v(path).v(callback).o(offset).o(limit).F()) {
-      Reference_root::S_temporary xref = { std_filesystem_file_stream(global, path, callback, offset, limit) };
+      Reference_root::S_temporary xref =
+        { std_filesystem_file_stream(global, path, callback, offset, limit) };
       return self = ::std::move(xref);
     }
     // Fail.
