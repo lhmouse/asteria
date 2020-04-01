@@ -659,15 +659,15 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
           const auto& f = except.frame(i);
           // Translate each frame into a human-readable format.
           V_object r;
-          r.try_emplace(::rocket::sref("frame"), V_string(::rocket::sref(f.what_type())));
-          r.try_emplace(::rocket::sref("file"), V_string(f.file()));
-          r.try_emplace(::rocket::sref("line"), V_integer(f.line()));
-          r.try_emplace(::rocket::sref("value"), f.value());
+          r.try_emplace(sref("frame"), V_string(sref(f.what_type())));
+          r.try_emplace(sref("file"), V_string(f.file()));
+          r.try_emplace(sref("line"), V_integer(f.line()));
+          r.try_emplace(sref("value"), f.value());
           // Append this frame.
           backtrace.emplace_back(::std::move(r));
         }
         Reference_root::S_constant xref = { ::std::move(backtrace) };
-        ctx_catch.open_named_reference(::rocket::sref("__backtrace")) = ::std::move(xref);
+        ctx_catch.open_named_reference(sref("__backtrace")) = ::std::move(xref);
         status = queue_catch.execute(ctx_catch);
       }
       ASTERIA_RUNTIME_CATCH(Runtime_Error& nested) {
@@ -1378,7 +1378,7 @@ ROCKET_PURE_FUNCTION V_string do_operator_SLA(const cow_string& lhs, int64_t rhs
     }
     // Append spaces in the right and return the result.
     size_t count = static_cast<size_t>(rhs);
-    res.assign(::rocket::sref(lhs));
+    res.assign(sref(lhs));
     res.append(count, ' ');
     return res;
   }
@@ -1684,7 +1684,7 @@ AIR_Status do_apply_xop_TYPEOF(Executive_Context& ctx, ParamU pu, const void* /*
     const auto& rhs = ctx.stack().get_top().read();
     // Return the type name of the operand.
     // N.B. This is one of the few operators that work on all types.
-    do_set_temporary(ctx.stack(), assign, V_string(::rocket::sref(rhs.what_vtype())));
+    do_set_temporary(ctx.stack(), assign, V_string(sref(rhs.what_vtype())));
     return air_status_next;
   }
 
@@ -2052,7 +2052,7 @@ AIR_Status do_apply_xop_CMP_3WAY(Executive_Context& ctx, ParamU pu, const void* 
         break;
       }
     case compare_unordered: {
-        do_set_temporary(ctx.stack(), assign, V_string(::rocket::sref("<unordered>")));
+        do_set_temporary(ctx.stack(), assign, V_string(sref("<unordered>")));
         break;
       }
     default:

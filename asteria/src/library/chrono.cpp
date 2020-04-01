@@ -127,9 +127,9 @@ Sval std_chrono_utc_format(Ival time_point, Bopt with_ms)
     bool pms = with_ms.value_or(false);
     // Handle special time points.
     if(time_point <= s_timestamp_min)
-      return ::rocket::sref(s_strings_min[pms]);
+      return sref(s_strings_min[pms]);
     if(time_point >= s_timestamp_max)
-      return ::rocket::sref(s_strings_max[pms]);
+      return sref(s_strings_max[pms]);
 
     // Convert the timestamp to the number of milliseconds since 1600-03-01.
     uint64_t temp = static_cast<uint64_t>(time_point - s_timestamp_1600_03_01);
@@ -378,7 +378,7 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
     //===================================================================
     // `std.chrono.utc_now()`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("utc_now"),
+    result.insert_or_assign(sref("utc_now"),
       Fval(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.chrono.utc_now()`
@@ -390,7 +390,7 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.utc_now"));
+    Argument_Reader reader(::rocket::ref(args), sref("std.chrono.utc_now"));
     // Parse arguments.
     if(reader.I().F()) {
       Reference_root::S_temporary xref = { std_chrono_utc_now() };
@@ -403,7 +403,7 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
     //===================================================================
     // `std.chrono.local_now()`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("local_now"),
+    result.insert_or_assign(sref("local_now"),
       Fval(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.chrono.local_now()`
@@ -415,7 +415,7 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.local_now"));
+    Argument_Reader reader(::rocket::ref(args), sref("std.chrono.local_now"));
     // Parse arguments.
     if(reader.I().F()) {
       Reference_root::S_temporary xref = { std_chrono_local_now() };
@@ -428,7 +428,7 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
     //===================================================================
     // `std.chrono.hires_now()`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("hires_now"),
+    result.insert_or_assign(sref("hires_now"),
       Fval(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.chrono.hires_now()`
@@ -443,7 +443,7 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.hires_now"));
+    Argument_Reader reader(::rocket::ref(args), sref("std.chrono.hires_now"));
     // Parse arguments.
     if(reader.I().F()) {
       Reference_root::S_temporary xref = { std_chrono_hires_now() };
@@ -456,7 +456,7 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
     //===================================================================
     // `std.chrono.steady_now()`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("steady_now"),
+    result.insert_or_assign(sref("steady_now"),
       Fval(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.chrono.steady_now()`
@@ -471,7 +471,7 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.steady_now"));
+    Argument_Reader reader(::rocket::ref(args), sref("std.chrono.steady_now"));
     // Parse arguments.
     if(reader.I().F()) {
       Reference_root::S_temporary xref = { std_chrono_steady_now() };
@@ -484,7 +484,7 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
     //===================================================================
     // `std.chrono.local_from_utc()`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("local_from_utc"),
+    result.insert_or_assign(sref("local_from_utc"),
       Fval(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.chrono.local_from_utc(time_utc)`
@@ -497,7 +497,7 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.local_from_utc"));
+    Argument_Reader reader(::rocket::ref(args), sref("std.chrono.local_from_utc"));
     // Parse arguments.
     Ival time_utc;
     if(reader.I().v(time_utc).F()) {
@@ -511,7 +511,7 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
     //===================================================================
     // `std.chrono.utc_from_local()`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("utc_from_local"),
+    result.insert_or_assign(sref("utc_from_local"),
       Fval(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.chrono.utc_from_local(time_local)`
@@ -525,7 +525,7 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.utc_from_local"));
+    Argument_Reader reader(::rocket::ref(args), sref("std.chrono.utc_from_local"));
     // Parse arguments.
     Ival time_local;
     if(reader.I().v(time_local).F()) {
@@ -539,7 +539,7 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
     //===================================================================
     // `std.chrono.utc_format()`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("utc_format"),
+    result.insert_or_assign(sref("utc_format"),
       Fval(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.chrono.utc_format(time_point, [with_ms])`
@@ -554,7 +554,7 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.utc_format"));
+    Argument_Reader reader(::rocket::ref(args), sref("std.chrono.utc_format"));
     // Parse arguments.
     Ival time_point;
     Bopt with_ms;
@@ -570,7 +570,7 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
     //===================================================================
     // `std.chrono.utc_parse()`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("utc_parse"),
+    result.insert_or_assign(sref("utc_parse"),
       Fval(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.chrono.utc_parse(time_str)`
@@ -586,7 +586,7 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.utc_parse"));
+    Argument_Reader reader(::rocket::ref(args), sref("std.chrono.utc_parse"));
     // Parse arguments.
     Sval time_str;
     if(reader.I().v(time_str).F()) {

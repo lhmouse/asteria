@@ -33,7 +33,7 @@ class Runtime_Error : public virtual exception
         m_value(V_string(stdex.what()))
       {
         this->do_backtrace();
-        this->do_insert_frame(frame_type_native, ::rocket::sref("<native code>"), -1, this->m_value);
+        this->do_insert_frame(frame_type_native, sref("<native code>"), -1, this->m_value);
       }
     ~Runtime_Error() override;
 

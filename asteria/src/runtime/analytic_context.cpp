@@ -32,9 +32,9 @@ void Analytic_Context::do_prepare_function(const cow_vector<phsh_string>& params
     }
     // Set pre-defined references.
     // N.B. If you have ever changed these, remember to update 'executive_context.cpp' as well.
-    this->open_named_reference(::rocket::sref("__varg")) /*= Reference_root::S_void()*/;
-    this->open_named_reference(::rocket::sref("__this")) /*= Reference_root::S_void()*/;
-    this->open_named_reference(::rocket::sref("__func")) /*= Reference_root::S_void()*/;
+    this->open_named_reference(sref("__varg")) /*= Reference_root::S_void()*/;
+    this->open_named_reference(sref("__this")) /*= Reference_root::S_void()*/;
+    this->open_named_reference(sref("__func")) /*= Reference_root::S_void()*/;
   }
 
 bool Analytic_Context::do_is_analytic() const noexcept

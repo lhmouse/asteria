@@ -14,7 +14,7 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
   {
     // Initialize the parameter list. This is the same for all scripts so we only do this once.
     if(ROCKET_UNEXPECT(this->m_params.empty()))
-      this->m_params.emplace_back(::rocket::sref("..."));
+      this->m_params.emplace_back(sref("..."));
 
     // Tokenize the character stream.
     Token_Stream tstrm;
@@ -26,7 +26,7 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
 
     // Instantiate the function.
     this->m_func = ::rocket::make_refcnt<Instantiated_Function>(this->m_params,
-                         ::rocket::make_refcnt<Variadic_Arguer>(name, 0, ::rocket::sref("<top level>")),
+                         ::rocket::make_refcnt<Variadic_Arguer>(name, 0, sref("<top level>")),
                          do_generate_function(this->m_opts, this->m_params, nullptr, stmtq));
     return *this;
   }
@@ -56,7 +56,7 @@ Simple_Script& Simple_Script::reload_stdin()
     // Initialize a stream using `stdin`.
     ::rocket::tinybuf_file cbuf;
     cbuf.reset(stdin, nullptr);
-    return this->reload(cbuf, ::rocket::sref("<stdin>"));
+    return this->reload(cbuf, sref("<stdin>"));
   }
 
 Reference Simple_Script::execute(Global_Context& global, cow_vector<Reference>&& args) const
