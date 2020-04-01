@@ -582,7 +582,7 @@ void Argument_Reader::throw_no_matching_function_call() const
         // Seek to the next overload.
         if(++k == ovlds.size())
           break;
-        ovlds_str << ",\n  ";
+        ovlds_str << "\n  ";
       }
       ovlds_str << "\n  -- end of list of overloads]";
     }
