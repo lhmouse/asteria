@@ -115,6 +115,30 @@ void std_system_daemonize()
       ASTERIA_THROW_SYSTEM_ERROR("daemon");
   }
 
+Sopt std_system_env_get_variable(Sval name)
+  {
+    const char* val = ::getenv(name.safe_c_str());
+    if(!val) {
+      return nullopt;
+    }
+    return ::rocket::sref(val);
+  }
+
+Oval std_system_env_get_variables()
+  {
+    Oval vars;
+    const char* const* vpos = ::environ;
+    while(auto str = *(vpos++)) {
+      // The key is terminated by an equals sign.
+      auto equ = ::strchr(str, '=');
+      if(ROCKET_UNEXPECT(!equ))
+        vars.insert_or_assign(::rocket::sref(str), ::rocket::sref(""));  // no equals sign?
+      else
+        vars.insert_or_assign(cow_string(str, equ), ::rocket::sref(equ + 1));
+    }
+    return vars;
+  }
+
 void create_bindings_system(V_object& result, API_Version /*version*/)
   {
     //===================================================================
@@ -290,6 +314,57 @@ void create_bindings_system(V_object& result, API_Version /*version*/)
     success so this function never returns.
 
   * Throws an exception on failure.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+      ));
+    //===================================================================
+    // `std.system.env_get_variable()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("env_get_variable"),
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.env_get_variable"));
+    // Parse arguments.
+    Sval name;
+    if(reader.I().v(name).F()) {
+      return std_system_env_get_variable(::std::move(name));
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.system.env_get_variable(name)`
+
+  * Retrieves an environment variable with `name`.
+
+  * Returns the environment variable's value if a match is found,
+    or `null` if no such variable exists.
+
+  * Throws an exception if `name` is not valid.
+)'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
+      ));
+    //===================================================================
+    // `std.system.env_get_variables()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("env_get_variables"),
+      Fval(
+[](cow_vector<Reference>&& args) -> Value
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.env_get_variables"));
+    // Parse arguments.
+    if(reader.I().F()) {
+      return std_system_env_get_variables();
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  },
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.system.env_get_variables()`
+
+  * Retrieves all environment variables.
+
+  * Returns an object of strings which consists of copies of all
+    environment variables.
 )'''''''''''''''"  """"""""""""""""""""""""""""""""""""""""""""""""
       ));
     //===================================================================

@@ -16,6 +16,9 @@ Ival std_system_gc_collect(Global& global, Iopt generation_limit = { });
 Ival std_system_execute(Sval path, Aopt argv = { }, Aopt envp = { });
 void std_system_daemonize();
 
+Sopt std_system_env_get_variable(Sval name);
+Oval std_system_env_get_variables();
+
 // Create an object that is to be referenced as `std.system`.
 void create_bindings_system(V_object& result, API_Version version);
 

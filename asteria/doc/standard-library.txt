@@ -78,6 +78,22 @@
 
 	* Throws an exception on failure.
 
+`std.system.env_get_variable(name)`
+
+	* Retrieves an environment variable with `name`.
+
+	* Returns the environment variable's value if a match is found,
+	  or `null` if no such variable exists.
+
+	* Throws an exception if `name` is not valid.
+
+`std.system.env_get_variables()`
+
+	* Retrieves all environment variables.
+
+	* Returns an object of strings which consists of copies of all
+	  environment variables.
+
 ### `std.debug`
 
 `std.debug.logf(templ, ...)`
