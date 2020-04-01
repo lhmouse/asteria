@@ -11,9 +11,9 @@ namespace Asteria {
 Iopt std_system_gc_count_variables(Global& global, Ival generation);
 Iopt std_system_gc_get_threshold(Global& global, Ival generation);
 Iopt std_system_gc_set_threshold(Global& global, Ival generation, Ival threshold);
-Ival std_system_gc_collect(Global& global, Iopt generation_limit = { });
+Ival std_system_gc_collect(Global& global, Iopt generation_limit);
 
-Ival std_system_execute(Sval path, Aopt argv = { }, Aopt envp = { });
+Ival std_system_execute(Sval path, Aopt argv, Aopt envp);
 void std_system_daemonize();
 
 Sopt std_system_env_get_variable(Sval name);

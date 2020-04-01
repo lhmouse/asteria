@@ -8,11 +8,11 @@
 
 namespace Asteria {
 
-Sval std_string_slice(Sval text, Ival from, Iopt length = { });
+Sval std_string_slice(Sval text, Ival from, Iopt length);
 Sval std_string_replace_slice(Sval text, Ival from, Sval replacement);
 Sval std_string_replace_slice(Sval text, Ival from, Iopt length, Sval replacement);
 
-Ival std_string_compare(Sval text1, Sval text2, Iopt length = { });
+Ival std_string_compare(Sval text1, Sval text2, Iopt length);
 Bval std_string_starts_with(Sval text, Sval prefix);
 Bval std_string_ends_with(Sval text, Sval suffix);
 
@@ -40,34 +40,34 @@ Iopt std_string_rfind_not_of(Sval text, Ival from, Sval reject);
 Iopt std_string_rfind_not_of(Sval text, Ival from, Iopt length, Sval reject);
 
 Sval std_string_reverse(Sval text);
-Sval std_string_trim(Sval text, Sopt reject = { });
-Sval std_string_triml(Sval text, Sopt reject = { });
-Sval std_string_trimr(Sval text, Sopt reject = { });
-Sval std_string_padl(Sval text, Ival length, Sopt padding = { });
-Sval std_string_padr(Sval text, Ival length, Sopt padding = { });
+Sval std_string_trim(Sval text, Sopt reject);
+Sval std_string_triml(Sval text, Sopt reject);
+Sval std_string_trimr(Sval text, Sopt reject);
+Sval std_string_padl(Sval text, Ival length, Sopt padding);
+Sval std_string_padr(Sval text, Ival length, Sopt padding);
 Sval std_string_to_upper(Sval text);
 Sval std_string_to_lower(Sval text);
-Sval std_string_translate(Sval text, Sval inputs, Sopt outputs = { });
+Sval std_string_translate(Sval text, Sval inputs, Sopt outputs);
 
-Aval std_string_explode(Sval text, Sopt delim, Iopt limit = { });
-Sval std_string_implode(Aval segments, Sopt delim = { });
+Aval std_string_explode(Sval text, Sopt delim, Iopt limit);
+Sval std_string_implode(Aval segments, Sopt delim);
 
-Sval std_string_hex_encode(Sval data, Bopt lowercase = { }, Sopt delim = { });
+Sval std_string_hex_encode(Sval data, Bopt lowercase, Sopt delim);
 Sval std_string_hex_decode(Sval text);
-Sval std_string_base32_encode(Sval data, Bopt lowercase = { });
+Sval std_string_base32_encode(Sval data, Bopt lowercase);
 Sval std_string_base32_decode(Sval text);
 Sval std_string_base64_encode(Sval data);
 Sval std_string_base64_decode(Sval text);
 
-Sval std_string_url_encode(Sval data, Bopt lowercase = { });
+Sval std_string_url_encode(Sval data, Bopt lowercase);
 Sval std_string_url_decode(Sval text);
-Sval std_string_url_encode_query(Sval data, Bopt lowercase = { });
+Sval std_string_url_encode_query(Sval data, Bopt lowercase);
 Sval std_string_url_decode_query(Sval text);
 
 Bval std_string_utf8_validate(Sval text);
-Sval std_string_utf8_encode(Ival code_point, Bopt permissive = { });
-Sval std_string_utf8_encode(Aval code_points, Bopt permissive = { });
-Aval std_string_utf8_decode(Sval text, Bopt permissive = { });
+Sval std_string_utf8_encode(Ival code_point, Bopt permissive);
+Sval std_string_utf8_encode(Aval code_points, Bopt permissive);
+Aval std_string_utf8_decode(Sval text, Bopt permissive);
 
 Sval std_string_pack_8(Ival value);
 Sval std_string_pack_8(Aval values);

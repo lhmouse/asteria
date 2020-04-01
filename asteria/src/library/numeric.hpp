@@ -42,7 +42,7 @@ Ival std_numeric_iceil(Rval value);
 Ival std_numeric_itrunc(Ival value);
 Ival std_numeric_itrunc(Rval value);
 
-Rval std_numeric_random(Global& global, Ropt limit = { });
+Rval std_numeric_random(Global& global, Ropt limit);
 
 Rval std_numeric_sqrt(Rval x);
 Rval std_numeric_fma(Rval x, Rval y, Rval z);
@@ -68,10 +68,10 @@ Ival std_numeric_popcnt(Ival x);
 Ival std_numeric_rotl(Ival m, Ival x, Ival n);
 Ival std_numeric_rotr(Ival m, Ival x, Ival n);
 
-Sval std_numeric_format(Ival value, Iopt base = { }, Iopt ebase = { });
-Sval std_numeric_format(Rval value, Iopt base = { }, Iopt ebase = { });
+Sval std_numeric_format(Ival value, Iopt base, Iopt ebase);
+Sval std_numeric_format(Rval value, Iopt base, Iopt ebase);
 Ival std_numeric_parse_integer(Sval text);
-Rval std_numeric_parse_real(Sval text, Bopt saturating = { });
+Rval std_numeric_parse_real(Sval text, Bopt saturating);
 
 // Create an object that is to be referenced as `std.numeric`.
 void create_bindings_numeric(V_object& result, API_Version version);

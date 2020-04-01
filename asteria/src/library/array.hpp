@@ -8,7 +8,7 @@
 
 namespace Asteria {
 
-Aval std_array_slice(Aval data, Ival from, Iopt length = { });
+Aval std_array_slice(Aval data, Ival from, Iopt length);
 Aval std_array_replace_slice(Aval data, Ival from, Aval replacement);
 Aval std_array_replace_slice(Aval data, Ival from, Iopt length, Aval replacement);
 
@@ -52,21 +52,21 @@ Aval std_array_exclude_if_not(Global& global, Aval data, Fval predictor);
 Aval std_array_exclude_if_not(Global& global, Aval data, Ival from, Fval predictor);
 Aval std_array_exclude_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor);
 
-Bval std_array_is_sorted(Global& global, Aval data, Fopt comparator = { });
-Iopt std_array_binary_search(Global& global, Aval data, Value target, Fopt comparator = { });
-Ival std_array_lower_bound(Global& global, Aval data, Value target, Fopt comparator = { });
-Ival std_array_upper_bound(Global& global, Aval data, Value target, Fopt comparator = { });
-pair<Ival, Ival> std_array_equal_range(Global& global, Aval data, Value target, Fopt comparator = { });
+Bval std_array_is_sorted(Global& global, Aval data, Fopt comparator);
+Iopt std_array_binary_search(Global& global, Aval data, Value target, Fopt comparator);
+Ival std_array_lower_bound(Global& global, Aval data, Value target, Fopt comparator);
+Ival std_array_upper_bound(Global& global, Aval data, Value target, Fopt comparator);
+pair<Ival, Ival> std_array_equal_range(Global& global, Aval data, Value target, Fopt comparator);
 
-Aval std_array_sort(Global& global, Aval data, Fopt comparator = { });
-Aval std_array_sortu(Global& global, Aval data, Fopt comparator = { });
+Aval std_array_sort(Global& global, Aval data, Fopt comparator);
+Aval std_array_sortu(Global& global, Aval data, Fopt comparator);
 
-Value std_array_max_of(Global& global, Aval data, Fopt comparator = { });
-Value std_array_min_of(Global& global, Aval data, Fopt comparator = { });
+Value std_array_max_of(Global& global, Aval data, Fopt comparator);
+Value std_array_min_of(Global& global, Aval data, Fopt comparator);
 
 Aval std_array_reverse(Aval data);
 Aval std_array_generate(Global& global, Fval generator, Ival length);
-Aval std_array_shuffle(Aval data, Iopt seed = { });
+Aval std_array_shuffle(Aval data, Iopt seed);
 Aval std_array_rotate(Aval data, Ival shift);
 
 Aval std_array_copy_keys(Oval source);
