@@ -2,7 +2,7 @@
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
 #ifndef ASTERIA_LIBRARY_SYSTEM_HPP_
-#define ASTERIA_LIBRARY_SYSTEm_HPP_
+#define ASTERIA_LIBRARY_SYSTEM_HPP_
 
 #include "../fwd.hpp"
 
