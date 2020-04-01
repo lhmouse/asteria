@@ -979,6 +979,16 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       {
         return this->m_ptr;
       }
+    // N.B. This is a non-standard extension.
+    const value_type* safe_c_str() const
+      {
+        auto clen = traits_type::length(this->m_ptr);
+        if(clen != this->m_len) {
+          noadl::sprintf_and_throw<domain_error>("cow_string: embedded null character detected (at `%llu`)",
+                                                 static_cast<unsigned long long>(clen));
+        }
+        return this->m_ptr;
+      }
 
     // Get a pointer to mutable data. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
