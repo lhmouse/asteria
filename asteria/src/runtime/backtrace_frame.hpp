@@ -20,42 +20,33 @@ class Backtrace_Frame
 
   public:
     template<typename XValT> Backtrace_Frame(Frame_Type xtype, const Source_Location& xsloc, XValT&& xval)
-      :
-        m_type(xtype), m_sloc(xsloc), m_value(::std::forward<XValT>(xval))
-      {
-      }
+      : m_type(xtype), m_sloc(xsloc), m_value(::std::forward<XValT>(xval))
+      { }
+
     template<typename XValT> Backtrace_Frame(Frame_Type xtype, const cow_string& xfile, int32_t xline, XValT&& xval)
-      :
-        m_type(xtype), m_sloc(xfile, xline), m_value(::std::forward<XValT>(xval))
-      {
-      }
+      : m_type(xtype), m_sloc(xfile, xline), m_value(::std::forward<XValT>(xval))
+      { }
+
     ~Backtrace_Frame();
 
   public:
     Frame_Type type() const noexcept
-      {
-        return this->m_type;
-      }
+      { return this->m_type;  }
+
     const char* what_type() const noexcept
-      {
-        return describe_frame_type(this->m_type);
-      }
+      { return describe_frame_type(this->m_type);  }
+
     const Source_Location& sloc() const noexcept
-      {
-        return this->m_sloc;
-      }
+      { return this->m_sloc;  }
+
     const cow_string& file() const noexcept
-      {
-        return this->m_sloc.file();
-      }
+      { return this->m_sloc.file();  }
+
     long line() const noexcept
-      {
-        return this->m_sloc.line();
-      }
+      { return this->m_sloc.line();  }
+
     const Value& value() const noexcept
-      {
-        return this->m_value;
-      }
+      { return this->m_value;  }
   };
 
 }  // namespace Asteria

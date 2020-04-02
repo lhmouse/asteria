@@ -15,36 +15,34 @@
 namespace Asteria {
 namespace {
 
+constexpr uint64_t do_cantor_pair(uint64_t x, uint64_t y) noexcept
+  { return (x + y) * (x + y + 1) / 2 + y;  }
+
+inline uint64_t do_get_unique_id(const Token_Stream& tstrm)
+  {
+    auto qtok = tstrm.peek_opt();
+    if(!qtok)
+      return 0;
+    else
+      return do_cantor_pair(static_cast<unsigned long>(qtok->line()), qtok->offset());
+  }
+
 [[noreturn]] inline void do_throw_parser_error(const Token_Stream& tstrm, Parser_Status status)
   {
     auto qtok = tstrm.peek_opt();
-    if(!qtok) {
+    if(!qtok)
       throw Parser_Error(status, -1, 0, 0);
-    }
-    throw Parser_Error(status, qtok->line(), qtok->offset(), qtok->length());
+    else
+      throw Parser_Error(status, qtok->line(), qtok->offset(), qtok->length());
   }
 
 inline Source_Location do_tell_source_location(const Token_Stream& tstrm)
   {
     auto qtok = tstrm.peek_opt();
-    if(!qtok) {
+    if(!qtok)
       return Source_Location(::rocket::sref("<end of stream>"), -1);
-    }
-    return Source_Location(qtok->file(), qtok->line());
-  }
-
-constexpr uint64_t do_cantor_pair(uint64_t x, uint64_t y) noexcept
-  {
-    return (x + y) * (x + y + 1) / 2 + y;
-  }
-
-inline uint64_t do_get_unique_id(const Token_Stream& tstrm)
-  {
-    auto qtok = tstrm.peek_opt();
-    if(!qtok) {
-      return 0;
-    }
-    return do_cantor_pair(static_cast<unsigned long>(qtok->line()), qtok->offset());
+    else
+      return Source_Location(qtok->file(), qtok->line());
   }
 
 opt<Keyword> do_accept_keyword_opt(Token_Stream& tstrm, initializer_list<Keyword> accept)

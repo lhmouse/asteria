@@ -79,9 +79,8 @@ class BMH_Searcher
 
   public:
     ptrdiff_t pattern_length() const noexcept
-      {
-        return this->m_plen;
-      }
+      { return this->m_plen;  }
+
     template<typename IterT> opt<IterT> search_opt(IterT tbegin, IterT tend, IterT pbegin) const
       {
         // Search for the pattern.
@@ -98,8 +97,7 @@ class BMH_Searcher
       }
   };
 
-template<typename IterT>
-    opt<IterT> do_find_opt(IterT tbegin, IterT tend, IterT pbegin, IterT pend)
+template<typename IterT> opt<IterT> do_find_opt(IterT tbegin, IterT tend, IterT pbegin, IterT pend)
   {
     // If the pattern is empty, there is a match at the beginning.
     if(pbegin == pend) {
@@ -114,9 +112,8 @@ template<typename IterT>
     return srch.search_opt(tbegin, tend, pbegin);
   }
 
-template<typename IterT>
-    Sval& do_find_and_replace(Sval& res, IterT tbegin, IterT tend, IterT pbegin, IterT pend,
-                                         IterT rbegin, IterT rend)
+template<typename IterT> Sval& do_find_and_replace(Sval& res, IterT tbegin, IterT tend, IterT pbegin, IterT pend,
+                                                   IterT rbegin, IterT rend)
   {
     // If the pattern is empty, there is a match beside every byte.
     if(pbegin == pend) {
@@ -151,36 +148,31 @@ template<typename IterT>
     return res;
   }
 
-template<typename IterT>
-    opt<IterT> do_find_of_opt(IterT begin, IterT end, const Sval& set, bool match)
+template<typename IterT> opt<IterT> do_find_of_opt(IterT begin, IterT end, const Sval& set, bool match)
   {
     // Make a lookup table.
     array<bool, 256> table = { };
     ::rocket::for_each(set, [&](char c) { table[uint8_t(c)] = true;  });
     // Search the range.
-    for(auto it = begin;  it != end;  ++it) {
+    for(auto it = begin;  it != end;  ++it)
       if(table[uint8_t(*it)] == match)
         return ::std::move(it);
-    }
     return nullopt;
   }
 
 inline Sval do_get_reject(const Sopt& reject)
   {
-    if(!reject) {
+    if(!reject)
       return ::rocket::sref(" \t");
-    }
     return *reject;
   }
 
 inline Sval do_get_padding(const Sopt& padding)
   {
-    if(!padding) {
+    if(!padding)
       return ::rocket::sref(" ");
-    }
-    if(padding->empty()) {
+    if(padding->empty())
       ASTERIA_THROW("empty padding string not valid");
-    }
     return *padding;
   }
 
@@ -250,19 +242,13 @@ constexpr char s_url_chars[256] =
   };
 
 constexpr bool do_is_url_invalid_char(char c) noexcept
-  {
-    return s_url_chars[uint8_t(c)] == 0;
-  }
+  { return s_url_chars[uint8_t(c)] == 0;  }
 
 constexpr bool do_is_url_unreserved_char(char c) noexcept
-  {
-    return s_url_chars[uint8_t(c)] == 2;
-  }
+  { return s_url_chars[uint8_t(c)] == 2;  }
 
 constexpr bool do_is_url_query_char(char c) noexcept
-  {
-    return s_url_chars[uint8_t(c)] & 2;
-  }
+  { return s_url_chars[uint8_t(c)] & 2;  }
 
 const char* do_xstrchr(const char* str, char c) noexcept
   {
@@ -372,14 +358,12 @@ template<bool bigendT, typename WordT> Sval& do_pack_one_impl(Sval& text, const 
     // Return  the output string.
     return text;
   }
+
 template<typename WordT> Sval& do_pack_one_be(Sval& text, const Ival& value)
-  {
-    return do_pack_one_impl<1, WordT>(text, value);
-  }
+  { return do_pack_one_impl<1, WordT>(text, value);  }
+
 template<typename WordT> Sval& do_pack_one_le(Sval& text, const Ival& value)
-  {
-    return do_pack_one_impl<0, WordT>(text, value);
-  }
+  { return do_pack_one_impl<0, WordT>(text, value);  }
 
 template<bool bigendT, typename WordT> Aval do_unpack_impl(const Sval& text)
   {
@@ -410,14 +394,12 @@ template<bool bigendT, typename WordT> Aval do_unpack_impl(const Sval& text)
     }
     return values;
   }
+
 template<typename WordT> Aval do_unpack_be(const Sval& text)
-  {
-    return do_unpack_impl<1, WordT>(text);
-  }
+  { return do_unpack_impl<1, WordT>(text);  }
+
 template<typename WordT> Aval do_unpack_le(const Sval& text)
-  {
-    return do_unpack_impl<0, WordT>(text);
-  }
+  { return do_unpack_impl<0, WordT>(text);  }
 
 ::std::regex do_make_regex(const Sval& pattern)
   try {
@@ -432,8 +414,7 @@ template<typename WordT> Aval do_unpack_le(const Sval& text)
     return ::std::string(replacement.data(), replacement.size());
   }
 
-template<typename IterT>
-    ::std::sub_match<IterT> do_regex_search(IterT tbegin, IterT tend, const ::std::regex& pattern)
+template<typename IterT> ::std::sub_match<IterT> do_regex_search(IterT tbegin, IterT tend, const ::std::regex& pattern)
   {
     ::std::sub_match<IterT> match;
     ::std::match_results<IterT> matches;
@@ -442,16 +423,14 @@ template<typename IterT>
     return match;
   }
 
-template<typename IterT>
-    ::std::match_results<IterT> do_regex_match(IterT tbegin, IterT tend, const ::std::regex& pattern)
+template<typename IterT> ::std::match_results<IterT> do_regex_match(IterT tbegin, IterT tend, const ::std::regex& pattern)
   {
     ::std::match_results<IterT> matches;
     ::std::regex_match(tbegin, tend, matches, pattern);
     return matches;
   }
 
-template<typename IterT>
-    Aval do_regex_copy_matches(const ::std::match_results<IterT>& matches)
+template<typename IterT> Aval do_regex_copy_matches(const ::std::match_results<IterT>& matches)
   {
     Aval rval(matches.size());
     for(size_t i = 0;  i < matches.size();  ++i) {
@@ -462,9 +441,8 @@ template<typename IterT>
     return rval;
   }
 
-template<typename IterT>
-    Sval& do_regex_replace(Sval& res, IterT tbegin, IterT tend, const ::std::regex& pattern,
-                                      const ::std::string& replacement)
+template<typename IterT> Sval& do_regex_replace(Sval& res, IterT tbegin, IterT tend, const ::std::regex& pattern,
+                                                const ::std::string& replacement)
   {
     ::std::regex_replace(::std::back_inserter(res), tbegin, tend, pattern, replacement);
     return res;

@@ -18,9 +18,14 @@ class Variable_HashSet
         Bucket* prev;  // the previous bucket in the [circular] list
         union { rcptr<Variable> kstor[1];  };  // initialized iff `prev` is non-null
 
-        Bucket() noexcept { }
-        ~Bucket() { }
-        explicit operator bool () const noexcept { return this->prev != nullptr;  }
+        Bucket() noexcept
+          { }
+
+        ~Bucket()
+          { }
+
+        explicit operator bool () const noexcept
+          { return this->prev != nullptr;  }
       };
 
     struct Storage
@@ -30,33 +35,31 @@ class Variable_HashSet
         Bucket* head;  // the first initialized bucket
         size_t size;  // number of initialized buckets
       };
+
     Storage m_stor;
 
   public:
     constexpr Variable_HashSet() noexcept
-      :
-        m_stor()
-      {
-      }
+      : m_stor()
+      { }
+
     Variable_HashSet(Variable_HashSet&& other) noexcept
-      :
-        m_stor()
-      {
-        xswap(this->m_stor, other.m_stor);
-      }
+      : m_stor()
+      { xswap(this->m_stor, other.m_stor);  }
+
     Variable_HashSet& operator=(Variable_HashSet&& other) noexcept
       {
         xswap(this->m_stor, other.m_stor);
         return *this;
       }
+
     ~Variable_HashSet()
       {
-        if(this->m_stor.head) {
+        if(this->m_stor.head)
           this->do_destroy_buckets();
-        }
-        if(this->m_stor.bptr) {
+
+        if(this->m_stor.bptr)
           ::operator delete(this->m_stor.bptr);
-        }
 #ifdef ROCKET_DEBUG
         ::std::memset(::std::addressof(this->m_stor), 0xD2, sizeof(m_stor));
 #endif
@@ -78,18 +81,16 @@ class Variable_HashSet
 
   public:
     bool empty() const noexcept
-      {
-        return this->m_stor.head == nullptr;
-      }
+      { return this->m_stor.head == nullptr;  }
+
     size_t size() const noexcept
-      {
-        return this->m_stor.size;
-      }
+      { return this->m_stor.size;  }
+
     Variable_HashSet& clear() noexcept
       {
-        if(this->m_stor.head) {
+        if(this->m_stor.head)
           this->do_destroy_buckets();
-        }
+
         // Clean invalid data up.
         this->m_stor.head = nullptr;
         this->m_stor.size = 0;
@@ -117,6 +118,7 @@ class Variable_HashSet
         ROCKET_ASSERT(qbkt->kstor[0] == var);
         return true;
       }
+
     bool insert(const rcptr<Variable>& var) noexcept
       {
         // Reserve more room by rehashing if the load factor would exceed 0.5.
@@ -135,6 +137,7 @@ class Variable_HashSet
         this->do_attach(qbkt, var);
         return true;
       }
+
     bool erase(const rcptr<Variable>& var) noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.
@@ -152,6 +155,7 @@ class Variable_HashSet
         this->do_detach(qbkt);
         return true;
       }
+
     rcptr<Variable> erase_random_opt() noexcept
       {
         // Get a random bucket that contains a variable.
@@ -165,6 +169,7 @@ class Variable_HashSet
         this->do_detach(qbkt);
         return var;
       }
+
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const
       {
         this->do_enumerate_variables(callback);
@@ -173,9 +178,7 @@ class Variable_HashSet
   };
 
 inline void swap(Variable_HashSet& lhs, Variable_HashSet& rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 }  // namespace Asteria
 

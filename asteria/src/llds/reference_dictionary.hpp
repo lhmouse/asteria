@@ -31,33 +31,31 @@ class Reference_Dictionary
         Bucket* head;  // the first initialized bucket
         size_t size;  // number of initialized buckets
       };
+
     Storage m_stor;
 
   public:
     constexpr Reference_Dictionary() noexcept
-      :
-        m_stor()
-      {
-      }
+      : m_stor()
+      { }
+
     Reference_Dictionary(Reference_Dictionary&& other) noexcept
-      :
-        m_stor()
-      {
-        xswap(this->m_stor, other.m_stor);
-      }
+      : m_stor()
+      { xswap(this->m_stor, other.m_stor);  }
+
     Reference_Dictionary& operator=(Reference_Dictionary&& other) noexcept
       {
         xswap(this->m_stor, other.m_stor);
         return *this;
       }
+
     ~Reference_Dictionary()
       {
-        if(this->m_stor.head) {
+        if(this->m_stor.head)
           this->do_destroy_buckets();
-        }
-        if(this->m_stor.bptr) {
+
+        if(this->m_stor.bptr)
           ::operator delete(this->m_stor.bptr);
-        }
 #ifdef ROCKET_DEBUG
         ::std::memset(::std::addressof(this->m_stor), 0xB4, sizeof(m_stor));
 #endif
@@ -79,18 +77,16 @@ class Reference_Dictionary
 
   public:
     bool empty() const noexcept
-      {
-        return this->m_stor.head == nullptr;
-      }
+      { return this->m_stor.head == nullptr;  }
+
     size_t size() const noexcept
-      {
-        return this->m_stor.size;
-      }
+      { return this->m_stor.size;  }
+
     Reference_Dictionary& clear() noexcept
       {
-        if(this->m_stor.head) {
+        if(this->m_stor.head)
           this->do_destroy_buckets();
-        }
+
         // Clean invalid data up.
         this->m_stor.head = nullptr;
         this->m_stor.size = 0;
@@ -118,6 +114,7 @@ class Reference_Dictionary
         ROCKET_ASSERT(qbkt->kstor[0].rdhash() == name.rdhash());
         return qbkt->vstor;
       }
+
     Reference& open(const phsh_string& name)
       {
         // Reserve more room by rehashing if the load factor would exceed 0.5.
@@ -136,6 +133,7 @@ class Reference_Dictionary
         this->do_attach(qbkt, name);
         return qbkt->vstor[0];
       }
+
     bool erase(const phsh_string& name) noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.
@@ -152,6 +150,7 @@ class Reference_Dictionary
         this->do_detach(qbkt);
         return true;
       }
+
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const
       {
         this->do_enumerate_variables(callback);
@@ -160,9 +159,7 @@ class Reference_Dictionary
   };
 
 inline void swap(Reference_Dictionary& lhs, Reference_Dictionary& rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 }  // namespace Asteria
 

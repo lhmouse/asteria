@@ -17,43 +17,51 @@ class AIR_Node
     struct S_clear_stack
       {
       };
+
     struct S_execute_block
       {
         cow_vector<AIR_Node> code_body;
       };
+
     struct S_declare_variable
       {
         Source_Location sloc;
         phsh_string name;
       };
+
     struct S_initialize_variable
       {
         bool immutable;
       };
+
     struct S_if_statement
       {
         bool negative;
         cow_vector<AIR_Node> code_true;
         cow_vector<AIR_Node> code_false;
       };
+
     struct S_switch_statement
       {
         cow_vector<cow_vector<AIR_Node>> code_labels;
         cow_vector<cow_vector<AIR_Node>> code_bodies;
         cow_vector<cow_vector<phsh_string>> names_added;
       };
+
     struct S_do_while_statement
       {
         cow_vector<AIR_Node> code_body;
         bool negative;
         cow_vector<AIR_Node> code_cond;
       };
+
     struct S_while_statement
       {
         bool negative;
         cow_vector<AIR_Node> code_cond;
         cow_vector<AIR_Node> code_body;
       };
+
     struct S_for_each_statement
       {
         phsh_string name_key;
@@ -61,6 +69,7 @@ class AIR_Node
         cow_vector<AIR_Node> code_init;
         cow_vector<AIR_Node> code_body;
       };
+
     struct S_for_statement
       {
         cow_vector<AIR_Node> code_init;
@@ -68,6 +77,7 @@ class AIR_Node
         cow_vector<AIR_Node> code_step;
         cow_vector<AIR_Node> code_body;
       };
+
     struct S_try_statement
       {
         cow_vector<AIR_Node> code_try;
@@ -75,40 +85,49 @@ class AIR_Node
         phsh_string name_except;
         cow_vector<AIR_Node> code_catch;
       };
+
     struct S_throw_statement
       {
         Source_Location sloc;
       };
+
     struct S_assert_statement
       {
         Source_Location sloc;
         bool negative;
         cow_string msg;
       };
+
     struct S_simple_status
       {
         AIR_Status status;
       };
+
     struct S_glvalue_to_rvalue
       {
       };
+
     struct S_push_immediate
       {
         Value val;
       };
+
     struct S_push_global_reference
       {
         phsh_string name;
       };
+
     struct S_push_local_reference
       {
         uint32_t depth;
         phsh_string name;
       };
+
     struct S_push_bound_reference
       {
         Reference ref;
       };
+
     struct S_define_function
       {
         Source_Location sloc;
@@ -116,65 +135,78 @@ class AIR_Node
         cow_vector<phsh_string> params;
         cow_vector<AIR_Node> code_body;
       };
+
     struct S_branch_expression
       {
         cow_vector<AIR_Node> code_true;
         cow_vector<AIR_Node> code_false;
         bool assign;
       };
+
     struct S_coalescence
       {
         cow_vector<AIR_Node> code_null;
         bool assign;
       };
+
     struct S_function_call
       {
         Source_Location sloc;
         uint32_t nargs;
         PTC_Aware ptc;
       };
+
     struct S_member_access
       {
         phsh_string name;
       };
+
     struct S_push_unnamed_array
       {
         uint32_t nelems;
       };
+
     struct S_push_unnamed_object
       {
         cow_vector<phsh_string> keys;
       };
+
     struct S_apply_operator
       {
         Xop xop;
         bool assign;
       };
+
     struct S_unpack_struct_array
       {
         bool immutable;
         uint32_t nelems;
       };
+
     struct S_unpack_struct_object
       {
         bool immutable;
         cow_vector<phsh_string> keys;
       };
+
     struct S_define_null_variable
       {
         bool immutable;
         Source_Location sloc;
         phsh_string name;
       };
+
     struct S_single_step_trap
       {
         Source_Location sloc;
       };
+
     struct S_variadic_call
       {
         Source_Location sloc;
         PTC_Aware ptc;
       };
+
     struct S_defer_expression
       {
         Source_Location sloc;
@@ -217,6 +249,7 @@ class AIR_Node
         index_variadic_call          = 31,
         index_defer_expression       = 32,
       };
+
     using Storage = variant<
       ROCKET_CDR(
       , S_clear_stack            //  0,
@@ -253,6 +286,7 @@ class AIR_Node
       , S_variadic_call          // 31,
       , S_defer_expression       // 32,
       )>;
+
     static_assert(::std::is_nothrow_copy_assignable<Storage>::value, "");
 
   private:
@@ -260,10 +294,9 @@ class AIR_Node
 
   public:
     ASTERIA_VARIANT_CONSTRUCTOR(AIR_Node, Storage, XNodeT, xnode)
-      :
-        m_stor(::std::forward<XNodeT>(xnode))
-      {
-      }
+      : m_stor(::std::forward<XNodeT>(xnode))
+      { }
+
     ASTERIA_VARIANT_ASSIGNMENT(AIR_Node, Storage, XNodeT, xnode)
       {
         this->m_stor = ::std::forward<XNodeT>(xnode);
@@ -272,9 +305,7 @@ class AIR_Node
 
   public:
     Index index() const noexcept
-      {
-        return static_cast<Index>(this->m_stor.index());
-      }
+      { return static_cast<Index>(this->m_stor.index());  }
 
     AIR_Node& swap(AIR_Node& other) noexcept
       {
@@ -298,9 +329,7 @@ class AIR_Node
   };
 
 inline void swap(AIR_Node& lhs, AIR_Node& rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 }  // namespace Asteria
 

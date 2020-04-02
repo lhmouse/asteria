@@ -31,31 +31,27 @@ class Executive_Context : public Abstract_Context
 
   public:
     Executive_Context(ref_to<const Executive_Context> parent, nullptr_t)  // for non-functions
-      :
-        m_parent_opt(parent.ptr()),
+      : m_parent_opt(parent.ptr()),
         m_global(parent->m_global), m_stack(parent->m_stack), m_zvarg(parent->m_zvarg),
         m_self(Reference_root::S_void())
-      {
-      }
+      { }
+
     Executive_Context(ref_to<Global_Context> xglobal, ref_to<Evaluation_Stack> xstack,
                       ref_to<const rcptr<Variadic_Arguer>> xzvarg,
                       cow_bivector<Source_Location, AVMC_Queue>&& defer)  // for proper tail calls
-      :
-        m_parent_opt(nullptr),
+      : m_parent_opt(nullptr),
         m_global(xglobal), m_stack(xstack), m_zvarg(xzvarg),
         m_self(Reference_root::S_void()), m_defer(::std::move(defer))
-      {
-      }
+      { }
+
     Executive_Context(ref_to<Global_Context> xglobal, ref_to<Evaluation_Stack> xstack,
                       ref_to<const rcptr<Variadic_Arguer>> xzvarg, const cow_vector<phsh_string>& params,
                       Reference&& self, cow_vector<Reference>&& args)  // for functions
-      :
-        m_parent_opt(nullptr),
+      : m_parent_opt(nullptr),
         m_global(xglobal), m_stack(xstack), m_zvarg(xzvarg),
         m_self(::std::move(self))
-      {
-        this->do_bind_parameters(params, ::std::move(args));
-      }
+      { this->do_bind_parameters(params, ::std::move(args));  }
+
     ~Executive_Context() override;
 
   private:
@@ -73,26 +69,19 @@ class Executive_Context : public Abstract_Context
 
   public:
     bool is_analytic() const noexcept
-      {
-        return false;
-      }
+      { return false;  }
+
     const Executive_Context* get_parent_opt() const noexcept
-      {
-        return this->m_parent_opt;
-      }
+      { return this->m_parent_opt;  }
 
     Global_Context& global() const noexcept
-      {
-        return this->m_global;
-      }
+      { return this->m_global;  }
+
     Evaluation_Stack& stack() const noexcept
-      {
-        return this->m_stack;
-      }
+      { return this->m_stack;  }
+
     const rcptr<Variadic_Arguer>& zvarg() const noexcept
-      {
-        return this->m_zvarg;
-      }
+      { return this->m_zvarg;  }
 
     Executive_Context& defer_expression(const Source_Location& sloc, const cow_vector<AIR_Node>& code)
       {
@@ -117,6 +106,7 @@ class Executive_Context : public Abstract_Context
         this->do_on_scope_exit_return();
         return status;
       }
+
     Runtime_Error& on_scope_exit(Runtime_Error& except)
       {
         if(ROCKET_EXPECT(this->m_defer.empty())) {

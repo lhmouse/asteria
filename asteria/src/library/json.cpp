@@ -31,20 +31,17 @@ class Indenter_none final : public Indenter
   {
   public:
     explicit Indenter_none()
-      {
-      }
+      = default;
 
   public:
     tinyfmt& break_line(tinyfmt& fmt) const override
-      {
-        return fmt;
-      }
+      { return fmt;  }
+
     void increment_level() override
-      {
-      }
+      { }
+
     void decrement_level() override
-      {
-      }
+      { }
   };
 
 class Indenter_string final : public Indenter
@@ -55,24 +52,18 @@ class Indenter_string final : public Indenter
 
   public:
     explicit Indenter_string(const cow_string& add)
-      :
-        m_add(add), m_cur(::rocket::sref("\n"))
-      {
-      }
+      : m_add(add), m_cur(::rocket::sref("\n"))
+      { }
 
   public:
     tinyfmt& break_line(tinyfmt& fmt) const override
-      {
-        return fmt << this->m_cur;
-      }
+      { return fmt << this->m_cur;  }
+
     void increment_level() override
-      {
-        this->m_cur.append(this->m_add);
-      }
+      { this->m_cur.append(this->m_add);  }
+
     void decrement_level() override
-      {
-        this->m_cur.pop_back(this->m_add.size());
-      }
+      { this->m_cur.pop_back(this->m_add.size());  }
   };
 
 class Indenter_spaces final : public Indenter
@@ -83,24 +74,18 @@ class Indenter_spaces final : public Indenter
 
   public:
     explicit Indenter_spaces(int64_t add)
-      :
-        m_add(static_cast<size_t>(::rocket::clamp(add, 0, 10))), m_cur(0)
-      {
-      }
+      : m_add(static_cast<size_t>(::rocket::clamp(add, 0, 10))), m_cur(0)
+      { }
 
   public:
     tinyfmt& break_line(tinyfmt& fmt) const override
-      {
-        return fmt << pwrap(this->m_add, this->m_cur);
-      }
+      { return fmt << pwrap(this->m_add, this->m_cur);  }
+
     void increment_level() override
-      {
-        this->m_cur += this->m_add;
-      }
+      { this->m_cur += this->m_add;  }
+
     void decrement_level() override
-      {
-        this->m_cur -= this->m_add;
-      }
+      { this->m_cur -= this->m_add;  }
   };
 
 tinyfmt& do_quote_string(tinyfmt& fmt, const Sval& str)
@@ -208,11 +193,13 @@ struct S_xformat_array
     ref_to<const Aval> refa;
     Aval::const_iterator curp;
   };
+
 struct S_xformat_object
   {
     ref_to<const Oval> refo;
     Oval::const_iterator curp;
   };
+
 using Xformat = variant<S_xformat_array, S_xformat_object>;
 
 Sval do_format_nonrecursive(const Value& value, Indenter& indent)

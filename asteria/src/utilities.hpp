@@ -50,17 +50,13 @@ struct Quote_Wrapper
   };
 
 constexpr Quote_Wrapper quote(const char* str, size_t len) noexcept
-  {
-    return { str, len };
-  }
+  { return { str, len };  }
+
 inline Quote_Wrapper quote(const char* str) noexcept
-  {
-    return quote(str, ::std::strlen(str));
-  }
+  { return quote(str, ::std::strlen(str));  }
+
 inline Quote_Wrapper quote(const cow_string& str) noexcept
-  {
-    return quote(str.data(), str.size());
-  }
+  { return quote(str.data(), str.size());  }
 
 tinyfmt& operator<<(tinyfmt& fmt, const Quote_Wrapper& q);
 
@@ -72,9 +68,7 @@ struct Paragraph_Wrapper
   };
 
 constexpr Paragraph_Wrapper pwrap(size_t indent, size_t hanging) noexcept
-  {
-    return { indent, hanging };
-  }
+  { return { indent, hanging };  }
 
 tinyfmt& operator<<(tinyfmt& fmt, const Paragraph_Wrapper& q);
 

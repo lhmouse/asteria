@@ -26,13 +26,13 @@ class Random_Number_Generator final : public Rcfwd<Random_Number_Generator>
 
   public:
     Random_Number_Generator() noexcept
-      {
-        this->reset();
-      }
+      { this->reset();  }
+
     ~Random_Number_Generator() override;
 
     Random_Number_Generator(const Random_Number_Generator&)
       = delete;
+
     Random_Number_Generator& operator=(const Random_Number_Generator&)
       = delete;
 

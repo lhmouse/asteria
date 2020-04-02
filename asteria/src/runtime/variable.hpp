@@ -25,37 +25,32 @@ class Variable final : public Rcfwd<Variable>
 
   public:
     Variable() noexcept
-      {
-      }
+      = default;
+
     ~Variable() override;
 
     Variable(const Variable&)
       = delete;
+
     Variable& operator=(const Variable&)
       = delete;
 
   public:
     const Value& get_value() const noexcept
-      {
-        return this->m_value;
-      }
+      { return this->m_value;  }
+
     Value& open_value()
-      {
-        return this->m_value;
-      }
+      { return this->m_value;  }
+
     bool is_immutable() const noexcept
-      {
-        return this->m_immut;
-      }
+      { return this->m_immut;  }
+
     Variable& set_immutable(bool immutable) noexcept
-      {
-        return this->m_immut = immutable, *this;
-      }
+      { return this->m_immut = immutable, *this;  }
 
     bool is_initialized() const noexcept
-      {
-        return this->m_alive;
-      }
+      { return this->m_alive;  }
+
     template<typename XValT> Variable& initialize(XValT&& xval, bool immut)
       {
         this->m_value = ::std::forward<XValT>(xval);
@@ -63,6 +58,7 @@ class Variable final : public Rcfwd<Variable>
         this->m_alive = true;
         return *this;
       }
+
     Variable& uninitialize() noexcept
       {
         this->m_value = INT64_C(0x6eef8badf00ddead);
@@ -72,28 +68,28 @@ class Variable final : public Rcfwd<Variable>
       }
 
     long gcref_split() const noexcept
-      {
-        return this->m_value.gcref_split();
-      }
+      { return this->m_value.gcref_split();  }
+
     long get_gcref() const noexcept
-      {
-        return this->m_gcref_i;
-      }
+      { return this->m_gcref_i;  }
+
     Variable& reset_gcref(long iref) noexcept
       {
         this->m_gcref_i = iref;
         this->m_gcref_f = 0x1p-26;
         return *this;
       }
+
     Variable& increment_gcref(long split) noexcept
       {
         // Optimize for the non-split case.
         if(split > 1) {
           // Update the fractional part.
           this->m_gcref_f += 1 / static_cast<double>(split);
-          // Check and accumulate the carry bit.
-          if(static_cast<long>(this->m_gcref_f) == 0)
+          if(static_cast<long>(this->m_gcref_f) == 0) {
             return *this;
+          }
+          // Accumulate the carry bit.
           this->m_gcref_f -= 1;
         }
         this->m_gcref_i += 1;

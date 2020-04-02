@@ -20,56 +20,43 @@ class Variadic_Arguer final : public Abstract_Function
   public:
     template<typename... XVargsT> Variadic_Arguer(const Source_Location& xsloc, const cow_string& xfunc,
                                                   XVargsT&&... xvargs)
-      :
-        m_sloc(xsloc), m_func(xfunc),
+      : m_sloc(xsloc), m_func(xfunc),
         m_vargs(::std::forward<XVargsT>(xvargs)...)
-      {
-      }
+      { }
+
     template<typename... XVargsT> Variadic_Arguer(const cow_string& xfile, long xline, const cow_string& xfunc,
                                                   XVargsT&&... xvargs)
-      :
-        m_sloc(xfile, xline), m_func(xfunc),
+      : m_sloc(xfile, xline), m_func(xfunc),
         m_vargs(::std::forward<XVargsT>(xvargs)...)
-      {
-      }
+      { }
+
     template<typename... XVargsT> Variadic_Arguer(const Variadic_Arguer& other,
                                                   XVargsT&&... xvargs)
-      :
-        m_sloc(other.m_sloc), m_func(other.m_func),
+      : m_sloc(other.m_sloc), m_func(other.m_func),
         m_vargs(::std::forward<XVargsT>(xvargs)...)
-      {
-      }
+      { }
 
   public:
     const Source_Location& sloc() const noexcept
-      {
-        return this->m_sloc;
-      }
+      { return this->m_sloc;  }
+
     const cow_string& file() const noexcept
-      {
-        return this->m_sloc.file();
-      }
+      { return this->m_sloc.file();  }
+
     long line() const noexcept
-      {
-        return this->m_sloc.line();
-      }
+      { return this->m_sloc.line();  }
+
     const cow_string& func() const noexcept
-      {
-        return this->m_func;
-      }
+      { return this->m_func;  }
 
     bool empty() const noexcept
-      {
-        return this->m_vargs.empty();
-      }
+      { return this->m_vargs.empty();  }
+
     size_t size() const noexcept
-      {
-        return this->m_vargs.size();
-      }
+      { return this->m_vargs.size();  }
+
     const Reference& arg(size_t index) const
-      {
-        return this->m_vargs.at(index);
-      }
+      { return this->m_vargs.at(index);  }
 
     tinyfmt& describe(tinyfmt& fmt) const override;
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const override;

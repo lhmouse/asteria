@@ -18,45 +18,34 @@ class Token_Stream
 
   public:
     constexpr Token_Stream() noexcept
-      {
-      }
+      = default;
 
   public:
     // These are accessors and modifiers of tokens in this stream.
     bool empty() const noexcept
-      {
-        return this->m_rtoks.empty();
-      }
+      { return this->m_rtoks.empty();  }
+
     Token_Stream& clear() noexcept
-      {
-        return this->m_rtoks.clear(), *this;
-      }
+      { return this->m_rtoks.clear(), *this;  }
+
     size_t size() const noexcept
-      {
-        return this->m_rtoks.size();
-      }
+      { return this->m_rtoks.size();  }
+
     const Token* peek_opt(size_t offset = 0) const noexcept
-      {
-        return this->m_rtoks.get_ptr(this->m_rtoks.size() + ~offset);
-      }
+      { return this->m_rtoks.get_ptr(this->m_rtoks.size() + ~offset);  }
+
     Token_Stream& shift(size_t count = 1)
-      {
-        return this->m_rtoks.pop_back(count), *this;
-      }
+      { return this->m_rtoks.pop_back(count), *this;  }
 
     // This provides stack overflow protection.
     Recursion_Sentry copy_recursion_sentry() const
-      {
-        return this->m_sentry;
-      }
+      { return this->m_sentry;  }
+
     const void* get_recursion_base() const noexcept
-      {
-        return this->m_sentry.get_base();
-      }
+      { return this->m_sentry.get_base();  }
+
     Token_Stream& set_recursion_base(const void* base) noexcept
-      {
-        return this->m_sentry.set_base(base), *this;
-      }
+      { return this->m_sentry.set_base(base), *this;  }
 
     // This function parses characters from the input stream and fills tokens into `*this`.
     // The contents of `*this` are destroyed prior to any further operation.

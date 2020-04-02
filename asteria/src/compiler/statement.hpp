@@ -17,11 +17,13 @@ class Statement
         Source_Location sloc;
         cow_vector<Expression_Unit> units;
       };
+
     struct S_block
       {
         Source_Location sloc;
         cow_vector<Statement> stmts;
       };
+
     struct S_variables
       {
         bool immutable;
@@ -29,6 +31,7 @@ class Statement
         cow_vector<cow_vector<phsh_string>> decls;
         cow_vector<S_expression> inits;
       };
+
     struct S_function
       {
         Source_Location sloc;
@@ -36,6 +39,7 @@ class Statement
         cow_vector<phsh_string> params;
         cow_vector<Statement> body;
       };
+
     struct S_if
       {
         bool negative;
@@ -43,24 +47,28 @@ class Statement
         S_block branch_true;
         S_block branch_false;
       };
+
     struct S_switch
       {
         S_expression ctrl;
         cow_vector<S_expression> labels;
         cow_vector<S_block> bodies;
       };
+
     struct S_do_while
       {
         S_block body;
         bool negative;
         S_expression cond;
       };
+
     struct S_while
       {
         bool negative;
         S_expression cond;
         S_block body;
       };
+
     struct S_for_each
       {
         phsh_string name_key;
@@ -68,6 +76,7 @@ class Statement
         S_expression init;
         S_block body;
       };
+
     struct S_for
       {
         S_block init;
@@ -75,6 +84,7 @@ class Statement
         S_expression step;
         S_block body;
       };
+
     struct S_try
       {
         S_block body_try;
@@ -82,31 +92,37 @@ class Statement
         phsh_string name_except;
         S_block body_catch;
       };
+
     struct S_break
       {
         Source_Location sloc;
         Jump_Target target;
       };
+
     struct S_continue
       {
         Source_Location sloc;
         Jump_Target target;
       };
+
     struct S_throw
       {
         S_expression expr;
       };
+
     struct S_return
       {
         bool by_ref;
         S_expression expr;
       };
+
     struct S_assert
       {
         bool negative;
         S_expression expr;
         cow_string msg;
       };
+
     struct S_defer
       {
         S_expression expr;
@@ -132,6 +148,7 @@ class Statement
         index_assert      = 15,
         index_defer       = 16,
       };
+
     using Storage = variant<
       ROCKET_CDR(
       , S_expression  //  0,
@@ -152,6 +169,7 @@ class Statement
       , S_assert      // 15,
       , S_defer       // 16,
       )>;
+
     static_assert(::std::is_nothrow_copy_assignable<Storage>::value, "");
 
   private:
@@ -159,10 +177,9 @@ class Statement
 
   public:
     ASTERIA_VARIANT_CONSTRUCTOR(Statement, Storage, XStmtT, xstmt)
-      :
-        m_stor(::std::forward<XStmtT>(xstmt))
-      {
-      }
+      : m_stor(::std::forward<XStmtT>(xstmt))
+      { }
+
     ASTERIA_VARIANT_ASSIGNMENT(Statement, Storage, XStmtT, xstmt)
       {
         this->m_stor = ::std::forward<XStmtT>(xstmt);
@@ -171,13 +188,10 @@ class Statement
 
   public:
     Index index() const noexcept
-      {
-        return static_cast<Index>(this->m_stor.index());
-      }
+      { return static_cast<Index>(this->m_stor.index());  }
+
     bool is_empty_return() const noexcept
-      {
-        return (this->m_stor.index() == index_return) && this->m_stor.as<index_return>().expr.units.empty();
-      }
+      { return (this->m_stor.index() == index_return) && this->m_stor.as<index_return>().expr.units.empty();  }
 
     Statement& swap(Statement& other) noexcept
       {
@@ -190,9 +204,7 @@ class Statement
   };
 
 inline void swap(Statement& lhs, Statement& rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 // Generate code for a function which takes `params` and whose body consists of `stmts`.
 // This is an internal function during code generation. Seldom do you ever want to call it directly.

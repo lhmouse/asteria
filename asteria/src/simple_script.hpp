@@ -17,39 +17,29 @@ class Simple_Script
 
   public:
     constexpr Simple_Script() noexcept
-      {
-      }
+      = default;
+
     Simple_Script(tinybuf& cbuf, const cow_string& name)
-      {
-        this->reload(cbuf, name);
-      }
+      { this->reload(cbuf, name);  }
 
   public:
     const Compiler_Options& get_options() const noexcept
-      {
-        return this->m_opts;
-      }
+      { return this->m_opts;  }
+
     Compiler_Options& open_options() noexcept
-      {
-        return this->m_opts;
-      }
+      { return this->m_opts;  }
+
     Simple_Script& set_options(const Compiler_Options& opts) noexcept
-      {
-        return this->m_opts = opts, *this;
-      }
+      { return this->m_opts = opts, *this;  }
 
     explicit operator bool () const noexcept
-      {
-        return bool(this->m_func);
-      }
+      { return bool(this->m_func);  }
+
     Simple_Script& clear() noexcept
-      {
-        return this->m_func.reset(), *this;
-      }
+      { return this->m_func.reset(), *this;  }
+
     operator const cow_function& () const noexcept
-      {
-        return this->m_func;
-      }
+      { return this->m_func;  }
 
     Simple_Script& reload(tinybuf& cbuf, const cow_string& name);
 

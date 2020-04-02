@@ -16,17 +16,14 @@ class Analytic_Context : public Abstract_Context
 
   public:
     Analytic_Context(ref_to<const Abstract_Context> parent, nullptr_t)  // for non-functions
-      :
-        m_parent_opt(parent.ptr())
-      {
-      }
+      : m_parent_opt(parent.ptr())
+      { }
+
     Analytic_Context(const Abstract_Context* parent_opt,  // for functions
                      const cow_vector<phsh_string>& params)
-      :
-        m_parent_opt(parent_opt)
-      {
-        this->do_prepare_function(params);
-      }
+      : m_parent_opt(parent_opt)
+      { this->do_prepare_function(params);  }
+
     ~Analytic_Context() override;
 
   private:
@@ -39,13 +36,10 @@ class Analytic_Context : public Abstract_Context
 
   public:
     bool is_analytic() const noexcept
-      {
-        return true;
-      }
+      { return true;  }
+
     const Abstract_Context* get_parent_opt() const noexcept
-      {
-        return this->m_parent_opt;
-      }
+      { return this->m_parent_opt;  }
   };
 
 }  // namespace Asteria

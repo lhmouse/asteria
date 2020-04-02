@@ -15,33 +15,26 @@ class Statement_Sequence
     cow_vector<Statement> m_stmts;
 
   public:
-    Statement_Sequence() noexcept
-      {
-      }
+    constexpr Statement_Sequence() noexcept
+      = default;
 
   public:
     // These are accessors to the statements in this sequence.
     // Note that the sequence cannot be modified.
     bool empty() const noexcept
-      {
-        return this->m_stmts.size();
-      }
+      { return this->m_stmts.size();  }
+
     Statement_Sequence& clear() noexcept
-      {
-        return this->m_stmts.clear(), *this;
-      }
+      { return this->m_stmts.clear(), *this;  }
+
     size_t size() const noexcept
-      {
-        return this->m_stmts.size();
-      }
+      { return this->m_stmts.size();  }
+
     const Statement& at(size_t index) const
-      {
-        return this->m_stmts.at(index);
-      }
+      { return this->m_stmts.at(index);  }
+
     operator const cow_vector<Statement>& () const noexcept
-      {
-        return this->m_stmts;
-      }
+      { return this->m_stmts;  }
 
     // This function parses tokens from the input stream and fills statements into `*this`.
     // The contents of `*this` are destroyed prior to any further operation.

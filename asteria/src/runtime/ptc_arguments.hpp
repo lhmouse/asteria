@@ -30,53 +30,42 @@ class PTC_Arguments final : public Rcfwd<PTC_Arguments>
   public:
     PTC_Arguments(const Source_Location& sloc, const rcptr<Variadic_Arguer>& zvarg, PTC_Aware ptc,
                   const cow_function& target, cow_vector<Reference>&& args_self)
-      :
-        m_sloc(sloc), m_zvarg(zvarg), m_ptc(ptc),
+      : m_sloc(sloc), m_zvarg(zvarg), m_ptc(ptc),
         m_target(target), m_args_self(::std::move(args_self))
-      {
-      }
+      { }
+
     ~PTC_Arguments() override;
 
     PTC_Arguments(const PTC_Arguments&)
       = delete;
+
     PTC_Arguments& operator=(const PTC_Arguments&)
       = delete;
 
   public:
     const Source_Location& sloc() const noexcept
-      {
-        return this->m_sloc;
-      }
+      { return this->m_sloc;  }
+
     const rcptr<Variadic_Arguer>& zvarg() const noexcept
-      {
-        return this->m_zvarg;
-      }
+      { return this->m_zvarg;  }
+
     PTC_Aware ptc_aware() const noexcept
-      {
-        return this->m_ptc;
-      }
+      { return this->m_ptc;  }
 
     const cow_bivector<Source_Location, AVMC_Queue>& get_defer_stack() const noexcept
-      {
-        return this->m_defer;
-      }
+      { return this->m_defer;  }
+
     cow_bivector<Source_Location, AVMC_Queue>& open_defer_stack() noexcept
-      {
-        return this->m_defer;
-      }
+      { return this->m_defer;  }
 
     const cow_function& get_target() const noexcept
-      {
-        return this->m_target;
-      }
+      { return this->m_target;  }
+
     const cow_vector<Reference>& get_arguments_and_self() const noexcept
-      {
-        return this->m_args_self;
-      }
+      { return this->m_args_self;  }
+
     cow_vector<Reference>& open_arguments_and_self() noexcept
-      {
-        return this->m_args_self;
-      }
+      { return this->m_args_self;  }
 
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const;
   };

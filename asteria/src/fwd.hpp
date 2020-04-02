@@ -159,15 +159,12 @@ struct Rcbase : virtual ::rocket::refcnt_base<Rcbase>
   };
 
 template<typename RealT> struct Rcfwd : Rcbase
-  {
-  };
+  { };
 
 template<typename RealT> using rcfwdp = rcptr<Rcfwd<RealT>>;
 
 template<typename RealT> constexpr rcptr<RealT> unerase_cast(const rcfwdp<RealT>& ptr) noexcept
-  {
-    return ::rocket::static_pointer_cast<RealT>(ptr);
-  }
+  { return ::rocket::static_pointer_cast<RealT>(ptr);  }
 
 // Standard I/O synchronization
 struct StdIO_Sentry
@@ -181,13 +178,13 @@ struct StdIO_Sentry
         if(!::freopen(nullptr, "w", stdout))
           ::abort();
       }
+
     ~StdIO_Sentry()
-      {
-        ::fflush(nullptr);
-      }
+      { ::fflush(nullptr);  }
 
     StdIO_Sentry(const StdIO_Sentry&)
       = delete;
+
     StdIO_Sentry& operator=(const StdIO_Sentry&)
       = delete;
   };
@@ -234,9 +231,7 @@ struct Abstract_Function : public Rcbase
   };
 
 inline tinyfmt& operator<<(tinyfmt& fmt, const Abstract_Function& func)
-  {
-    return func.describe(fmt);
-  }
+  { return func.describe(fmt);  }
 
 class cow_opaque
   {
@@ -245,26 +240,22 @@ class cow_opaque
 
   public:
     constexpr cow_opaque(nullptr_t = nullptr) noexcept
-      {
-      }
+      { };
+
     template<typename OpaqueT> constexpr cow_opaque(rcptr<OpaqueT> sptr) noexcept
-      :
-        m_sptr(::std::move(sptr))
-      {
-      }
+      : m_sptr(::std::move(sptr))
+      { }
 
   private:
     [[noreturn]] void do_throw_null_pointer() const;
 
   public:
     bool unique() const noexcept
-      {
-        return this->m_sptr.unique();
-      }
+      { return this->m_sptr.unique();  }
+
     long use_count() const noexcept
-      {
-        return this->m_sptr.use_count();
-      }
+      { return this->m_sptr.use_count();  }
+
     cow_opaque& reset() noexcept
       {
         this->m_sptr = nullptr;
@@ -272,73 +263,69 @@ class cow_opaque
       }
 
     explicit operator bool () const noexcept
-      {
-        return bool(this->m_sptr);
-      }
+      { return bool(this->m_sptr);  }
+
     const type_info& type() const noexcept
-      {
-        return typeid(*(this->m_sptr.get()));
-      }
+      { return typeid(*(this->m_sptr.get()));  }
 
     tinyfmt& describe(tinyfmt& fmt) const
       {
         auto ptr = this->m_sptr.get();
-        if(!ptr) {
+        if(!ptr)
           return fmt << "<null opaque pointer>";
-        }
+
         return ptr->describe(fmt);
       }
+
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const
       {
         auto ptr = this->m_sptr.get();
-        if(!ptr) {
+        if(!ptr)
           return callback;
-        }
+
         return ptr->enumerate_variables(callback);
       }
 
     template<typename OpaqueT> rcptr<const OpaqueT> cast_opt() const
       {
         auto ptr = this->m_sptr.get();
-        if(!ptr) {
+        if(!ptr)
           this->do_throw_null_pointer();
-        }
+
         auto tsptr = ::rocket::dynamic_pointer_cast<const OpaqueT>(this->m_sptr);
         return tsptr;
       }
+
     template<typename OpaqueT> rcptr<OpaqueT> open_opt()
       {
         auto ptr = this->m_sptr.get();
-        if(!ptr) {
+        if(!ptr)
           this->do_throw_null_pointer();
-        }
+
         auto tsptr = ::rocket::dynamic_pointer_cast<OpaqueT>(this->m_sptr);
-        if(!tsptr) {
+        if(!tsptr)
           return tsptr;
-        }
+
         // Clone the existent instance if it is shared.
         // If the overriding function returns a null pointer, the shared instance is used.
         // Note the covariance of the return type of `clone_opt()`.
         rcptr<Abstract_Opaque> sptr2;
         auto tptr2 = tsptr->clone_opt(sptr2);
-        if(!tptr2) {
-          return tsptr;
+        if(tptr2) {
+          // Take ownership of the clone.
+          // Don't introduce a dependent name here.
+          ROCKET_ASSERT(tptr2 == sptr2.get());
+          this->m_sptr.swap(sptr2);
+          ptr = tptr2;
+          ptr->add_reference();
+          tsptr.reset(tptr2);
         }
-        // Take ownership of the clone.
-        // Don't introduce a dependent name here.
-        ROCKET_ASSERT(tptr2 == sptr2.get());
-        this->m_sptr.swap(sptr2);
-        ptr = tptr2;
-        ptr->add_reference();
-        tsptr.reset(tptr2);
         return tsptr;
       }
   };
 
 inline tinyfmt& operator<<(tinyfmt& fmt, const cow_opaque& opaq)
-  {
-    return opaq.describe(fmt);
-  }
+  { return opaq.describe(fmt);  }
 
 // Function type support
 using simple_function = Reference& (Reference& self,  // `this` (input) and return (output) reference
@@ -354,31 +341,26 @@ class cow_function
 
   public:
     constexpr cow_function(nullptr_t = nullptr) noexcept
-      {
-      }
+      { }
+
     constexpr cow_function(const char* desc, simple_function& func) noexcept
-      :
-        m_desc(desc), m_fptr(func)
-      {
-      }
+      : m_desc(desc), m_fptr(func)
+      { }
+
     template<typename FunctionT> constexpr cow_function(rcptr<FunctionT> sptr) noexcept
-      :
-        m_sptr(::std::move(sptr))
-      {
-      }
+      : m_sptr(::std::move(sptr))
+      { }
 
   private:
     [[noreturn]] void do_throw_null_pointer() const;
 
   public:
     bool unique() const noexcept
-      {
-        return this->m_sptr.unique();
-      }
+      { return this->m_sptr.unique();  }
+
     long use_count() const noexcept
-      {
-        return this->m_sptr.use_count();
-      }
+      { return this->m_sptr.use_count();  }
+
     cow_function& reset() noexcept
       {
         this->m_fptr = nullptr;
@@ -389,42 +371,44 @@ class cow_function
     explicit operator bool () const noexcept
       {
         auto fptr = this->m_fptr;
-        if(fptr) {
+        if(fptr)
           return true;  // static
-        }
+
         return bool(this->m_sptr);  // dynamic
       }
+
     const type_info& type() const noexcept
       {
         auto fptr = this->m_fptr;
-        if(fptr) {
+        if(fptr)
           return typeid(*fptr);  // static
-        }
+
         return typeid(*(this->m_sptr.get()));  // dynamic
       }
 
     tinyfmt& describe(tinyfmt& fmt) const
       {
         auto fptr = this->m_fptr;
-        if(fptr) {
+        if(fptr)
           return fmt << this->m_desc << " (native function @ " << (void*)(intptr_t)fptr << ")";  // static
-        }
+
         auto ptr = this->m_sptr.get();
-        if(!ptr) {
-          return fmt << "<null function pointer>";
-        }
+        if(!ptr)
+          return fmt << "<null function pointer>";  // null
+
         return ptr->describe(fmt);  // dynamic
       }
+
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const
       {
         auto fptr = this->m_fptr;
-        if(fptr) {
+        if(fptr)
           return callback;  // static - nothing to do
-        }
+
         auto ptr = this->m_sptr.get();
-        if(!ptr) {
+        if(!ptr)
           return callback;  // null - nothing to do
-        }
+
         return ptr->enumerate_variables(callback);  // dynamic
       }
 
@@ -434,9 +418,7 @@ class cow_function
   };
 
 inline tinyfmt& operator<<(tinyfmt& fmt, const cow_function& func)
-  {
-    return func.describe(fmt);
-  }
+  { return func.describe(fmt);  }
 
 // Fundamental types
 using V_null      = nullptr_t;
@@ -561,17 +543,17 @@ enum API_Version : uint32_t
 template<uint32_t... paramsT> struct Compiler_Options_template;
 template<uint32_t fragmentT> struct Compiler_Options_fragment;
 
-template<uint32_t versionT>
-    struct Compiler_Options_template<versionT> : Compiler_Options_template<versionT, versionT>
-  {
-  };
-template<uint32_t versionT, uint32_t fragmentT>
-    struct Compiler_Options_template<versionT, fragmentT> : Compiler_Options_template<versionT, fragmentT - 1>,
-                                                            Compiler_Options_fragment<fragmentT>
+template<uint32_t versionT> struct Compiler_Options_template<versionT>
+    : Compiler_Options_template<versionT, versionT>
+  { };
+
+template<uint32_t versionT, uint32_t fragmentT> struct Compiler_Options_template<versionT, fragmentT>
+    : Compiler_Options_template<versionT, fragmentT - 1>, Compiler_Options_fragment<fragmentT>
   {
     // All members from `Compiler_Options_fragment<fragmentT>` have been brought in.
     // This struct does not define anything by itself.
   };
+
 template<uint32_t versionT> struct Compiler_Options_template<versionT, 0>
   {
     // This member exists in all derived structs.

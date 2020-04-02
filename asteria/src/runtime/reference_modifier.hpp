@@ -15,13 +15,16 @@ class Reference_modifier
       {
         int64_t index;
       };
+
     struct S_object_key
       {
         phsh_string key;
       };
+
     struct S_array_head
       {
       };
+
     struct S_array_tail
       {
       };
@@ -33,6 +36,7 @@ class Reference_modifier
         index_array_head   = 2,
         index_array_tail   = 3,
       };
+
     using Storage = variant<
       ROCKET_CDR(
       , S_array_index  // 0,
@@ -40,6 +44,7 @@ class Reference_modifier
       , S_array_head   // 2,
       , S_array_tail   // 3,
       )>;
+
     static_assert(::std::is_nothrow_copy_assignable<Storage>::value, "");
 
   private:
@@ -47,10 +52,9 @@ class Reference_modifier
 
   public:
     ASTERIA_VARIANT_CONSTRUCTOR(Reference_modifier, Storage, XModT, xmod)
-      :
-        m_stor(::std::forward<XModT>(xmod))
-      {
-      }
+      : m_stor(::std::forward<XModT>(xmod))
+      { }
+
     ASTERIA_VARIANT_ASSIGNMENT(Reference_modifier, Storage, XModT, xmod)
       {
         this->m_stor = ::std::forward<XModT>(xmod);
@@ -59,9 +63,7 @@ class Reference_modifier
 
   public:
     Index index() const noexcept
-      {
-        return static_cast<Index>(this->m_stor.index());
-      }
+      { return static_cast<Index>(this->m_stor.index());  }
 
     Reference_modifier& swap(Reference_modifier& other) noexcept
       {
@@ -75,9 +77,7 @@ class Reference_modifier
   };
 
 inline void swap(Reference_modifier& lhs, Reference_modifier& rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 }  // namespace Asteria
 

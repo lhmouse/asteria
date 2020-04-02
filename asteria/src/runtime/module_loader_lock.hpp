@@ -20,12 +20,13 @@ class Module_Loader_Lock final : public Rcfwd<Module_Loader_Lock>
 
   public:
     Module_Loader_Lock() noexcept
-      {
-      }
+      = default;
+
     ~Module_Loader_Lock() override;
 
     Module_Loader_Lock(const Module_Loader_Lock&)
       = delete;
+
     Module_Loader_Lock& operator=(const Module_Loader_Lock&)
       = delete;
 
@@ -42,38 +43,29 @@ class Module_Loader_Lock::Unique_Stream
 
   public:
     constexpr Unique_Stream() noexcept
-      {
-      }
+      = default;
+
     Unique_Stream(const rcptr<Module_Loader_Lock>& lock, const char* path)
-      {
-        this->reset(lock, path);
-      }
+      { this->reset(lock, path);  }
+
     Unique_Stream(Unique_Stream&& other) noexcept
-      {
-        this->swap(other);
-      }
+      { this->swap(other);  }
+
     Unique_Stream& operator=(Unique_Stream&& other) noexcept
-      {
-        return this->swap(other);
-      }
+      { return this->swap(other);  }
+
     ~Unique_Stream()
-      {
-        this->reset();
-      }
+      { this->reset();  }
 
   public:
     explicit operator bool () const noexcept
-      {
-        return bool(this->m_elem);
-      }
+      { return bool(this->m_elem);  }
+
     ::rocket::tinybuf_file& get() const noexcept
-      {
-        return ROCKET_ASSERT(this->m_elem), this->m_elem->second;
-      }
+      { return ROCKET_ASSERT(this->m_elem), this->m_elem->second;  }
+
     operator ::rocket::tinybuf_file& () const noexcept
-      {
-        return ROCKET_ASSERT(this->m_elem), this->m_elem->second;
-      }
+      { return ROCKET_ASSERT(this->m_elem), this->m_elem->second;  }
 
     Unique_Stream& reset() noexcept
       {
@@ -86,6 +78,7 @@ class Module_Loader_Lock::Unique_Stream
           qlock->do_unlock_stream(qelem);
         return *this;
       }
+
     Unique_Stream& reset(const rcptr<Module_Loader_Lock>& lock, const char* path)
       {
         // Lock the stream. If an exception is thrown, there is no effect.
@@ -112,9 +105,7 @@ class Module_Loader_Lock::Unique_Stream
   };
 
 inline void swap(Module_Loader_Lock::Unique_Stream& lhs, Module_Loader_Lock::Unique_Stream& rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 }  // namespace Asteria
 

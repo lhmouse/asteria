@@ -11,7 +11,7 @@
 namespace Asteria {
 namespace {
 
-const Ival& do_verify_bounds(const Ival& lower, const Ival& upper)
+int64_t do_verify_bounds(int64_t lower, int64_t upper)
   {
     if(!(lower <= upper)) {
       ASTERIA_THROW("bounds not valid (`$1` is not less than or equal to `$2`)", lower, upper);
@@ -19,7 +19,7 @@ const Ival& do_verify_bounds(const Ival& lower, const Ival& upper)
     return upper;
   }
 
-const Rval& do_verify_bounds(const Rval& lower, const Rval& upper)
+double do_verify_bounds(double lower, double upper)
   {
     if(!::std::islessequal(lower, upper)) {
       ASTERIA_THROW("bounds not valid (`$1` is not less than or equal to `$2`)", lower, upper);
@@ -27,7 +27,7 @@ const Rval& do_verify_bounds(const Rval& lower, const Rval& upper)
     return upper;
   }
 
-Ival do_cast_to_integer(const Rval& value)
+Ival do_cast_to_integer(double value)
   {
     if(!::std::islessequal(-0x1p63, value) || !::std::islessequal(value, 0x1p63 - 0x1p10)) {
       ASTERIA_THROW("`real` value not representable as an `integer` (value `$1`)", value);
@@ -35,7 +35,7 @@ Ival do_cast_to_integer(const Rval& value)
     return Ival(value);
   }
 
-ROCKET_PURE_FUNCTION Ival do_saturating_add(const Ival& lhs, const Ival& rhs)
+ROCKET_PURE_FUNCTION Ival do_saturating_add(int64_t lhs, int64_t rhs)
   {
     if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)) {
       return (rhs >> 63) ^ INT64_MAX;
@@ -43,7 +43,7 @@ ROCKET_PURE_FUNCTION Ival do_saturating_add(const Ival& lhs, const Ival& rhs)
     return lhs + rhs;
   }
 
-ROCKET_PURE_FUNCTION Ival do_saturating_sub(const Ival& lhs, const Ival& rhs)
+ROCKET_PURE_FUNCTION Ival do_saturating_sub(int64_t lhs, int64_t rhs)
   {
     if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs)) {
       return (rhs >> 63) ^ INT64_MIN;
@@ -51,7 +51,7 @@ ROCKET_PURE_FUNCTION Ival do_saturating_sub(const Ival& lhs, const Ival& rhs)
     return lhs - rhs;
   }
 
-ROCKET_PURE_FUNCTION Ival do_saturating_mul(const Ival& lhs, const Ival& rhs)
+ROCKET_PURE_FUNCTION Ival do_saturating_mul(int64_t lhs, int64_t rhs)
   {
     if((lhs == 0) || (rhs == 0)) {
       return 0;
@@ -76,22 +76,16 @@ ROCKET_PURE_FUNCTION Ival do_saturating_mul(const Ival& lhs, const Ival& rhs)
     return alhs * srhs;
   }
 
-ROCKET_PURE_FUNCTION Rval do_saturating_add(const Rval& lhs, const Rval& rhs)
-  {
-    return lhs + rhs;
-  }
+ROCKET_PURE_FUNCTION Rval do_saturating_add(double lhs, double rhs)
+  { return lhs + rhs;  }
 
-ROCKET_PURE_FUNCTION Rval do_saturating_sub(const Rval& lhs, const Rval& rhs)
-  {
-    return lhs - rhs;
-  }
+ROCKET_PURE_FUNCTION Rval do_saturating_sub(double lhs, double rhs)
+  { return lhs - rhs;  }
 
-ROCKET_PURE_FUNCTION Rval do_saturating_mul(const Rval& lhs, const Rval& rhs)
-  {
-    return lhs * rhs;
-  }
+ROCKET_PURE_FUNCTION Rval do_saturating_mul(double lhs, double rhs)
+  { return lhs * rhs;  }
 
-pair<Ival, int> do_decompose_integer(uint8_t ebase, const Ival& value)
+pair<Ival, int> do_decompose_integer(uint8_t ebase, int64_t value)
   {
     int64_t ireg = value;
     int iexp = 0;

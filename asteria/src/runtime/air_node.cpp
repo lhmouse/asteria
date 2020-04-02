@@ -113,14 +113,10 @@ AIR_Status do_evaluate_branch(const AVMC_Queue& queue, bool assign, Executive_Co
   }
 
 template<typename ParamV> inline const ParamV* do_pcast(const void* pv) noexcept
-  {
-    return static_cast<const ParamV*>(pv);
-  }
+  { return static_cast<const ParamV*>(pv);  }
 
 template<typename ParamV> Variable_Callback& do_penum(Variable_Callback& callback, ParamU /*pu*/, const void* pv)
-  {
-    return static_cast<const ParamV*>(pv)->enumerate_variables(callback);
-  }
+  { return static_cast<const ParamV*>(pv)->enumerate_variables(callback);  }
 
 // This is the trait struct for parameter types that implement `enumerate_variables()`.
 template<typename ParamV, typename = void> struct AVMC_Appender : ParamV
@@ -128,19 +124,14 @@ template<typename ParamV, typename = void> struct AVMC_Appender : ParamV
     ParamU pu;
 
     constexpr AVMC_Appender()
-      :
-        ParamV(), pu()
-      {
-      }
+      : ParamV(), pu()
+      { }
 
     AVMC_Queue& request(AVMC_Queue& queue) const
-      {
-        return queue.request(sizeof(ParamV));
-      }
+      { return queue.request(sizeof(ParamV));  }
+
     template<Executor executorT> AVMC_Queue& output(AVMC_Queue& queue)
-      {
-        return queue.append<executorT, do_penum<ParamV>>(this->pu, static_cast<ParamV&&>(*this));
-      }
+      { return queue.append<executorT, do_penum<ParamV>>(this->pu, static_cast<ParamV&&>(*this));  }
   };
 
 // This is the trait struct for parameter types that do not implement `enumerate_variables()`.
@@ -151,19 +142,14 @@ template<typename ParamV> struct AVMC_Appender<ParamV,
     ParamU pu;
 
     constexpr AVMC_Appender()
-      :
-        ParamV(), pu()
-      {
-      }
+      : ParamV(), pu()
+      { }
 
     AVMC_Queue& request(AVMC_Queue& queue) const
-      {
-        return queue.request(sizeof(ParamV));
-      }
+      { return queue.request(sizeof(ParamV));  }
+
     template<Executor executorT> AVMC_Queue& output(AVMC_Queue& queue)
-      {
-        return queue.append<executorT>(this->pu, static_cast<ParamV&&>(*this));
-      }
+      { return queue.append<executorT>(this->pu, static_cast<ParamV&&>(*this));  }
   };
 
 // This is the trait struct when there is no parameter.
@@ -172,19 +158,14 @@ template<> struct AVMC_Appender<void, void>
     ParamU pu;
 
     constexpr AVMC_Appender()
-      :
-        pu()
-      {
-      }
+      : pu()
+      { }
 
     AVMC_Queue& request(AVMC_Queue& queue) const
-      {
-        return queue.request(0);
-      }
+      { return queue.request(0);  }
+
     template<Executor executorT> AVMC_Queue& output(AVMC_Queue& queue)
-      {
-        return queue.append<executorT>(this->pu);
-      }
+      { return queue.append<executorT>(this->pu);  }
   };
 
 AVMC_Queue& do_solidify_queue(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)

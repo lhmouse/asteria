@@ -90,29 +90,24 @@ class Line_Reader
 
   public:
     Line_Reader(ref_to<tinybuf> xcbuf, const cow_string& xfile)
-      :
-        m_cbuf(xcbuf), m_file(xfile)
-      {
-      }
+      : m_cbuf(xcbuf), m_file(xfile)
+      { }
 
     Line_Reader(const Line_Reader&)
       = delete;
+
     Line_Reader& operator=(const Line_Reader&)
       = delete;
 
   public:
     tinybuf& cbuf() const noexcept
-      {
-        return this->m_cbuf;
-      }
+      { return this->m_cbuf;  }
+
     const cow_string& file() const noexcept
-      {
-        return this->m_file;
-      }
+      { return this->m_file;  }
+
     long line() const noexcept
-      {
-        return this->m_line;
-      }
+      { return this->m_line;  }
 
     bool advance()
       {
@@ -148,47 +143,42 @@ class Line_Reader
       }
 
     size_t offset() const noexcept
-      {
-        return this->m_off;
-      }
+      { return this->m_off;  }
+
     size_t navail() const noexcept
-      {
-        return this->m_str.size() - this->m_off;
-      }
+      { return this->m_str.size() - this->m_off;  }
+
     const char* data(size_t add = 0) const
       {
-        if(add > this->m_str.size() - this->m_off) {
+        if(add > this->m_str.size() - this->m_off)
           ASTERIA_THROW("attempt to seek past end of line (`$1` + `$2` > `$3`)", this->m_off, add, this->m_str.size());
-        }
         return this->m_str.data() + (this->m_off + add);
       }
+
     char peek(size_t add = 0) const noexcept
       {
-        if(add > this->m_str.size() - this->m_off) {
+        if(add > this->m_str.size() - this->m_off)
           return 0;
-        }
         return this->m_str[this->m_off + add];
       }
+
     void consume(size_t add)
       {
-        if(add > this->m_str.size() - this->m_off) {
+        if(add > this->m_str.size() - this->m_off)
           ASTERIA_THROW("attempt to seek past end of line (`$1` + `$2` > `$3`)", this->m_off, add, this->m_str.size());
-        }
         this->m_off += add;
       }
+
     void rewind(size_t off = 0)
       {
-        if(off > this->m_str.size()) {
+        if(off > this->m_str.size())
           ASTERIA_THROW("invalid offset within current line (`$1` > `$2`)", off, this->m_str.size());
-        }
         this->m_off = off;
       }
   };
 
 [[noreturn]] inline void do_throw_parser_error(Parser_Status status, const Line_Reader& reader, size_t tlen)
-  {
-    throw Parser_Error(status, reader.line(), reader.offset(), tlen);
-  }
+  { throw Parser_Error(status, reader.line(), reader.offset(), tlen);  }
 
 class Tack
   {
@@ -198,27 +188,18 @@ class Tack
     size_t m_length = 0;
 
   public:
-    constexpr Tack() noexcept
-      {
-      }
-
-  public:
     constexpr long line() const noexcept
-      {
-        return this->m_line;
-      }
+      { return this->m_line;  }
+
     constexpr size_t offset() const noexcept
-      {
-        return this->m_offset;
-      }
+      { return this->m_offset;  }
+
     constexpr size_t length() const noexcept
-      {
-        return this->m_length;
-      }
+      { return this->m_length;  }
+
     explicit operator bool () const noexcept
-      {
-        return this->m_line != 0;
-      }
+      { return this->m_line != 0;  }
+
     Tack& set(const Line_Reader& reader, size_t xlength) noexcept
       {
         this->m_line = reader.line();
@@ -226,6 +207,7 @@ class Tack
         this->m_length = xlength;
         return *this;
       }
+
     Tack& clear() noexcept
       {
         this->m_line = 0;
@@ -414,17 +396,13 @@ bool do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, b
 struct Prefix_Comparator
   {
     template<typename ElementT> bool operator()(const ElementT& lhs, const ElementT& rhs) const noexcept
-      {
-        return ::rocket::char_traits<char>::compare(lhs.first, rhs.first, sizeof(lhs.first)) < 0;
-      }
+      { return ::rocket::char_traits<char>::compare(lhs.first, rhs.first, sizeof(lhs.first)) < 0;  }
+
     template<typename ElementT> bool operator()(char lhs, const ElementT& rhs) const noexcept
-      {
-        return ::rocket::char_traits<char>::lt(lhs, rhs.first[0]);
-      }
+      { return ::rocket::char_traits<char>::lt(lhs, rhs.first[0]);  }
+
     template<typename ElementT> bool operator()(const ElementT& lhs, char rhs) const noexcept
-      {
-        return ::rocket::char_traits<char>::lt(lhs.first[0], rhs);
-      }
+      { return ::rocket::char_traits<char>::lt(lhs.first[0], rhs);  }
   };
 
 struct Punctuator_Element

@@ -17,10 +17,12 @@ class Expression_Unit
       {
         Value val;
       };
+
     struct S_named_reference
       {
         phsh_string name;
       };
+
     struct S_closure_function
       {
         Source_Location sloc;
@@ -28,47 +30,57 @@ class Expression_Unit
         cow_vector<phsh_string> params;
         cow_vector<Statement> body;
       };
+
     struct S_branch
       {
         cow_vector<Expression_Unit> branch_true;
         cow_vector<Expression_Unit> branch_false;
         bool assign;
       };
+
     struct S_function_call
       {
         Source_Location sloc;
         uint32_t nargs;
       };
+
     struct S_member_access
       {
         phsh_string name;
       };
+
     struct S_operator_rpn
       {
         Xop xop;
         bool assign;  // This parameter is ignored for `++`, `--`, `[]` and `=`.
       };
+
     struct S_unnamed_array
       {
         uint32_t nelems;
       };
+
     struct S_unnamed_object
       {
         cow_vector<phsh_string> keys;
       };
+
     struct S_coalescence
       {
         cow_vector<Expression_Unit> branch_null;
         bool assign;
       };
+
     struct S_global_reference
       {
         phsh_string name;
       };
+
     struct S_variadic_call
       {
         Source_Location sloc;
       };
+
     struct S_argument_finish
       {
         bool by_ref;
@@ -90,6 +102,7 @@ class Expression_Unit
         index_variadic_call     = 11,
         index_argument_finish   = 12,
       };
+
     using Storage = variant<
       ROCKET_CDR(
       , S_literal           //  0,
@@ -106,6 +119,7 @@ class Expression_Unit
       , S_variadic_call     // 11,
       , S_argument_finish   // 12,
       )>;
+
     static_assert(::std::is_nothrow_copy_assignable<Storage>::value, "");
 
   private:
@@ -113,10 +127,9 @@ class Expression_Unit
 
   public:
     ASTERIA_VARIANT_CONSTRUCTOR(Expression_Unit, Storage, XUnitT, xunit)
-      :
-        m_stor(::std::forward<XUnitT>(xunit))
-      {
-      }
+      : m_stor(::std::forward<XUnitT>(xunit))
+      { }
+
     ASTERIA_VARIANT_ASSIGNMENT(Expression_Unit, Storage, XUnitT, xunit)
       {
         this->m_stor = ::std::forward<XUnitT>(xunit);
@@ -125,9 +138,7 @@ class Expression_Unit
 
   public:
     Index index() const noexcept
-      {
-        return static_cast<Index>(this->m_stor.index());
-      }
+      { return static_cast<Index>(this->m_stor.index());  }
 
     Expression_Unit& swap(Expression_Unit& other) noexcept
       {
@@ -140,9 +151,7 @@ class Expression_Unit
   };
 
 inline void swap(Expression_Unit& lhs, Expression_Unit& rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 }  // namespace Asteria
 

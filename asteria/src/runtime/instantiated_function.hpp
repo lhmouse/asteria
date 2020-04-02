@@ -20,11 +20,9 @@ class Instantiated_Function final : public Abstract_Function
   public:
     Instantiated_Function(const cow_vector<phsh_string>& params, rcptr<Variadic_Arguer>&& zvarg,
                           const cow_vector<AIR_Node>& code)
-      :
-        m_params(params), m_zvarg(::std::move(zvarg))
-      {
-        this->do_solidify_code(code);
-      }
+      : m_params(params), m_zvarg(::std::move(zvarg))
+      { this->do_solidify_code(code);  }
+
     ~Instantiated_Function() override;
 
   private:
@@ -32,17 +30,13 @@ class Instantiated_Function final : public Abstract_Function
 
   public:
     const Source_Location& source_location() const noexcept
-      {
-        return this->m_zvarg->sloc();
-      }
+      { return this->m_zvarg->sloc();  }
+
     const cow_string& signature() const noexcept
-      {
-        return this->m_zvarg->func();
-      }
+      { return this->m_zvarg->func();  }
+
     const cow_vector<phsh_string>& parameters() const noexcept
-      {
-        return this->m_params;
-      }
+      { return this->m_params;  }
 
     tinyfmt& describe(tinyfmt& fmt) const override;
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const override;

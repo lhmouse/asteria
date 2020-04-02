@@ -18,26 +18,21 @@ class Sentry
 
   public:
     explicit Sentry(long& ref) noexcept
-      :
-        m_ref(ref), m_old(ref)
-      {
-        this->m_ref++;
-      }
+      : m_ref(ref), m_old(ref)
+      { this->m_ref++;  }
+
     ~Sentry()
-      {
-        this->m_ref--;
-      }
+      { this->m_ref--;  }
 
     Sentry(const Sentry&)
       = delete;
+
     Sentry& operator=(const Sentry&)
       = delete;
 
   public:
     explicit operator bool () const noexcept
-      {
-        return this->m_old == 0;
-      }
+      { return this->m_old == 0;  }
   };
 
 template<typename FuncT> struct Variable_Walker final : Variable_Callback
@@ -45,14 +40,11 @@ template<typename FuncT> struct Variable_Walker final : Variable_Callback
     FuncT func;  // If `FunctionT` is a reference type then this is a reference.
 
     explicit Variable_Walker(FuncT&& xfunc)
-      :
-        func(::std::forward<FuncT>(xfunc))
-      {
-      }
+      : func(::std::forward<FuncT>(xfunc))
+      { }
+
     bool process(const rcptr<Variable>& var) override
-      {
-        return this->func(var);
-      }
+      { return this->func(var);  }
   };
 
 template<typename ContT, typename FuncT> FuncT&& do_traverse(const ContT& cont, FuncT&& func)
@@ -80,10 +72,10 @@ struct Variable_Wiper final : Variable_Callback
 
 bool Collector::track_variable(const rcptr<Variable>& var)
   {
-    if(!this->m_tracked.insert(var)) {
+    if(!this->m_tracked.insert(var))
       return false;
-    }
     this->m_counter++;
+
     // Perform automatic garbage collection on `*this`.
     if(ROCKET_UNEXPECT(this->m_counter > this->m_threshold)) {
       auto qnext = this;
@@ -96,9 +88,8 @@ bool Collector::track_variable(const rcptr<Variable>& var)
 
 bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
   {
-    if(!this->m_tracked.erase(var)) {
+    if(!this->m_tracked.erase(var))
       return false;
-    }
     this->m_counter--;
     return true;
   }
@@ -109,6 +100,7 @@ Collector* Collector::collect_single_opt()
     const Sentry sentry(this->m_recur);
     if(!sentry)
       return nullptr;
+
     Collector* next = nullptr;
     auto output = this->m_output_opt;
     auto tied = this->m_tied_opt;
@@ -256,6 +248,7 @@ Collector& Collector::wipe_out_variables() noexcept
     const Sentry sentry(this->m_recur);
     if(!sentry)
       return *this;
+
     // Wipe all variables recursively.
     Variable_Wiper wiper;
     this->m_tracked.enumerate_variables(wiper);

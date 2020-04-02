@@ -21,12 +21,9 @@ class Parser_Error : public virtual exception
 
   public:
     Parser_Error(Parser_Status xstat, long xline, size_t xoffset, size_t xlength)
-      :
-        m_stat(xstat),
-        m_line(xline), m_offset(xoffset), m_length(xlength)
-      {
-        this->do_compose_message();
-      }
+      : m_stat(xstat), m_line(xline), m_offset(xoffset), m_length(xlength)
+      { this->do_compose_message();  }
+
     ~Parser_Error() override;
 
   private:
@@ -34,49 +31,35 @@ class Parser_Error : public virtual exception
 
   public:
     const char* what() const noexcept override
-      {
-        return this->m_what.c_str();
-      }
+      { return this->m_what.c_str();  }
 
     long line() const noexcept
-      {
-        return this->m_line;
-      }
+      { return this->m_line;  }
+
     size_t offset() const noexcept
-      {
-        return this->m_offset;
-      }
+      { return this->m_offset;  }
+
     size_t length() const noexcept
-      {
-        return this->m_length;
-      }
+      { return this->m_length;  }
+
     Parser_Status status() const noexcept
-      {
-        return this->m_stat;
-      }
+      { return this->m_stat;  }
+
     const char* what_status() const noexcept
-      {
-        return describe_parser_status(this->m_stat);
-      }
+      { return describe_parser_status(this->m_stat);  }
   };
 
 inline bool operator==(const Parser_Error& lhs, Parser_Status rhs) noexcept
-  {
-    return lhs.status() == rhs;
-  }
+  { return lhs.status() == rhs;  }
+
 inline bool operator!=(const Parser_Error& lhs, Parser_Status rhs) noexcept
-  {
-    return lhs.status() != rhs;
-  }
+  { return lhs.status() != rhs;  }
 
 inline bool operator==(Parser_Status lhs, const Parser_Error& rhs) noexcept
-  {
-    return lhs == rhs.status();
-  }
+  { return lhs == rhs.status();  }
+
 inline bool operator!=(Parser_Status lhs, const Parser_Error& rhs) noexcept
-  {
-    return lhs != rhs.status();
-  }
+  { return lhs != rhs.status();  }
 
 }  // namespace Asteria
 

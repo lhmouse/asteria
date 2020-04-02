@@ -15,27 +15,32 @@ class Infix_Element
       {
         cow_vector<Expression_Unit> units;
       };
+
     struct S_ternary  // ? :
       {
         bool assign;
         cow_vector<Expression_Unit> branch_true;
         cow_vector<Expression_Unit> branch_false;
       };
+
     struct S_logical_and  // &&
       {
         bool assign;
         cow_vector<Expression_Unit> branch_true;
       };
+
     struct S_logical_or  // ||
       {
         bool assign;
         cow_vector<Expression_Unit> branch_false;
       };
+
     struct S_coalescence  // ??
       {
         bool assign;
         cow_vector<Expression_Unit> branch_null;
       };
+
     struct S_general  // no short circuit
       {
         Xop xop;
@@ -52,6 +57,7 @@ class Infix_Element
         index_coalescence  = 4,
         index_general      = 5,
       };
+
     using Storage = variant<
       ROCKET_CDR(
       , S_head         // 0,
@@ -61,6 +67,7 @@ class Infix_Element
       , S_coalescence  // 4,
       , S_general      // 5,
       )>;
+
     static_assert(::std::is_nothrow_copy_assignable<Storage>::value, "");
 
   private:
@@ -68,10 +75,9 @@ class Infix_Element
 
   public:
     ASTERIA_VARIANT_CONSTRUCTOR(Infix_Element, Storage, XElemT, xelem)
-      :
-        m_stor(::std::forward<XElemT>(xelem))
-      {
-      }
+      : m_stor(::std::forward<XElemT>(xelem))
+      { }
+
     ASTERIA_VARIANT_ASSIGNMENT(Infix_Element, Storage, XElemT, xelem)
       {
         this->m_stor = ::std::forward<XElemT>(xelem);
@@ -80,9 +86,7 @@ class Infix_Element
 
   public:
     Index index() const noexcept
-      {
-        return static_cast<Index>(this->m_stor.index());
-      }
+      { return static_cast<Index>(this->m_stor.index());  }
 
     Infix_Element& swap(Infix_Element& other) noexcept
       {
@@ -99,9 +103,7 @@ class Infix_Element
   };
 
 inline void swap(Infix_Element& lhs, Infix_Element& rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 }  // namespace Asteria
 

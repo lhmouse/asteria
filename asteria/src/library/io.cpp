@@ -16,26 +16,21 @@ class IOF_Sentry
 
   public:
     explicit IOF_Sentry(::FILE* fp) noexcept
-      :
-        m_fp(fp)
-      {
-        ::flockfile(this->m_fp);
-      }
+      : m_fp(fp)
+      { ::flockfile(this->m_fp);  }
+
     ~IOF_Sentry()
-      {
-        ::funlockfile(this->m_fp);
-      }
+      { ::funlockfile(this->m_fp);  }
 
     IOF_Sentry(const IOF_Sentry&)
       = delete;
+
     IOF_Sentry& operator=(const IOF_Sentry&)
       = delete;
 
   public:
     operator ::FILE* () const noexcept
-      {
-        return this->m_fp;
-      }
+      { return this->m_fp;  }
   };
 
 int do_recover(const IOF_Sentry& fp)

@@ -12,16 +12,14 @@ class Variable_Callback
   {
   public:
     Variable_Callback() noexcept
-      {
-      }
+      = default;
+
     virtual ~Variable_Callback();
 
   public:
     // This is a helper function for `std` algorithms.
     template<typename ContainerT> Variable_Callback& operator()(ContainerT& cont)
-      {
-        return cont.enumerate_variables(*this);
-      }
+      { return cont.enumerate_variables(*this);  }
 
     // The return value indicates whether to invoke `*this` on child VARIABLES recursively.
     // It has no effect on children that are not variables, which are always enumerated.

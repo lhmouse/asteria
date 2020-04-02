@@ -108,9 +108,8 @@ Compare do_compare(Global& global, cow_vector<Reference>& args,
     return self.read().compare(Ival(0));
   }
 
-template<typename IterT>
-    pair<IterT, bool> do_bsearch(Global& global, cow_vector<Reference>& args, IterT begin, IterT end,
-                                 const Fopt& kcomp, const Value& target)
+template<typename IterT> pair<IterT, bool> do_bsearch(Global& global, cow_vector<Reference>& args, IterT begin, IterT end,
+                                                      const Fopt& kcomp, const Value& target)
   {
     auto bpos = ::std::move(begin);
     auto epos = ::std::move(end);
@@ -135,9 +134,8 @@ template<typename IterT>
     }
   }
 
-template<typename IterT, typename PredT>
-    IterT do_bound(Global& global, cow_vector<Reference>& args, IterT begin, IterT end,
-                   const Fopt& kcomp, const Value& target, PredT&& pred)
+template<typename IterT, typename PredT> IterT do_bound(Global& global, cow_vector<Reference>& args, IterT begin, IterT end,
+                                                        const Fopt& kcomp, const Value& target, PredT&& pred)
   {
     auto bpos = ::std::move(begin);
     auto epos = ::std::move(end);

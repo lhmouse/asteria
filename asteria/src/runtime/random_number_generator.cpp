@@ -11,25 +11,19 @@ namespace Asteria {
 namespace {
 
 constexpr uint32_t do_sll(uint32_t reg, int bits) noexcept
-  {
-    return reg << bits;
-  }
+  { return reg << bits;  }
 
 constexpr uint32_t do_srl(uint32_t reg, int bits) noexcept
-  {
-    return reg >> bits;
-  }
+  { return reg >> bits;  }
 
 size_t do_read_random_device(void* data, size_t size) noexcept
   {
     ::rocket::unique_posix_fd fd(::open("/dev/urandom", O_RDONLY), ::close);
-    if(!fd) {
+    if(!fd)
       return 0;
-    }
     ::ssize_t nread = ::read(fd, data, size);
-    if(nread < 0) {
+    if(nread < 0)
       return 0;
-    }
     return static_cast<size_t>(nread);
   }
 

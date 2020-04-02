@@ -9,9 +9,9 @@ namespace Asteria {
 
 void Argument_Reader::do_record_parameter_required(Vtype vtype)
   {
-    if(this->m_state.finished) {
+    if(this->m_state.finished)
       ASTERIA_THROW("argument reader finished and disposed");
-    }
+
     // Record a parameter and increment the number of parameters in total.
     this->m_state.history << ", " << describe_vtype(vtype);
     this->m_state.nparams++;
@@ -19,9 +19,9 @@ void Argument_Reader::do_record_parameter_required(Vtype vtype)
 
 void Argument_Reader::do_record_parameter_optional(Vtype vtype)
   {
-    if(this->m_state.finished) {
+    if(this->m_state.finished)
       ASTERIA_THROW("argument reader finished and disposed");
-    }
+
     // Record a parameter and increment the number of parameters in total.
     this->m_state.history << ", [" << describe_vtype(vtype) << ']';
     this->m_state.nparams++;
@@ -29,9 +29,9 @@ void Argument_Reader::do_record_parameter_optional(Vtype vtype)
 
 void Argument_Reader::do_record_parameter_generic()
   {
-    if(this->m_state.finished) {
+    if(this->m_state.finished)
       ASTERIA_THROW("argument reader finished and disposed");
-    }
+
     // Record a parameter and increment the number of parameters in total.
     this->m_state.history << ", <generic>";
     this->m_state.nparams++;
@@ -39,18 +39,18 @@ void Argument_Reader::do_record_parameter_generic()
 
 void Argument_Reader::do_record_parameter_variadic()
   {
-    if(this->m_state.finished) {
+    if(this->m_state.finished)
       ASTERIA_THROW("argument reader finished and disposed");
-    }
+
     // Terminate the parameter list.
     this->m_state.history << ", ...";
   }
 
 void Argument_Reader::do_record_parameter_finish()
   {
-    if(this->m_state.finished) {
+    if(this->m_state.finished)
       ASTERIA_THROW("argument reader finished and disposed");
-    }
+
     // Terminate this overload.
     this->m_state.history.push_back('\0');
     // Append it to the overload list as a single operation.
@@ -59,9 +59,9 @@ void Argument_Reader::do_record_parameter_finish()
 
 const Reference* Argument_Reader::do_peek_argument_opt() const
   {
-    if(!this->m_state.succeeded) {
+    if(!this->m_state.succeeded)
       return nullptr;
-    }
+
     // Before calling this function, the parameter information must have been recorded.
     auto index = this->m_state.nparams - 1;
     // Return a pointer to the argument at `index`.
@@ -70,9 +70,9 @@ const Reference* Argument_Reader::do_peek_argument_opt() const
 
 opt<size_t> Argument_Reader::do_check_finish_opt() const
   {
-    if(!this->m_state.succeeded) {
+    if(!this->m_state.succeeded)
       return nullopt;
-    }
+
     // Before calling this function, the current overload must have been finished.
     auto index = this->m_state.nparams;
     // Return the beginning of variadic arguments.

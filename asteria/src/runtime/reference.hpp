@@ -22,11 +22,10 @@ class Reference
 
   public:
     ASTERIA_VARIANT_CONSTRUCTOR(Reference, Root, XRootT, xroot)
-      :
-        m_root(::std::forward<XRootT>(xroot)),
+      : m_root(::std::forward<XRootT>(xroot)),
         m_mods()
-      {
-      }
+      { }
+
     ASTERIA_VARIANT_ASSIGNMENT(Reference, Root, XRootT, xroot)
       {
         this->m_root = ::std::forward<XRootT>(xroot);
@@ -45,38 +44,28 @@ class Reference
 
   public:
     bool is_void() const noexcept
-      {
-        return this->m_root.is_void();
-      }
+      { return this->m_root.is_void();  }
+
     bool is_constant() const noexcept
-      {
-        return this->m_root.is_constant();
-      }
+      { return this->m_root.is_constant();  }
+
     bool is_temporary() const noexcept
-      {
-        return this->m_root.is_temporary();
-      }
+      { return this->m_root.is_temporary();  }
+
     bool is_variable() const noexcept
-      {
-        return this->m_root.is_variable();
-      }
+      { return this->m_root.is_variable();  }
+
     bool is_tail_call() const noexcept
-      {
-        return this->m_root.is_tail_call();
-      }
+      { return this->m_root.is_tail_call();  }
 
     bool is_lvalue() const noexcept
-      {
-        return this->is_variable();
-      }
+      { return this->is_variable();  }
+
     bool is_glvalue() const noexcept
-      {
-        return this->is_variable() || this->m_mods.size();
-      }
+      { return this->is_variable() || this->m_mods.size();  }
+
     bool is_rvalue() const noexcept
-      {
-        return this->is_constant() || this->is_temporary();
-      }
+      { return this->is_constant() || this->is_temporary();  }
 
     template<typename XModT> Reference& zoom_in(XModT&& xmod)
       {
@@ -84,6 +73,7 @@ class Reference
         this->m_mods.emplace_back(::std::forward<XModT>(xmod));
         return *this;
       }
+
     Reference& zoom_out()
       {
         // Drop the last modifier. If there is no modifier, set `this` to `null`.
@@ -108,6 +98,7 @@ class Reference
         else
           return this->do_read(this->m_mods.data(), this->m_mods.size() - 1, this->m_mods.back());
       }
+
     Value& open() const
       {
         if(ROCKET_EXPECT(this->m_mods.empty()))
@@ -115,6 +106,7 @@ class Reference
         else
           return this->do_open(this->m_mods.data(), this->m_mods.size() - 1, this->m_mods.back());
       }
+
     Value unset() const
       {
         if(ROCKET_EXPECT(this->m_mods.empty()))
@@ -124,17 +116,13 @@ class Reference
       }
 
     const Value& read(const Modifier& last) const
-      {
-        return this->do_read(this->m_mods.data(), this->m_mods.size(), last);
-      }
+      { return this->do_read(this->m_mods.data(), this->m_mods.size(), last);  }
+
     Value& open(const Modifier& last) const
-      {
-        return this->do_open(this->m_mods.data(), this->m_mods.size(), last);
-      }
+      { return this->do_open(this->m_mods.data(), this->m_mods.size(), last);  }
+
     Value unset(const Modifier& last) const
-      {
-        return this->do_unset(this->m_mods.data(), this->m_mods.size(), last);
-      }
+      { return this->do_unset(this->m_mods.data(), this->m_mods.size(), last);  }
 
     ASTERIA_INCOMPLET(Variable) rcptr<Variable> get_variable_opt() const noexcept
       {
@@ -143,6 +131,7 @@ class Reference
         else
           return unerase_cast<Variable>(this->m_root.as_variable());
       }
+
     ASTERIA_INCOMPLET(PTC_Arguments) rcptr<PTC_Arguments> get_tail_call_opt() const noexcept
       {
         if(ROCKET_UNEXPECT(!this->is_tail_call()))
@@ -150,6 +139,7 @@ class Reference
         else
           return unerase_cast<PTC_Arguments>(this->m_root.as_tail_call());
       }
+
     Reference& finish_call(Global_Context& global)
       {
         if(ROCKET_EXPECT(!this->is_tail_call()))
@@ -162,9 +152,7 @@ class Reference
   };
 
 inline void swap(Reference& lhs, Reference& rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 }  // namespace Asteria
 

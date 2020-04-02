@@ -16,13 +16,14 @@ class Abstract_Context
     mutable Reference_Dictionary m_named_refs;
 
   public:
-    Abstract_Context() noexcept
-      {
-      }
+    constexpr Abstract_Context() noexcept
+      = default;
+
     virtual ~Abstract_Context();
 
     Abstract_Context(const Abstract_Context&)
       = delete;
+
     Abstract_Context& operator=(const Abstract_Context&)
       = delete;
 
@@ -33,31 +34,25 @@ class Abstract_Context
 
   public:
     bool is_analytic() const noexcept
-      {
-        return this->do_is_analytic();
-      }
+      { return this->do_is_analytic();  }
+
     const Abstract_Context* get_parent_opt() const noexcept
-      {
-        return this->do_get_parent_opt();
-      }
+      { return this->do_get_parent_opt();  }
 
     const Reference* get_named_reference_opt(const phsh_string& name) const
       {
         auto qref = this->m_named_refs.get_opt(name);
-        if(ROCKET_UNEXPECT(!qref)) {
-          // Initialize builtins only when needed.
+        // Initialize builtins only when needed.
+        if(ROCKET_UNEXPECT(!qref))
           qref = const_cast<Abstract_Context*>(this)->do_lazy_lookup_opt(name);
-        }
         return qref;
       }
+
     Reference& open_named_reference(const phsh_string& name)
-      {
-        return this->m_named_refs.open(name);
-      }
+      { return this->m_named_refs.open(name);  }
+
     Abstract_Context& clear_named_references() noexcept
-      {
-        return this->m_named_refs.clear(), *this;
-      }
+      { return this->m_named_refs.clear(), *this;  }
   };
 
 }  // namespace Asteria

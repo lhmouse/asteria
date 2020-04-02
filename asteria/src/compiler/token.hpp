@@ -16,22 +16,27 @@ class Token
       {
         Keyword kwrd;
       };
+
     struct S_punctuator
       {
         Punctuator punct;
       };
+
     struct S_identifier
       {
         cow_string name;
       };
+
     struct S_integer_literal
       {
         int64_t val;
       };
+
     struct S_real_literal
       {
         double val;
       };
+
     struct S_string_literal
       {
         cow_string val;
@@ -46,6 +51,7 @@ class Token
         index_real_literal     = 4,
         index_string_literal   = 5,
       };
+
     using Storage = variant<
       ROCKET_CDR(
       , S_keyword          // 0,
@@ -55,6 +61,7 @@ class Token
       , S_real_literal     // 4,
       , S_string_literal   // 5,
       )>;
+
     static_assert(::std::is_nothrow_copy_assignable<Storage>::value, "");
 
   private:
@@ -66,90 +73,62 @@ class Token
 
   public:
     template<typename XTokT, ASTERIA_SFINAE_CONSTRUCT(Storage, XTokT&&)>
-        Token(const cow_string& xfile, int32_t xline, size_t xoffset, size_t xlength,
-              XTokT&& xtok)
-      :
-        m_file(xfile), m_line(xline), m_offset(xoffset), m_length(xlength),
+          Token(const cow_string& xfile, int32_t xline, size_t xoffset, size_t xlength, XTokT&& xtok)
+      : m_file(xfile), m_line(xline), m_offset(xoffset), m_length(xlength),
         m_stor(::std::forward<XTokT>(xtok))
-      {
-      }
+      { }
 
   public:
     const cow_string& file() const noexcept
-      {
-        return this->m_file;
-      }
+      { return this->m_file;  }
+
     long line() const noexcept
-      {
-        return this->m_line;
-      }
+      { return this->m_line;  }
+
     size_t offset() const noexcept
-      {
-        return this->m_offset;
-      }
+      { return this->m_offset;  }
+
     size_t length() const noexcept
-      {
-        return this->m_length;
-      }
+      { return this->m_length;  }
 
     Index index() const noexcept
-      {
-        return static_cast<Index>(this->m_stor.index());
-      }
+      { return static_cast<Index>(this->m_stor.index());  }
 
     bool is_keyword() const noexcept
-      {
-        return this->index() == index_keyword;
-      }
+      { return this->index() == index_keyword;  }
+
     Keyword as_keyword() const
-      {
-        return this->m_stor.as<index_keyword>().kwrd;
-      }
+      { return this->m_stor.as<index_keyword>().kwrd;  }
 
     bool is_punctuator() const noexcept
-      {
-        return this->index() == index_punctuator;
-      }
+      { return this->index() == index_punctuator;  }
+
     Punctuator as_punctuator() const
-      {
-        return this->m_stor.as<index_punctuator>().punct;
-      }
+      { return this->m_stor.as<index_punctuator>().punct;  }
 
     bool is_identifier() const noexcept
-      {
-        return this->index() == index_identifier;
-      }
+      { return this->index() == index_identifier;  }
+
     const cow_string& as_identifier() const
-      {
-        return this->m_stor.as<index_identifier>().name;
-      }
+      { return this->m_stor.as<index_identifier>().name;  }
 
     bool is_integer_literal() const noexcept
-      {
-        return this->index() == index_integer_literal;
-      }
+      { return this->index() == index_integer_literal;  }
+
     int64_t as_integer_literal() const
-      {
-        return this->m_stor.as<index_integer_literal>().val;
-      }
+      { return this->m_stor.as<index_integer_literal>().val;  }
 
     bool is_real_literal() const noexcept
-      {
-        return this->index() == index_real_literal;
-      }
+      { return this->index() == index_real_literal;  }
+
     double as_real_literal() const
-      {
-        return this->m_stor.as<index_real_literal>().val;
-      }
+      { return this->m_stor.as<index_real_literal>().val;  }
 
     bool is_string_literal() const noexcept
-      {
-        return this->index() == index_string_literal;
-      }
+      { return this->index() == index_string_literal;  }
+
     const cow_string& as_string_literal() const
-      {
-        return this->m_stor.as<index_string_literal>().val;
-      }
+      { return this->m_stor.as<index_string_literal>().val;  }
 
     Token& swap(Token& other) noexcept
       {
@@ -165,14 +144,10 @@ class Token
   };
 
 inline void swap(Token& lhs, Token& rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 inline tinyfmt& operator<<(tinyfmt& fmt, const Token& token)
-  {
-    return token.print(fmt);
-  }
+  { return token.print(fmt);  }
 
 }  // namespace Asteria
 

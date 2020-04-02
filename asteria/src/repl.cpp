@@ -198,6 +198,7 @@ struct REPL_Hooks : Abstract_Hooks
                           sloc.c_file(), sloc.line(), inside.c_str(),
                           name.c_str());
       }
+
     void on_function_call(const Source_Location& sloc, const cow_string& inside,
                           const cow_function& target) noexcept override
       {
@@ -208,6 +209,7 @@ struct REPL_Hooks : Abstract_Hooks
                           sloc.c_file(), sloc.line(), inside.c_str(),
                           do_stringify(target).c_str());
       }
+
     void on_function_return(const Source_Location& sloc, const cow_string& inside,
                             const Reference& result) noexcept override
       {
@@ -218,6 +220,7 @@ struct REPL_Hooks : Abstract_Hooks
                           sloc.c_file(), sloc.line(), inside.c_str(),
                           do_stringify(result).c_str());
       }
+
     void on_function_except(const Source_Location& sloc, const cow_string& inside,
                             const Runtime_Error& except) noexcept override
       {
@@ -228,6 +231,7 @@ struct REPL_Hooks : Abstract_Hooks
                           sloc.c_file(), sloc.line(), inside.c_str(),
                           do_stringify(except).c_str());
       }
+
     void on_single_step_trap(const Source_Location& sloc, const cow_string& inside,
                              Executive_Context* /*ctx*/) override
       {

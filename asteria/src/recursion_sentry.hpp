@@ -21,30 +21,26 @@ class Recursion_Sentry
 
   public:
     constexpr Recursion_Sentry() noexcept
-      :
-        m_base(this)
-      {
-      }
+      : m_base(this)
+      { }
+
     explicit constexpr Recursion_Sentry(const void* base) noexcept
-      :
-        m_base(base)
-      {
-      }
+      : m_base(base)
+      { }
+
     Recursion_Sentry(const Recursion_Sentry& other)  // copy constructor
-      :
-        m_base(other.m_base)
-      {
-        this->do_check();
-      }
+      : m_base(other.m_base)
+      { this->do_check();  }
+
     Recursion_Sentry& operator=(const Recursion_Sentry& other)  // copy assignment
       {
         this->m_base = other.m_base;
         this->do_check();
         return *this;
       }
+
     ~Recursion_Sentry()
-      {
-      }
+      { }
 
   private:
     [[noreturn]] void do_throw_stack_overflow(size_t usage, size_t limit);
@@ -59,13 +55,10 @@ class Recursion_Sentry
 
   public:
     const void* get_base() const noexcept
-      {
-        return this->m_base;
-      }
+      { return this->m_base;  }
+
     Recursion_Sentry& set_base(const void* base) noexcept
-      {
-        return this->m_base = base, *this;
-      }
+      { return this->m_base = base, *this;  }
   };
 
 }  // namespace Asteria

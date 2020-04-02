@@ -32,13 +32,12 @@ class Argument_Reader
 
   public:
     Argument_Reader(ref_to<const cow_vector<Reference>> args, const cow_string& name) noexcept
-      :
-        m_args(args), m_name(name)
-      {
-      }
+      : m_args(args), m_name(name)
+      { }
 
     Argument_Reader(const Argument_Reader&)
       = delete;
+
     Argument_Reader& operator=(const Argument_Reader&)
       = delete;
 
@@ -54,17 +53,13 @@ class Argument_Reader
 
   public:
     size_t count_arguments() const noexcept
-      {
-        return this->m_args->size();
-      }
+      { return this->m_args->size();  }
+
     const Reference& get_argument(size_t index) const
-      {
-        return this->m_args->at(index);
-      }
+      { return this->m_args->at(index);  }
+
     const cow_string& get_name() const noexcept
-      {
-        return this->m_name;
-      }
+      { return this->m_name;  }
 
     // `S` stands for `save` or `store`.
     const Argument_Reader& S(State& state) const noexcept
@@ -72,11 +67,13 @@ class Argument_Reader
         state = this->m_state;
         return *this;
       }
+
     Argument_Reader& S(State& state) noexcept
       {
         state = this->m_state;
         return *this;
       }
+
     // `L` stands for `load`.
     Argument_Reader& L(const State& state) noexcept
       {
