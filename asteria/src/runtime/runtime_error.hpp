@@ -23,17 +23,13 @@ class Runtime_Error : public virtual exception
     template<typename XValT, ASTERIA_SFINAE_CONSTRUCT(Value, XValT&&)>
                                        Runtime_Error(const Source_Location& sloc, XValT&& xval)
       : m_value(::std::forward<XValT>(xval))
-      {
-        this->do_backtrace();
-        this->do_insert_frame(frame_type_throw, sloc, this->m_value);
-      }
+      { this->do_backtrace(),
+        this->do_insert_frame(frame_type_throw, sloc, this->m_value);  }
 
     explicit Runtime_Error(const exception& stdex)
       : m_value(V_string(stdex.what()))
-      {
-        this->do_backtrace();
-        this->do_insert_frame(frame_type_native, ::rocket::sref("<native code>"), -1, this->m_value);
-      }
+      { this->do_backtrace(),
+        this->do_insert_frame(frame_type_native, ::rocket::sref("<native code>"), -1, this->m_value);  }
 
     ~Runtime_Error() override;
 
@@ -43,7 +39,7 @@ class Runtime_Error : public virtual exception
 
     template<typename... ParamsT> void do_insert_frame(ParamsT&&... params)
       {
-        // Insert the frame.
+        // Insert the frame. Note exception safety.
         size_t ipos = this->m_ipos;
         this->m_frames.insert(ipos, Backtrace_Frame(::std::forward<ParamsT>(params)...));
         this->m_ipos = ipos + 1;
