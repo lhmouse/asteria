@@ -142,20 +142,20 @@ Reference* Executive_Context::do_lazy_lookup_opt(const phsh_string& name)
     // Create pre-defined references as needed.
     // N.B. If you have ever changed these, remember to update 'analytic_context.cpp' as well.
     if(name == "__func") {
-      auto& ref = this->open_named_reference(sref("__func"));
+      auto& ref = this->open_named_reference(::rocket::sref("__func"));
       // Copy the function name as a constant.
       Reference_root::S_constant xref = { this->m_zvarg.get()->func() };
       ref = ::std::move(xref);
       return &ref;
     }
     if(name == "__this") {
-      auto& ref = this->open_named_reference(sref("__this"));
+      auto& ref = this->open_named_reference(::rocket::sref("__this"));
       // Copy the `this` reference.
       ref = ::std::move(this->m_self);
       return &ref;
     }
     if(name == "__varg") {
-      auto& ref = this->open_named_reference(sref("__varg"));
+      auto& ref = this->open_named_reference(::rocket::sref("__varg"));
       // Use the pre-allocated zero-ary variadic argument getter if there is no variadic argument.
       // Allocate a new one otherwise.
       auto varg = this->m_zvarg.get();

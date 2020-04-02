@@ -48,7 +48,7 @@ void create_bindings_debug(V_object& result, API_Version /*version*/)
     //===================================================================
     // `std.debug.logf()`
     //===================================================================
-    result.insert_or_assign(sref("logf"),
+    result.insert_or_assign(::rocket::sref("logf"),
       Fval(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.debug.logf(templ, ...)`
@@ -62,7 +62,7 @@ void create_bindings_debug(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), sref("std.debug.logf"));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.debug.logf"));
     // Parse variadic arguments.
     Sval templ;
     cow_vector<Value> values;
@@ -77,7 +77,7 @@ void create_bindings_debug(V_object& result, API_Version /*version*/)
     //===================================================================
     // `std.debug.dump()`
     //===================================================================
-    result.insert_or_assign(sref("dump"),
+    result.insert_or_assign(::rocket::sref("dump"),
       Fval(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.debug.dump(value, [indent])`
@@ -93,7 +93,7 @@ void create_bindings_debug(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), sref("std.debug.dump"));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.debug.dump"));
     // Parse arguments.
     Value value;
     Iopt indent;

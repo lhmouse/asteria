@@ -28,7 +28,7 @@ inline Source_Location do_tell_source_location(const Token_Stream& tstrm)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
-      return Source_Location(sref("<end of stream>"), -1);
+      return Source_Location(::rocket::sref("<end of stream>"), -1);
     }
     return Source_Location(qtok->file(), qtok->line());
   }
@@ -147,7 +147,7 @@ opt<cow_string> do_accept_json5_key_opt(Token_Stream& tstrm)
       auto kwrd = qtok->as_keyword();
       // Treat the keyword as a plain identifier and discard this token.
       tstrm.shift();
-      return sref(stringify_keyword(kwrd));
+      return ::rocket::sref(stringify_keyword(kwrd));
     }
     if(qtok->is_identifier()) {
       auto name = qtok->as_identifier();
@@ -317,8 +317,8 @@ opt<cow_vector<phsh_string>> do_accept_variable_declarator_opt(Token_Stream& tst
         do_throw_parser_error(tstrm, parser_status_closed_bracket_expected);
       }
       // Make the list different from a plain, sole one.
-      qnames->insert(0, sref("["));
-      qnames->emplace_back(sref("]"));
+      qnames->insert(0, ::rocket::sref("["));
+      qnames->emplace_back(::rocket::sref("]"));
       return qnames;
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
@@ -334,8 +334,8 @@ opt<cow_vector<phsh_string>> do_accept_variable_declarator_opt(Token_Stream& tst
         do_throw_parser_error(tstrm, parser_status_closed_brace_expected);
       }
       // Make the list different from a plain, sole one.
-      qnames->insert(0, sref("{"));
-      qnames->emplace_back(sref("}"));
+      qnames->insert(0, ::rocket::sref("{"));
+      qnames->emplace_back(::rocket::sref("}"));
       return qnames;
     }
     return nullopt;
@@ -515,7 +515,7 @@ opt<cow_vector<phsh_string>> do_accept_parameter_list_opt(Token_Stream& tstrm)
     cow_vector<phsh_string> params;
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_ellipsis });
     if(kpunct) {
-      params.emplace_back(sref("..."));
+      params.emplace_back(::rocket::sref("..."));
       return ::std::move(params);
     }
     auto qname = do_accept_identifier_opt(tstrm);
@@ -531,7 +531,7 @@ opt<cow_vector<phsh_string>> do_accept_parameter_list_opt(Token_Stream& tstrm)
       }
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_ellipsis });
       if(kpunct) {
-        params.emplace_back(sref("..."));
+        params.emplace_back(::rocket::sref("..."));
         return ::std::move(params);
       }
       qname = do_accept_identifier_opt(tstrm);
@@ -1401,7 +1401,7 @@ bool do_accept_this(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
     if(!qkwrd) {
       return false;
     }
-    Expression_Unit::S_named_reference xunit = { sref("__this") };
+    Expression_Unit::S_named_reference xunit = { ::rocket::sref("__this") };
     units.emplace_back(::std::move(xunit));
     return true;
   }

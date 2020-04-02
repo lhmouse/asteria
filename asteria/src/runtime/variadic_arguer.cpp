@@ -22,7 +22,7 @@ Variable_Callback& Variadic_Arguer::enumerate_variables(Variable_Callback& callb
 Reference& Variadic_Arguer::invoke_ptc_aware(Reference& self, Global_Context& /*global*/,
                                              cow_vector<Reference>&& args) const
   {
-    Argument_Reader reader(::rocket::ref(args), sref("<built-in>.__varg"));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("<built-in>.__varg"));
     // Extract arguments.
     Iopt qindex;
     if(reader.I().o(qindex).F()) {

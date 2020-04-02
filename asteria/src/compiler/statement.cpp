@@ -388,7 +388,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Create a fresh context for the `catch` clause.
         Analytic_Context ctx_catch(::rocket::ref(ctx), nullptr);
         do_user_declare(names_opt, ctx_catch, altr.name_except, "exception placeholder");
-        ctx_catch.open_named_reference(sref("__backtrace"));
+        ctx_catch.open_named_reference(::rocket::sref("__backtrace"));
         // Generate code for the `catch` body.
         // Unlike the `try` body, this may be PTC'd.
         auto code_catch = do_generate_statement_list(nullptr, ctx_catch, opts, ptc, altr.body_catch);

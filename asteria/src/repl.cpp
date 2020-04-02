@@ -51,15 +51,15 @@ cow_string do_stringify(const Value& val) noexcept
     return do_xindent(fmt.extract_string());
   }
   catch(exception& stdex) {
-    return sref("<bad value>");
+    return ::rocket::sref("<bad value>");
   }
 
 cow_string do_stringify(const Reference& ref) noexcept
   try {
     if(ref.is_void())
-      return sref("<void>");
+      return ::rocket::sref("<void>");
     if(ref.is_tail_call())
-      return sref("<tail call>");
+      return ::rocket::sref("<tail call>");
     ::rocket::tinyfmt_str fmt;
     // Print the value category.
     if(auto var = ref.get_variable_opt())
@@ -79,7 +79,7 @@ cow_string do_stringify(const Reference& ref) noexcept
     return do_xindent(fmt.extract_string());
   }
   catch(exception& stdex) {
-    return sref("<bad reference>");
+    return ::rocket::sref("<bad reference>");
   }
 
 cow_string do_stringify(const exception& stdex) noexcept
@@ -93,7 +93,7 @@ cow_string do_stringify(const exception& stdex) noexcept
     return do_xindent(fmt.extract_string());
   }
   catch(exception& other) {
-    return sref("<bad exception>");
+    return ::rocket::sref("<bad exception>");
   }
 
 cow_string do_stringify(const Parser_Error& except) noexcept
@@ -117,7 +117,7 @@ cow_string do_stringify(const Parser_Error& except) noexcept
     return do_xindent(fmt.extract_string());
   }
   catch(exception& other) {
-    return sref("<bad exception>");
+    return ::rocket::sref("<bad exception>");
   }
 
 cow_string do_stringify(const Runtime_Error& except) noexcept
@@ -150,7 +150,7 @@ cow_string do_stringify(const Runtime_Error& except) noexcept
     return do_xindent(fmt.extract_string());
   }
   catch(exception& other) {
-    return sref("<bad exception>");
+    return ::rocket::sref("<bad exception>");
   }
 
 // Define command-line options here.
@@ -391,7 +391,7 @@ void do_parse_command_line(int argc, char** argv)
     // Interactive mode is enabled when no FILE is given (not even `-`) and standard input is
     // connected to a terminal.
     cmdline.interactive = interactive ? *interactive : (!path && ::isatty(STDIN_FILENO));
-    cmdline.path = path.move_value_or(sref("-"));
+    cmdline.path = path.move_value_or(::rocket::sref("-"));
     cmdline.args = ::std::move(args);
   }
 

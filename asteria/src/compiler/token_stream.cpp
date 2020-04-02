@@ -306,12 +306,12 @@ bool do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, b
     // Look for an explicit sign symbol.
     switch(reader.peek(tlen)) {
     case '+': {
-        tstr = sref("+");
+        tstr = ::rocket::sref("+");
         tlen++;
         break;
       }
     case '-': {
-        tstr = sref("-");
+        tstr = ::rocket::sref("-");
         tlen++;
         break;
       }

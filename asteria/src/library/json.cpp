@@ -56,7 +56,7 @@ class Indenter_string final : public Indenter
   public:
     explicit Indenter_string(const cow_string& add)
       :
-        m_add(add), m_cur(sref("\n"))
+        m_add(add), m_cur(::rocket::sref("\n"))
       {
       }
 
@@ -161,7 +161,7 @@ tinyfmt& do_quote_string(tinyfmt& fmt, const Sval& str)
             nump.put_XU(*p, 4);
             char seq[8] = { "\\u" };
             ::std::memcpy(seq + 2, nump.data() + 2, 4);
-            fmt << sref(seq, 6);
+            fmt << ::rocket::sref(seq, 6);
           }
           break;
         }
@@ -626,7 +626,7 @@ Value std_json_parse(Sval text)
     try {
       ::rocket::tinybuf_str cbuf;
       cbuf.set_string(text, tinybuf::open_read);
-      tstrm.reload(cbuf, sref("<JSON text>"), opts);
+      tstrm.reload(cbuf, ::rocket::sref("<JSON text>"), opts);
     }
     catch(Parser_Error& except) {
       ASTERIA_THROW("invalid JSON string: $1", describe_parser_status(except.status()));
@@ -649,7 +649,7 @@ void create_bindings_json(V_object& result, API_Version /*version*/)
     //===================================================================
     // `std.json.format()`
     //===================================================================
-    result.insert_or_assign(sref("format"),
+    result.insert_or_assign(::rocket::sref("format"),
       Fval(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.json.format(value, [indent])`
@@ -670,7 +670,7 @@ void create_bindings_json(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), sref("std.json.format"));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.json.format"));
     Argument_Reader::State state;
     // Parse arguments.
     Value value;
@@ -691,7 +691,7 @@ void create_bindings_json(V_object& result, API_Version /*version*/)
     //===================================================================
     // `std.json.parse()`
     //===================================================================
-    result.insert_or_assign(sref("parse"),
+    result.insert_or_assign(::rocket::sref("parse"),
       Fval(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.json.parse(text)`
@@ -719,7 +719,7 @@ void create_bindings_json(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), sref("std.json.parse"));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.json.parse"));
     // Parse arguments.
     Sval text;
     if(reader.I().v(text).F()) {
