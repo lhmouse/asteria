@@ -341,9 +341,8 @@ AIR_Status do_declare_variable(Executive_Context& ctx, ParamU /*pu*/, const void
     Reference_root::S_variable xref = { ::std::move(var) };
     ctx.open_named_reference(name) = xref;
     // Call the hook function if any.
-    if(qhooks) {
+    if(qhooks)
       qhooks->on_variable_declare(sloc, inside, name);
-    }
     // Push a copy of the reference onto the stack.
     ctx.stack().push(::std::move(xref));
     return air_status_next;
@@ -826,9 +825,8 @@ ROCKET_NOINLINE Reference& do_invoke_nontail(Reference& self, const Source_Locat
     // Call the hook function if any.
     const auto& inside = ctx.zvarg()->func();
     const auto& qhooks = ctx.global().get_hooks_opt();
-    if(qhooks) {
+    if(qhooks)
       qhooks->on_function_call(sloc, inside, target);
-    }
     // Perform a non-tail call.
     ASTERIA_RUNTIME_TRY {
       target.invoke(self, ctx.global(), ::std::move(args));
@@ -837,15 +835,13 @@ ROCKET_NOINLINE Reference& do_invoke_nontail(Reference& self, const Source_Locat
       // Append the current frame and rethrow the exception.
       except.push_frame_call(sloc, inside);
       // Call the hook function if any.
-      if(qhooks) {
+      if(qhooks)
         qhooks->on_function_except(sloc, inside, except);
-      }
       throw;
     }
     // Call the hook function if any.
-    if(qhooks) {
+    if(qhooks)
       qhooks->on_function_return(sloc, inside, self);
-    }
     return self;
   }
 
@@ -889,9 +885,8 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
     // Check for stack overflows.
     const auto sentry = ctx.global().copy_recursion_sentry();
     // Generate a single-step trap.
-    if(qhooks) {
+    if(qhooks)
       qhooks->on_single_step_trap(sloc, inside, ::std::addressof(ctx));
-    }
     // Pop arguments off the stack backwards.
     cow_vector<Reference> args;
     args.resize(nargs, Reference_root::S_void());
@@ -2535,9 +2530,8 @@ AIR_Status do_define_null_variable(Executive_Context& ctx, ParamU pu, const void
     Reference_root::S_variable xref = { var };
     ctx.open_named_reference(name) = ::std::move(xref);
     // Call the hook function if any.
-    if(qhooks) {
+    if(qhooks)
       qhooks->on_variable_declare(sloc, inside, name);
-    }
     // Initialize the variable to `null`.
     var->initialize(nullptr, immutable);
     return air_status_next;
@@ -2551,9 +2545,8 @@ AIR_Status do_single_step_trap(Executive_Context& ctx, ParamU /*pu*/, const void
     const auto& qhooks = ctx.global().get_hooks_opt();
 
     // Call the hook function if any.
-    if(qhooks) {
+    if(qhooks)
       qhooks->on_single_step_trap(sloc, inside, ::std::addressof(ctx));
-    }
     return air_status_next;
   }
 
@@ -2568,9 +2561,8 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
     // Check for stack overflows.
     const auto sentry = ctx.global().copy_recursion_sentry();
     // Generate a single-step trap.
-    if(qhooks) {
+    if(qhooks)
       qhooks->on_single_step_trap(sloc, inside, ::std::addressof(ctx));
-    }
     // Pop the argument generator.
     cow_vector<Reference> args;
     auto value = ctx.stack().get_top().read();
