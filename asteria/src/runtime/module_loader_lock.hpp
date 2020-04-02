@@ -62,15 +62,15 @@ class Module_Loader_Lock::Unique_Stream
       }
 
   public:
-    explicit constexpr operator bool () const noexcept
+    explicit operator bool () const noexcept
       {
         return bool(this->m_elem);
       }
-    constexpr ::rocket::tinybuf_file& get() const noexcept
+    ::rocket::tinybuf_file& get() const noexcept
       {
         return ROCKET_ASSERT(this->m_elem), this->m_elem->second;
       }
-    constexpr operator ::rocket::tinybuf_file& () const noexcept
+    operator ::rocket::tinybuf_file& () const noexcept
       {
         return ROCKET_ASSERT(this->m_elem), this->m_elem->second;
       }
