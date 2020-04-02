@@ -2299,10 +2299,10 @@
 	* Returns the hasher as an object consisting of the following
 	  members:
 
-	  * `write(data)`
+	  * `update(data)`
 	  * `finish()`
 
-	  The function `write()` is used to put data into the hasher,
+	  The function `update()` is used to put data into the hasher,
 	  which shall be a byte string. After all data have been put, the
 	  function `finish()` extracts the checksum as an integer (whose
 	  high-order 32 bits are always zeroes), then resets the hasher,
@@ -2317,7 +2317,7 @@
 	  ```
 	  std.checksum.crc32 = func(data) {
 	    var h = this.crc32_new();
-	    h.write(data);
+	    h.update(data);
 	    return h.finish();
 	  };
 	  ```
@@ -2337,12 +2337,12 @@
 	* Returns the hasher as an object consisting of the following
 	  members:
 
-	  * `write(data)`
+	  * `update(data)`
 	  * `finish()`
 
-	  The function `write()` is used to put data into the hasher,
+	  The function `update()` is used to put data into the hasher,
 	  which shall be a byte string. After all data have been put, the
-	  function `finish()` extracts the checksum as an integer whose
+	  function `finish()` extracts the checksum as an integer (whose
 	  high-order 32 bits are always zeroes), then resets the hasher,
 	  making it suitable for further data as if it had just been
 	  created.
@@ -2355,7 +2355,7 @@
 	  ```
 	  std.checksum.fnv1a32 = func(data) {
 	    var h = this.fnv1a32_new();
-	    h.write(data);
+	    h.update(data);
 	    return h.finish();
 	  };
 	  ```
@@ -2373,10 +2373,10 @@
 	* Returns the hasher as an object consisting of the following
 	  members:
 
-	  * `write(data)`
+	  * `update(data)`
 	  * `finish()`
 
-	  The function `write()` is used to put data into the hasher,
+	  The function `update()` is used to put data into the hasher,
 	  which shall be a byte string. After all data have been put, the
 	  function `finish()` extracts the checksum as a string of 32
 	  hexadecimal digits in uppercase, then resets the hasher, making
@@ -2390,7 +2390,7 @@
 	  ```
 	  std.checksum.md5 = func(data) {
 	    var h = this.md5_new();
-	    h.write(data);
+	    h.update(data);
 	    return h.finish();
 	  };
 	  ```
@@ -2408,10 +2408,10 @@
 	* Returns the hasher as an object consisting of the following
 	  members:
 
-	  * `write(data)`
+	  * `update(data)`
 	  * `finish()`
 
-	  The function `write()` is used to put data into the hasher,
+	  The function `update()` is used to put data into the hasher,
 	  which shall be a byte string. After all data have been put, the
 	  function `finish()` extracts the checksum as a string of 40
 	  hexadecimal digits in uppercase, then resets the hasher, making
@@ -2425,7 +2425,7 @@
 	  ```
 	  std.checksum.sha1 = func(data) {
 	    var h = this.sha1_new();
-	    h.write(data);
+	    h.update(data);
 	    return h.finish();
 	  };
 	  ```
@@ -2443,10 +2443,10 @@
 	* Returns the hasher as an object consisting of the following
 	  members:
 
-	  * `write(data)`
+	  * `update(data)`
 	  * `finish()`
 
-	  The function `write()` is used to put data into the hasher,
+	  The function `update()` is used to put data into the hasher,
 	  which shall be a byte string. After all data have been put, the
 	  function `finish()` extracts the checksum as a string of 64
 	  hexadecimal digits in uppercase, then resets the hasher, making
@@ -2460,7 +2460,7 @@
 	  ```
 	  std.checksum.sha256 = func(data) {
 	    var h = this.sha256_new();
-	    h.write(data);
+	    h.update(data);
 	    return h.finish();
 	  };
 	  ```

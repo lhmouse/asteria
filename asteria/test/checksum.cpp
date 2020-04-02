@@ -38,18 +38,18 @@ int main()
         for(each k, v : crc32_results) {
           // split
           for(var i = 0; i < k; ++i) {
-            h.write(s);
+            h.update(s);
           }
           assert h.finish() == v;
           // simple
           assert std.checksum.crc32(s * k) == v;
         }
         h = std.checksum.crc32_new();
-        h.write("hello");
+        h.update("hello");
         q = h;
-        h.write("1");
+        h.update("1");
         assert h.finish() == 0x8731D904;
-        q.write("2");
+        q.update("2");
         assert q.finish() == 0x1E3888BE;
 
         // FNV1a-32
@@ -75,18 +75,18 @@ int main()
         for(each k, v : fnv1a32_results) {
           // split
           for(var i = 0; i < k; ++i) {
-            h.write(s);
+            h.update(s);
           }
           assert h.finish() == v;
           // simple
           assert std.checksum.fnv1a32(s * k) == v;
         }
         h = std.checksum.fnv1a32_new();
-        h.write("hello");
+        h.update("hello");
         q = h;
-        h.write("1");
+        h.update("1");
         assert h.finish() == 0xF193366E;
-        q.write("2");
+        q.update("2");
         assert q.finish() == 0xF09334DB;
 
         // MD5
@@ -160,18 +160,18 @@ int main()
         for(each k, v : md5_results) {
           // split
           for(var i = 0; i < k; ++i) {
-            h.write(s);
+            h.update(s);
           }
           assert h.finish() == v;
           // simple
           assert std.checksum.md5(s * k) == v;
         }
         h = std.checksum.md5_new();
-        h.write("hello");
+        h.update("hello");
         q = h;
-        h.write("1");
+        h.update("1");
         assert h.finish() == "203AD5FFA1D7C650AD681FDFF3965CD2";
-        q.write("2");
+        q.update("2");
         assert q.finish() == "6E809CBDA0732AC4845916A59016F954";
 
         // SHA-1
@@ -245,18 +245,18 @@ int main()
         for(each k, v : sha1_results) {
           // split
           for(var i = 0; i < k; ++i) {
-            h.write(s);
+            h.update(s);
           }
           assert h.finish() == v;
           // simple
           assert std.checksum.sha1(s * k) == v;
         }
         h = std.checksum.sha1_new();
-        h.write("hello");
+        h.update("hello");
         q = h;
-        h.write("1");
+        h.update("1");
         assert h.finish() == "88FDD585121A4CCB3D1540527AEE53A77C77ABB8";
-        q.write("2");
+        q.update("2");
         assert q.finish() == "0F1DEFD5135596709273B3A1A07E466EA2BF4FFF";
 
         // SHA-256
@@ -394,18 +394,18 @@ int main()
         for(each k, v : sha256_results) {
           // split
           for(var i = 0; i < k; ++i) {
-            h.write(s);
+            h.update(s);
           }
           assert h.finish() == v;
           // simple
           assert std.checksum.sha256(s * k) == v;
         }
         h = std.checksum.sha256_new();
-        h.write("hello");
+        h.update("hello");
         q = h;
-        h.write("1");
+        h.update("1");
         assert h.finish() == "91E9240F415223982EDC345532630710E94A7F52CD5F48F5EE1AFC555078F0AB";
-        q.write("2");
+        q.update("2");
         assert q.finish() == "87298CC2F31FBA73181EA2A9E6EF10DCE21ED95E98BDAC9C4E1504EA16F486E4";
 
       )__"), tinybuf::open_read);

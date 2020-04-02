@@ -51,7 +51,7 @@ class CRC32_Hasher final : public Abstract_Opaque
         return qnew.release();
       }
 
-    Ival write(const Sval& data) noexcept
+    void update(const Sval& data) noexcept
       {
         const auto p = reinterpret_cast<const uint8_t*>(data.data());
         const auto n = data.size();
@@ -61,9 +61,7 @@ class CRC32_Hasher final : public Abstract_Opaque
           r = s_iso3309_CRC32_table[((r ^ p[i]) & 0xFF)] ^ (r >> 8);
         }
         this->m_reg = r;
-        return data.ssize();
       }
-
     Ival finish() noexcept
       {
         // Get the checksum.
@@ -98,7 +96,7 @@ class FNV1a32_Hasher final : public Abstract_Opaque
         return qnew.release();
       }
 
-    Ival write(const Sval& data) noexcept
+    void update(const Sval& data) noexcept
       {
         const auto p = reinterpret_cast<const uint8_t*>(data.data());
         const auto n = data.size();
@@ -108,9 +106,7 @@ class FNV1a32_Hasher final : public Abstract_Opaque
           r = (r ^ p[i]) * prime;
         }
         this->m_reg = r;
-        return data.ssize();
       }
-
     Ival finish() noexcept
       {
         // Get the checksum.
@@ -342,7 +338,7 @@ class MD5_Hasher final : public Abstract_Opaque
         return qnew.release();
       }
 
-    Ival write(const Sval& data) noexcept
+    void update(const Sval& data) noexcept
       {
         auto bp = reinterpret_cast<const uint8_t*>(data.data());
         auto ep = bp + data.size();
@@ -360,7 +356,7 @@ class MD5_Hasher final : public Abstract_Opaque
           // ... and if is still not full, there aren't going to be any more data.
           if(bc != ec) {
             ROCKET_ASSERT(bp == ep);
-            return data.ssize();
+            return;
           }
           // Consume the last chunk.
           ROCKET_ASSERT(this->m_size % 64 == 0);
@@ -382,9 +378,7 @@ class MD5_Hasher final : public Abstract_Opaque
           bc += n;
         }
         ROCKET_ASSERT(bp == ep);
-        return data.ssize();
       }
-
     Sval finish() noexcept
       {
         // Finalize the hasher.
@@ -585,7 +579,7 @@ class SHA1_Hasher final : public Abstract_Opaque
         return qnew.release();
       }
 
-    Ival write(const Sval& data) noexcept
+    void update(const Sval& data) noexcept
       {
         auto bp = reinterpret_cast<const uint8_t*>(data.data());
         auto ep = bp + data.size();
@@ -603,7 +597,7 @@ class SHA1_Hasher final : public Abstract_Opaque
           // ... and if is still not full, there aren't going to be any more data.
           if(bc != ec) {
             ROCKET_ASSERT(bp == ep);
-            return data.ssize();
+            return;
           }
           // Consume the last chunk.
           ROCKET_ASSERT(this->m_size % 64 == 0);
@@ -625,9 +619,7 @@ class SHA1_Hasher final : public Abstract_Opaque
           bc += n;
         }
         ROCKET_ASSERT(bp == ep);
-        return data.ssize();
       }
-
     Sval finish() noexcept
       {
         // Finalize the hasher.
@@ -799,7 +791,7 @@ class SHA256_Hasher final : public Abstract_Opaque
         return qnew.release();
       }
 
-    Ival write(const Sval& data) noexcept
+    void update(const Sval& data) noexcept
       {
         auto bp = reinterpret_cast<const uint8_t*>(data.data());
         auto ep = bp + data.size();
@@ -817,7 +809,7 @@ class SHA256_Hasher final : public Abstract_Opaque
           // ... and if is still not full, there aren't going to be any more data.
           if(bc != ec) {
             ROCKET_ASSERT(bp == ep);
-            return data.ssize();
+            return;
           }
           // Consume the last chunk.
           ROCKET_ASSERT(this->m_size % 64 == 0);
@@ -839,9 +831,7 @@ class SHA256_Hasher final : public Abstract_Opaque
           bc += n;
         }
         ROCKET_ASSERT(bp == ep);
-        return data.ssize();
       }
-
     Sval finish() noexcept
       {
         // Finalize the hasher.
@@ -882,6 +872,14 @@ class SHA256_Hasher final : public Abstract_Opaque
       }
   };
 
+template<typename HasherT> rcptr<HasherT> do_cast_hasher(Pval& h)
+  {
+    auto qh = h.open_opt<HasherT>();
+    if(!qh)
+      ASTERIA_THROW("invalid hasher reference (runtime type was `$1`)", h.type().name());
+    return qh;
+  }
+
 }  // namespace
 
 Pval std_checksum_crc32_new_private()
@@ -889,22 +887,14 @@ Pval std_checksum_crc32_new_private()
     return ::rocket::make_refcnt<CRC32_Hasher>();
   }
 
-Ival std_checksum_crc32_new_write(Pval& h, Sval data)
+void std_checksum_crc32_new_update(Pval& h, Sval data)
   {
-    auto qh = h.open_opt<CRC32_Hasher>();
-    if(!qh) {
-      ASTERIA_THROW("invalid CRC-32 hasher (runtime type was `$1`)", h.type().name());
-    }
-    return qh->write(data);
+    return do_cast_hasher<CRC32_Hasher>(h)->update(data);
   }
 
 Ival std_checksum_crc32_new_finish(Pval& h)
   {
-    auto qh = h.open_opt<CRC32_Hasher>();
-    if(!qh) {
-      ASTERIA_THROW("invalid CRC-32 hasher (runtime type was `$1`)", h.type().name());
-    }
-    return qh->finish();
+    return do_cast_hasher<CRC32_Hasher>(h)->finish();
   }
 
 Oval std_checksum_crc32_new()
@@ -916,25 +906,27 @@ Oval std_checksum_crc32_new()
     result.insert_or_assign(::rocket::sref("$h"),
       std_checksum_crc32_new_private());
     //===================================================================
-    // `.write(data)`
+    // `.update(data)`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("write"),
+    result.insert_or_assign(::rocket::sref("update"),
       Fval(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-std.checksum.crc32_new().write
+`std.checksum.crc32_new().update(data)`
+
+  * Puts `data` into the hasher denoted by `this`, which shall be
+    a byte string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.crc32_new().write"));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.crc32_new().update"));
     // Get the hasher.
     Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      Reference_root::S_temporary xref =
-        { std_checksum_crc32_new_write(self.open().open_opaque(), ::std::move(data)) };
-      return self = ::std::move(xref);
+      std_checksum_crc32_new_update(self.open().open_opaque(), ::std::move(data));
+      return self = Reference_root::S_void();
     }
     reader.throw_no_matching_function_call();
   }
@@ -945,7 +937,14 @@ std.checksum.crc32_new().write
     result.insert_or_assign(::rocket::sref("finish"),
       Fval(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-std.checksum.crc32_new().finish
+`std.checksum.crc32_new().finish()`
+
+  * Extracts the checksum from the hasher denoted by `this`, then
+    resets it, making it suitable for further data as if it had
+    just been created.
+
+  * Returns the checksum as an integer, whose high-order 32 bits
+    are always zeroes.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
@@ -971,7 +970,7 @@ std.checksum.crc32_new().finish
 Ival std_checksum_crc32(Sval data)
   {
     CRC32_Hasher h;
-    h.write(data);
+    h.update(data);
     return h.finish();
   }
 
@@ -980,22 +979,14 @@ Pval std_checksum_fnv1a32_new_private()
     return ::rocket::make_refcnt<FNV1a32_Hasher>();
   }
 
-Ival std_checksum_fnv1a32_new_write(Pval& h, Sval data)
+void std_checksum_fnv1a32_new_update(Pval& h, Sval data)
   {
-    auto qh = h.open_opt<FNV1a32_Hasher>();
-    if(!qh) {
-      ASTERIA_THROW("invalid FNV1a-32 hasher (runtime type was `$1`)", h.type().name());
-    }
-    return qh->write(data);
+    return do_cast_hasher<FNV1a32_Hasher>(h)->update(data);
   }
 
 Ival std_checksum_fnv1a32_new_finish(Pval& h)
   {
-    auto qh = h.open_opt<FNV1a32_Hasher>();
-    if(!qh) {
-      ASTERIA_THROW("invalid FNV1a-32 hasher (runtime type was `$1`)", h.type().name());
-    }
-    return qh->finish();
+    return do_cast_hasher<FNV1a32_Hasher>(h)->finish();
   }
 
 Oval std_checksum_fnv1a32_new()
@@ -1007,25 +998,27 @@ Oval std_checksum_fnv1a32_new()
     result.insert_or_assign(::rocket::sref("$h"),
       std_checksum_fnv1a32_new_private());
     //===================================================================
-    // `.write(data)`
+    // `.update(data)`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("write"),
+    result.insert_or_assign(::rocket::sref("update"),
       Fval(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-std.checksum.fnv1a32_new().write
+`std.checksum.fnv1a32_new().update(data)`
+
+  * Puts `data` into the hasher denoted by `this`, which shall be
+    a byte string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.fnv1a32_new().write"));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.fnv1a32_new().update"));
     // Get the hasher.
     Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      Reference_root::S_temporary xref =
-        { std_checksum_fnv1a32_new_write(self.open().open_opaque(), ::std::move(data)) };
-      return self = ::std::move(xref);
+      std_checksum_fnv1a32_new_update(self.open().open_opaque(), ::std::move(data));
+      return self = Reference_root::S_void();
     }
     reader.throw_no_matching_function_call();
   }
@@ -1036,7 +1029,14 @@ std.checksum.fnv1a32_new().write
     result.insert_or_assign(::rocket::sref("finish"),
       Fval(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-std.checksum.fnv1a32_new().finish
+`std.checksum.fnv1a32_new().finish()`
+
+  * Extracts the checksum from the hasher denoted by `this`, then
+    resets it, making it suitable for further data as if it had
+    just been created.
+
+  * Returns the checksum as an integer, whose high-order 32 bits
+    are always zeroes.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
@@ -1062,7 +1062,7 @@ std.checksum.fnv1a32_new().finish
 Ival std_checksum_fnv1a32(Sval data)
   {
     FNV1a32_Hasher h;
-    h.write(data);
+    h.update(data);
     return h.finish();
   }
 
@@ -1071,22 +1071,14 @@ Pval std_checksum_md5_new_private()
     return ::rocket::make_refcnt<MD5_Hasher>();
   }
 
-Ival std_checksum_md5_new_write(Pval& h, Sval data)
+void std_checksum_md5_new_update(Pval& h, Sval data)
   {
-    auto qh = h.open_opt<MD5_Hasher>();
-    if(!qh) {
-      ASTERIA_THROW("invalid MD5 hasher (runtime type was `$1`)", h.type().name());
-    }
-    return qh->write(data);
+    return do_cast_hasher<MD5_Hasher>(h)->update(data);
   }
 
 Sval std_checksum_md5_new_finish(Pval& h)
   {
-    auto qh = h.open_opt<MD5_Hasher>();
-    if(!qh) {
-      ASTERIA_THROW("invalid MD5 hasher (runtime type was `$1`)", h.type().name());
-    }
-    return qh->finish();
+    return do_cast_hasher<MD5_Hasher>(h)->finish();
   }
 
 Oval std_checksum_md5_new()
@@ -1098,25 +1090,27 @@ Oval std_checksum_md5_new()
     result.insert_or_assign(::rocket::sref("$h"),
       std_checksum_md5_new_private());
     //===================================================================
-    // `.write(data)`
+    // `.update(data)`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("write"),
+    result.insert_or_assign(::rocket::sref("update"),
       Fval(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-std.checksum.md5_new().write
+`std.checksum.md5_new().update(data)`
+
+  * Puts `data` into the hasher denoted by `this`, which shall be
+    a byte string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.md5_new().write"));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.md5_new().update"));
     // Get the hasher.
     Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      Reference_root::S_temporary xref =
-        { std_checksum_md5_new_write(self.open().open_opaque(), ::std::move(data)) };
-      return self = ::std::move(xref);
+      std_checksum_md5_new_update(self.open().open_opaque(), ::std::move(data));
+      return self = Reference_root::S_void();
     }
     reader.throw_no_matching_function_call();
   }
@@ -1127,7 +1121,14 @@ std.checksum.md5_new().write
     result.insert_or_assign(::rocket::sref("finish"),
       Fval(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-std.checksum.md5_new().finish
+`std.checksum.md5_new().finish()`
+
+  * Extracts the checksum from the hasher denoted by `this`, then
+    resets it, making it suitable for further data as if it had
+    just been created.
+
+  * Returns the checksum as a string of 32 hexadecimal digits in
+    uppercase.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
@@ -1153,7 +1154,7 @@ std.checksum.md5_new().finish
 Sval std_checksum_md5(Sval data)
   {
     MD5_Hasher h;
-    h.write(data);
+    h.update(data);
     return h.finish();
   }
 
@@ -1162,22 +1163,14 @@ Pval std_checksum_sha1_new_private()
     return ::rocket::make_refcnt<SHA1_Hasher>();
   }
 
-Ival std_checksum_sha1_new_write(Pval& h, Sval data)
+void std_checksum_sha1_new_update(Pval& h, Sval data)
   {
-    auto qh = h.open_opt<SHA1_Hasher>();
-    if(!qh) {
-      ASTERIA_THROW("invalid SHA-1 hasher (runtime type was `$1`)", h.type().name());
-    }
-    return qh->write(data);
+    return do_cast_hasher<SHA1_Hasher>(h)->update(data);
   }
 
 Sval std_checksum_sha1_new_finish(Pval& h)
   {
-    auto qh = h.open_opt<SHA1_Hasher>();
-    if(!qh) {
-      ASTERIA_THROW("invalid SHA-1 hasher (runtime type was `$1`)", h.type().name());
-    }
-    return qh->finish();
+    return do_cast_hasher<SHA1_Hasher>(h)->finish();
   }
 
 Oval std_checksum_sha1_new()
@@ -1189,25 +1182,27 @@ Oval std_checksum_sha1_new()
     result.insert_or_assign(::rocket::sref("$h"),
       std_checksum_sha1_new_private());
     //===================================================================
-    // `.write(data)`
+    // `.update(data)`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("write"),
+    result.insert_or_assign(::rocket::sref("update"),
       Fval(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-std.checksum.sha1_new().write
+`std.checksum.sha1_new().update(data)`
+
+  * Puts `data` into the hasher denoted by `this`, which shall be
+    a byte string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha1_new().write"));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha1_new().update"));
     // Get the hasher.
     Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      Reference_root::S_temporary xref =
-        { std_checksum_sha1_new_write(self.open().open_opaque(), ::std::move(data)) };
-      return self = ::std::move(xref);
+      std_checksum_sha1_new_update(self.open().open_opaque(), ::std::move(data));
+      return self = Reference_root::S_void();
     }
     reader.throw_no_matching_function_call();
   }
@@ -1218,7 +1213,14 @@ std.checksum.sha1_new().write
     result.insert_or_assign(::rocket::sref("finish"),
       Fval(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-std.checksum.sha1_new().finish
+`std.checksum.sha1_new().finish()`
+
+  * Extracts the checksum from the hasher denoted by `this`, then
+    resets it, making it suitable for further data as if it had
+    just been created.
+
+  * Returns the checksum as  a string of 40 hexadecimal digits in
+    uppercase.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
@@ -1244,7 +1246,7 @@ std.checksum.sha1_new().finish
 Sval std_checksum_sha1(Sval data)
   {
     SHA1_Hasher h;
-    h.write(data);
+    h.update(data);
     return h.finish();
   }
 
@@ -1253,22 +1255,14 @@ Pval std_checksum_sha256_new_private()
     return ::rocket::make_refcnt<SHA256_Hasher>();
   }
 
-Ival std_checksum_sha256_new_write(Pval& h, Sval data)
+void std_checksum_sha256_new_update(Pval& h, Sval data)
   {
-    auto qh = h.open_opt<SHA256_Hasher>();
-    if(!qh) {
-      ASTERIA_THROW("invalid SHA-256 hasher (runtime type was `$1`)", h.type().name());
-    }
-    return qh->write(data);
+    return do_cast_hasher<SHA256_Hasher>(h)->update(data);
   }
 
 Sval std_checksum_sha256_new_finish(Pval& h)
   {
-    auto qh = h.open_opt<SHA256_Hasher>();
-    if(!qh) {
-      ASTERIA_THROW("invalid SHA-256 hasher (runtime type was `$1`)", h.type().name());
-    }
-    return qh->finish();
+    return do_cast_hasher<SHA256_Hasher>(h)->finish();
   }
 
 Oval std_checksum_sha256_new()
@@ -1280,25 +1274,27 @@ Oval std_checksum_sha256_new()
     result.insert_or_assign(::rocket::sref("$h"),
       std_checksum_sha256_new_private());
     //===================================================================
-    // `.write(data)`
+    // `.update(data)`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("write"),
+    result.insert_or_assign(::rocket::sref("update"),
       Fval(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-std.checksum.sha256_new().write
+`std.checksum.sha256_new().update(data)`
+
+  * Puts `data` into the hasher denoted by `this`, which shall be
+    a byte string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha256_new().write"));
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha256_new().update"));
     // Get the hasher.
     Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     Sval data;
     if(reader.I().v(data).F()) {
-      Reference_root::S_temporary xref =
-        { std_checksum_sha256_new_write(self.open().open_opaque(), ::std::move(data)) };
-      return self = ::std::move(xref);
+      std_checksum_sha256_new_update(self.open().open_opaque(), ::std::move(data));
+      return self = Reference_root::S_void();
     }
     reader.throw_no_matching_function_call();
   }
@@ -1309,7 +1305,14 @@ std.checksum.sha256_new().write
     result.insert_or_assign(::rocket::sref("finish"),
       Fval(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-std.checksum.sha256_new().finish
+`std.checksum.sha256_new().finish()`
+
+  * Extracts the checksum from the hasher denoted by `this`, then
+    resets it, making it suitable for further data as if it had
+    just been created.
+
+  * Returns the checksum as  a string of 64 hexadecimal digits in
+    uppercase.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
   {
@@ -1335,7 +1338,7 @@ std.checksum.sha256_new().finish
 Sval std_checksum_sha256(Sval data)
   {
     SHA256_Hasher h;
-    h.write(data);
+    h.update(data);
     return h.finish();
   }
 
@@ -1355,10 +1358,10 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
   * Returns the hasher as an object consisting of the following
     members:
 
-    * `write(data)`
+    * `update(data)`
     * `finish()`
 
-    The function `write()` is used to put data into the hasher,
+    The function `update()` is used to put data into the hasher,
     which shall be a byte string. After all data have been put, the
     function `finish()` extracts the checksum as an integer (whose
     high-order 32 bits are always zeroes), then resets the hasher,
@@ -1391,7 +1394,7 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
     ```
     std.checksum.crc32 = func(data) {
       var h = this.crc32_new();
-      h.write(data);
+      h.update(data);
       return h.finish();
     };
     ```
@@ -1430,12 +1433,12 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
   * Returns the hasher as an object consisting of the following
     members:
 
-    * `write(data)`
+    * `update(data)`
     * `finish()`
 
-    The function `write()` is used to put data into the hasher,
+    The function `update()` is used to put data into the hasher,
     which shall be a byte string. After all data have been put, the
-    function `finish()` extracts the checksum as an integer whose
+    function `finish()` extracts the checksum as an integer (whose
     high-order 32 bits are always zeroes), then resets the hasher,
     making it suitable for further data as if it had just been
     created.
@@ -1466,7 +1469,7 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
     ```
     std.checksum.fnv1a32 = func(data) {
       var h = this.fnv1a32_new();
-      h.write(data);
+      h.update(data);
       return h.finish();
     };
     ```
@@ -1503,10 +1506,10 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
   * Returns the hasher as an object consisting of the following
     members:
 
-    * `write(data)`
+    * `update(data)`
     * `finish()`
 
-    The function `write()` is used to put data into the hasher,
+    The function `update()` is used to put data into the hasher,
     which shall be a byte string. After all data have been put, the
     function `finish()` extracts the checksum as a string of 32
     hexadecimal digits in uppercase, then resets the hasher, making
@@ -1538,7 +1541,7 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
     ```
     std.checksum.md5 = func(data) {
       var h = this.md5_new();
-      h.write(data);
+      h.update(data);
       return h.finish();
     };
     ```
@@ -1575,10 +1578,10 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
   * Returns the hasher as an object consisting of the following
     members:
 
-    * `write(data)`
+    * `update(data)`
     * `finish()`
 
-    The function `write()` is used to put data into the hasher,
+    The function `update()` is used to put data into the hasher,
     which shall be a byte string. After all data have been put, the
     function `finish()` extracts the checksum as a string of 40
     hexadecimal digits in uppercase, then resets the hasher, making
@@ -1610,7 +1613,7 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
     ```
     std.checksum.sha1 = func(data) {
       var h = this.sha1_new();
-      h.write(data);
+      h.update(data);
       return h.finish();
     };
     ```
@@ -1647,10 +1650,10 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
   * Returns the hasher as an object consisting of the following
     members:
 
-    * `write(data)`
+    * `update(data)`
     * `finish()`
 
-    The function `write()` is used to put data into the hasher,
+    The function `update()` is used to put data into the hasher,
     which shall be a byte string. After all data have been put, the
     function `finish()` extracts the checksum as a string of 64
     hexadecimal digits in uppercase, then resets the hasher, making
@@ -1682,7 +1685,7 @@ void create_bindings_checksum(V_object& result, API_Version /*version*/)
     ```
     std.checksum.sha256 = func(data) {
       var h = this.sha256_new();
-      h.write(data);
+      h.update(data);
       return h.finish();
     };
     ```
