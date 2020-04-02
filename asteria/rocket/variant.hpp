@@ -22,12 +22,8 @@ template<typename... alternativesT> class variant
                   "move constructors of alternative types must not throw exceptions");
 
   public:
-    template<typename targetT> struct index_of : details_variant::type_finder<0, targetT, alternativesT...>
-      {
-      };
-    template<size_t indexT> struct alternative_at : details_variant::type_getter<indexT, alternativesT...>
-      {
-      };
+    template<typename targetT> struct index_of : details_variant::type_finder<0, targetT, alternativesT...>  { };
+    template<size_t indexT> struct alternative_at : details_variant::type_getter<indexT, alternativesT...>  { };
     static constexpr size_t alternative_size = sizeof...(alternativesT);
 
   private:
@@ -45,6 +41,7 @@ template<typename... alternativesT> class variant
         noadl::construct_at(static_cast<typename alternative_at<0>::type*>(static_cast<void*>(this->m_stor)));
         this->m_index = 0;
       }
+
     template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<typename decay<paramT>::type>::value)>
         variant(paramT&& param) noexcept(is_nothrow_constructible<typename decay<paramT>::type, paramT&&>::value)
       {
@@ -57,6 +54,7 @@ template<typename... alternativesT> class variant
                             ::std::forward<paramT>(param));
         this->m_index = index_new;
       }
+
     variant(const variant& other) noexcept(conjunction<is_nothrow_copy_constructible<alternativesT>...>::value)
       {
 #ifdef ROCKET_DEBUG
@@ -67,6 +65,7 @@ template<typename... alternativesT> class variant
         details_variant::dispatch_copy_construct<alternativesT...>(index_new, this->m_stor, other.m_stor);
         this->m_index = index_new;
       }
+
     variant(variant&& other) noexcept
       {
 #ifdef ROCKET_DEBUG
@@ -77,6 +76,7 @@ template<typename... alternativesT> class variant
         details_variant::dispatch_move_construct<alternativesT...>(index_new, this->m_stor, other.m_stor);
         this->m_index = index_new;
       }
+
     // 23.7.3.3, assignment
     template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<paramT>::value)>
         variant& operator=(const paramT& param) noexcept(conjunction<is_nothrow_copy_assignable<paramT>,
@@ -113,6 +113,7 @@ template<typename... alternativesT> class variant
         }
         return *this;
       }
+
     // N.B. This assignment operator only accepts rvalues hence no backup is needed.
     template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<paramT>::value)>
         variant& operator=(paramT&& param) noexcept(is_nothrow_move_assignable<paramT>::value)
@@ -133,6 +134,7 @@ template<typename... alternativesT> class variant
         }
         return *this;
       }
+
     variant& operator=(const variant& other) noexcept(conjunction<is_nothrow_copy_assignable<alternativesT>...,
                                                                   is_nothrow_copy_constructible<alternativesT>...>::value)
       {
@@ -167,6 +169,7 @@ template<typename... alternativesT> class variant
         }
         return *this;
       }
+
     variant& operator=(variant&& other) noexcept(conjunction<is_nothrow_move_assignable<alternativesT>...>::value)
       {
         auto index_old = this->m_index;
@@ -183,6 +186,7 @@ template<typename... alternativesT> class variant
         }
         return *this;
       }
+
     // 23.7.3.2, destructor
     ~variant()
       {
@@ -210,6 +214,7 @@ template<typename... alternativesT> class variant
         ROCKET_ASSERT(this->m_index < alternative_size);
         return this->m_index;
       }
+
     const type_info& type() const noexcept
       {
         static const type_info* const s_table[] = { ::std::addressof(typeid(alternativesT))... };
@@ -219,22 +224,23 @@ template<typename... alternativesT> class variant
     // accessors
     template<size_t indexT> const typename alternative_at<indexT>::type* get() const noexcept
       {
-        if(this->m_index != indexT) {
+        if(this->m_index != indexT)
           return nullptr;
-        }
         return static_cast<const typename alternative_at<indexT>::type*>(static_cast<const void*>(this->m_stor));
       }
+
     template<typename targetT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)> const targetT* get() const noexcept
       {
         return this->get<index_of<targetT>::value>();
       }
+
     template<size_t indexT> typename alternative_at<indexT>::type* get() noexcept
       {
-        if(this->m_index != indexT) {
+        if(this->m_index != indexT)
           return nullptr;
-        }
         return static_cast<typename alternative_at<indexT>::type*>(static_cast<void*>(this->m_stor));
       }
+
     template<typename targetT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)> targetT* get() noexcept
       {
         return this->get<index_of<targetT>::value>();
@@ -243,23 +249,24 @@ template<typename... alternativesT> class variant
     template<size_t indexT> const typename alternative_at<indexT>::type& as() const
       {
         auto ptr = this->get<indexT>();
-        if(!ptr) {
+        if(!ptr)
           this->do_throw_index_mismatch(indexT, typeid(typename alternative_at<indexT>::type));
-        }
         return *ptr;
       }
+
     template<typename targetT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)> const targetT& as() const
       {
         return this->as<index_of<targetT>::value>();
       }
+
     template<size_t indexT> typename alternative_at<indexT>::type& as()
       {
         auto ptr = this->get<indexT>();
-        if(!ptr) {
+        if(!ptr)
           this->do_throw_index_mismatch(indexT, typeid(typename alternative_at<indexT>::type));
-        }
         return *ptr;
       }
+
     template<typename targetT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)> targetT& as()
       {
         return this->as<index_of<targetT>::value>();
@@ -271,6 +278,7 @@ template<typename... alternativesT> class variant
           { details_variant::wrapped_visit<const alternativesT>... };
         s_jump_table[this->m_index](this->m_stor, ::std::forward<visitorT>(visitor));
       }
+
     template<typename visitorT> void visit(visitorT&& visitor)
       {
         static constexpr void (*const s_jump_table[])(void*, visitorT&&) =
@@ -312,6 +320,7 @@ template<typename... alternativesT> class variant
         }
         return *static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor));
       }
+
     template<typename targetT, typename... paramsT>
         targetT& emplace(paramsT&&... params) noexcept(is_nothrow_constructible<targetT, paramsT&&...>::value)
       {
@@ -345,9 +354,7 @@ template<typename... alternativesT> class variant
 template<typename... alternativesT>
     inline void swap(variant<alternativesT...>& lhs,
                      variant<alternativesT...>& rhs) noexcept(noexcept(lhs.swap(rhs)))
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 }  // namespace rocket
 

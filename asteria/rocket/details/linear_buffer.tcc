@@ -7,8 +7,7 @@
 
 namespace details_linear_buffer {
 
-template<typename allocT, typename traitsT>
-    class basic_storage : private allocator_wrapper_base_for<allocT>::type
+template<typename allocT, typename traitsT> class basic_storage : private allocator_wrapper_base_for<allocT>::type
   {
   public:
     using allocator_type  = allocT;
@@ -26,51 +25,40 @@ template<typename allocT, typename traitsT>
 
   public:
     explicit constexpr basic_storage(const allocator_type& alloc) noexcept
-      :
-        allocator_base(alloc)
-      {
-      }
+      : allocator_base(alloc)
+      { }
+
     explicit constexpr basic_storage(allocator_type&& alloc) noexcept
-      :
-        allocator_base(::std::move(alloc))
-      {
-      }
+      : allocator_base(::std::move(alloc))
+      { }
+
     ~basic_storage()
-      {
-        this->deallocate();
-      }
+      { this->deallocate();  }
 
     basic_storage(const basic_storage&)
       = delete;
+
     basic_storage& operator=(const basic_storage&)
       = delete;
 
   public:
     const allocator_type& as_allocator() const noexcept
-      {
-        return static_cast<const allocator_base&>(*this);
-      }
+      { return static_cast<const allocator_base&>(*this);  }
+
     allocator_type& as_allocator() noexcept
-      {
-        return static_cast<allocator_base&>(*this);
-      }
+      { return static_cast<allocator_base&>(*this);  }
 
     const value_type* data() const noexcept
-      {
-        return noadl::unfancy(this->m_ptr);
-      }
+      { return noadl::unfancy(this->m_ptr);  }
+
     value_type* mut_data() noexcept
-      {
-        return noadl::unfancy(this->m_ptr);
-      }
+      { return noadl::unfancy(this->m_ptr);  }
+
     size_type max_size() const noexcept
-      {
-        return allocator_traits<allocator_type>::max_size(this->as_allocator());
-      }
+      { return allocator_traits<allocator_type>::max_size(this->as_allocator());  }
+
     size_type capacity() const noexcept
-      {
-        return this->m_cap;
-      }
+      { return this->m_cap;  }
 
     ROCKET_NOINLINE size_type reserve(size_type goff, size_type eoff, size_type nadd)
       {
@@ -118,6 +106,7 @@ template<typename allocT, typename traitsT>
         ROCKET_ASSERT(nused + nadd <= this->m_cap);
         return nused;
       }
+
     void deallocate() noexcept
       {
         // If the pointer is null we assume the capacity is zero.
@@ -129,10 +118,11 @@ template<typename allocT, typename traitsT>
         allocator_traits<allocator_type>::deallocate(this->as_allocator(), ptr, this->m_cap);
         this->m_cap = 0;
       }
+
     void exchange_with(basic_storage& other) noexcept
       {
-        xswap(this->m_ptr, other.m_ptr);
-        xswap(this->m_cap, other.m_cap);
+        noadl::xswap(this->m_ptr, other.m_ptr);
+        noadl::xswap(this->m_cap, other.m_cap);
       }
   };
 

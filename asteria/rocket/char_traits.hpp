@@ -21,70 +21,50 @@ template<> struct char_traits<char>
     using size_type  = size_t;
 
     static constexpr char_type to_char_type(int_type ch) noexcept
-      {
-        return (char)ch;
-      }
+      { return (char)ch;  }
+
     static constexpr int_type to_int_type(char_type c) noexcept
-      {
-        return (uint8_t)c;
-      }
+      { return (uint8_t)c;  }
 
     static constexpr char_type& assign(char_type& r, char_type c) noexcept
-      {
-        return r = c;
-      }
+      { return r = c;  }
+
     static bool eq(char_type x, char_type y) noexcept
-      {
-        return x == y;
-      }
+      { return x == y;  }
+
     static bool lt(char_type x, char_type y) noexcept
-      {
-        return (uint8_t)x < (uint8_t)y;
-      }
+      { return (uint8_t)x < (uint8_t)y;  }
 
     static char_type* assign(char_type* p, size_type n, char_type c) noexcept
-      {
-        return (char*)::memset(p, c, n);
-      }
+      { return (char*)::memset(p, c, n);  }
+
     static char_type* copy(char_type* p, const char_type* s, size_type n) noexcept
-      {
-        return (char*)::memcpy(p, s, n);
-      }
+      { return (char*)::memcpy(p, s, n);  }
+
     static char_type* move(char_type* p, const char_type* s, size_type n) noexcept
-      {
-        return (char*)::memmove(p, s, n);
-      }
+      { return (char*)::memmove(p, s, n);  }
 
     static const char_type* find(const char_type* p, size_type n, char_type c) noexcept
-      {
-        return (char*)::memchr(p, c, n);
-      }
+      { return (char*)::memchr(p, c, n);  }
+
     static int compare(const char_type* p, const char_type* s, size_type n) noexcept
-      {
-        return ::memcmp(p, s, n);
-      }
+      { return ::memcmp(p, s, n);  }
+
     static size_type length(const char_type* p) noexcept
-      {
-        return ::strlen(p);
-      }
+      { return ::strlen(p);  }
 
     static constexpr int_type eof() noexcept
-      {
-        return EOF;
-      }
+      { return EOF;  }
+
     static constexpr bool is_eof(int_type ch) noexcept
-      {
-        return ch == EOF;
-      }
+      { return ch == EOF;  }
 
     static int_type fgetc(::FILE* fp)
-      {
-        return ::fgetc(fp);
-      }
+      { return ::fgetc(fp);  }
+
     static int_type fputc(::FILE* fp, char_type c)
-      {
-        return ::fputc(c, fp);
-      }
+      { return ::fputc(c, fp);  }
+
     static size_type fgetn(::FILE* fp, char_type* p, size_type n)
       {
         size_t k = 0;
@@ -100,6 +80,7 @@ template<> struct char_traits<char>
         ::funlockfile(fp);
         return k;
       }
+
     static size_type fputn(::FILE* fp, const char_type* p, size_type n)
       {
         size_t k = 0;
@@ -122,70 +103,50 @@ template<> struct char_traits<wchar_t>
     using size_type  = size_t;
 
     static constexpr char_type to_char_type(int_type ch) noexcept
-      {
-        return (wchar_t)ch;
-      }
+      { return (wchar_t)ch;  }
+
     static constexpr int_type to_int_type(char_type c) noexcept
-      {
-        return (::wint_t)c;
-      }
+      { return (::wint_t)c;  }
 
     static constexpr char_type& assign(char_type& r, char_type c) noexcept
-      {
-        return r = c;
-      }
+      { return r = c;  }
+
     static bool eq(char_type x, char_type y) noexcept
-      {
-        return x == y;
-      }
+      { return x == y;  }
+
     static bool lt(char_type x, char_type y) noexcept
-      {
-        return x < y;
-      }
+      { return x < y;  }
 
     static char_type* assign(char_type* p, size_type n, char_type c) noexcept
-      {
-        return ::wmemset(p, c, n);
-      }
+      { return ::wmemset(p, c, n);  }
+
     static char_type* copy(char_type* p, const char_type* s, size_type n) noexcept
-      {
-        return ::wmemcpy(p, s, n);
-      }
+      { return ::wmemcpy(p, s, n);  }
+
     static char_type* move(char_type* p, const char_type* s, size_type n) noexcept
-      {
-        return ::wmemmove(p, s, n);
-      }
+      { return ::wmemmove(p, s, n);  }
 
     static const char_type* find(const char_type* p, size_type n, char_type c) noexcept
-      {
-        return ::wmemchr(p, c, n);
-      }
+      { return ::wmemchr(p, c, n);  }
+
     static int compare(const char_type* p, const char_type* s, size_type n) noexcept
-      {
-        return ::wmemcmp(p, s, n);
-      }
+      { return ::wmemcmp(p, s, n);  }
+
     static size_type length(const char_type* p) noexcept
-      {
-        return ::wcslen(p);
-      }
+      { return ::wcslen(p);  }
 
     static constexpr int_type eof() noexcept
-      {
-        return WEOF;
-      }
+      { return WEOF;  }
+
     static constexpr bool is_eof(int_type ch) noexcept
-      {
-        return ch == WEOF;
-      }
+      { return ch == WEOF;  }
 
     static int_type fgetc(::FILE* fp)
-      {
-        return ::fgetwc(fp);
-      }
+      { return ::fgetwc(fp);  }
+
     static int_type fputc(::FILE* fp, char_type c)
-      {
-        return ::fputwc(c, fp);
-      }
+      { return ::fputwc(c, fp);  }
+
     static size_type fgetn(::FILE* fp, char_type* p, size_type n)
       {
         size_t k = 0;
@@ -201,6 +162,7 @@ template<> struct char_traits<wchar_t>
         ::funlockfile(fp);
         return k;
       }
+
     static size_type fputn(::FILE* fp, const char_type* p, size_type n)
       {
         size_t k = 0;
@@ -223,91 +185,55 @@ template<> struct char_traits<char16_t>
     using size_type  = size_t;
 
     static constexpr char_type to_char_type(int_type ch) noexcept
-      {
-        return (char16_t)ch;
-      }
+      { return (char16_t)ch;  }
+
     static constexpr int_type to_int_type(char_type c) noexcept
-      {
-        return c;
-      }
+      { return c;  }
 
     static constexpr char_type& assign(char_type& r, char_type c) noexcept
-      {
-        return r = c;
-      }
+      { return r = c;  }
+
     static bool eq(char_type x, char_type y) noexcept
-      {
-        return x == y;
-      }
+      { return x == y;  }
+
     static bool lt(char_type x, char_type y) noexcept
-      {
-        return x < y;
-      }
+      { return x < y;  }
 
     static char_type* assign(char_type* p, size_type n, char_type c) noexcept
-      {
-        for(size_t i = 0; i < n; ++i) {
-          p[i] = c;
-        }
-        return p;
-      }
+      { return ::std::char_traits<char16_t>::assign(p, n, c);  }
+
     static char_type* copy(char_type* p, const char_type* s, size_type n) noexcept
-      {
-        return (char16_t*)::memcpy(p, s, n * sizeof(char16_t));
-      }
+      { return ::std::char_traits<char16_t>::copy(p, s, n);  }
+
     static char_type* move(char_type* p, const char_type* s, size_type n) noexcept
-      {
-        return (char16_t*)::memmove(p, s, n * sizeof(char16_t));
-      }
+      { return ::std::char_traits<char16_t>::move(p, s, n);  }
 
     static const char_type* find(const char_type* p, size_type n, char_type c) noexcept
-      {
-        for(size_t i = 0; i < n; ++i) {
-          if(p[i] == c)
-            return p + i;
-        }
-        return nullptr;
-      }
+      { return ::std::char_traits<char16_t>::find(p, n, c);  }
+
     static int compare(const char_type* p, const char_type* s, size_type n) noexcept
-      {
-        for(size_t i = 0; i < n; ++i) {
-          if(p[i] != s[i])
-            return (p[i] < s[i]) ? -1 : +1;
-        }
-        return 0;
-      }
+      { return ::std::char_traits<char16_t>::compare(p, s, n);  }
+
     static size_type length(const char_type* p) noexcept
-      {
-        for(size_t i = 0; ; ++i)
-          if(p[i] == 0)
-            return i;
-      }
+      { return ::std::char_traits<char16_t>::length(p);  }
 
     static constexpr int_type eof() noexcept
-      {
-        return UINT_LEAST16_MAX;
-      }
+      { return UINT_LEAST16_MAX;  }
+
     static constexpr bool is_eof(int_type ch) noexcept
-      {
-        return ch >= UINT_LEAST16_MAX;
-      }
+      { return ch >= UINT_LEAST16_MAX;  }
 
     [[noreturn]] static int_type fgetc(::FILE* /*fp*/)
-      {
-        noadl::sprintf_and_throw<domain_error>("char_traits: `char16_t` I/O not implemented");
-      }
+      { noadl::sprintf_and_throw<domain_error>("char_traits: `char16_t` I/O not implemented");  }
+
     [[noreturn]] static int_type fputc(::FILE* /*fp*/, char_type /*c*/)
-      {
-        noadl::sprintf_and_throw<domain_error>("char_traits: `char16_t` I/O not implemented");
-      }
+      { noadl::sprintf_and_throw<domain_error>("char_traits: `char16_t` I/O not implemented");  }
+
     [[noreturn]] static size_type fgetn(::FILE* /*fp*/, char_type* /*p*/, size_type /*n*/)
-      {
-        noadl::sprintf_and_throw<domain_error>("char_traits: `char16_t` I/O not implemented");
-      }
+      { noadl::sprintf_and_throw<domain_error>("char_traits: `char16_t` I/O not implemented");  }
+
     [[noreturn]] static size_type fputn(::FILE* /*fp*/, const char_type* /*p*/, size_type /*n*/)
-      {
-        noadl::sprintf_and_throw<domain_error>("char_traits: `char16_t` I/O not implemented");
-      }
+      { noadl::sprintf_and_throw<domain_error>("char_traits: `char16_t` I/O not implemented");  }
   };
 
 template<> struct char_traits<char32_t>
@@ -317,91 +243,55 @@ template<> struct char_traits<char32_t>
     using size_type  = size_t;
 
     static constexpr char_type to_char_type(int_type ch) noexcept
-      {
-        return (char32_t)ch;
-      }
+      { return (char32_t)ch;  }
+
     static constexpr int_type to_int_type(char_type c) noexcept
-      {
-        return c;
-      }
+      { return c;  }
 
     static constexpr char_type& assign(char_type& r, char_type c) noexcept
-      {
-        return r = c;
-      }
+      { return r = c;  }
+
     static bool eq(char_type x, char_type y) noexcept
-      {
-        return x == y;
-      }
+      { return x == y;  }
+
     static bool lt(char_type x, char_type y) noexcept
-      {
-        return x < y;
-      }
+      { return x < y;  }
 
     static char_type* assign(char_type* p, size_type n, char_type c) noexcept
-      {
-        for(size_t i = 0; i < n; ++i) {
-          p[i] = c;
-        }
-        return p;
-      }
+      { return ::std::char_traits<char32_t>::assign(p, n, c);  }
+
     static char_type* copy(char_type* p, const char_type* s, size_type n) noexcept
-      {
-        return (char32_t*)::memcpy(p, s, n * sizeof(char32_t));
-      }
+      { return ::std::char_traits<char32_t>::copy(p, s, n);  }
+
     static char_type* move(char_type* p, const char_type* s, size_type n) noexcept
-      {
-        return (char32_t*)::memmove(p, s, n * sizeof(char32_t));
-      }
+      { return ::std::char_traits<char32_t>::move(p, s, n);  }
 
     static const char_type* find(const char_type* p, size_type n, char_type c) noexcept
-      {
-        for(size_t i = 0; i < n; ++i) {
-          if(p[i] == c)
-            return p + i;
-        }
-        return nullptr;
-      }
+      { return ::std::char_traits<char32_t>::find(p, n, c);  }
+
     static int compare(const char_type* p, const char_type* s, size_type n) noexcept
-      {
-        for(size_t i = 0; i < n; ++i) {
-          if(p[i] != s[i])
-            return (p[i] < s[i]) ? -1 : +1;
-        }
-        return 0;
-      }
+      { return ::std::char_traits<char32_t>::compare(p, s, n);  }
+
     static size_type length(const char_type* p) noexcept
-      {
-        for(size_t i = 0; ; ++i)
-          if(p[i] == 0)
-            return i;
-      }
+      { return ::std::char_traits<char32_t>::length(p);  }
 
     static constexpr int_type eof() noexcept
-      {
-        return UINT_LEAST32_MAX;
-      }
+      { return UINT_LEAST32_MAX;  }
+
     static constexpr bool is_eof(int_type ch) noexcept
-      {
-        return ch >= UINT_LEAST32_MAX;
-      }
+      { return ch >= UINT_LEAST32_MAX;  }
 
     [[noreturn]] static int_type fgetc(::FILE* /*fp*/)
-      {
-        noadl::sprintf_and_throw<domain_error>("char_traits: `char32_t` I/O not implemented");
-      }
+      { noadl::sprintf_and_throw<domain_error>("char_traits: `char32_t` I/O not implemented");  }
+
     [[noreturn]] static int_type fputc(::FILE* /*fp*/, char_type /*c*/)
-      {
-        noadl::sprintf_and_throw<domain_error>("char_traits: `char32_t` I/O not implemented");
-      }
+      { noadl::sprintf_and_throw<domain_error>("char_traits: `char32_t` I/O not implemented");  }
+
     [[noreturn]] static size_type fgetn(::FILE* /*fp*/, char_type* /*p*/, size_type /*n*/)
-      {
-        noadl::sprintf_and_throw<domain_error>("char_traits: `char32_t` I/O not implemented");
-      }
+      { noadl::sprintf_and_throw<domain_error>("char_traits: `char32_t` I/O not implemented");  }
+
     [[noreturn]] static size_type fputn(::FILE* /*fp*/, const char_type* /*p*/, size_type /*n*/)
-      {
-        noadl::sprintf_and_throw<domain_error>("char_traits: `char32_t` I/O not implemented");
-      }
+      { noadl::sprintf_and_throw<domain_error>("char_traits: `char32_t` I/O not implemented");  }
   };
 
 }  // namespace rocket

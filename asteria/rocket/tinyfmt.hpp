@@ -19,8 +19,7 @@ template<typename charT, typename traitsT = char_traits<charT>> class basic_tiny
  * 3. The stream is stateless. Exceptions are preferred when reporting errors.
  */
 
-template<typename charT, typename traitsT>
-    class basic_tinyfmt
+template<typename charT, typename traitsT> class basic_tinyfmt
   {
   public:
     using char_type    = charT;
@@ -39,8 +38,10 @@ template<typename charT, typename traitsT>
     // This interface class is stateless.
     basic_tinyfmt() noexcept
       = default;
+
     basic_tinyfmt(const basic_tinyfmt&) noexcept
       = default;
+
     basic_tinyfmt& operator=(const basic_tinyfmt&) noexcept
       = default;
 
@@ -53,25 +54,19 @@ template<typename charT, typename traitsT>
 
     // unformatted output functions
     basic_tinyfmt& flush()
-      {
-        return this->get_tinybuf().flush(), *this;
-      }
+      { return this->get_tinybuf().flush(), *this;  }
+
     off_type seek(off_type off, seek_dir dir = tinybuf_base::seek_set)
-      {
-        return this->get_tinybuf().seek(off, dir);
-      }
+      { return this->get_tinybuf().seek(off, dir);  }
+
     basic_tinyfmt& putc(char_type c)
-      {
-        return this->get_tinybuf().putc(c), *this;
-      }
+      { return this->get_tinybuf().putc(c), *this;  }
+
     basic_tinyfmt& putn(const char_type* s, size_type n)
-      {
-        return this->get_tinybuf().putn(s, n), *this;
-      }
+      { return this->get_tinybuf().putn(s, n), *this;  }
+
     basic_tinyfmt& puts(const char_type* s)
-      {
-        return this->get_tinybuf().puts(s), *this;
-      }
+      { return this->get_tinybuf().puts(s), *this;  }
   };
 
 template<typename charT, typename traitsT>
@@ -85,16 +80,15 @@ using tinyfmt   = basic_tinyfmt<char>;
 using wtinyfmt  = basic_tinyfmt<wchar_t>;
 
 // zero-conversion inserters
-template<typename charT, typename traitsT>
-    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, charT c)
+template<typename charT, typename traitsT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, charT c)
   {
     // Insert the character as is.
     auto& buf = fmt.get_tinybuf();
     buf.putc(c);
     return fmt;
   }
-template<typename charT, typename traitsT>
-    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const charT* s)
+
+template<typename charT, typename traitsT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const charT* s)
   {
     // Insert the sequence as is.
     auto& buf = fmt.get_tinybuf();
@@ -103,14 +97,14 @@ template<typename charT, typename traitsT>
   }
 
 // conversion inserters
-template<typename charT, typename traitsT>
-    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ascii_numput& nump)
+template<typename charT, typename traitsT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ascii_numput& nump)
   {
     // Widen all characters and insert them.
     auto& buf = fmt.get_tinybuf();
     noadl::for_each(nump, [&](char c) { buf.putc(traitsT::to_char_type(c & 0xFF));  });
     return fmt;
   }
+
 inline basic_tinyfmt<char>& operator<<(basic_tinyfmt<char>& fmt, const ascii_numput& nump)
   {
     // Optimize it a bit if no conversion is required.
@@ -120,31 +114,22 @@ inline basic_tinyfmt<char>& operator<<(basic_tinyfmt<char>& fmt, const ascii_num
   }
 
 // delegating inserters
-template<typename charT, typename traitsT, typename valueT,
-         ROCKET_DISABLE_IF(is_same<charT, valueT>::value), ROCKET_ENABLE_IF(is_arithmetic<valueT>::value)>
-    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT value)
-  {
-    return fmt << ascii_numput(value);
-  }
-template<typename charT, typename traitsT, typename valueT,
-         ROCKET_DISABLE_IF(is_same<charT, valueT>::value), ROCKET_ENABLE_IF(is_enum<valueT>::value)>
-    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT value)
-  {
-    return fmt << ascii_numput(static_cast<typename underlying_type<valueT>::type>(value));
-  }
-template<typename charT, typename traitsT, typename valueT,
-         ROCKET_DISABLE_IF(is_same<charT, typename remove_cv<valueT>::type>::value)>
-    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT* value)
-  {
-    return fmt << ascii_numput(static_cast<const void*>(value));
-  }
+template<typename charT, typename traitsT, typename valueT, ROCKET_DISABLE_IF(is_same<charT, valueT>::value),
+             ROCKET_ENABLE_IF(is_arithmetic<valueT>::value)> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT value)
+  { return fmt << ascii_numput(value);  }
+
+template<typename charT, typename traitsT, typename valueT, ROCKET_DISABLE_IF(is_same<charT, valueT>::value),
+             ROCKET_ENABLE_IF(is_enum<valueT>::value)> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT value)
+  { return fmt << ascii_numput(static_cast<typename underlying_type<valueT>::type>(value));  }
+
+template<typename charT, typename traitsT, typename valueT, ROCKET_DISABLE_IF(is_same<charT, typename remove_cv<valueT>::type>::value)>
+             basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT* value)
+  { return fmt << ascii_numput(static_cast<const void*>(value));  }
+
 
 // rvalue inserter
-template<typename charT, typename traitsT, typename xvalueT>
-    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>&& fmt, xvalueT&& xvalue)
-  {
-    return fmt << ::std::forward<xvalueT>(xvalue);
-  }
+template<typename charT, typename traitsT, typename xvalueT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>&& fmt, xvalueT&& xvalue)
+  { return fmt << ::std::forward<xvalueT>(xvalue);  }
 
 extern template tinyfmt&  operator<<(tinyfmt&,  char);
 extern template wtinyfmt& operator<<(wtinyfmt&, wchar_t);

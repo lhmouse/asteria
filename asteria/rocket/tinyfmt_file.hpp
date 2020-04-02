@@ -36,57 +36,56 @@ template<typename charT, typename traitsT, typename allocT>
 
   public:
     basic_tinyfmt_file() noexcept
-      :
-        m_buf()
-      {
-      }
+      : m_buf()
+      { }
+
     explicit basic_tinyfmt_file(const char* path, open_mode mode = tinybuf_base::open_write) noexcept
-      :
-        m_buf(path, mode)
-      {
-      }
+      : m_buf(path, mode)
+      { }
+
     basic_tinyfmt_file(handle_type fp, closer_type cl) noexcept
-      :
-        m_buf(fp, cl)
-      {
-      }
+      : m_buf(fp, cl)
+      { }
+
     ~basic_tinyfmt_file() override;
 
     basic_tinyfmt_file(basic_tinyfmt_file&&)
       = default;
+
     basic_tinyfmt_file& operator=(basic_tinyfmt_file&&)
       = default;
 
   public:
     tinybuf_type& get_tinybuf() const override
-      {
-        return this->m_buf;
-      }
+      { return this->m_buf;  }
 
     handle_type get_handle() const noexcept
-      {
-        return this->m_buf.get_handle();
-      }
+      { return this->m_buf.get_handle();  }
+
     closer_type get_closer() const noexcept
-      {
-        return this->m_buf.get_closer();
-      }
+      { return this->m_buf.get_closer();  }
+
     basic_tinyfmt_file& reset(handle_type fp, closer_type cl) noexcept
       {
-        return this->m_buf.reset(fp, cl), *this;
+        this->m_buf.reset(fp, cl);
+        return *this;
       }
+
     basic_tinyfmt_file& open(const char* path, open_mode mode = tinybuf_base::open_write)
       {
-        return this->m_buf.open(path, mode), *this;
+        this->m_buf.open(path, mode);
+        return *this;
       }
+
     basic_tinyfmt_file& close() noexcept
       {
-        return this->m_buf.close(), *this;
+        this->m_buf.close();
+        return *this;
       }
 
     basic_tinyfmt_file& swap(basic_tinyfmt_file& other) noexcept(is_nothrow_swappable<tinybuf_type>::value)
       {
-        xswap(this->m_buf, other.m_buf);
+        noadl::xswap(this->m_buf, other.m_buf);
         return *this;
       }
   };
@@ -95,12 +94,9 @@ template<typename charT, typename traitsT, typename allocT>
     basic_tinyfmt_file<charT, traitsT, allocT>::~basic_tinyfmt_file()
   = default;
 
-template<typename charT, typename traitsT, typename allocT>
-    inline void swap(basic_tinyfmt_file<charT, traitsT, allocT>& lhs,
-                     basic_tinyfmt_file<charT, traitsT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
-  {
-    lhs.swap(rhs);
-  }
+template<typename charT, typename traitsT, typename allocT> inline void swap(basic_tinyfmt_file<charT, traitsT, allocT>& lhs,
+                                                      basic_tinyfmt_file<charT, traitsT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+  { lhs.swap(rhs);  }
 
 extern template class basic_tinyfmt_file<char>;
 extern template class basic_tinyfmt_file<wchar_t>;

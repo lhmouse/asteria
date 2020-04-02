@@ -15,8 +15,7 @@ template<typename allocT>
     struct allocator_wrapper_base_for : conditional<is_final<allocT>::value,
                                                     details_allocator_utilities::final_wrapper<allocT>,
                                                     allocT>
-  {
-  };
+  { };
 
 template<typename allocT>
     void propagate_allocator_on_copy(allocT& lhs, const allocT& rhs) noexcept
@@ -27,6 +26,7 @@ template<typename allocT>
                            details_allocator_utilities::propagate_none_tag>::type(),
       lhs, rhs);
   }
+
 template<typename allocT>
     void propagate_allocator_on_move(allocT& lhs, allocT& rhs) noexcept
   {
@@ -36,6 +36,7 @@ template<typename allocT>
                            details_allocator_utilities::propagate_none_tag>::type(),
       lhs, rhs);
   }
+
 template<typename allocT>
     void propagate_allocator_on_swap(allocT& lhs, allocT& rhs) noexcept
   {
@@ -48,12 +49,11 @@ template<typename allocT>
 
 template<typename allocT>
     struct is_std_allocator : false_type
-  {
-  };
+  { };
+
 template<typename valueT>
     struct is_std_allocator<::std::allocator<valueT>> : true_type
-  {
-  };
+  { };
 
 }  // namespace rocket
 

@@ -35,53 +35,50 @@ template<typename charT, typename traitsT,
 
   public:
     basic_tinyfmt_str() noexcept
-      :
-        m_buf(tinybuf_base::open_write)
-      {
-      }
+      : m_buf(tinybuf_base::open_write)
+      { }
+
     explicit basic_tinyfmt_str(open_mode mode) noexcept
-      :
-        m_buf(mode)
-      {
-      }
+      : m_buf(mode)
+      { }
+
     template<typename xstrT> explicit basic_tinyfmt_str(xstrT&& xstr, open_mode mode = tinybuf_base::open_write)
-      :
-        m_buf(::std::forward<xstrT>(xstr), mode)
-      {
-      }
+      : m_buf(::std::forward<xstrT>(xstr), mode)
+      { }
+
     ~basic_tinyfmt_str() override;
 
     basic_tinyfmt_str(basic_tinyfmt_str&&)
       = default;
+
     basic_tinyfmt_str& operator=(basic_tinyfmt_str&&)
       = default;
 
   public:
     tinybuf_type& get_tinybuf() const override
-      {
-        return this->m_buf;
-      }
+      { return this->m_buf;  }
 
     const string_type& get_string() const noexcept
-      {
-        return this->m_buf.get_string();
-      }
+      { return this->m_buf.get_string();  }
+
     const char_type* get_c_string() const noexcept
-      {
-        return this->m_buf.get_c_string();
-     }
+      { return this->m_buf.get_c_string();  }
+
     size_type get_length() const noexcept
-      {
-        return this->m_buf.get_length();
-     }
+      { return this->m_buf.get_length();  }
+
     basic_tinyfmt_str& clear_string(open_mode mode = tinybuf_base::open_write)
       {
-        return this->m_buf.clear_string(mode), *this;
+        this->m_buf.clear_string(mode);
+        return *this;
       }
+
     template<typename xstrT> basic_tinyfmt_str& set_string(xstrT&& xstr, open_mode mode = tinybuf_base::open_write)
       {
-        return this->m_buf.set_string(::std::forward<xstrT>(xstr), mode), *this;
+        this->m_buf.set_string(::std::forward<xstrT>(xstr), mode);
+        return *this;
       }
+
     string_type extract_string(open_mode mode = tinybuf_base::open_write)
       {
         return this->m_buf.extract_string(mode);
@@ -89,7 +86,7 @@ template<typename charT, typename traitsT,
 
     basic_tinyfmt_str& swap(basic_tinyfmt_str& other) noexcept(is_nothrow_swappable<tinybuf_type>::value)
       {
-        xswap(this->m_buf, other.m_buf);
+        noadl::xswap(this->m_buf, other.m_buf);
         return *this;
       }
   };

@@ -20,66 +20,54 @@ template<typename valueT> class reference_counter
 
   public:
     constexpr reference_counter() noexcept
-      :
-        m_nref(1)
-      {
-      }
+      : m_nref(1)
+      { }
+
     explicit constexpr reference_counter(valueT nref) noexcept
-      :
-        m_nref(nref)
-      {
-      }
+      : m_nref(nref)
+      { }
+
     constexpr reference_counter(const reference_counter&) noexcept
-      :
-        reference_counter()
-      {
-      }
+      : reference_counter()
+      { }
+
     reference_counter& operator=(const reference_counter&) noexcept
-      {
-        return *this;
-      }
+      { return *this;  }
+
     ~reference_counter()
-      {
-        this->do_terminate_if_shared();
-      }
+      { this->do_terminate_if_shared();  }
 
   private:
     void do_terminate_if_shared() const
       {
         auto old = this->m_nref.load(::std::memory_order_relaxed);
-        if(old <= 1) {
-          return;
-        }
-        ::std::terminate();
+        if(old > 1)
+          ::std::terminate();
       }
 
   public:
     ROCKET_PURE_FUNCTION bool unique() const noexcept
-      {
-        auto old = this->m_nref.load(::std::memory_order_relaxed);
-        return ROCKET_EXPECT(old == 1);
-      }
+      { return ROCKET_EXPECT(this->m_nref.load(::std::memory_order_relaxed) == 1);  }
+
     valueT get() const noexcept
-      {
-        auto old = this->m_nref.load(::std::memory_order_relaxed);
-        return old;
-      }
+      { return this->m_nref.load(::std::memory_order_relaxed);  }
+
     bool try_increment() noexcept
       {
         auto old = this->m_nref.load(::std::memory_order_relaxed);
-        for(;;) {
+        for(;;)
           if(old == 0)
             return false;
-          if(this->m_nref.compare_exchange_weak(old, old + 1, ::std::memory_order_relaxed))
-            break;
-        }
-        return true;
+          else if(this->m_nref.compare_exchange_weak(old, old + 1, ::std::memory_order_relaxed))
+            return true;
       }
+
     void increment() noexcept
       {
         auto old = this->m_nref.fetch_add(1, ::std::memory_order_relaxed);
         ROCKET_ASSERT(old >= 1);
       }
+
     bool decrement() noexcept
       {
         auto old = this->m_nref.fetch_sub(1, ::std::memory_order_acq_rel);

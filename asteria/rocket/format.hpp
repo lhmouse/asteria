@@ -39,9 +39,7 @@ template<typename charT, typename traitsT> struct basic_formatter
     const void* param;
 
     tinyfmt_type& submit(tinyfmt_type& fmt) const
-      {
-        return this->ifunc(fmt, this->param);
-      }
+      { return this->ifunc(fmt, this->param);  }
   };
 
 template<typename charT, typename traitsT = char_traits<charT>, typename paramT>

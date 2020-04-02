@@ -143,34 +143,28 @@ namespace noadl = ::rocket;
 
 template<typename lhsT, typename rhsT> struct is_lvalue_assignable
     : is_assignable<typename add_lvalue_reference<lhsT>::type, rhsT>
-  {
-  };
+  { };
 
 template<typename typeT> struct remove_cvref
     : remove_cv<typename remove_reference<typeT>::type>
-  {
-  };
+  { };
 
 template<typename typeT> struct is_nothrow_swappable
     : integral_constant<bool, noexcept(swap(::std::declval<typeT&>(), ::std::declval<typeT&>()))>
-  {
-  };
+  { };
 
 template<typename typeT> inline void xswap(typeT& lhs, typeT& rhs) noexcept(noexcept(swap(lhs, rhs)))
-  {
-    swap(lhs, rhs);
-  }
+  { swap(lhs, rhs);  }
 
 template<typename firstT, typename secondT, typename... restT>
     struct select_type
       : select_type<typename select_type<firstT, secondT>::type, restT...>
-  {
-  };
+  { };
+
 template<typename firstT, typename secondT>
     struct select_type<firstT, secondT>
       : enable_if<true, decltype(1 ? ::std::declval<firstT ()>()() : ::std::declval<secondT ()>()())>
-  {
-  };
+  { };
 
 template<typename lhsT, typename rhsT>
     constexpr typename select_type<lhsT&&, rhsT&&>::type min(lhsT&& lhs, rhsT&& rhs)
@@ -197,14 +191,13 @@ template<typename xvT, typename loT, typename upT>
 template<typename typeT, typename = void>
     struct is_input_iterator
       : integral_constant<bool, false>
-  {
-  };
+  { };
+
 template<typename typeT>
     struct is_input_iterator<typeT, typename conditional<1, void,
                                         typename iterator_traits<typeT>::iterator_category>::type>
       : integral_constant<bool, true>
-  {
-  };
+  { };
 
 template<typename firstT, typename lastT, typename funcT, typename... paramsT>
     void ranged_for(firstT first, lastT last, funcT&& func, const paramsT&... params)
@@ -224,21 +217,19 @@ template<typename firstT, typename lastT, typename funcT, typename... paramsT>
 
 template<typename... typesT>
     struct conjunction : true_type
-  {
-  };
+  { };
+
 template<typename firstT, typename... restT>
     struct conjunction<firstT, restT...> : conditional<bool(firstT::value), conjunction<restT...>, firstT>::type
-  {
-  };
+  { };
 
 template<typename... typesT>
     struct disjunction : false_type
-  {
-  };
+  { };
+
 template<typename firstT, typename... restT>
     struct disjunction<firstT, restT...> : conditional<bool(firstT::value), firstT, disjunction<restT...>>::type
-  {
-  };
+  { };
 
 template<typename iteratorT>
     constexpr size_t estimate_distance(iteratorT first, iteratorT last)
@@ -337,94 +328,97 @@ template<typename elementT> void rotate(elementT* ptr, size_t begin, size_t seek
 template<typename containerT, typename callbackT>
     void for_each(containerT&& cont, callbackT&& callback)
   {
-    return details_utilities::for_each_nonconstexpr(::std::forward<containerT>(cont),
-                                                    ::std::forward<callbackT>(callback));
+    return details_utilities::for_each_nonconstexpr(
+                  ::std::forward<containerT>(cont), ::std::forward<callbackT>(callback));
   }
+
 template<typename elementT, typename callbackT>
     void for_each(initializer_list<elementT> init, callbackT&& callback)
   {
-    return details_utilities::for_each_nonconstexpr(init, ::std::forward<callbackT>(callback));
+    return details_utilities::for_each_nonconstexpr(
+                  init, ::std::forward<callbackT>(callback));
   }
 
 template<typename containerT, typename callbackT>
     constexpr bool any_of(containerT&& cont, callbackT&& callback)
   {
-    return details_utilities::any_of_nonconstexpr(::std::forward<containerT>(cont),
-                                                  ::std::forward<callbackT>(callback));
+    return details_utilities::any_of_nonconstexpr(
+                  ::std::forward<containerT>(cont), ::std::forward<callbackT>(callback));
   }
+
 template<typename elementT, typename callbackT>
     constexpr bool any_of(initializer_list<elementT> init, callbackT&& callback)
   {
-    return details_utilities::any_of_nonconstexpr(init, ::std::forward<callbackT>(callback));
+    return details_utilities::any_of_nonconstexpr(
+                  init, ::std::forward<callbackT>(callback));
   }
 
 template<typename containerT, typename callbackT>
     constexpr bool none_of(containerT&& cont, callbackT&& callback)
   {
-    return details_utilities::none_of_nonconstexpr(::std::forward<containerT>(cont),
-                                                   ::std::forward<callbackT>(callback));
+    return details_utilities::none_of_nonconstexpr(
+                  ::std::forward<containerT>(cont), ::std::forward<callbackT>(callback));
   }
+
 template<typename elementT, typename callbackT>
     constexpr bool none_of(initializer_list<elementT> init, callbackT&& callback)
   {
-    return details_utilities::none_of_nonconstexpr(init, ::std::forward<callbackT>(callback));
+    return details_utilities::none_of_nonconstexpr(
+                  init, ::std::forward<callbackT>(callback));
   }
 
 template<typename targetT, typename containerT>
     constexpr bool is_any_of(targetT&& targ, containerT&& cont)
   {
-    return details_utilities::is_any_of_nonconstexpr(::std::forward<targetT>(targ),
-                                                     ::std::forward<containerT>(cont));
+    return details_utilities::is_any_of_nonconstexpr(
+                  ::std::forward<targetT>(targ), ::std::forward<containerT>(cont));
   }
+
 template<typename targetT, typename elementT>
     constexpr bool is_any_of(targetT&& targ, initializer_list<elementT> init)
   {
-    return details_utilities::is_any_of_nonconstexpr(::std::forward<targetT>(targ), init);
+    return details_utilities::is_any_of_nonconstexpr(
+                  ::std::forward<targetT>(targ), init);
   }
 
 template<typename targetT, typename containerT>
     constexpr bool is_none_of(targetT&& targ, containerT&& cont)
   {
-    return details_utilities::is_none_of_nonconstexpr(::std::forward<targetT>(targ),
-                                                      ::std::forward<containerT>(cont));
+    return details_utilities::is_none_of_nonconstexpr(
+                  ::std::forward<targetT>(targ), ::std::forward<containerT>(cont));
   }
+
 template<typename targetT, typename elementT>
     constexpr bool is_none_of(targetT&& targ, initializer_list<elementT> init)
   {
-    return details_utilities::is_none_of_nonconstexpr(::std::forward<targetT>(targ), init);
+    return details_utilities::is_none_of_nonconstexpr(
+                  ::std::forward<targetT>(targ), init);
   }
 
 template<typename enumT>
     constexpr typename underlying_type<enumT>::type weaken_enum(enumT value) noexcept
-  {
-    return static_cast<typename underlying_type<enumT>::type>(value);
-  }
+  { return static_cast<typename underlying_type<enumT>::type>(value);  }
 
 template<typename elementT, size_t countT>
     constexpr size_t countof(const elementT (&)[countT]) noexcept
-  {
-    return countT;
-  }
+  { return countT;  }
 
 template<intmax_t valueT>
     struct lowest_signed
       : details_utilities::integer_selector<intmax_t, valueT,
               signed char, signed short, signed, signed long, signed long long>
-  {
-  };
+  { };
 
 template<uintmax_t valueT>
     struct lowest_unsigned
       : details_utilities::integer_selector<uintmax_t, valueT,
               unsigned char, unsigned short, unsigned, unsigned long, unsigned long long>
-  {
-  };
+  { };
 
 // This tag value is used to construct an empty container. Assigning `nullopt` to a container clears it.
 struct nullopt_t
-  {
-  }
-constexpr nullopt;
+  { }
+  constexpr nullopt;
 
 // Fancy pointer conversion
 template<typename pointerT>
@@ -437,7 +431,7 @@ template<typename targetT, typename sourceT>
     constexpr targetT static_or_dynamic_cast(sourceT&& src)
   {
     return details_utilities::static_or_dynamic_cast_aux<targetT, sourceT>(
-                  details_utilities::use_static_cast_aux<targetT, sourceT>(), ::std::forward<sourceT>(src));
+                        details_utilities::use_static_cast_aux<targetT, sourceT>(), ::std::forward<sourceT>(src));
   }
 
 }  // namespace rocket

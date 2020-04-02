@@ -23,35 +23,27 @@ template<typename stringT, typename hashT>
 
   public:
     template<typename... paramsT> explicit string_storage(const hasher& hf, paramsT&&... params)
-      :
-        hasher_base(hf),
-        m_str(::std::forward<paramsT>(params)...), m_hval(this->as_hasher()(this->m_str))
-      {
-      }
+      : hasher_base(hf), m_str(::std::forward<paramsT>(params)...), m_hval(this->as_hasher()(this->m_str))
+      { }
 
     string_storage(const string_storage&)
       = delete;
+
     string_storage& operator=(const string_storage&)
       = delete;
 
   public:
     const hasher& as_hasher() const noexcept
-      {
-        return static_cast<const hasher_base&>(*this);
-      }
+      { return static_cast<const hasher_base&>(*this);  }
+
     hasher& as_hasher() noexcept
-      {
-        return static_cast<hasher_base&>(*this);
-      }
+      { return static_cast<hasher_base&>(*this);  }
 
     const string_type& str() const noexcept
-      {
-        return this->m_str;
-      }
+      { return this->m_str;  }
+
     size_t hval() const noexcept
-      {
-        return this->m_hval;
-      }
+      { return this->m_hval;  }
 
     void clear()
       {
@@ -64,20 +56,23 @@ template<typename stringT, typename hashT>
         this->m_str.assign(::std::forward<paramsT>(params)...);
         this->m_hval = this->as_hasher()(this->m_str);
       }
+
     void assign(const string_storage& other)
       {
         this->m_str = other.m_str;
         this->m_hval = other.m_hval;
       }
+
     void assign(string_storage&& other)
       {
         this->m_str = ::std::move(other.m_str);
         this->m_hval = this->as_hasher()(this->m_str);
       }
+
     void exchange_with(string_storage& other)
       {
-        xswap(this->m_str, other.m_str);
-        xswap(this->m_hval, other.m_hval);
+        noadl::xswap(this->m_str, other.m_str);
+        noadl::xswap(this->m_hval, other.m_hval);
       }
   };
 

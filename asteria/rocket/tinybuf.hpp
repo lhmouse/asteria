@@ -42,30 +42,22 @@ struct tinybuf_base
       };
 
     static constexpr bool has_mode(open_mode mode, open_mode opt) noexcept
-      {
-        return (mode & opt) == opt;
-      }
+      { return (mode & opt) == opt;  }
   };
 
 constexpr tinybuf_base::open_mode operator~(tinybuf_base::open_mode rhs) noexcept
-  {
-    return tinybuf_base::open_mode(~uint32_t(rhs));
-  }
-constexpr tinybuf_base::open_mode operator&(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs) noexcept
-  {
-    return tinybuf_base::open_mode(uint32_t(lhs) & uint32_t(rhs));
-  }
-constexpr tinybuf_base::open_mode operator|(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs) noexcept
-  {
-    return tinybuf_base::open_mode(uint32_t(lhs) | uint32_t(rhs));
-  }
-constexpr tinybuf_base::open_mode operator^(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs) noexcept
-  {
-    return tinybuf_base::open_mode(uint32_t(lhs) ^ uint32_t(rhs));
-  }
+  { return tinybuf_base::open_mode(~uint32_t(rhs));  }
 
-template<typename charT, typename traitsT>
-    class basic_tinybuf : public tinybuf_base
+constexpr tinybuf_base::open_mode operator&(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs) noexcept
+  { return tinybuf_base::open_mode(uint32_t(lhs) & uint32_t(rhs));  }
+
+constexpr tinybuf_base::open_mode operator|(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs) noexcept
+  { return tinybuf_base::open_mode(uint32_t(lhs) | uint32_t(rhs));  }
+
+constexpr tinybuf_base::open_mode operator^(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs) noexcept
+  { return tinybuf_base::open_mode(uint32_t(lhs) ^ uint32_t(rhs));  }
+
+template<typename charT, typename traitsT> class basic_tinybuf : public tinybuf_base
   {
   public:
     using char_type       = charT;
@@ -86,8 +78,10 @@ template<typename charT, typename traitsT>
   protected:
     basic_tinybuf() noexcept
       = default;
+
     basic_tinybuf(const basic_tinybuf&) noexcept
       = default;
+
     basic_tinybuf& operator=(const basic_tinybuf&) noexcept
       = default;
 
@@ -96,13 +90,10 @@ template<typename charT, typename traitsT>
 
   private:
     int_type do_call_underflow(bool peek)
-      {
-        return this->do_underflow(this->m_gcur, this->m_gend, peek);
-      }
+      { return this->do_underflow(this->m_gcur, this->m_gend, peek);  }
+
     basic_tinybuf& do_call_overflow(const char_type* sadd, size_type nadd)
-      {
-        return this->do_overflow(this->m_pcur, this->m_pend, sadd, nadd);
-      }
+      { return this->do_overflow(this->m_pcur, this->m_pend, sadd, nadd);  }
 
   protected:
     // * Estimates how many characters are available for non-blocking reads.
@@ -110,25 +101,21 @@ template<typename charT, typename traitsT>
     //   Returns `-1` if no character is available.
     // The default implementation indicates an unknown number.
     virtual off_type do_fortell() const
-      {
-        return 0;
-      }
+      { return 0;  }
+
     // * Synchronizes the get and put areas with the external device.
     // * Throws an exception on failure.
     // The default implementation does nothing.
     virtual basic_tinybuf& do_flush(const char_type*& /*gcur*/, const char_type*& /*gend*/,
                                     char_type*& /*pcur*/, char_type*& /*pend*/)
-      {
-        return *this;
-      }
+      { return *this;  }
+
     // * Sets the stream position.
     // * Returns its absolute value.
     // * Throws an exception on failure.
     // The default implementation fails.
     virtual off_type do_seek(off_type /*off*/, seek_dir /*dir*/)
-      {
-        noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not seekable");
-      }
+      { noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not seekable");  }
 
     // * Reads data from the external device into the get area and discards it unless `peek` is set.
     // * Returns the first character that has been read, or `traits::eof()` if there are no more
@@ -137,19 +124,15 @@ template<typename charT, typename traitsT>
     // This function may reallocate the get area as needed.
     // The default implementation fails.
     virtual int_type do_underflow(const char_type*& /*gcur*/, const char_type*& /*gend*/, bool /*peek*/)
-      {
-        noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not readable");
-      }
+      { noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not readable");  }
+
     // * Writes the contents of the put area, followed by the sequence denoted by `sadd`
     //   unless `nadd` is zero, to the external device.
     // * Throws an exception on failure.
     // This function may reallocate the put area as needed.
     // The default implementation fails.
-    virtual basic_tinybuf& do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/,
-                                       const char_type* /*sadd*/, size_type /*nadd*/)
-      {
-        noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not writable");
-      }
+    virtual basic_tinybuf& do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/, const char_type* /*sadd*/, size_type /*nadd*/)
+      { noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not writable");  }
 
     // * Calls `do_flush()` only when either the get or put area is active.
     // This function may be useful when handling interleaving reads and writes.
@@ -162,6 +145,7 @@ template<typename charT, typename traitsT>
           // Synchronize the get and put areas.
           return this->do_flush(this->m_gcur, this->m_gend, this->m_pcur, this->m_pend);
       }
+
     // * Destroys the get and put areas.
     // This function may be useful when clearing this buffer.
     basic_tinybuf& do_purge_areas() noexcept
@@ -185,11 +169,13 @@ template<typename charT, typename traitsT>
           // Return the number of characters after the get area.
           return this->do_fortell();
       }
+
     basic_tinybuf& flush()
       {
         // Synchronize the get and put areas.
         return this->do_flush(this->m_gcur, this->m_gend, this->m_pcur, this->m_pend);
       }
+
     off_type seek(off_type off, seek_dir dir)
       {
         // Reposition the stream, which might invalidate the get and put areas.
@@ -205,6 +191,7 @@ template<typename charT, typename traitsT>
           // Try populating the get area.
           return this->do_call_underflow(true);
       }
+
     int_type getc()
       {
         if(ROCKET_EXPECT(this->m_gcur != this->m_gend))
@@ -214,6 +201,7 @@ template<typename charT, typename traitsT>
           // Try populating the get area and discard the first character.
           return this->do_call_underflow(false);
       }
+
     basic_tinybuf& putc(char_type c)
       {
         if(ROCKET_EXPECT(this->m_pcur != this->m_pend))
@@ -245,6 +233,7 @@ template<typename charT, typename traitsT>
         this->m_gcur += k;
         return k;
       }
+
     basic_tinybuf& putn(const char_type* s, size_type n)
       {
         if(n == 0) {
@@ -262,6 +251,7 @@ template<typename charT, typename traitsT>
         this->m_pcur += k;
         return *this;
       }
+
     basic_tinybuf& puts(const char_type* s)
       {
         static constexpr char_type s_null[] = { '(', 'n', 'u', 'l', 'l', ')', 0 };
@@ -274,10 +264,10 @@ template<typename charT, typename traitsT>
 
     basic_tinybuf& swap(basic_tinybuf& other) noexcept
       {
-        xswap(this->m_gcur, other.m_gcur);
-        xswap(this->m_gend, other.m_gend);
-        xswap(this->m_pcur, other.m_pcur);
-        xswap(this->m_pend, other.m_pend);
+        noadl::xswap(this->m_gcur, other.m_gcur);
+        noadl::xswap(this->m_gend, other.m_gend);
+        noadl::xswap(this->m_pcur, other.m_pcur);
+        noadl::xswap(this->m_pend, other.m_pend);
         return *this;
       }
   };

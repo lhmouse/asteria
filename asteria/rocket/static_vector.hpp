@@ -51,76 +51,57 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
   public:
     // 26.3.11.2, construct/copy/destroy
     explicit static_vector(const allocator_type& alloc) noexcept
-      :
-        m_sth(alloc)
-      {
-      }
+      : m_sth(alloc)
+      { }
+
     static_vector(const static_vector& other) noexcept(is_nothrow_copy_constructible<value_type>::value)
-      :
-        m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
-      {
-        this->assign(other);
-      }
+      : m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
+      { this->assign(other);  }
+
     static_vector(const static_vector& other, const allocator_type& alloc) noexcept(is_nothrow_copy_constructible<value_type>::value)
-      :
-        m_sth(alloc)
-      {
-        this->assign(other);
-      }
+      : m_sth(alloc)
+      { this->assign(other);  }
+
     static_vector(static_vector&& other) noexcept(is_nothrow_move_constructible<value_type>::value)
-      :
-        m_sth(::std::move(other.m_sth.as_allocator()))
-      {
-        this->assign(::std::move(other));
-      }
+      : m_sth(::std::move(other.m_sth.as_allocator()))
+      { this->assign(::std::move(other));  }
+
     static_vector(static_vector&& other, const allocator_type& alloc) noexcept(is_nothrow_move_constructible<value_type>::value)
-      :
-        m_sth(alloc)
-      {
-        this->assign(::std::move(other));
-      }
+      : m_sth(alloc)
+      { this->assign(::std::move(other));  }
+
     static_vector(nullopt_t = nullopt_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
-      :
-        static_vector(allocator_type())
-      {
-      }
+      : static_vector(allocator_type())
+      { }
+
     explicit static_vector(size_type n, const allocator_type& alloc = allocator_type())
-      :
-        static_vector(alloc)
-      {
-        this->assign(n);
-      }
+      : static_vector(alloc)
+      { this->assign(n);  }
+
     static_vector(size_type n, const value_type& value, const allocator_type& alloc = allocator_type())
-      :
-        static_vector(alloc)
-      {
-        this->assign(n, value);
-      }
+      : static_vector(alloc)
+      { this->assign(n, value);  }
+
     template<typename firstT, typename... restT, ROCKET_DISABLE_IF(is_same<typename decay<firstT>::type, allocator_type>::value)>
-        static_vector(size_type n, const firstT& first, const restT&... rest)
-      :
-        static_vector()
-      {
-        this->assign(n, first, rest...);
-      }
+                                   static_vector(size_type n, const firstT& first, const restT&... rest)
+      : static_vector()
+      { this->assign(n, first, rest...);  }
+
     template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
-        static_vector(inputT first, inputT last, const allocator_type& alloc = allocator_type())
-      :
-        static_vector(alloc)
-      {
-        this->assign(::std::move(first), ::std::move(last));
-      }
+                                   static_vector(inputT first, inputT last, const allocator_type& alloc = allocator_type())
+      : static_vector(alloc)
+      { this->assign(::std::move(first), ::std::move(last));  }
+
     static_vector(initializer_list<value_type> init, const allocator_type& alloc = allocator_type())
-      :
-        static_vector(alloc)
-      {
-        this->assign(init);
-      }
+      : static_vector(alloc)
+      { this->assign(init);  }
+
     static_vector& operator=(nullopt_t) noexcept
       {
         this->clear();
         return *this;
       }
+
     static_vector& operator=(const static_vector& other) noexcept(conjunction<is_nothrow_copy_assignable<value_type>,
                                                                               is_nothrow_copy_constructible<value_type>>::value)
       {
@@ -128,6 +109,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         this->assign(other);
         return *this;
       }
+
     static_vector& operator=(static_vector&& other) noexcept(conjunction<is_nothrow_move_assignable<value_type>,
                                                                          is_nothrow_move_constructible<value_type>>::value)
       {
@@ -135,6 +117,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         this->assign(::std::move(other));
         return *this;
       }
+
     static_vector& operator=(initializer_list<value_type> init)
       {
         this->assign(init);
@@ -162,9 +145,8 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
     ROCKET_PURE_FUNCTION size_type do_clamp_subvec(size_type tpos, size_type tn) const
       {
         auto tcnt = this->size();
-        if(tpos > tcnt) {
+        if(tpos > tcnt)
           this->do_throw_subscript_out_of_range(tpos);
-        }
         return noadl::min(tcnt - tpos, tn);
       }
 
@@ -178,6 +160,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         noadl::rotate(ptr, tpos, cnt_old, cnt_old + cnt_add);
         return ptr + tpos;
       }
+
     value_type* do_erase_no_bound_check(size_type tpos, size_type tn)
       {
         auto cnt_old = this->size();
@@ -192,114 +175,90 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
   public:
     // iterators
     const_iterator begin() const noexcept
-      {
-        return const_iterator(this->m_sth, this->data());
-      }
+      { return const_iterator(this->m_sth, this->data());  }
+
     const_iterator end() const noexcept
-      {
-        return const_iterator(this->m_sth, this->data() + this->size());
-      }
+      { return const_iterator(this->m_sth, this->data() + this->size());  }
+
     const_reverse_iterator rbegin() const noexcept
-      {
-        return const_reverse_iterator(this->end());
-      }
+      { return const_reverse_iterator(this->end());  }
+
     const_reverse_iterator rend() const noexcept
-      {
-        return const_reverse_iterator(this->begin());
-      }
+      { return const_reverse_iterator(this->begin());  }
 
     const_iterator cbegin() const noexcept
-      {
-        return this->begin();
-      }
+      { return this->begin();  }
+
     const_iterator cend() const noexcept
-      {
-        return this->end();
-      }
+      { return this->end();  }
+
     const_reverse_iterator crbegin() const noexcept
-      {
-        return this->rbegin();
-      }
+      { return this->rbegin();  }
+
     const_reverse_iterator crend() const noexcept
-      {
-        return this->rend();
-      }
+      { return this->rend();  }
 
     // N.B. This is a non-standard extension.
     iterator mut_begin()
-      {
-        return iterator(this->m_sth, this->mut_data());
-      }
+      { return iterator(this->m_sth, this->mut_data());  }
+
     // N.B. This is a non-standard extension.
     iterator mut_end()
-      {
-        return iterator(this->m_sth, this->mut_data() + this->size());
-      }
+      { return iterator(this->m_sth, this->mut_data() + this->size());  }
+
     // N.B. This is a non-standard extension.
     reverse_iterator mut_rbegin()
-      {
-        return reverse_iterator(this->mut_end());
-      }
+      { return reverse_iterator(this->mut_end());  }
+
     // N.B. This is a non-standard extension.
     reverse_iterator mut_rend()
-      {
-        return reverse_iterator(this->mut_begin());
-      }
+      { return reverse_iterator(this->mut_begin());  }
 
     // 26.3.11.3, capacity
     constexpr bool empty() const noexcept
-      {
-        return this->m_sth.empty();
-      }
+      { return this->m_sth.empty();  }
+
     constexpr size_type size() const noexcept
-      {
-        return this->m_sth.size();
-      }
+      { return this->m_sth.size();  }
+
     // N.B. This is a non-standard extension.
     constexpr difference_type ssize() const noexcept
-      {
-        return static_cast<difference_type>(this->size());
-      }
+      { return static_cast<difference_type>(this->size());  }
+
     constexpr size_type max_size() const noexcept
-      {
-        return this->m_sth.max_size();
-      }
+      { return this->m_sth.max_size();  }
+
     // N.B. The return type and the parameter pack are non-standard extensions.
     template<typename... paramsT> static_vector& resize(size_type n, const paramsT&... params)
       {
         auto cnt_old = this->size();
-        if(cnt_old < n) {
+        if(cnt_old < n)
           this->append(n - cnt_old, params...);
-        }
-        else if(cnt_old > n) {
+        else if(cnt_old > n)
           this->pop_back(cnt_old - n);
-        }
         ROCKET_ASSERT(this->size() == n);
         return *this;
       }
+
     static constexpr size_type capacity() noexcept
-      {
-        return capacityT;
-      }
+      { return capacityT;  }
+
     // N.B. The return type is a non-standard extension.
     static_vector& reserve(size_type res_arg)
       {
         this->m_sth.check_size_add(0, res_arg);
-        // There is nothing to do.
         return *this;
       }
+
     // N.B. The return type is a non-standard extension.
     static_vector& shrink_to_fit() noexcept
-      {
-        // There is nothing to do.
-        return *this;
-      }
+      { return *this;  }
+
     // N.B. The return type is a non-standard extension.
     static_vector& clear() noexcept
       {
-        if(this->empty()) {
+        if(this->empty())
           return *this;
-        }
         this->m_sth.pop_back_n_unchecked(this->m_sth.size());
         return *this;
       }
@@ -308,36 +267,38 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
     const_reference at(size_type pos) const
       {
         auto cnt = this->size();
-        if(pos >= cnt) {
+        if(pos >= cnt)
           this->do_throw_subscript_out_of_range(pos);
-        }
         return this->data()[pos];
       }
+
     const_reference operator[](size_type pos) const noexcept
       {
         auto cnt = this->size();
         ROCKET_ASSERT(pos < cnt);
         return this->data()[pos];
       }
+
     const_reference front() const noexcept
       {
         auto cnt = this->size();
         ROCKET_ASSERT(cnt > 0);
         return this->data()[0];
       }
+
     const_reference back() const noexcept
       {
         auto cnt = this->size();
         ROCKET_ASSERT(cnt > 0);
         return this->data()[cnt - 1];
       }
+
     // N.B. This is a non-standard extension.
     const value_type* get_ptr(size_type pos) const noexcept
       {
         auto cnt = this->size();
-        if(pos >= cnt) {
+        if(pos >= cnt)
           return nullptr;
-        }
         return this->data() + pos;
       }
 
@@ -346,17 +307,18 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
     reference mut(size_type pos)
       {
         auto cnt = this->size();
-        if(pos >= cnt) {
+        if(pos >= cnt)
           this->do_throw_subscript_out_of_range(pos);
-        }
         return this->mut_data()[pos];
       }
+
     reference operator[](size_type pos) noexcept
       {
         auto cnt = this->size();
         ROCKET_ASSERT(pos < cnt);
         return this->mut_data()[pos];
       }
+
     // N.B. This is a non-standard extension.
     reference mut_front()
       {
@@ -364,6 +326,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         ROCKET_ASSERT(cnt > 0);
         return this->mut_data()[0];
       }
+
     // N.B. This is a non-standard extension.
     reference mut_back()
       {
@@ -371,37 +334,39 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         ROCKET_ASSERT(cnt > 0);
         return this->mut_data()[cnt - 1];
       }
+
     // N.B. This is a non-standard extension.
     value_type* mut_ptr(size_type pos) noexcept
       {
         auto cnt = this->size();
-        if(pos >= cnt) {
+        if(pos >= cnt)
           return nullptr;
-        }
         return this->mut_data() + pos;
       }
 
     // N.B. This is a non-standard extension.
     template<typename... paramsT> static_vector& append(size_type n, const paramsT&... params)
       {
-        if(n == 0) {
+        if(n == 0)
           return *this;
-        }
+
         this->do_reserve_more(n);
         noadl::ranged_do_while(size_type(0), n, [&](size_type) { this->m_sth.emplace_back_unchecked(params...);  });
         return *this;
       }
+
     // N.B. This is a non-standard extension.
     static_vector& append(initializer_list<value_type> init)
       {
         return this->append(init.begin(), init.end());
       }
+
     // N.B. This is a non-standard extension.
     template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)> static_vector& append(inputT first, inputT last)
       {
-        if(first == last) {
+        if(first == last)
           return *this;
-        }
+
         auto dist = noadl::estimate_distance(first, last);
         if(dist == 0) {
           noadl::ranged_do_while(::std::move(first), ::std::move(last),
@@ -413,6 +378,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
                                [&](const inputT& it) { this->m_sth.emplace_back_unchecked(*it);  });
         return *this;
       }
+
     // 26.3.11.5, modifiers
     template<typename... paramsT> reference emplace_back(paramsT&&... params)
       {
@@ -420,6 +386,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         auto ptr = this->m_sth.emplace_back_unchecked(::std::forward<paramsT>(params)...);
         return *ptr;
       }
+
     // N.B. The return type is a non-standard extension.
     reference push_back(const value_type& value)
       {
@@ -434,6 +401,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         auto ptr = this->m_sth.emplace_back_unchecked(value);
         return *ptr;
       }
+
     // N.B. The return type is a non-standard extension.
     reference push_back(value_type&& value)
       {
@@ -448,42 +416,49 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         this->do_insert_no_bound_check(tpos + this->do_clamp_subvec(tpos, 0), details_static_vector::push_back, value);
         return *this;
       }
+
     // N.B. This is a non-standard extension.
     static_vector& insert(size_type tpos, value_type&& value)
       {
         this->do_insert_no_bound_check(tpos + this->do_clamp_subvec(tpos, 0), details_static_vector::push_back, ::std::move(value));
         return *this;
       }
+
     // N.B. This is a non-standard extension.
     template<typename... paramsT> static_vector& insert(size_type tpos, size_type n, const paramsT&... params)
       {
         this->do_insert_no_bound_check(tpos + this->do_clamp_subvec(tpos, 0), details_static_vector::append, n, params...);
         return *this;
       }
+
     // N.B. This is a non-standard extension.
     static_vector& insert(size_type tpos, initializer_list<value_type> init)
       {
         this->do_insert_no_bound_check(tpos + this->do_clamp_subvec(tpos, 0), details_static_vector::append, init);
         return *this;
       }
+
     // N.B. This is a non-standard extension.
     template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)> static_vector& insert(size_type tpos, inputT first, inputT last)
       {
         this->do_insert_no_bound_check(tpos + this->do_clamp_subvec(tpos, 0), details_static_vector::append, ::std::move(first), ::std::move(last));
         return *this;
       }
+
     iterator insert(const_iterator tins, const value_type& value)
       {
         auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
         auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::push_back, value);
         return iterator(this->m_sth, ptr);
       }
+
     iterator insert(const_iterator tins, value_type&& value)
       {
         auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
         auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::push_back, ::std::move(value));
         return iterator(this->m_sth, ptr);
       }
+
     // N.B. The parameter pack is a non-standard extension.
     template<typename... paramsT> iterator insert(const_iterator tins, size_type n, const paramsT&... params)
       {
@@ -491,12 +466,14 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::append, n, params...);
         return iterator(this->m_sth, ptr);
       }
+
     iterator insert(const_iterator tins, initializer_list<value_type> init)
       {
         auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
         auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::append, init);
         return iterator(this->m_sth, ptr);
       }
+
     template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)> iterator insert(const_iterator tins, inputT first, inputT last)
       {
         auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
@@ -510,6 +487,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         this->do_erase_no_bound_check(tpos, this->do_clamp_subvec(tpos, tn));
         return *this;
       }
+
     iterator erase(const_iterator tfirst, const_iterator tlast)
       {
         auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->data());
@@ -517,12 +495,14 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         auto ptr = this->do_erase_no_bound_check(tpos, tn);
         return iterator(this->m_sth, ptr);
       }
+
     iterator erase(const_iterator tfirst)
       {
         auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->data());
         auto ptr = this->do_erase_no_bound_check(tpos, 1);
         return iterator(this->m_sth, ptr);
       }
+
     // N.B. The return type and parameter are non-standard extensions.
     static_vector& pop_back(size_type n = 1)
       {
@@ -534,10 +514,8 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
 
     // N.B. This is a non-standard extension.
     static_vector subvec(size_type tpos, size_type tn = size_type(-1)) const
-      {
-        return static_vector(this->data() + tpos, this->data() + tpos + this->do_clamp_subvec(tpos, tn),
-                             this->m_sth.as_allocator());
-      }
+      { return static_vector(this->data() + tpos, this->data() + tpos + this->do_clamp_subvec(tpos, tn),
+                             this->m_sth.as_allocator());  }
 
     // N.B. The return type is a non-standard extension.
     static_vector& assign(const static_vector& other) noexcept(conjunction<is_nothrow_copy_assignable<value_type>,
@@ -559,6 +537,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         }
         return *this;
       }
+
     // N.B. The return type is a non-standard extension.
     static_vector& assign(static_vector&& other) noexcept(conjunction<is_nothrow_move_assignable<value_type>,
                                                                       is_nothrow_move_constructible<value_type>>::value)
@@ -579,6 +558,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         }
         return *this;
       }
+
     // N.B. The parameter pack is a non-standard extension.
     // N.B. The return type is a non-standard extension.
     template<typename... paramsT> static_vector& assign(size_type n, const paramsT&... params)
@@ -587,6 +567,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         this->append(n, params...);
         return *this;
       }
+
     // N.B. The return type is a non-standard extension.
     static_vector& assign(initializer_list<value_type> init)
       {
@@ -594,6 +575,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         this->append(init);
         return *this;
       }
+
     // N.B. The return type is a non-standard extension.
     template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)> static_vector& assign(inputT first, inputT last)
       {
@@ -609,7 +591,7 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
         // Swap the initial sequence.
         auto ncomm = noadl::min(this->size(), other.size());
         for(size_type i = 0; i != ncomm; ++i) {
-          xswap(this->m_sth.mut_data()[i], other.m_sth.mut_data()[i]);
+          noadl::xswap(this->m_sth.mut_data()[i], other.m_sth.mut_data()[i]);
         }
         if(ncomm < other.size()) {
           // Move-construct remaining elements from `other` if is longer.
@@ -630,34 +612,24 @@ template<typename valueT, size_t capacityT, typename allocT> class static_vector
 
     // 26.3.11.4, data access
     const value_type* data() const noexcept
-      {
-        return this->m_sth.data();
-      }
+      { return this->m_sth.data();  }
 
     // Get a pointer to mutable data.
     // N.B. This is a non-standard extension.
     value_type* mut_data()
-      {
-        return this->m_sth.mut_data();
-      }
+      { return this->m_sth.mut_data();  }
 
     // N.B. The return type differs from `std::vector`.
     const allocator_type& get_allocator() const noexcept
-      {
-        return this->m_sth.as_allocator();
-      }
+      { return this->m_sth.as_allocator();  }
+
     allocator_type& get_allocator() noexcept
-      {
-        return this->m_sth.as_allocator();
-      }
+      { return this->m_sth.as_allocator();  }
   };
 
-template<typename valueT, size_t capacityT, typename allocT>
-    inline void swap(static_vector<valueT, capacityT, allocT>& lhs,
-                     static_vector<valueT, capacityT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
-  {
-    lhs.swap(rhs);
-  }
+template<typename valueT, size_t capacityT, typename allocT> inline void swap(static_vector<valueT, capacityT, allocT>& lhs,
+                                                        static_vector<valueT, capacityT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+  { lhs.swap(rhs);  }
 
 }  // namespace rocket
 

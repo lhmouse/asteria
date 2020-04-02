@@ -40,50 +40,37 @@ template<typename charT, typename traitsT, typename allocT>
 
   public:
     explicit constexpr basic_linear_buffer(const allocator_type& alloc) noexcept
-      :
-        m_stor(alloc)
-      {
-      }
+      : m_stor(alloc)
+      { }
+
     basic_linear_buffer(const basic_linear_buffer& other)
-      :
-        m_stor(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_stor.as_allocator()))
-      {
-        // Copy the contents from `other`.
-        this->putn(other.data(), other.size());
-      }
+      : m_stor(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_stor.as_allocator()))
+      { this->putn(other.data(), other.size());  }
+
     basic_linear_buffer(const basic_linear_buffer& other, const allocator_type& alloc)
-      :
-        m_stor(alloc)
-      {
-        // Copy the contents from `other`.
-        this->putn(other.data(), other.size());
-      }
+      : m_stor(alloc)
+      { this->putn(other.data(), other.size());  }
+
     basic_linear_buffer(basic_linear_buffer&& other) noexcept
-      :
-        m_stor(::std::move(other.m_stor.as_allocator()))
-      {
-        // Steal the buffer from `other`.
-        this->do_exchange_with(other);
-      }
+      : m_stor(::std::move(other.m_stor.as_allocator()))
+      { this->do_exchange_with(other);  }
+
     basic_linear_buffer(basic_linear_buffer&& other, const allocator_type& alloc)
-                    noexcept(is_std_allocator<allocator_type>::value /* TODO: is_always_equal */)
-      :
-        m_stor(alloc)
+                                 noexcept(is_std_allocator<allocator_type>::value /* TODO: is_always_equal */)
+      : m_stor(alloc)
       {
-        if(ROCKET_EXPECT(this->m_stor.as_allocator() == alloc)) {
+        if(ROCKET_EXPECT(this->m_stor.as_allocator() == alloc))
           // If the allocators compare equal, they can deallocate memory allocated by each other.
           this->do_exchange_with(other);
-        }
-        else {
+        else
           // Otherwise, we have to copy its contents instead.
           this->putn(other.data(), other.size());
-        }
       }
+
     constexpr basic_linear_buffer() noexcept(is_nothrow_constructible<allocator_type>::value)
-      :
-        basic_linear_buffer(allocator_type())
-      {
-      }
+      : basic_linear_buffer(allocator_type())
+      { }
+
     basic_linear_buffer& operator=(const basic_linear_buffer& other)
       {
         if(ROCKET_EXPECT(this->m_stor.as_allocator() == other.m_stor.as_allocator())) {
@@ -104,9 +91,10 @@ template<typename charT, typename traitsT, typename allocT>
         }
         return *this;
       }
+
     basic_linear_buffer& operator=(basic_linear_buffer&& other)
-                    noexcept(is_std_allocator<allocator_type>::value /* TODO: is_always_equal */ ||
-                             allocator_traits<allocator_type>::propagate_on_container_move_assignment::value)
+                                 noexcept(is_std_allocator<allocator_type>::value /* TODO: is_always_equal */ ||
+                                          allocator_traits<allocator_type>::propagate_on_container_move_assignment::value)
       {
         if(ROCKET_EXPECT(this->m_stor.as_allocator() == other.m_stor.as_allocator())) {
           // If the allocators compare equal, they can deallocate memory allocated by each other.
@@ -134,11 +122,12 @@ template<typename charT, typename traitsT, typename allocT>
         this->m_goff = 0;
         this->m_eoff = 0;
       }
+
     void do_exchange_with(basic_linear_buffer& other) noexcept
       {
         this->m_stor.exchange_with(other.m_stor);
-        xswap(this->m_goff, other.m_goff);
-        xswap(this->m_eoff, other.m_eoff);
+        noadl::xswap(this->m_goff, other.m_goff);
+        noadl::xswap(this->m_eoff, other.m_eoff);
       }
 
     void do_assign(const basic_linear_buffer& other)
@@ -150,34 +139,26 @@ template<typename charT, typename traitsT, typename allocT>
 
   public:
     constexpr const allocator_type& get_allocator() const noexcept
-      {
-        return this->m_stor.as_allocator();
-      }
+      { return this->m_stor.as_allocator();  }
+
     allocator_type& get_allocator() noexcept
-      {
-        return this->m_stor.as_allocator();
-      }
+      { return this->m_stor.as_allocator();  }
 
     bool empty() const noexcept
-      {
-        return this->m_goff == this->m_eoff;
-      }
+      { return this->m_goff == this->m_eoff;  }
+
     size_type size() const noexcept
-      {
-        return this->m_eoff - this->m_goff;
-      }
+      { return this->m_eoff - this->m_goff;  }
+
     difference_type ssize() const noexcept
-      {
-        return static_cast<difference_type>(this->m_eoff - this->m_goff);
-      }
+      { return static_cast<difference_type>(this->m_eoff - this->m_goff);  }
+
     size_type max_size() const noexcept
-      {
-        return this->m_stor.max_size();
-      }
+      { return this->m_stor.max_size();  }
+
     size_type capacity() const noexcept
-      {
-        return this->m_stor.capacity();
-      }
+      { return this->m_stor.capacity();  }
+
     basic_linear_buffer& clear() noexcept
       {
         this->m_goff = 0;
@@ -187,17 +168,14 @@ template<typename charT, typename traitsT, typename allocT>
 
     // read functions
     const value_type* begin() const noexcept
-      {
-        return this->m_stor.data() + this->m_goff;
-      }
+      { return this->m_stor.data() + this->m_goff;  }
+
     const value_type* end() const noexcept
-      {
-        return this->m_stor.data() + this->m_eoff;
-      }
+      { return this->m_stor.data() + this->m_eoff;  }
+
     const value_type* data() const noexcept
-      {
-        return this->m_stor.data() + this->m_goff;
-      }
+      { return this->m_stor.data() + this->m_goff;  }
+
     basic_linear_buffer& discard(size_type nbump) noexcept
       {
         ROCKET_ASSERT(nbump <= this->m_eoff - this->m_goff);
@@ -210,53 +188,50 @@ template<typename charT, typename traitsT, typename allocT>
 
     size_type peekn(value_type* s, size_type n) const noexcept
       {
-        auto nread = noadl::min(n, this->size());
-        if(nread == 0) {
-          return 0;
-        }
-        traits_type::copy(s, this->begin(), nread);
+        size_type nread = noadl::min(n, this->size());
+        if(nread != 0)
+          traits_type::copy(s, this->begin(), nread);
         return nread;
       }
+
     size_type getn(value_type* s, size_type n) noexcept
       {
-        auto nread = noadl::min(n, this->size());
-        if(nread == 0) {
-          return 0;
+        size_type nread = noadl::min(n, this->size());
+        if(nread != 0) {
+          traits_type::copy(s, this->begin(), nread);
+          this->discard(nread);
         }
-        traits_type::copy(s, this->begin(), nread);
-        this->discard(nread);
         return nread;
       }
+
     int_type peekc() const noexcept
       {
+        int_type ch = traits_type::eof();
         value_type s[1];
-        if(this->peekn(s, 1) == 0) {
-          return traits_type::eof();
-        }
-        return traits_type::to_int_type(s[0]);
+        if(this->peekn(s, 1) != 0)
+          ch = traits_type::to_int_type(s[0]);
+        return ch;
       }
+
     int_type getc() noexcept
       {
+        int_type ch = traits_type::eof();
         value_type s[1];
-        if(this->getn(s, 1) == 0) {
-          return traits_type::eof();
-        }
-        return traits_type::to_int_type(s[0]);
+        if(this->getn(s, 1) != 0)
+          ch = traits_type::to_int_type(s[0]);
+        return ch;
       }
 
     // write functions
     value_type* mut_begin() noexcept
-      {
-        return this->m_stor.mut_data() + this->m_goff;
-      }
+      { return this->m_stor.mut_data() + this->m_goff;  }
+
     value_type* mut_end() noexcept
-      {
-        return this->m_stor.mut_data() + this->m_eoff;
-      }
+      { return this->m_stor.mut_data() + this->m_eoff;  }
+
     value_type* mut_data() noexcept
-      {
-        return this->m_stor.mut_data() + this->m_goff;
-      }
+      { return this->m_stor.mut_data() + this->m_goff;  }
+
     size_type reserve(size_type nbump)
       {
         if(ROCKET_UNEXPECT(nbump > this->m_stor.capacity() - this->m_eoff)) {
@@ -271,6 +246,7 @@ template<typename charT, typename traitsT, typename allocT>
 #endif
         return this->m_stor.capacity() - this->m_eoff;
       }
+
     basic_linear_buffer& accept(size_type nbump) noexcept
       {
         ROCKET_ASSERT(nbump <= this->m_stor.capacity() - this->m_eoff);
@@ -285,6 +261,7 @@ template<typename charT, typename traitsT, typename allocT>
         this->accept(1);
         return *this;
       }
+
     basic_linear_buffer& putn(size_type n, value_type c)
       {
         this->reserve(n);
@@ -292,6 +269,7 @@ template<typename charT, typename traitsT, typename allocT>
         this->accept(n);
         return *this;
       }
+
     basic_linear_buffer& putn(const value_type* s, size_type n)
       {
         this->reserve(n);
@@ -299,14 +277,12 @@ template<typename charT, typename traitsT, typename allocT>
         this->accept(n);
         return *this;
       }
-    basic_linear_buffer& puts(const value_type* s)
-      {
-        return this->putn(s, traits_type::length(s));
-      }
 
-    basic_linear_buffer& swap(basic_linear_buffer& other)
-                    noexcept(is_std_allocator<allocator_type>::value /* TODO: is_always_equal */ ||
-                             allocator_traits<allocator_type>::propagate_on_container_swap::value)
+    basic_linear_buffer& puts(const value_type* s)
+      { return this->putn(s, traits_type::length(s));  }
+
+    basic_linear_buffer& swap(basic_linear_buffer& other) noexcept(is_std_allocator<allocator_type>::value /* TODO: is_always_equal */ ||
+                                                                   allocator_traits<allocator_type>::propagate_on_container_swap::value)
       {
         ROCKET_ASSERT((this->m_stor.as_allocator() == other.m_stor.as_allocator()) ||
                       allocator_traits<allocator_type>::propagate_on_container_swap::value);
@@ -318,12 +294,9 @@ template<typename charT, typename traitsT, typename allocT>
       }
   };
 
-template<typename charT, typename traitsT, typename allocT>
-    inline void swap(basic_linear_buffer<charT, traitsT, allocT>& lhs,
-                     basic_linear_buffer<charT, traitsT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
-  {
-    lhs.swap(rhs);
-  }
+template<typename charT, typename traitsT, typename allocT> inline void swap(basic_linear_buffer<charT, traitsT, allocT>& lhs,
+                                                      basic_linear_buffer<charT, traitsT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+  { lhs.swap(rhs);  }
 
 extern template class basic_linear_buffer<char>;
 extern template class basic_linear_buffer<wchar_t>;

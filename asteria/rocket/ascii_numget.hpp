@@ -43,50 +43,38 @@ class ascii_numget
 
   public:
     ascii_numget() noexcept
-      {
-        this->clear();
-      }
+      { this->clear();  }
+
     template<typename valueT, ROCKET_ENABLE_IF(is_scalar<valueT>::value)>
                      ascii_numget(valueT& value, const char*& bptr, const char* eptr)
-      {
-        this->get(value, bptr, eptr);
-      }
+      { this->get(value, bptr, eptr);  }
 
   public:
     // accessors
     explicit operator bool () const noexcept
-      {
-        return this->m_succ;
-      }
+      { return this->m_succ;  }
+
     bool overflowed() const noexcept
-      {
-        return this->m_ovfl;
-      }
+      { return this->m_ovfl;  }
+
     bool underflowed() const noexcept
-      {
-        return this->m_udfl;
-      }
+      { return this->m_udfl;  }
+
     bool inexact() const noexcept
-      {
-        return this->m_inxc;
-      }
+      { return this->m_inxc;  }
 
     bool is_finite() const noexcept
-      {
-        return this->m_vcls == 0;
-      }
+      { return this->m_vcls == 0;  }
+
     bool is_infinitesimal() const noexcept
-      {
-        return this->m_vcls == 1;
-      }
+      { return this->m_vcls == 1;  }
+
     bool is_infinity() const noexcept
-      {
-        return this->m_vcls == 2;
-      }
+      { return this->m_vcls == 2;  }
+
     bool is_nan() const noexcept
-      {
-        return this->m_vcls == 3;
-      }
+      { return this->m_vcls == 3;  }
+
     ascii_numget& clear() noexcept
       {
         this->m_bits = 0;
@@ -116,119 +104,147 @@ class ascii_numget
     ascii_numget& cast_F(double& value, double lower, double upper, bool single = false) noexcept;
 
     // default parse functions
-    ascii_numget& get(bool& value, const char*& bptr, const char* eptr)
-      {
-        uint64_t temp = 0;
-        if(this->parse_B(bptr, eptr))
-          this->cast_U(temp, 0, 1);
-        value = temp & 1;
-        return *this;
-      }
-    ascii_numget& get(void*& value, const char*& bptr, const char* eptr)
-      {
-        uint64_t temp = 0;
-        if(this->parse_P(bptr, eptr))
-          this->cast_U(temp, 0, UINTPTR_MAX);
-        value = reinterpret_cast<void*>(static_cast<uintptr_t>(temp));
-        return *this;
-      }
-    ascii_numget& get(unsigned char& value, const char*& bptr, const char* eptr)
-      {
-        uint64_t temp = 0;
-        if(this->parse_U(bptr, eptr))
-          this->cast_U(temp, 0, UCHAR_MAX);
-        value = static_cast<unsigned char>(temp);
-        return *this;
-      }
-    ascii_numget& get(unsigned short& value, const char*& bptr, const char* eptr)
-      {
-        uint64_t temp = 0;
-        if(this->parse_U(bptr, eptr))
-          this->cast_U(temp, 0, USHRT_MAX);
-        value = static_cast<unsigned short>(temp);
-        return *this;
-      }
-    ascii_numget& get(unsigned& value, const char*& bptr, const char* eptr)
-      {
-        uint64_t temp = 0;
-        if(this->parse_U(bptr, eptr))
-          this->cast_U(temp, 0, UINT_MAX);
-        value = static_cast<unsigned>(temp);
-        return *this;
-      }
-    ascii_numget& get(unsigned long& value, const char*& bptr, const char* eptr)
-      {
-        uint64_t temp = 0;
-        if(this->parse_U(bptr, eptr))
-          this->cast_U(temp, 0, ULONG_MAX);
-        value = static_cast<unsigned long>(temp);
-        return *this;
-      }
-    ascii_numget& get(unsigned long long& value, const char*& bptr, const char* eptr)
-      {
-        uint64_t temp = 0;
-        if(this->parse_U(bptr, eptr))
-          this->cast_U(temp, 0, ULLONG_MAX);
-        value = temp;
-        return *this;
-      }
-    ascii_numget& get(signed char& value, const char*& bptr, const char* eptr)
-      {
-        int64_t temp = 0;
-        if(this->parse_I(bptr, eptr))
-          this->cast_I(temp, SCHAR_MIN, SCHAR_MAX);
-        value = static_cast<signed char>(temp);
-        return *this;
-      }
-    ascii_numget& get(signed short& value, const char*& bptr, const char* eptr)
-      {
-        int64_t temp = 0;
-        if(this->parse_I(bptr, eptr))
-          this->cast_I(temp, SHRT_MIN, SHRT_MAX);
-        value = static_cast<signed short>(temp);
-        return *this;
-      }
-    ascii_numget& get(signed& value, const char*& bptr, const char* eptr)
-      {
-        int64_t temp = 0;
-        if(this->parse_I(bptr, eptr))
-          this->cast_I(temp, INT_MIN, INT_MAX);
-        value = static_cast<signed int>(temp);
-        return *this;
-      }
-    ascii_numget& get(signed long& value, const char*& bptr, const char* eptr)
-      {
-        int64_t temp = 0;
-        if(this->parse_I(bptr, eptr))
-          this->cast_I(temp, LONG_MIN, LONG_MAX);
-        value = static_cast<signed long>(temp);
-        return *this;
-      }
-    ascii_numget& get(signed long long& value, const char*& bptr, const char* eptr)
-      {
-        int64_t temp = 0;
-        if(this->parse_I(bptr, eptr))
-          this->cast_I(temp, LLONG_MIN, LLONG_MAX);
-        value = temp;
-        return *this;
-      }
-    ascii_numget& get(float& value, const char*& bptr, const char* eptr)
-      {
-        double temp = 0;
-        if(this->parse_F(bptr, eptr))
-          this->cast_F(temp, -HUGE_VAL, HUGE_VAL, true);
-        value = static_cast<float>(temp);
-        return *this;
-      }
-    ascii_numget& get(double& value, const char*& bptr, const char* eptr)
-      {
-        double temp = 0;
-        if(this->parse_F(bptr, eptr))
-          this->cast_F(temp, -HUGE_VAL, HUGE_VAL);
-        value = temp;
-        return *this;
-      }
+    ascii_numget& get(bool& value, const char*& bptr, const char* eptr);
+    ascii_numget& get(void*& value, const char*& bptr, const char* eptr);
+    ascii_numget& get(unsigned char& value, const char*& bptr, const char* eptr);
+    ascii_numget& get(unsigned short& value, const char*& bptr, const char* eptr);
+    ascii_numget& get(unsigned& value, const char*& bptr, const char* eptr);
+    ascii_numget& get(unsigned long& value, const char*& bptr, const char* eptr);
+    ascii_numget& get(unsigned long long& value, const char*& bptr, const char* eptr);
+    ascii_numget& get(signed char& value, const char*& bptr, const char* eptr);
+    ascii_numget& get(signed short& value, const char*& bptr, const char* eptr);
+    ascii_numget& get(signed& value, const char*& bptr, const char* eptr);
+    ascii_numget& get(signed long& value, const char*& bptr, const char* eptr);
+    ascii_numget& get(signed long long& value, const char*& bptr, const char* eptr);
+    ascii_numget& get(float& value, const char*& bptr, const char* eptr);
+    ascii_numget& get(double& value, const char*& bptr, const char* eptr);
   };
+
+inline ascii_numget& ascii_numget::get(bool& value, const char*& bptr, const char* eptr)
+  {
+    uint64_t temp = 0;
+    if(this->parse_B(bptr, eptr))
+      this->cast_U(temp, 0, 1);
+    value = temp & 1;
+    return *this;
+  }
+
+inline ascii_numget& ascii_numget::get(void*& value, const char*& bptr, const char* eptr)
+  {
+    uint64_t temp = 0;
+    if(this->parse_P(bptr, eptr))
+      this->cast_U(temp, 0, UINTPTR_MAX);
+    value = reinterpret_cast<void*>(static_cast<uintptr_t>(temp));
+    return *this;
+  }
+
+inline ascii_numget& ascii_numget::get(unsigned char& value, const char*& bptr, const char* eptr)
+  {
+    uint64_t temp = 0;
+    if(this->parse_U(bptr, eptr))
+      this->cast_U(temp, 0, UCHAR_MAX);
+    value = static_cast<unsigned char>(temp);
+    return *this;
+  }
+
+inline ascii_numget& ascii_numget::get(unsigned short& value, const char*& bptr, const char* eptr)
+  {
+    uint64_t temp = 0;
+    if(this->parse_U(bptr, eptr))
+      this->cast_U(temp, 0, USHRT_MAX);
+    value = static_cast<unsigned short>(temp);
+    return *this;
+  }
+
+inline ascii_numget& ascii_numget::get(unsigned& value, const char*& bptr, const char* eptr)
+  {
+    uint64_t temp = 0;
+    if(this->parse_U(bptr, eptr))
+      this->cast_U(temp, 0, UINT_MAX);
+    value = static_cast<unsigned>(temp);
+    return *this;
+  }
+
+inline ascii_numget& ascii_numget::get(unsigned long& value, const char*& bptr, const char* eptr)
+  {
+    uint64_t temp = 0;
+    if(this->parse_U(bptr, eptr))
+      this->cast_U(temp, 0, ULONG_MAX);
+    value = static_cast<unsigned long>(temp);
+    return *this;
+  }
+
+inline ascii_numget& ascii_numget::get(unsigned long long& value, const char*& bptr, const char* eptr)
+  {
+    uint64_t temp = 0;
+    if(this->parse_U(bptr, eptr))
+      this->cast_U(temp, 0, ULLONG_MAX);
+    value = temp;
+    return *this;
+  }
+
+inline ascii_numget& ascii_numget::get(signed char& value, const char*& bptr, const char* eptr)
+  {
+    int64_t temp = 0;
+    if(this->parse_I(bptr, eptr))
+      this->cast_I(temp, SCHAR_MIN, SCHAR_MAX);
+    value = static_cast<signed char>(temp);
+    return *this;
+  }
+
+inline ascii_numget& ascii_numget::get(signed short& value, const char*& bptr, const char* eptr)
+  {
+    int64_t temp = 0;
+    if(this->parse_I(bptr, eptr))
+      this->cast_I(temp, SHRT_MIN, SHRT_MAX);
+    value = static_cast<signed short>(temp);
+    return *this;
+  }
+
+inline ascii_numget& ascii_numget::get(signed& value, const char*& bptr, const char* eptr)
+  {
+    int64_t temp = 0;
+    if(this->parse_I(bptr, eptr))
+      this->cast_I(temp, INT_MIN, INT_MAX);
+    value = static_cast<signed int>(temp);
+    return *this;
+  }
+
+inline ascii_numget& ascii_numget::get(signed long& value, const char*& bptr, const char* eptr)
+  {
+    int64_t temp = 0;
+    if(this->parse_I(bptr, eptr))
+      this->cast_I(temp, LONG_MIN, LONG_MAX);
+    value = static_cast<signed long>(temp);
+    return *this;
+  }
+
+inline ascii_numget& ascii_numget::get(signed long long& value, const char*& bptr, const char* eptr)
+  {
+    int64_t temp = 0;
+    if(this->parse_I(bptr, eptr))
+      this->cast_I(temp, LLONG_MIN, LLONG_MAX);
+    value = temp;
+    return *this;
+  }
+
+inline ascii_numget& ascii_numget::get(float& value, const char*& bptr, const char* eptr)
+  {
+    double temp = 0;
+    if(this->parse_F(bptr, eptr))
+      this->cast_F(temp, -HUGE_VAL, HUGE_VAL, true);
+    value = static_cast<float>(temp);
+    return *this;
+  }
+
+inline ascii_numget& ascii_numget::get(double& value, const char*& bptr, const char* eptr)
+  {
+    double temp = 0;
+    if(this->parse_F(bptr, eptr))
+      this->cast_F(temp, -HUGE_VAL, HUGE_VAL);
+    value = temp;
+    return *this;
+  }
 
 }  // namespace rocket
 

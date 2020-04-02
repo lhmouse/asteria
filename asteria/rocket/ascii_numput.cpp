@@ -18,6 +18,7 @@ constexpr char do_pdigit_D(uint32_t dval) noexcept
   {
     return static_cast<char>('0' + dval);
   }
+
 constexpr char do_pdigit_X(uint32_t dval) noexcept
   {
     return static_cast<char>('0' + dval + ((9 - dval) >> 29));

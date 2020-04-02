@@ -23,37 +23,29 @@ class ascii_numput
 
   public:
     ascii_numput() noexcept
-      {
-        this->clear();
-      }
+      { this->clear();  }
+
     template<typename valueT, ROCKET_ENABLE_IF(is_scalar<valueT>::value)>
                             explicit ascii_numput(const valueT& value) noexcept
-      {
-        this->put(value);
-      }
+      { this->put(value);  }
 
   public:
     // accessors
     const char* begin() const noexcept
-      {
-        return this->m_bptr;
-      }
+      { return this->m_bptr;  }
+
     const char* end() const noexcept
-      {
-        return this->m_eptr;
-      }
+      { return this->m_eptr;  }
+
     bool empty() const noexcept
-      {
-        return this->m_bptr == this->m_eptr;
-      }
+      { return this->m_bptr == this->m_eptr;  }
+
     size_t size() const noexcept
-      {
-        return static_cast<size_t>(this->m_eptr - this->m_bptr);
-      }
+      { return static_cast<size_t>(this->m_eptr - this->m_bptr);  }
+
     const char* data() const noexcept
-      {
-        return this->m_bptr;
-      }
+      { return this->m_bptr;  }
+
     ascii_numput& clear() noexcept
       {
         this->m_bptr = this->m_stor;
@@ -93,77 +85,105 @@ class ascii_numput
     ascii_numput& put_DE(double value, bool single = false) noexcept;
 
     // default format functions
-    ascii_numput& put(bool value) noexcept
-      {
-        this->put_TB(value);
-        return *this;
-      }
-    ascii_numput& put(const void* value) noexcept
-      {
-        this->put_XP(value);
-        return *this;
-      }
-    ascii_numput& put(unsigned char value) noexcept
-      {
-        this->put_DU(value);
-        return *this;
-      }
-    ascii_numput& put(unsigned short value) noexcept
-      {
-        this->put_DU(value);
-        return *this;
-      }
-    ascii_numput& put(unsigned value) noexcept
-      {
-        this->put_DU(value);
-        return *this;
-      }
-    ascii_numput& put(unsigned long value) noexcept
-      {
-        this->put_DU(value);
-        return *this;
-      }
-    ascii_numput& put(unsigned long long value) noexcept
-      {
-        this->put_DU(value);
-        return *this;
-      }
-    ascii_numput& put(signed char value) noexcept
-      {
-        this->put_DI(value);
-        return *this;
-      }
-    ascii_numput& put(signed short value) noexcept
-      {
-        this->put_DI(value);
-        return *this;
-      }
-    ascii_numput& put(signed value) noexcept
-      {
-        this->put_DI(value);
-        return *this;
-      }
-    ascii_numput& put(signed long value) noexcept
-      {
-        this->put_DI(value);
-        return *this;
-      }
-    ascii_numput& put(signed long long value) noexcept
-      {
-        this->put_DI(value);
-        return *this;
-      }
-    ascii_numput& put(float value) noexcept
-      {
-        this->put_DF(static_cast<double>(value), true);
-        return *this;
-      }
-    ascii_numput& put(double value) noexcept
-      {
-        this->put_DF(value);
-        return *this;
-      }
+    ascii_numput& put(bool value) noexcept;
+    ascii_numput& put(const void* value) noexcept;
+    ascii_numput& put(unsigned char value) noexcept;
+    ascii_numput& put(unsigned short value) noexcept;
+    ascii_numput& put(unsigned value) noexcept;
+    ascii_numput& put(unsigned long value) noexcept;
+    ascii_numput& put(unsigned long long value) noexcept;
+    ascii_numput& put(signed char value) noexcept;
+    ascii_numput& put(signed short value) noexcept;
+    ascii_numput& put(signed value) noexcept;
+    ascii_numput& put(signed long value) noexcept;
+    ascii_numput& put(signed long long value) noexcept;
+    ascii_numput& put(float value) noexcept;
+    ascii_numput& put(double value) noexcept;
   };
+
+inline ascii_numput& ascii_numput::put(bool value) noexcept
+  {
+    this->put_TB(value);
+    return *this;
+  }
+
+inline ascii_numput& ascii_numput::put(const void* value) noexcept
+  {
+    this->put_XP(value);
+    return *this;
+  }
+
+inline ascii_numput& ascii_numput::put(unsigned char value) noexcept
+  {
+    this->put_DU(value);
+    return *this;
+  }
+
+inline ascii_numput& ascii_numput::put(unsigned short value) noexcept
+  {
+    this->put_DU(value);
+    return *this;
+  }
+
+inline ascii_numput& ascii_numput::put(unsigned value) noexcept
+  {
+    this->put_DU(value);
+    return *this;
+  }
+
+inline ascii_numput& ascii_numput::put(unsigned long value) noexcept
+  {
+    this->put_DU(value);
+    return *this;
+  }
+
+inline ascii_numput& ascii_numput::put(unsigned long long value) noexcept
+  {
+    this->put_DU(value);
+    return *this;
+  }
+
+inline ascii_numput& ascii_numput::put(signed char value) noexcept
+  {
+    this->put_DI(value);
+    return *this;
+  }
+
+inline ascii_numput& ascii_numput::put(signed short value) noexcept
+  {
+    this->put_DI(value);
+    return *this;
+  }
+
+inline ascii_numput& ascii_numput::put(signed value) noexcept
+  {
+    this->put_DI(value);
+    return *this;
+  }
+
+inline ascii_numput& ascii_numput::put(signed long value) noexcept
+  {
+    this->put_DI(value);
+    return *this;
+  }
+
+inline ascii_numput& ascii_numput::put(signed long long value) noexcept
+  {
+    this->put_DI(value);
+    return *this;
+  }
+
+inline ascii_numput& ascii_numput::put(float value) noexcept
+  {
+    this->put_DF(static_cast<double>(value), true);
+    return *this;
+  }
+
+inline ascii_numput& ascii_numput::put(double value) noexcept
+  {
+    this->put_DF(value);
+    return *this;
+  }
 
 }  // namespace rocket
 
