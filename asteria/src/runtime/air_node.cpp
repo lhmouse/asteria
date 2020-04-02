@@ -873,6 +873,21 @@ AIR_Status do_function_call_common(Reference& self, const Source_Location& sloc,
     return air_status_return_ref;
   }
 
+cow_vector<Reference> do_pop_positional_arguments(Executive_Context& ctx, size_t nargs)
+  {
+    cow_vector<Reference> args;
+    args.resize(nargs, Reference_root::S_void());
+    for(size_t i = args.size() - 1;  i != SIZE_MAX;  --i) {
+      // Get an argument. Ensure it is dereferenceable.
+      auto& arg = ctx.stack().open_top();
+      static_cast<void>(arg.read());
+      // Set the argument as is.
+      args.mut(i) = ::std::move(arg);
+      ctx.stack().pop();
+    }
+    return args;
+  }
+
 AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
   {
     // Unpack arguments.
@@ -888,16 +903,7 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
     if(qhooks)
       qhooks->on_single_step_trap(sloc, inside, ::std::addressof(ctx));
     // Pop arguments off the stack backwards.
-    cow_vector<Reference> args;
-    args.resize(nargs, Reference_root::S_void());
-    for(size_t i = args.size() - 1;  i != SIZE_MAX;  --i) {
-      // Get an argument. Ensure it is dereferenceable.
-      auto& arg = ctx.stack().open_top();
-      static_cast<void>(arg.read());
-      // Set the argument as is.
-      args.mut(i) = ::std::move(arg);
-      ctx.stack().pop();
-    }
+    auto args = do_pop_positional_arguments(ctx, nargs);
     // Copy the target, which shall be of type `function`.
     auto value = ctx.stack().get_top().read();
     if(!value.is_function()) {
