@@ -23,6 +23,7 @@ class Value
       , V_array     // 7,
       , V_object    // 8,
       )>;
+
     static_assert(::std::is_nothrow_copy_assignable<Storage>::value, "");
 
   private:
