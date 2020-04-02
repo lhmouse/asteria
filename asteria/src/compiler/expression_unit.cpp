@@ -187,6 +187,15 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         return code;
       }
 
+    case index_import_call: {
+        const auto& altr = this->m_stor.as<index_import_call>();
+
+        // Encode arguments.
+        AIR_Node::S_import_call xnode = { altr.sloc, altr.nargs, opts };
+        code.emplace_back(::std::move(xnode));
+        return code;
+      }
+
     default:
       ASTERIA_TERMINATE("invalid expression unit type (index `$1`)", this->index());
     }

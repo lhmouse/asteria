@@ -213,6 +213,13 @@ class AIR_Node
         cow_vector<AIR_Node> code_body;
       };
 
+    struct S_import_call
+      {
+        Source_Location sloc;
+        uint32_t nargs;
+        Compiler_Options opts;
+      };
+
     enum Index : uint8_t
       {
         index_clear_stack            =  0,
@@ -248,6 +255,7 @@ class AIR_Node
         index_single_step_trap       = 30,
         index_variadic_call          = 31,
         index_defer_expression       = 32,
+        index_import_call            = 33,
       };
 
     using Storage = variant<
@@ -285,6 +293,7 @@ class AIR_Node
       , S_single_step_trap       // 30,
       , S_variadic_call          // 31,
       , S_defer_expression       // 32,
+      , S_import_call            // 33,
       )>;
 
     static_assert(::std::is_nothrow_copy_assignable<Storage>::value, "");

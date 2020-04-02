@@ -1,0 +1,4 @@
+assert __varg(0) == __file;
+var x = __varg(1);
+var y = __varg(2);
+return x + y;

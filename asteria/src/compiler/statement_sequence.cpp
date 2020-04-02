@@ -1637,11 +1637,60 @@ bool do_accept_variadic_function_call(cow_vector<Expression_Unit>& units, Token_
     return true;
   }
 
+opt<bool> do_accept_function_argument_opt(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+  {
+    auto qref = do_accept_argument_opt(units, tstrm);
+    if(!qref) {
+      return nullopt;
+    }
+    Expression_Unit::S_argument_finish xunit = { *qref };
+    units.emplace_back(::std::move(xunit));
+    return *qref;
+  }
+
+bool do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+  {
+    // import-function-call ::=
+    //   "import" "(" argument-list ")"
+    auto sloc = do_tell_source_location(tstrm);
+    auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_import });
+    if(!qkwrd) {
+      return false;
+    }
+    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
+    if(!kpunct) {
+      do_throw_parser_error(tstrm, parser_status_open_parenthesis_expected);
+    }
+    uint32_t nargs = 0;
+    for(;;) {
+      auto qref = do_accept_function_argument_opt(units, tstrm);
+      if(!qref) {
+        do_throw_parser_error(tstrm, parser_status_argument_expected);
+      }
+      if(nargs >= INT32_MAX) {
+        do_throw_parser_error(tstrm, parser_status_too_many_elements);
+      }
+      nargs += 1;
+      // Look for the next argument.
+      kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
+      if(!kpunct) {
+        break;
+      }
+    }
+    kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
+    if(!kpunct) {
+      do_throw_parser_error(tstrm, parser_status_closed_parenthesis_expected);
+    }
+    Expression_Unit::S_import_call xunit = { ::std::move(sloc), nargs };
+    units.emplace_back(::std::move(xunit));
+    return true;
+  }
+
 bool do_accept_primary_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // primary-expression ::=
     //   identifier | global-identifier | literal | "this" | closure-function | unnamed-array | unnamed-object |
-    //   nested-expression | fused-multiply-add | variadic-function-call
+    //   nested-expression | fused-multiply-add | variadic-function-call | import-function-call
     if(do_accept_named_reference(units, tstrm)) {
       return true;
     }
@@ -1670,6 +1719,9 @@ bool do_accept_primary_expression(cow_vector<Expression_Unit>& units, Token_Stre
       return true;
     }
     if(do_accept_variadic_function_call(units, tstrm)) {
+      return true;
+    }
+    if(do_accept_import_function_call(units, tstrm)) {
       return true;
     }
     return false;
@@ -1713,17 +1765,6 @@ bool do_accept_postfix_operator(cow_vector<Expression_Unit>& units, Token_Stream
       return true;
     }
     return false;
-  }
-
-opt<bool> do_accept_function_argument_opt(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
-  {
-    auto qref = do_accept_argument_opt(units, tstrm);
-    if(!qref) {
-      return nullopt;
-    }
-    Expression_Unit::S_argument_finish xunit = { *qref };
-    units.emplace_back(::std::move(xunit));
-    return *qref;
   }
 
 bool do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
