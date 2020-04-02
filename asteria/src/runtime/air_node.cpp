@@ -14,6 +14,9 @@
 #include "variable_callback.hpp"
 #include "variable.hpp"
 #include "ptc_arguments.hpp"
+#include "loader_lock.hpp"
+#include "../compiler/token_stream.hpp"
+#include "../compiler/statement_sequence.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -302,6 +305,14 @@ struct Pv_sloc_msg
   {
     Source_Location sloc;
     cow_string msg;
+
+    using nonenumerable = ::std::true_type;
+  };
+
+struct Pv_sloc_opts
+  {
+    Source_Location sloc;
+    Compiler_Options opts;
 
     using nonenumerable = ::std::true_type;
   };
@@ -905,6 +916,7 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
 
     // Pop arguments off the stack backwards.
     auto args = do_pop_positional_arguments(ctx, nargs);
+
     // Copy the target, which shall be of type `function`.
     auto value = ctx.stack().get_top().read();
     if(!value.is_function())
@@ -2570,6 +2582,7 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
     // Generate a single-step trap.
     if(qhooks)
       qhooks->on_single_step_trap(sloc, inside, ::std::addressof(ctx));
+
     // Pop the argument generator.
     cow_vector<Reference> args;
     auto value = ctx.stack().get_top().read();
@@ -2638,6 +2651,82 @@ AIR_Status do_defer_expression(Executive_Context& ctx, ParamU /*pu*/, const void
     // Push this expression.
     ctx.defer_expression(sloc, pair.second);
     return air_status_next;
+  }
+
+AIR_Status do_import_call(Executive_Context& ctx, ParamU pu, const void* pv)
+  {
+    // Unpack arguments.
+    const auto& sloc = do_pcast<Pv_sloc_opts>(pv)->sloc;
+    const auto& opts = do_pcast<Pv_sloc_opts>(pv)->opts;
+    const auto& nargs = static_cast<size_t>(pu.y32);
+    const auto& inside = ctx.zvarg()->func();
+    const auto& qhooks = ctx.global().get_hooks_opt();
+
+    // Check for stack overflows.
+    const auto sentry = ctx.global().copy_recursion_sentry();
+    // Generate a single-step trap.
+    if(qhooks)
+      qhooks->on_single_step_trap(sloc, inside, ::std::addressof(ctx));
+
+    // Pop arguments off the stack backwards.
+    auto args = do_pop_positional_arguments(ctx, nargs);
+    if(args.empty()) {
+      ASTERIA_THROW("no path specified for `import`");
+    }
+    auto value = args[0].read();
+    if(!value.is_string()) {
+      ASTERIA_THROW("invalid path specified for `import` (value `$1` not a string)", value);
+    }
+    auto path = ::std::move(value.open_string());
+    if(path.empty()) {
+      ASTERIA_THROW("empty path specified for `import`");
+    }
+
+    // Rewrite the path if it is not absolute.
+    auto abspath = path;
+    if((abspath[0] != '/') && (sloc.c_file()[0] == '/')) {
+      abspath.assign(sloc.file());
+      abspath.erase(abspath.rfind('/') + 1);
+      abspath.append(path);
+    }
+    // Canonicalize it.
+    ::rocket::unique_ptr<char, void (&)(void*)> tpath(::realpath(abspath.safe_c_str(), nullptr), ::free);
+    if(!tpath) {
+      int err = errno;
+      char sbuf[256];
+      const char* msg = ::strerror_r(err, sbuf, sizeof(sbuf));
+      ASTERIA_THROW("import failure (path `$1` => '$2', errno was `$3`: $4)", path, abspath, err, msg);
+    }
+    abspath.assign(tpath);
+
+    // Rewrite the first argument.
+    // Update the first argument to `import` if it was passed by reference.
+    if(args[0].is_rvalue()) {
+      Reference_root::S_temporary xref = { abspath };
+      args.mut(0) = ::std::move(xref);
+    }
+    else
+      args[0].open() = abspath;
+
+    // Compile the script file.
+    Loader_Lock::Unique_Stream strm;
+    strm.reset(ctx.global().loader_lock(), abspath.safe_c_str());
+
+    Token_Stream tstrm;
+    tstrm.reload(strm, abspath, opts);
+
+    Statement_Sequence stmtq;
+    stmtq.reload(tstrm, opts);
+
+    cow_vector<phsh_string> params;
+    params.emplace_back(::rocket::sref("..."));
+
+    auto func = ::rocket::make_refcnt<Instantiated_Function>(params,
+                       ::rocket::make_refcnt<Variadic_Arguer>(abspath, 0, ::rocket::sref("<top level>")),
+                       do_generate_function(opts, params, nullptr, stmtq));
+    auto& self = ctx.stack().push(Reference_root::S_void());
+
+    return do_function_call_common(self, sloc, ctx, func, ptc_aware_none, ::std::move(args));
   }
 
 }  // namespace
@@ -2856,6 +2945,11 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
           return nullopt;
         }
         return ::std::move(pair.second);
+      }
+
+    case index_import_call: {
+        // There is nothing to bind.
+        return nullopt;
       }
 
     default:
@@ -3552,6 +3646,22 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_defer_expression>(queue);
       }
 
+    case index_import_call: {
+        const auto& altr = this->m_stor.as<index_import_call>();
+        // `pu.u8s[0]` is `nargs`.
+        // `pv` points to the source location and complete set of options.
+        AVMC_Appender<Pv_sloc_opts> avmcp;
+        if(ipass == 0) {
+          return avmcp.request(queue);
+        }
+        // Encode arguments.
+        avmcp.sloc = altr.sloc;
+        avmcp.pu.y32 = altr.nargs;
+        avmcp.opts = altr.opts;
+        // Push a new node.
+        return avmcp.output<do_import_call>(queue);
+      }
+
     default:
       ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
     }
@@ -3687,6 +3797,10 @@ Variable_Callback& AIR_Node::enumerate_variables(Variable_Callback& callback) co
     case index_defer_expression: {
         const auto& altr = this->m_stor.as<index_defer_expression>();
         ::rocket::for_each(altr.code_body, callback);
+        return callback;
+      }
+
+    case index_import_call: {
         return callback;
       }
 

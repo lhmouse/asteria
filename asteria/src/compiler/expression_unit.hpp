@@ -86,6 +86,12 @@ class Expression_Unit
         bool by_ref;
       };
 
+    struct S_import_call
+      {
+        Source_Location sloc;
+        uint32_t nargs;
+      };
+
     enum Index : uint8_t
       {
         index_literal           =  0,
@@ -101,6 +107,7 @@ class Expression_Unit
         index_global_reference  = 10,
         index_variadic_call     = 11,
         index_argument_finish   = 12,
+        index_import_call       = 13,
       };
 
     using Storage = variant<
@@ -118,6 +125,7 @@ class Expression_Unit
       , S_global_reference  // 10,
       , S_variadic_call     // 11,
       , S_argument_finish   // 12,
+      , S_import_call       // 13,
       )>;
 
     static_assert(::std::is_nothrow_copy_assignable<Storage>::value, "");
