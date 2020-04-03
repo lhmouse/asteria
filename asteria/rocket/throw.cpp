@@ -12,11 +12,13 @@ namespace rocket {
 // Define the main template.
 template<typename exceptT> void sprintf_and_throw(const char* fmt, ...)
   {
-    // Compose the error message in allocated storage.
     ::va_list ap;
-    va_start(ap, fmt);
     char* str;
-    int ret = ::vasprintf(&str, fmt, ap);
+    int ret;
+
+    // Compose the error message in allocated storage.
+    va_start(ap, fmt);
+    ret = ::vasprintf(&str, fmt, ap);
     va_end(ap);
     if(ret < 0)
       throw ::std::bad_alloc();
