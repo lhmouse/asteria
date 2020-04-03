@@ -25,9 +25,8 @@ void do_user_declare(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
     // Record this name.
     if(names_opt) {
       auto oldp = ::std::find(names_opt->begin(), names_opt->end(), name);
-      if(oldp != names_opt->end()) {
+      if(oldp != names_opt->end())
         names_opt->erase(oldp);
-      }
       names_opt->emplace_back(name);
     }
     // Just ensure the name exists.

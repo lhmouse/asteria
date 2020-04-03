@@ -179,11 +179,12 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         const auto& altr = this->m_stor.as<index_argument_finish>();
 
         // Apply glvalue-to-rvalue conversion if the argument is to be passed by value.
-        if(!altr.by_ref) {
-          // Encode arguments.
-          AIR_Node::S_glvalue_to_rvalue xnode = { };
-          code.emplace_back(::std::move(xnode));
-        }
+        if(altr.by_ref)
+          return code;
+
+        // Encode arguments.
+        AIR_Node::S_glvalue_to_rvalue xnode = { };
+        code.emplace_back(::std::move(xnode));
         return code;
       }
 
