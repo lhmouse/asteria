@@ -2,18 +2,18 @@
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
 #include "../precompiled.hpp"
-#include "module_loader_lock.hpp"
+#include "loader_lock.hpp"
 #include "../utilities.hpp"
 #include <sys/stat.h>
 #include <unistd.h>  // ::fstat()
 
 namespace Asteria {
 
-Module_Loader_Lock::~Module_Loader_Lock()
+Loader_Lock::~Loader_Lock()
   {
   }
 
-Module_Loader_Lock::element_type* Module_Loader_Lock::do_lock_stream(const char* path)
+Loader_Lock::element_type* Loader_Lock::do_lock_stream(const char* path)
   {
     // Open the file first.
     ::rocket::unique_posix_file file(::fopen(path, "r"), ::fclose);
@@ -34,7 +34,7 @@ Module_Loader_Lock::element_type* Module_Loader_Lock::do_lock_stream(const char*
     return &*(result.first);
   }
 
-void Module_Loader_Lock::do_unlock_stream(Module_Loader_Lock::element_type* qelem) noexcept
+void Loader_Lock::do_unlock_stream(Loader_Lock::element_type* qelem) noexcept
   {
     ROCKET_ASSERT(qelem);
     auto count = this->m_strms.erase(qelem->first);

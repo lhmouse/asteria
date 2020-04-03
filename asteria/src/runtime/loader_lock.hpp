@@ -1,15 +1,15 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_RUNTIME_MODULE_LOADER_LOCK_HPP_
-#define ASTERIA_RUNTIME_MODULE_LOADER_LOCK_HPP_
+#ifndef ASTERIA_RUNTIME_LOADER_LOCK_HPP_
+#define ASTERIA_RUNTIME_LOADER_LOCK_HPP_
 
 #include "../fwd.hpp"
 #include "../../rocket/tinybuf_file.hpp"
 
 namespace Asteria {
 
-class Module_Loader_Lock final : public Rcfwd<Module_Loader_Lock>
+class Loader_Lock final : public Rcfwd<Loader_Lock>
   {
   public:
     class Unique_Stream;  // RAII wrapper
@@ -19,15 +19,15 @@ class Module_Loader_Lock final : public Rcfwd<Module_Loader_Lock>
     using element_type = decltype(m_strms)::value_type;
 
   public:
-    Module_Loader_Lock() noexcept
+    Loader_Lock() noexcept
       = default;
 
-    ~Module_Loader_Lock() override;
+    ~Loader_Lock() override;
 
-    Module_Loader_Lock(const Module_Loader_Lock&)
+    Loader_Lock(const Loader_Lock&)
       = delete;
 
-    Module_Loader_Lock& operator=(const Module_Loader_Lock&)
+    Loader_Lock& operator=(const Loader_Lock&)
       = delete;
 
   private:
@@ -35,17 +35,17 @@ class Module_Loader_Lock final : public Rcfwd<Module_Loader_Lock>
     void do_unlock_stream(element_type* qelem) noexcept;
   };
 
-class Module_Loader_Lock::Unique_Stream
+class Loader_Lock::Unique_Stream
   {
   private:
-    rcptr<Module_Loader_Lock> m_lock;
+    rcptr<Loader_Lock> m_lock;
     element_type* m_elem = nullptr;
 
   public:
     constexpr Unique_Stream() noexcept
       = default;
 
-    Unique_Stream(const rcptr<Module_Loader_Lock>& lock, const char* path)
+    Unique_Stream(const rcptr<Loader_Lock>& lock, const char* path)
       { this->reset(lock, path);  }
 
     Unique_Stream(Unique_Stream&& other) noexcept
@@ -79,7 +79,7 @@ class Module_Loader_Lock::Unique_Stream
         return *this;
       }
 
-    Unique_Stream& reset(const rcptr<Module_Loader_Lock>& lock, const char* path)
+    Unique_Stream& reset(const rcptr<Loader_Lock>& lock, const char* path)
       {
         // Lock the stream. If an exception is thrown, there is no effect.
         ROCKET_ASSERT(lock);
@@ -103,6 +103,9 @@ class Module_Loader_Lock::Unique_Stream
         return *this;
       }
   };
+
+inline void swap(Loader_Lock::Unique_Stream& lhs, Loader_Lock::Unique_Stream& rhs) noexcept
+  { lhs.swap(rhs);  }
 
 }  // namespace Asteria
 
