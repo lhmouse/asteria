@@ -118,10 +118,10 @@ void Global_Context::initialize(API_Version version)
     this->m_prng = prng;
 
     // Initialize the module loader lock.
-    auto mlock = unerase_cast(this->m_mlock);
-    if(!mlock)
-      mlock = ::rocket::make_refcnt<Loader_Lock>();
-    this->m_mlock = mlock;
+    auto ldrlk = unerase_cast(this->m_ldrlk);
+    if(!ldrlk)
+      ldrlk = ::rocket::make_refcnt<Loader_Lock>();
+    this->m_ldrlk = ldrlk;
 
     // Initialize standard library modules.
 #ifdef ROCKET_DEBUG

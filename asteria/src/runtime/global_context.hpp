@@ -19,7 +19,7 @@ class Global_Context : public Abstract_Context
 
     rcfwdp<Generational_Collector> m_gcoll;
     rcfwdp<Random_Number_Generator> m_prng;
-    rcfwdp<Loader_Lock> m_mlock;
+    rcfwdp<Loader_Lock> m_ldrlk;
     rcfwdp<Variable> m_vstd;
 
   public:
@@ -65,7 +65,7 @@ class Global_Context : public Abstract_Context
       { return unerase_cast<Random_Number_Generator>(this->m_prng);  }
 
     ASTERIA_INCOMPLET(Loader_Lock) rcptr<Loader_Lock> loader_lock() const noexcept
-      { return unerase_cast<Loader_Lock>(this->m_mlock);  }
+      { return unerase_cast<Loader_Lock>(this->m_ldrlk);  }
 
     ASTERIA_INCOMPLET(Variable) rcptr<Variable> std_variable() const noexcept
       { return unerase_cast<Variable>(this->m_vstd);  }
