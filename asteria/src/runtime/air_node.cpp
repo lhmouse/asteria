@@ -902,15 +902,16 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
     // Generate a single-step trap.
     if(qhooks)
       qhooks->on_single_step_trap(sloc, inside, ::std::addressof(ctx));
+
     // Pop arguments off the stack backwards.
     auto args = do_pop_positional_arguments(ctx, nargs);
     // Copy the target, which shall be of type `function`.
     auto value = ctx.stack().get_top().read();
-    if(!value.is_function()) {
+    if(!value.is_function())
       ASTERIA_THROW("attempt to call a non-function (value `$1`)", value);
-    }
-    return do_function_call_common(ctx.stack().open_top().zoom_out(),
-                                   sloc, ctx, value.as_function(), ptc, ::std::move(args));
+    auto& self = ctx.stack().open_top().zoom_out();
+
+    return do_function_call_common(self, sloc, ctx, value.as_function(), ptc, ::std::move(args));
   }
 
 AIR_Status do_member_access(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
@@ -2618,11 +2619,11 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
     }
     // Copy the target, which shall be of type `function`.
     value = ctx.stack().get_top().read();
-    if(!value.is_function()) {
+    if(!value.is_function())
       ASTERIA_THROW("attempt to call a non-function (value `$1`)", value);
-    }
-    return do_function_call_common(ctx.stack().open_top().zoom_out(),
-                                   sloc, ctx, value.as_function(), ptc, ::std::move(args));
+    auto& self = ctx.stack().open_top().zoom_out();
+
+    return do_function_call_common(self, sloc, ctx, value.as_function(), ptc, ::std::move(args));
   }
 
 AIR_Status do_defer_expression(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
