@@ -47,6 +47,7 @@ class Scrambler
         for(size_t i = 0;  i < 8;  ++i)
           this->m_regs[i] += src[i];
       }
+
     void mix() noexcept
       {
         auto step = [&](size_t r, auto shift, int b)
@@ -55,6 +56,7 @@ class Scrambler
             this->m_regs[(r+3)%8] += this->m_regs[r];
             this->m_regs[(r+1)%8] += this->m_regs[(r+2)%8];
           };
+
         step(0, do_sll, 11);
         step(1, do_srl,  2);
         step(2, do_sll,  8);
@@ -64,6 +66,7 @@ class Scrambler
         step(6, do_sll,  8);
         step(7, do_srl,  9);
       }
+
     void output(uint32_t* out) const noexcept
       {
         for(size_t i = 0;  i < 8;  ++i)

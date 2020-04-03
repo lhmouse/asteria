@@ -83,11 +83,11 @@ bool utf8_encode(char*& pos, char32_t cp)
       // Code point is too large.
       return false;
     }
+
     // Encode bits into a byte.
     auto encode_one = [&](int sh, char32_t m)
-      {
-        *(pos++) = static_cast<char>((~m << 1) | ((cp >> sh) & m));
-      };
+      { *(pos++) = static_cast<char>((~m << 1) | ((cp >> sh) & m));  };
+
     // Encode the code point now. The result may be 2, 3 or 4 bytes.
     if(cp < 0x800) {
       encode_one( 6, 0x1F);
