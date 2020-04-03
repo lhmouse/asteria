@@ -259,7 +259,7 @@ const char* do_xstrchr(const char* str, char c) noexcept
     return nullptr;
   }
 
-template<bool queryT> Sval do_url_encode(const Sval& data, bool rlowerc)
+template<bool queryT> Sval do_url_encode(const Sval& data, bool lcase)
   {
     Sval text = data;
     // Only modify the string as needed, without causing copies on write.
@@ -281,12 +281,7 @@ template<bool queryT> Sval do_url_encode(const Sval& data, bool rlowerc)
           continue;
       }
       // Escape it.
-      uint32_t b;
-      char rep[3] = { '%' };
-      b = (((c >> 3) & 0x1E) + rlowerc) & 0xFF;
-      rep[1] = s_base16_table[b];
-      b = (((c << 1) & 0x1E) + rlowerc) & 0xFF;
-      rep[2] = s_base16_table[b];
+      char rep[3] = { '%', s_base16_table[((c >> 3) & 0x1E) + lcase], s_base16_table[((c << 1) & 0x1E) + lcase] };
       // Replace this character with the escape string.
       text.replace(nread - 1, 1, rep, 3);
       nread += 2;
@@ -814,7 +809,7 @@ Sval std_string_hex_encode(Sval data, Bopt lowercase, Sopt delim)
   {
     Sval text;
     auto rdelim = delim ? ::rocket::sref(*delim) : ::rocket::sref("");
-    bool rlowerc = lowercase == true;
+    bool rlowerc = lowercase.value_or(false);
     text.reserve(data.size() * (2 + rdelim.length()));
     // These shall be operated in big-endian order.
     uint32_t reg = 0;
@@ -879,7 +874,7 @@ Sval std_string_hex_decode(Sval text)
 Sval std_string_base32_encode(Sval data, Bopt lowercase)
   {
     Sval text;
-    bool rlowerc = lowercase == true;
+    bool rlowerc = lowercase.value_or(false);
     text.reserve((data.size() + 4) / 5 * 8);
     // These shall be operated in big-endian order.
     uint64_t reg = 0;
@@ -1095,7 +1090,7 @@ Sval std_string_base64_decode(Sval text)
 
 Sval std_string_url_encode(Sval data, Bopt lowercase)
   {
-    return do_url_encode<0>(data, lowercase == true);
+    return do_url_encode<0>(data, lowercase.value_or(false));
   }
 
 Sval std_string_url_decode(Sval text)
@@ -1105,7 +1100,7 @@ Sval std_string_url_decode(Sval text)
 
 Sval std_string_url_encode_query(Sval data, Bopt lowercase)
   {
-    return do_url_encode<1>(data, lowercase == true);
+    return do_url_encode<1>(data, lowercase.value_or(false));
   }
 
 Sval std_string_url_decode_query(Sval text)
