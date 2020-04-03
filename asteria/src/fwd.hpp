@@ -526,6 +526,7 @@ enum Parser_Status : uint32_t
     parser_status_closed_brace_or_comma_expected             = 3026,
     parser_status_closed_bracket_or_expression_expected      = 3027,
     parser_status_closed_brace_or_json5_key_expected         = 3028,
+    parser_status_argument_expected                          = 3029,
   };
 
 ROCKET_PURE_FUNCTION const char* describe_parser_status(Parser_Status status) noexcept;

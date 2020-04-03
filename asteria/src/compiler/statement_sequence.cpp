@@ -16,7 +16,9 @@ namespace Asteria {
 namespace {
 
 constexpr uint64_t do_cantor_pair(uint64_t x, uint64_t y) noexcept
-  { return (x + y) * (x + y + 1) / 2 + y;  }
+  {
+    return (x + y) * (x + y + 1) / 2 + y;
+  }
 
 inline uint64_t do_get_unique_id(const Token_Stream& tstrm)
   {
@@ -1713,52 +1715,54 @@ bool do_accept_postfix_operator(cow_vector<Expression_Unit>& units, Token_Stream
     return false;
   }
 
-opt<uint32_t> do_accept_argument_list_opt(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+opt<bool> do_accept_function_argument_opt(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
-    // argument-list-opt ::=
-    //   argument-list | ""
-    // argument-list ::=
-    //   argument ( "," argument-list | "" )
-    uint32_t nargs = 0;
     auto qref = do_accept_argument_opt(units, tstrm);
     if(!qref) {
       return nullopt;
     }
-    for(;;) {
-      Expression_Unit::S_argument_finish xunit = { *qref };
-      units.emplace_back(::std::move(xunit));
-      nargs += 1;
-      // The code above looks so ugly...
-      auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
-      if(!kpunct) {
-        break;
-      }
-      qref = do_accept_argument_opt(units, tstrm);
-      if(!qref) {
-        do_throw_parser_error(tstrm, parser_status_expression_expected);
-      }
-    }
-    return nargs;
+    Expression_Unit::S_argument_finish xunit = { *qref };
+    units.emplace_back(::std::move(xunit));
+    return *qref;
   }
 
 bool do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // postfix-function-call ::=
     //   "(" argument-list-opt ")"
+    // argument-list-opt ::=
+    //   argument-list | ""
+    // argument-list ::=
+    //   argument ( "," argument-list | "" )
     auto sloc = do_tell_source_location(tstrm);
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct) {
       return false;
     }
-    auto knargs = do_accept_argument_list_opt(units, tstrm);
-    if(!knargs) {
-      knargs.emplace();
+    uint32_t nargs = 0;
+    for(;;) {
+      auto qref = do_accept_function_argument_opt(units, tstrm);
+      if(!nargs && !qref) {
+        break;
+      }
+      if(!qref) {
+        do_throw_parser_error(tstrm, parser_status_argument_expected);
+      }
+      if(nargs >= INT32_MAX) {
+        do_throw_parser_error(tstrm, parser_status_too_many_elements);
+      }
+      nargs += 1;
+      // Look for the next argument.
+      kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
+      if(!kpunct) {
+        break;
+      }
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct) {
       do_throw_parser_error(tstrm, parser_status_closed_parenthesis_expected);
     }
-    Expression_Unit::S_function_call xunit = { ::std::move(sloc), *knargs };
+    Expression_Unit::S_function_call xunit = { ::std::move(sloc), nargs };
     units.emplace_back(::std::move(xunit));
     return true;
   }

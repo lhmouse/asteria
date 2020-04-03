@@ -261,6 +261,9 @@ const char* describe_parser_status(Parser_Status status) noexcept
     case parser_status_closed_brace_or_json5_key_expected: {
         return "`}`, identifier or string literal expected";
       }
+    case parser_status_argument_expected: {
+        return "argument expected";
+      }
     default:
       return "<unknown parser error>";
     }
