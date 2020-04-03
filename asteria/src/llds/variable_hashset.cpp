@@ -136,9 +136,8 @@ void Variable_HashSet::do_rehash(size_t nbkt)
       ::rocket::construct_at(qbkt->kstor, ::std::move(var));
     }
     // Deallocate the old table.
-    if(bold) {
+    if(bold)
       ::operator delete(bold);
-    }
   }
 
 void Variable_HashSet::do_attach(Variable_HashSet::Bucket* qbkt, const rcptr<Variable>& var) noexcept

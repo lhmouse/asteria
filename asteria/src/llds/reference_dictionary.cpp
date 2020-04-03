@@ -139,9 +139,8 @@ void Reference_Dictionary::do_rehash(size_t nbkt)
       ::rocket::construct_at(qbkt->vstor, ::std::move(refr));
     }
     // Deallocate the old table.
-    if(bold) {
+    if(bold)
       ::operator delete(bold);
-    }
   }
 
 void Reference_Dictionary::do_attach(Reference_Dictionary::Bucket* qbkt, const phsh_string& name) noexcept

@@ -22,9 +22,8 @@ void AVMC_Queue::do_deallocate_storage() const
       qnode += qnode->nphdrs + size_t(1);
     }
     // Deallocate the storage if any.
-    if(bptr) {
+    if(bptr)
       ::operator delete(bptr);
-    }
   }
 
 void AVMC_Queue::do_execute_all_break(AIR_Status& status, Executive_Context& ctx) const
