@@ -104,9 +104,6 @@ class Module_Loader_Lock::Unique_Stream
       }
   };
 
-inline void swap(Module_Loader_Lock::Unique_Stream& lhs, Module_Loader_Lock::Unique_Stream& rhs) noexcept
-  { lhs.swap(rhs);  }
-
 }  // namespace Asteria
 
 #endif
