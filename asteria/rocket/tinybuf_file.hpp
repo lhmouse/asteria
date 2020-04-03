@@ -52,6 +52,10 @@ template<typename charT, typename traitsT, typename allocT>
       : m_gbuf(alloc)
       { }
 
+    basic_tinybuf_file(unique_posix_file&& file, const allocator_type& alloc = allocator_type()) noexcept
+      : basic_tinybuf_file(alloc)
+      { this->reset(::std::move(file));  }
+
     basic_tinybuf_file(handle_type fp, closer_type cl, const allocator_type& alloc = allocator_type()) noexcept
       : basic_tinybuf_file(alloc)
       { this->reset(fp, cl);  }
@@ -247,6 +251,15 @@ template<typename charT, typename traitsT, typename allocT>
     closer_type get_closer() const noexcept
       { return this->m_file.get_closer();  }
 
+    basic_tinybuf_file& reset(unique_posix_file&& file) noexcept
+      {
+        this->do_purge_areas();
+        // Discard the input buffer and reset the file handle, ignoring any errors.
+        this->m_goff = -1;
+        this->m_file = ::std::move(file);
+        return *this;
+      }
+
     basic_tinybuf_file& reset(handle_type fp, closer_type cl) noexcept
       {
         this->do_purge_areas();
@@ -304,15 +317,15 @@ template<typename charT, typename traitsT, typename allocT>
                                                   errno, path, mode);
         }
         // Convert it to a `FILE*`.
-        unique_posix_file fp(::fdopen(fd, mstr), ::fclose);
-        if(!fp) {
+        unique_posix_file file(::fdopen(fd, mstr), ::fclose);
+        if(!file) {
           noadl::sprintf_and_throw<runtime_error>("tinybuf_file: stream open error (errno `%d`, path `%s`, mode `%u`)",
                                                   errno, path, mode);
         }
         // If `fdopen()` succeeds it will have taken the ownership of `fd`.
         fd.release();
         // Discard the input buffer and close the file, ignoring any errors.
-        return this->reset(fp.release(), fp.get_closer());
+        return this->reset(::std::move(file));
       }
 
     basic_tinybuf_file& close() noexcept

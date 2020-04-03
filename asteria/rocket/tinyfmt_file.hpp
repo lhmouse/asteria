@@ -39,12 +39,16 @@ template<typename charT, typename traitsT, typename allocT>
       : m_buf()
       { }
 
-    explicit basic_tinyfmt_file(const char* path, open_mode mode = tinybuf_base::open_write) noexcept
-      : m_buf(path, mode)
+    basic_tinyfmt_file(unique_posix_file&& file) noexcept
+      : m_buf(::std::move(file))
       { }
 
     basic_tinyfmt_file(handle_type fp, closer_type cl) noexcept
       : m_buf(fp, cl)
+      { }
+
+    explicit basic_tinyfmt_file(const char* path, open_mode mode = tinybuf_base::open_write) noexcept
+      : m_buf(path, mode)
       { }
 
     ~basic_tinyfmt_file() override;
@@ -64,6 +68,12 @@ template<typename charT, typename traitsT, typename allocT>
 
     closer_type get_closer() const noexcept
       { return this->m_buf.get_closer();  }
+
+    basic_tinyfmt_file& reset(unique_posix_file&& file) noexcept
+      {
+        this->m_buf.reset(::std::move(file));
+        return *this;
+      }
 
     basic_tinyfmt_file& reset(handle_type fp, closer_type cl) noexcept
       {
