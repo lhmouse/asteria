@@ -59,7 +59,7 @@ class AVMC_Queue
           Executor* exec;  // active if `has_vtbl`
           const Vtable* vtbl;  // active otherwise
         };
-        alignas(max_align_t) mutable intptr_t paramv[];  // user-defined data [3]
+        alignas(max_align_t) mutable char paramv[];  // user-defined data [3]
 
         constexpr ParamU get_paramu() const noexcept
           { return {{ this->paramu_x32, this->paramu_x16 }};  }
@@ -121,6 +121,7 @@ class AVMC_Queue
         // Append a node with a trivial parameter.
         this->do_append_trivial(execT, paramu, sizeof(xnode), ::std::addressof(xnode));
       }
+
     template<Executor execT, Enumerator* enumT, typename XNodeT> void do_dispatch_append(::std::false_type, ParamU paramu, XNodeT&& xnode)
       {
         // The vtable must have static storage duration. As it is defined `constexpr` here, we need 'real'
