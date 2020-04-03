@@ -1312,6 +1312,7 @@ bool do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream&
     //   "unset" | "lengthof" | "typeof" | "not" |
     //   "__abs" | "__sqrt" | "__sign" | "__isnan" | "__isinf" |
     //   "__round" | "__floor" | "__ceil" | "__trunc" | "__iround" | "__ifloor" | "__iceil" | "__itrunc"
+    auto sloc = do_tell_source_location(tstrm);
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
       return false;
@@ -1323,7 +1324,7 @@ bool do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream&
       }
       // Return the prefix operator and discard this token.
       tstrm.shift();
-      Expression_Unit::S_operator_rpn xunit = { qcnf->xop, false };
+      Expression_Unit::S_operator_rpn xunit = { sloc, qcnf->xop, false };
       units.emplace_back(::std::move(xunit));
       return true;
     }
@@ -1334,7 +1335,7 @@ bool do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream&
       }
       // Return the prefix operator and discard this token.
       tstrm.shift();
-      Expression_Unit::S_operator_rpn xunit = { qcnf->xop, false };
+      Expression_Unit::S_operator_rpn xunit = { sloc, qcnf->xop, false };
       units.emplace_back(::std::move(xunit));
       return true;
     }
@@ -1360,7 +1361,7 @@ bool do_accept_named_reference(cow_vector<Expression_Unit>& units, Token_Stream&
       units.emplace_back(::std::move(xunit));
       return true;
     }
-    Expression_Unit::S_named_reference xunit = { ::std::move(*qname) };
+    Expression_Unit::S_named_reference xunit = { sloc, ::std::move(*qname) };
     units.emplace_back(::std::move(xunit));
     return true;
   }
@@ -1369,6 +1370,7 @@ bool do_accept_global_reference(cow_vector<Expression_Unit>& units, Token_Stream
   {
     // global-identifier ::=
     //   "__global" identifier
+    auto sloc = do_tell_source_location(tstrm);
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_global });
     if(!qkwrd) {
       return false;
@@ -1377,7 +1379,7 @@ bool do_accept_global_reference(cow_vector<Expression_Unit>& units, Token_Stream
     if(!qname) {
       do_throw_parser_error(tstrm, parser_status_identifier_expected);
     }
-    Expression_Unit::S_global_reference xunit = { ::std::move(*qname) };
+    Expression_Unit::S_global_reference xunit = { sloc, ::std::move(*qname) };
     units.emplace_back(::std::move(xunit));
     return true;
   }
@@ -1397,11 +1399,12 @@ bool do_accept_literal(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
 bool do_accept_this(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // Get the keyword `this`.
+    auto sloc = do_tell_source_location(tstrm);
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_this });
     if(!qkwrd) {
       return false;
     }
-    Expression_Unit::S_named_reference xunit = { ::rocket::sref("__this") };
+    Expression_Unit::S_named_reference xunit = { sloc, ::rocket::sref("__this") };
     units.emplace_back(::std::move(xunit));
     return true;
   }
@@ -1566,6 +1569,7 @@ bool do_accept_fused_multiply_add(cow_vector<Expression_Unit>& units, Token_Stre
   {
     // fused-multiply-add ::=
     //   "__fma" "(" expression "," expression "," expression ")"
+    auto sloc = do_tell_source_location(tstrm);
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_fma });
     if(!qkwrd) {
       return false;
@@ -1598,7 +1602,7 @@ bool do_accept_fused_multiply_add(cow_vector<Expression_Unit>& units, Token_Stre
     if(!kpunct) {
       do_throw_parser_error(tstrm, parser_status_closed_parenthesis_expected);
     }
-    Expression_Unit::S_operator_rpn xunit = { xop_fma, false };
+    Expression_Unit::S_operator_rpn xunit = { sloc, xop_fma, false };
     units.emplace_back(::std::move(xunit));
     return true;
   }
@@ -1749,6 +1753,7 @@ bool do_accept_postfix_operator(cow_vector<Expression_Unit>& units, Token_Stream
   {
     // postfix-operator ::=
     //   "++" | "--" | "[^]" | "[$]"
+    auto sloc = do_tell_source_location(tstrm);
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
       return false;
@@ -1760,7 +1765,7 @@ bool do_accept_postfix_operator(cow_vector<Expression_Unit>& units, Token_Stream
       }
       // Return the postfix operator and discard this token.
       tstrm.shift();
-      Expression_Unit::S_operator_rpn xunit = { qcnf->xop, false };
+      Expression_Unit::S_operator_rpn xunit = { sloc, qcnf->xop, false };
       units.emplace_back(::std::move(xunit));
       return true;
     }
@@ -1812,6 +1817,7 @@ bool do_accept_postfix_subscript(cow_vector<Expression_Unit>& units, Token_Strea
   {
     // postfix-subscript ::=
     //   "[" expression "]"
+    auto sloc = do_tell_source_location(tstrm);
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_op });
     if(!kpunct) {
       return false;
@@ -1824,7 +1830,7 @@ bool do_accept_postfix_subscript(cow_vector<Expression_Unit>& units, Token_Strea
     if(!kpunct) {
       do_throw_parser_error(tstrm, parser_status_closed_bracket_expected);
     }
-    Expression_Unit::S_operator_rpn xunit = { xop_subscr, false };
+    Expression_Unit::S_operator_rpn xunit = { sloc, xop_subscr, false };
     units.emplace_back(::std::move(xunit));
     return true;
   }
@@ -1833,6 +1839,7 @@ bool do_accept_postfix_member_access(cow_vector<Expression_Unit>& units, Token_S
   {
     // postfix-member-access ::=
     //   "." ( string-literal | identifier )
+    auto sloc = do_tell_source_location(tstrm);
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_dot });
     if(!kpunct) {
       return false;
@@ -1841,7 +1848,7 @@ bool do_accept_postfix_member_access(cow_vector<Expression_Unit>& units, Token_S
     if(!qkey) {
       do_throw_parser_error(tstrm, parser_status_identifier_expected);
     }
-    Expression_Unit::S_member_access xunit = { ::std::move(*qkey) };
+    Expression_Unit::S_member_access xunit = { sloc, ::std::move(*qkey) };
     units.emplace_back(::std::move(xunit));
     return true;
   }
@@ -1902,6 +1909,7 @@ opt<Infix_Element> do_accept_infix_operator_ternary_opt(Token_Stream& tstrm)
   {
     // infix-operator-ternary ::=
     //   ( "?" | "?=" ) expression ":"
+    auto sloc = do_tell_source_location(tstrm);
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_quest, punctuator_quest_eq });
     if(!kpunct) {
       return nullopt;
@@ -1914,7 +1922,7 @@ opt<Infix_Element> do_accept_infix_operator_ternary_opt(Token_Stream& tstrm)
     if(!kpunct) {
       do_throw_parser_error(tstrm, parser_status_colon_expected);
     }
-    Infix_Element::S_ternary xelem = { *kpunct == punctuator_quest_eq, ::std::move(btrue), nullopt };
+    Infix_Element::S_ternary xelem = { sloc, *kpunct == punctuator_quest_eq, ::std::move(btrue), nullopt };
     return ::std::move(xelem);
   }
 
@@ -1922,6 +1930,7 @@ opt<Infix_Element> do_accept_infix_operator_logical_and_opt(Token_Stream& tstrm)
   {
     // infix-operator-logical-and ::=
     //   "&&" | "&&=" | "and"
+    auto sloc = do_tell_source_location(tstrm);
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_andl, punctuator_andl_eq });
     if(!kpunct) {
       auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_and });
@@ -1930,7 +1939,7 @@ opt<Infix_Element> do_accept_infix_operator_logical_and_opt(Token_Stream& tstrm)
       }
       kpunct.emplace(punctuator_andl);
     }
-    Infix_Element::S_logical_and xelem = { *kpunct == punctuator_andl_eq, nullopt };
+    Infix_Element::S_logical_and xelem = { sloc, *kpunct == punctuator_andl_eq, nullopt };
     return ::std::move(xelem);
   }
 
@@ -1938,6 +1947,7 @@ opt<Infix_Element> do_accept_infix_operator_logical_or_opt(Token_Stream& tstrm)
   {
     // infix-operator-logical-or ::=
     //   "||" | "||=" | "or"
+    auto sloc = do_tell_source_location(tstrm);
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_orl, punctuator_orl_eq });
     if(!kpunct) {
       auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_or });
@@ -1946,7 +1956,7 @@ opt<Infix_Element> do_accept_infix_operator_logical_or_opt(Token_Stream& tstrm)
       }
       kpunct.emplace(punctuator_orl);
     }
-    Infix_Element::S_logical_or xelem = { *kpunct == punctuator_orl_eq, nullopt };
+    Infix_Element::S_logical_or xelem = { sloc, *kpunct == punctuator_orl_eq, nullopt };
     return ::std::move(xelem);
   }
 
@@ -1954,11 +1964,12 @@ opt<Infix_Element> do_accept_infix_operator_coalescence_opt(Token_Stream& tstrm)
   {
     // infix-operator-coalescence ::=
     //   "??" | "??="
+    auto sloc = do_tell_source_location(tstrm);
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_coales, punctuator_coales_eq });
     if(!kpunct) {
       return nullopt;
     }
-    Infix_Element::S_coalescence xelem = { *kpunct == punctuator_coales_eq, nullopt };
+    Infix_Element::S_coalescence xelem = { sloc, *kpunct == punctuator_coales_eq, nullopt };
     return ::std::move(xelem);
   }
 
@@ -2015,6 +2026,7 @@ opt<Infix_Element> do_accept_infix_operator_general_opt(Token_Stream& tstrm)
     //   "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | "<<<"  | ">>>"  | "&"  | "|"  | "^"  |
     //   "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | "<<<=" | ">>>=" | "&=" | "|=" | "^=" |
     //   "="  | "==" | "!=" | "<"  | ">"  | "<="  | ">="  | "<=>"
+    auto sloc = do_tell_source_location(tstrm);
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
       return nullopt;
@@ -2026,7 +2038,7 @@ opt<Infix_Element> do_accept_infix_operator_general_opt(Token_Stream& tstrm)
       }
       // Return the infix operator and discard this token.
       tstrm.shift();
-      Infix_Element::S_general xelem = { qcnf->xop, qcnf->assign, nullopt };
+      Infix_Element::S_general xelem = { sloc, qcnf->xop, qcnf->assign, nullopt };
       return ::std::move(xelem);
     }
     return nullopt;

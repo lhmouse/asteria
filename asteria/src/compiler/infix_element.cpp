@@ -108,29 +108,29 @@ Infix_Element& Infix_Element::extract(cow_vector<Expression_Unit>& units)
     case index_ternary: {
         auto& altr = this->m_stor.as<index_ternary>();
         // Construct a branch unit from both branches, then append it to `units`.
-        Expression_Unit::S_branch xunit = { ::std::move(altr.branch_true),
-                                            ::std::move(altr.branch_false), altr.assign };
+        Expression_Unit::S_branch xunit = { altr.sloc, ::std::move(altr.branch_true),
+                                                       ::std::move(altr.branch_false), altr.assign };
         units.emplace_back(::std::move(xunit));
         return *this;
       }
     case index_logical_and: {
         auto& altr = this->m_stor.as<index_logical_and>();
         // Construct a branch unit from the TRUE branch and an empty FALSE branch, then append it to `units`.
-        Expression_Unit::S_branch xunit = { ::std::move(altr.branch_true), nullopt, altr.assign };
+        Expression_Unit::S_branch xunit = { altr.sloc, ::std::move(altr.branch_true), nullopt, altr.assign };
         units.emplace_back(::std::move(xunit));
         return *this;
       }
     case index_logical_or: {
         auto& altr = this->m_stor.as<index_logical_or>();
         // Construct a branch unit from an empty TRUE branch and the FALSE branch, then append it to `units`.
-        Expression_Unit::S_branch xunit = { nullopt, ::std::move(altr.branch_false), altr.assign };
+        Expression_Unit::S_branch xunit = { altr.sloc, nullopt, ::std::move(altr.branch_false), altr.assign };
         units.emplace_back(::std::move(xunit));
         return *this;
       }
     case index_coalescence: {
         auto& altr = this->m_stor.as<index_coalescence>();
         // Construct a branch unit from the NULL branch, then append it to `units`.
-        Expression_Unit::S_coalescence xunit = { ::std::move(altr.branch_null), altr.assign };
+        Expression_Unit::S_coalescence xunit = { altr.sloc, ::std::move(altr.branch_null), altr.assign };
         units.emplace_back(::std::move(xunit));
         return *this;
       }
@@ -139,10 +139,9 @@ Infix_Element& Infix_Element::extract(cow_vector<Expression_Unit>& units)
         // N.B. `units` is the LHS operand.
         // Append the RHS operand to the LHS operand, followed by the operator, forming the Reverse Polish
         // Notation (RPN).
-        units.append(::std::make_move_iterator(altr.rhs.mut_begin()),
-                     ::std::make_move_iterator(altr.rhs.mut_end()));
+        units.append(::std::make_move_iterator(altr.rhs.mut_begin()), ::std::make_move_iterator(altr.rhs.mut_end()));
         // Append the operator itself.
-        Expression_Unit::S_operator_rpn xunit = { altr.xop, altr.assign };
+        Expression_Unit::S_operator_rpn xunit = { altr.sloc, altr.xop, altr.assign };
         units.emplace_back(::std::move(xunit));
         return *this;
       }

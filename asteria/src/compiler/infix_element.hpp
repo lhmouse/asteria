@@ -5,6 +5,7 @@
 #define ASTERIA_COMPILER_INFIX_ELEMENT_HPP_
 
 #include "../fwd.hpp"
+#include "../source_location.hpp"
 
 namespace Asteria {
 
@@ -18,6 +19,7 @@ class Infix_Element
 
     struct S_ternary  // ? :
       {
+        Source_Location sloc;
         bool assign;
         cow_vector<Expression_Unit> branch_true;
         cow_vector<Expression_Unit> branch_false;
@@ -25,24 +27,28 @@ class Infix_Element
 
     struct S_logical_and  // &&
       {
+        Source_Location sloc;
         bool assign;
         cow_vector<Expression_Unit> branch_true;
       };
 
     struct S_logical_or  // ||
       {
+        Source_Location sloc;
         bool assign;
         cow_vector<Expression_Unit> branch_false;
       };
 
     struct S_coalescence  // ??
       {
+        Source_Location sloc;
         bool assign;
         cow_vector<Expression_Unit> branch_null;
       };
 
     struct S_general  // no short circuit
       {
+        Source_Location sloc;
         Xop xop;
         bool assign;
         cow_vector<Expression_Unit> rhs;

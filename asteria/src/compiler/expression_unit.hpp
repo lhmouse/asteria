@@ -20,6 +20,7 @@ class Expression_Unit
 
     struct S_named_reference
       {
+        Source_Location sloc;
         phsh_string name;
       };
 
@@ -33,6 +34,7 @@ class Expression_Unit
 
     struct S_branch
       {
+        Source_Location sloc;
         cow_vector<Expression_Unit> branch_true;
         cow_vector<Expression_Unit> branch_false;
         bool assign;
@@ -46,11 +48,13 @@ class Expression_Unit
 
     struct S_member_access
       {
+        Source_Location sloc;
         phsh_string name;
       };
 
     struct S_operator_rpn
       {
+        Source_Location sloc;
         Xop xop;
         bool assign;  // This parameter is ignored for `++`, `--`, `[]` and `=`.
       };
@@ -67,12 +71,14 @@ class Expression_Unit
 
     struct S_coalescence
       {
+        Source_Location sloc;
         cow_vector<Expression_Unit> branch_null;
         bool assign;
       };
 
     struct S_global_reference
       {
+        Source_Location sloc;
         phsh_string name;
       };
 
