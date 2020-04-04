@@ -12,6 +12,7 @@ void AVMC_Queue::do_deallocate_storage() const
   {
     auto bptr = this->m_bptr;
     auto eptr = bptr + this->m_used;
+
     // Destroy all nodes.
     auto qnode = bptr;
     while(ROCKET_EXPECT(qnode != eptr)) {
@@ -19,8 +20,11 @@ void AVMC_Queue::do_deallocate_storage() const
       auto dtor = qnode->has_vtbl ? qnode->vtbl->dtor : nullptr;
       if(ROCKET_UNEXPECT(dtor))
         (*dtor)(qnode->get_paramu(), qnode->get_paramv());
-      qnode += qnode->nphdrs + size_t(1);
+
+      // Move to the next node.
+      qnode += qnode->total_size_in_headers();
     }
+
     // Deallocate the storage if any.
     if(bptr)
       ::operator delete(bptr);
@@ -30,6 +34,7 @@ void AVMC_Queue::do_execute_all_break(AIR_Status& status, Executive_Context& ctx
   {
     auto bptr = this->m_bptr;
     auto eptr = bptr + this->m_used;
+
     // Execute all nodes.
     auto qnode = bptr;
     while(ROCKET_EXPECT(qnode != eptr)) {
@@ -39,7 +44,9 @@ void AVMC_Queue::do_execute_all_break(AIR_Status& status, Executive_Context& ctx
       status = (*exec)(ctx, qnode->get_paramu(), qnode->get_paramv());
       if(ROCKET_UNEXPECT(status != air_status_next))
         return;
-      qnode += qnode->nphdrs + size_t(1);
+
+      // Move to the next node.
+      qnode += qnode->total_size_in_headers();
     }
   }
 
@@ -47,6 +54,7 @@ void AVMC_Queue::do_enumerate_variables(Variable_Callback& callback) const
   {
     auto bptr = this->m_bptr;
     auto eptr = bptr + this->m_used;
+
     // Enumerate variables from all nodes.
     auto qnode = bptr;
     while(ROCKET_EXPECT(qnode != eptr)) {
@@ -54,17 +62,19 @@ void AVMC_Queue::do_enumerate_variables(Variable_Callback& callback) const
       auto vnum = qnode->has_vtbl ? qnode->vtbl->vnum : nullptr;
       if(ROCKET_UNEXPECT(vnum))
         (*vnum)(callback, qnode->get_paramu(), qnode->get_paramv());
-      qnode += qnode->nphdrs + size_t(1);
+
+      // Move to the next node.
+      qnode += qnode->total_size_in_headers();
     }
   }
 
 void AVMC_Queue::do_reserve_delta(size_t nbytes)
   {
+    if(this->m_bptr)
+      ASTERIA_THROW("AVMC queue not resizable");
+
     // Once a node has been appended, reallocation is no longer allowed.
     // Otherwise we would have to move nodes around, which complexifies things without any obvious benefits.
-    if(this->m_bptr) {
-      ASTERIA_THROW("AVMC queue not resizable");
-    }
     constexpr auto nbytes_hdr = sizeof(Header);
     constexpr auto nbytes_max = nbytes_hdr * nphdrs_max;
     if(nbytes > nbytes_max) {
@@ -78,7 +88,7 @@ void AVMC_Queue::do_reserve_delta(size_t nbytes)
     this->m_rsrv += nbytes_node;
   }
 
-AVMC_Queue::Header* AVMC_Queue::do_check_storage_for_paramv(size_t nbytes)
+AVMC_Queue::Header* AVMC_Queue::do_check_node_storage(size_t nbytes)
   {
     constexpr auto nbytes_hdr = sizeof(Header);
     auto bptr = this->m_bptr;
@@ -99,7 +109,7 @@ AVMC_Queue::Header* AVMC_Queue::do_check_storage_for_paramv(size_t nbytes)
 
 void AVMC_Queue::do_append_trivial(Executor* exec, AVMC_Queue::ParamU paramu, size_t nbytes, const void* source)
   {
-    auto qnode = this->AVMC_Queue::do_check_storage_for_paramv(nbytes);
+    auto qnode = this->do_check_node_storage(nbytes);
     auto nbytes_node = static_cast<uint32_t>(qnode->nphdrs + size_t(1));
     // Initialize the node.
     qnode->has_vtbl = false;
@@ -113,19 +123,19 @@ void AVMC_Queue::do_append_trivial(Executor* exec, AVMC_Queue::ParamU paramu, si
     this->m_used += nbytes_node;
   }
 
-void AVMC_Queue::do_append_nontrivial(ref_to<const Vtable> vtbl, AVMC_Queue::ParamU paramu, size_t nbytes,
-                                      Constructor* ctor, intptr_t source)
+void AVMC_Queue::do_append_nontrivial(const AVMC_Queue::Vtable* vtbl, AVMC_Queue::ParamU paramu, size_t nbytes,
+                                      AVMC_Queue::Constructor* ctor_opt, intptr_t source)
   {
-    auto qnode = this->AVMC_Queue::do_check_storage_for_paramv(nbytes);
+    auto qnode = this->do_check_node_storage(nbytes);
     auto nbytes_node = static_cast<uint32_t>(qnode->nphdrs + size_t(1));
     // Initialize the node.
     qnode->has_vtbl = true;
     qnode->paramu_x16 = paramu.x16;
     qnode->paramu_x32 = paramu.x32;
-    qnode->vtbl = vtbl.ptr();
+    qnode->vtbl = vtbl;
     // Invoke the constructor if any, which is subject to exceptions.
-    if(ROCKET_EXPECT(ctor))
-      (*ctor)(paramu, qnode->paramv, source);
+    if(ROCKET_EXPECT(ctor_opt))
+      (*ctor_opt)(paramu, qnode->paramv, source);
     this->m_used += nbytes_node;
   }
 

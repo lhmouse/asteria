@@ -58,6 +58,9 @@ class AVMC_Queue
         };
         alignas(max_align_t) mutable char paramv[];  // user-defined data [3]
 
+        constexpr uint32_t total_size_in_headers() const noexcept
+          { return UINT32_C(1) + this->nphdrs; }
+
         constexpr ParamU get_paramu() const noexcept
           { return {{ this->paramu_x32, this->paramu_x16 }};  }
 
@@ -94,15 +97,15 @@ class AVMC_Queue
     void do_enumerate_variables(Variable_Callback& callback) const;
 
     // Reserve storage for another node. `nbytes` is the size of `paramv` to reserve in bytes.
-    // Note: All calls to this function must precede calls to `do_check_storage_for_paramv()`.
+    // Note: All calls to this function must precede calls to `do_check_node_storage()`.
     void do_reserve_delta(size_t nbytes);
     // Allocate storage for all nodes that have been reserved so far, then checks whether there is enough room
     // for a new node with `paramv` whose size is `nbytes` in bytes. An exception is thrown in case of failure.
-    Header* do_check_storage_for_paramv(size_t nbytes);
+    inline Header* do_check_node_storage(size_t nbytes);
     // Append a new node to the end. `nbytes` is the size of `paramv` to initialize in bytes.
     // Note: The storage must have been reserved using `do_reserve_delta()`.
     void do_append_trivial(Executor* exec, ParamU paramu, size_t nbytes, const void* source);
-    void do_append_nontrivial(ref_to<const Vtable> vtbl, ParamU paramu, size_t nbytes, Constructor* ctor, intptr_t source);
+    void do_append_nontrivial(const Vtable* vtbl, ParamU paramu, size_t nbytes, Constructor* ctor_opt, intptr_t source);
 
     template<Executor execT, nullptr_t, typename XNodeT> void do_dispatch_append(::std::true_type, ParamU paramu, XNodeT&& xnode)
       {
@@ -115,7 +118,7 @@ class AVMC_Queue
       {
         // The vtable must have static storage duration. As it is defined `constexpr` here, we need 'real'
         // function pointers. Those converted from non-capturing lambdas are not an option.
-        struct H
+        struct Helper
           {
             static void construct(ParamU /*paramu*/, void* paramv, intptr_t source)
               { ::rocket::construct_at(static_cast<typename ::rocket::remove_cvref<XNodeT>::type*>(paramv),
@@ -126,11 +129,10 @@ class AVMC_Queue
           };
 
         // Define the virtual table.
-        static constexpr Vtable s_vtbl = { H::destroy, execT, enumT };
+        static constexpr Vtable s_vtbl = { Helper::destroy, execT, enumT };
 
         // Append a node with a non-trivial parameter.
-        this->do_append_nontrivial(::rocket::ref(s_vtbl), paramu, sizeof(xnode), H::construct,
-                                   reinterpret_cast<intptr_t>(::std::addressof(xnode)));
+        this->do_append_nontrivial(&s_vtbl, paramu, sizeof(xnode), Helper::construct, reinterpret_cast<intptr_t>(::std::addressof(xnode)));
       }
 
   public:
