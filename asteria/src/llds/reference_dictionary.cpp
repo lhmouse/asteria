@@ -104,15 +104,13 @@ void Reference_Dictionary::do_rehash(size_t nbkt)
   {
     ROCKET_ASSERT(nbkt / 2 > this->m_size);
     // Allocate a new table.
-    if(nbkt > PTRDIFF_MAX / sizeof(Bucket)) {
+    if(nbkt > PTRDIFF_MAX / sizeof(Bucket))
       throw ::std::bad_array_new_length();
-    }
     auto bptr = static_cast<Bucket*>(::operator new(nbkt * sizeof(Bucket)));
     auto eptr = bptr + nbkt;
     // Initialize an empty table.
-    for(auto qbkt = bptr;  qbkt != eptr;  ++qbkt) {
+    for(auto qbkt = bptr;  qbkt != eptr;  ++qbkt)
       qbkt->prev = nullptr;
-    }
     auto bold = ::std::exchange(this->m_bptr, bptr);
     this->m_eptr = eptr;
     auto next = ::std::exchange(this->m_head, nullptr);

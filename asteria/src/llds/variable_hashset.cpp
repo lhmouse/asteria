@@ -27,9 +27,8 @@ void Variable_HashSet::do_enumerate_variables(Variable_Callback& callback) const
       auto qbkt = ::std::exchange(next, next->next);
       // Enumerate a child variable.
       ROCKET_ASSERT(*qbkt);
-      if(!callback.process(qbkt->kstor[0])) {
+      if(!callback.process(qbkt->kstor[0]))
         continue;
-      }
       // Enumerate grandchildren recursively.
       qbkt->kstor[0]->enumerate_variables(callback);
     }
@@ -104,15 +103,13 @@ void Variable_HashSet::do_rehash(size_t nbkt)
   {
     ROCKET_ASSERT(nbkt / 2 > this->m_size);
     // Allocate a new table.
-    if(nbkt > PTRDIFF_MAX / sizeof(Bucket)) {
+    if(nbkt > PTRDIFF_MAX / sizeof(Bucket))
       throw ::std::bad_array_new_length();
-    }
     auto bptr = static_cast<Bucket*>(::operator new(nbkt * sizeof(Bucket)));
     auto eptr = bptr + nbkt;
     // Initialize an empty table.
-    for(auto qbkt = bptr;  qbkt != eptr;  ++qbkt) {
+    for(auto qbkt = bptr;  qbkt != eptr;  ++qbkt)
       qbkt->prev = nullptr;
-    }
     auto bold = ::std::exchange(this->m_bptr, bptr);
     this->m_eptr = eptr;
     auto next = ::std::exchange(this->m_head, nullptr);
