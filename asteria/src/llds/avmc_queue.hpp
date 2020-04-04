@@ -32,20 +32,17 @@ class AVMC_Queue
     using Executor     = AIR_Status (Executive_Context& ctx, ParamU paramu, const void* paramv);
     using Enumerator   = Variable_Callback& (Variable_Callback& callback, ParamU paramu, const void* paramv);
 
-    // This specifies characteristics of the data contained.
+  private:
+    enum : size_t
+      {
+        nphdrs_max = 0x100,  // maximum value of `Header::nphdrs`
+      };
+
     struct Vtable
       {
         Destructor* dtor;
         Executor* exec;
         Enumerator* vnum;
-      };
-
-    static_assert(::std::is_trivial<Vtable>::value, "");
-
-  private:
-    enum : size_t
-      {
-        nphdrs_max = 0x100,  // maximum value of `Header::nphdrs`
       };
 
     struct Header
