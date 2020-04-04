@@ -10,7 +10,7 @@ namespace Asteria {
 
 void Reference_Dictionary::do_destroy_buckets() const noexcept
   {
-    auto next = this->m_stor.head;
+    auto next = this->m_head;
     while(ROCKET_EXPECT(next)) {
       auto qbkt = ::std::exchange(next, next->next);
       // Destroy this bucket.
@@ -23,7 +23,7 @@ void Reference_Dictionary::do_destroy_buckets() const noexcept
 
 void Reference_Dictionary::do_enumerate_variables(Variable_Callback& callback) const
   {
-    auto next = this->m_stor.head;
+    auto next = this->m_head;
     while(ROCKET_EXPECT(next)) {
       auto qbkt = ::std::exchange(next, next->next);
       // Enumerate child variables.
@@ -34,8 +34,8 @@ void Reference_Dictionary::do_enumerate_variables(Variable_Callback& callback) c
 
 Reference_Dictionary::Bucket* Reference_Dictionary::do_xprobe(const phsh_string& name) const noexcept
   {
-    auto bptr = this->m_stor.bptr;
-    auto eptr = this->m_stor.eptr;
+    auto bptr = this->m_bptr;
+    auto eptr = this->m_eptr;
     // Find a bucket using linear probing.
     // We keep the load factor below 1.0 so there will always be some empty buckets in the table.
     auto mptr = ::rocket::get_probing_origin(bptr, eptr, name.rdhash());
@@ -46,8 +46,8 @@ Reference_Dictionary::Bucket* Reference_Dictionary::do_xprobe(const phsh_string&
 
 void Reference_Dictionary::do_xrelocate_but(Reference_Dictionary::Bucket* qxcld) noexcept
   {
-    auto bptr = this->m_stor.bptr;
-    auto eptr = this->m_stor.eptr;
+    auto bptr = this->m_bptr;
+    auto eptr = this->m_eptr;
     // Reallocate buckets that follow `*qbkt`.
     ::rocket::linear_probe(
       // Only probe non-erased buckets.
@@ -80,7 +80,7 @@ void Reference_Dictionary::do_xrelocate_but(Reference_Dictionary::Bucket* qxcld)
 void Reference_Dictionary::do_list_attach(Reference_Dictionary::Bucket* qbkt) noexcept
   {
     // Insert the bucket before `head`.
-    auto next = ::std::exchange(this->m_stor.head, qbkt);
+    auto next = ::std::exchange(this->m_head, qbkt);
     // Update the forward list, which is non-circular.
     qbkt->next = next;
     // Update the backward list, which is circular.
@@ -91,9 +91,9 @@ void Reference_Dictionary::do_list_detach(Reference_Dictionary::Bucket* qbkt) no
   {
     auto next = qbkt->next;
     auto prev = qbkt->prev;
-    auto head = this->m_stor.head;
+    auto head = this->m_head;
     // Update the forward list, which is non-circular.
-    ((qbkt == head) ? this->m_stor.head : prev->next) = next;
+    ((qbkt == head) ? this->m_head : prev->next) = next;
     // Update the backward list, which is circular.
     (next ? next : head)->prev = prev;
     // Mark the bucket empty.
@@ -102,7 +102,7 @@ void Reference_Dictionary::do_list_detach(Reference_Dictionary::Bucket* qbkt) no
 
 void Reference_Dictionary::do_rehash(size_t nbkt)
   {
-    ROCKET_ASSERT(nbkt / 2 > this->m_stor.size);
+    ROCKET_ASSERT(nbkt / 2 > this->m_size);
     // Allocate a new table.
     if(nbkt > PTRDIFF_MAX / sizeof(Bucket)) {
       throw ::std::bad_array_new_length();
@@ -113,9 +113,9 @@ void Reference_Dictionary::do_rehash(size_t nbkt)
     for(auto qbkt = bptr;  qbkt != eptr;  ++qbkt) {
       qbkt->prev = nullptr;
     }
-    auto bold = ::std::exchange(this->m_stor.bptr, bptr);
-    this->m_stor.eptr = eptr;
-    auto next = ::std::exchange(this->m_stor.head, nullptr);
+    auto bold = ::std::exchange(this->m_bptr, bptr);
+    this->m_eptr = eptr;
+    auto next = ::std::exchange(this->m_head, nullptr);
     // Move buckets into the new table.
     // Warning: No exception shall be thrown from the code below.
     while(ROCKET_EXPECT(next)) {
@@ -151,13 +151,13 @@ void Reference_Dictionary::do_attach(Reference_Dictionary::Bucket* qbkt, const p
     ::rocket::construct_at(qbkt->kstor, name);
     ::rocket::construct_at(qbkt->vstor, Reference_root::S_void());
     ROCKET_ASSERT(*qbkt);
-    this->m_stor.size++;
+    this->m_size++;
   }
 
 void Reference_Dictionary::do_detach(Reference_Dictionary::Bucket* qbkt) noexcept
   {
     // Destroy the old name and reference, then detach the bucket.
-    this->m_stor.size--;
+    this->m_size--;
     ROCKET_ASSERT(*qbkt);
     ::rocket::destroy_at(qbkt->kstor);
     ::rocket::destroy_at(qbkt->vstor);

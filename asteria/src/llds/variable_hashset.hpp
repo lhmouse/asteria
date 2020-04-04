@@ -18,50 +18,37 @@ class Variable_HashSet
         Bucket* prev;  // the previous bucket in the [circular] list
         union { rcptr<Variable> kstor[1];  };  // initialized iff `prev` is non-null
 
-        Bucket() noexcept
-          { }
-
-        ~Bucket()
-          { }
+        Bucket() noexcept { }
+        ~Bucket() { }
 
         explicit operator bool () const noexcept
           { return this->prev != nullptr;  }
       };
 
-    struct Storage
-      {
-        Bucket* bptr;  // beginning of bucket storage
-        Bucket* eptr;  // end of bucket storage
-        Bucket* head;  // the first initialized bucket
-        size_t size;  // number of initialized buckets
-      };
-
-    Storage m_stor;
+    Bucket* m_bptr = nullptr;  // beginning of bucket storage
+    Bucket* m_eptr = nullptr;  // end of bucket storage
+    Bucket* m_head = nullptr;  // the first initialized bucket
+    size_t m_size = 0;         // number of initialized buckets
 
   public:
     constexpr Variable_HashSet() noexcept
-      : m_stor()
       { }
 
     Variable_HashSet(Variable_HashSet&& other) noexcept
-      : m_stor()
-      { xswap(this->m_stor, other.m_stor);  }
+      { this->swap(other);  }
 
     Variable_HashSet& operator=(Variable_HashSet&& other) noexcept
-      {
-        xswap(this->m_stor, other.m_stor);
-        return *this;
-      }
+      { return this->swap(other);  }
 
     ~Variable_HashSet()
       {
-        if(this->m_stor.head)
+        if(this->m_head)
           this->do_destroy_buckets();
 
-        if(this->m_stor.bptr)
-          ::operator delete(this->m_stor.bptr);
+        if(this->m_bptr)
+          ::operator delete(this->m_bptr);
 #ifdef ROCKET_DEBUG
-        ::std::memset(::std::addressof(this->m_stor), 0xD2, sizeof(m_stor));
+        ::std::memset(static_cast<void*>(this), 0x93, sizeof(*this));
 #endif
       }
 
@@ -81,32 +68,35 @@ class Variable_HashSet
 
   public:
     bool empty() const noexcept
-      { return this->m_stor.head == nullptr;  }
+      { return this->m_head == nullptr;  }
 
     size_t size() const noexcept
-      { return this->m_stor.size;  }
+      { return this->m_size;  }
 
     Variable_HashSet& clear() noexcept
       {
-        if(this->m_stor.head)
+        if(this->m_head)
           this->do_destroy_buckets();
 
         // Clean invalid data up.
-        this->m_stor.head = nullptr;
-        this->m_stor.size = 0;
+        this->m_head = nullptr;
+        this->m_size = 0;
         return *this;
       }
 
     Variable_HashSet& swap(Variable_HashSet& other) noexcept
       {
-        xswap(this->m_stor, other.m_stor);
+        xswap(this->m_bptr, other.m_bptr);
+        xswap(this->m_eptr, other.m_eptr);
+        xswap(this->m_head, other.m_head);
+        xswap(this->m_size, other.m_size);
         return *this;
       }
 
     bool has(const rcptr<Variable>& var) const noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.
-        if(!this->m_stor.bptr) {
+        if(!this->m_bptr) {
           return false;
         }
         // Find the bucket for the variable.
@@ -122,10 +112,10 @@ class Variable_HashSet
     bool insert(const rcptr<Variable>& var) noexcept
       {
         // Reserve more room by rehashing if the load factor would exceed 0.5.
-        auto nbkt = static_cast<size_t>(this->m_stor.eptr - this->m_stor.bptr);
-        if(ROCKET_UNEXPECT(this->m_stor.size >= nbkt / 2)) {
+        auto nbkt = static_cast<size_t>(this->m_eptr - this->m_bptr);
+        if(ROCKET_UNEXPECT(this->m_size >= nbkt / 2)) {
           // Ensure the number of buckets is an odd number.
-          this->do_rehash(this->m_stor.size * 3 | 97);
+          this->do_rehash(this->m_size * 3 | 97);
         }
         // Find a bucket for the new variable.
         auto qbkt = this->do_xprobe(var);
@@ -141,7 +131,7 @@ class Variable_HashSet
     bool erase(const rcptr<Variable>& var) noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.
-        if(!this->m_stor.bptr) {
+        if(!this->m_bptr) {
           return false;
         }
         // Find the bucket for the variable.
@@ -159,7 +149,7 @@ class Variable_HashSet
     rcptr<Variable> erase_random_opt() noexcept
       {
         // Get a random bucket that contains a variable.
-        auto qbkt = this->m_stor.head;
+        auto qbkt = this->m_head;
         if(!qbkt) {
           // Empty.
           return nullptr;

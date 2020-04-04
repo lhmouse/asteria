@@ -21,43 +21,35 @@ class Reference_Dictionary
 
         Bucket() noexcept { }
         ~Bucket() { }
-        explicit operator bool () const noexcept { return this->prev != nullptr;  }
+
+        explicit operator bool () const noexcept
+          { return this->prev != nullptr;  }
       };
 
-    struct Storage
-      {
-        Bucket* bptr;  // beginning of bucket storage
-        Bucket* eptr;  // end of bucket storage
-        Bucket* head;  // the first initialized bucket
-        size_t size;  // number of initialized buckets
-      };
-
-    Storage m_stor;
+    Bucket* m_bptr = nullptr;  // beginning of bucket storage
+    Bucket* m_eptr = nullptr;  // end of bucket storage
+    Bucket* m_head = nullptr;  // the first initialized bucket
+    size_t m_size = 0;         // number of initialized buckets
 
   public:
     constexpr Reference_Dictionary() noexcept
-      : m_stor()
       { }
 
     Reference_Dictionary(Reference_Dictionary&& other) noexcept
-      : m_stor()
-      { xswap(this->m_stor, other.m_stor);  }
+      { this->swap(other);  }
 
     Reference_Dictionary& operator=(Reference_Dictionary&& other) noexcept
-      {
-        xswap(this->m_stor, other.m_stor);
-        return *this;
-      }
+      { return this->swap(other);  }
 
     ~Reference_Dictionary()
       {
-        if(this->m_stor.head)
+        if(this->m_head)
           this->do_destroy_buckets();
 
-        if(this->m_stor.bptr)
-          ::operator delete(this->m_stor.bptr);
+        if(this->m_bptr)
+          ::operator delete(this->m_bptr);
 #ifdef ROCKET_DEBUG
-        ::std::memset(::std::addressof(this->m_stor), 0xB4, sizeof(m_stor));
+        ::std::memset(static_cast<void*>(this), 0xA6, sizeof(*this));
 #endif
       }
 
@@ -77,32 +69,35 @@ class Reference_Dictionary
 
   public:
     bool empty() const noexcept
-      { return this->m_stor.head == nullptr;  }
+      { return this->m_head == nullptr;  }
 
     size_t size() const noexcept
-      { return this->m_stor.size;  }
+      { return this->m_size;  }
 
     Reference_Dictionary& clear() noexcept
       {
-        if(this->m_stor.head)
+        if(this->m_head)
           this->do_destroy_buckets();
 
         // Clean invalid data up.
-        this->m_stor.head = nullptr;
-        this->m_stor.size = 0;
+        this->m_head = nullptr;
+        this->m_size = 0;
         return *this;
       }
 
     Reference_Dictionary& swap(Reference_Dictionary& other) noexcept
       {
-        xswap(this->m_stor, other.m_stor);
+        xswap(this->m_bptr, other.m_bptr);
+        xswap(this->m_eptr, other.m_eptr);
+        xswap(this->m_head, other.m_head);
+        xswap(this->m_size, other.m_size);
         return *this;
       }
 
     const Reference* get_opt(const phsh_string& name) const noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.
-        if(!this->m_stor.bptr) {
+        if(!this->m_bptr) {
           return nullptr;
         }
         // Find the bucket for the name.
@@ -118,10 +113,10 @@ class Reference_Dictionary
     Reference& open(const phsh_string& name)
       {
         // Reserve more room by rehashing if the load factor would exceed 0.5.
-        auto nbkt = static_cast<size_t>(this->m_stor.eptr - this->m_stor.bptr);
-        if(ROCKET_UNEXPECT(this->m_stor.size >= nbkt / 2)) {
+        auto nbkt = static_cast<size_t>(this->m_eptr - this->m_bptr);
+        if(ROCKET_UNEXPECT(this->m_size >= nbkt / 2)) {
           // Ensure the number of buckets is an odd number.
-          this->do_rehash(this->m_stor.size * 3 | 17);
+          this->do_rehash(this->m_size * 3 | 17);
         }
         // Find a bucket for the new name.
         auto qbkt = this->do_xprobe(name);
@@ -137,7 +132,7 @@ class Reference_Dictionary
     bool erase(const phsh_string& name) noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.
-        if(!this->m_stor.bptr) {
+        if(!this->m_bptr) {
           return false;
         }
         // Find the bucket for the name.

@@ -65,34 +65,26 @@ class AVMC_Queue
           { return this->paramv;  }
       };
 
-    struct Storage
-      {
-        Header* bptr;  // beginning of raw storage
-        uint32_t nrsrv;  // size of raw storage, in number of `Header`s [!]
-        uint32_t nused;  // size of used storage, in number of `Header`s [!]
-      };
-
-    Storage m_stor = { };
+    Header* m_bptr = nullptr;  // beginning of raw storage
+    uint32_t m_rsrv = 0;  // size of raw storage, in number of `Header`s [!]
+    uint32_t m_used = 0;  // size of used storage, in number of `Header`s [!]
 
   public:
     constexpr AVMC_Queue() noexcept
       { }
 
     AVMC_Queue(AVMC_Queue&& other) noexcept
-      { xswap(this->m_stor, other.m_stor);  }
+      { this->swap(other);  }
 
     AVMC_Queue& operator=(AVMC_Queue&& other) noexcept
-      {
-        xswap(this->m_stor, other.m_stor);
-        return *this;
-      }
+      { return this->swap(other);  }
 
     ~AVMC_Queue()
       {
-        if(this->m_stor.bptr)
+        if(this->m_bptr)
           this->do_deallocate_storage();
 #ifdef ROCKET_DEBUG
-        ::std::memset(::std::addressof(this->m_stor), 0xE5, sizeof(m_stor));
+        ::std::memset(static_cast<void*>(this), 0xCA, sizeof(*this));
 #endif
       }
 
@@ -126,14 +118,13 @@ class AVMC_Queue
         struct H
           {
             static void construct(ParamU /*paramu*/, void* paramv, intptr_t source)
-              { ::rocket::construct_at(
-                  static_cast<typename ::rocket::remove_cvref<XNodeT>::type*>(paramv),
-                  ::std::forward<XNodeT>(*(typename ::std::remove_reference<XNodeT>::type*)source));  }
+              { ::rocket::construct_at(static_cast<typename ::rocket::remove_cvref<XNodeT>::type*>(paramv),
+                                       ::std::forward<XNodeT>(*reinterpret_cast<typename ::std::remove_reference<XNodeT>::type*>(source)));  }
 
             static void destroy(ParamU /*paramu*/, void* paramv) noexcept
-              { ::rocket::destroy_at(
-                  static_cast<typename ::rocket::remove_cvref<XNodeT>::type*>(paramv));  }
+              { ::rocket::destroy_at(static_cast<typename ::rocket::remove_cvref<XNodeT>::type*>(paramv));  }
           };
+
         // Define the virtual table.
         static constexpr Vtable s_vtbl = { H::destroy, execT, enumT };
 
@@ -144,23 +135,25 @@ class AVMC_Queue
 
   public:
     bool empty() const noexcept
-      { return this->m_stor.bptr == nullptr;  }
+      { return this->m_bptr == nullptr;  }
 
     AVMC_Queue& clear() noexcept
       {
-        if(this->m_stor.bptr)
+        if(this->m_bptr)
           this->do_deallocate_storage();
 
         // Clean invalid data up.
-        this->m_stor.bptr = nullptr;
-        this->m_stor.nrsrv = 0;
-        this->m_stor.nused = 0;
+        this->m_bptr = nullptr;
+        this->m_rsrv = 0;
+        this->m_used = 0;
         return *this;
       }
 
     AVMC_Queue& swap(AVMC_Queue& other) noexcept
       {
-        xswap(this->m_stor, other.m_stor);
+        xswap(this->m_bptr, other.m_bptr);
+        xswap(this->m_rsrv, other.m_rsrv);
+        xswap(this->m_used, other.m_used);
         return *this;
       }
 

@@ -10,8 +10,8 @@ namespace Asteria {
 
 void AVMC_Queue::do_deallocate_storage() const
   {
-    auto bptr = this->m_stor.bptr;
-    auto eptr = bptr + this->m_stor.nused;
+    auto bptr = this->m_bptr;
+    auto eptr = bptr + this->m_used;
     // Destroy all nodes.
     auto qnode = bptr;
     while(ROCKET_EXPECT(qnode != eptr)) {
@@ -28,8 +28,8 @@ void AVMC_Queue::do_deallocate_storage() const
 
 void AVMC_Queue::do_execute_all_break(AIR_Status& status, Executive_Context& ctx) const
   {
-    auto bptr = this->m_stor.bptr;
-    auto eptr = bptr + this->m_stor.nused;
+    auto bptr = this->m_bptr;
+    auto eptr = bptr + this->m_used;
     // Execute all nodes.
     auto qnode = bptr;
     while(ROCKET_EXPECT(qnode != eptr)) {
@@ -45,8 +45,8 @@ void AVMC_Queue::do_execute_all_break(AIR_Status& status, Executive_Context& ctx
 
 void AVMC_Queue::do_enumerate_variables(Variable_Callback& callback) const
   {
-    auto bptr = this->m_stor.bptr;
-    auto eptr = bptr + this->m_stor.nused;
+    auto bptr = this->m_bptr;
+    auto eptr = bptr + this->m_used;
     // Enumerate variables from all nodes.
     auto qnode = bptr;
     while(ROCKET_EXPECT(qnode != eptr)) {
@@ -62,7 +62,7 @@ void AVMC_Queue::do_reserve_delta(size_t nbytes)
   {
     // Once a node has been appended, reallocation is no longer allowed.
     // Otherwise we would have to move nodes around, which complexifies things without any obvious benefits.
-    if(this->m_stor.bptr) {
+    if(this->m_bptr) {
       ASTERIA_THROW("AVMC queue not resizable");
     }
     constexpr auto nbytes_hdr = sizeof(Header);
@@ -72,24 +72,24 @@ void AVMC_Queue::do_reserve_delta(size_t nbytes)
     }
     auto nbytes_node = static_cast<uint32_t>(1 + (nbytes + nbytes_hdr - 1) / nbytes_hdr);
     // Reserve one header, followed by `nphdrs` headers for the parameters.
-    if(this->m_stor.nrsrv > INT32_MAX / nbytes_hdr + nbytes_node) {
+    if(this->m_rsrv > INT32_MAX / nbytes_hdr + nbytes_node) {
       ASTERIA_THROW("too many AVMC nodes");
     }
-    this->m_stor.nrsrv += nbytes_node;
+    this->m_rsrv += nbytes_node;
   }
 
 AVMC_Queue::Header* AVMC_Queue::do_check_storage_for_paramv(size_t nbytes)
   {
     constexpr auto nbytes_hdr = sizeof(Header);
-    auto bptr = this->m_stor.bptr;
+    auto bptr = this->m_bptr;
     // If no storage has been allocated so far, it shall be allocated now.
     if(ROCKET_UNEXPECT(!bptr)) {
-      bptr = static_cast<Header*>(::operator new(nbytes_hdr * this->m_stor.nrsrv));
-      this->m_stor.bptr = bptr;
+      bptr = static_cast<Header*>(::operator new(nbytes_hdr * this->m_rsrv));
+      this->m_bptr = bptr;
     }
-    auto qnode = bptr + this->m_stor.nused;
+    auto qnode = bptr + this->m_used;
     // Check the number of available headers.
-    auto navail = static_cast<size_t>(this->m_stor.nrsrv - this->m_stor.nused);
+    auto navail = static_cast<size_t>(this->m_rsrv - this->m_used);
     if((navail < 1) || (nbytes > nbytes_hdr * (navail - 1))) {
       ASTERIA_THROW("AVMC queue full");
     }
@@ -110,7 +110,7 @@ void AVMC_Queue::do_append_trivial(Executor* exec, AVMC_Queue::ParamU paramu, si
     if(nbytes != 0) {
       ::std::memcpy(qnode->paramv, source, nbytes);
     }
-    this->m_stor.nused += nbytes_node;
+    this->m_used += nbytes_node;
   }
 
 void AVMC_Queue::do_append_nontrivial(ref_to<const Vtable> vtbl, AVMC_Queue::ParamU paramu, size_t nbytes,
@@ -126,7 +126,7 @@ void AVMC_Queue::do_append_nontrivial(ref_to<const Vtable> vtbl, AVMC_Queue::Par
     // Invoke the constructor if any, which is subject to exceptions.
     if(ROCKET_EXPECT(ctor))
       (*ctor)(paramu, qnode->paramv, source);
-    this->m_stor.nused += nbytes_node;
+    this->m_used += nbytes_node;
   }
 
 }  // namespace Asteria
