@@ -75,68 +75,75 @@ void AVMC_Queue::do_reserve_delta(size_t nbytes)
 
     // Once a node has been appended, reallocation is no longer allowed.
     // Otherwise we would have to move nodes around, which complexifies things without any obvious benefits.
-    constexpr auto nbytes_hdr = sizeof(Header);
-    constexpr auto nbytes_max = nbytes_hdr * nphdrs_max;
-    if(nbytes > nbytes_max) {
+    constexpr size_t nbytes_hdr = sizeof(Header);
+    constexpr size_t nbytes_max = nbytes_hdr * nphdrs_max;
+    if(nbytes > nbytes_max)
       ASTERIA_THROW("invalid AVMC node size (`$1` > `$2`)", nbytes, nbytes_max);
-    }
-    auto nbytes_node = static_cast<uint32_t>(1 + (nbytes + nbytes_hdr - 1) / nbytes_hdr);
+
     // Reserve one header, followed by `nphdrs` headers for the parameters.
-    if(this->m_rsrv > INT32_MAX / nbytes_hdr + nbytes_node) {
-      ASTERIA_THROW("too many AVMC nodes");
-    }
-    this->m_rsrv += nbytes_node;
+    uint32_t nhdrs_total = static_cast<uint32_t>((nbytes_hdr * 2 - 1 + nbytes) / nbytes_hdr);
+    constexpr uint32_t nhdrs_max = UINT32_MAX / nbytes_hdr;
+    if(this->m_rsrv > nhdrs_max - nhdrs_total)
+      ASTERIA_THROW("too many AVMC nodes (`$1` + `$2` > `$3`)", this->m_rsrv, nhdrs_total, nhdrs_max);
+    this->m_rsrv += nhdrs_total;
   }
 
 AVMC_Queue::Header* AVMC_Queue::do_check_node_storage(size_t nbytes)
   {
-    constexpr auto nbytes_hdr = sizeof(Header);
-    auto bptr = this->m_bptr;
-    // If no storage has been allocated so far, it shall be allocated now.
-    if(ROCKET_UNEXPECT(!bptr)) {
-      bptr = static_cast<Header*>(::operator new(nbytes_hdr * this->m_rsrv));
-      this->m_bptr = bptr;
-    }
-    auto qnode = bptr + this->m_used;
     // Check the number of available headers.
-    auto navail = static_cast<size_t>(this->m_rsrv - this->m_used);
-    if((navail < 1) || (nbytes > nbytes_hdr * (navail - 1))) {
-      ASTERIA_THROW("AVMC queue full");
+    constexpr size_t nbytes_hdr = sizeof(Header);
+    uint32_t nhdrs_total = static_cast<uint32_t>((nbytes_hdr * 2 - 1 + nbytes) / nbytes_hdr);
+    uint32_t nhdrs_avail = this->m_rsrv - this->m_used;
+    if(nhdrs_total > nhdrs_avail)
+      ASTERIA_THROW("AVMC queue full (`$1` > `$2`)", nhdrs_total > nhdrs_avail);
+
+    // If no storage has been allocated so far, it shall be allocated now.
+    auto qnode = this->m_bptr;
+    if(ROCKET_UNEXPECT(!qnode)) {
+      qnode = static_cast<Header*>(::operator new(this->m_rsrv * nbytes_hdr));
+      this->m_bptr = qnode;
     }
-    qnode->nphdrs = (nbytes + nbytes_hdr - 1) / nbytes_hdr % nphdrs_max;
+    qnode += this->m_used;
+
+    // Initialize the `nphdrs` field here only.
+    // The caller is responsible for setting other fields appropriately.
+    qnode->nphdrs = (nhdrs_total - 1) & (nphdrs_max - 1);
     return qnode;
   }
 
 void AVMC_Queue::do_append_trivial(Executor* exec, AVMC_Queue::ParamU paramu, size_t nbytes, const void* source)
   {
+    // Create a new node.
     auto qnode = this->do_check_node_storage(nbytes);
-    auto nbytes_node = static_cast<uint32_t>(qnode->nphdrs + size_t(1));
-    // Initialize the node.
     qnode->has_vtbl = false;
     qnode->paramu_x16 = paramu.x16;
     qnode->paramu_x32 = paramu.x32;
     qnode->exec = exec;
+
     // Copy source data if any.
-    if(nbytes != 0) {
+    if(nbytes != 0)
       ::std::memcpy(qnode->paramv, source, nbytes);
-    }
-    this->m_used += nbytes_node;
+
+    // Consume the storage.
+    this->m_used += qnode->total_size_in_headers();
   }
 
 void AVMC_Queue::do_append_nontrivial(const AVMC_Queue::Vtable* vtbl, AVMC_Queue::ParamU paramu, size_t nbytes,
                                       AVMC_Queue::Constructor* ctor_opt, intptr_t source)
   {
+    // Create a new node.
     auto qnode = this->do_check_node_storage(nbytes);
-    auto nbytes_node = static_cast<uint32_t>(qnode->nphdrs + size_t(1));
-    // Initialize the node.
     qnode->has_vtbl = true;
     qnode->paramu_x16 = paramu.x16;
     qnode->paramu_x32 = paramu.x32;
     qnode->vtbl = vtbl;
-    // Invoke the constructor if any, which is subject to exceptions.
+
+    // Invoke the constructor. If an exception is thrown, there is no effect.
     if(ROCKET_EXPECT(ctor_opt))
       (*ctor_opt)(paramu, qnode->paramv, source);
-    this->m_used += nbytes_node;
+
+    // Consume the storage.
+    this->m_used += qnode->total_size_in_headers();
   }
 
 }  // namespace Asteria
