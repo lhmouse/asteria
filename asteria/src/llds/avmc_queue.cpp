@@ -107,7 +107,7 @@ AVMC_Queue::Header* AVMC_Queue::do_check_node_storage(size_t nbytes)
 
     // Initialize the `nphdrs` field here only.
     // The caller is responsible for setting other fields appropriately.
-    qnode->nphdrs = (nhdrs_total - 1) & (nphdrs_max - 1);
+    qnode->nphdrs = (nhdrs_total - 1) & nphdrs_max;
     return qnode;
   }
 

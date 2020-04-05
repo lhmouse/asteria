@@ -33,16 +33,16 @@ class AVMC_Queue
     using Enumerator   = Variable_Callback& (Variable_Callback& callback, ParamU paramu, const void* paramv);
 
   private:
-    enum : size_t
-      {
-        nphdrs_max = 0x100,  // maximum value of `Header::nphdrs`
-      };
-
     struct Vtable
       {
         Destructor* dtor;
         Executor* exec;
         Enumerator* vnum;
+      };
+
+    enum : size_t
+      {
+        nphdrs_max = 0xFF,  // maximum value of `Header::nphdrs`
       };
 
     struct Header
@@ -114,7 +114,7 @@ class AVMC_Queue
         this->do_append_trivial(execT, paramu, sizeof(xnode), ::std::addressof(xnode));
       }
 
-    template<Executor execT, Enumerator* enumT, typename XNodeT> void do_dispatch_append(::std::false_type, ParamU paramu, XNodeT&& xnode)
+    template<Executor execT, Enumerator* vnumT, typename XNodeT> void do_dispatch_append(::std::false_type, ParamU paramu, XNodeT&& xnode)
       {
         // The vtable must have static storage duration. As it is defined `constexpr` here, we need 'real'
         // function pointers. Those converted from non-capturing lambdas are not an option.
@@ -129,7 +129,7 @@ class AVMC_Queue
           };
 
         // Define the virtual table.
-        static constexpr Vtable s_vtbl = { Helper::destroy, execT, enumT };
+        static constexpr Vtable s_vtbl = { Helper::destroy, execT, vnumT };
 
         // Append a node with a non-trivial parameter.
         this->do_append_nontrivial(&s_vtbl, paramu, sizeof(xnode), Helper::construct, reinterpret_cast<intptr_t>(::std::addressof(xnode)));
@@ -181,10 +181,10 @@ class AVMC_Queue
         return *this;
       }
 
-    template<Executor execT, Enumerator enumT, typename XNodeT> AVMC_Queue& append(ParamU paramu, XNodeT&& xnode)
+    template<Executor execT, Enumerator vnumT, typename XNodeT> AVMC_Queue& append(ParamU paramu, XNodeT&& xnode)
       {
         // Append a node with a parameter of type `remove_cvref_t<XNodeT>`.
-        this->do_dispatch_append<execT, enumT>(::std::false_type(), paramu, ::std::forward<XNodeT>(xnode));
+        this->do_dispatch_append<execT, vnumT>(::std::false_type(), paramu, ::std::forward<XNodeT>(xnode));
         return *this;
       }
 
