@@ -76,7 +76,7 @@ void AVMC_Queue::do_reserve_delta(size_t nbytes)
     // Once a node has been appended, reallocation is no longer allowed.
     // Otherwise we would have to move nodes around, which complexifies things without any obvious benefits.
     constexpr size_t nbytes_hdr = sizeof(Header);
-    constexpr size_t nbytes_max = nbytes_hdr * nphdrs_max;
+    constexpr size_t nbytes_max = nbytes_hdr * Header::nphdrs_max;
     if(nbytes > nbytes_max)
       ASTERIA_THROW("invalid AVMC node size (`$1` > `$2`)", nbytes, nbytes_max);
 
@@ -107,7 +107,7 @@ AVMC_Queue::Header* AVMC_Queue::do_check_node_storage(size_t nbytes)
 
     // Initialize the `nphdrs` field here only.
     // The caller is responsible for setting other fields appropriately.
-    qnode->nphdrs = (nhdrs_total - 1) & nphdrs_max;
+    qnode->nphdrs = (nhdrs_total - 1) & Header::nphdrs_max;
     return qnode;
   }
 

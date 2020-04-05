@@ -40,13 +40,10 @@ class AVMC_Queue
         Enumerator* vnum;
       };
 
-    enum : size_t
-      {
-        nphdrs_max = 0xFF,  // maximum value of `Header::nphdrs`
-      };
-
     struct Header
       {
+        enum : size_t { nphdrs_max = 0xFF  };
+
         uint16_t nphdrs : 8;  // size of `paramv`, in number of `Header`s [!]
         uint16_t has_vtbl : 1;  // vtable exists?
         uint16_t : 7;
