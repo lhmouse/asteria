@@ -833,24 +833,22 @@ AIR_Status do_coalescence(Executive_Context& ctx, ParamU pu, const void* pv)
 ROCKET_NOINLINE Reference& do_invoke_nontail(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
                                              const cow_function& target, cow_vector<Reference>&& args)
   {
-    // Call the hook function if any.
     const auto& inside = ctx.zvarg()->func();
     const auto& qhooks = ctx.global().get_hooks_opt();
+    // Note exceptions thrown here are not caught.
     if(qhooks)
       qhooks->on_function_call(sloc, inside, target);
-    // Perform a non-tail call.
+
     ASTERIA_RUNTIME_TRY {
       target.invoke(self, ctx.global(), ::std::move(args));
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
       // Append the current frame and rethrow the exception.
       except.push_frame_call(sloc, inside);
-      // Call the hook function if any.
       if(qhooks)
         qhooks->on_function_except(sloc, inside, except);
       throw;
     }
-    // Call the hook function if any.
     if(qhooks)
       qhooks->on_function_return(sloc, inside, self);
     return self;
@@ -862,7 +860,7 @@ ROCKET_NOINLINE Reference& do_wrap_ptc(Reference& self, const Source_Location& s
     // Pack arguments for this proper tail call.
     auto tca = ::rocket::make_refcnt<PTC_Arguments>(sloc, ctx.zvarg(), ptc, target,
                                         ::std::move(args.insert(args.size(), ::std::move(self))));
-    // Return it.
+
     Reference_root::S_tail_call xref = { ::std::move(tca) };
     return self = ::std::move(xref);
   }

@@ -104,8 +104,8 @@ class Runtime_Error : public virtual exception
                                           // Perform operations that might throw exceptions here.
 #define ASTERIA_RUNTIME_CATCH(...)      catch(::Asteria::Runtime_Error&)  \
                                           { throw;  }  \
-                                        catch(::std::exception& zTrSr9grT)  \
-                                          { throw ::Asteria::Runtime_Error(zTrSr9grT); }  \
+                                        catch(::std::exception& zTrSrvgrK_)  \
+                                          { throw ::Asteria::Runtime_Error(zTrSrvgrK_); }  \
                                       }  \
                                       catch(__VA_ARGS__)
 

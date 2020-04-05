@@ -22,6 +22,7 @@ Runtime_Error& do_unpack_frames(Runtime_Error& except, Global_Context& global, E
     while(frames.size()) {
       auto tca = ::std::move(frames.mut_back());
       frames.pop_back();
+
       // Unpack arguments.
       const auto& sloc = tca->sloc();
       const auto& inside = tca->zvarg()->func();
@@ -30,9 +31,9 @@ Runtime_Error& do_unpack_frames(Runtime_Error& except, Global_Context& global, E
       // Push the function call.
       except.push_frame_call(sloc, inside);
       // Call the hook function if any.
-      if(qhooks) {
+      if(qhooks)
         qhooks->on_function_except(sloc, inside, except);
-      }
+
       // Evaluate deferred expressions if any.
       if(tca->get_defer_stack().size()) {
         Executive_Context ctx(::rocket::ref(global), ::rocket::ref(stack), ::rocket::ref(tca->zvarg()),
@@ -73,18 +74,19 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
       frames.emplace_back(tca);
 
       // Generate a single-step trap.
-      if(qhooks) {
+      if(qhooks)
         qhooks->on_single_step_trap(sloc, inside, nullptr);
-      }
+
       // Get the `this` reference and all the other arguments.
       const auto& target = tca->get_target();
       auto args = ::std::move(tca->open_arguments_and_self());
       self = ::std::move(args.mut_back());
       args.pop_back();
+
       // Call the hook function if any.
-      if(qhooks) {
+      if(qhooks)
         qhooks->on_function_call(sloc, inside, target);
-      }
+
       // Perform a non-tail call.
       ASTERIA_RUNTIME_TRY {
         target.invoke_ptc_aware(self, global, ::std::move(args));
@@ -94,6 +96,7 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
         throw;
       }
     }
+
     // Check for deferred expressions.
     while(frames.size()) {
       tca = ::std::move(frames.mut_back());
@@ -111,6 +114,7 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
         throw;
       }
     }
+
     // Process the result.
     if(ptc_conj == ptc_aware_void) {
       // Return `void`.
