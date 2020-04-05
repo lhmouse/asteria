@@ -53,16 +53,16 @@ class AVMC_Queue
           Executor* exec;  // active if `has_vtbl`
           const Vtable* vtbl;  // active otherwise
         };
-        alignas(max_align_t) mutable char paramv[];  // user-defined data [3]
+        alignas(max_align_t) mutable char payload[];  // user-defined data [3]
 
         constexpr uint32_t total_size_in_headers() const noexcept
           { return UINT32_C(1) + this->nphdrs; }
 
-        constexpr ParamU get_paramu() const noexcept
+        constexpr ParamU paramu() const noexcept
           { return {{ this->paramu_x32, this->paramu_x16 }};  }
 
-        constexpr void* get_paramv() const noexcept
-          { return this->paramv;  }
+        constexpr void* paramv() const noexcept
+          { return this->payload;  }
       };
 
     Header* m_bptr = nullptr;  // beginning of raw storage

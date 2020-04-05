@@ -19,7 +19,7 @@ void AVMC_Queue::do_deallocate_storage() const
       // Call the destructor for this node.
       auto dtor = qnode->has_vtbl ? qnode->vtbl->dtor : nullptr;
       if(ROCKET_UNEXPECT(dtor))
-        (*dtor)(qnode->get_paramu(), qnode->get_paramv());
+        (*dtor)(qnode->paramu(), qnode->paramv());
 
       // Move to the next node.
       qnode += qnode->total_size_in_headers();
@@ -41,7 +41,7 @@ void AVMC_Queue::do_execute_all_break(AIR_Status& status, Executive_Context& ctx
       // Call the executor function for this node.
       auto exec = qnode->has_vtbl ? qnode->vtbl->exec : qnode->exec;
       ROCKET_ASSERT(exec);
-      status = (*exec)(ctx, qnode->get_paramu(), qnode->get_paramv());
+      status = (*exec)(ctx, qnode->paramu(), qnode->paramv());
       if(ROCKET_UNEXPECT(status != air_status_next))
         return;
 
@@ -61,7 +61,7 @@ void AVMC_Queue::do_enumerate_variables(Variable_Callback& callback) const
       // Call the enumerator function for this node.
       auto vnum = qnode->has_vtbl ? qnode->vtbl->vnum : nullptr;
       if(ROCKET_UNEXPECT(vnum))
-        (*vnum)(callback, qnode->get_paramu(), qnode->get_paramv());
+        (*vnum)(callback, qnode->paramu(), qnode->paramv());
 
       // Move to the next node.
       qnode += qnode->total_size_in_headers();
@@ -122,7 +122,7 @@ void AVMC_Queue::do_append_trivial(Executor* exec, AVMC_Queue::ParamU paramu, si
 
     // Copy source data if any.
     if(nbytes != 0)
-      ::std::memcpy(qnode->paramv, source, nbytes);
+      ::std::memcpy(qnode->paramv(), source, nbytes);
 
     // Consume the storage.
     this->m_used += qnode->total_size_in_headers();
@@ -140,7 +140,7 @@ void AVMC_Queue::do_append_nontrivial(const AVMC_Queue::Vtable* vtbl, AVMC_Queue
 
     // Invoke the constructor. If an exception is thrown, there is no effect.
     if(ROCKET_EXPECT(ctor_opt))
-      (*ctor_opt)(paramu, qnode->paramv, source);
+      (*ctor_opt)(paramu, qnode->paramv(), source);
 
     // Consume the storage.
     this->m_used += qnode->total_size_in_headers();
