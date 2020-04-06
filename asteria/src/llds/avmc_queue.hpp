@@ -42,8 +42,6 @@ class AVMC_Queue
 
     struct Header
       {
-        enum : size_t { nphdrs_max = 0xFF  };
-
         uint16_t nphdrs : 8;  // size of `paramv`, in number of `Header`s [!]
         uint16_t has_vtbl : 1;  // vtable exists?
         uint16_t : 7;
@@ -55,11 +53,14 @@ class AVMC_Queue
         };
         alignas(max_align_t) mutable char payload[];  // user-defined data [3]
 
-        constexpr uint32_t total_size_in_headers() const noexcept
-          { return UINT32_C(1) + this->nphdrs; }
+        static constexpr uint32_t nphdrs_max() noexcept
+          { return 0xFF;  }  // note: keep this up to date with `nphdrs`!
 
         constexpr ParamU paramu() const noexcept
           { return {{ this->paramu_x32, this->paramu_x16 }};  }
+
+        constexpr uint32_t total_size_in_headers() const noexcept
+          { return UINT32_C(1) + this->nphdrs;  }
 
         constexpr void* paramv() const noexcept
           { return this->payload;  }
