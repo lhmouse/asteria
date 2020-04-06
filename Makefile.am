@@ -285,7 +285,8 @@ check_PROGRAMS =  \
   asteria/test/github_71.test  \
   asteria/test/github_78.test  \
   asteria/test/github_84.test  \
-  asteria/test/github_85.test
+  asteria/test/github_85.test  \
+  asteria/test/github_98.test
 
 TESTS = ${check_PROGRAMS}
 
