@@ -386,7 +386,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         auto code_init = do_generate_statement_list(nullptr, ctx_for, opts, ptc_aware_none, altr.init);
 
         auto code_cond = do_generate_expression(opts, ptc_aware_none, ctx_for, altr.cond);
-        if(!altr.cond.empty())
+        if(!altr.cond.units.empty())
           do_generate_glvalue_to_rvalue(code_cond, altr.cond.sloc);
 
         auto code_step = do_generate_expression(opts, ptc_aware_none, ctx_for, altr.step);
