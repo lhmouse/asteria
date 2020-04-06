@@ -14,11 +14,9 @@ Precedence Infix_Element::tell_precedence() const noexcept
   {
     switch(this->index()) {
     case index_head: {
-        // const auto& altr = this->m_stor.as<index_head>();
         return precedence_lowest;
       }
     case index_ternary: {
-        // const auto& altr = this->m_stor.as<index_ternary>();
         return precedence_assignment;
       }
     case index_logical_and: {
