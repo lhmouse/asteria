@@ -2690,7 +2690,7 @@ AIR_Status do_import_call(Executive_Context& ctx, ParamU pu, const void* pv)
       abspath.append(path);
     }
     // Canonicalize it.
-    ::rocket::unique_ptr<char, void (&)(void*)> tpath(::realpath(abspath.safe_c_str(), nullptr), ::free);
+    uptr<char, void (&)(void*)> tpath(::realpath(abspath.safe_c_str(), nullptr), ::free);
     if(!tpath) {
       int err = errno;
       char sbuf[256];

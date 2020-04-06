@@ -41,7 +41,7 @@ Simple_Script& Simple_Script::reload_string(const cow_string& code, const cow_st
 Simple_Script& Simple_Script::reload_file(const char* path)
   {
     // Resolve the path to an absolute one.
-    ::rocket::unique_ptr<char, void (&)(void*)> abspath(::realpath(path, nullptr), ::free);
+    uptr<char, void (&)(void*)> abspath(::realpath(path, nullptr), ::free);
     if(!abspath)
       ASTERIA_THROW_SYSTEM_ERROR("realpath");
 

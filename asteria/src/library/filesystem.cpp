@@ -129,7 +129,7 @@ Sval std_filesystem_get_working_directory()
   {
     // Pass a null pointer to request dynamic allocation.
     // Note this behavior is an extension that exists almost everywhere.
-    ::rocket::unique_ptr<char, void (&)(void*)> qcwd(::getcwd(nullptr, 0), ::free);
+    uptr<char, void (&)(void*)> qcwd(::getcwd(nullptr, 0), ::free);
     if(!qcwd)
       ASTERIA_THROW_SYSTEM_ERROR("getcwd");
     return Sval(qcwd);
@@ -138,7 +138,7 @@ Sval std_filesystem_get_working_directory()
 Sval std_filesystem_get_real_path(Sval path)
   {
     // Pass a null pointer to request dynamic allocation.
-    ::rocket::unique_ptr<char, void (&)(void*)> abspath(::realpath(path.safe_c_str(), nullptr), ::free);
+    uptr<char, void (&)(void*)> abspath(::realpath(path.safe_c_str(), nullptr), ::free);
     if(!abspath)
       ASTERIA_THROW_SYSTEM_ERROR("realpath");
     return Sval(abspath);
