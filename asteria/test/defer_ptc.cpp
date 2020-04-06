@@ -21,18 +21,17 @@ int main()
     var st1, st2;
 
     // convert the backtrace to somethign comparable
-    func transform_backtrace(st, bt) {
+    func transform_backtrace(st, bt, ln) {
       st = [ ];
       // ignore top level calls
       for(each k, v : bt) {
         st[$] = v.frame;
-        st[$] = v.frame == "call" && v.func == "<top level>"
-                ? 12345
-                : v.line;
+        st[$] = v.line >= ln - 3 ? 12345 : v.line;
         st[$] = v.value;
+        st[$] = "-----";
       }
       // print the backtrace
-      std.debug.logf("backtrace: $1", st);
+      std.debug.dump(bt);
       return& st;
     }
 
@@ -66,13 +65,13 @@ int main()
     try
       foo();
     catch(e)
-      transform_backtrace(&st1, __backtrace);
+      transform_backtrace(&st1, __backtrace, __line);
     // ptc
     ptc = true;
     try
       foo();
     catch(e)
-      transform_backtrace(&st2, __backtrace);
+      transform_backtrace(&st2, __backtrace, __line);
     // compare
     assert st1 == st2;
 
@@ -83,13 +82,13 @@ int main()
     try
       foo();
     catch(e)
-      transform_backtrace(&st1, __backtrace);
+      transform_backtrace(&st1, __backtrace, __line);
     // ptc
     ptc = true;
     try
       foo();
     catch(e)
-      transform_backtrace(&st2, __backtrace);
+      transform_backtrace(&st2, __backtrace, __line);
     // compare
     assert st1 == st2;
 
@@ -100,13 +99,13 @@ int main()
     try
       foo();
     catch(e)
-      transform_backtrace(&st1, __backtrace);
+      transform_backtrace(&st1, __backtrace, __line);
     // ptc
     ptc = true;
     try
       foo();
     catch(e)
-      transform_backtrace(&st2, __backtrace);
+      transform_backtrace(&st2, __backtrace, __line);
     // compare
     assert st1 == st2;
 
@@ -117,13 +116,13 @@ int main()
     try
       foo();
     catch(e)
-      transform_backtrace(&st1, __backtrace);
+      transform_backtrace(&st1, __backtrace, __line);
     // ptc
     ptc = true;
     try
       foo();
     catch(e)
-      transform_backtrace(&st2, __backtrace);
+      transform_backtrace(&st2, __backtrace, __line);
     // compare
     assert st1 == st2;
 
