@@ -70,13 +70,23 @@ void AVMC_Queue::do_enumerate_variables(Variable_Callback& callback) const
 
 void AVMC_Queue::do_reserve_delta(size_t nbytes)
   {
+    // Once a node has been appended, reallocation is no longer allowed.
+    // Otherwise we would have to move nodes around, which complexifies things without any obvious benefits.
     if(this->m_bptr)
       ASTERIA_THROW("AVMC queue not resizable");
 
-    // Once a node has been appended, reallocation is no longer allowed.
-    // Otherwise we would have to move nodes around, which complexifies things without any obvious benefits.
+    // Get the maximum size of user-defined parameter that is allowed in a node.
+    Header test;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Woverflow"
+    test.nphdrs = SIZE_MAX;
+#pragma GCC diagnostic pop
+    size_t nphdrs_max = test.nphdrs;
+
+    // Check for overlarge `nbytes` values.
     constexpr size_t nbytes_hdr = sizeof(Header);
-    constexpr size_t nbytes_max = nbytes_hdr * Header::nphdrs_max();
+    size_t nbytes_max = nbytes_hdr * nphdrs_max;
     if(nbytes > nbytes_max)
       ASTERIA_THROW("invalid AVMC node size (`$1` > `$2`)", nbytes, nbytes_max);
 

@@ -53,9 +53,6 @@ class AVMC_Queue
         };
         alignas(max_align_t) mutable char payload[];  // user-defined data [3]
 
-        static constexpr uint32_t nphdrs_max() noexcept
-          { return 0xFF;  }  // note: keep this up to date with `nphdrs`!
-
         constexpr ParamU paramu() const noexcept
           { return {{ this->paramu_x32, this->paramu_x16 }};  }
 
