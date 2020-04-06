@@ -52,7 +52,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
           qref = qctx->get_named_reference_opt(altr.name);
           if(qref) {
             // A reference declared later has been found. Record the context depth for later lookups.
-            AIR_Node::S_push_local_reference xnode = { depth, altr.name };
+            AIR_Node::S_push_local_reference xnode = { altr.sloc, depth, altr.name };
             code.emplace_back(::std::move(xnode));
             return code;
           }
@@ -60,7 +60,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
           qctx = qctx->get_parent_opt();
           if(!qctx) {
             // No name has been found so far. Assume that the name will be found in the global context.
-            AIR_Node::S_push_global_reference xnode = { altr.name };
+            AIR_Node::S_push_global_reference xnode = { altr.sloc, altr.name };
             code.emplace_back(::std::move(xnode));
             return code;
           }
@@ -95,7 +95,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         auto code_false = do_generate_code_branch(opts, ptc, ctx, altr.branch_false);
 
         // Encode arguments.
-        AIR_Node::S_branch_expression xnode = { ::std::move(code_true), ::std::move(code_false), altr.assign };
+        AIR_Node::S_branch_expression xnode = { altr.sloc, ::std::move(code_true), ::std::move(code_false), altr.assign };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -113,7 +113,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         const auto& altr = this->m_stor.as<index_member_access>();
 
         // Encode arguments.
-        AIR_Node::S_member_access xnode = { altr.name };
+        AIR_Node::S_member_access xnode = { altr.sloc, altr.name };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -122,7 +122,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         const auto& altr = this->m_stor.as<index_operator_rpn>();
 
         // Encode arguments.
-        AIR_Node::S_apply_operator xnode = { altr.xop, altr.assign };
+        AIR_Node::S_apply_operator xnode = { altr.sloc, altr.xop, altr.assign };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -131,7 +131,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         const auto& altr = this->m_stor.as<index_unnamed_array>();
 
         // Encode arguments.
-        AIR_Node::S_push_unnamed_array xnode = { altr.nelems };
+        AIR_Node::S_push_unnamed_array xnode = { altr.sloc, altr.nelems };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -140,7 +140,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         const auto& altr = this->m_stor.as<index_unnamed_object>();
 
         // Encode arguments.
-        AIR_Node::S_push_unnamed_object xnode = { altr.keys };
+        AIR_Node::S_push_unnamed_object xnode = { altr.sloc, altr.keys };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -152,7 +152,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         auto code_null = do_generate_code_branch(opts, ptc, ctx, altr.branch_null);
 
         // Encode arguments.
-        AIR_Node::S_coalescence xnode = { ::std::move(code_null), altr.assign };
+        AIR_Node::S_coalescence xnode = { altr.sloc, ::std::move(code_null), altr.assign };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -161,7 +161,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         const auto& altr = this->m_stor.as<index_global_reference>();
 
         // This name is always looked up in the global context.
-        AIR_Node::S_push_global_reference xnode = { altr.name };
+        AIR_Node::S_push_global_reference xnode = { altr.sloc, altr.name };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -183,7 +183,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
           return code;
 
         // Encode arguments.
-        AIR_Node::S_glvalue_to_rvalue xnode = { };
+        AIR_Node::S_glvalue_to_rvalue xnode = { altr.sloc };
         code.emplace_back(::std::move(xnode));
         return code;
       }

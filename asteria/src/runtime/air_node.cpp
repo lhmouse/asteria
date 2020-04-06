@@ -23,6 +23,7 @@ namespace Asteria {
 namespace {
 
 using ParamU      = AVMC_Queue::ParamU;
+using Symbols     = AVMC_Queue::Symbols;
 using Executor    = AVMC_Queue::Executor;
 using Enumerator  = AVMC_Queue::Enumerator;
 
@@ -119,54 +120,57 @@ template<typename ParamV> inline const ParamV* do_pcast(const void* pv) noexcept
 template<typename ParamV> Variable_Callback& do_penum(Variable_Callback& callback, ParamU /*pu*/, const void* pv)
   { return static_cast<const ParamV*>(pv)->enumerate_variables(callback);  }
 
-// This is the trait struct for parameter types that implement `enumerate_variables()`.
-template<typename ParamV, typename = void> struct AVMC_Appender : ParamV
+// This defines common members of AVMC nodes.
+struct AVMC_Appender_common
   {
-    ParamU pu;
+    ParamU pu = { };
+    opt<Symbols> syms;
 
+    void set_symbols(const Source_Location& sloc)
+      { this->syms = { sloc };  }
+  };
+
+// This is the trait struct for parameter types that implement `enumerate_variables()`.
+template<typename ParamV, typename = void> struct AVMC_Appender : AVMC_Appender_common, ParamV
+  {
     constexpr AVMC_Appender()
-      : ParamV(), pu()
-      { }
+      : ParamV()  { }
 
     AVMC_Queue& request(AVMC_Queue& queue) const
-      { return queue.request(sizeof(ParamV));  }
+      { return queue.request(sizeof(ParamV), this->syms.value_ptr());  }
 
     template<Executor executorT> AVMC_Queue& output(AVMC_Queue& queue)
-      { return queue.append<executorT, do_penum<ParamV>>(this->pu, static_cast<ParamV&&>(*this));  }
+      { return queue.append<executorT, do_penum<ParamV>>(this->pu, this->syms.value_ptr(),
+                                                         static_cast<ParamV&&>(*this));  }
   };
 
 // This is the trait struct for parameter types that do not implement `enumerate_variables()`.
 template<typename ParamV> struct AVMC_Appender<ParamV,
-               typename ::std::conditional<1, void,
-                                 typename ParamV::nonenumerable>::type> : ParamV
+              typename ::std::conditional<1, void,
+                         typename ParamV::nonenumerable>::type> : AVMC_Appender_common, ParamV
   {
-    ParamU pu;
-
     constexpr AVMC_Appender()
-      : ParamV(), pu()
-      { }
+      : ParamV()  { }
 
     AVMC_Queue& request(AVMC_Queue& queue) const
-      { return queue.request(sizeof(ParamV));  }
+      { return queue.request(sizeof(ParamV), this->syms.value_ptr());  }
 
     template<Executor executorT> AVMC_Queue& output(AVMC_Queue& queue)
-      { return queue.append<executorT>(this->pu, static_cast<ParamV&&>(*this));  }
+      { return queue.append<executorT>(this->pu, this->syms.value_ptr(),
+                                       static_cast<ParamV&&>(*this));  }
   };
 
 // This is the trait struct when there is no parameter.
-template<> struct AVMC_Appender<void, void>
+template<> struct AVMC_Appender<void, void> : AVMC_Appender_common
   {
-    ParamU pu;
-
     constexpr AVMC_Appender()
-      : pu()
       { }
 
     AVMC_Queue& request(AVMC_Queue& queue) const
-      { return queue.request(0);  }
+      { return queue.request(0, this->syms.value_ptr());  }
 
     template<Executor executorT> AVMC_Queue& output(AVMC_Queue& queue)
-      { return queue.append<executorT>(this->pu);  }
+      { return queue.append<executorT>(this->pu, this->syms.value_ptr());  }
   };
 
 AVMC_Queue& do_solidify_queue(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
@@ -223,7 +227,7 @@ struct Pv_for_each
 struct Pv_try
   {
     AVMC_Queue queue_try;
-    Source_Location sloc;
+    Source_Location sloc_catch;
     phsh_string name_except;
     AVMC_Queue queue_catch;
 
@@ -617,7 +621,7 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
   {
     // Unpack arguments.
     const auto& queue_try = do_pcast<Pv_try>(pv)->queue_try;
-    const auto& sloc = do_pcast<Pv_try>(pv)->sloc;
+    const auto& sloc_catch = do_pcast<Pv_try>(pv)->sloc_catch;
     const auto& name_except = do_pcast<Pv_try>(pv)->name_except;
     const auto& queue_catch = do_pcast<Pv_try>(pv)->queue_catch;
 
@@ -634,7 +638,7 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
       // Reuse the exception object. Don't bother allocating a new one.
-      except.push_frame_catch(sloc);
+      except.push_frame_catch(sloc_catch);
       // This branch must be executed inside this `catch` block.
       // User-provided bindings may obtain the current exception using `::std::current_exception`.
       Executive_Context ctx_catch(::rocket::ref(ctx), nullptr);
@@ -709,7 +713,7 @@ AIR_Status do_glvalue_to_rvalue(Executive_Context& ctx, ParamU /*pu*/, const voi
   {
     // Check for glvalues only. Void references and PTC wrappers are forwarded as is.
     auto& self = ctx.stack().open_top();
-    if(!self.is_glvalue()) {
+    if(self.is_rvalue()) {
       return air_status_next;
     }
     // Convert the result to an rvalue.
@@ -843,8 +847,6 @@ ROCKET_NOINLINE Reference& do_invoke_nontail(Reference& self, const Source_Locat
       target.invoke(self, ctx.global(), ::std::move(args));
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
-      // Append the current frame and rethrow the exception.
-      except.push_frame_call(sloc, inside);
       if(qhooks)
         qhooks->on_function_except(sloc, inside, except);
       throw;
@@ -2739,13 +2741,13 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
 
     case index_execute_block: {
         const auto& altr = this->m_stor.as<index_execute_block>();
+
         // Check for rebinds recursively.
         Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
         auto pair = ::std::make_pair(false, altr);
         do_rebind_nodes(pair.first, pair.second.code_body, ctx_body);
-        if(!pair.first) {
+        if(!pair.first)
           return nullopt;
-        }
         return ::std::move(pair.second);
       }
 
@@ -2757,72 +2759,73 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
 
     case index_if_statement: {
         const auto& altr = this->m_stor.as<index_if_statement>();
+
         // Check for rebinds recursively.
         Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
         auto pair = ::std::make_pair(false, altr);
         do_rebind_nodes(pair.first, pair.second.code_true, ctx_body);
         do_rebind_nodes(pair.first, pair.second.code_false, ctx_body);
-        if(!pair.first) {
+        if(!pair.first)
           return nullopt;
-        }
         return ::std::move(pair.second);
       }
 
     case index_switch_statement: {
         const auto& altr = this->m_stor.as<index_switch_statement>();
+
         // Check for rebinds recursively.
         Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
         auto pair = ::std::make_pair(false, altr);
         do_rebind_nodes(pair.first, pair.second.code_labels, ctx_body);
         do_rebind_nodes(pair.first, pair.second.code_bodies, ctx_body);
-        if(!pair.first) {
+        if(!pair.first)
           return nullopt;
-        }
         return ::std::move(pair.second);
       }
 
     case index_do_while_statement: {
         const auto& altr = this->m_stor.as<index_do_while_statement>();
+
         // Check for rebinds recursively.
         Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
         auto pair = ::std::make_pair(false, altr);
         do_rebind_nodes(pair.first, pair.second.code_body, ctx_body);
         do_rebind_nodes(pair.first, pair.second.code_cond, ctx_body);
-        if(!pair.first) {
+        if(!pair.first)
           return nullopt;
-        }
         return ::std::move(pair.second);
       }
 
     case index_while_statement: {
         const auto& altr = this->m_stor.as<index_while_statement>();
+
         // Check for rebinds recursively.
         Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
         auto pair = ::std::make_pair(false, altr);
         do_rebind_nodes(pair.first, pair.second.code_cond, ctx_body);
         do_rebind_nodes(pair.first, pair.second.code_body, ctx_body);
-        if(!pair.first) {
+        if(!pair.first)
           return nullopt;
-        }
         return ::std::move(pair.second);
       }
 
     case index_for_each_statement: {
         const auto& altr = this->m_stor.as<index_for_each_statement>();
+
         // Check for rebinds recursively.
         Analytic_Context ctx_for(::rocket::ref(ctx), nullptr);
         Analytic_Context ctx_body(::rocket::ref(ctx_for), nullptr);
         auto pair = ::std::make_pair(false, altr);
         do_rebind_nodes(pair.first, pair.second.code_init, ctx_for);
         do_rebind_nodes(pair.first, pair.second.code_body, ctx_body);
-        if(!pair.first) {
+        if(!pair.first)
           return nullopt;
-        }
         return ::std::move(pair.second);
       }
 
     case index_for_statement: {
         const auto& altr = this->m_stor.as<index_for_statement>();
+
         // Check for rebinds recursively.
         Analytic_Context ctx_for(::rocket::ref(ctx), nullptr);
         Analytic_Context ctx_body(::rocket::ref(ctx_for), nullptr);
@@ -2831,22 +2834,21 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         do_rebind_nodes(pair.first, pair.second.code_cond, ctx_for);
         do_rebind_nodes(pair.first, pair.second.code_step, ctx_for);
         do_rebind_nodes(pair.first, pair.second.code_body, ctx_body);
-        if(!pair.first) {
+        if(!pair.first)
           return nullopt;
-        }
         return ::std::move(pair.second);
       }
 
     case index_try_statement: {
         const auto& altr = this->m_stor.as<index_try_statement>();
+
         // Check for rebinds recursively.
         Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
         auto pair = ::std::make_pair(false, altr);
         do_rebind_nodes(pair.first, pair.second.code_try, ctx_body);
         do_rebind_nodes(pair.first, pair.second.code_catch, ctx_body);
-        if(!pair.first) {
+        if(!pair.first)
           return nullopt;
-        }
         return ::std::move(pair.second);
       }
 
@@ -2862,19 +2864,20 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
 
     case index_push_local_reference: {
         const auto& altr = this->m_stor.as<index_push_local_reference>();
+
         // Get the context.
         const Abstract_Context* qctx = ::std::addressof(ctx);
         ::rocket::ranged_for(uint32_t(0), altr.depth, [&](uint32_t) { qctx = qctx->get_parent_opt();  });
         ROCKET_ASSERT(qctx);
         // Don't bind references in analytic contexts.
-        if(qctx->is_analytic()) {
+        if(qctx->is_analytic())
           return nullopt;
-        }
+
         // Look for the name in the context.
         auto qref = qctx->get_named_reference_opt(altr.name);
-        if(!qref) {
+        if(!qref)
           return nullopt;
-        }
+
         // Bind it now.
         S_push_bound_reference xnode = { *qref };
         return ::std::move(xnode);
@@ -2887,36 +2890,36 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
 
     case index_define_function: {
         const auto& altr = this->m_stor.as<index_define_function>();
+
         // Check for rebinds recursively.
         Analytic_Context ctx_func(::std::addressof(ctx), altr.params);
         auto pair = ::std::make_pair(false, altr);
         do_rebind_nodes(pair.first, pair.second.code_body, ctx_func);
-        if(!pair.first) {
+        if(!pair.first)
           return nullopt;
-        }
         return ::std::move(pair.second);
       }
 
     case index_branch_expression: {
         const auto& altr = this->m_stor.as<index_branch_expression>();
+
         // Check for rebinds recursively.
         auto pair = ::std::make_pair(false, altr);
         do_rebind_nodes(pair.first, pair.second.code_true, ctx);
         do_rebind_nodes(pair.first, pair.second.code_false, ctx);
-        if(!pair.first) {
+        if(!pair.first)
           return nullopt;
-        }
         return ::std::move(pair.second);
       }
 
     case index_coalescence: {
         const auto& altr = this->m_stor.as<index_coalescence>();
+
         // Check for rebinds recursively.
         auto pair = ::std::make_pair(false, altr);
         do_rebind_nodes(pair.first, pair.second.code_null, ctx);
-        if(!pair.first) {
+        if(!pair.first)
           return nullopt;
-        }
         return ::std::move(pair.second);
       }
 
@@ -2936,12 +2939,12 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
 
     case index_defer_expression: {
         const auto& altr = this->m_stor.as<index_defer_expression>();
+
         // Check for rebinds recursively.
         auto pair = ::std::make_pair(false, altr);
         do_rebind_nodes(pair.first, pair.second.code_body, ctx);
-        if(!pair.first) {
+        if(!pair.first)
           return nullopt;
-        }
         return ::std::move(pair.second);
       }
 
@@ -2960,405 +2963,395 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     switch(this->index()) {
     case index_clear_stack: {
         const auto& altr = this->m_stor.as<index_clear_stack>();
-        // There is no parameter.
+
+        // There are no symbols.
         AVMC_Appender<void> avmcp;
-        if(ipass == 0) {
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         (void)altr;
-        // Push a new node.
         return avmcp.output<do_clear_stack>(queue);
       }
 
     case index_execute_block: {
         const auto& altr = this->m_stor.as<index_execute_block>();
-        // `pu` is unused.
-        // `pv` points to the body.
+
+        // There are no symbols.
         AVMC_Appender<Pv_queues_fixed<1>> avmcp;
-        if(ipass == 0) {
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         do_solidify_queue(avmcp.queues[0], altr.code_body);
-        // Push a new node.
         return avmcp.output<do_execute_block>(queue);
       }
 
     case index_declare_variable: {
         const auto& altr = this->m_stor.as<index_declare_variable>();
-        // `pu` is unused.
-        // `pv` points to the source location and name.
+
+        // Set up symbols.
         AVMC_Appender<Pv_sloc_name> avmcp;
-        if(ipass == 0) {
+        avmcp.set_symbols(altr.sloc);
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         avmcp.sloc = altr.sloc;
         avmcp.name = altr.name;
-        // Push a new node.
         return avmcp.output<do_declare_variable>(queue);
       }
 
     case index_initialize_variable: {
         const auto& altr = this->m_stor.as<index_initialize_variable>();
-        // `pu.u8s[0]` is `immutable`.
-        // `pv` is unused.
+
+        // Set up symbols.
         AVMC_Appender<void> avmcp;
-        if(ipass == 0) {
+        avmcp.set_symbols(altr.sloc);
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         avmcp.pu.u8s[0] = altr.immutable;
-        // Push a new node.
         return avmcp.output<do_initialize_variable>(queue);
       }
 
     case index_if_statement: {
         const auto& altr = this->m_stor.as<index_if_statement>();
-        // `pu.u8s[0]` is `negative`.
-        // `pv` points to the two branches.
+
+        // There are no symbols.
         AVMC_Appender<Pv_queues_fixed<2>> avmcp;
-        if(ipass == 0) {
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         avmcp.pu.u8s[0] = altr.negative;
         do_solidify_queue(avmcp.queues[0], altr.code_true);
         do_solidify_queue(avmcp.queues[1], altr.code_false);
-        // Push a new node.
         return avmcp.output<do_if_statement>(queue);
       }
 
     case index_switch_statement: {
         const auto& altr = this->m_stor.as<index_switch_statement>();
-        // `pu` is unused.
-        // `pv` points to all clauses.
+
+        // There are no symbols.
         AVMC_Appender<Pv_switch> avmcp;
-        if(ipass == 0) {
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         for(size_t i = 0;  i < altr.code_bodies.size();  ++i) {
           do_solidify_queue(avmcp.queues_labels.emplace_back(), altr.code_labels.at(i));
           do_solidify_queue(avmcp.queues_bodies.emplace_back(), altr.code_bodies.at(i));
         }
         avmcp.names_added = altr.names_added;
-        // Push a new node.
         return avmcp.output<do_switch_statement>(queue);
       }
 
     case index_do_while_statement: {
         const auto& altr = this->m_stor.as<index_do_while_statement>();
-        // `pu.u8s[0]` is `negative`.
-        // `pv` points to the body and the condition.
+
+        // There are no symbols.
         AVMC_Appender<Pv_queues_fixed<2>> avmcp;
-        if(ipass == 0) {
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         do_solidify_queue(avmcp.queues[0], altr.code_body);
         avmcp.pu.u8s[0] = altr.negative;
         do_solidify_queue(avmcp.queues[1], altr.code_cond);
-        // Push a new node.
         return avmcp.output<do_do_while_statement>(queue);
       }
 
     case index_while_statement: {
         const auto& altr = this->m_stor.as<index_while_statement>();
-        // `pu.u8s[0]` is `negative`.
-        // `pv` points to the condition and the body.
+
+        // There are no symbols.
         AVMC_Appender<Pv_queues_fixed<2>> avmcp;
-        if(ipass == 0) {
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         avmcp.pu.u8s[0] = altr.negative;
         do_solidify_queue(avmcp.queues[0], altr.code_cond);
         do_solidify_queue(avmcp.queues[1], altr.code_body);
-        // Push a new node.
         return avmcp.output<do_while_statement>(queue);
       }
 
     case index_for_each_statement: {
         const auto& altr = this->m_stor.as<index_for_each_statement>();
-        // `pu` is unused.
-        // `pv` points to the range initializer and the body.
+
+        // There are no symbols.
         AVMC_Appender<Pv_for_each> avmcp;
-        if(ipass == 0) {
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         avmcp.name_key = altr.name_key;
         avmcp.name_mapped = altr.name_mapped;
         do_solidify_queue(avmcp.queue_init, altr.code_init);
         do_solidify_queue(avmcp.queue_body, altr.code_body);
-        // Push a new node.
         return avmcp.output<do_for_each_statement>(queue);
       }
 
     case index_for_statement: {
         const auto& altr = this->m_stor.as<index_for_statement>();
-        // `pu` is unused.
-        // `pv` points to the triplet and the body.
+
+        // There are no symbols.
         AVMC_Appender<Pv_queues_fixed<4>> avmcp;
-        if(ipass == 0) {
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         do_solidify_queue(avmcp.queues[0], altr.code_init);
         do_solidify_queue(avmcp.queues[1], altr.code_cond);
         do_solidify_queue(avmcp.queues[2], altr.code_step);
         do_solidify_queue(avmcp.queues[3], altr.code_body);
-        // Push a new node.
         return avmcp.output<do_for_statement>(queue);
       }
 
     case index_try_statement: {
         const auto& altr = this->m_stor.as<index_try_statement>();
-        // `pu` is unused.
-        // `pv` points to the clauses.
+
+        // There are no symbols.
         AVMC_Appender<Pv_try> avmcp;
-        if(ipass == 0) {
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         do_solidify_queue(avmcp.queue_try, altr.code_try);
-        avmcp.sloc = altr.sloc;
+        avmcp.sloc_catch = altr.sloc_catch;
         avmcp.name_except = altr.name_except;
         do_solidify_queue(avmcp.queue_catch, altr.code_catch);
-        // Push a new node.
         return avmcp.output<do_try_statement>(queue);
       }
 
     case index_throw_statement: {
         const auto& altr = this->m_stor.as<index_throw_statement>();
-        // `pu` is unused.
-        // `pv` points to the source location.
+
+        // The `throw` statement add its own frame so prevent a duplicate.
         AVMC_Appender<Pv_sloc> avmcp;
-        if(ipass == 0) {
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         avmcp.sloc = altr.sloc;
-        // Push a new node.
         return avmcp.output<do_throw_statement>(queue);
       }
 
     case index_assert_statement: {
         const auto& altr = this->m_stor.as<index_assert_statement>();
-        // `pu.u8s[0]` is `negative`.
-        // `pv` points to the source location and the message.
+
+        // Set up symbols.
         AVMC_Appender<Pv_sloc_msg> avmcp;
-        if(ipass == 0) {
+        avmcp.set_symbols(altr.sloc);
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         avmcp.sloc = altr.sloc;
         avmcp.pu.u8s[0] = altr.negative;
         avmcp.msg = altr.msg;
-        // Push a new node.
         return avmcp.output<do_assert_statement>(queue);
       }
 
     case index_simple_status: {
         const auto& altr = this->m_stor.as<index_simple_status>();
-        // `pu.u8s[0] ` is `status`.
-        // `pv` is unused.
+
+        // There are no symbols.
         AVMC_Appender<void> avmcp;
-        if(ipass == 0) {
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         avmcp.pu.u8s[0] = altr.status;
-        // Push a new node.
         return avmcp.output<do_simple_status>(queue);
       }
 
     case index_glvalue_to_rvalue: {
         const auto& altr = this->m_stor.as<index_glvalue_to_rvalue>();
-        // There is no parameter.
+
+        // Set up symbols.
         AVMC_Appender<void> avmcp;
-        if(ipass == 0) {
+        avmcp.set_symbols(altr.sloc);
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         (void)altr;
-        // Push a new node.
         return avmcp.output<do_glvalue_to_rvalue>(queue);
       }
 
     case index_push_immediate: {
         const auto& altr = this->m_stor.as<index_push_immediate>();
-        // `pu` is unused.
-        // `pv` points to a copy of `val`.
+
+        // There are no symbols.
         AVMC_Appender<Value> avmcp;
-        if(ipass == 0) {
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         static_cast<Value&>(avmcp) = altr.value;
-        // Push a new node.
         return avmcp.output<do_push_immediate>(queue);
       }
 
     case index_push_global_reference: {
         const auto& altr = this->m_stor.as<index_push_global_reference>();
-        // `pu` is unused.
-        // `pv` points to the name.
+
+        // Set up symbols.
         AVMC_Appender<Pv_name> avmcp;
-        if(ipass == 0) {
+        avmcp.set_symbols(altr.sloc);
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         avmcp.name = altr.name;
-        // Push a new node.
         return avmcp.output<do_push_global_reference>(queue);
       }
 
     case index_push_local_reference: {
         const auto& altr = this->m_stor.as<index_push_local_reference>();
-        // `pu.x32` is `depth`.
-        // `pv` points to the name.
+
+        // Set up symbols.
         AVMC_Appender<Pv_name> avmcp;
-        if(ipass == 0) {
+        avmcp.set_symbols(altr.sloc);
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         avmcp.pu.x32 = altr.depth;
         avmcp.name = altr.name;
-        // Push a new node.
         return avmcp.output<do_push_local_reference>(queue);
       }
 
     case index_push_bound_reference: {
         const auto& altr = this->m_stor.as<index_push_bound_reference>();
-        // `pu` is unused.
-        // `pv` points to a copy of `ref`.
+
+        // There are no symbols.
         AVMC_Appender<Pv_ref> avmcp;
-        if(ipass == 0) {
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         avmcp.ref = altr.ref;
-        // Push a new node.
         return avmcp.output<do_push_bound_reference>(queue);
       }
 
     case index_define_function: {
         const auto& altr = this->m_stor.as<index_define_function>();
-        // `pu` is unused.
-        // `pv` points to the name, the parameter list, and the body of the function.
+
+        // Set up symbols.
         AVMC_Appender<Pv_func> avmcp;
-        if(ipass == 0) {
+        avmcp.set_symbols(altr.sloc);
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         avmcp.sloc = altr.sloc;
         avmcp.func = altr.func;
         avmcp.params = altr.params;
         avmcp.code_body = altr.code_body;
-        // Push a new node.
         return avmcp.output<do_define_function>(queue);
       }
 
     case index_branch_expression: {
         const auto& altr = this->m_stor.as<index_branch_expression>();
-        // `pu.u8s[0]` is `assign`.
-        // `pv` points to the two branches.
+
+        // Set up symbols.
         AVMC_Appender<Pv_queues_fixed<2>> avmcp;
-        if(ipass == 0) {
+        avmcp.set_symbols(altr.sloc);
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         do_solidify_queue(avmcp.queues[0], altr.code_true);
         do_solidify_queue(avmcp.queues[1], altr.code_false);
         avmcp.pu.u8s[0] = altr.assign;
-        // Push a new node.
         return avmcp.output<do_branch_expression>(queue);
       }
 
     case index_coalescence: {
         const auto& altr = this->m_stor.as<index_coalescence>();
-        // `pu.u8s[0]` is `assign`.
-        // `pv` points to the alternative.
+
+        // Set up symbols.
         AVMC_Appender<Pv_queues_fixed<1>> avmcp;
-        if(ipass == 0) {
+        avmcp.set_symbols(altr.sloc);
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         do_solidify_queue(avmcp.queues[0], altr.code_null);
         avmcp.pu.u8s[0] = altr.assign;
-        // Push a new node.
         return avmcp.output<do_coalescence>(queue);
       }
 
     case index_function_call: {
         const auto& altr = this->m_stor.as<index_function_call>();
-        // `pu.u8s[0]` is `nargs` and `ptc`.
-        // `pv` points to the source location.
+
+        // Set up symbols.
         AVMC_Appender<Pv_sloc> avmcp;
-        if(ipass == 0) {
+        avmcp.set_symbols(altr.sloc);
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         avmcp.sloc = altr.sloc;
         avmcp.pu.y32 = altr.nargs;
         avmcp.pu.y8s[0] = altr.ptc;
-        // Push a new node.
         return avmcp.output<do_function_call>(queue);
       }
 
     case index_member_access: {
         const auto& altr = this->m_stor.as<index_member_access>();
-        // `pu` is unused.
-        // `pv` points to the name.
+
+        // Set up symbols.
         AVMC_Appender<Pv_name> avmcp;
-        if(ipass == 0) {
+        avmcp.set_symbols(altr.sloc);
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         avmcp.name = altr.name;
-        // Push a new node.
         return avmcp.output<do_member_access>(queue);
       }
 
     case index_push_unnamed_array: {
         const auto& altr = this->m_stor.as<index_push_unnamed_array>();
-        // `pu.x32` is `nelems`.
-        // `pv` is unused.
+
+        // Set up symbols.
         AVMC_Appender<void> avmcp;
-        if(ipass == 0) {
+        avmcp.set_symbols(altr.sloc);
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         avmcp.pu.x32 = altr.nelems;
-        // Push a new node.
         return avmcp.output<do_push_unnamed_array>(queue);
       }
 
     case index_push_unnamed_object: {
         const auto& altr = this->m_stor.as<index_push_unnamed_object>();
-        // `pu` is unused.
-        // `pv` points to the keys.
+
+        // Set up symbols.
         AVMC_Appender<Pv_names> avmcp;
-        if(ipass == 0) {
+        avmcp.set_symbols(altr.sloc);
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         avmcp.names = altr.keys;
-        // Push a new node.
         return avmcp.output<do_push_unnamed_object>(queue);
       }
 
     case index_apply_operator: {
         const auto& altr = this->m_stor.as<index_apply_operator>();
-        // `pu.u8s[0]` is `assign`. Other fields may be used depending on the operator.
-        // `pv` is unused.
+
+        // Set up symbols.
         AVMC_Appender<void> avmcp;
-        if(ipass == 0) {
+        avmcp.set_symbols(altr.sloc);
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         switch(::rocket::weaken_enum(altr.xop)) {
         case xop_cmp_eq: {
@@ -3402,7 +3395,6 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
             break;
           }
         }
-        // Push a new node.
         switch(altr.xop) {
         case xop_inc_post: {
             return avmcp.output<do_apply_xop_INC_POST>(queue);
@@ -3555,108 +3547,107 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
 
     case index_unpack_struct_array: {
         const auto& altr = this->m_stor.as<index_unpack_struct_array>();
-        // `pu.y8s[0]` is `immutable`.
-        // `pu.y32` is `nelems`.
-        // `pv` is unused.
+
+        // Set up symbols.
         AVMC_Appender<void> avmcp;
-        if(ipass == 0) {
+        avmcp.set_symbols(altr.sloc);
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         avmcp.pu.y8s[0] = altr.immutable;
         avmcp.pu.y32 = altr.nelems;
-        // Push a new node.
         return avmcp.output<do_unpack_struct_array>(queue);
       }
 
     case index_unpack_struct_object: {
         const auto& altr = this->m_stor.as<index_unpack_struct_object>();
-        // `pu.u8s[0]` is `immutable`.
-        // `pv` points to the keys.
+
+        // Set up symbols.
         AVMC_Appender<Pv_names> avmcp;
-        if(ipass == 0) {
+        avmcp.set_symbols(altr.sloc);
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         avmcp.pu.u8s[0] = altr.immutable;
         avmcp.names = altr.keys;
-        // Push a new node.
         return avmcp.output<do_unpack_struct_object>(queue);
       }
 
     case index_define_null_variable: {
         const auto& altr = this->m_stor.as<index_define_null_variable>();
-        // `pu.u8s[0]` is `immutable`.
-        // `pv` points to the source location and name.
+
+        // Set up symbols.
         AVMC_Appender<Pv_sloc_name> avmcp;
-        if(ipass == 0) {
+        avmcp.set_symbols(altr.sloc);
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         avmcp.pu.u8s[0] = altr.immutable;
         avmcp.sloc = altr.sloc;
         avmcp.name = altr.name;
-        // Push a new node.
         return avmcp.output<do_define_null_variable>(queue);
       }
 
     case index_single_step_trap: {
         const auto& altr = this->m_stor.as<index_single_step_trap>();
-        // `pu.u8s[0]` is unused.
-        // `pv` points to the source location.
+
+        // Set up symbols.
         AVMC_Appender<Pv_sloc> avmcp;
-        if(ipass == 0) {
+        avmcp.set_symbols(altr.sloc);
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         avmcp.sloc = altr.sloc;
-        // Push a new node.
         return avmcp.output<do_single_step_trap>(queue);
       }
 
     case index_variadic_call: {
         const auto& altr = this->m_stor.as<index_variadic_call>();
-        // `pu.u8s[0]` is `ptc`.
-        // `pv` points to the source location.
+
+        // Set up symbols.
         AVMC_Appender<Pv_sloc> avmcp;
-        if(ipass == 0) {
+        avmcp.set_symbols(altr.sloc);
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         avmcp.sloc = altr.sloc;
         avmcp.pu.u8s[0] = altr.ptc;
-        // Push a new node.
         return avmcp.output<do_variadic_call>(queue);
       }
 
     case index_defer_expression: {
         const auto& altr = this->m_stor.as<index_defer_expression>();
-        // `pu` is unused.
-        // `pv` points to the source location and body.
+
+        // Set up symbols.
         AVMC_Appender<Pv_defer> avmcp;
-        if(ipass == 0) {
+        avmcp.set_symbols(altr.sloc);
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         avmcp.sloc = altr.sloc;
         avmcp.code_body = altr.code_body;
-        // Push a new node.
         return avmcp.output<do_defer_expression>(queue);
       }
 
     case index_import_call: {
         const auto& altr = this->m_stor.as<index_import_call>();
-        // `pu.u8s[0]` is `nargs`.
-        // `pv` points to the source location and complete set of options.
+
+        // Set up symbols.
         AVMC_Appender<Pv_sloc_opts> avmcp;
-        if(ipass == 0) {
+        avmcp.set_symbols(altr.sloc);
+        if(ipass == 0)
           return avmcp.request(queue);
-        }
+
         // Encode arguments.
         avmcp.sloc = altr.sloc;
         avmcp.pu.y32 = altr.nargs;
         avmcp.opts = altr.opts;
-        // Push a new node.
         return avmcp.output<do_import_call>(queue);
       }
 
