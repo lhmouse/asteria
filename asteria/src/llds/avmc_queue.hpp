@@ -102,14 +102,16 @@ class AVMC_Queue
     void do_append_trivial(Executor* exec, ParamU paramu, size_t nbytes, const void* source);
     void do_append_nontrivial(const Vtable* vtbl, ParamU paramu, size_t nbytes, Constructor* ctor_opt, intptr_t source);
 
-    template<Executor execT, nullptr_t, typename XNodeT> void do_dispatch_append(::std::true_type, ParamU paramu, XNodeT&& xnode)
+    template<Executor execT, nullptr_t, typename XNodeT> void do_dispatch_append(::std::true_type,
+                                   ParamU paramu, XNodeT&& xnode)
       {
         // The parameter type is trivial and no vtable is required.
         // Append a node with a trivial parameter.
         this->do_append_trivial(execT, paramu, sizeof(xnode), ::std::addressof(xnode));
       }
 
-    template<Executor execT, Enumerator* vnumT, typename XNodeT> void do_dispatch_append(::std::false_type, ParamU paramu, XNodeT&& xnode)
+    template<Executor execT, Enumerator* vnumT, typename XNodeT> void do_dispatch_append(::std::false_type,
+                                   ParamU paramu, XNodeT&& xnode)
       {
         // The vtable must have static storage duration. As it is defined `constexpr` here, we need 'real'
         // function pointers. Those converted from non-capturing lambdas are not an option.
@@ -117,17 +119,17 @@ class AVMC_Queue
           {
             static void construct(ParamU /*paramu*/, void* paramv, intptr_t source)
               { ::rocket::construct_at(static_cast<typename ::rocket::remove_cvref<XNodeT>::type*>(paramv),
-                                       ::std::forward<XNodeT>(*reinterpret_cast<typename ::std::remove_reference<XNodeT>::type*>(source)));  }
+                                       ::std::forward<XNodeT>(*(typename ::std::remove_reference<XNodeT>::type*)source));  }
 
             static void destroy(ParamU /*paramu*/, void* paramv) noexcept
-              { ::rocket::destroy_at(static_cast<typename ::rocket::remove_cvref<XNodeT>::type*>(paramv));  }
+              { ::rocket::destroy_at((typename ::rocket::remove_cvref<XNodeT>::type*)paramv);  }
           };
 
         // Define the virtual table.
         static constexpr Vtable s_vtbl = { Helper::destroy, execT, vnumT };
 
         // Append a node with a non-trivial parameter.
-        this->do_append_nontrivial(&s_vtbl, paramu, sizeof(xnode), Helper::construct, reinterpret_cast<intptr_t>(::std::addressof(xnode)));
+        this->do_append_nontrivial(&s_vtbl, paramu, sizeof(xnode), Helper::construct, (intptr_t)::std::addressof(xnode));
       }
 
   public:
@@ -179,7 +181,8 @@ class AVMC_Queue
     template<Executor execT, Enumerator vnumT, typename XNodeT> AVMC_Queue& append(ParamU paramu, XNodeT&& xnode)
       {
         // Append a node with a parameter of type `remove_cvref_t<XNodeT>`.
-        this->do_dispatch_append<execT, vnumT>(::std::false_type(), paramu, ::std::forward<XNodeT>(xnode));
+        this->do_dispatch_append<execT, vnumT>(::std::false_type(),  // cannot be trivial
+                                               paramu, ::std::forward<XNodeT>(xnode));
         return *this;
       }
 
