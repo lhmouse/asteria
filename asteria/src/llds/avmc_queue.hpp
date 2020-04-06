@@ -118,7 +118,7 @@ class AVMC_Queue
     // Append a new node to the end. `nbytes` is the size of `paramv` to initialize in bytes.
     // Note: The storage must have been reserved using `do_reserve_delta()`.
     void do_append_trivial(Executor* exec, ParamU paramu, const Symbols* syms_opt,
-                           const void* source, size_t nbytes);
+                           const void* source_opt, size_t nbytes);
     void do_append_nontrivial(const Vtable* vtbl, ParamU paramu, const Symbols* syms_opt,
                               size_t nbytes, Constructor* ctor_opt, intptr_t source);
 

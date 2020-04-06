@@ -104,8 +104,8 @@ void AVMC_Queue::do_reserve_delta(size_t nbytes, const Symbols* syms_opt)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
     qnode->nphdrs = (nbytes + sizeof(Header) - 1) / sizeof(Header);
-    qnode->has_syms = !!syms_opt;
 #pragma GCC diagnostic pop
+    qnode->has_syms = !!syms_opt;
     uint32_t nhdrs_total = qnode->total_size_in_headers();
     constexpr uint32_t nhdrs_max = UINT32_MAX / sizeof(Header);
     if(nhdrs_max - this->m_rsrv < nhdrs_total) {
@@ -134,8 +134,8 @@ AVMC_Queue::Header* AVMC_Queue::do_allocate_node(ParamU paramu, const Symbols* s
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
     qnode->nphdrs = (nbytes + sizeof(Header) - 1) / sizeof(Header);
-    qnode->has_syms = !!syms_opt;
 #pragma GCC diagnostic pop
+    qnode->has_syms = !!syms_opt;
     uint32_t nhdrs_total = qnode->total_size_in_headers();
     if(nhdrs_total > nhdrs_avail) {
       ASTERIA_THROW("insufficient space in AVMC queue (`$1` > `$2`)", nhdrs_total > nhdrs_avail);
@@ -146,7 +146,7 @@ AVMC_Queue::Header* AVMC_Queue::do_allocate_node(ParamU paramu, const Symbols* s
   }
 
 void AVMC_Queue::do_append_trivial(Executor* exec, ParamU paramu, const Symbols* syms_opt,
-                                   const void* source, size_t nbytes)
+                                   const void* source_opt, size_t nbytes)
   {
     // Create a new node.
     auto qnode = this->do_allocate_node(paramu, syms_opt, nbytes);
@@ -154,8 +154,10 @@ void AVMC_Queue::do_append_trivial(Executor* exec, ParamU paramu, const Symbols*
     qnode->exec = exec;
 
     // Copy source data if any.
-    if(nbytes != 0)
-      ::std::memcpy(qnode->paramv(), source, nbytes);
+    if(ROCKET_EXPECT(source_opt))
+      ::std::memcpy(qnode->paramv(), source_opt, nbytes);
+    else if(nbytes != 0)
+      ::std::memset(qnode->paramv(), 0, nbytes);
 
     // Set up symbols. This shall not throw exceptions.
     if(syms_opt)
