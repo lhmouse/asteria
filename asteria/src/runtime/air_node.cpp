@@ -223,7 +223,7 @@ struct Pv_for_each
 struct Pv_try
   {
     AVMC_Queue queue_try;
-    Source_Location sloc;
+    Source_Location sloc_catch;
     phsh_string name_except;
     AVMC_Queue queue_catch;
 
@@ -617,7 +617,7 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
   {
     // Unpack arguments.
     const auto& queue_try = do_pcast<Pv_try>(pv)->queue_try;
-    const auto& sloc = do_pcast<Pv_try>(pv)->sloc;
+    const auto& sloc_catch = do_pcast<Pv_try>(pv)->sloc_catch;
     const auto& name_except = do_pcast<Pv_try>(pv)->name_except;
     const auto& queue_catch = do_pcast<Pv_try>(pv)->queue_catch;
 
@@ -634,7 +634,7 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
       // Reuse the exception object. Don't bother allocating a new one.
-      except.push_frame_catch(sloc);
+      except.push_frame_catch(sloc_catch);
       // This branch must be executed inside this `catch` block.
       // User-provided bindings may obtain the current exception using `::std::current_exception`.
       Executive_Context ctx_catch(::rocket::ref(ctx), nullptr);
@@ -3124,7 +3124,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         }
         // Encode arguments.
         do_solidify_queue(avmcp.queue_try, altr.code_try);
-        avmcp.sloc = altr.sloc;
+        avmcp.sloc_catch = altr.sloc_catch;
         avmcp.name_except = altr.name_except;
         do_solidify_queue(avmcp.queue_catch, altr.code_catch);
         // Push a new node.

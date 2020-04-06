@@ -31,11 +31,13 @@ class AIR_Node
 
     struct S_initialize_variable
       {
+        Source_Location sloc;
         bool immutable;
       };
 
     struct S_if_statement
       {
+        Source_Location sloc_cond;
         bool negative;
         cow_vector<AIR_Node> code_true;
         cow_vector<AIR_Node> code_false;
@@ -43,6 +45,7 @@ class AIR_Node
 
     struct S_switch_statement
       {
+        Source_Location sloc_cond;
         cow_vector<cow_vector<AIR_Node>> code_labels;
         cow_vector<cow_vector<AIR_Node>> code_bodies;
         cow_vector<cow_vector<phsh_string>> names_added;
@@ -51,12 +54,14 @@ class AIR_Node
     struct S_do_while_statement
       {
         cow_vector<AIR_Node> code_body;
+        Source_Location sloc_cond;
         bool negative;
         cow_vector<AIR_Node> code_cond;
       };
 
     struct S_while_statement
       {
+        Source_Location sloc_cond;
         bool negative;
         cow_vector<AIR_Node> code_cond;
         cow_vector<AIR_Node> code_body;
@@ -66,6 +71,7 @@ class AIR_Node
       {
         phsh_string name_key;
         phsh_string name_mapped;
+        Source_Location sloc_init;
         cow_vector<AIR_Node> code_init;
         cow_vector<AIR_Node> code_body;
       };
@@ -73,6 +79,7 @@ class AIR_Node
     struct S_for_statement
       {
         cow_vector<AIR_Node> code_init;
+        Source_Location sloc_cond;
         cow_vector<AIR_Node> code_cond;
         cow_vector<AIR_Node> code_step;
         cow_vector<AIR_Node> code_body;
@@ -81,7 +88,7 @@ class AIR_Node
     struct S_try_statement
       {
         cow_vector<AIR_Node> code_try;
-        Source_Location sloc;
+        Source_Location sloc_catch;
         phsh_string name_except;
         cow_vector<AIR_Node> code_catch;
       };
@@ -105,6 +112,7 @@ class AIR_Node
 
     struct S_glvalue_to_rvalue
       {
+        Source_Location sloc;
       };
 
     struct S_push_immediate
@@ -114,11 +122,13 @@ class AIR_Node
 
     struct S_push_global_reference
       {
+        Source_Location sloc;
         phsh_string name;
       };
 
     struct S_push_local_reference
       {
+        Source_Location sloc;
         uint32_t depth;
         phsh_string name;
       };
@@ -138,6 +148,7 @@ class AIR_Node
 
     struct S_branch_expression
       {
+        Source_Location sloc;
         cow_vector<AIR_Node> code_true;
         cow_vector<AIR_Node> code_false;
         bool assign;
@@ -145,6 +156,7 @@ class AIR_Node
 
     struct S_coalescence
       {
+        Source_Location sloc;
         cow_vector<AIR_Node> code_null;
         bool assign;
       };
@@ -158,33 +170,39 @@ class AIR_Node
 
     struct S_member_access
       {
+        Source_Location sloc;
         phsh_string name;
       };
 
     struct S_push_unnamed_array
       {
+        Source_Location sloc;
         uint32_t nelems;
       };
 
     struct S_push_unnamed_object
       {
+        Source_Location sloc;
         cow_vector<phsh_string> keys;
       };
 
     struct S_apply_operator
       {
+        Source_Location sloc;
         Xop xop;
         bool assign;
       };
 
     struct S_unpack_struct_array
       {
+        Source_Location sloc;
         bool immutable;
         uint32_t nelems;
       };
 
     struct S_unpack_struct_object
       {
+        Source_Location sloc;
         bool immutable;
         cow_vector<phsh_string> keys;
       };

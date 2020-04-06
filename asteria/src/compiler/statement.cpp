@@ -206,15 +206,15 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
             do_generate_subexpression(code, opts, ptc_aware_none, ctx, altr.inits[i]);
             // Initialize variables.
             if(sb_arr) {
-              AIR_Node::S_unpack_struct_array xnode = { altr.immutable, static_cast<uint32_t>(epos - bpos) };
+              AIR_Node::S_unpack_struct_array xnode = { altr.slocs[i], altr.immutable, static_cast<uint32_t>(epos - bpos) };
               code.emplace_back(::std::move(xnode));
             }
             else if(sb_obj) {
-              AIR_Node::S_unpack_struct_object xnode = { altr.immutable, altr.decls[i].subvec(bpos, epos - bpos) };
+              AIR_Node::S_unpack_struct_object xnode = { altr.slocs[i], altr.immutable, altr.decls[i].subvec(bpos, epos - bpos) };
               code.emplace_back(::std::move(xnode));
             }
             else {
-              AIR_Node::S_initialize_variable xnode = { altr.immutable };
+              AIR_Node::S_initialize_variable xnode = { altr.slocs[i], altr.immutable };
               code.emplace_back(::std::move(xnode));
             }
           }
@@ -246,7 +246,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         code.emplace_back(::std::move(xnode_defn));
 
         // Initialize the function.
-        AIR_Node::S_initialize_variable xnode = { true };
+        AIR_Node::S_initialize_variable xnode = { altr.sloc, true };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -264,7 +264,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         auto code_false = do_generate_block(opts, ptc, ctx, altr.branch_false);
 
         // Encode arguments.
-        AIR_Node::S_if_statement xnode = { altr.negative, ::std::move(code_true), ::std::move(code_false) };
+        AIR_Node::S_if_statement xnode = { altr.cond.sloc, altr.negative, ::std::move(code_true), ::std::move(code_false) };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -297,7 +297,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         }
 
         // Encode arguments.
-        AIR_Node::S_switch_statement xnode = { ::std::move(code_labels), ::std::move(code_bodies),
+        AIR_Node::S_switch_statement xnode = { altr.ctrl.sloc, ::std::move(code_labels), ::std::move(code_bodies),
                                                ::std::move(names_added) };
         code.emplace_back(::std::move(xnode));
         return code;
@@ -314,7 +314,8 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         auto code_cond = do_generate_expression(opts, ptc_aware_none, ctx, altr.cond);
 
         // Encode arguments.
-        AIR_Node::S_do_while_statement xnode = { ::std::move(code_body), altr.negative, ::std::move(code_cond) };
+        AIR_Node::S_do_while_statement xnode = { ::std::move(code_body), altr.cond.sloc, altr.negative,
+                                                 ::std::move(code_cond) };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -330,7 +331,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         auto code_body = do_generate_block(opts, ptc_aware_none, ctx, altr.body);
 
         // Encode arguments.
-        AIR_Node::S_while_statement xnode = { altr.negative, ::std::move(code_cond), ::std::move(code_body) };
+        AIR_Node::S_while_statement xnode = { altr.cond.sloc, altr.negative, ::std::move(code_cond), ::std::move(code_body) };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -352,7 +353,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         auto code_body = do_generate_block(opts, ptc_aware_none, ctx_for, altr.body);
 
         // Encode arguments.
-        AIR_Node::S_for_each_statement xnode = { altr.name_key, altr.name_mapped, ::std::move(code_init),
+        AIR_Node::S_for_each_statement xnode = { altr.name_key, altr.name_mapped, altr.init.sloc, ::std::move(code_init),
                                                  ::std::move(code_body) };
         code.emplace_back(::std::move(xnode));
         return code;
@@ -373,7 +374,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         auto code_body = do_generate_block(opts, ptc_aware_none, ctx_for, altr.body);
 
         // Encode arguments.
-        AIR_Node::S_for_statement xnode = { ::std::move(code_init), ::std::move(code_cond),
+        AIR_Node::S_for_statement xnode = { ::std::move(code_init), altr.cond.sloc, ::std::move(code_cond),
                                             ::std::move(code_step), ::std::move(code_body) };
         code.emplace_back(::std::move(xnode));
         return code;
