@@ -1468,6 +1468,7 @@ bool do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& t
     //   array-element-list | ""
     // array-element-list ::=
     //   expression ( ( "," | ";" ) array-element-list-opt | "" )
+    auto sloc = do_tell_source_location(tstrm);
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_op });
     if(!kpunct) {
       return false;
@@ -1495,7 +1496,7 @@ bool do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& t
       do_throw_parser_error(tstrm, comma_allowed ? parser_status_closed_bracket_or_comma_expected
                                                  : parser_status_closed_bracket_or_expression_expected);
     }
-    Expression_Unit::S_unnamed_array xunit = { nelems };
+    Expression_Unit::S_unnamed_array xunit = { sloc, nelems };
     units.emplace_back(::std::move(xunit));
     return true;
   }
@@ -1508,6 +1509,7 @@ bool do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& 
     //   key-mapped-list | ""
     // key-mapped-list ::=
     //   ( string-literal | identifier ) ( "=" | ":" ) expression ( ( "," | ";" ) key-mapped-list-opt | "" )
+    auto sloc = do_tell_source_location(tstrm);
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
     if(!kpunct) {
       return false;
@@ -1541,7 +1543,7 @@ bool do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& 
       do_throw_parser_error(tstrm, comma_allowed ? parser_status_closed_brace_or_comma_expected
                                                  : parser_status_closed_brace_or_json5_key_expected);
     }
-    Expression_Unit::S_unnamed_object xunit = { ::std::move(keys) };
+    Expression_Unit::S_unnamed_object xunit = { sloc, ::std::move(keys) };
     units.emplace_back(::std::move(xunit));
     return true;
   }
@@ -1643,11 +1645,12 @@ bool do_accept_variadic_function_call(cow_vector<Expression_Unit>& units, Token_
 
 opt<bool> do_accept_function_argument_opt(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
+    auto sloc = do_tell_source_location(tstrm);
     auto qref = do_accept_argument_opt(units, tstrm);
     if(!qref) {
       return nullopt;
     }
-    Expression_Unit::S_argument_finish xunit = { *qref };
+    Expression_Unit::S_argument_finish xunit = { sloc, *qref };
     units.emplace_back(::std::move(xunit));
     return *qref;
   }

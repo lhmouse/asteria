@@ -29,7 +29,8 @@ Runtime_Error& do_unpack_frames(Runtime_Error& except, Global_Context& global, E
       const auto& qhooks = global.get_hooks_opt();
 
       // Push the function call.
-      except.push_frame_call(sloc, inside);
+      except.push_frame_plain(sloc);
+
       // Call the hook function if any.
       if(qhooks)
         qhooks->on_function_except(sloc, inside, except);
@@ -40,6 +41,7 @@ Runtime_Error& do_unpack_frames(Runtime_Error& except, Global_Context& global, E
                               ::std::move(tca->open_defer_stack()));
         ctx.on_scope_exit(except);
       }
+
       // Push the caller.
       except.push_frame_func(tca->zvarg()->sloc(), inside);
     }

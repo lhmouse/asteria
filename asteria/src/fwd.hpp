@@ -462,7 +462,7 @@ enum Frame_Type : uint8_t
     frame_type_native  = 0,  // The frame could not be determined.
     frame_type_throw   = 1,  // An exception was thrown here.
     frame_type_catch   = 2,  // An exception was caught here.
-    frame_type_call    = 3,  // An exception propagated across a function call.
+    frame_type_plain   = 3,  // An exception propagated across an IR node.
     frame_type_func    = 4,  // An exception propagated across a function boundary.
     frame_type_defer   = 5,  // A new exception was thrown here.
   };
