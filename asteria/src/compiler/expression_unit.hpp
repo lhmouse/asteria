@@ -61,13 +61,11 @@ class Expression_Unit
 
     struct S_unnamed_array
       {
-        Source_Location sloc;
         uint32_t nelems;
       };
 
     struct S_unnamed_object
       {
-        Source_Location sloc;
         cow_vector<phsh_string> keys;
       };
 
