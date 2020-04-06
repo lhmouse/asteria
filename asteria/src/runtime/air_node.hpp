@@ -117,7 +117,7 @@ class AIR_Node
 
     struct S_push_immediate
       {
-        Value val;
+        Value value;
       };
 
     struct S_push_global_reference

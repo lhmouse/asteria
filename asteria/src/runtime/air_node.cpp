@@ -3197,7 +3197,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
           return avmcp.request(queue);
         }
         // Encode arguments.
-        static_cast<Value&>(avmcp) = altr.val;
+        static_cast<Value&>(avmcp) = altr.value;
         // Push a new node.
         return avmcp.output<do_push_immediate>(queue);
       }
@@ -3745,7 +3745,7 @@ Variable_Callback& AIR_Node::enumerate_variables(Variable_Callback& callback) co
 
     case index_push_immediate: {
         const auto& altr = this->m_stor.as<index_push_immediate>();
-        altr.val.enumerate_variables(callback);
+        altr.value.enumerate_variables(callback);
         return callback;
       }
 
