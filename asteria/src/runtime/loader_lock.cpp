@@ -34,7 +34,7 @@ Loader_Lock::element_type* Loader_Lock::do_lock_stream(const char* path)
     return &*(result.first);
   }
 
-void Loader_Lock::do_unlock_stream(Loader_Lock::element_type* qelem) noexcept
+void Loader_Lock::do_unlock_stream(element_type* qelem) noexcept
   {
     ROCKET_ASSERT(qelem);
     auto count = this->m_strms.erase(qelem->first);

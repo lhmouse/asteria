@@ -44,7 +44,7 @@ Reference_Dictionary::Bucket* Reference_Dictionary::do_xprobe(const phsh_string&
     return qbkt;
   }
 
-void Reference_Dictionary::do_xrelocate_but(Reference_Dictionary::Bucket* qxcld) noexcept
+void Reference_Dictionary::do_xrelocate_but(Bucket* qxcld) noexcept
   {
     auto bptr = this->m_bptr;
     auto eptr = this->m_eptr;
@@ -77,7 +77,7 @@ void Reference_Dictionary::do_xrelocate_but(Reference_Dictionary::Bucket* qxcld)
       });
   }
 
-void Reference_Dictionary::do_list_attach(Reference_Dictionary::Bucket* qbkt) noexcept
+void Reference_Dictionary::do_list_attach(Bucket* qbkt) noexcept
   {
     // Insert the bucket before `head`.
     auto next = ::std::exchange(this->m_head, qbkt);
@@ -87,7 +87,7 @@ void Reference_Dictionary::do_list_attach(Reference_Dictionary::Bucket* qbkt) no
     qbkt->prev = next ? ::std::exchange(next->prev, qbkt) : qbkt;
   }
 
-void Reference_Dictionary::do_list_detach(Reference_Dictionary::Bucket* qbkt) noexcept
+void Reference_Dictionary::do_list_detach(Bucket* qbkt) noexcept
   {
     auto next = qbkt->next;
     auto prev = qbkt->prev;
@@ -141,7 +141,7 @@ void Reference_Dictionary::do_rehash(size_t nbkt)
       ::operator delete(bold);
   }
 
-void Reference_Dictionary::do_attach(Reference_Dictionary::Bucket* qbkt, const phsh_string& name) noexcept
+void Reference_Dictionary::do_attach(Bucket* qbkt, const phsh_string& name) noexcept
   {
     // Construct the node, then attach it.
     ROCKET_ASSERT(!*qbkt);
@@ -152,7 +152,7 @@ void Reference_Dictionary::do_attach(Reference_Dictionary::Bucket* qbkt, const p
     this->m_size++;
   }
 
-void Reference_Dictionary::do_detach(Reference_Dictionary::Bucket* qbkt) noexcept
+void Reference_Dictionary::do_detach(Bucket* qbkt) noexcept
   {
     // Destroy the old name and reference, then detach the bucket.
     this->m_size--;
