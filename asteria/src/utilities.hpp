@@ -20,7 +20,7 @@ template<typename... ParamsT> ROCKET_NOINLINE cow_string format_string(const Par
     return out.extract_string();
   }
 
-// Note the format string must be a string literal that contains no dollar signs.
+// Note the format string must be a string literal.
 #define ASTERIA_TERMINATE(...)     (::Asteria::write_log_to_stderr(__FILE__, __LINE__,  \
                                        ::Asteria::format_string("ASTERIA_TERMINATE: " ROCKET_CAR(__VA_ARGS__)  \
                                            "\nThis is likely a bug. Please report.\0" __VA_ARGS__)),  \
