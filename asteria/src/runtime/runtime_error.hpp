@@ -29,7 +29,7 @@ class Runtime_Error : public virtual exception
     explicit Runtime_Error(const exception& stdex)
       : m_value(V_string(stdex.what()))
       { this->do_backtrace(),
-        this->do_insert_frame(frame_type_native, ::rocket::sref("<native code>"), -1, this->m_value);  }
+        this->do_insert_frame(frame_type_native, ::rocket::sref("<unknown>"), -1, this->m_value);  }
 
     ~Runtime_Error() override;
 
