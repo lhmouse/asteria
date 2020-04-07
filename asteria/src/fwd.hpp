@@ -210,9 +210,7 @@ struct Abstract_Opaque : public Rcbase
   };
 
 inline tinyfmt& operator<<(tinyfmt& fmt, const Abstract_Opaque& opaq)
-  {
-    return opaq.describe(fmt);
-  }
+  { return opaq.describe(fmt);  }
 
 struct Abstract_Function : public Rcbase
   {
@@ -265,67 +263,55 @@ class cow_opaque
     explicit operator bool () const noexcept
       { return bool(this->m_sptr);  }
 
-    const type_info& type() const noexcept
+    const type_info& type() const
       { return typeid(*(this->m_sptr.get()));  }
 
-    tinyfmt& describe(tinyfmt& fmt) const
-      {
-        auto ptr = this->m_sptr.get();
-        if(!ptr)
-          return fmt << "<null opaque pointer>";
+    tinyfmt& describe(tinyfmt& fmt) const;
+    Variable_Callback& enumerate_variables(Variable_Callback& callback) const;
 
-        return ptr->describe(fmt);
-      }
-
-    Variable_Callback& enumerate_variables(Variable_Callback& callback) const
-      {
-        auto ptr = this->m_sptr.get();
-        if(!ptr)
-          return callback;
-
-        return ptr->enumerate_variables(callback);
-      }
-
-    template<typename OpaqueT> rcptr<const OpaqueT> cast_opt() const
-      {
-        auto ptr = this->m_sptr.get();
-        if(!ptr)
-          this->do_throw_null_pointer();
-
-        auto tsptr = ::rocket::dynamic_pointer_cast<const OpaqueT>(this->m_sptr);
-        return tsptr;
-      }
-
-    template<typename OpaqueT> rcptr<OpaqueT> open_opt()
-      {
-        auto ptr = this->m_sptr.get();
-        if(!ptr)
-          this->do_throw_null_pointer();
-
-        auto tsptr = ::rocket::dynamic_pointer_cast<OpaqueT>(this->m_sptr);
-        if(!tsptr)
-          return tsptr;
-
-        // Clone the existent instance if it is shared.
-        // If the overriding function returns a null pointer, the shared instance is used.
-        // Note the covariance of the return type of `clone_opt()`.
-        rcptr<Abstract_Opaque> sptr2;
-        auto tptr2 = tsptr->clone_opt(sptr2);
-        if(tptr2) {
-          // Take ownership of the clone.
-          // Don't introduce a dependent name here.
-          ROCKET_ASSERT(tptr2 == sptr2.get());
-          this->m_sptr.swap(sptr2);
-          ptr = tptr2;
-          ptr->add_reference();
-          tsptr.reset(tptr2);
-        }
-        return tsptr;
-      }
+    template<typename OpaqueT> rcptr<const OpaqueT> cast_opt() const;
+    template<typename OpaqueT> rcptr<OpaqueT> open_opt();
   };
 
 inline tinyfmt& operator<<(tinyfmt& fmt, const cow_opaque& opaq)
   { return opaq.describe(fmt);  }
+
+template<typename OpaqueT> rcptr<const OpaqueT> cow_opaque::cast_opt() const
+  {
+    auto ptr = this->m_sptr.get();
+    if(!ptr)
+      this->do_throw_null_pointer();
+
+    auto tsptr = ::rocket::dynamic_pointer_cast<const OpaqueT>(this->m_sptr);
+    return tsptr;
+  }
+
+template<typename OpaqueT> rcptr<OpaqueT> cow_opaque::open_opt()
+  {
+    auto ptr = this->m_sptr.get();
+    if(!ptr)
+      this->do_throw_null_pointer();
+
+    auto tsptr = ::rocket::dynamic_pointer_cast<OpaqueT>(this->m_sptr);
+    if(!tsptr)
+      return tsptr;
+
+    // Clone the existent instance if it is shared.
+    // If the overriding function returns a null pointer, the shared instance is used.
+    // Note the covariance of the return type of `clone_opt()`.
+    rcptr<Abstract_Opaque> sptr2;
+    auto tptr2 = tsptr->clone_opt(sptr2);
+    if(tptr2) {
+      // Take ownership of the clone.
+      // Don't introduce a dependent name here.
+      ROCKET_ASSERT(tptr2 == sptr2.get());
+      this->m_sptr.swap(sptr2);
+      ptr = tptr2;
+      ptr->add_reference();
+      tsptr.reset(tptr2);
+    }
+    return tsptr;
+  }
 
 // Function type support
 using simple_function = Reference& (Reference& self,  // `this` (input) and return (output) reference
@@ -369,48 +355,13 @@ class cow_function
       }
 
     explicit operator bool () const noexcept
-      {
-        auto fptr = this->m_fptr;
-        if(fptr)
-          return true;  // static
+      { return this->m_fptr || this->m_sptr;  }
 
-        return bool(this->m_sptr);  // dynamic
-      }
+    const type_info& type() const
+      { return this->m_fptr ? typeid(simple_function) : typeid(*(this->m_sptr.get()));  }
 
-    const type_info& type() const noexcept
-      {
-        auto fptr = this->m_fptr;
-        if(fptr)
-          return typeid(*fptr);  // static
-
-        return typeid(*(this->m_sptr.get()));  // dynamic
-      }
-
-    tinyfmt& describe(tinyfmt& fmt) const
-      {
-        auto fptr = this->m_fptr;
-        if(fptr)
-          return fmt << this->m_desc << " (native function @ " << (void*)(intptr_t)fptr << ")";  // static
-
-        auto ptr = this->m_sptr.get();
-        if(!ptr)
-          return fmt << "<null function pointer>";  // null
-
-        return ptr->describe(fmt);  // dynamic
-      }
-
-    Variable_Callback& enumerate_variables(Variable_Callback& callback) const
-      {
-        auto fptr = this->m_fptr;
-        if(fptr)
-          return callback;  // static - nothing to do
-
-        auto ptr = this->m_sptr.get();
-        if(!ptr)
-          return callback;  // null - nothing to do
-
-        return ptr->enumerate_variables(callback);  // dynamic
-      }
+    tinyfmt& describe(tinyfmt& fmt) const;
+    Variable_Callback& enumerate_variables(Variable_Callback& callback) const;
 
     Reference& invoke_ptc_aware(Reference& self, Global_Context& global, cow_vector<Reference>&& args = { }) const;
     Reference& invoke(Reference& self, Global_Context& global, cow_vector<Reference>&& args = { }) const;

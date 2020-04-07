@@ -26,9 +26,49 @@ void cow_opaque::do_throw_null_pointer() const
     ASTERIA_THROW("attempt to dereference a null opaque pointer");
   }
 
+tinyfmt& cow_opaque::describe(tinyfmt& fmt) const
+  {
+    auto ptr = this->m_sptr.get();
+    if(ptr) {
+      return ptr->describe(fmt);
+    }
+    return fmt.puts("<null opaque pointer>");
+  }
+
+Variable_Callback& cow_opaque::enumerate_variables(Variable_Callback& callback) const
+  {
+    auto ptr = this->m_sptr.get();
+    if(ptr) {
+      ptr->enumerate_variables(callback);
+    }
+    return callback;
+  }
+
 void cow_function::do_throw_null_pointer() const
   {
     ASTERIA_THROW("attempt to dereference a null function pointer");
+  }
+
+tinyfmt& cow_function::describe(tinyfmt& fmt) const
+  {
+    auto fptr = this->m_fptr;
+    if(fptr) {
+      return format(fmt, "$1\n[native function at $2]", this->m_desc, (void*)(intptr_t)fptr);  // static
+    }
+    auto ptr = this->m_sptr.get();
+    if(ptr) {
+      return ptr->describe(fmt);  // dynamic
+    }
+    return fmt.puts("<null function pointer>");
+  }
+
+Variable_Callback& cow_function::enumerate_variables(Variable_Callback& callback) const
+  {
+    auto ptr = this->m_sptr.get();
+    if(ptr) {
+      ptr->enumerate_variables(callback);  // dynamic
+    }
+    return callback;
   }
 
 Reference& cow_function::invoke_ptc_aware(Reference& self, Global_Context& global, cow_vector<Reference>&& args) const
