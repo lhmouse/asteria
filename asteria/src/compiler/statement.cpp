@@ -59,20 +59,25 @@ cow_vector<AIR_Node>& do_generate_subexpression(cow_vector<AIR_Node>& code, cons
     return code;
   }
 
+cow_vector<AIR_Node>& do_generate_single_step_trap(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
+                                                   const Source_Location& sloc)
+  {
+    // Note this can be disabled.
+    if(!opts.verbose_single_step_traps)
+      return code;
+
+    AIR_Node::S_single_step_trap xnode = { sloc };
+    code.emplace_back(::std::move(xnode));
+    return code;
+  }
+
 cow_vector<AIR_Node>& do_generate_expression(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
                                              PTC_Aware ptc, const Analytic_Context& ctx,
                                              const Statement::S_expression& expr)
   {
-    // Generate a single-step trap unless disabled.
-    if(opts.verbose_single_step_traps) {
-      AIR_Node::S_single_step_trap xnode = { expr.sloc };
-      code.emplace_back(::std::move(xnode));
-    }
-    // Generate code for the full expression.
-    if(expr.units.size()) {
-      do_generate_clear_stack(code);
-      do_generate_subexpression(code, opts, ptc, ctx, expr);
-    }
+    do_generate_single_step_trap(code, opts, expr.sloc);
+    do_generate_clear_stack(code);
+    do_generate_subexpression(code, opts, ptc, ctx, expr);
     return code;
   }
 
@@ -109,16 +114,9 @@ cow_vector<AIR_Node> do_generate_statement_list(cow_vector<phsh_string>* names_o
 cow_vector<AIR_Node>& do_generate_block(cow_vector<AIR_Node>& code, const Compiler_Options& opts, PTC_Aware ptc,
                                         const Analytic_Context& ctx, const Statement::S_block& block)
   {
-    // Generate a single-step trap unless disabled.
-    if(opts.verbose_single_step_traps) {
-      AIR_Node::S_single_step_trap xnode = { block.sloc };
-      code.emplace_back(::std::move(xnode));
-    }
-    // Create a new context for the block. No new names are injected into `ctx`.
-    if(block.stmts.size()) {
-      Analytic_Context ctx_stmts(::rocket::ref(ctx), nullptr);
-      do_generate_statement_list(code, nullptr, ctx_stmts, opts, ptc, block);
-    }
+    Analytic_Context ctx_stmts(::rocket::ref(ctx), nullptr);
+    do_generate_single_step_trap(code, opts, block.sloc);
+    do_generate_statement_list(code, nullptr, ctx_stmts, opts, ptc, block);
     return code;
   }
 
