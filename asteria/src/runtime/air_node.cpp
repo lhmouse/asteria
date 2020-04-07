@@ -919,8 +919,9 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
 
     // Copy the target, which shall be of type `function`.
     auto value = ctx.stack().get_top().read();
-    if(!value.is_function())
+    if(!value.is_function()) {
       ASTERIA_THROW("attempt to call a non-function (value `$1`)", value);
+    }
     auto& self = ctx.stack().open_top().zoom_out();
 
     return do_function_call_common(self, sloc, ctx, value.as_function(), ptc, ::std::move(args));
@@ -2627,13 +2628,14 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
         static_cast<void>(args[i].read());
       }
     }
-    else {
+    else
       ASTERIA_THROW("invalid variadic argument generator (value `$1`)", value);
-    }
+
     // Copy the target, which shall be of type `function`.
     value = ctx.stack().get_top().read();
-    if(!value.is_function())
+    if(!value.is_function()) {
       ASTERIA_THROW("attempt to call a non-function (value `$1`)", value);
+    }
     auto& self = ctx.stack().open_top().zoom_out();
 
     return do_function_call_common(self, sloc, ctx, value.as_function(), ptc, ::std::move(args));
@@ -2708,7 +2710,7 @@ AIR_Status do_import_call(Executive_Context& ctx, ParamU pu, const void* pv)
     else
       args[0].open() = abspath;
 
-    // Compile the script file.
+    // Compile the script file into a function object.
     Loader_Lock::Unique_Stream strm;
     strm.reset(ctx.global().loader_lock(), abspath.safe_c_str());
 
