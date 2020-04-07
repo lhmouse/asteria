@@ -18,7 +18,8 @@ class Random_Number_Generator final : public Rcfwd<Random_Number_Generator>
     // output pool
     uint32_t m_ngot;
     uint32_t m_pool[256];
-    // internal state
+
+    // internal states
     uint32_t m_aa;
     uint32_t m_bb;
     uint32_t m_cc;

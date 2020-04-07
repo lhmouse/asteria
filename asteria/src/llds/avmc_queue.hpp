@@ -112,9 +112,11 @@ class AVMC_Queue
     // Reserve storage for another node. `nbytes` is the size of `paramv` to reserve in bytes.
     // Note: All calls to this function must precede calls to `do_check_node_storage()`.
     void do_reserve_delta(size_t nbytes, const Symbols* syms_opt);
+
     // Allocate storage for all nodes that have been reserved so far, then checks whether there is enough room
     // for a new node with `paramv` whose size is `nbytes` in bytes. An exception is thrown in case of failure.
     inline Header* do_allocate_node(ParamU paramu, const Symbols* syms_opt, size_t nbytes);
+
     // Append a new node to the end. `nbytes` is the size of `paramv` to initialize in bytes.
     // Note: The storage must have been reserved using `do_reserve_delta()`.
     void do_append_trivial(Executor* exec, ParamU paramu, const Symbols* syms_opt,
