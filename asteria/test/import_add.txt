@@ -1,3 +1,5 @@
+#!this looks like a shebang
+
 assert this == null;
 assert __varg(0) == __file;
 
