@@ -61,11 +61,14 @@ class Reference
     bool is_lvalue() const noexcept
       { return this->is_variable();  }
 
-    bool is_glvalue() const noexcept
-      { return this->is_variable() || this->m_mods.size();  }
-
     bool is_rvalue() const noexcept
       { return this->is_constant() || this->is_temporary();  }
+
+    bool is_glvalue() const noexcept
+      { return this->is_lvalue() || !this->m_mods.empty();  }
+
+    bool is_prvalue() const noexcept
+      { return this->is_rvalue() && this->m_mods.empty();  }
 
     template<typename XModT> Reference& zoom_in(XModT&& xmod)
       {

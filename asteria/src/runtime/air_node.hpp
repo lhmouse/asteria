@@ -104,7 +104,7 @@ class AIR_Node
         AIR_Status status;
       };
 
-    struct S_glvalue_to_rvalue
+    struct S_glvalue_to_prvalue
       {
         Source_Location sloc;
       };
@@ -248,7 +248,7 @@ class AIR_Node
         index_throw_statement        = 11,
         index_assert_statement       = 12,
         index_simple_status          = 13,
-        index_glvalue_to_rvalue      = 14,
+        index_glvalue_to_prvalue     = 14,
         index_push_immediate         = 15,
         index_push_global_reference  = 16,
         index_push_local_reference   = 17,
@@ -286,7 +286,7 @@ class AIR_Node
       , S_throw_statement        // 11,
       , S_assert_statement       // 12,
       , S_simple_status          // 13,
-      , S_glvalue_to_rvalue      // 14,
+      , S_glvalue_to_prvalue     // 14,
       , S_push_immediate         // 15,
       , S_push_global_reference  // 16,
       , S_push_local_reference   // 17,

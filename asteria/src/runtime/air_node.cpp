@@ -709,11 +709,11 @@ AIR_Status do_simple_status(Executive_Context& /*ctx*/, ParamU pu, const void* /
     return status;
   }
 
-AIR_Status do_glvalue_to_rvalue(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
+AIR_Status do_glvalue_to_prvalue(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // Check for glvalues only. Void references and PTC wrappers are forwarded as is.
     auto& self = ctx.stack().open_top();
-    if(self.is_rvalue()) {
+    if(self.is_prvalue()) {
       return air_status_next;
     }
     // Convert the result to an rvalue.
@@ -2701,7 +2701,7 @@ AIR_Status do_import_call(Executive_Context& ctx, ParamU pu, const void* pv)
 
     // Rewrite the first argument.
     // Update the first argument to `import` if it was passed by reference.
-    if(args[0].is_rvalue()) {
+    if(!args[0].is_lvalue()) {
       Reference_root::S_temporary xref = { abspath };
       args.mut(0) = ::std::move(xref);
     }
@@ -2855,7 +2855,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
     case index_throw_statement:
     case index_assert_statement:
     case index_simple_status:
-    case index_glvalue_to_rvalue:
+    case index_glvalue_to_prvalue:
     case index_push_immediate:
     case index_push_global_reference: {
         // There is nothing to bind.
@@ -3168,8 +3168,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_simple_status>(queue);
       }
 
-    case index_glvalue_to_rvalue: {
-        const auto& altr = this->m_stor.as<index_glvalue_to_rvalue>();
+    case index_glvalue_to_prvalue: {
+        const auto& altr = this->m_stor.as<index_glvalue_to_prvalue>();
 
         // Set up symbols.
         AVMC_Appender<void> avmcp;
@@ -3179,7 +3179,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
 
         // Encode arguments.
         (void)altr;
-        return avmcp.output<do_glvalue_to_rvalue>(queue);
+        return avmcp.output<do_glvalue_to_prvalue>(queue);
       }
 
     case index_push_immediate: {
@@ -3730,7 +3730,7 @@ Variable_Callback& AIR_Node::enumerate_variables(Variable_Callback& callback) co
     case index_throw_statement:
     case index_assert_statement:
     case index_simple_status:
-    case index_glvalue_to_rvalue: {
+    case index_glvalue_to_prvalue: {
         return callback;
       }
 

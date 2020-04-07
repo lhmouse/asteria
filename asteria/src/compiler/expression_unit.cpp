@@ -183,7 +183,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
           return code;
 
         // Encode arguments.
-        AIR_Node::S_glvalue_to_rvalue xnode = { altr.sloc };
+        AIR_Node::S_glvalue_to_prvalue xnode = { altr.sloc };
         code.emplace_back(::std::move(xnode));
         return code;
       }
