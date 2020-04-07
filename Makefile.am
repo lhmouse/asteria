@@ -40,8 +40,8 @@ pkginclude_rocket_HEADERS =  \
   asteria/rocket/compiler.h  \
   asteria/rocket/preprocessor_utilities.h  \
   asteria/rocket/assert.hpp  \
-  asteria/rocket/throw.hpp  \
   asteria/rocket/utilities.hpp  \
+  asteria/rocket/throw.hpp  \
   asteria/rocket/allocator_utilities.hpp  \
   asteria/rocket/hash_table_utilities.hpp  \
   asteria/rocket/variant.hpp  \
