@@ -2726,7 +2726,9 @@ AIR_Status do_import_call(Executive_Context& ctx, ParamU pu, const void* pv)
     auto func = ::rocket::make_refcnt<Instantiated_Function>(params,
                        ::rocket::make_refcnt<Variadic_Arguer>(abspath, 0, ::rocket::sref("<top level>")),
                        do_generate_function(opts, params, nullptr, stmtq));
-    auto& self = ctx.stack().push(Reference_root::S_void());
+
+    // `this` is null for imported scripts.
+    auto& self = ctx.stack().push(Reference_root::S_constant());
 
     return do_function_call_common(self, sloc, ctx, func, ptc_aware_none, ::std::move(args));
   }
