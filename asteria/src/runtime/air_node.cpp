@@ -630,11 +630,9 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
     ASTERIA_RUNTIME_TRY {
       // Execute the `try` block. If no exception is thrown, this will have little overhead.
       status = do_execute_block(queue_try, ctx);
-      // This cannot be PTC'd, otherwise exceptions thrown from tail calls won't be caught.
-      if(status == air_status_return_ref) {
+      // This must not be PTC'd, otherwise exceptions thrown from tail calls won't be caught.
+      if(status == air_status_return_ref)
         ctx.stack().open_top().finish_call(ctx.global());
-      }
-      return status;
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
       // Reuse the exception object. Don't bother allocating a new one.
@@ -668,8 +666,8 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
         throw;
       }
       ctx_catch.on_scope_exit(status);
-      return status;
     }
+    return status;
   }
 
 [[noreturn]] AIR_Status do_throw_statement(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
