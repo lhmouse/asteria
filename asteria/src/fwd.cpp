@@ -98,22 +98,22 @@ const char* describe_frame_type(Frame_Type type) noexcept
   {
     switch(type) {
     case frame_type_native: {
-        return "native";
+        return "native code";
       }
     case frame_type_throw: {
-        return "throw";
+        return "throw statement";
       }
     case frame_type_catch: {
-        return "catch";
+        return "catch clause";
       }
     case frame_type_plain: {
-        return "plain";
+        return "frame";
       }
     case frame_type_func: {
         return "function";
       }
     case frame_type_defer: {
-        return "defer";
+        return "defer statement";
       }
     default:
       return "<unknown frame type>";

@@ -17,15 +17,18 @@ void Parser_Error::do_compose_message()
     ::rocket::tinyfmt_str fmt;
     fmt.set_string(::std::move(this->m_what));
     fmt.clear_string();
+
     // Write the status code in digital form.
     format(fmt, "asteria parser error: ERROR $1: $2",
                 this->m_stat, describe_parser_status(this->m_stat));
+
     // Append the source location.
     if(this->m_line > 0)
       format(fmt, "\n[unexpected token at line $1, offset $2, length $3]",
                   this->m_line, this->m_offset, this->m_length);
     else
       fmt << "\n[end of input encountered]";
+
     // Set the new string.
     this->m_what = fmt.extract_string();
   }

@@ -35,17 +35,20 @@ void Runtime_Error::do_compose_message()
     ::rocket::tinyfmt_str fmt;
     fmt.set_string(::std::move(this->m_what));
     fmt.clear_string();
+
     // Write the value. Strings are written as is. ALl other values are prettified.
     fmt << "asteria runtime error: ";
     if(this->m_value.is_string())
       fmt << this->m_value.as_string();
     else
       fmt << this->m_value;
+
     // Append stack frames.
     for(unsigned long i = 0;  i < this->m_frames.size();  ++i) {
       const auto& frm = this->m_frames[i];
-      format(fmt, "\n[frame #$1 at '$2' ($3): $4]", i, frm.sloc(), frm.what_type(), frm.value());
+      format(fmt, "\n  #$1 $2 at '$3': $4", i, frm.what_type(), frm.sloc(), frm.value());
     }
+
     // Set the string.
     this->m_what = fmt.extract_string();
   }
