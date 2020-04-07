@@ -12,11 +12,13 @@ template<size_t indexT, typename targetT, typename... alternativesT>
   { };
 
 template<size_t indexT, typename targetT, typename firstT, typename... restT>
-    struct type_finder<indexT, targetT, firstT, restT...> : type_finder<indexT + 1, targetT, restT...>  // recursive
+    struct type_finder<indexT, targetT, firstT, restT...>
+      : type_finder<indexT + 1, targetT, restT...>  // recursive
   { };
 
 template<size_t indexT, typename targetT, typename... restT>
-    struct type_finder<indexT, targetT, targetT, restT...> : integral_constant<size_t, indexT>  // found
+    struct type_finder<indexT, targetT, targetT, restT...>
+      : integral_constant<size_t, indexT>  // found
   { };
 
 template<size_t indexT, typename... alternativesT>
@@ -24,26 +26,33 @@ template<size_t indexT, typename... alternativesT>
   { };
 
 template<size_t indexT, typename firstT, typename... restT>
-    struct type_getter<indexT, firstT, restT...> : type_getter<indexT - 1, restT...>  // recursive
+    struct type_getter<indexT, firstT, restT...>
+      : type_getter<indexT - 1, restT...>  // recursive
   { };
 
 template<typename firstT, typename... restT>
-    struct type_getter<0, firstT, restT...> : enable_if<1, firstT>  // found
+    struct type_getter<0, firstT, restT...>
+      : enable_if<1, firstT>  // found
   { };
 
-// In a `catch` block that is conditionally unreachable, direct use of `throw` is possibly subject to compiler warnings.
-// Wrapping the `throw` expression in a function could silence this warning.
+// In a `catch` block that is conditionally unreachable, direct use of `throw` is subject to compiler
+// warnings. Wrapping the `throw` expression in a function could silence this warning.
 [[noreturn]] inline void rethrow_current_exception()
   { throw;  }
 
-constexpr bool all_of(const bool* table, size_t count) noexcept
-  { return (count == 0) || (table[0] && all_of(table + 1, count - 1));  }
+ROCKET_PURE_FUNCTION inline bool test_bit(const bool* table, size_t count, size_t index) noexcept
+  {
+    size_t sum = 0;
+    for(size_t i = 0;  i != count;  ++i)
+      sum += table[i];
 
-constexpr bool any_of(const bool* table, size_t count) noexcept
-  { return (count != 0) && (table[0] || any_of(table + 1, count - 1));  }
-
-constexpr bool test_bit(const bool* table, size_t count, size_t index) noexcept
-  { return all_of(table, count) || (any_of(table, count) && table[index]);  }
+    if(sum == count)  // all set
+      return true;
+    else if(sum == 0)  // none set
+      return false;
+    else
+      return table[index];
+  }
 
 template<typename alternativeT> void wrapped_copy_construct(void* dptr, const void* sptr)
   { noadl::construct_at(static_cast<alternativeT*>(dptr), *static_cast<const alternativeT*>(sptr));  }
