@@ -141,10 +141,6 @@ namespace noadl = ::rocket;
 #define ROCKET_ENABLE_IF_HAS_TYPE(...)       typename ::std::conditional<1, void, typename __VA_ARGS__>::type* = nullptr
 #define ROCKET_ENABLE_IF_HAS_VALUE(...)      typename ::std::enable_if<!sizeof((__VA_ARGS__)) || true>::type* = nullptr
 
-template<typename lhsT, typename rhsT> struct is_lvalue_assignable
-    : is_assignable<typename add_lvalue_reference<lhsT>::type, rhsT>
-  { };
-
 template<typename typeT> struct remove_cvref
     : remove_cv<typename remove_reference<typeT>::type>
   { };
