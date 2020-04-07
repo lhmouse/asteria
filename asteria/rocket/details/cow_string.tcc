@@ -30,7 +30,7 @@ template<typename allocT> struct basic_storage : storage_header
 
     allocator_type alloc;
     size_type nblk;
-    union { value_type data[0];  };
+    value_type data[0];
 
     basic_storage(const allocator_type& xalloc, size_type xnblk) noexcept
       : alloc(xalloc), nblk(xnblk)
