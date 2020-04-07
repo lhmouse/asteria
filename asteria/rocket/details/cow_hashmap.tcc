@@ -125,88 +125,79 @@ template<typename allocT> struct pointer_storage : storage_header
       = delete;
   };
 
-template<typename pointerT, typename hashT, typename allocT,
-         bool copyableT = is_copy_constructible<typename allocT::value_type>::value>
-    struct copy_storage_helper
+template<typename ptrT, typename allocT, typename hashT> [[noreturn]] void dispatch_copy_storage(false_type,
+                               ptrT /*ptr*/, const hashT& /*hf*/, ptrT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/)
   {
-    void operator()(pointerT ptr, const hashT& hf, pointerT ptr_old, size_t off, size_t cnt) const
-      {
-        // Get table bounds.
-        auto data = ptr->data;
-        auto end = data + pointer_storage<allocT>::max_nbkt_for_nblk(ptr->nblk);
-        // Copy elements one by one.
-        for(size_t i = off; i != off + cnt; ++i) {
-          auto eptr_old = ptr_old->data[i].get();
-          if(!eptr_old) {
-            continue;
-          }
-          // Find a bucket for the new element.
-          auto origin = noadl::get_probing_origin(data, end, hf(eptr_old->first));
-          auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const auto&) { return false;  });
-          ROCKET_ASSERT(bkt);
-          // Allocate a new element by copy-constructing from the old one.
-          auto eptr = allocator_traits<allocT>::allocate(ptr->alloc, size_t(1));
-          try {
-            allocator_traits<allocT>::construct(ptr->alloc, noadl::unfancy(eptr), *eptr_old);
-          }
-          catch(...) {
-            allocator_traits<allocT>::deallocate(ptr->alloc, eptr, size_t(1));
-            throw;
-          }
-          // Insert it into the new bucket.
-          ROCKET_ASSERT(!*bkt);
-          bkt->reset(eptr);
-          ptr->nelem++;
-        }
-      }
-  };
+    // Throw an exception unconditionally, even when there is nothing to copy.
+    noadl::sprintf_and_throw<domain_error>("cow_hashmap: `%s` not copy-constructible", typeid(typename allocT::value_type).name());
+  }
 
-template<typename pointerT, typename hashT, typename allocT>
-    struct copy_storage_helper<pointerT, hashT, allocT,
-                               false>     // copyableT
+template<typename ptrT, typename allocT, typename hashT> void dispatch_copy_storage(true_type,
+                               ptrT ptr, const hashT& hf, ptrT ptr_old, size_t off, size_t cnt)
   {
-    [[noreturn]] void operator()(pointerT /*ptr*/, const hashT& /*hf*/, pointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
-      {
-        // `allocT::value_type` is not copy-constructible.
-        // Throw an exception unconditionally, even when there is nothing to copy.
-        noadl::sprintf_and_throw<domain_error>("cow_hashmap: `%s` not copy-constructible",
-                                               typeid(typename allocT::value_type).name());
+    // Get table bounds.
+    auto data = ptr->data;
+    auto end = data + pointer_storage<allocT>::max_nbkt_for_nblk(ptr->nblk);
+    // Copy elements one by one.
+    for(size_t i = off; i != off + cnt; ++i) {
+      auto eptr_old = ptr_old->data[i].get();
+      if(!eptr_old)
+        continue;
+      // Find a bucket for the new element.
+      auto origin = noadl::get_probing_origin(data, end, hf(eptr_old->first));
+      auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const auto&) { return false;  });
+      ROCKET_ASSERT(bkt);
+      // Allocate a new element by copy-constructing from the old one.
+      auto eptr = allocator_traits<allocT>::allocate(ptr->alloc, size_t(1));
+      try {
+        allocator_traits<allocT>::construct(ptr->alloc, noadl::unfancy(eptr), *eptr_old);
       }
-  };
+      catch(...) {
+        allocator_traits<allocT>::deallocate(ptr->alloc, eptr, size_t(1));
+        throw;
+      }
+      // Insert it into the new bucket.
+      ROCKET_ASSERT(!*bkt);
+      bkt->reset(eptr);
+      ptr->nelem++;
+    }
+  }
 
-template<typename pointerT, typename hashT, typename allocT>
-    struct move_storage_helper
+template<typename ptrT, typename allocT, typename hashT> void copy_storage(ptrT ptr, const hashT& hf, ptrT ptr_old, size_t off, size_t cnt)
   {
-    void operator()(pointerT ptr, const hashT& hf, pointerT ptr_old, size_t off, size_t cnt) const
-      {
-        // Get table bounds.
-        auto data = ptr->data;
-        auto end = data + pointer_storage<allocT>::max_nbkt_for_nblk(ptr->nblk);
-        // Move elements one by one.
-        for(size_t i = off; i != off + cnt; ++i) {
-          auto eptr_old = ptr_old->data[i].get();
-          if(!eptr_old) {
-            continue;
-          }
-          // Find a bucket for the new element.
-          auto origin = noadl::get_probing_origin(data, end, hf(eptr_old->first));
-          auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const auto&) { return false;  });
-          ROCKET_ASSERT(bkt);
-          // Detach the old element.
-          auto eptr = ptr_old->data[i].reset();
-          ptr_old->nelem--;
-          // Insert it into the new bucket.
-          ROCKET_ASSERT(!*bkt);
-          bkt->reset(eptr);
-          ptr->nelem++;
-        }
-      }
-  };
+    dispatch_copy_storage<ptrT, allocT>(
+       is_copy_constructible<typename allocT::value_type>(),  // copyable
+       ptr, hf, ptr_old, off, cnt);
+  }
+
+template<typename ptrT, typename allocT, typename hashT> void move_storage(ptrT ptr, const hashT& hf, ptrT ptr_old, size_t off, size_t cnt)
+  {
+    // Get table bounds.
+    auto data = ptr->data;
+    auto end = data + pointer_storage<allocT>::max_nbkt_for_nblk(ptr->nblk);
+    // Move elements one by one.
+    for(size_t i = off; i != off + cnt; ++i) {
+      auto eptr_old = ptr_old->data[i].get();
+      if(!eptr_old)
+        continue;
+      // Find a bucket for the new element.
+      auto origin = noadl::get_probing_origin(data, end, hf(eptr_old->first));
+      auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const auto&) { return false;  });
+      ROCKET_ASSERT(bkt);
+      // Detach the old element.
+      auto eptr = ptr_old->data[i].reset();
+      ptr_old->nelem--;
+      // Insert it into the new bucket.
+      ROCKET_ASSERT(!*bkt);
+      bkt->reset(eptr);
+      ptr->nelem++;
+    }
+  }
 
 // This struct is used as placeholders for EBO'd bases that would otherwise be duplicate, in order to prevent ambiguity.
 template<int indexT> struct ebo_placeholder
   {
-    template<typename anythingT> explicit constexpr ebo_placeholder(anythingT&&) noexcept
+    template<typename anyT> constexpr ebo_placeholder(anyT&&) noexcept
       { }
   };
 
@@ -423,12 +414,12 @@ template<typename allocT, typename hashT, typename eqT>
             // Copy or move elements into the new block.
             // Moving is only viable if the old and new allocators compare equal and the old block is owned exclusively.
             if((ptr_old->alloc == ptr->alloc) && ptr_old->nref.unique()) {
-              move_storage_helper<storage_pointer, hasher, allocator_type>()(ptr, this->as_hasher(), ptr_old,       0, cnt_one);
-              move_storage_helper<storage_pointer, hasher, allocator_type>()(ptr, this->as_hasher(), ptr_old, off_two, cnt_two);
+              move_storage<storage_pointer, allocator_type>(ptr, this->as_hasher(), ptr_old,       0, cnt_one);
+              move_storage<storage_pointer, allocator_type>(ptr, this->as_hasher(), ptr_old, off_two, cnt_two);
             }
             else {
-              copy_storage_helper<storage_pointer, hasher, allocator_type>()(ptr, this->as_hasher(), ptr_old,       0, cnt_one);
-              copy_storage_helper<storage_pointer, hasher, allocator_type>()(ptr, this->as_hasher(), ptr_old, off_two, cnt_two);
+              copy_storage<storage_pointer, allocator_type>(ptr, this->as_hasher(), ptr_old,       0, cnt_one);
+              copy_storage<storage_pointer, allocator_type>(ptr, this->as_hasher(), ptr_old, off_two, cnt_two);
             }
           }
           catch(...) {

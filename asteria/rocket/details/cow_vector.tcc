@@ -57,101 +57,75 @@ template<typename allocT> struct basic_storage : storage_header
       = delete;
   };
 
-template<typename pointerT, typename allocT,
-         bool copyableT = is_copy_constructible<typename allocT::value_type>::value,
-         bool memcpyT = conjunction<is_trivially_copy_constructible<typename allocT::value_type>,
-                                    is_std_allocator<allocT>>::value>
-    struct copy_storage_helper
+template<typename ptrT, typename allocT, typename ignoreT> [[noreturn]] void dispatch_copy_storage(false_type, ignoreT&&,
+                               ptrT /*ptr*/, ptrT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/)
   {
-    void operator()(pointerT ptr, pointerT ptr_old, size_t off, size_t cnt) const
-      {
-        // Copy elements one by one.
-        auto nelem = ptr->nelem;
-        auto cap = basic_storage<allocT>::max_nelem_for_nblk(ptr->nblk);
-        ROCKET_ASSERT(cnt <= cap - nelem);
-        for(size_t i = off; i != off + cnt; ++i) {
-          allocator_traits<allocT>::construct(ptr->alloc, ptr->data + nelem, ptr_old->data[i]);
-          ptr->nelem = ++nelem;
-        }
-      }
-  };
+    // Throw an exception unconditionally, even when there is nothing to copy.
+    noadl::sprintf_and_throw<domain_error>("cow_vector: `%s` not copy-constructible", typeid(typename allocT::value_type).name());
+  }
 
-template<typename pointerT, typename allocT, bool memcpyT>
-    struct copy_storage_helper<pointerT, allocT,
-                               false,  // copyableT
-                               memcpyT>  // trivial && std::allocator
+template<typename ptrT, typename allocT> void dispatch_copy_storage(true_type, true_type,
+                               ptrT ptr, ptrT ptr_old, size_t off, size_t cnt)
   {
-    [[noreturn]] void operator()(pointerT /*ptr*/, pointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
-      {
-        // Throw an exception unconditionally, even when there is nothing to copy.
-        noadl::sprintf_and_throw<domain_error>("cow_vector: `%s` not copy-constructible",
-                                               typeid(typename allocT::value_type).name());
-      }
-  };
+    // Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
+    auto nelem = ptr->nelem;
+    auto cap = basic_storage<allocT>::max_nelem_for_nblk(ptr->nblk);
+    ROCKET_ASSERT(cnt <= cap - nelem);
+    ::std::memcpy(ptr->data + nelem, ptr_old->data + off, cnt * sizeof(typename allocT::value_type));
+    ptr->nelem = (nelem += cnt);
+  }
 
-template<typename pointerT, typename allocT>
-    struct copy_storage_helper<pointerT, allocT,
-                               true,  // copyableT
-                               true>  // trivial && std::allocator
+template<typename ptrT, typename allocT> void dispatch_copy_storage(true_type, false_type,
+                               ptrT ptr, ptrT ptr_old, size_t off, size_t cnt)
   {
-    void operator()(pointerT ptr, pointerT ptr_old, size_t off, size_t cnt) const
-      {
-        // Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
-        auto nelem = ptr->nelem;
-        auto cap = basic_storage<allocT>::max_nelem_for_nblk(ptr->nblk);
-        ROCKET_ASSERT(cnt <= cap - nelem);
-        ::std::memcpy(static_cast<void*>(ptr->data + nelem), ptr_old->data + off, sizeof(typename allocT::value_type) * cnt);
-        ptr->nelem = (nelem += cnt);
-      }
-  };
+    // Copy elements one by one.
+    auto nelem = ptr->nelem;
+    auto cap = basic_storage<allocT>::max_nelem_for_nblk(ptr->nblk);
+    ROCKET_ASSERT(cnt <= cap - nelem);
+    for(size_t i = off; i != off + cnt; ++i) {
+      allocator_traits<allocT>::construct(ptr->alloc, ptr->data + nelem, ptr_old->data[i]);
+      ptr->nelem = ++nelem;
+    }
+  }
 
-template<typename pointerT, typename allocT,
-         bool movableT = is_move_constructible<typename allocT::value_type>::value,
-         bool memcpyT = conjunction<is_trivially_move_constructible<typename allocT::value_type>,
-                                    is_std_allocator<allocT>>::value>
-    struct move_storage_helper
+template<typename ptrT, typename allocT> void copy_storage(ptrT ptr, ptrT ptr_old, size_t off, size_t cnt)
   {
-    void operator()(pointerT ptr, pointerT ptr_old, size_t off, size_t cnt) const
-      {
-        // Move elements one by one.
-        auto nelem = ptr->nelem;
-        auto cap = basic_storage<allocT>::max_nelem_for_nblk(ptr->nblk);
-        ROCKET_ASSERT(cnt <= cap - nelem);
-        for(size_t i = off; i != off + cnt; ++i) {
-          allocator_traits<allocT>::construct(ptr->alloc, ptr->data + nelem, ::std::move(ptr_old->data[i]));
-          ptr->nelem = ++nelem;
-        }
-      }
-  };
+    dispatch_copy_storage<ptrT, allocT>(
+       is_copy_constructible<typename allocT::value_type>(),  // copyable
+       conjunction<is_trivially_copy_constructible<typename allocT::value_type>, is_std_allocator<allocT>>(),  // memcpy
+       ptr, ptr_old, off, cnt);
+  }
 
-template<typename pointerT, typename allocT, bool memcpyT>
-    struct move_storage_helper<pointerT, allocT,
-                               false,  // movableT
-                               memcpyT>  // trivial && std::allocator
+template<typename ptrT, typename allocT> void dispatch_move_storage(true_type,
+                               ptrT ptr, ptrT ptr_old, size_t off, size_t cnt)
   {
-    [[noreturn]] void operator()(pointerT /*ptr*/, pointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
-      {
-        // Throw an exception unconditionally, even when there is nothing to move.
-        noadl::sprintf_and_throw<domain_error>("cow_vector: `%s` not move-constructible",
-                                               typeid(typename allocT::value_type).name());
-      }
-  };
+    // Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
+    auto nelem = ptr->nelem;
+    auto cap = basic_storage<allocT>::max_nelem_for_nblk(ptr->nblk);
+    ROCKET_ASSERT(cnt <= cap - nelem);
+    ::std::memcpy(ptr->data + nelem, ptr_old->data + off, cnt * sizeof(typename allocT::value_type));
+    ptr->nelem = (nelem += cnt);
+  }
 
-template<typename pointerT, typename allocT>
-    struct move_storage_helper<pointerT, allocT,
-                               true,  // movableT
-                               true>  // trivial && std::allocator
+template<typename ptrT, typename allocT> void dispatch_move_storage(false_type,
+                               ptrT ptr, ptrT ptr_old, size_t off, size_t cnt)
   {
-    void operator()(pointerT ptr, pointerT ptr_old, size_t off, size_t cnt) const
-      {
-        // Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
-        auto nelem = ptr->nelem;
-        auto cap = basic_storage<allocT>::max_nelem_for_nblk(ptr->nblk);
-        ROCKET_ASSERT(cnt <= cap - nelem);
-        ::std::memcpy(static_cast<void*>(ptr->data + nelem), ptr_old->data + off, sizeof(typename allocT::value_type) * cnt);
-        ptr->nelem = (nelem += cnt);
-      }
-  };
+    // Move elements one by one.
+    auto nelem = ptr->nelem;
+    auto cap = basic_storage<allocT>::max_nelem_for_nblk(ptr->nblk);
+    ROCKET_ASSERT(cnt <= cap - nelem);
+    for(size_t i = off; i != off + cnt; ++i) {
+      allocator_traits<allocT>::construct(ptr->alloc, ptr->data + nelem, ::std::move(ptr_old->data[i]));
+      ptr->nelem = ++nelem;
+    }
+  }
+
+template<typename ptrT, typename allocT> void move_storage(ptrT ptr, ptrT ptr_old, size_t off, size_t cnt)
+  {
+    dispatch_move_storage<ptrT, allocT>(
+       conjunction<is_trivially_move_constructible<typename allocT::value_type>, is_std_allocator<allocT>>(),  // memcpy
+       ptr, ptr_old, off, cnt);
+  }
 
 template<typename allocT> class storage_handle : private allocator_wrapper_base_for<allocT>::type
   {
@@ -320,12 +294,12 @@ template<typename allocT> class storage_handle : private allocator_wrapper_base_
             // Copy or move elements into the new block.
             // Moving is only viable if the old and new allocators compare equal and the old block is owned exclusively.
             if((ptr_old->alloc == ptr->alloc) && ptr_old->nref.unique()) {
-              move_storage_helper<storage_pointer, allocator_type>()(ptr, ptr_old,       0, cnt_one);
-              move_storage_helper<storage_pointer, allocator_type>()(ptr, ptr_old, off_two, cnt_two);
+              move_storage<storage_pointer, allocator_type>(ptr, ptr_old,       0, cnt_one);
+              move_storage<storage_pointer, allocator_type>(ptr, ptr_old, off_two, cnt_two);
             }
             else {
-              copy_storage_helper<storage_pointer, allocator_type>()(ptr, ptr_old,       0, cnt_one);
-              copy_storage_helper<storage_pointer, allocator_type>()(ptr, ptr_old, off_two, cnt_two);
+              copy_storage<storage_pointer, allocator_type>(ptr, ptr_old,       0, cnt_one);
+              copy_storage<storage_pointer, allocator_type>(ptr, ptr_old, off_two, cnt_two);
             }
           }
           catch(...) {
