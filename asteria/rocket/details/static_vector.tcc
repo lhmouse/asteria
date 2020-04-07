@@ -26,7 +26,7 @@ template<typename allocT, size_t capacityT> class storage_handle : private alloc
       : allocator_base(alloc), m_nelem(0)
       {
 #ifdef ROCKET_DEBUG
-        ::std::memset(this->m_ebase, '*', sizeof(m_ebase));
+        ::std::memset(static_cast<void*>(this->m_ebase), '*', sizeof(m_ebase));
 #endif
       }
 
@@ -34,7 +34,7 @@ template<typename allocT, size_t capacityT> class storage_handle : private alloc
       : allocator_base(::std::move(alloc)), m_nelem(0)
       {
 #ifdef ROCKET_DEBUG
-        ::std::memset(this->m_ebase, '*', sizeof(m_ebase));
+        ::std::memset(static_cast<void*>(this->m_ebase), '*', sizeof(m_ebase));
 #endif
       }
 
@@ -49,7 +49,7 @@ template<typename allocT, size_t capacityT> class storage_handle : private alloc
         }
 #ifdef ROCKET_DEBUG
         this->m_nelem = static_cast<decltype(m_nelem)>(0xBAD1BEEF);
-        ::std::memset(this->m_ebase, '~', sizeof(m_ebase));
+        ::std::memset(static_cast<void*>(this->m_ebase), '~', sizeof(m_ebase));
 #endif
       }
 

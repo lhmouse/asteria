@@ -56,7 +56,6 @@ class Scrambler
             this->m_regs[(r+3)%8] += this->m_regs[r];
             this->m_regs[(r+1)%8] += this->m_regs[(r+2)%8];
           };
-
         step(0, do_sll, 11);
         step(1, do_srl,  2);
         step(2, do_sll,  8);
