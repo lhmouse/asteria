@@ -30,5 +30,5 @@ int main()
 
     Simple_Script code(cbuf, ::rocket::sref(__FILE__));
     Global_Context global;
-    code.execute(global).read().as_string() == "function";
+    ASTERIA_TEST_CHECK(code.execute(global).read().as_string() == "function");
   }

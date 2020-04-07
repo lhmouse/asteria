@@ -86,6 +86,7 @@ pkginclude_rocket_details_HEADERS =  \
   asteria/rocket/details/allocator_utilities.tcc  \
   asteria/rocket/details/variant.tcc  \
   asteria/rocket/details/unique_handle.tcc  \
+  asteria/rocket/details/char_traits.tcc  \
   asteria/rocket/details/cow_string.tcc  \
   asteria/rocket/details/cow_vector.tcc  \
   asteria/rocket/details/cow_hashmap.tcc  \

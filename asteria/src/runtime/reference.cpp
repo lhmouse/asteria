@@ -59,7 +59,7 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
 
     // Unpack all frames recursively.
     // Note that `self` is overwritten before the wrapped function is called.
-    while(tca = self.get_tail_call_opt()) {
+    while((tca = self.get_tail_call_opt())) {
       // Unpack arguments.
       const auto& sloc = tca->sloc();
       const auto& inside = tca->zvarg()->func();

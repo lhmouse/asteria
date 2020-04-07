@@ -14,6 +14,8 @@ namespace rocket {
 
 template<typename charT> struct char_traits;
 
+#include "details/char_traits.tcc"
+
 template<> struct char_traits<char>
   {
     using char_type  = char;
@@ -35,23 +37,23 @@ template<> struct char_traits<char>
     static bool lt(char_type x, char_type y) noexcept
       { return (uint8_t)x < (uint8_t)y;  }
 
-    static char_type* assign(char_type* p, size_type n, char_type c) noexcept
-      { return (char*)::memset(p, c, n);  }
-
     static char_type* copy(char_type* p, const char_type* s, size_type n) noexcept
       { return (char*)::memcpy(p, s, n);  }
 
     static char_type* move(char_type* p, const char_type* s, size_type n) noexcept
       { return (char*)::memmove(p, s, n);  }
 
+    static char_type* assign(char_type* p, size_type n, char_type c) noexcept
+      { return (char*)::memset(p, c, n);  }
+
     static const char_type* find(const char_type* p, size_type n, char_type c) noexcept
       { return (char*)::memchr(p, c, n);  }
 
-    static int compare(const char_type* p, const char_type* s, size_type n) noexcept
-      { return ::memcmp(p, s, n);  }
-
     static size_type length(const char_type* p) noexcept
       { return ::strlen(p);  }
+
+    static int compare(const char_type* p, const char_type* s, size_type n) noexcept
+      { return ::memcmp(p, s, n);  }
 
     static constexpr int_type eof() noexcept
       { return EOF;  }
@@ -70,7 +72,7 @@ template<> struct char_traits<char>
         size_t k = 0;
         ::flockfile(fp);
         while(k < n) {
-          int ch = ::getc_unlocked(fp);
+          int ch = ::fgetc_unlocked(fp);
           if(ROCKET_UNEXPECT(ch == EOF))
             break;
           p[k++] = (char)ch;
@@ -86,7 +88,7 @@ template<> struct char_traits<char>
         size_t k = 0;
         ::flockfile(fp);
         while(k < n) {
-          int ch = ::putc_unlocked(p[k], fp);
+          int ch = ::fputc_unlocked(p[k], fp);
           if(ROCKET_UNEXPECT(ch == EOF))
             break;
           k++;
@@ -117,23 +119,23 @@ template<> struct char_traits<wchar_t>
     static bool lt(char_type x, char_type y) noexcept
       { return x < y;  }
 
-    static char_type* assign(char_type* p, size_type n, char_type c) noexcept
-      { return ::wmemset(p, c, n);  }
-
     static char_type* copy(char_type* p, const char_type* s, size_type n) noexcept
       { return ::wmemcpy(p, s, n);  }
 
     static char_type* move(char_type* p, const char_type* s, size_type n) noexcept
       { return ::wmemmove(p, s, n);  }
 
+    static char_type* assign(char_type* p, size_type n, char_type c) noexcept
+      { return ::wmemset(p, c, n);  }
+
     static const char_type* find(const char_type* p, size_type n, char_type c) noexcept
       { return ::wmemchr(p, c, n);  }
 
-    static int compare(const char_type* p, const char_type* s, size_type n) noexcept
-      { return ::wmemcmp(p, s, n);  }
-
     static size_type length(const char_type* p) noexcept
       { return ::wcslen(p);  }
+
+    static int compare(const char_type* p, const char_type* s, size_type n) noexcept
+      { return ::wmemcmp(p, s, n);  }
 
     static constexpr int_type eof() noexcept
       { return WEOF;  }
@@ -152,7 +154,7 @@ template<> struct char_traits<wchar_t>
         size_t k = 0;
         ::flockfile(fp);
         while(k < n) {
-          ::wint_t ch = ::getwc_unlocked(fp);
+          ::wint_t ch = ::fgetwc_unlocked(fp);
           if(ROCKET_UNEXPECT(ch == WEOF))
             break;
           p[k++] = (wchar_t)ch;
@@ -168,7 +170,7 @@ template<> struct char_traits<wchar_t>
         size_t k = 0;
         ::flockfile(fp);
         while(k < n) {
-          ::wint_t ch = ::putwc_unlocked(p[k], fp);
+          ::wint_t ch = ::fputwc_unlocked(p[k], fp);
           if(ROCKET_UNEXPECT(ch == WEOF))
             break;
           k++;
@@ -199,23 +201,23 @@ template<> struct char_traits<char16_t>
     static bool lt(char_type x, char_type y) noexcept
       { return x < y;  }
 
-    static char_type* assign(char_type* p, size_type n, char_type c) noexcept
-      { return ::std::char_traits<char16_t>::assign(p, n, c);  }
-
     static char_type* copy(char_type* p, const char_type* s, size_type n) noexcept
-      { return ::std::char_traits<char16_t>::copy(p, s, n);  }
+      { return (char16_t*)::memcpy(p, s, n * sizeof(char16_t));  }
 
     static char_type* move(char_type* p, const char_type* s, size_type n) noexcept
-      { return ::std::char_traits<char16_t>::move(p, s, n);  }
+      { return (char16_t*)::memmove(p, s, n * sizeof(char16_t));  }
+
+    static char_type* assign(char_type* p, size_type n, char_type c) noexcept
+      { return details_char_traits::assign<char16_t>(p, n, c);  }
 
     static const char_type* find(const char_type* p, size_type n, char_type c) noexcept
-      { return ::std::char_traits<char16_t>::find(p, n, c);  }
-
-    static int compare(const char_type* p, const char_type* s, size_type n) noexcept
-      { return ::std::char_traits<char16_t>::compare(p, s, n);  }
+      { return details_char_traits::find<char16_t>(p, n, c);  }
 
     static size_type length(const char_type* p) noexcept
-      { return ::std::char_traits<char16_t>::length(p);  }
+      { return details_char_traits::length<char16_t>(p);  }
+
+    static int compare(const char_type* p, const char_type* s, size_type n) noexcept
+      { return details_char_traits::compare<char16_t>(p, s, n);  }
 
     static constexpr int_type eof() noexcept
       { return UINT_LEAST16_MAX;  }
@@ -257,23 +259,23 @@ template<> struct char_traits<char32_t>
     static bool lt(char_type x, char_type y) noexcept
       { return x < y;  }
 
-    static char_type* assign(char_type* p, size_type n, char_type c) noexcept
-      { return ::std::char_traits<char32_t>::assign(p, n, c);  }
-
     static char_type* copy(char_type* p, const char_type* s, size_type n) noexcept
-      { return ::std::char_traits<char32_t>::copy(p, s, n);  }
+      { return (char32_t*)::memcpy(p, s, n * sizeof(char32_t));  }
 
     static char_type* move(char_type* p, const char_type* s, size_type n) noexcept
-      { return ::std::char_traits<char32_t>::move(p, s, n);  }
+      { return (char32_t*)::memmove(p, s, n * sizeof(char32_t));  }
+
+    static char_type* assign(char_type* p, size_type n, char_type c) noexcept
+      { return details_char_traits::assign<char32_t>(p, n, c);  }
 
     static const char_type* find(const char_type* p, size_type n, char_type c) noexcept
-      { return ::std::char_traits<char32_t>::find(p, n, c);  }
-
-    static int compare(const char_type* p, const char_type* s, size_type n) noexcept
-      { return ::std::char_traits<char32_t>::compare(p, s, n);  }
+      { return details_char_traits::find<char32_t>(p, n, c);  }
 
     static size_type length(const char_type* p) noexcept
-      { return ::std::char_traits<char32_t>::length(p);  }
+      { return details_char_traits::length<char32_t>(p);  }
+
+    static int compare(const char_type* p, const char_type* s, size_type n) noexcept
+      { return details_char_traits::compare<char32_t>(p, s, n);  }
 
     static constexpr int_type eof() noexcept
       { return UINT_LEAST32_MAX;  }

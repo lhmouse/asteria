@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <climits>
 #include <cstdio>
+#include <cwchar>
 #include "../rocket/preprocessor_utilities.h"
 #include "../rocket/cow_string.hpp"
 #include "../rocket/cow_vector.hpp"
