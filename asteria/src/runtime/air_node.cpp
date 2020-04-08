@@ -677,9 +677,7 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
 
     // Read the value to throw.
     // Note that the operand must not have been empty for this code.
-    const auto& value = ctx.stack().get_top().read();
-    // Throw it now.
-    throw Runtime_Error(sloc, value);
+    throw Runtime_Error(Runtime_Error::T_throw(), ctx.stack().get_top().read(), sloc);
   }
 
 AIR_Status do_assert_statement(Executive_Context& ctx, ParamU pu, const void* pv)
@@ -694,8 +692,8 @@ AIR_Status do_assert_statement(Executive_Context& ctx, ParamU pu, const void* pv
       // When the assertion succeeds, there is nothing to do.
       return air_status_next;
     }
-    // Throw a `runtime_error`.
-    ASTERIA_THROW("assertion failure: $1\n[declared at '$2']", msg, sloc);
+    // Throw a `Runtime_Error`.
+    throw Runtime_Error(Runtime_Error::T_assert(), sloc, msg);
   }
 
 AIR_Status do_simple_status(Executive_Context& /*ctx*/, ParamU pu, const void* /*pv*/)

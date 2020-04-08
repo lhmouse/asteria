@@ -155,6 +155,9 @@ const char* describe_frame_type(Frame_Type type) noexcept
     case frame_type_defer: {
         return "defer statement";
       }
+    case frame_type_assert: {
+        return "assertion failure";
+      }
     default:
       return "<unknown frame type>";
     }

@@ -12,6 +12,11 @@ namespace Asteria {
 
 class Runtime_Error : public virtual exception
   {
+  public:
+    struct T_native { };
+    struct T_throw { };
+    struct T_assert { };
+
   private:
     Value m_value;
     cow_vector<Backtrace_Frame> m_frames;
@@ -20,16 +25,20 @@ class Runtime_Error : public virtual exception
     cow_string m_what;  // a comprehensive string that is human-readable.
 
   public:
-    template<typename XValT, ASTERIA_SFINAE_CONSTRUCT(Value, XValT&&)>
-                                            Runtime_Error(const Source_Location& sloc, XValT&& xval)
+    Runtime_Error(T_native, const exception& stdex)
+      : m_value(cow_string(stdex.what()))
+      { this->do_backtrace(),
+        this->do_insert_frame(frame_type_native, ::rocket::sref("<unknown>"), -1, this->m_value);  }
+
+    template<typename XValT> Runtime_Error(T_throw, XValT&& xval, const Source_Location& sloc)
       : m_value(::std::forward<XValT>(xval))
       { this->do_backtrace(),
         this->do_insert_frame(frame_type_throw, sloc, this->m_value);  }
 
-    explicit Runtime_Error(const exception& stdex)
-      : m_value(cow_string(stdex.what()))
+    Runtime_Error(T_assert, const Source_Location& sloc, const cow_string& msg)
+      : m_value("assertion failure: " + msg)
       { this->do_backtrace(),
-        this->do_insert_frame(frame_type_native, ::rocket::sref("<unknown>"), -1, this->m_value);  }
+        this->do_insert_frame(frame_type_assert, sloc, this->m_value);  }
 
     ~Runtime_Error() override;
 
@@ -104,8 +113,9 @@ class Runtime_Error : public virtual exception
                                           // Perform operations that might throw exceptions here.
 #define ASTERIA_RUNTIME_CATCH(...)      catch(::Asteria::Runtime_Error&)  \
                                           { throw;  }  \
-                                        catch(::std::exception& zTrSrvgrK_)  \
-                                          { throw ::Asteria::Runtime_Error(zTrSrvgrK_); }  \
+                                        catch(::std::exception& zTrSrvgK_)  \
+                                          { throw ::Asteria::Runtime_Error(  \
+                                              ::Asteria::Runtime_Error::T_native(), zTrSrvgK_); }  \
                                       }  \
                                       catch(__VA_ARGS__)
 
