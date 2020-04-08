@@ -174,7 +174,7 @@ tinyfmt& do_format_scalar(tinyfmt& fmt, const Value& value)
     }
     if(value.is_integer()) {
       // Write the integer in decimal.
-      return fmt << value.as_integer();
+      return fmt << Rval(value.as_integer());
     }
     if(value.is_real() && ::std::isfinite(value.as_real())) {
       // Write the real in decimal.
