@@ -428,10 +428,9 @@ AIR_Status do_switch_statement(Executive_Context& ctx, ParamU /*pu*/, const void
         break;
       }
     }
-    if(target < nclauses) {
+    if(target < nclauses)
       // No matching clause has been found.
       return air_status_next;
-    }
 
     // Jump to the clause denoted by `target`.
     // Note that all clauses share the same context.
