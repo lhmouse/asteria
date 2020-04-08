@@ -159,11 +159,11 @@ tinyfmt& do_quote_string(tinyfmt& fmt, const Sval& str)
 Oval::const_iterator do_find_uncensored(const Oval& object, Oval::const_iterator from)
   {
     return ::std::find_if(from, object.end(),
-      [](const auto& pair) {
-        return pair.second.is_null() || pair.second.is_boolean() || pair.second.is_integer() ||
-               pair.second.is_real() || pair.second.is_string() ||
-               pair.second.is_array() || pair.second.is_object();
-      });
+               [](const auto& pair) {
+                 return ::rocket::is_any_of(pair.second.vtype(),
+                             { vtype_null, vtype_boolean, vtype_integer, vtype_real, vtype_string,
+                               vtype_array, vtype_object });
+               });
   }
 
 tinyfmt& do_format_scalar(tinyfmt& fmt, const Value& value)
