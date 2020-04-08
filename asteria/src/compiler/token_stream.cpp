@@ -700,12 +700,10 @@ bool do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Line_Reader& rea
     size_t tlen = 1;
     for(;;) {
       auto next = reader.peek(tlen);
-      if(next == 0) {
+      if(next == 0)
         break;
-      }
-      if(!do_check_cctype(next, cctype_namei | cctype_digit)) {
+      if(!do_check_cctype(next, cctype_namei | cctype_digit))
         break;
-      }
       tlen++;
     }
     if(keywords_as_identifiers) {
