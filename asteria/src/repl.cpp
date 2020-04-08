@@ -551,10 +551,9 @@ int do_REP_single()
     // Execute the script as a function, which returns a `Reference`.
     try {
       const auto ref = script.execute(global, ::std::move(cmdline.args));
-      if(!ref.is_void()) {
-        // Ensure it is dereferenceable.
+      // Ensure it is dereferenceable.
+      if(!ref.is_void())
         static_cast<void>(ref.read());
-      }
       // Print the result.
       ::fprintf(stderr, "* result #%lu: %s\n", index, do_stringify(ref).c_str());
     }
