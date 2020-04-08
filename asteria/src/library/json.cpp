@@ -88,7 +88,7 @@ class Indenter_spaces final : public Indenter
       { this->m_cur -= this->m_add;  }
   };
 
-tinyfmt& do_quote_string(tinyfmt& fmt, const Sval& str)
+tinyfmt& do_quote_string(tinyfmt& fmt, const cow_string& str)
   {
     // Although JavaScript uses UCS-2 rather than UTF-16, the JSON specification adopts UTF-16.
     fmt << '\"';
@@ -156,33 +156,98 @@ tinyfmt& do_quote_string(tinyfmt& fmt, const Sval& str)
     return fmt;
   }
 
+enum : uint8_t
+  {
+    cctype_space   = 0x01,  // [ \t\v\f\r\n]
+    cctype_alpha   = 0x02,  // [A-Za-z]
+    cctype_digit   = 0x04,  // [0-9]
+    cctype_xdigit  = 0x08,  // [0-9A-Fa-f]
+    cctype_namei   = 0x10,  // [A-Za-z_]
+  };
+
+constexpr uint8_t s_cctypes[128] =
+  {
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C,
+    0x0C, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x1A, 0x1A, 0x1A, 0x1A, 0x1A, 0x1A, 0x12,
+    0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12,
+    0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12,
+    0x12, 0x12, 0x12, 0x00, 0x00, 0x00, 0x00, 0x10,
+    0x00, 0x1A, 0x1A, 0x1A, 0x1A, 0x1A, 0x1A, 0x12,
+    0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12,
+    0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12,
+    0x12, 0x12, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00,
+  };
+
+inline bool do_check_cctype(char c, uint8_t mask) noexcept
+  {
+    size_t ch = c & 0x7F;
+    if(ch != static_cast<uint8_t>(c))
+      return false;
+    else
+      return s_cctypes[ch] & mask;
+  }
+
+tinyfmt& do_quote_object_key(tinyfmt& fmt, bool json5, const cow_string& name)
+  {
+    if(json5 && !name.empty() && do_check_cctype(name[0], cctype_namei) &&
+               ::std::none_of(name.begin() + 1, name.end(),
+                              [](char c) { return do_check_cctype(c, cctype_namei | cctype_digit);  }))
+      return fmt << name;
+    else
+      return do_quote_string(fmt, name);
+  }
+
 Oval::const_iterator do_find_uncensored(const Oval& object, Oval::const_iterator from)
   {
     return ::std::find_if(from, object.end(),
-               [](const auto& pair) {
-                 return ::rocket::is_any_of(pair.second.vtype(),
-                             { vtype_null, vtype_boolean, vtype_integer, vtype_real, vtype_string,
-                               vtype_array, vtype_object });
-               });
+        [](const auto& pair) {
+          return ::rocket::is_any_of(pair.second.vtype(),
+              { vtype_null, vtype_boolean, vtype_integer, vtype_real, vtype_string,
+                vtype_array, vtype_object });
+        });
   }
 
-tinyfmt& do_format_scalar(tinyfmt& fmt, const Value& value)
+tinyfmt& do_format_scalar(tinyfmt& fmt, const Value& value, bool json5)
   {
-    if(value.is_boolean()){
-      // Write `true` or `false`.
-      return fmt << value.as_boolean();
-    }
-    if(value.is_integer()) {
-      // Write the integer in decimal.
-      return fmt << Rval(value.as_integer());
-    }
-    if(value.is_real() && ::std::isfinite(value.as_real())) {
-      // Write the real in decimal.
-      return fmt << value.as_real();
-    }
-    if(value.is_string()) {
-      // Write the quoted string.
-      return do_quote_string(fmt, value.as_string());
+    switch(::rocket::weaken_enum(value.vtype())) {
+    case vtype_boolean: {
+        // Write `true` or `false`.
+        return fmt << value.as_boolean();
+      }
+    case vtype_integer: {
+        // Write the integer in decimal.
+        return fmt << Rval(value.as_integer());
+      }
+    case vtype_real: {
+        // Is the value finite?
+        switch(::std::fpclassify(value.as_real())) {
+        case FP_INFINITE: {
+            if(json5)
+              return fmt << "Infinity";
+            break;
+          }
+        case FP_NAN: {
+            if(json5)
+              return fmt << "NaN";
+            break;
+          }
+        default:
+          // Write the real in decimal.
+          return fmt << value.as_real();
+        }
+        break;
+      }
+    case vtype_string:  {
+        // Write the quoted string.
+        return do_quote_string(fmt, value.as_string());
+      }
     }
     // Anything else is censored to `null`.
     return fmt << "null";
@@ -202,7 +267,7 @@ struct S_xformat_object
 
 using Xformat = variant<S_xformat_array, S_xformat_object>;
 
-Sval do_format_nonrecursive(const Value& value, Indenter& indent)
+Sval do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
   {
     ::rocket::tinyfmt_str fmt;
     // Transform recursion to iteration using a handwritten stack.
@@ -214,15 +279,15 @@ Sval do_format_nonrecursive(const Value& value, Indenter& indent)
         const auto& array = qvalue->as_array();
         // Open an array.
         fmt << '[';
-        auto cur = array.begin();
-        if(cur != array.end()) {
+        auto curp = array.begin();
+        if(curp != array.end()) {
           // Indent the body.
           indent.increment_level();
           indent.break_line(fmt);
           // Decend into the array.
-          S_xformat_array ctxa = { ::rocket::ref(array), cur };
+          S_xformat_array ctxa = { ::rocket::ref(array), curp };
           stack.emplace_back(::std::move(ctxa));
-          qvalue = ::std::addressof(*cur);
+          qvalue = ::std::addressof(*curp);
           continue;
         }
         // Write an empty array.
@@ -232,18 +297,18 @@ Sval do_format_nonrecursive(const Value& value, Indenter& indent)
         const auto& object = qvalue->as_object();
         // Open an object.
         fmt << '{';
-        auto cur = do_find_uncensored(object, object.begin());
-        if(cur != object.end()) {
+        auto curp = do_find_uncensored(object, object.begin());
+        if(curp != object.end()) {
           // Indent the body.
           indent.increment_level();
           indent.break_line(fmt);
           // Write the key followed by a colon.
-          do_quote_string(fmt, cur->first);
+          do_quote_object_key(fmt, json5, curp->first);
           fmt << ':';
           // Decend into the object.
-          S_xformat_object ctxo = { ::rocket::ref(object), cur };
+          S_xformat_object ctxo = { ::rocket::ref(object), curp };
           stack.emplace_back(::std::move(ctxo));
-          qvalue = ::std::addressof(cur->second);
+          qvalue = ::std::addressof(curp->second);
           continue;
         }
         // Write an empty object.
@@ -251,7 +316,7 @@ Sval do_format_nonrecursive(const Value& value, Indenter& indent)
       }
       else {
         // Just write a scalar value which is never recursive.
-        do_format_scalar(fmt, *qvalue);
+        do_format_scalar(fmt, *qvalue, json5);
       }
       for(;;) {
         // Advance to the next element if any.
@@ -264,13 +329,17 @@ Sval do_format_nonrecursive(const Value& value, Indenter& indent)
           // Advance to the next element.
           auto curp = ++(ctxa.curp);
           if(curp != ctxa.refa->end()) {
-            // Add a separator between elements.
+            // Add a comma between elements.
             fmt << ',';
             indent.break_line(fmt);
             // Format the next element.
             ctxa.curp = curp;
             qvalue = ::std::addressof(*curp);
             break;
+          }
+          if(json5) {
+            // Add a trailing comma.
+            fmt << ',';
           }
           // Unindent the body.
           indent.decrement_level();
@@ -283,16 +352,20 @@ Sval do_format_nonrecursive(const Value& value, Indenter& indent)
           // Advance to the next key-value pair.
           auto curp = do_find_uncensored(ctxo.refo, ++(ctxo.curp));
           if(curp != ctxo.refo->end()) {
-            // Add a separator between elements.
+            // Add a comma between elements.
             fmt << ',';
             indent.break_line(fmt);
             // Write the key followed by a colon.
-            do_quote_string(fmt, curp->first);
+            do_quote_object_key(fmt, json5, curp->first);
             fmt << ':';
             // Format the next value.
             ctxo.curp = curp;
             qvalue = ::std::addressof(curp->second);
             break;
+          }
+          if(json5) {
+            // Add a trailing comma.
+            fmt << ',';
           }
           // Unindent the body.
           indent.decrement_level();
@@ -305,9 +378,9 @@ Sval do_format_nonrecursive(const Value& value, Indenter& indent)
     }
   }
 
-Sval do_format_nonrecursive(const Value& value, Indenter&& indent)
+Sval do_format_nonrecursive(const Value& value, bool json5, Indenter&& indent)
   {
-    return do_format_nonrecursive(value, indent);
+    return do_format_nonrecursive(value, json5, indent);
   }
 
 Sopt do_accept_identifier_opt(Token_Stream& tstrm, initializer_list<const char*> accept)
@@ -589,15 +662,29 @@ opt<Value> do_json_parse_nonrecursive_opt(Token_Stream& tstrm)
 Sval std_json_format(Value value, Sopt indent)
   {
     // No line break is inserted if `indent` is null or empty.
-    return (!indent || indent->empty()) ? do_format_nonrecursive(value, Indenter_none())
-                                        : do_format_nonrecursive(value, Indenter_string(*indent));
+    return (!indent || indent->empty()) ? do_format_nonrecursive(value, false, Indenter_none())
+                                        : do_format_nonrecursive(value, false, Indenter_string(*indent));
   }
 
 Sval std_json_format(Value value, Ival indent)
   {
     // No line break is inserted if `indent` is non-positive.
-    return (indent <= 0) ? do_format_nonrecursive(value, Indenter_none())
-                         : do_format_nonrecursive(value, Indenter_spaces(indent));
+    return (indent <= 0) ? do_format_nonrecursive(value, false, Indenter_none())
+                         : do_format_nonrecursive(value, false, Indenter_spaces(indent));
+  }
+
+Sval std_json_format5(Value value, Sopt indent)
+  {
+    // No line break is inserted if `indent` is null or empty.
+    return (!indent || indent->empty()) ? do_format_nonrecursive(value, true, Indenter_none())
+                                        : do_format_nonrecursive(value, true, Indenter_string(*indent));
+  }
+
+Sval std_json_format5(Value value, Ival indent)
+  {
+    // No line break is inserted if `indent` is non-positive.
+    return (indent <= 0) ? do_format_nonrecursive(value, true, Indenter_none())
+                         : do_format_nonrecursive(value, true, Indenter_spaces(indent));
   }
 
 Value std_json_parse(Sval text)
@@ -669,6 +756,43 @@ void create_bindings_json(V_object& result, API_Version /*version*/)
     Ival nindent;
     if(reader.L(state).v(nindent).F()) {
       Reference_root::S_temporary xref = { std_json_format(::std::move(value), ::std::move(nindent)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
+      ));
+    //===================================================================
+    // `std.json.format5()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("format5"),
+      Fval(
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.json.format5(value, [indent])`
+
+  * Converts a value to a string in the JSON5 format. In addition
+    to IETF RFC 7159, a few extensions in ECMAScript 5.1 have been
+    introduced to make the syntax more human-readable. Infinities
+    and NaNs are preserved. Array and object members always contain
+    trailing commas. Object keys that are valid identifiers are not
+    quoted. This function is otherwise identical to `format()`.
+
+  * Returns the formatted text as a string.
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.json.format5"));
+    Argument_Reader::State state;
+    // Parse arguments.
+    Value value;
+    Sopt sindent;
+    if(reader.I().o(value).S(state).o(sindent).F()) {
+      Reference_root::S_temporary xref = { std_json_format5(::std::move(value), ::std::move(sindent)) };
+      return self = ::std::move(xref);
+    }
+    Ival nindent;
+    if(reader.L(state).v(nindent).F()) {
+      Reference_root::S_temporary xref = { std_json_format5(::std::move(value), ::std::move(nindent)) };
       return self = ::std::move(xref);
     }
     // Fail.

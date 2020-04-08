@@ -28,6 +28,7 @@ int main()
 
         assert std.json.format({}) == "{}";
         assert std.json.format({a:1}) == "{\"a\":1}";
+        assert std.json.format({'$42':1}) == "{\"$42\":1}";
         assert std.json.format({a:infinity}) == "{\"a\":null}";
         assert std.json.format({a:1,b:std.json.format}) == "{\"a\":1}";
 
@@ -37,6 +38,33 @@ int main()
         assert std.json.format([[1,2],[3,4]], 0) == "[[1,2],[3,4]]";
         assert std.json.format([[1,2],[3,4]], -1) == "[[1,2],[3,4]]";
         assert std.json.format([[1,2],[3,4]], 2) == "[\n  [\n    1,\n    2\n  ],\n  [\n    3,\n    4\n  ]\n]";
+
+        assert std.json.format5(null) == "null";
+        assert std.json.format5(true) == "true";
+        assert std.json.format5(false) == "false";
+        assert std.json.format5(42) == "42";
+        assert std.json.format5(76.5) == "76.5";
+        assert std.json.format5("hello") == "\"hello\"";
+        assert std.json.format5("喵") == "\"\\u55B5\"";
+        assert std.json.format5("\a\b\v\f\n\r\t") == "\"\\u0007\\b\\u000B\\f\\n\\r\\t\"";
+
+        assert std.json.format5([]) == "[]";
+        assert std.json.format5([0]) == "[0,]";
+        assert std.json.format5([0,1]) == "[0,1,]";
+        assert std.json.format5([0,nan,2]) == "[0,NaN,2,]";
+
+        assert std.json.format5({}) == "{}";
+        assert std.json.format5({a:1}) == "{a:1,}";
+        assert std.json.format5({'$42':1}) == "{\"$42\":1,}";
+        assert std.json.format5({a:infinity}) == "{a:Infinity,}";
+        assert std.json.format5({a:1,b:std.json.format5}) == "{a:1,}";
+
+        assert std.json.format5([[1,2],[3,4]]) == "[[1,2,],[3,4,],]";
+        assert std.json.format5([[1,2],[3,4]], "") == "[[1,2,],[3,4,],]";
+        assert std.json.format5([[1,2],[3,4]], "!*") == "[\n!*[\n!*!*1,\n!*!*2,\n!*],\n!*[\n!*!*3,\n!*!*4,\n!*],\n]";
+        assert std.json.format5([[1,2],[3,4]], 0) == "[[1,2,],[3,4,],]";
+        assert std.json.format5([[1,2],[3,4]], -1) == "[[1,2,],[3,4,],]";
+        assert std.json.format5([[1,2],[3,4]], 2) == "[\n  [\n    1,\n    2,\n  ],\n  [\n    3,\n    4,\n  ],\n]";
 
         try { std.json.parse("");  assert false;  }
           catch(e) { assert std.string.find(e, "assertion failure") == null;  }

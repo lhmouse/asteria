@@ -2489,6 +2489,17 @@
 
 	* Returns the formatted text as a string.
 
+`std.json.format5(value, [indent])`
+
+	* Converts a value to a string in the JSON5 format. In addition
+	  to IETF RFC 7159, a few extensions in ECMAScript 5.1 have been
+	  introduced to make the syntax more human-readable. Infinities
+	  and NaNs are preserved. Array and object members always contain
+	  trailing commas. Object keys that are valid identifiers are not
+	  quoted. This function is otherwise identical to `format()`.
+
+	* Returns the formatted text as a string.
+
 `std.json.parse(text)`
 
 	* Parses a string containing data encoded in the JSON format and
