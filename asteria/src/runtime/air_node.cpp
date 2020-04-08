@@ -2670,9 +2670,8 @@ AIR_Status do_import_call(Executive_Context& ctx, ParamU pu, const void* pv)
       ASTERIA_THROW("invalid path specified for `import` (value `$1` not a string)", value);
     }
     auto path = ::std::move(value.open_string());
-    if(path.empty()) {
+    if(path.empty())
       ASTERIA_THROW("empty path specified for `import`");
-    }
 
     // Rewrite the path if it is not absolute.
     auto abspath = path;
@@ -2693,12 +2692,11 @@ AIR_Status do_import_call(Executive_Context& ctx, ParamU pu, const void* pv)
 
     // Rewrite the first argument.
     // Update the first argument to `import` if it was passed by reference.
-    if(!args[0].is_lvalue()) {
-      Reference_root::S_temporary xref = { abspath };
-      args.mut(0) = ::std::move(xref);
-    }
-    else
+    if(args[0].is_lvalue()) {
       args[0].open() = abspath;
+    }
+    // It is not passed to the script so remove it.
+    args.erase(args.begin());
 
     // Compile the script file into a function object.
     Loader_Lock::Unique_Stream strm;

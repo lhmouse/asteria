@@ -1,8 +1,8 @@
 #!this looks like a shebang
 
 assert this == null;
-assert __varg(0) == __file;
+assert __varg() == 2 : "insufficient arguments";
 
-var x = __varg(1);
-var y = __varg(2);
+var x = __varg(0);
+var y = __varg(1);
 return x + y;
