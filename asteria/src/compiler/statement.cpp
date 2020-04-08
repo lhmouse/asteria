@@ -296,7 +296,8 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         ROCKET_ASSERT(nclauses == altr.bodies.size());
         for(size_t i = 0;  i < nclauses;  ++i) {
           // Generate code for the label.
-          do_generate_expression(code_labels.emplace_back(), opts, ptc_aware_none, ctx_body, altr.labels[i]);
+          // Note labels are not part of the body.
+          do_generate_expression(code_labels.emplace_back(), opts, ptc_aware_none, ctx, altr.labels[i]);
           // Generate code for the clause and accumulate names.
           // This cannot be PTC'd.
           do_generate_statement_list(code_bodies.emplace_back(), &names, ctx_body, opts, ptc_aware_none, altr.bodies[i]);
