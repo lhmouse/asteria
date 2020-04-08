@@ -1089,7 +1089,7 @@ opt<Statement> do_accept_assert_statement_opt(Token_Stream& tstrm)
     }
     auto kmsg = do_accept_assert_message_opt(tstrm);
     if(!kmsg) {
-      kmsg.emplace();
+      kmsg.emplace(::rocket::sref("<no message>"));
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct) {
