@@ -2661,49 +2661,40 @@ AIR_Status do_import_call(Executive_Context& ctx, ParamU pu, const void* pv)
       qhooks->on_single_step_trap(sloc, inside, ::std::addressof(ctx));
 
     // Pop arguments off the stack backwards.
-    auto args = do_pop_positional_arguments(ctx, nargs);
-    if(args.empty()) {
-      ASTERIA_THROW("no path specified for `import`");
-    }
-    auto value = args[0].read();
+    ROCKET_ASSERT(nargs != 0);
+    auto args = do_pop_positional_arguments(ctx, nargs - 1);
+
+    // Copy the filename, which shall be of type `string`.
+    auto value = ctx.stack().get_top().read();
     if(!value.is_string()) {
       ASTERIA_THROW("invalid path specified for `import` (value `$1` not a string)", value);
     }
-    auto path = ::std::move(value.open_string());
-    if(path.empty())
+    auto path = value.as_string();
+    if(path.empty()) {
       ASTERIA_THROW("empty path specified for `import`");
-
+    }
     // Rewrite the path if it is not absolute.
-    auto abspath = path;
-    if((abspath[0] != '/') && (sloc.c_file()[0] == '/')) {
-      abspath.assign(sloc.file());
-      abspath.erase(abspath.rfind('/') + 1);
-      abspath.append(path);
+    if((path[0] != '/') && (sloc.c_file()[0] == '/')) {
+      path.assign(sloc.file());
+      path.erase(path.rfind('/') + 1);
+      path.append(value.as_string());
     }
     // Canonicalize it.
-    uptr<char, void (&)(void*)> tpath(::realpath(abspath.safe_c_str(), nullptr), ::free);
-    if(!tpath) {
+    uptr<char, void (&)(void*)> abspath(::realpath(path.safe_c_str(), nullptr), ::free);
+    if(!abspath) {
       int err = errno;
       char sbuf[256];
       const char* msg = ::strerror_r(err, sbuf, sizeof(sbuf));
-      ASTERIA_THROW("import failure (path `$1` => '$2', errno was `$3`: $4)", path, abspath, err, msg);
+      ASTERIA_THROW("import failure (path `$1` => '$2', errno was `$3`: $4)", value.as_string(), path, err, msg);
     }
-    abspath.assign(tpath);
-
-    // Rewrite the first argument.
-    // Update the first argument to `import` if it was passed by reference.
-    if(args[0].is_lvalue()) {
-      args[0].open() = abspath;
-    }
-    // It is not passed to the script so remove it.
-    args.erase(args.begin());
+    path.assign(abspath);
 
     // Compile the script file into a function object.
     Loader_Lock::Unique_Stream strm;
-    strm.reset(ctx.global().loader_lock(), abspath.safe_c_str());
+    strm.reset(ctx.global().loader_lock(), path.safe_c_str());
 
     Token_Stream tstrm;
-    tstrm.reload(strm, abspath, opts);
+    tstrm.reload(strm, path, opts);
 
     Statement_Sequence stmtq;
     stmtq.reload(tstrm, opts);
@@ -2712,11 +2703,16 @@ AIR_Status do_import_call(Executive_Context& ctx, ParamU pu, const void* pv)
     params.emplace_back(::rocket::sref("..."));
 
     auto func = ::rocket::make_refcnt<Instantiated_Function>(params,
-                       ::rocket::make_refcnt<Variadic_Arguer>(abspath, 0, ::rocket::sref("<top level>")),
+                       ::rocket::make_refcnt<Variadic_Arguer>(path, 0, ::rocket::sref("<top level>")),
                        do_generate_function(opts, params, nullptr, stmtq));
 
+    // Update the first argument to `import` if it was passed by reference.
     // `this` is null for imported scripts.
-    auto& self = ctx.stack().push(Reference_root::S_constant());
+    auto& self = ctx.stack().open_top();
+    if(self.is_lvalue()) {
+      self.open() = path;
+    }
+    self = Reference_root::S_constant();
 
     return do_function_call_common(self, sloc, ctx, func, ptc_aware_none, ::std::move(args));
   }
