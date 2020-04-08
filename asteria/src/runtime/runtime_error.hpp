@@ -16,18 +16,18 @@ class Runtime_Error : public virtual exception
     Value m_value;
     cow_vector<Backtrace_Frame> m_frames;
     size_t m_ipos = 0;  // where to insert new frames
-    // Create a comprehensive string that is also human-readable.
-    cow_string m_what;
+
+    cow_string m_what;  // a comprehensive string that is human-readable.
 
   public:
     template<typename XValT, ASTERIA_SFINAE_CONSTRUCT(Value, XValT&&)>
-                                       Runtime_Error(const Source_Location& sloc, XValT&& xval)
+                                            Runtime_Error(const Source_Location& sloc, XValT&& xval)
       : m_value(::std::forward<XValT>(xval))
       { this->do_backtrace(),
         this->do_insert_frame(frame_type_throw, sloc, this->m_value);  }
 
     explicit Runtime_Error(const exception& stdex)
-      : m_value(V_string(stdex.what()))
+      : m_value(cow_string(stdex.what()))
       { this->do_backtrace(),
         this->do_insert_frame(frame_type_native, ::rocket::sref("<unknown>"), -1, this->m_value);  }
 
