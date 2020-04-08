@@ -382,10 +382,10 @@ void do_parse_command_line(int argc, char** argv)
     // If more arguments follow, they denote the script to execute.
     if(optind < argc) {
       // The first non-option argument is the filename to execute. `-` is not special.
-      path = V_string(argv[optind]);
+      path = cow_string(argv[optind]);
       // All subsequent arguments are passed to the script verbatim.
       ::std::for_each(argv + optind + 1, argv + argc,
-                      [&](const char* arg) { args.emplace_back(V_string(arg));  });
+                      [&](const char* arg) { args.emplace_back(cow_string(arg));  });
     }
 
     // The default optimization level is `2`.
