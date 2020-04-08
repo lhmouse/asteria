@@ -389,12 +389,10 @@ AIR_Status do_if_statement(Executive_Context& ctx, ParamU pu, const void* pv)
     const auto& queue_false = do_pcast<Pv_queues_fixed<2>>(pv)->queues[1];
 
     // Check the value of the condition.
-    if(ctx.stack().get_top().read().test() != negative) {
-      // Execute the true branch.
+    if(ctx.stack().get_top().read().test() != negative)
       return do_execute_block(queue_true, ctx);
-    }
-    // Execute the false branch.
-    return do_execute_block(queue_false, ctx);
+    else
+      return do_execute_block(queue_false, ctx);
   }
 
 AIR_Status do_switch_statement(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
@@ -807,12 +805,10 @@ AIR_Status do_branch_expression(Executive_Context& ctx, ParamU pu, const void* p
     const auto& queue_false = do_pcast<Pv_queues_fixed<2>>(pv)->queues[1];
 
     // Check the value of the condition.
-    if(ctx.stack().get_top().read().test() != false) {
-      // Evaluate the true branch.
+    if(ctx.stack().get_top().read().test() != false)
       return do_evaluate_branch(queue_true, assign, ctx);
-    }
-    // Evaluate the false branch.
-    return do_evaluate_branch(queue_false, assign, ctx);
+    else
+      return do_evaluate_branch(queue_false, assign, ctx);
   }
 
 AIR_Status do_coalescence(Executive_Context& ctx, ParamU pu, const void* pv)
@@ -822,12 +818,10 @@ AIR_Status do_coalescence(Executive_Context& ctx, ParamU pu, const void* pv)
     const auto& queue_null = do_pcast<Pv_queues_fixed<1>>(pv)->queues[0];
 
     // Check the value of the condition.
-    if(ctx.stack().get_top().read().is_null() != false) {
-      // Evaluate the alternative.
+    if(ctx.stack().get_top().read().is_null() != false)
       return do_evaluate_branch(queue_null, assign, ctx);
-    }
-    // Leave the condition on the stack.
-    return air_status_next;
+    else
+      return air_status_next;
   }
 
 ROCKET_NOINLINE Reference& do_invoke_nontail(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
