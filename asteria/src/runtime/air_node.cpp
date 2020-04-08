@@ -686,10 +686,10 @@ AIR_Status do_assert_statement(Executive_Context& ctx, ParamU pu, const void* pv
     const auto& msg = do_pcast<Pv_sloc_msg>(pv)->msg;
 
     // Check the value of the condition.
-    if(ROCKET_EXPECT(ctx.stack().get_top().read().test() != negative)) {
+    if(ROCKET_EXPECT(ctx.stack().get_top().read().test() != negative))
       // When the assertion succeeds, there is nothing to do.
       return air_status_next;
-    }
+
     // Throw a `Runtime_Error`.
     throw Runtime_Error(Runtime_Error::T_assert(), sloc, msg);
   }
