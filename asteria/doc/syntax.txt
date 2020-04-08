@@ -107,7 +107,7 @@ parameter-list-opt ::=
 	parameter-list | ""
 
 parameter-list ::=
-	"..." | identifier ( "," parameter-list | "" )
+	"..." | identifier ( "," parameter-list-opt | "" )
 
 expression-statement ::=
 	expression ";"
@@ -276,7 +276,7 @@ argument-list-opt ::=
 	argument-list | ""
 
 argument-list ::=
-	argument ( "," argument-list | "" )
+	argument ( "," argument-list-opt | "" )
 
 postfix-subscript ::=
 	"[" expression "]"

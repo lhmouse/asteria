@@ -511,32 +511,23 @@ opt<cow_vector<phsh_string>> do_accept_parameter_list_opt(Token_Stream& tstrm)
     // parameter-list-opt ::=
     //   parameter-list | ""
     // parameter-list ::=
-    //   "..." | identifier ( "," parameter-list | "" )
+    //   "..." | identifier ( "," parameter-list-opt | "" )
     cow_vector<phsh_string> params;
-    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_ellipsis });
-    if(kpunct) {
-      params.emplace_back(::rocket::sref("..."));
-      return ::std::move(params);
-    }
-    auto qname = do_accept_identifier_opt(tstrm);
-    if(!qname) {
-      return nullopt;
-    }
     for(;;) {
+      auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_ellipsis });
+      if(kpunct) {
+        params.emplace_back(::rocket::sref("..."));
+        break;
+      }
+      auto qname = do_accept_identifier_opt(tstrm);
+      if(!qname) {
+        break;
+      }
       params.emplace_back(::std::move(*qname));
-      // The code above looks so ugly...
+      // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
       if(!kpunct) {
         break;
-      }
-      kpunct = do_accept_punctuator_opt(tstrm, { punctuator_ellipsis });
-      if(kpunct) {
-        params.emplace_back(::rocket::sref("..."));
-        return ::std::move(params);
-      }
-      qname = do_accept_identifier_opt(tstrm);
-      if(!qname) {
-        do_throw_parser_error(tstrm, parser_status_parameter_or_ellipsis_expected);
       }
     }
     return ::std::move(params);
@@ -1782,34 +1773,34 @@ bool do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_S
     // argument-list-opt ::=
     //   argument-list | ""
     // argument-list ::=
-    //   argument ( "," argument-list | "" )
+    //    argument ( "," argument-list-opt | "" )
     auto sloc = do_tell_source_location(tstrm);
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct) {
       return false;
     }
     uint32_t nargs = 0;
+    bool comma_allowed = false;
     for(;;) {
       auto qref = do_accept_function_argument_opt(units, tstrm);
-      if(!nargs && !qref) {
-        break;
-      }
       if(!qref) {
-        do_throw_parser_error(tstrm, parser_status_argument_expected);
+        break;
       }
       if(nargs >= INT32_MAX) {
         do_throw_parser_error(tstrm, parser_status_too_many_elements);
       }
       nargs += 1;
-      // Look for the next argument.
+      // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
+      comma_allowed = !kpunct;
       if(!kpunct) {
         break;
       }
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_closed_parenthesis_expected);
+      do_throw_parser_error(tstrm, comma_allowed ? parser_status_closed_parenthesis_or_comma_expected
+                                                 : parser_status_closed_parenthesis_or_argument_expected);
     }
     Expression_Unit::S_function_call xunit = { ::std::move(sloc), nargs };
     units.emplace_back(::std::move(xunit));

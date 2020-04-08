@@ -250,8 +250,8 @@ const char* describe_parser_status(Parser_Status status) noexcept
     case parser_status_open_parenthesis_expected: {
         return "`(` expected";
       }
-    case parser_status_parameter_or_ellipsis_expected: {
-        return "identifier or `...` expected";
+    case parser_status_closed_parenthesis_or_comma_expected: {
+        return "`)` or `,` expected";
       }
     case parser_status_closed_parenthesis_expected: {
         return "`)` expected";
@@ -306,6 +306,9 @@ const char* describe_parser_status(Parser_Status status) noexcept
       }
     case parser_status_argument_expected: {
         return "argument expected";
+      }
+    case parser_status_closed_parenthesis_or_argument_expected: {
+        return "`)` or argument expected";
       }
     default:
       return "<unknown parser error>";

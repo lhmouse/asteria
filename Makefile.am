@@ -272,6 +272,7 @@ check_PROGRAMS =  \
   asteria/test/variadic_function_call.test  \
   asteria/test/defer.test  \
   asteria/test/defer_ptc.test  \
+  asteria/test/trailing_commas.test  \
   asteria/test/system.test  \
   asteria/test/chrono.test  \
   asteria/test/string.test  \
