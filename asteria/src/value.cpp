@@ -9,7 +9,7 @@ namespace Asteria {
 namespace {
 
 template<typename ValT, ROCKET_ENABLE_IF(::std::is_integral<ValT>::value)>
-                    constexpr Compare do_3way_compare_scalar(const ValT& lhs, const ValT& rhs) noexcept
+              constexpr Compare do_3way_compare_scalar(const ValT& lhs, const ValT& rhs) noexcept
   {
     if(lhs < rhs)
       return compare_less;
@@ -20,7 +20,7 @@ template<typename ValT, ROCKET_ENABLE_IF(::std::is_integral<ValT>::value)>
   }
 
 template<typename ValT, ROCKET_ENABLE_IF(::std::is_floating_point<ValT>::value)>
-                    constexpr Compare do_3way_compare_scalar(const ValT& lhs, const ValT& rhs) noexcept
+              constexpr Compare do_3way_compare_scalar(const ValT& lhs, const ValT& rhs) noexcept
   {
     if(::std::isless(lhs, rhs))
       return compare_less;
