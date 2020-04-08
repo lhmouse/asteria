@@ -74,7 +74,7 @@ Reference Simple_Script::execute(Global_Context& global, cow_vector<Value>&& val
     // Convert all arguments to references to temporaries.
     cow_vector<Reference> args;
     args.reserve(vals.size());
-    for(size_t i = 0;  i < args.size();  ++i) {
+    for(size_t i = 0;  i < vals.size();  ++i) {
       Reference_root::S_temporary xref = { ::std::move(vals.mut(i)) };
       args.emplace_back(::std::move(xref));
     }
