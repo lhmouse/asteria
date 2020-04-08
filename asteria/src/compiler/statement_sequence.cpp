@@ -1512,7 +1512,6 @@ bool do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& 
       if(!qkey) {
         break;
       }
-      // Look for the initializer.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_assign, punctuator_colon });
       if(!kpunct) {
         do_throw_parser_error(tstrm, parser_status_equals_sign_or_colon_expected);
