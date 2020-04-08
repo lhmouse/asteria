@@ -262,7 +262,6 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Generate code for the condition.
         ROCKET_ASSERT(!altr.cond.units.empty());
         do_generate_expression(code, opts, ptc_aware_none, ctx, altr.cond);
-        do_generate_glvalue_to_prvalue(code, altr.cond.sloc);
 
         // The result will have been pushed onto the top of the stack.
         // Generate code for both branches.
@@ -282,7 +281,6 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Generate code for the control expression.
         ROCKET_ASSERT(!altr.ctrl.units.empty());
         do_generate_expression(code, opts, ptc_aware_none, ctx, altr.ctrl);
-        do_generate_glvalue_to_prvalue(code, altr.ctrl.sloc);
 
         // Generate code for all clauses.
         cow_vector<cow_vector<AIR_Node>> code_labels;
@@ -322,7 +320,6 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Generate code for the condition.
         ROCKET_ASSERT(!altr.cond.units.empty());
         auto code_cond = do_generate_expression(opts, ptc_aware_none, ctx, altr.cond);
-        do_generate_glvalue_to_prvalue(code_cond, altr.cond.sloc);
 
         // Encode arguments.
         AIR_Node::S_do_while_statement xnode = { ::std::move(code_body), altr.negative, ::std::move(code_cond) };
@@ -336,7 +333,6 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Generate code for the condition.
         ROCKET_ASSERT(!altr.cond.units.empty());
         auto code_cond = do_generate_expression(opts, ptc_aware_none, ctx, altr.cond);
-        do_generate_glvalue_to_prvalue(code_cond, altr.cond.sloc);
 
         // Generate code for the body.
         // Loop statements cannot be PTC'd.
@@ -360,7 +356,6 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Generate code for the range initializer.
         ROCKET_ASSERT(!altr.init.units.empty());
         auto code_init = do_generate_expression(opts, ptc_aware_none, ctx_for, altr.init);
-        do_generate_glvalue_to_prvalue(code_init, altr.init.sloc);
 
         // Generate code for the body.
         // Loop statements cannot be PTC'd.
@@ -382,11 +377,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
 
         // Generate code for the initializer, the condition and the loop increment.
         auto code_init = do_generate_statement_list(nullptr, ctx_for, opts, ptc_aware_none, altr.init);
-
         auto code_cond = do_generate_expression(opts, ptc_aware_none, ctx_for, altr.cond);
-        if(!altr.cond.units.empty())
-          do_generate_glvalue_to_prvalue(code_cond, altr.cond.sloc);
-
         auto code_step = do_generate_expression(opts, ptc_aware_none, ctx_for, altr.step);
 
         // Generate code for the body.
@@ -484,7 +475,6 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Generate code for the operand.
         ROCKET_ASSERT(!altr.expr.units.empty());
         do_generate_expression(code, opts, ptc_aware_none, ctx, altr.expr);
-        do_generate_glvalue_to_prvalue(code, altr.expr.sloc);
 
         // Encode arguments.
         AIR_Node::S_throw_statement xnode = { altr.expr.sloc };
@@ -525,7 +515,6 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Generate code for the operand.
         ROCKET_ASSERT(!altr.expr.units.empty());
         do_generate_expression(code, opts, ptc_aware_none, ctx, altr.expr);
-        do_generate_glvalue_to_prvalue(code, altr.expr.sloc);
 
         // Encode arguments.
         AIR_Node::S_assert_statement xnode = { altr.expr.sloc, altr.negative, altr.msg };

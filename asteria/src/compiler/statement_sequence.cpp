@@ -348,6 +348,18 @@ opt<Statement::S_block> do_accept_statement_as_block_opt(Token_Stream& tstrm);
 
 bool do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm);
 
+bool do_accept_expression_and_convert_to_rvalue(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+  {
+    auto sloc = do_tell_source_location(tstrm);
+    bool succ = do_accept_expression(units, tstrm);
+    if(!succ) {
+      return false;
+    }
+    Expression_Unit::S_argument_finish xunit = { ::std::move(sloc), false };
+    units.emplace_back(::std::move(xunit));
+    return true;
+  }
+
 opt<Statement::S_expression> do_accept_expression_opt(Token_Stream& tstrm)
   {
     // expression-opt ::=
@@ -355,6 +367,20 @@ opt<Statement::S_expression> do_accept_expression_opt(Token_Stream& tstrm)
     auto sloc = do_tell_source_location(tstrm);
     cow_vector<Expression_Unit> units;
     bool succ = do_accept_expression(units, tstrm);
+    if(!succ) {
+      return nullopt;
+    }
+    Statement::S_expression xexpr = { ::std::move(sloc), ::std::move(units) };
+    return ::std::move(xexpr);
+  }
+
+opt<Statement::S_expression> do_accept_expression_and_convert_to_rvalue_opt(Token_Stream& tstrm)
+  {
+    // expression-opt ::=
+    //   expression | ""
+    auto sloc = do_tell_source_location(tstrm);
+    cow_vector<Expression_Unit> units;
+    bool succ = do_accept_expression_and_convert_to_rvalue(units, tstrm);
     if(!succ) {
       return nullopt;
     }
@@ -616,7 +642,7 @@ opt<Statement> do_accept_if_statement_opt(Token_Stream& tstrm)
     if(!kpunct) {
       do_throw_parser_error(tstrm, parser_status_open_parenthesis_expected);
     }
-    auto qcond = do_accept_expression_opt(tstrm);
+    auto qcond = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
     if(!qcond) {
       do_throw_parser_error(tstrm, parser_status_expression_expected);
     }
@@ -656,7 +682,7 @@ opt<Statement> do_accept_switch_statement_opt(Token_Stream& tstrm)
     if(!kpunct) {
       do_throw_parser_error(tstrm, parser_status_open_parenthesis_expected);
     }
-    auto qctrl = do_accept_expression_opt(tstrm);
+    auto qctrl = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
     if(!qctrl) {
       do_throw_parser_error(tstrm, parser_status_expression_expected);
     }
@@ -679,7 +705,7 @@ opt<Statement> do_accept_switch_statement_opt(Token_Stream& tstrm)
       Statement::S_expression label;
       if(*qkwrd == keyword_case) {
         // The `case` label requires an expression argument.
-        auto qlabel = do_accept_expression_opt(tstrm);
+        auto qlabel = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
         if(!qlabel) {
           do_throw_parser_error(tstrm, parser_status_expression_expected);
         }
@@ -728,7 +754,7 @@ opt<Statement> do_accept_do_while_statement_opt(Token_Stream& tstrm)
     if(!kpunct) {
       do_throw_parser_error(tstrm, parser_status_open_parenthesis_expected);
     }
-    auto qcond = do_accept_expression_opt(tstrm);
+    auto qcond = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
     if(!qcond) {
       do_throw_parser_error(tstrm, parser_status_expression_expected);
     }
@@ -760,7 +786,7 @@ opt<Statement> do_accept_while_statement_opt(Token_Stream& tstrm)
     if(!kpunct) {
       do_throw_parser_error(tstrm, parser_status_open_parenthesis_expected);
     }
-    auto qcond = do_accept_expression_opt(tstrm);
+    auto qcond = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
     if(!qcond) {
       do_throw_parser_error(tstrm, parser_status_expression_expected);
     }
@@ -800,7 +826,7 @@ opt<Statement> do_accept_for_complement_range_opt(Token_Stream& tstrm)
     if(!kpunct) {
       do_throw_parser_error(tstrm, parser_status_colon_expected);
     }
-    auto qinit = do_accept_expression_opt(tstrm);
+    auto qinit = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
     if(!qinit) {
       do_throw_parser_error(tstrm, parser_status_expression_expected);
     }
@@ -854,7 +880,7 @@ opt<Statement> do_accept_for_complement_triplet_opt(Token_Stream& tstrm)
     if(!qinit) {
       return nullopt;
     }
-    auto qcond = do_accept_expression_opt(tstrm);
+    auto qcond = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
     if(!qcond) {
       qcond.emplace();
     }
@@ -992,7 +1018,7 @@ opt<Statement> do_accept_throw_statement_opt(Token_Stream& tstrm)
     if(!qkwrd) {
       return nullopt;
     }
-    auto kexpr = do_accept_expression_opt(tstrm);
+    auto kexpr = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
     if(!kexpr) {
       do_throw_parser_error(tstrm, parser_status_expression_expected);
     }
@@ -1074,7 +1100,7 @@ opt<Statement> do_accept_assert_statement_opt(Token_Stream& tstrm)
     if(!kneg) {
       kneg.emplace();
     }
-    auto kexpr = do_accept_expression_opt(tstrm);
+    auto kexpr = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
     if(!kexpr) {
       do_throw_parser_error(tstrm, parser_status_expression_expected);
     }
@@ -1467,7 +1493,7 @@ bool do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& t
     uint32_t nelems = 0;
     bool comma_allowed = false;
     for(;;) {
-      bool succ = do_accept_expression(units, tstrm);
+      bool succ = do_accept_expression_and_convert_to_rvalue(units, tstrm);
       if(!succ) {
         break;
       }
@@ -1516,7 +1542,7 @@ bool do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& 
       if(!kpunct) {
         do_throw_parser_error(tstrm, parser_status_equals_sign_or_colon_expected);
       }
-      bool succ = do_accept_expression(units, tstrm);
+      bool succ = do_accept_expression_and_convert_to_rvalue(units, tstrm);
       if(!succ) {
         do_throw_parser_error(tstrm, parser_status_expression_expected);
       }
@@ -1640,7 +1666,7 @@ opt<bool> do_accept_function_argument_opt(cow_vector<Expression_Unit>& units, To
     if(!qref) {
       return nullopt;
     }
-    Expression_Unit::S_argument_finish xunit = { sloc, *qref };
+    Expression_Unit::S_argument_finish xunit = { ::std::move(sloc), *qref };
     units.emplace_back(::std::move(xunit));
     return *qref;
   }
