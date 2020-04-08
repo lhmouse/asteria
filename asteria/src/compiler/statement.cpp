@@ -325,7 +325,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         do_generate_glvalue_to_prvalue(code_cond, altr.cond.sloc);
 
         // Encode arguments.
-        AIR_Node::S_do_while_statement xnode = { ::std::move(code_body), altr.negative, std::move(code_cond) };
+        AIR_Node::S_do_while_statement xnode = { ::std::move(code_body), altr.negative, ::std::move(code_cond) };
         code.emplace_back(::std::move(xnode));
         return code;
       }
