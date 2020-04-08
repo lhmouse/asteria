@@ -29,7 +29,7 @@ Runtime_Error& do_unpack_frames(Runtime_Error& except, Global_Context& global, E
       const auto& qhooks = global.get_hooks_opt();
 
       // Push the function call.
-      except.push_frame_plain(sloc);
+      except.push_frame_plain(sloc, ::rocket::sref("<proper tail call>"));
 
       // Call the hook function if any.
       if(qhooks)

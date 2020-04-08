@@ -86,10 +86,10 @@ class Runtime_Error : public virtual exception
         return *this;
       }
 
-    Runtime_Error& push_frame_plain(const Source_Location& sloc)
+    Runtime_Error& push_frame_plain(const Source_Location& sloc, const cow_string& remarks)
       {
         // Append a new frame to the current backtrace.
-        this->do_insert_frame(frame_type_plain, sloc, nullptr);
+        this->do_insert_frame(frame_type_plain, sloc, remarks);
         return *this;
       }
 

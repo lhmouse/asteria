@@ -50,7 +50,7 @@ void AVMC_Queue::do_execute_all_break(AIR_Status& status, Executive_Context& ctx
       }
       ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
         if(qnode->has_syms)
-          except.push_frame_plain(qnode->symbols()->sloc);
+          except.push_frame_plain(qnode->symbols()->sloc, ::rocket::sref(""));
         throw;
       }
       if(ROCKET_UNEXPECT(status != air_status_next))
