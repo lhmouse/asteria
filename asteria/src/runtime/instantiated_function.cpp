@@ -57,7 +57,7 @@ void Instantiated_Function::do_solidify_code(const cow_vector<AIR_Node>& code)
 
 tinyfmt& Instantiated_Function::describe(tinyfmt& fmt) const
   {
-    return fmt << this->m_zvarg->func() << " @ " << this->m_zvarg->sloc();
+    return fmt << "closure `" << this->m_zvarg->func() << "` at '" << this->m_zvarg->sloc() << "'";
   }
 
 Variable_Callback& Instantiated_Function::enumerate_variables(Variable_Callback& callback) const
