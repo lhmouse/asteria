@@ -19,7 +19,10 @@ template<typename allocT, size_t capacityT> class storage_handle : private alloc
 
   private:
     typename lowest_unsigned<capacityT - 1>::type m_nelem;
-    union { value_type m_ebase[capacityT];  };
+    union {
+      value_type m_ebase[capacityT];
+      volatile char m_do_not_use;  // suppresses warnings about potential use of uninitialized objects
+    };
 
   public:
     explicit storage_handle(const allocator_type& alloc) noexcept
