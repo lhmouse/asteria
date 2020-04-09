@@ -1030,7 +1030,7 @@ opt<Statement> do_accept_throw_statement_opt(Token_Stream& tstrm)
     return ::std::move(xstmt);
   }
 
-opt<bool> do_accept_argument_opt(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+opt<bool> do_accept_argument_no_conversion_opt(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // argument ::=
     //   reference-specifier expression | expression
@@ -1044,11 +1044,24 @@ opt<bool> do_accept_argument_opt(cow_vector<Expression_Unit>& units, Token_Strea
       }
       return true;  // by ref
     }
+    // We can't use `do_accept_expression_and_convert_to_rvalue_opt()` here as it breaks PTC.
     bool succ = do_accept_expression(units, tstrm);
     if(succ) {
       return false;  // by value
     }
     return nullopt;
+  }
+
+opt<bool> do_accept_function_argument_opt(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+  {
+    auto sloc = do_tell_source_location(tstrm);
+    auto qref = do_accept_argument_no_conversion_opt(units, tstrm);
+    if(!qref) {
+      return nullopt;
+    }
+    Expression_Unit::S_argument_finish xunit = { ::std::move(sloc), *qref };
+    units.emplace_back(::std::move(xunit));
+    return *qref;
   }
 
 opt<Statement> do_accept_return_statement_opt(Token_Stream& tstrm)
@@ -1061,7 +1074,7 @@ opt<Statement> do_accept_return_statement_opt(Token_Stream& tstrm)
     }
     auto sloc = do_tell_source_location(tstrm);
     cow_vector<Expression_Unit> units;
-    auto qref = do_accept_argument_opt(units, tstrm);
+    auto qref = do_accept_argument_no_conversion_opt(units, tstrm);
     if(!qref) {
       qref.emplace();
     }
@@ -1657,18 +1670,6 @@ bool do_accept_variadic_function_call(cow_vector<Expression_Unit>& units, Token_
     Expression_Unit::S_variadic_call xunit = { ::std::move(sloc) };
     units.emplace_back(::std::move(xunit));
     return true;
-  }
-
-opt<bool> do_accept_function_argument_opt(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
-  {
-    auto sloc = do_tell_source_location(tstrm);
-    auto qref = do_accept_argument_opt(units, tstrm);
-    if(!qref) {
-      return nullopt;
-    }
-    Expression_Unit::S_argument_finish xunit = { ::std::move(sloc), *qref };
-    units.emplace_back(::std::move(xunit));
-    return *qref;
   }
 
 bool do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
