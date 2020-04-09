@@ -95,9 +95,8 @@ template<typename charT, typename traitsT, typename allocT>
     basic_tinyfmt_str<charT, traitsT, allocT>::~basic_tinyfmt_str()
   = default;
 
-template<typename charT, typename traitsT, typename allocT>
-    inline void swap(basic_tinyfmt_str<charT, traitsT, allocT>& lhs,
-                     basic_tinyfmt_str<charT, traitsT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+template<typename charT, typename traitsT, typename allocT> inline void swap(
+               basic_tinyfmt_str<charT, traitsT, allocT>& lhs, basic_tinyfmt_str<charT, traitsT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     lhs.swap(rhs);
   }

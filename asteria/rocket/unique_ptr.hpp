@@ -167,12 +167,12 @@ template<typename elementT, typename deleterT> constexpr bool operator==(nullptr
 template<typename elementT, typename deleterT> constexpr bool operator!=(nullptr_t, const unique_ptr<elementT, deleterT>& rhs) noexcept
   { return !!rhs;  }
 
-template<typename elementT, typename deleterT> inline void swap(unique_ptr<elementT, deleterT>& lhs,
-                                         unique_ptr<elementT, deleterT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+template<typename elementT, typename deleterT> inline void swap(
+               unique_ptr<elementT, deleterT>& lhs, unique_ptr<elementT, deleterT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
 template<typename charT, typename traitsT, typename elementT, typename deleterT> inline basic_tinyfmt<charT, traitsT>& operator<<(
-                                           basic_tinyfmt<charT, traitsT>& fmt, const unique_ptr<elementT, deleterT>& rhs)
+                                         basic_tinyfmt<charT, traitsT>& fmt, const unique_ptr<elementT, deleterT>& rhs)
   { return fmt << rhs.get();  }
 
 template<typename elementT, typename... paramsT> inline unique_ptr<elementT> make_unique(paramsT&&... params)

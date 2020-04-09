@@ -417,18 +417,13 @@ struct nullopt_t
   constexpr nullopt;
 
 // Fancy pointer conversion
-template<typename pointerT>
-    constexpr typename remove_reference<decltype(*(::std::declval<pointerT&>()))>::type* unfancy(pointerT&& ptr)
-  {
-    return ptr ? ::std::addressof(*ptr) : nullptr;
-  }
+template<typename pointerT> constexpr typename remove_reference<
+                   decltype(*(::std::declval<pointerT&>()))>::type* unfancy(pointerT&& ptr)
+  { return ptr ? ::std::addressof(*ptr) : nullptr;  }
 
-template<typename targetT, typename sourceT>
-    constexpr targetT static_or_dynamic_cast(sourceT&& src)
-  {
-    return details_utilities::static_or_dynamic_cast_aux<targetT, sourceT>(
-                        details_utilities::use_static_cast_aux<targetT, sourceT>(), ::std::forward<sourceT>(src));
-  }
+template<typename targetT, typename sourceT> constexpr targetT static_or_dynamic_cast(sourceT&& src)
+  { return details_utilities::static_or_dynamic_cast_aux<targetT, sourceT>(
+                        details_utilities::use_static_cast_aux<targetT, sourceT>(), ::std::forward<sourceT>(src));  }
 
 }  // namespace rocket
 

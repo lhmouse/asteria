@@ -706,9 +706,9 @@ AIR_Status do_glvalue_to_prvalue(Executive_Context& ctx, ParamU /*pu*/, const vo
   {
     // Check for glvalues only. Void references and PTC wrappers are forwarded as is.
     auto& self = ctx.stack().open_top();
-    if(self.is_prvalue()) {
+    if(self.is_prvalue())
       return air_status_next;
-    }
+
     // Convert the result to an rvalue.
     Reference_root::S_temporary xref = { self.read() };
     self = ::std::move(xref);
@@ -733,9 +733,9 @@ AIR_Status do_push_global_reference(Executive_Context& ctx, ParamU /*pu*/, const
 
     // Look for the name in the global context.
     auto qref = ctx.global().get_named_reference_opt(name);
-    if(!qref) {
+    if(!qref)
       ASTERIA_THROW("undeclared identifier `$1`", name);
-    }
+
     // Push a copy of it.
     ctx.stack().push(*qref);
     return air_status_next;
@@ -753,9 +753,9 @@ AIR_Status do_push_local_reference(Executive_Context& ctx, ParamU pu, const void
     ROCKET_ASSERT(qctx);
     // Look for the name in the context.
     auto qref = qctx->get_named_reference_opt(name);
-    if(!qref) {
+    if(!qref)
       ASTERIA_THROW("undeclared identifier `$1`", name);
-    }
+
     // Push a copy of it.
     ctx.stack().push(*qref);
     return air_status_next;
@@ -783,13 +783,16 @@ AIR_Status do_define_function(Executive_Context& ctx, ParamU /*pu*/, const void*
     // 0) It is copied as `__varg` whenever its parent function is called with no variadic argument as an optimization.
     // 1) It provides storage for `__file`, `__line` and `__func` for its parent function.
     auto zvarg = ::rocket::make_refcnt<Variadic_Arguer>(sloc, func);
+
     // Rewrite nodes in the body as necessary.
     // Don't trigger copy-on-write unless a node needs rewriting.
     Analytic_Context ctx_func(::std::addressof(ctx), params);
     auto pair = ::std::make_pair(false, code_body);
     do_rebind_nodes(pair.first, pair.second, ctx_func);
+
     // Instantiate the function.
     auto qtarget = ::rocket::make_refcnt<Instantiated_Function>(params, ::std::move(zvarg), pair.second);
+
     // Push the function as a temporary.
     Reference_root::S_temporary xref = { V_function(::std::move(qtarget)) };
     ctx.stack().push(::std::move(xref));

@@ -17,8 +17,7 @@ template<typename charT, typename traitsT = char_traits<charT>,
 
 #include "details/linear_buffer.tcc"
 
-template<typename charT, typename traitsT, typename allocT>
-    class basic_linear_buffer
+template<typename charT, typename traitsT, typename allocT> class basic_linear_buffer
   {
     static_assert(!is_array<charT>::value, "invalid character type");
     static_assert(is_trivial<charT>::value, "characters must be trivial");
@@ -294,8 +293,8 @@ template<typename charT, typename traitsT, typename allocT>
       }
   };
 
-template<typename charT, typename traitsT, typename allocT> inline void swap(basic_linear_buffer<charT, traitsT, allocT>& lhs,
-                                                      basic_linear_buffer<charT, traitsT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+template<typename charT, typename traitsT, typename allocT> inline void swap(
+               basic_linear_buffer<charT, traitsT, allocT>& lhs, basic_linear_buffer<charT, traitsT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
 extern template class basic_linear_buffer<char>;

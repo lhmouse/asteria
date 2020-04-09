@@ -219,9 +219,8 @@ template<typename valueT, size_t capacityT, size_t... nestedT> class array
       { return this->m_stor;  }
   };
 
-template<typename valueT, size_t capacityT, size_t... nestedT>
-    inline void swap(array<valueT, capacityT, nestedT...>& lhs,
-                     array<valueT, capacityT, nestedT...>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+template<typename valueT, size_t capacityT, size_t... nestedT> inline void swap(
+             array<valueT, capacityT, nestedT...>& lhs, array<valueT, capacityT, nestedT...>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
 }  // namespace rocket

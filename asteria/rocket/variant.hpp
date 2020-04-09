@@ -351,9 +351,7 @@ template<typename... alternativesT> class variant
       }
   };
 
-template<typename... alternativesT>
-    inline void swap(variant<alternativesT...>& lhs,
-                     variant<alternativesT...>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+template<typename... alternativesT> inline void swap(variant<alternativesT...>& lhs, variant<alternativesT...>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
 }  // namespace rocket

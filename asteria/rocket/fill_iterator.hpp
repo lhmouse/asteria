@@ -63,15 +63,15 @@ template<typename elementT> fill_iterator<elementT> operator--(fill_iterator<ele
   }
 
 template<typename elementT> fill_iterator<elementT>& operator+=(fill_iterator<elementT>& lhs,
-                                                                typename fill_iterator<elementT>::difference_type rhs) noexcept
+                                          typename fill_iterator<elementT>::difference_type rhs) noexcept
   { return lhs.seek(lhs.tell() + rhs);  }
 
 template<typename elementT> fill_iterator<elementT>& operator-=(fill_iterator<elementT>& lhs,
-                                                                typename fill_iterator<elementT>::difference_type rhs) noexcept
+                                          typename fill_iterator<elementT>::difference_type rhs) noexcept
   { return lhs.seek(lhs.tell() - rhs);  }
 
 template<typename elementT> fill_iterator<elementT> operator+(const fill_iterator<elementT>& lhs,
-                                                              typename fill_iterator<elementT>::difference_type rhs) noexcept
+                                          typename fill_iterator<elementT>::difference_type rhs) noexcept
   {
     auto res = lhs;
     res.seek(res.tell() + rhs);
@@ -79,7 +79,7 @@ template<typename elementT> fill_iterator<elementT> operator+(const fill_iterato
   }
 
 template<typename elementT> fill_iterator<elementT> operator-(const fill_iterator<elementT>& lhs,
-                                                              typename fill_iterator<elementT>::difference_type rhs) noexcept
+                                          typename fill_iterator<elementT>::difference_type rhs) noexcept
   {
     auto res = lhs;
     res.seek(res.tell() - rhs);
@@ -87,7 +87,7 @@ template<typename elementT> fill_iterator<elementT> operator-(const fill_iterato
   }
 
 template<typename elementT> fill_iterator<elementT> operator+(typename fill_iterator<elementT>::difference_type lhs,
-                                                              const fill_iterator<elementT>& rhs) noexcept
+                                          const fill_iterator<elementT>& rhs) noexcept
   {
     auto res = rhs;
     res.seek(res.tell() + lhs);
@@ -95,7 +95,7 @@ template<typename elementT> fill_iterator<elementT> operator+(typename fill_iter
   }
 
 template<typename elementT> typename fill_iterator<elementT>::difference_type operator-(const fill_iterator<elementT>& lhs,
-                                                                                        const fill_iterator<elementT>& rhs) noexcept
+                                          const fill_iterator<elementT>& rhs) noexcept
   {
     return lhs.tell() - rhs.tell();
   }

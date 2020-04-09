@@ -582,7 +582,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
   };
 
 template<typename keyT, typename mappedT, typename hashT, typename eqT, typename allocT> inline void swap(
-                   cow_hashmap<keyT, mappedT, hashT, eqT, allocT>& lhs, cow_hashmap<keyT, mappedT, hashT, eqT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+           cow_hashmap<keyT, mappedT, hashT, eqT, allocT>& lhs, cow_hashmap<keyT, mappedT, hashT, eqT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
 }  // namespace rocket
