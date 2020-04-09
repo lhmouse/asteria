@@ -20,17 +20,16 @@ Loader_Lock::element_type* Loader_Lock::do_lock_stream(const char* path)
     if(!file)
       ASTERIA_THROW_SYSTEM_ERROR("fopen");
 
-    // Get the unique identifier of this file.
+    // Make the unique identifier of this file from its device ID and inode number.
     struct ::stat info;
     if(::fstat(::fileno(file), &info))
       ASTERIA_THROW_SYSTEM_ERROR("fstat");
-    // Concatenate the device ID and inode number.
     auto skey = format_string("dev:$1/ino:$2", info.st_dev, info.st_ino);
 
     // Mark the stream locked.
     auto result = this->m_strms.try_emplace(::std::move(skey), ::std::move(file));
     if(!result.second)
-      ASTERIA_THROW("recursive import denied (loading `$1`)", path);
+      ASTERIA_THROW("recursive import denied (loading `$1`, identified as `$2`)", path, skey);
     return &*(result.first);
   }
 
