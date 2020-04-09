@@ -346,14 +346,14 @@ tinyfmt& Value::dump(tinyfmt& fmt, size_t indent, size_t hanging) const
       }
     case vtype_opaque: {
         const auto& altr = this->m_stor.as<vtype_opaque>();
-        // opaque("typeid") [[`my opaque`]]
-        fmt << "opaque(" << quote(altr.type().name()) << ") [[`" << altr << "`]]";
+        // opaque(0x123456) [[`my opaque`]]
+        fmt << "opaque(" << altr.ptr() << ") [[`" << altr << "`]]";
         return fmt;
       }
     case vtype_function: {
         const auto& altr = this->m_stor.as<vtype_function>();
-        // function("typeid") [[`my function`]]
-        fmt << "function(" << quote(altr.type().name()) << ") [[`" << altr << "`]]";
+        // function(0x123456) [[`my function`]]
+        fmt << "function(" << altr.ptr() << ") [[`" << altr << "`]]";
         return fmt;
       }
     case vtype_array: {

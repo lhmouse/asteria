@@ -267,6 +267,9 @@ class cow_opaque
     const type_info& type() const
       { return typeid(*(this->m_sptr.get()));  }
 
+    const void* ptr() const noexcept
+      { return this->m_sptr.get();  }
+
     tinyfmt& describe(tinyfmt& fmt) const;
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const;
 
@@ -360,6 +363,9 @@ class cow_function
 
     const type_info& type() const
       { return this->m_fptr ? typeid(simple_function) : typeid(*(this->m_sptr.get()));  }
+
+    const void* ptr() const noexcept
+      { return this->m_fptr ? (void*)(intptr_t)this->m_fptr : this->m_sptr.get();  }
 
     tinyfmt& describe(tinyfmt& fmt) const;
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const;
