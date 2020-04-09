@@ -15,9 +15,9 @@ ptrdiff_t write_log_to_stderr(const char* file, long line, cow_string&& msg) noe
 
 template<typename... ParamsT> ROCKET_NOINLINE cow_string format_string(const ParamsT&... params)
   {
-    ::rocket::tinyfmt_str out;
-    format(out, params...);  // ADL intended
-    return out.extract_string();
+    ::rocket::tinyfmt_str fmt;
+    format(fmt, params...);  // ADL intended
+    return fmt.extract_string();
   }
 
 // Note the format string must be a string literal.
