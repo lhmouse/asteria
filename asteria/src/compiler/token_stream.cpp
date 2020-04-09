@@ -11,44 +11,6 @@
 namespace Asteria {
 namespace {
 
-enum : uint8_t
-  {
-    cctype_space   = 0x01,  // [ \t\v\f\r\n]
-    cctype_alpha   = 0x02,  // [A-Za-z]
-    cctype_digit   = 0x04,  // [0-9]
-    cctype_xdigit  = 0x08,  // [0-9A-Fa-f]
-    cctype_namei   = 0x10,  // [A-Za-z_]
-  };
-
-constexpr uint8_t s_cctypes[128] =
-  {
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C,
-    0x0C, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x1A, 0x1A, 0x1A, 0x1A, 0x1A, 0x1A, 0x12,
-    0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12,
-    0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12,
-    0x12, 0x12, 0x12, 0x00, 0x00, 0x00, 0x00, 0x10,
-    0x00, 0x1A, 0x1A, 0x1A, 0x1A, 0x1A, 0x1A, 0x12,
-    0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12,
-    0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12,
-    0x12, 0x12, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00,
-  };
-
-inline bool do_check_cctype(char c, uint8_t mask) noexcept
-  {
-    size_t ch = c & 0x7F;
-    if(ch != static_cast<uint8_t>(c))
-      return false;
-    else
-      return s_cctypes[ch] & mask;
-  }
-
 constexpr uint8_t s_digits[128] =
   {
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
@@ -250,16 +212,17 @@ bool do_may_infix_operators_follow(cow_vector<Token>& tokens)
 cow_string& do_collect_digits(cow_string& tstr, Line_Reader& reader, size_t& tlen, uint8_t mask)
   {
     for(;;) {
-      if(reader.peek(tlen) == '`') {
+      char c = reader.peek(tlen);
+      if(c == '`') {
         // Skip a digit separator.
         tlen++;
         continue;
       }
-      if(!do_check_cctype(reader.peek(tlen), mask)) {
+      if(!is_cctype(c, mask)) {
         break;
       }
       // Collect a digit.
-      tstr += reader.peek(tlen);
+      tstr.push_back(c);
       tlen++;
     }
     return tstr;
@@ -302,7 +265,7 @@ bool do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, b
     if((tlen != 0) && do_may_infix_operators_follow(tokens)) {
       return false;
     }
-    if(!do_check_cctype(reader.peek(tlen), cctype_digit)) {
+    if(!is_cctype(reader.peek(tlen), cctype_digit)) {
       return false;
     }
     // These are characterstics of the literal.
@@ -513,7 +476,7 @@ bool do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, ch
     cow_string val;
     for(;;) {
       // Read a character.
-      auto next = reader.peek(tlen);
+      char next = reader.peek(tlen);
       if(next == 0) {
         do_throw_parser_error(parser_status_string_literal_unclosed, reader, tlen);
       }
@@ -693,16 +656,16 @@ bool do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Line_Reader& rea
   {
     // identifier ::=
     //   PCRE([A-Za-z_][A-Za-z_0-9]*)
-    if(!do_check_cctype(reader.peek(), cctype_namei)) {
+    if(!is_cctype(reader.peek(), cctype_namei)) {
       return false;
     }
     // Get the length of this identifier.
     size_t tlen = 1;
     for(;;) {
-      auto next = reader.peek(tlen);
+      char next = reader.peek(tlen);
       if(next == 0)
         break;
-      if(!do_check_cctype(next, cctype_namei | cctype_digit))
+      if(!is_cctype(next, cctype_namei | cctype_digit))
         break;
       tlen++;
     }
@@ -789,7 +752,7 @@ Token_Stream& Token_Stream::reload(tinybuf& cbuf, const cow_string& file, const 
           continue;
         }
         // Read a character.
-        if(do_check_cctype(reader.peek(), cctype_space)) {
+        if(is_cctype(reader.peek(), cctype_space)) {
           // Skip a space.
           reader.consume(1);
           continue;

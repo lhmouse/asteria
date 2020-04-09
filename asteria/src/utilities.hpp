@@ -42,6 +42,24 @@ bool utf16_encode(cow_u16string& text, char32_t cp);
 bool utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail);
 bool utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset);
 
+// C character types
+enum : uint8_t
+  {
+    cctype_space   = 0x01,  // [ \t\v\f\r\n]
+    cctype_alpha   = 0x02,  // [A-Za-z]
+    cctype_digit   = 0x04,  // [0-9]
+    cctype_xdigit  = 0x08,  // [0-9A-Fa-f]
+    cctype_namei   = 0x10,  // [A-Za-z_]
+  };
+
+extern const uint8_t cctype_table[128];
+
+inline uint8_t get_cctype(char c) noexcept
+  { return (uint8_t(c) < 128) ? cctype_table[uint8_t(c)] : 0;  }
+
+inline bool is_cctype(char c, uint8_t mask) noexcept
+  { return get_cctype(c) & mask;  }
+
 // C-style quoting
 struct Quote_Wrapper
   {
