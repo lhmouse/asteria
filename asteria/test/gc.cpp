@@ -4,7 +4,7 @@
 #include "test_utilities.hpp"
 #include "../src/simple_script.hpp"
 #include "../src/runtime/global_context.hpp"
-#include "../src/runtime/generational_collector.hpp"
+#include "../src/runtime/genius_collector.hpp"
 #include "../src/runtime/variable.hpp"
 
 using namespace Asteria;
@@ -44,7 +44,7 @@ int main()
     bcnt.store(0, ::std::memory_order_relaxed);
     {
       Global_Context global;
-      var = global.generational_collector()->create_variable();
+      var = global.genius_collector()->create_variable();
       var->initialize(V_string("meow"), true);
 
       ::rocket::tinybuf_str cbuf;

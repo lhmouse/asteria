@@ -4,7 +4,7 @@
 #include "../precompiled.hpp"
 #include "global_context.hpp"
 #include "genius_collector.hpp"
-#include "random_number_generator.hpp"
+#include "random_engine.hpp"
 #include "loader_lock.hpp"
 #include "variable.hpp"
 #include "abstract_hooks.hpp"
@@ -114,7 +114,7 @@ void Global_Context::initialize(API_Version version)
     // Initialize the global random numbger generator.
     auto prng = unerase_cast(this->m_prng);
     if(!prng)
-      prng = ::rocket::make_refcnt<Random_Number_Generator>();
+      prng = ::rocket::make_refcnt<Random_Engine>();
     this->m_prng = prng;
 
     // Initialize the module loader lock.

@@ -131,7 +131,7 @@ class Analytic_Context;
 class Executive_Context;
 class Global_Context;
 class Genius_Collector;
-class Random_Number_Generator;
+class Random_Engine;
 class Loader_Lock;
 class Variadic_Arguer;
 class Instantiated_Function;

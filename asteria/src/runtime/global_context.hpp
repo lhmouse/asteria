@@ -18,7 +18,7 @@ class Global_Context : public Abstract_Context
     rcptr<Abstract_Hooks> m_qhooks;
 
     rcfwdp<Genius_Collector> m_gcoll;
-    rcfwdp<Random_Number_Generator> m_prng;
+    rcfwdp<Random_Engine> m_prng;
     rcfwdp<Loader_Lock> m_ldrlk;
     rcfwdp<Variable> m_vstd;
 
@@ -61,8 +61,8 @@ class Global_Context : public Abstract_Context
     ASTERIA_INCOMPLET(Genius_Collector) rcptr<Genius_Collector> genius_collector() const noexcept
       { return unerase_cast<Genius_Collector>(this->m_gcoll);  }
 
-    ASTERIA_INCOMPLET(Random_Number_Generator) rcptr<Random_Number_Generator> random_number_generator() const noexcept
-      { return unerase_cast<Random_Number_Generator>(this->m_prng);  }
+    ASTERIA_INCOMPLET(Random_Engine) rcptr<Random_Engine> random_engine() const noexcept
+      { return unerase_cast<Random_Engine>(this->m_prng);  }
 
     ASTERIA_INCOMPLET(Loader_Lock) rcptr<Loader_Lock> loader_lock() const noexcept
       { return unerase_cast<Loader_Lock>(this->m_ldrlk);  }
@@ -73,6 +73,7 @@ class Global_Context : public Abstract_Context
     // Get the maximum API version that is supported when this library is built.
     // N.B. This function must not be inlined for this reason.
     API_Version max_api_version() const noexcept;
+
     // Clear all references, perform a full garbage collection, then reload the standard library.
     void initialize(API_Version version = api_version_latest);
   };

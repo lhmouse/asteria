@@ -2,7 +2,7 @@
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
 #include "../precompiled.hpp"
-#include "random_number_generator.hpp"
+#include "random_engine.hpp"
 #include "../utilities.hpp"
 #include <fcntl.h>  // ::open()
 #include <unistd.h>  // ::close(), ::read()
@@ -29,11 +29,11 @@ size_t do_read_random_device(void* data, size_t size) noexcept
 
 }  // namespace
 
-Random_Number_Generator::~Random_Number_Generator()
+Random_Engine::~Random_Engine()
   {
   }
 
-void Random_Number_Generator::do_update() noexcept
+void Random_Engine::do_update() noexcept
   {
     // Increment `cc` and combine it with `bb` for every round.
     this->m_cc += 1;
@@ -65,7 +65,7 @@ void Random_Number_Generator::do_update() noexcept
     this->m_ngot = 0;
   }
 
-void Random_Number_Generator::reset() noexcept
+void Random_Engine::init() noexcept
   {
     // Initialize internal states.
     this->m_aa = 0;
@@ -83,7 +83,7 @@ void Random_Number_Generator::reset() noexcept
     this->m_ngot = 0;
   }
 
-uint32_t Random_Number_Generator::bump() noexcept
+uint32_t Random_Engine::bump() noexcept
   {
     // Advance the index.
     uint32_t k = this->m_ngot;

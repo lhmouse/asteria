@@ -148,7 +148,7 @@ pkginclude_runtime_HEADERS =  \
   asteria/src/runtime/executive_context.hpp  \
   asteria/src/runtime/global_context.hpp  \
   asteria/src/runtime/genius_collector.hpp  \
-  asteria/src/runtime/random_number_generator.hpp  \
+  asteria/src/runtime/random_engine.hpp  \
   asteria/src/runtime/loader_lock.hpp  \
   asteria/src/runtime/variadic_arguer.hpp  \
   asteria/src/runtime/evaluation_stack.hpp  \
@@ -208,7 +208,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/runtime/executive_context.cpp  \
   asteria/src/runtime/global_context.cpp  \
   asteria/src/runtime/genius_collector.cpp  \
-  asteria/src/runtime/random_number_generator.cpp  \
+  asteria/src/runtime/random_engine.cpp  \
   asteria/src/runtime/loader_lock.cpp  \
   asteria/src/runtime/variadic_arguer.cpp  \
   asteria/src/runtime/evaluation_stack.cpp  \
@@ -262,7 +262,7 @@ check_PROGRAMS =  \
   asteria/test/token_stream.test  \
   asteria/test/statement_sequence.test  \
   asteria/test/simple_script.test  \
-  asteria/test/garbage_collection.test  \
+  asteria/test/gc.test  \
   asteria/test/varg.test  \
   asteria/test/operators.test  \
   asteria/test/proper_tail_call.test  \

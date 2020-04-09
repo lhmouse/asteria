@@ -5,7 +5,7 @@
 #include "numeric.hpp"
 #include "../runtime/argument_reader.hpp"
 #include "../runtime/global_context.hpp"
-#include "../runtime/random_number_generator.hpp"
+#include "../runtime/random_engine.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -264,7 +264,7 @@ Ival std_numeric_itrunc(Rval value)
 
 Rval std_numeric_random(Global& global, Ropt limit)
   {
-    auto prng = global.random_number_generator();
+    auto prng = global.random_engine();
 
     // Generate a random `double` in the range [0.0,1.0).
     int64_t ireg = prng->bump();

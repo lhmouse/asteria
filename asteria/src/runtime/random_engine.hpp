@@ -8,8 +8,17 @@
 
 namespace Asteria {
 
-class Random_Number_Generator final : public Rcfwd<Random_Number_Generator>
+class Random_Engine final : public Rcfwd<Random_Engine>
   {
+  public:
+    using result_type  = uint32_t;
+
+    static constexpr result_type min() noexcept
+      { return 0; }
+
+    static constexpr result_type max() noexcept
+      { return UINT32_MAX; }
+
   private:
     // This implements the ISAAC PRNG that is both very fast and cryptographically secure.
     // The reference implementation assumes that `long` has 32 bits.
@@ -26,15 +35,15 @@ class Random_Number_Generator final : public Rcfwd<Random_Number_Generator>
     uint32_t m_mm[256];
 
   public:
-    Random_Number_Generator() noexcept
-      { this->reset();  }
+    Random_Engine() noexcept
+      { this->init();  }
 
-    ~Random_Number_Generator() override;
+    ~Random_Engine() override;
 
-    Random_Number_Generator(const Random_Number_Generator&)
+    Random_Engine(const Random_Engine&)
       = delete;
 
-    Random_Number_Generator& operator=(const Random_Number_Generator&)
+    Random_Engine& operator=(const Random_Engine&)
       = delete;
 
   private:
@@ -42,8 +51,11 @@ class Random_Number_Generator final : public Rcfwd<Random_Number_Generator>
     inline void do_update() noexcept;
 
   public:
-    void reset() noexcept;
+    void init() noexcept;
     uint32_t bump() noexcept;
+
+    result_type operator()() noexcept
+      { return this->bump();  }
   };
 
 }  // namespace Asteria
