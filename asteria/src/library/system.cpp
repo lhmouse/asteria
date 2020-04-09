@@ -5,7 +5,7 @@
 #include "system.hpp"
 #include "../runtime/argument_reader.hpp"
 #include "../runtime/global_context.hpp"
-#include "../runtime/generational_collector.hpp"
+#include "../runtime/genius_collector.hpp"
 #include "../utilities.hpp"
 #include <spawn.h>  // ::posix_spawnp()
 #include <sys/wait.h>  // ::waitpid()
@@ -21,7 +21,7 @@ Iopt std_system_gc_count_variables(Global& global, Ival generation)
       return nullopt;
     }
     // Get the current number of variables being tracked.
-    auto gcoll = global.generational_collector();
+    auto gcoll = global.genius_collector();
     size_t count = gcoll->get_collector(gc_gen).count_tracked_variables();
     return static_cast<int64_t>(count);
   }
@@ -34,7 +34,7 @@ Iopt std_system_gc_get_threshold(Global& global, Ival generation)
       return nullopt;
     }
     // Get the current threshold.
-    auto gcoll = global.generational_collector();
+    auto gcoll = global.genius_collector();
     uint32_t thres = gcoll->get_collector(gc_gen).get_threshold();
     return static_cast<int64_t>(thres);
   }
@@ -48,7 +48,7 @@ Iopt std_system_gc_set_threshold(Global& global, Ival generation, Ival threshold
     }
     uint32_t thres_new = static_cast<uint32_t>(::rocket::clamp(threshold, 0, INT32_MAX));
     // Set the threshold and return its old value.
-    auto gcoll = global.generational_collector();
+    auto gcoll = global.genius_collector();
     uint32_t thres = gcoll->get_collector(gc_gen).get_threshold();
     gcoll->open_collector(gc_gen).set_threshold(thres_new);
     return static_cast<int64_t>(thres);
@@ -63,7 +63,7 @@ Ival std_system_gc_collect(Global& global, Iopt generation_limit)
                        static_cast<Ival>(gc_generation_newest), static_cast<Ival>(gc_generation_oldest)));
     }
     // Perform garbage collection up to the generation specified.
-    auto gcoll = global.generational_collector();
+    auto gcoll = global.genius_collector();
     size_t nvars = gcoll->collect_variables(gc_limit);
     return static_cast<int64_t>(nvars);
   }

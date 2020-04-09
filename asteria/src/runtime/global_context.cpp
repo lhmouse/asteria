@@ -3,7 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "global_context.hpp"
-#include "generational_collector.hpp"
+#include "genius_collector.hpp"
 #include "random_number_generator.hpp"
 #include "loader_lock.hpp"
 #include "variable.hpp"
@@ -108,7 +108,7 @@ void Global_Context::initialize(API_Version version)
       ::fprintf(stderr, "-- WARNING: garbage collection failed: %s\n", stdex.what());
     }
     if(!gcoll)
-      gcoll = ::rocket::make_refcnt<Generational_Collector>();
+      gcoll = ::rocket::make_refcnt<Genius_Collector>();
     this->m_gcoll = gcoll;
 
     // Initialize the global random numbger generator.

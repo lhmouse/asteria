@@ -9,7 +9,7 @@
 #include "abstract_hooks.hpp"
 #include "analytic_context.hpp"
 #include "instantiated_function.hpp"
-#include "generational_collector.hpp"
+#include "genius_collector.hpp"
 #include "runtime_error.hpp"
 #include "variable_callback.hpp"
 #include "variable.hpp"
@@ -347,7 +347,7 @@ AIR_Status do_declare_variable(Executive_Context& ctx, ParamU /*pu*/, const void
     const auto& sloc = do_pcast<Pv_sloc_name>(pv)->sloc;
     const auto& name = do_pcast<Pv_sloc_name>(pv)->name;
     const auto& inside = ctx.zvarg()->func();
-    const auto& gcoll = ctx.global().generational_collector();
+    const auto& gcoll = ctx.global().genius_collector();
     const auto& qhooks = ctx.global().get_hooks_opt();
 
     // Allocate an uninitialized variable.
@@ -516,7 +516,7 @@ AIR_Status do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const vo
     const auto& name_mapped = do_pcast<Pv_for_each>(pv)->name_mapped;
     const auto& queue_init = do_pcast<Pv_for_each>(pv)->queue_init;
     const auto& queue_body = do_pcast<Pv_for_each>(pv)->queue_body;
-    const auto& gcoll = ctx.global().generational_collector();
+    const auto& gcoll = ctx.global().genius_collector();
 
     // We have to create an outer context due to the fact that the key and mapped references outlast every iteration.
     Executive_Context ctx_for(::rocket::ref(ctx), nullptr);
@@ -2530,7 +2530,7 @@ AIR_Status do_define_null_variable(Executive_Context& ctx, ParamU pu, const void
     const auto& sloc = do_pcast<Pv_sloc_name>(pv)->sloc;
     const auto& name = do_pcast<Pv_sloc_name>(pv)->name;
     const auto& inside = ctx.zvarg()->func();
-    const auto& gcoll = ctx.global().generational_collector();
+    const auto& gcoll = ctx.global().genius_collector();
     const auto& qhooks = ctx.global().get_hooks_opt();
 
     // Allocate an uninitialized variable.

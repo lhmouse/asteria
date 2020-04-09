@@ -130,7 +130,7 @@ class Abstract_Context;
 class Analytic_Context;
 class Executive_Context;
 class Global_Context;
-class Generational_Collector;
+class Genius_Collector;
 class Random_Number_Generator;
 class Loader_Lock;
 class Variadic_Arguer;

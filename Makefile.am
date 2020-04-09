@@ -147,7 +147,7 @@ pkginclude_runtime_HEADERS =  \
   asteria/src/runtime/analytic_context.hpp  \
   asteria/src/runtime/executive_context.hpp  \
   asteria/src/runtime/global_context.hpp  \
-  asteria/src/runtime/generational_collector.hpp  \
+  asteria/src/runtime/genius_collector.hpp  \
   asteria/src/runtime/random_number_generator.hpp  \
   asteria/src/runtime/loader_lock.hpp  \
   asteria/src/runtime/variadic_arguer.hpp  \
@@ -207,7 +207,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/runtime/analytic_context.cpp  \
   asteria/src/runtime/executive_context.cpp  \
   asteria/src/runtime/global_context.cpp  \
-  asteria/src/runtime/generational_collector.cpp  \
+  asteria/src/runtime/genius_collector.cpp  \
   asteria/src/runtime/random_number_generator.cpp  \
   asteria/src/runtime/loader_lock.cpp  \
   asteria/src/runtime/variadic_arguer.cpp  \

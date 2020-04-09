@@ -2,35 +2,35 @@
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
 #include "../precompiled.hpp"
-#include "generational_collector.hpp"
+#include "genius_collector.hpp"
 #include "variable.hpp"
 #include "reference.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
 
-Generational_Collector::~Generational_Collector()
+Genius_Collector::~Genius_Collector()
   {
   }
 
-Collector Generational_Collector::* Generational_Collector::do_locate(GC_Generation gc_gen) const
+Collector Genius_Collector::* Genius_Collector::do_locate(GC_Generation gc_gen) const
   {
     switch(gc_gen) {
     case gc_generation_newest: {
-        return &Generational_Collector::m_newest;
+        return &Genius_Collector::m_newest;
       }
     case gc_generation_middle: {
-        return &Generational_Collector::m_middle;
+        return &Genius_Collector::m_middle;
       }
     case gc_generation_oldest: {
-        return &Generational_Collector::m_oldest;
+        return &Genius_Collector::m_oldest;
       }
     default:
       ASTERIA_THROW("invalid GC generation (gc_gen `$1`)", gc_gen);
     }
   }
 
-rcptr<Variable> Generational_Collector::create_variable(GC_Generation gc_hint)
+rcptr<Variable> Genius_Collector::create_variable(GC_Generation gc_hint)
   {
     // Locate the collector, which will be responsible for tracking the new variable.
     auto& coll = this->*(this->do_locate(gc_hint));
@@ -46,7 +46,7 @@ rcptr<Variable> Generational_Collector::create_variable(GC_Generation gc_hint)
     return var;
   }
 
-size_t Generational_Collector::collect_variables(GC_Generation gc_limit)
+size_t Genius_Collector::collect_variables(GC_Generation gc_limit)
   {
     // Collect variables from the newest generation to the oldest.
     for(auto p = ::std::make_pair(&(this->m_newest), gc_limit + 1);
@@ -58,7 +58,7 @@ size_t Generational_Collector::collect_variables(GC_Generation gc_limit)
     return nvars;
   }
 
-Generational_Collector& Generational_Collector::wipe_out_variables() noexcept
+Genius_Collector& Genius_Collector::wipe_out_variables() noexcept
   {
     // Uninitialize all variables recursively.
     this->m_newest.wipe_out_variables();
