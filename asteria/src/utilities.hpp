@@ -25,6 +25,8 @@ template<typename... ParamsT> ROCKET_NOINLINE cow_string format_string(const Par
                                        ::Asteria::format_string("ASTERIA_TERMINATE: " ROCKET_CAR(__VA_ARGS__)  \
                                            "\nThis is likely a bug. Please report.\0" __VA_ARGS__)),  \
                                        ::std::terminate())
+
+// Note the format string must be a string literal.
 #define ASTERIA_THROW(...)         (::rocket::sprintf_and_throw<::std::runtime_error>(  \
                                        "%s: %s\n[thrown from native code at '%s:%ld']",  \
                                            __func__, ::Asteria::format_string("" __VA_ARGS__).c_str(),  \
