@@ -865,7 +865,7 @@ template<typename HasherT> rcptr<HasherT> do_cast_hasher(Pval& h)
   {
     auto qh = h.open_opt<HasherT>();
     if(!qh)
-      ASTERIA_THROW("invalid hasher reference (runtime type was `$1`)", h.type().name());
+      ASTERIA_THROW("invalid dynamic cast to type `$1` from type `$2`", typeid(HasherT).name(), h.type().name());
     return qh;
   }
 
