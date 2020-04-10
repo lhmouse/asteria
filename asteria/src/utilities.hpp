@@ -22,8 +22,8 @@ template<typename... ParamsT> ROCKET_NOINLINE cow_string format_string(const Par
 
 // Note the format string must be a string literal.
 #define ASTERIA_TERMINATE(...)     (::Asteria::write_log_to_stderr(__FILE__, __LINE__,  \
-                                      __func__ + ::Asteria::format_string(": " ROCKET_CAR(__VA_ARGS__)  \
-                                        "\nThis is likely a bug. Please report.\0" __VA_ARGS__)),  \
+                                      __func__ + ::Asteria::format_string(": " __VA_ARGS__)  \
+                                               + "\nThis is likely a bug. Please report."),  \
                                     ::std::terminate())
 
 // Note the format string must be a string literal.
