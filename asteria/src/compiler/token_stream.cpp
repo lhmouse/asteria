@@ -110,8 +110,10 @@ class Line_Reader
       }
   };
 
-[[noreturn]] inline void do_throw_parser_error(Parser_Status status, const Line_Reader& reader, size_t tlen)
-  { throw Parser_Error(status, reader.line(), reader.offset(), tlen);  }
+[[noreturn]] void do_throw_parser_error(Parser_Status status, const Line_Reader& reader, size_t tlen)
+  {
+    throw Parser_Error(status, reader.line(), reader.offset(), tlen);
+  }
 
 class Tack
   {

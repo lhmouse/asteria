@@ -29,7 +29,7 @@ inline uint64_t do_get_unique_id(const Token_Stream& tstrm)
       return do_cantor_pair(static_cast<unsigned long>(qtok->line()), qtok->offset());
   }
 
-[[noreturn]] inline void do_throw_parser_error(const Token_Stream& tstrm, Parser_Status status)
+[[noreturn]] void do_throw_parser_error(const Token_Stream& tstrm, Parser_Status status)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok)
@@ -38,7 +38,7 @@ inline uint64_t do_get_unique_id(const Token_Stream& tstrm)
       throw Parser_Error(status, qtok->line(), qtok->offset(), qtok->length());
   }
 
-inline Source_Location do_tell_source_location(const Token_Stream& tstrm)
+Source_Location do_tell_source_location(const Token_Stream& tstrm)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok)
