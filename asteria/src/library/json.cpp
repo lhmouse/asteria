@@ -498,6 +498,15 @@ Sopt do_accept_key_opt(Token_Stream& tstrm)
     return nullopt;
   }
 
+[[noreturn]] void do_throw_parser_error(const Token_Stream& tstrm, Parser_Status status)
+  {
+    auto qtok = tstrm.peek_opt();
+    if(!qtok)
+      throw Parser_Error(status, -1, 0, 0);
+    else
+      throw Parser_Error(status, qtok->line(), qtok->offset(), qtok->length());
+  }
+
 struct S_xparse_array
   {
     Aval array;
@@ -509,7 +518,7 @@ struct S_xparse_object
   };
 using Xparse = variant<S_xparse_array, S_xparse_object>;
 
-opt<Value> do_json_parse_nonrecursive_opt(Token_Stream& tstrm)
+Value do_json_parse_nonrecursive(Token_Stream& tstrm)
   {
     Value value;
     // Implement a recursive descent parser without recursion.
@@ -536,11 +545,11 @@ opt<Value> do_json_parse_nonrecursive_opt(Token_Stream& tstrm)
           // A key followed by a colon is expected.
           auto qkey = do_accept_key_opt(tstrm);
           if(!qkey) {
-            return nullopt;
+            do_throw_parser_error(tstrm, parser_status_closed_brace_or_json5_key_expected);
           }
           kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
           if(!kpunct) {
-            return nullopt;
+            do_throw_parser_error(tstrm, parser_status_colon_expected);
           }
           // Descend into a new object.
           S_xparse_object ctxo = { nullopt, ::std::move(*qkey) };
@@ -554,7 +563,7 @@ opt<Value> do_json_parse_nonrecursive_opt(Token_Stream& tstrm)
         // Just accept a scalar value which is never recursive.
         auto qvalue = do_accept_scalar_opt(tstrm);
         if(!qvalue) {
-          return nullopt;
+          do_throw_parser_error(tstrm, parser_status_expression_expected);
         }
         value = ::std::move(*qvalue);
       }
@@ -562,7 +571,7 @@ opt<Value> do_json_parse_nonrecursive_opt(Token_Stream& tstrm)
       for(;;) {
         if(stack.empty()) {
           // Accept the root value.
-          return ::std::move(value);
+          return value;
         }
         if(stack.back().index() == 0) {
           auto& ctxa = stack.mut_back().as<0>();
@@ -571,7 +580,7 @@ opt<Value> do_json_parse_nonrecursive_opt(Token_Stream& tstrm)
           // Look for the next element.
           kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl, punctuator_comma });
           if(!kpunct) {
-            return nullopt;
+            do_throw_parser_error(tstrm, parser_status_comma_expected);
           }
           if(*kpunct == punctuator_comma) {
             kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
@@ -591,7 +600,7 @@ opt<Value> do_json_parse_nonrecursive_opt(Token_Stream& tstrm)
           // Look for the next element.
           kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl, punctuator_comma });
           if(!kpunct) {
-            return nullopt;
+            do_throw_parser_error(tstrm, parser_status_closed_brace_or_comma_expected);
           }
           if(*kpunct == punctuator_comma) {
             kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
@@ -599,11 +608,11 @@ opt<Value> do_json_parse_nonrecursive_opt(Token_Stream& tstrm)
               // The next key is expected to follow the comma.
               auto qkey = do_accept_key_opt(tstrm);
               if(!qkey) {
-                return nullopt;
+                do_throw_parser_error(tstrm, parser_status_closed_brace_or_json5_key_expected);
               }
               kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
               if(!kpunct) {
-                return nullopt;
+                do_throw_parser_error(tstrm, parser_status_colon_expected);
               }
               ctxo.key = ::std::move(*qkey);
               // The next value is expected to follow the colon.
@@ -650,7 +659,7 @@ Sval std_json_format5(Value value, Ival indent)
   }
 
 Value std_json_parse(Sval text)
-  {
+  try {
     // We reuse the lexer of Asteria here, allowing quite a few extensions e.g. binary numeric
     // literals and comments.
     Compiler_Options opts;
@@ -659,27 +668,23 @@ Value std_json_parse(Sval text)
     opts.integers_as_reals = true;
 
     // Tokenize the source string.
+    ::rocket::tinybuf_str cbuf;
+    cbuf.set_string(text, tinybuf::open_read);
+
     Token_Stream tstrm(opts);
-    try {
-      ::rocket::tinybuf_str cbuf;
-      cbuf.set_string(text, tinybuf::open_read);
-      tstrm.reload(cbuf, ::rocket::sref("<JSON text>"));
-    }
-    catch(Parser_Error& except) {
-      ASTERIA_THROW("invalid JSON string: $3 (line $1, offset $2)", except.line(), except.offset(),
-                                                                    describe_parser_status(except.status()));
-    }
-    // Parse tokens.
-    auto qvalue = do_json_parse_nonrecursive_opt(tstrm);
-    if(!qvalue) {
+    tstrm.reload(cbuf, ::rocket::sref("<JSON text>"));
+    if(tstrm.empty())
       ASTERIA_THROW("empty JSON string");
-    }
-    // Check whether all tokens have been consumed.
-    auto qtok = tstrm.peek_opt();
-    if(qtok) {
-      ASTERIA_THROW("invalid JSON string: excess text at the end");
-    }
-    return ::std::move(*qvalue);
+
+    // Parse a single value.
+    auto value = do_json_parse_nonrecursive(tstrm);
+    if(!tstrm.empty())
+      ASTERIA_THROW("excess text at end of JSON string");
+    return value;
+  }
+  catch(Parser_Error& except) {
+    ASTERIA_THROW("invalid JSON string: $3 (line $1, offset $2)", except.line(), except.offset(),
+                                                                  describe_parser_status(except.status()));
   }
 
 void create_bindings_json(V_object& result, API_Version /*version*/)
