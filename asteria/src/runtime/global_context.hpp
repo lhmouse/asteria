@@ -29,9 +29,14 @@ class Global_Context : public Abstract_Context
     ~Global_Context() override;
 
   protected:
-    bool do_is_analytic() const noexcept final;
-    const Abstract_Context* do_get_parent_opt() const noexcept final;
-    Reference* do_lazy_lookup_opt(const phsh_string& name) override;
+    bool do_is_analytic() const noexcept final
+      { return this->is_analytic();  }
+
+    const Abstract_Context* do_get_parent_opt() const noexcept final
+      { return this->get_parent_opt();  }
+
+    Reference* do_lazy_lookup_opt(const phsh_string& /*name*/) override
+      { return nullptr;  }
 
   public:
     bool is_analytic() const noexcept

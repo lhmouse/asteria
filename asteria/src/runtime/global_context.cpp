@@ -71,21 +71,6 @@ Global_Context::~Global_Context()
     gcoll->wipe_out_variables();
   }
 
-bool Global_Context::do_is_analytic() const noexcept
-  {
-    return this->is_analytic();
-  }
-
-const Abstract_Context* Global_Context::do_get_parent_opt() const noexcept
-  {
-    return this->get_parent_opt();
-  }
-
-Reference* Global_Context::do_lazy_lookup_opt(const phsh_string& /*name*/)
-  {
-    return nullptr;
-  }
-
 API_Version Global_Context::max_api_version() const noexcept
   {
     return static_cast<API_Version>(api_version_sentinel - 1);

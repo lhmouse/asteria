@@ -37,19 +37,4 @@ void Analytic_Context::do_prepare_function(const cow_vector<phsh_string>& params
     this->open_named_reference(::rocket::sref("__func")) /*= Reference_root::S_void()*/;
   }
 
-bool Analytic_Context::do_is_analytic() const noexcept
-  {
-    return this->is_analytic();
-  }
-
-const Abstract_Context* Analytic_Context::do_get_parent_opt() const noexcept
-  {
-    return this->get_parent_opt();
-  }
-
-Reference* Analytic_Context::do_lazy_lookup_opt(const phsh_string& /*name*/)
-  {
-    return nullptr;
-  }
-
 }  // namespace Asteria

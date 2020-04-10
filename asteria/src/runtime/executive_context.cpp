@@ -127,16 +127,6 @@ void Executive_Context::do_on_scope_exit_exception(Runtime_Error& except)
     ROCKET_ASSERT(this->m_defer.empty());
   }
 
-bool Executive_Context::do_is_analytic() const noexcept
-  {
-    return this->is_analytic();
-  }
-
-const Abstract_Context* Executive_Context::do_get_parent_opt() const noexcept
-  {
-    return this->get_parent_opt();
-  }
-
 Reference* Executive_Context::do_lazy_lookup_opt(const phsh_string& name)
   {
     // Create pre-defined references as needed.
