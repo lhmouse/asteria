@@ -100,15 +100,15 @@ Rval std_math_atan2(Rval y, Rval x)
 Rval std_math_hypot(cow_vector<Value> values)
   {
     switch(values.size()) {
-    case 0: {
+      case 0: {
         // Return zero if no argument is provided.
         return 0;
       }
-    case 1: {
+      case 1: {
         // Return the absolute value of the only argument.
         return ::std::fabs(values[0].convert_to_real());
       }
-    default: {
+      default: {
         // Call the C `hypot()` function.
         auto result = ::std::hypot(values[0].convert_to_real(), values[1].convert_to_real());
         // Sum up all the other values.

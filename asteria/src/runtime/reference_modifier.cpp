@@ -11,7 +11,7 @@ namespace Asteria {
 const Value* Reference_modifier::apply_const_opt(const Value& parent) const
   {
     switch(this->index()) {
-    case index_array_index: {
+      case index_array_index: {
         const auto& altr = this->m_stor.as<index_array_index>();
         // Elements of a `null` are also `null`s.
         if(parent.is_null()) {
@@ -30,7 +30,7 @@ const Value* Reference_modifier::apply_const_opt(const Value& parent) const
         return ::std::addressof(arr.at(w.rindex));
       }
 
-    case index_object_key: {
+      case index_object_key: {
         const auto& altr = this->m_stor.as<index_object_key>();
         // Members of a `null` are also `null`s.
         if(parent.is_null()) {
@@ -48,7 +48,7 @@ const Value* Reference_modifier::apply_const_opt(const Value& parent) const
         return ::std::addressof(q->second);
       }
 
-    case index_array_head: {
+      case index_array_head: {
         // Elements of a `null` are also `null`s.
         if(parent.is_null()) {
           return nullptr;
@@ -64,7 +64,7 @@ const Value* Reference_modifier::apply_const_opt(const Value& parent) const
         return ::std::addressof(arr.front());
       }
 
-    case index_array_tail: {
+      case index_array_tail: {
         // Elements of a `null` are also `null`s.
         if(parent.is_null()) {
           return nullptr;
@@ -80,15 +80,15 @@ const Value* Reference_modifier::apply_const_opt(const Value& parent) const
         return ::std::addressof(arr.back());
       }
 
-    default:
-      ASTERIA_TERMINATE("invalid reference modifier type (index `$1`)", this->index());
+      default:
+        ASTERIA_TERMINATE("invalid reference modifier type (index `$1`)", this->index());
     }
   }
 
 Value* Reference_modifier::apply_mutable_opt(Value& parent, bool create_new) const
   {
     switch(this->index()) {
-    case index_array_index: {
+      case index_array_index: {
         const auto& altr = this->m_stor.as<index_array_index>();
         // Elements of a `null` are also `null`s.
         if(parent.is_null()) {
@@ -119,7 +119,7 @@ Value* Reference_modifier::apply_mutable_opt(Value& parent, bool create_new) con
         return ::std::addressof(arr.mut(w.rindex));
       }
 
-    case index_object_key: {
+      case index_object_key: {
         const auto& altr = this->m_stor.as<index_object_key>();
         // Members of a `null` are also `null`s.
         if(parent.is_null()) {
@@ -147,7 +147,7 @@ Value* Reference_modifier::apply_mutable_opt(Value& parent, bool create_new) con
         return ::std::addressof(q->second);
       }
 
-    case index_array_head: {
+      case index_array_head: {
         // Elements of a `null` are also `null`s.
         if(parent.is_null()) {
           if(!create_new) {
@@ -164,7 +164,7 @@ Value* Reference_modifier::apply_mutable_opt(Value& parent, bool create_new) con
         return ::std::addressof(arr.insert(0, null_value).mut_front());
       }
 
-    case index_array_tail: {
+      case index_array_tail: {
         // Elements of a `null` are also `null`s.
         if(parent.is_null()) {
           if(!create_new) {
@@ -181,15 +181,15 @@ Value* Reference_modifier::apply_mutable_opt(Value& parent, bool create_new) con
         return ::std::addressof(arr.emplace_back());
       }
 
-    default:
-      ASTERIA_TERMINATE("invalid reference modifier type (index `$1`)", this->index());
+      default:
+        ASTERIA_TERMINATE("invalid reference modifier type (index `$1`)", this->index());
     }
   }
 
 Value Reference_modifier::apply_and_erase(Value& parent) const
   {
     switch(this->index()) {
-    case index_array_index: {
+      case index_array_index: {
         const auto& altr = this->m_stor.as<index_array_index>();
         // Elements of a `null` are also `null`s.
         if(parent.is_null()) {
@@ -210,7 +210,7 @@ Value Reference_modifier::apply_and_erase(Value& parent) const
         return elem;
       }
 
-    case index_object_key: {
+      case index_object_key: {
         const auto& altr = this->m_stor.as<index_object_key>();
         // Members of a `null` are also `null`s.
         if(parent.is_null()) {
@@ -230,7 +230,7 @@ Value Reference_modifier::apply_and_erase(Value& parent) const
         return elem;
       }
 
-    case index_array_head: {
+      case index_array_head: {
         // Elements of a `null` are also `null`s.
         if(parent.is_null()) {
           return nullptr;
@@ -248,7 +248,7 @@ Value Reference_modifier::apply_and_erase(Value& parent) const
         return elem;
       }
 
-    case index_array_tail: {
+      case index_array_tail: {
         // Elements of a `null` are also `null`s.
         if(parent.is_null()) {
           return nullptr;
@@ -266,8 +266,8 @@ Value Reference_modifier::apply_and_erase(Value& parent) const
         return elem;
       }
 
-    default:
-      ASTERIA_TERMINATE("invalid reference modifier type (index `$1`)", this->index());
+      default:
+        ASTERIA_TERMINATE("invalid reference modifier type (index `$1`)", this->index());
     }
   }
 

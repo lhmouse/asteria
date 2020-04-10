@@ -37,75 +37,75 @@ template<typename ValT, ROCKET_ENABLE_IF(::std::is_floating_point<ValT>::value)>
 bool Value::is_convertible_to_real() const noexcept
   {
     switch(::rocket::weaken_enum(this->vtype())) {
-    case vtype_integer: {
+      case vtype_integer: {
         return true;
       }
-    case vtype_real: {
+      case vtype_real: {
         return true;
       }
-    default:
-      return false;
+      default:
+        return false;
     }
   }
 
 V_real Value::convert_to_real() const
   {
     switch(::rocket::weaken_enum(this->vtype())) {
-    case vtype_integer: {
+      case vtype_integer: {
         return static_cast<V_real>(this->m_stor.as<vtype_integer>());
       }
-    case vtype_real: {
+      case vtype_real: {
         return this->m_stor.as<vtype_real>();
       }
-    default:
-      ASTERIA_THROW("value not convertible to real (value `$1`)", *this);
+      default:
+        ASTERIA_THROW("value not convertible to real (value `$1`)", *this);
     }
   }
 
 V_real& Value::mutate_into_real()
   {
     switch(::rocket::weaken_enum(this->vtype())) {
-    case vtype_integer: {
+      case vtype_integer: {
         return this->m_stor.emplace<vtype_real>(static_cast<V_real>(this->m_stor.as<vtype_integer>()));
       }
-    case vtype_real: {
+      case vtype_real: {
         return this->m_stor.as<vtype_real>();
       }
-    default:
-      ASTERIA_THROW("value not convertible to real (value `$1`)", *this);
+      default:
+        ASTERIA_THROW("value not convertible to real (value `$1`)", *this);
     }
   }
 
 bool Value::test() const noexcept
   {
     switch(this->vtype()) {
-    case vtype_null: {
+      case vtype_null: {
         return false;
       }
-    case vtype_boolean: {
+      case vtype_boolean: {
         return this->m_stor.as<vtype_boolean>();
       }
-    case vtype_integer: {
+      case vtype_integer: {
         return this->m_stor.as<vtype_integer>() != 0;
       }
-    case vtype_real: {
+      case vtype_real: {
         return ::std::fpclassify(this->m_stor.as<vtype_real>()) != FP_ZERO;
       }
-    case vtype_string: {
+      case vtype_string: {
         return this->m_stor.as<vtype_string>().size() != 0;
       }
-    case vtype_opaque:
-    case vtype_function: {
+      case vtype_opaque:
+      case vtype_function: {
         return true;
       }
-    case vtype_array: {
+      case vtype_array: {
         return this->m_stor.as<vtype_array>().size() != 0;
       }
-    case vtype_object: {
+      case vtype_object: {
         return true;
       }
-    default:
-      ASTERIA_TERMINATE("invalid value type (vtype `$1`)", this->vtype());
+      default:
+        ASTERIA_TERMINATE("invalid value type (vtype `$1`)", this->vtype());
     }
   }
 
@@ -122,26 +122,26 @@ Compare Value::compare(const Value& other) const noexcept
     }
     // Compare values of the same type
     switch(this->vtype()) {
-    case vtype_null: {
+      case vtype_null: {
         return compare_equal;
       }
-    case vtype_boolean: {
+      case vtype_boolean: {
         return do_3way_compare_scalar(this->m_stor.as<vtype_boolean>(), other.m_stor.as<vtype_boolean>());
       }
-    case vtype_integer: {
+      case vtype_integer: {
         return do_3way_compare_scalar(this->m_stor.as<vtype_integer>(), other.m_stor.as<vtype_integer>());
       }
-    case vtype_real: {
+      case vtype_real: {
         return do_3way_compare_scalar(this->m_stor.as<vtype_real>(), other.m_stor.as<vtype_real>());
       }
-    case vtype_string: {
+      case vtype_string: {
         return do_3way_compare_scalar(this->m_stor.as<vtype_string>().compare(other.m_stor.as<vtype_string>()), 0);
       }
-    case vtype_opaque:
-    case vtype_function: {
+      case vtype_opaque:
+      case vtype_function: {
         return compare_unordered;
       }
-    case vtype_array: {
+      case vtype_array: {
         const auto& lhs = this->m_stor.as<vtype_array>();
         const auto& rhs = other.m_stor.as<vtype_array>();
         // Perform lexicographical comparison on the longest initial sequences of the same length.
@@ -153,123 +153,123 @@ Compare Value::compare(const Value& other) const noexcept
         }
         return do_3way_compare_scalar(lhs.size(), rhs.size());
       }
-    case vtype_object: {
+      case vtype_object: {
         return compare_unordered;
       }
-    default:
-      ASTERIA_TERMINATE("invalid value type (vtype `$1`)", this->vtype());
+      default:
+        ASTERIA_TERMINATE("invalid value type (vtype `$1`)", this->vtype());
     }
   }
 
 bool Value::unique() const noexcept
   {
     switch(this->vtype()) {
-    case vtype_null: {
+      case vtype_null: {
         return false;
       }
-    case vtype_boolean:
-    case vtype_integer:
-    case vtype_real: {
+      case vtype_boolean:
+      case vtype_integer:
+      case vtype_real: {
         return true;
       }
-    case vtype_string: {
+      case vtype_string: {
         return this->m_stor.as<vtype_string>().unique();
       }
-    case vtype_opaque: {
+      case vtype_opaque: {
         return this->m_stor.as<vtype_opaque>().unique();
       }
-    case vtype_function: {
+      case vtype_function: {
         return this->m_stor.as<vtype_function>().unique();
       }
-    case vtype_array: {
+      case vtype_array: {
         return this->m_stor.as<vtype_array>().unique();
       }
-    case vtype_object: {
+      case vtype_object: {
         return this->m_stor.as<vtype_object>().unique();
       }
-    default:
-      ASTERIA_TERMINATE("invalid value type (vtype `$1`)", this->vtype());
+      default:
+        ASTERIA_TERMINATE("invalid value type (vtype `$1`)", this->vtype());
     }
   }
 
 long Value::use_count() const noexcept
   {
     switch(this->vtype()) {
-    case vtype_null: {
+      case vtype_null: {
         return 0;
       }
-    case vtype_boolean:
-    case vtype_integer:
-    case vtype_real: {
+      case vtype_boolean:
+      case vtype_integer:
+      case vtype_real: {
         return 1;
       }
-    case vtype_string: {
+      case vtype_string: {
         return this->m_stor.as<vtype_string>().use_count();
       }
-    case vtype_opaque: {
+      case vtype_opaque: {
         return this->m_stor.as<vtype_opaque>().use_count();
       }
-    case vtype_function: {
+      case vtype_function: {
         return this->m_stor.as<vtype_function>().use_count();
       }
-    case vtype_array: {
+      case vtype_array: {
         return this->m_stor.as<vtype_array>().use_count();
       }
-    case vtype_object: {
+      case vtype_object: {
         return this->m_stor.as<vtype_object>().use_count();
       }
-    default:
-      ASTERIA_TERMINATE("invalid value type (vtype `$1`)", this->vtype());
+      default:
+        ASTERIA_TERMINATE("invalid value type (vtype `$1`)", this->vtype());
     }
   }
 
 long Value::gcref_split() const noexcept
   {
     switch(this->vtype()) {
-    case vtype_null:
-    case vtype_boolean:
-    case vtype_integer:
-    case vtype_real:
-    case vtype_string: {
+      case vtype_null:
+      case vtype_boolean:
+      case vtype_integer:
+      case vtype_real:
+      case vtype_string: {
         return 0;
       }
-    case vtype_opaque: {
+      case vtype_opaque: {
         return this->m_stor.as<vtype_opaque>().use_count();
       }
-    case vtype_function: {
+      case vtype_function: {
         return this->m_stor.as<vtype_function>().use_count();
       }
-    case vtype_array: {
+      case vtype_array: {
         return this->m_stor.as<vtype_array>().use_count();
       }
-    case vtype_object: {
+      case vtype_object: {
         return this->m_stor.as<vtype_object>().use_count();
       }
-    default:
-      ASTERIA_TERMINATE("invalid value type (vtype `$1`)", this->vtype());
+      default:
+        ASTERIA_TERMINATE("invalid value type (vtype `$1`)", this->vtype());
     }
   }
 
 tinyfmt& Value::print(tinyfmt& fmt, bool escape) const
   {
     switch(this->vtype()) {
-    case vtype_null: {
+      case vtype_null: {
         // null
         return fmt << "null";
       }
-    case vtype_boolean: {
+      case vtype_boolean: {
         // true
         return fmt << this->m_stor.as<vtype_boolean>();
       }
-    case vtype_integer: {
+      case vtype_integer: {
         // 42
         return fmt << this->m_stor.as<vtype_integer>();
       }
-    case vtype_real: {
+      case vtype_real: {
         // 123.456
         return fmt << this->m_stor.as<vtype_real>();
       }
-    case vtype_string: {
+      case vtype_string: {
         const auto& altr = this->m_stor.as<vtype_string>();
         if(!escape)
           // hello
@@ -278,19 +278,19 @@ tinyfmt& Value::print(tinyfmt& fmt, bool escape) const
           // "hello"
           return fmt << quote(altr);
       }
-    case vtype_opaque: {
+      case vtype_opaque: {
         const auto& altr = this->m_stor.as<vtype_opaque>();
         // <opaque> [[`my opaque`]]
         fmt << "<opaque> [[`" << altr << "`]]";
         return fmt;
       }
-    case vtype_function: {
+      case vtype_function: {
         const auto& altr = this->m_stor.as<vtype_function>();
         // <function> [[`my function`]]
         fmt << "<function> [[`" << altr << "`]]";
         return fmt;
       }
-    case vtype_array: {
+      case vtype_array: {
         const auto& altr = this->m_stor.as<vtype_array>();
         // [ 1, 2, 3, ]
         fmt << '[';
@@ -302,7 +302,7 @@ tinyfmt& Value::print(tinyfmt& fmt, bool escape) const
         fmt << " ]";
         return fmt;
       }
-    case vtype_object: {
+      case vtype_object: {
         const auto& altr = this->m_stor.as<vtype_object>();
         // { "one" = 1, "two" = 2, "three" = 3, }
         fmt << '{';
@@ -314,49 +314,49 @@ tinyfmt& Value::print(tinyfmt& fmt, bool escape) const
         fmt << " }";
         return fmt;
       }
-    default:
-      ASTERIA_TERMINATE("invalid value type (vtype `$1`)", this->vtype());
+      default:
+        ASTERIA_TERMINATE("invalid value type (vtype `$1`)", this->vtype());
     }
   }
 
 tinyfmt& Value::dump(tinyfmt& fmt, size_t indent, size_t hanging) const
   {
     switch(this->vtype()) {
-    case vtype_null: {
+      case vtype_null: {
         // null
         return fmt << "null";
       }
-    case vtype_boolean: {
+      case vtype_boolean: {
         // boolean true
         return fmt << "boolean " << this->m_stor.as<vtype_boolean>();
       }
-    case vtype_integer: {
+      case vtype_integer: {
         // integer 42
         return fmt << "integer " << this->m_stor.as<vtype_integer>();
       }
-    case vtype_real: {
+      case vtype_real: {
         // real 123.456
         return fmt << "real " << this->m_stor.as<vtype_real>();
       }
-    case vtype_string: {
+      case vtype_string: {
         const auto& altr = this->m_stor.as<vtype_string>();
         // string(5) "hello"
         fmt << "string(" << altr.size() << ") " << quote(altr);
         return fmt;
       }
-    case vtype_opaque: {
+      case vtype_opaque: {
         const auto& altr = this->m_stor.as<vtype_opaque>();
         // opaque(0x123456) [[`my opaque`]]
         fmt << "opaque(" << altr.ptr() << ") [[`" << altr << "`]]";
         return fmt;
       }
-    case vtype_function: {
+      case vtype_function: {
         const auto& altr = this->m_stor.as<vtype_function>();
         // function(0x123456) [[`my function`]]
         fmt << "function(" << altr.ptr() << ") [[`" << altr << "`]]";
         return fmt;
       }
-    case vtype_array: {
+      case vtype_array: {
         const auto& altr = this->m_stor.as<vtype_array>();
         // array(3) =
         //  [
@@ -373,7 +373,7 @@ tinyfmt& Value::dump(tinyfmt& fmt, size_t indent, size_t hanging) const
         fmt << pwrap(indent, hanging + 1) << ']';
         return fmt;
       }
-    case vtype_object: {
+      case vtype_object: {
         const auto& altr = this->m_stor.as<vtype_object>();
         // object(3) =
         //  {
@@ -390,39 +390,39 @@ tinyfmt& Value::dump(tinyfmt& fmt, size_t indent, size_t hanging) const
         fmt << pwrap(indent, hanging + 1) << '}';
         return fmt;
       }
-    default:
-      ASTERIA_TERMINATE("invalid value type (vtype `$1`)", this->vtype());
+      default:
+        ASTERIA_TERMINATE("invalid value type (vtype `$1`)", this->vtype());
     }
   }
 
 Variable_Callback& Value::enumerate_variables(Variable_Callback& callback) const
   {
     switch(this->vtype()) {
-    case vtype_null:
-    case vtype_boolean:
-    case vtype_integer:
-    case vtype_real:
-    case vtype_string: {
+      case vtype_null:
+      case vtype_boolean:
+      case vtype_integer:
+      case vtype_real:
+      case vtype_string: {
         return callback;
       }
-    case vtype_opaque: {
+      case vtype_opaque: {
         return this->m_stor.as<vtype_opaque>().enumerate_variables(callback);
       }
-    case vtype_function: {
+      case vtype_function: {
         return this->m_stor.as<vtype_function>().enumerate_variables(callback);
       }
-    case vtype_array: {
+      case vtype_array: {
         ::rocket::for_each(this->m_stor.as<vtype_array>(),
                      [&](const auto& elem) { elem.enumerate_variables(callback);  });
         return callback;
       }
-    case vtype_object: {
+      case vtype_object: {
         ::rocket::for_each(this->m_stor.as<vtype_object>(),
                      [&](const auto& pair) { pair.second.enumerate_variables(callback);  });
         return callback;
       }
-    default:
-      ASTERIA_TERMINATE("invalid value type (vtype `$1`)", this->vtype());
+      default:
+        ASTERIA_TERMINATE("invalid value type (vtype `$1`)", this->vtype());
     }
   }
 

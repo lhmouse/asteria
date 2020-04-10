@@ -16,17 +16,17 @@ Genius_Collector::~Genius_Collector()
 Collector Genius_Collector::* Genius_Collector::do_locate(GC_Generation gc_gen) const
   {
     switch(gc_gen) {
-    case gc_generation_newest: {
+      case gc_generation_newest: {
         return &Genius_Collector::m_newest;
       }
-    case gc_generation_middle: {
+      case gc_generation_middle: {
         return &Genius_Collector::m_middle;
       }
-    case gc_generation_oldest: {
+      case gc_generation_oldest: {
         return &Genius_Collector::m_oldest;
       }
-    default:
-      ASTERIA_THROW("invalid GC generation (gc_gen `$1`)", gc_gen);
+      default:
+        ASTERIA_THROW("invalid GC generation (gc_gen `$1`)", gc_gen);
     }
   }
 

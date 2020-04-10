@@ -9,334 +9,334 @@ namespace Asteria {
 const char* stringify_punctuator(Punctuator punct) noexcept
   {
     switch(punct) {
-    case punctuator_add: {
+      case punctuator_add: {
         return "+";
       }
-    case punctuator_add_eq: {
+      case punctuator_add_eq: {
         return "+=";
       }
-    case punctuator_sub: {
+      case punctuator_sub: {
         return "-";
       }
-    case punctuator_sub_eq: {
+      case punctuator_sub_eq: {
         return "-=";
       }
-    case punctuator_mul: {
+      case punctuator_mul: {
         return "*";
       }
-    case punctuator_mul_eq: {
+      case punctuator_mul_eq: {
         return "*=";
       }
-    case punctuator_div: {
+      case punctuator_div: {
         return "/";
       }
-    case punctuator_div_eq: {
+      case punctuator_div_eq: {
         return "/=";
       }
-    case punctuator_mod: {
+      case punctuator_mod: {
         return "%";
       }
-    case punctuator_mod_eq: {
+      case punctuator_mod_eq: {
         return "%=";
       }
-    case punctuator_inc: {
+      case punctuator_inc: {
         return "++";
       }
-    case punctuator_dec: {
+      case punctuator_dec: {
         return "--";
       }
-    case punctuator_sll: {
+      case punctuator_sll: {
         return "<<<";
       }
-    case punctuator_sll_eq: {
+      case punctuator_sll_eq: {
         return "<<<=";
       }
-    case punctuator_srl: {
+      case punctuator_srl: {
         return ">>>";
       }
-    case punctuator_srl_eq: {
+      case punctuator_srl_eq: {
         return ">>>=";
       }
-    case punctuator_sla: {
+      case punctuator_sla: {
         return "<<";
       }
-    case punctuator_sla_eq: {
+      case punctuator_sla_eq: {
         return "<<=";
       }
-    case punctuator_sra: {
+      case punctuator_sra: {
         return ">>";
       }
-    case punctuator_sra_eq: {
+      case punctuator_sra_eq: {
         return ">>=";
       }
-    case punctuator_andb: {
+      case punctuator_andb: {
         return "&";
       }
-    case punctuator_andb_eq: {
+      case punctuator_andb_eq: {
         return "&=";
       }
-    case punctuator_andl: {
+      case punctuator_andl: {
         return "&&";
       }
-    case punctuator_andl_eq: {
+      case punctuator_andl_eq: {
         return "&&=";
       }
-    case punctuator_orb: {
+      case punctuator_orb: {
         return "|";
       }
-    case punctuator_orb_eq: {
+      case punctuator_orb_eq: {
         return "|=";
       }
-    case punctuator_orl: {
+      case punctuator_orl: {
         return "||";
       }
-    case punctuator_orl_eq: {
+      case punctuator_orl_eq: {
         return "||=";
       }
-    case punctuator_xorb: {
+      case punctuator_xorb: {
         return "^";
       }
-    case punctuator_xorb_eq: {
+      case punctuator_xorb_eq: {
         return "^=";
       }
-    case punctuator_notb: {
+      case punctuator_notb: {
         return "~";
       }
-    case punctuator_notl: {
+      case punctuator_notl: {
         return "!";
       }
-    case punctuator_cmp_eq: {
+      case punctuator_cmp_eq: {
         return "==";
       }
-    case punctuator_cmp_ne: {
+      case punctuator_cmp_ne: {
         return "!=";
       }
-    case punctuator_cmp_lt: {
+      case punctuator_cmp_lt: {
         return "<";
       }
-    case punctuator_cmp_gt: {
+      case punctuator_cmp_gt: {
         return ">";
       }
-    case punctuator_cmp_lte: {
+      case punctuator_cmp_lte: {
         return "<=";
       }
-    case punctuator_cmp_gte: {
+      case punctuator_cmp_gte: {
         return ">=";
       }
-    case punctuator_dot: {
+      case punctuator_dot: {
         return ".";
       }
-    case punctuator_quest: {
+      case punctuator_quest: {
         return "?";
       }
-    case punctuator_quest_eq: {
+      case punctuator_quest_eq: {
         return "?=";
       }
-    case punctuator_assign: {
+      case punctuator_assign: {
         return "=";
       }
-    case punctuator_parenth_op: {
+      case punctuator_parenth_op: {
         return "(";
       }
-    case punctuator_parenth_cl: {
+      case punctuator_parenth_cl: {
         return ")";
       }
-    case punctuator_bracket_op: {
+      case punctuator_bracket_op: {
         return "[";
       }
-    case punctuator_bracket_cl: {
+      case punctuator_bracket_cl: {
         return "]";
       }
-    case punctuator_brace_op: {
+      case punctuator_brace_op: {
         return "{";
       }{
-    case punctuator_brace_cl:
+      case punctuator_brace_cl:
         return "}";
       }
-    case punctuator_comma: {
+      case punctuator_comma: {
         return ",";
       }
-    case punctuator_colon: {
+      case punctuator_colon: {
         return ":";
       }
-    case punctuator_semicol: {
+      case punctuator_semicol: {
         return ";";
       }
-    case punctuator_spaceship: {
+      case punctuator_spaceship: {
         return "<=>";
       }
-    case punctuator_coales: {
+      case punctuator_coales: {
         return "?\?";
       }
-    case punctuator_coales_eq: {
+      case punctuator_coales_eq: {
         return "?\?=";
       }
-    case punctuator_ellipsis: {
+      case punctuator_ellipsis: {
         return "...";
       }
-    case punctuator_head: {
+      case punctuator_head: {
         return "[^]";
       }
-    case punctuator_tail: {
+      case punctuator_tail: {
         return "[$]";
       }
-    default:
-      return "<unknown punctuator>";
+      default:
+        return "<unknown punctuator>";
     }
   }
 
 const char* stringify_keyword(Keyword kwrd) noexcept
   {
     switch(kwrd) {
-    case keyword_var: {
+      case keyword_var: {
         return "var";
       }
-    case keyword_const: {
+      case keyword_const: {
         return "const";
       }
-    case keyword_func: {
+      case keyword_func: {
         return "func";
       }
-    case keyword_if: {
+      case keyword_if: {
         return "if";
       }
-    case keyword_else: {
+      case keyword_else: {
         return "else";
       }
-    case keyword_switch: {
+      case keyword_switch: {
         return "switch";
       }
-    case keyword_case: {
+      case keyword_case: {
         return "case";
       }
-    case keyword_default: {
+      case keyword_default: {
         return "default";
       }
-    case keyword_do: {
+      case keyword_do: {
         return "do";
       }
-    case keyword_while: {
+      case keyword_while: {
         return "while";
       }
-    case keyword_for: {
+      case keyword_for: {
         return "for";
       }
-    case keyword_each: {
+      case keyword_each: {
         return "each";
       }
-    case keyword_try: {
+      case keyword_try: {
         return "try";
       }
-    case keyword_catch: {
+      case keyword_catch: {
         return "catch";
       }
-    case keyword_defer: {
+      case keyword_defer: {
         return "defer";
       }
-    case keyword_break: {
+      case keyword_break: {
         return "break";
       }
-    case keyword_continue: {
+      case keyword_continue: {
         return "continue";
       }
-    case keyword_throw: {
+      case keyword_throw: {
         return "throw";
       }
-    case keyword_return: {
+      case keyword_return: {
         return "return";
       }
-    case keyword_null: {
+      case keyword_null: {
         return "null";
       }
-    case keyword_true: {
+      case keyword_true: {
         return "true";
       }
-    case keyword_false: {
+      case keyword_false: {
         return "false";
       }
-    case keyword_nan: {
+      case keyword_nan: {
         return "nan";
       }
-    case keyword_infinity: {
+      case keyword_infinity: {
         return "infinity";
       }
-    case keyword_this: {
+      case keyword_this: {
         return "this";
       }
-    case keyword_unset: {
+      case keyword_unset: {
         return "unset";
       }
-    case keyword_lengthof: {
+      case keyword_lengthof: {
         return "lengthof";
       }
-    case keyword_typeof: {
+      case keyword_typeof: {
         return "typeof";
       }
-    case keyword_and: {
+      case keyword_and: {
         return "and";
       }
-    case keyword_or: {
+      case keyword_or: {
         return "or";
       }
-    case keyword_not: {
+      case keyword_not: {
         return "not";
       }
-    case keyword_assert: {
+      case keyword_assert: {
         return "assert";
       }
-    case keyword_sqrt: {
+      case keyword_sqrt: {
         return "__sqrt";
       }
-    case keyword_isnan: {
+      case keyword_isnan: {
         return "__isnan";
       }
-    case keyword_isinf: {
+      case keyword_isinf: {
         return "__isinf";
       }
-    case keyword_abs: {
+      case keyword_abs: {
         return "__abs";
       }
-    case keyword_sign: {
+      case keyword_sign: {
         return "__sign";
       }
-    case keyword_round: {
+      case keyword_round: {
         return "__round";
       }
-    case keyword_floor: {
+      case keyword_floor: {
         return "__floor";
       }
-    case keyword_ceil: {
+      case keyword_ceil: {
         return "__ceil";
       }
-    case keyword_trunc: {
+      case keyword_trunc: {
         return "__trunc";
       }
-    case keyword_iround: {
+      case keyword_iround: {
         return "__iround";
       }
-    case keyword_ifloor: {
+      case keyword_ifloor: {
         return "__ifloor";
       }
-    case keyword_iceil: {
+      case keyword_iceil: {
         return "__iceil";
       }
-    case keyword_itrunc: {
+      case keyword_itrunc: {
         return "__itrunc";
       }
-    case keyword_fma: {
+      case keyword_fma: {
         return "__fma";
       }
-    case keyword_global: {
+      case keyword_global: {
         return "__global";
       }
-    case keyword_vcall: {
+      case keyword_vcall: {
         return "__vcall";
       }
-    case keyword_import: {
+      case keyword_import: {
         return "import";
       }
-    default:
-      return "<unknown keyword>";
+      default:
+        return "<unknown keyword>";
     }
   }
 

@@ -135,7 +135,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
                                                PTC_Aware ptc) const
   {
     switch(this->index()) {
-    case index_expression: {
+      case index_expression: {
         const auto& altr = this->m_stor.as<index_expression>();
 
         // Evaluate the expression. Its value is discarded.
@@ -143,7 +143,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         return code;
       }
 
-    case index_block: {
+      case index_block: {
         const auto& altr = this->m_stor.as<index_block>();
 
         // Generate code for the body. This can be PTC'd.
@@ -155,7 +155,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         return code;
       }
 
-    case index_variables: {
+      case index_variables: {
         const auto& altr = this->m_stor.as<index_variables>();
 
         // Get the number of variables to declare.
@@ -227,7 +227,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         return code;
       }
 
-    case index_function: {
+      case index_function: {
         const auto& altr = this->m_stor.as<index_function>();
 
         // Create a dummy reference for further name lookups.
@@ -256,7 +256,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         return code;
       }
 
-    case index_if: {
+      case index_if: {
         const auto& altr = this->m_stor.as<index_if>();
 
         // Generate code for the condition.
@@ -275,7 +275,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         return code;
       }
 
-    case index_switch: {
+      case index_switch: {
         const auto& altr = this->m_stor.as<index_switch>();
 
         // Generate code for the control expression.
@@ -311,7 +311,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         return code;
       }
 
-    case index_do_while: {
+      case index_do_while: {
         const auto& altr = this->m_stor.as<index_do_while>();
 
         // Generate code for the body.
@@ -328,7 +328,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         return code;
       }
 
-    case index_while: {
+      case index_while: {
         const auto& altr = this->m_stor.as<index_while>();
 
         // Generate code for the condition.
@@ -345,7 +345,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         return code;
       }
 
-    case index_for_each: {
+      case index_for_each: {
         const auto& altr = this->m_stor.as<index_for_each>();
 
         // Note that the key and value references outlasts every iteration, so we have to create
@@ -369,7 +369,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         return code;
       }
 
-    case index_for: {
+      case index_for: {
         const auto& altr = this->m_stor.as<index_for>();
 
         // Note that names declared in the first segment of a for-statement outlasts every iteration,
@@ -392,7 +392,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         return code;
       }
 
-    case index_try: {
+      case index_try: {
         const auto& altr = this->m_stor.as<index_try>();
 
         // Generate code for the `try` body.
@@ -412,65 +412,65 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         return code;
       }
 
-    case index_break: {
+      case index_break: {
         const auto& altr = this->m_stor.as<index_break>();
 
         // Translate jump targets to AIR status codes.
         switch(altr.target) {
-        case jump_target_unspec: {
+          case jump_target_unspec: {
             AIR_Node::S_simple_status xnode = { air_status_break_unspec };
             code.emplace_back(::std::move(xnode));
             return code;
           }
-        case jump_target_switch: {
+          case jump_target_switch: {
             AIR_Node::S_simple_status xnode = { air_status_break_switch };
             code.emplace_back(::std::move(xnode));
             return code;
           }
-        case jump_target_while: {
+          case jump_target_while: {
             AIR_Node::S_simple_status xnode = { air_status_break_while };
             code.emplace_back(::std::move(xnode));
             return code;
           }
-        case jump_target_for: {
+          case jump_target_for: {
             AIR_Node::S_simple_status xnode = { air_status_break_for };
             code.emplace_back(::std::move(xnode));
             return code;
           }
-        default:
-          ASTERIA_TERMINATE("invalid target scope type (target `$1`)", altr.target);
+          default:
+            ASTERIA_TERMINATE("invalid target scope type (target `$1`)", altr.target);
         }
       }
 
-    case index_continue: {
+      case index_continue: {
         const auto& altr = this->m_stor.as<index_continue>();
 
         // Translate jump targets to AIR status codes.
         switch(altr.target) {
-        case jump_target_unspec: {
+          case jump_target_unspec: {
             AIR_Node::S_simple_status xnode = { air_status_continue_unspec };
             code.emplace_back(::std::move(xnode));
             return code;
           }
-        case jump_target_switch: {
+          case jump_target_switch: {
             ASTERIA_TERMINATE("`target_switch` not allowed to follow `continue`");
           }
-        case jump_target_while: {
+          case jump_target_while: {
             AIR_Node::S_simple_status xnode = { air_status_continue_while };
             code.emplace_back(::std::move(xnode));
             return code;
           }
-        case jump_target_for: {
+          case jump_target_for: {
             AIR_Node::S_simple_status xnode = { air_status_continue_for };
             code.emplace_back(::std::move(xnode));
             return code;
           }
-        default:
-          ASTERIA_TERMINATE("invalid target scope type (target `$1`)", altr.target);
+          default:
+            ASTERIA_TERMINATE("invalid target scope type (target `$1`)", altr.target);
         }
       }
 
-    case index_throw: {
+      case index_throw: {
         const auto& altr = this->m_stor.as<index_throw>();
 
         // Generate code for the operand.
@@ -483,7 +483,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         return code;
       }
 
-    case index_return: {
+      case index_return: {
         const auto& altr = this->m_stor.as<index_return>();
 
         // We don't tell empty return statements from non-empty ones here.
@@ -510,7 +510,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         return code;
       }
 
-    case index_assert: {
+      case index_assert: {
         const auto& altr = this->m_stor.as<index_assert>();
 
         // Generate code for the operand.
@@ -523,7 +523,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         return code;
       }
 
-    case index_defer: {
+      case index_defer: {
         const auto& altr = this->m_stor.as<index_defer>();
 
         // Generate code for the operand.
@@ -536,8 +536,8 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         return code;
       }
 
-    default:
-      ASTERIA_TERMINATE("invalid statement type (index `$1`)", this->index());
+      default:
+        ASTERIA_TERMINATE("invalid statement type (index `$1`)", this->index());
     }
   }
 

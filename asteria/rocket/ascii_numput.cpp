@@ -45,22 +45,22 @@ template<typename valueT>
     char* do_check_special(char*& bp, char*& ep, const valueT& value) noexcept
   {
     switch(::std::fpclassify(value)) {
-    case FP_INFINITE: {
+      case FP_INFINITE: {
         bp = const_cast<char*>("-infinity");
         ep = bp + 9;
         return bp;
       }
-    case FP_NAN: {
+      case FP_NAN: {
         bp = const_cast<char*>("-nan");
         ep = bp + 4;
         return bp;
       }
-    case FP_ZERO: {
+      case FP_ZERO: {
         bp = const_cast<char*>("-0");
         ep = bp + 2;
         return bp;
       }
-    default:
+      default:
       return nullptr;
     }
   }

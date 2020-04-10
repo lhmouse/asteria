@@ -41,7 +41,7 @@ int64_t do_remove_recursive(const char* path)
       stack.pop_back();
       // Process this element.
       switch(elem.disp) {
-      case rm_disp_rmdir: {
+        case rm_disp_rmdir: {
           // This is an empty directory. Remove it.
           if(::rmdir(elem.path.c_str()) != 0)
             ASTERIA_THROW_SYSTEM_ERROR("rmdir");
@@ -49,7 +49,7 @@ int64_t do_remove_recursive(const char* path)
           nremoved++;
           break;
         }
-      case rm_disp_unlink: {
+        case rm_disp_unlink: {
           // This is a plain file. Unlink it.
           if(::unlink(elem.path.c_str()) != 0)
             ASTERIA_THROW_SYSTEM_ERROR("unlink");
@@ -57,7 +57,7 @@ int64_t do_remove_recursive(const char* path)
           nremoved++;
           break;
         }
-      case rm_disp_expand: {
+        case rm_disp_expand: {
           // This is a subdirectory that has not been expanded. Expand it.
           // Push the directory itself. Since elements are maintained in LIFO order, only when this
           // element is encountered for a second time, will all of its children have been removed.
@@ -101,8 +101,8 @@ int64_t do_remove_recursive(const char* path)
           }
           break;
         }
-      default:
-        ROCKET_ASSERT(false);
+        default:
+          ROCKET_ASSERT(false);
       }
     }
     return nremoved;
@@ -204,24 +204,24 @@ Ival std_filesystem_remove_recursive(Sval path)
       return 1;
     }
     switch(errno) {
-    case ENOENT: {
+      case ENOENT: {
         // The path does not denote an existent file or directory.
         return 0;
       }
-    case ENOTDIR: {
+      case ENOTDIR: {
         // This is something not a directory.
         if(::unlink(path.safe_c_str()) != 0)
           ASTERIA_THROW_SYSTEM_ERROR("unlink");
         // A file has been removed.
         return 1;
       }
-    case EEXIST:
-    case ENOTEMPTY: {
+      case EEXIST:
+      case ENOTEMPTY: {
         // Remove contents first.
         return do_remove_recursive(path.safe_c_str());
       }
-    default:
-      ASTERIA_THROW_SYSTEM_ERROR("rmdir");
+      default:
+        ASTERIA_THROW_SYSTEM_ERROR("rmdir");
     }
   }
 

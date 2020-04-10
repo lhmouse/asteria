@@ -102,35 +102,35 @@ tinyfmt& do_quote_string(tinyfmt& fmt, const cow_string& str)
       }
       // Escape double quotes, backslashes, and control characters.
       switch(cp) {
-      case '\"': {
+        case '\"': {
           fmt << "\\\"";
           break;
         }
-      case '\\': {
+        case '\\': {
           fmt << "\\\\";
           break;
         }
-      case '\b': {
+        case '\b': {
           fmt << "\\b";
           break;
         }
-      case '\f': {
+        case '\f': {
           fmt << "\\f";
           break;
         }
-      case '\n': {
+        case '\n': {
           fmt << "\\n";
           break;
         }
-      case '\r': {
+        case '\r': {
           fmt << "\\r";
           break;
         }
-      case '\t': {
+        case '\t': {
           fmt << "\\t";
           break;
         }
-      default: {
+        default: {
           if((0x20 <= cp) && (cp <= 0x7E)) {
             // Write printable characters as is.
             fmt << static_cast<char>(cp);
@@ -179,34 +179,34 @@ Oval::const_iterator do_find_uncensored(const Oval& object, Oval::const_iterator
 tinyfmt& do_format_scalar(tinyfmt& fmt, const Value& value, bool json5)
   {
     switch(::rocket::weaken_enum(value.vtype())) {
-    case vtype_boolean: {
+      case vtype_boolean: {
         // Write `true` or `false`.
         return fmt << value.as_boolean();
       }
-    case vtype_integer: {
+      case vtype_integer: {
         // Write the integer in decimal.
         return fmt << Rval(value.as_integer());
       }
-    case vtype_real: {
+      case vtype_real: {
         // Is the value finite?
         switch(::std::fpclassify(value.as_real())) {
-        case FP_INFINITE: {
+          case FP_INFINITE: {
             if(json5)
               return fmt << "Infinity";
             break;
           }
-        case FP_NAN: {
+          case FP_NAN: {
             if(json5)
               return fmt << "NaN";
             break;
           }
-        default:
-          // Write the real in decimal.
-          return fmt << value.as_real();
+          default:
+            // Write the real in decimal.
+            return fmt << value.as_real();
         }
         break;
       }
-    case vtype_string:  {
+      case vtype_string:  {
         // Write the quoted string.
         return do_quote_string(fmt, value.as_string());
       }

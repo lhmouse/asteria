@@ -82,7 +82,7 @@ template<typename charT, typename traitsT>
       // The placeholder shall contain a valid index.
       size_t index = 0;
       switch(ch) {
-      case '{': {
+        case '{': {
           // Look for the terminator.
           bp = traitsT::find(bp, static_cast<size_t>(ep - bp), traitsT::to_char_type('}'));
           if(!bp) {
@@ -106,22 +106,22 @@ template<typename charT, typename traitsT>
           }
           break;
         }
-      case '0':
-      case '1':
-      case '2':
-      case '3':
-      case '4':
-      case '5':
-      case '6':
-      case '7':
-      case '8':
-      case '9': {
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9': {
           // Accept a single decimal digit.
           index = static_cast<size_t>(ch - '0');
           break;
         }
-      default:
-        noadl::sprintf_and_throw<invalid_argument>("format: invalid placeholder (sequence `$%c`)", (int)ch);
+        default:
+          noadl::sprintf_and_throw<invalid_argument>("format: invalid placeholder (sequence `$%c`)", (int)ch);
       }
       // Replace the placeholder.
       if(index == 0) {

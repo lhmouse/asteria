@@ -1638,24 +1638,24 @@ AIR_Status do_apply_xop_LENGTHOF(Executive_Context& ctx, ParamU pu, const void* 
     // Return the number of elements in the operand.
     size_t nelems;
     switch(::rocket::weaken_enum(rhs.vtype())) {
-    case vtype_null: {
+      case vtype_null: {
         nelems = 0;
         break;
       }
-    case vtype_string: {
+      case vtype_string: {
         nelems = rhs.as_string().size();
         break;
       }
-    case vtype_array: {
+      case vtype_array: {
         nelems = rhs.as_array().size();
         break;
       }
-    case vtype_object: {
+      case vtype_object: {
         nelems = rhs.as_object().size();
         break;
       }
-    default:
-      ASTERIA_THROW("prefix `lengthof` not applicable (operand was `$1`)", rhs);
+      default:
+        ASTERIA_THROW("prefix `lengthof` not applicable (operand was `$1`)", rhs);
     }
     do_set_temporary(ctx.stack(), assign, V_integer(nelems));
     return air_status_next;
@@ -2025,24 +2025,24 @@ AIR_Status do_apply_xop_CMP_3WAY(Executive_Context& ctx, ParamU pu, const void* 
     // N.B. This is one of the few operators that work on all types.
     auto comp = lhs.compare(rhs);
     switch(comp) {
-    case compare_greater: {
+      case compare_greater: {
         do_set_temporary(ctx.stack(), assign, V_integer(+1));
         break;
       }
-    case compare_less: {
+      case compare_less: {
         do_set_temporary(ctx.stack(), assign, V_integer(-1));
         break;
       }
-    case compare_equal: {
+      case compare_equal: {
         do_set_temporary(ctx.stack(), assign, V_integer(0));
         break;
       }
-    case compare_unordered: {
+      case compare_unordered: {
         do_set_temporary(ctx.stack(), assign, V_string(::rocket::sref("<unordered>")));
         break;
       }
-    default:
-      ROCKET_ASSERT(false);
+      default:
+        ROCKET_ASSERT(false);
     }
     return air_status_next;
   }
@@ -2727,12 +2727,12 @@ AIR_Status do_import_call(Executive_Context& ctx, ParamU pu, const void* pv)
 opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
   {
     switch(this->index()) {
-    case index_clear_stack: {
+      case index_clear_stack: {
         // There is nothing to bind.
         return nullopt;
       }
 
-    case index_execute_block: {
+      case index_execute_block: {
         const auto& altr = this->m_stor.as<index_execute_block>();
 
         // Check for rebinds recursively.
@@ -2744,13 +2744,13 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         return ::std::move(pair.second);
       }
 
-    case index_declare_variable:
-    case index_initialize_variable: {
+      case index_declare_variable:
+      case index_initialize_variable: {
         // There is nothing to bind.
         return nullopt;
       }
 
-    case index_if_statement: {
+      case index_if_statement: {
         const auto& altr = this->m_stor.as<index_if_statement>();
 
         // Check for rebinds recursively.
@@ -2763,7 +2763,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         return ::std::move(pair.second);
       }
 
-    case index_switch_statement: {
+      case index_switch_statement: {
         const auto& altr = this->m_stor.as<index_switch_statement>();
 
         // Check for rebinds recursively.
@@ -2776,7 +2776,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         return ::std::move(pair.second);
       }
 
-    case index_do_while_statement: {
+      case index_do_while_statement: {
         const auto& altr = this->m_stor.as<index_do_while_statement>();
 
         // Check for rebinds recursively.
@@ -2789,7 +2789,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         return ::std::move(pair.second);
       }
 
-    case index_while_statement: {
+      case index_while_statement: {
         const auto& altr = this->m_stor.as<index_while_statement>();
 
         // Check for rebinds recursively.
@@ -2802,7 +2802,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         return ::std::move(pair.second);
       }
 
-    case index_for_each_statement: {
+      case index_for_each_statement: {
         const auto& altr = this->m_stor.as<index_for_each_statement>();
 
         // Check for rebinds recursively.
@@ -2816,7 +2816,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         return ::std::move(pair.second);
       }
 
-    case index_for_statement: {
+      case index_for_statement: {
         const auto& altr = this->m_stor.as<index_for_statement>();
 
         // Check for rebinds recursively.
@@ -2832,7 +2832,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         return ::std::move(pair.second);
       }
 
-    case index_try_statement: {
+      case index_try_statement: {
         const auto& altr = this->m_stor.as<index_try_statement>();
 
         // Check for rebinds recursively.
@@ -2845,17 +2845,17 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         return ::std::move(pair.second);
       }
 
-    case index_throw_statement:
-    case index_assert_statement:
-    case index_simple_status:
-    case index_glvalue_to_prvalue:
-    case index_push_immediate:
-    case index_push_global_reference: {
+      case index_throw_statement:
+      case index_assert_statement:
+      case index_simple_status:
+      case index_glvalue_to_prvalue:
+      case index_push_immediate:
+      case index_push_global_reference: {
         // There is nothing to bind.
         return nullopt;
       }
 
-    case index_push_local_reference: {
+      case index_push_local_reference: {
         const auto& altr = this->m_stor.as<index_push_local_reference>();
 
         // Get the context.
@@ -2876,12 +2876,12 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         return ::std::move(xnode);
       }
 
-    case index_push_bound_reference: {
+      case index_push_bound_reference: {
         // There is nothing to bind.
         return nullopt;
       }
 
-    case index_define_function: {
+      case index_define_function: {
         const auto& altr = this->m_stor.as<index_define_function>();
 
         // Check for rebinds recursively.
@@ -2893,7 +2893,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         return ::std::move(pair.second);
       }
 
-    case index_branch_expression: {
+      case index_branch_expression: {
         const auto& altr = this->m_stor.as<index_branch_expression>();
 
         // Check for rebinds recursively.
@@ -2905,7 +2905,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         return ::std::move(pair.second);
       }
 
-    case index_coalescence: {
+      case index_coalescence: {
         const auto& altr = this->m_stor.as<index_coalescence>();
 
         // Check for rebinds recursively.
@@ -2916,21 +2916,21 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         return ::std::move(pair.second);
       }
 
-    case index_function_call:
-    case index_member_access:
-    case index_push_unnamed_array:
-    case index_push_unnamed_object:
-    case index_apply_operator:
-    case index_unpack_struct_array:
-    case index_unpack_struct_object:
-    case index_define_null_variable:
-    case index_single_step_trap:
-    case index_variadic_call: {
+      case index_function_call:
+      case index_member_access:
+      case index_push_unnamed_array:
+      case index_push_unnamed_object:
+      case index_apply_operator:
+      case index_unpack_struct_array:
+      case index_unpack_struct_object:
+      case index_define_null_variable:
+      case index_single_step_trap:
+      case index_variadic_call: {
         // There is nothing to bind.
         return nullopt;
       }
 
-    case index_defer_expression: {
+      case index_defer_expression: {
         const auto& altr = this->m_stor.as<index_defer_expression>();
 
         // Check for rebinds recursively.
@@ -2941,20 +2941,20 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         return ::std::move(pair.second);
       }
 
-    case index_import_call: {
+      case index_import_call: {
         // There is nothing to bind.
         return nullopt;
       }
 
-    default:
-      ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
+      default:
+        ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
     }
   }
 
 AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
   {
     switch(this->index()) {
-    case index_clear_stack: {
+      case index_clear_stack: {
         const auto& altr = this->m_stor.as<index_clear_stack>();
 
         // There are no symbols.
@@ -2967,7 +2967,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_clear_stack>(queue);
       }
 
-    case index_execute_block: {
+      case index_execute_block: {
         const auto& altr = this->m_stor.as<index_execute_block>();
 
         // There are no symbols.
@@ -2980,7 +2980,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_execute_block>(queue);
       }
 
-    case index_declare_variable: {
+      case index_declare_variable: {
         const auto& altr = this->m_stor.as<index_declare_variable>();
 
         // Set up symbols.
@@ -2995,7 +2995,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_declare_variable>(queue);
       }
 
-    case index_initialize_variable: {
+      case index_initialize_variable: {
         const auto& altr = this->m_stor.as<index_initialize_variable>();
 
         // Set up symbols.
@@ -3009,7 +3009,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_initialize_variable>(queue);
       }
 
-    case index_if_statement: {
+      case index_if_statement: {
         const auto& altr = this->m_stor.as<index_if_statement>();
 
         // There are no symbols.
@@ -3024,7 +3024,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_if_statement>(queue);
       }
 
-    case index_switch_statement: {
+      case index_switch_statement: {
         const auto& altr = this->m_stor.as<index_switch_statement>();
 
         // There are no symbols.
@@ -3041,7 +3041,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_switch_statement>(queue);
       }
 
-    case index_do_while_statement: {
+      case index_do_while_statement: {
         const auto& altr = this->m_stor.as<index_do_while_statement>();
 
         // There are no symbols.
@@ -3056,7 +3056,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_do_while_statement>(queue);
       }
 
-    case index_while_statement: {
+      case index_while_statement: {
         const auto& altr = this->m_stor.as<index_while_statement>();
 
         // There are no symbols.
@@ -3071,7 +3071,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_while_statement>(queue);
       }
 
-    case index_for_each_statement: {
+      case index_for_each_statement: {
         const auto& altr = this->m_stor.as<index_for_each_statement>();
 
         // There are no symbols.
@@ -3087,7 +3087,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_for_each_statement>(queue);
       }
 
-    case index_for_statement: {
+      case index_for_statement: {
         const auto& altr = this->m_stor.as<index_for_statement>();
 
         // There are no symbols.
@@ -3103,7 +3103,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_for_statement>(queue);
       }
 
-    case index_try_statement: {
+      case index_try_statement: {
         const auto& altr = this->m_stor.as<index_try_statement>();
 
         // There are no symbols.
@@ -3119,7 +3119,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_try_statement>(queue);
       }
 
-    case index_throw_statement: {
+      case index_throw_statement: {
         const auto& altr = this->m_stor.as<index_throw_statement>();
 
         // The `throw` statement add its own frame so prevent a duplicate.
@@ -3132,7 +3132,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_throw_statement>(queue);
       }
 
-    case index_assert_statement: {
+      case index_assert_statement: {
         const auto& altr = this->m_stor.as<index_assert_statement>();
 
         // Set up symbols.
@@ -3148,7 +3148,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_assert_statement>(queue);
       }
 
-    case index_simple_status: {
+      case index_simple_status: {
         const auto& altr = this->m_stor.as<index_simple_status>();
 
         // There are no symbols.
@@ -3161,7 +3161,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_simple_status>(queue);
       }
 
-    case index_glvalue_to_prvalue: {
+      case index_glvalue_to_prvalue: {
         const auto& altr = this->m_stor.as<index_glvalue_to_prvalue>();
 
         // Set up symbols.
@@ -3175,7 +3175,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_glvalue_to_prvalue>(queue);
       }
 
-    case index_push_immediate: {
+      case index_push_immediate: {
         const auto& altr = this->m_stor.as<index_push_immediate>();
 
         // There are no symbols.
@@ -3188,7 +3188,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_push_immediate>(queue);
       }
 
-    case index_push_global_reference: {
+      case index_push_global_reference: {
         const auto& altr = this->m_stor.as<index_push_global_reference>();
 
         // Set up symbols.
@@ -3202,7 +3202,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_push_global_reference>(queue);
       }
 
-    case index_push_local_reference: {
+      case index_push_local_reference: {
         const auto& altr = this->m_stor.as<index_push_local_reference>();
 
         // Set up symbols.
@@ -3217,7 +3217,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_push_local_reference>(queue);
       }
 
-    case index_push_bound_reference: {
+      case index_push_bound_reference: {
         const auto& altr = this->m_stor.as<index_push_bound_reference>();
 
         // There are no symbols.
@@ -3230,7 +3230,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_push_bound_reference>(queue);
       }
 
-    case index_define_function: {
+      case index_define_function: {
         const auto& altr = this->m_stor.as<index_define_function>();
 
         // Set up symbols.
@@ -3247,7 +3247,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_define_function>(queue);
       }
 
-    case index_branch_expression: {
+      case index_branch_expression: {
         const auto& altr = this->m_stor.as<index_branch_expression>();
 
         // Set up symbols.
@@ -3263,7 +3263,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_branch_expression>(queue);
       }
 
-    case index_coalescence: {
+      case index_coalescence: {
         const auto& altr = this->m_stor.as<index_coalescence>();
 
         // Set up symbols.
@@ -3278,7 +3278,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_coalescence>(queue);
       }
 
-    case index_function_call: {
+      case index_function_call: {
         const auto& altr = this->m_stor.as<index_function_call>();
 
         // Set up symbols.
@@ -3294,7 +3294,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_function_call>(queue);
       }
 
-    case index_member_access: {
+      case index_member_access: {
         const auto& altr = this->m_stor.as<index_member_access>();
 
         // Set up symbols.
@@ -3308,7 +3308,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_member_access>(queue);
       }
 
-    case index_push_unnamed_array: {
+      case index_push_unnamed_array: {
         const auto& altr = this->m_stor.as<index_push_unnamed_array>();
 
         // Set up symbols.
@@ -3322,7 +3322,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_push_unnamed_array>(queue);
       }
 
-    case index_push_unnamed_object: {
+      case index_push_unnamed_object: {
         const auto& altr = this->m_stor.as<index_push_unnamed_object>();
 
         // Set up symbols.
@@ -3336,7 +3336,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_push_unnamed_object>(queue);
       }
 
-    case index_apply_operator: {
+      case index_apply_operator: {
         const auto& altr = this->m_stor.as<index_apply_operator>();
 
         // Set up symbols.
@@ -3347,198 +3347,198 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
 
         // Encode arguments.
         switch(::rocket::weaken_enum(altr.xop)) {
-        case xop_cmp_eq: {
+          case xop_cmp_eq: {
             avmcp.pu.u8s[0] = altr.assign;
             avmcp.pu.u8s[1] = compare_equal;
             avmcp.pu.u8s[2] = false;
             break;
           }
-        case xop_cmp_ne: {
+          case xop_cmp_ne: {
             avmcp.pu.u8s[0] = altr.assign;
             avmcp.pu.u8s[1] = compare_equal;
             avmcp.pu.u8s[2] = true;
             break;
           }
-        case xop_cmp_lt: {
+          case xop_cmp_lt: {
             avmcp.pu.u8s[0] = altr.assign;
             avmcp.pu.u8s[1] = compare_less;
             avmcp.pu.u8s[2] = false;
             break;
           }
-        case xop_cmp_gt: {
+          case xop_cmp_gt: {
             avmcp.pu.u8s[0] = altr.assign;
             avmcp.pu.u8s[1] = compare_greater;
             avmcp.pu.u8s[2] = false;
             break;
           }
-        case xop_cmp_lte: {
+          case xop_cmp_lte: {
             avmcp.pu.u8s[0] = altr.assign;
             avmcp.pu.u8s[1] = compare_greater;
             avmcp.pu.u8s[2] = true;
             break;
           }
-        case xop_cmp_gte: {
+          case xop_cmp_gte: {
             avmcp.pu.u8s[0] = altr.assign;
             avmcp.pu.u8s[1] = compare_less;
             avmcp.pu.u8s[2] = true;
             break;
           }
-        default: {
+          default: {
             avmcp.pu.u8s[0] = altr.assign;
             break;
           }
         }
         switch(altr.xop) {
-        case xop_inc_post: {
+          case xop_inc_post: {
             return avmcp.output<do_apply_xop_INC_POST>(queue);
           }
-        case xop_dec_post: {
+          case xop_dec_post: {
             return avmcp.output<do_apply_xop_DEC_POST>(queue);
           }
-        case xop_subscr: {
+          case xop_subscr: {
             return avmcp.output<do_apply_xop_SUBSCR>(queue);
           }
-        case xop_pos: {
+          case xop_pos: {
             return avmcp.output<do_apply_xop_POS>(queue);
           }
-        case xop_neg: {
+          case xop_neg: {
             return avmcp.output<do_apply_xop_NEG>(queue);
           }
-        case xop_notb: {
+          case xop_notb: {
             return avmcp.output<do_apply_xop_NOTB>(queue);
           }
-        case xop_notl: {
+          case xop_notl: {
             return avmcp.output<do_apply_xop_NOTL>(queue);
           }
-        case xop_inc_pre: {
+          case xop_inc_pre: {
             return avmcp.output<do_apply_xop_INC_PRE>(queue);
           }
-        case xop_dec_pre: {
+          case xop_dec_pre: {
             return avmcp.output<do_apply_xop_DEC_PRE>(queue);
           }
-        case xop_unset: {
+          case xop_unset: {
             return avmcp.output<do_apply_xop_UNSET>(queue);
           }
-        case xop_lengthof: {
+          case xop_lengthof: {
             return avmcp.output<do_apply_xop_LENGTHOF>(queue);
           }
-        case xop_typeof: {
+          case xop_typeof: {
             return avmcp.output<do_apply_xop_TYPEOF>(queue);
           }
-        case xop_sqrt: {
+          case xop_sqrt: {
             return avmcp.output<do_apply_xop_SQRT>(queue);
           }
-        case xop_isnan: {
+          case xop_isnan: {
             return avmcp.output<do_apply_xop_ISNAN>(queue);
           }
-        case xop_isinf: {
+          case xop_isinf: {
             return avmcp.output<do_apply_xop_ISINF>(queue);
           }
-        case xop_abs: {
+          case xop_abs: {
             return avmcp.output<do_apply_xop_ABS>(queue);
           }
-        case xop_sign: {
+          case xop_sign: {
             return avmcp.output<do_apply_xop_SIGN>(queue);
           }
-        case xop_round: {
+          case xop_round: {
             return avmcp.output<do_apply_xop_ROUND>(queue);
           }
-        case xop_floor: {
+          case xop_floor: {
             return avmcp.output<do_apply_xop_FLOOR>(queue);
           }
-        case xop_ceil: {
+          case xop_ceil: {
             return avmcp.output<do_apply_xop_CEIL>(queue);
           }
-        case xop_trunc: {
+          case xop_trunc: {
             return avmcp.output<do_apply_xop_TRUNC>(queue);
           }
-        case xop_iround: {
+          case xop_iround: {
             return avmcp.output<do_apply_xop_IROUND>(queue);
           }
-        case xop_ifloor: {
+          case xop_ifloor: {
             return avmcp.output<do_apply_xop_IFLOOR>(queue);
           }
-        case xop_iceil: {
+          case xop_iceil: {
             return avmcp.output<do_apply_xop_ICEIL>(queue);
           }
-        case xop_itrunc: {
+          case xop_itrunc: {
             return avmcp.output<do_apply_xop_ITRUNC>(queue);
           }
-        case xop_cmp_eq: {
+          case xop_cmp_eq: {
             return avmcp.output<do_apply_xop_CMP_XEQ>(queue);
           }
-        case xop_cmp_ne: {
+          case xop_cmp_ne: {
             return avmcp.output<do_apply_xop_CMP_XEQ>(queue);
           }
-        case xop_cmp_lt: {
+          case xop_cmp_lt: {
             return avmcp.output<do_apply_xop_CMP_XREL>(queue);
           }
-        case xop_cmp_gt: {
+          case xop_cmp_gt: {
             return avmcp.output<do_apply_xop_CMP_XREL>(queue);
           }
-        case xop_cmp_lte: {
+          case xop_cmp_lte: {
             return avmcp.output<do_apply_xop_CMP_XREL>(queue);
           }
-        case xop_cmp_gte: {
+          case xop_cmp_gte: {
             return avmcp.output<do_apply_xop_CMP_XREL>(queue);
           }
-        case xop_cmp_3way: {
+          case xop_cmp_3way: {
             return avmcp.output<do_apply_xop_CMP_3WAY>(queue);
           }
-        case xop_add: {
+          case xop_add: {
             return avmcp.output<do_apply_xop_ADD>(queue);
           }
-        case xop_sub: {
+          case xop_sub: {
             return avmcp.output<do_apply_xop_SUB>(queue);
           }
-        case xop_mul: {
+          case xop_mul: {
             return avmcp.output<do_apply_xop_MUL>(queue);
           }
-        case xop_div: {
+          case xop_div: {
             return avmcp.output<do_apply_xop_DIV>(queue);
           }
-        case xop_mod: {
+          case xop_mod: {
             return avmcp.output<do_apply_xop_MOD>(queue);
           }
-        case xop_sll: {
+          case xop_sll: {
             return avmcp.output<do_apply_xop_SLL>(queue);
           }
-        case xop_srl: {
+          case xop_srl: {
             return avmcp.output<do_apply_xop_SRL>(queue);
           }
-        case xop_sla: {
+          case xop_sla: {
             return avmcp.output<do_apply_xop_SLA>(queue);
           }
-        case xop_sra: {
+          case xop_sra: {
             return avmcp.output<do_apply_xop_SRA>(queue);
           }
-        case xop_andb: {
+          case xop_andb: {
             return avmcp.output<do_apply_xop_ANDB>(queue);
           }
-        case xop_orb: {
+          case xop_orb: {
             return avmcp.output<do_apply_xop_ORB>(queue);
           }
-        case xop_xorb: {
+          case xop_xorb: {
             return avmcp.output<do_apply_xop_XORB>(queue);
           }
-        case xop_assign: {
+          case xop_assign: {
             return avmcp.output<do_apply_xop_ASSIGN>(queue);
           }
-        case xop_fma: {
+          case xop_fma: {
             return avmcp.output<do_apply_xop_FMA>(queue);
           }
-        case xop_head: {
+          case xop_head: {
             return avmcp.output<do_apply_xop_HEAD>(queue);
           }
-        case xop_tail: {
+          case xop_tail: {
             return avmcp.output<do_apply_xop_TAIL>(queue);
           }
-        default:
-          ASTERIA_TERMINATE("invalid operator type (xop `$1`)", altr.xop);
+          default:
+            ASTERIA_TERMINATE("invalid operator type (xop `$1`)", altr.xop);
         }
       }
 
-    case index_unpack_struct_array: {
+      case index_unpack_struct_array: {
         const auto& altr = this->m_stor.as<index_unpack_struct_array>();
 
         // Set up symbols.
@@ -3553,7 +3553,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_unpack_struct_array>(queue);
       }
 
-    case index_unpack_struct_object: {
+      case index_unpack_struct_object: {
         const auto& altr = this->m_stor.as<index_unpack_struct_object>();
 
         // Set up symbols.
@@ -3568,7 +3568,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_unpack_struct_object>(queue);
       }
 
-    case index_define_null_variable: {
+      case index_define_null_variable: {
         const auto& altr = this->m_stor.as<index_define_null_variable>();
 
         // Set up symbols.
@@ -3584,7 +3584,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_define_null_variable>(queue);
       }
 
-    case index_single_step_trap: {
+      case index_single_step_trap: {
         const auto& altr = this->m_stor.as<index_single_step_trap>();
 
         // Set up symbols.
@@ -3598,7 +3598,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_single_step_trap>(queue);
       }
 
-    case index_variadic_call: {
+      case index_variadic_call: {
         const auto& altr = this->m_stor.as<index_variadic_call>();
 
         // Set up symbols.
@@ -3613,7 +3613,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_variadic_call>(queue);
       }
 
-    case index_defer_expression: {
+      case index_defer_expression: {
         const auto& altr = this->m_stor.as<index_defer_expression>();
 
         // Set up symbols.
@@ -3628,7 +3628,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_defer_expression>(queue);
       }
 
-    case index_import_call: {
+      case index_import_call: {
         const auto& altr = this->m_stor.as<index_import_call>();
 
         // Set up symbols.
@@ -3644,37 +3644,37 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_import_call>(queue);
       }
 
-    default:
-      ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
+      default:
+        ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
     }
   }
 
 Variable_Callback& AIR_Node::enumerate_variables(Variable_Callback& callback) const
   {
     switch(this->index()) {
-    case index_clear_stack: {
+      case index_clear_stack: {
         return callback;
       }
 
-    case index_execute_block: {
+      case index_execute_block: {
         const auto& altr = this->m_stor.as<index_execute_block>();
         ::rocket::for_each(altr.code_body, callback);
         return callback;
       }
 
-    case index_declare_variable:
-    case index_initialize_variable: {
+      case index_declare_variable:
+      case index_initialize_variable: {
         return callback;
       }
 
-    case index_if_statement: {
+      case index_if_statement: {
         const auto& altr = this->m_stor.as<index_if_statement>();
         ::rocket::for_each(altr.code_true, callback);
         ::rocket::for_each(altr.code_false, callback);
         return callback;
       }
 
-    case index_switch_statement: {
+      case index_switch_statement: {
         const auto& altr = this->m_stor.as<index_switch_statement>();
         for(size_t i = 0;  i < altr.code_labels.size();  ++i) {
           ::rocket::for_each(altr.code_labels.at(i), callback);
@@ -3683,28 +3683,28 @@ Variable_Callback& AIR_Node::enumerate_variables(Variable_Callback& callback) co
         return callback;
       }
 
-    case index_do_while_statement: {
+      case index_do_while_statement: {
         const auto& altr = this->m_stor.as<index_do_while_statement>();
         ::rocket::for_each(altr.code_body, callback);
         ::rocket::for_each(altr.code_cond, callback);
         return callback;
       }
 
-    case index_while_statement: {
+      case index_while_statement: {
         const auto& altr = this->m_stor.as<index_while_statement>();
         ::rocket::for_each(altr.code_cond, callback);
         ::rocket::for_each(altr.code_body, callback);
         return callback;
       }
 
-    case index_for_each_statement: {
+      case index_for_each_statement: {
         const auto& altr = this->m_stor.as<index_for_each_statement>();
         ::rocket::for_each(altr.code_init, callback);
         ::rocket::for_each(altr.code_body, callback);
         return callback;
       }
 
-    case index_for_statement: {
+      case index_for_statement: {
         const auto& altr = this->m_stor.as<index_for_statement>();
         ::rocket::for_each(altr.code_init, callback);
         ::rocket::for_each(altr.code_cond, callback);
@@ -3713,81 +3713,81 @@ Variable_Callback& AIR_Node::enumerate_variables(Variable_Callback& callback) co
         return callback;
       }
 
-    case index_try_statement: {
+      case index_try_statement: {
         const auto& altr = this->m_stor.as<index_try_statement>();
         ::rocket::for_each(altr.code_try, callback);
         ::rocket::for_each(altr.code_catch, callback);
         return callback;
       }
 
-    case index_throw_statement:
-    case index_assert_statement:
-    case index_simple_status:
-    case index_glvalue_to_prvalue: {
+      case index_throw_statement:
+      case index_assert_statement:
+      case index_simple_status:
+      case index_glvalue_to_prvalue: {
         return callback;
       }
 
-    case index_push_immediate: {
+      case index_push_immediate: {
         const auto& altr = this->m_stor.as<index_push_immediate>();
         altr.value.enumerate_variables(callback);
         return callback;
       }
 
-    case index_push_global_reference:
-    case index_push_local_reference: {
+      case index_push_global_reference:
+      case index_push_local_reference: {
         return callback;
       }
 
-    case index_push_bound_reference: {
+      case index_push_bound_reference: {
         const auto& altr = this->m_stor.as<index_push_bound_reference>();
         altr.ref.enumerate_variables(callback);
         return callback;
       }
 
-    case index_define_function: {
+      case index_define_function: {
         const auto& altr = this->m_stor.as<index_define_function>();
         ::rocket::for_each(altr.code_body, callback);
         return callback;
       }
 
-    case index_branch_expression: {
+      case index_branch_expression: {
         const auto& altr = this->m_stor.as<index_branch_expression>();
         ::rocket::for_each(altr.code_true, callback);
         ::rocket::for_each(altr.code_false, callback);
         return callback;
       }
 
-    case index_coalescence: {
+      case index_coalescence: {
         const auto& altr = this->m_stor.as<index_coalescence>();
         ::rocket::for_each(altr.code_null, callback);
         return callback;
       }
 
-    case index_function_call:
-    case index_member_access:
-    case index_push_unnamed_array:
-    case index_push_unnamed_object:
-    case index_apply_operator:
-    case index_unpack_struct_array:
-    case index_unpack_struct_object:
-    case index_define_null_variable:
-    case index_single_step_trap:
-    case index_variadic_call: {
+      case index_function_call:
+      case index_member_access:
+      case index_push_unnamed_array:
+      case index_push_unnamed_object:
+      case index_apply_operator:
+      case index_unpack_struct_array:
+      case index_unpack_struct_object:
+      case index_define_null_variable:
+      case index_single_step_trap:
+      case index_variadic_call: {
         return callback;
       }
 
-    case index_defer_expression: {
+      case index_defer_expression: {
         const auto& altr = this->m_stor.as<index_defer_expression>();
         ::rocket::for_each(altr.code_body, callback);
         return callback;
       }
 
-    case index_import_call: {
+      case index_import_call: {
         return callback;
       }
 
-    default:
-      ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
+      default:
+        ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
     }
   }
 

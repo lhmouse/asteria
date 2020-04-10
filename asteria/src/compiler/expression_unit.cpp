@@ -30,7 +30,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
                                                      const Analytic_Context& ctx, PTC_Aware ptc) const
   {
     switch(this->index()) {
-    case index_literal: {
+      case index_literal: {
         const auto& altr = this->m_stor.as<index_literal>();
 
         // Encode arguments.
@@ -39,7 +39,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         return code;
       }
 
-    case index_named_reference: {
+      case index_named_reference: {
         const auto& altr = this->m_stor.as<index_named_reference>();
 
         // Perform early lookup when the expression is defined.
@@ -68,7 +68,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         }
       }
 
-    case index_closure_function: {
+      case index_closure_function: {
         const auto& altr = this->m_stor.as<index_closure_function>();
 
         // Name the closure.
@@ -86,7 +86,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         return code;
       }
 
-    case index_branch: {
+      case index_branch: {
         const auto& altr = this->m_stor.as<index_branch>();
 
         // Generate code for both branches.
@@ -100,7 +100,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         return code;
       }
 
-    case index_function_call: {
+      case index_function_call: {
         const auto& altr = this->m_stor.as<index_function_call>();
 
         // Encode arguments.
@@ -109,7 +109,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         return code;
       }
 
-    case index_member_access: {
+      case index_member_access: {
         const auto& altr = this->m_stor.as<index_member_access>();
 
         // Encode arguments.
@@ -118,7 +118,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         return code;
       }
 
-    case index_operator_rpn: {
+      case index_operator_rpn: {
         const auto& altr = this->m_stor.as<index_operator_rpn>();
 
         // Encode arguments.
@@ -127,7 +127,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         return code;
       }
 
-    case index_unnamed_array: {
+      case index_unnamed_array: {
         const auto& altr = this->m_stor.as<index_unnamed_array>();
 
         // Encode arguments.
@@ -136,7 +136,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         return code;
       }
 
-    case index_unnamed_object: {
+      case index_unnamed_object: {
         const auto& altr = this->m_stor.as<index_unnamed_object>();
 
         // Encode arguments.
@@ -145,7 +145,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         return code;
       }
 
-    case index_coalescence: {
+      case index_coalescence: {
         const auto& altr = this->m_stor.as<index_coalescence>();
 
         // Generate code for the branch. This branch may be PTC'd.
@@ -157,7 +157,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         return code;
       }
 
-    case index_global_reference: {
+      case index_global_reference: {
         const auto& altr = this->m_stor.as<index_global_reference>();
 
         // This name is always looked up in the global context.
@@ -166,7 +166,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         return code;
       }
 
-    case index_variadic_call: {
+      case index_variadic_call: {
         const auto& altr = this->m_stor.as<index_variadic_call>();
 
         // Encode arguments.
@@ -175,7 +175,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         return code;
       }
 
-    case index_argument_finish: {
+      case index_argument_finish: {
         const auto& altr = this->m_stor.as<index_argument_finish>();
 
         // Apply glvalue-to-rvalue conversion if the argument is to be passed by value.
@@ -188,7 +188,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         return code;
       }
 
-    case index_import_call: {
+      case index_import_call: {
         const auto& altr = this->m_stor.as<index_import_call>();
 
         // Encode arguments.
@@ -197,8 +197,8 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         return code;
       }
 
-    default:
-      ASTERIA_TERMINATE("invalid expression unit type (index `$1`)", this->index());
+      default:
+        ASTERIA_TERMINATE("invalid expression unit type (index `$1`)", this->index());
     }
   }
 
