@@ -36,11 +36,10 @@ Runtime_Error& do_unpack_frames(Runtime_Error& except, Global_Context& global, E
         qhooks->on_function_except(sloc, inside, except);
 
       // Evaluate deferred expressions if any.
-      if(tca->get_defer_stack().size()) {
-        Executive_Context ctx(::rocket::ref(global), ::rocket::ref(stack), ::rocket::ref(tca->zvarg()),
-                              ::std::move(tca->open_defer_stack()));
-        ctx.on_scope_exit(except);
-      }
+      if(tca->get_defer_stack().size())
+        Executive_Context(::rocket::ref(global), ::rocket::ref(stack),
+                          ::rocket::ref(tca->zvarg()), ::std::move(tca->open_defer_stack()))
+          .on_scope_exit(except);
 
       // Push the caller.
       except.push_frame_func(tca->zvarg()->sloc(), inside);
@@ -59,7 +58,7 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
 
     // Unpack all frames recursively.
     // Note that `self` is overwritten before the wrapped function is called.
-    while((tca = self.get_tail_call_opt())) {
+    while(!!(tca = self.get_tail_call_opt())) {
       // Unpack arguments.
       const auto& sloc = tca->sloc();
       const auto& inside = tca->zvarg()->func();
@@ -105,11 +104,10 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
       frames.pop_back();
       // Evaluate deferred expressions if any.
       ASTERIA_RUNTIME_TRY {
-        if(tca->get_defer_stack().size()) {
-          Executive_Context ctx(::rocket::ref(global), ::rocket::ref(stack), ::rocket::ref(tca->zvarg()),
-                                ::std::move(tca->open_defer_stack()));
-          ctx.on_scope_exit(air_status_next);
-        }
+        if(tca->get_defer_stack().size())
+          Executive_Context(::rocket::ref(global), ::rocket::ref(stack),
+                            ::rocket::ref(tca->zvarg()), ::std::move(tca->open_defer_stack()))
+            .on_scope_exit(air_status_next);
       }
       ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
         do_unpack_frames(except, global, stack, ::std::move(frames));
