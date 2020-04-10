@@ -57,7 +57,7 @@ class Executive_Context : public Abstract_Context
   private:
     void do_bind_parameters(const cow_vector<phsh_string>& params, cow_vector<Reference>&& args);
 
-    void do_defer_expression(const Source_Location& sloc, const cow_vector<AIR_Node>& code);
+    void do_defer_expression(const Source_Location& sloc, AVMC_Queue&& queue);
     void do_on_scope_exit_void();
     void do_on_scope_exit_return();
     void do_on_scope_exit_exception(Runtime_Error& except);
@@ -87,9 +87,11 @@ class Executive_Context : public Abstract_Context
     const rcptr<Variadic_Arguer>& zvarg() const noexcept
       { return this->m_zvarg;  }
 
-    Executive_Context& defer_expression(const Source_Location& sloc, const cow_vector<AIR_Node>& code)
+    // Defer an expression which will be evaluated at scope exit.
+    // The result of such expressions are discarded.
+    Executive_Context& defer_expression(const Source_Location& sloc, AVMC_Queue&& queue)
       {
-        this->do_defer_expression(sloc, code);
+        this->do_defer_expression(sloc, ::std::move(queue));
         return *this;
       }
 

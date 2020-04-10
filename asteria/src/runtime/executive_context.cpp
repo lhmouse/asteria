@@ -3,7 +3,6 @@
 
 #include "../precompiled.hpp"
 #include "executive_context.hpp"
-#include "air_node.hpp"
 #include "runtime_error.hpp"
 #include "ptc_arguments.hpp"
 #include "../llds/avmc_queue.hpp"
@@ -51,13 +50,8 @@ void Executive_Context::do_bind_parameters(const cow_vector<phsh_string>& params
       this->m_args = ::std::move(args);
   }
 
-void Executive_Context::do_defer_expression(const Source_Location& sloc, const cow_vector<AIR_Node>& code)
+void Executive_Context::do_defer_expression(const Source_Location& sloc, AVMC_Queue&& queue)
   {
-    AVMC_Queue queue;
-    // Solidify the expression.
-    ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(queue, 0);  });  // 1st pass
-    ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(queue, 1);  });  // 2nd pass
-    // Append it.
     this->m_defer.emplace_back(sloc, ::std::move(queue));
   }
 

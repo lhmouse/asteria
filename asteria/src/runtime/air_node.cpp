@@ -2642,8 +2642,11 @@ AIR_Status do_defer_expression(Executive_Context& ctx, ParamU /*pu*/, const void
     // Rebind the body here.
     auto pair = ::std::make_pair(false, code_body);
     do_rebind_nodes(pair.first, pair.second, ctx);
+    AVMC_Queue queue;
+    do_solidify_queue(queue, pair.second);
+
     // Push this expression.
-    ctx.defer_expression(sloc, pair.second);
+    ctx.defer_expression(sloc, ::std::move(queue));
     return air_status_next;
   }
 
