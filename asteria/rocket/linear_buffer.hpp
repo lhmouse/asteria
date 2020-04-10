@@ -188,36 +188,37 @@ template<typename charT, typename traitsT, typename allocT> class basic_linear_b
     size_type peekn(value_type* s, size_type n) const noexcept
       {
         size_type nread = noadl::min(n, this->size());
-        if(nread != 0)
-          traits_type::copy(s, this->begin(), nread);
+        if(nread <= 0)
+          return 0;
+        traits_type::copy(s, this->begin(), nread);
         return nread;
       }
 
     size_type getn(value_type* s, size_type n) noexcept
       {
         size_type nread = noadl::min(n, this->size());
-        if(nread != 0) {
-          traits_type::copy(s, this->begin(), nread);
-          this->discard(nread);
-        }
+        if(nread <= 0)
+          return 0;
+        traits_type::copy(s, this->begin(), nread);
+        this->discard(nread);
         return nread;
       }
 
     int_type peekc() const noexcept
       {
-        int_type ch = traits_type::eof();
         value_type s[1];
-        if(this->peekn(s, 1) != 0)
-          ch = traits_type::to_int_type(s[0]);
+        if(this->peekn(s, 1) == 0)
+          return traits_type::eof();
+        int_type ch = traits_type::to_int_type(s[0]);
         return ch;
       }
 
     int_type getc() noexcept
       {
-        int_type ch = traits_type::eof();
         value_type s[1];
-        if(this->getn(s, 1) != 0)
-          ch = traits_type::to_int_type(s[0]);
+        if(this->getn(s, 1) == 0)
+          return traits_type::eof();
+        int_type ch = traits_type::to_int_type(s[0]);
         return ch;
       }
 
