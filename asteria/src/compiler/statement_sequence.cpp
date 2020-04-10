@@ -2140,7 +2140,7 @@ bool do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstr
 
 }  // namespace
 
-Statement_Sequence& Statement_Sequence::reload(Token_Stream& tstrm, const Compiler_Options& /*opts*/)
+Statement_Sequence& Statement_Sequence::reload(Token_Stream& tstrm)
   {
     // Parse the document recursively.
     cow_vector<Statement> stmts;

@@ -16,13 +16,12 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
     if(ROCKET_UNEXPECT(this->m_params.empty()))
       this->m_params.emplace_back(::rocket::sref("..."));
 
-    // Tokenize the character stream.
-    Token_Stream tstrm;
-    tstrm.reload(cbuf, name, this->m_opts);
+    // Parse source code.
+    Token_Stream tstrm(this->m_opts);
+    tstrm.reload(cbuf, name);
 
-    // Parse tokens.
-    Statement_Sequence stmtq;
-    stmtq.reload(tstrm, this->m_opts);
+    Statement_Sequence stmtq(this->m_opts);
+    stmtq.reload(tstrm);
 
     // Instantiate the function.
     this->m_func = ::rocket::make_refcnt<Instantiated_Function>(this->m_params,

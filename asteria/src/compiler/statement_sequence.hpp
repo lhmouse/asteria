@@ -12,13 +12,25 @@ namespace Asteria {
 class Statement_Sequence
   {
   private:
+    Compiler_Options m_opts;
     cow_vector<Statement> m_stmts;
 
   public:
-    constexpr Statement_Sequence() noexcept
-      = default;
+    explicit constexpr Statement_Sequence(const Compiler_Options& opts) noexcept
+      : m_opts(opts)
+      { }
 
   public:
+    // These are accessors and modifiers of options for parsing.
+    const Compiler_Options& get_options() const noexcept
+      { return this->m_opts;  }
+
+    Compiler_Options& open_options() noexcept
+      { return this->m_opts;  }
+
+    Statement_Sequence& set_options(const Compiler_Options& opts) noexcept
+      { return this->m_opts = opts, *this;  }
+
     // These are accessors to the statements in this sequence.
     // Note that the sequence cannot be modified.
     bool empty() const noexcept
@@ -39,7 +51,7 @@ class Statement_Sequence
     // This function parses tokens from the input stream and fills statements into `*this`.
     // The contents of `*this` are destroyed prior to any further operation.
     // This function throws a `Parser_Error` upon failure.
-    Statement_Sequence& reload(Token_Stream& tstrm, const Compiler_Options& opts);
+    Statement_Sequence& reload(Token_Stream& tstrm);
   };
 
 }  // namespace Asteria

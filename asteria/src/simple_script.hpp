@@ -11,19 +11,21 @@ namespace Asteria {
 class Simple_Script
   {
   private:
-    Compiler_Options m_opts = { };  // static
+    Compiler_Options m_opts;  // static
     cow_vector<phsh_string> m_params;  // constant
     cow_function m_func;  // note type erasure
 
   public:
     constexpr Simple_Script() noexcept
-      = default;
+      : m_opts()
+      { }
 
     explicit constexpr Simple_Script(const Compiler_Options& opts) noexcept
       : m_opts(opts)
       { }
 
     Simple_Script(tinybuf& cbuf, const cow_string& name)
+      : m_opts()
       { this->reload(cbuf, name);  }
 
     Simple_Script(const Compiler_Options& opts, tinybuf& cbuf, const cow_string& name)

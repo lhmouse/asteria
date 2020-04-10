@@ -666,7 +666,7 @@ bool do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Line_Reader& rea
 
 }  // namespace
 
-Token_Stream& Token_Stream::reload(tinybuf& cbuf, const cow_string& file, const Compiler_Options& opts)
+Token_Stream& Token_Stream::reload(tinybuf& cbuf, const cow_string& file)
   {
     // Tokens are parsed and stored here in normal order.
     // We will have to reverse this sequence before storing it into `*this` if it is accepted.
@@ -739,11 +739,11 @@ Token_Stream& Token_Stream::reload(tinybuf& cbuf, const cow_string& file, const 
             continue;
           }
         }
-        bool token_got = do_accept_numeric_literal(tokens, reader, opts.integers_as_reals) ||
+        bool token_got = do_accept_numeric_literal(tokens, reader, this->m_opts.integers_as_reals) ||
                          do_accept_punctuator(tokens, reader) ||
                          do_accept_string_literal(tokens, reader, '\"', true) ||
-                         do_accept_string_literal(tokens, reader, '\'', opts.escapable_single_quotes) ||
-                         do_accept_identifier_or_keyword(tokens, reader, opts.keywords_as_identifiers);
+                         do_accept_string_literal(tokens, reader, '\'', this->m_opts.escapable_single_quotes) ||
+                         do_accept_identifier_or_keyword(tokens, reader, this->m_opts.keywords_as_identifiers);
         if(!token_got)
           do_throw_parser_error(parser_status_token_character_unrecognized, reader, 1);
       }

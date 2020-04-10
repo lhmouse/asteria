@@ -2698,15 +2698,17 @@ AIR_Status do_import_call(Executive_Context& ctx, ParamU pu, const void* pv)
     Loader_Lock::Unique_Stream strm;
     strm.reset(ctx.global().loader_lock(), path.safe_c_str());
 
-    Token_Stream tstrm;
-    tstrm.reload(strm, path, opts);
+    // Parse source code.
+    Token_Stream tstrm(opts);
+    tstrm.reload(strm, path);
 
-    Statement_Sequence stmtq;
-    stmtq.reload(tstrm, opts);
+    Statement_Sequence stmtq(opts);
+    stmtq.reload(tstrm);
 
     cow_vector<phsh_string> params;
     params.emplace_back(::rocket::sref("..."));
 
+    // Instantiate the function.
     auto func = ::rocket::make_refcnt<Instantiated_Function>(params,
                        ::rocket::make_refcnt<Variadic_Arguer>(path, 0, ::rocket::sref("<top level>")),
                        do_generate_function(opts, params, nullptr, stmtq));

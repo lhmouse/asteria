@@ -657,15 +657,17 @@ Value std_json_parse(Sval text)
     opts.escapable_single_quotes = true;
     opts.keywords_as_identifiers = true;
     opts.integers_as_reals = true;
+
     // Tokenize the source string.
-    Token_Stream tstrm;
+    Token_Stream tstrm(opts);
     try {
       ::rocket::tinybuf_str cbuf;
       cbuf.set_string(text, tinybuf::open_read);
-      tstrm.reload(cbuf, ::rocket::sref("<JSON text>"), opts);
+      tstrm.reload(cbuf, ::rocket::sref("<JSON text>"));
     }
     catch(Parser_Error& except) {
-      ASTERIA_THROW("invalid JSON string: $1", describe_parser_status(except.status()));
+      ASTERIA_THROW("invalid JSON string: $3 (line $1, offset $2)", except.line(), except.offset(),
+                                                                    describe_parser_status(except.status()));
     }
     // Parse tokens.
     auto qvalue = do_json_parse_nonrecursive_opt(tstrm);
