@@ -11,6 +11,7 @@ AM_CXXFLAGS = -std=c++1z  \
   -Werror={non-virtual-dtor,missing-declarations}
 AM_DEFAULT_SOURCE_EXT = .cpp
 LDADD = lib/libasteria.la
+NOTHING =
 
 .pch.hpp: ${srcdir}/asteria/src/precompiled.hpp
 	${AM_V_GEN}echo "#include \"$$(cygpath -m $< 2>/dev/null || readlink -f $<)\"" >$@
@@ -22,18 +23,22 @@ LDADD = lib/libasteria.la
 
 BUILT_SOURCES =  \
   .pch.hpp  \
-  .pch.hpp.gch
+  .pch.hpp.gch  \
+  ${NOTHING}
 
 CLEANFILES =  \
   .pch.hpp  \
   .pch.hpp.gch  \
-  .pch.hpp.gch.lo
+  .pch.hpp.gch.lo  \
+  ${NOTHING}
 
 noinst_LTLIBRARIES =  \
-  lib/librocket.la
+  lib/librocket.la  \
+  ${NOTHING}
 
 lib_LTLIBRARIES =  \
-  lib/libasteria.la
+  lib/libasteria.la  \
+  ${NOTHING}
 
 pkginclude_rocketdir = ${pkgincludedir}/rocket
 pkginclude_rocket_HEADERS =  \
@@ -72,13 +77,15 @@ pkginclude_rocket_HEADERS =  \
   asteria/rocket/tinyfmt_str.hpp  \
   asteria/rocket/tinyfmt_file.hpp  \
   asteria/rocket/format.hpp  \
-  asteria/rocket/atomic_flag.hpp
+  asteria/rocket/atomic_flag.hpp  \
+  ${NOTHING}
 
 pkginclude_rocket_platformdir = ${pkgincludedir}/rocket/platform
 pkginclude_rocket_platform_HEADERS =  \
   asteria/rocket/platform/compiler_clang.h  \
   asteria/rocket/platform/compiler_gcc.h  \
-  asteria/rocket/platform/compiler_msvc.h
+  asteria/rocket/platform/compiler_msvc.h  \
+  ${NOTHING}
 
 pkginclude_rocket_detailsdir = ${pkgincludedir}/rocket/details
 pkginclude_rocket_details_HEADERS =  \
@@ -95,7 +102,8 @@ pkginclude_rocket_details_HEADERS =  \
   asteria/rocket/details/refcnt_ptr.tcc  \
   asteria/rocket/details/static_vector.tcc  \
   asteria/rocket/details/array.tcc  \
-  asteria/rocket/details/linear_buffer.tcc
+  asteria/rocket/details/linear_buffer.tcc  \
+  ${NOTHING}
 
 lib_librocket_la_SOURCES =  \
   asteria/rocket/assert.cpp  \
@@ -110,7 +118,8 @@ lib_librocket_la_SOURCES =  \
   asteria/rocket/tinyfmt.cpp  \
   asteria/rocket/tinyfmt_str.cpp  \
   asteria/rocket/tinyfmt_file.cpp  \
-  asteria/rocket/format.cpp
+  asteria/rocket/format.cpp  \
+  ${NOTHING}
 
 lib_librocket_la_CXXFLAGS =  \
   ${AM_CXXFLAGS} -include .pch.hpp
@@ -122,13 +131,15 @@ pkginclude_HEADERS =  \
   asteria/src/recursion_sentry.hpp  \
   asteria/src/value.hpp  \
   asteria/src/source_location.hpp  \
-  asteria/src/simple_script.hpp
+  asteria/src/simple_script.hpp  \
+  ${NOTHING}
 
 pkginclude_lldsdir = ${pkgincludedir}/llds
 pkginclude_llds_HEADERS =  \
   asteria/src/llds/variable_hashset.hpp  \
   asteria/src/llds/reference_dictionary.hpp  \
-  asteria/src/llds/avmc_queue.hpp
+  asteria/src/llds/avmc_queue.hpp  \
+  ${NOTHING}
 
 pkginclude_runtimedir = ${pkgincludedir}/runtime
 pkginclude_runtime_HEADERS =  \
@@ -154,7 +165,8 @@ pkginclude_runtime_HEADERS =  \
   asteria/src/runtime/evaluation_stack.hpp  \
   asteria/src/runtime/instantiated_function.hpp  \
   asteria/src/runtime/air_node.hpp  \
-  asteria/src/runtime/argument_reader.hpp
+  asteria/src/runtime/argument_reader.hpp  \
+  ${NOTHING}
 
 pkginclude_compilerdir = ${pkgincludedir}/compiler
 pkginclude_compiler_HEADERS =  \
@@ -165,7 +177,8 @@ pkginclude_compiler_HEADERS =  \
   asteria/src/compiler/expression_unit.hpp  \
   asteria/src/compiler/statement.hpp  \
   asteria/src/compiler/infix_element.hpp  \
-  asteria/src/compiler/statement_sequence.hpp
+  asteria/src/compiler/statement_sequence.hpp  \
+  ${NOTHING}
 
 pkginclude_librarydir = ${pkgincludedir}/library
 pkginclude_library_HEADERS =  \
@@ -180,7 +193,8 @@ pkginclude_library_HEADERS =  \
   asteria/src/library/filesystem.hpp  \
   asteria/src/library/checksum.hpp  \
   asteria/src/library/json.hpp  \
-  asteria/src/library/io.hpp
+  asteria/src/library/io.hpp  \
+  ${NOTHING}
 
 lib_libasteria_la_SOURCES =  \
   asteria/src/fwd.cpp  \
@@ -234,7 +248,8 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/library/filesystem.cpp  \
   asteria/src/library/checksum.cpp  \
   asteria/src/library/json.cpp  \
-  asteria/src/library/io.cpp
+  asteria/src/library/io.cpp  \
+  ${NOTHING}
 
 lib_libasteria_la_CXXFLAGS =  \
   ${AM_CXXFLAGS} -include .pch.hpp
@@ -246,13 +261,16 @@ lib_libasteria_la_LDFLAGS =  \
   -Wl,--no-undefined -no-undefined -version-info 0:0:0
 
 bin_PROGRAMS =  \
-  bin/asteria
+  bin/asteria  \
+  ${NOTHING}
 
 bin_asteria_SOURCES =  \
-  asteria/src/repl.cpp
+  asteria/src/repl.cpp  \
+  ${NOTHING}
 
 check_HEADERS =  \
-  asteria/test/test_utilities.hpp
+  asteria/test/test_utilities.hpp  \
+  ${NOTHING}
 
 check_PROGRAMS =  \
   asteria/test/utilities.test  \
@@ -288,7 +306,8 @@ check_PROGRAMS =  \
   asteria/test/github_78.test  \
   asteria/test/github_84.test  \
   asteria/test/github_85.test  \
-  asteria/test/github_98.test
+  asteria/test/github_98.test  \
+  ${NOTHING}
 
 TESTS = ${check_PROGRAMS}
 
@@ -296,4 +315,5 @@ EXTRA_DIST =  \
   asteria/doc/operator-precedence.txt  \
   asteria/doc/standard-library.txt  \
   asteria/doc/syntax.txt  \
-  asteria/doc/examples.txt
+  asteria/doc/examples.txt  \
+  ${NOTHING}
