@@ -25,7 +25,7 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
 
     // Instantiate the function.
     this->m_func = ::rocket::make_refcnt<Instantiated_Function>(this->m_params,
-                         ::rocket::make_refcnt<Variadic_Arguer>(name, 0, ::rocket::sref("<top level>")),
+                         ::rocket::make_refcnt<Variadic_Arguer>(Source_Location(name, 0, 0), ::rocket::sref("<top level>")),
                          do_generate_function(this->m_opts, this->m_params, nullptr, stmtq));
     return *this;
   }

@@ -3,49 +3,18 @@
 
 #include "../precompiled.hpp"
 #include "statement_sequence.hpp"
-#include "enums.hpp"
+#include "parser_error.hpp"
 #include "token_stream.hpp"
 #include "token.hpp"
 #include "expression_unit.hpp"
 #include "statement.hpp"
 #include "infix_element.hpp"
+#include "enums.hpp"
 #include "../runtime/enums.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
 namespace {
-
-constexpr uint64_t do_cantor_pair(uint64_t x, uint64_t y) noexcept
-  {
-    return (x + y) * (x + y + 1) / 2 + y;
-  }
-
-inline uint64_t do_get_unique_id(const Token_Stream& tstrm)
-  {
-    auto qtok = tstrm.peek_opt();
-    if(!qtok)
-      return 0;
-    else
-      return do_cantor_pair(static_cast<unsigned long>(qtok->line()), qtok->offset());
-  }
-
-[[noreturn]] void do_throw_parser_error(const Token_Stream& tstrm, Parser_Status status)
-  {
-    auto qtok = tstrm.peek_opt();
-    if(!qtok)
-      throw Parser_Error(status, -1, 0, 0);
-    else
-      throw Parser_Error(status, qtok->line(), qtok->offset(), qtok->length());
-  }
-
-Source_Location do_tell_source_location(const Token_Stream& tstrm)
-  {
-    auto qtok = tstrm.peek_opt();
-    if(!qtok)
-      return Source_Location(::rocket::sref("<end of stream>"), -1);
-    else
-      return Source_Location(qtok->file(), qtok->line());
-  }
 
 opt<Keyword> do_accept_keyword_opt(Token_Stream& tstrm, initializer_list<Keyword> accept)
   {
@@ -283,7 +252,7 @@ opt<cow_vector<phsh_string>> do_accept_identifier_list_opt(Token_Stream& tstrm)
       }
       qname = do_accept_identifier_opt(tstrm);
       if(!qname) {
-        do_throw_parser_error(tstrm, parser_status_identifier_expected);
+        throw Parser_Error(parser_status_identifier_expected, tstrm.next_sloc(), tstrm.next_length());
       }
     }
     return ::std::move(names);
@@ -310,11 +279,11 @@ opt<cow_vector<phsh_string>> do_accept_variable_declarator_opt(Token_Stream& tst
       // There must be at least one identifier.
       auto qnames = do_accept_identifier_list_opt(tstrm);
       if(!qnames) {
-        do_throw_parser_error(tstrm, parser_status_identifier_expected);
+        throw Parser_Error(parser_status_identifier_expected, tstrm.next_sloc(), tstrm.next_length());
       }
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
       if(!kpunct) {
-        do_throw_parser_error(tstrm, parser_status_closed_bracket_expected);
+        throw Parser_Error(parser_status_closed_bracket_expected, tstrm.next_sloc(), tstrm.next_length());
       }
       // Make the list different from a plain, sole one.
       qnames->insert(0, ::rocket::sref("["));
@@ -327,11 +296,11 @@ opt<cow_vector<phsh_string>> do_accept_variable_declarator_opt(Token_Stream& tst
       // There must be at least one identifier.
       auto qnames = do_accept_identifier_list_opt(tstrm);
       if(!qnames) {
-        do_throw_parser_error(tstrm, parser_status_identifier_expected);
+        throw Parser_Error(parser_status_identifier_expected, tstrm.next_sloc(), tstrm.next_length());
       }
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
       if(!kpunct) {
-        do_throw_parser_error(tstrm, parser_status_closed_brace_expected);
+        throw Parser_Error(parser_status_closed_brace_expected, tstrm.next_sloc(), tstrm.next_length());
       }
       // Make the list different from a plain, sole one.
       qnames->insert(0, ::rocket::sref("{"));
@@ -350,7 +319,7 @@ bool do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstr
 
 bool do_accept_expression_and_convert_to_rvalue(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     bool succ = do_accept_expression(units, tstrm);
     if(!succ) {
       return false;
@@ -364,7 +333,7 @@ opt<Statement::S_expression> do_accept_expression_opt(Token_Stream& tstrm)
   {
     // expression-opt ::=
     //   expression | ""
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     cow_vector<Expression_Unit> units;
     bool succ = do_accept_expression(units, tstrm);
     if(!succ) {
@@ -378,7 +347,7 @@ opt<Statement::S_expression> do_accept_expression_and_convert_to_rvalue_opt(Toke
   {
     // expression-opt ::=
     //   expression | ""
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     cow_vector<Expression_Unit> units;
     bool succ = do_accept_expression_and_convert_to_rvalue(units, tstrm);
     if(!succ) {
@@ -396,7 +365,7 @@ opt<Statement::S_block> do_accept_block_opt(Token_Stream& tstrm)
     //   statement-list | ""
     // statement-list ::=
     //   statement statement-list-opt
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
     if(!kpunct) {
       return nullopt;
@@ -411,7 +380,7 @@ opt<Statement::S_block> do_accept_block_opt(Token_Stream& tstrm)
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_closed_brace_or_statement_expected);
+      throw Parser_Error(parser_status_closed_brace_or_statement_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     Statement::S_block xstmt = { ::std::move(sloc), ::std::move(body) };
     return ::std::move(xstmt);
@@ -443,7 +412,7 @@ opt<Statement> do_accept_null_statement_opt(Token_Stream& tstrm)
   {
     // null-statement ::=
     //   ";"
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct) {
       return nullopt;
@@ -466,10 +435,10 @@ opt<Statement> do_accept_variable_definition_opt(Token_Stream& tstrm)
     cow_vector<Statement::S_expression> inits;
     for(;;) {
       // Accept a declarator, which may denote a single variable or a structured binding.
-      auto sloc = do_tell_source_location(tstrm);
+      auto sloc = tstrm.next_sloc();
       auto qdecl = do_accept_variable_declarator_opt(tstrm);
       if(!qdecl) {
-        do_throw_parser_error(tstrm, parser_status_identifier_expected);
+        throw Parser_Error(parser_status_identifier_expected, tstrm.next_sloc(), tstrm.next_length());
       }
       auto qinit = do_accept_equal_initializer_opt(tstrm);
       if(!qinit) {
@@ -486,7 +455,7 @@ opt<Statement> do_accept_variable_definition_opt(Token_Stream& tstrm)
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_semicolon_expected);
+      throw Parser_Error(parser_status_semicolon_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     Statement::S_variables xstmt = { false, ::std::move(slocs), ::std::move(decls), ::std::move(inits) };
     return ::std::move(xstmt);
@@ -506,14 +475,14 @@ opt<Statement> do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
     cow_vector<Statement::S_expression> inits;
     for(;;) {
       // Accept a declarator, which may denote a single variable or a structured binding.
-      auto sloc = do_tell_source_location(tstrm);
+      auto sloc = tstrm.next_sloc();
       auto qdecl = do_accept_variable_declarator_opt(tstrm);
       if(!qdecl) {
-        do_throw_parser_error(tstrm, parser_status_identifier_expected);
+        throw Parser_Error(parser_status_identifier_expected, tstrm.next_sloc(), tstrm.next_length());
       }
       auto qinit = do_accept_equal_initializer_opt(tstrm);
       if(!qinit) {
-        do_throw_parser_error(tstrm, parser_status_equals_sign_expected);
+        throw Parser_Error(parser_status_equals_sign_expected, tstrm.next_sloc(), tstrm.next_length());
       }
       slocs.emplace_back(::std::move(sloc));
       decls.emplace_back(::std::move(*qdecl));
@@ -526,7 +495,7 @@ opt<Statement> do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_semicolon_expected);
+      throw Parser_Error(parser_status_semicolon_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     Statement::S_variables xstmt = { true, ::std::move(slocs), ::std::move(decls), ::std::move(inits) };
     return ::std::move(xstmt);
@@ -563,18 +532,18 @@ opt<Statement> do_accept_function_definition_opt(Token_Stream& tstrm)
   {
     // function-definition ::=
     //   "func" identifier "(" parameter-list-opt ")" block
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_func });
     if(!qkwrd) {
       return nullopt;
     }
     auto qname = do_accept_identifier_opt(tstrm);
     if(!qname) {
-      do_throw_parser_error(tstrm, parser_status_identifier_expected);
+      throw Parser_Error(parser_status_identifier_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_open_parenthesis_expected);
+      throw Parser_Error(parser_status_open_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     auto kparams = do_accept_parameter_list_opt(tstrm);
     if(!kparams) {
@@ -582,11 +551,11 @@ opt<Statement> do_accept_function_definition_opt(Token_Stream& tstrm)
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_closed_parenthesis_expected);
+      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     auto qbody = do_accept_block_opt(tstrm);
     if(!qbody) {
-      do_throw_parser_error(tstrm, parser_status_open_brace_expected);
+      throw Parser_Error(parser_status_open_brace_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     Statement::S_function xstmt = { ::std::move(sloc), ::std::move(*qname), ::std::move(*kparams),
                                     ::std::move(qbody->stmts) };
@@ -603,7 +572,7 @@ opt<Statement> do_accept_expression_statement_opt(Token_Stream& tstrm)
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_semicolon_expected);
+      throw Parser_Error(parser_status_semicolon_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     Statement::S_expression xstmt = { ::std::move(*kexpr) };
     return ::std::move(xstmt);
@@ -619,7 +588,7 @@ opt<Statement::S_block> do_accept_else_branch_opt(Token_Stream& tstrm)
     }
     auto qblock = do_accept_statement_as_block_opt(tstrm);
     if(!qblock) {
-      do_throw_parser_error(tstrm, parser_status_statement_expected);
+      throw Parser_Error(parser_status_statement_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     return ::std::move(*qblock);
   }
@@ -640,19 +609,19 @@ opt<Statement> do_accept_if_statement_opt(Token_Stream& tstrm)
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_open_parenthesis_expected);
+      throw Parser_Error(parser_status_open_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     auto qcond = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
     if(!qcond) {
-      do_throw_parser_error(tstrm, parser_status_expression_expected);
+      throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_closed_parenthesis_expected);
+      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     auto qbtrue = do_accept_statement_as_block_opt(tstrm);
     if(!qbtrue) {
-      do_throw_parser_error(tstrm, parser_status_statement_expected);
+      throw Parser_Error(parser_status_statement_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     auto qbfalse = do_accept_else_branch_opt(tstrm);
     if(!qbfalse) {
@@ -680,22 +649,22 @@ opt<Statement> do_accept_switch_statement_opt(Token_Stream& tstrm)
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_open_parenthesis_expected);
+      throw Parser_Error(parser_status_open_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     auto qctrl = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
     if(!qctrl) {
-      do_throw_parser_error(tstrm, parser_status_expression_expected);
+      throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_closed_parenthesis_expected);
+      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     // Parse the block by hand.
     cow_vector<Statement::S_expression> labels;
     cow_vector<Statement::S_block> bodies;
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_open_brace_expected);
+      throw Parser_Error(parser_status_open_brace_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     for(;;) {
       qkwrd = do_accept_keyword_opt(tstrm, { keyword_case, keyword_default });
@@ -707,13 +676,13 @@ opt<Statement> do_accept_switch_statement_opt(Token_Stream& tstrm)
         // The `case` label requires an expression argument.
         auto qlabel = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
         if(!qlabel) {
-          do_throw_parser_error(tstrm, parser_status_expression_expected);
+          throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
         }
         label = ::std::move(*qlabel);
       }
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
       if(!kpunct) {
-        do_throw_parser_error(tstrm, parser_status_colon_expected);
+        throw Parser_Error(parser_status_colon_expected, tstrm.next_sloc(), tstrm.next_length());
       }
       auto qblock = do_accept_statement_as_block_opt(tstrm);
       if(!qblock) {
@@ -724,7 +693,7 @@ opt<Statement> do_accept_switch_statement_opt(Token_Stream& tstrm)
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_closed_brace_or_switch_clause_expected);
+      throw Parser_Error(parser_status_closed_brace_or_switch_clause_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     Statement::S_switch xstmt = { ::std::move(*qctrl), ::std::move(labels), ::std::move(bodies) };
     return ::std::move(xstmt);
@@ -740,7 +709,7 @@ opt<Statement> do_accept_do_while_statement_opt(Token_Stream& tstrm)
     }
     auto qblock = do_accept_statement_as_block_opt(tstrm);
     if(!qblock) {
-      do_throw_parser_error(tstrm, parser_status_statement_expected);
+      throw Parser_Error(parser_status_statement_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     qkwrd = do_accept_keyword_opt(tstrm, { keyword_while });
     if(!qkwrd) {
@@ -752,19 +721,19 @@ opt<Statement> do_accept_do_while_statement_opt(Token_Stream& tstrm)
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_open_parenthesis_expected);
+      throw Parser_Error(parser_status_open_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     auto qcond = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
     if(!qcond) {
-      do_throw_parser_error(tstrm, parser_status_expression_expected);
+      throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_closed_parenthesis_expected);
+      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_semicolon_expected);
+      throw Parser_Error(parser_status_semicolon_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     Statement::S_do_while xstmt = { ::std::move(*qblock), *kneg, ::std::move(*qcond) };
     return ::std::move(xstmt);
@@ -784,19 +753,19 @@ opt<Statement> do_accept_while_statement_opt(Token_Stream& tstrm)
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_open_parenthesis_expected);
+      throw Parser_Error(parser_status_open_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     auto qcond = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
     if(!qcond) {
-      do_throw_parser_error(tstrm, parser_status_expression_expected);
+      throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_closed_parenthesis_expected);
+      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     auto qblock = do_accept_statement_as_block_opt(tstrm);
     if(!qblock) {
-      do_throw_parser_error(tstrm, parser_status_statement_expected);
+      throw Parser_Error(parser_status_statement_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     Statement::S_while xstmt = { *kneg, ::std::move(*qcond), ::std::move(*qblock) };
     return ::std::move(xstmt);
@@ -812,31 +781,31 @@ opt<Statement> do_accept_for_complement_range_opt(Token_Stream& tstrm)
     }
     auto qkname = do_accept_identifier_opt(tstrm);
     if(!qkname) {
-      do_throw_parser_error(tstrm, parser_status_identifier_expected);
+      throw Parser_Error(parser_status_identifier_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_comma_expected);
+      throw Parser_Error(parser_status_comma_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     auto qmname = do_accept_identifier_opt(tstrm);
     if(!qmname) {
-      do_throw_parser_error(tstrm, parser_status_identifier_expected);
+      throw Parser_Error(parser_status_identifier_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_colon_expected);
+      throw Parser_Error(parser_status_colon_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     auto qinit = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
     if(!qinit) {
-      do_throw_parser_error(tstrm, parser_status_expression_expected);
+      throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_closed_parenthesis_expected);
+      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     auto qblock = do_accept_statement_as_block_opt(tstrm);
     if(!qblock) {
-      do_throw_parser_error(tstrm, parser_status_statement_expected);
+      throw Parser_Error(parser_status_statement_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     Statement::S_for_each xstmt = { ::std::move(*qkname), ::std::move(*qmname), ::std::move(*qinit),
                                     ::std::move(*qblock) };
@@ -856,7 +825,7 @@ opt<Statement::S_block> do_accept_for_initializer_opt(Token_Stream& tstrm)
   {
     // for-initializer ::=
     //   null-statement | variable-definition | immutable-variable-definition | expression-statement
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto qinit = do_accept_null_statement_opt(tstrm);
     if(qinit) {
       return do_blockify_statement(::std::move(sloc), ::std::move(*qinit));
@@ -886,7 +855,7 @@ opt<Statement> do_accept_for_complement_triplet_opt(Token_Stream& tstrm)
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_semicolon_expected);
+      throw Parser_Error(parser_status_semicolon_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     auto kstep = do_accept_expression_opt(tstrm);
     if(!kstep) {
@@ -894,11 +863,11 @@ opt<Statement> do_accept_for_complement_triplet_opt(Token_Stream& tstrm)
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_closed_parenthesis_expected);
+      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     auto qblock = do_accept_statement_as_block_opt(tstrm);
     if(!qblock) {
-      do_throw_parser_error(tstrm, parser_status_statement_expected);
+      throw Parser_Error(parser_status_statement_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     Statement::S_for xstmt = { ::std::move(*qinit), ::std::move(*qcond), ::std::move(*kstep),
                                ::std::move(*qblock) };
@@ -928,11 +897,11 @@ opt<Statement> do_accept_for_statement_opt(Token_Stream& tstrm)
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_open_parenthesis_expected);
+      throw Parser_Error(parser_status_open_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     auto qcompl = do_accept_for_complement_opt(tstrm);
     if(!qcompl) {
-      do_throw_parser_error(tstrm, parser_status_for_statement_initializer_expected);
+      throw Parser_Error(parser_status_for_statement_initializer_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     return ::std::move(*qcompl);
   }
@@ -958,7 +927,7 @@ opt<Statement> do_accept_break_statement_opt(Token_Stream& tstrm)
   {
     // break-statement ::=
     //   "break" break-target-opt ";"
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_break });
     if(!qkwrd) {
       return nullopt;
@@ -969,7 +938,7 @@ opt<Statement> do_accept_break_statement_opt(Token_Stream& tstrm)
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_semicolon_expected);
+      throw Parser_Error(parser_status_semicolon_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     Statement::S_break xstmt = { ::std::move(sloc), *qtarget };
     return ::std::move(xstmt);
@@ -993,7 +962,7 @@ opt<Statement> do_accept_continue_statement_opt(Token_Stream& tstrm)
   {
     // continue-statement ::=
     //   "continue" continue-target-opt ";"
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_continue });
     if(!qkwrd) {
       return nullopt;
@@ -1004,7 +973,7 @@ opt<Statement> do_accept_continue_statement_opt(Token_Stream& tstrm)
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_semicolon_expected);
+      throw Parser_Error(parser_status_semicolon_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     Statement::S_continue xstmt = { ::std::move(sloc), *qtarget };
     return ::std::move(xstmt);
@@ -1020,11 +989,11 @@ opt<Statement> do_accept_throw_statement_opt(Token_Stream& tstrm)
     }
     auto kexpr = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
     if(!kexpr) {
-      do_throw_parser_error(tstrm, parser_status_expression_expected);
+      throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_semicolon_expected);
+      throw Parser_Error(parser_status_semicolon_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     Statement::S_throw xstmt = { ::std::move(*kexpr) };
     return ::std::move(xstmt);
@@ -1040,7 +1009,7 @@ opt<bool> do_accept_argument_no_conversion_opt(cow_vector<Expression_Unit>& unit
     if(kpunct) {
       bool succ = do_accept_expression(units, tstrm);
       if(!succ) {
-        do_throw_parser_error(tstrm, parser_status_expression_expected);
+        throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
       }
       return true;  // by ref
     }
@@ -1054,7 +1023,7 @@ opt<bool> do_accept_argument_no_conversion_opt(cow_vector<Expression_Unit>& unit
 
 opt<bool> do_accept_function_argument_opt(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto qref = do_accept_argument_no_conversion_opt(units, tstrm);
     if(!qref) {
       return nullopt;
@@ -1072,7 +1041,7 @@ opt<Statement> do_accept_return_statement_opt(Token_Stream& tstrm)
     if(!qkwrd) {
       return nullopt;
     }
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     cow_vector<Expression_Unit> units;
     auto qref = do_accept_argument_no_conversion_opt(units, tstrm);
     if(!qref) {
@@ -1080,7 +1049,7 @@ opt<Statement> do_accept_return_statement_opt(Token_Stream& tstrm)
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_semicolon_expected);
+      throw Parser_Error(parser_status_semicolon_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     Statement::S_return xstmt = { *qref, { ::std::move(sloc), ::std::move(units) } };
     return ::std::move(xstmt);
@@ -1096,7 +1065,7 @@ opt<cow_string> do_accept_assert_message_opt(Token_Stream& tstrm)
     }
     auto kmsg = do_accept_string_literal_opt(tstrm);
     if(!kmsg) {
-      do_throw_parser_error(tstrm, parser_status_string_literal_expected);
+      throw Parser_Error(parser_status_string_literal_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     return ::std::move(*kmsg);
   }
@@ -1115,7 +1084,7 @@ opt<Statement> do_accept_assert_statement_opt(Token_Stream& tstrm)
     }
     auto kexpr = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
     if(!kexpr) {
-      do_throw_parser_error(tstrm, parser_status_expression_expected);
+      throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     auto kmsg = do_accept_assert_message_opt(tstrm);
     if(!kmsg) {
@@ -1123,7 +1092,7 @@ opt<Statement> do_accept_assert_statement_opt(Token_Stream& tstrm)
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_semicolon_expected);
+      throw Parser_Error(parser_status_semicolon_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     Statement::S_assert xstmt = { *kneg, ::std::move(*kexpr), ::std::move(*kmsg) };
     return ::std::move(xstmt);
@@ -1139,29 +1108,29 @@ opt<Statement> do_accept_try_statement_opt(Token_Stream& tstrm)
     }
     auto qbtry = do_accept_statement_as_block_opt(tstrm);
     if(!qbtry) {
-      do_throw_parser_error(tstrm, parser_status_statement_expected);
+      throw Parser_Error(parser_status_statement_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     // Note that this is the location of the `catch` block.
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     qkwrd = do_accept_keyword_opt(tstrm, { keyword_catch });
     if(!qkwrd) {
-      do_throw_parser_error(tstrm, parser_status_keyword_catch_expected);
+      throw Parser_Error(parser_status_keyword_catch_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_open_parenthesis_expected);
+      throw Parser_Error(parser_status_open_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     auto kexcept = do_accept_identifier_opt(tstrm);
     if(!kexcept) {
-      do_throw_parser_error(tstrm, parser_status_identifier_expected);
+      throw Parser_Error(parser_status_identifier_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_closed_parenthesis_expected);
+      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     auto qbcatch = do_accept_statement_as_block_opt(tstrm);
     if(!qbcatch) {
-      do_throw_parser_error(tstrm, parser_status_statement_expected);
+      throw Parser_Error(parser_status_statement_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     Statement::S_try xstmt = { ::std::move(*qbtry), ::std::move(sloc), ::std::move(*kexcept),
                                ::std::move(*qbcatch) };
@@ -1178,11 +1147,11 @@ opt<Statement> do_accept_defer_statement_opt(Token_Stream& tstrm)
     }
     auto kexpr = do_accept_expression_opt(tstrm);
     if(!kexpr) {
-      do_throw_parser_error(tstrm, parser_status_expression_expected);
+      throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_semicolon_expected);
+      throw Parser_Error(parser_status_semicolon_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     Statement::S_defer xstmt = { ::std::move(*kexpr) };
     return ::std::move(xstmt);
@@ -1276,7 +1245,7 @@ opt<Statement::S_block> do_accept_statement_as_block_opt(Token_Stream& tstrm)
     if(qblock) {
       return qblock;
     }
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto qstmt = do_accept_nonblock_statement_opt(tstrm);
     if(qstmt) {
       return do_blockify_statement(::std::move(sloc), ::std::move(*qstmt));
@@ -1342,7 +1311,7 @@ bool do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream&
     //   "unset" | "lengthof" | "typeof" | "not" |
     //   "__abs" | "__sqrt" | "__sign" | "__isnan" | "__isinf" |
     //   "__round" | "__floor" | "__ceil" | "__trunc" | "__iround" | "__ifloor" | "__iceil" | "__itrunc"
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
       return false;
@@ -1375,7 +1344,7 @@ bool do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream&
 bool do_accept_named_reference(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // Get an identifier.
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto qname = do_accept_identifier_opt(tstrm);
     if(!qname) {
       return false;
@@ -1400,14 +1369,14 @@ bool do_accept_global_reference(cow_vector<Expression_Unit>& units, Token_Stream
   {
     // global-identifier ::=
     //   "__global" identifier
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_global });
     if(!qkwrd) {
       return false;
     }
     auto qname = do_accept_identifier_opt(tstrm);
     if(!qname) {
-      do_throw_parser_error(tstrm, parser_status_identifier_expected);
+      throw Parser_Error(parser_status_identifier_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     Expression_Unit::S_global_reference xunit = { sloc, ::std::move(*qname) };
     units.emplace_back(::std::move(xunit));
@@ -1429,7 +1398,7 @@ bool do_accept_literal(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
 bool do_accept_this(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // Get the keyword `this`.
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_this });
     if(!qkwrd) {
       return false;
@@ -1447,7 +1416,7 @@ opt<Statement::S_block> do_accept_closure_body_opt(Token_Stream& tstrm)
     if(qblock) {
       return qblock;
     }
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto qinit = do_accept_equal_initializer_opt(tstrm);
     if(qinit) {
       // In the case of an `equal-initializer`, behave as if it was a `return-statement`.
@@ -1462,15 +1431,14 @@ bool do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream
   {
     // closure-function ::=
     //   "func" "(" parameter-list-opt ")" closure-body
-    auto sloc = do_tell_source_location(tstrm);
-    auto uniq = do_get_unique_id(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_func });
     if(!qkwrd) {
       return false;
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_open_parenthesis_expected);
+      throw Parser_Error(parser_status_open_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     auto kparams = do_accept_parameter_list_opt(tstrm);
     if(!kparams) {
@@ -1478,14 +1446,14 @@ bool do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_closed_parenthesis_expected);
+      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     auto qblock = do_accept_closure_body_opt(tstrm);
     if(!qblock) {
-      do_throw_parser_error(tstrm, parser_status_open_brace_or_equal_initializer_expected);
+      throw Parser_Error(parser_status_open_brace_or_equal_initializer_expected, tstrm.next_sloc(), tstrm.next_length());
     }
-    Expression_Unit::S_closure_function xunit = { ::std::move(sloc), uniq, ::std::move(*kparams),
-                                                  ::std::move(qblock->stmts) };
+    Expression_Unit::S_closure_function xunit = { ::std::move(sloc), format_string("<closure:$1:$2", sloc.line(), sloc.offset()),
+                                                  ::std::move(*kparams), ::std::move(qblock->stmts) };
     units.emplace_back(::std::move(xunit));
     return true;
   }
@@ -1498,7 +1466,7 @@ bool do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& t
     //   array-element-list | ""
     // array-element-list ::=
     //   expression ( ( "," | ";" ) array-element-list-opt | "" )
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_op });
     if(!kpunct) {
       return false;
@@ -1511,7 +1479,7 @@ bool do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& t
         break;
       }
       if(nelems >= INT32_MAX) {
-        do_throw_parser_error(tstrm, parser_status_too_many_elements);
+        throw Parser_Error(parser_status_too_many_elements, tstrm.next_sloc(), tstrm.next_length());
       }
       nelems += 1;
       // Look for the separator.
@@ -1523,8 +1491,9 @@ bool do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& t
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, comma_allowed ? parser_status_closed_bracket_or_comma_expected
-                                                 : parser_status_closed_bracket_or_expression_expected);
+      throw Parser_Error(comma_allowed ? parser_status_closed_bracket_or_comma_expected
+                                       : parser_status_closed_bracket_or_expression_expected,
+                         tstrm.next_sloc(), tstrm.next_length());
     }
     Expression_Unit::S_unnamed_array xunit = { sloc, nelems };
     units.emplace_back(::std::move(xunit));
@@ -1539,7 +1508,7 @@ bool do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& 
     //   key-mapped-list | ""
     // key-mapped-list ::=
     //   ( string-literal | identifier ) ( "=" | ":" ) expression ( ( "," | ";" ) key-mapped-list-opt | "" )
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
     if(!kpunct) {
       return false;
@@ -1553,11 +1522,11 @@ bool do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& 
       }
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_assign, punctuator_colon });
       if(!kpunct) {
-        do_throw_parser_error(tstrm, parser_status_equals_sign_or_colon_expected);
+        throw Parser_Error(parser_status_equals_sign_or_colon_expected, tstrm.next_sloc(), tstrm.next_length());
       }
       bool succ = do_accept_expression_and_convert_to_rvalue(units, tstrm);
       if(!succ) {
-        do_throw_parser_error(tstrm, parser_status_expression_expected);
+        throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
       }
       keys.emplace_back(::std::move(*qkey));
       // Look for the separator.
@@ -1569,8 +1538,9 @@ bool do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& 
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, comma_allowed ? parser_status_closed_brace_or_comma_expected
-                                                 : parser_status_closed_brace_or_json5_key_expected);
+      throw Parser_Error(comma_allowed ? parser_status_closed_brace_or_comma_expected
+                                       : parser_status_closed_brace_or_json5_key_expected,
+                         tstrm.next_sloc(), tstrm.next_length());
     }
     Expression_Unit::S_unnamed_object xunit = { sloc, ::std::move(keys) };
     units.emplace_back(::std::move(xunit));
@@ -1587,11 +1557,11 @@ bool do_accept_nested_expression(cow_vector<Expression_Unit>& units, Token_Strea
     }
     bool succ = do_accept_expression(units, tstrm);
     if(!succ) {
-      do_throw_parser_error(tstrm, parser_status_expression_expected);
+      throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_closed_parenthesis_expected);
+      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     return true;
   }
@@ -1600,38 +1570,38 @@ bool do_accept_fused_multiply_add(cow_vector<Expression_Unit>& units, Token_Stre
   {
     // fused-multiply-add ::=
     //   "__fma" "(" expression "," expression "," expression ")"
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_fma });
     if(!qkwrd) {
       return false;
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_open_parenthesis_expected);
+      throw Parser_Error(parser_status_open_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     bool succ = do_accept_expression(units, tstrm);
     if(!succ) {
-      do_throw_parser_error(tstrm, parser_status_expression_expected);
+      throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_comma_expected);
+      throw Parser_Error(parser_status_comma_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     succ = do_accept_expression(units, tstrm);
     if(!succ) {
-      do_throw_parser_error(tstrm, parser_status_expression_expected);
+      throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_comma_expected);
+      throw Parser_Error(parser_status_comma_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     succ = do_accept_expression(units, tstrm);
     if(!succ) {
-      do_throw_parser_error(tstrm, parser_status_expression_expected);
+      throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_closed_parenthesis_expected);
+      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     Expression_Unit::S_operator_rpn xunit = { sloc, xop_fma, false };
     units.emplace_back(::std::move(xunit));
@@ -1642,30 +1612,30 @@ bool do_accept_variadic_function_call(cow_vector<Expression_Unit>& units, Token_
   {
     // variadic-function-call ::=
     //   "__vcall" "(" expression "," expression ")"
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_vcall });
     if(!qkwrd) {
       return false;
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_open_parenthesis_expected);
+      throw Parser_Error(parser_status_open_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     bool succ = do_accept_expression(units, tstrm);
     if(!succ) {
-      do_throw_parser_error(tstrm, parser_status_expression_expected);
+      throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_comma_expected);
+      throw Parser_Error(parser_status_comma_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     succ = do_accept_expression(units, tstrm);
     if(!succ) {
-      do_throw_parser_error(tstrm, parser_status_expression_expected);
+      throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_closed_parenthesis_expected);
+      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     Expression_Unit::S_variadic_call xunit = { ::std::move(sloc) };
     units.emplace_back(::std::move(xunit));
@@ -1676,23 +1646,23 @@ bool do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_St
   {
     // import-function-call ::=
     //   "import" "(" argument-list ")"
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_import });
     if(!qkwrd) {
       return false;
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_open_parenthesis_expected);
+      throw Parser_Error(parser_status_open_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     uint32_t nargs = 0;
     for(;;) {
       auto qref = do_accept_function_argument_opt(units, tstrm);
       if(!qref) {
-        do_throw_parser_error(tstrm, parser_status_argument_expected);
+        throw Parser_Error(parser_status_argument_expected, tstrm.next_sloc(), tstrm.next_length());
       }
       if(nargs >= INT32_MAX) {
-        do_throw_parser_error(tstrm, parser_status_too_many_elements);
+        throw Parser_Error(parser_status_too_many_elements, tstrm.next_sloc(), tstrm.next_length());
       }
       nargs += 1;
       // Look for the next argument.
@@ -1703,7 +1673,7 @@ bool do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_St
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_closed_parenthesis_expected);
+      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     Expression_Unit::S_import_call xunit = { ::std::move(sloc), nargs };
     units.emplace_back(::std::move(xunit));
@@ -1773,7 +1743,7 @@ bool do_accept_postfix_operator(cow_vector<Expression_Unit>& units, Token_Stream
   {
     // postfix-operator ::=
     //   "++" | "--" | "[^]" | "[$]"
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
       return false;
@@ -1800,7 +1770,7 @@ bool do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_S
     //   argument-list | ""
     // argument-list ::=
     //    argument ( "," argument-list-opt | "" )
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct) {
       return false;
@@ -1813,7 +1783,7 @@ bool do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_S
         break;
       }
       if(nargs >= INT32_MAX) {
-        do_throw_parser_error(tstrm, parser_status_too_many_elements);
+        throw Parser_Error(parser_status_too_many_elements, tstrm.next_sloc(), tstrm.next_length());
       }
       nargs += 1;
       // Look for the separator.
@@ -1825,8 +1795,9 @@ bool do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_S
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, comma_allowed ? parser_status_closed_parenthesis_or_comma_expected
-                                                 : parser_status_closed_parenthesis_or_argument_expected);
+      throw Parser_Error(comma_allowed ? parser_status_closed_parenthesis_or_comma_expected
+                                       : parser_status_closed_parenthesis_or_argument_expected,
+                         tstrm.next_sloc(), tstrm.next_length());
     }
     Expression_Unit::S_function_call xunit = { ::std::move(sloc), nargs };
     units.emplace_back(::std::move(xunit));
@@ -1837,18 +1808,18 @@ bool do_accept_postfix_subscript(cow_vector<Expression_Unit>& units, Token_Strea
   {
     // postfix-subscript ::=
     //   "[" expression "]"
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_op });
     if(!kpunct) {
       return false;
     }
     bool succ = do_accept_expression(units, tstrm);
     if(!succ) {
-      do_throw_parser_error(tstrm, parser_status_expression_expected);
+      throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_closed_bracket_expected);
+      throw Parser_Error(parser_status_closed_bracket_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     Expression_Unit::S_operator_rpn xunit = { sloc, xop_subscr, false };
     units.emplace_back(::std::move(xunit));
@@ -1859,14 +1830,14 @@ bool do_accept_postfix_member_access(cow_vector<Expression_Unit>& units, Token_S
   {
     // postfix-member-access ::=
     //   "." ( string-literal | identifier )
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_dot });
     if(!kpunct) {
       return false;
     }
     auto qkey = do_accept_json5_key_opt(tstrm);
     if(!qkey) {
-      do_throw_parser_error(tstrm, parser_status_identifier_expected);
+      throw Parser_Error(parser_status_identifier_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     Expression_Unit::S_member_access xunit = { sloc, ::std::move(*qkey) };
     units.emplace_back(::std::move(xunit));
@@ -1894,10 +1865,10 @@ bool do_accept_infix_element(cow_vector<Expression_Unit>& units, Token_Stream& t
     // Fail if some prefixes have been consumed but no primary expression can be accepted.
     succ = do_accept_primary_expression(units, tstrm);
     if(!succ) {
-      if(prefixes.empty()) {
-        return false;
+      if(!prefixes.empty()) {
+        throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
       }
-      do_throw_parser_error(tstrm, parser_status_expression_expected);
+      return false;
     }
     do {
       succ = do_accept_postfix_operator(units, tstrm) ||
@@ -1907,8 +1878,7 @@ bool do_accept_infix_element(cow_vector<Expression_Unit>& units, Token_Stream& t
     } while(succ);
     // Append prefixes in reverse order.
     // N.B. Prefix operators have lower precedence than postfix ones.
-    units.append(::std::make_move_iterator(prefixes.mut_rbegin()),
-                 ::std::make_move_iterator(prefixes.mut_rend()));
+    units.append(::std::make_move_iterator(prefixes.mut_rbegin()), ::std::make_move_iterator(prefixes.mut_rend()));
     return true;
   }
 
@@ -1929,18 +1899,18 @@ opt<Infix_Element> do_accept_infix_operator_ternary_opt(Token_Stream& tstrm)
   {
     // infix-operator-ternary ::=
     //   ( "?" | "?=" ) expression ":"
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_quest, punctuator_quest_eq });
     if(!kpunct) {
       return nullopt;
     }
     cow_vector<Expression_Unit> btrue;
     if(!do_accept_expression(btrue, tstrm)) {
-      do_throw_parser_error(tstrm, parser_status_expression_expected);
+      throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_quest, punctuator_colon });
     if(!kpunct) {
-      do_throw_parser_error(tstrm, parser_status_colon_expected);
+      throw Parser_Error(parser_status_colon_expected, tstrm.next_sloc(), tstrm.next_length());
     }
     Infix_Element::S_ternary xelem = { sloc, *kpunct == punctuator_quest_eq, ::std::move(btrue), nullopt };
     return ::std::move(xelem);
@@ -1950,7 +1920,7 @@ opt<Infix_Element> do_accept_infix_operator_logical_and_opt(Token_Stream& tstrm)
   {
     // infix-operator-logical-and ::=
     //   "&&" | "&&=" | "and"
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_andl, punctuator_andl_eq });
     if(!kpunct) {
       auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_and });
@@ -1967,7 +1937,7 @@ opt<Infix_Element> do_accept_infix_operator_logical_or_opt(Token_Stream& tstrm)
   {
     // infix-operator-logical-or ::=
     //   "||" | "||=" | "or"
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_orl, punctuator_orl_eq });
     if(!kpunct) {
       auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_or });
@@ -1984,7 +1954,7 @@ opt<Infix_Element> do_accept_infix_operator_coalescence_opt(Token_Stream& tstrm)
   {
     // infix-operator-coalescence ::=
     //   "??" | "??="
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_coales, punctuator_coales_eq });
     if(!kpunct) {
       return nullopt;
@@ -2046,7 +2016,7 @@ opt<Infix_Element> do_accept_infix_operator_general_opt(Token_Stream& tstrm)
     //   "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | "<<<"  | ">>>"  | "&"  | "|"  | "^"  |
     //   "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | "<<<=" | ">>>=" | "&=" | "|=" | "^=" |
     //   "="  | "==" | "!=" | "<"  | ">"  | "<="  | ">="  | "<=>"
-    auto sloc = do_tell_source_location(tstrm);
+    auto sloc = tstrm.next_sloc();
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
       return nullopt;
@@ -2112,7 +2082,7 @@ bool do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstr
       }
       bool succ = do_accept_infix_element(qnext->open_junction(), tstrm);
       if(!succ) {
-        do_throw_parser_error(tstrm, parser_status_expression_expected);
+        throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
       }
       // Collapse elements that have no lower precedence.
       auto preced_next = qnext->tell_precedence();
@@ -2155,7 +2125,7 @@ Statement_Sequence& Statement_Sequence::reload(Token_Stream& tstrm)
 
     // If there are any non-statement tokens left in the stream, fail.
     if(!tstrm.empty())
-      do_throw_parser_error(tstrm, parser_status_statement_expected);
+      throw Parser_Error(parser_status_statement_expected, tstrm.next_sloc(), tstrm.next_length());
 
     // Succeed.
     this->m_stmts = ::std::move(stmts);

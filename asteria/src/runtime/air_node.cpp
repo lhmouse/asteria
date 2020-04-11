@@ -2710,7 +2710,7 @@ AIR_Status do_import_call(Executive_Context& ctx, ParamU pu, const void* pv)
 
     // Instantiate the function.
     auto func = ::rocket::make_refcnt<Instantiated_Function>(params,
-                       ::rocket::make_refcnt<Variadic_Arguer>(path, 0, ::rocket::sref("<top level>")),
+                       ::rocket::make_refcnt<Variadic_Arguer>(Source_Location(path, 0, 0), ::rocket::sref("<top level>")),
                        do_generate_function(opts, params, nullptr, stmtq));
 
     // Update the first argument to `import` if it was passed by reference.

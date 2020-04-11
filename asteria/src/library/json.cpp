@@ -6,6 +6,7 @@
 #include "../runtime/argument_reader.hpp"
 #include "../runtime/global_context.hpp"
 #include "../compiler/token_stream.hpp"
+#include "../compiler/parser_error.hpp"
 #include "../compiler/enums.hpp"
 #include "../utilities.hpp"
 
@@ -498,15 +499,6 @@ Sopt do_accept_key_opt(Token_Stream& tstrm)
     return nullopt;
   }
 
-[[noreturn]] void do_throw_parser_error(const Token_Stream& tstrm, Parser_Status status)
-  {
-    auto qtok = tstrm.peek_opt();
-    if(!qtok)
-      throw Parser_Error(status, -1, 0, 0);
-    else
-      throw Parser_Error(status, qtok->line(), qtok->offset(), qtok->length());
-  }
-
 struct S_xparse_array
   {
     Aval array;
@@ -545,11 +537,11 @@ Value do_json_parse_nonrecursive(Token_Stream& tstrm)
           // A key followed by a colon is expected.
           auto qkey = do_accept_key_opt(tstrm);
           if(!qkey) {
-            do_throw_parser_error(tstrm, parser_status_closed_brace_or_json5_key_expected);
+            throw Parser_Error(parser_status_closed_brace_or_json5_key_expected, tstrm.next_sloc(), tstrm.next_length());
           }
           kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
           if(!kpunct) {
-            do_throw_parser_error(tstrm, parser_status_colon_expected);
+            throw Parser_Error(parser_status_colon_expected, tstrm.next_sloc(), tstrm.next_length());
           }
           // Descend into a new object.
           S_xparse_object ctxo = { nullopt, ::std::move(*qkey) };
@@ -563,7 +555,7 @@ Value do_json_parse_nonrecursive(Token_Stream& tstrm)
         // Just accept a scalar value which is never recursive.
         auto qvalue = do_accept_scalar_opt(tstrm);
         if(!qvalue) {
-          do_throw_parser_error(tstrm, parser_status_expression_expected);
+          throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
         }
         value = ::std::move(*qvalue);
       }
@@ -580,7 +572,7 @@ Value do_json_parse_nonrecursive(Token_Stream& tstrm)
           // Look for the next element.
           kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl, punctuator_comma });
           if(!kpunct) {
-            do_throw_parser_error(tstrm, parser_status_comma_expected);
+            throw Parser_Error(parser_status_comma_expected, tstrm.next_sloc(), tstrm.next_length());
           }
           if(*kpunct == punctuator_comma) {
             kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
@@ -600,7 +592,7 @@ Value do_json_parse_nonrecursive(Token_Stream& tstrm)
           // Look for the next element.
           kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl, punctuator_comma });
           if(!kpunct) {
-            do_throw_parser_error(tstrm, parser_status_closed_brace_or_comma_expected);
+            throw Parser_Error(parser_status_closed_brace_or_comma_expected, tstrm.next_sloc(), tstrm.next_length());
           }
           if(*kpunct == punctuator_comma) {
             kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
@@ -608,11 +600,11 @@ Value do_json_parse_nonrecursive(Token_Stream& tstrm)
               // The next key is expected to follow the comma.
               auto qkey = do_accept_key_opt(tstrm);
               if(!qkey) {
-                do_throw_parser_error(tstrm, parser_status_closed_brace_or_json5_key_expected);
+                throw Parser_Error(parser_status_closed_brace_or_json5_key_expected, tstrm.next_sloc(), tstrm.next_length());
               }
               kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
               if(!kpunct) {
-                do_throw_parser_error(tstrm, parser_status_colon_expected);
+                throw Parser_Error(parser_status_colon_expected, tstrm.next_sloc(), tstrm.next_length());
               }
               ctxo.key = ::std::move(*qkey);
               // The next value is expected to follow the colon.

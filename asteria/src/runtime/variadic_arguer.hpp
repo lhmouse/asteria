@@ -24,12 +24,6 @@ class Variadic_Arguer final : public Abstract_Function
         m_vargs(::std::forward<XVargsT>(xvargs)...)
       { }
 
-    template<typename... XVargsT> Variadic_Arguer(const cow_string& xfile, long xline, const cow_string& xfunc,
-                                                  XVargsT&&... xvargs)
-      : m_sloc(xfile, xline), m_func(xfunc),
-        m_vargs(::std::forward<XVargsT>(xvargs)...)
-      { }
-
     template<typename... XVargsT> Variadic_Arguer(const Variadic_Arguer& other,
                                                   XVargsT&&... xvargs)
       : m_sloc(other.m_sloc), m_func(other.m_func),
@@ -43,8 +37,11 @@ class Variadic_Arguer final : public Abstract_Function
     const cow_string& file() const noexcept
       { return this->m_sloc.file();  }
 
-    long line() const noexcept
+    int line() const noexcept
       { return this->m_sloc.line();  }
+
+    int offset() const noexcept
+      { return this->m_sloc.offset();  }
 
     const cow_string& func() const noexcept
       { return this->m_func;  }

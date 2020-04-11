@@ -5,7 +5,7 @@
 #define ASTERIA_COMPILER_TOKEN_HPP_
 
 #include "../fwd.hpp"
-#include "parser_error.hpp"
+#include "../source_location.hpp"
 
 namespace Asteria {
 
@@ -65,28 +65,27 @@ class Token
     static_assert(::std::is_nothrow_copy_assignable<Storage>::value, "");
 
   private:
-    cow_string m_file;
-    long m_line;
-    size_t m_offset;
+    Source_Location m_sloc;
     size_t m_length;
     Storage m_stor;
 
   public:
-    template<typename XTokT, ASTERIA_SFINAE_CONSTRUCT(Storage, XTokT&&)>
-          Token(const cow_string& xfile, int32_t xline, size_t xoffset, size_t xlength, XTokT&& xtok)
-      : m_file(xfile), m_line(xline), m_offset(xoffset), m_length(xlength),
-        m_stor(::std::forward<XTokT>(xtok))
+    template<typename XTokT> Token(const Source_Location& xsloc, size_t xlen, XTokT&& xtok)
+      : m_sloc(xsloc), m_length(xlen), m_stor(::std::forward<XTokT>(xtok))
       { }
 
   public:
+    const Source_Location& sloc() const noexcept
+      { return this->m_sloc;  }
+
     const cow_string& file() const noexcept
-      { return this->m_file;  }
+      { return this->m_sloc.file();  }
 
-    long line() const noexcept
-      { return this->m_line;  }
+    int line() const noexcept
+      { return this->m_sloc.line();  }
 
-    size_t offset() const noexcept
-      { return this->m_offset;  }
+    int offset() const noexcept
+      { return this->m_sloc.offset();  }
 
     size_t length() const noexcept
       { return this->m_length;  }
@@ -132,10 +131,8 @@ class Token
 
     Token& swap(Token& other) noexcept
       {
-        this->m_file.swap(other.m_file);
-        xswap(this->m_line, other.m_line);
-        xswap(this->m_offset, other.m_offset);
-        xswap(this->m_length, other.m_length);
+        this->m_sloc.swap(other.m_sloc);
+        ::std::swap(this->m_length, other.m_length);
         this->m_stor.swap(other.m_stor);
         return *this;
       }

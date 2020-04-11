@@ -27,7 +27,7 @@ class Expression_Unit
     struct S_closure_function
       {
         Source_Location sloc;
-        uint64_t unique_id;
+        cow_string unique_name;
         cow_vector<phsh_string> params;
         cow_vector<Statement> body;
       };

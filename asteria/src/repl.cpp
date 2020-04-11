@@ -195,7 +195,7 @@ struct REPL_Hooks : Abstract_Hooks
         if(ROCKET_EXPECT(!cmdline.verbose)) {
           return;
         }
-        ::fprintf(stderr, "~ running: ['%s:%ld' inside `%s`] declaring variable: %s\n",
+        ::fprintf(stderr, "~ running: ['%s:%d' inside `%s`] declaring variable: %s\n",
                           sloc.c_file(), sloc.line(), inside.c_str(),
                           name.c_str());
       }
@@ -206,7 +206,7 @@ struct REPL_Hooks : Abstract_Hooks
         if(ROCKET_EXPECT(!cmdline.verbose)) {
           return;
         }
-        ::fprintf(stderr, "~ running: ['%s:%ld' inside `%s`] initiating function call: %s\n",
+        ::fprintf(stderr, "~ running: ['%s:%d' inside `%s`] initiating function call: %s\n",
                           sloc.c_file(), sloc.line(), inside.c_str(),
                           do_stringify(target).c_str());
       }
@@ -217,7 +217,7 @@ struct REPL_Hooks : Abstract_Hooks
         if(ROCKET_EXPECT(!cmdline.verbose)) {
           return;
         }
-        ::fprintf(stderr, "~ running: ['%s:%ld' inside `%s`] returned from function call: %s\n",
+        ::fprintf(stderr, "~ running: ['%s:%d' inside `%s`] returned from function call: %s\n",
                           sloc.c_file(), sloc.line(), inside.c_str(),
                           do_stringify(result).c_str());
       }
@@ -228,7 +228,7 @@ struct REPL_Hooks : Abstract_Hooks
         if(ROCKET_EXPECT(!cmdline.verbose)) {
           return;
         }
-        ::fprintf(stderr, "~ running: ['%s:%ld' inside `%s`] caught exception from function call: %s\n",
+        ::fprintf(stderr, "~ running: ['%s:%d' inside `%s`] caught exception from function call: %s\n",
                           sloc.c_file(), sloc.line(), inside.c_str(),
                           do_stringify(except).c_str());
       }

@@ -5,6 +5,7 @@
 #define ASTERIA_COMPILER_PARSER_ERROR_HPP_
 
 #include "../fwd.hpp"
+#include "../source_location.hpp"
 #include <exception>
 
 namespace Asteria {
@@ -13,15 +14,14 @@ class Parser_Error : public virtual exception
   {
   private:
     Parser_Status m_stat;
-    long m_line;
-    size_t m_offset;
+    Source_Location m_sloc;
     size_t m_length;
-    // Create a comprehensive string that is also human-readable.
-    cow_string m_what;
+
+    cow_string m_what;  // a comprehensive string that is human-readable.
 
   public:
-    Parser_Error(Parser_Status xstat, long xline, size_t xoffset, size_t xlength)
-      : m_stat(xstat), m_line(xline), m_offset(xoffset), m_length(xlength)
+    Parser_Error(Parser_Status xstat, const Source_Location& xsloc, size_t xlength)
+      : m_stat(xstat), m_sloc(xsloc), m_length(xlength)
       { this->do_compose_message();  }
 
     ~Parser_Error() override;
@@ -33,20 +33,26 @@ class Parser_Error : public virtual exception
     const char* what() const noexcept override
       { return this->m_what.c_str();  }
 
-    long line() const noexcept
-      { return this->m_line;  }
-
-    size_t offset() const noexcept
-      { return this->m_offset;  }
-
-    size_t length() const noexcept
-      { return this->m_length;  }
-
     Parser_Status status() const noexcept
       { return this->m_stat;  }
 
     const char* what_status() const noexcept
       { return describe_parser_status(this->m_stat);  }
+
+    const Source_Location& sloc() const noexcept
+      { return this->m_sloc;  }
+
+    const cow_string& file() const noexcept
+      { return this->m_sloc.file();  }
+
+    int line() const noexcept
+      { return this->m_sloc.line();  }
+
+    int offset() const noexcept
+      { return this->m_sloc.offset();  }
+
+    size_t length() const noexcept
+      { return this->m_length;  }
   };
 
 inline bool operator==(const Parser_Error& lhs, Parser_Status rhs) noexcept

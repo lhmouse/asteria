@@ -98,8 +98,8 @@ class Loader_Lock::Unique_Stream
 
     Unique_Stream& swap(Unique_Stream& other) noexcept
       {
-        xswap(this->m_lock, other.m_lock);
-        xswap(this->m_elem, other.m_elem);
+        this->m_lock.swap(other.m_lock);
+        ::std::swap(this->m_elem, other.m_elem);
         return *this;
       }
   };

@@ -23,10 +23,6 @@ class Backtrace_Frame
       : m_type(xtype), m_sloc(xsloc), m_value(::std::forward<XValT>(xval))
       { }
 
-    template<typename XValT> Backtrace_Frame(Frame_Type xtype, const cow_string& xfile, int32_t xline, XValT&& xval)
-      : m_type(xtype), m_sloc(xfile, xline), m_value(::std::forward<XValT>(xval))
-      { }
-
     ~Backtrace_Frame();
 
   public:
@@ -42,8 +38,11 @@ class Backtrace_Frame
     const cow_string& file() const noexcept
       { return this->m_sloc.file();  }
 
-    long line() const noexcept
+    int line() const noexcept
       { return this->m_sloc.line();  }
+
+    int offset() const noexcept
+      { return this->m_sloc.offset();  }
 
     const Value& value() const noexcept
       { return this->m_value;  }

@@ -73,7 +73,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
 
         // Name the closure.
         ::rocket::tinyfmt_str fmt;
-        fmt << "<closure>._" << altr.unique_id << '(';
+        fmt << altr.unique_name << '(';
         // Append the parameter list. Parameters are separated by commas.
         for(size_t i = 0;  i < altr.params.size();  ++i)
           ((i == 0) ? fmt : (fmt << ", ")) << altr.params[i];

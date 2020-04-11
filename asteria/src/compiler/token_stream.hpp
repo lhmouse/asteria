@@ -59,6 +59,22 @@ class Token_Stream
     Token_Stream& shift(size_t count = 1) noexcept
       { return this->m_rtoks.pop_back(count), *this;  }
 
+    Source_Location next_sloc() const noexcept
+      {
+        if(this->m_rtoks.empty())
+          return Source_Location(::rocket::sref("<end of stream>"), -1, 0);
+        else
+          return this->m_rtoks.back().sloc();
+      }
+
+    size_t next_length() const noexcept
+      {
+        if(this->m_rtoks.empty())
+          return 0;
+        else
+          return this->m_rtoks.back().length();
+      }
+
     // This function parses characters from the input stream and fills tokens into `*this`.
     // The contents of `*this` are destroyed prior to any further operation.
     // This function throws a `Parser_Error` upon failure.
