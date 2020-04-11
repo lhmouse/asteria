@@ -87,7 +87,9 @@ class storage_handle
     noexcept
       { return capacityT;  }
 
-    size_type max_size()
+    constexpr
+    size_type
+    max_size()
     const
     noexcept
       { return noadl::min(allocator_traits<allocator_type>::max_size(this->as_allocator()), this->capacity());  }

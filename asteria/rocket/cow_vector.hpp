@@ -621,7 +621,8 @@ class cow_vector
 
     // N.B. This is a non-standard extension.
     template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
-    cow_vector& insert(size_type tpos, inputT first, inputT last)
+    cow_vector&
+    insert(size_type tpos, inputT first, inputT last)
       {
         this->do_insert_no_bound_check(tpos + this->do_clamp_subvec(tpos, 0), details_cow_vector::append, ::std::move(first), ::std::move(last));
         return *this;

@@ -711,7 +711,8 @@ class static_vector
       }
 
     // N.B. The return type is a non-standard extension.
-    static_vector& assign(initializer_list<value_type> init)
+    static_vector&
+    assign(initializer_list<value_type> init)
       {
         this->clear();
         this->append(init);
