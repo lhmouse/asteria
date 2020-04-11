@@ -130,6 +130,10 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
 
 }  // namespace
 
+Reference::~Reference()
+  {
+  }
+
 void Reference::do_throw_unset_no_modifier() const
   {
     ASTERIA_THROW("non-members can't be unset");

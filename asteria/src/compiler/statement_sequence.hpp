@@ -20,6 +20,14 @@ class Statement_Sequence
       : m_opts(opts)
       { }
 
+    ~Statement_Sequence();
+
+    Statement_Sequence(const Statement_Sequence&)
+      = delete;
+
+    Statement_Sequence& operator=(const Statement_Sequence&)
+      = delete;
+
   public:
     // These are accessors and modifiers of options for parsing.
     const Compiler_Options& get_options() const noexcept
@@ -36,17 +44,11 @@ class Statement_Sequence
     bool empty() const noexcept
       { return this->m_stmts.size();  }
 
-    Statement_Sequence& clear() noexcept
-      { return this->m_stmts.clear(), *this;  }
-
-    size_t size() const noexcept
-      { return this->m_stmts.size();  }
-
-    const Statement& at(size_t index) const
-      { return this->m_stmts.at(index);  }
-
     operator const cow_vector<Statement>& () const noexcept
       { return this->m_stmts;  }
+
+    Statement_Sequence& clear() noexcept
+      { return this->m_stmts.clear(), *this;  }
 
     // This function parses tokens from the input stream and fills statements into `*this`.
     // The contents of `*this` are destroyed prior to any further operation.

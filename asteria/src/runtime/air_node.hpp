@@ -134,6 +134,7 @@ class AIR_Node
 
     struct S_define_function
       {
+        Compiler_Options opts;
         Source_Location sloc;
         cow_string func;
         cow_vector<phsh_string> params;
@@ -227,9 +228,9 @@ class AIR_Node
 
     struct S_import_call
       {
+        Compiler_Options opts;
         Source_Location sloc;
         uint32_t nargs;
-        Compiler_Options opts;
       };
 
     enum Index : uint8_t

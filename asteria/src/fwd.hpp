@@ -152,6 +152,7 @@ class Expression_Unit;
 class Statement;
 class Infix_Element;
 class Statement_Sequence;
+class AIR_Optimizer;
 
 // Type erasure
 struct Rcbase : virtual ::rocket::refcnt_base<Rcbase>
@@ -534,7 +535,7 @@ template<> struct Compiler_Options_fragment<1>
     // Enable proper tail calls. [more commonly known as tail call optimization]
     bool proper_tail_calls = true;
     // Enable optimization. [master switch]
-    bool optimization = true;
+    uint8_t optimization_level = true;
 
     // Generate calls to single-step hooks for every expression, not just function calls.
     bool verbose_single_step_traps = false;

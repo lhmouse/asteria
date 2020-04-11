@@ -4,6 +4,7 @@
 #include "../precompiled.hpp"
 #include "expression_unit.hpp"
 #include "statement.hpp"
+#include "air_optimizer.hpp"
 #include "../runtime/enums.hpp"
 #include "../runtime/air_node.hpp"
 #include "../runtime/analytic_context.hpp"
@@ -71,17 +72,12 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
       case index_closure_function: {
         const auto& altr = this->m_stor.as<index_closure_function>();
 
-        // Name the closure.
-        ::rocket::tinyfmt_str fmt;
-        fmt << altr.unique_name << '(';
-        // Append the parameter list. Parameters are separated by commas.
-        for(size_t i = 0;  i < altr.params.size();  ++i)
-          ((i == 0) ? fmt : (fmt << ", ")) << altr.params[i];
-        fmt << ')';
+        // Generate code
+        AIR_Optimizer optmz(opts);
+        optmz.reload(&ctx, altr.params, altr.body);
 
         // Encode arguments.
-        AIR_Node::S_define_function xnode = { altr.sloc, fmt.extract_string(), altr.params,
-                                              do_generate_function(opts, altr.params, &ctx, altr.body) };
+        AIR_Node::S_define_function xnode = { opts, altr.sloc, altr.unique_name, altr.params, optmz };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -192,7 +188,7 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         const auto& altr = this->m_stor.as<index_import_call>();
 
         // Encode arguments.
-        AIR_Node::S_import_call xnode = { altr.sloc, altr.nargs, opts };
+        AIR_Node::S_import_call xnode = { opts, altr.sloc, altr.nargs };
         code.emplace_back(::std::move(xnode));
         return code;
       }

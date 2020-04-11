@@ -8,7 +8,6 @@
 #include "global_context.hpp"
 #include "abstract_hooks.hpp"
 #include "analytic_context.hpp"
-#include "instantiated_function.hpp"
 #include "genius_collector.hpp"
 #include "runtime_error.hpp"
 #include "variable_callback.hpp"
@@ -17,6 +16,8 @@
 #include "loader_lock.hpp"
 #include "../compiler/token_stream.hpp"
 #include "../compiler/statement_sequence.hpp"
+#include "../compiler/air_optimizer.hpp"
+#include "../llds/avmc_queue.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -241,6 +242,7 @@ struct Pv_try
 
 struct Pv_func
   {
+    Compiler_Options opts;
     Source_Location sloc;
     cow_string func;
     cow_vector<phsh_string> params;
@@ -313,10 +315,10 @@ struct Pv_sloc_msg
     using nonenumerable = ::std::true_type;
   };
 
-struct Pv_sloc_opts
+struct Pv_opts_sloc
   {
-    Source_Location sloc;
     Compiler_Options opts;
+    Source_Location sloc;
 
     using nonenumerable = ::std::true_type;
   };
@@ -774,24 +776,16 @@ AIR_Status do_push_bound_reference(Executive_Context& ctx, ParamU /*pu*/, const 
 AIR_Status do_define_function(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
   {
     // Unpack arguments.
+    const auto& opts = do_pcast<Pv_func>(pv)->opts;
     const auto& sloc = do_pcast<Pv_func>(pv)->sloc;
     const auto& func = do_pcast<Pv_func>(pv)->func;
     const auto& params = do_pcast<Pv_func>(pv)->params;
     const auto& code_body = do_pcast<Pv_func>(pv)->code_body;
 
-    // Create the zero-ary argument getter, which serves two purposes:
-    // 0) It is copied as `__varg` whenever its parent function is called with no variadic argument as an optimization.
-    // 1) It provides storage for `__file`, `__line` and `__func` for its parent function.
-    auto zvarg = ::rocket::make_refcnt<Variadic_Arguer>(sloc, func);
-
     // Rewrite nodes in the body as necessary.
-    // Don't trigger copy-on-write unless a node needs rewriting.
-    Analytic_Context ctx_func(::std::addressof(ctx), params);
-    auto pair = ::std::make_pair(false, code_body);
-    do_rebind_nodes(pair.first, pair.second, ctx_func);
-
-    // Instantiate the function.
-    auto qtarget = ::rocket::make_refcnt<Instantiated_Function>(params, ::std::move(zvarg), pair.second);
+    AIR_Optimizer optmz(opts);
+    optmz.rebind(&ctx, params, code_body);
+    auto qtarget = optmz.create_function(sloc, func);
 
     // Push the function as a temporary.
     Reference_root::S_temporary xref = { V_function(::std::move(qtarget)) };
@@ -2653,8 +2647,8 @@ AIR_Status do_defer_expression(Executive_Context& ctx, ParamU /*pu*/, const void
 AIR_Status do_import_call(Executive_Context& ctx, ParamU pu, const void* pv)
   {
     // Unpack arguments.
-    const auto& sloc = do_pcast<Pv_sloc_opts>(pv)->sloc;
-    const auto& opts = do_pcast<Pv_sloc_opts>(pv)->opts;
+    const auto& opts = do_pcast<Pv_opts_sloc>(pv)->opts;
+    const auto& sloc = do_pcast<Pv_opts_sloc>(pv)->sloc;
     const auto& nargs = static_cast<size_t>(pu.y32);
     const auto& inside = ctx.zvarg()->func();
     const auto& qhooks = ctx.global().get_hooks_opt();
@@ -2705,13 +2699,10 @@ AIR_Status do_import_call(Executive_Context& ctx, ParamU pu, const void* pv)
     Statement_Sequence stmtq(opts);
     stmtq.reload(tstrm);
 
-    cow_vector<phsh_string> params;
-    params.emplace_back(::rocket::sref("..."));
-
     // Instantiate the function.
-    auto func = ::rocket::make_refcnt<Instantiated_Function>(params,
-                       ::rocket::make_refcnt<Variadic_Arguer>(Source_Location(path, 0, 0), ::rocket::sref("<top level>")),
-                       do_generate_function(opts, params, nullptr, stmtq));
+    AIR_Optimizer optmz(opts);
+    optmz.reload(nullptr, cow_vector<phsh_string>(1, ::rocket::sref("...")), stmtq);
+    auto qtarget = optmz.create_function(Source_Location(path, 0, 0), ::rocket::sref("<top level>"));
 
     // Update the first argument to `import` if it was passed by reference.
     // `this` is null for imported scripts.
@@ -2721,7 +2712,7 @@ AIR_Status do_import_call(Executive_Context& ctx, ParamU pu, const void* pv)
     }
     self = Reference_root::S_constant();
 
-    return do_function_call_common(self, sloc, ctx, func, ptc_aware_none, ::std::move(args));
+    return do_function_call_common(self, sloc, ctx, qtarget, ptc_aware_none, ::std::move(args));
   }
 
 }  // namespace
@@ -3242,6 +3233,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
           return avmcp.request(queue);
 
         // Encode arguments.
+        avmcp.opts = altr.opts;
         avmcp.sloc = altr.sloc;
         avmcp.func = altr.func;
         avmcp.params = altr.params;
@@ -3634,15 +3626,15 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_import_call>();
 
         // Set up symbols.
-        AVMC_Appender<Pv_sloc_opts> avmcp;
+        AVMC_Appender<Pv_opts_sloc> avmcp;
         avmcp.set_symbols(altr.sloc);
         if(ipass == 0)
           return avmcp.request(queue);
 
         // Encode arguments.
+        avmcp.opts = altr.opts;
         avmcp.sloc = altr.sloc;
         avmcp.pu.y32 = altr.nargs;
-        avmcp.opts = altr.opts;
         return avmcp.output<do_import_call>(queue);
       }
 

@@ -5,7 +5,7 @@
 #include "simple_script.hpp"
 #include "compiler/token_stream.hpp"
 #include "compiler/statement_sequence.hpp"
-#include "runtime/instantiated_function.hpp"
+#include "compiler/air_optimizer.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {
@@ -24,9 +24,9 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
     stmtq.reload(tstrm);
 
     // Instantiate the function.
-    this->m_func = ::rocket::make_refcnt<Instantiated_Function>(this->m_params,
-                         ::rocket::make_refcnt<Variadic_Arguer>(Source_Location(name, 0, 0), ::rocket::sref("<top level>")),
-                         do_generate_function(this->m_opts, this->m_params, nullptr, stmtq));
+    AIR_Optimizer optmz(this->m_opts);
+    optmz.reload(nullptr, this->m_params, stmtq);
+    this->m_func = optmz.create_function(Source_Location(name, 0, 0), ::rocket::sref("<top level>"));
     return *this;
   }
 

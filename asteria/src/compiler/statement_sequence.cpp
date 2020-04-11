@@ -1452,7 +1452,7 @@ bool do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream
     if(!qblock) {
       throw Parser_Error(parser_status_open_brace_or_equal_initializer_expected, tstrm.next_sloc(), tstrm.next_length());
     }
-    Expression_Unit::S_closure_function xunit = { ::std::move(sloc), format_string("<closure:$1:$2", sloc.line(), sloc.offset()),
+    Expression_Unit::S_closure_function xunit = { ::std::move(sloc), format_string("<closure:$1:$2>", sloc.line(), sloc.offset()),
                                                   ::std::move(*kparams), ::std::move(qblock->stmts) };
     units.emplace_back(::std::move(xunit));
     return true;
@@ -2109,6 +2109,10 @@ bool do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstr
   }
 
 }  // namespace
+
+Statement_Sequence::~Statement_Sequence()
+  {
+  }
 
 Statement_Sequence& Statement_Sequence::reload(Token_Stream& tstrm)
   {

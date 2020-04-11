@@ -666,6 +666,10 @@ bool do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Line_Reader& rea
 
 }  // namespace
 
+Token_Stream::~Token_Stream()
+  {
+  }
+
 Token_Stream& Token_Stream::reload(tinybuf& cbuf, const cow_string& file)
   {
     // Tokens are parsed and stored here in normal order.

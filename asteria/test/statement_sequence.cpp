@@ -36,5 +36,5 @@ int main()
     tstrm.reload(cbuf, ::rocket::sref("dummy file"));
     Statement_Sequence stmtq({ });
     stmtq.reload(tstrm);
-    ASTERIA_TEST_CHECK(stmtq.size() == 4);
+    ASTERIA_TEST_CHECK(cow_vector<Statement>(stmtq).size() == 4);
   }

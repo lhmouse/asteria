@@ -33,6 +33,8 @@ class Reference
         return *this;
       }
 
+    ~Reference();
+
   private:
     [[noreturn]] void do_throw_unset_no_modifier() const;
 

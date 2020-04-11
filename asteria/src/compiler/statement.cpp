@@ -4,6 +4,7 @@
 #include "../precompiled.hpp"
 #include "statement.hpp"
 #include "expression_unit.hpp"
+#include "air_optimizer.hpp"
 #include "enums.hpp"
 #include "../runtime/air_node.hpp"
 #include "../runtime/analytic_context.hpp"
@@ -13,12 +14,12 @@
 namespace Asteria {
 namespace {
 
-void do_user_declare(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
-                     const phsh_string& name, const char* desc)
+void do_user_declare(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx, const phsh_string& name, const char* desc)
   {
     // Check for special names.
     if(name.rdstr().empty())
       ASTERIA_THROW("attempt to declare a nameless $1", desc);
+
     if(name.rdstr().starts_with("__"))
       ASTERIA_THROW("reserved name not declarable as $2 (name `$1`)", name);
 
@@ -237,17 +238,12 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         AIR_Node::S_declare_variable xnode_decl = { altr.sloc, altr.name };
         code.emplace_back(::std::move(xnode_decl));
 
-        // Prettify the function name.
-        ::rocket::tinyfmt_str fmt;
-        fmt << altr.name << '(';
-        // Append the parameter list. Parameters are separated by commas.
-        for(size_t i = 0;  i < altr.params.size();  ++i)
-          ((i == 0) ? fmt : (fmt << ", ")) << altr.params[i];
-        fmt << ')';
+        // Generate code
+        AIR_Optimizer optmz(opts);
+        optmz.reload(&ctx, altr.params, altr.body);
 
         // Encode arguments.
-        AIR_Node::S_define_function xnode_defn = { altr.sloc, fmt.extract_string(), altr.params,
-                                                   do_generate_function(opts, altr.params, &ctx, altr.body) };
+        AIR_Node::S_define_function xnode_defn = { opts, altr.sloc, altr.name, altr.params, optmz };
         code.emplace_back(::std::move(xnode_defn));
 
         // Initialize the function.
@@ -539,22 +535,6 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
       default:
         ASTERIA_TERMINATE("invalid statement type (index `$1`)", this->index());
     }
-  }
-
-// This is referenced from 'expression_unit.cpp' and '../runtime/simple_script.cpp'.
-cow_vector<AIR_Node> do_generate_function(const Compiler_Options& opts, const cow_vector<phsh_string>& params,
-                                          const Abstract_Context* ctx_opt, const cow_vector<Statement>& stmts)
-  {
-    // Generate code for all statements.
-    cow_vector<AIR_Node> code_body;
-    Analytic_Context ctx_func(ctx_opt, params);
-    for(size_t i = 0;  i < stmts.size();  ++i)
-      stmts[i].generate_code(code_body, nullptr, ctx_func, opts,
-                     ((i + 1 == stmts.size()) || stmts.at(i + 1).is_empty_return())
-                          ? ptc_aware_void     // last or preceding empty return
-                          : ptc_aware_none);
-    // TODO: Insert optimization passes, which may rewrite nodes in `code_body`.
-    return code_body;
   }
 
 }  // namespace Asteria

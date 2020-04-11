@@ -22,6 +22,14 @@ class Token_Stream
       : m_opts(opts)
       { }
 
+    ~Token_Stream();
+
+    Token_Stream(const Token_Stream&)
+      = delete;
+
+    Token_Stream& operator=(const Token_Stream&)
+      = delete;
+
   public:
     // This provides stack overflow protection.
     Recursion_Sentry copy_recursion_sentry() const
@@ -47,14 +55,11 @@ class Token_Stream
     bool empty() const noexcept
       { return this->m_rtoks.empty();  }
 
-    Token_Stream& clear() noexcept
-      { return this->m_rtoks.clear(), *this;  }
-
     size_t size() const noexcept
       { return this->m_rtoks.size();  }
 
     const Token* peek_opt(size_t offset = 0) const noexcept
-      { return this->m_rtoks.get_ptr(this->m_rtoks.size() - 1 - offset);  }
+      { return this->m_rtoks.get_ptr(this->m_rtoks.size() + ~offset);  }
 
     Token_Stream& shift(size_t count = 1) noexcept
       { return this->m_rtoks.pop_back(count), *this;  }
@@ -74,6 +79,9 @@ class Token_Stream
         else
           return this->m_rtoks.back().length();
       }
+
+    Token_Stream& clear() noexcept
+      { return this->m_rtoks.clear(), *this;  }
 
     // This function parses characters from the input stream and fills tokens into `*this`.
     // The contents of `*this` are destroyed prior to any further operation.
