@@ -28,7 +28,7 @@ namespace rocket {
 template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename eqT = equal_to<keyT>,
          typename allocT = allocator<pair<const keyT, mappedT>>> class cow_hashmap;
 
-#include "details/cow_hashmap.tcc"
+#include "details/cow_hashmap.ipp"
 
 template<typename keyT, typename mappedT, typename hashT, typename eqT, typename allocT> class cow_hashmap
   {

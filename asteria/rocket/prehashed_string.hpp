@@ -11,7 +11,7 @@ namespace rocket {
 
 template<typename stringT, typename hashT = hash<stringT>> class basic_prehashed_string;
 
-#include "details/prehashed_string.tcc"
+#include "details/prehashed_string.ipp"
 
 template<typename stringT, typename hashT> class basic_prehashed_string
   {

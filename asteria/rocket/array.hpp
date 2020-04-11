@@ -18,7 +18,7 @@ namespace rocket {
  */
 template<typename valueT, size_t capacityT, size_t... nestedT> class array;
 
-#include "details/array.tcc"
+#include "details/array.ipp"
 
 template<typename valueT, size_t capacityT, size_t... nestedT> class array
   {

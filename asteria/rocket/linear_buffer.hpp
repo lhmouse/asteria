@@ -15,7 +15,7 @@ namespace rocket {
 template<typename charT, typename traitsT = char_traits<charT>,
          typename allocT = allocator<charT>> class basic_linear_buffer;
 
-#include "details/linear_buffer.tcc"
+#include "details/linear_buffer.ipp"
 
 template<typename charT, typename traitsT, typename allocT> class basic_linear_buffer
   {

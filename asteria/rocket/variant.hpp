@@ -13,7 +13,7 @@ namespace rocket {
 
 template<typename... alternativesT> class variant;
 
-#include "details/variant.tcc"
+#include "details/variant.ipp"
 
 template<typename... alternativesT> class variant
   {

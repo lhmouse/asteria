@@ -15,7 +15,7 @@ namespace rocket {
 template<typename elementT, typename deleterT = default_delete<const elementT>> class unique_ptr;
 template<typename charT, typename traitsT> class basic_tinyfmt;
 
-#include "details/unique_ptr.tcc"
+#include "details/unique_ptr.ipp"
 
 template<typename elementT, typename deleterT> class unique_ptr
   {

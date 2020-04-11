@@ -89,20 +89,20 @@ pkginclude_rocket_platform_HEADERS =  \
 
 pkginclude_rocket_detailsdir = ${pkgincludedir}/rocket/details
 pkginclude_rocket_details_HEADERS =  \
-  asteria/rocket/details/utilities.tcc  \
-  asteria/rocket/details/allocator_utilities.tcc  \
-  asteria/rocket/details/variant.tcc  \
-  asteria/rocket/details/unique_handle.tcc  \
-  asteria/rocket/details/char_traits.tcc  \
-  asteria/rocket/details/cow_string.tcc  \
-  asteria/rocket/details/cow_vector.tcc  \
-  asteria/rocket/details/cow_hashmap.tcc  \
-  asteria/rocket/details/prehashed_string.tcc  \
-  asteria/rocket/details/unique_ptr.tcc  \
-  asteria/rocket/details/refcnt_ptr.tcc  \
-  asteria/rocket/details/static_vector.tcc  \
-  asteria/rocket/details/array.tcc  \
-  asteria/rocket/details/linear_buffer.tcc  \
+  asteria/rocket/details/utilities.ipp  \
+  asteria/rocket/details/allocator_utilities.ipp  \
+  asteria/rocket/details/variant.ipp  \
+  asteria/rocket/details/unique_handle.ipp  \
+  asteria/rocket/details/char_traits.ipp  \
+  asteria/rocket/details/cow_string.ipp  \
+  asteria/rocket/details/cow_vector.ipp  \
+  asteria/rocket/details/cow_hashmap.ipp  \
+  asteria/rocket/details/prehashed_string.ipp  \
+  asteria/rocket/details/unique_ptr.ipp  \
+  asteria/rocket/details/refcnt_ptr.ipp  \
+  asteria/rocket/details/static_vector.ipp  \
+  asteria/rocket/details/array.ipp  \
+  asteria/rocket/details/linear_buffer.ipp  \
   ${NOTHING}
 
 lib_librocket_la_SOURCES =  \

@@ -28,7 +28,7 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
 template<typename charT, typename traitsT = char_traits<charT>> class basic_shallow_string;
 template<typename charT, typename traitsT = char_traits<charT>, typename allocT = allocator<charT>> class basic_cow_string;
 
-#include "details/cow_string.tcc"
+#include "details/cow_string.ipp"
 
 template<typename charT, typename traitsT> class basic_shallow_string
   {

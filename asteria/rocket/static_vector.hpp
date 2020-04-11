@@ -23,7 +23,7 @@ namespace rocket {
  */
 template<typename valueT, size_t capacityT, typename allocT = allocator<valueT>> class static_vector;
 
-#include "details/static_vector.tcc"
+#include "details/static_vector.ipp"
 
 template<typename valueT, size_t capacityT, typename allocT> class static_vector
   {

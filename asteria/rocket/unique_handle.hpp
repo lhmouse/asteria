@@ -25,7 +25,7 @@ namespace rocket {
 template<typename handleT, typename closerT> class unique_handle;
 template<typename charT, typename traitsT> class basic_tinyfmt;
 
-#include "details/unique_handle.tcc"
+#include "details/unique_handle.ipp"
 
 template<typename handleT, typename closerT> class unique_handle
   {

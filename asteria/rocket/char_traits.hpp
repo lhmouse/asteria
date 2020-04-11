@@ -14,7 +14,7 @@ namespace rocket {
 
 template<typename charT> struct char_traits;
 
-#include "details/char_traits.tcc"
+#include "details/char_traits.ipp"
 
 template<> struct char_traits<char>
   {

@@ -9,7 +9,7 @@
 
 namespace rocket {
 
-#include "details/allocator_utilities.tcc"
+#include "details/allocator_utilities.ipp"
 
 template<typename allocT>
     struct allocator_wrapper_base_for : conditional<is_final<allocT>::value,

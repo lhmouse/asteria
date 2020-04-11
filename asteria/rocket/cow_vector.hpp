@@ -24,7 +24,7 @@ namespace rocket {
  */
 template<typename valueT, typename allocT = allocator<valueT>> class cow_vector;
 
-#include "details/cow_vector.tcc"
+#include "details/cow_vector.ipp"
 
 template<typename valueT, typename allocT> class cow_vector
   {

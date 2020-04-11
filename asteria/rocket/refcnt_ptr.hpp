@@ -17,7 +17,7 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
 template<typename elementT> class refcnt_ptr;
 template<typename charT, typename traitsT> class basic_tinyfmt;
 
-#include "details/refcnt_ptr.tcc"
+#include "details/refcnt_ptr.ipp"
 
 template<typename elementT, typename deleterT> class refcnt_base : public virtual details_refcnt_ptr::reference_counter_base,
                                                                    private virtual allocator_wrapper_base_for<deleterT>::type
