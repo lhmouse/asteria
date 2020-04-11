@@ -11,34 +11,46 @@
 
 namespace rocket {
 
-template<typename valueT = long> class reference_counter;
+template<typename valueT = long>
+class reference_counter;
 
-template<typename valueT> class reference_counter
+template<typename valueT>
+class reference_counter
   {
   private:
     ::std::atomic<valueT> m_nref;
 
   public:
-    constexpr reference_counter() noexcept
+    constexpr
+    reference_counter()
+    noexcept
       : m_nref(1)
       { }
 
-    explicit constexpr reference_counter(valueT nref) noexcept
+    explicit constexpr
+    reference_counter(valueT nref)
+    noexcept
       : m_nref(nref)
       { }
 
-    constexpr reference_counter(const reference_counter&) noexcept
+    constexpr
+    reference_counter(const reference_counter&)
+    noexcept
       : reference_counter()
       { }
 
-    reference_counter& operator=(const reference_counter&) noexcept
+    reference_counter&
+    operator=(const reference_counter&)
+    noexcept
       { return *this;  }
 
     ~reference_counter()
       { this->do_terminate_if_shared();  }
 
   private:
-    void do_terminate_if_shared() const
+    void
+    do_terminate_if_shared()
+    const
       {
         auto old = this->m_nref.load(::std::memory_order_relaxed);
         if(old > 1)
@@ -46,13 +58,22 @@ template<typename valueT> class reference_counter
       }
 
   public:
-    ROCKET_PURE_FUNCTION bool unique() const noexcept
+    ROCKET_PURE_FUNCTION
+    bool
+    unique()
+    const
+    noexcept
       { return ROCKET_EXPECT(this->m_nref.load(::std::memory_order_relaxed) == 1);  }
 
-    valueT get() const noexcept
+    valueT
+    get()
+    const
+    noexcept
       { return this->m_nref.load(::std::memory_order_relaxed);  }
 
-    bool try_increment() noexcept
+    bool
+    try_increment()
+    noexcept
       {
         auto old = this->m_nref.load(::std::memory_order_relaxed);
         for(;;)
@@ -62,13 +83,17 @@ template<typename valueT> class reference_counter
             return true;
       }
 
-    void increment() noexcept
+    void
+    increment()
+    noexcept
       {
         auto old = this->m_nref.fetch_add(1, ::std::memory_order_relaxed);
         ROCKET_ASSERT(old >= 1);
       }
 
-    bool decrement() noexcept
+    bool
+    decrement()
+    noexcept
       {
         auto old = this->m_nref.fetch_sub(1, ::std::memory_order_acq_rel);
         ROCKET_ASSERT(old >= 1);
@@ -76,7 +101,8 @@ template<typename valueT> class reference_counter
       }
   };
 
-template class reference_counter<long>;
+template
+class reference_counter<long>;
 
 }  // namespace rocket
 

@@ -19,24 +19,43 @@ class posix_dir_closer
     closer_type m_cl;
 
   public:
-    constexpr posix_dir_closer(closer_type cl) noexcept
+    constexpr
+    posix_dir_closer(closer_type cl)
+    noexcept
       : m_cl(cl)
       { }
 
   public:
-    constexpr operator closer_type () const noexcept
+    constexpr operator
+    closer_type()
+    const
+    noexcept
       { return this->m_cl;  }
 
-    int operator()(handle_type dp) const noexcept
+    int
+    operator()(handle_type dp)
+    const
+    noexcept
       { return this->close(dp);  }
 
-    constexpr handle_type null() const noexcept
+    constexpr
+    handle_type
+    null()
+    const
+    noexcept
       { return nullptr;  }
 
-    constexpr bool is_null(handle_type dp) const noexcept
+    constexpr
+    bool
+    is_null(handle_type dp)
+    const
+    noexcept
       { return dp == nullptr;  }
 
-    int close(handle_type dp) const noexcept
+    int
+    close(handle_type dp)
+    const
+    noexcept
       {
         if(!this->m_cl)
           return 0;  // no close

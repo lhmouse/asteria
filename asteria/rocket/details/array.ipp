@@ -7,14 +7,14 @@
 
 namespace details_array {
 
-template<typename valueT, size_t capacityT, size_t... nestedT>
-    struct element_type_of
-      : enable_if<1, array<valueT, nestedT...>>
+template<typename valueT, size_t capT, size_t... nestedT>
+struct element_type_of
+  : enable_if<1, array<valueT, nestedT...>>
   { };
 
-template<typename valueT, size_t capacityT>
-    struct element_type_of<valueT, capacityT>
-      : enable_if<1, valueT>
+template<typename valueT, size_t capT>
+struct element_type_of<valueT, capT>
+  : enable_if<1, valueT>
   { };
 
 }  // namespace details_array

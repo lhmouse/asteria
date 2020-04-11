@@ -9,11 +9,12 @@
 
 namespace rocket {
 
-template<typename charT, typename traitsT = char_traits<charT>,
-         typename allocT = allocator<charT>> class basic_tinyfmt_str;
+template<typename charT, typename traitsT = char_traits<charT>, typename allocT = allocator<charT>>
+class basic_tinyfmt_str;
 
-template<typename charT, typename traitsT,
-         typename allocT> class basic_tinyfmt_str : public basic_tinyfmt<charT, traitsT>
+template<typename charT, typename traitsT, typename allocT>
+class basic_tinyfmt_str
+  : public basic_tinyfmt<charT, traitsT>
   {
   public:
     using char_type       = charT;
@@ -34,57 +35,82 @@ template<typename charT, typename traitsT,
     mutable tinybuf_type m_buf;
 
   public:
-    basic_tinyfmt_str() noexcept
+    basic_tinyfmt_str()
+    noexcept
       : m_buf(tinybuf_base::open_write)
       { }
 
-    explicit basic_tinyfmt_str(open_mode mode) noexcept
+    explicit
+    basic_tinyfmt_str(open_mode mode)
+    noexcept
       : m_buf(mode)
       { }
 
-    template<typename xstrT> explicit basic_tinyfmt_str(xstrT&& xstr, open_mode mode = tinybuf_base::open_write)
+    template<typename xstrT>
+    explicit
+    basic_tinyfmt_str(xstrT&& xstr, open_mode mode = tinybuf_base::open_write)
       : m_buf(::std::forward<xstrT>(xstr), mode)
       { }
 
-    ~basic_tinyfmt_str() override;
+    ~basic_tinyfmt_str()
+    override;
 
     basic_tinyfmt_str(basic_tinyfmt_str&&)
       = default;
 
-    basic_tinyfmt_str& operator=(basic_tinyfmt_str&&)
+    basic_tinyfmt_str&
+    operator=(basic_tinyfmt_str&&)
       = default;
 
   public:
-    tinybuf_type& get_tinybuf() const override
+    tinybuf_type&
+    get_tinybuf()
+    const
+    override
       { return this->m_buf;  }
 
-    const string_type& get_string() const noexcept
+    const string_type&
+    get_string()
+    const
+    noexcept
       { return this->m_buf.get_string();  }
 
-    const char_type* get_c_string() const noexcept
+    const char_type*
+    get_c_string()
+    const
+    noexcept
       { return this->m_buf.get_c_string();  }
 
-    size_type get_length() const noexcept
+    size_type
+    get_length()
+    const
+    noexcept
       { return this->m_buf.get_length();  }
 
-    basic_tinyfmt_str& clear_string(open_mode mode = tinybuf_base::open_write)
+    basic_tinyfmt_str&
+    clear_string(open_mode mode = tinybuf_base::open_write)
       {
         this->m_buf.clear_string(mode);
         return *this;
       }
 
-    template<typename xstrT> basic_tinyfmt_str& set_string(xstrT&& xstr, open_mode mode = tinybuf_base::open_write)
+    template<typename xstrT>
+    basic_tinyfmt_str&
+    set_string(xstrT&& xstr, open_mode mode = tinybuf_base::open_write)
       {
         this->m_buf.set_string(::std::forward<xstrT>(xstr), mode);
         return *this;
       }
 
-    string_type extract_string(open_mode mode = tinybuf_base::open_write)
+    string_type
+    extract_string(open_mode mode = tinybuf_base::open_write)
       {
         return this->m_buf.extract_string(mode);
       }
 
-    basic_tinyfmt_str& swap(basic_tinyfmt_str& other) noexcept(is_nothrow_swappable<tinybuf_type>::value)
+    basic_tinyfmt_str&
+    swap(basic_tinyfmt_str& other)
+    noexcept(is_nothrow_swappable<tinybuf_type>::value)
       {
         noadl::xswap(this->m_buf, other.m_buf);
         return *this;
@@ -92,17 +118,24 @@ template<typename charT, typename traitsT,
   };
 
 template<typename charT, typename traitsT, typename allocT>
-    basic_tinyfmt_str<charT, traitsT, allocT>::~basic_tinyfmt_str()
+basic_tinyfmt_str<charT, traitsT, allocT>::
+~basic_tinyfmt_str()
   = default;
 
-template<typename charT, typename traitsT, typename allocT> inline void swap(
-               basic_tinyfmt_str<charT, traitsT, allocT>& lhs, basic_tinyfmt_str<charT, traitsT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+template<typename charT, typename traitsT, typename allocT>
+inline
+void
+swap(basic_tinyfmt_str<charT, traitsT, allocT>& lhs, basic_tinyfmt_str<charT, traitsT, allocT>& rhs)
+noexcept(noexcept(lhs.swap(rhs)))
   {
     lhs.swap(rhs);
   }
 
-extern template class basic_tinyfmt_str<char>;
-extern template class basic_tinyfmt_str<wchar_t>;
+extern template
+class basic_tinyfmt_str<char>;
+
+extern template
+class basic_tinyfmt_str<wchar_t>;
 
 using tinyfmt_str   = basic_tinyfmt_str<char>;
 using wtinyfmt_str  = basic_tinyfmt_str<wchar_t>;

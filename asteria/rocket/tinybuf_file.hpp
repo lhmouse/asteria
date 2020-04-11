@@ -15,11 +15,12 @@
 
 namespace rocket {
 
-template<typename charT, typename traitsT = char_traits<charT>,
-         typename allocT = allocator<charT>> class basic_tinybuf_file;
+template<typename charT, typename traitsT = char_traits<charT>, typename allocT = allocator<charT>>
+class basic_tinybuf_file;
 
 template<typename charT, typename traitsT, typename allocT>
-    class basic_tinybuf_file : public basic_tinybuf<charT, traitsT>
+class basic_tinybuf_file
+  : public basic_tinybuf<charT, traitsT>
   {
   public:
     using char_type       = charT;
@@ -44,19 +45,24 @@ template<typename charT, typename traitsT, typename allocT>
     unique_posix_file m_file = { nullptr, nullptr };  // file handle
 
   public:
-    basic_tinybuf_file() noexcept(is_nothrow_constructible<file_buffer>::value)
+    basic_tinybuf_file()
+    noexcept(is_nothrow_constructible<file_buffer>::value)
       : m_gbuf()
       { }
 
-    explicit basic_tinybuf_file(const allocator_type& alloc) noexcept
+    explicit
+    basic_tinybuf_file(const allocator_type& alloc)
+    noexcept
       : m_gbuf(alloc)
       { }
 
-    basic_tinybuf_file(unique_posix_file&& file, const allocator_type& alloc = allocator_type()) noexcept
+    basic_tinybuf_file(unique_posix_file&& file, const allocator_type& alloc = allocator_type())
+    noexcept
       : basic_tinybuf_file(alloc)
       { this->reset(::std::move(file));  }
 
-    basic_tinybuf_file(handle_type fp, closer_type cl, const allocator_type& alloc = allocator_type()) noexcept
+    basic_tinybuf_file(handle_type fp, closer_type cl, const allocator_type& alloc = allocator_type())
+    noexcept
       : basic_tinybuf_file(alloc)
       { this->reset(fp, cl);  }
 
@@ -64,7 +70,8 @@ template<typename charT, typename traitsT, typename allocT>
       : basic_tinybuf_file(alloc)
       { this->open(path, mode);  }
 
-    ~basic_tinybuf_file() override;
+    ~basic_tinybuf_file()
+    override;
 
     basic_tinybuf_file(basic_tinybuf_file&&)
       = default;
@@ -73,7 +80,8 @@ template<typename charT, typename traitsT, typename allocT>
       = default;
 
   private:
-    basic_tinybuf_file& do_xsync_gbuf(const char_type*& gcur, const char_type*& gend)
+    basic_tinybuf_file&
+    do_xsync_gbuf(const char_type*& gcur, const char_type*& gend)
       {
         // Note that this function may or may not clear the get area.
         if(this->m_goff < 0) {
@@ -104,7 +112,10 @@ template<typename charT, typename traitsT, typename allocT>
       }
 
   protected:
-    off_type do_fortell() const override
+    off_type
+    do_fortell()
+    const
+    override
       {
         if(!this->m_file) {
           // No file has been opened. There are no characters to read.
@@ -118,8 +129,9 @@ template<typename charT, typename traitsT, typename allocT>
         return 0;
       }
 
-    basic_tinybuf_file& do_flush(const char_type*& gcur, const char_type*& gend,
-                                 char_type*& /*pcur*/, char_type*& /*pend*/) override
+    basic_tinybuf_file&
+    do_flush(const char_type*& gcur, const char_type*& gend, char_type*& /*pcur*/, char_type*& /*pend*/)
+    override
       {
         if(gcur) {
           // If the get area exists, a file must have been opened.
@@ -137,7 +149,9 @@ template<typename charT, typename traitsT, typename allocT>
         return *this;
       }
 
-    off_type do_seek(off_type off, seek_dir dir) override
+    off_type
+    do_seek(off_type off, seek_dir dir)
+    override
       {
         // Invalidate the get area before doing anything else.
         this->do_sync_areas();
@@ -161,7 +175,9 @@ template<typename charT, typename traitsT, typename allocT>
         return ::ftello(this->m_file);
       }
 
-    int_type do_underflow(const char_type*& gcur, const char_type*& gend, bool peek) override
+    int_type
+    do_underflow(const char_type*& gcur, const char_type*& gend, bool peek)
+    override
       {
         // If the get area exists, update the offset and clear it.
         this->do_sync_areas();
@@ -219,7 +235,9 @@ template<typename charT, typename traitsT, typename allocT>
         return traits_type::to_int_type(gbase[0]);
       }
 
-    basic_tinybuf_file& do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/, const char_type* sadd, size_type nadd) override
+    basic_tinybuf_file&
+    do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/, const char_type* sadd, size_type nadd)
+    override
       {
         // If the get area exists, update the offset and clear it.
         this->do_sync_areas();
@@ -245,13 +263,26 @@ template<typename charT, typename traitsT, typename allocT>
       }
 
   public:
-    handle_type get_handle() const noexcept
+    handle_type
+    get_handle()
+    const
+    noexcept
       { return this->m_file.get();  }
 
-    closer_type get_closer() const noexcept
+    const closer_type&
+    get_closer()
+    const
+    noexcept
       { return this->m_file.get_closer();  }
 
-    basic_tinybuf_file& reset(unique_posix_file&& file) noexcept
+    closer_type&
+    get_closer()
+    noexcept
+      { return this->m_file.get_closer();  }
+
+    basic_tinybuf_file&
+    reset(unique_posix_file&& file)
+    noexcept
       {
         this->do_purge_areas();
         // Discard the input buffer and reset the file handle, ignoring any errors.
@@ -260,7 +291,9 @@ template<typename charT, typename traitsT, typename allocT>
         return *this;
       }
 
-    basic_tinybuf_file& reset(handle_type fp, closer_type cl) noexcept
+    basic_tinybuf_file&
+    reset(handle_type fp, closer_type cl)
+    noexcept
       {
         this->do_purge_areas();
         // Discard the input buffer and reset the file handle, ignoring any errors.
@@ -269,7 +302,8 @@ template<typename charT, typename traitsT, typename allocT>
         return *this;
       }
 
-    basic_tinybuf_file& open(const char* path, open_mode mode)
+    basic_tinybuf_file&
+    open(const char* path, open_mode mode)
       {
         int flags;
         char mstr[8];
@@ -328,13 +362,17 @@ template<typename charT, typename traitsT, typename allocT>
         return this->reset(::std::move(file));
       }
 
-    basic_tinybuf_file& close() noexcept
+    basic_tinybuf_file&
+    close()
+    noexcept
       {
         // Discard the input buffer and close the file, ignoring any errors.
         return this->reset(nullptr, nullptr);
       }
 
-    basic_tinybuf_file& swap(basic_tinybuf_file& other) noexcept(is_nothrow_swappable<file_buffer>::value)
+    basic_tinybuf_file&
+    swap(basic_tinybuf_file& other)
+    noexcept(is_nothrow_swappable<file_buffer>::value)
       {
         noadl::xswap(this->m_gbuf, other.m_gbuf);
         // No exception shall be thrown afterwards.
@@ -346,15 +384,22 @@ template<typename charT, typename traitsT, typename allocT>
   };
 
 template<typename charT, typename traitsT, typename allocT>
-    basic_tinybuf_file<charT, traitsT, allocT>::~basic_tinybuf_file()
+basic_tinybuf_file<charT, traitsT, allocT>::
+~basic_tinybuf_file()
   = default;
 
-template<typename charT, typename traitsT, typename allocT> inline void swap(basic_tinybuf_file<charT, traitsT, allocT>& lhs,
-                                                basic_tinybuf_file<charT, traitsT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+template<typename charT, typename traitsT, typename allocT>
+inline
+void
+swap(basic_tinybuf_file<charT, traitsT, allocT>& lhs, basic_tinybuf_file<charT, traitsT, allocT>& rhs)
+noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
-extern template class basic_tinybuf_file<char>;
-extern template class basic_tinybuf_file<wchar_t>;
+extern template
+class basic_tinybuf_file<char>;
+
+extern template
+class basic_tinybuf_file<wchar_t>;
 
 using tinybuf_file   = basic_tinybuf_file<char>;
 using wtinybuf_file  = basic_tinybuf_file<wchar_t>;

@@ -9,22 +9,23 @@ namespace rocket {
 namespace {
 
 template<typename valueT>
-    constexpr typename make_unsigned<valueT>::type do_cast_U(const valueT& value) noexcept
-  {
-    return static_cast<typename make_unsigned<valueT>::type>(value);
-  }
+constexpr
+typename make_unsigned<valueT>::type
+do_cast_U(const valueT& value)
+  { return static_cast<typename make_unsigned<valueT>::type>(value);  }
 
-constexpr char do_pdigit_D(uint32_t dval) noexcept
-  {
-    return static_cast<char>('0' + dval);
-  }
+constexpr
+char
+do_pdigit_D(uint32_t dval)
+  { return static_cast<char>('0' + dval);  }
 
-constexpr char do_pdigit_X(uint32_t dval) noexcept
-  {
-    return static_cast<char>('0' + dval + ((9 - dval) >> 29));
-  }
+constexpr
+char
+do_pdigit_X(uint32_t dval)
+  { return static_cast<char>('0' + dval + ((9 - dval) >> 29));  }
 
-void do_xput_U_bkwd(char*& bp, const uint64_t& value, uint8_t base, size_t precision) noexcept
+void
+do_xput_U_bkwd(char*& bp, const uint64_t& value, uint8_t base, size_t precision)
   {
     char* fp = bp - precision;
     uint64_t ireg = value;
@@ -42,7 +43,8 @@ void do_xput_U_bkwd(char*& bp, const uint64_t& value, uint8_t base, size_t preci
   }
 
 template<typename valueT>
-    char* do_check_special(char*& bp, char*& ep, const valueT& value) noexcept
+char*
+do_check_special(char*& bp, char*& ep, const valueT& value)
   {
     switch(::std::fpclassify(value)) {
       case FP_INFINITE: {
@@ -65,7 +67,8 @@ template<typename valueT>
     }
   }
 
-void do_xfrexp_F_bin(uint64_t& mant, int& exp, const double& value) noexcept
+void
+do_xfrexp_F_bin(uint64_t& mant, int& exp, const double& value)
   {
     // Note if `value` is not finite then the behavior is undefined.
     int bexp;
@@ -74,7 +77,8 @@ void do_xfrexp_F_bin(uint64_t& mant, int& exp, const double& value) noexcept
     mant = (uint64_t)(int64_t)(frac * 0x1p53) << 11;
   }
 
-void do_xput_M_bin(char*& ep, const uint64_t& mant, const char* rdxp) noexcept
+void
+do_xput_M_bin(char*& ep, const uint64_t& mant, const char* rdxp)
   {
     // Write digits in normal order.
     uint64_t ireg = mant;
@@ -95,7 +99,8 @@ void do_xput_M_bin(char*& ep, const uint64_t& mant, const char* rdxp) noexcept
         *(ep++) = '0';
   }
 
-void do_xput_M_hex(char*& ep, const uint64_t& mant, const char* rdxp) noexcept
+void
+do_xput_M_hex(char*& ep, const uint64_t& mant, const char* rdxp)
   {
     // Write digits in normal order.
     uint64_t ireg = mant;
@@ -116,7 +121,8 @@ void do_xput_M_hex(char*& ep, const uint64_t& mant, const char* rdxp) noexcept
         *(ep++) = '0';
   }
 
-char* do_xput_I_exp(char*& ep, const int& exp) noexcept
+char*
+do_xput_I_exp(char*& ep, const int& exp)
   {
     // Append the sign symbol, always.
     if(exp < 0)
@@ -145,7 +151,8 @@ char* do_xput_I_exp(char*& ep, const int& exp) noexcept
 #include <quadmath.h>
 #include <stdio.h>
 
-void do_print_one(int e)
+void
+do_print_one(int e)
   {
     __float128 value, frac;
     int bexp;
@@ -187,7 +194,8 @@ void do_print_one(int e)
     printf("  // 1.0e%+.3d\n", e);
   }
 
-int main(void)
+int
+main(void)
   {
     int e;
 
@@ -843,7 +851,8 @@ constexpr s_decmult_F[] =
   };
 static_assert(noadl::countof(s_decmult_F) == 633, "");
 
-void do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single) noexcept
+void
+do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
   {
     // Note if `value` is not finite then the behavior is undefined.
     // Get the first digit.
@@ -901,7 +910,8 @@ void do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
     exp = static_cast<int>(bpos) - 324;
   }
 
-void do_xput_M_dec(char*& ep, const uint64_t& mant, const char* rdxp) noexcept
+void
+do_xput_M_dec(char*& ep, const uint64_t& mant, const char* rdxp)
   {
     // Write digits in normal order.
     uint64_t ireg = mant;
@@ -926,7 +936,10 @@ void do_xput_M_dec(char*& ep, const uint64_t& mant, const char* rdxp) noexcept
 
 }  // namespace
 
-ascii_numput& ascii_numput::put_TB(bool value) noexcept
+ascii_numput&
+ascii_numput::
+put_TB(bool value)
+noexcept
   {
     this->clear();
     char* bp;
@@ -946,7 +959,10 @@ ascii_numput& ascii_numput::put_TB(bool value) noexcept
     return *this;
   }
 
-ascii_numput& ascii_numput::put_XP(const void* value) noexcept
+ascii_numput&
+ascii_numput::
+put_XP(const void* value)
+noexcept
   {
     this->clear();
     char* bp = this->m_stor + M;
@@ -964,7 +980,10 @@ ascii_numput& ascii_numput::put_XP(const void* value) noexcept
     return *this;
   }
 
-ascii_numput& ascii_numput::put_BU(uint64_t value, size_t precision) noexcept
+ascii_numput&
+ascii_numput::
+put_BU(uint64_t value, size_t precision)
+noexcept
   {
     this->clear();
     char* bp = this->m_stor + M;
@@ -982,7 +1001,10 @@ ascii_numput& ascii_numput::put_BU(uint64_t value, size_t precision) noexcept
     return *this;
   }
 
-ascii_numput& ascii_numput::put_XU(uint64_t value, size_t precision) noexcept
+ascii_numput&
+ascii_numput::
+put_XU(uint64_t value, size_t precision)
+noexcept
   {
     this->clear();
     char* bp = this->m_stor + M;
@@ -1000,7 +1022,10 @@ ascii_numput& ascii_numput::put_XU(uint64_t value, size_t precision) noexcept
     return *this;
   }
 
-ascii_numput& ascii_numput::put_DU(uint64_t value, size_t precision) noexcept
+ascii_numput&
+ascii_numput::
+put_DU(uint64_t value, size_t precision)
+noexcept
   {
     this->clear();
     char* bp = this->m_stor + M;
@@ -1015,7 +1040,10 @@ ascii_numput& ascii_numput::put_DU(uint64_t value, size_t precision) noexcept
     return *this;
   }
 
-ascii_numput& ascii_numput::put_BI(int64_t value, size_t precision) noexcept
+ascii_numput&
+ascii_numput::
+put_BI(int64_t value, size_t precision)
+noexcept
   {
     this->clear();
     char* bp = this->m_stor + M;
@@ -1038,7 +1066,10 @@ ascii_numput& ascii_numput::put_BI(int64_t value, size_t precision) noexcept
     return *this;
   }
 
-ascii_numput& ascii_numput::put_XI(int64_t value, size_t precision) noexcept
+ascii_numput&
+ascii_numput::
+put_XI(int64_t value, size_t precision)
+noexcept
   {
     this->clear();
     char* bp = this->m_stor + M;
@@ -1061,7 +1092,10 @@ ascii_numput& ascii_numput::put_XI(int64_t value, size_t precision) noexcept
     return *this;
   }
 
-ascii_numput& ascii_numput::put_DI(int64_t value, size_t precision) noexcept
+ascii_numput&
+ascii_numput::
+put_DI(int64_t value, size_t precision)
+noexcept
   {
     this->clear();
     char* bp = this->m_stor + M;
@@ -1081,7 +1115,10 @@ ascii_numput& ascii_numput::put_DI(int64_t value, size_t precision) noexcept
     return *this;
   }
 
-ascii_numput& ascii_numput::put_BF(double value, bool single) noexcept
+ascii_numput&
+ascii_numput::
+put_BF(double value, bool single)
+noexcept
   {
     this->clear();
     char* bp;
@@ -1135,7 +1172,10 @@ ascii_numput& ascii_numput::put_BF(double value, bool single) noexcept
     return *this;
   }
 
-ascii_numput& ascii_numput::put_BE(double value, bool /*single*/) noexcept
+ascii_numput&
+ascii_numput::
+put_BE(double value, bool /*single*/)
+noexcept
   {
     this->clear();
     char* bp;
@@ -1175,7 +1215,10 @@ ascii_numput& ascii_numput::put_BE(double value, bool /*single*/) noexcept
     return *this;
   }
 
-ascii_numput& ascii_numput::put_XF(double value, bool single) noexcept
+ascii_numput&
+ascii_numput::
+put_XF(double value, bool single)
+noexcept
   {
     this->clear();
     char* bp;
@@ -1232,7 +1275,10 @@ ascii_numput& ascii_numput::put_XF(double value, bool single) noexcept
     return *this;
   }
 
-ascii_numput& ascii_numput::put_XE(double value, bool /*single*/) noexcept
+ascii_numput&
+ascii_numput::
+put_XE(double value, bool /*single*/)
+noexcept
   {
     this->clear();
     char* bp;
@@ -1275,7 +1321,10 @@ ascii_numput& ascii_numput::put_XE(double value, bool /*single*/) noexcept
     return *this;
   }
 
-ascii_numput& ascii_numput::put_DF(double value, bool single) noexcept
+ascii_numput&
+ascii_numput::
+put_DF(double value, bool single)
+noexcept
   {
     this->clear();
     char* bp;
@@ -1326,7 +1375,10 @@ ascii_numput& ascii_numput::put_DF(double value, bool single) noexcept
     return *this;
   }
 
-ascii_numput& ascii_numput::put_DE(double value, bool single) noexcept
+ascii_numput&
+ascii_numput::
+put_DE(double value, bool single)
+noexcept
   {
     this->clear();
     char* bp;

@@ -5,7 +5,10 @@
 
 namespace rocket {
 
-template class basic_linear_buffer<char>;
-template class basic_linear_buffer<wchar_t>;
+template
+class basic_linear_buffer<char>;
+
+template
+class basic_linear_buffer<wchar_t>;
 
 }  // namespace rocket

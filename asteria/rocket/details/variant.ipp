@@ -8,39 +8,46 @@
 namespace details_variant {
 
 template<size_t indexT, typename targetT, typename... alternativesT>
-    struct type_finder  // no value
+struct type_finder
+  // no value
   { };
 
 template<size_t indexT, typename targetT, typename firstT, typename... restT>
-    struct type_finder<indexT, targetT, firstT, restT...>
-      : type_finder<indexT + 1, targetT, restT...>  // recursive
+struct type_finder<indexT, targetT, firstT, restT...>
+  : type_finder<indexT + 1, targetT, restT...>  // recursive
   { };
 
 template<size_t indexT, typename targetT, typename... restT>
-    struct type_finder<indexT, targetT, targetT, restT...>
-      : integral_constant<size_t, indexT>  // found
+struct type_finder<indexT, targetT, targetT, restT...>
+  : integral_constant<size_t, indexT>  // found
   { };
 
 template<size_t indexT, typename... alternativesT>
-    struct type_getter  // no type
+struct type_getter
+  // no type
   { };
 
 template<size_t indexT, typename firstT, typename... restT>
-    struct type_getter<indexT, firstT, restT...>
-      : type_getter<indexT - 1, restT...>  // recursive
+struct type_getter<indexT, firstT, restT...>
+  : type_getter<indexT - 1, restT...>  // recursive
   { };
 
 template<typename firstT, typename... restT>
-    struct type_getter<0, firstT, restT...>
-      : enable_if<1, firstT>  // found
+struct type_getter<0, firstT, restT...>
+  : enable_if<1, firstT>  // found
   { };
 
 // In a `catch` block that is conditionally unreachable, direct use of `throw` is subject to compiler
 // warnings. Wrapping the `throw` expression in a function could silence this warning.
-[[noreturn]] inline void rethrow_current_exception()
+[[noreturn]] inline
+void
+rethrow_current_exception()
   { throw;  }
 
-ROCKET_PURE_FUNCTION inline bool test_bit(const bool* table, size_t count, size_t index) noexcept
+ROCKET_PURE_FUNCTION inline
+bool
+test_bit(const bool* table, size_t count, size_t index)
+noexcept
   {
     size_t sum = 0;
     for(size_t i = 0;  i != count;  ++i)
@@ -54,10 +61,14 @@ ROCKET_PURE_FUNCTION inline bool test_bit(const bool* table, size_t count, size_
       return table[index];
   }
 
-template<typename alternativeT> void wrapped_copy_construct(void* dptr, const void* sptr)
+template<typename alternativeT>
+void
+wrapped_copy_construct(void* dptr, const void* sptr)
   { noadl::construct_at(static_cast<alternativeT*>(dptr), *static_cast<const alternativeT*>(sptr));  }
 
-template<typename... alternativesT> void dispatch_copy_construct(size_t rindex, void* dptr, const void* sptr)
+template<typename... alternativesT>
+void
+dispatch_copy_construct(size_t rindex, void* dptr, const void* sptr)
   {
     static constexpr bool s_trivial_table[] = { is_trivially_copy_constructible<alternativesT>::value... };
     if(ROCKET_EXPECT(test_bit(s_trivial_table, sizeof...(alternativesT), rindex))) {
@@ -71,10 +82,14 @@ template<typename... alternativesT> void dispatch_copy_construct(size_t rindex, 
     s_jump_table[rindex](dptr, sptr);
   }
 
-template<typename alternativeT> void wrapped_move_construct(void* dptr, void* sptr)
+template<typename alternativeT>
+void
+wrapped_move_construct(void* dptr, void* sptr)
   { noadl::construct_at(static_cast<alternativeT*>(dptr), ::std::move(*static_cast<alternativeT*>(sptr)));  }
 
-template<typename... alternativesT> void dispatch_move_construct(size_t rindex, void* dptr, void* sptr)
+template<typename... alternativesT>
+void
+dispatch_move_construct(size_t rindex, void* dptr, void* sptr)
   {
     static constexpr bool s_trivial_table[] = { is_trivially_move_constructible<alternativesT>::value... };
     if(ROCKET_EXPECT(test_bit(s_trivial_table, sizeof...(alternativesT), rindex))) {
@@ -88,10 +103,14 @@ template<typename... alternativesT> void dispatch_move_construct(size_t rindex, 
     s_jump_table[rindex](dptr, sptr);
   }
 
-template<typename alternativeT> void wrapped_copy_assign(void* dptr, const void* sptr)
+template<typename alternativeT>
+void
+wrapped_copy_assign(void* dptr, const void* sptr)
   { *static_cast<alternativeT*>(dptr) = *static_cast<const alternativeT*>(sptr);  }
 
-template<typename... alternativesT> void dispatch_copy_assign(size_t rindex, void* dptr, const void* sptr)
+template<typename... alternativesT>
+void
+dispatch_copy_assign(size_t rindex, void* dptr, const void* sptr)
   {
     static constexpr bool s_trivial_table[] = { is_trivially_copy_assignable<alternativesT>::value... };
     if(ROCKET_EXPECT(test_bit(s_trivial_table, sizeof...(alternativesT), rindex))) {
@@ -105,10 +124,14 @@ template<typename... alternativesT> void dispatch_copy_assign(size_t rindex, voi
     s_jump_table[rindex](dptr, sptr);
   }
 
-template<typename alternativeT> void wrapped_move_assign(void* dptr, void* sptr)
+template<typename alternativeT>
+void
+wrapped_move_assign(void* dptr, void* sptr)
   { *static_cast<alternativeT*>(dptr) = ::std::move(*static_cast<alternativeT*>(sptr));  }
 
-template<typename... alternativesT> void dispatch_move_assign(size_t rindex, void* dptr, void* sptr)
+template<typename... alternativesT>
+void
+dispatch_move_assign(size_t rindex, void* dptr, void* sptr)
   {
     static constexpr bool s_trivial_table[] = { is_trivially_move_assignable<alternativesT>::value... };
     if(ROCKET_EXPECT(test_bit(s_trivial_table, sizeof...(alternativesT), rindex))) {
@@ -122,10 +145,14 @@ template<typename... alternativesT> void dispatch_move_assign(size_t rindex, voi
     s_jump_table[rindex](dptr, sptr);
   }
 
-template<typename alternativeT> void wrapped_destroy(void* dptr) noexcept
+template<typename alternativeT>
+void
+wrapped_destroy(void* dptr)
   { noadl::destroy_at(static_cast<alternativeT*>(dptr));  }
 
-template<typename... alternativesT> void dispatch_destroy(size_t rindex, void* dptr)
+template<typename... alternativesT>
+void
+dispatch_destroy(size_t rindex, void* dptr)
   {
     static constexpr bool s_trivial_table[] = { is_trivially_destructible<alternativesT>::value... };
     if(ROCKET_EXPECT(test_bit(s_trivial_table, sizeof...(alternativesT), rindex))) {
@@ -137,13 +164,17 @@ template<typename... alternativesT> void dispatch_destroy(size_t rindex, void* d
     s_jump_table[rindex](dptr);
   }
 
-template<typename alternativeT> void wrapped_move_construct_then_destroy(void* dptr, void* sptr)
+template<typename alternativeT>
+void
+wrapped_move_construct_then_destroy(void* dptr, void* sptr)
   {
     noadl::construct_at(static_cast<alternativeT*>(dptr), ::std::move(*static_cast<alternativeT*>(sptr)));
     noadl::destroy_at(static_cast<alternativeT*>(sptr));
   }
 
-template<typename... alternativesT> void dispatch_move_construct_then_destroy(size_t rindex, void* dptr, void* sptr)
+template<typename... alternativesT>
+void
+dispatch_move_construct_then_destroy(size_t rindex, void* dptr, void* sptr)
   {
     static constexpr bool s_trivial_table[] = { conjunction<is_trivially_move_constructible<alternativesT>,
                                                             is_trivially_destructible<alternativesT>>::value... };
@@ -158,10 +189,14 @@ template<typename... alternativesT> void dispatch_move_construct_then_destroy(si
     s_jump_table[rindex](dptr, sptr);
   }
 
-template<typename alternativeT> void wrapped_adl_swap(void* dptr, void* sptr)
+template<typename alternativeT>
+void
+wrapped_adl_swap(void* dptr, void* sptr)
   { noadl::xswap(*static_cast<alternativeT*>(dptr), *static_cast<alternativeT*>(sptr));  }
 
-template<typename... alternativesT> void dispatch_swap(size_t rindex, void* dptr, void* sptr)
+template<typename... alternativesT>
+void
+dispatch_swap(size_t rindex, void* dptr, void* sptr)
   {
     static constexpr bool s_trivial_table[] = { conjunction<is_trivially_move_constructible<alternativesT>...,
                                                             is_trivially_move_assignable<alternativesT>...,
@@ -177,7 +212,9 @@ template<typename... alternativesT> void dispatch_swap(size_t rindex, void* dptr
     s_jump_table[rindex](dptr, sptr);
   }
 
-template<typename alternativeT, typename voidT, typename visitorT> void wrapped_visit(voidT* sptr, visitorT&& visitor)
+template<typename alternativeT, typename voidT, typename visitorT>
+void
+wrapped_visit(voidT* sptr, visitorT&& visitor)
   { return ::std::forward<visitorT>(visitor)(*static_cast<alternativeT*>(sptr));  }
 
 }  // namespace details_variant

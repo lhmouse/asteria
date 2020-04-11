@@ -9,10 +9,12 @@
 
 namespace rocket {
 
-template<typename charT, typename traitsT = char_traits<charT>,
-         typename allocT = allocator<charT>> class basic_tinybuf_str;
+template<typename charT, typename traitsT = char_traits<charT>, typename allocT = allocator<charT>>
+class basic_tinybuf_str;
 
-template<typename charT, typename traitsT, typename allocT> class basic_tinybuf_str : public basic_tinybuf<charT, traitsT>
+template<typename charT, typename traitsT, typename allocT>
+class basic_tinybuf_str
+  : public basic_tinybuf<charT, traitsT>
   {
   public:
     using char_type       = charT;
@@ -34,33 +36,44 @@ template<typename charT, typename traitsT, typename allocT> class basic_tinybuf_
     bool m_mapp = false;  // append mode
 
   public:
-    basic_tinybuf_str() noexcept(is_nothrow_constructible<string_type>::value)
+    basic_tinybuf_str()
+    noexcept(is_nothrow_constructible<string_type>::value)
       : m_stor()
       { }
 
-    explicit basic_tinybuf_str(const allocator_type& alloc) noexcept
+    explicit
+    basic_tinybuf_str(const allocator_type& alloc)
+    noexcept
       : m_stor(alloc)
       { }
 
-    explicit basic_tinybuf_str(open_mode mode, const allocator_type& alloc = allocator_type()) noexcept
+    explicit
+    basic_tinybuf_str(open_mode mode, const allocator_type& alloc = allocator_type())
+    noexcept
       : basic_tinybuf_str(alloc)
       { this->clear_string(mode);  }
 
-    template<typename xstrT> explicit basic_tinybuf_str(xstrT&& xstr, open_mode mode,
-                                                        const allocator_type& alloc = allocator_type())
+    template<typename xstrT>
+    explicit
+    basic_tinybuf_str(xstrT&& xstr, open_mode mode, const allocator_type& alloc = allocator_type())
       : basic_tinybuf_str(alloc)
       { this->set_string(::std::forward<xstrT>(xstr), mode);  }
 
-    ~basic_tinybuf_str() override;
+    ~basic_tinybuf_str()
+    override;
 
     basic_tinybuf_str(basic_tinybuf_str&&)
       = default;
 
-    basic_tinybuf_str& operator=(basic_tinybuf_str&&)
+    basic_tinybuf_str&
+    operator=(basic_tinybuf_str&&)
       = default;
 
   protected:
-    off_type do_fortell() const override
+    off_type
+    do_fortell()
+    const
+    override
       {
         // Calculate the number of characters after the get area.
         auto navail = this->m_stor.size() - this->m_goff;
@@ -73,8 +86,9 @@ template<typename charT, typename traitsT, typename allocT> class basic_tinybuf_
         return static_cast<off_type>(navail);
       }
 
-    basic_tinybuf_str& do_flush(const char_type*& gcur, const char_type*& gend,
-                                char_type*& /*pcur*/, char_type*& /*pend*/) override
+    basic_tinybuf_str&
+    do_flush(const char_type*& gcur, const char_type*& gend, char_type*& /*pcur*/, char_type*& /*pend*/)
+    override
       {
         if(gcur) {
           // If the get area exists, update the offset and clear it.
@@ -86,7 +100,9 @@ template<typename charT, typename traitsT, typename allocT> class basic_tinybuf_
         return *this;
       }
 
-    off_type do_seek(off_type off, seek_dir dir) override
+    off_type
+    do_seek(off_type off, seek_dir dir)
+    override
       {
         // Invalidate the get area before doing anything else.
         this->do_sync_areas();
@@ -112,7 +128,9 @@ template<typename charT, typename traitsT, typename allocT> class basic_tinybuf_
         return abs;
       }
 
-    int_type do_underflow(const char_type*& gcur, const char_type*& gend, bool peek) override
+    int_type
+    do_underflow(const char_type*& gcur, const char_type*& gend, bool peek)
+    override
       {
         // If the get area exists, update the offset and clear it.
         this->do_sync_areas();
@@ -131,8 +149,9 @@ template<typename charT, typename traitsT, typename allocT> class basic_tinybuf_
         return traits_type::to_int_type(gbase[0]);
       }
 
-    basic_tinybuf_str& do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/,
-                                   const char_type* sadd, size_type nadd) override
+    basic_tinybuf_str&
+    do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/, const char_type* sadd, size_type nadd)
+    override
       {
         // Be warned if the get area exists, it must be invalidated before modifying the string.
         this->do_sync_areas();
@@ -153,16 +172,26 @@ template<typename charT, typename traitsT, typename allocT> class basic_tinybuf_
       }
 
   public:
-    const string_type& get_string() const noexcept
+    const string_type&
+    get_string()
+    const
+    noexcept
       { return this->m_stor;  }
 
-    const char_type* get_c_string() const noexcept
+    const char_type*
+    get_c_string()
+    const
+    noexcept
       { return this->m_stor.c_str();  }
 
-    size_type get_length() const noexcept
+    size_type
+    get_length()
+    const
+    noexcept
       { return this->m_stor.length();  }
 
-    void clear_string(open_mode mode)
+    void
+    clear_string(open_mode mode)
       {
         this->do_purge_areas();
         // Clear the string and set the new mode.
@@ -171,7 +200,9 @@ template<typename charT, typename traitsT, typename allocT> class basic_tinybuf_
         this->m_mapp = tinybuf_base::has_mode(mode, tinybuf_base::open_append);
       }
 
-    template<typename xstrT> void set_string(xstrT&& xstr, open_mode mode)
+    template<typename xstrT>
+    void
+    set_string(xstrT&& xstr, open_mode mode)
       {
         this->do_purge_areas();
         // Set the new string and mode.
@@ -180,7 +211,8 @@ template<typename charT, typename traitsT, typename allocT> class basic_tinybuf_
         this->m_mapp = tinybuf_base::has_mode(mode, tinybuf_base::open_append);
       }
 
-    string_type extract_string(open_mode mode)
+    string_type
+    extract_string(open_mode mode)
       {
         this->do_purge_areas();
         // Swap the string with an empty one and set the new mode.
@@ -191,7 +223,9 @@ template<typename charT, typename traitsT, typename allocT> class basic_tinybuf_
         return str;
       }
 
-    basic_tinybuf_str& swap(basic_tinybuf_str& other) noexcept(is_nothrow_swappable<string_type>::value)
+    basic_tinybuf_str&
+    swap(basic_tinybuf_str& other)
+    noexcept(is_nothrow_swappable<string_type>::value)
       {
         noadl::xswap(this->m_stor, other.m_stor);
         // No exception shall be thrown afterwards.
@@ -203,15 +237,22 @@ template<typename charT, typename traitsT, typename allocT> class basic_tinybuf_
   };
 
 template<typename charT, typename traitsT, typename allocT>
-    basic_tinybuf_str<charT, traitsT, allocT>::~basic_tinybuf_str()
+basic_tinybuf_str<charT, traitsT, allocT>::
+~basic_tinybuf_str()
   = default;
 
-template<typename charT, typename traitsT, typename allocT> inline void swap(basic_tinybuf_str<charT, traitsT, allocT>& lhs,
-                                     basic_tinybuf_str<charT, traitsT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+template<typename charT, typename traitsT, typename allocT>
+inline
+void
+swap(basic_tinybuf_str<charT, traitsT, allocT>& lhs, basic_tinybuf_str<charT, traitsT, allocT>& rhs)
+noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
-extern template class basic_tinybuf_str<char>;
-extern template class basic_tinybuf_str<wchar_t>;
+extern template
+class basic_tinybuf_str<char>;
+
+extern template
+class basic_tinybuf_str<wchar_t>;
 
 using tinybuf_str   = basic_tinybuf_str<char>;
 using wtinybuf_str  = basic_tinybuf_str<wchar_t>;

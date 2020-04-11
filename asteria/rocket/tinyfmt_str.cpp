@@ -5,7 +5,10 @@
 
 namespace rocket {
 
-template class basic_tinyfmt_str<char>;
-template class basic_tinyfmt_str<wchar_t>;
+template
+class basic_tinyfmt_str<char>;
+
+template
+class basic_tinyfmt_str<wchar_t>;
 
 }  // namespace rocket

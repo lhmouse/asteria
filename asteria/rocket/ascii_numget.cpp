@@ -9,12 +9,15 @@
 namespace rocket {
 namespace {
 
-constexpr bool do_match_char_ci(char ch, char cmp) noexcept
+constexpr
+bool
+do_match_char_ci(char ch, char cmp)
   {
     return static_cast<uint8_t>(ch | 0x20) == static_cast<uint8_t>(cmp);
   }
 
-bool do_get_sign(const char*& rp, const char* eptr)
+bool
+do_get_sign(const char*& rp, const char* eptr)
   {
     // Look ahead for at most 1 character.
     if(eptr - rp < 1) {
@@ -36,7 +39,8 @@ bool do_get_sign(const char*& rp, const char* eptr)
     return 0;
   }
 
-uint8_t do_get_base(const char*& rp, const char* eptr, uint8_t ibase)
+uint8_t
+do_get_base(const char*& rp, const char* eptr, uint8_t ibase)
   {
     switch(ibase) {
       case 0: {
@@ -93,7 +97,8 @@ constexpr int8_t s_digits[] =
      -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
   };
 
-size_t do_collect_U(mantissa& m, const char*& rp, const char* eptr, uint8_t base, uint64_t limit)
+size_t
+do_collect_U(mantissa& m, const char*& rp, const char* eptr, uint8_t base, uint64_t limit)
   {
     size_t nread = 0;
     for(;;) {
@@ -137,7 +142,8 @@ size_t do_collect_U(mantissa& m, const char*& rp, const char* eptr, uint8_t base
 #include <quadmath.h>
 #include <stdio.h>
 
-void do_print_one(int e)
+void
+do_print_one(int e)
   {
     __float128 value, frac;
     int bexp;
@@ -160,7 +166,8 @@ void do_print_one(int e)
     printf("  // 1.0e%+.3d\n", e);
   }
 
-int main(void)
+int
+main(void)
   {
     int e;
 
@@ -834,7 +841,8 @@ constexpr s_decmult_F[] =
   };
 static_assert(noadl::countof(s_decmult_F) == 652, "");
 
-double do_xldexp_I(uint64_t ireg, int bexp, bool single) noexcept
+double
+do_xldexp_I(uint64_t ireg, int bexp, bool single)
   {
     ROCKET_ASSERT(ireg <= INT64_MAX);
     // Round it correctly.
@@ -846,7 +854,9 @@ double do_xldexp_I(uint64_t ireg, int bexp, bool single) noexcept
 
 }  // namespace
 
-ascii_numget& ascii_numget::parse_B(const char*& bptr, const char* eptr)
+ascii_numget&
+ascii_numget::
+parse_B(const char*& bptr, const char* eptr)
   {
     this->clear();
     const char* rp = bptr;
@@ -903,13 +913,16 @@ ascii_numget& ascii_numget::parse_B(const char*& bptr, const char* eptr)
     // Set the value.
     this->m_base = 2;
     this->m_mant = value;
+
     // Report success and advance the read pointer.
     this->m_succ = true;
     bptr = rp;
     return *this;
   }
 
-ascii_numget& ascii_numget::parse_P(const char*& bptr, const char* eptr)
+ascii_numget&
+ascii_numget::
+parse_P(const char*& bptr, const char* eptr)
   {
     this->clear();
     const char* rp = bptr;
@@ -932,13 +945,16 @@ ascii_numget& ascii_numget::parse_P(const char*& bptr, const char* eptr)
       this->m_base = base;
       this->m_mant = m.value;
     }
+
     // Report success and advance the read pointer.
     this->m_succ = true;
     bptr = rp;
     return *this;
   }
 
-ascii_numget& ascii_numget::parse_U(const char*& bptr, const char* eptr, uint8_t ibase)
+ascii_numget&
+ascii_numget::
+parse_U(const char*& bptr, const char* eptr, uint8_t ibase)
   {
     this->clear();
     const char* rp = bptr;
@@ -987,6 +1003,7 @@ ascii_numget& ascii_numget::parse_I(const char*& bptr, const char* eptr, uint8_t
       this->m_mant = m.value;
     }
     this->m_sign = sign;
+
     // Report success and advance the read pointer.
     this->m_succ = true;
     bptr = rp;
@@ -1098,13 +1115,17 @@ ascii_numget& ascii_numget::parse_F(const char*& bptr, const char* eptr, uint8_t
       }
     }
     this->m_sign = sign;
+
     // Report success and advance the read pointer.
     this->m_succ = true;
     bptr = rp;
     return *this;
   }
 
-ascii_numget& ascii_numget::cast_U(uint64_t& value, uint64_t lower, uint64_t upper) noexcept
+ascii_numget&
+ascii_numget::
+cast_U(uint64_t& value, uint64_t lower, uint64_t upper)
+noexcept
   {
     this->m_stat = 0;
     // Try casting the value.
@@ -1203,15 +1224,18 @@ ascii_numget& ascii_numget::cast_U(uint64_t& value, uint64_t lower, uint64_t upp
       value = upper;
       this->m_ovfl = true;
     }
-    // Report success if no error occurred.
-    if(this->m_stat != 0) {
+    if(this->m_stat != 0)
       return *this;
-    }
+
+    // Report success if no error occurred.
     this->m_succ = true;
     return *this;
   }
 
-ascii_numget& ascii_numget::cast_I(int64_t& value, int64_t lower, int64_t upper) noexcept
+ascii_numget&
+ascii_numget::
+cast_I(int64_t& value, int64_t lower, int64_t upper)
+noexcept
   {
     this->m_stat = 0;
     // Try casting the value.
@@ -1315,15 +1339,18 @@ ascii_numget& ascii_numget::cast_I(int64_t& value, int64_t lower, int64_t upper)
       value = upper;
       this->m_ovfl = true;
     }
-    // Report success if no error occurred.
-    if(this->m_stat != 0) {
+    if(this->m_stat != 0)
       return *this;
-    }
+
+    // Report success if no error occurred.
     this->m_succ = true;
     return *this;
   }
 
-ascii_numget& ascii_numget::cast_F(double& value, double lower, double upper, bool single) noexcept
+ascii_numget&
+ascii_numget::
+cast_F(double& value, double lower, double upper, bool single)
+noexcept
   {
     this->m_stat = 0;
     // Store the sign bit into a `double`.
@@ -1436,10 +1463,10 @@ ascii_numget& ascii_numget::cast_F(double& value, double lower, double upper, bo
       value = upper;
       this->m_ovfl = true;
     }
-    // Report success if no error occurred.
-    if(this->m_stat != 0) {
+    if(this->m_stat != 0)
       return *this;
-    }
+
+    // Report success if no error occurred.
     this->m_succ = true;
     return *this;
   }

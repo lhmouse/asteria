@@ -9,17 +9,20 @@
 
 namespace rocket {
 
-template<typename charT, typename traitsT = char_traits<charT>> struct basic_formatter;
+template<typename charT, typename traitsT = char_traits<charT>>
+struct basic_formatter;
 
 template<typename charT, typename traitsT>
-    basic_tinyfmt<charT, traitsT>& vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl,
-                                           const basic_formatter<charT, traitsT>* pinsts, size_t ninsts);
+basic_tinyfmt<charT, traitsT>&
+vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl, const basic_formatter<charT, traitsT>* pinsts, size_t ninsts);
+
 template<typename charT, typename traitsT>
-    basic_tinyfmt<charT, traitsT>& vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl,
-                                           const basic_formatter<charT, traitsT>* pinsts, size_t ninsts);
+basic_tinyfmt<charT, traitsT>&
+vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, const basic_formatter<charT, traitsT>* pinsts, size_t ninsts);
+
 template<typename charT, typename traitsT, typename... paramsT>
-    basic_tinyfmt<charT, traitsT>& format(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl,
-                                          const paramsT&... params);
+basic_tinyfmt<charT, traitsT>&
+format(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, const paramsT&... params);
 
 /* Examples:
  *   rocket::format(fmt, "hello $1 $2", "world", '!');   // outputs "hello world!"
@@ -30,7 +33,8 @@ template<typename charT, typename traitsT, typename... paramsT>
  *   rocket::format(fmt, "${12}3", 'x');                 // throws an exception
  */
 
-template<typename charT, typename traitsT> struct basic_formatter
+template<typename charT, typename traitsT>
+struct basic_formatter
   {
     using tinyfmt_type   = basic_tinyfmt<charT, traitsT>;
     using callback_type  = tinyfmt_type& (tinyfmt_type&, const void*);
@@ -38,12 +42,17 @@ template<typename charT, typename traitsT> struct basic_formatter
     callback_type* ifunc;
     const void* param;
 
-    tinyfmt_type& submit(tinyfmt_type& fmt) const
+    tinyfmt_type&
+    submit(tinyfmt_type& fmt)
+    const
       { return this->ifunc(fmt, this->param);  }
   };
 
 template<typename charT, typename traitsT = char_traits<charT>, typename paramT>
-    constexpr basic_formatter<charT, traitsT> make_default_formatter(paramT& param) noexcept
+constexpr
+basic_formatter<charT, traitsT>
+make_default_formatter(paramT& param)
+noexcept
   {
     return { [](basic_tinyfmt<charT, traitsT>& fmt, const void* ptr) -> basic_tinyfmt<charT, traitsT>&
                  { return fmt << *(static_cast<const paramT*>(ptr));  },
@@ -51,8 +60,8 @@ template<typename charT, typename traitsT = char_traits<charT>, typename paramT>
   }
 
 template<typename charT, typename traitsT>
-    basic_tinyfmt<charT, traitsT>& vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl,
-                                           const basic_formatter<charT, traitsT>* pinsts, size_t ninsts)
+basic_tinyfmt<charT, traitsT>&
+vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl, const basic_formatter<charT, traitsT>* pinsts, size_t ninsts)
   {
     // Get the range of `format`. The end pointer points to the null terminator.
     const charT* bp = stempl;
@@ -67,18 +76,21 @@ template<typename charT, typename traitsT>
       }
       // A placeholder has been found. Write all characters preceding it.
       fmt.putn(bp, static_cast<size_t>(pp - bp));
+
       // Skip the dollar sign and parse the placeholder.
       if(pp == ep) {
         noadl::sprintf_and_throw<invalid_argument>("format: incomplete placeholder (dangling `$`)");
       }
       typename traitsT::int_type ch = traitsT::to_int_type(*++pp);
       bp = ++pp;
+
       // Replace the placeholder.
       if(ch == '$') {
         // Write a plain dollar sign.
         fmt.putc(traitsT::to_char_type('$'));
         continue;
       }
+
       // The placeholder shall contain a valid index.
       size_t index = 0;
       switch(ch) {
@@ -106,6 +118,7 @@ template<typename charT, typename traitsT>
           }
           break;
         }
+
         case '0':
         case '1':
         case '2':
@@ -120,16 +133,16 @@ template<typename charT, typename traitsT>
           index = static_cast<size_t>(ch - '0');
           break;
         }
+
         default:
           noadl::sprintf_and_throw<invalid_argument>("format: invalid placeholder (sequence `$%c`)", (int)ch);
       }
+
       // Replace the placeholder.
-      if(index == 0) {
+      if(index == 0)
         fmt.putn(stempl, ntempl);
-      }
-      else if(index <= ninsts) {
+      else if(index <= ninsts)
         pinsts[index-1].submit(fmt);
-      }
       else
         noadl::sprintf_and_throw<invalid_argument>("format: no enough arguments (`%zu` > `%zu`)", index, ninsts);
     }
@@ -137,15 +150,15 @@ template<typename charT, typename traitsT>
   }
 
 template<typename charT, typename traitsT>
-    basic_tinyfmt<charT, traitsT>& vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl,
-                                           const basic_formatter<charT, traitsT>* pinsts, size_t ninsts)
+basic_tinyfmt<charT, traitsT>&
+vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, const basic_formatter<charT, traitsT>* pinsts, size_t ninsts)
   {
     return noadl::vformat(fmt, stempl, traitsT::length(stempl), pinsts, ninsts);
   }
 
 template<typename charT, typename traitsT, typename... paramsT>
-    basic_tinyfmt<charT, traitsT>& format(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl,
-                                          const paramsT&... params)
+basic_tinyfmt<charT, traitsT>&
+format(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, const paramsT&... params)
   {
     basic_formatter<charT, traitsT> insts[] = { noadl::make_default_formatter<charT, traitsT>(params)... };
     return noadl::vformat(fmt, stempl, traitsT::length(stempl), insts, sizeof...(params));
@@ -154,8 +167,13 @@ template<typename charT, typename traitsT, typename... paramsT>
 using formatter   = basic_formatter<char>;
 using wformatter  = basic_formatter<wchar_t>;
 
-extern template tinyfmt&  vformat(tinyfmt&,  const char*,    size_t, const formatter*,  size_t);
-extern template wtinyfmt& vformat(wtinyfmt&, const wchar_t*, size_t, const wformatter*, size_t);
+extern template
+tinyfmt&
+vformat(tinyfmt&, const char*, size_t, const formatter*, size_t);
+
+extern template
+wtinyfmt&
+vformat(wtinyfmt&, const wchar_t*, size_t, const wformatter*, size_t);
 
 }  // namespace rocket
 

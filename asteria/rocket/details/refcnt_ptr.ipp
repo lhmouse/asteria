@@ -13,24 +13,40 @@ class reference_counter_base
     mutable reference_counter<long> m_nref;
 
   public:
-    bool unique() const noexcept
+    bool
+    unique()
+    const
+    noexcept
       { return this->m_nref.unique();  }
 
-    long use_count() const noexcept
+    long
+    use_count()
+    const
+    noexcept
       { return this->m_nref.get();  }
 
-    void add_reference() const noexcept
+    void
+    add_reference()
+    const
+    noexcept
       { return this->m_nref.increment();  }
 
-    bool drop_reference() const noexcept
+    bool
+    drop_reference()
+    const
+    noexcept
       { return this->m_nref.decrement();  }
   };
 
-template<typename elementT, typename deleterT> constexpr deleterT copy_deleter(
-                                          const refcnt_base<elementT, deleterT>& base) noexcept
+template<typename elementT, typename deleterT>
+constexpr
+deleterT
+copy_deleter(const refcnt_base<elementT, deleterT>& base)
+noexcept
   { return base.as_deleter();  }
 
-template<typename elementT> class stored_pointer
+template<typename elementT>
+class stored_pointer
   {
   public:
     using element_type  = elementT;
@@ -40,7 +56,9 @@ template<typename elementT> class stored_pointer
     pointer m_ptr;
 
   public:
-    constexpr stored_pointer() noexcept
+    constexpr
+    stored_pointer()
+    noexcept
       : m_ptr()
       { }
 
@@ -56,11 +74,15 @@ template<typename elementT> class stored_pointer
     stored_pointer(const stored_pointer&)
       = delete;
 
-    stored_pointer& operator=(const stored_pointer&)
+    stored_pointer&
+    operator=(const stored_pointer&)
       = delete;
 
   public:
-    bool unique() const noexcept
+    bool
+    unique()
+    const
+    noexcept
       {
         auto ptr = this->m_ptr;
         if(!ptr)
@@ -68,7 +90,10 @@ template<typename elementT> class stored_pointer
         return ptr->reference_counter_base::unique();
       }
 
-    long use_count() const noexcept
+    long
+    use_count()
+    const
+    noexcept
       {
         auto ptr = this->m_ptr;
         if(!ptr)
@@ -76,13 +101,22 @@ template<typename elementT> class stored_pointer
         return ptr->reference_counter_base::use_count();
       }
 
-    constexpr pointer get() const noexcept
+    constexpr
+    pointer
+    get()
+    const
+    noexcept
       { return this->m_ptr;  }
 
-    pointer release() noexcept
+    pointer
+    release()
+    noexcept
       { return ::std::exchange(this->m_ptr, pointer());  }
 
-    pointer fork() const noexcept
+    pointer
+    fork()
+    const
+    noexcept
       {
         auto ptr = this->m_ptr;
         if(ptr)
@@ -90,7 +124,9 @@ template<typename elementT> class stored_pointer
         return ptr;
       }
 
-    void reset(pointer ptr_new) noexcept
+    void
+    reset(pointer ptr_new)
+    noexcept
       {
         auto ptr = ::std::exchange(this->m_ptr, ptr_new);
         if(ptr)
@@ -98,12 +134,15 @@ template<typename elementT> class stored_pointer
             (copy_deleter)(*ptr)(ptr);
       }
 
-    void exchange_with(stored_pointer& other) noexcept
+    void
+    exchange_with(stored_pointer& other)
+    noexcept
       { noadl::xswap(this->m_ptr, other.m_ptr);  }
   };
 
 template<typename targetT, typename sourceT, typename casterT>
-                     refcnt_ptr<targetT> pointer_cast_aux(const refcnt_ptr<sourceT>& sptr, casterT&& caster)
+refcnt_ptr<targetT>
+pointer_cast_aux(const refcnt_ptr<sourceT>& sptr, casterT&& caster)
   {
     refcnt_ptr<targetT> dptr(::std::forward<casterT>(caster)(sptr.get()));
     if(dptr)
@@ -112,7 +151,8 @@ template<typename targetT, typename sourceT, typename casterT>
   }
 
 template<typename targetT, typename sourceT, typename casterT>
-                     refcnt_ptr<targetT> pointer_cast_aux(refcnt_ptr<sourceT>&& sptr, casterT&& caster)
+refcnt_ptr<targetT>
+pointer_cast_aux(refcnt_ptr<sourceT>&& sptr, casterT&& caster)
   {
     refcnt_ptr<targetT> dptr(::std::forward<casterT>(caster)(sptr.get()));
     if(dptr)

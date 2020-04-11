@@ -19,24 +19,43 @@ class posix_fd_closer
     closer_type m_cl;
 
   public:
-    constexpr posix_fd_closer(closer_type cl) noexcept
+    constexpr
+    posix_fd_closer(closer_type cl)
+    noexcept
       : m_cl(cl)
       { }
 
   public:
-    constexpr operator closer_type () const noexcept
+    constexpr operator
+    closer_type()
+    const
+    noexcept
       { return this->m_cl;  }
 
-    int operator()(handle_type fd) const noexcept
+    int
+    operator()(handle_type fd)
+    const
+    noexcept
       { return this->close(fd);  }
 
-    constexpr handle_type null() const noexcept
+    constexpr
+    handle_type
+    null()
+    const
+    noexcept
       { return -1;  }
 
-    constexpr bool is_null(handle_type fd) const noexcept
+    constexpr
+    bool
+    is_null(handle_type fd)
+    const
+    noexcept
       { return fd == -1;  }
 
-    int close(handle_type fd) const noexcept
+    int
+    close(handle_type fd)
+    const
+    noexcept
       {
         if(!this->m_cl)
           return 0;  // no close

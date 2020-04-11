@@ -11,7 +11,8 @@
 
 namespace rocket {
 
-template<typename charT, typename traitsT = char_traits<charT>> class basic_tinyfmt;
+template<typename charT, typename traitsT = char_traits<charT>>
+class basic_tinyfmt;
 
 /* Differences from `std::basic_ostream`:
  * 1. Locales are not supported.
@@ -19,7 +20,8 @@ template<typename charT, typename traitsT = char_traits<charT>> class basic_tiny
  * 3. The stream is stateless. Exceptions are preferred when reporting errors.
  */
 
-template<typename charT, typename traitsT> class basic_tinyfmt
+template<typename charT, typename traitsT>
+class basic_tinyfmt
   {
   public:
     using char_type    = charT;
@@ -36,51 +38,71 @@ template<typename charT, typename traitsT> class basic_tinyfmt
 
   protected:
     // This interface class is stateless.
-    basic_tinyfmt() noexcept
+    basic_tinyfmt()
+    noexcept
       = default;
 
-    basic_tinyfmt(const basic_tinyfmt&) noexcept
+    basic_tinyfmt(const basic_tinyfmt&)
+    noexcept
       = default;
 
-    basic_tinyfmt& operator=(const basic_tinyfmt&) noexcept
+    basic_tinyfmt&
+    operator=(const basic_tinyfmt&)
+    noexcept
       = default;
 
   public:
-    virtual ~basic_tinyfmt();
+    virtual
+    ~basic_tinyfmt();
 
   public:
     // buffer interfaces
-    virtual tinybuf_type& get_tinybuf() const = 0;
+    virtual
+    tinybuf_type&
+    get_tinybuf()
+    const
+      = 0;
 
     // unformatted output functions
-    basic_tinyfmt& flush()
+    basic_tinyfmt&
+    flush()
       { return this->get_tinybuf().flush(), *this;  }
 
-    off_type seek(off_type off, seek_dir dir = tinybuf_base::seek_set)
+    off_type
+    seek(off_type off, seek_dir dir = tinybuf_base::seek_set)
       { return this->get_tinybuf().seek(off, dir);  }
 
-    basic_tinyfmt& putc(char_type c)
+    basic_tinyfmt&
+    putc(char_type c)
       { return this->get_tinybuf().putc(c), *this;  }
 
-    basic_tinyfmt& putn(const char_type* s, size_type n)
+    basic_tinyfmt&
+    putn(const char_type* s, size_type n)
       { return this->get_tinybuf().putn(s, n), *this;  }
 
-    basic_tinyfmt& puts(const char_type* s)
+    basic_tinyfmt&
+    puts(const char_type* s)
       { return this->get_tinybuf().puts(s), *this;  }
   };
 
 template<typename charT, typename traitsT>
-    basic_tinyfmt<charT, traitsT>::~basic_tinyfmt()
+basic_tinyfmt<charT, traitsT>::
+~basic_tinyfmt()
   = default;
 
-extern template class basic_tinyfmt<char>;
-extern template class basic_tinyfmt<wchar_t>;
+extern template
+class basic_tinyfmt<char>;
+
+extern template
+class basic_tinyfmt<wchar_t>;
 
 using tinyfmt   = basic_tinyfmt<char>;
 using wtinyfmt  = basic_tinyfmt<wchar_t>;
 
 // zero-conversion inserters
-template<typename charT, typename traitsT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, charT c)
+template<typename charT, typename traitsT>
+basic_tinyfmt<charT, traitsT>&
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, charT c)
   {
     // Insert the character as is.
     auto& buf = fmt.get_tinybuf();
@@ -88,7 +110,9 @@ template<typename charT, typename traitsT> basic_tinyfmt<charT, traitsT>& operat
     return fmt;
   }
 
-template<typename charT, typename traitsT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const charT* s)
+template<typename charT, typename traitsT>
+basic_tinyfmt<charT, traitsT>&
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, const charT* s)
   {
     // Insert the sequence as is.
     auto& buf = fmt.get_tinybuf();
@@ -97,7 +121,9 @@ template<typename charT, typename traitsT> basic_tinyfmt<charT, traitsT>& operat
   }
 
 // conversion inserters
-template<typename charT, typename traitsT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ascii_numput& nump)
+template<typename charT, typename traitsT>
+basic_tinyfmt<charT, traitsT>&
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ascii_numput& nump)
   {
     // Widen all characters and insert them.
     auto& buf = fmt.get_tinybuf();
@@ -105,7 +131,9 @@ template<typename charT, typename traitsT> basic_tinyfmt<charT, traitsT>& operat
     return fmt;
   }
 
-inline basic_tinyfmt<char>& operator<<(basic_tinyfmt<char>& fmt, const ascii_numput& nump)
+inline
+basic_tinyfmt<char>&
+operator<<(basic_tinyfmt<char>& fmt, const ascii_numput& nump)
   {
     // Optimize it a bit if no conversion is required.
     auto& buf = fmt.get_tinybuf();
@@ -114,54 +142,165 @@ inline basic_tinyfmt<char>& operator<<(basic_tinyfmt<char>& fmt, const ascii_num
   }
 
 // delegating inserters
-template<typename charT, typename traitsT, typename valueT, ROCKET_DISABLE_IF(is_same<charT, valueT>::value),
-             ROCKET_ENABLE_IF(is_arithmetic<valueT>::value)> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT value)
+template<typename charT, typename traitsT, typename valueT,
+         ROCKET_ENABLE_IF(!is_same<charT, valueT>::value && is_arithmetic<valueT>::value)>
+basic_tinyfmt<charT, traitsT>&
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT value)
   { return fmt << ascii_numput(value);  }
 
-template<typename charT, typename traitsT, typename valueT, ROCKET_DISABLE_IF(is_same<charT, valueT>::value),
-             ROCKET_ENABLE_IF(is_enum<valueT>::value)> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT value)
+template<typename charT, typename traitsT, typename valueT,
+         ROCKET_ENABLE_IF(!is_same<charT, valueT>::value && is_enum<valueT>::value)>
+basic_tinyfmt<charT, traitsT>&
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT value)
   { return fmt << ascii_numput(static_cast<typename underlying_type<valueT>::type>(value));  }
 
-template<typename charT, typename traitsT, typename valueT, ROCKET_DISABLE_IF(is_same<charT, typename remove_cv<valueT>::type>::value)>
-             basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT* value)
+template<typename charT, typename traitsT, typename valueT,
+         ROCKET_ENABLE_IF(!is_same<charT, typename remove_cv<valueT>::type>::value)>
+basic_tinyfmt<charT, traitsT>&
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT* value)
   { return fmt << ascii_numput(static_cast<const void*>(value));  }
 
-
 // rvalue inserter
-template<typename charT, typename traitsT, typename xvalueT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>&& fmt, xvalueT&& xvalue)
+template<typename charT, typename traitsT, typename xvalueT>
+basic_tinyfmt<charT, traitsT>&
+operator<<(basic_tinyfmt<charT, traitsT>&& fmt, xvalueT&& xvalue)
   { return fmt << ::std::forward<xvalueT>(xvalue);  }
 
-extern template tinyfmt&  operator<<(tinyfmt&,  char);
-extern template wtinyfmt& operator<<(wtinyfmt&, wchar_t);
-extern template tinyfmt&  operator<<(tinyfmt&,  const char*);
-extern template wtinyfmt& operator<<(wtinyfmt&, const wchar_t*);
-extern template tinyfmt&  operator<<(tinyfmt&,  const ascii_numput&);
-extern template wtinyfmt& operator<<(wtinyfmt&, const ascii_numput&);
+extern template
+tinyfmt&
+operator<<(tinyfmt&, char);
 
-extern template tinyfmt&  operator<<(tinyfmt&,  signed char);
-extern template wtinyfmt& operator<<(wtinyfmt&, signed char);
-extern template tinyfmt&  operator<<(tinyfmt&,  unsigned char);
-extern template wtinyfmt& operator<<(wtinyfmt&, unsigned char);
-extern template tinyfmt&  operator<<(tinyfmt&,  signed short);
-extern template wtinyfmt& operator<<(wtinyfmt&, signed short);
-extern template tinyfmt&  operator<<(tinyfmt&,  unsigned short);
-extern template wtinyfmt& operator<<(wtinyfmt&, unsigned short);
-extern template tinyfmt&  operator<<(tinyfmt&,  signed);
-extern template wtinyfmt& operator<<(wtinyfmt&, signed);
-extern template tinyfmt&  operator<<(tinyfmt&,  unsigned);
-extern template wtinyfmt& operator<<(wtinyfmt&, unsigned);
-extern template tinyfmt&  operator<<(tinyfmt&,  signed long);
-extern template wtinyfmt& operator<<(wtinyfmt&, signed long);
-extern template tinyfmt&  operator<<(tinyfmt&,  unsigned long);
-extern template wtinyfmt& operator<<(wtinyfmt&, unsigned long);
-extern template tinyfmt&  operator<<(tinyfmt&,  signed long long);
-extern template wtinyfmt& operator<<(wtinyfmt&, signed long long);
-extern template tinyfmt&  operator<<(tinyfmt&,  unsigned long long);
-extern template wtinyfmt& operator<<(wtinyfmt&, unsigned long long);
-extern template tinyfmt&  operator<<(tinyfmt&,  float);
-extern template wtinyfmt& operator<<(wtinyfmt&, double);
-extern template tinyfmt&  operator<<(tinyfmt&,  const void*);
-extern template tinyfmt&  operator<<(tinyfmt&,  void*);
+extern template
+tinyfmt&
+operator<<(tinyfmt&, const char*);
+
+extern template
+tinyfmt&
+operator<<(tinyfmt&, const ascii_numput&);
+
+extern template
+tinyfmt&
+operator<<(tinyfmt&, signed char);
+
+extern template
+tinyfmt&
+operator<<(tinyfmt&, signed short);
+
+extern template
+tinyfmt&
+operator<<(tinyfmt&, signed);
+
+extern template
+tinyfmt&
+operator<<(tinyfmt&, signed long);
+
+extern template
+tinyfmt&
+operator<<(tinyfmt&, signed long long);
+
+extern template
+tinyfmt&
+operator<<(tinyfmt&, unsigned char);
+
+extern template
+tinyfmt&
+operator<<(tinyfmt&, unsigned short);
+
+extern template
+tinyfmt&
+operator<<(tinyfmt&, unsigned);
+
+extern template
+tinyfmt&
+operator<<(tinyfmt&, unsigned long);
+
+extern template
+tinyfmt&
+operator<<(tinyfmt&, unsigned long long);
+
+extern template
+tinyfmt&
+operator<<(tinyfmt&, float);
+
+extern template
+tinyfmt&
+operator<<(tinyfmt&, double);
+
+extern template
+tinyfmt&
+operator<<(tinyfmt&, const void*);
+
+extern template
+tinyfmt&
+operator<<(tinyfmt&, void*);
+
+extern template
+wtinyfmt&
+operator<<(wtinyfmt&, wchar_t);
+
+extern template
+wtinyfmt&
+operator<<(wtinyfmt&, const wchar_t*);
+
+extern template
+wtinyfmt&
+operator<<(wtinyfmt&, const ascii_numput&);
+
+extern template
+wtinyfmt&
+operator<<(wtinyfmt&, signed char);
+
+extern template
+wtinyfmt&
+operator<<(wtinyfmt&, signed short);
+
+extern template
+wtinyfmt&
+operator<<(wtinyfmt&, signed);
+
+extern template
+wtinyfmt&
+operator<<(wtinyfmt&, signed long);
+
+extern template
+wtinyfmt&
+operator<<(wtinyfmt&, signed long long);
+
+extern template
+wtinyfmt&
+operator<<(wtinyfmt&, unsigned char);
+
+extern template
+wtinyfmt&
+operator<<(wtinyfmt&, unsigned short);
+
+extern template
+wtinyfmt&
+operator<<(wtinyfmt&, unsigned);
+
+extern template
+wtinyfmt&
+operator<<(wtinyfmt&, unsigned long);
+
+extern template
+wtinyfmt&
+operator<<(wtinyfmt&, unsigned long long);
+
+extern template
+wtinyfmt&
+operator<<(wtinyfmt&, float);
+
+extern template
+wtinyfmt&
+operator<<(wtinyfmt&, double);
+
+extern template
+wtinyfmt&
+operator<<(wtinyfmt&, const void*);
+
+extern template
+wtinyfmt&
+operator<<(wtinyfmt&, void*);
 
 }  // namespace rocket
 
