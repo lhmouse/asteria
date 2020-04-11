@@ -76,7 +76,8 @@ class basic_prehashed_string
       : m_sth(hf, ::std::move(str))
       { }
 
-    template<typename xstringT, ROCKET_ENABLE_IF(is_convertible<xstringT&, string_type>::value)>
+    template<typename xstringT,
+    ROCKET_ENABLE_IF(is_convertible<xstringT&, string_type>::value)>
     explicit constexpr
     basic_prehashed_string(xstringT& xstr, const hasher& hf = hasher())
     noexcept(conjunction<is_nothrow_constructible<string_type, xstringT&>,
@@ -84,7 +85,8 @@ class basic_prehashed_string
       : m_sth(hf, xstr)
       { }
 
-    template<typename xstringT, ROCKET_ENABLE_IF(is_convertible<xstringT&&, string_type>::value)>
+    template<typename xstringT,
+    ROCKET_ENABLE_IF(is_convertible<xstringT&&, string_type>::value)>
     constexpr
     basic_prehashed_string(xstringT&& xstr, const hasher& hf = hasher())
     noexcept(conjunction<is_nothrow_constructible<string_type, xstringT&&>,
@@ -350,28 +352,28 @@ operator!=(const basic_prehashed_string<stringT, hashT>& lhs, const basic_prehas
   { return (lhs.rdhash() != rhs.rdhash()) || (lhs.rdstr() != rhs.rdstr());  }
 
 template<typename stringT, typename hashT, typename otherT,
-         ROCKET_ENABLE_IF_HAS_TYPE(decltype(::std::declval<const stringT&>() == ::std::declval<const otherT&>()))>
+ROCKET_ENABLE_IF_HAS_TYPE(decltype(::std::declval<const stringT&>() == ::std::declval<const otherT&>()))>
 constexpr
 bool
 operator==(const basic_prehashed_string<stringT, hashT>& lhs, const otherT& rhs)
   { return lhs.rdstr() == rhs;  }
 
 template<typename stringT, typename hashT, typename otherT,
-         ROCKET_ENABLE_IF_HAS_TYPE(decltype(::std::declval<const stringT&>() != ::std::declval<const otherT&>()))>
+ROCKET_ENABLE_IF_HAS_TYPE(decltype(::std::declval<const stringT&>() != ::std::declval<const otherT&>()))>
 constexpr
 bool
 operator!=(const basic_prehashed_string<stringT, hashT>& lhs, const otherT& rhs)
   { return lhs.rdstr() != rhs;  }
 
 template<typename stringT, typename hashT, typename otherT,
-         ROCKET_ENABLE_IF_HAS_TYPE(decltype(::std::declval<const otherT&>() == ::std::declval<const stringT&>()))>
+ROCKET_ENABLE_IF_HAS_TYPE(decltype(::std::declval<const otherT&>() == ::std::declval<const stringT&>()))>
 constexpr
 bool
 operator==(const otherT& lhs, const basic_prehashed_string<stringT, hashT>& rhs)
   { return lhs == rhs.rdstr();  }
 
 template<typename stringT, typename hashT, typename otherT,
-         ROCKET_ENABLE_IF_HAS_TYPE(decltype(::std::declval<const otherT&>() != ::std::declval<const stringT&>()))>
+ROCKET_ENABLE_IF_HAS_TYPE(decltype(::std::declval<const otherT&>() != ::std::declval<const stringT&>()))>
 constexpr
 bool
 operator!=(const otherT& lhs, const basic_prehashed_string<stringT, hashT>& rhs)

@@ -93,12 +93,14 @@ class static_vector
       : static_vector(alloc)
       { this->assign(n, value);  }
 
-    template<typename firstT, typename... restT, ROCKET_DISABLE_IF(is_same<typename decay<firstT>::type, allocator_type>::value)>
+    template<typename firstT, typename... restT,
+    ROCKET_DISABLE_IF(is_same<typename decay<firstT>::type, allocator_type>::value)>
     static_vector(size_type n, const firstT& first, const restT&... rest)
       : static_vector()
       { this->assign(n, first, rest...);  }
 
-    template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
+    template<typename inputT,
+    ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     static_vector(inputT first, inputT last, const allocator_type& alloc = allocator_type())
       : static_vector(alloc)
       { this->assign(::std::move(first), ::std::move(last));  }
@@ -469,7 +471,8 @@ class static_vector
       }
 
     // N.B. This is a non-standard extension.
-    template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
+    template<typename inputT,
+    ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     static_vector&
     append(inputT first, inputT last)
       {
@@ -558,7 +561,8 @@ class static_vector
       }
 
     // N.B. This is a non-standard extension.
-    template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
+    template<typename inputT,
+    ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     static_vector&
     insert(size_type tpos, inputT first, inputT last)
       {
@@ -600,7 +604,8 @@ class static_vector
         return iterator(this->m_sth, ptr);
       }
 
-    template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
+    template<typename inputT,
+    ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     iterator
     insert(const_iterator tins, inputT first, inputT last)
       {
@@ -720,7 +725,8 @@ class static_vector
       }
 
     // N.B. The return type is a non-standard extension.
-    template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
+    template<typename inputT,
+    ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     static_vector&
     assign(inputT first, inputT last)
       {

@@ -143,19 +143,19 @@ operator<<(basic_tinyfmt<char>& fmt, const ascii_numput& nump)
 
 // delegating inserters
 template<typename charT, typename traitsT, typename valueT,
-         ROCKET_ENABLE_IF(!is_same<charT, valueT>::value && is_arithmetic<valueT>::value)>
+ROCKET_ENABLE_IF(!is_same<charT, valueT>::value && is_arithmetic<valueT>::value)>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT value)
   { return fmt << ascii_numput(value);  }
 
 template<typename charT, typename traitsT, typename valueT,
-         ROCKET_ENABLE_IF(!is_same<charT, valueT>::value && is_enum<valueT>::value)>
+ROCKET_ENABLE_IF(!is_same<charT, valueT>::value && is_enum<valueT>::value)>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT value)
   { return fmt << ascii_numput(static_cast<typename underlying_type<valueT>::type>(value));  }
 
 template<typename charT, typename traitsT, typename valueT,
-         ROCKET_ENABLE_IF(!is_same<charT, typename remove_cv<valueT>::type>::value)>
+ROCKET_ENABLE_IF(!is_same<charT, typename remove_cv<valueT>::type>::value)>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT* value)
   { return fmt << ascii_numput(static_cast<const void*>(value));  }

@@ -761,7 +761,8 @@ class hashmap_iterator
       : hashmap_iterator(nullptr, nullptr)
       { }
 
-    template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<yvalueT*, valueT*>::value)>
+    template<typename yvalueT,
+    ROCKET_ENABLE_IF(is_convertible<yvalueT*, valueT*>::value)>
     constexpr
     hashmap_iterator(const hashmap_iterator<hashmapT, yvalueT>& other)
     noexcept

@@ -53,7 +53,8 @@ class variant
         this->m_index = 0;
       }
 
-    template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<typename decay<paramT>::type>::value)>
+    template<typename paramT,
+    ROCKET_ENABLE_IF_HAS_VALUE(index_of<typename decay<paramT>::type>::value)>
     variant(paramT&& param)
     noexcept(is_nothrow_constructible<typename decay<paramT>::type, paramT&&>::value)
       {
@@ -92,7 +93,8 @@ class variant
       }
 
     // 23.7.3.3, assignment
-    template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<paramT>::value)>
+    template<typename paramT,
+    ROCKET_ENABLE_IF_HAS_VALUE(index_of<paramT>::value)>
     variant&
     operator=(const paramT& param)
     noexcept(conjunction<is_nothrow_copy_assignable<paramT>,
@@ -131,7 +133,8 @@ class variant
       }
 
     // N.B. This assignment operator only accepts rvalues hence no backup is needed.
-    template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<paramT>::value)>
+    template<typename paramT,
+    ROCKET_ENABLE_IF_HAS_VALUE(index_of<paramT>::value)>
     variant&
     operator=(paramT&& param)
     noexcept(is_nothrow_move_assignable<paramT>::value)
@@ -264,7 +267,8 @@ class variant
         return static_cast<const typename alternative_at<indexT>::type*>(static_cast<const void*>(this->m_stor));
       }
 
-    template<typename targetT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)>
+    template<typename targetT,
+    ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)>
     const targetT*
     get()
     const
@@ -283,7 +287,8 @@ class variant
         return static_cast<typename alternative_at<indexT>::type*>(static_cast<void*>(this->m_stor));
       }
 
-    template<typename targetT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)>
+    template<typename targetT,
+    ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)>
     targetT*
     get()
     noexcept
@@ -302,7 +307,8 @@ class variant
         return *ptr;
       }
 
-    template<typename targetT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)>
+    template<typename targetT,
+    ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)>
     const targetT&
     as()
     const
@@ -320,7 +326,8 @@ class variant
         return *ptr;
       }
 
-    template<typename targetT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)>
+    template<typename targetT,
+    ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)>
     targetT&
     as()
       {

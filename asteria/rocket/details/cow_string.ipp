@@ -347,7 +347,8 @@ class string_iterator
       : string_iterator(nullptr, nullptr)
       { }
 
-    template<typename ycharT, ROCKET_ENABLE_IF(is_convertible<ycharT*, charT*>::value)>
+    template<typename ycharT,
+    ROCKET_ENABLE_IF(is_convertible<ycharT*, charT*>::value)>
     constexpr
     string_iterator(const string_iterator<stringT, ycharT>& other)
     noexcept

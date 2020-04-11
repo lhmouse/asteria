@@ -63,8 +63,8 @@ class unique_ptr
       { this->reset(::std::move(ptr));  }
 
     template<typename yelementT, typename ydeleterT,
-             ROCKET_ENABLE_IF(conjunction<is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer, pointer>,
-                                          is_convertible<typename unique_ptr<yelementT, ydeleterT>::deleter_type, deleter_type>>::value)>
+    ROCKET_ENABLE_IF(is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer, pointer>::value &&
+                     is_constructible<deleter_type, typename unique_ptr<yelementT, ydeleterT>::deleter_type&&>::value)>
     unique_ptr(unique_ptr<yelementT, ydeleterT>&& other)
     noexcept
       : unique_ptr(::std::move(other.m_sth.as_deleter()))
@@ -91,8 +91,8 @@ class unique_ptr
       }
 
     template<typename yelementT, typename ydeleterT,
-             ROCKET_ENABLE_IF(conjunction<is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer, pointer>,
-                                          is_convertible<typename unique_ptr<yelementT, ydeleterT>::deleter_type, deleter_type>>::value)>
+    ROCKET_ENABLE_IF(is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer, pointer>::value &&
+                     is_assignable<deleter_type&, typename unique_ptr<yelementT, ydeleterT>::deleter_type&&>::value)>
     unique_ptr&
     operator=(unique_ptr<yelementT, ydeleterT>&& other)
     noexcept

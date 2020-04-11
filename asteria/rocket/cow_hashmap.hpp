@@ -112,7 +112,8 @@ class cow_hashmap
       : cow_hashmap(alloc, hf, eq)
       { this->m_sth.reallocate(0, 0, 0, res_arg);  }
 
-    template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
+    template<typename inputT,
+    ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     cow_hashmap(inputT first, inputT last, size_type res_arg = 0, const hasher& hf = hasher(), const key_equal& eq = key_equal(),
                 const allocator_type& alloc = allocator_type())
       : cow_hashmap(res_arg, hf, eq, alloc)
@@ -127,7 +128,8 @@ class cow_hashmap
       : cow_hashmap(alloc, hf, key_equal())
       { this->m_sth.reallocate(0, 0, 0, res_arg);  }
 
-    template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
+    template<typename inputT,
+    ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     cow_hashmap(inputT first, inputT last, size_type res_arg, const hasher& hf, const allocator_type& alloc)
       : cow_hashmap(res_arg, hf, alloc)
       { this->assign(::std::move(first), ::std::move(last));  }
@@ -140,7 +142,8 @@ class cow_hashmap
       : cow_hashmap(alloc, hasher(), key_equal())
       { this->m_sth.reallocate(0, 0, 0, res_arg);  }
 
-    template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
+    template<typename inputT,
+    ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     cow_hashmap(inputT first, inputT last, size_type res_arg, const allocator_type& alloc)
       : cow_hashmap(res_arg, alloc)
       { this->assign(::std::move(first), ::std::move(last));  }
@@ -433,7 +436,8 @@ class cow_hashmap
       { return this->try_emplace(::std::move(value.first), ::std::move(value.second));  }
 
     // N.B. The return type is a non-standard extension.
-    template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
+    template<typename inputT,
+    ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     cow_hashmap&
     insert(inputT first, inputT last)
       {
@@ -535,7 +539,8 @@ class cow_hashmap
 
     // N.B. This function may throw `std::bad_alloc`.
     // N.B. The return type differs from `std::unordered_map`.
-    template<typename ykeyT, ROCKET_DISABLE_IF(is_convertible<ykeyT, const_iterator>::value)>
+    template<typename ykeyT,
+    ROCKET_DISABLE_IF(is_convertible<ykeyT, const_iterator>::value)>
     bool
     erase(const ykeyT& key)
       {
@@ -687,7 +692,8 @@ class cow_hashmap
       }
 
     // N.B. This function is a non-standard extension.
-    template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
+    template<typename inputT,
+    ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     cow_hashmap&
     assign(inputT first, inputT last)
       {

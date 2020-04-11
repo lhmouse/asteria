@@ -86,7 +86,7 @@ class basic_linear_buffer
             this->do_assign(other);
         }
         else if(allocator_traits<allocator_type>::propagate_on_container_copy_assignment::value) {
-          // Otherwise, if the allocator in `*this` will be replaced anyway, the old buffer must be deallocated first.
+          // Otherwise, if the allocator in `*this` will be replaced, the old buffer must be deallocated first.
           this->do_deallocate();
           noadl::propagate_allocator_on_copy(this->m_stor.as_allocator(), other.m_stor.as_allocator());
           this->putn(other.data(), other.size());
@@ -110,7 +110,7 @@ class basic_linear_buffer
           this->do_exchange_with(other);
         }
         else if(allocator_traits<allocator_type>::propagate_on_container_move_assignment::value) {
-          // Otherwise, if the allocator in `*this` will be replaced anyway, the old buffer must be deallocated first.
+          // Otherwise, if the allocator in `*this` will be replaced, the old buffer must be deallocated first.
           this->do_deallocate();
           noadl::propagate_allocator_on_move(this->m_stor.as_allocator(), other.m_stor.as_allocator());
           this->do_exchange_with(other);

@@ -136,13 +136,15 @@ class refcnt_ptr
       : refcnt_ptr()
       { this->reset(ptr);  }
 
-    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
+    template<typename yelementT,
+    ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
     refcnt_ptr(const refcnt_ptr<yelementT>& other)
     noexcept
       : refcnt_ptr()
       { this->reset(other.m_sth.fork());  }
 
-    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
+    template<typename yelementT,
+    ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
     refcnt_ptr(refcnt_ptr<yelementT>&& other)
     noexcept
       : refcnt_ptr()
@@ -166,7 +168,8 @@ class refcnt_ptr
         return *this;
       }
 
-    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
+    template<typename yelementT,
+    ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
     refcnt_ptr&
     operator=(const refcnt_ptr<yelementT>& other)
     noexcept
@@ -175,7 +178,8 @@ class refcnt_ptr
         return *this;
       }
 
-    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
+    template<typename yelementT,
+    ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
     refcnt_ptr&
     operator=(refcnt_ptr<yelementT>&& other)
     noexcept

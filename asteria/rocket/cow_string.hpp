@@ -211,7 +211,8 @@ class basic_cow_string
       : basic_cow_string(alloc)
       { this->assign(n, ch);  }
 
-    template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
+    template<typename inputT,
+    ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     basic_cow_string(inputT first, inputT last, const allocator_type& alloc = allocator_type())
       : basic_cow_string(alloc)
       { this->assign(::std::move(first), ::std::move(last));  }
@@ -791,8 +792,8 @@ class basic_cow_string
         return this->append(first, static_cast<size_type>(last - first));
       }
 
-    template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value),
-                              ROCKET_DISABLE_IF(is_convertible<inputT, const value_type*>::value)>
+    template<typename inputT,
+    ROCKET_ENABLE_IF(is_input_iterator<inputT>::value && !is_convertible<inputT, const value_type*>::value)>
     basic_cow_string&
     append(inputT first, inputT last)
       {
@@ -932,7 +933,8 @@ class basic_cow_string
         return *this;
       }
 
-    template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
+    template<typename inputT,
+    ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     basic_cow_string&
     assign(inputT first, inputT last)
       {
@@ -1019,7 +1021,8 @@ class basic_cow_string
         return iterator(this, ptr);
       }
 
-    template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
+    template<typename inputT,
+    ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     iterator
     insert(const_iterator tins, inputT first, inputT last)
       {
@@ -1110,7 +1113,8 @@ class basic_cow_string
         return *this;
       }
 
-    template<typename inputT, ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
+    template<typename inputT,
+    ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     basic_cow_string&
     replace(const_iterator tfirst, const_iterator tlast, inputT first, inputT last)
       {
