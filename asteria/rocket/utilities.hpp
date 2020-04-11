@@ -133,13 +133,14 @@ using ::std::swap;
 
 namespace noadl = ::rocket;
 
-#include "details/utilities.tcc"
-
+#define ROCKET_VOID_T(...)               typename ::std::conditional<1, void, __VA_ARGS__>::type
 #define ROCKET_ENABLE_IF(...)            typename ::std::enable_if<+bool(__VA_ARGS__)>::type* = nullptr
 #define ROCKET_DISABLE_IF(...)           typename ::std::enable_if<!bool(__VA_ARGS__)>::type* = nullptr
 
-#define ROCKET_ENABLE_IF_HAS_TYPE(...)       typename ::std::conditional<1, void, typename __VA_ARGS__>::type* = nullptr
+#define ROCKET_ENABLE_IF_HAS_TYPE(...)       typename ::std::conditional<1, void, typename ::std::remove_reference<__VA_ARGS__>::type>::type* = nullptr
 #define ROCKET_ENABLE_IF_HAS_VALUE(...)      typename ::std::enable_if<!sizeof((__VA_ARGS__)) || true>::type* = nullptr
+
+#include "details/utilities.tcc"
 
 template<typename typeT> struct remove_cvref
     : remove_cv<typename remove_reference<typeT>::type>

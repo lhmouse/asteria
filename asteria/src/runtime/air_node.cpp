@@ -146,9 +146,7 @@ template<typename ParamV, typename = void> struct AVMC_Appender : AVMC_Appender_
   };
 
 // This is the trait struct for parameter types that do not implement `enumerate_variables()`.
-template<typename ParamV> struct AVMC_Appender<ParamV,
-              typename ::std::conditional<1, void,
-                         typename ParamV::nonenumerable>::type> : AVMC_Appender_common, ParamV
+template<typename ParamV> struct AVMC_Appender<ParamV, ROCKET_VOID_T(typename ParamV::nonenumerable)> : AVMC_Appender_common, ParamV
   {
     constexpr AVMC_Appender()
       : ParamV()  { }
