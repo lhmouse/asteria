@@ -9,7 +9,6 @@
 namespace Asteria {
 
 Aval std_array_slice(Aval data, Ival from, Iopt length);
-Aval std_array_replace_slice(Aval data, Ival from, Aval replacement);
 Aval std_array_replace_slice(Aval data, Ival from, Iopt length, Aval replacement);
 
 Iopt std_array_find(Aval data, Ival from, Iopt length, Value target);

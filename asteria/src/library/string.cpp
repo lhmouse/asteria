@@ -455,15 +455,6 @@ Sval std_string_slice(Sval text, Ival from, Iopt length)
     return Sval(range.first, range.second);
   }
 
-Sval std_string_replace_slice(Sval text, Ival from, Sval replacement)
-  {
-    Sval res = text;
-    auto range = do_slice(res, from, nullopt);
-    // Replace the subrange.
-    res.replace(range.first, range.second, replacement);
-    return res;
-  }
-
 Sval std_string_replace_slice(Sval text, Ival from, Iopt length, Sval replacement)
   {
     Sval res = text;
@@ -1458,7 +1449,7 @@ void create_bindings_string(V_object& result, API_Version /*version*/)
     Sval replacement;
     if(reader.I().v(text).v(from).S(state).v(replacement).F()) {
       Reference_root::S_temporary xref =
-        { std_string_replace_slice(::std::move(text), from, ::std::move(replacement)) };
+        { std_string_replace_slice(::std::move(text), from, nullopt, ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
     Iopt length;

@@ -9,7 +9,6 @@
 namespace Asteria {
 
 Sval std_string_slice(Sval text, Ival from, Iopt length);
-Sval std_string_replace_slice(Sval text, Ival from, Sval replacement);
 Sval std_string_replace_slice(Sval text, Ival from, Iopt length, Sval replacement);
 
 Ival std_string_compare(Sval text1, Sval text2, Iopt length);

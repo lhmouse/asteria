@@ -242,18 +242,6 @@ Aval std_array_slice(Aval data, Ival from, Iopt length)
     return Aval(range.first, range.second);
   }
 
-Aval std_array_replace_slice(Aval data, Ival from, Aval replacement)
-  {
-    auto range = do_slice(data, from, nullopt);
-    // Append segments.
-    Aval res;
-    res.reserve(data.size() - static_cast<size_t>(range.second - range.first) + replacement.size());
-    res.append(data.begin(), range.first);
-    res.append(replacement.begin(), replacement.end());
-    res.append(range.second, data.end());
-    return res;
-  }
-
 Aval std_array_replace_slice(Aval data, Ival from, Iopt length, Aval replacement)
   {
     auto range = do_slice(data, from, length);
@@ -701,7 +689,7 @@ void create_bindings_array(V_object& result, API_Version /*version*/)
     Aval replacement;
     if(reader.I().v(data).v(from).S(state).v(replacement).F()) {
       Reference_root::S_temporary xref =
-        { std_array_replace_slice(::std::move(data), from, ::std::move(replacement)) };
+        { std_array_replace_slice(::std::move(data), from, nullopt, ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
     Iopt length;
