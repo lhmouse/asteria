@@ -84,70 +84,9 @@ cow_string do_stringify(const Reference& ref) noexcept
 
 cow_string do_stringify(const exception& stdex) noexcept
   try {
+    // Write the exception message verbatim, followed by the dynamic type.
     ::rocket::tinyfmt_str fmt;
-
-    // Write the exception message verbatim.
-    fmt << stdex.what();
-
-    // Append the dynamic type of the exception object that has been caught.
-    format(fmt, "\n[exception class `$1`]", typeid(stdex).name());
-    return do_xindent(fmt.extract_string());
-  }
-  catch(exception& other) {
-    return ::rocket::sref("<bad exception>");
-  }
-
-cow_string do_stringify(const Parser_Error& except) noexcept
-  try {
-    ::rocket::tinyfmt_str fmt;
-
-    // Write the description of this error.
-    format(fmt, "ERROR $1: $2", except.status(),
-                          describe_parser_status(except.status()));
-
-    // Append the source location of the error.
-    if(except.line() >= 0)
-      format(fmt, "\n[unexpected token at line $1, offset $2, length $3]",
-                  except.line(), except.offset(), except.length());
-    else
-      fmt << "\n[end of input encountered]";
-
-    // Append the dynamic type of the exception object that has been caught.
-    format(fmt, "\n[exception class `$1`]", typeid(except).name());
-    return do_xindent(fmt.extract_string());
-  }
-  catch(exception& other) {
-    return ::rocket::sref("<bad exception>");
-  }
-
-cow_string do_stringify(const Runtime_Error& except) noexcept
-  try {
-    ::rocket::tinyfmt_str fmt;
-
-    // If the exception value is a string, write it verbatim.
-    // Otherwise print it like `std.debug.dump()`.
-    const auto& val = except.value();
-    if(val.is_string())
-      fmt << val.as_string();
-    else
-      fmt << val;
-
-    // Append backtrace frames.
-    size_t nframes = except.count_frames();
-    if(nframes != 0) {
-      fmt << "\n[backtrace:";
-      for(size_t i = 0;  i < except.count_frames();  ++i) {
-        const auto& frm = except.frame(i);
-        format(fmt, "\n  #$1 $2 at '$3': $4", i, frm.what_type(), frm.sloc(), frm.value());
-      }
-      fmt << "\n  -- end of backtrace]";
-    }
-    else
-      fmt << "\n[no backtrace available]";
-
-    // Append the dynamic type of the exception object that has been caught.
-    format(fmt, "\n[exception class `$1`]",
-                          typeid(except).name());
+    format(fmt, "$1\n[exception class `$2`]", stdex.what(), typeid(stdex).name());
     return do_xindent(fmt.extract_string());
   }
   catch(exception& other) {
@@ -543,7 +482,7 @@ int do_REP_single()
       }
       if(!retry) {
         // Bail out upon irrecoverable errors.
-        ::fprintf(stderr, "! parser error: %s\n", do_stringify(except).c_str());
+        ::fprintf(stderr, "! %s\n", do_stringify(except).c_str());
         return SIGPIPE;
       }
     }
@@ -557,13 +496,9 @@ int do_REP_single()
       // Print the result.
       ::fprintf(stderr, "* result #%lu: %s\n", index, do_stringify(ref).c_str());
     }
-    catch(Runtime_Error& except) {
-      // If an exception was thrown, print something informative.
-      ::fprintf(stderr, "! runtime error: %s\n", do_stringify(except).c_str());
-    }
     catch(exception& stdex) {
       // If an exception was thrown, print something informative.
-      ::fprintf(stderr, "! unhandled exception: %s\n", do_stringify(stdex).c_str());
+      ::fprintf(stderr, "! %s\n", do_stringify(stdex).c_str());
     }
     return 0;
   }
@@ -621,7 +556,7 @@ int do_REP_single()
     }
     catch(Parser_Error& except) {
       // Report the error and exit.
-      ::fprintf(stderr, "! parser error: %s\n", do_stringify(except).c_str());
+      ::fprintf(stderr, "! %s\n", do_stringify(except).c_str());
       do_exit(exit_parser_error);
     }
 
@@ -642,13 +577,9 @@ int do_REP_single()
           status = exit_unspecified;
       }
     }
-    catch(Runtime_Error& except) {
-      // If an exception was thrown, print something informative.
-      ::fprintf(stderr, "! runtime error: %s\n", do_stringify(except).c_str());
-    }
     catch(exception& stdex) {
       // If an exception was thrown, print something informative.
-      ::fprintf(stderr, "! unhandled exception: %s\n", do_stringify(stdex).c_str());
+      ::fprintf(stderr, "! %s\n", do_stringify(stdex).c_str());
     }
     do_exit(status);
   }
@@ -675,6 +606,6 @@ int main(int argc, char** argv)
   }
   catch(exception& stdex) {
     // Print a message followed by the backtrace if it is available. There isn't much we can do.
-    ::fprintf(stderr, "! unhandled exception: %s\n", do_stringify(stdex).c_str());
+    ::fprintf(stderr, "! %s\n", do_stringify(stdex).c_str());
     do_exit(exit_unspecified);
   }
