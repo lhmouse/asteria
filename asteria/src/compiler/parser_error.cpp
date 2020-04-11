@@ -19,8 +19,8 @@ void Parser_Error::do_compose_message()
     fmt.clear_string();
 
     // Write the status code in digital form.
-    format(fmt, "asteria parser error: ERROR $1: $2\n"
-                "[unexpected token at $3]",
+    format(fmt, "asteria parser error $1: $2\n"
+                "[unexpected token at '$3']",
                 this->m_stat, describe_parser_status(this->m_stat),
                 this->m_sloc);
 
