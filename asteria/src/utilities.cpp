@@ -57,7 +57,9 @@ constexpr char s_escapes[][8] =
 
 }  // namespace
 
-ptrdiff_t write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept
+ptrdiff_t
+write_log_to_stderr(const char* file, long line, cow_string&& msg)
+noexcept
   {
     ::rocket::tinyfmt_str fmt;
     fmt.set_string(cow_string(1023, '/'));
@@ -108,7 +110,9 @@ ptrdiff_t write_log_to_stderr(const char* file, long line, cow_string&& msg) noe
     return static_cast<ptrdiff_t>(nput);
   }
 
-bool utf8_encode(char*& pos, char32_t cp)
+bool
+utf8_encode(char*& pos, char32_t cp)
+noexcept
   {
     if(cp < 0x80) {
       // This character takes only one byte.
@@ -147,7 +151,8 @@ bool utf8_encode(char*& pos, char32_t cp)
     return true;
   }
 
-bool utf8_encode(cow_string& text, char32_t cp)
+bool
+utf8_encode(cow_string& text, char32_t cp)
   {
     char str[4];
     char* pos = str;
@@ -160,7 +165,9 @@ bool utf8_encode(cow_string& text, char32_t cp)
     return true;
   }
 
-bool utf8_decode(char32_t& cp, const char*& pos, size_t avail)
+bool
+utf8_decode(char32_t& cp, const char*& pos, size_t avail)
+noexcept
   {
     if(avail == 0) {
       return false;
@@ -211,7 +218,8 @@ bool utf8_decode(char32_t& cp, const char*& pos, size_t avail)
     return true;
   }
 
-bool utf8_decode(char32_t& cp, const cow_string& text, size_t& offset)
+bool
+utf8_decode(char32_t& cp, const cow_string& text, size_t& offset)
   {
     if(offset >= text.size()) {
       return false;
@@ -226,7 +234,9 @@ bool utf8_decode(char32_t& cp, const cow_string& text, size_t& offset)
     return true;
   }
 
-bool utf16_encode(char16_t*& pos, char32_t cp)
+bool
+utf16_encode(char16_t*& pos, char32_t cp)
+noexcept
   {
     if((0xD800 <= cp) && (cp < 0xE000)) {
       // Surrogates are reserved for UTF-16.
@@ -247,7 +257,8 @@ bool utf16_encode(char16_t*& pos, char32_t cp)
     return true;
   }
 
-bool utf16_encode(cow_u16string& text, char32_t cp)
+bool
+utf16_encode(cow_u16string& text, char32_t cp)
   {
     char16_t str[2];
     char16_t* pos = str;
@@ -260,7 +271,9 @@ bool utf16_encode(cow_u16string& text, char32_t cp)
     return true;
   }
 
-bool utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail)
+bool
+utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail)
+noexcept
   {
     if(avail == 0) {
       return false;
@@ -289,7 +302,8 @@ bool utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail)
     return true;
   }
 
-bool utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset)
+bool
+utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset)
   {
     if(offset >= text.size()) {
       return false;
@@ -324,7 +338,8 @@ const uint8_t cctype_table[128] =
     0x12, 0x12, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00,
   };
 
-tinyfmt& operator<<(tinyfmt& fmt, const Quote_Wrapper& q)
+tinyfmt&
+operator<<(tinyfmt& fmt, const Quote_Wrapper& q)
   {
     // Insert the leading quote mark.
     fmt << '\"';
@@ -344,7 +359,8 @@ tinyfmt& operator<<(tinyfmt& fmt, const Quote_Wrapper& q)
     return fmt;
   }
 
-tinyfmt& operator<<(tinyfmt& fmt, const Paragraph_Wrapper& q)
+tinyfmt&
+operator<<(tinyfmt& fmt, const Paragraph_Wrapper& q)
   {
     if(q.indent == 0) {
       // Write everything in a single line, separated by spaces.
@@ -360,7 +376,9 @@ tinyfmt& operator<<(tinyfmt& fmt, const Paragraph_Wrapper& q)
     return fmt;
   }
 
-Wrapped_Index wrap_index(int64_t index, size_t size) noexcept
+Wrapped_Index
+wrap_index(int64_t index, size_t size)
+noexcept
   {
     ROCKET_ASSERT(size <= PTRDIFF_MAX);
     // The range of valid indices is (~size, size).
@@ -385,7 +403,9 @@ Wrapped_Index wrap_index(int64_t index, size_t size) noexcept
     return w;
   }
 
-uint64_t generate_random_seed() noexcept
+uint64_t
+generate_random_seed()
+noexcept
   {
     // Get the system time of very high resolution.
     ::timespec ts;
@@ -402,14 +422,16 @@ uint64_t generate_random_seed() noexcept
     return seed;
   }
 
-void throw_system_error(const char* func, int err)
+void
+throw_system_error(const char* func, int err)
   {
     char sbuf[256];
     const char* msg = ::strerror_r(err, sbuf, sizeof(sbuf));
     ASTERIA_THROW("`$1()` failed (errno was `$2`: $3)", func, err, msg);
   }
 
-void throw_system_error(const char* func)
+void
+throw_system_error(const char* func)
   {
     throw_system_error(func, errno);
   }

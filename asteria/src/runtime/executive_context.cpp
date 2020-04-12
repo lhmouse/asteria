@@ -10,11 +10,14 @@
 
 namespace Asteria {
 
-Executive_Context::~Executive_Context()
+Executive_Context::
+~Executive_Context()
   {
   }
 
-void Executive_Context::do_bind_parameters(const cow_vector<phsh_string>& params, cow_vector<Reference>&& args)
+void
+Executive_Context::
+do_bind_parameters(const cow_vector<phsh_string>& params, cow_vector<Reference>&& args)
   {
     // This is the subscript of the special parameter placeholder `...`.
     size_t elps = SIZE_MAX;
@@ -45,17 +48,21 @@ void Executive_Context::do_bind_parameters(const cow_vector<phsh_string>& params
     }
     args.erase(0, elps);
     // Stash variadic arguments for lazy initialization.
-    // If all arguments are positional, `args` may be reused for the evaluation stack, so don't move it at all.
+    // If all arguments are positional, `args` may be reused for the evaluation stack, so don't move it.
     if(!args.empty())
       this->m_args = ::std::move(args);
   }
 
-void Executive_Context::do_defer_expression(const Source_Location& sloc, AVMC_Queue&& queue)
+void
+Executive_Context::
+do_defer_expression(const Source_Location& sloc, AVMC_Queue&& queue)
   {
     this->m_defer.emplace_back(sloc, ::std::move(queue));
   }
 
-void Executive_Context::do_on_scope_exit_void()
+void
+Executive_Context::
+do_on_scope_exit_void()
   {
     // Execute all deferred expressions backwards.
     while(this->m_defer.size()) {
@@ -76,7 +83,9 @@ void Executive_Context::do_on_scope_exit_void()
     ROCKET_ASSERT(this->m_defer.empty());
   }
 
-void Executive_Context::do_on_scope_exit_return()
+void
+Executive_Context::
+do_on_scope_exit_return()
   {
     // Stash the return reference.
     this->m_self = this->m_stack->get_top();
@@ -101,7 +110,9 @@ void Executive_Context::do_on_scope_exit_return()
     this->m_stack->push(::std::move(this->m_self));
   }
 
-void Executive_Context::do_on_scope_exit_exception(Runtime_Error& except)
+void
+Executive_Context::
+do_on_scope_exit_exception(Runtime_Error& except)
   {
     // Execute all deferred expressions backwards.
     while(this->m_defer.size()) {
@@ -121,7 +132,9 @@ void Executive_Context::do_on_scope_exit_exception(Runtime_Error& except)
     ROCKET_ASSERT(this->m_defer.empty());
   }
 
-Reference* Executive_Context::do_lazy_lookup_opt(const phsh_string& name)
+Reference*
+Executive_Context::
+do_lazy_lookup_opt(const phsh_string& name)
   {
     // Create pre-defined references as needed.
     // N.B. If you have ever changed these, remember to update 'analytic_context.cpp' as well.

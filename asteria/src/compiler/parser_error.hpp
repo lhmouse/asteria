@@ -10,7 +10,8 @@
 
 namespace Asteria {
 
-class Parser_Error : public virtual exception
+class Parser_Error
+  : public virtual exception
   {
   private:
     Parser_Status m_stat;
@@ -24,47 +25,86 @@ class Parser_Error : public virtual exception
       : m_stat(xstat), m_sloc(xsloc), m_length(xlength)
       { this->do_compose_message();  }
 
-    ~Parser_Error() override;
+    ~Parser_Error()
+    override;
 
   private:
-    void do_compose_message();
+    void
+    do_compose_message();
 
   public:
-    const char* what() const noexcept override
+    const char*
+    what()
+    const
+    noexcept
+    override
       { return this->m_what.c_str();  }
 
-    Parser_Status status() const noexcept
+    Parser_Status
+    status()
+    const
+    noexcept
       { return this->m_stat;  }
 
-    const char* what_status() const noexcept
+    const char*
+    what_status()
+    const
+    noexcept
       { return describe_parser_status(this->m_stat);  }
 
-    const Source_Location& sloc() const noexcept
+    const Source_Location&
+    sloc()
+    const
+    noexcept
       { return this->m_sloc;  }
 
-    const cow_string& file() const noexcept
+    const cow_string&
+    file()
+    const
+    noexcept
       { return this->m_sloc.file();  }
 
-    int line() const noexcept
+    int
+    line()
+    const
+    noexcept
       { return this->m_sloc.line();  }
 
-    int offset() const noexcept
+    int
+    offset()
+    const
+    noexcept
       { return this->m_sloc.offset();  }
 
-    size_t length() const noexcept
+    size_t
+    length()
+    const
+    noexcept
       { return this->m_length;  }
   };
 
-inline bool operator==(const Parser_Error& lhs, Parser_Status rhs) noexcept
+inline
+bool
+operator==(const Parser_Error& lhs, Parser_Status rhs)
+noexcept
   { return lhs.status() == rhs;  }
 
-inline bool operator!=(const Parser_Error& lhs, Parser_Status rhs) noexcept
+inline
+bool
+operator!=(const Parser_Error& lhs, Parser_Status rhs)
+noexcept
   { return lhs.status() != rhs;  }
 
-inline bool operator==(Parser_Status lhs, const Parser_Error& rhs) noexcept
+inline
+bool
+operator==(Parser_Status lhs, const Parser_Error& rhs)
+noexcept
   { return lhs == rhs.status();  }
 
-inline bool operator!=(Parser_Status lhs, const Parser_Error& rhs) noexcept
+inline
+bool
+operator!=(Parser_Status lhs, const Parser_Error& rhs)
+noexcept
   { return lhs != rhs.status();  }
 
 }  // namespace Asteria

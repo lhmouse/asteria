@@ -19,32 +19,54 @@ class Backtrace_Frame
     Value m_value;
 
   public:
-    template<typename XValT> Backtrace_Frame(Frame_Type xtype, const Source_Location& xsloc, XValT&& xval)
+    template<typename XValT>
+    Backtrace_Frame(Frame_Type xtype, const Source_Location& xsloc, XValT&& xval)
       : m_type(xtype), m_sloc(xsloc), m_value(::std::forward<XValT>(xval))
       { }
 
     ~Backtrace_Frame();
 
   public:
-    Frame_Type type() const noexcept
+    Frame_Type
+    type()
+    const
+    noexcept
       { return this->m_type;  }
 
-    const char* what_type() const noexcept
+    const char*
+    what_type()
+    const
+    noexcept
       { return describe_frame_type(this->m_type);  }
 
-    const Source_Location& sloc() const noexcept
+    const Source_Location&
+    sloc()
+    const
+    noexcept
       { return this->m_sloc;  }
 
-    const cow_string& file() const noexcept
+    const cow_string&
+    file()
+    const
+    noexcept
       { return this->m_sloc.file();  }
 
-    int line() const noexcept
+    int
+    line()
+    const
+    noexcept
       { return this->m_sloc.line();  }
 
-    int offset() const noexcept
+    int
+    offset()
+    const
+    noexcept
       { return this->m_sloc.offset();  }
 
-    const Value& value() const noexcept
+    const Value&
+    value()
+    const
+    noexcept
       { return this->m_value;  }
   };
 

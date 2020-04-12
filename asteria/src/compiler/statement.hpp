@@ -187,23 +187,37 @@ class Statement
       }
 
   public:
-    Index index() const noexcept
+    Index
+    index()
+    const
+    noexcept
       { return static_cast<Index>(this->m_stor.index());  }
 
-    bool is_empty_return() const noexcept
-      { return (this->m_stor.index() == index_return) && this->m_stor.as<index_return>().expr.units.empty();  }
+    bool
+    is_empty_return()
+    const
+    noexcept
+      { return (this->m_stor.index() == index_return) &&
+               this->m_stor.as<index_return>().expr.units.empty();  }
 
-    Statement& swap(Statement& other) noexcept
+    Statement&
+    swap(Statement& other)
+    noexcept
       {
         this->m_stor.swap(other.m_stor);
         return *this;
       }
 
-    cow_vector<AIR_Node>& generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
-                                        Analytic_Context& ctx, const Compiler_Options& opts, PTC_Aware ptc) const;
+    cow_vector<AIR_Node>&
+    generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
+                  Analytic_Context& ctx, const Compiler_Options& opts, PTC_Aware ptc)
+    const;
   };
 
-inline void swap(Statement& lhs, Statement& rhs) noexcept
+inline
+void
+swap(Statement& lhs, Statement& rhs)
+noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace Asteria

@@ -11,7 +11,8 @@
 namespace Asteria {
 namespace {
 
-int64_t do_verify_bounds(int64_t lower, int64_t upper)
+int64_t
+do_verify_bounds(int64_t lower, int64_t upper)
   {
     if(!(lower <= upper)) {
       ASTERIA_THROW("bounds not valid (`$1` is not less than or equal to `$2`)", lower, upper);
@@ -19,7 +20,8 @@ int64_t do_verify_bounds(int64_t lower, int64_t upper)
     return upper;
   }
 
-double do_verify_bounds(double lower, double upper)
+double
+do_verify_bounds(double lower, double upper)
   {
     if(!::std::islessequal(lower, upper)) {
       ASTERIA_THROW("bounds not valid (`$1` is not less than or equal to `$2`)", lower, upper);
@@ -27,7 +29,8 @@ double do_verify_bounds(double lower, double upper)
     return upper;
   }
 
-Ival do_cast_to_integer(double value)
+Ival
+do_cast_to_integer(double value)
   {
     if(!::std::islessequal(-0x1p63, value) || !::std::islessequal(value, 0x1p63 - 0x1p10)) {
       ASTERIA_THROW("`real` value not representable as an `integer` (value `$1`)", value);
@@ -35,7 +38,9 @@ Ival do_cast_to_integer(double value)
     return Ival(value);
   }
 
-ROCKET_PURE_FUNCTION Ival do_saturating_add(int64_t lhs, int64_t rhs)
+ROCKET_PURE_FUNCTION
+Ival
+do_saturating_add(int64_t lhs, int64_t rhs)
   {
     if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)) {
       return (rhs >> 63) ^ INT64_MAX;
@@ -43,7 +48,9 @@ ROCKET_PURE_FUNCTION Ival do_saturating_add(int64_t lhs, int64_t rhs)
     return lhs + rhs;
   }
 
-ROCKET_PURE_FUNCTION Ival do_saturating_sub(int64_t lhs, int64_t rhs)
+ROCKET_PURE_FUNCTION
+Ival
+do_saturating_sub(int64_t lhs, int64_t rhs)
   {
     if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs)) {
       return (rhs >> 63) ^ INT64_MIN;
@@ -51,7 +58,9 @@ ROCKET_PURE_FUNCTION Ival do_saturating_sub(int64_t lhs, int64_t rhs)
     return lhs - rhs;
   }
 
-ROCKET_PURE_FUNCTION Ival do_saturating_mul(int64_t lhs, int64_t rhs)
+ROCKET_PURE_FUNCTION
+Ival
+do_saturating_mul(int64_t lhs, int64_t rhs)
   {
     if((lhs == 0) || (rhs == 0)) {
       return 0;
@@ -76,16 +85,29 @@ ROCKET_PURE_FUNCTION Ival do_saturating_mul(int64_t lhs, int64_t rhs)
     return alhs * srhs;
   }
 
-ROCKET_PURE_FUNCTION Rval do_saturating_add(double lhs, double rhs)
-  { return lhs + rhs;  }
+ROCKET_PURE_FUNCTION
+Rval
+do_saturating_add(double lhs, double rhs)
+  {
+    return lhs + rhs;
+  }
 
-ROCKET_PURE_FUNCTION Rval do_saturating_sub(double lhs, double rhs)
-  { return lhs - rhs;  }
+ROCKET_PURE_FUNCTION
+Rval
+do_saturating_sub(double lhs, double rhs)
+  {
+    return lhs - rhs;
+  }
 
-ROCKET_PURE_FUNCTION Rval do_saturating_mul(double lhs, double rhs)
-  { return lhs * rhs;  }
+ROCKET_PURE_FUNCTION
+Rval
+do_saturating_mul(double lhs, double rhs)
+  {
+    return lhs * rhs;
+  }
 
-pair<Ival, int> do_decompose_integer(uint8_t ebase, int64_t value)
+pair<Ival, int>
+do_decompose_integer(uint8_t ebase, int64_t value)
   {
     int64_t ireg = value;
     int iexp = 0;
@@ -101,7 +123,8 @@ pair<Ival, int> do_decompose_integer(uint8_t ebase, int64_t value)
     return ::std::make_pair(ireg, iexp);
   }
 
-Sval& do_append_exponent(Sval& text, ::rocket::ascii_numput& nump, char delim, int exp)
+Sval&
+do_append_exponent(Sval& text, ::rocket::ascii_numput& nump, char delim, int exp)
   {
     // Write the delimiter.
     text.push_back(delim);
@@ -119,7 +142,8 @@ constexpr char s_spaces[] = " \f\n\r\t\v";
 
 }  // namespace
 
-Ival std_numeric_abs(Ival value)
+Ival
+std_numeric_abs(Ival value)
   {
     if(value == INT64_MIN) {
       ASTERIA_THROW("integer absolute value overflow (value `$1`)", value);
@@ -127,142 +151,170 @@ Ival std_numeric_abs(Ival value)
     return ::std::abs(value);
   }
 
-Rval std_numeric_abs(Rval value)
+Rval
+std_numeric_abs(Rval value)
   {
     return ::std::fabs(value);
   }
 
-Ival std_numeric_sign(Ival value)
+Ival
+std_numeric_sign(Ival value)
   {
     return value >> 63;
   }
 
-Ival std_numeric_sign(Rval value)
+Ival
+std_numeric_sign(Rval value)
   {
     return ::std::signbit(value) ? -1 : 0;
   }
 
-Bval std_numeric_is_finite(Ival /*value*/)
+Bval
+std_numeric_is_finite(Ival /*value*/)
   {
     return true;
   }
 
-Bval std_numeric_is_finite(Rval value)
+Bval
+std_numeric_is_finite(Rval value)
   {
     return ::std::isfinite(value);
   }
 
-Bval std_numeric_is_infinity(Ival /*value*/)
+Bval
+std_numeric_is_infinity(Ival /*value*/)
   {
     return false;
   }
 
-Bval std_numeric_is_infinity(Rval value)
+Bval
+std_numeric_is_infinity(Rval value)
   {
     return ::std::isinf(value);
   }
 
-Bval std_numeric_is_nan(Ival /*value*/)
+Bval
+std_numeric_is_nan(Ival /*value*/)
   {
     return false;
   }
 
-Bval std_numeric_is_nan(Rval value)
+Bval
+std_numeric_is_nan(Rval value)
   {
     return ::std::isnan(value);
   }
 
-Ival std_numeric_clamp(Ival value, Ival lower, Ival upper)
+Ival
+std_numeric_clamp(Ival value, Ival lower, Ival upper)
   {
     return ::rocket::clamp(value, lower, do_verify_bounds(lower, upper));
   }
 
-Rval std_numeric_clamp(Rval value, Rval lower, Rval upper)
+Rval
+std_numeric_clamp(Rval value, Rval lower, Rval upper)
   {
     return ::rocket::clamp(value, lower, do_verify_bounds(lower, upper));
   }
 
-Ival std_numeric_round(Ival value)
+Ival
+std_numeric_round(Ival value)
   {
     return value;
   }
 
-Rval std_numeric_round(Rval value)
+Rval
+std_numeric_round(Rval value)
   {
     return ::std::round(value);
   }
 
-Ival std_numeric_floor(Ival value)
+Ival
+std_numeric_floor(Ival value)
   {
     return value;
   }
 
-Rval std_numeric_floor(Rval value)
+Rval
+std_numeric_floor(Rval value)
   {
     return ::std::floor(value);
   }
 
-Ival std_numeric_ceil(Ival value)
+Ival
+std_numeric_ceil(Ival value)
   {
     return value;
   }
 
-Rval std_numeric_ceil(Rval value)
+Rval
+std_numeric_ceil(Rval value)
   {
     return ::std::ceil(value);
   }
 
-Ival std_numeric_trunc(Ival value)
+Ival
+std_numeric_trunc(Ival value)
   {
     return value;
   }
 
-Rval std_numeric_trunc(Rval value)
+Rval
+std_numeric_trunc(Rval value)
   {
     return ::std::trunc(value);
   }
 
-Ival std_numeric_iround(Ival value)
+Ival
+std_numeric_iround(Ival value)
   {
     return value;
   }
 
-Ival std_numeric_iround(Rval value)
+Ival
+std_numeric_iround(Rval value)
   {
     return do_cast_to_integer(::std::round(value));
   }
 
-Ival std_numeric_ifloor(Ival value)
+Ival
+std_numeric_ifloor(Ival value)
   {
     return value;
   }
 
-Ival std_numeric_ifloor(Rval value)
+Ival
+std_numeric_ifloor(Rval value)
   {
     return do_cast_to_integer(::std::floor(value));
   }
 
-Ival std_numeric_iceil(Ival value)
+Ival
+std_numeric_iceil(Ival value)
   {
     return value;
   }
 
-Ival std_numeric_iceil(Rval value)
+Ival
+std_numeric_iceil(Rval value)
   {
     return do_cast_to_integer(::std::ceil(value));
   }
 
-Ival std_numeric_itrunc(Ival value)
+Ival
+std_numeric_itrunc(Ival value)
   {
     return value;
   }
 
-Ival std_numeric_itrunc(Rval value)
+Ival
+std_numeric_itrunc(Rval value)
   {
     return do_cast_to_integer(::std::trunc(value));
   }
 
-Rval std_numeric_random(Global& global, Ropt limit)
+Rval
+std_numeric_random(Global& global, Ropt limit)
   {
     auto prng = global.random_engine();
 
@@ -287,80 +339,95 @@ Rval std_numeric_random(Global& global, Ropt limit)
     return *limit * ratio;
   }
 
-Rval std_numeric_sqrt(Rval x)
+Rval
+std_numeric_sqrt(Rval x)
   {
     return ::std::sqrt(x);
   }
 
-Rval std_numeric_fma(Rval x, Rval y, Rval z)
+Rval
+std_numeric_fma(Rval x, Rval y, Rval z)
   {
     return ::std::fma(x, y, z);
   }
 
-Rval std_numeric_remainder(Rval x, Rval y)
+Rval
+std_numeric_remainder(Rval x, Rval y)
   {
     return ::std::remainder(x, y);
   }
 
-pair<Rval, Ival> std_numeric_frexp(Rval x)
+pair<Rval, Ival>
+std_numeric_frexp(Rval x)
   {
     int exp;
     auto frac = ::std::frexp(x, &exp);
     return ::std::make_pair(frac, exp);
   }
 
-Rval std_numeric_ldexp(Rval frac, Ival exp)
+Rval
+std_numeric_ldexp(Rval frac, Ival exp)
   {
     int rexp = static_cast<int>(::rocket::clamp(exp, INT_MIN, INT_MAX));
     return ::std::ldexp(frac, rexp);
   }
 
-Ival std_numeric_addm(Ival x, Ival y)
+Ival
+std_numeric_addm(Ival x, Ival y)
   {
     return Ival(static_cast<uint64_t>(x) + static_cast<uint64_t>(y));
   }
 
-Ival std_numeric_subm(Ival x, Ival y)
+Ival
+std_numeric_subm(Ival x, Ival y)
   {
     return Ival(static_cast<uint64_t>(x) - static_cast<uint64_t>(y));
   }
 
-Ival std_numeric_mulm(Ival x, Ival y)
+Ival
+std_numeric_mulm(Ival x, Ival y)
   {
     return Ival(static_cast<uint64_t>(x) * static_cast<uint64_t>(y));
   }
 
-Ival std_numeric_adds(Ival x, Ival y)
+Ival
+std_numeric_adds(Ival x, Ival y)
   {
     return do_saturating_add(x, y);
   }
 
-Rval std_numeric_adds(Rval x, Rval y)
+Rval
+std_numeric_adds(Rval x, Rval y)
   {
     return do_saturating_add(x, y);
   }
 
-Ival std_numeric_subs(Ival x, Ival y)
+Ival
+std_numeric_subs(Ival x, Ival y)
   {
     return do_saturating_sub(x, y);
   }
 
-Rval std_numeric_subs(Rval x, Rval y)
+Rval
+std_numeric_subs(Rval x, Rval y)
   {
     return do_saturating_sub(x, y);
   }
 
-Ival std_numeric_muls(Ival x, Ival y)
+Ival
+std_numeric_muls(Ival x, Ival y)
   {
     return do_saturating_mul(x, y);
   }
 
-Rval std_numeric_muls(Rval x, Rval y)
+Rval
+std_numeric_muls(Rval x, Rval y)
   {
     return do_saturating_mul(x, y);
   }
 
-Ival std_numeric_lzcnt(Ival x)
+Ival
+std_numeric_lzcnt(Ival x)
   {
     // TODO: Modern CPUs have intrinsics for this.
     uint64_t ireg = static_cast<uint64_t>(x);
@@ -378,7 +445,8 @@ Ival std_numeric_lzcnt(Ival x)
     return count;
   }
 
-Ival std_numeric_tzcnt(Ival x)
+Ival
+std_numeric_tzcnt(Ival x)
   {
     // TODO: Modern CPUs have intrinsics for this.
     uint64_t ireg = static_cast<uint64_t>(x);
@@ -396,7 +464,8 @@ Ival std_numeric_tzcnt(Ival x)
     return count;
   }
 
-Ival std_numeric_popcnt(Ival x)
+Ival
+std_numeric_popcnt(Ival x)
   {
     // TODO: Modern CPUs have intrinsics for this.
     uint64_t ireg = static_cast<uint64_t>(x);
@@ -413,7 +482,8 @@ Ival std_numeric_popcnt(Ival x)
     return count;
   }
 
-Ival std_numeric_rotl(Ival m, Ival x, Ival n)
+Ival
+std_numeric_rotl(Ival m, Ival x, Ival n)
   {
     if((m < 0) || (m > 64)) {
       ASTERIA_THROW("invalid modulo bit count (`$1` is not between 0 and 64)", m);
@@ -437,7 +507,8 @@ Ival std_numeric_rotl(Ival m, Ival x, Ival n)
     return static_cast<int64_t>(ireg & mask);
   }
 
-Ival std_numeric_rotr(Ival m, Ival x, Ival n)
+Ival
+std_numeric_rotr(Ival m, Ival x, Ival n)
   {
     if((m < 0) || (m > 64)) {
       ASTERIA_THROW("invalid modulo bit count (`$1` is not between 0 and 64)", m);
@@ -461,7 +532,8 @@ Ival std_numeric_rotr(Ival m, Ival x, Ival n)
     return static_cast<int64_t>(ireg & mask);
   }
 
-Sval std_numeric_format(Ival value, Iopt base, Iopt ebase)
+Sval
+std_numeric_format(Ival value, Iopt base, Iopt ebase)
   {
     Sval text;
     ::rocket::ascii_numput nump;
@@ -518,7 +590,8 @@ Sval std_numeric_format(Ival value, Iopt base, Iopt ebase)
     return text;
   }
 
-Sval std_numeric_format(Rval value, Iopt base, Iopt ebase)
+Sval
+std_numeric_format(Rval value, Iopt base, Iopt ebase)
   {
     Sval text;
     ::rocket::ascii_numput nump;
@@ -569,7 +642,8 @@ Sval std_numeric_format(Rval value, Iopt base, Iopt ebase)
     return text;
   }
 
-Ival std_numeric_parse_integer(Sval text)
+Ival
+std_numeric_parse_integer(Sval text)
   {
     auto tpos = text.find_first_not_of(s_spaces);
     if(tpos == Sval::npos) {
@@ -592,7 +666,8 @@ Ival std_numeric_parse_integer(Sval text)
     return value;
   }
 
-Rval std_numeric_parse_real(Sval text, Bopt saturating)
+Rval
+std_numeric_parse_real(Sval text, Bopt saturating)
   {
     auto tpos = text.find_first_not_of(s_spaces);
     if(tpos == Sval::npos) {
@@ -619,7 +694,8 @@ Rval std_numeric_parse_real(Sval text, Bopt saturating)
     return value;
   }
 
-void create_bindings_numeric(V_object& result, API_Version /*version*/)
+void
+create_bindings_numeric(V_object& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.numeric.integer_max`
@@ -864,14 +940,16 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Ival ilower;
     Ival iupper;
     if(reader.I().v(ivalue).v(ilower).v(iupper).F()) {
-      Reference_root::S_temporary xref = { std_numeric_clamp(::std::move(ivalue), ::std::move(ilower), ::std::move(iupper)) };
+      Reference_root::S_temporary xref = { std_numeric_clamp(::std::move(ivalue), ::std::move(ilower),
+                                                             ::std::move(iupper)) };
       return self = ::std::move(xref);
     }
     Rval rvalue;
     Rval flower;
     Rval fupper;
     if(reader.I().v(rvalue).v(flower).v(fupper).F()) {
-      Reference_root::S_temporary xref = { std_numeric_clamp(::std::move(rvalue), ::std::move(flower), ::std::move(fupper)) };
+      Reference_root::S_temporary xref = { std_numeric_clamp(::std::move(rvalue), ::std::move(flower),
+                                                             ::std::move(fupper)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1708,12 +1786,14 @@ void create_bindings_numeric(V_object& result, API_Version /*version*/)
     Iopt base;
     Iopt ebase;
     if(reader.I().v(ivalue).o(base).o(ebase).F()) {
-      Reference_root::S_temporary xref = { std_numeric_format(::std::move(ivalue), ::std::move(base), ::std::move(ebase)) };
+      Reference_root::S_temporary xref = { std_numeric_format(::std::move(ivalue), ::std::move(base),
+                                                              ::std::move(ebase)) };
       return self = ::std::move(xref);
     }
     Rval fvalue;
     if(reader.I().v(fvalue).o(base).o(ebase).F()) {
-      Reference_root::S_temporary xref = { std_numeric_format(::std::move(fvalue), ::std::move(base), ::std::move(ebase)) };
+      Reference_root::S_temporary xref = { std_numeric_format(::std::move(fvalue), ::std::move(base),
+                                                              ::std::move(ebase)) };
       return self = ::std::move(xref);
     }
     // Fail.

@@ -6,7 +6,9 @@
 
 namespace Asteria {
 
-const char* describe_xop(Xop xop) noexcept
+const char*
+describe_xop(Xop xop)
+noexcept
   {
     switch(xop) {
       case xop_inc_post: {

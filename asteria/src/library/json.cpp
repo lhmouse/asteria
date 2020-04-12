@@ -16,80 +16,125 @@ namespace {
 class Indenter
   {
   public:
-    virtual ~Indenter();
+    virtual
+    ~Indenter();
 
   public:
-    virtual tinyfmt& break_line(tinyfmt& fmt) const = 0;
-    virtual void increment_level() = 0;
-    virtual void decrement_level() = 0;
+    virtual
+    tinyfmt&
+    break_line(tinyfmt& fmt)
+    const
+      = 0;
+
+    virtual
+    void
+    increment_level()
+      = 0;
+
+    virtual
+    void
+    decrement_level()
+      = 0;
   };
 
-Indenter::~Indenter()
+Indenter::
+~Indenter()
   {
   }
 
-class Indenter_none final : public Indenter
+class Indenter_none
+final
+  : public Indenter
   {
   public:
-    explicit Indenter_none()
+    explicit
+    Indenter_none()
       = default;
 
   public:
-    tinyfmt& break_line(tinyfmt& fmt) const override
+    tinyfmt&
+    break_line(tinyfmt& fmt)
+    const
+    override
       { return fmt;  }
 
-    void increment_level() override
+    void
+    increment_level()
+    override
       { }
 
-    void decrement_level() override
+    void
+    decrement_level()
+    override
       { }
   };
 
-class Indenter_string final : public Indenter
+class Indenter_string
+final
+  : public Indenter
   {
   private:
     cow_string m_add;
     cow_string m_cur;
 
   public:
-    explicit Indenter_string(const cow_string& add)
+    explicit
+    Indenter_string(const cow_string& add)
       : m_add(add), m_cur(::rocket::sref("\n"))
       { }
 
   public:
-    tinyfmt& break_line(tinyfmt& fmt) const override
+    tinyfmt&
+    break_line(tinyfmt& fmt)
+    const
+    override
       { return fmt << this->m_cur;  }
 
-    void increment_level() override
+    void
+    increment_level()
+    override
       { this->m_cur.append(this->m_add);  }
 
-    void decrement_level() override
+    void
+    decrement_level()
+    override
       { this->m_cur.pop_back(this->m_add.size());  }
   };
 
-class Indenter_spaces final : public Indenter
+class Indenter_spaces
+final
+  : public Indenter
   {
   private:
     size_t m_add;
     size_t m_cur;
 
   public:
-    explicit Indenter_spaces(int64_t add)
+    explicit
+    Indenter_spaces(int64_t add)
       : m_add(static_cast<size_t>(::rocket::clamp(add, 0, 10))), m_cur(0)
       { }
 
   public:
-    tinyfmt& break_line(tinyfmt& fmt) const override
+    tinyfmt&
+    break_line(tinyfmt& fmt)
+    const
+    override
       { return fmt << pwrap(this->m_add, this->m_cur);  }
 
-    void increment_level() override
+    void
+    increment_level()
+    override
       { this->m_cur += this->m_add;  }
 
-    void decrement_level() override
+    void
+    decrement_level()
+    override
       { this->m_cur -= this->m_add;  }
   };
 
-tinyfmt& do_quote_string(tinyfmt& fmt, const cow_string& str)
+tinyfmt&
+do_quote_string(tinyfmt& fmt, const cow_string& str)
   {
     // Although JavaScript uses UCS-2 rather than UTF-16, the JSON specification adopts UTF-16.
     fmt << '\"';
@@ -157,7 +202,8 @@ tinyfmt& do_quote_string(tinyfmt& fmt, const cow_string& str)
     return fmt;
   }
 
-tinyfmt& do_quote_object_key(tinyfmt& fmt, bool json5, const cow_string& name)
+tinyfmt&
+do_quote_object_key(tinyfmt& fmt, bool json5, const cow_string& name)
   {
     if(json5 && !name.empty() && is_cctype(name[0], cctype_namei) &&
                ::std::none_of(name.begin() + 1, name.end(),
@@ -167,7 +213,8 @@ tinyfmt& do_quote_object_key(tinyfmt& fmt, bool json5, const cow_string& name)
       return do_quote_string(fmt, name);
   }
 
-Oval::const_iterator do_find_uncensored(const Oval& object, Oval::const_iterator from)
+Oval::const_iterator
+do_find_uncensored(const Oval& object, Oval::const_iterator from)
   {
     return ::std::find_if(from, object.end(),
         [](const auto& pair) {
@@ -177,7 +224,8 @@ Oval::const_iterator do_find_uncensored(const Oval& object, Oval::const_iterator
         });
   }
 
-tinyfmt& do_format_scalar(tinyfmt& fmt, const Value& value, bool json5)
+tinyfmt&
+do_format_scalar(tinyfmt& fmt, const Value& value, bool json5)
   {
     switch(::rocket::weaken_enum(value.vtype())) {
       case vtype_boolean: {
@@ -230,7 +278,8 @@ struct S_xformat_object
 
 using Xformat = variant<S_xformat_array, S_xformat_object>;
 
-Sval do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
+Sval
+do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
   {
     ::rocket::tinyfmt_str fmt;
     // Transform recursion to iteration using a handwritten stack.
@@ -341,12 +390,14 @@ Sval do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
     }
   }
 
-Sval do_format_nonrecursive(const Value& value, bool json5, Indenter&& indent)
+Sval
+do_format_nonrecursive(const Value& value, bool json5, Indenter&& indent)
   {
     return do_format_nonrecursive(value, json5, indent);
   }
 
-Sopt do_accept_identifier_opt(Token_Stream& tstrm, initializer_list<const char*> accept)
+Sopt
+do_accept_identifier_opt(Token_Stream& tstrm, initializer_list<const char*> accept)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
@@ -363,7 +414,8 @@ Sopt do_accept_identifier_opt(Token_Stream& tstrm, initializer_list<const char*>
     return nullopt;
   }
 
-opt<Punctuator> do_accept_punctuator_opt(Token_Stream& tstrm, initializer_list<Punctuator> accept)
+opt<Punctuator>
+do_accept_punctuator_opt(Token_Stream& tstrm, initializer_list<Punctuator> accept)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
@@ -380,7 +432,8 @@ opt<Punctuator> do_accept_punctuator_opt(Token_Stream& tstrm, initializer_list<P
     return nullopt;
   }
 
-Ropt do_accept_number_opt(Token_Stream& tstrm)
+Ropt
+do_accept_number_opt(Token_Stream& tstrm)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
@@ -427,7 +480,8 @@ Ropt do_accept_number_opt(Token_Stream& tstrm)
     return nullopt;
   }
 
-Sopt do_accept_string_opt(Token_Stream& tstrm)
+Sopt
+do_accept_string_opt(Token_Stream& tstrm)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
@@ -442,7 +496,8 @@ Sopt do_accept_string_opt(Token_Stream& tstrm)
     return nullopt;
   }
 
-opt<Value> do_accept_scalar_opt(Token_Stream& tstrm)
+opt<Value>
+do_accept_scalar_opt(Token_Stream& tstrm)
   {
     auto qnum = do_accept_number_opt(tstrm);
     if(qnum) {
@@ -478,7 +533,8 @@ opt<Value> do_accept_scalar_opt(Token_Stream& tstrm)
     return nullopt;
   }
 
-Sopt do_accept_key_opt(Token_Stream& tstrm)
+Sopt
+do_accept_key_opt(Token_Stream& tstrm)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
@@ -503,14 +559,17 @@ struct S_xparse_array
   {
     Aval array;
   };
+
 struct S_xparse_object
   {
     Oval object;
     Sval key;
   };
+
 using Xparse = variant<S_xparse_array, S_xparse_object>;
 
-Value do_json_parse_nonrecursive(Token_Stream& tstrm)
+Value
+do_json_parse_nonrecursive(Token_Stream& tstrm)
   {
     Value value;
     // Implement a recursive descent parser without recursion.
@@ -537,7 +596,8 @@ Value do_json_parse_nonrecursive(Token_Stream& tstrm)
           // A key followed by a colon is expected.
           auto qkey = do_accept_key_opt(tstrm);
           if(!qkey) {
-            throw Parser_Error(parser_status_closed_brace_or_json5_key_expected, tstrm.next_sloc(), tstrm.next_length());
+            throw Parser_Error(parser_status_closed_brace_or_json5_key_expected, tstrm.next_sloc(),
+                               tstrm.next_length());
           }
           kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
           if(!kpunct) {
@@ -592,7 +652,8 @@ Value do_json_parse_nonrecursive(Token_Stream& tstrm)
           // Look for the next element.
           kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl, punctuator_comma });
           if(!kpunct) {
-            throw Parser_Error(parser_status_closed_brace_or_comma_expected, tstrm.next_sloc(), tstrm.next_length());
+            throw Parser_Error(parser_status_closed_brace_or_comma_expected, tstrm.next_sloc(),
+                               tstrm.next_length());
           }
           if(*kpunct == punctuator_comma) {
             kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
@@ -600,7 +661,8 @@ Value do_json_parse_nonrecursive(Token_Stream& tstrm)
               // The next key is expected to follow the comma.
               auto qkey = do_accept_key_opt(tstrm);
               if(!qkey) {
-                throw Parser_Error(parser_status_closed_brace_or_json5_key_expected, tstrm.next_sloc(), tstrm.next_length());
+                throw Parser_Error(parser_status_closed_brace_or_json5_key_expected, tstrm.next_sloc(),
+                                   tstrm.next_length());
               }
               kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
               if(!kpunct) {
@@ -622,35 +684,40 @@ Value do_json_parse_nonrecursive(Token_Stream& tstrm)
 
 }  // namespace
 
-Sval std_json_format(Value value, Sopt indent)
+Sval
+std_json_format(Value value, Sopt indent)
   {
     // No line break is inserted if `indent` is null or empty.
     return (!indent || indent->empty()) ? do_format_nonrecursive(value, false, Indenter_none())
                                         : do_format_nonrecursive(value, false, Indenter_string(*indent));
   }
 
-Sval std_json_format(Value value, Ival indent)
+Sval
+std_json_format(Value value, Ival indent)
   {
     // No line break is inserted if `indent` is non-positive.
     return (indent <= 0) ? do_format_nonrecursive(value, false, Indenter_none())
                          : do_format_nonrecursive(value, false, Indenter_spaces(indent));
   }
 
-Sval std_json_format5(Value value, Sopt indent)
+Sval
+std_json_format5(Value value, Sopt indent)
   {
     // No line break is inserted if `indent` is null or empty.
     return (!indent || indent->empty()) ? do_format_nonrecursive(value, true, Indenter_none())
                                         : do_format_nonrecursive(value, true, Indenter_string(*indent));
   }
 
-Sval std_json_format5(Value value, Ival indent)
+Sval
+std_json_format5(Value value, Ival indent)
   {
     // No line break is inserted if `indent` is non-positive.
     return (indent <= 0) ? do_format_nonrecursive(value, true, Indenter_none())
                          : do_format_nonrecursive(value, true, Indenter_spaces(indent));
   }
 
-Value std_json_parse(Sval text)
+Value
+std_json_parse(Sval text)
   try {
     // We reuse the lexer of Asteria here, allowing quite a few extensions e.g. binary numeric
     // literals and comments.
@@ -679,7 +746,8 @@ Value std_json_parse(Sval text)
                                                                   describe_parser_status(except.status()));
   }
 
-void create_bindings_json(V_object& result, API_Version /*version*/)
+void
+create_bindings_json(V_object& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.json.format()`

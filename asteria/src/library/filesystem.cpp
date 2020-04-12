@@ -29,7 +29,8 @@ struct RM_Element
     cow_string path;
   };
 
-int64_t do_remove_recursive(const char* path)
+int64_t
+do_remove_recursive(const char* path)
   {
     int64_t nremoved = 0;
     // Push the first element.
@@ -108,7 +109,8 @@ int64_t do_remove_recursive(const char* path)
     return nremoved;
   }
 
-::ssize_t do_write_loop(int fd, const void* buf, size_t count)
+::ssize_t
+do_write_loop(int fd, const void* buf, size_t count)
   {
     auto bp = static_cast<const char*>(buf);
     auto ep = bp + count;
@@ -125,7 +127,8 @@ int64_t do_remove_recursive(const char* path)
 
 }  // namespace
 
-Sval std_filesystem_get_working_directory()
+Sval
+std_filesystem_get_working_directory()
   {
     // Pass a null pointer to request dynamic allocation.
     // Note this behavior is an extension that exists almost everywhere.
@@ -135,7 +138,8 @@ Sval std_filesystem_get_working_directory()
     return Sval(qcwd);
   }
 
-Sval std_filesystem_get_real_path(Sval path)
+Sval
+std_filesystem_get_real_path(Sval path)
   {
     // Pass a null pointer to request dynamic allocation.
     uptr<char, void (&)(void*)> abspath(::realpath(path.safe_c_str(), nullptr), ::free);
@@ -144,7 +148,8 @@ Sval std_filesystem_get_real_path(Sval path)
     return Sval(abspath);
   }
 
-Oopt std_filesystem_get_information(Sval path)
+Oopt
+std_filesystem_get_information(Sval path)
   {
     struct ::stat stb;
     if(::lstat(path.safe_c_str(), &stb) != 0) {
@@ -191,13 +196,15 @@ Oopt std_filesystem_get_information(Sval path)
     return ::std::move(stat);
   }
 
-void std_filesystem_move_from(Sval path_new, Sval path_old)
+void
+std_filesystem_move_from(Sval path_new, Sval path_old)
   {
     if(::rename(path_old.safe_c_str(), path_new.safe_c_str()) != 0)
       ASTERIA_THROW_SYSTEM_ERROR("rename");
   }
 
-Ival std_filesystem_remove_recursive(Sval path)
+Ival
+std_filesystem_remove_recursive(Sval path)
   {
     if(::rmdir(path.safe_c_str()) == 0) {
       // An empty directory has been removed.
@@ -225,7 +232,8 @@ Ival std_filesystem_remove_recursive(Sval path)
     }
   }
 
-Oopt std_filesystem_directory_list(Sval path)
+Oopt
+std_filesystem_directory_list(Sval path)
   {
     ::rocket::unique_posix_dir dp(::opendir(path.safe_c_str()), closedir);
     if(!dp) {
@@ -284,7 +292,8 @@ Oopt std_filesystem_directory_list(Sval path)
     return ::std::move(entries);
   }
 
-Bval std_filesystem_directory_create(Sval path)
+Bval
+std_filesystem_directory_create(Sval path)
   {
     if(::mkdir(path.safe_c_str(), 0777) == 0) {
       // A new directory has been created.
@@ -304,7 +313,8 @@ Bval std_filesystem_directory_create(Sval path)
     return false;
   }
 
-Bval std_filesystem_directory_remove(Sval path)
+Bval
+std_filesystem_directory_remove(Sval path)
   {
     if(::rmdir(path.safe_c_str()) == 0) {
       // The directory has been removed.
@@ -317,7 +327,8 @@ Bval std_filesystem_directory_remove(Sval path)
     return false;
   }
 
-Sopt std_filesystem_file_read(Sval path, Iopt offset, Iopt limit)
+Sopt
+std_filesystem_file_read(Sval path, Iopt offset, Iopt limit)
   {
     if(offset && (*offset < 0)) {
       ASTERIA_THROW("negative file offset (offset `$1`)", *offset);
@@ -351,7 +362,8 @@ Sopt std_filesystem_file_read(Sval path, Iopt offset, Iopt limit)
     return ::std::move(data);
   }
 
-Iopt std_filesystem_file_stream(Global& global, Sval path, Fval callback, Iopt offset, Iopt limit)
+Iopt
+std_filesystem_file_stream(Global& global, Sval path, Fval callback, Iopt offset, Iopt limit)
   {
     if(offset && (*offset < 0)) {
       ASTERIA_THROW("negative file offset (offset `$1`)", *offset);
@@ -410,7 +422,8 @@ Iopt std_filesystem_file_stream(Global& global, Sval path, Fval callback, Iopt o
     return ntotal;
   }
 
-void std_filesystem_file_write(Sval path, Sval data, Iopt offset)
+void
+std_filesystem_file_write(Sval path, Sval data, Iopt offset)
   {
     if(offset && (*offset < 0)) {
       ASTERIA_THROW("negative file offset (offset `$1`)", *offset);
@@ -439,7 +452,8 @@ void std_filesystem_file_write(Sval path, Sval data, Iopt offset)
       ASTERIA_THROW_SYSTEM_ERROR("write");
   }
 
-void std_filesystem_file_append(Sval path, Sval data, Bopt exclusive)
+void
+std_filesystem_file_append(Sval path, Sval data, Bopt exclusive)
   {
     int flags = O_WRONLY | O_CREAT | O_APPEND;
     if(exclusive == true)
@@ -454,7 +468,8 @@ void std_filesystem_file_append(Sval path, Sval data, Bopt exclusive)
       ASTERIA_THROW_SYSTEM_ERROR("write");
   }
 
-void std_filesystem_file_copy_from(Sval path_new, Sval path_old)
+void
+std_filesystem_file_copy_from(Sval path_new, Sval path_old)
   {
     // Open the old file.
     ::rocket::unique_posix_fd fd_old(::open(path_old.safe_c_str(), O_RDONLY), ::close);
@@ -493,7 +508,8 @@ void std_filesystem_file_copy_from(Sval path_new, Sval path_old)
       ASTERIA_THROW_SYSTEM_ERROR("fchmod");
   }
 
-bool std_filesystem_file_remove(Sval path)
+bool
+std_filesystem_file_remove(Sval path)
   {
     if(::unlink(path.safe_c_str()) == 0) {
       // The file has been removed.
@@ -506,7 +522,8 @@ bool std_filesystem_file_remove(Sval path)
     return false;
   }
 
-void create_bindings_filesystem(V_object& result, API_Version /*version*/)
+void
+create_bindings_filesystem(V_object& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.filesystem.get_working_directory()`
@@ -791,8 +808,8 @@ void create_bindings_filesystem(V_object& result, API_Version /*version*/)
     Iopt offset;
     Iopt limit;
     if(reader.I().v(path).o(offset).o(limit).F()) {
-      Reference_root::S_temporary xref =
-        { std_filesystem_file_read(::std::move(path), ::std::move(offset), ::std::move(limit)) };
+      Reference_root::S_temporary xref = { std_filesystem_file_read(::std::move(path), ::std::move(offset),
+                                                                    ::std::move(limit)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -835,8 +852,7 @@ void create_bindings_filesystem(V_object& result, API_Version /*version*/)
     Iopt offset;
     Iopt limit;
     if(reader.I().v(path).v(callback).o(offset).o(limit).F()) {
-      Reference_root::S_temporary xref =
-        { std_filesystem_file_stream(global, path, callback, offset, limit) };
+      Reference_root::S_temporary xref = { std_filesystem_file_stream(global, path, callback, offset, limit) };
       return self = ::std::move(xref);
     }
     // Fail.

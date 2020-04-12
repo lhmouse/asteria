@@ -16,8 +16,9 @@
 namespace Asteria {
 namespace {
 
-Runtime_Error& do_unpack_frames(Runtime_Error& except, Global_Context& global, Evaluation_Stack& stack,
-                                cow_vector<rcptr<PTC_Arguments>>&& frames)
+Runtime_Error&
+do_unpack_frames(Runtime_Error& except, Global_Context& global, Evaluation_Stack& stack,
+                 cow_vector<rcptr<PTC_Arguments>>&& frames)
   {
     while(frames.size()) {
       auto tca = ::std::move(frames.mut_back());
@@ -47,7 +48,8 @@ Runtime_Error& do_unpack_frames(Runtime_Error& except, Global_Context& global, E
     return except;
   }
 
-Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
+Reference&
+do_unpack_tail_calls(Reference& self, Global_Context& global)
   {
     // The function call shall yield an rvalue unless all wrapped calls return by reference.
     PTC_Aware ptc_conj = ptc_aware_by_ref;
@@ -130,16 +132,23 @@ Reference& do_unpack_tail_calls(Reference& self, Global_Context& global)
 
 }  // namespace
 
-Reference::~Reference()
+Reference::
+~Reference()
   {
   }
 
-void Reference::do_throw_unset_no_modifier() const
+void
+Reference::
+do_throw_unset_no_modifier()
+const
   {
     ASTERIA_THROW("non-members can't be unset");
   }
 
-const Value& Reference::do_read(const Modifier* mods, size_t nmod, const Modifier& last) const
+const Value&
+Reference::
+do_read(const Modifier* mods, size_t nmod, const Modifier& last)
+const
   {
     auto qref = ::std::addressof(this->m_root.dereference_const());
     for(size_t i = 0;  i < nmod;  ++i) {
@@ -152,7 +161,10 @@ const Value& Reference::do_read(const Modifier* mods, size_t nmod, const Modifie
     return (qref = last.apply_const_opt(*qref)) ? *qref : null_value;
   }
 
-Value& Reference::do_open(const Modifier* mods, size_t nmod, const Modifier& last) const
+Value&
+Reference::
+do_open(const Modifier* mods, size_t nmod, const Modifier& last)
+const
   {
     auto qref = ::std::addressof(this->m_root.dereference_mutable());
     for(size_t i = 0;  i < nmod;  ++i) {
@@ -165,7 +177,10 @@ Value& Reference::do_open(const Modifier* mods, size_t nmod, const Modifier& las
     return *(last.apply_mutable_opt(*qref, true));
   }
 
-Value Reference::do_unset(const Modifier* mods, size_t nmod, const Modifier& last) const
+Value
+Reference::
+do_unset(const Modifier* mods, size_t nmod, const Modifier& last)
+const
   {
     auto qref = ::std::addressof(this->m_root.dereference_mutable());
     for(size_t i = 0;  i < nmod;  ++i) {
@@ -178,12 +193,17 @@ Value Reference::do_unset(const Modifier* mods, size_t nmod, const Modifier& las
     return last.apply_and_erase(*qref);
   }
 
-Reference& Reference::do_finish_call(Global_Context& global)
+Reference&
+Reference::
+do_finish_call(Global_Context& global)
   {
     return do_unpack_tail_calls(*this, global);
   }
 
-Variable_Callback& Reference::enumerate_variables(Variable_Callback& callback) const
+Variable_Callback&
+Reference::
+enumerate_variables(Variable_Callback& callback)
+const
   {
     return this->m_root.enumerate_variables(callback);
   }

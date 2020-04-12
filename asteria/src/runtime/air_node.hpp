@@ -326,31 +326,47 @@ class AIR_Node
       }
 
   public:
-    Index index() const noexcept
+    Index
+    index()
+    const
+    noexcept
       { return static_cast<Index>(this->m_stor.index());  }
 
-    AIR_Node& swap(AIR_Node& other) noexcept
+    AIR_Node&
+    swap(AIR_Node& other)
+    noexcept
       {
         this->m_stor.swap(other.m_stor);
         return *this;
       }
 
     // Rebind this node.
-    // If this node refers to a local reference, which has been allocated in an executive context now,
-    // we need to replace `*this` with a copy of it.
-    opt<AIR_Node> rebind_opt(const Abstract_Context& ctx) const;
+    // If this node refers to a local reference, which has been allocated in an
+    // executive context now, we need to replace `*this` with a copy of it.
+    opt<AIR_Node>
+    rebind_opt(const Abstract_Context& ctx)
+    const;
 
     // Compress this IR node.
-    // Be advised that solid nodes cannot be copied or moved because they occupy variant numbers of bytes.
-    // Solidification is performed as two passes: The total number of bytes is calculated, which are allocated
-    // as a whole at the end of the first pass, where nodes are constructed in the second pass.
-    // The argument for `ipass` shall be `0` for the first pass and `1` for the second pass.
-    AVMC_Queue& solidify(AVMC_Queue& queue, uint8_t ipass) const;
+    // Be advised that solid nodes cannot be copied or moved because they occupy
+    // variant numbers of bytes. Solidification is performed as two passes: The
+    // total number of bytes is calculated, which are allocated as a whole at the
+    // end of the first pass, where nodes are constructed in the second pass.
+    // The argument for `ipass` shall be `0` for the first pass and `1` for the
+    // second pass.
+    AVMC_Queue&
+    solidify(AVMC_Queue& queue, uint8_t ipass)
+    const;
 
-    Variable_Callback& enumerate_variables(Variable_Callback& callback) const;
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback)
+    const;
   };
 
-inline void swap(AIR_Node& lhs, AIR_Node& rhs) noexcept
+inline
+void
+swap(AIR_Node& lhs, AIR_Node& rhs)
+noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace Asteria

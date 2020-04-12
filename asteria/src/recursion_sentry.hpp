@@ -12,19 +12,21 @@ class Recursion_Sentry
   {
   public:
     enum : size_t
-      {
-        stack_mask_bits = 19,  // 512KiB
-      };
+      { stack_mask_bits = 19  };  // 512KiB
 
   private:
     const void* m_base;
 
   public:
-    constexpr Recursion_Sentry() noexcept
+    constexpr
+    Recursion_Sentry()
+    noexcept
       : m_base(this)
       { }
 
-    explicit constexpr Recursion_Sentry(const void* base) noexcept
+    explicit constexpr
+    Recursion_Sentry(const void* base)
+    noexcept
       : m_base(base)
       { }
 
@@ -32,7 +34,8 @@ class Recursion_Sentry
       : m_base(other.m_base)
       { this->do_check();  }
 
-    Recursion_Sentry& operator=(const Recursion_Sentry& other)  // copy assignment
+    Recursion_Sentry&
+    operator=(const Recursion_Sentry& other)  // copy assignment
       {
         this->m_base = other.m_base;
         this->do_check();
@@ -43,21 +46,32 @@ class Recursion_Sentry
       { }
 
   private:
-    [[noreturn]] void do_throw_stack_overflow(size_t usage, size_t limit);
+    [[noreturn]]
+    void
+    do_throw_stack_overflow(size_t usage, size_t limit)
+    const;
 
-    void do_check()
+    void
+    do_check()
+    const
       {
         // Estimate stack usage.
-        size_t usage = (size_t)::std::abs((const char*)this - (const char*)this->m_base);
+        size_t usage = static_cast<size_t>(::std::abs(reinterpret_cast<const char*>(this)
+                                                      - static_cast<const char*>(this->m_base)));
         if(ROCKET_UNEXPECT(usage >> stack_mask_bits))
-          this->do_throw_stack_overflow(usage, uint32_t(1) << stack_mask_bits);
+          this->do_throw_stack_overflow(usage, size_t(1) << stack_mask_bits);
       }
 
   public:
-    const void* get_base() const noexcept
+    const void*
+    get_base()
+    const
+    noexcept
       { return this->m_base;  }
 
-    Recursion_Sentry& set_base(const void* base) noexcept
+    Recursion_Sentry&
+    set_base(const void* base)
+    noexcept
       { return this->m_base = base, *this;  }
   };
 

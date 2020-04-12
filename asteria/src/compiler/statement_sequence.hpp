@@ -16,7 +16,9 @@ class Statement_Sequence
     cow_vector<Statement> m_stmts;
 
   public:
-    explicit constexpr Statement_Sequence(const Compiler_Options& opts) noexcept
+    explicit constexpr
+    Statement_Sequence(const Compiler_Options& opts)
+    noexcept
       : m_opts(opts)
       { }
 
@@ -25,35 +27,52 @@ class Statement_Sequence
     Statement_Sequence(const Statement_Sequence&)
       = delete;
 
-    Statement_Sequence& operator=(const Statement_Sequence&)
+    Statement_Sequence&
+    operator=(const Statement_Sequence&)
       = delete;
 
   public:
     // These are accessors and modifiers of options for parsing.
-    const Compiler_Options& get_options() const noexcept
+    const Compiler_Options&
+    get_options()
+    const
+    noexcept
       { return this->m_opts;  }
 
-    Compiler_Options& open_options() noexcept
+    Compiler_Options&
+    open_options()
+    noexcept
       { return this->m_opts;  }
 
-    Statement_Sequence& set_options(const Compiler_Options& opts) noexcept
+    Statement_Sequence&
+    set_options(const Compiler_Options& opts)
+    noexcept
       { return this->m_opts = opts, *this;  }
 
     // These are accessors to the statements in this sequence.
     // Note that the sequence cannot be modified.
-    bool empty() const noexcept
+    bool
+    empty()
+    const
+    noexcept
       { return this->m_stmts.size();  }
 
-    operator const cow_vector<Statement>& () const noexcept
+    operator
+    const cow_vector<Statement>&()
+    const
+    noexcept
       { return this->m_stmts;  }
 
-    Statement_Sequence& clear() noexcept
+    Statement_Sequence&
+    clear()
+    noexcept
       { return this->m_stmts.clear(), *this;  }
 
     // This function parses tokens from the input stream and fills statements into `*this`.
     // The contents of `*this` are destroyed prior to any further operation.
     // This function throws a `Parser_Error` upon failure.
-    Statement_Sequence& reload(Token_Stream& tstrm);
+    Statement_Sequence&
+    reload(Token_Stream& tstrm);
   };
 
 }  // namespace Asteria

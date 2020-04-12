@@ -25,14 +25,12 @@
 namespace Asteria {
 namespace {
 
-using Module_Initializer = void (V_object& result, API_Version version);
-
 // N.B. Please keep this list sorted by the `version` member.
 struct Module
   {
     API_Version version;
     const char* name;
-    Module_Initializer& init;
+    decltype(create_bindings_version)& init;
   }
 constexpr s_modules[] =
   {
@@ -52,31 +50,50 @@ constexpr s_modules[] =
 
 struct Module_Comparator
   {
-    bool operator()(const Module& lhs, const Module& rhs) const noexcept
+    constexpr
+    bool
+    operator()(const Module& lhs, const Module& rhs)
+    const
+    noexcept
       { return lhs.version < rhs.version;  }
 
-    bool operator()(API_Version lhs, const Module& rhs) const noexcept
+    constexpr
+    bool
+    operator()(API_Version lhs, const Module& rhs)
+    const
+    noexcept
       { return lhs < rhs.version;  }
 
-    bool operator()(const Module& lhs, API_Version rhs) const noexcept
+    constexpr
+    bool
+    operator()(const Module& lhs, API_Version rhs)
+    const
+    noexcept
       { return lhs.version < rhs;  }
   };
 
 }  // namespace
 
-Global_Context::~Global_Context()
+Global_Context::
+~Global_Context()
   {
     auto gcoll = unerase_cast(this->m_gcoll);
     ROCKET_ASSERT(gcoll);
     gcoll->wipe_out_variables();
   }
 
-API_Version Global_Context::max_api_version() const noexcept
+API_Version
+Global_Context::
+max_api_version()
+const
+noexcept
   {
     return static_cast<API_Version>(api_version_sentinel - 1);
   }
 
-void Global_Context::initialize(API_Version version)
+void
+Global_Context::
+initialize(API_Version version)
   {
     // Tidy old contents.
     this->clear_named_references();
@@ -118,6 +135,7 @@ void Global_Context::initialize(API_Version version)
     V_object ostd;
     auto bptr = begin(s_modules);
     auto eptr = ::std::upper_bound(bptr, end(s_modules), version, Module_Comparator());
+
     // Initialize library modules.
     for(auto q = bptr;  q != eptr;  ++q) {
       // Create the subobject if it doesn't exist.
@@ -130,6 +148,7 @@ void Global_Context::initialize(API_Version version)
     }
     auto vstd = gcoll->create_variable(gc_generation_oldest);
     vstd->initialize(::std::move(ostd), true);
+
     // Set the `std` reference now.
     Reference_root::S_variable xref = { vstd };
     this->open_named_reference(::rocket::sref("std")) = ::std::move(xref);

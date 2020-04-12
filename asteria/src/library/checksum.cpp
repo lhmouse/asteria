@@ -10,86 +10,129 @@
 namespace Asteria {
 namespace {
 
-template<uint32_t valueT, uint32_t divisorT, int roundT> struct CRC32_Generator
-    : CRC32_Generator<(valueT >> 1) ^ (-(valueT & 1) & divisorT), divisorT, roundT + 1>
+template<uint32_t valueT, uint32_t divisorT, int roundT>
+struct CRC32_Generator
+  : CRC32_Generator<(valueT >> 1) ^ (-(valueT & 1) & divisorT), divisorT, roundT + 1>
   { };
 
-template<uint32_t valueT, uint32_t divisorT> struct CRC32_Generator<valueT, divisorT, 8>
-    : ::std::integral_constant<uint32_t, valueT>
+template<uint32_t valueT, uint32_t divisorT>
+struct CRC32_Generator<valueT, divisorT, 8>
+  : ::std::integral_constant<uint32_t, valueT>
   { };
 
-template<uint32_t divisorT, size_t... S> constexpr array<uint32_t, 256> do_CRC32_table_impl(const index_sequence<S...>&) noexcept
+template<uint32_t divisorT, size_t... S>
+constexpr
+array<uint32_t, 256>
+do_CRC32_table_impl(const index_sequence<S...>&)
+noexcept
   { return { CRC32_Generator<uint8_t(S), divisorT, 0>::value... };  }
 
-template<uint32_t divisorT> constexpr array<uint32_t, 256> do_CRC32_table() noexcept
+template<uint32_t divisorT>
+constexpr
+array<uint32_t, 256>
+do_CRC32_table()
+noexcept
   { return do_CRC32_table_impl<divisorT>(::std::make_index_sequence<256>());  }
 
 constexpr auto s_iso3309_CRC32_table = do_CRC32_table<0xEDB88320>();
 
-class CRC32_Hasher final : public Abstract_Opaque
+class CRC32_Hasher
+final
+  : public Abstract_Opaque
   {
   private:
     uint32_t m_reg = UINT32_MAX;
 
   public:
-    tinyfmt& describe(tinyfmt& fmt) const override
+    tinyfmt&
+    describe(tinyfmt& fmt)
+    const
+    override
       { return fmt << "CRC-32 hasher";  }
 
-    Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback)
+    const
+    override
       { return callback;  }
 
-    CRC32_Hasher* clone_opt(rcptr<Abstract_Opaque>& output) const override
+    CRC32_Hasher*
+    clone_opt(rcptr<Abstract_Opaque>& output)
+    const
+    override
       {
         auto qnew = ::rocket::make_unique<CRC32_Hasher>(*this);
         output.reset(qnew.get());
         return qnew.release();
       }
 
-    void update(const Sval& data) noexcept
+    void
+    update(const Sval& data)
+    noexcept
       {
         const auto p = reinterpret_cast<const uint8_t*>(data.data());
         const auto n = data.size();
         uint32_t r = this->m_reg;
+
         // Hash bytes one by one.
-        for(size_t i = 0;  i < n;  ++i) {
+        for(size_t i = 0;  i < n;  ++i)
           r = s_iso3309_CRC32_table[((r ^ p[i]) & 0xFF)] ^ (r >> 8);
-        }
         this->m_reg = r;
       }
 
-    Ival finish() noexcept
+    Ival
+    finish()
+    noexcept
       {
         // Get the checksum.
         uint32_t ck = ~(this->m_reg);
+
         // Reset internal states.
         this->m_reg = UINT32_MAX;
         return ck;
       }
   };
 
-class FNV1a32_Hasher final : public Abstract_Opaque
+class FNV1a32_Hasher
+final
+  : public Abstract_Opaque
   {
   private:
-    static constexpr uint32_t prime = 16777619;
-    static constexpr uint32_t offset = 2166136261;
+    enum : uint32_t
+      {
+        prime   = 16777619,
+        offset  = 2166136261,
+      };
 
+  private:
     uint32_t m_reg = offset;
 
   public:
-    tinyfmt& describe(tinyfmt& fmt) const override
+    tinyfmt&
+    describe(tinyfmt& fmt)
+    const
+    override
       { return fmt << "FNV-1a hasher (32-bit)";  }
 
-    Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback)
+    const
+    override
       { return callback;  }
 
-    FNV1a32_Hasher* clone_opt(rcptr<Abstract_Opaque>& output) const override
+    FNV1a32_Hasher*
+    clone_opt(rcptr<Abstract_Opaque>& output)
+    const
+    override
       {
         auto qnew = ::rocket::make_unique<FNV1a32_Hasher>(*this);
         output.reset(qnew.get());
         return qnew.release();
       }
 
-    void update(const Sval& data) noexcept
+    void
+    update(const Sval& data)
+    noexcept
       {
         const auto p = reinterpret_cast<const uint8_t*>(data.data());
         const auto n = data.size();
@@ -101,7 +144,9 @@ class FNV1a32_Hasher final : public Abstract_Opaque
         this->m_reg = r;
       }
 
-    Ival finish() noexcept
+    Ival
+    finish()
+    noexcept
       {
         // Get the checksum.
         uint32_t ck = this->m_reg;
@@ -111,19 +156,30 @@ class FNV1a32_Hasher final : public Abstract_Opaque
       }
   };
 
-template<uint32_t valueT> struct Hexdigit
-    : ::std::integral_constant<char, char('0' + valueT + ((9 - valueT) >> 29))>
+template<uint32_t valueT>
+struct Hex_Digit
+  : ::std::integral_constant<char, char('0' + valueT + ((9 - valueT) >> 29))>
   { };
 
-template<uint32_t valueT> constexpr array<char, 2> do_generate_hex_digits_for_byte() noexcept
-  { return { Hexdigit<valueT/16>::value, Hexdigit<valueT%16>::value };  }
+template<uint32_t valueT>
+constexpr
+array<char, 2>
+do_generate_hex_digits_for_byte()
+noexcept
+  { return { Hex_Digit<valueT / 16>::value, Hex_Digit<valueT % 16>::value };  }
 
-template<size_t... S> constexpr array<char, 256, 2> do_generate_hexdigits_impl(const index_sequence<S...>&) noexcept
+template<size_t... S>
+constexpr
+array<char, 256, 2>
+do_generate_hex_digits_impl(const index_sequence<S...>&)
+noexcept
   { return { do_generate_hex_digits_for_byte<uint8_t(S)>()... };  }
 
-constexpr auto s_hexdigits = do_generate_hexdigits_impl(::std::make_index_sequence<256>());
+constexpr auto s_hex_digits = do_generate_hex_digits_impl(::std::make_index_sequence<256>());
 
-template<bool bigendT, typename WordT> Sval& do_pdigits_impl(Sval& str, const WordT& ref)
+template<bool bigendT, typename WordT>
+Sval&
+do_pdigits_impl(Sval& str, const WordT& ref)
   {
     static_assert(::std::is_unsigned<WordT>::value, "");
     array<uint8_t, sizeof(WordT)> stor_le;
@@ -135,28 +191,38 @@ template<bool bigendT, typename WordT> Sval& do_pdigits_impl(Sval& str, const Wo
     }
     // Append hexadecimal digits.
     if(bigendT)
-      ::std::for_each(stor_le.rbegin(), stor_le.rend(), [&](uint8_t b) { str.append(s_hexdigits[b].data(), 2);  });
+      ::std::for_each(stor_le.rbegin(), stor_le.rend(),
+                      [&](uint8_t b) { str.append(s_hex_digits[b].data(), 2);  });
     else
-      ::std::for_each(stor_le.begin(), stor_le.end(), [&](uint8_t b) { str.append(s_hexdigits[b].data(), 2);  });
+      ::std::for_each(stor_le.begin(), stor_le.end(),
+                      [&](uint8_t b) { str.append(s_hex_digits[b].data(), 2);  });
     return str;
   }
 
-template<typename WordT> Sval& do_pdigits_be(Sval& str, const WordT& ref)
+template<typename WordT>
+Sval&
+do_pdigits_be(Sval& str, const WordT& ref)
   { return do_pdigits_impl<1, WordT>(str, ref);  }
 
-template<typename WordT> Sval& do_pdigits_le(Sval& str, const WordT& ref)
+template<typename WordT>
+Sval&
+do_pdigits_le(Sval& str, const WordT& ref)
   { return do_pdigits_impl<0, WordT>(str, ref);  }
 
-template<bool bigendT, typename WordT> WordT& do_load_impl(WordT& ref, const uint8_t* ptr)
+template<bool bigendT, typename WordT>
+WordT&
+do_load_impl(WordT& ref, const uint8_t* ptr)
   {
-    static_assert(::std::is_unsigned<WordT>::value, "");
+    static_assert(::std::is_unsigned<WordT>::value);
     array<uint8_t, sizeof(WordT)> stor_be;
     uint64_t word = 0;
+
     // Re-arrange bytes.
     if(bigendT)
       ::std::copy_n(ptr, stor_be.size(), stor_be.mut_begin());
     else
       ::std::copy_n(ptr, stor_be.size(), stor_be.mut_rbegin());
+
     // Assemble the word.
     for(uint8_t byte : stor_be) {
       word <<= 8;
@@ -165,43 +231,62 @@ template<bool bigendT, typename WordT> WordT& do_load_impl(WordT& ref, const uin
     return ref = static_cast<WordT>(word);
   }
 
-template<typename WordT> WordT& do_load_be(WordT& ref, const uint8_t* ptr)
+template<typename WordT>
+WordT&
+do_load_be(WordT& ref, const uint8_t* ptr)
   { return do_load_impl<1, WordT>(ref, ptr);  }
 
-template<typename WordT> WordT& do_load_le(WordT& ref, const uint8_t* ptr)
+template<typename WordT>
+WordT&
+do_load_le(WordT& ref, const uint8_t* ptr)
   { return do_load_impl<0, WordT>(ref, ptr);  }
 
-template<typename WordT> constexpr WordT do_rotl(const WordT& ref, size_t bits)
+template<typename WordT>
+constexpr
+WordT
+do_rotl(const WordT& ref, size_t bits)
   {
     constexpr auto width = sizeof(WordT) * 8;
     auto sum = (ref << (+bits) % width) | (ref >> (-bits) % width);
     return static_cast<WordT>(sum);
   }
 
-template<typename WordT, size_t sizeT> inline void do_padd(array<WordT, sizeT>& lhs, const array<WordT, sizeT>& rhs)
+template<typename WordT, size_t sizeT>
+inline
+void
+do_padd(array<WordT, sizeT>& lhs, const array<WordT, sizeT>& rhs)
   {
     ::rocket::ranged_for(size_t(0), sizeT, [&](size_t i) { lhs[i] += rhs[i];  });
   }
 
-class MD5_Hasher final : public Abstract_Opaque
+class MD5_Hasher
+final
+  : public Abstract_Opaque
   {
   private:
-    static constexpr array<uint32_t, 4> init() noexcept
+    static
+    constexpr
+    array<uint32_t, 4>
+    init()
+    noexcept
       { return { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476 };  }
 
+  private:
     array<uint32_t, 4> m_regs = init();
     uint64_t m_size = 0;
     array<uint8_t, 64> m_chunk;
 
   private:
-    void do_consume_chunk(const uint8_t* p) noexcept
+    void
+    do_consume_chunk(const uint8_t* p)
+    noexcept
       {
         uint32_t w;
         uint32_t f, g;
 
         // https://en.wikipedia.org/wiki/MD5
-        auto update = [&](uint32_t i, auto&& specx, uint32_t& a, uint32_t& b, uint32_t& c,
-                          uint32_t& d, uint32_t k, uint8_t rb)
+        auto update = [&](uint32_t i, auto&& specx, uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
+                          uint32_t k, uint8_t rb)
           {
             specx(i, b, c, d);
             do_load_le(w, p + g * 4);
@@ -308,26 +393,38 @@ class MD5_Hasher final : public Abstract_Opaque
       }
 
   public:
-    tinyfmt& describe(tinyfmt& fmt) const override
+    tinyfmt&
+    describe(tinyfmt& fmt)
+    const
+    override
       { return fmt << "MD5 hasher";  }
 
-    Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback)
+    const
+    override
       { return callback;  }
 
-    MD5_Hasher* clone_opt(rcptr<Abstract_Opaque>& output) const override
+    MD5_Hasher*
+    clone_opt(rcptr<Abstract_Opaque>& output)
+    const
+    override
       {
         auto qnew = ::rocket::make_unique<MD5_Hasher>(*this);
         output.reset(qnew.get());
         return qnew.release();
       }
 
-    void update(const Sval& data) noexcept
+    void
+    update(const Sval& data)
+    noexcept
       {
         auto bp = reinterpret_cast<const uint8_t*>(data.data());
         auto ep = bp + data.size();
         auto bc = this->m_chunk.mut_begin() + this->m_size % 64;
         auto ec = this->m_chunk.mut_end();
         ptrdiff_t n;
+
         // If the last chunk was not empty, ...
         if(bc != this->m_chunk.begin()) {
           // ... append data to the last chunk, ...
@@ -346,12 +443,14 @@ class MD5_Hasher final : public Abstract_Opaque
           this->do_consume_chunk(this->m_chunk.data());
           bc = this->m_chunk.mut_begin();
         }
+
         // Consume as many chunks as possible; don't bother copying them.
         while(ep - bp >= 64) {
           this->do_consume_chunk(bp);
           bp += 64;
           this->m_size += 64;
         }
+
         // Append any bytes remaining to the last chunk.
         n = ep - bp;
         if(n != 0) {
@@ -363,12 +462,15 @@ class MD5_Hasher final : public Abstract_Opaque
         ROCKET_ASSERT(bp == ep);
       }
 
-    Sval finish() noexcept
+    Sval
+    finish()
+    noexcept
       {
         // Finalize the hasher.
         auto bc = this->m_chunk.mut_begin() + this->m_size % 64;
         auto ec = this->m_chunk.mut_end();
         ptrdiff_t n;
+
         // Append a `0x80` byte followed by zeroes.
         *(bc++) = 0x80;
         n = ec - bc;
@@ -385,6 +487,7 @@ class MD5_Hasher final : public Abstract_Opaque
           bc += n;
         }
         ROCKET_ASSERT(ec - bc == 8);
+
         // Write the number of bits in little-endian order.
         auto bits = this->m_size * 8;
         for(ptrdiff_t i = 0;  i < 8;  ++i) {
@@ -392,10 +495,12 @@ class MD5_Hasher final : public Abstract_Opaque
           bits >>= 8;
         }
         this->do_consume_chunk(this->m_chunk.data());
+
         // Get the checksum.
         Sval ck;
         ck.reserve(this->m_regs.size() * 8);
         ::rocket::for_each(this->m_regs, [&](uint32_t w) { do_pdigits_le(ck, w);  });
+
         // Reset internal states.
         this->m_regs = init();
         this->m_size = 0;
@@ -403,34 +508,34 @@ class MD5_Hasher final : public Abstract_Opaque
       }
   };
 
-class SHA1_Hasher final : public Abstract_Opaque
+class SHA1_Hasher
+final
+  : public Abstract_Opaque
   {
   private:
-    static constexpr array<uint32_t, 5> init() noexcept
+    static
+    constexpr
+    array<uint32_t, 5>
+    init()
+    noexcept
       { return { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 };  }
 
+  private:
     array<uint32_t, 5> m_regs = init();
     uint64_t m_size = 0;
     array<uint8_t, 64> m_chunk;
 
   private:
-    void do_consume_chunk(const uint8_t* p) noexcept
+    void
+    do_consume_chunk(const uint8_t* p)
+    noexcept
       {
         array<uint32_t, 80> w;
         uint32_t f, k;
 
         // https://en.wikipedia.org/wiki/SHA-1
-        for(size_t i =  0;  i < 16;  ++i) {
-          do_load_be(w[i], p + i * 4);
-        }
-        for(size_t i = 16;  i < 32;  ++i) {
-          w[i] = do_rotl(w[i-3] ^ w[i- 8] ^ w[i-14] ^ w[i-16], 1);
-        }
-        for(size_t i = 32;  i < 80;  ++i) {
-          w[i] = do_rotl(w[i-6] ^ w[i-16] ^ w[i-28] ^ w[i-32], 2);
-        }
-        auto update = [&](uint32_t i, auto&& specx, uint32_t& a, uint32_t& b, uint32_t& c,
-                          uint32_t& d, uint32_t& e)
+        auto update = [&](uint32_t i, auto&& specx, uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
+                          uint32_t& e)
           {
             specx(b, c, d);
             e += do_rotl(a, 5) + f + k + w[i];
@@ -458,6 +563,16 @@ class SHA1_Hasher final : public Abstract_Opaque
           };
         // Unroll loops by hand.
         auto r = this->m_regs;
+
+        // Initialize `w`.
+        for(size_t i =  0;  i < 16;  ++i)
+          do_load_be(w[i], p + i * 4);
+
+        for(size_t i = 16;  i < 32;  ++i)
+          w[i] = do_rotl(w[i-3] ^ w[i- 8] ^ w[i-14] ^ w[i-16], 1);
+
+        for(size_t i = 32;  i < 80;  ++i)
+          w[i] = do_rotl(w[i-6] ^ w[i-16] ^ w[i-28] ^ w[i-32], 2);
 
         // 0 * 20
         update( 0, spec0, r[0], r[1], r[2], r[3], r[4]);
@@ -552,26 +667,38 @@ class SHA1_Hasher final : public Abstract_Opaque
       }
 
   public:
-    tinyfmt& describe(tinyfmt& fmt) const override
+    tinyfmt&
+    describe(tinyfmt& fmt)
+    const
+    override
       { return fmt << "SHA-1 hasher";  }
 
-    Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback)
+    const
+    override
       { return callback;  }
 
-    SHA1_Hasher* clone_opt(rcptr<Abstract_Opaque>& output) const override
+    SHA1_Hasher*
+    clone_opt(rcptr<Abstract_Opaque>& output)
+    const
+    override
       {
         auto qnew = ::rocket::make_unique<SHA1_Hasher>(*this);
         output.reset(qnew.get());
         return qnew.release();
       }
 
-    void update(const Sval& data) noexcept
+    void
+    update(const Sval& data)
+    noexcept
       {
         auto bp = reinterpret_cast<const uint8_t*>(data.data());
         auto ep = bp + data.size();
         auto bc = this->m_chunk.mut_begin() + this->m_size % 64;
         auto ec = this->m_chunk.mut_end();
         ptrdiff_t n;
+
         // If the last chunk was not empty, ...
         if(bc != this->m_chunk.begin()) {
           // ... append data to the last chunk, ...
@@ -590,12 +717,14 @@ class SHA1_Hasher final : public Abstract_Opaque
           this->do_consume_chunk(this->m_chunk.data());
           bc = this->m_chunk.mut_begin();
         }
+
         // Consume as many chunks as possible; don't bother copying them.
         while(ep - bp >= 64) {
           this->do_consume_chunk(bp);
           bp += 64;
           this->m_size += 64;
         }
+
         // Append any bytes remaining to the last chunk.
         n = ep - bp;
         if(n != 0) {
@@ -607,12 +736,15 @@ class SHA1_Hasher final : public Abstract_Opaque
         ROCKET_ASSERT(bp == ep);
       }
 
-    Sval finish() noexcept
+    Sval
+    finish()
+    noexcept
       {
         // Finalize the hasher.
         auto bc = this->m_chunk.mut_begin() + this->m_size % 64;
         auto ec = this->m_chunk.mut_end();
         ptrdiff_t n;
+
         // Append a `0x80` byte followed by zeroes.
         *(bc++) = 0x80;
         n = ec - bc;
@@ -629,6 +761,7 @@ class SHA1_Hasher final : public Abstract_Opaque
           bc += n;
         }
         ROCKET_ASSERT(ec - bc == 8);
+
         // Write the number of bits in big-endian order.
         auto bits = this->m_size * 8;
         for(ptrdiff_t i = 7;  i != -1;  --i) {
@@ -636,10 +769,12 @@ class SHA1_Hasher final : public Abstract_Opaque
           bits >>= 8;
         }
         this->do_consume_chunk(this->m_chunk.data());
+
         // Get the checksum.
         Sval ck;
         ck.reserve(this->m_regs.size() * 8);
         ::rocket::for_each(this->m_regs, [&](uint32_t w) { do_pdigits_be(ck, w);  });
+
         // Reset internal states.
         this->m_regs = init();
         this->m_size = 0;
@@ -647,33 +782,33 @@ class SHA1_Hasher final : public Abstract_Opaque
       }
   };
 
-class SHA256_Hasher final : public Abstract_Opaque
+class SHA256_Hasher
+final
+  : public Abstract_Opaque
   {
   private:
-    static constexpr array<uint32_t, 8> init() noexcept
-      { return { 0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19 };  }
+    static
+    constexpr
+    array<uint32_t, 8>
+    init()
+    noexcept
+      { return { 0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
+                 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19 };  }
 
+  private:
     array<uint32_t, 8> m_regs = init();
     uint64_t m_size = 0;
     array<uint8_t, 64> m_chunk;
 
   private:
-    void do_consume_chunk(const uint8_t* p) noexcept
+    void
+    do_consume_chunk(const uint8_t* p)
+    noexcept
       {
         array<uint32_t, 64> w;
         uint32_t s0, maj, t2, s1, ch, t1;
 
         // https://en.wikipedia.org/wiki/SHA-2
-        for(size_t i =  0;  i < 16;  ++i) {
-          do_load_be(w[i], p + i * 4);
-        }
-        for(size_t i = 16;  i < 64;  ++i) {
-          t1 = w[i-15];
-          s0 = do_rotl(t1, 14) ^ do_rotl(t1, 25) ^ (t1 >>  3);
-          t2 = w[i- 2];
-          s1 = do_rotl(t2, 13) ^ do_rotl(t2, 15) ^ (t2 >> 10);
-          w[i] = w[i-16] + w[i-7] + s0 + s1;
-        }
         auto update = [&](uint32_t i, uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
                           uint32_t& e, uint32_t& f, uint32_t& g, uint32_t& h, uint32_t k)
           {
@@ -688,6 +823,18 @@ class SHA256_Hasher final : public Abstract_Opaque
           };
         // Unroll loops by hand.
         auto r = this->m_regs;
+
+        // Initialize `w`.
+        for(size_t i =  0;  i < 16;  ++i)
+          do_load_be(w[i], p + i * 4);
+
+        for(size_t i = 16;  i < 64;  ++i) {
+          t1 = w[i-15];
+          s0 = do_rotl(t1, 14) ^ do_rotl(t1, 25) ^ (t1 >>  3);
+          t2 = w[i- 2];
+          s1 = do_rotl(t2, 13) ^ do_rotl(t2, 15) ^ (t2 >> 10);
+          w[i] = w[i-16] + w[i-7] + s0 + s1;
+        }
 
         // 0 * 16
         update( 0, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x428A2F98);
@@ -766,26 +913,38 @@ class SHA256_Hasher final : public Abstract_Opaque
       }
 
   public:
-    tinyfmt& describe(tinyfmt& fmt) const override
+    tinyfmt&
+    describe(tinyfmt& fmt)
+    const
+    override
       { return fmt << "SHA-256 hasher";  }
 
-    Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback)
+    const
+    override
       { return callback;  }
 
-    SHA256_Hasher* clone_opt(rcptr<Abstract_Opaque>& output) const override
+    SHA256_Hasher*
+    clone_opt(rcptr<Abstract_Opaque>& output)
+    const
+    override
       {
         auto qnew = ::rocket::make_unique<SHA256_Hasher>(*this);
         output.reset(qnew.get());
         return qnew.release();
       }
 
-    void update(const Sval& data) noexcept
+    void
+    update(const Sval& data)
+    noexcept
       {
         auto bp = reinterpret_cast<const uint8_t*>(data.data());
         auto ep = bp + data.size();
         auto bc = this->m_chunk.mut_begin() + this->m_size % 64;
         auto ec = this->m_chunk.mut_end();
         ptrdiff_t n;
+
         // If the last chunk was not empty, ...
         if(bc != this->m_chunk.begin()) {
           // ... append data to the last chunk, ...
@@ -804,12 +963,14 @@ class SHA256_Hasher final : public Abstract_Opaque
           this->do_consume_chunk(this->m_chunk.data());
           bc = this->m_chunk.mut_begin();
         }
+
         // Consume as many chunks as possible; don't bother copying them.
         while(ep - bp >= 64) {
           this->do_consume_chunk(bp);
           bp += 64;
           this->m_size += 64;
         }
+
         // Append any bytes remaining to the last chunk.
         n = ep - bp;
         if(n != 0) {
@@ -821,12 +982,15 @@ class SHA256_Hasher final : public Abstract_Opaque
         ROCKET_ASSERT(bp == ep);
       }
 
-    Sval finish() noexcept
+    Sval
+    finish()
+    noexcept
       {
         // Finalize the hasher.
         auto bc = this->m_chunk.mut_begin() + this->m_size % 64;
         auto ec = this->m_chunk.mut_end();
         ptrdiff_t n;
+
         // Append a `0x80` byte followed by zeroes.
         *(bc++) = 0x80;
         n = ec - bc;
@@ -843,6 +1007,7 @@ class SHA256_Hasher final : public Abstract_Opaque
           bc += n;
         }
         ROCKET_ASSERT(ec - bc == 8);
+
         // Write the number of bits in big-endian order.
         auto bits = this->m_size * 8;
         for(ptrdiff_t i = 7;  i != -1;  --i) {
@@ -850,10 +1015,12 @@ class SHA256_Hasher final : public Abstract_Opaque
           bits >>= 8;
         }
         this->do_consume_chunk(this->m_chunk.data());
+
         // Get the checksum.
         Sval ck;
         ck.reserve(this->m_regs.size() * 8);
         ::rocket::for_each(this->m_regs, [&](uint32_t w) { do_pdigits_be(ck, w);  });
+
         // Reset internal states.
         this->m_regs = init();
         this->m_size = 0;
@@ -861,32 +1028,39 @@ class SHA256_Hasher final : public Abstract_Opaque
       }
   };
 
-template<typename HasherT> rcptr<HasherT> do_cast_hasher(Pval& h)
+template<typename HasherT>
+rcptr<HasherT>
+do_cast_hasher(Pval& h)
   {
     auto qh = h.open_opt<HasherT>();
     if(!qh)
-      ASTERIA_THROW("invalid dynamic cast to type `$1` from type `$2`", typeid(HasherT).name(), h.type().name());
+      ASTERIA_THROW("invalid dynamic cast to type `$1` from type `$2`",
+                    typeid(HasherT).name(), h.type().name());
     return qh;
   }
 
 }  // namespace
 
-Pval std_checksum_crc32_new_private()
+Pval
+std_checksum_crc32_new_private()
   {
     return ::rocket::make_refcnt<CRC32_Hasher>();
   }
 
-void std_checksum_crc32_new_update(Pval& h, Sval data)
+void
+std_checksum_crc32_new_update(Pval& h, Sval data)
   {
     return do_cast_hasher<CRC32_Hasher>(h)->update(data);
   }
 
-Ival std_checksum_crc32_new_finish(Pval& h)
+Ival
+std_checksum_crc32_new_finish(Pval& h)
   {
     return do_cast_hasher<CRC32_Hasher>(h)->finish();
   }
 
-Oval std_checksum_crc32_new()
+Oval
+std_checksum_crc32_new()
   {
     Oval result;
     //===================================================================
@@ -943,8 +1117,7 @@ Oval std_checksum_crc32_new()
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref =
-        { std_checksum_crc32_new_finish(self.open().open_opaque()) };
+      Reference_root::S_temporary xref = { std_checksum_crc32_new_finish(self.open().open_opaque()) };
       return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
@@ -956,29 +1129,34 @@ Oval std_checksum_crc32_new()
     return result;
   }
 
-Ival std_checksum_crc32(Sval data)
+Ival
+std_checksum_crc32(Sval data)
   {
     CRC32_Hasher h;
     h.update(data);
     return h.finish();
   }
 
-Pval std_checksum_fnv1a32_new_private()
+Pval
+std_checksum_fnv1a32_new_private()
   {
     return ::rocket::make_refcnt<FNV1a32_Hasher>();
   }
 
-void std_checksum_fnv1a32_new_update(Pval& h, Sval data)
+void
+std_checksum_fnv1a32_new_update(Pval& h, Sval data)
   {
     return do_cast_hasher<FNV1a32_Hasher>(h)->update(data);
   }
 
-Ival std_checksum_fnv1a32_new_finish(Pval& h)
+Ival
+std_checksum_fnv1a32_new_finish(Pval& h)
   {
     return do_cast_hasher<FNV1a32_Hasher>(h)->finish();
   }
 
-Oval std_checksum_fnv1a32_new()
+Oval
+std_checksum_fnv1a32_new()
   {
     Oval result;
     //===================================================================
@@ -1035,8 +1213,7 @@ Oval std_checksum_fnv1a32_new()
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref =
-        { std_checksum_fnv1a32_new_finish(self.open().open_opaque()) };
+      Reference_root::S_temporary xref = { std_checksum_fnv1a32_new_finish(self.open().open_opaque()) };
       return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
@@ -1048,29 +1225,34 @@ Oval std_checksum_fnv1a32_new()
     return result;
   }
 
-Ival std_checksum_fnv1a32(Sval data)
+Ival
+std_checksum_fnv1a32(Sval data)
   {
     FNV1a32_Hasher h;
     h.update(data);
     return h.finish();
   }
 
-Pval std_checksum_md5_new_private()
+Pval
+std_checksum_md5_new_private()
   {
     return ::rocket::make_refcnt<MD5_Hasher>();
   }
 
-void std_checksum_md5_new_update(Pval& h, Sval data)
+void
+std_checksum_md5_new_update(Pval& h, Sval data)
   {
     return do_cast_hasher<MD5_Hasher>(h)->update(data);
   }
 
-Sval std_checksum_md5_new_finish(Pval& h)
+Sval
+std_checksum_md5_new_finish(Pval& h)
   {
     return do_cast_hasher<MD5_Hasher>(h)->finish();
   }
 
-Oval std_checksum_md5_new()
+Oval
+std_checksum_md5_new()
   {
     Oval result;
     //===================================================================
@@ -1127,8 +1309,7 @@ Oval std_checksum_md5_new()
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref =
-        { std_checksum_md5_new_finish(self.open().open_opaque()) };
+      Reference_root::S_temporary xref = { std_checksum_md5_new_finish(self.open().open_opaque()) };
       return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
@@ -1140,29 +1321,34 @@ Oval std_checksum_md5_new()
     return result;
   }
 
-Sval std_checksum_md5(Sval data)
+Sval
+std_checksum_md5(Sval data)
   {
     MD5_Hasher h;
     h.update(data);
     return h.finish();
   }
 
-Pval std_checksum_sha1_new_private()
+Pval
+std_checksum_sha1_new_private()
   {
     return ::rocket::make_refcnt<SHA1_Hasher>();
   }
 
-void std_checksum_sha1_new_update(Pval& h, Sval data)
+void
+std_checksum_sha1_new_update(Pval& h, Sval data)
   {
     return do_cast_hasher<SHA1_Hasher>(h)->update(data);
   }
 
-Sval std_checksum_sha1_new_finish(Pval& h)
+Sval
+std_checksum_sha1_new_finish(Pval& h)
   {
     return do_cast_hasher<SHA1_Hasher>(h)->finish();
   }
 
-Oval std_checksum_sha1_new()
+Oval
+std_checksum_sha1_new()
   {
     Oval result;
     //===================================================================
@@ -1219,8 +1405,7 @@ Oval std_checksum_sha1_new()
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref =
-        { std_checksum_sha1_new_finish(self.open().open_opaque()) };
+      Reference_root::S_temporary xref = { std_checksum_sha1_new_finish(self.open().open_opaque()) };
       return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
@@ -1232,29 +1417,34 @@ Oval std_checksum_sha1_new()
     return result;
   }
 
-Sval std_checksum_sha1(Sval data)
+Sval
+std_checksum_sha1(Sval data)
   {
     SHA1_Hasher h;
     h.update(data);
     return h.finish();
   }
 
-Pval std_checksum_sha256_new_private()
+Pval
+std_checksum_sha256_new_private()
   {
     return ::rocket::make_refcnt<SHA256_Hasher>();
   }
 
-void std_checksum_sha256_new_update(Pval& h, Sval data)
+void
+std_checksum_sha256_new_update(Pval& h, Sval data)
   {
     return do_cast_hasher<SHA256_Hasher>(h)->update(data);
   }
 
-Sval std_checksum_sha256_new_finish(Pval& h)
+Sval
+std_checksum_sha256_new_finish(Pval& h)
   {
     return do_cast_hasher<SHA256_Hasher>(h)->finish();
   }
 
-Oval std_checksum_sha256_new()
+Oval
+std_checksum_sha256_new()
   {
     Oval result;
     //===================================================================
@@ -1311,8 +1501,7 @@ Oval std_checksum_sha256_new()
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref =
-        { std_checksum_sha256_new_finish(self.open().open_opaque()) };
+      Reference_root::S_temporary xref = { std_checksum_sha256_new_finish(self.open().open_opaque()) };
       return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
@@ -1324,14 +1513,16 @@ Oval std_checksum_sha256_new()
     return result;
   }
 
-Sval std_checksum_sha256(Sval data)
+Sval
+std_checksum_sha256(Sval data)
   {
     SHA256_Hasher h;
     h.update(data);
     return h.finish();
   }
 
-void create_bindings_checksum(V_object& result, API_Version /*version*/)
+void
+create_bindings_checksum(V_object& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.checksum.crc32_new()`

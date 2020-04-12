@@ -10,13 +10,21 @@
 namespace Asteria {
 namespace {
 
-constexpr uint32_t do_sll(uint32_t reg, int bits) noexcept
+constexpr
+uint32_t
+do_sll(uint32_t reg, int bits)
+noexcept
   { return reg << bits;  }
 
-constexpr uint32_t do_srl(uint32_t reg, int bits) noexcept
+constexpr
+uint32_t
+do_srl(uint32_t reg, int bits)
+noexcept
   { return reg >> bits;  }
 
-size_t do_read_random_device(void* data, size_t size) noexcept
+size_t
+do_read_random_device(void* data, size_t size)
+noexcept
   {
     ::rocket::unique_posix_fd fd(::open("/dev/urandom", O_RDONLY), ::close);
     if(!fd)
@@ -29,11 +37,15 @@ size_t do_read_random_device(void* data, size_t size) noexcept
 
 }  // namespace
 
-Random_Engine::~Random_Engine()
+Random_Engine::
+~Random_Engine()
   {
   }
 
-void Random_Engine::do_update() noexcept
+void
+Random_Engine::
+do_update()
+noexcept
   {
     // Increment `cc` and combine it with `bb` for every round.
     this->m_cc += 1;
@@ -65,7 +77,10 @@ void Random_Engine::do_update() noexcept
     this->m_ngot = 0;
   }
 
-void Random_Engine::init() noexcept
+void
+Random_Engine::
+init()
+noexcept
   {
     // Initialize internal states.
     this->m_aa = 0;
@@ -83,7 +98,10 @@ void Random_Engine::init() noexcept
     this->m_ngot = 0;
   }
 
-uint32_t Random_Engine::bump() noexcept
+uint32_t
+Random_Engine::
+bump()
+noexcept
   {
     // Advance the index.
     uint32_t k = this->m_ngot;

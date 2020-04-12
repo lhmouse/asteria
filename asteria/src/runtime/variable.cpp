@@ -7,11 +7,15 @@
 
 namespace Asteria {
 
-Variable::~Variable()
+Variable::
+~Variable()
   {
   }
 
-Variable_Callback& Variable::enumerate_variables(Variable_Callback& callback) const
+Variable_Callback&
+Variable::
+enumerate_variables(Variable_Callback& callback)
+const
   {
     return this->m_value.enumerate_variables(callback);
   }

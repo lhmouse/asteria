@@ -12,7 +12,8 @@
 
 namespace Asteria {
 
-class Executive_Context : public Abstract_Context
+class Executive_Context
+  : public Abstract_Context
   {
   private:
     const Executive_Context* m_parent_opt;
@@ -52,44 +53,79 @@ class Executive_Context : public Abstract_Context
         m_self(::std::move(self))
       { this->do_bind_parameters(params, ::std::move(args));  }
 
-    ~Executive_Context() override;
+    ~Executive_Context()
+    override;
 
   private:
-    void do_bind_parameters(const cow_vector<phsh_string>& params, cow_vector<Reference>&& args);
+    void
+    do_bind_parameters(const cow_vector<phsh_string>& params, cow_vector<Reference>&& args);
 
-    void do_defer_expression(const Source_Location& sloc, AVMC_Queue&& queue);
-    void do_on_scope_exit_void();
-    void do_on_scope_exit_return();
-    void do_on_scope_exit_exception(Runtime_Error& except);
+    void
+    do_defer_expression(const Source_Location& sloc, AVMC_Queue&& queue);
+
+    void
+    do_on_scope_exit_void();
+
+    void
+    do_on_scope_exit_return();
+
+    void
+    do_on_scope_exit_exception(Runtime_Error& except);
 
   protected:
-    bool do_is_analytic() const noexcept final
+    bool
+    do_is_analytic()
+    const
+    noexcept
+    final
       { return this->is_analytic();  }
 
-    const Abstract_Context* do_get_parent_opt() const noexcept override
+    const Abstract_Context*
+    do_get_parent_opt()
+    const
+    noexcept
+    override
       { return this->get_parent_opt();  }
 
-    Reference* do_lazy_lookup_opt(const phsh_string& name) override;
+    Reference*
+    do_lazy_lookup_opt(const phsh_string& name)
+    override;
 
   public:
-    bool is_analytic() const noexcept
+    bool
+    is_analytic()
+    const
+    noexcept
       { return false;  }
 
-    const Executive_Context* get_parent_opt() const noexcept
+    const Executive_Context*
+    get_parent_opt()
+    const
+    noexcept
       { return this->m_parent_opt;  }
 
-    Global_Context& global() const noexcept
+    Global_Context&
+    global()
+    const
+    noexcept
       { return this->m_global;  }
 
-    Evaluation_Stack& stack() const noexcept
+    Evaluation_Stack&
+    stack()
+    const
+    noexcept
       { return this->m_stack;  }
 
-    const rcptr<Variadic_Arguer>& zvarg() const noexcept
+    const rcptr<Variadic_Arguer>&
+    zvarg()
+    const
+    noexcept
       { return this->m_zvarg;  }
 
     // Defer an expression which will be evaluated at scope exit.
     // The result of such expressions are discarded.
-    Executive_Context& defer_expression(const Source_Location& sloc, AVMC_Queue&& queue)
+    Executive_Context&
+    defer_expression(const Source_Location& sloc, AVMC_Queue&& queue)
       {
         this->do_defer_expression(sloc, ::std::move(queue));
         return *this;
@@ -97,29 +133,25 @@ class Executive_Context : public Abstract_Context
 
     // These functions must be called before exiting a scope.
     // Note that these functions may throw exceptions on their own, which is why RAII is inapplicable.
-    AIR_Status on_scope_exit(AIR_Status status)
+    AIR_Status
+    on_scope_exit(AIR_Status status)
       {
-        if(ROCKET_EXPECT(this->m_defer.empty())) {
-          // There is nothing to do.
+        if(ROCKET_EXPECT(this->m_defer.empty()))
           return status;
-        }
-        if(status != air_status_return_ref) {
-          // Discard the stack.
+
+        if(status != air_status_return_ref)
           this->do_on_scope_exit_void();
-          return status;
-        }
-        // Process the return reference.
-        this->do_on_scope_exit_return();
+        else
+          this->do_on_scope_exit_return();
         return status;
       }
 
-    Runtime_Error& on_scope_exit(Runtime_Error& except)
+    Runtime_Error&
+    on_scope_exit(Runtime_Error& except)
       {
-        if(ROCKET_EXPECT(this->m_defer.empty())) {
-          // There is nothing to do.
+        if(ROCKET_EXPECT(this->m_defer.empty()))
           return except;
-        }
-        // Append frames to the exception object.
+
         this->do_on_scope_exit_exception(except);
         return except;
       }

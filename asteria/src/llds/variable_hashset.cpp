@@ -8,7 +8,11 @@
 
 namespace Asteria {
 
-void Variable_HashSet::do_destroy_buckets() const noexcept
+void
+Variable_HashSet::
+do_destroy_buckets()
+const
+noexcept
   {
     auto next = this->m_head;
     while(ROCKET_EXPECT(next)) {
@@ -20,7 +24,10 @@ void Variable_HashSet::do_destroy_buckets() const noexcept
     }
   }
 
-void Variable_HashSet::do_enumerate_variables(Variable_Callback& callback) const
+void
+Variable_HashSet::
+do_enumerate_variables(Variable_Callback& callback)
+const
   {
     auto next = this->m_head;
     while(ROCKET_EXPECT(next)) {
@@ -34,19 +41,27 @@ void Variable_HashSet::do_enumerate_variables(Variable_Callback& callback) const
     }
   }
 
-Variable_HashSet::Bucket* Variable_HashSet::do_xprobe(const rcptr<Variable>& var) const noexcept
+Variable_HashSet::Bucket*
+Variable_HashSet::
+do_xprobe(const rcptr<Variable>& var)
+const
+noexcept
   {
     auto bptr = this->m_bptr;
     auto eptr = this->m_eptr;
     // Find a bucket using linear probing.
     // We keep the load factor below 1.0 so there will always be some empty buckets in the table.
     auto mptr = ::rocket::get_probing_origin(bptr, eptr, reinterpret_cast<uintptr_t>(var.get()));
-    auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr, [&](const Bucket& r) { return r.kstor[0] == var;  });
+    auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr,
+                                       [&](const Bucket& r) { return r.kstor[0] == var;  });
     ROCKET_ASSERT(qbkt);
     return qbkt;
   }
 
-void Variable_HashSet::do_xrelocate_but(Bucket* qxcld) noexcept
+void
+Variable_HashSet::
+do_xrelocate_but(Variable_HashSet::Bucket* qxcld)
+noexcept
   {
     auto bptr = this->m_bptr;
     auto eptr = this->m_eptr;
@@ -76,7 +91,10 @@ void Variable_HashSet::do_xrelocate_but(Bucket* qxcld) noexcept
       });
   }
 
-void Variable_HashSet::do_list_attach(Bucket* qbkt) noexcept
+void
+Variable_HashSet::
+do_list_attach(Variable_HashSet::Bucket* qbkt)
+noexcept
   {
     // Insert the bucket before `head`.
     auto next = ::std::exchange(this->m_head, qbkt);
@@ -86,7 +104,10 @@ void Variable_HashSet::do_list_attach(Bucket* qbkt) noexcept
     qbkt->prev = next ? ::std::exchange(next->prev, qbkt) : qbkt;
   }
 
-void Variable_HashSet::do_list_detach(Bucket* qbkt) noexcept
+void
+Variable_HashSet::
+do_list_detach(Variable_HashSet::Bucket* qbkt)
+noexcept
   {
     auto next = qbkt->next;
     auto prev = qbkt->prev;
@@ -99,7 +120,9 @@ void Variable_HashSet::do_list_detach(Bucket* qbkt) noexcept
     qbkt->prev = nullptr;
   }
 
-void Variable_HashSet::do_rehash(size_t nbkt)
+void
+Variable_HashSet::
+do_rehash(size_t nbkt)
   {
     ROCKET_ASSERT(nbkt / 2 > this->m_size);
     // Allocate a new table.
@@ -137,7 +160,10 @@ void Variable_HashSet::do_rehash(size_t nbkt)
       ::operator delete(bold);
   }
 
-void Variable_HashSet::do_attach(Bucket* qbkt, const rcptr<Variable>& var) noexcept
+void
+Variable_HashSet::
+do_attach(Variable_HashSet::Bucket* qbkt, const rcptr<Variable>& var)
+noexcept
   {
     // Construct the node, then attach it.
     ROCKET_ASSERT(!*qbkt);
@@ -147,7 +173,10 @@ void Variable_HashSet::do_attach(Bucket* qbkt, const rcptr<Variable>& var) noexc
     this->m_size++;
   }
 
-void Variable_HashSet::do_detach(Bucket* qbkt) noexcept
+void
+Variable_HashSet::
+do_detach(Variable_HashSet::Bucket* qbkt)
+noexcept
   {
     // Transfer ownership of the old variable, then detach the bucket.
     this->m_size--;

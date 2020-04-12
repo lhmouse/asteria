@@ -7,11 +7,14 @@
 
 namespace Asteria {
 
-Analytic_Context::~Analytic_Context()
+Analytic_Context::
+~Analytic_Context()
   {
   }
 
-void Analytic_Context::do_prepare_function(const cow_vector<phsh_string>& params)
+void
+Analytic_Context::
+do_prepare_function(const cow_vector<phsh_string>& params)
   {
     // Set parameters, which are local references.
     for(size_t i = 0;  i < params.size();  ++i) {

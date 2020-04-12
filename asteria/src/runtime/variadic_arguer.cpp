@@ -9,18 +9,26 @@
 
 namespace Asteria {
 
-tinyfmt& Variadic_Arguer::describe(tinyfmt& fmt) const
+tinyfmt&
+Variadic_Arguer::
+describe(tinyfmt& fmt)
+const
   {
     return fmt << "<built-in>.__varg([index]) @ " << this->m_sloc;
   }
 
-Variable_Callback& Variadic_Arguer::enumerate_variables(Variable_Callback& callback) const
+Variable_Callback&
+Variadic_Arguer::
+enumerate_variables(Variable_Callback& callback)
+const
   {
     return ::rocket::for_each(this->m_vargs, callback), callback;
   }
 
-Reference& Variadic_Arguer::invoke_ptc_aware(Reference& self, Global_Context& /*global*/,
-                                             cow_vector<Reference>&& args) const
+Reference&
+Variadic_Arguer::
+invoke_ptc_aware(Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args)
+const
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("<built-in>.__varg"));
     // Extract arguments.

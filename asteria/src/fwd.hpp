@@ -43,10 +43,16 @@ namespace Asteria {
 #define ASTERIA_SFINAE_ASSIGN(T, ...)       ROCKET_ENABLE_IF(::std::is_assignable<T&, __VA_ARGS__>::value)
 #define ASTERIA_SFINAE_CONVERT(T, ...)      ROCKET_ENABLE_IF(::std::is_convertible<T, __VA_ARGS__>::value)
 
-#define ASTERIA_VARIANT_CONSTRUCTOR(C, V, T, t)   template<typename T, ASTERIA_SFINAE_CONSTRUCT(V, T&&)> C(T&& t)
-#define ASTERIA_VARIANT_ASSIGNMENT(C, V, T, t)    template<typename T, ASTERIA_SFINAE_ASSIGN(V, T&&)> C& operator=(T&& t)
+#define ASTERIA_VARIANT_CONSTRUCTOR(C, V, T, t)   template<typename T,  \
+                                                  ASTERIA_SFINAE_CONSTRUCT(V, T&&)>  \
+                                                  C(T&& t)
 
-#define ASTERIA_INCOMPLET(T)       template<typename T##_1_ = T, typename T = T##_1_>
+#define ASTERIA_VARIANT_ASSIGNMENT(C, V, T, t)    template<typename T,  \
+                                                  ASTERIA_SFINAE_ASSIGN(V, T&&)>  \
+                                                  C&  \
+                                                  operator=(T&& t)
+
+#define ASTERIA_INCOMPLET(T)     template<typename T##_1_ = T, typename T = T##_1_>
 
 // `using`-directives
 using ::std::initializer_list;
@@ -89,18 +95,39 @@ using phsh_string = ::rocket::prehashed_string;
 using tinybuf = ::rocket::tinybuf;
 using tinyfmt = ::rocket::tinyfmt;
 
-template<typename E, typename D = ::std::default_delete<const E>> using uptr = ::rocket::unique_ptr<E, D>;
-template<typename E> using rcptr = ::rocket::refcnt_ptr<E>;
-template<typename E> using cow_vector = ::rocket::cow_vector<E>;
-template<typename E> using cow_dictionary = ::rocket::cow_hashmap<::rocket::prehashed_string, E,
-                                                ::rocket::prehashed_string::hash, ::std::equal_to<void>>;
-template<typename E, size_t k> using sso_vector = ::rocket::static_vector<E, k>;
-template<typename... P> using variant = ::rocket::variant<P...>;
-template<typename T> using opt = ::rocket::optional<T>;
-template<typename F, typename S> using pair = ::std::pair<F, S>;
-template<typename F, typename S> using cow_bivector = ::rocket::cow_vector<::std::pair<F, S>>;
-template<typename E, size_t... k> using array = ::rocket::array<E, k...>;
-template<typename E> using ref_to = ::rocket::reference_wrapper<E>;
+template<typename E, typename D = ::std::default_delete<const E>>
+using uptr = ::rocket::unique_ptr<E, D>;
+
+template<typename E>
+using rcptr = ::rocket::refcnt_ptr<E>;
+
+template<typename E>
+using cow_vector = ::rocket::cow_vector<E>;
+
+template<typename E>
+using cow_dictionary = ::rocket::cow_hashmap<::rocket::prehashed_string, E,
+                                             ::rocket::prehashed_string::hash, ::std::equal_to<void>>;
+
+template<typename E, size_t k>
+using sso_vector = ::rocket::static_vector<E, k>;
+
+template<typename... P>
+using variant = ::rocket::variant<P...>;
+
+template<typename T>
+using opt = ::rocket::optional<T>;
+
+template<typename F, typename S>
+using pair = ::std::pair<F, S>;
+
+template<typename F, typename S>
+using cow_bivector = ::rocket::cow_vector<::std::pair<F, S>>;
+
+template<typename E, size_t... k>
+using array = ::rocket::array<E, k...>;
+
+template<typename E>
+using ref_to = ::rocket::reference_wrapper<E>;
 
 // Core
 class Value;
@@ -155,23 +182,32 @@ class Statement_Sequence;
 class AIR_Optimizer;
 
 // Type erasure
-struct Rcbase : virtual ::rocket::refcnt_base<Rcbase>
+struct Rcbase
+  : virtual ::rocket::refcnt_base<Rcbase>
   {
     virtual ~Rcbase();
   };
 
-template<typename RealT> struct Rcfwd : Rcbase
+template<typename RealT>
+struct Rcfwd
+  : Rcbase
   { };
 
-template<typename RealT> using rcfwdp = rcptr<Rcfwd<RealT>>;
+template<typename RealT>
+using rcfwdp = rcptr<Rcfwd<RealT>>;
 
-template<typename RealT> constexpr rcptr<RealT> unerase_cast(const rcfwdp<RealT>& ptr) noexcept
+template<typename RealT>
+constexpr
+rcptr<RealT>
+unerase_cast(const rcfwdp<RealT>& ptr)
+noexcept
   { return ::rocket::static_pointer_cast<RealT>(ptr);  }
 
 // Standard I/O synchronization
 struct StdIO_Sentry
   {
-    StdIO_Sentry() noexcept
+    StdIO_Sentry()
+    noexcept
       {
         // Discard unread data. Clear EOF and error bits. Clear orientation.
         if(!::freopen(nullptr, "r", stdin))
@@ -187,50 +223,84 @@ struct StdIO_Sentry
     StdIO_Sentry(const StdIO_Sentry&)
       = delete;
 
-    StdIO_Sentry& operator=(const StdIO_Sentry&)
+    StdIO_Sentry&
+    operator=(const StdIO_Sentry&)
       = delete;
   };
 
 // Opaque (user-defined) type support
-struct Abstract_Opaque : public Rcbase
+struct Abstract_Opaque
+  : Rcbase
   {
-    ~Abstract_Opaque() override;
+    ~Abstract_Opaque()
+    override;
 
     // This function is called to convert this object to a human-readble string.
-    virtual tinyfmt& describe(tinyfmt& fmt) const = 0;
+    virtual
+    tinyfmt&
+    describe(tinyfmt& fmt)
+    const
+      = 0;
 
     // This function is called during garbage collection to mark variables that are not
     // directly reachable. Although strong exception safety is guaranteed, it is discouraged
     // to throw exceptions in this function, as it prevents garbage collection from running.
-    virtual Variable_Callback& enumerate_variables(Variable_Callback& callback) const = 0;
+    virtual
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback)
+    const
+      = 0;
 
     // This function is called when a mutable reference is requested and the current instance
     // is shared. If this function returns a null pointer, the shared instance is used. If this
     // function returns a non-null pointer, it replaces the current value. Derived classes that
     // are not copyable should throw an exception in this function.
-    virtual Abstract_Opaque* clone_opt(rcptr<Abstract_Opaque>& output) const = 0;
+    virtual
+    Abstract_Opaque*
+    clone_opt(rcptr<Abstract_Opaque>& output)
+    const
+      = 0;
   };
 
-inline tinyfmt& operator<<(tinyfmt& fmt, const Abstract_Opaque& opaq)
+inline
+tinyfmt&
+operator<<(tinyfmt& fmt, const Abstract_Opaque& opaq)
   { return opaq.describe(fmt);  }
 
-struct Abstract_Function : public Rcbase
+struct
+Abstract_Function
+  : Rcbase
   {
-    ~Abstract_Function() override;
+    ~Abstract_Function()
+    override;
 
     // This function is called to convert this object to a human-readble string.
-    virtual tinyfmt& describe(tinyfmt& fmt) const = 0;
+    virtual
+    tinyfmt&
+    describe(tinyfmt& fmt)
+    const
+      = 0;
 
     // This function is called during garbage collection to mark variables that are not
     // directly reachable. Although strong exception safety is guaranteed, it is discouraged
     // to throw exceptions in this function, as it prevents garbage collection from running.
-    virtual Variable_Callback& enumerate_variables(Variable_Callback& callback) const = 0;
+    virtual
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback)
+    const
+      = 0;
 
     // This function may return a proper tail call wrapper.
-    virtual Reference& invoke_ptc_aware(Reference& self, Global_Context& global, cow_vector<Reference>&& args) const = 0;
+    virtual
+    Reference&
+    invoke_ptc_aware(Reference& self, Global_Context& global, cow_vector<Reference>&& args)
+    const
+      = 0;
   };
 
-inline tinyfmt& operator<<(tinyfmt& fmt, const Abstract_Function& func)
+inline
+tinyfmt&
+operator<<(tinyfmt& fmt, const Abstract_Function& func)
   { return func.describe(fmt);  }
 
 class cow_opaque
@@ -239,49 +309,90 @@ class cow_opaque
     rcptr<Abstract_Opaque> m_sptr;
 
   public:
-    constexpr cow_opaque(nullptr_t = nullptr) noexcept
-      { };
+    constexpr
+    cow_opaque(nullptr_t = nullptr)
+    noexcept
+      { }
 
-    template<typename OpaqueT> constexpr cow_opaque(rcptr<OpaqueT> sptr) noexcept
+    template<typename OpaqueT>
+    constexpr
+    cow_opaque(rcptr<OpaqueT> sptr)
+    noexcept
       : m_sptr(::std::move(sptr))
       { }
 
   private:
-    [[noreturn]] void do_throw_null_pointer() const;
+    [[noreturn]]
+    void
+    do_throw_null_pointer()
+    const;
 
   public:
-    bool unique() const noexcept
+    bool
+    unique()
+    const
+    noexcept
       { return this->m_sptr.unique();  }
 
-    long use_count() const noexcept
+    long
+    use_count()
+    const
+    noexcept
       { return this->m_sptr.use_count();  }
 
-    cow_opaque& reset() noexcept
+    cow_opaque&
+    reset()
+    noexcept
       {
         this->m_sptr = nullptr;
         return *this;
       }
 
-    explicit operator bool () const noexcept
+    explicit operator
+    bool()
+    const
+    noexcept
       { return bool(this->m_sptr);  }
 
-    const type_info& type() const
+    const type_info&
+    type()
+    const
       { return typeid(*(this->m_sptr.get()));  }  // may throw `std::bad_typeid`
 
-    const void* ptr() const noexcept
+    const void*
+    ptr()
+    const
+    noexcept
       { return this->m_sptr.get();  }
 
-    tinyfmt& describe(tinyfmt& fmt) const;
-    Variable_Callback& enumerate_variables(Variable_Callback& callback) const;
+    tinyfmt&
+    describe(tinyfmt& fmt)
+    const;
 
-    template<typename OpaqueT> rcptr<const OpaqueT> cast_opt() const;
-    template<typename OpaqueT> rcptr<OpaqueT> open_opt();
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback)
+    const;
+
+    template<typename OpaqueT>
+    rcptr<const OpaqueT>
+    cast_opt() const;
+
+    template<typename OpaqueT>
+    rcptr<OpaqueT>
+    open_opt();
   };
 
-inline tinyfmt& operator<<(tinyfmt& fmt, const cow_opaque& opaq)
+inline
+tinyfmt&
+operator<<(tinyfmt& fmt, const cow_opaque& opaq)
   { return opaq.describe(fmt);  }
 
-template<typename OpaqueT> rcptr<const OpaqueT> cow_opaque::cast_opt() const
+template<typename OpaqueT>
+inline
+rcptr<const OpaqueT>
+cow_opaque::
+cast_opt()
+const
   {
     auto ptr = this->m_sptr.get();
     if(!ptr)
@@ -291,7 +402,11 @@ template<typename OpaqueT> rcptr<const OpaqueT> cow_opaque::cast_opt() const
     return tsptr;
   }
 
-template<typename OpaqueT> rcptr<OpaqueT> cow_opaque::open_opt()
+template<typename OpaqueT>
+inline
+rcptr<OpaqueT>
+cow_opaque::
+open_opt()
   {
     auto ptr = this->m_sptr.get();
     if(!ptr)
@@ -331,52 +446,94 @@ class cow_function
     rcptr<const Abstract_Function> m_sptr;
 
   public:
-    constexpr cow_function(nullptr_t = nullptr) noexcept
+    constexpr
+    cow_function(nullptr_t = nullptr)
+    noexcept
       { }
 
-    constexpr cow_function(const char* desc, simple_function& func) noexcept
+    constexpr
+    cow_function(const char* desc, simple_function& func)
+    noexcept
       : m_desc(desc), m_fptr(func)
       { }
 
-    template<typename FunctionT> constexpr cow_function(rcptr<FunctionT> sptr) noexcept
+    template<typename FunctionT>
+    constexpr
+    cow_function(rcptr<FunctionT> sptr)
+    noexcept
       : m_sptr(::std::move(sptr))
       { }
 
   private:
-    [[noreturn]] void do_throw_null_pointer() const;
+    [[noreturn]]
+    void
+    do_throw_null_pointer()
+    const;
 
   public:
-    bool unique() const noexcept
+    bool
+    unique()
+    const
+    noexcept
       { return this->m_sptr.unique();  }
 
-    long use_count() const noexcept
+    long
+    use_count()
+    const
+    noexcept
       { return this->m_sptr.use_count();  }
 
-    cow_function& reset() noexcept
+    cow_function&
+    reset()
+    noexcept
       {
         this->m_fptr = nullptr;
         this->m_sptr = nullptr;
         return *this;
       }
 
-    explicit operator bool () const noexcept
+    explicit operator
+    bool()
+    const
+    noexcept
       { return this->m_fptr || this->m_sptr;  }
 
-    const type_info& type() const
-      { return this->m_fptr ? typeid(simple_function) : typeid(*(this->m_sptr.get()));  }  // may throw `std::bad_typeid`
+    const type_info&
+    type()
+    const
+      { return this->m_fptr ? typeid(simple_function)
+                            : typeid(*(this->m_sptr.get()));  }  // may throw `std::bad_typeid`
 
-    const void* ptr() const noexcept
+    const void*
+    ptr()
+    const
+    noexcept
       { return this->m_fptr ? (void*)(intptr_t)this->m_fptr : this->m_sptr.get();  }
 
-    tinyfmt& describe(tinyfmt& fmt) const;
-    Variable_Callback& enumerate_variables(Variable_Callback& callback) const;
+    tinyfmt&
+    describe(tinyfmt& fmt)
+    const;
 
-    Reference& invoke_ptc_aware(Reference& self, Global_Context& global, cow_vector<Reference>&& args = { }) const;
-    Reference& invoke(Reference& self, Global_Context& global, cow_vector<Reference>&& args = { }) const;
-    Reference invoke(Global_Context& global, cow_vector<Reference>&& args = { }) const;
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback)
+    const;
+
+    Reference&
+    invoke_ptc_aware(Reference& self, Global_Context& global, cow_vector<Reference>&& args = { })
+    const;
+
+    Reference&
+    invoke(Reference& self, Global_Context& global, cow_vector<Reference>&& args = { })
+    const;
+
+    Reference
+    invoke(Global_Context& global, cow_vector<Reference>&& args = { })
+    const;
   };
 
-inline tinyfmt& operator<<(tinyfmt& fmt, const cow_function& func)
+inline
+tinyfmt&
+operator<<(tinyfmt& fmt, const cow_function& func)
   { return func.describe(fmt);  }
 
 // Fundamental types
@@ -404,7 +561,10 @@ enum Vtype : uint8_t
     vtype_object    = 8,
   };
 
-ROCKET_PURE_FUNCTION const char* describe_vtype(Vtype vtype) noexcept;
+ROCKET_PURE_FUNCTION
+const char*
+describe_vtype(Vtype vtype)
+noexcept;
 
 // Value comparison results
 enum Compare : uint8_t
@@ -427,7 +587,10 @@ enum Frame_Type : uint8_t
     frame_type_assert  = 6,  // An assertion failed here [initiates a new chain].
   };
 
-ROCKET_PURE_FUNCTION const char* describe_frame_type(Frame_Type type) noexcept;
+ROCKET_PURE_FUNCTION
+const char*
+describe_frame_type(Frame_Type type)
+noexcept;
 
 // Garbage collection generations
 enum GC_Generation : uint8_t
@@ -490,7 +653,10 @@ enum Parser_Status : uint32_t
     parser_status_closed_parenthesis_or_argument_expected    = 3030,
   };
 
-ROCKET_PURE_FUNCTION const char* describe_parser_status(Parser_Status status) noexcept;
+ROCKET_PURE_FUNCTION
+const char*
+describe_parser_status(Parser_Status status)
+noexcept;
 
 // API versioning of the standard library
 enum API_Version : uint32_t
@@ -502,28 +668,35 @@ enum API_Version : uint32_t
   };
 
 // Options for source parsing and code generation
-template<uint32_t... paramsT> struct Compiler_Options_template;
-template<uint32_t fragmentT> struct Compiler_Options_fragment;
+template<uint32_t... paramsT>
+struct Compiler_Options_template;
 
-template<uint32_t versionT> struct Compiler_Options_template<versionT>
-    : Compiler_Options_template<versionT, versionT>
+template<uint32_t fragmentT>
+struct Compiler_Options_fragment;
+
+template<uint32_t versionT>
+struct Compiler_Options_template<versionT>
+  : Compiler_Options_template<versionT, versionT>
   { };
 
-template<uint32_t versionT, uint32_t fragmentT> struct Compiler_Options_template<versionT, fragmentT>
-    : Compiler_Options_template<versionT, fragmentT - 1>, Compiler_Options_fragment<fragmentT>
+template<uint32_t versionT, uint32_t fragmentT>
+struct Compiler_Options_template<versionT, fragmentT>
+  : Compiler_Options_template<versionT, fragmentT - 1>, Compiler_Options_fragment<fragmentT>
   {
     // All members from `Compiler_Options_fragment<fragmentT>` have been brought in.
     // This struct does not define anything by itself.
   };
 
-template<uint32_t versionT> struct Compiler_Options_template<versionT, 0>
+template<uint32_t versionT>
+struct Compiler_Options_template<versionT, 0>
   {
     // This member exists in all derived structs.
     // We would like these structs to be trivial, hence virtual bases are not an option.
     uint8_t version = versionT;
   };
 
-template<> struct Compiler_Options_fragment<1>
+template<>
+struct Compiler_Options_fragment<1>
   {
     // Make single quotes behave similiar to double quotes. [useful when parsing JSON5 text]
     bool escapable_single_quotes = false;
@@ -541,7 +714,8 @@ template<> struct Compiler_Options_fragment<1>
     bool verbose_single_step_traps = false;
   };
 
-template<> struct Compiler_Options_fragment<2>
+template<>
+struct Compiler_Options_fragment<2>
   {
     // Note: Please keep this struct as compact as possible.
   };

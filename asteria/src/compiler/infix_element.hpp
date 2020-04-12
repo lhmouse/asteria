@@ -91,24 +91,40 @@ class Infix_Element
       }
 
   public:
-    Index index() const noexcept
+    Index
+    index()
+    const
+    noexcept
       { return static_cast<Index>(this->m_stor.index());  }
 
-    Infix_Element& swap(Infix_Element& other) noexcept
+    Infix_Element&
+    swap(Infix_Element& other)
+    noexcept
       {
         this->m_stor.swap(other.m_stor);
         return *this;
       }
 
     // Returns the precedence of this element.
-    Precedence tell_precedence() const noexcept;
+    Precedence
+    tell_precedence()
+    const
+    noexcept;
+
     // Moves all units into `units`.
-    Infix_Element& extract(cow_vector<Expression_Unit>& units);
+    Infix_Element&
+    extract(cow_vector<Expression_Unit>& units);
+
     // Returns a reference where new units will be appended.
-    cow_vector<Expression_Unit>& open_junction() noexcept;
+    cow_vector<Expression_Unit>&
+    open_junction()
+    noexcept;
   };
 
-inline void swap(Infix_Element& lhs, Infix_Element& rhs) noexcept
+inline
+void
+swap(Infix_Element& lhs, Infix_Element& rhs)
+noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace Asteria

@@ -9,7 +9,9 @@
 
 namespace Asteria {
 
-class Loader_Lock final : public Rcfwd<Loader_Lock>
+class Loader_Lock
+final
+  : public Rcfwd<Loader_Lock>
   {
   public:
     class Unique_Stream;  // RAII wrapper
@@ -19,20 +21,27 @@ class Loader_Lock final : public Rcfwd<Loader_Lock>
     using element_type = decltype(m_strms)::value_type;
 
   public:
-    Loader_Lock() noexcept
+    Loader_Lock()
+    noexcept
       = default;
 
-    ~Loader_Lock() override;
+    ~Loader_Lock()
+    override;
 
     Loader_Lock(const Loader_Lock&)
       = delete;
 
-    Loader_Lock& operator=(const Loader_Lock&)
+    Loader_Lock&
+    operator=(const Loader_Lock&)
       = delete;
 
   private:
-    element_type* do_lock_stream(const char* path);
-    void do_unlock_stream(element_type* qelem) noexcept;
+    element_type*
+    do_lock_stream(const char* path);
+
+    void
+    do_unlock_stream(element_type* qelem)
+    noexcept;
   };
 
 class Loader_Lock::Unique_Stream
@@ -42,32 +51,48 @@ class Loader_Lock::Unique_Stream
     element_type* m_elem = nullptr;
 
   public:
-    constexpr Unique_Stream() noexcept
+    constexpr
+    Unique_Stream()
+    noexcept
       = default;
 
     Unique_Stream(const rcptr<Loader_Lock>& lock, const char* path)
       { this->reset(lock, path);  }
 
-    Unique_Stream(Unique_Stream&& other) noexcept
+    Unique_Stream(Unique_Stream&& other)
+    noexcept
       { this->swap(other);  }
 
-    Unique_Stream& operator=(Unique_Stream&& other) noexcept
+    Unique_Stream&
+    operator=(Unique_Stream&& other)
+    noexcept
       { return this->swap(other);  }
 
     ~Unique_Stream()
       { this->reset();  }
 
   public:
-    explicit operator bool () const noexcept
+    explicit operator
+    bool()
+    const
+    noexcept
       { return bool(this->m_elem);  }
 
-    ::rocket::tinybuf_file& get() const noexcept
+    ::rocket::tinybuf_file&
+    get()
+    const
+    noexcept
       { return ROCKET_ASSERT(this->m_elem), this->m_elem->second;  }
 
-    operator ::rocket::tinybuf_file& () const noexcept
+    operator
+    ::rocket::tinybuf_file&()
+    const
+    noexcept
       { return ROCKET_ASSERT(this->m_elem), this->m_elem->second;  }
 
-    Unique_Stream& reset() noexcept
+    Unique_Stream&
+    reset()
+    noexcept
       {
         // Update contents of *this.
         auto qlock = ::std::exchange(this->m_lock, nullptr);
@@ -79,7 +104,8 @@ class Loader_Lock::Unique_Stream
         return *this;
       }
 
-    Unique_Stream& reset(const rcptr<Loader_Lock>& lock, const char* path)
+    Unique_Stream&
+    reset(const rcptr<Loader_Lock>& lock, const char* path)
       {
         // Lock the stream. If an exception is thrown, there is no effect.
         ROCKET_ASSERT(lock);
@@ -96,7 +122,9 @@ class Loader_Lock::Unique_Stream
         return *this;
       }
 
-    Unique_Stream& swap(Unique_Stream& other) noexcept
+    Unique_Stream&
+    swap(Unique_Stream& other)
+    noexcept
       {
         this->m_lock.swap(other.m_lock);
         ::std::swap(this->m_elem, other.m_elem);
@@ -104,7 +132,10 @@ class Loader_Lock::Unique_Stream
       }
   };
 
-inline void swap(Loader_Lock::Unique_Stream& lhs, Loader_Lock::Unique_Stream& rhs) noexcept
+inline
+void
+swap(Loader_Lock::Unique_Stream& lhs, Loader_Lock::Unique_Stream& rhs)
+noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace Asteria

@@ -13,7 +13,8 @@
 
 namespace Asteria {
 
-Iopt std_system_gc_count_variables(Global& global, Ival generation)
+Iopt
+std_system_gc_count_variables(Global& global, Ival generation)
   {
     auto gc_gen = static_cast<GC_Generation>(::rocket::clamp(generation,
                         static_cast<Ival>(gc_generation_newest), static_cast<Ival>(gc_generation_oldest)));
@@ -26,7 +27,8 @@ Iopt std_system_gc_count_variables(Global& global, Ival generation)
     return static_cast<int64_t>(count);
   }
 
-Iopt std_system_gc_get_threshold(Global& global, Ival generation)
+Iopt
+std_system_gc_get_threshold(Global& global, Ival generation)
   {
     auto gc_gen = static_cast<GC_Generation>(::rocket::clamp(generation,
                         static_cast<Ival>(gc_generation_newest), static_cast<Ival>(gc_generation_oldest)));
@@ -39,7 +41,8 @@ Iopt std_system_gc_get_threshold(Global& global, Ival generation)
     return static_cast<int64_t>(thres);
   }
 
-Iopt std_system_gc_set_threshold(Global& global, Ival generation, Ival threshold)
+Iopt
+std_system_gc_set_threshold(Global& global, Ival generation, Ival threshold)
   {
     auto gc_gen = static_cast<GC_Generation>(::rocket::clamp(generation,
                         static_cast<Ival>(gc_generation_newest), static_cast<Ival>(gc_generation_oldest)));
@@ -54,7 +57,8 @@ Iopt std_system_gc_set_threshold(Global& global, Ival generation, Ival threshold
     return static_cast<int64_t>(thres);
   }
 
-Ival std_system_gc_collect(Global& global, Iopt generation_limit)
+Ival
+std_system_gc_collect(Global& global, Iopt generation_limit)
   {
     auto gc_limit = gc_generation_oldest;
     // Unlike others, this function does not fail if `generation_limit` is out of range.
@@ -68,7 +72,8 @@ Ival std_system_gc_collect(Global& global, Iopt generation_limit)
     return static_cast<int64_t>(nvars);
   }
 
-Ival std_system_execute(Sval cmd, Aopt argv, Aopt envp)
+Ival
+std_system_execute(Sval cmd, Aopt argv, Aopt envp)
   {
     // Append arguments.
     cow_vector<const char*> ptrs = { cmd.safe_c_str() };
@@ -108,13 +113,15 @@ Ival std_system_execute(Sval cmd, Aopt argv, Aopt envp)
     }
   }
 
-void std_system_daemonize()
+void
+std_system_daemonize()
   {
     if(::daemon(1, 0) != 0)
       ASTERIA_THROW_SYSTEM_ERROR("daemon");
   }
 
-Sopt std_system_env_get_variable(Sval name)
+Sopt
+std_system_env_get_variable(Sval name)
   {
     const char* val = ::getenv(name.safe_c_str());
     if(!val) {
@@ -123,7 +130,8 @@ Sopt std_system_env_get_variable(Sval name)
     return ::rocket::sref(val);
   }
 
-Oval std_system_env_get_variables()
+Oval
+std_system_env_get_variables()
   {
     Oval vars;
     const char* const* vpos = ::environ;
@@ -138,7 +146,8 @@ Oval std_system_env_get_variables()
     return vars;
   }
 
-void create_bindings_system(V_object& result, API_Version /*version*/)
+void
+create_bindings_system(V_object& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.system.gc_count_variables()`
@@ -162,8 +171,7 @@ void create_bindings_system(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival generation;
     if(reader.I().v(generation).F()) {
-      Reference_root::S_temporary xref =
-        { std_system_gc_count_variables(global, ::std::move(generation)) };
+      Reference_root::S_temporary xref = { std_system_gc_count_variables(global, ::std::move(generation)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -190,8 +198,7 @@ void create_bindings_system(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Ival generation;
     if(reader.I().v(generation).F()) {
-      Reference_root::S_temporary xref =
-        { std_system_gc_get_threshold(global, ::std::move(generation)) };
+      Reference_root::S_temporary xref = { std_system_gc_get_threshold(global, ::std::move(generation)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -224,8 +231,8 @@ void create_bindings_system(V_object& result, API_Version /*version*/)
     Ival generation;
     Ival threshold;
     if(reader.I().v(generation).v(threshold).F()) {
-      Reference_root::S_temporary xref =
-        { std_system_gc_set_threshold(global, ::std::move(generation), ::std::move(threshold)) };
+      Reference_root::S_temporary xref = { std_system_gc_set_threshold(global, ::std::move(generation),
+                                                                       ::std::move(threshold)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -253,8 +260,7 @@ void create_bindings_system(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Iopt generation_limit;
     if(reader.I().o(generation_limit).F()) {
-      Reference_root::S_temporary xref =
-        { std_system_gc_collect(global, ::std::move(generation_limit)) };
+      Reference_root::S_temporary xref = { std_system_gc_collect(global, ::std::move(generation_limit)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -291,8 +297,8 @@ void create_bindings_system(V_object& result, API_Version /*version*/)
     Aopt argv;
     Aopt envp;
     if(reader.I().v(cmd).o(argv).o(envp).F()) {
-      Reference_root::S_temporary xref =
-        { std_system_execute(::std::move(cmd), ::std::move(argv), ::std::move(envp)) };
+      Reference_root::S_temporary xref = { std_system_execute(::std::move(cmd), ::std::move(argv),
+                                                              ::std::move(envp)) };
       return self = ::std::move(xref);
     }
     // Fail.

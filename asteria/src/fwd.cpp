@@ -9,24 +9,33 @@
 
 namespace Asteria {
 
-Rcbase::~Rcbase()
+Rcbase::
+~Rcbase()
   {
   }
 
-Abstract_Opaque::~Abstract_Opaque()
+Abstract_Opaque::
+~Abstract_Opaque()
   {
   }
 
-Abstract_Function::~Abstract_Function()
+Abstract_Function::
+~Abstract_Function()
   {
   }
 
-void cow_opaque::do_throw_null_pointer() const
+void
+cow_opaque::
+do_throw_null_pointer()
+const
   {
     ASTERIA_THROW("attempt to dereference a null opaque pointer");
   }
 
-tinyfmt& cow_opaque::describe(tinyfmt& fmt) const
+tinyfmt&
+cow_opaque::
+describe(tinyfmt& fmt)
+const
   {
     auto ptr = this->m_sptr.get();
     if(ptr) {
@@ -35,7 +44,10 @@ tinyfmt& cow_opaque::describe(tinyfmt& fmt) const
     return fmt.puts("<null opaque pointer>");
   }
 
-Variable_Callback& cow_opaque::enumerate_variables(Variable_Callback& callback) const
+Variable_Callback&
+cow_opaque::
+enumerate_variables(Variable_Callback& callback)
+const
   {
     auto ptr = this->m_sptr.get();
     if(ptr) {
@@ -44,12 +56,18 @@ Variable_Callback& cow_opaque::enumerate_variables(Variable_Callback& callback) 
     return callback;
   }
 
-void cow_function::do_throw_null_pointer() const
+void
+cow_function::
+do_throw_null_pointer()
+const
   {
     ASTERIA_THROW("attempt to dereference a null function pointer");
   }
 
-tinyfmt& cow_function::describe(tinyfmt& fmt) const
+tinyfmt&
+cow_function::
+describe(tinyfmt& fmt)
+const
   {
     auto fptr = this->m_fptr;
     if(fptr) {
@@ -62,7 +80,10 @@ tinyfmt& cow_function::describe(tinyfmt& fmt) const
     return fmt.puts("<null function pointer>");
   }
 
-Variable_Callback& cow_function::enumerate_variables(Variable_Callback& callback) const
+Variable_Callback&
+cow_function::
+enumerate_variables(Variable_Callback& callback)
+const
   {
     auto ptr = this->m_sptr.get();
     if(ptr) {
@@ -71,7 +92,10 @@ Variable_Callback& cow_function::enumerate_variables(Variable_Callback& callback
     return callback;
   }
 
-Reference& cow_function::invoke_ptc_aware(Reference& self, Global_Context& global, cow_vector<Reference>&& args) const
+Reference&
+cow_function::
+invoke_ptc_aware(Reference& self, Global_Context& global, cow_vector<Reference>&& args)
+const
   {
     auto fptr = this->m_fptr;
     if(fptr) {
@@ -84,14 +108,20 @@ Reference& cow_function::invoke_ptc_aware(Reference& self, Global_Context& globa
     return ptr->invoke_ptc_aware(self, global, ::std::move(args));  // dynamic
   }
 
-Reference& cow_function::invoke(Reference& self, Global_Context& global, cow_vector<Reference>&& args) const
+Reference&
+cow_function::
+invoke(Reference& self, Global_Context& global, cow_vector<Reference>&& args)
+const
   {
     this->invoke_ptc_aware(self, global, ::std::move(args));
     self.finish_call(global);
     return self;
   }
 
-Reference cow_function::invoke(Global_Context& global, cow_vector<Reference>&& args) const
+Reference
+cow_function::
+invoke(Global_Context& global, cow_vector<Reference>&& args)
+const
   {
     Reference self = Reference_root::S_constant();
     this->invoke_ptc_aware(self, global, ::std::move(args));
@@ -99,7 +129,9 @@ Reference cow_function::invoke(Global_Context& global, cow_vector<Reference>&& a
     return self;
   }
 
-const char* describe_vtype(Vtype vtype) noexcept
+const char*
+describe_vtype(Vtype vtype)
+noexcept
   {
     switch(vtype) {
       case vtype_null: {
@@ -134,7 +166,9 @@ const char* describe_vtype(Vtype vtype) noexcept
     }
   }
 
-const char* describe_frame_type(Frame_Type type) noexcept
+const char*
+describe_frame_type(Frame_Type type)
+noexcept
   {
     switch(type) {
       case frame_type_native: {
@@ -163,7 +197,9 @@ const char* describe_frame_type(Frame_Type type) noexcept
     }
   }
 
-const char* describe_parser_status(Parser_Status status) noexcept
+const char*
+describe_parser_status(Parser_Status status)
+noexcept
   {
     switch(status) {
       case parser_status_success: {

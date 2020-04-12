@@ -9,7 +9,9 @@
 
 namespace Asteria {
 
-class Variable final : public Rcfwd<Variable>
+class Variable
+final
+  : public Rcfwd<Variable>
   {
   private:
     Value m_value;
@@ -24,34 +26,51 @@ class Variable final : public Rcfwd<Variable>
     double m_gcref_f;
 
   public:
-    Variable() noexcept
+    Variable()
+    noexcept
       = default;
 
-    ~Variable() override;
+    ~Variable()
+    override;
 
     Variable(const Variable&)
       = delete;
 
-    Variable& operator=(const Variable&)
+    Variable&
+    operator=(const Variable&)
       = delete;
 
   public:
-    const Value& get_value() const noexcept
+    const Value&
+    get_value()
+    const
+    noexcept
       { return this->m_value;  }
 
-    Value& open_value()
+    Value&
+    open_value()
       { return this->m_value;  }
 
-    bool is_immutable() const noexcept
+    bool
+    is_immutable()
+    const
+    noexcept
       { return this->m_immut;  }
 
-    Variable& set_immutable(bool immutable) noexcept
+    Variable&
+    set_immutable(bool immutable)
+    noexcept
       { return this->m_immut = immutable, *this;  }
 
-    bool is_initialized() const noexcept
+    bool
+    is_initialized()
+    const
+    noexcept
       { return this->m_alive;  }
 
-    template<typename XValT> Variable& initialize(XValT&& xval, bool immut)
+    template<typename XValT>
+    Variable&
+    initialize(XValT&& xval, bool immut)
       {
         this->m_value = ::std::forward<XValT>(xval);
         this->m_immut = immut;
@@ -59,7 +78,9 @@ class Variable final : public Rcfwd<Variable>
         return *this;
       }
 
-    Variable& uninitialize() noexcept
+    Variable&
+    uninitialize()
+    noexcept
       {
         this->m_value = INT64_C(0x6eef8badf00ddead);
         this->m_immut = true;
@@ -67,20 +88,30 @@ class Variable final : public Rcfwd<Variable>
         return *this;
       }
 
-    long gcref_split() const noexcept
+    long
+    gcref_split()
+    const
+    noexcept
       { return this->m_value.gcref_split();  }
 
-    long get_gcref() const noexcept
+    long
+    get_gcref()
+    const
+    noexcept
       { return this->m_gcref_i;  }
 
-    Variable& reset_gcref(long iref) noexcept
+    Variable&
+    reset_gcref(long iref)
+    noexcept
       {
         this->m_gcref_i = iref;
         this->m_gcref_f = 0x1p-26;
         return *this;
       }
 
-    Variable& increment_gcref(long split) noexcept
+    Variable&
+    increment_gcref(long split)
+    noexcept
       {
         // Optimize for the non-split case.
         if(split > 1) {
@@ -96,7 +127,9 @@ class Variable final : public Rcfwd<Variable>
         return *this;
       }
 
-    Variable_Callback& enumerate_variables(Variable_Callback& callback) const;
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback)
+    const;
   };
 
 }  // namespace Asteria

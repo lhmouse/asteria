@@ -17,7 +17,9 @@ class Sentry
     long m_old;
 
   public:
-    explicit Sentry(long& ref) noexcept
+    explicit
+    Sentry(long& ref)
+    noexcept
       : m_ref(ref), m_old(ref)
       { this->m_ref++;  }
 
@@ -27,27 +29,39 @@ class Sentry
     Sentry(const Sentry&)
       = delete;
 
-    Sentry& operator=(const Sentry&)
+    Sentry&
+    operator=(const Sentry&)
       = delete;
 
   public:
-    explicit operator bool () const noexcept
+    explicit operator
+    bool()
+    const
+    noexcept
       { return this->m_old == 0;  }
   };
 
-template<typename FuncT> struct Variable_Walker final : Variable_Callback
+template<typename FuncT>
+struct Variable_Walker
+final
+  : Variable_Callback
   {
     FuncT func;  // If `FunctionT` is a reference type then this is a reference.
 
-    explicit Variable_Walker(FuncT&& xfunc)
+    explicit
+    Variable_Walker(FuncT&& xfunc)
       : func(::std::forward<FuncT>(xfunc))
       { }
 
-    bool process(const rcptr<Variable>& var) override
+    bool
+    process(const rcptr<Variable>& var)
+    override
       { return this->func(var);  }
   };
 
-template<typename ContT, typename FuncT> FuncT&& do_traverse(const ContT& cont, FuncT&& func)
+template<typename ContT, typename FuncT>
+FuncT&&
+do_traverse(const ContT& cont, FuncT&& func)
   {
     // The callback has to be an lvalue.
     Variable_Walker<FuncT&&> walker(::std::forward<FuncT>(func));
@@ -55,9 +69,13 @@ template<typename ContT, typename FuncT> FuncT&& do_traverse(const ContT& cont, 
     return ::std::forward<FuncT>(walker.func);
   }
 
-struct Variable_Wiper final : Variable_Callback
+struct Variable_Wiper
+final
+  : Variable_Callback
   {
-    bool process(const rcptr<Variable>& var) override
+    bool
+    process(const rcptr<Variable>& var)
+    override
       {
         // Don't modify variables in place which might have side effects.
         auto value = ::std::move(var->open_value());
@@ -70,7 +88,9 @@ struct Variable_Wiper final : Variable_Callback
 
 }  // namespace
 
-bool Collector::track_variable(const rcptr<Variable>& var)
+bool
+Collector::
+track_variable(const rcptr<Variable>& var)
   {
     if(!this->m_tracked.insert(var))
       return false;
@@ -86,7 +106,10 @@ bool Collector::track_variable(const rcptr<Variable>& var)
     return true;
   }
 
-bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
+bool
+Collector::
+untrack_variable(const rcptr<Variable>& var)
+noexcept
   {
     if(!this->m_tracked.erase(var))
       return false;
@@ -94,7 +117,9 @@ bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
     return true;
   }
 
-Collector* Collector::collect_single_opt()
+Collector*
+Collector::
+collect_single_opt()
   {
     // Ignore recursive requests.
     const Sentry sentry(this->m_recur);
@@ -242,7 +267,10 @@ Collector* Collector::collect_single_opt()
     return next;
   }
 
-Collector& Collector::wipe_out_variables() noexcept
+Collector&
+Collector::
+wipe_out_variables()
+noexcept
   {
     // Ignore recursive requests.
     const Sentry sentry(this->m_recur);

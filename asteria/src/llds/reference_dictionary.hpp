@@ -19,10 +19,16 @@ class Reference_Dictionary
         union { phsh_string kstor[1];  };  // initialized iff `prev` is non-null
         union { Reference vstor[1];  };  // initialized iff `prev` is non-null
 
-        Bucket() noexcept { }
-        ~Bucket() { }
+        Bucket()
+        { }
 
-        explicit operator bool () const noexcept
+        ~Bucket()
+        { }
+
+        explicit operator
+        bool()
+        const
+        noexcept
           { return this->prev != nullptr;  }
       };
 
@@ -32,13 +38,18 @@ class Reference_Dictionary
     size_t m_size = 0;         // number of initialized buckets
 
   public:
-    constexpr Reference_Dictionary() noexcept
+    constexpr
+    Reference_Dictionary()
+    noexcept
       { }
 
-    Reference_Dictionary(Reference_Dictionary&& other) noexcept
+    Reference_Dictionary(Reference_Dictionary&& other)
+    noexcept
       { this->swap(other);  }
 
-    Reference_Dictionary& operator=(Reference_Dictionary&& other) noexcept
+    Reference_Dictionary&
+    operator=(Reference_Dictionary&& other)
+    noexcept
       { return this->swap(other);  }
 
     ~Reference_Dictionary()
@@ -54,27 +65,61 @@ class Reference_Dictionary
       }
 
   private:
-    void do_destroy_buckets() const noexcept;
-    void do_enumerate_variables(Variable_Callback& callback) const;
+    void
+    do_destroy_buckets()
+    const
+    noexcept;
 
-    Bucket* do_xprobe(const phsh_string& name) const noexcept;
-    void do_xrelocate_but(Bucket* qxcld) noexcept;
+    void
+    do_enumerate_variables(Variable_Callback& callback)
+    const;
 
-    inline void do_list_attach(Bucket* qbkt) noexcept;
-    inline void do_list_detach(Bucket* qbkt) noexcept;
+    Bucket*
+    do_xprobe(const phsh_string& name)
+    const
+    noexcept;
 
-    void do_rehash(size_t nbkt);
-    void do_attach(Bucket* qbkt, const phsh_string& name) noexcept;
-    void do_detach(Bucket* qbkt) noexcept;
+    void
+    do_xrelocate_but(Bucket* qxcld)
+    noexcept;
+
+    inline
+    void
+    do_list_attach(Bucket* qbkt)
+    noexcept;
+
+    inline
+    void
+    do_list_detach(Bucket* qbkt)
+    noexcept;
+
+    void
+    do_rehash(size_t nbkt);
+
+    void
+    do_attach(Bucket* qbkt, const phsh_string& name)
+    noexcept;
+
+    void
+    do_detach(Bucket* qbkt)
+    noexcept;
 
   public:
-    bool empty() const noexcept
+    bool
+    empty()
+    const
+    noexcept
       { return this->m_head == nullptr;  }
 
-    size_t size() const noexcept
+    size_t
+    size()
+    const
+    noexcept
       { return this->m_size;  }
 
-    Reference_Dictionary& clear() noexcept
+    Reference_Dictionary&
+    clear()
+    noexcept
       {
         if(this->m_head)
           this->do_destroy_buckets();
@@ -85,7 +130,9 @@ class Reference_Dictionary
         return *this;
       }
 
-    Reference_Dictionary& swap(Reference_Dictionary& other) noexcept
+    Reference_Dictionary&
+    swap(Reference_Dictionary& other)
+    noexcept
       {
         xswap(this->m_bptr, other.m_bptr);
         xswap(this->m_eptr, other.m_eptr);
@@ -94,7 +141,10 @@ class Reference_Dictionary
         return *this;
       }
 
-    const Reference* get_opt(const phsh_string& name) const noexcept
+    const Reference*
+    get_opt(const phsh_string& name)
+    const
+    noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.
         if(!this->m_bptr) {
@@ -110,7 +160,8 @@ class Reference_Dictionary
         return qbkt->vstor;
       }
 
-    Reference& open(const phsh_string& name)
+    Reference&
+    open(const phsh_string& name)
       {
         // Reserve more room by rehashing if the load factor would exceed 0.5.
         auto nbkt = static_cast<size_t>(this->m_eptr - this->m_bptr);
@@ -129,7 +180,9 @@ class Reference_Dictionary
         return qbkt->vstor[0];
       }
 
-    bool erase(const phsh_string& name) noexcept
+    bool
+    erase(const phsh_string& name)
+    noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.
         if(!this->m_bptr) {
@@ -146,14 +199,19 @@ class Reference_Dictionary
         return true;
       }
 
-    Variable_Callback& enumerate_variables(Variable_Callback& callback) const
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback)
+    const
       {
         this->do_enumerate_variables(callback);
         return callback;
       }
   };
 
-inline void swap(Reference_Dictionary& lhs, Reference_Dictionary& rhs) noexcept
+inline
+void
+swap(Reference_Dictionary& lhs, Reference_Dictionary& rhs)
+noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace Asteria

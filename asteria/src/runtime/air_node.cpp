@@ -32,7 +32,8 @@ using Enumerator  = AVMC_Queue::Enumerator;
 // Auxiliary functions
 ///////////////////////////////////////////////////////////////////////////
 
-bool do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code, const Abstract_Context& ctx)
+bool
+do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code, const Abstract_Context& ctx)
   {
     for(size_t i = 0;  i < code.size();  ++i) {
       auto qnode = code.at(i).rebind_opt(ctx);
@@ -44,7 +45,8 @@ bool do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code, const Abstract_Con
     return dirty;
   }
 
-bool do_rebind_nodes(bool& dirty, cow_vector<cow_vector<AIR_Node>>& code, const Abstract_Context& ctx)
+bool
+do_rebind_nodes(bool& dirty, cow_vector<cow_vector<AIR_Node>>& code, const Abstract_Context& ctx)
   {
     for(size_t i = 0;  i < code.size();  ++i) {
       for(size_t k = 0;  k < code.at(i).size();  ++k) {
@@ -58,7 +60,9 @@ bool do_rebind_nodes(bool& dirty, cow_vector<cow_vector<AIR_Node>>& code, const 
     return dirty;
   }
 
-template<typename XValT> Reference& do_set_temporary(Evaluation_Stack& stack, bool assign, XValT&& xval)
+template<typename XValT>
+Reference&
+do_set_temporary(Evaluation_Stack& stack, bool assign, XValT&& xval)
   {
     auto& ref = stack.open_top();
     if(assign) {
@@ -71,12 +75,14 @@ template<typename XValT> Reference& do_set_temporary(Evaluation_Stack& stack, bo
     return ref = ::std::move(xref);
   }
 
-Reference& do_declare(Executive_Context& ctx, const phsh_string& name)
+Reference&
+do_declare(Executive_Context& ctx, const phsh_string& name)
   {
     return ctx.open_named_reference(name) = Reference_root::S_void();
   }
 
-AIR_Status do_execute_block(const AVMC_Queue& queue, Executive_Context& ctx)
+AIR_Status
+do_execute_block(const AVMC_Queue& queue, Executive_Context& ctx)
   {
     // Execute the body on a new context.
     Executive_Context ctx_next(::rocket::ref(ctx), nullptr);
@@ -92,7 +98,8 @@ AIR_Status do_execute_block(const AVMC_Queue& queue, Executive_Context& ctx)
     return status;
   }
 
-AIR_Status do_evaluate_branch(const AVMC_Queue& queue, bool assign, Executive_Context& ctx)
+AIR_Status
+do_evaluate_branch(const AVMC_Queue& queue, bool assign, Executive_Context& ctx)
   {
     if(ROCKET_EXPECT(queue.empty())) {
       // Leave the condition on the top of the stack.
@@ -111,15 +118,25 @@ AIR_Status do_evaluate_branch(const AVMC_Queue& queue, bool assign, Executive_Co
     // Discard the top which will be overwritten anyway.
     ctx.stack().pop();
     // Evaluate the branch.
-    // Be advised that you must forward the status code as is, because PTCs may return `air_status_return_ref`.
+    // You must forward the status code as is, because PTCs may return `air_status_return_ref`.
     return queue.execute(ctx);
   }
 
-template<typename ParamV> inline const ParamV* do_pcast(const void* pv) noexcept
-  { return static_cast<const ParamV*>(pv);  }
+template<typename ParamV>
+inline
+const ParamV*
+do_pcast(const void* pv)
+noexcept
+  {
+    return static_cast<const ParamV*>(pv);
+  }
 
-template<typename ParamV> Variable_Callback& do_penum(Variable_Callback& callback, ParamU /*pu*/, const void* pv)
-  { return static_cast<const ParamV*>(pv)->enumerate_variables(callback);  }
+template<typename ParamV>
+Variable_Callback&
+do_penum(Variable_Callback& callback, ParamU /*pu*/, const void* pv)
+  {
+    return static_cast<const ParamV*>(pv)->enumerate_variables(callback);
+  }
 
 // This defines common members of AVMC nodes.
 struct AVMC_Appender_common
@@ -127,52 +144,76 @@ struct AVMC_Appender_common
     ParamU pu = { };
     opt<Symbols> syms;
 
-    void set_symbols(const Source_Location& sloc)
+    void
+    set_symbols(const Source_Location& sloc)
       { this->syms = { sloc };  }
   };
 
 // This is the trait struct for parameter types that implement `enumerate_variables()`.
-template<typename ParamV, typename = void> struct AVMC_Appender : AVMC_Appender_common, ParamV
+template<typename ParamV, typename = void>
+struct AVMC_Appender
+  : AVMC_Appender_common, ParamV
   {
-    constexpr AVMC_Appender()
-      : ParamV()  { }
+    constexpr
+    AVMC_Appender()
+      : ParamV()
+      { }
 
-    AVMC_Queue& request(AVMC_Queue& queue) const
+    AVMC_Queue&
+    request(AVMC_Queue& queue)
+    const
       { return queue.request(sizeof(ParamV), this->syms.value_ptr());  }
 
-    template<Executor executorT> AVMC_Queue& output(AVMC_Queue& queue)
+    template<Executor executorT>
+    AVMC_Queue&
+    output(AVMC_Queue& queue)
       { return queue.append<executorT, do_penum<ParamV>>(this->pu, this->syms.value_ptr(),
                                                          static_cast<ParamV&&>(*this));  }
   };
 
 // This is the trait struct for parameter types that do not implement `enumerate_variables()`.
-template<typename ParamV> struct AVMC_Appender<ParamV, ROCKET_VOID_T(typename ParamV::nonenumerable)> : AVMC_Appender_common, ParamV
+template<typename ParamV>
+struct AVMC_Appender<ParamV, ROCKET_VOID_T(typename ParamV::nonenumerable)>
+  : AVMC_Appender_common, ParamV
   {
-    constexpr AVMC_Appender()
-      : ParamV()  { }
+    constexpr
+    AVMC_Appender()
+      : ParamV()
+      { }
 
-    AVMC_Queue& request(AVMC_Queue& queue) const
+    AVMC_Queue&
+    request(AVMC_Queue& queue)
+    const
       { return queue.request(sizeof(ParamV), this->syms.value_ptr());  }
 
-    template<Executor executorT> AVMC_Queue& output(AVMC_Queue& queue)
-      { return queue.append<executorT>(this->pu, this->syms.value_ptr(),
-                                       static_cast<ParamV&&>(*this));  }
+    template<Executor executorT>
+    AVMC_Queue&
+    output(AVMC_Queue& queue)
+      { return queue.append<executorT>(this->pu, this->syms.value_ptr(), static_cast<ParamV&&>(*this));  }
   };
 
 // This is the trait struct when there is no parameter.
-template<> struct AVMC_Appender<void, void> : AVMC_Appender_common
+template<>
+struct AVMC_Appender<void, void>
+  : AVMC_Appender_common
   {
-    constexpr AVMC_Appender()
+    constexpr
+    AVMC_Appender()
       { }
 
-    AVMC_Queue& request(AVMC_Queue& queue) const
+    AVMC_Queue&
+    request(AVMC_Queue& queue)
+    const
       { return queue.request(0, this->syms.value_ptr());  }
 
-    template<Executor executorT> AVMC_Queue& output(AVMC_Queue& queue)
+    template<Executor executorT>
+    AVMC_Queue&
+    output(AVMC_Queue& queue)
       { return queue.append<executorT>(this->pu, this->syms.value_ptr());  }
   };
 
-AVMC_Queue& do_solidify_queue(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
+AVMC_Queue&
+do_solidify_queue(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
   {
     ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(queue, 0);  });  // 1st pass
     ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(queue, 1);  });  // 2nd pass
@@ -183,11 +224,14 @@ AVMC_Queue& do_solidify_queue(AVMC_Queue& queue, const cow_vector<AIR_Node>& cod
 // Parameter structs and variable enumeration callbacks
 ///////////////////////////////////////////////////////////////////////////
 
-template<size_t nqsT> struct Pv_queues_fixed
+template<size_t nqsT>
+struct Pv_queues_fixed
   {
     AVMC_Queue queues[nqsT];
 
-    Variable_Callback& enumerate_variables(Variable_Callback& callback) const
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback)
+    const
       {
         ::rocket::for_each(this->queues, callback);
         return callback;
@@ -200,7 +244,9 @@ struct Pv_switch
     cow_vector<AVMC_Queue> queues_bodies;
     cow_vector<cow_vector<phsh_string>> names_added;
 
-    Variable_Callback& enumerate_variables(Variable_Callback& callback) const
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback)
+    const
       {
         ::rocket::for_each(this->queues_labels, callback);
         ::rocket::for_each(this->queues_bodies, callback);
@@ -215,7 +261,9 @@ struct Pv_for_each
     AVMC_Queue queue_init;
     AVMC_Queue queue_body;
 
-    Variable_Callback& enumerate_variables(Variable_Callback& callback) const
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback)
+    const
       {
         this->queue_init.enumerate_variables(callback);
         this->queue_body.enumerate_variables(callback);
@@ -230,7 +278,9 @@ struct Pv_try
     phsh_string name_except;
     AVMC_Queue queue_catch;
 
-    Variable_Callback& enumerate_variables(Variable_Callback& callback) const
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback)
+    const
       {
         this->queue_try.enumerate_variables(callback);
         this->queue_catch.enumerate_variables(callback);
@@ -246,7 +296,9 @@ struct Pv_func
     cow_vector<phsh_string> params;
     cow_vector<AIR_Node> code_body;
 
-    Variable_Callback& enumerate_variables(Variable_Callback& callback) const
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback)
+    const
       {
         ::rocket::for_each(this->code_body, callback);
         return callback;
@@ -258,7 +310,9 @@ struct Pv_defer
     Source_Location sloc;
     cow_vector<AIR_Node> code_body;
 
-    Variable_Callback& enumerate_variables(Variable_Callback& callback) const
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback)
+    const
       {
         ::rocket::for_each(this->code_body, callback);
         return callback;
@@ -269,7 +323,9 @@ struct Pv_ref
   {
     Reference ref = Reference_root::S_void();
 
-    Variable_Callback& enumerate_variables(Variable_Callback& callback) const
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback)
+    const
       {
         this->ref.enumerate_variables(callback);
         return callback;
@@ -325,14 +381,16 @@ struct Pv_opts_sloc
 // Executor functions
 ///////////////////////////////////////////////////////////////////////////
 
-AIR_Status do_clear_stack(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
+AIR_Status
+do_clear_stack(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // Clear the stack.
     ctx.stack().clear();
     return air_status_next;
   }
 
-AIR_Status do_execute_block(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
+AIR_Status
+do_execute_block(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
   {
     // Unpack arguments.
     const auto& queue_body = do_pcast<Pv_queues_fixed<1>>(pv)->queues[0];
@@ -341,7 +399,8 @@ AIR_Status do_execute_block(Executive_Context& ctx, ParamU /*pu*/, const void* p
     return do_execute_block(queue_body, ctx);
   }
 
-AIR_Status do_declare_variable(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
+AIR_Status
+do_declare_variable(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
   {
     // Unpack arguments.
     const auto& sloc = do_pcast<Pv_sloc_name>(pv)->sloc;
@@ -363,7 +422,8 @@ AIR_Status do_declare_variable(Executive_Context& ctx, ParamU /*pu*/, const void
     return air_status_next;
   }
 
-AIR_Status do_initialize_variable(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_initialize_variable(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& immutable = static_cast<bool>(pu.u8s[0]);
@@ -381,7 +441,8 @@ AIR_Status do_initialize_variable(Executive_Context& ctx, ParamU pu, const void*
     return air_status_next;
   }
 
-AIR_Status do_if_statement(Executive_Context& ctx, ParamU pu, const void* pv)
+AIR_Status
+do_if_statement(Executive_Context& ctx, ParamU pu, const void* pv)
   {
     // Unpack arguments.
     const auto& negative = static_cast<bool>(pu.u8s[0]);
@@ -395,7 +456,8 @@ AIR_Status do_if_statement(Executive_Context& ctx, ParamU pu, const void* pv)
       return do_execute_block(queue_false, ctx);
   }
 
-AIR_Status do_switch_statement(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
+AIR_Status
+do_switch_statement(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
   {
     // Unpack arguments.
     const auto& queues_labels = do_pcast<Pv_switch>(pv)->queues_labels;
@@ -461,7 +523,8 @@ AIR_Status do_switch_statement(Executive_Context& ctx, ParamU /*pu*/, const void
     return status;
   }
 
-AIR_Status do_do_while_statement(Executive_Context& ctx, ParamU pu, const void* pv)
+AIR_Status
+do_do_while_statement(Executive_Context& ctx, ParamU pu, const void* pv)
   {
     // Unpack arguments.
     const auto& queue_body = do_pcast<Pv_queues_fixed<2>>(pv)->queues[0];
@@ -485,7 +548,8 @@ AIR_Status do_do_while_statement(Executive_Context& ctx, ParamU pu, const void* 
     return air_status_next;
   }
 
-AIR_Status do_while_statement(Executive_Context& ctx, ParamU pu, const void* pv)
+AIR_Status
+do_while_statement(Executive_Context& ctx, ParamU pu, const void* pv)
   {
     // Unpack arguments.
     const auto& negative = static_cast<bool>(pu.u8s[0]);
@@ -509,7 +573,8 @@ AIR_Status do_while_statement(Executive_Context& ctx, ParamU pu, const void* pv)
     return air_status_next;
   }
 
-AIR_Status do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
+AIR_Status
+do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
   {
     // Unpack arguments.
     const auto& name_key = do_pcast<Pv_for_each>(pv)->name_key;
@@ -518,7 +583,8 @@ AIR_Status do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const vo
     const auto& queue_body = do_pcast<Pv_for_each>(pv)->queue_body;
     const auto& gcoll = ctx.global().genius_collector();
 
-    // We have to create an outer context due to the fact that the key and mapped references outlast every iteration.
+    // We have to create an outer context due to the fact that the key and mapped
+    // references outlast every iteration.
     Executive_Context ctx_for(::rocket::ref(ctx), nullptr);
     // Allocate an uninitialized variable for the key.
     const auto vkey = gcoll->create_variable();
@@ -579,7 +645,8 @@ AIR_Status do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const vo
     return air_status_next;
   }
 
-AIR_Status do_for_statement(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
+AIR_Status
+do_for_statement(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
   {
     // Unpack arguments.
     const auto& queue_init = do_pcast<Pv_queues_fixed<4>>(pv)->queues[0];
@@ -614,7 +681,8 @@ AIR_Status do_for_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
     return air_status_next;
   }
 
-AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
+AIR_Status
+do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
   {
     // Unpack arguments.
     const auto& queue_try = do_pcast<Pv_try>(pv)->queue_try;
@@ -667,7 +735,9 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
     return status;
   }
 
-[[noreturn]] AIR_Status do_throw_statement(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
+[[noreturn]]
+AIR_Status
+do_throw_statement(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
   {
     // Unpack arguments.
     const auto& sloc = do_pcast<Pv_sloc>(pv)->sloc;
@@ -677,7 +747,8 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
     throw Runtime_Error(Runtime_Error::T_throw(), ctx.stack().get_top().read(), sloc);
   }
 
-AIR_Status do_assert_statement(Executive_Context& ctx, ParamU pu, const void* pv)
+AIR_Status
+do_assert_statement(Executive_Context& ctx, ParamU pu, const void* pv)
   {
     // Unpack arguments.
     const auto& sloc = do_pcast<Pv_sloc_msg>(pv)->sloc;
@@ -693,7 +764,8 @@ AIR_Status do_assert_statement(Executive_Context& ctx, ParamU pu, const void* pv
     throw Runtime_Error(Runtime_Error::T_assert(), sloc, msg);
   }
 
-AIR_Status do_simple_status(Executive_Context& /*ctx*/, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_simple_status(Executive_Context& /*ctx*/, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& status = static_cast<AIR_Status>(pu.u8s[0]);
@@ -702,7 +774,8 @@ AIR_Status do_simple_status(Executive_Context& /*ctx*/, ParamU pu, const void* /
     return status;
   }
 
-AIR_Status do_glvalue_to_prvalue(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
+AIR_Status
+do_glvalue_to_prvalue(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // Check for glvalues only. Void references and PTC wrappers are forwarded as is.
     auto& self = ctx.stack().open_top();
@@ -715,7 +788,8 @@ AIR_Status do_glvalue_to_prvalue(Executive_Context& ctx, ParamU /*pu*/, const vo
     return air_status_next;
   }
 
-AIR_Status do_push_immediate(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
+AIR_Status
+do_push_immediate(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
   {
     // Unpack arguments.
     const auto& val = do_pcast<Value>(pv)[0];
@@ -726,7 +800,8 @@ AIR_Status do_push_immediate(Executive_Context& ctx, ParamU /*pu*/, const void* 
     return air_status_next;
   }
 
-AIR_Status do_push_global_reference(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
+AIR_Status
+do_push_global_reference(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
   {
     // Unpack arguments.
     const auto& name = do_pcast<Pv_name>(pv)->name;
@@ -741,7 +816,8 @@ AIR_Status do_push_global_reference(Executive_Context& ctx, ParamU /*pu*/, const
     return air_status_next;
   }
 
-AIR_Status do_push_local_reference(Executive_Context& ctx, ParamU pu, const void* pv)
+AIR_Status
+do_push_local_reference(Executive_Context& ctx, ParamU pu, const void* pv)
   {
     // Unpack arguments.
     const auto& depth = pu.x32;
@@ -761,7 +837,8 @@ AIR_Status do_push_local_reference(Executive_Context& ctx, ParamU pu, const void
     return air_status_next;
   }
 
-AIR_Status do_push_bound_reference(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
+AIR_Status
+do_push_bound_reference(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
   {
     // Unpack arguments.
     const auto& ref = do_pcast<Pv_ref>(pv)->ref;
@@ -771,7 +848,8 @@ AIR_Status do_push_bound_reference(Executive_Context& ctx, ParamU /*pu*/, const 
     return air_status_next;
   }
 
-AIR_Status do_define_function(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
+AIR_Status
+do_define_function(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
   {
     // Unpack arguments.
     const auto& opts = do_pcast<Pv_func>(pv)->opts;
@@ -791,7 +869,8 @@ AIR_Status do_define_function(Executive_Context& ctx, ParamU /*pu*/, const void*
     return air_status_next;
   }
 
-AIR_Status do_branch_expression(Executive_Context& ctx, ParamU pu, const void* pv)
+AIR_Status
+do_branch_expression(Executive_Context& ctx, ParamU pu, const void* pv)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -805,7 +884,8 @@ AIR_Status do_branch_expression(Executive_Context& ctx, ParamU pu, const void* p
       return do_evaluate_branch(queue_false, assign, ctx);
   }
 
-AIR_Status do_coalescence(Executive_Context& ctx, ParamU pu, const void* pv)
+AIR_Status
+do_coalescence(Executive_Context& ctx, ParamU pu, const void* pv)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -818,8 +898,10 @@ AIR_Status do_coalescence(Executive_Context& ctx, ParamU pu, const void* pv)
       return air_status_next;
   }
 
-ROCKET_NOINLINE Reference& do_invoke_nontail(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
-                                             const cow_function& target, cow_vector<Reference>&& args)
+ROCKET_NOINLINE
+Reference&
+do_invoke_nontail(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
+                  const cow_function& target, cow_vector<Reference>&& args)
   {
     const auto& inside = ctx.zvarg()->func();
     const auto& qhooks = ctx.global().get_hooks_opt();
@@ -840,8 +922,9 @@ ROCKET_NOINLINE Reference& do_invoke_nontail(Reference& self, const Source_Locat
     return self;
   }
 
-ROCKET_NOINLINE Reference& do_wrap_ptc(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
-                                       const cow_function& target, PTC_Aware ptc, cow_vector<Reference>&& args)
+ROCKET_NOINLINE
+Reference& do_wrap_ptc(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
+                       const cow_function& target, PTC_Aware ptc, cow_vector<Reference>&& args)
   {
     // Pack arguments for this proper tail call.
     auto tca = ::rocket::make_refcnt<PTC_Arguments>(sloc, ctx.zvarg(), ptc, target,
@@ -851,8 +934,9 @@ ROCKET_NOINLINE Reference& do_wrap_ptc(Reference& self, const Source_Location& s
     return self = ::std::move(xref);
   }
 
-AIR_Status do_function_call_common(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
-                                   const cow_function& target, PTC_Aware ptc, cow_vector<Reference>&& args)
+AIR_Status
+do_function_call_common(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
+                        const cow_function& target, PTC_Aware ptc, cow_vector<Reference>&& args)
   {
     if(ROCKET_EXPECT(ptc == ptc_aware_none)) {
       // Perform plain calls.
@@ -868,7 +952,8 @@ AIR_Status do_function_call_common(Reference& self, const Source_Location& sloc,
     return air_status_return_ref;
   }
 
-cow_vector<Reference> do_pop_positional_arguments(Executive_Context& ctx, size_t nargs)
+cow_vector<Reference>
+do_pop_positional_arguments(Executive_Context& ctx, size_t nargs)
   {
     cow_vector<Reference> args;
     args.resize(nargs, Reference_root::S_void());
@@ -883,7 +968,8 @@ cow_vector<Reference> do_pop_positional_arguments(Executive_Context& ctx, size_t
     return args;
   }
 
-AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
+AIR_Status
+do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
   {
     // Unpack arguments.
     const auto& sloc = do_pcast<Pv_sloc>(pv)->sloc;
@@ -911,7 +997,8 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
     return do_function_call_common(self, sloc, ctx, value.as_function(), ptc, ::std::move(args));
   }
 
-AIR_Status do_member_access(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
+AIR_Status
+do_member_access(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
   {
     // Unpack arguments.
     const auto& name = do_pcast<Pv_name>(pv)->name;
@@ -922,7 +1009,8 @@ AIR_Status do_member_access(Executive_Context& ctx, ParamU /*pu*/, const void* p
     return air_status_next;
   }
 
-AIR_Status do_push_unnamed_array(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_push_unnamed_array(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& nelems = static_cast<size_t>(pu.x32);
@@ -941,7 +1029,8 @@ AIR_Status do_push_unnamed_array(Executive_Context& ctx, ParamU pu, const void* 
     return air_status_next;
   }
 
-AIR_Status do_push_unnamed_object(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
+AIR_Status
+do_push_unnamed_object(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
   {
     // Unpack arguments.
     const auto& keys = do_pcast<Pv_names>(pv)->names;
@@ -961,27 +1050,37 @@ AIR_Status do_push_unnamed_object(Executive_Context& ctx, ParamU /*pu*/, const v
     return air_status_next;
   }
 
-ROCKET_PURE_FUNCTION V_boolean do_operator_NOT(bool rhs)
+ROCKET_PURE_FUNCTION
+V_boolean
+do_operator_NOT(bool rhs)
   {
     return !rhs;
   }
 
-ROCKET_PURE_FUNCTION V_boolean do_operator_AND(bool lhs, bool rhs)
+ROCKET_PURE_FUNCTION
+V_boolean
+do_operator_AND(bool lhs, bool rhs)
   {
     return lhs & rhs;
   }
 
-ROCKET_PURE_FUNCTION V_boolean do_operator_OR(bool lhs, bool rhs)
+ROCKET_PURE_FUNCTION
+V_boolean
+do_operator_OR(bool lhs, bool rhs)
   {
     return lhs | rhs;
   }
 
-ROCKET_PURE_FUNCTION V_boolean do_operator_XOR(bool lhs, bool rhs)
+ROCKET_PURE_FUNCTION
+V_boolean
+do_operator_XOR(bool lhs, bool rhs)
   {
     return lhs ^ rhs;
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_NEG(int64_t rhs)
+ROCKET_PURE_FUNCTION
+V_integer
+do_operator_NEG(int64_t rhs)
   {
     if(rhs == INT64_MIN) {
       ASTERIA_THROW("integer negation overflow (operand was `$1`)", rhs);
@@ -989,22 +1088,30 @@ ROCKET_PURE_FUNCTION V_integer do_operator_NEG(int64_t rhs)
     return -rhs;
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_SQRT(int64_t rhs)
+ROCKET_PURE_FUNCTION
+V_real
+do_operator_SQRT(int64_t rhs)
   {
     return ::std::sqrt(V_real(rhs));
   }
 
-ROCKET_PURE_FUNCTION V_boolean do_operator_ISINF(int64_t /*rhs*/)
+ROCKET_PURE_FUNCTION
+V_boolean
+do_operator_ISINF(int64_t /*rhs*/)
   {
     return false;
   }
 
-ROCKET_PURE_FUNCTION V_boolean do_operator_ISNAN(int64_t /*rhs*/)
+ROCKET_PURE_FUNCTION
+V_boolean
+do_operator_ISNAN(int64_t /*rhs*/)
   {
     return false;
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_ABS(int64_t rhs)
+ROCKET_PURE_FUNCTION
+V_integer
+do_operator_ABS(int64_t rhs)
   {
     if(rhs == INT64_MIN) {
       ASTERIA_THROW("integer absolute value overflow (operand was `$1`)", rhs);
@@ -1012,12 +1119,16 @@ ROCKET_PURE_FUNCTION V_integer do_operator_ABS(int64_t rhs)
     return ::std::abs(rhs);
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_SIGN(int64_t rhs)
+ROCKET_PURE_FUNCTION
+V_integer
+do_operator_SIGN(int64_t rhs)
   {
     return rhs >> 63;
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_ADD(int64_t lhs, int64_t rhs)
+ROCKET_PURE_FUNCTION
+V_integer
+do_operator_ADD(int64_t lhs, int64_t rhs)
   {
     if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)) {
       ASTERIA_THROW("integer addition overflow (operands were `$1` and `$2`)", lhs, rhs);
@@ -1025,7 +1136,9 @@ ROCKET_PURE_FUNCTION V_integer do_operator_ADD(int64_t lhs, int64_t rhs)
     return lhs + rhs;
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_SUB(int64_t lhs, int64_t rhs)
+ROCKET_PURE_FUNCTION
+V_integer
+do_operator_SUB(int64_t lhs, int64_t rhs)
   {
     if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs)) {
       ASTERIA_THROW("integer subtraction overflow (operands were `$1` and `$2`)", lhs, rhs);
@@ -1033,7 +1146,9 @@ ROCKET_PURE_FUNCTION V_integer do_operator_SUB(int64_t lhs, int64_t rhs)
     return lhs - rhs;
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_MUL(int64_t lhs, int64_t rhs)
+ROCKET_PURE_FUNCTION
+V_integer
+do_operator_MUL(int64_t lhs, int64_t rhs)
   {
     if((lhs == 0) || (rhs == 0)) {
       return 0;
@@ -1058,7 +1173,9 @@ ROCKET_PURE_FUNCTION V_integer do_operator_MUL(int64_t lhs, int64_t rhs)
     return alhs * srhs;
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_DIV(int64_t lhs, int64_t rhs)
+ROCKET_PURE_FUNCTION
+V_integer
+do_operator_DIV(int64_t lhs, int64_t rhs)
   {
     if(rhs == 0) {
       ASTERIA_THROW("integer divided by zero (operands were `$1` and `$2`)", lhs, rhs);
@@ -1069,7 +1186,9 @@ ROCKET_PURE_FUNCTION V_integer do_operator_DIV(int64_t lhs, int64_t rhs)
     return lhs / rhs;
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_MOD(int64_t lhs, int64_t rhs)
+ROCKET_PURE_FUNCTION
+V_integer
+do_operator_MOD(int64_t lhs, int64_t rhs)
   {
     if(rhs == 0) {
       ASTERIA_THROW("integer divided by zero (operands were `$1` and `$2`)", lhs, rhs);
@@ -1080,7 +1199,9 @@ ROCKET_PURE_FUNCTION V_integer do_operator_MOD(int64_t lhs, int64_t rhs)
     return lhs % rhs;
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_SLL(int64_t lhs, int64_t rhs)
+ROCKET_PURE_FUNCTION
+V_integer
+do_operator_SLL(int64_t lhs, int64_t rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1091,7 +1212,9 @@ ROCKET_PURE_FUNCTION V_integer do_operator_SLL(int64_t lhs, int64_t rhs)
     return V_integer(static_cast<uint64_t>(lhs) << rhs);
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_SRL(int64_t lhs, int64_t rhs)
+ROCKET_PURE_FUNCTION
+V_integer
+do_operator_SRL(int64_t lhs, int64_t rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1102,7 +1225,9 @@ ROCKET_PURE_FUNCTION V_integer do_operator_SRL(int64_t lhs, int64_t rhs)
     return V_integer(static_cast<uint64_t>(lhs) >> rhs);
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_SLA(int64_t lhs, int64_t rhs)
+ROCKET_PURE_FUNCTION
+V_integer
+do_operator_SLA(int64_t lhs, int64_t rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1122,7 +1247,9 @@ ROCKET_PURE_FUNCTION V_integer do_operator_SLA(int64_t lhs, int64_t rhs)
     return V_integer(static_cast<uint64_t>(lhs) << rhs);
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_SRA(int64_t lhs, int64_t rhs)
+ROCKET_PURE_FUNCTION
+V_integer
+do_operator_SRA(int64_t lhs, int64_t rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1133,77 +1260,106 @@ ROCKET_PURE_FUNCTION V_integer do_operator_SRA(int64_t lhs, int64_t rhs)
     return lhs >> rhs;
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_NOT(int64_t rhs)
+ROCKET_PURE_FUNCTION
+V_integer
+do_operator_NOT(int64_t rhs)
   {
     return ~rhs;
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_AND(int64_t lhs, int64_t rhs)
+ROCKET_PURE_FUNCTION
+V_integer
+do_operator_AND(int64_t lhs, int64_t rhs)
   {
     return lhs & rhs;
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_OR(int64_t lhs, int64_t rhs)
+ROCKET_PURE_FUNCTION
+V_integer
+do_operator_OR(int64_t lhs, int64_t rhs)
   {
     return lhs | rhs;
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_XOR(int64_t lhs, int64_t rhs)
+ROCKET_PURE_FUNCTION
+V_integer
+do_operator_XOR(int64_t lhs, int64_t rhs)
   {
     return lhs ^ rhs;
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_NEG(double rhs)
+ROCKET_PURE_FUNCTION
+V_real
+do_operator_NEG(double rhs)
   {
     return -rhs;
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_SQRT(double rhs)
+ROCKET_PURE_FUNCTION
+V_real
+do_operator_SQRT(double rhs)
   {
     return ::std::sqrt(rhs);
   }
 
-ROCKET_PURE_FUNCTION V_boolean do_operator_ISINF(double rhs)
+ROCKET_PURE_FUNCTION
+V_boolean
+do_operator_ISINF(double rhs)
   {
     return ::std::isinf(rhs);
   }
 
-ROCKET_PURE_FUNCTION V_boolean do_operator_ISNAN(double rhs)
+ROCKET_PURE_FUNCTION
+V_boolean
+do_operator_ISNAN(double rhs)
   {
     return ::std::isnan(rhs);
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_ABS(double rhs)
+ROCKET_PURE_FUNCTION
+V_real
+do_operator_ABS(double rhs)
   {
     return ::std::fabs(rhs);
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_SIGN(double rhs)
+ROCKET_PURE_FUNCTION
+V_integer
+do_operator_SIGN(double rhs)
   {
     return ::std::signbit(rhs) ? -1 : 0;
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_ROUND(double rhs)
+ROCKET_PURE_FUNCTION
+V_real
+do_operator_ROUND(double rhs)
   {
     return ::std::round(rhs);
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_FLOOR(double rhs)
+ROCKET_PURE_FUNCTION
+V_real
+do_operator_FLOOR(double rhs)
   {
     return ::std::floor(rhs);
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_CEIL(double rhs)
+ROCKET_PURE_FUNCTION
+V_real
+do_operator_CEIL(double rhs)
   {
     return ::std::ceil(rhs);
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_TRUNC(double rhs)
+ROCKET_PURE_FUNCTION
+V_real
+do_operator_TRUNC(double rhs)
   {
     return ::std::trunc(rhs);
   }
 
-V_integer do_cast_to_integer(double value)
+V_integer
+do_cast_to_integer(double value)
   {
     if(!::std::islessequal(-0x1p63, value) || !::std::islessequal(value, 0x1p63 - 0x1p10)) {
       ASTERIA_THROW("value not representable as an `integer` (operand was `$1`)", value);
@@ -1211,57 +1367,78 @@ V_integer do_cast_to_integer(double value)
     return V_integer(value);
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_IROUND(double rhs)
+ROCKET_PURE_FUNCTION
+V_integer
+do_operator_IROUND(double rhs)
   {
     return do_cast_to_integer(::std::round(rhs));
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_IFLOOR(double rhs)
+ROCKET_PURE_FUNCTION
+V_integer
+do_operator_IFLOOR(double rhs)
   {
     return do_cast_to_integer(::std::floor(rhs));
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_ICEIL(double rhs)
+ROCKET_PURE_FUNCTION
+V_integer
+do_operator_ICEIL(double rhs)
   {
     return do_cast_to_integer(::std::ceil(rhs));
   }
 
-ROCKET_PURE_FUNCTION V_integer do_operator_ITRUNC(double rhs)
+ROCKET_PURE_FUNCTION
+V_integer
+do_operator_ITRUNC(double rhs)
   {
     return do_cast_to_integer(::std::trunc(rhs));
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_ADD(double lhs, double rhs)
+ROCKET_PURE_FUNCTION
+V_real
+do_operator_ADD(double lhs, double rhs)
   {
     return lhs + rhs;
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_SUB(double lhs, double rhs)
+ROCKET_PURE_FUNCTION
+V_real
+do_operator_SUB(double lhs, double rhs)
   {
     return lhs - rhs;
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_MUL(double lhs, double rhs)
+ROCKET_PURE_FUNCTION
+V_real
+do_operator_MUL(double lhs, double rhs)
   {
     return lhs * rhs;
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_DIV(double lhs, double rhs)
+ROCKET_PURE_FUNCTION
+V_real
+do_operator_DIV(double lhs, double rhs)
   {
     return lhs / rhs;
   }
 
-ROCKET_PURE_FUNCTION V_real do_operator_MOD(double lhs, double rhs)
+ROCKET_PURE_FUNCTION
+V_real
+do_operator_MOD(double lhs, double rhs)
   {
     return ::std::fmod(lhs, rhs);
   }
 
-ROCKET_PURE_FUNCTION V_string do_operator_ADD(const cow_string& lhs, const cow_string& rhs)
+ROCKET_PURE_FUNCTION
+V_string
+do_operator_ADD(const cow_string& lhs, const cow_string& rhs)
   {
     return lhs + rhs;
   }
 
-V_string do_duplicate_string(const cow_string& source, uint64_t count)
+V_string
+do_duplicate_string(const cow_string& source, uint64_t count)
   {
     V_string res;
     auto nchars = source.size();
@@ -1295,7 +1472,9 @@ V_string do_duplicate_string(const cow_string& source, uint64_t count)
     return res;
   }
 
-ROCKET_PURE_FUNCTION V_string do_operator_MUL(const cow_string& lhs, int64_t rhs)
+ROCKET_PURE_FUNCTION
+V_string
+do_operator_MUL(const cow_string& lhs, int64_t rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative duplicate count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1303,7 +1482,9 @@ ROCKET_PURE_FUNCTION V_string do_operator_MUL(const cow_string& lhs, int64_t rhs
     return do_duplicate_string(lhs, static_cast<uint64_t>(rhs));
   }
 
-ROCKET_PURE_FUNCTION V_string do_operator_MUL(int64_t lhs, const cow_string& rhs)
+ROCKET_PURE_FUNCTION
+V_string
+do_operator_MUL(int64_t lhs, const cow_string& rhs)
   {
     if(lhs < 0) {
       ASTERIA_THROW("negative duplicate count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1311,7 +1492,9 @@ ROCKET_PURE_FUNCTION V_string do_operator_MUL(int64_t lhs, const cow_string& rhs
     return do_duplicate_string(rhs, static_cast<uint64_t>(lhs));
   }
 
-ROCKET_PURE_FUNCTION V_string do_operator_SLL(const cow_string& lhs, int64_t rhs)
+ROCKET_PURE_FUNCTION
+V_string
+do_operator_SLL(const cow_string& lhs, int64_t rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1328,7 +1511,9 @@ ROCKET_PURE_FUNCTION V_string do_operator_SLL(const cow_string& lhs, int64_t rhs
     return res;
   }
 
-ROCKET_PURE_FUNCTION V_string do_operator_SRL(const cow_string& lhs, int64_t rhs)
+ROCKET_PURE_FUNCTION
+V_string
+do_operator_SRL(const cow_string& lhs, int64_t rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1345,7 +1530,9 @@ ROCKET_PURE_FUNCTION V_string do_operator_SRL(const cow_string& lhs, int64_t rhs
     return res;
   }
 
-ROCKET_PURE_FUNCTION V_string do_operator_SLA(const cow_string& lhs, int64_t rhs)
+ROCKET_PURE_FUNCTION
+V_string
+do_operator_SLA(const cow_string& lhs, int64_t rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1361,7 +1548,9 @@ ROCKET_PURE_FUNCTION V_string do_operator_SLA(const cow_string& lhs, int64_t rhs
     return res;
   }
 
-ROCKET_PURE_FUNCTION V_string do_operator_SRA(const cow_string& lhs, int64_t rhs)
+ROCKET_PURE_FUNCTION
+V_string
+do_operator_SRA(const cow_string& lhs, int64_t rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1376,7 +1565,9 @@ ROCKET_PURE_FUNCTION V_string do_operator_SRA(const cow_string& lhs, int64_t rhs
     return res;
   }
 
-ROCKET_PURE_FUNCTION V_string do_operator_NOT(cow_string&& rhs)
+ROCKET_PURE_FUNCTION
+V_string
+do_operator_NOT(cow_string&& rhs)
   {
     // The length of the result is the same as the operand.
     auto tp = reinterpret_cast<uint8_t*>(rhs.mut_data());
@@ -1387,7 +1578,9 @@ ROCKET_PURE_FUNCTION V_string do_operator_NOT(cow_string&& rhs)
     return ::std::move(rhs);
   }
 
-ROCKET_PURE_FUNCTION V_string do_operator_AND(const cow_string& lhs, cow_string&& rhs)
+ROCKET_PURE_FUNCTION
+V_string
+do_operator_AND(const cow_string& lhs, cow_string&& rhs)
   {
     // The length of the result is the shorter from both operands.
     auto sp = reinterpret_cast<const uint8_t*>(lhs.data());
@@ -1401,7 +1594,9 @@ ROCKET_PURE_FUNCTION V_string do_operator_AND(const cow_string& lhs, cow_string&
     return ::std::move(rhs);
   }
 
-ROCKET_PURE_FUNCTION V_string do_operator_OR(const cow_string& lhs, cow_string&& rhs)
+ROCKET_PURE_FUNCTION
+V_string
+do_operator_OR(const cow_string& lhs, cow_string&& rhs)
   {
     // The length of the result is the longer from both operands.
     auto sp = reinterpret_cast<const uint8_t*>(lhs.data());
@@ -1415,7 +1610,9 @@ ROCKET_PURE_FUNCTION V_string do_operator_OR(const cow_string& lhs, cow_string&&
     return ::std::move(rhs);
   }
 
-ROCKET_PURE_FUNCTION V_string do_operator_XOR(const cow_string& lhs, cow_string&& rhs)
+ROCKET_PURE_FUNCTION
+V_string
+do_operator_XOR(const cow_string& lhs, cow_string&& rhs)
   {
     // The length of the result is the longer from both operands.
     auto sp = reinterpret_cast<const uint8_t*>(lhs.data());
@@ -1429,7 +1626,8 @@ ROCKET_PURE_FUNCTION V_string do_operator_XOR(const cow_string& lhs, cow_string&
     return ::std::move(rhs);
   }
 
-AIR_Status do_apply_xop_INC_POST(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
+AIR_Status
+do_apply_xop_INC_POST(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // This operator is unary.
     auto& lhs = ctx.stack().get_top().open();
@@ -1450,7 +1648,8 @@ AIR_Status do_apply_xop_INC_POST(Executive_Context& ctx, ParamU /*pu*/, const vo
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_DEC_POST(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
+AIR_Status
+do_apply_xop_DEC_POST(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // This operator is unary.
     auto& lhs = ctx.stack().get_top().open();
@@ -1471,7 +1670,8 @@ AIR_Status do_apply_xop_DEC_POST(Executive_Context& ctx, ParamU /*pu*/, const vo
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_SUBSCR(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
+AIR_Status
+do_apply_xop_SUBSCR(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // This operator is binary.
     auto rhs = ctx.stack().get_top().read();
@@ -1494,7 +1694,8 @@ AIR_Status do_apply_xop_SUBSCR(Executive_Context& ctx, ParamU /*pu*/, const void
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_POS(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_POS(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1507,7 +1708,8 @@ AIR_Status do_apply_xop_POS(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_NEG(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_NEG(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1530,7 +1732,8 @@ AIR_Status do_apply_xop_NEG(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_NOTB(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_NOTB(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1557,7 +1760,8 @@ AIR_Status do_apply_xop_NOTB(Executive_Context& ctx, ParamU pu, const void* /*pv
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_NOTL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_NOTL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1570,7 +1774,8 @@ AIR_Status do_apply_xop_NOTL(Executive_Context& ctx, ParamU pu, const void* /*pv
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_INC_PRE(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
+AIR_Status
+do_apply_xop_INC_PRE(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // This operator is unary.
     auto& rhs = ctx.stack().get_top().open();
@@ -1589,7 +1794,8 @@ AIR_Status do_apply_xop_INC_PRE(Executive_Context& ctx, ParamU /*pu*/, const voi
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_DEC_PRE(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
+AIR_Status
+do_apply_xop_DEC_PRE(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // This operator is unary.
     auto& rhs = ctx.stack().get_top().open();
@@ -1608,7 +1814,8 @@ AIR_Status do_apply_xop_DEC_PRE(Executive_Context& ctx, ParamU /*pu*/, const voi
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_UNSET(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_UNSET(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1620,7 +1827,8 @@ AIR_Status do_apply_xop_UNSET(Executive_Context& ctx, ParamU pu, const void* /*p
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_LENGTHOF(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_LENGTHOF(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1653,7 +1861,8 @@ AIR_Status do_apply_xop_LENGTHOF(Executive_Context& ctx, ParamU pu, const void* 
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_TYPEOF(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_TYPEOF(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1666,7 +1875,8 @@ AIR_Status do_apply_xop_TYPEOF(Executive_Context& ctx, ParamU pu, const void* /*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_SQRT(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_SQRT(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1689,7 +1899,8 @@ AIR_Status do_apply_xop_SQRT(Executive_Context& ctx, ParamU pu, const void* /*pv
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_ISNAN(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_ISNAN(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1712,7 +1923,8 @@ AIR_Status do_apply_xop_ISNAN(Executive_Context& ctx, ParamU pu, const void* /*p
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_ISINF(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_ISINF(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1735,7 +1947,8 @@ AIR_Status do_apply_xop_ISINF(Executive_Context& ctx, ParamU pu, const void* /*p
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_ABS(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_ABS(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1758,7 +1971,8 @@ AIR_Status do_apply_xop_ABS(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_SIGN(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_SIGN(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1781,7 +1995,8 @@ AIR_Status do_apply_xop_SIGN(Executive_Context& ctx, ParamU pu, const void* /*pv
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_ROUND(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_ROUND(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1804,7 +2019,8 @@ AIR_Status do_apply_xop_ROUND(Executive_Context& ctx, ParamU pu, const void* /*p
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_FLOOR(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_FLOOR(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1827,7 +2043,8 @@ AIR_Status do_apply_xop_FLOOR(Executive_Context& ctx, ParamU pu, const void* /*p
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_CEIL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_CEIL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1850,7 +2067,8 @@ AIR_Status do_apply_xop_CEIL(Executive_Context& ctx, ParamU pu, const void* /*pv
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_TRUNC(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_TRUNC(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1873,7 +2091,8 @@ AIR_Status do_apply_xop_TRUNC(Executive_Context& ctx, ParamU pu, const void* /*p
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_IROUND(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_IROUND(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1896,7 +2115,8 @@ AIR_Status do_apply_xop_IROUND(Executive_Context& ctx, ParamU pu, const void* /*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_IFLOOR(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_IFLOOR(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1919,7 +2139,8 @@ AIR_Status do_apply_xop_IFLOOR(Executive_Context& ctx, ParamU pu, const void* /*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_ICEIL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_ICEIL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1942,7 +2163,8 @@ AIR_Status do_apply_xop_ICEIL(Executive_Context& ctx, ParamU pu, const void* /*p
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_ITRUNC(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_ITRUNC(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1965,7 +2187,8 @@ AIR_Status do_apply_xop_ITRUNC(Executive_Context& ctx, ParamU pu, const void* /*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_CMP_XEQ(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_CMP_XEQ(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1983,7 +2206,8 @@ AIR_Status do_apply_xop_CMP_XEQ(Executive_Context& ctx, ParamU pu, const void* /
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_CMP_XREL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_CMP_XREL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2004,7 +2228,8 @@ AIR_Status do_apply_xop_CMP_XREL(Executive_Context& ctx, ParamU pu, const void* 
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_CMP_3WAY(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_CMP_3WAY(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2039,7 +2264,8 @@ AIR_Status do_apply_xop_CMP_3WAY(Executive_Context& ctx, ParamU pu, const void* 
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_ADD(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_ADD(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2063,7 +2289,7 @@ AIR_Status do_apply_xop_ADD(Executive_Context& ctx, ParamU pu, const void* /*pv*
       rhs = do_operator_ADD(lhs.convert_to_real(), rhs.convert_to_real());
     }
     else if(lhs.is_string() && rhs.is_string()) {
-      // For the `string` type, concatenate the operands in lexical order to create a new string, then return it.
+      // For the `string` type, concatenate the operands in lexical order to create a new string.
       auto& reg = rhs.open_string();
       reg = do_operator_ADD(lhs.as_string(), reg);
     }
@@ -2074,7 +2300,8 @@ AIR_Status do_apply_xop_ADD(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_SUB(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_SUB(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2104,7 +2331,8 @@ AIR_Status do_apply_xop_SUB(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_MUL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_MUL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2144,7 +2372,8 @@ AIR_Status do_apply_xop_MUL(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_DIV(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_DIV(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2169,7 +2398,8 @@ AIR_Status do_apply_xop_DIV(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_MOD(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_MOD(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2194,7 +2424,8 @@ AIR_Status do_apply_xop_MOD(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_SLL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_SLL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2222,7 +2453,8 @@ AIR_Status do_apply_xop_SLL(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_SRL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_SRL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2232,14 +2464,14 @@ AIR_Status do_apply_xop_SRL(Executive_Context& ctx, ParamU pu, const void* /*pv*
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
     if(lhs.is_integer() && rhs.is_integer()) {
-      // If the LHS operand has type `integer`, shift the LHS operand to the right by the number of bits specified
-      // by the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with zeroes.
+      // If the LHS operand has type `integer`, shift the LHS operand to the right by the number of bits
+      // specified by the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with zeroes.
       auto& reg = rhs.open_integer();
       reg = do_operator_SRL(lhs.as_integer(), reg);
     }
     else if(lhs.is_string() && rhs.is_integer()) {
-      // If the LHS operand has type `string`, fill space characters in the left and discard characters from the
-      // right. The number of bytes in the LHS operand will be preserved.
+      // If the LHS operand has type `string`, fill space characters in the left and discard characters from
+      // the right. The number of bytes in the LHS operand will be preserved.
       // Note that `rhs` does not have type `V_string`, thus this branch can't be optimized.
       rhs = do_operator_SRL(lhs.as_string(), rhs.as_integer());
     }
@@ -2250,7 +2482,8 @@ AIR_Status do_apply_xop_SRL(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_SLA(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_SLA(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2260,9 +2493,10 @@ AIR_Status do_apply_xop_SLA(Executive_Context& ctx, ParamU pu, const void* /*pv*
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
     if(lhs.is_integer() && rhs.is_integer()) {
-      // If the LHS operand is of type `integer`, shift the LHS operand to the left by the number of bits specified
-      // by the RHS operand. Bits shifted out that are equal to the sign bit are discarded. Bits shifted in are filled
-      // with zeroes. If any bits that are different from the sign bit would be shifted out, an exception is thrown.
+      // If the LHS operand is of type `integer`, shift the LHS operand to the left by the number of bits
+      // specified by the RHS operand. Bits shifted out that are equal to the sign bit are discarded. Bits
+      // shifted in are filled with zeroes. If any bits that are different from the sign bit would be shifted
+      // out, an exception is thrown.
       auto& reg = rhs.open_integer();
       reg = do_operator_SLA(lhs.as_integer(), reg);
     }
@@ -2278,7 +2512,8 @@ AIR_Status do_apply_xop_SLA(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_SRA(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_SRA(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2288,8 +2523,9 @@ AIR_Status do_apply_xop_SRA(Executive_Context& ctx, ParamU pu, const void* /*pv*
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
     if(lhs.is_integer() && rhs.is_integer()) {
-      // If the LHS operand is of type `integer`, shift the LHS operand to the right by the number of bits specified
-      // by the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with the sign bit.
+      // If the LHS operand is of type `integer`, shift the LHS operand to the right by the number of bits
+      // specified by the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with the
+      // sign bit.
       auto& reg = rhs.open_integer();
       reg = do_operator_SRA(lhs.as_integer(), reg);
     }
@@ -2305,7 +2541,8 @@ AIR_Status do_apply_xop_SRA(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_ANDB(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_ANDB(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2337,7 +2574,8 @@ AIR_Status do_apply_xop_ANDB(Executive_Context& ctx, ParamU pu, const void* /*pv
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_ORB(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_ORB(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2369,7 +2607,8 @@ AIR_Status do_apply_xop_ORB(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_XORB(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_XORB(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2401,7 +2640,8 @@ AIR_Status do_apply_xop_XORB(Executive_Context& ctx, ParamU pu, const void* /*pv
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_ASSIGN(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
+AIR_Status
+do_apply_xop_ASSIGN(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // Pop the RHS operand.
     auto rhs = ctx.stack().get_top().read();
@@ -2411,7 +2651,8 @@ AIR_Status do_apply_xop_ASSIGN(Executive_Context& ctx, ParamU /*pu*/, const void
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_FMA(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_apply_xop_FMA(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2434,7 +2675,8 @@ AIR_Status do_apply_xop_FMA(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_HEAD(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
+AIR_Status
+do_apply_xop_HEAD(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // This operator is unary.
     auto& lref = ctx.stack().open_top();
@@ -2443,7 +2685,8 @@ AIR_Status do_apply_xop_HEAD(Executive_Context& ctx, ParamU /*pu*/, const void* 
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_TAIL(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
+AIR_Status
+do_apply_xop_TAIL(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // This operator is unary.
     auto& lref = ctx.stack().open_top();
@@ -2452,7 +2695,8 @@ AIR_Status do_apply_xop_TAIL(Executive_Context& ctx, ParamU /*pu*/, const void* 
     return air_status_next;
   }
 
-AIR_Status do_unpack_struct_array(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status
+do_unpack_struct_array(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& immutable = static_cast<bool>(pu.y8s[0]);
@@ -2485,7 +2729,8 @@ AIR_Status do_unpack_struct_array(Executive_Context& ctx, ParamU pu, const void*
     return air_status_next;
   }
 
-AIR_Status do_unpack_struct_object(Executive_Context& ctx, ParamU pu, const void* pv)
+AIR_Status
+do_unpack_struct_object(Executive_Context& ctx, ParamU pu, const void* pv)
   {
     // Unpack arguments.
     const auto& immutable = static_cast<bool>(pu.u8s[0]);
@@ -2518,7 +2763,8 @@ AIR_Status do_unpack_struct_object(Executive_Context& ctx, ParamU pu, const void
     return air_status_next;
   }
 
-AIR_Status do_define_null_variable(Executive_Context& ctx, ParamU pu, const void* pv)
+AIR_Status
+do_define_null_variable(Executive_Context& ctx, ParamU pu, const void* pv)
   {
     // Unpack arguments.
     const auto& immutable = static_cast<bool>(pu.u8s[0]);
@@ -2541,7 +2787,8 @@ AIR_Status do_define_null_variable(Executive_Context& ctx, ParamU pu, const void
     return air_status_next;
   }
 
-AIR_Status do_single_step_trap(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
+AIR_Status
+do_single_step_trap(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
   {
     // Unpack arguments.
     const auto& sloc = do_pcast<Pv_sloc>(pv)->sloc;
@@ -2554,7 +2801,8 @@ AIR_Status do_single_step_trap(Executive_Context& ctx, ParamU /*pu*/, const void
     return air_status_next;
   }
 
-AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
+AIR_Status
+do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
   {
     // Unpack arguments.
     const auto& sloc = do_pcast<Pv_sloc>(pv)->sloc;
@@ -2625,7 +2873,8 @@ AIR_Status do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
     return do_function_call_common(self, sloc, ctx, value.as_function(), ptc, ::std::move(args));
   }
 
-AIR_Status do_defer_expression(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
+AIR_Status
+do_defer_expression(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
   {
     // Unpack arguments.
     const auto& sloc = do_pcast<Pv_defer>(pv)->sloc;
@@ -2642,7 +2891,8 @@ AIR_Status do_defer_expression(Executive_Context& ctx, ParamU /*pu*/, const void
     return air_status_next;
   }
 
-AIR_Status do_import_call(Executive_Context& ctx, ParamU pu, const void* pv)
+AIR_Status
+do_import_call(Executive_Context& ctx, ParamU pu, const void* pv)
   {
     // Unpack arguments.
     const auto& opts = do_pcast<Pv_opts_sloc>(pv)->opts;
@@ -2700,7 +2950,7 @@ AIR_Status do_import_call(Executive_Context& ctx, ParamU pu, const void* pv)
     // Instantiate the function.
     AIR_Optimizer optmz(opts);
     optmz.reload(nullptr, cow_vector<phsh_string>(1, ::rocket::sref("...")), stmtq);
-    auto qtarget = optmz.create_function(Source_Location(path, 0, 0), ::rocket::sref("<top level>"));
+    auto qtarget = optmz.create_function(Source_Location(path, 0, 0), ::rocket::sref("<file scope>"));
 
     // Update the first argument to `import` if it was passed by reference.
     // `this` is null for imported scripts.
@@ -2715,7 +2965,10 @@ AIR_Status do_import_call(Executive_Context& ctx, ParamU pu, const void* pv)
 
 }  // namespace
 
-opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
+opt<AIR_Node>
+AIR_Node::
+rebind_opt(const Abstract_Context& ctx)
+const
   {
     switch(this->index()) {
       case index_clear_stack: {
@@ -2942,7 +3195,10 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
     }
   }
 
-AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
+AVMC_Queue&
+AIR_Node::
+solidify(AVMC_Queue& queue, uint8_t ipass)
+const
   {
     switch(this->index()) {
       case index_clear_stack: {
@@ -3641,7 +3897,10 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     }
   }
 
-Variable_Callback& AIR_Node::enumerate_variables(Variable_Callback& callback) const
+Variable_Callback&
+AIR_Node::
+enumerate_variables(Variable_Callback& callback)
+const
   {
     switch(this->index()) {
       case index_clear_stack: {

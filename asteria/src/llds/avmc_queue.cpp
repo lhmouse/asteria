@@ -9,7 +9,10 @@
 
 namespace Asteria {
 
-void AVMC_Queue::do_deallocate_storage() const
+void
+AVMC_Queue::
+do_deallocate_storage()
+const
   {
     auto bptr = this->m_bptr;
     auto eptr = bptr + this->m_used;
@@ -35,7 +38,10 @@ void AVMC_Queue::do_deallocate_storage() const
       ::operator delete(bptr);
   }
 
-void AVMC_Queue::do_execute_all_break(AIR_Status& status, Executive_Context& ctx) const
+void
+AVMC_Queue::
+do_execute_all_break(AIR_Status& status, Executive_Context& ctx)
+const
   {
     auto bptr = this->m_bptr;
     auto eptr = bptr + this->m_used;
@@ -61,7 +67,10 @@ void AVMC_Queue::do_execute_all_break(AIR_Status& status, Executive_Context& ctx
     }
   }
 
-void AVMC_Queue::do_enumerate_variables(Variable_Callback& callback) const
+void
+AVMC_Queue::
+do_enumerate_variables(Variable_Callback& callback)
+const
   {
     auto bptr = this->m_bptr;
     auto eptr = bptr + this->m_used;
@@ -79,7 +88,9 @@ void AVMC_Queue::do_enumerate_variables(Variable_Callback& callback) const
     }
   }
 
-void AVMC_Queue::do_reserve_delta(size_t nbytes, const Symbols* syms_opt)
+void
+AVMC_Queue::
+do_reserve_delta(size_t nbytes, const Symbols* syms_opt)
   {
     // Once a node has been appended, reallocation is no longer allowed.
     // Otherwise we would have to move nodes around, which complexifies things without any obvious benefits.
@@ -145,8 +156,10 @@ AVMC_Queue::Header* AVMC_Queue::do_allocate_node(ParamU paramu, const Symbols* s
     return qnode;
   }
 
-void AVMC_Queue::do_append_trivial(Executor* exec, ParamU paramu, const Symbols* syms_opt,
-                                   const void* source_opt, size_t nbytes)
+void
+AVMC_Queue::
+do_append_trivial(Executor* exec, ParamU paramu, const Symbols* syms_opt,
+                  const void* source_opt, size_t nbytes)
   {
     // Create a new node.
     auto qnode = this->do_allocate_node(paramu, syms_opt, nbytes);
@@ -167,8 +180,10 @@ void AVMC_Queue::do_append_trivial(Executor* exec, ParamU paramu, const Symbols*
     this->m_used += qnode->total_size_in_headers();
   }
 
-void AVMC_Queue::do_append_nontrivial(const Vtable* vtbl, ParamU paramu, const Symbols* syms_opt,
-                                      size_t nbytes, Constructor* ctor_opt, intptr_t source)
+void
+AVMC_Queue::
+do_append_nontrivial(const Vtable* vtbl, ParamU paramu, const Symbols* syms_opt,
+                     size_t nbytes, Constructor* ctor_opt, intptr_t source)
   {
     // Create a new node.
     auto qnode = this->do_allocate_node(paramu, syms_opt, nbytes);

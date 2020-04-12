@@ -16,28 +16,44 @@ class Source_Location
     int m_offset;
 
   public:
-    Source_Location() noexcept
+    Source_Location()
+    noexcept
       : m_file(::rocket::sref("<unknown>")), m_line(-1), m_offset(0)
       { }
 
-    Source_Location(const cow_string& xfile, int xline, int xoffset) noexcept
+    Source_Location(const cow_string& xfile, int xline, int xoffset)
+    noexcept
       : m_file(xfile), m_line(xline), m_offset(xoffset)
       { }
 
   public:
-    const cow_string& file() const noexcept
+    const cow_string&
+    file()
+    const
+    noexcept
       { return this->m_file;  }
 
-    const char* c_file() const noexcept
+    const char*
+    c_file()
+    const
+    noexcept
       { return this->m_file.c_str();  }
 
-    int line() const noexcept
+    int
+    line()
+    const
+    noexcept
       { return this->m_line;  }
 
-    int offset() const noexcept
+    int
+    offset()
+    const
+    noexcept
       { return this->m_offset;  }
 
-    Source_Location& swap(Source_Location& other) noexcept
+    Source_Location&
+    swap(Source_Location& other)
+    noexcept
       {
         this->m_file.swap(other.m_file);
         ::std::swap(this->m_line, other.m_line);
@@ -45,13 +61,20 @@ class Source_Location
         return *this;
       }
 
-    tinyfmt& print(tinyfmt& fmt) const;
+    tinyfmt&
+    print(tinyfmt& fmt)
+    const;
   };
 
-inline void swap(Source_Location& lhs, Source_Location& rhs) noexcept
+inline
+void
+swap(Source_Location& lhs, Source_Location& rhs)
+noexcept
   { lhs.swap(rhs);  }
 
-inline tinyfmt& operator<<(tinyfmt& fmt, const Source_Location& sloc)
+inline
+tinyfmt&
+operator<<(tinyfmt& fmt, const Source_Location& sloc)
   { return sloc.print(fmt);  }
 
 }  // namespace Asteria

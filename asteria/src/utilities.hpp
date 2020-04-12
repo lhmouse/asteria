@@ -11,9 +11,14 @@
 namespace Asteria {
 
 // Error handling
-ptrdiff_t write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept;
+ptrdiff_t
+write_log_to_stderr(const char* file, long line, cow_string&& msg)
+noexcept;
 
-template<typename... ParamsT> ROCKET_NOINLINE cow_string format_string(const ParamsT&... params)
+template<typename... ParamsT>
+ROCKET_NOINLINE
+cow_string
+format_string(const ParamsT&... params)
   {
     ::rocket::tinyfmt_str fmt;
     format(fmt, params...);  // ADL intended
@@ -33,16 +38,34 @@ template<typename... ParamsT> ROCKET_NOINLINE cow_string format_string(const Par
                                         static_cast<long>(__LINE__)))
 
 // UTF-8 conversion functions
-bool utf8_encode(char*& pos, char32_t cp);
-bool utf8_encode(cow_string& text, char32_t cp);
-bool utf8_decode(char32_t& cp, const char*& pos, size_t avail);
-bool utf8_decode(char32_t& cp, const cow_string& text, size_t& offset);
+bool
+utf8_encode(char*& pos, char32_t cp)
+noexcept;
+
+bool
+utf8_encode(cow_string& text, char32_t cp);
+
+bool
+utf8_decode(char32_t& cp, const char*& pos, size_t avail)
+noexcept;
+
+bool
+utf8_decode(char32_t& cp, const cow_string& text, size_t& offset);
 
 // UTF-16 conversion functions
-bool utf16_encode(char16_t*& pos, char32_t cp);
-bool utf16_encode(cow_u16string& text, char32_t cp);
-bool utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail);
-bool utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset);
+bool
+utf16_encode(char16_t*& pos, char32_t cp)
+noexcept;
+
+bool
+utf16_encode(cow_u16string& text, char32_t cp);
+
+bool
+utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail)
+noexcept;
+
+bool
+utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset);
 
 // C character types
 enum : uint8_t
@@ -56,10 +79,16 @@ enum : uint8_t
 
 extern const uint8_t cctype_table[128];
 
-inline uint8_t get_cctype(char c) noexcept
+inline
+uint8_t
+get_cctype(char c)
+noexcept
   { return (uint8_t(c) < 128) ? cctype_table[uint8_t(c)] : 0;  }
 
-inline bool is_cctype(char c, uint8_t mask) noexcept
+inline
+bool
+is_cctype(char c, uint8_t mask)
+noexcept
   { return get_cctype(c) & mask;  }
 
 // C-style quoting
@@ -69,16 +98,26 @@ struct Quote_Wrapper
     size_t len;
   };
 
-constexpr Quote_Wrapper quote(const char* str, size_t len) noexcept
+constexpr
+Quote_Wrapper
+quote(const char* str, size_t len)
+noexcept
   { return { str, len };  }
 
-inline Quote_Wrapper quote(const char* str) noexcept
+inline
+Quote_Wrapper
+quote(const char* str)
+noexcept
   { return quote(str, ::std::strlen(str));  }
 
-inline Quote_Wrapper quote(const cow_string& str) noexcept
+inline
+Quote_Wrapper
+quote(const cow_string& str)
+noexcept
   { return quote(str.data(), str.size());  }
 
-tinyfmt& operator<<(tinyfmt& fmt, const Quote_Wrapper& q);
+tinyfmt&
+operator<<(tinyfmt& fmt, const Quote_Wrapper& q);
 
 // Justifying
 struct Paragraph_Wrapper
@@ -87,10 +126,14 @@ struct Paragraph_Wrapper
     size_t hanging;
   };
 
-constexpr Paragraph_Wrapper pwrap(size_t indent, size_t hanging) noexcept
+constexpr
+Paragraph_Wrapper
+pwrap(size_t indent, size_t hanging)
+noexcept
   { return { indent, hanging };  }
 
-tinyfmt& operator<<(tinyfmt& fmt, const Paragraph_Wrapper& q);
+tinyfmt&
+operator<<(tinyfmt& fmt, const Paragraph_Wrapper& q);
 
 // Negative array index wrapper
 struct Wrapped_Index
@@ -100,14 +143,23 @@ struct Wrapped_Index
     size_t rindex;  // the wrapped index (valid if both `nprepend` and `nappend` are zeroes)
   };
 
-Wrapped_Index wrap_index(int64_t index, size_t size) noexcept;
+Wrapped_Index
+wrap_index(int64_t index, size_t size)
+noexcept;
 
 // Note that all bits in the result are filled.
-uint64_t generate_random_seed() noexcept;
+uint64_t
+generate_random_seed()
+noexcept;
 
 // The second overload takes the error code from `errno`.
-[[noreturn]] void throw_system_error(const char* func, int err);
-[[noreturn]] void throw_system_error(const char* func);
+[[noreturn]]
+void
+throw_system_error(const char* func, int err);
+
+[[noreturn]]
+void
+throw_system_error(const char* func);
 
 #define ASTERIA_THROW_SYSTEM_ERROR(...)       (::Asteria::throw_system_error(__VA_ARGS__))
 

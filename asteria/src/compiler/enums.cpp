@@ -6,7 +6,9 @@
 
 namespace Asteria {
 
-const char* stringify_punctuator(Punctuator punct) noexcept
+const char*
+stringify_punctuator(Punctuator punct)
+noexcept
   {
     switch(punct) {
       case punctuator_add: {
@@ -185,7 +187,9 @@ const char* stringify_punctuator(Punctuator punct) noexcept
     }
   }
 
-const char* stringify_keyword(Keyword kwrd) noexcept
+const char*
+stringify_keyword(Keyword kwrd)
+noexcept
   {
     switch(kwrd) {
       case keyword_var: {

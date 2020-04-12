@@ -29,30 +29,48 @@ class Line_Reader
     Line_Reader(const Line_Reader&)
       = delete;
 
-    Line_Reader& operator=(const Line_Reader&)
+    Line_Reader&
+    operator=(const Line_Reader&)
       = delete;
 
   public:
-    tinybuf& cbuf() const noexcept
+    tinybuf&
+    cbuf()
+    const
+    noexcept
       { return this->m_cbuf;  }
 
-    const cow_string& file() const noexcept
+    const cow_string&
+    file()
+    const
+    noexcept
       { return this->m_file;  }
 
-    int line() const noexcept
+    int
+    line()
+    const
+    noexcept
       { return static_cast<int>(this->m_line);  }
 
-    int offset() const noexcept
+    int
+    offset()
+    const
+    noexcept
       { return static_cast<int>(this->m_off);  }
 
-    Source_Location tell() const noexcept
+    Source_Location
+    tell()
+    const
+    noexcept
       { return Source_Location(this->file(), this->line(), this->offset());  }
 
-    bool advance()
+    bool
+    advance()
       {
         // Clear the current line buffer.
         this->m_str.clear();
         this->m_off = 0;
+
         // Buffer a line.
         for(;;) {
           int ch = this->m_cbuf->getc();
@@ -75,45 +93,60 @@ class Line_Reader
           // Append the character to the line buffer.
           this->m_str.push_back(static_cast<char>(ch));
         }
+
         // Increment the line number if a line has been read successfully.
         if(this->m_line >= INT_MAX) {
           ASTERIA_THROW("too many lines in source code");
         }
         this->m_line++;
+
         // Accept the line.
         return true;
       }
 
-    size_t navail() const noexcept
+    size_t
+    navail()
+    const
+    noexcept
       {
         return this->m_str.size() - this->m_off;
       }
 
-    const char* data(size_t add = 0) const
+    const char*
+    data(size_t add = 0)
+    const
       {
         if(add > this->m_str.size() - this->m_off)
-          ASTERIA_THROW("attempt to seek past end of line (`$1` + `$2` > `$3`)", this->m_off, add, this->m_str.size());
+          ASTERIA_THROW("attempt to seek past end of line (`$1` + `$2` > `$3`)",
+                        this->m_off, add, this->m_str.size());
         return this->m_str.data() + (this->m_off + add);
       }
 
-    char peek(size_t add = 0) const noexcept
+    char
+    peek(size_t add = 0)
+    const
+    noexcept
       {
         if(add > this->m_str.size() - this->m_off)
           return 0;
         return this->m_str[this->m_off + add];
       }
 
-    void consume(size_t add)
+    void
+    consume(size_t add)
       {
         if(add > this->m_str.size() - this->m_off)
-          ASTERIA_THROW("attempt to seek past end of line (`$1` + `$2` > `$3`)", this->m_off, add, this->m_str.size());
+          ASTERIA_THROW("attempt to seek past end of line (`$1` + `$2` > `$3`)",
+                        this->m_off, add, this->m_str.size());
         this->m_off += add;
       }
 
-    void rewind(size_t off = 0)
+    void
+    rewind(size_t off = 0)
       {
         if(off > this->m_str.size())
-          ASTERIA_THROW("invalid offset within current line (`$1` > `$2`)", off, this->m_str.size());
+          ASTERIA_THROW("invalid offset within current line (`$1` > `$2`)",
+                        off, this->m_str.size());
         this->m_off = off;
       }
   };
@@ -125,23 +158,36 @@ class Tack
     size_t m_length = 0;
 
   public:
-    explicit operator bool () const noexcept
+    explicit operator
+    bool()
+    const
+    noexcept
       { return this->m_sloc.line() != -1;  }
 
-    Source_Location tell() const noexcept
+    Source_Location
+    tell()
+    const
+    noexcept
       { return this->m_sloc;  }
 
-    size_t length() const noexcept
+    size_t
+    length()
+    const
+    noexcept
       { return this->m_length;  }
 
-    Tack& set(const Line_Reader& reader, size_t xlength) noexcept
+    Tack&
+    set(const Line_Reader& reader, size_t xlength)
+    noexcept
       {
         this->m_sloc = reader.tell();
         this->m_length = xlength;
         return *this;
       }
 
-    Tack& clear() noexcept
+    Tack&
+    clear()
+    noexcept
       {
         this->m_sloc = { };
         this->m_length = 0;
@@ -149,38 +195,41 @@ class Tack
       }
   };
 
-template<typename XTokenT> bool do_push_token(cow_vector<Token>& tokens, Line_Reader& reader, size_t tlen,
-                                              XTokenT&& xtoken)
+template<typename XTokenT>
+bool
+do_push_token(cow_vector<Token>& tokens, Line_Reader& reader, size_t tlen, XTokenT&& xtoken)
   {
     tokens.emplace_back(reader.tell(), tlen, ::std::forward<XTokenT>(xtoken));
     reader.consume(tlen);
     return true;
   }
 
-bool do_may_infix_operators_follow(cow_vector<Token>& tokens)
+bool
+do_may_infix_operators_follow(cow_vector<Token>& tokens)
   {
-    if(tokens.empty()) {
+    if(tokens.empty())
       // No previous token exists.
       return false;
-    }
     const auto& p = tokens.back();
-    if(p.is_keyword()) {
-      // Infix operators may follow if the keyword denotes a value or reference.
-      return ::rocket::is_any_of(p.as_keyword(), { keyword_null, keyword_true, keyword_false,
-                                                   keyword_nan, keyword_infinity, keyword_this });
-    }
-    if(p.is_punctuator()) {
-      // Infix operators may follow if the punctuator can terminate an expression.
-      return ::rocket::is_any_of(p.as_punctuator(), { punctuator_inc, punctuator_dec,
-                                                      punctuator_head, punctuator_tail,
-                                                      punctuator_parenth_cl, punctuator_bracket_cl,
-                                                      punctuator_brace_cl });
-    }
+
+    // Infix operators may follow if the keyword denotes a value or reference.
+    if(p.is_keyword())
+      return ::rocket::is_any_of(p.as_keyword(),
+                 { keyword_null, keyword_true, keyword_false, keyword_nan,
+                   keyword_infinity, keyword_this });
+
+    // Infix operators may follow if the punctuator can terminate an expression.
+    if(p.is_punctuator())
+      return ::rocket::is_any_of(p.as_punctuator(),
+                 { punctuator_inc, punctuator_dec, punctuator_head, punctuator_tail,
+                   punctuator_parenth_cl, punctuator_bracket_cl, punctuator_brace_cl });
+
     // Infix operators can follow.
     return true;
   }
 
-cow_string& do_collect_digits(cow_string& tstr, Line_Reader& reader, size_t& tlen, uint8_t mask)
+cow_string&
+do_collect_digits(cow_string& tstr, Line_Reader& reader, size_t& tlen, uint8_t mask)
   {
     for(;;) {
       char c = reader.peek(tlen);
@@ -199,7 +248,8 @@ cow_string& do_collect_digits(cow_string& tstr, Line_Reader& reader, size_t& tle
     return tstr;
   }
 
-bool do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool integers_as_reals)
+bool
+do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool integers_as_reals)
   {
     // numeric-literal ::=
     //   number-sign-opt ( binary-literal | decimal-literal | hexadecimal-literal ) exponent-suffix-opt
@@ -329,13 +379,25 @@ bool do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, b
 
 struct Prefix_Comparator
   {
-    template<typename ElementT> bool operator()(const ElementT& lhs, const ElementT& rhs) const noexcept
+    template<typename ElementT>
+    bool
+    operator()(const ElementT& lhs, const ElementT& rhs)
+    const
+    noexcept
       { return ::rocket::char_traits<char>::compare(lhs.first, rhs.first, sizeof(lhs.first)) < 0;  }
 
-    template<typename ElementT> bool operator()(char lhs, const ElementT& rhs) const noexcept
+    template<typename ElementT>
+    bool
+    operator()(char lhs, const ElementT& rhs)
+    const
+    noexcept
       { return ::rocket::char_traits<char>::lt(lhs, rhs.first[0]);  }
 
-    template<typename ElementT> bool operator()(const ElementT& lhs, char rhs) const noexcept
+    template<typename ElementT>
+    bool
+    operator()(const ElementT& lhs, char rhs)
+    const
+    noexcept
       { return ::rocket::char_traits<char>::lt(lhs.first[0], rhs);  }
   };
 
@@ -405,7 +467,8 @@ constexpr s_punctuators[] =
     { "~",     punctuator_notb        },
   };
 
-bool do_accept_punctuator(cow_vector<Token>& tokens, Line_Reader& reader)
+bool
+do_accept_punctuator(cow_vector<Token>& tokens, Line_Reader& reader)
   {
 #ifdef ROCKET_DEBUG
     ROCKET_ASSERT(::std::is_sorted(begin(s_punctuators), end(s_punctuators), Prefix_Comparator()));
@@ -431,7 +494,8 @@ bool do_accept_punctuator(cow_vector<Token>& tokens, Line_Reader& reader)
     }
   }
 
-bool do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char head, bool escapable)
+bool
+do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char head, bool escapable)
   {
     // string-literal ::=
     //   escape-string-literal | noescape-string-literal
@@ -622,7 +686,8 @@ constexpr s_keywords[] =
     { "while",     keyword_while     },
   };
 
-bool do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Line_Reader& reader, bool keywords_as_identifiers)
+bool
+do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Line_Reader& reader, bool keywords_as_identifiers)
   {
     // identifier ::=
     //   PCRE([A-Za-z_][A-Za-z_0-9]*)
@@ -666,11 +731,14 @@ bool do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Line_Reader& rea
 
 }  // namespace
 
-Token_Stream::~Token_Stream()
+Token_Stream::
+~Token_Stream()
   {
   }
 
-Token_Stream& Token_Stream::reload(tinybuf& cbuf, const cow_string& file)
+Token_Stream&
+Token_Stream::
+reload(tinybuf& cbuf, const cow_string& file)
   {
     // Tokens are parsed and stored here in normal order.
     // We will have to reverse this sequence before storing it into `*this` if it is accepted.

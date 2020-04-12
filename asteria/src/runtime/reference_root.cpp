@@ -11,20 +11,20 @@
 
 namespace Asteria {
 
-const Value& Reference_root::dereference_const() const
+const Value&
+Reference_root::
+dereference_const()
+const
   {
     switch(this->index()) {
-      case index_void: {
+      case index_void:
         ASTERIA_THROW("attempt to take the result of a function call which returned no value");
-      }
 
-      case index_constant: {
+      case index_constant:
         return this->m_stor.as<index_constant>().val;
-      }
 
-      case index_temporary: {
+      case index_temporary:
         return this->m_stor.as<index_temporary>().val;
-      }
 
       case index_variable: {
         auto var = unerase_cast(this->m_stor.as<index_variable>().var);
@@ -37,29 +37,28 @@ const Value& Reference_root::dereference_const() const
         return var->get_value();
       }
 
-      case index_tail_call: {
+      case index_tail_call:
         ASTERIA_THROW("tail call wrapper not dereferenceable");
-      }
 
       default:
         ASTERIA_TERMINATE("invalid reference root type enumeration (index `$1`)", this->index());
     }
   }
 
-Value& Reference_root::dereference_mutable() const
+Value&
+Reference_root::
+dereference_mutable()
+const
   {
     switch(this->index()) {
-      case index_void: {
+      case index_void:
         ASTERIA_THROW("attempt to modify the result of a function call which returned no value");
-      }
 
-      case index_constant: {
+      case index_constant:
         ASTERIA_THROW("attempt to modify a constant `$1`", this->m_stor.as<index_constant>().val);
-      }
 
-      case index_temporary: {
+      case index_temporary:
         ASTERIA_THROW("attempt to modify a temporary `$1`", this->m_stor.as<index_temporary>().val);
-      }
 
       case index_variable: {
         auto var = unerase_cast(this->m_stor.as<index_variable>().var);
@@ -75,29 +74,28 @@ Value& Reference_root::dereference_mutable() const
         return var->open_value();
       }
 
-      case index_tail_call: {
+      case index_tail_call:
         ASTERIA_THROW("tail call wrapper not dereferenceable");
-      }
 
       default:
         ASTERIA_TERMINATE("invalid reference root type enumeration (index `$1`)", this->index());
     }
   }
 
-Variable_Callback& Reference_root::enumerate_variables(Variable_Callback& callback) const
+Variable_Callback&
+Reference_root::
+enumerate_variables(Variable_Callback& callback)
+const
   {
     switch(this->index()) {
-      case index_void: {
+      case index_void:
         return callback;
-      }
 
-      case index_constant: {
+      case index_constant:
         return this->m_stor.as<index_constant>().val.enumerate_variables(callback);
-      }
 
-      case index_temporary: {
+      case index_temporary:
         return this->m_stor.as<index_temporary>().val.enumerate_variables(callback);
-      }
 
       case index_variable: {
         auto var = unerase_cast(this->m_stor.as<index_variable>().var);

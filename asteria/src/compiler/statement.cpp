@@ -14,7 +14,9 @@
 namespace Asteria {
 namespace {
 
-void do_user_declare(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx, const phsh_string& name, const char* desc)
+void
+do_user_declare(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
+                const phsh_string& name, const char* desc)
   {
     // Check for special names.
     if(name.rdstr().empty())
@@ -34,23 +36,25 @@ void do_user_declare(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx, 
     ctx.open_named_reference(name) /*= Reference_root::S_void()*/;
   }
 
-cow_vector<AIR_Node>& do_generate_clear_stack(cow_vector<AIR_Node>& code)
+cow_vector<AIR_Node>&
+do_generate_clear_stack(cow_vector<AIR_Node>& code)
   {
     AIR_Node::S_clear_stack xnode = { };
     code.emplace_back(::std::move(xnode));
     return code;
   }
 
-cow_vector<AIR_Node>& do_generate_glvalue_to_prvalue(cow_vector<AIR_Node>& code, const Source_Location& sloc)
+cow_vector<AIR_Node>&
+do_generate_glvalue_to_prvalue(cow_vector<AIR_Node>& code, const Source_Location& sloc)
   {
     AIR_Node::S_glvalue_to_prvalue xnode = { sloc };
     code.emplace_back(::std::move(xnode));
     return code;
   }
 
-cow_vector<AIR_Node>& do_generate_subexpression(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
-                                                PTC_Aware ptc, const Analytic_Context& ctx,
-                                                const Statement::S_expression& expr)
+cow_vector<AIR_Node>&
+do_generate_subexpression(cow_vector<AIR_Node>& code, const Compiler_Options& opts, PTC_Aware ptc,
+                          const Analytic_Context& ctx, const Statement::S_expression& expr)
   {
     // Expression units other than the last one cannot be PTC'd.
     for(size_t i = 0;  i < expr.units.size();  ++i)
@@ -60,8 +64,9 @@ cow_vector<AIR_Node>& do_generate_subexpression(cow_vector<AIR_Node>& code, cons
     return code;
   }
 
-cow_vector<AIR_Node>& do_generate_single_step_trap(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
-                                                   const Source_Location& sloc)
+cow_vector<AIR_Node>&
+do_generate_single_step_trap(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
+                             const Source_Location& sloc)
   {
     // Note this can be disabled.
     if(!opts.verbose_single_step_traps)
@@ -72,9 +77,9 @@ cow_vector<AIR_Node>& do_generate_single_step_trap(cow_vector<AIR_Node>& code, c
     return code;
   }
 
-cow_vector<AIR_Node>& do_generate_expression(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
-                                             PTC_Aware ptc, const Analytic_Context& ctx,
-                                             const Statement::S_expression& expr)
+cow_vector<AIR_Node>&
+do_generate_expression(cow_vector<AIR_Node>& code, const Compiler_Options& opts, PTC_Aware ptc,
+                       const Analytic_Context& ctx, const Statement::S_expression& expr)
   {
     do_generate_single_step_trap(code, opts, expr.sloc);
     do_generate_clear_stack(code);
@@ -82,17 +87,18 @@ cow_vector<AIR_Node>& do_generate_expression(cow_vector<AIR_Node>& code, const C
     return code;
   }
 
-cow_vector<AIR_Node> do_generate_expression(const Compiler_Options& opts, PTC_Aware ptc,
-                                            const Analytic_Context& ctx, const Statement::S_expression& expr)
+cow_vector<AIR_Node>
+do_generate_expression(const Compiler_Options& opts, PTC_Aware ptc, const Analytic_Context& ctx,
+                       const Statement::S_expression& expr)
   {
     cow_vector<AIR_Node> code;
     do_generate_expression(code, opts, ptc, ctx, expr);
     return code;
   }
 
-cow_vector<AIR_Node>& do_generate_statement_list(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
-                                                 Analytic_Context& ctx, const Compiler_Options& opts, PTC_Aware ptc,
-                                                 const Statement::S_block& block)
+cow_vector<AIR_Node>&
+do_generate_statement_list(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
+                           const Compiler_Options& opts, PTC_Aware ptc, const Statement::S_block& block)
   {
     // Statements other than the last one cannot be the end of function.
     for(size_t i = 0;  i < block.stmts.size();  ++i)
@@ -103,17 +109,18 @@ cow_vector<AIR_Node>& do_generate_statement_list(cow_vector<AIR_Node>& code, cow
     return code;
   }
 
-cow_vector<AIR_Node> do_generate_statement_list(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
-                                                const Compiler_Options& opts, PTC_Aware ptc,
-                                                const Statement::S_block& block)
+cow_vector<AIR_Node>
+do_generate_statement_list(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
+                           const Compiler_Options& opts, PTC_Aware ptc, const Statement::S_block& block)
   {
     cow_vector<AIR_Node> code;
     do_generate_statement_list(code, names_opt, ctx, opts, ptc, block);
     return code;
   }
 
-cow_vector<AIR_Node>& do_generate_block(cow_vector<AIR_Node>& code, const Compiler_Options& opts, PTC_Aware ptc,
-                                        const Analytic_Context& ctx, const Statement::S_block& block)
+cow_vector<AIR_Node>&
+do_generate_block(cow_vector<AIR_Node>& code, const Compiler_Options& opts, PTC_Aware ptc,
+                  const Analytic_Context& ctx, const Statement::S_block& block)
   {
     Analytic_Context ctx_stmts(::rocket::ref(ctx), nullptr);
     do_generate_single_step_trap(code, opts, block.sloc);
@@ -121,8 +128,9 @@ cow_vector<AIR_Node>& do_generate_block(cow_vector<AIR_Node>& code, const Compil
     return code;
   }
 
-cow_vector<AIR_Node> do_generate_block(const Compiler_Options& opts, PTC_Aware ptc, const Analytic_Context& ctx,
-                                       const Statement::S_block& block)
+cow_vector<AIR_Node>
+do_generate_block(const Compiler_Options& opts, PTC_Aware ptc, const Analytic_Context& ctx,
+                  const Statement::S_block& block)
   {
     cow_vector<AIR_Node> code;
     do_generate_block(code, opts, ptc, ctx, block);
@@ -131,9 +139,11 @@ cow_vector<AIR_Node> do_generate_block(const Compiler_Options& opts, PTC_Aware p
 
 }  // namespace
 
-cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
-                                               Analytic_Context& ctx, const Compiler_Options& opts,
-                                               PTC_Aware ptc) const
+cow_vector<AIR_Node>&
+Statement::
+generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
+              Analytic_Context& ctx, const Compiler_Options& opts, PTC_Aware ptc)
+const
   {
     switch(this->index()) {
       case index_expression: {
@@ -212,11 +222,13 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
             do_generate_subexpression(code, opts, ptc_aware_none, ctx, altr.inits[i]);
             // Initialize variables.
             if(sb_arr) {
-              AIR_Node::S_unpack_struct_array xnode = { altr.slocs[i], altr.immutable, static_cast<uint32_t>(epos - bpos) };
+              AIR_Node::S_unpack_struct_array xnode = { altr.slocs[i], altr.immutable,
+                                                        static_cast<uint32_t>(epos - bpos) };
               code.emplace_back(::std::move(xnode));
             }
             else if(sb_obj) {
-              AIR_Node::S_unpack_struct_object xnode = { altr.slocs[i], altr.immutable, altr.decls[i].subvec(bpos, epos - bpos) };
+              AIR_Node::S_unpack_struct_object xnode = { altr.slocs[i], altr.immutable,
+                                                         altr.decls[i].subvec(bpos, epos - bpos) };
               code.emplace_back(::std::move(xnode));
             }
             else {
@@ -296,7 +308,8 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
           do_generate_expression(code_labels.emplace_back(), opts, ptc_aware_none, ctx, altr.labels[i]);
           // Generate code for the clause and accumulate names.
           // This cannot be PTC'd.
-          do_generate_statement_list(code_bodies.emplace_back(), &names, ctx_body, opts, ptc_aware_none, altr.bodies[i]);
+          do_generate_statement_list(code_bodies.emplace_back(), &names, ctx_body, opts, ptc_aware_none,
+                                     altr.bodies[i]);
           names_added.emplace_back(names);
         }
 

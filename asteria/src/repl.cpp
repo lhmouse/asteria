@@ -30,13 +30,17 @@ enum Exit_Code : uint8_t
     exit_runtime_error      = 4,
   };
 
-[[noreturn]] int do_exit(Exit_Code code) noexcept
+[[noreturn]]
+int
+do_exit(Exit_Code code)
+noexcept
   {
     ::fflush(nullptr);
     ::quick_exit(static_cast<int>(code));
   }
 
-cow_string do_xindent(cow_string&& str)
+cow_string
+do_xindent(cow_string&& str)
   {
     size_t bp = SIZE_MAX;
     while((bp = str.find('\n', ++bp)) != cow_string::npos)
@@ -44,7 +48,9 @@ cow_string do_xindent(cow_string&& str)
     return ::std::move(str);
   }
 
-cow_string do_stringify(const Value& val) noexcept
+cow_string
+do_stringify(const Value& val)
+noexcept
   try {
     ::rocket::tinyfmt_str fmt;
     fmt << val;
@@ -54,7 +60,9 @@ cow_string do_stringify(const Value& val) noexcept
     return ::rocket::sref("<bad value>");
   }
 
-cow_string do_stringify(const Reference& ref) noexcept
+cow_string
+do_stringify(const Reference& ref)
+noexcept
   try {
     if(ref.is_void())
       return ::rocket::sref("<void>");
@@ -82,7 +90,9 @@ cow_string do_stringify(const Reference& ref) noexcept
     return ::rocket::sref("<bad reference>");
   }
 
-cow_string do_stringify(const exception& stdex) noexcept
+cow_string
+do_stringify(const exception& stdex)
+noexcept
   try {
     // Write the exception message verbatim, followed by the dynamic type.
     ::rocket::tinyfmt_str fmt;
@@ -108,7 +118,9 @@ struct Command_Line_Options
 // We want to detect Ctrl-C.
 volatile ::sig_atomic_t interrupted;
 
-void do_trap_sigint()
+void
+do_trap_sigint()
+noexcept
   {
     // Trap Ctrl-C. Failure to set the signal handler is ignored.
     struct ::sigaction sigx = { };
@@ -126,54 +138,56 @@ cow_string code;  // snippet
 cow_string heredoc;
 
 // These hooks help debugging
-struct REPL_Hooks : Abstract_Hooks
+struct REPL_Hooks
+  : Abstract_Hooks
   {
-    void on_variable_declare(const Source_Location& sloc, const cow_string& inside,
-                             const phsh_string& name) noexcept override
+    void
+    on_variable_declare(const Source_Location& sloc, const cow_string& inside, const phsh_string& name)
+    override
       {
         if(ROCKET_EXPECT(!cmdline.verbose)) {
           return;
         }
         ::fprintf(stderr, "~ running: ['%s:%d' inside `%s`] declaring variable: %s\n",
-                          sloc.c_file(), sloc.line(), inside.c_str(),
-                          name.c_str());
+                          sloc.c_file(), sloc.line(), inside.c_str(), name.c_str());
       }
 
-    void on_function_call(const Source_Location& sloc, const cow_string& inside,
-                          const cow_function& target) noexcept override
+    void
+    on_function_call(const Source_Location& sloc, const cow_string& inside, const cow_function& target)
+    override
       {
         if(ROCKET_EXPECT(!cmdline.verbose)) {
           return;
         }
         ::fprintf(stderr, "~ running: ['%s:%d' inside `%s`] initiating function call: %s\n",
-                          sloc.c_file(), sloc.line(), inside.c_str(),
-                          do_stringify(target).c_str());
+                          sloc.c_file(), sloc.line(), inside.c_str(), do_stringify(target).c_str());
       }
 
-    void on_function_return(const Source_Location& sloc, const cow_string& inside,
-                            const Reference& result) noexcept override
+    void
+    on_function_return(const Source_Location& sloc, const cow_string& inside, const Reference& result)
+    override
       {
         if(ROCKET_EXPECT(!cmdline.verbose)) {
           return;
         }
         ::fprintf(stderr, "~ running: ['%s:%d' inside `%s`] returned from function call: %s\n",
-                          sloc.c_file(), sloc.line(), inside.c_str(),
-                          do_stringify(result).c_str());
+                          sloc.c_file(), sloc.line(), inside.c_str(), do_stringify(result).c_str());
       }
 
-    void on_function_except(const Source_Location& sloc, const cow_string& inside,
-                            const Runtime_Error& except) noexcept override
+    void
+    on_function_except(const Source_Location& sloc, const cow_string& inside, const Runtime_Error& except)
+    override
       {
         if(ROCKET_EXPECT(!cmdline.verbose)) {
           return;
         }
         ::fprintf(stderr, "~ running: ['%s:%d' inside `%s`] caught exception from function call: %s\n",
-                          sloc.c_file(), sloc.line(), inside.c_str(),
-                          do_stringify(except).c_str());
+                          sloc.c_file(), sloc.line(), inside.c_str(), do_stringify(except).c_str());
       }
 
-    void on_single_step_trap(const Source_Location& sloc, const cow_string& inside,
-                             Executive_Context* /*ctx*/) override
+    void
+    on_single_step_trap(const Source_Location& sloc, const cow_string& inside, Executive_Context* /*ctx*/)
+    override
       {
         if(ROCKET_EXPECT(!interrupted)) {
           return;
@@ -182,7 +196,8 @@ struct REPL_Hooks : Abstract_Hooks
       }
   };
 
-void do_print_help(const char* self)
+void
+do_print_help(const char* self)
   {
     ::printf(
       //        1         2         3         4         5         6         7      |
@@ -224,7 +239,8 @@ void do_print_help(const char* self)
     );
   }
 
-void do_print_version()
+void
+do_print_version()
   {
     ::printf(
       //        1         2         3         4         5         6         7      |
@@ -242,7 +258,8 @@ void do_print_version()
     );
   }
 
-void do_parse_command_line(int argc, char** argv)
+void
+do_parse_command_line(int argc, char** argv)
   {
     bool help = false;
     bool version = false;
@@ -339,7 +356,8 @@ void do_parse_command_line(int argc, char** argv)
     cmdline.args = ::std::move(args);
   }
 
-void do_REPL_help()
+void
+do_REPL_help()
   {
     ::fprintf(stderr,
       //        1         2         3         4         5         6         7      |
@@ -351,7 +369,8 @@ void do_REPL_help()
     );
   }
 
-void do_handle_REPL_command(cow_string&& cmd)
+void
+do_handle_REPL_command(cow_string&& cmd)
   {
     // TODO tokenize
     if(cmd == "help") {
@@ -360,7 +379,8 @@ void do_handle_REPL_command(cow_string&& cmd)
     ::fprintf(stderr, "! unknown command: %s\n", cmd.c_str());
   }
 
-int do_REP_single()
+int
+do_REP_single()
   {
     // Reset standard streams.
     if(!::freopen(nullptr, "r", stdin)) {
@@ -503,7 +523,9 @@ int do_REP_single()
     return 0;
   }
 
-[[noreturn]] int do_REPL_noreturn()
+[[noreturn]]
+int
+do_REPL_noreturn()
   {
     // Write the title to standard error.
     ::fprintf(stderr,
@@ -536,7 +558,9 @@ int do_REP_single()
       do_REP_single();
   }
 
-[[noreturn]] int do_single_noreturn()
+[[noreturn]]
+int
+do_single_noreturn()
   {
     // Return this if an exception is thrown.
     Exit_Code status = exit_runtime_error;
@@ -586,7 +610,8 @@ int do_REP_single()
 
 }  // namespace
 
-int main(int argc, char** argv)
+int
+main(int argc, char** argv)
   try {
     // Select the C locale. UTF-8 is required for wide-oriented standard streams.
     ::setlocale(LC_ALL, "C.UTF-8");

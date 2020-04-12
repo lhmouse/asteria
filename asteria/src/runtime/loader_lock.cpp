@@ -9,11 +9,14 @@
 
 namespace Asteria {
 
-Loader_Lock::~Loader_Lock()
+Loader_Lock::
+~Loader_Lock()
   {
   }
 
-Loader_Lock::element_type* Loader_Lock::do_lock_stream(const char* path)
+Loader_Lock::element_type*
+Loader_Lock::
+do_lock_stream(const char* path)
   {
     // Open the file first.
     ::rocket::unique_posix_file file(::fopen(path, "r"), ::fclose);
@@ -33,8 +36,12 @@ Loader_Lock::element_type* Loader_Lock::do_lock_stream(const char* path)
     return &*(result.first);
   }
 
-void Loader_Lock::do_unlock_stream(element_type* qelem) noexcept
+void
+Loader_Lock::
+do_unlock_stream(element_type* qelem)
+noexcept
   {
+    // Erase the element denoted by `qelem`.
     ROCKET_ASSERT(qelem);
     auto count = this->m_strms.erase(qelem->first);
     ROCKET_ASSERT(count == 1);

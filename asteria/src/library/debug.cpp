@@ -8,7 +8,8 @@
 
 namespace Asteria {
 
-Iopt std_debug_logf(Sval templ, cow_vector<Value> values)
+Iopt
+std_debug_logf(Sval templ, cow_vector<Value> values)
   {
     // Prepare inserters.
     cow_vector<::rocket::formatter> insts;
@@ -29,7 +30,8 @@ Iopt std_debug_logf(Sval templ, cow_vector<Value> values)
     return static_cast<int64_t>(nput);
   }
 
-Iopt std_debug_dump(Value value, Iopt indent)
+Iopt
+std_debug_dump(Value value, Iopt indent)
   {
     // Clamp the suggested indent so we don't produce overlong lines.
     size_t rindent = static_cast<size_t>(::rocket::clamp(indent.value_or(2), 0, 10));
@@ -43,7 +45,8 @@ Iopt std_debug_dump(Value value, Iopt indent)
     return static_cast<int64_t>(nput);
   }
 
-void create_bindings_debug(V_object& result, API_Version /*version*/)
+void
+create_bindings_debug(V_object& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.debug.logf()`

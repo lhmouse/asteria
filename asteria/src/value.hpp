@@ -30,212 +30,283 @@ class Value
     Storage m_stor;
 
   public:
-    Value(nullptr_t = nullptr) noexcept
+    Value(nullptr_t = nullptr)
+    noexcept
       { }
 
-    Value(bool xval) noexcept
+    Value(bool xval)
+    noexcept
       : m_stor(V_boolean(xval))  { }
 
-    Value(signed char xval) noexcept
+    Value(signed char xval)
+    noexcept
       : m_stor(V_integer(xval))  { }
 
-    Value(signed short xval) noexcept
+    Value(signed short xval)
+    noexcept
       : m_stor(V_integer(xval))  { }
 
-    Value(signed xval) noexcept
+    Value(signed xval)
+    noexcept
       : m_stor(V_integer(xval))  { }
 
-    Value(signed long xval) noexcept
+    Value(signed long xval)
+    noexcept
       : m_stor(V_integer(xval))  { }
 
-    Value(signed long long xval) noexcept
+    Value(signed long long xval)
+    noexcept
       : m_stor(V_integer(xval))  { }
 
-    Value(float xval) noexcept
+    Value(float xval)
+    noexcept
       : m_stor(V_real(xval))  { }
 
-    Value(double xval) noexcept
+    Value(double xval)
+    noexcept
       : m_stor(V_real(xval))  { }
 
-    Value(cow_string xval) noexcept
+    Value(cow_string xval)
+    noexcept
       : m_stor(::std::move(xval))  { }
 
-    Value(cow_string::shallow_type xval) noexcept
+    Value(cow_string::shallow_type xval)
+    noexcept
       : m_stor(V_string(xval))  { }
 
-    Value(cow_opaque xval) noexcept
+    Value(cow_opaque xval)
+    noexcept
       { this->do_xassign<V_opaque&&>(xval, ::std::addressof(xval));  }
 
-    template<typename OpaqueT, ASTERIA_SFINAE_CONVERT(OpaqueT*,
-                          Abstract_Opaque*)> Value(rcptr<OpaqueT> xval) noexcept
+    template<typename OpaqueT,
+    ASTERIA_SFINAE_CONVERT(OpaqueT*, Abstract_Opaque*)>
+    Value(rcptr<OpaqueT> xval)
+    noexcept
       { this->do_xassign<V_opaque>(xval, ::std::addressof(xval));  }
 
-    Value(cow_function xval) noexcept
+    Value(cow_function xval)
+    noexcept
       { this->do_xassign<V_function&&>(xval, ::std::addressof(xval));  }
 
-    template<typename FunctionT, ASTERIA_SFINAE_CONVERT(FunctionT*,
-                          Abstract_Function*)> Value(rcptr<FunctionT> xval) noexcept
+    template<typename FunctionT,
+    ASTERIA_SFINAE_CONVERT(FunctionT*, Abstract_Function*)>
+    Value(rcptr<FunctionT> xval)
+    noexcept
       { this->do_xassign<V_function>(xval, ::std::addressof(xval));  }
 
-    Value(cow_vector<Value> xval) noexcept
+    Value(cow_vector<Value> xval)
+    noexcept
       : m_stor(::std::move(xval))  { }
 
-    Value(cow_dictionary<Value> xval) noexcept
+    Value(cow_dictionary<Value> xval)
+    noexcept
       : m_stor(::std::move(xval))  { }
 
     Value(initializer_list<Value> list)
       : m_stor(V_array(list.begin(), list.end()))  { }
 
-    template<typename KeyT> Value(initializer_list<pair<KeyT, Value>> list)
+    template<typename KeyT>
+    Value(initializer_list<pair<KeyT, Value>> list)
       : m_stor(V_object(list.begin(), list.end()))  { }
 
-    Value(const opt<bool>& xval) noexcept
+    Value(const opt<bool>& xval)
+    noexcept
       { this->do_xassign<V_boolean>(xval, xval); }
 
-    Value(const opt<signed char>& xval) noexcept
+    Value(const opt<signed char>& xval)
+    noexcept
       { this->do_xassign<V_integer>(xval, xval);  }
 
-    Value(const opt<signed short>& xval) noexcept
+    Value(const opt<signed short>& xval)
+    noexcept
       { this->do_xassign<V_integer>(xval, xval);  }
 
-    Value(const opt<signed>& xval) noexcept
+    Value(const opt<signed>& xval)
+    noexcept
       { this->do_xassign<V_integer>(xval, xval);  }
 
-    Value(const opt<signed long>& xval) noexcept
+    Value(const opt<signed long>& xval)
+    noexcept
       { this->do_xassign<V_integer>(xval, xval);  }
 
-    Value(const opt<signed long long>& xval) noexcept
+    Value(const opt<signed long long>& xval)
+    noexcept
       { this->do_xassign<V_integer>(xval, xval);  }
 
-    Value(const opt<float>& xval) noexcept
+    Value(const opt<float>& xval)
+    noexcept
       { this->do_xassign<V_real>(xval, xval);  }
 
-    Value(const opt<double>& xval) noexcept
+    Value(const opt<double>& xval)
+    noexcept
       { this->do_xassign<V_real>(xval, xval);  }
 
-    Value(const opt<cow_string>& xval) noexcept
+    Value(const opt<cow_string>& xval)
+    noexcept
       { this->do_xassign<const V_string&>(xval, xval);  }
 
-    Value(opt<cow_string>&& xval) noexcept
+    Value(opt<cow_string>&& xval)
+    noexcept
       { this->do_xassign<V_string&&>(xval, xval);  }
 
-    Value(const opt<cow_vector<Value>>& xval) noexcept
+    Value(const opt<cow_vector<Value>>& xval)
+    noexcept
       { this->do_xassign<const V_array&>(xval, xval);  }
 
-    Value(opt<cow_vector<Value>>&& xval) noexcept
+    Value(opt<cow_vector<Value>>&& xval)
+    noexcept
       { this->do_xassign<V_array&&>(xval, xval);  }
 
-    Value(const opt<cow_dictionary<Value>>& xval) noexcept
+    Value(const opt<cow_dictionary<Value>>& xval)
+    noexcept
       { this->do_xassign<const V_object&>(xval, xval);  }
 
-    Value(opt<cow_dictionary<Value>>&& xval) noexcept
+    Value(opt<cow_dictionary<Value>>&& xval)
+    noexcept
       { this->do_xassign<V_object&&>(xval, xval);  }
 
-    Value& operator=(nullptr_t) noexcept
+    Value&
+    operator=(nullptr_t)
+    noexcept
       {
         this->m_stor = V_null();
         return *this;
       }
 
-    Value& operator=(bool xval) noexcept
+    Value&
+    operator=(bool xval)
+    noexcept
       {
         this->m_stor = V_boolean(xval);
         return *this;
       }
 
-    Value& operator=(signed char xval) noexcept
+    Value&
+    operator=(signed char xval)
+    noexcept
       {
         this->m_stor = V_integer(xval);
         return *this;
       }
 
-    Value& operator=(signed short xval) noexcept
+    Value&
+    operator=(signed short xval)
+    noexcept
       {
         this->m_stor = V_integer(xval);
         return *this;
       }
 
-    Value& operator=(signed xval) noexcept
+    Value&
+    operator=(signed xval)
+    noexcept
       {
         this->m_stor = V_integer(xval);
         return *this;
       }
 
-    Value& operator=(signed long xval) noexcept
+    Value&
+    operator=(signed long xval)
+    noexcept
       {
         this->m_stor = V_integer(xval);
         return *this;
       }
 
-    Value& operator=(signed long long xval) noexcept
+    Value&
+    operator=(signed long long xval)
+    noexcept
       {
         this->m_stor = V_integer(xval);
         return *this;
       }
 
-    Value& operator=(float xval) noexcept
+    Value&
+    operator=(float xval)
+    noexcept
       {
         this->m_stor = V_real(xval);
         return *this;
       }
 
-    Value& operator=(double xval) noexcept
+    Value&
+    operator=(double xval)
+    noexcept
       {
         this->m_stor = V_real(xval);
         return *this;
       }
 
-    Value& operator=(cow_string xval) noexcept
+    Value&
+    operator=(cow_string xval)
+    noexcept
       {
         this->m_stor = V_string(::std::move(xval));
         return *this;
       }
 
-    Value& operator=(cow_string::shallow_type xval) noexcept
+    Value&
+    operator=(cow_string::shallow_type xval)
+    noexcept
       {
         this->m_stor = V_string(xval);
         return *this;
       }
 
-    Value& operator=(cow_opaque xval) noexcept
+    Value&
+    operator=(cow_opaque xval)
+    noexcept
       {
         this->do_xassign<V_opaque&&>(xval, ::std::addressof(xval));
         return *this;
       }
 
-    template<typename OpaqueT, ASTERIA_SFINAE_CONVERT(OpaqueT*,
-                          Abstract_Opaque*)> Value& operator=(rcptr<OpaqueT> xval) noexcept
+    template<typename OpaqueT,
+    ASTERIA_SFINAE_CONVERT(OpaqueT*, Abstract_Opaque*)>
+    Value&
+    operator=(rcptr<OpaqueT> xval)
+    noexcept
       {
         this->do_xassign<V_opaque>(xval, ::std::addressof(xval));
         return *this;
       }
 
-    Value& operator=(cow_function xval) noexcept
+    Value&
+    operator=(cow_function xval)
+    noexcept
       {
         this->do_xassign<V_function&&>(xval, ::std::addressof(xval));
         return *this;
       }
 
-    template<typename FunctionT, ASTERIA_SFINAE_CONVERT(FunctionT*,
-                          Abstract_Function*)> Value& operator=(rcptr<FunctionT> xval) noexcept
+    template<typename FunctionT,
+    ASTERIA_SFINAE_CONVERT(FunctionT*, Abstract_Function*)>
+    Value&
+    operator=(rcptr<FunctionT> xval)
+    noexcept
       {
         this->do_xassign<V_function>(xval, ::std::addressof(xval));
         return *this;
       }
 
-    Value& operator=(cow_vector<Value> xval) noexcept
+    Value&
+    operator=(cow_vector<Value> xval)
+    noexcept
       {
         this->m_stor = ::std::move(xval);
         return *this;
       }
 
-    Value& operator=(cow_dictionary<Value> xval) noexcept
+    Value&
+    operator=(cow_dictionary<Value> xval)
+    noexcept
       {
         this->m_stor = ::std::move(xval);
         return *this;
       }
 
-    Value& operator=(initializer_list<Value> list)
+    Value&
+    operator=(initializer_list<Value> list)
       {
         if(this->m_stor.index() != vtype_array)
           this->m_stor.emplace<V_array>();
@@ -244,7 +315,9 @@ class Value
         return *this;
       }
 
-    template<typename KeyT> Value& operator=(initializer_list<pair<KeyT, Value>> list)
+    template<typename KeyT>
+    Value&
+    operator=(initializer_list<pair<KeyT, Value>> list)
       {
         if(this->m_stor.index() != vtype_object)
           this->m_stor.emplace<V_object>();
@@ -253,92 +326,122 @@ class Value
         return *this;
       }
 
-    Value& operator=(const opt<bool>& xval) noexcept
+    Value&
+    operator=(const opt<bool>& xval)
+    noexcept
       {
         this->do_xassign<V_boolean>(xval, xval);
         return *this;
       }
 
-    Value& operator=(const opt<signed char>& xval) noexcept
+    Value&
+    operator=(const opt<signed char>& xval)
+    noexcept
       {
         this->do_xassign<V_integer>(xval, xval);
         return *this;
       }
 
-    Value& operator=(const opt<signed short>& xval) noexcept
+    Value&
+    operator=(const opt<signed short>& xval)
+    noexcept
       {
         this->do_xassign<V_integer>(xval, xval);
         return *this;
       }
 
-    Value& operator=(const opt<signed>& xval) noexcept
+    Value&
+    operator=(const opt<signed>& xval)
+    noexcept
       {
         this->do_xassign<V_integer>(xval, xval);
         return *this;
       }
 
-    Value& operator=(const opt<signed long>& xval) noexcept
+    Value&
+    operator=(const opt<signed long>& xval)
+    noexcept
       {
         this->do_xassign<V_integer>(xval, xval);
         return *this;
       }
 
-    Value& operator=(const opt<signed long long>& xval) noexcept
+    Value&
+    operator=(const opt<signed long long>& xval)
+    noexcept
       {
         this->do_xassign<V_integer>(xval, xval);
         return *this;
       }
 
-    Value& operator=(const opt<float>& xval) noexcept
+    Value&
+    operator=(const opt<float>& xval)
+    noexcept
       {
         this->do_xassign<V_real>(xval, xval);
         return *this;
       }
 
-    Value& operator=(const opt<double>& xval) noexcept
+    Value&
+    operator=(const opt<double>& xval)
+    noexcept
       {
         this->do_xassign<V_real>(xval, xval);
         return *this;
       }
 
-    Value& operator=(const opt<cow_string>& xval) noexcept
+    Value&
+    operator=(const opt<cow_string>& xval)
+    noexcept
       {
         this->do_xassign<const V_string&>(xval, xval);
         return *this;
       }
 
-    Value& operator=(opt<cow_string>&& xval) noexcept
+    Value&
+    operator=(opt<cow_string>&& xval)
+    noexcept
       {
         this->do_xassign<V_string&&>(xval, xval);
         return *this;
       }
 
-    Value& operator=(const opt<cow_vector<Value>>& xval) noexcept
+    Value&
+    operator=(const opt<cow_vector<Value>>& xval)
+    noexcept
       {
         this->do_xassign<const V_array&>(xval, xval);
         return *this;
       }
 
-    Value& operator=(opt<cow_vector<Value>>&& xval) noexcept
+    Value&
+    operator=(opt<cow_vector<Value>>&& xval)
+    noexcept
       {
         this->do_xassign<V_array&&>(xval, xval);
         return *this;
       }
 
-    Value& operator=(const opt<cow_dictionary<Value>>& xval) noexcept
+    Value&
+    operator=(const opt<cow_dictionary<Value>>& xval)
+    noexcept
       {
         this->do_xassign<const V_object&>(xval, xval);
         return *this;
       }
 
-    Value& operator=(opt<cow_dictionary<Value>>&& xval) noexcept
+    Value&
+    operator=(opt<cow_dictionary<Value>>&& xval)
+    noexcept
       {
         this->do_xassign<V_object&&>(xval, xval);
         return *this;
       }
 
   private:
-    template<typename CastT, typename ChkT, typename PtrT> void do_xassign(ChkT&& chk, PtrT&& ptr)
+    template<typename CastT, typename ChkT, typename PtrT>
+    void
+    do_xassign(ChkT&& chk, PtrT&& ptr)
       {
         if(chk)
           this->m_stor = static_cast<CastT>(*ptr);
@@ -347,113 +450,222 @@ class Value
       }
 
   public:
-    Vtype vtype() const noexcept
+    Vtype
+    vtype()
+    const
+    noexcept
       { return static_cast<Vtype>(this->m_stor.index());  }
 
-    const char* what_vtype() const noexcept
+    const char*
+    what_vtype()
+    const
+    noexcept
       { return describe_vtype(static_cast<Vtype>(this->m_stor.index()));  }
 
-    bool is_null() const noexcept
+    bool
+    is_null()
+    const
+    noexcept
       { return this->vtype() == vtype_null;  }
 
-    bool is_boolean() const noexcept
+    bool
+    is_boolean()
+    const
+    noexcept
       { return this->vtype() == vtype_boolean;  }
 
-    V_boolean as_boolean() const
+    V_boolean
+    as_boolean()
+    const
       { return this->m_stor.as<vtype_boolean>();  }
 
-    V_boolean& open_boolean()
+    V_boolean&
+    open_boolean()
       { return this->m_stor.as<vtype_boolean>();  }
 
-    bool is_integer() const noexcept
+    bool
+    is_integer()
+    const
+    noexcept
       { return this->vtype() == vtype_integer;  }
 
-    V_integer as_integer() const
+    V_integer
+    as_integer()
+    const
       { return this->m_stor.as<vtype_integer>();  }
 
-    V_integer& open_integer()
+    V_integer&
+    open_integer()
       { return this->m_stor.as<vtype_integer>();  }
 
-    bool is_real() const noexcept
+    bool
+    is_real()
+    const
+    noexcept
       { return this->vtype() == vtype_real;  }
 
-    V_real as_real() const
+    V_real
+    as_real()
+    const
       { return this->m_stor.as<vtype_real>();  }
 
-    V_real& open_real()
+    V_real&
+    open_real()
       { return this->m_stor.as<vtype_real>();  }
 
-    bool is_string() const noexcept
+    bool
+    is_string()
+    const
+    noexcept
       { return this->vtype() == vtype_string;  }
 
-    const V_string& as_string() const
+    const V_string&
+    as_string()
+    const
       { return this->m_stor.as<vtype_string>();  }
 
-    V_string& open_string()
+    V_string&
+    open_string()
       { return this->m_stor.as<vtype_string>();  }
 
-    bool is_function() const noexcept
+    bool
+    is_function()
+    const
+    noexcept
       { return this->vtype() == vtype_function;  }
 
-    const V_function& as_function() const
+    const V_function&
+    as_function()
+    const
       { return this->m_stor.as<vtype_function>();  }
 
-    V_function& open_function()
+    V_function&
+    open_function()
       { return this->m_stor.as<vtype_function>();  }
 
-    bool is_opaque() const noexcept
+    bool
+    is_opaque()
+    const
+    noexcept
       { return this->vtype() == vtype_opaque;  }
 
-    const V_opaque& as_opaque() const
+    const V_opaque&
+    as_opaque()
+    const
       { return this->m_stor.as<vtype_opaque>();  }
 
-    V_opaque& open_opaque()
+    V_opaque&
+    open_opaque()
       { return this->m_stor.as<vtype_opaque>();  }
 
-    bool is_array() const noexcept
+    bool
+    is_array()
+    const
+    noexcept
       { return this->vtype() == vtype_array;  }
 
-    const V_array& as_array() const
+    const V_array&
+    as_array()
+    const
       { return this->m_stor.as<vtype_array>();  }
 
-    V_array& open_array()
+    V_array&
+    open_array()
       { return this->m_stor.as<vtype_array>();  }
 
-    bool is_object() const noexcept
+    bool
+    is_object()
+    const
+    noexcept
       { return this->vtype() == vtype_object;  }
 
-    const V_object& as_object() const
+    const V_object&
+    as_object()
+    const
       { return this->m_stor.as<vtype_object>();  }
 
-    V_object& open_object()
+    V_object&
+    open_object()
       { return this->m_stor.as<vtype_object>();  }
 
-    Value& swap(Value& other) noexcept
+    Value&
+    swap(Value& other)
+    noexcept
       {
         this->m_stor.swap(other.m_stor);
         return *this;
       }
 
-    bool is_convertible_to_real() const noexcept;
-    V_real convert_to_real() const;
-    V_real& mutate_into_real();
+    // Note null and boolean values are not convertible to reals.
+    bool
+    is_convertible_to_real()
+    const
+    noexcept;
 
-    ROCKET_PURE_FUNCTION bool test() const noexcept;
-    ROCKET_PURE_FUNCTION Compare compare(const Value& other) const noexcept;
+    V_real
+    convert_to_real()
+    const;
 
-    ROCKET_PURE_FUNCTION bool unique() const noexcept;
-    ROCKET_PURE_FUNCTION long use_count() const noexcept;
-    ROCKET_PURE_FUNCTION long gcref_split() const noexcept;
+    V_real&
+    mutate_into_real();
 
-    tinyfmt& print(tinyfmt& fmt, bool escape = false) const;
-    tinyfmt& dump(tinyfmt& fmt, size_t indent = 2, size_t hanging = 0) const;
-    Variable_Callback& enumerate_variables(Variable_Callback& callback) const;
+    // This performs the builtin conversion to boolean values.
+    ROCKET_PURE_FUNCTION
+    bool
+    test()
+    const
+    noexcept;
+
+    // This performs the builtin comparison with another value.
+    ROCKET_PURE_FUNCTION
+    Compare
+    compare(const Value& other)
+    const
+    noexcept;
+
+    // These functions are used by the garbage collector.
+    // Read `runtime/collector.cpp` for details.
+    ROCKET_PURE_FUNCTION
+    bool
+    unique()
+    const
+    noexcept;
+
+    ROCKET_PURE_FUNCTION
+    long
+    use_count()
+    const
+    noexcept;
+
+    ROCKET_PURE_FUNCTION
+    long
+    gcref_split()
+    const
+    noexcept;
+
+    // These are miscellaneous interfaces for debugging.
+    tinyfmt&
+    print(tinyfmt& fmt, bool escape = false)
+    const;
+
+    tinyfmt&
+    dump(tinyfmt& fmt, size_t indent = 2, size_t hanging = 0)
+    const;
+
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback)
+    const;
   };
 
-inline void swap(Value& lhs, Value& rhs) noexcept
+inline
+void
+swap(Value& lhs, Value& rhs)
+noexcept
   { lhs.swap(rhs);  }
 
-inline tinyfmt& operator<<(tinyfmt& fmt, const Value& value)
+inline
+tinyfmt&
+operator<<(tinyfmt& fmt, const Value& value)
   { return value.dump(fmt);  }
 
 }  // namespace Asteria

@@ -16,7 +16,8 @@
 namespace Asteria {
 namespace {
 
-opt<Keyword> do_accept_keyword_opt(Token_Stream& tstrm, initializer_list<Keyword> accept)
+opt<Keyword>
+do_accept_keyword_opt(Token_Stream& tstrm, initializer_list<Keyword> accept)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
@@ -35,7 +36,8 @@ opt<Keyword> do_accept_keyword_opt(Token_Stream& tstrm, initializer_list<Keyword
     return kwrd;
   }
 
-opt<Punctuator> do_accept_punctuator_opt(Token_Stream& tstrm, initializer_list<Punctuator> accept)
+opt<Punctuator>
+do_accept_punctuator_opt(Token_Stream& tstrm, initializer_list<Punctuator> accept)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
@@ -54,7 +56,8 @@ opt<Punctuator> do_accept_punctuator_opt(Token_Stream& tstrm, initializer_list<P
     return punct;
   }
 
-opt<cow_string> do_accept_identifier_opt(Token_Stream& tstrm)
+opt<cow_string>
+do_accept_identifier_opt(Token_Stream& tstrm)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
@@ -70,7 +73,8 @@ opt<cow_string> do_accept_identifier_opt(Token_Stream& tstrm)
     return name;
   }
 
-cow_string& do_concatenate_string_literal_sequence(cow_string& val, Token_Stream& tstrm)
+cow_string&
+do_concatenate_string_literal_sequence(cow_string& val, Token_Stream& tstrm)
   {
     for(;;) {
       auto qtok = tstrm.peek_opt();
@@ -88,7 +92,8 @@ cow_string& do_concatenate_string_literal_sequence(cow_string& val, Token_Stream
     return val;
   }
 
-opt<cow_string> do_accept_string_literal_opt(Token_Stream& tstrm)
+opt<cow_string>
+do_accept_string_literal_opt(Token_Stream& tstrm)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
@@ -105,7 +110,8 @@ opt<cow_string> do_accept_string_literal_opt(Token_Stream& tstrm)
     return val;
   }
 
-opt<cow_string> do_accept_json5_key_opt(Token_Stream& tstrm)
+opt<cow_string>
+do_accept_json5_key_opt(Token_Stream& tstrm)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
@@ -134,33 +140,30 @@ opt<cow_string> do_accept_json5_key_opt(Token_Stream& tstrm)
     return nullopt;
   }
 
-Value do_generate_null()
-  {
-    return nullptr;
-  }
-Value do_generate_false()
-  {
-    return false;
-  }
-Value do_generate_true()
-  {
-    return true;
-  }
-Value do_generate_nan()
-  {
-    return ::std::numeric_limits<double>::quiet_NaN();
-  }
-Value do_generate_infinity()
-  {
-    return ::std::numeric_limits<double>::infinity();
-  }
+Value
+do_generate_null()
+  { return nullptr;  }
 
-using Value_Generator = Value ();
+Value
+do_generate_false()
+  { return false;  }
+
+Value
+do_generate_true()
+  { return true;  }
+
+Value
+do_generate_nan()
+  { return ::std::numeric_limits<double>::quiet_NaN();  }
+
+Value
+do_generate_infinity()
+  { return ::std::numeric_limits<double>::infinity();  }
 
 struct Literal_Element
   {
     Keyword kwrd;
-    Value_Generator& vgen;
+    decltype(do_generate_null)& vgen;
   }
 constexpr s_literal_table[] =
   {
@@ -171,12 +174,16 @@ constexpr s_literal_table[] =
     { keyword_infinity,  do_generate_infinity  },
   };
 
-constexpr bool operator==(const Literal_Element& lhs, Keyword rhs) noexcept
+constexpr
+bool
+operator==(const Literal_Element& lhs, Keyword rhs)
+noexcept
   {
     return lhs.kwrd == rhs;
   }
 
-opt<Value> do_accept_literal_opt(Token_Stream& tstrm)
+opt<Value>
+do_accept_literal_opt(Token_Stream& tstrm)
   {
     // literal ::=
     //   keyword-literal | string-literal | numeric-literal
@@ -217,7 +224,8 @@ opt<Value> do_accept_literal_opt(Token_Stream& tstrm)
     return nullopt;
   }
 
-opt<bool> do_accept_negation_opt(Token_Stream& tstrm)
+opt<bool>
+do_accept_negation_opt(Token_Stream& tstrm)
   {
     // negation ::=
     //   "!" | "not"
@@ -232,7 +240,8 @@ opt<bool> do_accept_negation_opt(Token_Stream& tstrm)
     return nullopt;
   }
 
-opt<cow_vector<phsh_string>> do_accept_identifier_list_opt(Token_Stream& tstrm)
+opt<cow_vector<phsh_string>>
+do_accept_identifier_list_opt(Token_Stream& tstrm)
   {
     // identifier-list-opt ::=
     //   identifier-list | ""
@@ -258,7 +267,8 @@ opt<cow_vector<phsh_string>> do_accept_identifier_list_opt(Token_Stream& tstrm)
     return ::std::move(names);
   }
 
-opt<cow_vector<phsh_string>> do_accept_variable_declarator_opt(Token_Stream& tstrm)
+opt<cow_vector<phsh_string>>
+do_accept_variable_declarator_opt(Token_Stream& tstrm)
   {
     // variable-declarator ::=
     //   identifier | structured-binding-array | structured-binding-object
@@ -311,13 +321,18 @@ opt<cow_vector<phsh_string>> do_accept_variable_declarator_opt(Token_Stream& tst
   }
 
 // Accept a statement; a blockt is converted to a single statement.
-opt<Statement> do_accept_statement_opt(Token_Stream& tstrm);
+opt<Statement>
+do_accept_statement_opt(Token_Stream& tstrm);
+
 // Accept a statement; a non-block statement is converted to a block consisting of a single statement.
-opt<Statement::S_block> do_accept_statement_as_block_opt(Token_Stream& tstrm);
+opt<Statement::S_block>
+do_accept_statement_as_block_opt(Token_Stream& tstrm);
 
-bool do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm);
+bool
+do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm);
 
-bool do_accept_expression_and_convert_to_rvalue(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+bool
+do_accept_expression_and_convert_to_rvalue(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     auto sloc = tstrm.next_sloc();
     bool succ = do_accept_expression(units, tstrm);
@@ -329,7 +344,8 @@ bool do_accept_expression_and_convert_to_rvalue(cow_vector<Expression_Unit>& uni
     return true;
   }
 
-opt<Statement::S_expression> do_accept_expression_opt(Token_Stream& tstrm)
+opt<Statement::S_expression>
+do_accept_expression_opt(Token_Stream& tstrm)
   {
     // expression-opt ::=
     //   expression | ""
@@ -343,7 +359,8 @@ opt<Statement::S_expression> do_accept_expression_opt(Token_Stream& tstrm)
     return ::std::move(xexpr);
   }
 
-opt<Statement::S_expression> do_accept_expression_and_convert_to_rvalue_opt(Token_Stream& tstrm)
+opt<Statement::S_expression>
+do_accept_expression_and_convert_to_rvalue_opt(Token_Stream& tstrm)
   {
     // expression-opt ::=
     //   expression | ""
@@ -357,7 +374,8 @@ opt<Statement::S_expression> do_accept_expression_and_convert_to_rvalue_opt(Toke
     return ::std::move(xexpr);
   }
 
-opt<Statement::S_block> do_accept_block_opt(Token_Stream& tstrm)
+opt<Statement::S_block>
+do_accept_block_opt(Token_Stream& tstrm)
   {
     // block ::=
     //   "{" statement-list-opt "}"
@@ -380,13 +398,15 @@ opt<Statement::S_block> do_accept_block_opt(Token_Stream& tstrm)
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
     if(!kpunct) {
-      throw Parser_Error(parser_status_closed_brace_or_statement_expected, tstrm.next_sloc(), tstrm.next_length());
+      throw Parser_Error(parser_status_closed_brace_or_statement_expected, tstrm.next_sloc(),
+                         tstrm.next_length());
     }
     Statement::S_block xstmt = { ::std::move(sloc), ::std::move(body) };
     return ::std::move(xstmt);
   }
 
-opt<Statement> do_accept_block_statement_opt(Token_Stream& tstrm)
+opt<Statement>
+do_accept_block_statement_opt(Token_Stream& tstrm)
   {
     auto qblock = do_accept_block_opt(tstrm);
     if(!qblock) {
@@ -395,7 +415,8 @@ opt<Statement> do_accept_block_statement_opt(Token_Stream& tstrm)
     return ::std::move(*qblock);
   }
 
-opt<Statement::S_expression> do_accept_equal_initializer_opt(Token_Stream& tstrm)
+opt<Statement::S_expression>
+do_accept_equal_initializer_opt(Token_Stream& tstrm)
   {
     // equal-initializer-opt ::=
     //   equal-initializer | ""
@@ -408,7 +429,8 @@ opt<Statement::S_expression> do_accept_equal_initializer_opt(Token_Stream& tstrm
     return do_accept_expression_opt(tstrm);
   }
 
-opt<Statement> do_accept_null_statement_opt(Token_Stream& tstrm)
+opt<Statement>
+do_accept_null_statement_opt(Token_Stream& tstrm)
   {
     // null-statement ::=
     //   ";"
@@ -421,7 +443,8 @@ opt<Statement> do_accept_null_statement_opt(Token_Stream& tstrm)
     return ::std::move(xstmt);
   }
 
-opt<Statement> do_accept_variable_definition_opt(Token_Stream& tstrm)
+opt<Statement>
+do_accept_variable_definition_opt(Token_Stream& tstrm)
   {
     // variable-definition ::=
     //   "var" variable-declarator equal-initailizer-opt ( "," variable-declarator equal-initializer-opt | "" ) ";"
@@ -461,7 +484,8 @@ opt<Statement> do_accept_variable_definition_opt(Token_Stream& tstrm)
     return ::std::move(xstmt);
   }
 
-opt<Statement> do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
+opt<Statement>
+do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
   {
     // immutable-variable-definition ::=
     //   "const" variable-declarator equal-initailizer ( "," identifier equal-initializer | "" ) ";"
@@ -501,7 +525,8 @@ opt<Statement> do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
     return ::std::move(xstmt);
   }
 
-opt<cow_vector<phsh_string>> do_accept_parameter_list_opt(Token_Stream& tstrm)
+opt<cow_vector<phsh_string>>
+do_accept_parameter_list_opt(Token_Stream& tstrm)
   {
     // parameter-list-opt ::=
     //   parameter-list | ""
@@ -528,7 +553,8 @@ opt<cow_vector<phsh_string>> do_accept_parameter_list_opt(Token_Stream& tstrm)
     return ::std::move(params);
   }
 
-opt<Statement> do_accept_function_definition_opt(Token_Stream& tstrm)
+opt<Statement>
+do_accept_function_definition_opt(Token_Stream& tstrm)
   {
     // function-definition ::=
     //   "func" identifier "(" parameter-list-opt ")" block
@@ -562,7 +588,8 @@ opt<Statement> do_accept_function_definition_opt(Token_Stream& tstrm)
     return ::std::move(xstmt);
   }
 
-opt<Statement> do_accept_expression_statement_opt(Token_Stream& tstrm)
+opt<Statement>
+do_accept_expression_statement_opt(Token_Stream& tstrm)
   {
     // expression-statement ::=
     //   expression ";"
@@ -578,7 +605,8 @@ opt<Statement> do_accept_expression_statement_opt(Token_Stream& tstrm)
     return ::std::move(xstmt);
   }
 
-opt<Statement::S_block> do_accept_else_branch_opt(Token_Stream& tstrm)
+opt<Statement::S_block>
+do_accept_else_branch_opt(Token_Stream& tstrm)
   {
     // else-branch-opt ::=
     //   "else" statement | ""
@@ -593,7 +621,8 @@ opt<Statement::S_block> do_accept_else_branch_opt(Token_Stream& tstrm)
     return ::std::move(*qblock);
   }
 
-opt<Statement> do_accept_if_statement_opt(Token_Stream& tstrm)
+opt<Statement>
+do_accept_if_statement_opt(Token_Stream& tstrm)
   {
     // if-statement ::=
     //   "if" negation-opt "(" expression ")" statement else-branch-opt
@@ -631,7 +660,8 @@ opt<Statement> do_accept_if_statement_opt(Token_Stream& tstrm)
     return ::std::move(xstmt);
   }
 
-opt<Statement> do_accept_switch_statement_opt(Token_Stream& tstrm)
+opt<Statement>
+do_accept_switch_statement_opt(Token_Stream& tstrm)
   {
     // switch-statement ::=
     //   "switch" "(" expression ")" switch-block
@@ -693,13 +723,15 @@ opt<Statement> do_accept_switch_statement_opt(Token_Stream& tstrm)
     }
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
     if(!kpunct) {
-      throw Parser_Error(parser_status_closed_brace_or_switch_clause_expected, tstrm.next_sloc(), tstrm.next_length());
+      throw Parser_Error(parser_status_closed_brace_or_switch_clause_expected, tstrm.next_sloc(),
+                         tstrm.next_length());
     }
     Statement::S_switch xstmt = { ::std::move(*qctrl), ::std::move(labels), ::std::move(bodies) };
     return ::std::move(xstmt);
   }
 
-opt<Statement> do_accept_do_while_statement_opt(Token_Stream& tstrm)
+opt<Statement>
+do_accept_do_while_statement_opt(Token_Stream& tstrm)
   {
     // do-while-statement ::=
     //   "do" statement "while" negation-opt "(" expression ")" ";"
@@ -739,7 +771,8 @@ opt<Statement> do_accept_do_while_statement_opt(Token_Stream& tstrm)
     return ::std::move(xstmt);
   }
 
-opt<Statement> do_accept_while_statement_opt(Token_Stream& tstrm)
+opt<Statement>
+do_accept_while_statement_opt(Token_Stream& tstrm)
   {
     // while-statement ::=
     //   "while" negation-opt "(" expression ")" statement
@@ -771,7 +804,8 @@ opt<Statement> do_accept_while_statement_opt(Token_Stream& tstrm)
     return ::std::move(xstmt);
   }
 
-opt<Statement> do_accept_for_complement_range_opt(Token_Stream& tstrm)
+opt<Statement>
+do_accept_for_complement_range_opt(Token_Stream& tstrm)
   {
     // for-complement-range ::=
     //   "each" identifier "," identifier ":" expression ")" statement
@@ -812,7 +846,8 @@ opt<Statement> do_accept_for_complement_range_opt(Token_Stream& tstrm)
     return ::std::move(xstmt);
   }
 
-Statement::S_block do_blockify_statement(Source_Location&& sloc, Statement&& stmt)
+Statement::S_block
+do_blockify_statement(Source_Location&& sloc, Statement&& stmt)
   {
     cow_vector<Statement> stmts;
     stmts.emplace_back(::std::move(stmt));
@@ -821,7 +856,8 @@ Statement::S_block do_blockify_statement(Source_Location&& sloc, Statement&& stm
     return xblock;
   }
 
-opt<Statement::S_block> do_accept_for_initializer_opt(Token_Stream& tstrm)
+opt<Statement::S_block>
+do_accept_for_initializer_opt(Token_Stream& tstrm)
   {
     // for-initializer ::=
     //   null-statement | variable-definition | immutable-variable-definition | expression-statement
@@ -841,7 +877,8 @@ opt<Statement::S_block> do_accept_for_initializer_opt(Token_Stream& tstrm)
     return nullopt;
   }
 
-opt<Statement> do_accept_for_complement_triplet_opt(Token_Stream& tstrm)
+opt<Statement>
+do_accept_for_complement_triplet_opt(Token_Stream& tstrm)
   {
     // for-complement-triplet ::=
     //   for-initializer expression-opt ";" expression-opt ")" statement
@@ -874,7 +911,8 @@ opt<Statement> do_accept_for_complement_triplet_opt(Token_Stream& tstrm)
     return ::std::move(xstmt);
   }
 
-opt<Statement> do_accept_for_complement_opt(Token_Stream& tstrm)
+opt<Statement>
+do_accept_for_complement_opt(Token_Stream& tstrm)
   {
     // for-complement ::=
     //   for-complement-range | for-complement-triplet
@@ -887,7 +925,8 @@ opt<Statement> do_accept_for_complement_opt(Token_Stream& tstrm)
     return nullopt;
   }
 
-opt<Statement> do_accept_for_statement_opt(Token_Stream& tstrm)
+opt<Statement>
+do_accept_for_statement_opt(Token_Stream& tstrm)
   {
     // for-statement ::=
     //   "for" "(" for-complement
@@ -901,12 +940,14 @@ opt<Statement> do_accept_for_statement_opt(Token_Stream& tstrm)
     }
     auto qcompl = do_accept_for_complement_opt(tstrm);
     if(!qcompl) {
-      throw Parser_Error(parser_status_for_statement_initializer_expected, tstrm.next_sloc(), tstrm.next_length());
+      throw Parser_Error(parser_status_for_statement_initializer_expected, tstrm.next_sloc(),
+                         tstrm.next_length());
     }
     return ::std::move(*qcompl);
   }
 
-opt<Jump_Target> do_accept_break_target_opt(Token_Stream& tstrm)
+opt<Jump_Target>
+do_accept_break_target_opt(Token_Stream& tstrm)
   {
     // break-target-opt ::=
     //   "switch" | "while" | "for" | ""
@@ -923,7 +964,8 @@ opt<Jump_Target> do_accept_break_target_opt(Token_Stream& tstrm)
     return nullopt;
   }
 
-opt<Statement> do_accept_break_statement_opt(Token_Stream& tstrm)
+opt<Statement>
+do_accept_break_statement_opt(Token_Stream& tstrm)
   {
     // break-statement ::=
     //   "break" break-target-opt ";"
@@ -944,7 +986,8 @@ opt<Statement> do_accept_break_statement_opt(Token_Stream& tstrm)
     return ::std::move(xstmt);
   }
 
-opt<Jump_Target> do_accept_continue_target_opt(Token_Stream& tstrm)
+opt<Jump_Target>
+do_accept_continue_target_opt(Token_Stream& tstrm)
   {
     // continue-target-opt ::=
     //   "while" | "for" | ""
@@ -958,7 +1001,8 @@ opt<Jump_Target> do_accept_continue_target_opt(Token_Stream& tstrm)
     return nullopt;
   }
 
-opt<Statement> do_accept_continue_statement_opt(Token_Stream& tstrm)
+opt<Statement>
+do_accept_continue_statement_opt(Token_Stream& tstrm)
   {
     // continue-statement ::=
     //   "continue" continue-target-opt ";"
@@ -979,7 +1023,8 @@ opt<Statement> do_accept_continue_statement_opt(Token_Stream& tstrm)
     return ::std::move(xstmt);
   }
 
-opt<Statement> do_accept_throw_statement_opt(Token_Stream& tstrm)
+opt<Statement>
+do_accept_throw_statement_opt(Token_Stream& tstrm)
   {
     // throw-statement ::=
     //   "throw" expression ";"
@@ -999,7 +1044,8 @@ opt<Statement> do_accept_throw_statement_opt(Token_Stream& tstrm)
     return ::std::move(xstmt);
   }
 
-opt<bool> do_accept_argument_no_conversion_opt(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+opt<bool>
+do_accept_argument_no_conversion_opt(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // argument ::=
     //   reference-specifier expression | expression
@@ -1021,7 +1067,8 @@ opt<bool> do_accept_argument_no_conversion_opt(cow_vector<Expression_Unit>& unit
     return nullopt;
   }
 
-opt<bool> do_accept_function_argument_opt(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+opt<bool>
+do_accept_function_argument_opt(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     auto sloc = tstrm.next_sloc();
     auto qref = do_accept_argument_no_conversion_opt(units, tstrm);
@@ -1033,7 +1080,8 @@ opt<bool> do_accept_function_argument_opt(cow_vector<Expression_Unit>& units, To
     return *qref;
   }
 
-opt<Statement> do_accept_return_statement_opt(Token_Stream& tstrm)
+opt<Statement>
+do_accept_return_statement_opt(Token_Stream& tstrm)
   {
     // return-statement ::=
     //   "return" ( argument | "" ) ";"
@@ -1055,7 +1103,8 @@ opt<Statement> do_accept_return_statement_opt(Token_Stream& tstrm)
     return ::std::move(xstmt);
   }
 
-opt<cow_string> do_accept_assert_message_opt(Token_Stream& tstrm)
+opt<cow_string>
+do_accept_assert_message_opt(Token_Stream& tstrm)
   {
     // assert-message ::=
     //   ":" string-literal | ""
@@ -1070,7 +1119,8 @@ opt<cow_string> do_accept_assert_message_opt(Token_Stream& tstrm)
     return ::std::move(*kmsg);
   }
 
-opt<Statement> do_accept_assert_statement_opt(Token_Stream& tstrm)
+opt<Statement>
+do_accept_assert_statement_opt(Token_Stream& tstrm)
   {
     // assert-statement ::=
     //   "assert" negation-opt expression assert-message-opt ";"
@@ -1098,7 +1148,8 @@ opt<Statement> do_accept_assert_statement_opt(Token_Stream& tstrm)
     return ::std::move(xstmt);
   }
 
-opt<Statement> do_accept_try_statement_opt(Token_Stream& tstrm)
+opt<Statement>
+do_accept_try_statement_opt(Token_Stream& tstrm)
   {
     // try-statement ::=
     //   "try" statement "catch" "(" identifier ")" statement
@@ -1137,7 +1188,8 @@ opt<Statement> do_accept_try_statement_opt(Token_Stream& tstrm)
     return ::std::move(xstmt);
   }
 
-opt<Statement> do_accept_defer_statement_opt(Token_Stream& tstrm)
+opt<Statement>
+do_accept_defer_statement_opt(Token_Stream& tstrm)
   {
     // defer-statement ::=
     //  "defer" expression ";"
@@ -1157,7 +1209,8 @@ opt<Statement> do_accept_defer_statement_opt(Token_Stream& tstrm)
     return ::std::move(xstmt);
   }
 
-opt<Statement> do_accept_nonblock_statement_opt(Token_Stream& tstrm)
+opt<Statement>
+do_accept_nonblock_statement_opt(Token_Stream& tstrm)
   {
     // nonblock-statement ::=
     //   null-statement |
@@ -1220,7 +1273,8 @@ opt<Statement> do_accept_nonblock_statement_opt(Token_Stream& tstrm)
     return nullopt;
   }
 
-opt<Statement> do_accept_statement_opt(Token_Stream& tstrm)
+opt<Statement>
+do_accept_statement_opt(Token_Stream& tstrm)
   {
     // Check for stack overflows.
     const auto sentry = tstrm.copy_recursion_sentry();
@@ -1235,7 +1289,8 @@ opt<Statement> do_accept_statement_opt(Token_Stream& tstrm)
     return nullopt;
   }
 
-opt<Statement::S_block> do_accept_statement_as_block_opt(Token_Stream& tstrm)
+opt<Statement::S_block>
+do_accept_statement_as_block_opt(Token_Stream& tstrm)
   {
     // Check for stack overflows.
     const auto sentry = tstrm.copy_recursion_sentry();
@@ -1279,7 +1334,10 @@ constexpr s_keyword_table[] =
     { keyword_itrunc,    xop_itrunc    },
   };
 
-constexpr bool operator==(const Keyword_Element& lhs, Keyword rhs) noexcept
+constexpr
+bool
+operator==(const Keyword_Element& lhs, Keyword rhs)
+noexcept
   {
     return lhs.kwrd == rhs;
   }
@@ -1299,12 +1357,16 @@ constexpr s_punctuator_table[] =
     { punctuator_dec,   xop_dec_pre  },
   };
 
-constexpr bool operator==(const Punctuator_Element& lhs, Punctuator rhs) noexcept
+constexpr
+bool
+operator==(const Punctuator_Element& lhs, Punctuator rhs)
+noexcept
   {
     return lhs.punct == rhs;
   }
 
-bool do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+bool
+do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // prefix-operator ::=
     //   "+" | "-" | "~" | "!" | "++" | "--" |
@@ -1341,7 +1403,8 @@ bool do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream&
     return false;
   }
 
-bool do_accept_named_reference(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+bool
+do_accept_named_reference(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // Get an identifier.
     auto sloc = tstrm.next_sloc();
@@ -1365,7 +1428,8 @@ bool do_accept_named_reference(cow_vector<Expression_Unit>& units, Token_Stream&
     return true;
   }
 
-bool do_accept_global_reference(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+bool
+do_accept_global_reference(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // global-identifier ::=
     //   "__global" identifier
@@ -1383,7 +1447,8 @@ bool do_accept_global_reference(cow_vector<Expression_Unit>& units, Token_Stream
     return true;
   }
 
-bool do_accept_literal(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+bool
+do_accept_literal(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // Get a literal as a `Value`.
     auto qval = do_accept_literal_opt(tstrm);
@@ -1395,7 +1460,8 @@ bool do_accept_literal(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
     return true;
   }
 
-bool do_accept_this(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+bool
+do_accept_this(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // Get the keyword `this`.
     auto sloc = tstrm.next_sloc();
@@ -1408,7 +1474,8 @@ bool do_accept_this(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
     return true;
   }
 
-opt<Statement::S_block> do_accept_closure_body_opt(Token_Stream& tstrm)
+opt<Statement::S_block>
+do_accept_closure_body_opt(Token_Stream& tstrm)
   {
     // closure-body ::=
     //   block | equal-initializer
@@ -1427,7 +1494,8 @@ opt<Statement::S_block> do_accept_closure_body_opt(Token_Stream& tstrm)
     return nullopt;
   }
 
-bool do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+bool
+do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // closure-function ::=
     //   "func" "(" parameter-list-opt ")" closure-body
@@ -1450,15 +1518,18 @@ bool do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream
     }
     auto qblock = do_accept_closure_body_opt(tstrm);
     if(!qblock) {
-      throw Parser_Error(parser_status_open_brace_or_equal_initializer_expected, tstrm.next_sloc(), tstrm.next_length());
+      throw Parser_Error(parser_status_open_brace_or_equal_initializer_expected, tstrm.next_sloc(),
+                         tstrm.next_length());
     }
-    Expression_Unit::S_closure_function xunit = { ::std::move(sloc), format_string("<closure:$1:$2>", sloc.line(), sloc.offset()),
-                                                  ::std::move(*kparams), ::std::move(qblock->stmts) };
+    Expression_Unit::S_closure_function xunit = { ::std::move(sloc), format_string("<closure:$1:$2>",
+                                                  sloc.line(), sloc.offset()), ::std::move(*kparams),
+                                                  ::std::move(qblock->stmts) };
     units.emplace_back(::std::move(xunit));
     return true;
   }
 
-bool do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+bool
+do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // unnamed-array ::=
     //   "[" array-element-list-opt "]"
@@ -1500,7 +1571,8 @@ bool do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& t
     return true;
   }
 
-bool do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+bool
+do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // unnamed-object ::=
     //   "{" key-mapped-list-opt "}"
@@ -1547,7 +1619,8 @@ bool do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& 
     return true;
   }
 
-bool do_accept_nested_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+bool
+do_accept_nested_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // nested-expression ::=
     //   "(" expression ")"
@@ -1566,7 +1639,8 @@ bool do_accept_nested_expression(cow_vector<Expression_Unit>& units, Token_Strea
     return true;
   }
 
-bool do_accept_fused_multiply_add(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+bool
+do_accept_fused_multiply_add(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // fused-multiply-add ::=
     //   "__fma" "(" expression "," expression "," expression ")"
@@ -1608,7 +1682,8 @@ bool do_accept_fused_multiply_add(cow_vector<Expression_Unit>& units, Token_Stre
     return true;
   }
 
-bool do_accept_variadic_function_call(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+bool
+do_accept_variadic_function_call(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // variadic-function-call ::=
     //   "__vcall" "(" expression "," expression ")"
@@ -1642,7 +1717,8 @@ bool do_accept_variadic_function_call(cow_vector<Expression_Unit>& units, Token_
     return true;
   }
 
-bool do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+bool
+do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // import-function-call ::=
     //   "import" "(" argument-list ")"
@@ -1680,7 +1756,8 @@ bool do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_St
     return true;
   }
 
-bool do_accept_primary_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+bool
+do_accept_primary_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // primary-expression ::=
     //   identifier | global-identifier | literal | "this" | closure-function | unnamed-array | unnamed-object |
@@ -1726,7 +1803,7 @@ struct Postfix_Operator_Element
     Punctuator punct;
     Xop xop;
   }
-constexpr s_postfix_operator_table[] =
+constexpr s_postfix_xop_table[] =
   {
     { punctuator_inc,   xop_inc_post  },
     { punctuator_dec,   xop_dec_post  },
@@ -1734,12 +1811,16 @@ constexpr s_postfix_operator_table[] =
     { punctuator_tail,  xop_tail      },
   };
 
-constexpr bool operator==(const Postfix_Operator_Element& lhs, Punctuator rhs) noexcept
+constexpr
+bool
+operator==(const Postfix_Operator_Element& lhs, Punctuator rhs)
+noexcept
   {
     return lhs.punct == rhs;
   }
 
-bool do_accept_postfix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+bool
+do_accept_postfix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // postfix-operator ::=
     //   "++" | "--" | "[^]" | "[$]"
@@ -1749,8 +1830,8 @@ bool do_accept_postfix_operator(cow_vector<Expression_Unit>& units, Token_Stream
       return false;
     }
     if(qtok->is_punctuator()) {
-      auto qcnf = ::std::find(begin(s_postfix_operator_table), end(s_postfix_operator_table), qtok->as_punctuator());
-      if(qcnf == end(s_postfix_operator_table)) {
+      auto qcnf = ::std::find(begin(s_postfix_xop_table), end(s_postfix_xop_table), qtok->as_punctuator());
+      if(qcnf == end(s_postfix_xop_table)) {
         return false;
       }
       // Return the postfix operator and discard this token.
@@ -1762,7 +1843,8 @@ bool do_accept_postfix_operator(cow_vector<Expression_Unit>& units, Token_Stream
     return false;
   }
 
-bool do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+bool
+do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // postfix-function-call ::=
     //   "(" argument-list-opt ")"
@@ -1804,7 +1886,8 @@ bool do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_S
     return true;
   }
 
-bool do_accept_postfix_subscript(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+bool
+do_accept_postfix_subscript(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // postfix-subscript ::=
     //   "[" expression "]"
@@ -1826,7 +1909,8 @@ bool do_accept_postfix_subscript(cow_vector<Expression_Unit>& units, Token_Strea
     return true;
   }
 
-bool do_accept_postfix_member_access(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+bool
+do_accept_postfix_member_access(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // postfix-member-access ::=
     //   "." ( string-literal | identifier )
@@ -1844,7 +1928,8 @@ bool do_accept_postfix_member_access(cow_vector<Expression_Unit>& units, Token_S
     return true;
   }
 
-bool do_accept_infix_element(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+bool
+do_accept_infix_element(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // infix-element ::=
     //   prefix-operator-list-opt primary-expression postfix-operator-list-opt
@@ -1861,6 +1946,7 @@ bool do_accept_infix_element(cow_vector<Expression_Unit>& units, Token_Stream& t
     do {
       succ = do_accept_prefix_operator(prefixes, tstrm);
     } while(succ);
+
     // Get a `primary-expression` with suffixes.
     // Fail if some prefixes have been consumed but no primary expression can be accepted.
     succ = do_accept_primary_expression(units, tstrm);
@@ -1876,13 +1962,16 @@ bool do_accept_infix_element(cow_vector<Expression_Unit>& units, Token_Stream& t
              do_accept_postfix_subscript(units, tstrm) ||
              do_accept_postfix_member_access(units, tstrm);
     } while(succ);
+
     // Append prefixes in reverse order.
     // N.B. Prefix operators have lower precedence than postfix ones.
-    units.append(::std::make_move_iterator(prefixes.mut_rbegin()), ::std::make_move_iterator(prefixes.mut_rend()));
+    units.append(::std::make_move_iterator(prefixes.mut_rbegin()),
+                 ::std::make_move_iterator(prefixes.mut_rend()));
     return true;
   }
 
-opt<Infix_Element> do_accept_infix_head_opt(Token_Stream& tstrm)
+opt<Infix_Element>
+do_accept_infix_head_opt(Token_Stream& tstrm)
   {
     // infix-head ::=
     //   infix-element
@@ -1895,7 +1984,8 @@ opt<Infix_Element> do_accept_infix_head_opt(Token_Stream& tstrm)
     return ::std::move(xelem);
   }
 
-opt<Infix_Element> do_accept_infix_operator_ternary_opt(Token_Stream& tstrm)
+opt<Infix_Element>
+do_accept_infix_operator_ternary_opt(Token_Stream& tstrm)
   {
     // infix-operator-ternary ::=
     //   ( "?" | "?=" ) expression ":"
@@ -1916,7 +2006,8 @@ opt<Infix_Element> do_accept_infix_operator_ternary_opt(Token_Stream& tstrm)
     return ::std::move(xelem);
   }
 
-opt<Infix_Element> do_accept_infix_operator_logical_and_opt(Token_Stream& tstrm)
+opt<Infix_Element>
+do_accept_infix_operator_logical_and_opt(Token_Stream& tstrm)
   {
     // infix-operator-logical-and ::=
     //   "&&" | "&&=" | "and"
@@ -1933,7 +2024,8 @@ opt<Infix_Element> do_accept_infix_operator_logical_and_opt(Token_Stream& tstrm)
     return ::std::move(xelem);
   }
 
-opt<Infix_Element> do_accept_infix_operator_logical_or_opt(Token_Stream& tstrm)
+opt<Infix_Element>
+do_accept_infix_operator_logical_or_opt(Token_Stream& tstrm)
   {
     // infix-operator-logical-or ::=
     //   "||" | "||=" | "or"
@@ -1950,7 +2042,8 @@ opt<Infix_Element> do_accept_infix_operator_logical_or_opt(Token_Stream& tstrm)
     return ::std::move(xelem);
   }
 
-opt<Infix_Element> do_accept_infix_operator_coalescence_opt(Token_Stream& tstrm)
+opt<Infix_Element>
+do_accept_infix_operator_coalescence_opt(Token_Stream& tstrm)
   {
     // infix-operator-coalescence ::=
     //   "??" | "??="
@@ -1969,7 +2062,7 @@ struct Infix_Operator_Element
     Xop xop;
     bool assign;
   }
-constexpr s_infix_operator_table[] =
+constexpr s_infix_xop_table[] =
   {
     { punctuator_add,        xop_add,       0 },
     { punctuator_sub,        xop_sub,       0 },
@@ -2005,12 +2098,16 @@ constexpr s_infix_operator_table[] =
     { punctuator_spaceship,  xop_cmp_3way,  0 },
   };
 
-constexpr bool operator==(const Infix_Operator_Element& lhs, Punctuator rhs) noexcept
+constexpr
+bool
+operator==(const Infix_Operator_Element& lhs, Punctuator rhs)
+noexcept
   {
     return lhs.punct == rhs;
   }
 
-opt<Infix_Element> do_accept_infix_operator_general_opt(Token_Stream& tstrm)
+opt<Infix_Element>
+do_accept_infix_operator_general_opt(Token_Stream& tstrm)
   {
     // infix-operator-general ::=
     //   "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | "<<<"  | ">>>"  | "&"  | "|"  | "^"  |
@@ -2022,8 +2119,8 @@ opt<Infix_Element> do_accept_infix_operator_general_opt(Token_Stream& tstrm)
       return nullopt;
     }
     if(qtok->is_punctuator()) {
-      auto qcnf = ::std::find(begin(s_infix_operator_table), end(s_infix_operator_table), qtok->as_punctuator());
-      if(qcnf == end(s_infix_operator_table)) {
+      auto qcnf = ::std::find(begin(s_infix_xop_table), end(s_infix_xop_table), qtok->as_punctuator());
+      if(qcnf == end(s_infix_xop_table)) {
         return nullopt;
       }
       // Return the infix operator and discard this token.
@@ -2034,7 +2131,8 @@ opt<Infix_Element> do_accept_infix_operator_general_opt(Token_Stream& tstrm)
     return nullopt;
   }
 
-opt<Infix_Element> do_accept_infix_operator_opt(Token_Stream& tstrm)
+opt<Infix_Element>
+do_accept_infix_operator_opt(Token_Stream& tstrm)
   {
     // infix-operator ::=
     //   infix-operator-ternary | infix-operator-logical-and | infix-operator-logical-or |
@@ -2057,7 +2155,8 @@ opt<Infix_Element> do_accept_infix_operator_opt(Token_Stream& tstrm)
     return nullopt;
   }
 
-bool do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+bool
+do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // Check for stack overflows.
     const auto sentry = tstrm.copy_recursion_sentry();
@@ -2110,11 +2209,14 @@ bool do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstr
 
 }  // namespace
 
-Statement_Sequence::~Statement_Sequence()
+Statement_Sequence::
+~Statement_Sequence()
   {
   }
 
-Statement_Sequence& Statement_Sequence::reload(Token_Stream& tstrm)
+Statement_Sequence&
+Statement_Sequence::
+reload(Token_Stream& tstrm)
   {
     // Parse the document recursively.
     cow_vector<Statement> stmts;

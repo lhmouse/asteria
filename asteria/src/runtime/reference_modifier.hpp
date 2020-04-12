@@ -62,21 +62,37 @@ class Reference_modifier
       }
 
   public:
-    Index index() const noexcept
+    Index
+    index()
+    const
+    noexcept
       { return static_cast<Index>(this->m_stor.index());  }
 
-    Reference_modifier& swap(Reference_modifier& other) noexcept
+    Reference_modifier&
+    swap(Reference_modifier& other)
+    noexcept
       {
         this->m_stor.swap(other.m_stor);
         return *this;
       }
 
-    const Value* apply_const_opt(const Value& parent) const;
-    Value* apply_mutable_opt(Value& parent, bool create_new) const;
-    Value apply_and_erase(Value& parent) const;
+    const Value*
+    apply_const_opt(const Value& parent)
+    const;
+
+    Value*
+    apply_mutable_opt(Value& parent, bool create_new)
+    const;
+
+    Value
+    apply_and_erase(Value& parent)
+    const;
   };
 
-inline void swap(Reference_modifier& lhs, Reference_modifier& rhs) noexcept
+inline
+void
+swap(Reference_modifier& lhs, Reference_modifier& rhs)
+noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace Asteria

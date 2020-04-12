@@ -8,7 +8,8 @@
 
 namespace Asteria {
 
-void create_bindings_version(V_object& result, API_Version version)
+void
+create_bindings_version(V_object& result, API_Version version)
   {
     //===================================================================
     // `std.version.major`

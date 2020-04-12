@@ -72,48 +72,87 @@ class Reference_root
       }
 
   public:
-    Index index() const noexcept
+    Index
+    index()
+    const
+    noexcept
       { return static_cast<Index>(this->m_stor.index());  }
 
-    bool is_void() const noexcept
+    bool
+    is_void()
+    const
+    noexcept
       { return this->index() == index_void;  }
 
-    bool is_constant() const noexcept
+    bool
+    is_constant()
+    const
+    noexcept
       { return this->index() == index_constant;  }
 
-    const Value& as_constant() const
+    const Value&
+    as_constant()
+    const
       { return this->m_stor.as<index_constant>().val;  }
 
-    bool is_temporary() const noexcept
+    bool
+    is_temporary()
+    const
+    noexcept
       { return this->index() == index_temporary;  }
 
-    const Value& as_temporary() const
+    const Value&
+    as_temporary()
+    const
       { return this->m_stor.as<index_temporary>().val;  }
 
-    bool is_variable() const noexcept
+    bool
+    is_variable()
+    const
+    noexcept
       { return this->index() == index_variable;  }
 
-    const rcfwdp<Variable>& as_variable() const
+    const rcfwdp<Variable>&
+    as_variable()
+    const
       { return this->m_stor.as<index_variable>().var;  }
 
-    bool is_tail_call() const noexcept
+    bool
+    is_tail_call()
+    const
+    noexcept
       { return this->index() == index_tail_call;  }
 
-    const rcfwdp<PTC_Arguments>& as_tail_call() const
+    const rcfwdp<PTC_Arguments>&
+    as_tail_call()
+    const
       { return this->m_stor.as<index_tail_call>().tca;  }
 
-    Reference_root& swap(Reference_root& other) noexcept
+    Reference_root&
+    swap(Reference_root& other)
+    noexcept
       {
         this->m_stor.swap(other.m_stor);
         return *this;
       }
 
-    const Value& dereference_const() const;
-    Value& dereference_mutable() const;
-    Variable_Callback& enumerate_variables(Variable_Callback& callback) const;
+    const Value&
+    dereference_const()
+    const;
+
+    Value&
+    dereference_mutable()
+    const;
+
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback)
+    const;
   };
 
-inline void swap(Reference_root& lhs, Reference_root& rhs) noexcept
+inline
+void
+swap(Reference_root& lhs, Reference_root& rhs)
+noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace Asteria

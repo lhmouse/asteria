@@ -15,7 +15,9 @@ class IOF_Sentry
     ::FILE* m_fp;
 
   public:
-    explicit IOF_Sentry(::FILE* fp) noexcept
+    explicit
+    IOF_Sentry(::FILE* fp)
+    noexcept
       : m_fp(fp)
       { ::flockfile(this->m_fp);  }
 
@@ -25,15 +27,20 @@ class IOF_Sentry
     IOF_Sentry(const IOF_Sentry&)
       = delete;
 
-    IOF_Sentry& operator=(const IOF_Sentry&)
+    IOF_Sentry&
+    operator=(const IOF_Sentry&)
       = delete;
 
   public:
-    operator ::FILE* () const noexcept
+    operator
+    ::FILE*()
+    const
+    noexcept
       { return this->m_fp;  }
   };
 
-int do_recover(const IOF_Sentry& fp)
+int
+do_recover(const IOF_Sentry& fp)
   {
     int err = 0;
     // Note `errno` is meaningful only when an error has occurred. EOF is not an error.
@@ -48,7 +55,8 @@ int do_recover(const IOF_Sentry& fp)
     return err;
   }
 
-size_t do_write_utf8_common(const IOF_Sentry& fp, const cow_string& text)
+size_t
+do_write_utf8_common(const IOF_Sentry& fp, const cow_string& text)
   {
     size_t ncps = 0;
     size_t off = 0;
@@ -68,7 +76,8 @@ size_t do_write_utf8_common(const IOF_Sentry& fp, const cow_string& text)
 
 }  // namespace
 
-Iopt std_io_getc()
+Iopt
+std_io_getc()
   {
     // Lock standard input for reading.
     const IOF_Sentry fp(stdin);
@@ -92,7 +101,8 @@ Iopt std_io_getc()
     return static_cast<uint32_t>(wch);
   }
 
-Sopt std_io_getln()
+Sopt
+std_io_getln()
   {
     // Lock standard input for reading.
     const IOF_Sentry fp(stdin);
@@ -129,7 +139,8 @@ Sopt std_io_getln()
     return u8str;
   }
 
-Iopt std_io_putc(Ival value)
+Iopt
+std_io_putc(Ival value)
   {
     // Lock standard output for writing.
     const IOF_Sentry fp(stdout);
@@ -159,7 +170,8 @@ Iopt std_io_putc(Ival value)
     return 1;
   }
 
-Iopt std_io_putc(Sval value)
+Iopt
+std_io_putc(Sval value)
   {
     // Lock standard output for writing.
     const IOF_Sentry fp(stdout);
@@ -176,7 +188,8 @@ Iopt std_io_putc(Sval value)
     return static_cast<int64_t>(ncps);
   }
 
-Iopt std_io_putln(Sval value)
+Iopt
+std_io_putln(Sval value)
   {
     // Lock standard output for writing.
     const IOF_Sentry fp(stdout);
@@ -197,7 +210,8 @@ Iopt std_io_putln(Sval value)
     return static_cast<int64_t>(ncps + 1);
   }
 
-Iopt std_io_putf(Sval templ, cow_vector<Value> values)
+Iopt
+std_io_putf(Sval templ, cow_vector<Value> values)
   {
     // Lock standard output for writing.
     const IOF_Sentry fp(stdout);
@@ -226,7 +240,8 @@ Iopt std_io_putf(Sval templ, cow_vector<Value> values)
     return static_cast<int64_t>(ncps);
   }
 
-Sopt std_io_read(Iopt limit)
+Sopt
+std_io_read(Iopt limit)
   {
     // Lock standard input for reading.
     const IOF_Sentry fp(stdin);
@@ -253,7 +268,8 @@ Sopt std_io_read(Iopt limit)
     return ::std::move(data.erase(ntotal));
   }
 
-Iopt std_io_write(Sval data)
+Iopt
+std_io_write(Sval data)
   {
     // Lock standard output for writing.
     const IOF_Sentry fp(stdout);
@@ -277,7 +293,8 @@ Iopt std_io_write(Sval data)
     return static_cast<int64_t>(ntotal);
   }
 
-void std_io_flush()
+void
+std_io_flush()
   {
     // Lock standard output for writing.
     const IOF_Sentry fp(stdout);
@@ -287,7 +304,8 @@ void std_io_flush()
       ASTERIA_THROW_SYSTEM_ERROR("fflush_unlocked");
   }
 
-void create_bindings_io(V_object& result, API_Version /*version*/)
+void
+create_bindings_io(V_object& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.io.getc()`

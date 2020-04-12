@@ -6,7 +6,8 @@
 
 namespace Asteria {
 
-Variable_Callback::~Variable_Callback()
+Variable_Callback::
+~Variable_Callback()
   {
   }
 

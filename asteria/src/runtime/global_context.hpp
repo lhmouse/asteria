@@ -11,7 +11,8 @@
 
 namespace Asteria {
 
-class Global_Context : public Abstract_Context
+class Global_Context
+  : public Abstract_Context
   {
   private:
     Recursion_Sentry m_sentry;
@@ -23,64 +24,114 @@ class Global_Context : public Abstract_Context
     rcfwdp<Variable> m_vstd;
 
   public:
-    explicit Global_Context(API_Version version = api_version_latest)
+    explicit
+    Global_Context(API_Version version = api_version_latest)
       { this->initialize(version);  }
 
-    ~Global_Context() override;
+    ~Global_Context()
+    override;
 
   protected:
-    bool do_is_analytic() const noexcept final
+    bool
+    do_is_analytic()
+    const
+    noexcept
+    final
       { return this->is_analytic();  }
 
-    const Abstract_Context* do_get_parent_opt() const noexcept final
+    const Abstract_Context*
+    do_get_parent_opt()
+    const
+    noexcept
+    final
       { return this->get_parent_opt();  }
 
-    Reference* do_lazy_lookup_opt(const phsh_string& /*name*/) override
+    Reference*
+    do_lazy_lookup_opt(const phsh_string& /*name*/)
+    override
       { return nullptr;  }
 
   public:
-    bool is_analytic() const noexcept
+    bool
+    is_analytic()
+    const
+    noexcept
       { return false;  }
 
-    const Abstract_Context* get_parent_opt() const noexcept
+    const Abstract_Context*
+    get_parent_opt()
+    const
+    noexcept
       { return nullptr;  }
 
     // This provides stack overflow protection.
-    Recursion_Sentry copy_recursion_sentry() const
+    Recursion_Sentry
+    copy_recursion_sentry()
+    const
       { return this->m_sentry;  }
 
-    const void* get_recursion_base() const noexcept
+    const void*
+    get_recursion_base()
+    const
+    noexcept
       { return this->m_sentry.get_base();  }
 
-    Global_Context& set_recursion_base(const void* base) noexcept
+    Global_Context&
+    set_recursion_base(const void* base)
+    noexcept
       { return this->m_sentry.set_base(base), *this;  }
 
     // This helps debugging and profiling.
-    rcptr<Abstract_Hooks> get_hooks_opt() const noexcept
+    rcptr<Abstract_Hooks>
+    get_hooks_opt()
+    const
+    noexcept
       { return this->m_qhooks;  }
 
-    Global_Context& set_hooks(rcptr<Abstract_Hooks> hooks_opt) noexcept
+    Global_Context&
+    set_hooks(rcptr<Abstract_Hooks> hooks_opt)
+    noexcept
       { return this->m_qhooks = ::std::move(hooks_opt), *this;  }
 
     // These are interfaces for individual global components.
-    ASTERIA_INCOMPLET(Genius_Collector) rcptr<Genius_Collector> genius_collector() const noexcept
+    ASTERIA_INCOMPLET(Genius_Collector)
+    rcptr<Genius_Collector>
+    genius_collector()
+    const
+    noexcept
       { return unerase_cast<Genius_Collector>(this->m_gcoll);  }
 
-    ASTERIA_INCOMPLET(Random_Engine) rcptr<Random_Engine> random_engine() const noexcept
+    ASTERIA_INCOMPLET(Random_Engine)
+    rcptr<Random_Engine>
+    random_engine()
+    const
+    noexcept
       { return unerase_cast<Random_Engine>(this->m_prng);  }
 
-    ASTERIA_INCOMPLET(Loader_Lock) rcptr<Loader_Lock> loader_lock() const noexcept
+    ASTERIA_INCOMPLET(Loader_Lock)
+    rcptr<Loader_Lock>
+    loader_lock()
+    const
+    noexcept
       { return unerase_cast<Loader_Lock>(this->m_ldrlk);  }
 
-    ASTERIA_INCOMPLET(Variable) rcptr<Variable> std_variable() const noexcept
+    ASTERIA_INCOMPLET(Variable)
+    rcptr<Variable>
+    std_variable()
+    const
+    noexcept
       { return unerase_cast<Variable>(this->m_vstd);  }
 
     // Get the maximum API version that is supported when this library is built.
     // N.B. This function must not be inlined for this reason.
-    API_Version max_api_version() const noexcept;
+    API_Version
+    max_api_version()
+    const
+    noexcept;
 
     // Clear all references, perform a full garbage collection, then reload the standard library.
-    void initialize(API_Version version = api_version_latest);
+    void
+    initialize(API_Version version = api_version_latest);
   };
 
 }  // namespace Asteria

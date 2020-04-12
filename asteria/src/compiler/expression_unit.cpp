@@ -13,8 +13,9 @@
 namespace Asteria {
 namespace {
 
-cow_vector<AIR_Node> do_generate_code_branch(const Compiler_Options& opts, PTC_Aware ptc,
-                                             const Analytic_Context& ctx, const cow_vector<Expression_Unit>& units)
+cow_vector<AIR_Node>
+do_generate_code_branch(const Compiler_Options& opts, PTC_Aware ptc, const Analytic_Context& ctx,
+                        const cow_vector<Expression_Unit>& units)
   {
     // Expression units other than the last one cannot be PTC'd.
     cow_vector<AIR_Node> code;
@@ -27,8 +28,11 @@ cow_vector<AIR_Node> do_generate_code_branch(const Compiler_Options& opts, PTC_A
 
 }  // namespace
 
-cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
-                                                     const Analytic_Context& ctx, PTC_Aware ptc) const
+cow_vector<AIR_Node>&
+Expression_Unit::
+generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
+              const Analytic_Context& ctx, PTC_Aware ptc)
+const
   {
     switch(this->index()) {
       case index_literal: {
@@ -91,7 +95,8 @@ cow_vector<AIR_Node>& Expression_Unit::generate_code(cow_vector<AIR_Node>& code,
         auto code_false = do_generate_code_branch(opts, ptc, ctx, altr.branch_false);
 
         // Encode arguments.
-        AIR_Node::S_branch_expression xnode = { altr.sloc, ::std::move(code_true), ::std::move(code_false), altr.assign };
+        AIR_Node::S_branch_expression xnode = { altr.sloc, ::std::move(code_true), ::std::move(code_false),
+                                                altr.assign };
         code.emplace_back(::std::move(xnode));
         return code;
       }

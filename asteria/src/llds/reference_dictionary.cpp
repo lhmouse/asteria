@@ -8,7 +8,11 @@
 
 namespace Asteria {
 
-void Reference_Dictionary::do_destroy_buckets() const noexcept
+void
+Reference_Dictionary::
+do_destroy_buckets()
+const
+noexcept
   {
     auto next = this->m_head;
     while(ROCKET_EXPECT(next)) {
@@ -21,7 +25,10 @@ void Reference_Dictionary::do_destroy_buckets() const noexcept
     }
   }
 
-void Reference_Dictionary::do_enumerate_variables(Variable_Callback& callback) const
+void
+Reference_Dictionary::
+do_enumerate_variables(Variable_Callback& callback)
+const
   {
     auto next = this->m_head;
     while(ROCKET_EXPECT(next)) {
@@ -32,19 +39,27 @@ void Reference_Dictionary::do_enumerate_variables(Variable_Callback& callback) c
     }
   }
 
-Reference_Dictionary::Bucket* Reference_Dictionary::do_xprobe(const phsh_string& name) const noexcept
+Reference_Dictionary::Bucket*
+Reference_Dictionary::
+do_xprobe(const phsh_string& name)
+const
+noexcept
   {
     auto bptr = this->m_bptr;
     auto eptr = this->m_eptr;
     // Find a bucket using linear probing.
     // We keep the load factor below 1.0 so there will always be some empty buckets in the table.
     auto mptr = ::rocket::get_probing_origin(bptr, eptr, name.rdhash());
-    auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr, [&](const Bucket& r) { return r.kstor[0] == name;  });
+    auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr,
+                                       [&](const Bucket& r) { return r.kstor[0] == name;  });
     ROCKET_ASSERT(qbkt);
     return qbkt;
   }
 
-void Reference_Dictionary::do_xrelocate_but(Bucket* qxcld) noexcept
+void
+Reference_Dictionary::
+do_xrelocate_but(Reference_Dictionary::Bucket* qxcld)
+noexcept
   {
     auto bptr = this->m_bptr;
     auto eptr = this->m_eptr;
@@ -77,7 +92,10 @@ void Reference_Dictionary::do_xrelocate_but(Bucket* qxcld) noexcept
       });
   }
 
-void Reference_Dictionary::do_list_attach(Bucket* qbkt) noexcept
+void
+Reference_Dictionary::
+do_list_attach(Reference_Dictionary::Bucket* qbkt)
+noexcept
   {
     // Insert the bucket before `head`.
     auto next = ::std::exchange(this->m_head, qbkt);
@@ -87,7 +105,10 @@ void Reference_Dictionary::do_list_attach(Bucket* qbkt) noexcept
     qbkt->prev = next ? ::std::exchange(next->prev, qbkt) : qbkt;
   }
 
-void Reference_Dictionary::do_list_detach(Bucket* qbkt) noexcept
+void
+Reference_Dictionary::
+do_list_detach(Reference_Dictionary::Bucket* qbkt)
+noexcept
   {
     auto next = qbkt->next;
     auto prev = qbkt->prev;
@@ -100,7 +121,9 @@ void Reference_Dictionary::do_list_detach(Bucket* qbkt) noexcept
     qbkt->prev = nullptr;
   }
 
-void Reference_Dictionary::do_rehash(size_t nbkt)
+void
+Reference_Dictionary::
+do_rehash(size_t nbkt)
   {
     ROCKET_ASSERT(nbkt / 2 > this->m_size);
     // Allocate a new table.
@@ -141,7 +164,10 @@ void Reference_Dictionary::do_rehash(size_t nbkt)
       ::operator delete(bold);
   }
 
-void Reference_Dictionary::do_attach(Bucket* qbkt, const phsh_string& name) noexcept
+void
+Reference_Dictionary::
+do_attach(Bucket* qbkt, const phsh_string& name)
+noexcept
   {
     // Construct the node, then attach it.
     ROCKET_ASSERT(!*qbkt);
@@ -152,7 +178,10 @@ void Reference_Dictionary::do_attach(Bucket* qbkt, const phsh_string& name) noex
     this->m_size++;
   }
 
-void Reference_Dictionary::do_detach(Bucket* qbkt) noexcept
+void
+Reference_Dictionary::
+do_detach(Bucket* qbkt)
+noexcept
   {
     // Destroy the old name and reference, then detach the bucket.
     this->m_size--;

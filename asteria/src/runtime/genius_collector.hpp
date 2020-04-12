@@ -10,7 +10,9 @@
 
 namespace Asteria {
 
-class Genius_Collector final : public Rcfwd<Genius_Collector>
+class Genius_Collector
+final
+  : public Rcfwd<Genius_Collector>
   {
   private:
     // Mind the order of construction and destruction.
@@ -20,39 +22,58 @@ class Genius_Collector final : public Rcfwd<Genius_Collector>
     Collector m_newest;
 
   public:
-    Genius_Collector() noexcept
+    Genius_Collector()
+    noexcept
       : m_oldest(&(this->m_pool),           nullptr,  10),
         m_middle(&(this->m_pool), &(this->m_oldest),  60),
         m_newest(&(this->m_pool), &(this->m_middle), 800)
       { }
 
-    ~Genius_Collector() override;
+    ~Genius_Collector()
+    override;
 
     Genius_Collector(const Genius_Collector&)
       = delete;
 
-    Genius_Collector& operator=(const Genius_Collector&)
+    Genius_Collector&
+    operator=(const Genius_Collector&)
       = delete;
 
   private:
-    Collector Genius_Collector::* do_locate(GC_Generation gc_gen) const;
+    Collector Genius_Collector::*
+    do_locate(GC_Generation gc_gen)
+    const;
 
   public:
-    size_t get_pool_size() const noexcept
+    size_t
+    get_pool_size()
+    const
+    noexcept
       { return this->m_pool.size();  }
 
-    Genius_Collector& clear_pool() noexcept
+    Genius_Collector&
+    clear_pool()
+    noexcept
       { return this->m_pool.clear(), *this;  }
 
-    const Collector& get_collector(GC_Generation gc_gen) const
+    const Collector&
+    get_collector(GC_Generation gc_gen)
+    const
       { return this->*(this->do_locate(gc_gen));  }
 
-    Collector& open_collector(GC_Generation gc_gen)
+    Collector&
+    open_collector(GC_Generation gc_gen)
       { return this->*(this->do_locate(gc_gen));  }
 
-    rcptr<Variable> create_variable(GC_Generation gc_hint = gc_generation_newest);
-    size_t collect_variables(GC_Generation gc_limit = gc_generation_oldest);
-    Genius_Collector& wipe_out_variables() noexcept;
+    rcptr<Variable>
+    create_variable(GC_Generation gc_hint = gc_generation_newest);
+
+    size_t
+    collect_variables(GC_Generation gc_limit = gc_generation_oldest);
+
+    Genius_Collector&
+    wipe_out_variables()
+    noexcept;
   };
 
 }  // namespace Asteria

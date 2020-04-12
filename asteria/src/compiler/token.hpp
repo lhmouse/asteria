@@ -70,66 +70,117 @@ class Token
     Storage m_stor;
 
   public:
-    template<typename XTokT> Token(const Source_Location& xsloc, size_t xlen, XTokT&& xtok)
+    template<typename XTokT>
+    Token(const Source_Location& xsloc, size_t xlen, XTokT&& xtok)
       : m_sloc(xsloc), m_length(xlen), m_stor(::std::forward<XTokT>(xtok))
       { }
 
   public:
-    const Source_Location& sloc() const noexcept
+    const Source_Location&
+    sloc()
+    const
+    noexcept
       { return this->m_sloc;  }
 
-    const cow_string& file() const noexcept
+    const cow_string&
+    file()
+    const
+    noexcept
       { return this->m_sloc.file();  }
 
-    int line() const noexcept
+    int
+    line()
+    const
+    noexcept
       { return this->m_sloc.line();  }
 
-    int offset() const noexcept
+    int
+    offset()
+    const
+    noexcept
       { return this->m_sloc.offset();  }
 
-    size_t length() const noexcept
+    size_t
+    length()
+    const
+    noexcept
       { return this->m_length;  }
 
-    Index index() const noexcept
+    Index
+    index()
+    const
+    noexcept
       { return static_cast<Index>(this->m_stor.index());  }
 
-    bool is_keyword() const noexcept
+    bool
+    is_keyword()
+    const
+    noexcept
       { return this->index() == index_keyword;  }
 
-    Keyword as_keyword() const
+    Keyword
+    as_keyword()
+    const
       { return this->m_stor.as<index_keyword>().kwrd;  }
 
-    bool is_punctuator() const noexcept
+    bool
+    is_punctuator()
+    const
+    noexcept
       { return this->index() == index_punctuator;  }
 
-    Punctuator as_punctuator() const
+    Punctuator
+    as_punctuator()
+    const
       { return this->m_stor.as<index_punctuator>().punct;  }
 
-    bool is_identifier() const noexcept
+    bool
+    is_identifier()
+    const
+    noexcept
       { return this->index() == index_identifier;  }
 
-    const cow_string& as_identifier() const
+    const cow_string&
+    as_identifier()
+    const
       { return this->m_stor.as<index_identifier>().name;  }
 
-    bool is_integer_literal() const noexcept
+    bool
+    is_integer_literal()
+    const
+    noexcept
       { return this->index() == index_integer_literal;  }
 
-    int64_t as_integer_literal() const
+    int64_t
+    as_integer_literal()
+    const
       { return this->m_stor.as<index_integer_literal>().val;  }
 
-    bool is_real_literal() const noexcept
+    bool
+    is_real_literal()
+    const
+    noexcept
       { return this->index() == index_real_literal;  }
 
-    double as_real_literal() const
+    double
+    as_real_literal()
+    const
       { return this->m_stor.as<index_real_literal>().val;  }
 
-    bool is_string_literal() const noexcept
+    bool
+    is_string_literal()
+    const
+    noexcept
       { return this->index() == index_string_literal;  }
 
-    const cow_string& as_string_literal() const
+    const cow_string&
+    as_string_literal()
+    const
       { return this->m_stor.as<index_string_literal>().val;  }
 
-    Token& swap(Token& other) noexcept
+    Token&
+    swap(Token& other)
+    noexcept
       {
         this->m_sloc.swap(other.m_sloc);
         ::std::swap(this->m_length, other.m_length);
@@ -137,13 +188,20 @@ class Token
         return *this;
       }
 
-    tinyfmt& print(tinyfmt& fmt) const;
+    tinyfmt&
+    print(tinyfmt& fmt)
+    const;
   };
 
-inline void swap(Token& lhs, Token& rhs) noexcept
+inline
+void
+swap(Token& lhs, Token& rhs)
+noexcept
   { lhs.swap(rhs);  }
 
-inline tinyfmt& operator<<(tinyfmt& fmt, const Token& token)
+inline
+tinyfmt&
+operator<<(tinyfmt& fmt, const Token& token)
   { return token.print(fmt);  }
 
 }  // namespace Asteria

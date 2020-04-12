@@ -10,7 +10,8 @@
 
 namespace Asteria {
 
-class Runtime_Error : public virtual exception
+class Runtime_Error
+  : public virtual exception
   {
   public:
     struct T_native { };
@@ -30,7 +31,8 @@ class Runtime_Error : public virtual exception
       { this->do_backtrace(),
         this->do_insert_frame(frame_type_native, Source_Location(), this->m_value);  }
 
-    template<typename XValT> Runtime_Error(T_throw, XValT&& xval, const Source_Location& sloc)
+    template<typename XValT>
+    Runtime_Error(T_throw, XValT&& xval, const Source_Location& sloc)
       : m_value(::std::forward<XValT>(xval))
       { this->do_backtrace(),
         this->do_insert_frame(frame_type_throw, sloc, this->m_value);  }
@@ -40,13 +42,19 @@ class Runtime_Error : public virtual exception
       { this->do_backtrace(),
         this->do_insert_frame(frame_type_assert, sloc, this->m_value);  }
 
-    ~Runtime_Error() override;
+    ~Runtime_Error()
+    override;
 
   private:
-    void do_backtrace();
-    void do_compose_message();
+    void
+    do_backtrace();
 
-    template<typename... ParamsT> void do_insert_frame(ParamsT&&... params)
+    void
+    do_compose_message();
+
+    template<typename... ParamsT>
+    void
+    do_insert_frame(ParamsT&&... params)
       {
         // Insert the frame. Note exception safety.
         size_t ipos = this->m_ipos;
@@ -57,19 +65,33 @@ class Runtime_Error : public virtual exception
       }
 
   public:
-    const char* what() const noexcept override
+    const char*
+    what()
+    const
+    noexcept
+    override
       { return this->m_what.c_str();  }
 
-    const Value& value() const noexcept
+    const Value&
+    value()
+    const
+    noexcept
       { return this->m_value;  }
 
-    size_t count_frames() const noexcept
+    size_t
+    count_frames()
+    const
+    noexcept
       { return this->m_frames.size();  }
 
-    const Backtrace_Frame& frame(size_t index) const
+    const Backtrace_Frame&
+    frame(size_t index)
+    const
       { return this->m_frames.at(index);  }
 
-    template<typename XValT> Runtime_Error& push_frame_throw(const Source_Location& sloc, XValT&& xval)
+    template<typename XValT>
+    Runtime_Error&
+    push_frame_throw(const Source_Location& sloc, XValT&& xval)
       {
         // Start a new backtrace.
         this->m_value = ::std::forward<XValT>(xval);
@@ -79,28 +101,32 @@ class Runtime_Error : public virtual exception
         return *this;
       }
 
-    Runtime_Error& push_frame_catch(const Source_Location& sloc)
+    Runtime_Error&
+    push_frame_catch(const Source_Location& sloc)
       {
         // Append a new frame to the current backtrace.
         this->do_insert_frame(frame_type_catch, sloc, this->m_value);
         return *this;
       }
 
-    Runtime_Error& push_frame_plain(const Source_Location& sloc, const cow_string& remarks)
+    Runtime_Error&
+    push_frame_plain(const Source_Location& sloc, const cow_string& remarks)
       {
         // Append a new frame to the current backtrace.
         this->do_insert_frame(frame_type_plain, sloc, remarks);
         return *this;
       }
 
-    Runtime_Error& push_frame_func(const Source_Location& sloc, const cow_string& func)
+    Runtime_Error&
+    push_frame_func(const Source_Location& sloc, const cow_string& func)
       {
         // Append a new frame to the current backtrace.
         this->do_insert_frame(frame_type_func, sloc, func);
         return *this;
       }
 
-    Runtime_Error& push_frame_defer(const Source_Location& sloc)
+    Runtime_Error&
+    push_frame_defer(const Source_Location& sloc)
       {
         // Append a new frame to the current backtrace.
         this->do_insert_frame(frame_type_defer, sloc, this->m_value);
@@ -110,12 +136,14 @@ class Runtime_Error : public virtual exception
 
 #define ASTERIA_RUNTIME_TRY           try {  \
                                         try
-                                          // Perform operations that might throw exceptions here.
+                                          // Perform operations that might throw
+                                          // exceptions here.
 #define ASTERIA_RUNTIME_CATCH(...)      catch(::Asteria::Runtime_Error&)  \
                                           { throw;  }  \
                                         catch(::std::exception& zTrSrvgK_)  \
                                           { throw ::Asteria::Runtime_Error(  \
-                                              ::Asteria::Runtime_Error::T_native(), zTrSrvgK_); }  \
+                                                ::Asteria::Runtime_Error::T_native(),  \
+                                                zTrSrvgK_); }  \
                                       }  \
                                       catch(__VA_ARGS__)
 

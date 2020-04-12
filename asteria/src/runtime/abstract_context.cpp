@@ -7,7 +7,8 @@
 
 namespace Asteria {
 
-Abstract_Context::~Abstract_Context()
+Abstract_Context::
+~Abstract_Context()
   {
   }
 

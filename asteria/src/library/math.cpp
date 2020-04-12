@@ -16,7 +16,8 @@ constexpr double s_const_lb10 = 3.3219280948873623478703194294893901758648313930
 
 }  // namespace
 
-Rval std_math_exp(Rval y, Ropt base)
+Rval
+std_math_exp(Rval y, Ropt base)
   {
     if(!base) {
       return ::std::exp(y);
@@ -30,17 +31,20 @@ Rval std_math_exp(Rval y, Ropt base)
     return ::std::pow(*base, y);
   }
 
-Rval std_math_expm1(Rval y)
+Rval
+std_math_expm1(Rval y)
   {
     return ::std::expm1(y);
   }
 
-Rval std_math_pow(Rval x, Rval y)
+Rval
+std_math_pow(Rval x, Rval y)
   {
     return ::std::pow(x, y);
   }
 
-Rval std_math_log(Rval x, Ropt base)
+Rval
+std_math_log(Rval x, Ropt base)
   {
     if(!base) {
       return ::std::log(x);
@@ -57,120 +61,134 @@ Rval std_math_log(Rval x, Ropt base)
     return ::std::log2(x) / ::std::log2(*base);
   }
 
-Rval std_math_log1p(Rval x)
+Rval
+std_math_log1p(Rval x)
   {
     return ::std::log1p(x);
   }
 
-Rval std_math_sin(Rval x)
+Rval
+std_math_sin(Rval x)
   {
     return ::std::sin(x);
   }
 
-Rval std_math_cos(Rval x)
+Rval
+std_math_cos(Rval x)
   {
     return ::std::cos(x);
   }
 
-Rval std_math_tan(Rval x)
+Rval
+std_math_tan(Rval x)
   {
     return ::std::tan(x);
   }
 
-Rval std_math_asin(Rval x)
+Rval
+std_math_asin(Rval x)
   {
     return ::std::asin(x);
   }
 
-Rval std_math_acos(Rval x)
+Rval
+std_math_acos(Rval x)
   {
     return ::std::acos(x);
   }
 
-Rval std_math_atan(Rval x)
+Rval
+std_math_atan(Rval x)
   {
     return ::std::atan(x);
   }
 
-Rval std_math_atan2(Rval y, Rval x)
+Rval
+std_math_atan2(Rval y, Rval x)
   {
     return ::std::atan2(y, x);
   }
 
-Rval std_math_hypot(cow_vector<Value> values)
+Rval
+std_math_hypot(cow_vector<Value> values)
   {
-    switch(values.size()) {
-      case 0: {
-        // Return zero if no argument is provided.
-        return 0;
-      }
-      case 1: {
-        // Return the absolute value of the only argument.
-        return ::std::fabs(values[0].convert_to_real());
-      }
-      default: {
-        // Call the C `hypot()` function.
-        auto result = ::std::hypot(values[0].convert_to_real(), values[1].convert_to_real());
-        // Sum up all the other values.
-        for(size_t i = 2;  i < values.size();  ++i) {
-          result = ::std::hypot(result, values[i].convert_to_real());
-        }
-        return result;
-      }
-    }
+    // Return zero if no argument is provided.
+    if(values.size() == 0)
+      return 0;
+
+    // Return the absolute value of the only argument.
+    if(values.size() == 1)
+      return ::std::fabs(values[0].convert_to_real());
+
+    // Call the C `hypot()` function for every two values.
+    auto res = ::std::hypot(values[0].convert_to_real(), values[1].convert_to_real());
+    for(size_t i = 2;  i < values.size();  ++i)
+      res = ::std::hypot(res, values[i].convert_to_real());
+    return res;
   }
 
-Rval std_math_sinh(Rval x)
+Rval
+std_math_sinh(Rval x)
   {
     return ::std::sinh(x);
   }
 
-Rval std_math_cosh(Rval x)
+Rval
+std_math_cosh(Rval x)
   {
     return ::std::cosh(x);
   }
 
-Rval std_math_tanh(Rval x)
+Rval
+std_math_tanh(Rval x)
   {
     return ::std::tanh(x);
   }
 
-Rval std_math_asinh(Rval x)
+Rval
+std_math_asinh(Rval x)
   {
     return ::std::asinh(x);
   }
 
-Rval std_math_acosh(Rval x)
+Rval
+std_math_acosh(Rval x)
   {
     return ::std::acosh(x);
   }
 
-Rval std_math_atanh(Rval x)
+Rval
+std_math_atanh(Rval x)
   {
     return ::std::atanh(x);
   }
 
-Rval std_math_erf(Rval x)
+Rval
+std_math_erf(Rval x)
   {
     return ::std::erf(x);
   }
 
-Rval std_math_cerf(Rval x)
+Rval
+std_math_cerf(Rval x)
   {
     return ::std::erfc(x);
   }
 
-Rval std_math_gamma(Rval x)
+Rval
+std_math_gamma(Rval x)
   {
     return ::std::tgamma(x);
   }
 
-Rval std_math_lgamma(Rval x)
+Rval
+std_math_lgamma(Rval x)
   {
     return ::std::lgamma(x);
   }
 
-void create_bindings_math(V_object& result, API_Version /*version*/)
+void
+create_bindings_math(V_object& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.math.e`

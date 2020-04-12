@@ -10,7 +10,9 @@
 
 namespace Asteria {
 
-class Instantiated_Function final : public Abstract_Function
+class Instantiated_Function
+final
+  : public Abstract_Function
   {
   private:
     cow_vector<phsh_string> m_params;
@@ -23,24 +25,28 @@ class Instantiated_Function final : public Abstract_Function
       : m_params(params), m_zvarg(::std::move(zvarg))
       { this->do_solidify_code(code);  }
 
-    ~Instantiated_Function() override;
+    ~Instantiated_Function()
+    override;
 
   private:
-    void do_solidify_code(const cow_vector<AIR_Node>& code);
+    void
+    do_solidify_code(const cow_vector<AIR_Node>& code);
 
   public:
-    const Source_Location& source_location() const noexcept
-      { return this->m_zvarg->sloc();  }
+    tinyfmt&
+    describe(tinyfmt& fmt)
+    const
+    override;
 
-    const cow_string& signature() const noexcept
-      { return this->m_zvarg->func();  }
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback)
+    const
+    override;
 
-    const cow_vector<phsh_string>& parameters() const noexcept
-      { return this->m_params;  }
-
-    tinyfmt& describe(tinyfmt& fmt) const override;
-    Variable_Callback& enumerate_variables(Variable_Callback& callback) const override;
-    Reference& invoke_ptc_aware(Reference& self, Global_Context& global, cow_vector<Reference>&& args) const override;
+    Reference&
+    invoke_ptc_aware(Reference& self, Global_Context& global, cow_vector<Reference>&& args)
+    const
+    override;
   };
 
 }  // namespace Asteria

@@ -23,7 +23,8 @@ constexpr char s_spaces[] = " \f\n\r\t\v";
 
 }  // namespace
 
-Ival std_chrono_utc_now()
+Ival
+std_chrono_utc_now()
   {
     // Get UTC time from the system.
     ::timespec ts;
@@ -35,7 +36,8 @@ Ival std_chrono_utc_now()
     return secs * 1000 + msecs;
   }
 
-Ival std_chrono_local_now()
+Ival
+std_chrono_local_now()
   {
     // Get local time and GMT offset from the system.
     ::timespec ts;
@@ -49,7 +51,8 @@ Ival std_chrono_local_now()
     return secs * 1000 + msecs;
   }
 
-Rval std_chrono_hires_now()
+Rval
+std_chrono_hires_now()
   {
     // Get the time since the system was started.
     ::timespec ts;
@@ -62,7 +65,8 @@ Rval std_chrono_hires_now()
     return secs * 1000 + msecs + 1234567890123;
   }
 
-Ival std_chrono_steady_now()
+Ival
+std_chrono_steady_now()
   {
     // Get the time since the system was started.
     ::timespec ts;
@@ -75,7 +79,8 @@ Ival std_chrono_steady_now()
     return secs * 1000 + msecs + 3210987654321;
   }
 
-Ival std_chrono_local_from_utc(Ival time_utc)
+Ival
+std_chrono_local_from_utc(Ival time_utc)
   {
     // Handle special time values.
     if(time_utc <= s_timestamp_min)
@@ -98,7 +103,8 @@ Ival std_chrono_local_from_utc(Ival time_utc)
       return time_local;
   }
 
-Ival std_chrono_utc_from_local(Ival time_local)
+Ival
+std_chrono_utc_from_local(Ival time_local)
   {
     // Handle special time values.
     if(time_local <= s_timestamp_min)
@@ -121,7 +127,8 @@ Ival std_chrono_utc_from_local(Ival time_local)
       return time_utc;
   }
 
-Sval std_chrono_utc_format(Ival time_point, Bopt with_ms)
+Sval
+std_chrono_utc_format(Ival time_point, Bopt with_ms)
   {
     // No millisecond part is added by default.
     bool pms = with_ms.value_or(false);
@@ -228,7 +235,8 @@ Sval std_chrono_utc_format(Ival time_point, Bopt with_ms)
     return time_str;
   }
 
-Ival std_chrono_utc_parse(Sval time_str)
+Ival
+std_chrono_utc_parse(Sval time_str)
   {
     // Trim leading and trailing spaces. Fail if the string becomes empty.
     size_t off = time_str.find_first_not_of(s_spaces);
@@ -373,7 +381,8 @@ Ival std_chrono_utc_parse(Sval time_str)
     return static_cast<int64_t>(temp) + s_timestamp_1600_03_01;
   }
 
-void create_bindings_chrono(V_object& result, API_Version /*version*/)
+void
+create_bindings_chrono(V_object& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.chrono.utc_now()`
@@ -559,8 +568,7 @@ void create_bindings_chrono(V_object& result, API_Version /*version*/)
     Ival time_point;
     Bopt with_ms;
     if(reader.I().v(time_point).o(with_ms).F()) {
-      Reference_root::S_temporary xref =
-        { std_chrono_utc_format(::std::move(time_point), ::std::move(with_ms)) };
+      Reference_root::S_temporary xref = { std_chrono_utc_format(::std::move(time_point), ::std::move(with_ms)) };
       return self = ::std::move(xref);
     }
     // Fail.

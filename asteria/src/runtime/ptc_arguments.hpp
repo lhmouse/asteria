@@ -10,7 +10,9 @@
 
 namespace Asteria {
 
-class PTC_Arguments final : public Rcfwd<PTC_Arguments>
+class PTC_Arguments
+final
+  : public Rcfwd<PTC_Arguments>
   {
   private:
     // These describe characteristics of the function call.
@@ -34,40 +36,66 @@ class PTC_Arguments final : public Rcfwd<PTC_Arguments>
         m_target(target), m_args_self(::std::move(args_self))
       { }
 
-    ~PTC_Arguments() override;
+    ~PTC_Arguments()
+    override;
 
     PTC_Arguments(const PTC_Arguments&)
       = delete;
 
-    PTC_Arguments& operator=(const PTC_Arguments&)
+    PTC_Arguments&
+    operator=(const PTC_Arguments&)
       = delete;
 
   public:
-    const Source_Location& sloc() const noexcept
+    const Source_Location&
+    sloc()
+    const
+    noexcept
       { return this->m_sloc;  }
 
-    const rcptr<Variadic_Arguer>& zvarg() const noexcept
+    const rcptr<Variadic_Arguer>&
+    zvarg()
+    const
+    noexcept
       { return this->m_zvarg;  }
 
-    PTC_Aware ptc_aware() const noexcept
+    PTC_Aware
+    ptc_aware()
+    const
+    noexcept
       { return this->m_ptc;  }
 
-    const cow_bivector<Source_Location, AVMC_Queue>& get_defer_stack() const noexcept
+    const cow_bivector<Source_Location, AVMC_Queue>&
+    get_defer_stack()
+    const
+    noexcept
       { return this->m_defer;  }
 
-    cow_bivector<Source_Location, AVMC_Queue>& open_defer_stack() noexcept
+    cow_bivector<Source_Location, AVMC_Queue>&
+    open_defer_stack()
+    noexcept
       { return this->m_defer;  }
 
-    const cow_function& get_target() const noexcept
+    const cow_function&
+    get_target()
+    const
+    noexcept
       { return this->m_target;  }
 
-    const cow_vector<Reference>& get_arguments_and_self() const noexcept
+    const cow_vector<Reference>&
+    get_arguments_and_self()
+    const
+    noexcept
       { return this->m_args_self;  }
 
-    cow_vector<Reference>& open_arguments_and_self() noexcept
+    cow_vector<Reference>&
+    open_arguments_and_self()
+    noexcept
       { return this->m_args_self;  }
 
-    Variable_Callback& enumerate_variables(Variable_Callback& callback) const;
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback)
+    const;
   };
 
 }  // namespace Asteria

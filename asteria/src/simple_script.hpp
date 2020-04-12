@@ -16,11 +16,15 @@ class Simple_Script
     cow_function m_func;  // note type erasure
 
   public:
-    constexpr Simple_Script() noexcept
+    constexpr
+    Simple_Script()
+    noexcept
       : m_opts()
       { }
 
-    explicit constexpr Simple_Script(const Compiler_Options& opts) noexcept
+    explicit constexpr
+    Simple_Script(const Compiler_Options& opts)
+    noexcept
       : m_opts(opts)
       { }
 
@@ -33,32 +37,60 @@ class Simple_Script
       { this->reload(cbuf, name);  }
 
   public:
-    const Compiler_Options& get_options() const noexcept
+    const Compiler_Options&
+    get_options()
+    const
+    noexcept
       { return this->m_opts;  }
 
-    Compiler_Options& open_options() noexcept
+    Compiler_Options&
+    open_options()
+    noexcept
       { return this->m_opts;  }
 
-    Simple_Script& set_options(const Compiler_Options& opts) noexcept
+    Simple_Script&
+    set_options(const Compiler_Options& opts)
+    noexcept
       { return this->m_opts = opts, *this;  }
 
-    explicit operator bool () const noexcept
+    explicit operator
+    bool()
+    const
+    noexcept
       { return bool(this->m_func);  }
 
-    Simple_Script& clear() noexcept
+    Simple_Script&
+    clear()
+    noexcept
       { return this->m_func.reset(), *this;  }
 
-    operator const cow_function& () const noexcept
+    operator
+    const cow_function&()
+    const
+    noexcept
       { return this->m_func;  }
 
-    Simple_Script& reload(tinybuf& cbuf, const cow_string& name);
+    // Load a script.
+    Simple_Script&
+    reload(tinybuf& cbuf, const cow_string& name);
 
-    Simple_Script& reload_string(const cow_string& code, const cow_string& name);
-    Simple_Script& reload_file(const char* path);
-    Simple_Script& reload_stdin();
+    Simple_Script&
+    reload_string(const cow_string& code, const cow_string& name);
 
-    Reference execute(Global_Context& global, cow_vector<Reference>&& args = { }) const;
-    Reference execute(Global_Context& global, cow_vector<Value>&& vals) const;
+    Simple_Script&
+    reload_file(const char* path);
+
+    Simple_Script&
+    reload_stdin();
+
+    // Execute the script that has been loaded.
+    Reference
+    execute(Global_Context& global, cow_vector<Reference>&& args = { })
+    const;
+
+    Reference
+    execute(Global_Context& global, cow_vector<Value>&& vals)
+    const;
   };
 
 }  // namespace Asteria

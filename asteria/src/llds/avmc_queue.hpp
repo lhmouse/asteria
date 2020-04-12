@@ -62,22 +62,46 @@ class AVMC_Queue
         };
         alignas(max_align_t) mutable char payload[];  // user-defined data [3]
 
-        constexpr ParamU paramu() const noexcept
+        constexpr
+        ParamU
+        paramu()
+        const
+        noexcept
           { return {{ this->paramu_x32, this->paramu_x16 }};  }
 
-        constexpr Symbols* symbols() const noexcept
+        constexpr
+        Symbols*
+        symbols()
+        const
+        noexcept
           { return !this->has_syms ? nullptr : static_cast<Symbols*>(static_cast<void*>(this->payload));  }
 
-        constexpr uint32_t symbol_size_in_headers() const noexcept
+        constexpr
+        uint32_t
+        symbol_size_in_headers()
+        const
+        noexcept
           { return !this->has_syms ? 0 : (sizeof(Symbols) - 1) / sizeof(Header) + 1;  }
 
-        constexpr void* paramv() const noexcept
+        constexpr
+        void*
+        paramv()
+        const
+        noexcept
           { return this->payload + this->has_syms * this->symbol_size_in_headers() * sizeof(Header);  }
 
-        constexpr uint32_t paramv_size_in_headers() const noexcept
+        constexpr
+        uint32_t
+        paramv_size_in_headers()
+        const
+        noexcept
           { return this->nphdrs;  }
 
-        constexpr uint32_t total_size_in_headers() const noexcept
+        constexpr
+        uint32_t
+        total_size_in_headers()
+        const
+        noexcept
           { return 1 + this->symbol_size_in_headers() + this->paramv_size_in_headers();  }
       };
 
@@ -86,13 +110,18 @@ class AVMC_Queue
     uint32_t m_used = 0;  // size of used storage, in number of `Header`s [!]
 
   public:
-    constexpr AVMC_Queue() noexcept
+    constexpr
+    AVMC_Queue()
+    noexcept
       { }
 
-    AVMC_Queue(AVMC_Queue&& other) noexcept
+    AVMC_Queue(AVMC_Queue&& other)
+    noexcept
       { this->swap(other);  }
 
-    AVMC_Queue& operator=(AVMC_Queue&& other) noexcept
+    AVMC_Queue&
+    operator=(AVMC_Queue&& other)
+    noexcept
       { return this->swap(other);  }
 
     ~AVMC_Queue()
@@ -105,45 +134,65 @@ class AVMC_Queue
       }
 
   private:
-    void do_deallocate_storage() const;
-    void do_execute_all_break(AIR_Status& status, Executive_Context& ctx) const;
-    void do_enumerate_variables(Variable_Callback& callback) const;
+    void
+    do_deallocate_storage()
+    const;
+
+    void
+    do_execute_all_break(AIR_Status& status, Executive_Context& ctx)
+    const;
+
+    void
+    do_enumerate_variables(Variable_Callback& callback)
+    const;
 
     // Reserve storage for another node. `nbytes` is the size of `paramv` to reserve in bytes.
     // Note: All calls to this function must precede calls to `do_check_node_storage()`.
-    void do_reserve_delta(size_t nbytes, const Symbols* syms_opt);
+    void
+    do_reserve_delta(size_t nbytes, const Symbols* syms_opt);
 
     // Allocate storage for all nodes that have been reserved so far, then checks whether there is enough room
     // for a new node with `paramv` whose size is `nbytes` in bytes. An exception is thrown in case of failure.
-    inline Header* do_allocate_node(ParamU paramu, const Symbols* syms_opt, size_t nbytes);
+    inline
+    Header*
+    do_allocate_node(ParamU paramu, const Symbols* syms_opt, size_t nbytes);
 
     // Append a new node to the end. `nbytes` is the size of `paramv` to initialize in bytes.
     // Note: The storage must have been reserved using `do_reserve_delta()`.
-    void do_append_trivial(Executor* exec, ParamU paramu, const Symbols* syms_opt,
-                           const void* source_opt, size_t nbytes);
-    void do_append_nontrivial(const Vtable* vtbl, ParamU paramu, const Symbols* syms_opt,
-                              size_t nbytes, Constructor* ctor_opt, intptr_t source);
+    void
+    do_append_trivial(Executor* exec, ParamU paramu, const Symbols* syms_opt,
+                      const void* source_opt, size_t nbytes);
 
-    template<Executor execT, nullptr_t, typename XNodeT> void do_dispatch_append(::std::true_type,
-                                   ParamU paramu, const Symbols* syms_opt, XNodeT&& xnode)
+    void
+    do_append_nontrivial(const Vtable* vtbl, ParamU paramu, const Symbols* syms_opt,
+                         size_t nbytes, Constructor* ctor_opt, intptr_t source);
+
+    template<Executor execT, nullptr_t, typename XNodeT>
+    void
+    do_dispatch_append(::std::true_type, ParamU paramu, const Symbols* syms_opt, XNodeT&& xnode)
       {
         // The parameter type is trivial and no vtable is required.
         // Append a node with a trivial parameter.
         this->do_append_trivial(execT, paramu, syms_opt, ::std::addressof(xnode), sizeof(xnode));
       }
 
-    template<Executor execT, Enumerator* vnumT, typename XNodeT> void do_dispatch_append(::std::false_type,
-                                   ParamU paramu, const Symbols* syms_opt, XNodeT&& xnode)
+    template<Executor execT, Enumerator* vnumT, typename XNodeT>
+    void
+    do_dispatch_append(::std::false_type, ParamU paramu, const Symbols* syms_opt, XNodeT&& xnode)
       {
         // The vtable must have static storage duration. As it is defined `constexpr` here, we need 'real'
         // function pointers. Those converted from non-capturing lambdas are not an option.
         struct Funcs
           {
-            static void construct(ParamU /*paramu*/, void* paramv, intptr_t source)
-              { ::rocket::construct_at(static_cast<typename ::rocket::remove_cvref<XNodeT>::type*>(paramv),
-                                       ::std::forward<XNodeT>(*(typename ::std::remove_reference<XNodeT>::type*)source));  }
+            static
+            void
+            construct(ParamU /*paramu*/, void* paramv, intptr_t source)
+              { ::rocket::construct_at((typename ::rocket::remove_cvref<XNodeT>::type*)paramv,
+                             ::std::forward<XNodeT>(*(typename ::std::remove_reference<XNodeT>::type*)source));  }
 
-            static void destroy(ParamU /*paramu*/, void* paramv) noexcept
+            static
+            void
+            destroy(ParamU /*paramu*/, void* paramv)
               { ::rocket::destroy_at((typename ::rocket::remove_cvref<XNodeT>::type*)paramv);  }
           };
 
@@ -151,14 +200,20 @@ class AVMC_Queue
         static constexpr Vtable s_vtbl = { Funcs::destroy, execT, vnumT };
 
         // Append a node with a non-trivial parameter.
-        this->do_append_nontrivial(&s_vtbl, paramu, syms_opt, sizeof(xnode), Funcs::construct, (intptr_t)::std::addressof(xnode));
+        this->do_append_nontrivial(&s_vtbl, paramu, syms_opt,
+                                   sizeof(xnode), Funcs::construct, (intptr_t)::std::addressof(xnode));
       }
 
   public:
-    bool empty() const noexcept
+    bool
+    empty()
+    const
+    noexcept
       { return this->m_bptr == nullptr;  }
 
-    AVMC_Queue& clear() noexcept
+    AVMC_Queue&
+    clear()
+    noexcept
       {
         if(this->m_bptr)
           this->do_deallocate_storage();
@@ -170,7 +225,9 @@ class AVMC_Queue
         return *this;
       }
 
-    AVMC_Queue& swap(AVMC_Queue& other) noexcept
+    AVMC_Queue&
+    swap(AVMC_Queue& other)
+    noexcept
       {
         xswap(this->m_bptr, other.m_bptr);
         xswap(this->m_rsrv, other.m_rsrv);
@@ -178,21 +235,26 @@ class AVMC_Queue
         return *this;
       }
 
-    AVMC_Queue& request(size_t nbytes, const Symbols* syms_opt)
+    AVMC_Queue&
+    request(size_t nbytes, const Symbols* syms_opt)
       {
         // Reserve space for a node of size `nbytes`.
         this->do_reserve_delta(nbytes, syms_opt);
         return *this;
       }
 
-    template<Executor execT> AVMC_Queue& append(ParamU paramu, const Symbols* syms_opt)
+    template<Executor execT>
+    AVMC_Queue&
+    append(ParamU paramu, const Symbols* syms_opt)
       {
         // Append a node with no parameter.
         this->do_append_trivial(execT, paramu, syms_opt, nullptr, 0);
         return *this;
       }
 
-    template<Executor execT, typename XNodeT> AVMC_Queue& append(ParamU paramu, const Symbols* syms_opt, XNodeT&& xnode)
+    template<Executor execT, typename XNodeT>
+    AVMC_Queue&
+    append(ParamU paramu, const Symbols* syms_opt, XNodeT&& xnode)
       {
         // Append a node with a parameter of type `remove_cvref_t<XNodeT>`.
         this->do_dispatch_append<execT, nullptr>(::std::is_trivial<typename ::std::remove_reference<XNodeT>::type>(),
@@ -200,7 +262,9 @@ class AVMC_Queue
         return *this;
       }
 
-    template<Executor execT, Enumerator vnumT, typename XNodeT> AVMC_Queue& append(ParamU paramu, const Symbols* syms_opt, XNodeT&& xnode)
+    template<Executor execT, Enumerator vnumT, typename XNodeT>
+    AVMC_Queue&
+    append(ParamU paramu, const Symbols* syms_opt, XNodeT&& xnode)
       {
         // Append a node with a parameter of type `remove_cvref_t<XNodeT>`.
         this->do_dispatch_append<execT, vnumT>(::std::false_type(),  // cannot be trivial
@@ -208,28 +272,36 @@ class AVMC_Queue
         return *this;
       }
 
-    AVMC_Queue& append_trivial(Executor* exec, ParamU paramu, const Symbols* syms_opt, const void* data, size_t size)
+    AVMC_Queue&
+    append_trivial(Executor* exec, ParamU paramu, const Symbols* syms_opt, const void* data, size_t size)
       {
         // Append an arbitrary function with a trivial argument.
         this->do_append_trivial(exec, paramu, syms_opt, data, size);
         return *this;
       }
 
-    AIR_Status execute(Executive_Context& ctx) const
+    AIR_Status
+    execute(Executive_Context& ctx)
+    const
       {
         auto status = air_status_next;
         this->do_execute_all_break(status, ctx);
         return status;
       }
 
-    Variable_Callback& enumerate_variables(Variable_Callback& callback) const
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback)
+    const
       {
         this->do_enumerate_variables(callback);
         return callback;
       }
   };
 
-inline void swap(AVMC_Queue& lhs, AVMC_Queue& rhs) noexcept
+inline
+void
+swap(AVMC_Queue& lhs, AVMC_Queue& rhs)
+noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace Asteria

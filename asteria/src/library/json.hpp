@@ -8,14 +8,27 @@
 
 namespace Asteria {
 
-Sval std_json_format(Value value, Sopt indent);
-Sval std_json_format(Value value, Ival indent);
-Sval std_json_format5(Value value, Sopt indent);
-Sval std_json_format5(Value value, Ival indent);
-Value std_json_parse(Sval text);
+// `std.json.format`
+Sval
+std_json_format(Value value, Sopt indent);
+
+Sval
+std_json_format(Value value, Ival indent);
+
+// `std.json.format5`
+Sval
+std_json_format5(Value value, Sopt indent);
+
+Sval
+std_json_format5(Value value, Ival indent);
+
+// `std.json.parse`
+Value
+std_json_parse(Sval text);
 
 // Create an object that is to be referenced as `std.json`.
-void create_bindings_json(V_object& result, API_Version version);
+void
+create_bindings_json(V_object& result, API_Version version);
 
 }  // namespace Asteria
 

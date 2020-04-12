@@ -56,7 +56,7 @@ class Expression_Unit
       {
         Source_Location sloc;
         Xop xop;
-        bool assign;  // This parameter is ignored for `++`, `--`, `[]` and `=`.
+        bool assign;  // ignored for `++`, `--`, `[]` and `=`
       };
 
     struct S_unnamed_array
@@ -154,20 +154,30 @@ class Expression_Unit
       }
 
   public:
-    Index index() const noexcept
+    Index
+    index()
+    const
+    noexcept
       { return static_cast<Index>(this->m_stor.index());  }
 
-    Expression_Unit& swap(Expression_Unit& other) noexcept
+    Expression_Unit&
+    swap(Expression_Unit& other)
+    noexcept
       {
         this->m_stor.swap(other.m_stor);
         return *this;
       }
 
-    cow_vector<AIR_Node>& generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
-                                        const Analytic_Context& ctx, PTC_Aware ptc) const;
+    cow_vector<AIR_Node>&
+    generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
+                  const Analytic_Context& ctx, PTC_Aware ptc)
+    const;
   };
 
-inline void swap(Expression_Unit& lhs, Expression_Unit& rhs) noexcept
+inline
+void
+swap(Expression_Unit& lhs, Expression_Unit& rhs)
+noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace Asteria

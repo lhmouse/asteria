@@ -10,12 +10,15 @@
 
 namespace Asteria {
 
-AIR_Optimizer::~AIR_Optimizer()
+AIR_Optimizer::
+~AIR_Optimizer()
   {
   }
 
-AIR_Optimizer& AIR_Optimizer::reload(const Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
-                                     const cow_vector<Statement>& stmts)
+AIR_Optimizer&
+AIR_Optimizer::
+reload(const Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
+       const cow_vector<Statement>& stmts)
   {
     this->m_code.clear();
     this->m_params = params;
@@ -32,8 +35,10 @@ AIR_Optimizer& AIR_Optimizer::reload(const Abstract_Context* ctx_opt, const cow_
     return *this;
   }
 
-AIR_Optimizer& AIR_Optimizer::rebind(const Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
-                                     const cow_vector<AIR_Node>& code)
+AIR_Optimizer&
+AIR_Optimizer::
+rebind(const Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
+       const cow_vector<AIR_Node>& code)
   {
     this->m_code = code;
     this->m_params = params;
@@ -52,7 +57,9 @@ AIR_Optimizer& AIR_Optimizer::rebind(const Abstract_Context* ctx_opt, const cow_
     return *this;
   }
 
-cow_function AIR_Optimizer::create_function(const Source_Location& sloc, const cow_string& name)
+cow_function
+AIR_Optimizer::
+create_function(const Source_Location& sloc, const cow_string& name)
   {
     // Append the parameter list to `name`.
     // We only do this if `name` really looks like a function name.
@@ -68,7 +75,8 @@ cow_function AIR_Optimizer::create_function(const Source_Location& sloc, const c
 
     // Instantiate the function.
     return ::rocket::make_refcnt<Instantiated_Function>(this->m_params,
-                                         ::rocket::make_refcnt<Variadic_Arguer>(sloc, func), this->m_code);
+                             ::rocket::make_refcnt<Variadic_Arguer>(sloc, func),
+                             this->m_code);
   }
 
 }  // namespace Asteria
