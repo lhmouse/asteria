@@ -10,9 +10,7 @@
 namespace Asteria {
 namespace {
 
-using Slice = pair<Sval::const_iterator, Sval::const_iterator>;
-
-Slice
+pair<Sval::const_iterator, Sval::const_iterator>
 do_slice(const Sval& text, Sval::const_iterator tbegin, const Iopt& length)
   {
     if(!length || (*length >= text.end() - tbegin)) {
@@ -27,7 +25,7 @@ do_slice(const Sval& text, Sval::const_iterator tbegin, const Iopt& length)
     return ::std::make_pair(tbegin, tbegin + static_cast<ptrdiff_t>(*length));
   }
 
-Slice
+pair<Sval::const_iterator, Sval::const_iterator>
 do_slice(const Sval& text, const Ival& from, const Iopt& length)
   {
     auto slen = static_cast<int64_t>(text.size());
