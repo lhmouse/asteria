@@ -70,25 +70,24 @@ Ival std_system_gc_collect(Global& global, Iopt generation_limit)
 
 Ival std_system_execute(Sval cmd, Aopt argv, Aopt envp)
   {
-    cow_vector<const char*> ptrs = { cmd.safe_c_str(), nullptr };
+    // Append arguments.
+    cow_vector<const char*> ptrs = { cmd.safe_c_str() };
+    if(argv)
+      ::rocket::for_each(*argv, [&](const Value& arg) { ptrs.emplace_back(arg.as_string().safe_c_str());  });
+    ptrs.emplace_back(nullptr);
     size_t eoff = 1;  // beginning of environment variables
 
-    // Append arguments. `eoff` will be the offset of the terminating null pointer.
-    if(argv) {
-      ptrs.clear();
-      ::rocket::for_each(*argv, [&](const Value& arg) { ptrs.emplace_back(arg.as_string().safe_c_str());  });
-      eoff = ptrs.size();
-      ptrs.emplace_back(nullptr);
-    }
     // Append environment variables.
     if(envp) {
       eoff = ptrs.size();
-      ::rocket::for_each(*envp, [&](const Value& arg) { ptrs.emplace_back(arg.as_string().safe_c_str());  });
+      ::rocket::for_each(*envp, [&](const Value& env) { ptrs.emplace_back(env.as_string().safe_c_str());  });
       ptrs.emplace_back(nullptr);
     }
+
     // Be `const`-friendly.
     auto pargv = const_cast<char**>(ptrs.data());
     auto penvp = const_cast<char**>(ptrs.data() + eoff);
+
     // Launch the program.
     ::pid_t pid;
     if(::posix_spawnp(&pid, cmd.c_str(), nullptr, nullptr, pargv, penvp) != 0)
@@ -272,10 +271,10 @@ void create_bindings_system(V_object& result, API_Version /*version*/)
 
   * Launches the program denoted by `cmd`, awaits its termination,
     and returns its exit status. If `argv` is provided, it shall be
-    an array of strings, which specify arguments passed to the
-    program. If `envp` is provided, it shall also be an array of
-    strings, which specify environment variables passed to the
-    program.
+    an array of strings, which specify additional arguments to pass
+    to the program along with `cmd`. If `envp` is specified, it
+    shall also be an array of strings, which specify environment
+    variables to pass to the program.
 
   * Returns the exit status as an integer. If the process exits due
     to a signal, the exit status is `128+N` where `N` is the signal

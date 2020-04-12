@@ -24,14 +24,14 @@ int main()
           assert std.string.find(e, "assertion failure") == null;
 
         assert std.system.execute('bash',
-          [ 'bash', '-c', 'kill -1 $$' ]) == 129;
+          [ '-c', 'kill -1 $$' ]) == 129;
         assert std.system.execute('bash',
-          [ 'bash', '-c', 'kill -9 $$' ]) == 137;
+          [ '-c', 'kill -9 $$' ]) == 137;
 
         assert std.system.execute('bash',
-          [ 'bash', '-c', 'test $VAR == yes' ], [ 'VAR=yes' ]) == 0;
+          [ '-c', 'test $VAR == yes' ], [ 'VAR=yes' ]) == 0;
         assert std.system.execute('bash',
-          [ 'bash', '-c', 'test $VAR == yes' ], [ 'VAR=no' ]) != 0;
+          [ '-c', 'test $VAR == yes' ], [ 'VAR=no' ]) != 0;
 
       )__"), tinybuf::open_read);
 
