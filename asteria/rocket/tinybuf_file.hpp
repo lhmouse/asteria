@@ -76,7 +76,8 @@ class basic_tinybuf_file
     basic_tinybuf_file(basic_tinybuf_file&&)
       = default;
 
-    basic_tinybuf_file& operator=(basic_tinybuf_file&&)
+    basic_tinybuf_file&
+    operator=(basic_tinybuf_file&&)
       = default;
 
   private:

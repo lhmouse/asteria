@@ -375,7 +375,8 @@ class cow_opaque
 
     template<typename OpaqueT>
     rcptr<const OpaqueT>
-    cast_opt() const;
+    cast_opt()
+    const;
 
     template<typename OpaqueT>
     rcptr<OpaqueT>
