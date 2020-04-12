@@ -66,23 +66,38 @@ class basic_tinyfmt
     // unformatted output functions
     basic_tinyfmt&
     flush()
-      { return this->get_tinybuf().flush(), *this;  }
+      {
+        this->get_tinybuf().flush();
+        return *this;
+      }
 
     off_type
     seek(off_type off, seek_dir dir = tinybuf_base::seek_set)
-      { return this->get_tinybuf().seek(off, dir);  }
+      {
+        auto absoff = this->get_tinybuf().seek(off, dir);
+        return absoff;
+      }
 
     basic_tinyfmt&
     putc(char_type c)
-      { return this->get_tinybuf().putc(c), *this;  }
+      {
+        this->get_tinybuf().putc(c);
+        return *this;
+      }
 
     basic_tinyfmt&
     putn(const char_type* s, size_type n)
-      { return this->get_tinybuf().putn(s, n), *this;  }
+      {
+        this->get_tinybuf().putn(s, n);
+        return *this;
+      }
 
     basic_tinyfmt&
     puts(const char_type* s)
-      { return this->get_tinybuf().puts(s), *this;  }
+      {
+        this->get_tinybuf().puts(s);
+        return *this;
+      }
   };
 
 template<typename charT, typename traitsT>
