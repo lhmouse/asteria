@@ -166,7 +166,6 @@ class static_vector
 
     // This function works the same way as `std::string::substr()`.
     // Ensure `tpos` is in `[0, size()]` and return `min(tn, size() - tpos)`.
-    ROCKET_PURE_FUNCTION
     size_type
     do_clamp_subvec(size_type tpos, size_type tn)
     const

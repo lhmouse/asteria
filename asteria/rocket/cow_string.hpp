@@ -333,7 +333,6 @@ class basic_cow_string
 
     // This function works the same way as `substr()`.
     // Ensure `tpos` is in `[0, size()]` and return `min(tn, size() - tpos)`.
-    ROCKET_PURE_FUNCTION
     size_type
     do_clamp_substr(size_type tpos, size_type tn)
     const
