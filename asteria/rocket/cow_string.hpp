@@ -26,12 +26,15 @@ class basic_cow_string;
 #include "details/cow_string.ipp"
 
 /* Differences from `std::basic_string`:
- * 1. All functions guarantee only basic exception safety rather than strong exception safety, hence are more efficient.
- * 2. `begin()` and `end()` always return `const_iterator`s. `at()`, `front()` and `back()` always return `const_reference`s.
+ * 1. All functions guarantee only basic exception safety rather than strong exception safety, hence
+      are more efficient.
+ * 2. `begin()` and `end()` always return `const_iterator`s. `at()`, `front()` and `back()` always
+      return `const_reference`s.
  * 3. The copy constructor and copy assignment operator will not throw exceptions.
  * 4. The constructor taking a sole const pointer is made `explicit`.
  * 5. The assignment operator taking a character and the one taking a const pointer are not provided.
- * 6. It is possible to create strings holding non-owning references of null-terminated character arrays allocated externally.
+ * 6. It is possible to create strings holding non-owning references of null-terminated character
+      arrays allocated externally.
  * 7. `data()` returns a null pointer if the string is empty.
  * 8. `erase()` and `substr()` cannot be called without arguments.
  */
@@ -194,7 +197,8 @@ class basic_cow_string
       : basic_cow_string(allocator_type())
       { }
 
-    basic_cow_string(const basic_cow_string& other, size_type pos, size_type n = npos, const allocator_type& alloc = allocator_type())
+    basic_cow_string(const basic_cow_string& other, size_type pos, size_type n = npos,
+                     const allocator_type& alloc = allocator_type())
       : basic_cow_string(alloc)
       { this->assign(other, pos, n);  }
 
@@ -562,7 +566,8 @@ class basic_cow_string
       {
         auto len = this->size();
         auto cap_new = this->m_sth.round_up_capacity(noadl::max(len, res_arg));
-        // If the storage is shared with other strings, force rellocation to prevent copy-on-write upon modification.
+        // If the storage is shared with other strings, force rellocation to prevent copy-on-write
+        // upon modification.
         if(this->unique() && (this->capacity() >= cap_new)) {
           return *this;
         }
@@ -654,7 +659,8 @@ class basic_cow_string
         return this->data()[len - 1];
       }
 
-    // There is no `at()` overload that returns a non-const reference. This is the consequent overload which does that.
+    // There is no `at()` overload that returns a non-const reference.
+    // This is the consequent overload which does that.
     // N.B. This is a non-standard extension.
     reference
     mut(size_type pos)
@@ -937,35 +943,40 @@ class basic_cow_string
     basic_cow_string&
     assign(inputT first, inputT last)
       {
-        this->do_replace_no_bound_check(0, this->size(), details_cow_string::append, ::std::move(first), ::std::move(last));
+        this->do_replace_no_bound_check(0, this->size(), details_cow_string::append,
+                                        ::std::move(first), ::std::move(last));
         return *this;
       }
 
     basic_cow_string&
     insert(size_type tpos, const basic_cow_string& other, size_type pos = 0, size_type n = npos)
       {
-        this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, 0), details_cow_string::append, other, pos, n);
+        this->do_clamp_substr(tpos, 0);  // just check
+        this->do_replace_no_bound_check(tpos, tpos, details_cow_string::append, other, pos, n);
         return *this;
       }
 
     basic_cow_string&
     insert(size_type tpos, const value_type* s, size_type n)
       {
-        this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, 0), details_cow_string::append, s, n);
+        this->do_clamp_substr(tpos, 0);  // just check
+        this->do_replace_no_bound_check(tpos, tpos, details_cow_string::append, s, n);
         return *this;
       }
 
     basic_cow_string&
     insert(size_type tpos, const value_type* s)
       {
-        this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, 0), details_cow_string::append, s);
+        this->do_clamp_substr(tpos, 0);  // just check
+        this->do_replace_no_bound_check(tpos, tpos, details_cow_string::append, s);
         return *this;
       }
 
     basic_cow_string&
     insert(size_type tpos, size_type n, value_type ch)
       {
-        this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, 0), details_cow_string::append, n, ch);
+        this->do_clamp_substr(tpos, 0);  // just check
+        this->do_replace_no_bound_check(tpos, tpos, details_cow_string::append, n, ch);
         return *this;
       }
 
@@ -973,7 +984,8 @@ class basic_cow_string
     basic_cow_string&
     insert(size_type tpos, initializer_list<value_type> init)
       {
-        this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, 0), details_cow_string::append, init);
+        this->do_clamp_substr(tpos, 0);  // just check
+        this->do_replace_no_bound_check(tpos, tpos, details_cow_string::append, init);
         return *this;
       }
 
@@ -1026,7 +1038,8 @@ class basic_cow_string
     insert(const_iterator tins, inputT first, inputT last)
       {
         auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-        auto ptr = this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, ::std::move(first), ::std::move(last));
+        auto ptr = this->do_replace_no_bound_check(tpos, 0, details_cow_string::append,
+                                                   ::std::move(first), ::std::move(last));
         return iterator(this, ptr);
       }
 
@@ -1041,34 +1054,39 @@ class basic_cow_string
     basic_cow_string&
     replace(size_type tpos, size_type tn, const basic_cow_string& other, size_type pos = 0, size_type n = npos)
       {
-        this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, tn), details_cow_string::append, other, pos, n);
+        this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, tn),
+                                        details_cow_string::append, other, pos, n);
         return *this;
       }
 
     basic_cow_string&
     replace(size_type tpos, size_type tn, const value_type* s, size_type n)
       {
-        this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, tn), details_cow_string::append, s, n);
+        this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, tn),
+                                        details_cow_string::append, s, n);
         return *this;
       }
 
     basic_cow_string&
     replace(size_type tpos, size_type tn, const value_type* s)
       {
-        this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, tn), details_cow_string::append, s);
+        this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, tn),
+                                        details_cow_string::append, s);
         return *this;
       }
 
     basic_cow_string&
     replace(size_type tpos, size_type tn, size_type n, value_type ch)
       {
-        this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, tn), details_cow_string::append, n, ch);
+        this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, tn),
+                                        details_cow_string::append, n, ch);
         return *this;
       }
 
     // N.B. The last two parameters are non-standard extensions.
     basic_cow_string&
-    replace(const_iterator tfirst, const_iterator tlast, const basic_cow_string& other, size_type pos = 0, size_type n = npos)
+    replace(const_iterator tfirst, const_iterator tlast, const basic_cow_string& other,
+            size_type pos = 0, size_type n = npos)
       {
         auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
         auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
@@ -1119,7 +1137,8 @@ class basic_cow_string
       {
         auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
         auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
-        this->do_replace_no_bound_check(tpos, tn, details_cow_string::append, ::std::move(first), ::std::move(last));
+        this->do_replace_no_bound_check(tpos, tn, details_cow_string::append,
+                                        ::std::move(first), ::std::move(last));
         return *this;
       }
 
@@ -1218,7 +1237,8 @@ class basic_cow_string
     find(const value_type* s, size_type from, size_type n)
     const
     noexcept
-      { return this->do_find_forwards_if(from, n, [&](const value_type* ts) { return traits_type::compare(ts, s, n) == 0;  });  }
+      { return this->do_find_forwards_if(from, n,
+                   [&](const value_type* ts) { return traits_type::compare(ts, s, n) == 0;  });  }
 
     size_type
     find(const value_type* s, size_type from = 0)
@@ -1258,7 +1278,8 @@ class basic_cow_string
     rfind(const value_type* s, size_type to, size_type n)
     const
     noexcept
-      { return this->do_find_backwards_if(to, n, [&](const value_type* ts) { return traits_type::compare(ts, s, n) == 0;  });  }
+      { return this->do_find_backwards_if(to, n,
+                   [&](const value_type* ts) { return traits_type::compare(ts, s, n) == 0;  });  }
 
     size_type
     rfind(const value_type* s, size_type to = npos)
@@ -1270,7 +1291,8 @@ class basic_cow_string
     rfind(value_type ch, size_type to = npos)
     const
     noexcept
-      { return this->do_find_backwards_if(to, 1, [&](const value_type* ts) { return traits_type::eq(*ts, ch);  });  }
+      { return this->do_find_backwards_if(to, 1,
+                   [&](const value_type* ts) { return traits_type::eq(*ts, ch);  });  }
 
     size_type
     find_first_of(const basic_cow_string& other, size_type from = 0)
@@ -1288,7 +1310,8 @@ class basic_cow_string
     find_first_of(const value_type* s, size_type from, size_type n)
     const
     noexcept
-      { return this->do_find_forwards_if(from, 1, [&](const value_type* ts) { return traits_type::find(s, n, *ts) != nullptr;  });  }
+      { return this->do_find_forwards_if(from, 1,
+                   [&](const value_type* ts) { return traits_type::find(s, n, *ts) != nullptr;  });  }
 
     size_type
     find_first_of(const value_type* s, size_type from = 0)
@@ -1318,7 +1341,8 @@ class basic_cow_string
     find_last_of(const value_type* s, size_type to, size_type n)
     const
     noexcept
-      { return this->do_find_backwards_if(to, 1, [&](const value_type* ts) { return traits_type::find(s, n, *ts) != nullptr;  });  }
+      { return this->do_find_backwards_if(to, 1,
+                   [&](const value_type* ts) { return traits_type::find(s, n, *ts) != nullptr;  });  }
 
     size_type
     find_last_of(const value_type* s, size_type to = npos)
@@ -1348,7 +1372,8 @@ class basic_cow_string
     find_first_not_of(const value_type* s, size_type from, size_type n)
     const
     noexcept
-      { return this->do_find_forwards_if(from, 1, [&](const value_type* ts) { return traits_type::find(s, n, *ts) == nullptr;  });  }
+      { return this->do_find_forwards_if(from, 1,
+                   [&](const value_type* ts) { return traits_type::find(s, n, *ts) == nullptr;  });  }
 
     size_type
     find_first_not_of(const value_type* s, size_type from = 0)
@@ -1360,7 +1385,8 @@ class basic_cow_string
     find_first_not_of(value_type ch, size_type from = 0)
     const
     noexcept
-      { return this->do_find_forwards_if(from, 1, [&](const value_type* ts) { return !traits_type::eq(*ts, ch);  });  }
+      { return this->do_find_forwards_if(from, 1,
+                   [&](const value_type* ts) { return !traits_type::eq(*ts, ch);  });  }
 
     size_type
     find_last_not_of(const basic_cow_string& other, size_type to = npos)
@@ -1378,7 +1404,8 @@ class basic_cow_string
     find_last_not_of(const value_type* s, size_type to, size_type n)
     const
     noexcept
-      { return this->do_find_backwards_if(to, 1, [&](const value_type* ts) { return traits_type::find(s, n, *ts) == nullptr;  });  }
+      { return this->do_find_backwards_if(to, 1,
+                   [&](const value_type* ts) { return traits_type::find(s, n, *ts) == nullptr;  });  }
 
     size_type
     find_last_not_of(const value_type* s, size_type to = npos)
@@ -1390,7 +1417,8 @@ class basic_cow_string
     find_last_not_of(value_type ch, size_type to = npos)
     const
     noexcept
-      { return this->do_find_backwards_if(to, 1, [&](const value_type* ts) { return !traits_type::eq(*ts, ch);  });  }
+      { return this->do_find_backwards_if(to, 1,
+                   [&](const value_type* ts) { return !traits_type::eq(*ts, ch);  });  }
 
     // N.B. This is a non-standard extension.
     template<typename predT>
@@ -1435,7 +1463,8 @@ class basic_cow_string
     compare(const value_type* s, size_type n)
     const
     noexcept
-      { return details_cow_string::comparator<charT, traitsT>::relation(this->data(), this->size(), s, n);  }
+      { return details_cow_string::comparator<charT, traitsT>::relation(
+                   this->data(), this->size(), s, n);  }
 
     int
     compare(const value_type* s)
@@ -1452,7 +1481,8 @@ class basic_cow_string
     int
     compare(size_type tpos, size_type tn, const value_type* s, size_type n)
     const
-      { return details_cow_string::comparator<charT, traitsT>::relation(this->data() + tpos, this->do_clamp_substr(tpos, tn), s, n);  }
+      { return details_cow_string::comparator<charT, traitsT>::relation(
+                   this->data() + tpos, this->do_clamp_substr(tpos, tn), s, n);  }
 
     int
     compare(size_type tpos, size_type tn, const value_type* s)
@@ -1666,210 +1696,240 @@ inline
 bool
 operator==(const basic_cow_string<charT, traitsT, allocT>& lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::inequality(lhs.data(), lhs.size(), rhs.data(), rhs.size()) == 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::inequality(
+               lhs.data(), lhs.size(), rhs.data(), rhs.size()) == 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator!=(const basic_cow_string<charT, traitsT, allocT>& lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::inequality(lhs.data(), lhs.size(), rhs.data(), rhs.size()) != 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::inequality(
+               lhs.data(), lhs.size(), rhs.data(), rhs.size()) != 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator<(const basic_cow_string<charT, traitsT, allocT>& lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) < 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::relation(
+               lhs.data(), lhs.size(), rhs.data(), rhs.size()) < 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator>(const basic_cow_string<charT, traitsT, allocT>& lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) > 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::relation(
+               lhs.data(), lhs.size(), rhs.data(), rhs.size()) > 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator<=(const basic_cow_string<charT, traitsT, allocT>& lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) <= 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::relation(
+               lhs.data(), lhs.size(), rhs.data(), rhs.size()) <= 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator>=(const basic_cow_string<charT, traitsT, allocT>& lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) >= 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::relation(
+               lhs.data(), lhs.size(), rhs.data(), rhs.size()) >= 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator==(const basic_cow_string<charT, traitsT, allocT>& lhs, const charT* rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::inequality(lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) == 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::inequality(
+               lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) == 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator!=(const basic_cow_string<charT, traitsT, allocT>& lhs, const charT* rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::inequality(lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) != 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::inequality(
+               lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) != 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator<(const basic_cow_string<charT, traitsT, allocT>& lhs, const charT* rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::relation(lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) < 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::relation(
+               lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) < 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator>(const basic_cow_string<charT, traitsT, allocT>& lhs, const charT* rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::relation(lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) > 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::relation(
+               lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) > 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator<=(const basic_cow_string<charT, traitsT, allocT>& lhs, const charT* rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::relation(lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) <= 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::relation(
+               lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) <= 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator>=(const basic_cow_string<charT, traitsT, allocT>& lhs, const charT* rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::relation(lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) >= 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::relation(
+               lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) >= 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator==(const charT* lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::inequality(lhs, traitsT::length(lhs), rhs.data(), rhs.size()) == 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::inequality(
+               lhs, traitsT::length(lhs), rhs.data(), rhs.size()) == 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator!=(const charT* lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::inequality(lhs, traitsT::length(lhs), rhs.data(), rhs.size()) != 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::inequality(
+               lhs, traitsT::length(lhs), rhs.data(), rhs.size()) != 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator<(const charT* lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::relation(lhs, traitsT::length(lhs), rhs.data(), rhs.size()) < 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::relation(
+               lhs, traitsT::length(lhs), rhs.data(), rhs.size()) < 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator>(const charT* lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::relation(lhs, traitsT::length(lhs), rhs.data(), rhs.size()) > 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::relation(
+               lhs, traitsT::length(lhs), rhs.data(), rhs.size()) > 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator<=(const charT* lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::relation(lhs, traitsT::length(lhs), rhs.data(), rhs.size()) <= 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::relation(
+               lhs, traitsT::length(lhs), rhs.data(), rhs.size()) <= 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator>=(const charT* lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::relation(lhs, traitsT::length(lhs), rhs.data(), rhs.size()) >= 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::relation(
+               lhs, traitsT::length(lhs), rhs.data(), rhs.size()) >= 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator==(const basic_cow_string<charT, traitsT, allocT>& lhs, basic_shallow_string<charT, traitsT> rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::inequality(lhs.data(), lhs.size(), rhs.c_str(), rhs.length()) == 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::inequality(
+               lhs.data(), lhs.size(), rhs.c_str(), rhs.length()) == 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator!=(const basic_cow_string<charT, traitsT, allocT>& lhs, basic_shallow_string<charT, traitsT> rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::inequality(lhs.data(), lhs.size(), rhs.c_str(), rhs.length()) != 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::inequality(
+               lhs.data(), lhs.size(), rhs.c_str(), rhs.length()) != 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator<(const basic_cow_string<charT, traitsT, allocT>& lhs, basic_shallow_string<charT, traitsT> rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::relation(lhs.data(), lhs.size(), rhs.c_str(), rhs.length()) < 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::relation(
+               lhs.data(), lhs.size(), rhs.c_str(), rhs.length()) < 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator>(const basic_cow_string<charT, traitsT, allocT>& lhs, basic_shallow_string<charT, traitsT> rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::relation(lhs.data(), lhs.size(), rhs.c_str(), rhs.length()) > 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::relation(
+               lhs.data(), lhs.size(), rhs.c_str(), rhs.length()) > 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator<=(const basic_cow_string<charT, traitsT, allocT>& lhs, basic_shallow_string<charT, traitsT> rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::relation(lhs.data(), lhs.size(), rhs.c_str(), rhs.length()) <= 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::relation(
+               lhs.data(), lhs.size(), rhs.c_str(), rhs.length()) <= 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator>=(const basic_cow_string<charT, traitsT, allocT>& lhs, basic_shallow_string<charT, traitsT> rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::relation(lhs.data(), lhs.size(), rhs.c_str(), rhs.length()) >= 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::relation(
+               lhs.data(), lhs.size(), rhs.c_str(), rhs.length()) >= 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator==(basic_shallow_string<charT, traitsT> lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::inequality(lhs.c_str(), lhs.length(), rhs.data(), rhs.size()) == 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::inequality(
+               lhs.c_str(), lhs.length(), rhs.data(), rhs.size()) == 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator!=(basic_shallow_string<charT, traitsT> lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::inequality(lhs.c_str(), lhs.length(), rhs.data(), rhs.size()) != 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::inequality(
+               lhs.c_str(), lhs.length(), rhs.data(), rhs.size()) != 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator<(basic_shallow_string<charT, traitsT> lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::relation(lhs.c_str(), lhs.length(), rhs.data(), rhs.size()) < 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::relation(
+               lhs.c_str(), lhs.length(), rhs.data(), rhs.size()) < 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator>(basic_shallow_string<charT, traitsT> lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::relation(lhs.c_str(), lhs.length(), rhs.data(), rhs.size()) > 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::relation(
+               lhs.c_str(), lhs.length(), rhs.data(), rhs.size()) > 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator<=(basic_shallow_string<charT, traitsT> lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::relation(lhs.c_str(), lhs.length(), rhs.data(), rhs.size()) <= 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::relation(
+               lhs.c_str(), lhs.length(), rhs.data(), rhs.size()) <= 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator>=(basic_shallow_string<charT, traitsT> lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
 noexcept
-  { return details_cow_string::comparator<charT, traitsT>::relation(lhs.c_str(), lhs.length(), rhs.data(), rhs.size()) >= 0;  }
+  { return details_cow_string::comparator<charT, traitsT>::relation(
+               lhs.c_str(), lhs.length(), rhs.data(), rhs.size()) >= 0;  }
 
 template<typename charT, typename traitsT, typename allocT>
 inline

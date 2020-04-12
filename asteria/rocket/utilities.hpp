@@ -137,8 +137,8 @@ namespace noadl = ::rocket;
 #define ROCKET_ENABLE_IF(...)            typename ::std::enable_if<+bool(__VA_ARGS__)>::type* = nullptr
 #define ROCKET_DISABLE_IF(...)           typename ::std::enable_if<!bool(__VA_ARGS__)>::type* = nullptr
 
-#define ROCKET_ENABLE_IF_HAS_TYPE(...)       typename ::std::conditional<1, void, typename ::std::remove_reference<__VA_ARGS__>::type>::type* = nullptr
-#define ROCKET_ENABLE_IF_HAS_VALUE(...)      typename ::std::enable_if<!sizeof((__VA_ARGS__)) || true>::type* = nullptr
+#define ROCKET_ENABLE_IF_HAS_TYPE(...)       ROCKET_VOID_T(__VA_ARGS__)* = nullptr
+#define ROCKET_ENABLE_IF_HAS_VALUE(...)      ROCKET_ENABLE_IF(sizeof(__VA_ARGS__) | 1)
 
 #include "details/utilities.ipp"
 

@@ -166,7 +166,8 @@ void
 dispatch_copy_storage(false_type, ptrT /*ptr*/, const hashT& /*hf*/, ptrT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/)
   {
     // Throw an exception unconditionally, even when there is nothing to copy.
-    noadl::sprintf_and_throw<domain_error>("cow_hashmap: `%s` not copy-constructible", typeid(typename allocT::value_type).name());
+    noadl::sprintf_and_throw<domain_error>("cow_hashmap: `%s` not copy-constructible",
+                                           typeid(typename allocT::value_type).name());
   }
 
 template<typename ptrT, typename allocT, typename hashT>
@@ -239,7 +240,8 @@ move_storage(ptrT ptr, const hashT& hf, ptrT ptr_old, size_t off, size_t cnt)
     }
   }
 
-// This struct is used as placeholders for EBO'd bases that would otherwise be duplicate, in order to prevent ambiguity.
+// This struct is used as placeholders for EBO'd bases that would otherwise be duplicate, in order to
+// prevent ambiguity.
 template<int indexT>
 struct ebo_placeholder
   {
@@ -320,7 +322,8 @@ class storage_handle
         if(ROCKET_EXPECT(!ptr))
           return;
         // This is needed for incomplete type support.
-        (*reinterpret_cast<void (*)(storage_pointer)>(reinterpret_cast<const storage_header*>(noadl::unfancy(ptr))->dtor))(ptr);
+        auto dtor = reinterpret_cast<const storage_header*>(noadl::unfancy(ptr))->dtor;
+        (*reinterpret_cast<void (*)(storage_pointer)>(dtor))(ptr);
       }
 
     ROCKET_NOINLINE static
@@ -448,9 +451,9 @@ class storage_handle
         auto nmax = this->max_size();
         ROCKET_ASSERT(base <= nmax);
         if(nmax - base < add)
-          noadl::sprintf_and_throw<length_error>("cow_hashmap: max size exceeded (`%llu` + `%llu` > `%llu`)",
-                                                 static_cast<unsigned long long>(base), static_cast<unsigned long long>(add),
-                                                 static_cast<unsigned long long>(nmax));
+          noadl::sprintf_and_throw<length_error>("cow_hashmap: max size exceeded (`%lld` + `%lld` > `%lld`)",
+                                                 static_cast<long long>(base), static_cast<long long>(add),
+                                                 static_cast<long long>(nmax));
         return base + add;
       }
 
@@ -506,6 +509,7 @@ class storage_handle
           return nullptr;
         }
         auto cap = this->check_size_add(0, res_arg);
+
         // Allocate an array of `storage` large enough for a header + `cap` instances of pointers.
         auto nblk = storage::min_nblk_for_nbkt(cap * max_load_factor_reciprocal);
         storage_allocator st_alloc(this->as_allocator());
@@ -513,12 +517,15 @@ class storage_handle
 #ifdef ROCKET_DEBUG
         ::std::memset(static_cast<void*>(noadl::unfancy(ptr)), '*', sizeof(storage) * nblk);
 #endif
-        noadl::construct_at(noadl::unfancy(ptr), reinterpret_cast<void (*)(...)>(&storage_handle::do_drop_reference), this->as_allocator(), nblk);
+        auto dtor = reinterpret_cast<void (*)(...)>(storage_handle::do_drop_reference);
+        noadl::construct_at(noadl::unfancy(ptr), dtor, this->as_allocator(), nblk);
+
+        // Copy or move elements into the new block.
         auto ptr_old = this->m_ptr;
         if(ROCKET_UNEXPECT(ptr_old)) {
           try {
-            // Copy or move elements into the new block.
-            // Moving is only viable if the old and new allocators compare equal and the old block is owned exclusively.
+            // Moving is only viable if the old and new allocators compare equal and the old block
+            // is owned exclusively.
             if((ptr_old->alloc == ptr->alloc) && ptr_old->nref.unique()) {
               move_storage<storage_pointer, allocator_type>(ptr, this->as_hasher(), ptr_old,       0, cnt_one);
               move_storage<storage_pointer, allocator_type>(ptr, this->as_hasher(), ptr_old, off_two, cnt_two);
@@ -601,7 +608,7 @@ class storage_handle
         // Find the desired element using linear probing.
         auto origin = noadl::get_probing_origin(data, end, this->as_hasher()(ykey));
         auto bkt = noadl::linear_probe(data, origin, origin, end,
-                                       [&](const bucket_type& rbkt) { return this->as_key_equal()(rbkt->first, ykey);  });
+                       [&](const bucket_type& rbkt) { return this->as_key_equal()(rbkt->first, ykey);  });
         if(!bkt) {
           // This can only happen if the load factor is 1.0 i.e. no bucket is empty in the table.
           ROCKET_ASSERT(max_load_factor_reciprocal == 1);
@@ -642,7 +649,7 @@ class storage_handle
         // Find an empty bucket using linear probing.
         auto origin = noadl::get_probing_origin(data, end, this->as_hasher()(ykey));
         auto bkt = noadl::linear_probe(data, origin, origin, end,
-                                       [&](const bucket_type& rbkt) { return this->as_key_equal()(rbkt->first, ykey);  });
+                       [&](const bucket_type& rbkt) { return this->as_key_equal()(rbkt->first, ykey);  });
         ROCKET_ASSERT(bkt);
         if(*bkt) {
           // A duplicate key has been found.
@@ -651,7 +658,8 @@ class storage_handle
         // Allocate a new element.
         auto eptr = allocator_traits<allocator_type>::allocate(ptr->alloc, size_t(1));
         try {
-          allocator_traits<allocator_type>::construct(ptr->alloc, noadl::unfancy(eptr), ::std::forward<paramsT>(params)...);
+          allocator_traits<allocator_type>::construct(ptr->alloc, noadl::unfancy(eptr),
+                                                      ::std::forward<paramsT>(params)...);
         }
         catch(...) {
           allocator_traits<allocT>::deallocate(ptr->alloc, eptr, size_t(1));

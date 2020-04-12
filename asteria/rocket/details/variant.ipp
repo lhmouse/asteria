@@ -166,7 +166,7 @@ dispatch_destroy(size_t rindex, void* dptr)
 
 template<typename alternativeT>
 void
-wrapped_move_construct_then_destroy(void* dptr, void* sptr)
+wrapped_move_then_destroy(void* dptr, void* sptr)
   {
     noadl::construct_at(static_cast<alternativeT*>(dptr), ::std::move(*static_cast<alternativeT*>(sptr)));
     noadl::destroy_at(static_cast<alternativeT*>(sptr));
@@ -174,7 +174,7 @@ wrapped_move_construct_then_destroy(void* dptr, void* sptr)
 
 template<typename... alternativesT>
 void
-dispatch_move_construct_then_destroy(size_t rindex, void* dptr, void* sptr)
+dispatch_move_then_destroy(size_t rindex, void* dptr, void* sptr)
   {
     static constexpr bool s_trivial_table[] = { conjunction<is_trivially_move_constructible<alternativesT>,
                                                             is_trivially_destructible<alternativesT>>::value... };
@@ -185,7 +185,7 @@ dispatch_move_construct_then_destroy(size_t rindex, void* dptr, void* sptr)
       return;
     }
     // Invoke the move constructor followed by the destructor.
-    static constexpr void (*const s_jump_table[])(void*, void*) = { wrapped_move_construct_then_destroy<alternativesT>... };
+    static constexpr void (*const s_jump_table[])(void*, void*) = { wrapped_move_then_destroy<alternativesT>... };
     s_jump_table[rindex](dptr, sptr);
   }
 

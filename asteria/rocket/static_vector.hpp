@@ -400,7 +400,8 @@ class static_vector
         return this->data() + pos;
       }
 
-    // There is no `at()` overload that returns a non-const reference. This is the consequent overload which does that.
+    // There is no `at()` overload that returns a non-const reference.
+    // This is the consequent overload which does that.
     // N.B. This is a non-standard extension.
     reference
     mut(size_type pos)
@@ -529,7 +530,8 @@ class static_vector
     static_vector&
     insert(size_type tpos, const value_type& value)
       {
-        this->do_insert_no_bound_check(tpos + this->do_clamp_subvec(tpos, 0), details_static_vector::push_back, value);
+        this->do_clamp_subvec(tpos, 0);  // just check
+        this->do_insert_no_bound_check(tpos, details_static_vector::push_back, value);
         return *this;
       }
 
@@ -537,7 +539,8 @@ class static_vector
     static_vector&
     insert(size_type tpos, value_type&& value)
       {
-        this->do_insert_no_bound_check(tpos + this->do_clamp_subvec(tpos, 0), details_static_vector::push_back, ::std::move(value));
+        this->do_clamp_subvec(tpos, 0);  // just check
+        this->do_insert_no_bound_check(tpos, details_static_vector::push_back, ::std::move(value));
         return *this;
       }
 
@@ -546,7 +549,8 @@ class static_vector
     static_vector&
     insert(size_type tpos, size_type n, const paramsT&... params)
       {
-        this->do_insert_no_bound_check(tpos + this->do_clamp_subvec(tpos, 0), details_static_vector::append, n, params...);
+        this->do_clamp_subvec(tpos, 0);  // just check
+        this->do_insert_no_bound_check(tpos, details_static_vector::append, n, params...);
         return *this;
       }
 
@@ -554,8 +558,8 @@ class static_vector
     static_vector&
     insert(size_type tpos, initializer_list<value_type> init)
       {
-
-       this->do_insert_no_bound_check(tpos + this->do_clamp_subvec(tpos, 0), details_static_vector::append, init);
+        this->do_clamp_subvec(tpos, 0);  // just check
+        this->do_insert_no_bound_check(tpos, details_static_vector::append, init);
         return *this;
       }
 
@@ -565,7 +569,8 @@ class static_vector
     static_vector&
     insert(size_type tpos, inputT first, inputT last)
       {
-        this->do_insert_no_bound_check(tpos + this->do_clamp_subvec(tpos, 0), details_static_vector::append, ::std::move(first), ::std::move(last));
+        this->do_clamp_subvec(tpos, 0);  // just check
+        this->do_insert_no_bound_check(tpos, details_static_vector::append, ::std::move(first), ::std::move(last));
         return *this;
       }
 
@@ -609,7 +614,8 @@ class static_vector
     insert(const_iterator tins, inputT first, inputT last)
       {
         auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
-        auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::append, ::std::move(first), ::std::move(last));
+        auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::append,
+                                                  ::std::move(first), ::std::move(last));
         return iterator(this->m_sth, ptr);
       }
 

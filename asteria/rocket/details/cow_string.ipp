@@ -197,9 +197,9 @@ class storage_handle
         auto nmax = this->max_size();
         ROCKET_ASSERT(base <= nmax);
         if(nmax - base < add)
-          noadl::sprintf_and_throw<length_error>("cow_string: max size exceeded (`%llu` + `%llu` > `%llu`)",
-                                                 static_cast<unsigned long long>(base), static_cast<unsigned long long>(add),
-                                                 static_cast<unsigned long long>(nmax));
+          noadl::sprintf_and_throw<length_error>("cow_string: max size exceeded (`%lld` + `%lld` > `%lld`)",
+                                                 static_cast<long long>(base), static_cast<long long>(add),
+                                                 static_cast<long long>(nmax));
         return base + add;
       }
 
@@ -233,6 +233,7 @@ class storage_handle
           return nullptr;
         }
         auto cap = this->check_size_add(0, res_arg);
+
         // Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
         auto nblk = storage::min_nblk_for_nchar(cap);
         storage_allocator st_alloc(this->as_allocator());
@@ -241,9 +242,11 @@ class storage_handle
         ::std::memset(static_cast<void*>(noadl::unfancy(ptr)), '*', sizeof(storage) * nblk);
 #endif
         noadl::construct_at(noadl::unfancy(ptr), this->as_allocator(), nblk);
+
+        // Copy characters into the new block.
         size_type len = 0;
-        if(ROCKET_UNEXPECT(len_one + len_two != 0)) {
-          // Copy characters into the new block.
+        if(len_one | len_two) {
+          // The two blocks will not overlap.
           ROCKET_ASSERT(len_one <= cap - len);
           traits_type::copy(ptr->data + len, src, len_one);
           len += len_one;
@@ -253,6 +256,7 @@ class storage_handle
         }
         // Add a null character.
         traits_type::assign(ptr->data[len], value_type());
+
         // Replace the current block.
         this->do_reset(ptr);
         return ptr->data;

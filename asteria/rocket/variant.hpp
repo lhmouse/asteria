@@ -40,6 +40,22 @@ class variant
     typename aligned_union<1, alternativesT...>::type m_stor[1];
     typename lowest_unsigned<alternative_size - 1>::type m_index;
 
+  private:
+    template<size_t indexT>
+    ROCKET_PURE_FUNCTION
+    const typename alternative_at<indexT>::type*
+    do_cast_storage()
+    const
+    noexcept
+      { return reinterpret_cast<const typename alternative_at<indexT>::type*>(this->m_stor);  }
+
+    template<size_t indexT>
+    ROCKET_PURE_FUNCTION
+    typename alternative_at<indexT>::type*
+    do_cast_storage()
+    noexcept
+      { return reinterpret_cast<typename alternative_at<indexT>::type*>(this->m_stor);  }
+
   public:
     // 23.7.3.1, constructors
     variant()
@@ -49,7 +65,7 @@ class variant
         ::std::memset(this->m_stor, '*', sizeof(m_stor));
 #endif
         // Value-initialize the first alternative in place.
-        noadl::construct_at(static_cast<typename alternative_at<0>::type*>(static_cast<void*>(this->m_stor)));
+        noadl::construct_at(this->do_cast_storage<0>());
         this->m_index = 0;
       }
 
@@ -63,8 +79,7 @@ class variant
 #endif
         constexpr auto index_new = index_of<typename decay<paramT>::type>::value;
         // Copy/move-initialize the alternative in place.
-        noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)),
-                            ::std::forward<paramT>(param));
+        noadl::construct_at(this->do_cast_storage<index_new>(), ::std::forward<paramT>(param));
         this->m_index = index_new;
       }
 
@@ -104,27 +119,27 @@ class variant
         constexpr auto index_new = index_of<paramT>::value;
         if(index_old == index_new) {
           // Copy-assign the alternative in place.
-          *static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)) = param;
+          this->do_cast_storage<index_new>()[0] = param;
         }
         else if(is_nothrow_copy_constructible<paramT>::value) {
           // Destroy the old alternative.
           details_variant::dispatch_destroy<alternativesT...>(index_old, this->m_stor);
           // Copy-construct the alternative in place.
-          noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)), param);
+          noadl::construct_at(this->do_cast_storage<index_new>(), param);
           this->m_index = index_new;
         }
         else {
           // Make a backup.
           typename aligned_union<1, alternativesT...>::type backup[1];
-          details_variant::dispatch_move_construct_then_destroy<alternativesT...>(index_old, backup, this->m_stor);
+          details_variant::dispatch_move_then_destroy<alternativesT...>(index_old, backup, this->m_stor);
           try {
             // Copy-construct the alternative in place.
-            noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)), param);
+            noadl::construct_at(this->do_cast_storage<index_new>(), param);
             this->m_index = index_new;
           }
           catch(...) {
             // Move the backup back in case of exceptions.
-            details_variant::dispatch_move_construct_then_destroy<alternativesT...>(index_old, this->m_stor, backup);
+            details_variant::dispatch_move_then_destroy<alternativesT...>(index_old, this->m_stor, backup);
             details_variant::rethrow_current_exception();
           }
           details_variant::dispatch_destroy<alternativesT...>(index_old, backup);
@@ -143,14 +158,13 @@ class variant
         constexpr auto index_new = index_of<paramT>::value;
         if(index_old == index_new) {
           // Move-assign the alternative in place.
-          *static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)) = ::std::move(param);
+          this->do_cast_storage<index_new>()[0] = ::std::move(param);
         }
         else {
           // Destroy the old alternative.
           details_variant::dispatch_destroy<alternativesT...>(index_old, this->m_stor);
           // Move-construct the alternative in place.
-          noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)),
-                              ::std::move(param));
+          noadl::construct_at(this->do_cast_storage<index_new>(), ::std::move(param));
           this->m_index = index_new;
         }
         return *this;
@@ -177,7 +191,7 @@ class variant
         else {
           // Make a backup.
           typename aligned_union<1, alternativesT...>::type backup[1];
-          details_variant::dispatch_move_construct_then_destroy<alternativesT...>(index_old, backup, this->m_stor);
+          details_variant::dispatch_move_then_destroy<alternativesT...>(index_old, backup, this->m_stor);
           try {
             // Copy-construct the alternative in place.
             details_variant::dispatch_copy_construct<alternativesT...>(index_new, this->m_stor, other.m_stor);
@@ -185,7 +199,7 @@ class variant
           }
           catch(...) {
             // Move the backup back in case of exceptions.
-            details_variant::dispatch_move_construct_then_destroy<alternativesT...>(index_old, this->m_stor, backup);
+            details_variant::dispatch_move_then_destroy<alternativesT...>(index_old, this->m_stor, backup);
             details_variant::rethrow_current_exception();
           }
           details_variant::dispatch_destroy<alternativesT...>(index_old, backup);
@@ -230,7 +244,7 @@ class variant
     do_throw_index_mismatch(size_t yindex, const type_info& ytype)
     const
       {
-        noadl::sprintf_and_throw<invalid_argument>("variant: index mismatch (requesting `%d` [`%s`], got `%d` [`%s`]).",
+        noadl::sprintf_and_throw<invalid_argument>("variant: index mismatch (expecting `%d` [`%s`], got `%d` [`%s`]).",
                                                    static_cast<int>(yindex), ytype.name(),
                                                    static_cast<int>(this->index()), this->type().name());
       }
@@ -264,7 +278,7 @@ class variant
       {
         if(this->m_index != indexT)
           return nullptr;
-        return static_cast<const typename alternative_at<indexT>::type*>(static_cast<const void*>(this->m_stor));
+        return this->do_cast_storage<indexT>();
       }
 
     template<typename targetT,
@@ -284,7 +298,7 @@ class variant
       {
         if(this->m_index != indexT)
           return nullptr;
-        return static_cast<typename alternative_at<indexT>::type*>(static_cast<void*>(this->m_stor));
+        return this->do_cast_storage<indexT>();
       }
 
     template<typename targetT,
@@ -365,28 +379,26 @@ class variant
           // Destroy the old alternative.
           details_variant::dispatch_destroy<alternativesT...>(index_old, this->m_stor);
           // Construct the alternative in place.
-          noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)),
-                              ::std::forward<paramsT>(params)...);
+          noadl::construct_at(this->do_cast_storage<index_new>(), ::std::forward<paramsT>(params)...);
           this->m_index = index_new;
         }
         else {
           // Make a backup.
           typename aligned_union<1, alternativesT...>::type backup[1];
-          details_variant::dispatch_move_construct_then_destroy<alternativesT...>(index_old, backup, this->m_stor);
+          details_variant::dispatch_move_then_destroy<alternativesT...>(index_old, backup, this->m_stor);
           try {
             // Construct the alternative in place.
-            noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)),
-                                ::std::forward<paramsT>(params)...);
+            noadl::construct_at(this->do_cast_storage<index_new>(), ::std::forward<paramsT>(params)...);
             this->m_index = index_new;
           }
           catch(...) {
             // Move the backup back in case of exceptions.
-            details_variant::dispatch_move_construct_then_destroy<alternativesT...>(index_old, this->m_stor, backup);
+            details_variant::dispatch_move_then_destroy<alternativesT...>(index_old, this->m_stor, backup);
             details_variant::rethrow_current_exception();
           }
           details_variant::dispatch_destroy<alternativesT...>(index_old, backup);
         }
-        return *static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor));
+        return this->do_cast_storage<index_new>()[0];
       }
 
     template<typename targetT, typename... paramsT>
@@ -411,12 +423,12 @@ class variant
         else {
           // Swap active alternatives using an indeterminate buffer.
           typename aligned_union<1, alternativesT...>::type backup[1];
-          details_variant::dispatch_move_construct_then_destroy<alternativesT...>(index_old, backup, this->m_stor);
+          details_variant::dispatch_move_then_destroy<alternativesT...>(index_old, backup, this->m_stor);
           // Move-construct the other alternative in place.
-          details_variant::dispatch_move_construct_then_destroy<alternativesT...>(index_new, this->m_stor, other.m_stor);
+          details_variant::dispatch_move_then_destroy<alternativesT...>(index_new, this->m_stor, other.m_stor);
           this->m_index = index_new;
           // Move the backup into `other`.
-          details_variant::dispatch_move_construct_then_destroy<alternativesT...>(index_old, other.m_stor, backup);
+          details_variant::dispatch_move_then_destroy<alternativesT...>(index_old, other.m_stor, backup);
           other.m_index = index_old;
         }
         return *this;

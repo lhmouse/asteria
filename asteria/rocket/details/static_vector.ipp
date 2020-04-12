@@ -101,9 +101,9 @@ class storage_handle
         auto nmax = this->max_size();
         ROCKET_ASSERT(base <= nmax);
         if(nmax - base < add)
-          noadl::sprintf_and_throw<length_error>("static_vector: max size exceeded (`%llu` + `%llu` > `%llu`)",
-                                                 static_cast<unsigned long long>(base), static_cast<unsigned long long>(add),
-                                                 static_cast<unsigned long long>(nmax));
+          noadl::sprintf_and_throw<length_error>("static_vector: max size exceeded (`%lld` + `%lld` > `%lld`)",
+                                                 static_cast<long long>(base), static_cast<long long>(add),
+                                                 static_cast<long long>(nmax));
         return base + add;
       }
 
@@ -151,7 +151,8 @@ class storage_handle
         ROCKET_ASSERT(this->size() < this->capacity());
         auto ebase = this->m_ebase;
         size_t nelem = this->m_nelem;
-        allocator_traits<allocator_type>::construct(this->as_allocator(), ebase + nelem, ::std::forward<paramsT>(params)...);
+        allocator_traits<allocator_type>::construct(this->as_allocator(), ebase + nelem,
+                                                    ::std::forward<paramsT>(params)...);
         this->m_nelem = static_cast<decltype(m_nelem)>(++nelem);
         return ebase + nelem - 1;
       }

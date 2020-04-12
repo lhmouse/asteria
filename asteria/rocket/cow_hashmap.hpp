@@ -22,12 +22,16 @@ class cow_hashmap;
 #include "details/cow_hashmap.ipp"
 
 /* Differences from `std::unordered_map`:
- * 1. `begin()` and `end()` always return `const_iterator`s. `at()`, `front()` and `back()` always return `const_reference`s.
+ * 1. `begin()` and `end()` always return `const_iterator`s. `at()`, `front()` and `back()` always
+      return `const_reference`s.
  * 2. The copy constructor and copy assignment operator will not throw exceptions.
  * 3. Comparison operators are not provided.
- * 4. `emplace()` and `emplace_hint()` functions are not provided. `try_emplace()` is recommended as an alternative.
- * 5. There are no buckets. Bucket lookups and local iterators are not provided. Multimap cannot be implemented.
- * 6. The key and mapped types may be incomplete. The mapped type need be neither copy-assignable nor move-assignable.
+ * 4. `emplace()` and `emplace_hint()` functions are not provided. `try_emplace()` is recommended
+      as an alternative.
+ * 5. There are no buckets. Bucket lookups and local iterators are not provided. Multimap cannot
+      be implemented.
+ * 6. The key and mapped types may be incomplete. The mapped type need be neither copy-assignable
+      nor move-assignable.
  * 7. `erase()` may move elements around and invalidate iterators.
  * 8. `operator[]()` is not provided.
  */
@@ -37,8 +41,10 @@ class cow_hashmap
   {
     static_assert(!is_array<keyT>::value, "invalid key type");
     static_assert(!is_array<mappedT>::value, "invalid mapped value type");
-    static_assert(is_same<typename allocT::value_type, pair<const keyT, mappedT>>::value, "inappropriate allocator type");
-    static_assert(noexcept(::std::declval<const hashT&>()(::std::declval<const keyT&>())), "hash operations must not throw exceptions");
+    static_assert(is_same<typename allocT::value_type, pair<const keyT, mappedT>>::value,
+                  "inappropriate allocator type");
+    static_assert(noexcept(::std::declval<const hashT&>()(::std::declval<const keyT&>())),
+                  "hash operations must not throw exceptions");
 
   public:
     // types
@@ -114,13 +120,13 @@ class cow_hashmap
 
     template<typename inputT,
     ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
-    cow_hashmap(inputT first, inputT last, size_type res_arg = 0, const hasher& hf = hasher(), const key_equal& eq = key_equal(),
-                const allocator_type& alloc = allocator_type())
+    cow_hashmap(inputT first, inputT last, size_type res_arg = 0, const hasher& hf = hasher(),
+                const key_equal& eq = key_equal(), const allocator_type& alloc = allocator_type())
       : cow_hashmap(res_arg, hf, eq, alloc)
       { this->assign(::std::move(first), ::std::move(last));  }
 
-    cow_hashmap(initializer_list<value_type> init, size_type res_arg = 0, const hasher& hf = hasher(), const key_equal& eq = key_equal(),
-                const allocator_type& alloc = allocator_type())
+    cow_hashmap(initializer_list<value_type> init, size_type res_arg = 0, const hasher& hf = hasher(),
+                const key_equal& eq = key_equal(), const allocator_type& alloc = allocator_type())
       : cow_hashmap(res_arg, hf, eq, alloc)
       { this->assign(init);  }
 
@@ -343,7 +349,8 @@ class cow_hashmap
       {
         auto cnt = this->size();
         auto cap_new = this->m_sth.round_up_capacity(noadl::max(cnt, res_arg));
-        // If the storage is shared with other hashmaps, force rellocation to prevent copy-on-write upon modification.
+        // If the storage is shared with other hashmaps, force rellocation to prevent copy-on-write
+        // upon modification.
         if(this->unique() && (this->capacity() >= cap_new)) {
           return *this;
         }
@@ -486,9 +493,9 @@ class cow_hashmap
     try_emplace(ykeyT&& key, paramsT&&... params)
       {
         this->do_reserve_more(1);
-        auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
-                                                               ::std::forward_as_tuple(::std::forward<ykeyT>(key)),
-                                                               ::std::forward_as_tuple(::std::forward<paramsT>(params)...));
+        auto result = this->m_sth.keyed_emplace_unchecked(key,
+                          ::std::piecewise_construct, ::std::forward_as_tuple(::std::forward<ykeyT>(key)),
+                                                      ::std::forward_as_tuple(::std::forward<paramsT>(params)...));
         return ::std::make_pair(iterator(this->m_sth, result.first), result.second);
       }
 
@@ -503,7 +510,8 @@ class cow_hashmap
     template<typename ykeyT, typename yvalueT> pair<iterator, bool> insert_or_assign(ykeyT&& key, yvalueT&& yvalue)
       {
         this->do_reserve_more(1);
-        auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::forward<ykeyT>(key), ::std::forward<yvalueT>(yvalue));
+        auto result = this->m_sth.keyed_emplace_unchecked(key,
+                          ::std::forward<ykeyT>(key), ::std::forward<yvalueT>(yvalue));
         if(!result.second) {
           result.first->get()->second = ::std::forward<yvalueT>(yvalue);
         }

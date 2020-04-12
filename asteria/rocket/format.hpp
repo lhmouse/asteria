@@ -14,11 +14,13 @@ struct basic_formatter;
 
 template<typename charT, typename traitsT>
 basic_tinyfmt<charT, traitsT>&
-vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl, const basic_formatter<charT, traitsT>* pinsts, size_t ninsts);
+vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl,
+        const basic_formatter<charT, traitsT>* pinsts, size_t ninsts);
 
 template<typename charT, typename traitsT>
 basic_tinyfmt<charT, traitsT>&
-vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, const basic_formatter<charT, traitsT>* pinsts, size_t ninsts);
+vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl,
+        const basic_formatter<charT, traitsT>* pinsts, size_t ninsts);
 
 template<typename charT, typename traitsT, typename... paramsT>
 basic_tinyfmt<charT, traitsT>&
@@ -61,7 +63,8 @@ noexcept
 
 template<typename charT, typename traitsT>
 basic_tinyfmt<charT, traitsT>&
-vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl, const basic_formatter<charT, traitsT>* pinsts, size_t ninsts)
+vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl,
+        const basic_formatter<charT, traitsT>* pinsts, size_t ninsts)
   {
     // Get the range of `format`. The end pointer points to the null terminator.
     const charT* bp = stempl;
@@ -151,7 +154,8 @@ vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl, 
 
 template<typename charT, typename traitsT>
 basic_tinyfmt<charT, traitsT>&
-vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, const basic_formatter<charT, traitsT>* pinsts, size_t ninsts)
+vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl,
+        const basic_formatter<charT, traitsT>* pinsts, size_t ninsts)
   {
     return noadl::vformat(fmt, stempl, traitsT::length(stempl), pinsts, ninsts);
   }

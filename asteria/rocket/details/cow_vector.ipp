@@ -75,7 +75,8 @@ void
 dispatch_copy_storage(false_type, ignoreT&&, ptrT /*ptr*/, ptrT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/)
   {
     // Throw an exception unconditionally, even when there is nothing to copy.
-    noadl::sprintf_and_throw<domain_error>("cow_vector: `%s` not copy-constructible", typeid(typename allocT::value_type).name());
+    noadl::sprintf_and_throw<domain_error>("cow_vector: `%s` not copy-constructible",
+                                           typeid(typename allocT::value_type).name());
   }
 
 template<typename ptrT, typename allocT>
@@ -112,7 +113,8 @@ copy_storage(ptrT ptr, ptrT ptr_old, size_t off, size_t cnt)
   {
     dispatch_copy_storage<ptrT, allocT>(
        is_copy_constructible<typename allocT::value_type>(),  // copyable
-       conjunction<is_trivially_copy_constructible<typename allocT::value_type>, is_std_allocator<allocT>>(),  // memcpy
+       conjunction<is_trivially_copy_constructible<typename allocT::value_type>,
+                   is_std_allocator<allocT>>(),  // memcpy
        ptr, ptr_old, off, cnt);
   }
 
@@ -150,7 +152,8 @@ void
 move_storage(ptrT ptr, ptrT ptr_old, size_t off, size_t cnt)
   {
     dispatch_move_storage<ptrT, allocT>(
-       conjunction<is_trivially_move_constructible<typename allocT::value_type>, is_std_allocator<allocT>>(),  // memcpy
+       conjunction<is_trivially_move_constructible<typename allocT::value_type>,
+                   is_std_allocator<allocT>>(),  // memcpy
        ptr, ptr_old, off, cnt);
   }
 
@@ -204,7 +207,8 @@ class storage_handle
         if(ROCKET_EXPECT(!ptr))
           return;
         // This is needed for incomplete type support.
-        (*reinterpret_cast<void (*)(storage_pointer)>(reinterpret_cast<const storage_header*>(noadl::unfancy(ptr))->dtor))(ptr);
+        auto dtor = reinterpret_cast<const storage_header*>(noadl::unfancy(ptr))->dtor;
+        (*reinterpret_cast<void (*)(storage_pointer)>(dtor))(ptr);
       }
 
     ROCKET_NOINLINE static
@@ -293,9 +297,9 @@ class storage_handle
         auto nmax = this->max_size();
         ROCKET_ASSERT(base <= nmax);
         if(nmax - base < add)
-          noadl::sprintf_and_throw<length_error>("cow_vector: max size exceeded (`%llu` + `%llu` > `%llu`)",
-                                                 static_cast<unsigned long long>(base), static_cast<unsigned long long>(add),
-                                                 static_cast<unsigned long long>(nmax));
+          noadl::sprintf_and_throw<length_error>("cow_vector: max size exceeded (`%lld` + `%lld` > `%lld`)",
+                                                 static_cast<long long>(base), static_cast<long long>(add),
+                                                 static_cast<long long>(nmax));
         return base + add;
       }
 
@@ -351,6 +355,7 @@ class storage_handle
           return nullptr;
         }
         auto cap = this->check_size_add(0, res_arg);
+
         // Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
         auto nblk = storage::min_nblk_for_nelem(cap);
         storage_allocator st_alloc(this->as_allocator());
@@ -358,12 +363,15 @@ class storage_handle
 #ifdef ROCKET_DEBUG
         ::std::memset(static_cast<void*>(noadl::unfancy(ptr)), '*', sizeof(storage) * nblk);
 #endif
-        noadl::construct_at(noadl::unfancy(ptr), reinterpret_cast<void (*)(...)>(&storage_handle::do_drop_reference), this->as_allocator(), nblk);
+        auto dtor = reinterpret_cast<void (*)(...)>(storage_handle::do_drop_reference);
+        noadl::construct_at(noadl::unfancy(ptr), dtor, this->as_allocator(), nblk);
+
+        // Copy or move elements into the new block.
         auto ptr_old = this->m_ptr;
         if(ROCKET_UNEXPECT(ptr_old)) {
           try {
-            // Copy or move elements into the new block.
-            // Moving is only viable if the old and new allocators compare equal and the old block is owned exclusively.
+            // Moving is only viable if the old and new allocators compare equal and the old block
+            // is owned exclusively.
             if((ptr_old->alloc == ptr->alloc) && ptr_old->nref.unique()) {
               move_storage<storage_pointer, allocator_type>(ptr, ptr_old,       0, cnt_one);
               move_storage<storage_pointer, allocator_type>(ptr, ptr_old, off_two, cnt_two);
@@ -446,7 +454,8 @@ class storage_handle
         auto ptr = this->m_ptr;
         ROCKET_ASSERT(ptr);
         auto nelem = ptr->nelem;
-        allocator_traits<allocator_type>::construct(ptr->alloc, ptr->data + nelem, ::std::forward<paramsT>(params)...);
+        allocator_traits<allocator_type>::construct(ptr->alloc, ptr->data + nelem,
+                                                    ::std::forward<paramsT>(params)...);
         ptr->nelem = ++nelem;
         return ptr->data + nelem - 1;
       }

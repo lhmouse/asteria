@@ -100,9 +100,8 @@ class basic_tinybuf_file
           // Discard all characters preceding `*gcur`.
           auto nbump = static_cast<size_type>(gcur - this->m_gbuf.begin());
           if(traits_type::fgetn(this->m_file, this->m_gbuf.mut_begin(), nbump) != nbump)
-            noadl::sprintf_and_throw<runtime_error>("tinybuf_file: error resetting file position (errno `%d`, fileno `%d`)",
+            noadl::sprintf_and_throw<runtime_error>("tinybuf_file: read error (errno `%d`, fileno `%d`)",
                                                     errno, ::fileno(this->m_file));
-          // The input buffer is out of interest now.
         }
         // Deactivate the input buffer and clear the get area.
         this->m_goff = -1;
@@ -168,7 +167,7 @@ class basic_tinybuf_file
           noadl::sprintf_and_throw<invalid_argument>("tinybuf_file: no file opened");
         }
         if(::fseeko(this->m_file, off, whence) != 0) {
-          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: stream seek error (errno `%d`, fileno `%d`)",
+          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: seek error (errno `%d`, fileno `%d`)",
                                                   errno, ::fileno(this->m_file));
         }
         // Return the new offset.
@@ -218,7 +217,7 @@ class basic_tinybuf_file
         this->m_goff = goff;
         // Check for read errors.
         if((navail == 0) && ::ferror(this->m_file)) {
-          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: stream read error (errno `%d`, fileno `%d`)",
+          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: read error (errno `%d`, fileno `%d`)",
                                                   errno, ::fileno(this->m_file));
         }
         // Get the number of characters available in total.
@@ -256,7 +255,7 @@ class basic_tinybuf_file
           failed = traits_type::fputn(this->m_file, sadd, nadd) != nadd;
         }
         if(failed) {
-          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: stream write error (errno `%d`, fileno `%d`)",
+          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: write error (errno `%d`, fileno `%d`)",
                                                   errno, ::fileno(this->m_file));
         }
         return *this;
@@ -308,6 +307,7 @@ class basic_tinybuf_file
         int flags;
         char mstr[8];
         unsigned mlen = 0;
+
         // Translate read/write access flags.
         if(tinybuf_base::has_mode(mode, tinybuf_base::open_read_write)) {
           flags = O_RDWR;
@@ -322,10 +322,10 @@ class basic_tinybuf_file
           flags = O_WRONLY;
           mstr[mlen++] = 'w';
         }
-        else {
+        else
           noadl::sprintf_and_throw<invalid_argument>("tinybuf_file: no access specified (path `%s`, mode `%u`)",
                                                      path, mode);
-        }
+
         // Translate combination flags.
         if(tinybuf_base::has_mode(mode, tinybuf_base::open_append)) {
           flags |= O_APPEND;
@@ -344,20 +344,21 @@ class basic_tinybuf_file
           flags |= O_EXCL;
         }
         mstr[mlen] = 0;
+
         // Open the file.
         unique_posix_fd fd(::open(path, flags, 0666), ::close);
-        if(!fd) {
-          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: file open error (errno `%d`, path `%s`, mode `%u`)",
+        if(!fd)
+          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: open error (errno `%d`, path `%s`, mode `%u`)",
                                                   errno, path, mode);
-        }
+
         // Convert it to a `FILE*`.
         unique_posix_file file(::fdopen(fd, mstr), ::fclose);
-        if(!file) {
-          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: stream open error (errno `%d`, path `%s`, mode `%u`)",
+        if(!file)
+          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: open error (errno `%d`, path `%s`, mode `%u`)",
                                                   errno, path, mode);
-        }
         // If `fdopen()` succeeds it will have taken the ownership of `fd`.
         fd.release();
+
         // Discard the input buffer and close the file, ignoring any errors.
         return this->reset(::std::move(file));
       }
