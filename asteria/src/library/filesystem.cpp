@@ -211,10 +211,10 @@ std_filesystem_remove_recursive(V_string path)
       return 1;
     }
     switch(errno) {
-      case ENOENT: {
+      case ENOENT:
         // The path does not denote an existent file or directory.
         return 0;
-      }
+
       case ENOTDIR: {
         // This is something not a directory.
         if(::unlink(path.safe_c_str()) != 0)
@@ -223,10 +223,10 @@ std_filesystem_remove_recursive(V_string path)
         return 1;
       }
       case EEXIST:
-      case ENOTEMPTY: {
+      case ENOTEMPTY:
         // Remove contents first.
         return do_remove_recursive(path.safe_c_str());
-      }
+
       default:
         ASTERIA_THROW_SYSTEM_ERROR("rmdir");
     }

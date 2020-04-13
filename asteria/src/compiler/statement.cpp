@@ -461,9 +461,9 @@ const
             code.emplace_back(::std::move(xnode));
             return code;
           }
-          case jump_target_switch: {
+          case jump_target_switch:
             ASTERIA_TERMINATE("`target_switch` not allowed to follow `continue`");
-          }
+
           case jump_target_while: {
             AIR_Node::S_simple_status xnode = { air_status_continue_while };
             code.emplace_back(::std::move(xnode));

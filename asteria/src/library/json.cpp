@@ -227,15 +227,15 @@ do_find_uncensored(const V_object& object, V_object::const_iterator from)
 tinyfmt&
 do_format_scalar(tinyfmt& fmt, const Value& value, bool json5)
   {
-    switch(::rocket::weaken_enum(value.vtype())) {
-      case vtype_boolean: {
+    switch(weaken_enum(value.vtype())) {
+      case vtype_boolean:
         // Write `true` or `false`.
         return fmt << value.as_boolean();
-      }
-      case vtype_integer: {
+
+      case vtype_integer:
         // Write the integer in decimal.
         return fmt << V_real(value.as_integer());
-      }
+
       case vtype_real: {
         // Is the value finite?
         switch(::std::fpclassify(value.as_real())) {

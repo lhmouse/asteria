@@ -41,13 +41,13 @@ is_convertible_to_real()
 const
 noexcept
   {
-    switch(::rocket::weaken_enum(this->vtype())) {
-      case vtype_integer: {
+    switch(weaken_enum(this->vtype())) {
+      case vtype_integer:
         return true;
-      }
-      case vtype_real: {
+
+      case vtype_real:
         return true;
-      }
+
       default:
         return false;
     }
@@ -58,7 +58,7 @@ Value::
 convert_to_real()
 const
   {
-    switch(::rocket::weaken_enum(this->vtype())) {
+    switch(weaken_enum(this->vtype())) {
       case vtype_integer:
         return static_cast<V_real>(this->m_stor.as<vtype_integer>());
 
@@ -74,7 +74,7 @@ V_real&
 Value::
 mutate_into_real()
   {
-    switch(::rocket::weaken_enum(this->vtype())) {
+    switch(weaken_enum(this->vtype())) {
       case vtype_integer:
         return this->m_stor.emplace<vtype_real>(static_cast<V_real>(this->m_stor.as<vtype_integer>()));
 

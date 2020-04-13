@@ -61,10 +61,10 @@ do_get_base(const char*& rp, const char* eptr, uint8_t ibase)
       }
       case 2:
       case 10:
-      case 16: {
+      case 16:
         // Prefer `ibase` if it is specified explicitly.
         return ibase;
-      }
+
       default:
         noadl::sprintf_and_throw<invalid_argument>("ascii_numget: invalid radix (`%d` not 2, 10 or 16)", ibase);
     }
