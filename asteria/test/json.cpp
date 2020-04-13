@@ -29,8 +29,8 @@ int main()
         assert std.json.format({}) == "{}";
         assert std.json.format({a:1}) == "{\"a\":1}";
         assert std.json.format({'$42':1}) == "{\"$42\":1}";
-        assert std.json.format({a:infinity}) == "{\"a\":null}";
-        assert std.json.format({a:1,b:std.json.format}) == "{\"a\":1}";
+        assert std.json.format({ab:infinity}) == "{\"ab\":null}";
+        assert std.json.format({ab:1,cde:std.json.format}) == "{\"ab\":1}";
 
         assert std.json.format([[1,2],[3,4]]) == "[[1,2],[3,4]]";
         assert std.json.format([[1,2],[3,4]], "") == "[[1,2],[3,4]]";
@@ -38,6 +38,9 @@ int main()
         assert std.json.format([[1,2],[3,4]], 0) == "[[1,2],[3,4]]";
         assert std.json.format([[1,2],[3,4]], -1) == "[[1,2],[3,4]]";
         assert std.json.format([[1,2],[3,4]], 2) == "[\n  [\n    1,\n    2\n  ],\n  [\n    3,\n    4\n  ]\n]";
+
+        assert std.json.format({a:1,bc:2}, 2) == "{\n  \"a\": 1,\n  \"bc\": 2\n}" ||
+               std.json.format({a:1,bc:2}, 2) == "{\n  \"bc\": 2,\n  \"a\": 1\n}";
 
         assert std.json.format5(null) == "null";
         assert std.json.format5(true) == "true";
@@ -49,22 +52,25 @@ int main()
         assert std.json.format5("\a\b\v\f\n\r\t") == "\"\\u0007\\b\\u000B\\f\\n\\r\\t\"";
 
         assert std.json.format5([]) == "[]";
-        assert std.json.format5([0]) == "[0,]";
-        assert std.json.format5([0,1]) == "[0,1,]";
-        assert std.json.format5([0,nan,2]) == "[0,NaN,2,]";
+        assert std.json.format5([0]) == "[0]";
+        assert std.json.format5([0,1]) == "[0,1]";
+        assert std.json.format5([0,nan,2]) == "[0,NaN,2]";
 
         assert std.json.format5({}) == "{}";
-        assert std.json.format5({a:1}) == "{a:1,}";
-        assert std.json.format5({'$42':1}) == "{\"$42\":1,}";
-        assert std.json.format5({a:infinity}) == "{a:Infinity,}";
-        assert std.json.format5({a:1,b:std.json.format5}) == "{a:1,}";
+        assert std.json.format5({a:1}) == "{a:1}";
+        assert std.json.format5({'$42':1}) == "{\"$42\":1}";
+        assert std.json.format5({ab:infinity}) == "{ab:Infinity}";
+        assert std.json.format5({ab:1,cde:std.json.format5}) == "{ab:1}";
 
-        assert std.json.format5([[1,2],[3,4]]) == "[[1,2,],[3,4,],]";
-        assert std.json.format5([[1,2],[3,4]], "") == "[[1,2,],[3,4,],]";
+        assert std.json.format5([[1,2],[3,4]]) == "[[1,2],[3,4]]";
+        assert std.json.format5([[1,2],[3,4]], "") == "[[1,2],[3,4]]";
         assert std.json.format5([[1,2],[3,4]], "!*") == "[\n!*[\n!*!*1,\n!*!*2,\n!*],\n!*[\n!*!*3,\n!*!*4,\n!*],\n]";
-        assert std.json.format5([[1,2],[3,4]], 0) == "[[1,2,],[3,4,],]";
-        assert std.json.format5([[1,2],[3,4]], -1) == "[[1,2,],[3,4,],]";
+        assert std.json.format5([[1,2],[3,4]], 0) == "[[1,2],[3,4]]";
+        assert std.json.format5([[1,2],[3,4]], -1) == "[[1,2],[3,4]]";
         assert std.json.format5([[1,2],[3,4]], 2) == "[\n  [\n    1,\n    2,\n  ],\n  [\n    3,\n    4,\n  ],\n]";
+
+        assert std.json.format5({a:1,bcd:2}, 2) == "{\n  a: 1,\n  bcd: 2,\n}" ||
+               std.json.format5({a:1,bcd:2}, 2) == "{\n  bcd: 2,\n  a: 1,\n}";
 
         try { std.json.parse("");  assert false;  }
           catch(e) { assert std.string.find(e, "assertion failure") == null;  }

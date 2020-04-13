@@ -35,6 +35,13 @@ class Indenter
     void
     decrement_level()
       = 0;
+
+    virtual
+    bool
+    has_indention()
+    const
+    noexcept
+      = 0;
   };
 
 Indenter::
@@ -67,6 +74,13 @@ final
     decrement_level()
     override
       { }
+
+    bool
+    has_indention()
+    const
+    noexcept
+    override
+      { return false;  }
   };
 
 class Indenter_string
@@ -99,6 +113,13 @@ final
     decrement_level()
     override
       { this->m_cur.pop_back(this->m_add.size());  }
+
+    bool
+    has_indention()
+    const
+    noexcept
+    override
+      { return this->m_add.size();  }
   };
 
 class Indenter_spaces
@@ -131,6 +152,13 @@ final
     decrement_level()
     override
       { this->m_cur -= this->m_add;  }
+
+    bool
+    has_indention()
+    const
+    noexcept
+    override
+      { return this->m_add;  }
   };
 
 tinyfmt&
@@ -205,8 +233,8 @@ do_quote_string(tinyfmt& fmt, const cow_string& str)
 tinyfmt&
 do_quote_object_key(tinyfmt& fmt, bool json5, const cow_string& name)
   {
-    if(json5 && !name.empty() && is_cctype(name[0], cctype_namei) &&
-               ::std::none_of(name.begin() + 1, name.end(),
+    if(json5 && name.size() && is_cctype(name[0], cctype_namei) &&
+                ::std::all_of(name.begin() + 1, name.end(),
                               [](char c) { return is_cctype(c, cctype_namei | cctype_digit);  }))
       return fmt << name;
     else
@@ -317,6 +345,8 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
           // Write the key followed by a colon.
           do_quote_object_key(fmt, json5, curp->first);
           fmt << ':';
+          if(indent.has_indention())
+            fmt << ' ';
           // Decend into the object.
           S_xformat_object ctxo = { ::rocket::ref(object), curp };
           stack.emplace_back(::std::move(ctxo));
@@ -349,10 +379,9 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
             qvalue = ::std::addressof(*curp);
             break;
           }
-          if(json5) {
-            // Add a trailing comma.
+          // Add a trailing comma.
+          if(json5 && indent.has_indention())
             fmt << ',';
-          }
           // Unindent the body.
           indent.decrement_level();
           indent.break_line(fmt);
@@ -370,15 +399,16 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
             // Write the key followed by a colon.
             do_quote_object_key(fmt, json5, curp->first);
             fmt << ':';
+            if(indent.has_indention())
+              fmt << ' ';
             // Format the next value.
             ctxo.curp = curp;
             qvalue = ::std::addressof(curp->second);
             break;
           }
-          if(json5) {
-            // Add a trailing comma.
+          // Add a trailing comma.
+          if(json5 && indent.has_indention())
             fmt << ',';
-          }
           // Unindent the body.
           indent.decrement_level();
           indent.break_line(fmt);
@@ -802,9 +832,10 @@ create_bindings_json(V_object& result, API_Version /*version*/)
   * Converts a value to a string in the JSON5 format. In addition
     to IETF RFC 7159, a few extensions in ECMAScript 5.1 have been
     introduced to make the syntax more human-readable. Infinities
-    and NaNs are preserved. Array and object members always contain
-    trailing commas. Object keys that are valid identifiers are not
-    quoted. This function is otherwise identical to `format()`.
+    and NaNs are preserved. Object keys that are valid identifiers
+    are not quoted. Trailing commas of array and object members are
+    appended if `indent` is neither null nor zero nor an empty
+    string. This function is otherwise identical to `format()`.
 
   * Returns the formatted text as a string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
