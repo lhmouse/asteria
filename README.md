@@ -1,3 +1,5 @@
+# The Asteria Programming Language
+
 ![README](https://raw.githubusercontent.com/lhmouse/asteria/master/README.png)
 
 |CI            |Category                   |Build on OS     |Host OS         |Build Status     |Remarks          |
@@ -18,22 +20,6 @@
 |**MSVC 19** |:no_entry:Abandoned        |Little build system support. Internal compiler errors.   |
 
 ![GNU nano for the win!](https://raw.githubusercontent.com/lhmouse/asteria/master/GNU-nano-FTW.png)
-
-# How to Build
-
-```sh
-$ autoreconf -i  # requires autoconf, automake and libtool
-$ ./configure
-$ make -j$(nproc)
-```
-
-# The REPL
-
-```sh
-$ ./bin/asteria
-```
-
-### WIP
 
 # Concepts
 
@@ -64,7 +50,30 @@ However, compared with typed languages such as **Java**, **JavaScript** has a fe
 1. A number is always a `Number`. There are no integer types of varieties of widths, which simplifies programming. Unlike integers, `Number`s never overflow.
 2. Being untyped, a function can be passed around like objects without knowing its parameters.
 
-**Asteria** is highly inspired by **JavaScript** but has been designed to address such issues.
+**Asteria** has been highly inspired by **JavaScript** but has been designed to address such issues.
+
+# Features
+
+1. Sane and clean.
+2. Self-consistent.
+3. Simple to use.
+4. Lightweight.
+5. Procedural.
+6. Dynamically typed.
+7. Easy to integrate in a C++ project. (C++14 and hexadecimal floating-point literals are required.)
+8. Native to C++ exceptions, particularly `std::bad_alloc`.
+
+# Characteristics
+
+1. First-class functions.
+2. Closure functions.
+3. Exceptions.
+4. Flexible syntax similar to **C++** and **JavaScript**.
+5. Regular grammar.
+6. Argument passing (by value or reference) determined by the **argument** rather than the **parameter**.
+7. Idempotently copyable values basing on copy-on-write.
+8. Minimal garbage collection support.
+9. Structured binding similar to **C++17**.
 
 # Data Types
 
@@ -102,30 +111,21 @@ func add(x) { return x + inc;  };   // return by value
 // `add(5)` refers to a "temporary" holding an `integer` of `47`.
 ```
 
+# How to Build
+
+```sh
+$ autoreconf -i  # requires autoconf, automake and libtool
+$ ./configure
+$ make -j$(nproc)
+```
+
+# The REPL
+
+```sh
+$ ./bin/asteria
+```
+
 # WIP
-
-# Features
-
-1. Sane and clean.
-2. Self-consistent.
-3. Simple to use.
-4. Lightweight.
-5. Procedural.
-6. Dynamically typed.
-7. Easy to integrate in a C++ project. (C++14 and hexadecimal floating-point literals are required.)
-8. Native to C++ exceptions, particularly `std::bad_alloc`.
-
-# Characteristics
-
-1. First-class functions.
-2. Closure functions.
-3. Exceptions.
-4. Flexible syntax similar to **C++** and **JavaScript**.
-5. Regular grammar.
-6. Argument passing (by value or reference) determined by the **argument** rather than the **parameter**.
-7. Idempotently copyable values basing on copy-on-write.
-8. Minimal garbage collection support.
-9. Structured binding similar to **C++17**.
 
 # License
 
