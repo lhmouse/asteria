@@ -715,9 +715,9 @@ do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
           const auto& f = except.frame(i);
           // Translate each frame into a human-readable format.
           V_object r;
-          r.try_emplace(::rocket::sref("frame"), V_string(::rocket::sref(f.what_type())));
-          r.try_emplace(::rocket::sref("file"), V_string(f.file()));
-          r.try_emplace(::rocket::sref("line"), V_integer(f.line()));
+          r.try_emplace(::rocket::sref("frame"), ::rocket::sref(f.what_type()));
+          r.try_emplace(::rocket::sref("file"), f.file());
+          r.try_emplace(::rocket::sref("line"), f.line());
           r.try_emplace(::rocket::sref("value"), f.value());
           // Append this frame.
           backtrace.emplace_back(::std::move(r));
@@ -864,7 +864,7 @@ do_define_function(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
     auto qtarget = optmz.create_function(sloc, func);
 
     // Push the function as a temporary.
-    Reference_root::S_temporary xref = { V_function(::std::move(qtarget)) };
+    Reference_root::S_temporary xref = { ::std::move(qtarget) };
     ctx.stack().push(::std::move(xref));
     return air_status_next;
   }
@@ -963,6 +963,7 @@ do_pop_positional_arguments(Executive_Context& ctx, size_t nargs)
       static_cast<void>(arg.read());
       // Set the argument as is.
       args.mut(i) = ::std::move(arg);
+      args.mut(i) = ::std::move(ctx.stack().open_top());
       ctx.stack().pop();
     }
     return args;
@@ -1092,7 +1093,7 @@ ROCKET_PURE_FUNCTION
 V_real
 do_operator_SQRT(int64_t rhs)
   {
-    return ::std::sqrt(V_real(rhs));
+    return ::std::sqrt(double(rhs));
   }
 
 ROCKET_PURE_FUNCTION
@@ -1209,7 +1210,7 @@ do_operator_SLL(int64_t lhs, int64_t rhs)
     if(rhs >= 64) {
       return 0;
     }
-    return V_integer(static_cast<uint64_t>(lhs) << rhs);
+    return int64_t(uint64_t(lhs) << rhs);
   }
 
 ROCKET_PURE_FUNCTION
@@ -1222,7 +1223,7 @@ do_operator_SRL(int64_t lhs, int64_t rhs)
     if(rhs >= 64) {
       return 0;
     }
-    return V_integer(static_cast<uint64_t>(lhs) >> rhs);
+    return int64_t(uint64_t(lhs) >> rhs);
   }
 
 ROCKET_PURE_FUNCTION
@@ -1238,13 +1239,13 @@ do_operator_SLA(int64_t lhs, int64_t rhs)
     if(rhs >= 64) {
       ASTERIA_THROW("integer left shift overflow (operands were `$1` and `$2`)", lhs, rhs);
     }
-    auto bc = static_cast<int>(63 - rhs);
-    auto mask_out = static_cast<uint64_t>(lhs) >> bc << bc;
-    auto mask_sbt = static_cast<uint64_t>(lhs >> 63) << bc;
+    auto bc = 63 - int(rhs);
+    auto mask_out = uint64_t(lhs) >> bc << bc;
+    auto mask_sbt = uint64_t(lhs >> 63) << bc;
     if(mask_out != mask_sbt) {
       ASTERIA_THROW("integer left shift overflow (operands were `$1` and `$2`)", lhs, rhs);
     }
-    return V_integer(static_cast<uint64_t>(lhs) << rhs);
+    return int64_t(uint64_t(lhs) << rhs);
   }
 
 ROCKET_PURE_FUNCTION
@@ -1364,7 +1365,7 @@ do_cast_to_integer(double value)
     if(!::std::islessequal(-0x1p63, value) || !::std::islessequal(value, 0x1p63 - 0x1p10)) {
       ASTERIA_THROW("value not representable as an `integer` (operand was `$1`)", value);
     }
-    return V_integer(value);
+    return int64_t(value);
   }
 
 ROCKET_PURE_FUNCTION
@@ -1836,28 +1837,28 @@ do_apply_xop_LENGTHOF(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
     // This operator is unary.
     const auto& rhs = ctx.stack().get_top().read();
     // Return the number of elements in the operand.
-    size_t nelems;
+    ptrdiff_t nelems;
     switch(weaken_enum(rhs.vtype())) {
       case vtype_null: {
         nelems = 0;
         break;
       }
       case vtype_string: {
-        nelems = rhs.as_string().size();
+        nelems = rhs.as_string().ssize();
         break;
       }
       case vtype_array: {
-        nelems = rhs.as_array().size();
+        nelems = rhs.as_array().ssize();
         break;
       }
       case vtype_object: {
-        nelems = rhs.as_object().size();
+        nelems = rhs.as_object().ssize();
         break;
       }
       default:
         ASTERIA_THROW("prefix `lengthof` not applicable (operand was `$1`)", rhs);
     }
-    do_set_temporary(ctx.stack(), assign, V_integer(nelems));
+    do_set_temporary(ctx.stack(), assign, nelems);
     return air_status_next;
   }
 
@@ -1871,7 +1872,7 @@ do_apply_xop_TYPEOF(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
     const auto& rhs = ctx.stack().get_top().read();
     // Return the type name of the operand.
     // N.B. This is one of the few operators that work on all types.
-    do_set_temporary(ctx.stack(), assign, V_string(::rocket::sref(rhs.what_vtype())));
+    do_set_temporary(ctx.stack(), assign, ::rocket::sref(rhs.what_vtype()));
     return air_status_next;
   }
 
@@ -2202,7 +2203,7 @@ do_apply_xop_CMP_XEQ(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
     // Report unordered operands as being unequal.
     // N.B. This is one of the few operators that work on all types.
     auto comp = lhs.compare(rhs);
-    do_set_temporary(ctx.stack(), assign, V_boolean((comp == expect) ^ negative));
+    do_set_temporary(ctx.stack(), assign, (comp == expect) != negative);
     return air_status_next;
   }
 
@@ -2224,7 +2225,7 @@ do_apply_xop_CMP_XREL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
     if(comp == compare_unordered) {
       ASTERIA_THROW("values not comparable (operands were `$1` and `$2`)", lhs, rhs);
     }
-    do_set_temporary(ctx.stack(), assign, V_boolean((comp == expect) ^ negative));
+    do_set_temporary(ctx.stack(), assign, (comp == expect) != negative);
     return air_status_next;
   }
 
@@ -2243,19 +2244,19 @@ do_apply_xop_CMP_3WAY(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
     auto comp = lhs.compare(rhs);
     switch(comp) {
       case compare_greater: {
-        do_set_temporary(ctx.stack(), assign, V_integer(+1));
+        do_set_temporary(ctx.stack(), assign, +1);
         break;
       }
       case compare_less: {
-        do_set_temporary(ctx.stack(), assign, V_integer(-1));
+        do_set_temporary(ctx.stack(), assign, -1);
         break;
       }
       case compare_equal: {
-        do_set_temporary(ctx.stack(), assign, V_integer(0));
+        do_set_temporary(ctx.stack(), assign, 0);
         break;
       }
       case compare_unordered: {
-        do_set_temporary(ctx.stack(), assign, V_string(::rocket::sref("<unordered>")));
+        do_set_temporary(ctx.stack(), assign, ::rocket::sref("<unordered>"));
         break;
       }
       default:
@@ -2853,7 +2854,7 @@ do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
       args.assign(static_cast<size_t>(nvargs), gself);
       for(size_t i = 0;  i < args.size();  ++i) {
         // Initialize the argument list for the generator.
-        Reference_root::S_constant xref = { V_integer(i) };
+        Reference_root::S_constant xref = { int64_t(i) };
         gargs.clear().emplace_back(::std::move(xref));
         // Generate an argument. Ensure it is dereferenceable.
         do_invoke_nontail(args.mut(i), sloc, ctx, generator, ::std::move(gargs));
