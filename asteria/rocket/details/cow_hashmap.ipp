@@ -35,6 +35,7 @@ class bucket
     pointer m_ptr;
 
   public:
+    // This cannot be `constexpr` as `m_ptr` may be left uninitialized.
     bucket()
     noexcept
       = default;
@@ -751,6 +752,7 @@ class hashmap_iterator
     bucket_type* m_bkt;
 
   private:
+    // These constructors are called by the container.
     constexpr
     hashmap_iterator(const parent_type* ref, bucket_type* bkt)
     noexcept

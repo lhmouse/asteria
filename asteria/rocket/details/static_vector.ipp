@@ -197,6 +197,7 @@ class vector_iterator
     pointer m_ptr;
 
   private:
+    // These constructors are called by the container.
     constexpr
     vector_iterator(const parent_type* ref, pointer ptr)
     noexcept
