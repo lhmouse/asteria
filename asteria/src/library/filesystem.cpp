@@ -322,7 +322,6 @@ std_filesystem_directory_remove(V_string path)
     }
     if(errno != ENOENT)
       ASTERIA_THROW_SYSTEM_ERROR("rmdir");
-
     // The directory does not exist.
     return false;
   }
@@ -335,6 +334,7 @@ std_filesystem_file_read(V_string path, optV_integer offset, optV_integer limit)
     }
     int64_t roffset = offset.value_or(0);
     int64_t rlimit = ::rocket::clamp(limit.value_or(INT32_MAX), 0, 0x10'00000);
+
     // Open the file for reading.
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
     if(!fd) {
@@ -366,13 +366,14 @@ optV_integer
 std_filesystem_file_stream(Global_Context& global, V_string path, V_function callback,
                            optV_integer offset, optV_integer limit)
   {
-    if(offset && (*offset < 0)) {
+    if(offset && (*offset < 0))
       ASTERIA_THROW("negative file offset (offset `$1`)", *offset);
-    }
     int64_t roffset = offset.value_or(0);
+
     int64_t rlimit = ::rocket::clamp(limit.value_or(INT32_MAX), 0, 0x10'00000);
     int64_t ntotal = 0;
     int64_t ntlimit = ::rocket::max(limit.value_or(INT64_MAX), 0);
+
     // Open the file for reading.
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
     if(!fd) {
@@ -426,19 +427,21 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
 void
 std_filesystem_file_write(V_string path, V_string data, optV_integer offset)
   {
-    if(offset && (*offset < 0)) {
+    if(offset && (*offset < 0))
       ASTERIA_THROW("negative file offset (offset `$1`)", *offset);
-    }
     int64_t roffset = offset.value_or(0);
+
     // Calculate the `flags` argument.
     // If we are to write from the beginning, truncate the file at creation.
     int flags = O_WRONLY | O_CREAT | O_APPEND;
     if(roffset == 0)
       flags |= O_TRUNC;
+
     // Open the file for writing.
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), flags, 0666), ::close);
     if(!fd)
       ASTERIA_THROW_SYSTEM_ERROR("open");
+
     // Set the file pointer when an offset is specified, even when it is an explicit zero.
     if(offset) {
       // If `roffset` is not zero, truncate the file there.
@@ -447,6 +450,7 @@ std_filesystem_file_write(V_string path, V_string data, optV_integer offset)
       if(::ftruncate(fd, roffset) != 0)
         ASTERIA_THROW_SYSTEM_ERROR("ftruncate");
     }
+
     // Write all data.
     ::ssize_t nwrtn = do_write_loop(fd, data.data(), data.size());
     if(nwrtn < data.ssize())
@@ -459,10 +463,13 @@ std_filesystem_file_append(V_string path, V_string data, optV_boolean exclusive)
     int flags = O_WRONLY | O_CREAT | O_APPEND;
     if(exclusive == true)
       flags |= O_EXCL;
+
+    // Calculate the `flags` argument.
     // Open the file for writing.
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), flags, 0666), ::close);
     if(!fd)
       ASTERIA_THROW_SYSTEM_ERROR("open");
+
     // Write all data.
     ::ssize_t nwrtn = do_write_loop(fd, data.data(), data.size());
     if(nwrtn < data.ssize())
@@ -476,12 +483,14 @@ std_filesystem_file_copy_from(V_string path_new, V_string path_old)
     ::rocket::unique_posix_fd fd_old(::open(path_old.safe_c_str(), O_RDONLY), ::close);
     if(!fd_old)
       ASTERIA_THROW_SYSTEM_ERROR("open");
+
     // Get the file mode and preferred I/O block size.
     struct ::stat stb_old;
     if(::fstat(fd_old, &stb_old) != 0)
       ASTERIA_THROW_SYSTEM_ERROR("fstat");
     // We always overwrite the destination file.
     int flags = O_WRONLY | O_CREAT | O_TRUNC | O_APPEND;
+
     // Create the new file, discarding its contents.
     ::rocket::unique_posix_fd fd_new(::open(path_new.safe_c_str(), flags, 0200), ::close);
     if(!fd_new)
@@ -518,7 +527,6 @@ std_filesystem_file_remove(V_string path)
     }
     if(errno != ENOENT)
       ASTERIA_THROW_SYSTEM_ERROR("unlink");
-
     // The file does not exist.
     return false;
   }
