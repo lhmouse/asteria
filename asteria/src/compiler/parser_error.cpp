@@ -3,7 +3,6 @@
 
 #include "../precompiled.hpp"
 #include "parser_error.hpp"
-#include "../utilities.hpp"
 
 namespace Asteria {
 
@@ -21,7 +20,7 @@ void
 Parser_Error::
 do_compose_message()
   {
-    // Reuse the string.
+    // Reuse the storage if any.
     ::rocket::tinyfmt_str fmt;
     fmt.set_string(::std::move(this->m_what));
     fmt.clear_string();

@@ -952,7 +952,7 @@ class basic_cow_string
     insert(size_type tpos, const basic_cow_string& other, size_type pos = 0, size_type n = npos)
       {
         this->do_clamp_substr(tpos, 0);  // just check
-        this->do_replace_no_bound_check(tpos, tpos, details_cow_string::append, other, pos, n);
+        this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, other, pos, n);
         return *this;
       }
 
@@ -960,7 +960,7 @@ class basic_cow_string
     insert(size_type tpos, const value_type* s, size_type n)
       {
         this->do_clamp_substr(tpos, 0);  // just check
-        this->do_replace_no_bound_check(tpos, tpos, details_cow_string::append, s, n);
+        this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, s, n);
         return *this;
       }
 
@@ -968,7 +968,7 @@ class basic_cow_string
     insert(size_type tpos, const value_type* s)
       {
         this->do_clamp_substr(tpos, 0);  // just check
-        this->do_replace_no_bound_check(tpos, tpos, details_cow_string::append, s);
+        this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, s);
         return *this;
       }
 
@@ -976,7 +976,7 @@ class basic_cow_string
     insert(size_type tpos, size_type n, value_type ch)
       {
         this->do_clamp_substr(tpos, 0);  // just check
-        this->do_replace_no_bound_check(tpos, tpos, details_cow_string::append, n, ch);
+        this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, n, ch);
         return *this;
       }
 
@@ -985,7 +985,7 @@ class basic_cow_string
     insert(size_type tpos, initializer_list<value_type> init)
       {
         this->do_clamp_substr(tpos, 0);  // just check
-        this->do_replace_no_bound_check(tpos, tpos, details_cow_string::append, init);
+        this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, init);
         return *this;
       }
 
