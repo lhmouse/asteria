@@ -68,7 +68,6 @@ class AVMC_Queue
         const noexcept
           { return {{ this->paramu_x32, this->paramu_x16 }};  }
 
-        constexpr
         Symbols*
         symbols()
         const noexcept
@@ -80,7 +79,6 @@ class AVMC_Queue
         const noexcept
           { return !this->has_syms ? 0 : (sizeof(Symbols) - 1) / sizeof(Header) + 1;  }
 
-        constexpr
         void*
         paramv()
         const noexcept
