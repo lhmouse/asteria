@@ -39,8 +39,7 @@ class Simple_Script
   public:
     const Compiler_Options&
     get_options()
-    const
-    noexcept
+    const noexcept
       { return this->m_opts;  }
 
     Compiler_Options&
@@ -55,8 +54,7 @@ class Simple_Script
 
     explicit operator
     bool()
-    const
-    noexcept
+    const noexcept
       { return bool(this->m_func);  }
 
     Simple_Script&
@@ -66,8 +64,7 @@ class Simple_Script
 
     operator
     const cow_function&()
-    const
-    noexcept
+    const noexcept
       { return this->m_func;  }
 
     // Load a script.

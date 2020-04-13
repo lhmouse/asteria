@@ -36,8 +36,7 @@ class Sentry
   public:
     explicit operator
     bool()
-    const
-    noexcept
+    const noexcept
       { return this->m_old == 0;  }
   };
 

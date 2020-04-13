@@ -67,21 +67,17 @@ class Runtime_Error
   public:
     const char*
     what()
-    const
-    noexcept
-    override
+    const noexcept override
       { return this->m_what.c_str();  }
 
     const Value&
     value()
-    const
-    noexcept
+    const noexcept
       { return this->m_value;  }
 
     size_t
     count_frames()
-    const
-    noexcept
+    const noexcept
       { return this->m_frames.size();  }
 
     const Backtrace_Frame&

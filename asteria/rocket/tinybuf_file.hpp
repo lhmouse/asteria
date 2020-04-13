@@ -114,8 +114,7 @@ class basic_tinybuf_file
   protected:
     off_type
     do_fortell()
-    const
-    override
+    const override
       {
         if(!this->m_file) {
           // No file has been opened. There are no characters to read.
@@ -265,14 +264,12 @@ class basic_tinybuf_file
   public:
     handle_type
     get_handle()
-    const
-    noexcept
+    const noexcept
       { return this->m_file.get();  }
 
     const closer_type&
     get_closer()
-    const
-    noexcept
+    const noexcept
       { return this->m_file.get_closer();  }
 
     closer_type&

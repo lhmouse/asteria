@@ -43,8 +43,7 @@ final
   public:
     const Value&
     get_value()
-    const
-    noexcept
+    const noexcept
       { return this->m_value;  }
 
     Value&
@@ -53,8 +52,7 @@ final
 
     bool
     is_immutable()
-    const
-    noexcept
+    const noexcept
       { return this->m_immut;  }
 
     Variable&
@@ -64,8 +62,7 @@ final
 
     bool
     is_initialized()
-    const
-    noexcept
+    const noexcept
       { return this->m_alive;  }
 
     template<typename XValT>
@@ -90,14 +87,12 @@ final
 
     long
     gcref_split()
-    const
-    noexcept
+    const noexcept
       { return this->m_value.gcref_split();  }
 
     long
     get_gcref()
-    const
-    noexcept
+    const noexcept
       { return this->m_gcref_i;  }
 
     Variable&

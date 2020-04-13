@@ -50,29 +50,25 @@ class reference_wrapper
     constexpr
     reference
     get()
-    const
-    noexcept
+    const noexcept
       { return *(this->m_ptr);  }
 
     constexpr
     pointer
     ptr()
-    const
-    noexcept
+    const noexcept
       { return this->m_ptr;  }
 
     constexpr
     operator
     reference ()
-    const
-    noexcept
+    const noexcept
       { return this->get();  }
 
     constexpr
     pointer
     operator->()
-    const
-    noexcept
+    const noexcept
       { return this->ptr();  }
   };
 

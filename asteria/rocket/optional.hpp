@@ -161,14 +161,12 @@ class optional
     constexpr
     bool
     has_value()
-    const
-    noexcept
+    const noexcept
       { return this->m_stor.size() != 0;  }
 
     explicit constexpr operator
     bool()
-    const
-    noexcept
+    const noexcept
       { return this->m_stor.size() != 0;  }
 
     const_reference

@@ -61,57 +61,49 @@ class array
     constexpr
     const_iterator
     begin()
-    const
-    noexcept
+    const noexcept
       { return this->m_stor; }
 
     constexpr
     const_iterator
     end()
-    const
-    noexcept
+    const noexcept
       { return this->m_stor + capacityT;  }
 
     constexpr
     const_reverse_iterator
     rbegin()
-    const
-    noexcept
+    const noexcept
       { return const_reverse_iterator(this->end());  }
 
     constexpr
     const_reverse_iterator
     rend()
-    const
-    noexcept
+    const noexcept
       { return const_reverse_iterator(this->begin());  }
 
     constexpr
     const_iterator
     cbegin()
-    const
-    noexcept
+    const noexcept
       { return this->begin();  }
 
     constexpr
     const_iterator
     cend()
-    const
-    noexcept
+    const noexcept
       { return this->end();  }
 
     constexpr
     const_reverse_iterator
     crbegin()
-    const
-    noexcept
+    const noexcept
       { return this->rbegin();  }
 
     constexpr
     const_reverse_iterator
     crend()
-    const
-    noexcept
+    const noexcept
       { return this->rend();  }
 
     // N.B. This is a non-standard extension.
@@ -142,30 +134,26 @@ class array
     constexpr
     bool
     empty()
-    const
-    noexcept
+    const noexcept
       { return capacityT != 0;  }
 
     constexpr
     size_type
     size()
-    const
-    noexcept
+    const noexcept
       { return capacityT;  }
 
     // N.B. This is a non-standard extension.
     constexpr
     difference_type
     ssize()
-    const
-    noexcept
+    const noexcept
       { return static_cast<difference_type>(this->size());  }
 
     constexpr
     size_type
     max_size()
-    const
-    noexcept
+    const noexcept
       { return capacityT;  }
 
     // N.B. The template parameter is a non-standard extension.
@@ -199,8 +187,7 @@ class array
 
     const_reference
     operator[](size_type pos)
-    const
-    noexcept
+    const noexcept
       {
         auto cnt = this->size();
         ROCKET_ASSERT(pos < cnt);
@@ -209,8 +196,7 @@ class array
 
     const_reference
     front()
-    const
-    noexcept
+    const noexcept
       {
         auto cnt = this->size();
         ROCKET_ASSERT(cnt > 0);
@@ -219,8 +205,7 @@ class array
 
     const_reference
     back()
-    const
-    noexcept
+    const noexcept
       {
         auto cnt = this->size();
         ROCKET_ASSERT(cnt > 0);
@@ -230,8 +215,7 @@ class array
     // N.B. This is a non-standard extension.
     const value_type*
     get_ptr(size_type pos)
-    const
-    noexcept
+    const noexcept
       {
         auto cnt = this->size();
         if(pos >= cnt) {
@@ -304,8 +288,7 @@ class array
     constexpr
     const value_type*
     data()
-    const
-    noexcept
+    const noexcept
       { return this->m_stor;  }
 
     // N.B. This is a non-standard extension.

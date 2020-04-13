@@ -42,8 +42,7 @@ class Token_Stream
 
     const void*
     get_recursion_base()
-    const
-    noexcept
+    const noexcept
       { return this->m_sentry.get_base();  }
 
     Token_Stream&
@@ -54,8 +53,7 @@ class Token_Stream
     // These are accessors and modifiers of options for parsing.
     const Compiler_Options&
     get_options()
-    const
-    noexcept
+    const noexcept
       { return this->m_opts;  }
 
     Compiler_Options&
@@ -71,20 +69,17 @@ class Token_Stream
     // These are accessors and modifiers of tokens in this stream.
     bool
     empty()
-    const
-    noexcept
+    const noexcept
       { return this->m_rtoks.empty();  }
 
     size_t
     size()
-    const
-    noexcept
+    const noexcept
       { return this->m_rtoks.size();  }
 
     const Token*
     peek_opt(size_t offset = 0)
-    const
-    noexcept
+    const noexcept
       { return this->m_rtoks.get_ptr(this->m_rtoks.size() + ~offset);  }
 
     Token_Stream&
@@ -94,8 +89,7 @@ class Token_Stream
 
     Source_Location
     next_sloc()
-    const
-    noexcept
+    const noexcept
       {
         if(this->m_rtoks.empty())
           return Source_Location(::rocket::sref("<end of stream>"), -1, 0);
@@ -105,8 +99,7 @@ class Token_Stream
 
     size_t
     next_length()
-    const
-    noexcept
+    const noexcept
       {
         if(this->m_rtoks.empty())
           return 0;

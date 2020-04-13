@@ -65,8 +65,7 @@ class Recursion_Sentry
   public:
     const void*
     get_base()
-    const
-    noexcept
+    const noexcept
       { return this->m_base;  }
 
     Recursion_Sentry&

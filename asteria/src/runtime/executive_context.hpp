@@ -75,16 +75,12 @@ class Executive_Context
   protected:
     bool
     do_is_analytic()
-    const
-    noexcept
-    final
+    const noexcept final
       { return this->is_analytic();  }
 
     const Abstract_Context*
     do_get_parent_opt()
-    const
-    noexcept
-    override
+    const noexcept override
       { return this->get_parent_opt();  }
 
     Reference*
@@ -94,32 +90,27 @@ class Executive_Context
   public:
     bool
     is_analytic()
-    const
-    noexcept
+    const noexcept
       { return false;  }
 
     const Executive_Context*
     get_parent_opt()
-    const
-    noexcept
+    const noexcept
       { return this->m_parent_opt;  }
 
     Global_Context&
     global()
-    const
-    noexcept
+    const noexcept
       { return this->m_global;  }
 
     Evaluation_Stack&
     stack()
-    const
-    noexcept
+    const noexcept
       { return this->m_stack;  }
 
     const rcptr<Variadic_Arguer>&
     zvarg()
-    const
-    noexcept
+    const noexcept
       { return this->m_zvarg;  }
 
     // Defer an expression which will be evaluated at scope exit.

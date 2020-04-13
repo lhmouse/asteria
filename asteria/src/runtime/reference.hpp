@@ -59,56 +59,47 @@ class Reference
   public:
     bool
     is_void()
-    const
-    noexcept
+    const noexcept
       { return this->m_root.is_void();  }
 
     bool
     is_constant()
-    const
-    noexcept
+    const noexcept
       { return this->m_root.is_constant();  }
 
     bool
     is_temporary()
-    const
-    noexcept
+    const noexcept
       { return this->m_root.is_temporary();  }
 
     bool
     is_variable()
-    const
-    noexcept
+    const noexcept
       { return this->m_root.is_variable();  }
 
     bool
     is_tail_call()
-    const
-    noexcept
+    const noexcept
       { return this->m_root.is_tail_call();  }
 
     bool
     is_lvalue()
-    const
-    noexcept
+    const noexcept
       { return this->is_variable();  }
 
     bool
     is_rvalue()
-    const
-    noexcept
+    const noexcept
       { return this->is_constant() || this->is_temporary();  }
 
     bool
     is_glvalue()
-    const
-    noexcept
+    const noexcept
       { return this->is_lvalue() || !this->m_mods.empty();  }
 
     bool
     is_prvalue()
-    const
-    noexcept
+    const noexcept
       { return this->is_rvalue() && this->m_mods.empty();  }
 
     // Append a modifier.
@@ -189,8 +180,7 @@ class Reference
     ASTERIA_INCOMPLET(Variable)
     rcptr<Variable>
     get_variable_opt()
-    const
-    noexcept
+    const noexcept
       {
         if(ROCKET_UNEXPECT(!this->is_variable()))
           return nullptr;
@@ -201,8 +191,7 @@ class Reference
     ASTERIA_INCOMPLET(PTC_Arguments)
     rcptr<PTC_Arguments>
     get_tail_call_opt()
-    const
-    noexcept
+    const noexcept
       {
         if(ROCKET_UNEXPECT(!this->is_tail_call()))
           return nullptr;

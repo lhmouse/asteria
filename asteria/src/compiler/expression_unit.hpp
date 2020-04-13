@@ -156,8 +156,7 @@ class Expression_Unit
   public:
     Index
     index()
-    const
-    noexcept
+    const noexcept
       { return static_cast<Index>(this->m_stor.index());  }
 
     Expression_Unit&

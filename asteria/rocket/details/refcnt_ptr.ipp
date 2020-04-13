@@ -15,26 +15,22 @@ class reference_counter_base
   public:
     bool
     unique()
-    const
-    noexcept
+    const noexcept
       { return this->m_nref.unique();  }
 
     long
     use_count()
-    const
-    noexcept
+    const noexcept
       { return this->m_nref.get();  }
 
     void
     add_reference()
-    const
-    noexcept
+    const noexcept
       { return this->m_nref.increment();  }
 
     bool
     drop_reference()
-    const
-    noexcept
+    const noexcept
       { return this->m_nref.decrement();  }
   };
 
@@ -81,8 +77,7 @@ class stored_pointer
   public:
     bool
     unique()
-    const
-    noexcept
+    const noexcept
       {
         auto ptr = this->m_ptr;
         if(!ptr)
@@ -92,8 +87,7 @@ class stored_pointer
 
     long
     use_count()
-    const
-    noexcept
+    const noexcept
       {
         auto ptr = this->m_ptr;
         if(!ptr)
@@ -104,8 +98,7 @@ class stored_pointer
     constexpr
     pointer
     get()
-    const
-    noexcept
+    const noexcept
       { return this->m_ptr;  }
 
     pointer
@@ -115,8 +108,7 @@ class stored_pointer
 
     pointer
     fork()
-    const
-    noexcept
+    const noexcept
       {
         auto ptr = this->m_ptr;
         if(ptr)

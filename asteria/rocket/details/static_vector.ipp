@@ -72,8 +72,7 @@ class storage_handle
   public:
     constexpr const allocator_type&
     as_allocator()
-    const
-    noexcept
+    const noexcept
       { return static_cast<const allocator_base&>(*this);  }
 
     allocator_type&
@@ -90,8 +89,7 @@ class storage_handle
     constexpr
     size_type
     max_size()
-    const
-    noexcept
+    const noexcept
       { return noadl::min(allocator_traits<allocator_type>::max_size(this->as_allocator()), this->capacity());  }
 
     size_type
@@ -110,8 +108,7 @@ class storage_handle
     constexpr
     const value_type*
     data()
-    const
-    noexcept
+    const noexcept
       { return this->m_ebase;  }
 
     value_type*
@@ -122,21 +119,18 @@ class storage_handle
     constexpr
     bool
     empty()
-    const
-    noexcept
+    const noexcept
       { return this->m_nelem == 0;  }
 
     constexpr
     size_type
     size()
-    const
-    noexcept
+    const noexcept
       { return this->m_nelem;  }
 
     constexpr operator
     const storage_handle*()
-    const
-    noexcept
+    const noexcept
       { return this;  }
 
     operator
@@ -222,8 +216,7 @@ class vector_iterator
   private:
     pointer
     do_assert_valid_pointer(pointer ptr, bool deref)
-    const
-    noexcept
+    const noexcept
       {
         auto ref = this->m_ref;
         ROCKET_ASSERT_MSG(ref, "iterator not initialized");
@@ -236,20 +229,17 @@ class vector_iterator
   public:
     const parent_type*
     parent()
-    const
-    noexcept
+    const noexcept
       { return this->m_ref;  }
 
     pointer
     tell()
-    const
-    noexcept
+    const noexcept
       { return this->do_assert_valid_pointer(this->m_ptr, false);  }
 
     pointer
     tell_owned_by(const parent_type* ref)
-    const
-    noexcept
+    const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_ref == ref, "iterator not belonging to the same container");
         return this->tell();
@@ -265,8 +255,7 @@ class vector_iterator
 
     reference
     operator*()
-    const
-    noexcept
+    const noexcept
       {
         auto ptr = this->do_assert_valid_pointer(this->m_ptr, true);
         return *ptr;
@@ -274,8 +263,7 @@ class vector_iterator
 
     pointer
     operator->()
-    const
-    noexcept
+    const noexcept
       {
         auto ptr = this->do_assert_valid_pointer(this->m_ptr, true);
         return ptr;
@@ -283,8 +271,7 @@ class vector_iterator
 
     reference
     operator[](difference_type off)
-    const
-    noexcept
+    const noexcept
       {
         auto ptr = this->do_assert_valid_pointer(this->m_ptr + off, true);
         return *ptr;

@@ -26,8 +26,7 @@ class Variable_HashSet
 
         explicit operator
         bool()
-        const
-        noexcept
+        const noexcept
           { return this->prev != nullptr;  }
       };
 
@@ -66,8 +65,7 @@ class Variable_HashSet
   private:
     void
     do_destroy_buckets()
-    const
-    noexcept;
+    const noexcept;
 
     void
     do_enumerate_variables(Variable_Callback& callback)
@@ -75,8 +73,7 @@ class Variable_HashSet
 
     Bucket*
     do_xprobe(const rcptr<Variable>& var)
-    const
-    noexcept;
+    const noexcept;
 
     void
     do_xrelocate_but(Bucket* qxcld)
@@ -106,14 +103,12 @@ class Variable_HashSet
   public:
     bool
     empty()
-    const
-    noexcept
+    const noexcept
       { return this->m_head == nullptr;  }
 
     size_t
     size()
-    const
-    noexcept
+    const noexcept
       { return this->m_size;  }
 
     Variable_HashSet&
@@ -142,8 +137,7 @@ class Variable_HashSet
 
     bool
     has(const rcptr<Variable>& var)
-    const
-    noexcept
+    const noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.
         if(!this->m_bptr) {

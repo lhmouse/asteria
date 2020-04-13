@@ -189,14 +189,12 @@ class Statement
   public:
     Index
     index()
-    const
-    noexcept
+    const noexcept
       { return static_cast<Index>(this->m_stor.index());  }
 
     bool
     is_empty_return()
-    const
-    noexcept
+    const noexcept
       { return (this->m_stor.index() == index_return) &&
                this->m_stor.as<index_return>().expr.units.empty();  }
 

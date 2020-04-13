@@ -153,8 +153,7 @@ class basic_linear_buffer
     constexpr
     const allocator_type&
     get_allocator()
-    const
-    noexcept
+    const noexcept
       { return this->m_stor.as_allocator();  }
 
     allocator_type&
@@ -164,32 +163,27 @@ class basic_linear_buffer
 
     bool
     empty()
-    const
-    noexcept
+    const noexcept
       { return this->m_goff == this->m_eoff;  }
 
     size_type
     size()
-    const
-    noexcept
+    const noexcept
       { return this->m_eoff - this->m_goff;  }
 
     difference_type
     ssize()
-    const
-    noexcept
+    const noexcept
       { return static_cast<difference_type>(this->m_eoff - this->m_goff);  }
 
     size_type
     max_size()
-    const
-    noexcept
+    const noexcept
       { return this->m_stor.max_size();  }
 
     size_type
     capacity()
-    const
-    noexcept
+    const noexcept
       { return this->m_stor.capacity();  }
 
     basic_linear_buffer&
@@ -204,20 +198,17 @@ class basic_linear_buffer
     // read functions
     const value_type*
     begin()
-    const
-    noexcept
+    const noexcept
       { return this->m_stor.data() + this->m_goff;  }
 
     const value_type*
     end()
-    const
-    noexcept
+    const noexcept
       { return this->m_stor.data() + this->m_eoff;  }
 
     const value_type*
     data()
-    const
-    noexcept
+    const noexcept
       { return this->m_stor.data() + this->m_goff;  }
 
     basic_linear_buffer&
@@ -234,8 +225,7 @@ class basic_linear_buffer
 
     size_type
     peekn(value_type* s, size_type n)
-    const
-    noexcept
+    const noexcept
       {
         size_type nread = noadl::min(n, this->size());
         if(nread <= 0)
@@ -258,8 +248,7 @@ class basic_linear_buffer
 
     int_type
     peekc()
-    const
-    noexcept
+    const noexcept
       {
         value_type s[1];
         if(this->peekn(s, 1) == 0)

@@ -65,26 +65,22 @@ class basic_tinyfmt_str
   public:
     tinybuf_type&
     get_tinybuf()
-    const
-    override
+    const override
       { return this->m_buf;  }
 
     const string_type&
     get_string()
-    const
-    noexcept
+    const noexcept
       { return this->m_buf.get_string();  }
 
     const char_type*
     get_c_string()
-    const
-    noexcept
+    const noexcept
       { return this->m_buf.get_c_string();  }
 
     size_type
     get_length()
-    const
-    noexcept
+    const noexcept
       { return this->m_buf.get_length();  }
 
     basic_tinyfmt_str&

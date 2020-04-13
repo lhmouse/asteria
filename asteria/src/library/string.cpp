@@ -81,8 +81,7 @@ class BMH_Searcher
   public:
     ptrdiff_t
     pattern_length()
-    const
-    noexcept
+    const noexcept
       { return this->m_plen;  }
 
     template<typename IterT>

@@ -36,16 +36,14 @@ class Abstract_Context
     virtual
     bool
     do_is_analytic()
-    const
-    noexcept
+    const noexcept
       = 0;
 
     virtual
     const
     Abstract_Context*
     do_get_parent_opt()
-    const
-    noexcept
+    const noexcept
       = 0;
 
     virtual
@@ -56,14 +54,12 @@ class Abstract_Context
   public:
     bool
     is_analytic()
-    const
-    noexcept
+    const noexcept
       { return this->do_is_analytic();  }
 
     const Abstract_Context*
     get_parent_opt()
-    const
-    noexcept
+    const noexcept
       { return this->do_get_parent_opt();  }
 
     const Reference*

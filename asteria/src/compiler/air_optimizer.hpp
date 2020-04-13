@@ -36,8 +36,7 @@ class AIR_Optimizer
     // These are accessors and modifiers of options for optimizing.
     const Compiler_Options&
     get_options()
-    const
-    noexcept
+    const noexcept
       { return this->m_opts;  }
 
     Compiler_Options&
@@ -53,14 +52,12 @@ class AIR_Optimizer
     // These are accessors and modifiers of tokens in this stream.
     bool
     empty()
-    const
-    noexcept
+    const noexcept
       { return this->m_code.empty();  }
 
     operator
     const cow_vector<AIR_Node>&()
-    const
-    noexcept
+    const noexcept
       { return this->m_code;  }
 
     AIR_Optimizer&

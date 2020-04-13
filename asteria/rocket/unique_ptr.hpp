@@ -107,8 +107,7 @@ class unique_ptr
     constexpr
     pointer
     get()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.get();  }
 
     typename add_lvalue_reference<element_type>::type
@@ -122,8 +121,7 @@ class unique_ptr
 
     pointer
     operator->()
-    const
-    noexcept
+    const noexcept
       {
         auto ptr = this->get();
         ROCKET_ASSERT(ptr);
@@ -132,21 +130,18 @@ class unique_ptr
 
     explicit constexpr operator
     bool()
-    const
-    noexcept
+    const noexcept
       { return bool(this->get());  }
 
     constexpr operator
     pointer()
-    const
-    noexcept
+    const noexcept
       { return this->get();  }
 
     constexpr
     const deleter_type&
     get_deleter()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.as_deleter();  }
 
     deleter_type&

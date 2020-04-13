@@ -53,22 +53,19 @@ struct Module_Comparator
     constexpr
     bool
     operator()(const Module& lhs, const Module& rhs)
-    const
-    noexcept
+    const noexcept
       { return lhs.version < rhs.version;  }
 
     constexpr
     bool
     operator()(API_Version lhs, const Module& rhs)
-    const
-    noexcept
+    const noexcept
       { return lhs < rhs.version;  }
 
     constexpr
     bool
     operator()(const Module& lhs, API_Version rhs)
-    const
-    noexcept
+    const noexcept
       { return lhs.version < rhs;  }
   };
 

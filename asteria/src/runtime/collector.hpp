@@ -37,8 +37,7 @@ class Collector
   public:
     Variable_HashSet*
     get_output_pool_opt()
-    const
-    noexcept
+    const noexcept
       { return this->m_output_opt;  }
 
     Collector&
@@ -48,8 +47,7 @@ class Collector
 
     Collector*
     get_tied_collector_opt()
-    const
-    noexcept
+    const noexcept
       { return this->m_tied_opt;  }
 
     Collector&
@@ -59,8 +57,7 @@ class Collector
 
     uint32_t
     get_threshold()
-    const
-    noexcept
+    const noexcept
       { return this->m_threshold;  }
 
     Collector&
@@ -70,8 +67,7 @@ class Collector
 
     size_t
     count_tracked_variables()
-    const
-    noexcept
+    const noexcept
       { return this->m_tracked.size();  }
 
     bool

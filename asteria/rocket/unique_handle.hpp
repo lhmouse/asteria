@@ -93,15 +93,13 @@ class unique_handle
     constexpr
     handle_type
     get()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.get();  }
 
     constexpr
     const closer_type&
     get_closer()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.as_closer();  }
 
     closer_type&
@@ -111,14 +109,12 @@ class unique_handle
 
     explicit constexpr operator
     bool()
-    const
-    noexcept
+    const noexcept
       { return !(this->m_sth.as_closer().is_null(this->m_sth.get()));  }
 
     constexpr operator
     const handle_type&()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.get();  }
 
     // 23.11.1.2.5, modifiers

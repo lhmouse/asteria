@@ -74,20 +74,17 @@ class Loader_Lock::Unique_Stream
   public:
     explicit operator
     bool()
-    const
-    noexcept
+    const noexcept
       { return bool(this->m_elem);  }
 
     ::rocket::tinybuf_file&
     get()
-    const
-    noexcept
+    const noexcept
       { return ROCKET_ASSERT(this->m_elem), this->m_elem->second;  }
 
     operator
     ::rocket::tinybuf_file&()
-    const
-    noexcept
+    const noexcept
       { return ROCKET_ASSERT(this->m_elem), this->m_elem->second;  }
 
     Unique_Stream&

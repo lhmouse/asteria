@@ -56,50 +56,42 @@ class ascii_numget
     // accessors
     explicit operator
     bool()
-    const
-    noexcept
+    const noexcept
       { return this->m_succ;  }
 
     bool
     overflowed()
-    const
-    noexcept
+    const noexcept
       { return this->m_ovfl;  }
 
     bool
     underflowed()
-    const
-    noexcept
+    const noexcept
       { return this->m_udfl;  }
 
     bool
     inexact()
-    const
-    noexcept
+    const noexcept
       { return this->m_inxc;  }
 
     bool
     is_finite()
-    const
-    noexcept
+    const noexcept
       { return this->m_vcls == 0;  }
 
     bool
     is_infinitesimal()
-    const
-    noexcept
+    const noexcept
       { return this->m_vcls == 1;  }
 
     bool
     is_infinity()
-    const
-    noexcept
+    const noexcept
       { return this->m_vcls == 2;  }
 
     bool
     is_nan()
-    const
-    noexcept
+    const noexcept
       { return this->m_vcls == 3;  }
 
     ascii_numget&

@@ -50,8 +50,7 @@ class refcnt_base
   public:
     const deleter_type&
     as_deleter()
-    const
-    noexcept
+    const noexcept
       { return static_cast<const deleter_base&>(*this);  }
 
     deleter_type&
@@ -61,26 +60,22 @@ class refcnt_base
 
     bool
     unique()
-    const
-    noexcept
+    const noexcept
       { return this->details_refcnt_ptr::reference_counter_base::unique();  }
 
     long
     use_count()
-    const
-    noexcept
+    const noexcept
       { return this->details_refcnt_ptr::reference_counter_base::use_count();  }
 
     void
     add_reference()
-    const
-    noexcept
+    const noexcept
       { return this->details_refcnt_ptr::reference_counter_base::add_reference();  }
 
     bool
     drop_reference()
-    const
-    noexcept
+    const noexcept
       { return this->details_refcnt_ptr::reference_counter_base::drop_reference();  }
 
     template<typename yelementT = elementT>
@@ -208,21 +203,18 @@ class refcnt_ptr
     // 23.11.1.2.4, observers
     bool
     unique()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.unique();  }
 
     long
     use_count()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.use_count();  }
 
     constexpr
     pointer
     get()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.get();  }
 
     typename add_lvalue_reference<element_type>::type
@@ -236,8 +228,7 @@ class refcnt_ptr
 
     pointer
     operator->()
-    const
-    noexcept
+    const noexcept
       {
         auto ptr = this->get();
         ROCKET_ASSERT(ptr);
@@ -246,14 +237,12 @@ class refcnt_ptr
 
     explicit constexpr operator
     bool()
-    const
-    noexcept
+    const noexcept
       { return bool(this->get());  }
 
     constexpr operator
     pointer()
-    const
-    noexcept
+    const noexcept
       { return this->get();  }
 
     // 23.11.1.2.5, modifiers

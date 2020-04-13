@@ -39,8 +39,7 @@ class Indenter
     virtual
     bool
     has_indention()
-    const
-    noexcept
+    const noexcept
       = 0;
   };
 
@@ -61,8 +60,7 @@ final
   public:
     tinyfmt&
     break_line(tinyfmt& fmt)
-    const
-    override
+    const override
       { return fmt;  }
 
     void
@@ -77,9 +75,7 @@ final
 
     bool
     has_indention()
-    const
-    noexcept
-    override
+    const noexcept override
       { return false;  }
   };
 
@@ -100,8 +96,7 @@ final
   public:
     tinyfmt&
     break_line(tinyfmt& fmt)
-    const
-    override
+    const override
       { return fmt << this->m_cur;  }
 
     void
@@ -116,9 +111,7 @@ final
 
     bool
     has_indention()
-    const
-    noexcept
-    override
+    const noexcept override
       { return this->m_add.size();  }
   };
 
@@ -139,8 +132,7 @@ final
   public:
     tinyfmt&
     break_line(tinyfmt& fmt)
-    const
-    override
+    const override
       { return fmt << pwrap(this->m_add, this->m_cur);  }
 
     void
@@ -155,9 +147,7 @@ final
 
     bool
     has_indention()
-    const
-    noexcept
-    override
+    const noexcept override
       { return this->m_add;  }
   };
 

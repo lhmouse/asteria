@@ -30,8 +30,7 @@ class atomic_flag
   public:
     bool
     test_relaxed()
-    const
-    noexcept
+    const noexcept
       { return this->m_val.load(::std::memory_order_relaxed);  }
 
     void
@@ -62,8 +61,7 @@ class atomic_flag
 
     bool
     test_acquire()
-    const
-    noexcept
+    const noexcept
       { return this->m_val.load(::std::memory_order_acquire);  }
 
     void

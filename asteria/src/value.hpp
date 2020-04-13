@@ -452,26 +452,22 @@ class Value
   public:
     Vtype
     vtype()
-    const
-    noexcept
+    const noexcept
       { return static_cast<Vtype>(this->m_stor.index());  }
 
     const char*
     what_vtype()
-    const
-    noexcept
+    const noexcept
       { return describe_vtype(static_cast<Vtype>(this->m_stor.index()));  }
 
     bool
     is_null()
-    const
-    noexcept
+    const noexcept
       { return this->vtype() == vtype_null;  }
 
     bool
     is_boolean()
-    const
-    noexcept
+    const noexcept
       { return this->vtype() == vtype_boolean;  }
 
     V_boolean
@@ -485,8 +481,7 @@ class Value
 
     bool
     is_integer()
-    const
-    noexcept
+    const noexcept
       { return this->vtype() == vtype_integer;  }
 
     V_integer
@@ -500,8 +495,7 @@ class Value
 
     bool
     is_real()
-    const
-    noexcept
+    const noexcept
       { return this->vtype() == vtype_real;  }
 
     V_real
@@ -515,8 +509,7 @@ class Value
 
     bool
     is_string()
-    const
-    noexcept
+    const noexcept
       { return this->vtype() == vtype_string;  }
 
     const V_string&
@@ -530,8 +523,7 @@ class Value
 
     bool
     is_function()
-    const
-    noexcept
+    const noexcept
       { return this->vtype() == vtype_function;  }
 
     const V_function&
@@ -545,8 +537,7 @@ class Value
 
     bool
     is_opaque()
-    const
-    noexcept
+    const noexcept
       { return this->vtype() == vtype_opaque;  }
 
     const V_opaque&
@@ -560,8 +551,7 @@ class Value
 
     bool
     is_array()
-    const
-    noexcept
+    const noexcept
       { return this->vtype() == vtype_array;  }
 
     const V_array&
@@ -575,8 +565,7 @@ class Value
 
     bool
     is_object()
-    const
-    noexcept
+    const noexcept
       { return this->vtype() == vtype_object;  }
 
     const V_object&
@@ -599,8 +588,7 @@ class Value
     // Note null and boolean values are not convertible to reals.
     bool
     is_convertible_to_real()
-    const
-    noexcept;
+    const noexcept;
 
     V_real
     convert_to_real()
@@ -613,35 +601,30 @@ class Value
     ROCKET_PURE_FUNCTION
     bool
     test()
-    const
-    noexcept;
+    const noexcept;
 
     // This performs the builtin comparison with another value.
     ROCKET_PURE_FUNCTION
     Compare
     compare(const Value& other)
-    const
-    noexcept;
+    const noexcept;
 
     // These functions are used by the garbage collector.
     // Read `runtime/collector.cpp` for details.
     ROCKET_PURE_FUNCTION
     bool
     unique()
-    const
-    noexcept;
+    const noexcept;
 
     ROCKET_PURE_FUNCTION
     long
     use_count()
-    const
-    noexcept;
+    const noexcept;
 
     ROCKET_PURE_FUNCTION
     long
     gcref_split()
-    const
-    noexcept;
+    const noexcept;
 
     // These are miscellaneous interfaces for debugging.
     tinyfmt&

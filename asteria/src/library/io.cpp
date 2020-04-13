@@ -34,8 +34,7 @@ class IOF_Sentry
   public:
     operator
     ::FILE*()
-    const
-    noexcept
+    const noexcept
       { return this->m_fp;  }
   };
 

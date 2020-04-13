@@ -29,26 +29,22 @@ class Source_Location
   public:
     const cow_string&
     file()
-    const
-    noexcept
+    const noexcept
       { return this->m_file;  }
 
     const char*
     c_file()
-    const
-    noexcept
+    const noexcept
       { return this->m_file.c_str();  }
 
     int
     line()
-    const
-    noexcept
+    const noexcept
       { return this->m_line;  }
 
     int
     offset()
-    const
-    noexcept
+    const noexcept
       { return this->m_offset;  }
 
     Source_Location&

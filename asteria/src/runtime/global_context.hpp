@@ -34,16 +34,12 @@ class Global_Context
   protected:
     bool
     do_is_analytic()
-    const
-    noexcept
-    final
+    const noexcept final
       { return this->is_analytic();  }
 
     const Abstract_Context*
     do_get_parent_opt()
-    const
-    noexcept
-    final
+    const noexcept final
       { return this->get_parent_opt();  }
 
     Reference*
@@ -54,14 +50,12 @@ class Global_Context
   public:
     bool
     is_analytic()
-    const
-    noexcept
+    const noexcept
       { return false;  }
 
     const Abstract_Context*
     get_parent_opt()
-    const
-    noexcept
+    const noexcept
       { return nullptr;  }
 
     // This provides stack overflow protection.
@@ -72,8 +66,7 @@ class Global_Context
 
     const void*
     get_recursion_base()
-    const
-    noexcept
+    const noexcept
       { return this->m_sentry.get_base();  }
 
     Global_Context&
@@ -84,8 +77,7 @@ class Global_Context
     // This helps debugging and profiling.
     rcptr<Abstract_Hooks>
     get_hooks_opt()
-    const
-    noexcept
+    const noexcept
       { return this->m_qhooks;  }
 
     Global_Context&
@@ -97,37 +89,32 @@ class Global_Context
     ASTERIA_INCOMPLET(Genius_Collector)
     rcptr<Genius_Collector>
     genius_collector()
-    const
-    noexcept
+    const noexcept
       { return unerase_cast<Genius_Collector>(this->m_gcoll);  }
 
     ASTERIA_INCOMPLET(Random_Engine)
     rcptr<Random_Engine>
     random_engine()
-    const
-    noexcept
+    const noexcept
       { return unerase_cast<Random_Engine>(this->m_prng);  }
 
     ASTERIA_INCOMPLET(Loader_Lock)
     rcptr<Loader_Lock>
     loader_lock()
-    const
-    noexcept
+    const noexcept
       { return unerase_cast<Loader_Lock>(this->m_ldrlk);  }
 
     ASTERIA_INCOMPLET(Variable)
     rcptr<Variable>
     std_variable()
-    const
-    noexcept
+    const noexcept
       { return unerase_cast<Variable>(this->m_vstd);  }
 
     // Get the maximum API version that is supported when this library is built.
     // N.B. This function must not be inlined for this reason.
     API_Version
     max_api_version()
-    const
-    noexcept;
+    const noexcept;
 
     // Clear all references, perform a full garbage collection, then reload the standard library.
     void

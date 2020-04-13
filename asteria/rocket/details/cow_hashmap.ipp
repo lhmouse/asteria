@@ -50,8 +50,7 @@ class bucket
   public:
     const_pointer
     get()
-    const
-    noexcept
+    const noexcept
       { return this->m_ptr;  }
 
     pointer
@@ -66,14 +65,12 @@ class bucket
 
     explicit operator
     bool()
-    const
-    noexcept
+    const noexcept
       { return bool(this->get());  }
 
     const_reference
     operator*()
-    const
-    noexcept
+    const noexcept
       { return *(this->get());  }
 
     reference
@@ -83,8 +80,7 @@ class bucket
 
     const_pointer
     operator->()
-    const
-    noexcept
+    const noexcept
       { return this->m_ptr;  }
 
     pointer
@@ -349,8 +345,7 @@ class storage_handle
   public:
     const hasher&
     as_hasher()
-    const
-    noexcept
+    const noexcept
       { return static_cast<const hasher_base&>(*this);  }
 
     hasher&
@@ -360,8 +355,7 @@ class storage_handle
 
     const key_equal&
     as_key_equal()
-    const
-    noexcept
+    const noexcept
       { return static_cast<const key_equal_base&>(*this);  }
 
     key_equal&
@@ -371,8 +365,7 @@ class storage_handle
 
     const allocator_type&
     as_allocator()
-    const
-    noexcept
+    const noexcept
       { return static_cast<const allocator_base&>(*this);  }
 
     allocator_type&
@@ -382,8 +375,7 @@ class storage_handle
 
     bool
     unique()
-    const
-    noexcept
+    const noexcept
       {
         auto ptr = this->m_ptr;
         if(!ptr)
@@ -393,8 +385,7 @@ class storage_handle
 
     long
     use_count()
-    const
-    noexcept
+    const noexcept
       {
         auto ptr = this->m_ptr;
         if(!ptr)
@@ -407,14 +398,12 @@ class storage_handle
     constexpr
     double
     max_load_factor()
-    const
-    noexcept
+    const noexcept
       { return 1.0 / static_cast<double>(static_cast<difference_type>(max_load_factor_reciprocal));  }
 
     size_type
     bucket_count()
-    const
-    noexcept
+    const noexcept
       {
         auto ptr = this->m_ptr;
         if(!ptr)
@@ -424,8 +413,7 @@ class storage_handle
 
     size_type
     capacity()
-    const
-    noexcept
+    const noexcept
       {
         auto ptr = this->m_ptr;
         if(!ptr)
@@ -437,8 +425,7 @@ class storage_handle
 
     size_type
     max_size()
-    const
-    noexcept
+    const noexcept
       {
         storage_allocator st_alloc(this->as_allocator());
         auto max_nblk = allocator_traits<storage_allocator>::max_size(st_alloc);
@@ -469,8 +456,7 @@ class storage_handle
 
     const bucket_type*
     buckets()
-    const
-    noexcept
+    const noexcept
       {
         auto ptr = this->m_ptr;
         if(!ptr)
@@ -480,8 +466,7 @@ class storage_handle
 
     bool
     empty()
-    const
-    noexcept
+    const noexcept
       {
         auto ptr = this->m_ptr;
         if(!ptr)
@@ -491,8 +476,7 @@ class storage_handle
 
     size_type
     element_count()
-    const
-    noexcept
+    const noexcept
       {
         auto ptr = this->m_ptr;
         if(!ptr)
@@ -582,8 +566,7 @@ class storage_handle
 
     constexpr operator
     const storage_handle*()
-    const
-    noexcept
+    const noexcept
       { return this;  }
 
     operator
@@ -782,8 +765,7 @@ class hashmap_iterator
   private:
     bucket_type*
     do_assert_valid_bucket(bucket_type* bkt, bool deref)
-    const
-    noexcept
+    const noexcept
       {
         auto ref = this->m_ref;
         ROCKET_ASSERT_MSG(ref, "iterator not initialized");
@@ -796,8 +778,7 @@ class hashmap_iterator
 
     bucket_type*
     do_adjust_forwards(bucket_type* hint)
-    const
-    noexcept
+    const noexcept
       {
         if(hint == nullptr)
           return nullptr;
@@ -814,22 +795,19 @@ class hashmap_iterator
   public:
     const parent_type*
     parent()
-    const
-    noexcept
+    const noexcept
       { return this->m_ref;  }
 
     bucket_type*
     tell()
-    const
-    noexcept
+    const noexcept
       {
         return this->do_assert_valid_bucket(this->m_bkt, false);
       }
 
     bucket_type*
     tell_owned_by(const parent_type* ref)
-    const
-    noexcept
+    const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_ref == ref, "iterator not belonging to the same container");
         return this->tell();
@@ -847,8 +825,7 @@ class hashmap_iterator
 
     reference
     operator*()
-    const
-    noexcept
+    const noexcept
       {
         auto bkt = this->do_assert_valid_bucket(this->m_bkt, true);
         ROCKET_ASSERT(*bkt);
@@ -857,8 +834,7 @@ class hashmap_iterator
 
     pointer
     operator->()
-    const
-    noexcept
+    const noexcept
       {
         auto bkt = this->do_assert_valid_bucket(this->m_bkt, true);
         ROCKET_ASSERT(*bkt);

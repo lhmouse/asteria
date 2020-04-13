@@ -51,8 +51,7 @@ class basic_storage
   public:
     const allocator_type&
     as_allocator()
-    const
-    noexcept
+    const noexcept
       { return static_cast<const allocator_base&>(*this);  }
 
     allocator_type&
@@ -62,8 +61,7 @@ class basic_storage
 
     const value_type*
     data()
-    const
-    noexcept
+    const noexcept
       { return noadl::unfancy(this->m_ptr);  }
 
     value_type*
@@ -73,14 +71,12 @@ class basic_storage
 
     size_type
     max_size()
-    const
-    noexcept
+    const noexcept
       { return allocator_traits<allocator_type>::max_size(this->as_allocator());  }
 
     size_type
     capacity()
-    const
-    noexcept
+    const noexcept
       { return this->m_cap;  }
 
     ROCKET_NOINLINE

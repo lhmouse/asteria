@@ -61,14 +61,12 @@ class reference_counter
     ROCKET_PURE_FUNCTION
     bool
     unique()
-    const
-    noexcept
+    const noexcept
       { return ROCKET_EXPECT(this->m_nref.load(::std::memory_order_relaxed) == 1);  }
 
     valueT
     get()
-    const
-    noexcept
+    const noexcept
       { return this->m_nref.load(::std::memory_order_relaxed);  }
 
     bool

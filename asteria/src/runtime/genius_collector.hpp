@@ -47,8 +47,7 @@ final
   public:
     size_t
     get_pool_size()
-    const
-    noexcept
+    const noexcept
       { return this->m_pool.size();  }
 
     Genius_Collector&

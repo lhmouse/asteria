@@ -46,20 +46,17 @@ final
   public:
     tinyfmt&
     describe(tinyfmt& fmt)
-    const
-    override
+    const override
       { return fmt << "CRC-32 hasher";  }
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const
-    override
+    const override
       { return callback;  }
 
     CRC32_Hasher*
     clone_opt(rcptr<Abstract_Opaque>& output)
-    const
-    override
+    const override
       {
         auto qnew = ::rocket::make_unique<CRC32_Hasher>(*this);
         output.reset(qnew.get());
@@ -110,20 +107,17 @@ final
   public:
     tinyfmt&
     describe(tinyfmt& fmt)
-    const
-    override
+    const override
       { return fmt << "FNV-1a hasher (32-bit)";  }
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const
-    override
+    const override
       { return callback;  }
 
     FNV1a32_Hasher*
     clone_opt(rcptr<Abstract_Opaque>& output)
-    const
-    override
+    const override
       {
         auto qnew = ::rocket::make_unique<FNV1a32_Hasher>(*this);
         output.reset(qnew.get());
@@ -395,20 +389,17 @@ final
   public:
     tinyfmt&
     describe(tinyfmt& fmt)
-    const
-    override
+    const override
       { return fmt << "MD5 hasher";  }
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const
-    override
+    const override
       { return callback;  }
 
     MD5_Hasher*
     clone_opt(rcptr<Abstract_Opaque>& output)
-    const
-    override
+    const override
       {
         auto qnew = ::rocket::make_unique<MD5_Hasher>(*this);
         output.reset(qnew.get());
@@ -669,20 +660,17 @@ final
   public:
     tinyfmt&
     describe(tinyfmt& fmt)
-    const
-    override
+    const override
       { return fmt << "SHA-1 hasher";  }
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const
-    override
+    const override
       { return callback;  }
 
     SHA1_Hasher*
     clone_opt(rcptr<Abstract_Opaque>& output)
-    const
-    override
+    const override
       {
         auto qnew = ::rocket::make_unique<SHA1_Hasher>(*this);
         output.reset(qnew.get());
@@ -915,20 +903,17 @@ final
   public:
     tinyfmt&
     describe(tinyfmt& fmt)
-    const
-    override
+    const override
       { return fmt << "SHA-256 hasher";  }
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const
-    override
+    const override
       { return callback;  }
 
     SHA256_Hasher*
     clone_opt(rcptr<Abstract_Opaque>& output)
-    const
-    override
+    const override
       {
         auto qnew = ::rocket::make_unique<SHA256_Hasher>(*this);
         output.reset(qnew.get());

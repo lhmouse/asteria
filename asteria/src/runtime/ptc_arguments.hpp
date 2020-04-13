@@ -49,26 +49,22 @@ final
   public:
     const Source_Location&
     sloc()
-    const
-    noexcept
+    const noexcept
       { return this->m_sloc;  }
 
     const rcptr<Variadic_Arguer>&
     zvarg()
-    const
-    noexcept
+    const noexcept
       { return this->m_zvarg;  }
 
     PTC_Aware
     ptc_aware()
-    const
-    noexcept
+    const noexcept
       { return this->m_ptc;  }
 
     const cow_bivector<Source_Location, AVMC_Queue>&
     get_defer_stack()
-    const
-    noexcept
+    const noexcept
       { return this->m_defer;  }
 
     cow_bivector<Source_Location, AVMC_Queue>&
@@ -78,14 +74,12 @@ final
 
     const cow_function&
     get_target()
-    const
-    noexcept
+    const noexcept
       { return this->m_target;  }
 
     const cow_vector<Reference>&
     get_arguments_and_self()
-    const
-    noexcept
+    const noexcept
       { return this->m_args_self;  }
 
     cow_vector<Reference>&

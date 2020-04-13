@@ -45,8 +45,7 @@ class variant
     ROCKET_PURE_FUNCTION
     const typename alternative_at<indexT>::type*
     do_cast_storage()
-    const
-    noexcept
+    const noexcept
       { return reinterpret_cast<const typename alternative_at<indexT>::type*>(this->m_stor);  }
 
     template<size_t indexT>
@@ -253,8 +252,7 @@ class variant
     // 23.7.3.5, value status
     size_t
     index()
-    const
-    noexcept
+    const noexcept
       {
         ROCKET_ASSERT(this->m_index < alternative_size);
         return this->m_index;
@@ -262,8 +260,7 @@ class variant
 
     const type_info&
     type()
-    const
-    noexcept
+    const noexcept
       {
         static const type_info* const s_table[] = { ::std::addressof(typeid(alternativesT))... };
         return *(s_table[this->m_index]);
@@ -273,8 +270,7 @@ class variant
     template<size_t indexT>
     const typename alternative_at<indexT>::type*
     get()
-    const
-    noexcept
+    const noexcept
       {
         if(this->m_index != indexT)
           return nullptr;
@@ -285,8 +281,7 @@ class variant
     ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)>
     const targetT*
     get()
-    const
-    noexcept
+    const noexcept
       {
         return this->get<index_of<targetT>::value>();
       }

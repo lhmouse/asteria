@@ -53,8 +53,7 @@ class stored_handle
   public:
     const closer_type&
     as_closer()
-    const
-    noexcept
+    const noexcept
       { return static_cast<const closer_base&>(*this);  }
 
     closer_type&
@@ -65,8 +64,7 @@ class stored_handle
     constexpr
     const handle_type&
     get()
-    const
-    noexcept
+    const noexcept
       { return this->m_hv;  }
 
     handle_type

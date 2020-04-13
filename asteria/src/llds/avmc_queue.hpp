@@ -65,43 +65,37 @@ class AVMC_Queue
         constexpr
         ParamU
         paramu()
-        const
-        noexcept
+        const noexcept
           { return {{ this->paramu_x32, this->paramu_x16 }};  }
 
         constexpr
         Symbols*
         symbols()
-        const
-        noexcept
+        const noexcept
           { return !this->has_syms ? nullptr : static_cast<Symbols*>(static_cast<void*>(this->payload));  }
 
         constexpr
         uint32_t
         symbol_size_in_headers()
-        const
-        noexcept
+        const noexcept
           { return !this->has_syms ? 0 : (sizeof(Symbols) - 1) / sizeof(Header) + 1;  }
 
         constexpr
         void*
         paramv()
-        const
-        noexcept
+        const noexcept
           { return this->payload + this->has_syms * this->symbol_size_in_headers() * sizeof(Header);  }
 
         constexpr
         uint32_t
         paramv_size_in_headers()
-        const
-        noexcept
+        const noexcept
           { return this->nphdrs;  }
 
         constexpr
         uint32_t
         total_size_in_headers()
-        const
-        noexcept
+        const noexcept
           { return 1 + this->symbol_size_in_headers() + this->paramv_size_in_headers();  }
       };
 
@@ -207,8 +201,7 @@ class AVMC_Queue
   public:
     bool
     empty()
-    const
-    noexcept
+    const noexcept
       { return this->m_bptr == nullptr;  }
 
     AVMC_Queue&

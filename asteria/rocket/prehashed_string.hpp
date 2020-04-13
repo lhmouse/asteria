@@ -141,102 +141,86 @@ class basic_prehashed_string
     constexpr
     const string_type&
     rdstr()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.str();  }
 
     operator
     const string_type&()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.str();  }
 
     constexpr
     size_t
     rdhash()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.hval();  }
 
     // 24.3.2.3, iterators
     const_iterator
     begin()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.str().begin();  }
 
     const_iterator
     end()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.str().end();  }
 
     const_reverse_iterator
     rbegin()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.str().rbegin();  }
 
     const_reverse_iterator
     rend()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.str().rend();  }
 
     const_iterator
     cbegin()
-    const
-    noexcept
+    const noexcept
       { return this->begin();  }
 
     const_iterator
     cend()
-    const
-    noexcept
+    const noexcept
       { return this->end();  }
 
     const_reverse_iterator
     crbegin()
-    const
-    noexcept
+    const noexcept
       { return this->rbegin();  }
 
     const_reverse_iterator
     crend()
-    const
-    noexcept
+    const noexcept
       { return this->rend();  }
 
     // 24.3.2.4, capacity
     bool
     empty()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.str().empty();  }
 
     size_type
     size()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.str().size();  }
 
     size_type
     length()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.str().length();  }
 
     // N.B. This is a non-standard extension.
     difference_type
     ssize()
-    const
-    noexcept
+    const noexcept
       { return static_cast<difference_type>(this->m_sth.str().size());  }
 
     size_type
     max_size()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.str().max_size();  }
 
     basic_prehashed_string&
@@ -255,20 +239,17 @@ class basic_prehashed_string
 
     const_reference
     operator[](size_type pos)
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.str()[pos];  }
 
     const_reference
     front()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.str().front();  }
 
     const_reference
     back()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.str().back();  }
 
     template<typename... paramsT>
@@ -302,14 +283,12 @@ class basic_prehashed_string
     // 24.3.2.7, string operations
     constexpr const value_type*
     data()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.str().data();  }
 
     const value_type*
     c_str()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.str().c_str();  }
   };
 
@@ -322,8 +301,7 @@ struct basic_prehashed_string<stringT, hashT>::hash
     constexpr
     result_type
     operator()(const argument_type& str)
-    const
-    noexcept
+    const noexcept
       { return str.rdhash();  }
   };
 

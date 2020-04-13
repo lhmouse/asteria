@@ -205,50 +205,42 @@ class static_vector
     // iterators
     const_iterator
     begin()
-    const
-    noexcept
+    const noexcept
       { return const_iterator(this->m_sth, this->data());  }
 
     const_iterator
     end()
-    const
-    noexcept
+    const noexcept
       { return const_iterator(this->m_sth, this->data() + this->size());  }
 
     const_reverse_iterator
     rbegin()
-    const
-    noexcept
+    const noexcept
       { return const_reverse_iterator(this->end());  }
 
     const_reverse_iterator
     rend()
-    const
-    noexcept
+    const noexcept
       { return const_reverse_iterator(this->begin());  }
 
     const_iterator
     cbegin()
-    const
-    noexcept
+    const noexcept
       { return this->begin();  }
 
     const_iterator
     cend()
-    const
-    noexcept
+    const noexcept
       { return this->end();  }
 
     const_reverse_iterator
     crbegin()
-    const
-    noexcept
+    const noexcept
       { return this->rbegin();  }
 
     const_reverse_iterator
     crend()
-    const
-    noexcept
+    const noexcept
       { return this->rend();  }
 
     // N.B. This is a non-standard extension.
@@ -275,30 +267,26 @@ class static_vector
     constexpr
     bool
     empty()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.empty();  }
 
     constexpr
     size_type
     size()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.size();  }
 
     // N.B. This is a non-standard extension.
     constexpr
     difference_type
     ssize()
-    const
-    noexcept
+    const noexcept
       { return static_cast<difference_type>(this->size());  }
 
     constexpr
     size_type
     max_size()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.max_size();  }
 
     // N.B. The return type and the parameter pack are non-standard extensions.
@@ -360,8 +348,7 @@ class static_vector
 
     const_reference
     operator[](size_type pos)
-    const
-    noexcept
+    const noexcept
       {
         auto cnt = this->size();
         ROCKET_ASSERT(pos < cnt);
@@ -370,8 +357,7 @@ class static_vector
 
     const_reference
     front()
-    const
-    noexcept
+    const noexcept
       {
         auto cnt = this->size();
         ROCKET_ASSERT(cnt > 0);
@@ -380,8 +366,7 @@ class static_vector
 
     const_reference
     back()
-    const
-    noexcept
+    const noexcept
       {
         auto cnt = this->size();
         ROCKET_ASSERT(cnt > 0);
@@ -391,8 +376,7 @@ class static_vector
     // N.B. This is a non-standard extension.
     const value_type*
     get_ptr(size_type pos)
-    const
-    noexcept
+    const noexcept
       {
         auto cnt = this->size();
         if(pos >= cnt)
@@ -771,8 +755,7 @@ class static_vector
     // 26.3.11.4, data access
     const value_type*
     data()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.data();  }
 
     // Get a pointer to mutable data.
@@ -785,8 +768,7 @@ class static_vector
     constexpr
     const allocator_type&
     get_allocator()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.as_allocator();  }
 
     allocator_type&

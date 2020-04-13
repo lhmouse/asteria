@@ -78,44 +78,37 @@ class Token
   public:
     const Source_Location&
     sloc()
-    const
-    noexcept
+    const noexcept
       { return this->m_sloc;  }
 
     const cow_string&
     file()
-    const
-    noexcept
+    const noexcept
       { return this->m_sloc.file();  }
 
     int
     line()
-    const
-    noexcept
+    const noexcept
       { return this->m_sloc.line();  }
 
     int
     offset()
-    const
-    noexcept
+    const noexcept
       { return this->m_sloc.offset();  }
 
     size_t
     length()
-    const
-    noexcept
+    const noexcept
       { return this->m_length;  }
 
     Index
     index()
-    const
-    noexcept
+    const noexcept
       { return static_cast<Index>(this->m_stor.index());  }
 
     bool
     is_keyword()
-    const
-    noexcept
+    const noexcept
       { return this->index() == index_keyword;  }
 
     Keyword
@@ -125,8 +118,7 @@ class Token
 
     bool
     is_punctuator()
-    const
-    noexcept
+    const noexcept
       { return this->index() == index_punctuator;  }
 
     Punctuator
@@ -136,8 +128,7 @@ class Token
 
     bool
     is_identifier()
-    const
-    noexcept
+    const noexcept
       { return this->index() == index_identifier;  }
 
     const cow_string&
@@ -147,8 +138,7 @@ class Token
 
     bool
     is_integer_literal()
-    const
-    noexcept
+    const noexcept
       { return this->index() == index_integer_literal;  }
 
     int64_t
@@ -158,8 +148,7 @@ class Token
 
     bool
     is_real_literal()
-    const
-    noexcept
+    const noexcept
       { return this->index() == index_real_literal;  }
 
     double
@@ -169,8 +158,7 @@ class Token
 
     bool
     is_string_literal()
-    const
-    noexcept
+    const noexcept
       { return this->index() == index_string_literal;  }
 
     const cow_string&

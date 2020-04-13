@@ -330,14 +330,12 @@ class cow_opaque
   public:
     bool
     unique()
-    const
-    noexcept
+    const noexcept
       { return this->m_sptr.unique();  }
 
     long
     use_count()
-    const
-    noexcept
+    const noexcept
       { return this->m_sptr.use_count();  }
 
     cow_opaque&
@@ -350,8 +348,7 @@ class cow_opaque
 
     explicit operator
     bool()
-    const
-    noexcept
+    const noexcept
       { return bool(this->m_sptr);  }
 
     const type_info&
@@ -361,8 +358,7 @@ class cow_opaque
 
     const void*
     ptr()
-    const
-    noexcept
+    const noexcept
       { return this->m_sptr.get();  }
 
     tinyfmt&
@@ -474,14 +470,12 @@ class cow_function
   public:
     bool
     unique()
-    const
-    noexcept
+    const noexcept
       { return this->m_sptr.unique();  }
 
     long
     use_count()
-    const
-    noexcept
+    const noexcept
       { return this->m_sptr.use_count();  }
 
     cow_function&
@@ -495,8 +489,7 @@ class cow_function
 
     explicit operator
     bool()
-    const
-    noexcept
+    const noexcept
       { return this->m_fptr || this->m_sptr;  }
 
     const type_info&
@@ -507,8 +500,7 @@ class cow_function
 
     const void*
     ptr()
-    const
-    noexcept
+    const noexcept
       { return this->m_fptr ? (void*)(intptr_t)this->m_fptr : this->m_sptr.get();  }
 
     tinyfmt&

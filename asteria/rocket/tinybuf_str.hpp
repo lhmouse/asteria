@@ -72,8 +72,7 @@ class basic_tinybuf_str
   protected:
     off_type
     do_fortell()
-    const
-    override
+    const override
       {
         // Calculate the number of characters after the get area.
         auto navail = this->m_stor.size() - this->m_goff;
@@ -174,20 +173,17 @@ class basic_tinybuf_str
   public:
     const string_type&
     get_string()
-    const
-    noexcept
+    const noexcept
       { return this->m_stor;  }
 
     const char_type*
     get_c_string()
-    const
-    noexcept
+    const noexcept
       { return this->m_stor.c_str();  }
 
     size_type
     get_length()
-    const
-    noexcept
+    const noexcept
       { return this->m_stor.length();  }
 
     void

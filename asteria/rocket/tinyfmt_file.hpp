@@ -70,20 +70,17 @@ class basic_tinyfmt_file
   public:
     tinybuf_type&
     get_tinybuf()
-    const
-    override
+    const override
       { return this->m_buf;  }
 
     handle_type
     get_handle()
-    const
-    noexcept
+    const noexcept
       { return this->m_buf.get_handle();  }
 
     const closer_type&
     get_closer()
-    const
-    noexcept
+    const noexcept
       { return this->m_buf.get_closer();  }
 
     closer_type&

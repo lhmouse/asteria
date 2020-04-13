@@ -35,51 +35,42 @@ class Parser_Error
   public:
     const char*
     what()
-    const
-    noexcept
-    override
+    const noexcept override
       { return this->m_what.c_str();  }
 
     Parser_Status
     status()
-    const
-    noexcept
+    const noexcept
       { return this->m_stat;  }
 
     const char*
     what_status()
-    const
-    noexcept
+    const noexcept
       { return describe_parser_status(this->m_stat);  }
 
     const Source_Location&
     sloc()
-    const
-    noexcept
+    const noexcept
       { return this->m_sloc;  }
 
     const cow_string&
     file()
-    const
-    noexcept
+    const noexcept
       { return this->m_sloc.file();  }
 
     int
     line()
-    const
-    noexcept
+    const noexcept
       { return this->m_sloc.line();  }
 
     int
     offset()
-    const
-    noexcept
+    const noexcept
       { return this->m_sloc.offset();  }
 
     size_t
     length()
-    const
-    noexcept
+    const noexcept
       { return this->m_length;  }
   };
 

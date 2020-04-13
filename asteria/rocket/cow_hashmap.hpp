@@ -240,8 +240,7 @@ class cow_hashmap
 
     const details_cow_hashmap::bucket<allocator_type>*
     do_get_table()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.buckets();  }
 
     details_cow_hashmap::bucket<allocator_type>*
@@ -273,26 +272,22 @@ class cow_hashmap
     // iterators
     const_iterator
     begin()
-    const
-    noexcept
+    const noexcept
       { return const_iterator(this->m_sth, details_cow_hashmap::needs_adjust, this->do_get_table());  }
 
     const_iterator
     end()
-    const
-    noexcept
+    const noexcept
       { return const_iterator(this->m_sth, this->do_get_table() + this->bucket_count());  }
 
     const_iterator
     cbegin()
-    const
-    noexcept
+    const noexcept
       { return this->begin();  }
 
     const_iterator
     cend()
-    const
-    noexcept
+    const noexcept
       { return this->end();  }
 
     // N.B. This function may throw `std::bad_alloc`.
@@ -311,37 +306,32 @@ class cow_hashmap
     constexpr
     bool
     empty()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.empty();  }
 
     constexpr
     size_type
     size()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.element_count();  }
 
     // N.B. This is a non-standard extension.
     constexpr
     difference_type
     ssize()
-    const
-    noexcept
+    const noexcept
       { return static_cast<difference_type>(this->size());  }
 
     constexpr
     size_type
     max_size()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.max_size();  }
 
     constexpr
     size_type
     capacity()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.capacity();  }
 
     // N.B. The return type is a non-standard extension.
@@ -388,15 +378,13 @@ class cow_hashmap
     // N.B. This is a non-standard extension.
     bool
     unique()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.unique();  }
 
     // N.B. This is a non-standard extension.
     long
     use_count()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.use_count();  }
 
     // hash policy
@@ -404,16 +392,14 @@ class cow_hashmap
     constexpr
     size_type
     bucket_count()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.bucket_count();  }
 
     // N.B. The return type differs from `std::unordered_map`.
     constexpr
     double
     load_factor()
-    const
-    noexcept
+    const noexcept
       { return static_cast<double>(static_cast<difference_type>(this->size())) /
                static_cast<double>(static_cast<difference_type>(this->bucket_count()));  }
 
@@ -422,8 +408,7 @@ class cow_hashmap
     constexpr
     double
     max_load_factor()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.max_load_factor();  }
 
     void
@@ -725,8 +710,7 @@ class cow_hashmap
     const
     allocator_type&
     get_allocator()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.as_allocator();  }
 
     allocator_type&
@@ -738,8 +722,7 @@ class cow_hashmap
     constexpr
     const hasher&
     hash_function()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.as_hasher();  }
 
     hasher&
@@ -752,8 +735,7 @@ class cow_hashmap
     const
     key_equal&
     key_eq()
-    const
-    noexcept
+    const noexcept
       { return this->m_sth.as_key_equal();  }
 
     key_equal&

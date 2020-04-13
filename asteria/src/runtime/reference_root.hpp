@@ -74,20 +74,17 @@ class Reference_root
   public:
     Index
     index()
-    const
-    noexcept
+    const noexcept
       { return static_cast<Index>(this->m_stor.index());  }
 
     bool
     is_void()
-    const
-    noexcept
+    const noexcept
       { return this->index() == index_void;  }
 
     bool
     is_constant()
-    const
-    noexcept
+    const noexcept
       { return this->index() == index_constant;  }
 
     const Value&
@@ -97,8 +94,7 @@ class Reference_root
 
     bool
     is_temporary()
-    const
-    noexcept
+    const noexcept
       { return this->index() == index_temporary;  }
 
     const Value&
@@ -108,8 +104,7 @@ class Reference_root
 
     bool
     is_variable()
-    const
-    noexcept
+    const noexcept
       { return this->index() == index_variable;  }
 
     const rcfwdp<Variable>&
@@ -119,8 +114,7 @@ class Reference_root
 
     bool
     is_tail_call()
-    const
-    noexcept
+    const noexcept
       { return this->index() == index_tail_call;  }
 
     const rcfwdp<PTC_Arguments>&

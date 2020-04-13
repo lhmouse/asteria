@@ -37,32 +37,27 @@ class ascii_numput
     // accessors
     const char*
     begin()
-    const
-    noexcept
+    const noexcept
       { return this->m_bptr;  }
 
     const char*
     end()
-    const
-    noexcept
+    const noexcept
       { return this->m_eptr;  }
 
     bool
     empty()
-    const
-    noexcept
+    const noexcept
       { return this->m_bptr == this->m_eptr;  }
 
     size_t
     size()
-    const
-    noexcept
+    const noexcept
       { return static_cast<size_t>(this->m_eptr - this->m_bptr);  }
 
     const char*
     data()
-    const
-    noexcept
+    const noexcept
       { return this->m_bptr;  }
 
     ascii_numput&

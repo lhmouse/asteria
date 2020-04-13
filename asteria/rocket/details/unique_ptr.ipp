@@ -30,13 +30,11 @@ struct deleter_reference
 
     constexpr operator
     deleterT&()
-    const
-    noexcept
+    const noexcept
       { return *(this->m_qdel);  }
 
     constexpr deleterT&get()
-    const
-    noexcept
+    const noexcept
       { return *(this->m_qdel);  }
   };
 
@@ -93,8 +91,7 @@ class stored_pointer
   public:
     const deleter_type&
     as_deleter()
-    const
-    noexcept
+    const noexcept
       { return static_cast<const deleter_base&>(*this);  }
 
     deleter_type&
@@ -105,8 +102,7 @@ class stored_pointer
     constexpr
     pointer
     get()
-    const
-    noexcept
+    const noexcept
       { return this->m_ptr;  }
 
     pointer
@@ -170,8 +166,7 @@ class stored_pointer<pointerT, deleterT&>
   public:
     const deleter_base&
     as_deleter()
-    const
-    noexcept
+    const noexcept
       { return static_cast<const deleter_base&>(*this);  }
 
     deleter_base&
@@ -182,8 +177,7 @@ class stored_pointer<pointerT, deleterT&>
     constexpr
     pointer
     get()
-    const
-    noexcept
+    const noexcept
       { return this->m_ptr;  }
 
     pointer

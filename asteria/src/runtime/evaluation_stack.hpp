@@ -33,14 +33,12 @@ class Evaluation_Stack
   public:
     bool
     empty()
-    const
-    noexcept
+    const noexcept
       { return this->m_etop == this->m_refs.data();  }
 
     size_t
     size()
-    const
-    noexcept
+    const noexcept
       { return static_cast<size_t>(this->m_etop - this->m_refs.data());  }
 
     Evaluation_Stack&
@@ -78,8 +76,7 @@ class Evaluation_Stack
 
     const Reference&
     get_top(size_t off = 0)
-    const
-    noexcept
+    const noexcept
       {
         ROCKET_ASSERT(off < this->size());
         return this->m_etop[~off];

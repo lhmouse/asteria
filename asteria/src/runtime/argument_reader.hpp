@@ -78,8 +78,7 @@ class Argument_Reader
   public:
     size_t
     count_arguments()
-    const
-    noexcept
+    const noexcept
       { return this->m_args->size();  }
 
     const Reference&
@@ -89,15 +88,13 @@ class Argument_Reader
 
     const cow_string&
     get_name()
-    const
-    noexcept
+    const noexcept
       { return this->m_name;  }
 
     // `S` stands for `save` or `store`.
     const Argument_Reader&
     S(State& state)
-    const
-    noexcept
+    const noexcept
       {
         state = this->m_state;
         return *this;

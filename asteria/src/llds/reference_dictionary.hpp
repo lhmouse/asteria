@@ -27,8 +27,7 @@ class Reference_Dictionary
 
         explicit operator
         bool()
-        const
-        noexcept
+        const noexcept
           { return this->prev != nullptr;  }
       };
 
@@ -67,8 +66,7 @@ class Reference_Dictionary
   private:
     void
     do_destroy_buckets()
-    const
-    noexcept;
+    const noexcept;
 
     void
     do_enumerate_variables(Variable_Callback& callback)
@@ -76,8 +74,7 @@ class Reference_Dictionary
 
     Bucket*
     do_xprobe(const phsh_string& name)
-    const
-    noexcept;
+    const noexcept;
 
     void
     do_xrelocate_but(Bucket* qxcld)
@@ -107,14 +104,12 @@ class Reference_Dictionary
   public:
     bool
     empty()
-    const
-    noexcept
+    const noexcept
       { return this->m_head == nullptr;  }
 
     size_t
     size()
-    const
-    noexcept
+    const noexcept
       { return this->m_size;  }
 
     Reference_Dictionary&
@@ -143,8 +138,7 @@ class Reference_Dictionary
 
     const Reference*
     get_opt(const phsh_string& name)
-    const
-    noexcept
+    const noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.
         if(!this->m_bptr) {

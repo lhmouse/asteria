@@ -64,8 +64,7 @@ class Reference_modifier
   public:
     Index
     index()
-    const
-    noexcept
+    const noexcept
       { return static_cast<Index>(this->m_stor.index());  }
 
     Reference_modifier&
