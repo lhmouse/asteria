@@ -54,9 +54,12 @@ do_compose_message()
       fmt << this->m_value;
 
     // Append stack frames.
-    for(size_t i = 0;  i < this->m_frames.size();  ++i)
-      format(fmt, "\n  #$1 $2 at '$3': $4", i,
-                  this->m_frames[i].what_type(), this->m_frames[i].sloc(), this->m_frames[i].value());
+    fmt << "\n[backtrace frames:";
+    for(size_t i = 0;  i < this->m_frames.size();  ++i) {
+      const auto& frm = this->m_frames[i];
+      format(fmt, "\n  #$1 $2 at '$3': $4", i, frm.what_type(), frm.sloc(), frm.value());
+    }
+    fmt << "\n  -- end of backtrace frames]";
 
     // Set the string.
     this->m_what = fmt.extract_string();
