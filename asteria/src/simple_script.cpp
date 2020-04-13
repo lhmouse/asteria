@@ -28,7 +28,7 @@ reload(tinybuf& cbuf, const cow_string& name)
     // Instantiate the function.
     AIR_Optimizer optmz(this->m_opts);
     optmz.reload(nullptr, this->m_params, stmtq);
-    this->m_func = optmz.create_function(Source_Location(name, 0, 0), ::rocket::sref("<top level>"));
+    this->m_func = optmz.create_function(Source_Location(name, 0, 0), ::rocket::sref("<file scope>"));
     return *this;
   }
 
