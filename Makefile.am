@@ -6,7 +6,7 @@ AM_CPPFLAGS = -pipe -pthread -Wall -Wextra  \
   -Werror={{,sign-}conversion,write-strings,return-type,double-promotion}  \
   -W{invalid-pch,switch-enum,suggest-attribute=noreturn,undef,shadow,missing-field-initializers}  \
   -Wunused-{function,label,local-typedefs,{,but-set-}{variable,parameter}}
-AM_CXXFLAGS = -std=c++1z  \
+AM_CXXFLAGS = -std=gnu++14 -fno-gnu-keywords  \
   -Wzero-as-null-pointer-constant -Wno-redundant-move  \
   -Werror={non-virtual-dtor,missing-declarations}
 AM_DEFAULT_SOURCE_EXT = .cpp

@@ -1,9 +1,11 @@
 #!/bin/bash -e
 
+# setup
 export CXX=${CXX:-"g++"}
 export CPPFLAGS="-D_FILE_OFFSET_BITS=64 -D_POSIX_C_SOURCE=200809 -D_GNU_SOURCE -D_WIN32_WINNT=0x0600"
-export CXXFLAGS="-std=gnu++14"
+export CXXFLAGS='-std=gnu++14 -fno-gnu-keywords -Wno-zero-as-null-pointer-constant'
 
+# note: `sem` is not always available
 _sem="parallel --will-cite --semaphore"
 
 for _file in $(find -L "asteria" -name "*.[hc]pp")
