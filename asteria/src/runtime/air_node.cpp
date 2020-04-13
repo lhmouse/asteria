@@ -922,18 +922,6 @@ do_invoke_nontail(Reference& self, const Source_Location& sloc, Executive_Contex
     return self;
   }
 
-ROCKET_NOINLINE
-Reference& do_wrap_ptc(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
-                       const cow_function& target, PTC_Aware ptc, cow_vector<Reference>&& args)
-  {
-    // Pack arguments for this proper tail call.
-    auto tca = ::rocket::make_refcnt<PTC_Arguments>(sloc, ctx.zvarg(), ptc, target,
-                                        ::std::move(args.insert(args.size(), ::std::move(self))));
-
-    Reference_root::S_tail_call xref = { ::std::move(tca) };
-    return self = ::std::move(xref);
-  }
-
 AIR_Status
 do_function_call_common(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
                         const cow_function& target, PTC_Aware ptc, cow_vector<Reference>&& args)
@@ -941,12 +929,18 @@ do_function_call_common(Reference& self, const Source_Location& sloc, Executive_
     if(ROCKET_EXPECT(ptc == ptc_aware_none)) {
       // Perform plain calls.
       do_invoke_nontail(self, sloc, ctx, target, ::std::move(args));
-      // Discard `self`.
+      // The result will have been stored into `self`
       return air_status_next;
     }
-    // Wrap proper tail calls.
-    // The result will be unpacked outside this scope.
-    do_wrap_ptc(self, sloc, ctx, target, ptc, ::std::move(args));
+
+    // Pack arguments for this proper tail call.
+    args.emplace_back(::std::move(self));
+    auto tca = ::rocket::make_refcnt<PTC_Arguments>(sloc, ctx.zvarg(), ptc, target, ::std::move(args));
+
+    // Set the result, which will be unpacked outside this scope.
+    Reference_root::S_tail_call xref = { ::std::move(tca) };
+    self = ::std::move(xref);
+
     // Force `air_status_return_ref` if control flow reaches the end of a function.
     // Otherwise a null reference is returned instead of this PTC wrapper, which can then never be unpacked.
     return air_status_return_ref;
