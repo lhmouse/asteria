@@ -437,13 +437,6 @@ is_none_of(targetT&& targ, initializer_list<elementT> init)
                   ::std::forward<targetT>(targ), init);
   }
 
-template<typename enumT>
-constexpr
-typename underlying_type<enumT>::type
-weaken_enum(enumT value)
-noexcept
-  { return static_cast<typename underlying_type<enumT>::type>(value);  }
-
 template<typename elementT, size_t countT>
 constexpr
 size_t

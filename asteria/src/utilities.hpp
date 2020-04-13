@@ -67,6 +67,14 @@ noexcept;
 bool
 utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset);
 
+// Type conversion
+template<typename enumT>
+constexpr
+typename ::std::underlying_type<enumT>::type
+weaken_enum(enumT value)
+noexcept
+  { return static_cast<typename ::std::underlying_type<enumT>::type>(value);  }
+
 // C character types
 enum : uint8_t
   {
