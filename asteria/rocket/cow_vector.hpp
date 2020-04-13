@@ -817,8 +817,9 @@ class cow_vector
     value_type*
     mut_data()
       {
-        if(ROCKET_UNEXPECT(!this->empty() && !this->unique()))
+        if(ROCKET_UNEXPECT(!this->empty() && !this->unique())) {
           return this->do_reallocate(0, 0, this->size(), this->size() | 1);
+        }
         return this->m_sth.mut_data_unchecked();
       }
 

@@ -247,8 +247,9 @@ class cow_hashmap
     details_cow_hashmap::bucket<allocator_type>*
     do_mut_table()
       {
-        if(ROCKET_UNEXPECT(!this->empty() && !this->unique()))
+        if(ROCKET_UNEXPECT(!this->empty() && !this->unique())) {
           return this->do_reallocate(0, 0, this->bucket_count(), this->size() | 1);
+        }
         return this->m_sth.mut_buckets_unchecked();
       }
 

@@ -1202,10 +1202,10 @@ class basic_cow_string
     value_type*
     mut_data()
       {
-        if(ROCKET_UNEXPECT(!this->empty() && !this->unique()))
+        if(ROCKET_UNEXPECT(!this->empty() && !this->unique())) {
           return this->do_reallocate(0, 0, this->size(), this->size() | 1);
-        else
-          return this->m_sth.mut_data_unchecked();
+        }
+        return this->m_sth.mut_data_unchecked();
       }
 
     // N.B. The return type differs from `std::basic_string`.
