@@ -12,7 +12,7 @@ namespace Asteria {
 class Evaluation_Stack
   {
   private:
-    Reference* m_etop;
+    Reference* m_etop;  // this points past the last element
     cow_vector<Reference> m_refs;
 
   public:
@@ -47,9 +47,10 @@ class Evaluation_Stack
     clear()
     noexcept
       {
-        // We assume that `m_refs` is always owned uniquely, unless it is empty.
+        // We assume that `m_refs` is always empty or owned uniquely, unless it is empty.
         // Reset the top pointer without destroying references for efficiency.
-        this->m_etop = this->m_refs.mut_data();
+        ROCKET_ASSERT(this->m_refs.empty() || this->m_refs.unique());
+        this->m_etop = const_cast<Reference*>(this->m_refs.data());
         return *this;
       }
 
@@ -96,16 +97,11 @@ class Evaluation_Stack
     Reference&
     push(XRefT&& xref)
       {
-        if(ROCKET_EXPECT(this->size() < this->m_refs.size())) {
-          // Overwrite the next element.
+        if(ROCKET_EXPECT(this->size() < this->m_refs.size()))
           this->m_etop[0] = ::std::forward<XRefT>(xref);
-          this->m_etop += 1;
-        }
-        else {
-          // Push a new element.
-          this->m_refs.emplace_back(::std::forward<XRefT>(xref));
-          this->m_etop = this->m_refs.mut_data() + this->m_refs.size();
-        }
+        else
+          this->m_etop = &(this->m_refs.emplace_back(::std::forward<XRefT>(xref)));
+        this->m_etop += 1;
         return this->m_etop[-1];
       }
 
