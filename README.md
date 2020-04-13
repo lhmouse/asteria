@@ -1,3 +1,5 @@
+![README](https://raw.githubusercontent.com/lhmouse/asteria/master/README.png)
+
 |CI            |Category                   |Build on OS     |Host OS         |Build Status     |Remarks          |
 |:-------------|:--------------------------|:---------------|:---------------|:----------------|:----------------|
 |[**Travis CI**](https://travis-ci.org/lhmouse/asteria) |:1st_place_medal:Primary   |Linux (Ubuntu)  |Linux (Ubuntu)  |[![Build Status](https://travis-ci.org/lhmouse/asteria.svg?branch=master)](https://travis-ci.org/lhmouse/asteria) |       |
@@ -14,8 +16,6 @@
 |**Clang 8** |:2nd_place_medal:Secondary |Unknown warning options. A number of meaningless warnings.  |
 |**Clang 7** |:2nd_place_medal:Secondary |Unknown warning options. A number of meaningless warnings.  |
 |**MSVC 19** |:no_entry:Abandoned        |Little build system support. Internal compiler errors.   |
-
-![README](https://raw.githubusercontent.com/lhmouse/asteria/master/README.png)
 
 ![GNU nano for the win!](https://raw.githubusercontent.com/lhmouse/asteria/master/GNU-nano-FTW.png)
 
