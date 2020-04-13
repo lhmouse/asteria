@@ -6,7 +6,6 @@
 
 #include "../fwd.hpp"
 #include "abstract_context.hpp"
-#include "abstract_hooks.hpp"
 #include "../recursion_sentry.hpp"
 
 namespace Asteria {
@@ -16,8 +15,8 @@ class Global_Context
   {
   private:
     Recursion_Sentry m_sentry;
-    rcptr<Abstract_Hooks> m_qhooks;
 
+    rcfwdp<Abstract_Hooks> m_qhooks;
     rcfwdp<Genius_Collector> m_gcoll;
     rcfwdp<Random_Engine> m_prng;
     rcfwdp<Loader_Lock> m_ldrlk;
@@ -75,11 +74,13 @@ class Global_Context
       { return this->m_sentry.set_base(base), *this;  }
 
     // This helps debugging and profiling.
+    ASTERIA_INCOMPLET(Abstract_Hooks)
     rcptr<Abstract_Hooks>
     get_hooks_opt()
     const noexcept
-      { return this->m_qhooks;  }
+      { return unerase_cast<Abstract_Hooks>(this->m_qhooks);  }
 
+    ASTERIA_INCOMPLET(Abstract_Hooks)
     Global_Context&
     set_hooks(rcptr<Abstract_Hooks> hooks_opt)
     noexcept
