@@ -15,7 +15,9 @@
 |**Clang 7** |:2nd_place_medal:Secondary |Unknown warning options. A number of meaningless warnings.  |
 |**MSVC 19** |:no_entry:Abandoned        |Little build system support. Internal compiler errors.   |
 
-![GNU nano for the win!](https://raw.githubusercontent.com/lhmouse/poseidon/master/gnu-nano-ftw.png)
+![README](https://raw.githubusercontent.com/lhmouse/asteria/master/README.png)
+
+![GNU nano for the win!](https://raw.githubusercontent.com/lhmouse/asteria/master/GNU-nano-FTW.png)
 
 # How to Build
 
