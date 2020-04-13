@@ -132,7 +132,7 @@ initialize(API_Version version)
     // Get the range of modules to initialize.
     // This also determines the maximum version number of the library, which will be referenced
     // as `yend[-1].version`.
-    V_object ostd;
+    cow_dictionary<Value> ostd;
     auto bptr = begin(s_modules);
     auto eptr = ::std::upper_bound(bptr, end(s_modules), version, Module_Comparator());
 
@@ -142,7 +142,7 @@ initialize(API_Version version)
       auto pair = ostd.try_emplace(::rocket::sref(q->name));
       if(pair.second) {
         ROCKET_ASSERT(pair.first->second.is_null());
-        pair.first->second = V_object();
+        pair.first->second = cow_dictionary<Value>();
       }
       q->init(pair.first->second.open_object(), eptr[-1].version);
     }

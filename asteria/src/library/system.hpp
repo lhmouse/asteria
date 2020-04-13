@@ -9,35 +9,35 @@
 namespace Asteria {
 
 // `std.system.gc_count_variables`
-Iopt
-std_system_gc_count_variables(Global& global, Ival generation);
+optV_integer
+std_system_gc_count_variables(Global_Context& global, V_integer generation);
 
 // `std.system.gc_get_threshold`
-Iopt
-std_system_gc_get_threshold(Global& global, Ival generation);
+optV_integer
+std_system_gc_get_threshold(Global_Context& global, V_integer generation);
 
 // `std.system.gc_set_threshold`
-Iopt
-std_system_gc_set_threshold(Global& global, Ival generation, Ival threshold);
+optV_integer
+std_system_gc_set_threshold(Global_Context& global, V_integer generation, V_integer threshold);
 
 // `std.system.gc_collect`
-Ival
-std_system_gc_collect(Global& global, Iopt generation_limit);
+V_integer
+std_system_gc_collect(Global_Context& global, optV_integer generation_limit);
 
 // `std.system.execute`
-Ival
-std_system_execute(Sval path, Aopt argv, Aopt envp);
+V_integer
+std_system_execute(V_string path, optV_array argv, optV_array envp);
 
 // `std.system.daemonize`
 void
 std_system_daemonize();
 
 // `std.system.env_get_variable`
-Sopt
-std_system_env_get_variable(Sval name);
+optV_string
+std_system_env_get_variable(V_string name);
 
 // `std.system.env_get_variables`
-Oval
+V_object
 std_system_env_get_variables();
 
 // Create an object that is to be referenced as `std.system`.

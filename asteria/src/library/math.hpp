@@ -9,96 +9,96 @@
 namespace Asteria {
 
 // `std.math.exp`
-Rval
-std_math_exp(Rval y, Ropt base);
+V_real
+std_math_exp(V_real y, optV_real base);
 
 // `std.math.expm1`
-Rval
-std_math_expm1(Rval y);
+V_real
+std_math_expm1(V_real y);
 
 // `std.math.pow`
-Rval
-std_math_pow(Rval x, Rval y);
+V_real
+std_math_pow(V_real x, V_real y);
 
 // `std.math.log`
-Rval
-std_math_log(Rval x, Ropt base);
+V_real
+std_math_log(V_real x, optV_real base);
 
 // `std.math.log1p`
-Rval
-std_math_log1p(Rval x);
+V_real
+std_math_log1p(V_real x);
 
 // `std.math.sin`
-Rval
-std_math_sin(Rval x);
+V_real
+std_math_sin(V_real x);
 
 // `std.math.cos`
-Rval
-std_math_cos(Rval x);
+V_real
+std_math_cos(V_real x);
 
 // `std.math.tan`
-Rval
-std_math_tan(Rval x);
+V_real
+std_math_tan(V_real x);
 
 // `std.math.asin`
-Rval
-std_math_asin(Rval x);
+V_real
+std_math_asin(V_real x);
 
 // `std.math.acos`
-Rval
-std_math_acos(Rval x);
+V_real
+std_math_acos(V_real x);
 
 // `std.math.atan`
-Rval
-std_math_atan(Rval x);
+V_real
+std_math_atan(V_real x);
 
 // `std.math.atan2`
-Rval
-std_math_atan2(Rval y, Rval x);
+V_real
+std_math_atan2(V_real y, V_real x);
 
 // `std.math.hypot`
-Rval
+V_real
 std_math_hypot(cow_vector<Value> values);
 
 // `std.math.sinh`
-Rval
-std_math_sinh(Rval x);
+V_real
+std_math_sinh(V_real x);
 
 // `std.math.cosh`
-Rval
-std_math_cosh(Rval x);
+V_real
+std_math_cosh(V_real x);
 
 // `std.math.tanh`
-Rval
-std_math_tanh(Rval x);
+V_real
+std_math_tanh(V_real x);
 
 // `std.math.asinh`
-Rval
-std_math_asinh(Rval x);
+V_real
+std_math_asinh(V_real x);
 
 // `std.math.acosh`
-Rval
-std_math_acosh(Rval x);
+V_real
+std_math_acosh(V_real x);
 
 // `std.math.atanh`
-Rval
-std_math_atanh(Rval x);
+V_real
+std_math_atanh(V_real x);
 
 // `std.math.erf`
-Rval
-std_math_erf(Rval x);
+V_real
+std_math_erf(V_real x);
 
 // `std.math.cerf`
-Rval
-std_math_cerf(Rval x);
+V_real
+std_math_cerf(V_real x);
 
 // `std.math.gamma`
-Rval
-std_math_gamma(Rval x);
+V_real
+std_math_gamma(V_real x);
 
 // `std.math.lgamma`
-Rval
-std_math_lgamma(Rval x);
+V_real
+std_math_lgamma(V_real x);
 
 // Create an object that is to be referenced as `std.math`.
 void

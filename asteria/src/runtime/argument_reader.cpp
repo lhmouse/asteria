@@ -176,7 +176,7 @@ F()
 
 Argument_Reader&
 Argument_Reader::
-v(Bval& xval)
+v(V_boolean& xval)
   {
     this->do_record_parameter_required(vtype_boolean);
 
@@ -199,7 +199,7 @@ v(Bval& xval)
 
 Argument_Reader&
 Argument_Reader::
-v(Ival& xval)
+v(V_integer& xval)
   {
     this->do_record_parameter_required(vtype_integer);
 
@@ -222,7 +222,7 @@ v(Ival& xval)
 
 Argument_Reader&
 Argument_Reader::
-v(Rval& xval)
+v(V_real& xval)
   {
     this->do_record_parameter_required(vtype_real);
 
@@ -245,7 +245,7 @@ v(Rval& xval)
 
 Argument_Reader&
 Argument_Reader::
-v(Sval& xval)
+v(V_string& xval)
   {
     this->do_record_parameter_required(vtype_string);
 
@@ -268,7 +268,7 @@ v(Sval& xval)
 
 Argument_Reader&
 Argument_Reader::
-v(Pval& xval)
+v(V_opaque& xval)
   {
     this->do_record_parameter_required(vtype_opaque);
 
@@ -291,7 +291,7 @@ v(Pval& xval)
 
 Argument_Reader&
 Argument_Reader::
-v(Fval& xval)
+v(V_function& xval)
   {
     this->do_record_parameter_required(vtype_function);
 
@@ -314,7 +314,7 @@ v(Fval& xval)
 
 Argument_Reader&
 Argument_Reader::
-v(Aval& xval)
+v(V_array& xval)
   {
     this->do_record_parameter_required(vtype_array);
 
@@ -337,7 +337,7 @@ v(Aval& xval)
 
 Argument_Reader&
 Argument_Reader::
-v(Oval& xval)
+v(V_object& xval)
   {
     this->do_record_parameter_required(vtype_object);
 
@@ -392,7 +392,7 @@ o(Value& val)
 
 Argument_Reader&
 Argument_Reader::
-o(Bopt& xopt)
+o(optV_boolean& xopt)
   {
     this->do_record_parameter_optional(vtype_boolean);
 
@@ -419,7 +419,7 @@ o(Bopt& xopt)
 
 Argument_Reader&
 Argument_Reader::
-o(Iopt& xopt)
+o(optV_integer& xopt)
   {
     this->do_record_parameter_optional(vtype_integer);
 
@@ -446,7 +446,7 @@ o(Iopt& xopt)
 
 Argument_Reader&
 Argument_Reader::
-o(Ropt& xopt)
+o(optV_real& xopt)
   {
     this->do_record_parameter_optional(vtype_real);
 
@@ -473,7 +473,7 @@ o(Ropt& xopt)
 
 Argument_Reader&
 Argument_Reader::
-o(Sopt& xopt)
+o(optV_string& xopt)
   {
     this->do_record_parameter_optional(vtype_string);
 
@@ -500,7 +500,7 @@ o(Sopt& xopt)
 
 Argument_Reader&
 Argument_Reader::
-o(Popt& xopt)
+o(optV_opaque& xopt)
   {
     this->do_record_parameter_optional(vtype_opaque);
 
@@ -527,7 +527,7 @@ o(Popt& xopt)
 
 Argument_Reader&
 Argument_Reader::
-o(Fopt& xopt)
+o(optV_function& xopt)
   {
     this->do_record_parameter_optional(vtype_function);
 
@@ -554,7 +554,7 @@ o(Fopt& xopt)
 
 Argument_Reader&
 Argument_Reader::
-o(Aopt& xopt)
+o(optV_array& xopt)
   {
     this->do_record_parameter_optional(vtype_array);
 
@@ -581,7 +581,7 @@ o(Aopt& xopt)
 
 Argument_Reader&
 Argument_Reader::
-o(Oopt& xopt)
+o(optV_object& xopt)
   {
     this->do_record_parameter_optional(vtype_object);
 

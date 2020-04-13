@@ -23,7 +23,7 @@ constexpr char s_spaces[] = " \f\n\r\t\v";
 
 }  // namespace
 
-Ival
+V_integer
 std_chrono_utc_now()
   {
     // Get UTC time from the system.
@@ -36,7 +36,7 @@ std_chrono_utc_now()
     return secs * 1000 + msecs;
   }
 
-Ival
+V_integer
 std_chrono_local_now()
   {
     // Get local time and GMT offset from the system.
@@ -51,7 +51,7 @@ std_chrono_local_now()
     return secs * 1000 + msecs;
   }
 
-Rval
+V_real
 std_chrono_hires_now()
   {
     // Get the time since the system was started.
@@ -65,7 +65,7 @@ std_chrono_hires_now()
     return secs * 1000 + msecs + 1234567890123;
   }
 
-Ival
+V_integer
 std_chrono_steady_now()
   {
     // Get the time since the system was started.
@@ -79,8 +79,8 @@ std_chrono_steady_now()
     return secs * 1000 + msecs + 3210987654321;
   }
 
-Ival
-std_chrono_local_from_utc(Ival time_utc)
+V_integer
+std_chrono_local_from_utc(V_integer time_utc)
   {
     // Handle special time values.
     if(time_utc <= s_timestamp_min)
@@ -103,8 +103,8 @@ std_chrono_local_from_utc(Ival time_utc)
       return time_local;
   }
 
-Ival
-std_chrono_utc_from_local(Ival time_local)
+V_integer
+std_chrono_utc_from_local(V_integer time_local)
   {
     // Handle special time values.
     if(time_local <= s_timestamp_min)
@@ -127,8 +127,8 @@ std_chrono_utc_from_local(Ival time_local)
       return time_utc;
   }
 
-Sval
-std_chrono_utc_format(Ival time_point, Bopt with_ms)
+V_string
+std_chrono_utc_format(V_integer time_point, optV_boolean with_ms)
   {
     // No millisecond part is added by default.
     bool pms = with_ms.value_or(false);
@@ -235,12 +235,12 @@ std_chrono_utc_format(Ival time_point, Bopt with_ms)
     return time_str;
   }
 
-Ival
-std_chrono_utc_parse(Sval time_str)
+V_integer
+std_chrono_utc_parse(V_string time_str)
   {
     // Trim leading and trailing spaces. Fail if the string becomes empty.
     size_t off = time_str.find_first_not_of(s_spaces);
-    if(off == Sval::npos) {
+    if(off == V_string::npos) {
       ASTERIA_THROW("blank time string");
     }
     // Get the start and end of the non-empty sequence.
@@ -388,7 +388,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     // `std.chrono.utc_now()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("utc_now"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.chrono.utc_now()`
 
@@ -397,7 +397,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
   * Returns the number of milliseconds since the Unix epoch,
     represented as an integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.utc_now"));
     // Parse arguments.
@@ -413,7 +413,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     // `std.chrono.local_now()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("local_now"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.chrono.local_now()`
 
@@ -422,7 +422,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
   * Returns the number of milliseconds since `1970-01-01 00:00:00`
     in the local time zone, represented as an integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.local_now"));
     // Parse arguments.
@@ -438,7 +438,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     // `std.chrono.hires_now()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("hires_now"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.chrono.hires_now()`
 
@@ -450,7 +450,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
   * Returns the number of milliseconds since an unspecified time
     point, represented as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.hires_now"));
     // Parse arguments.
@@ -466,7 +466,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     // `std.chrono.steady_now()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("steady_now"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.chrono.steady_now()`
 
@@ -478,7 +478,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
   * Returns the number of milliseconds since an unspecified time
     point, represented as an integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.steady_now"));
     // Parse arguments.
@@ -494,7 +494,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     // `std.chrono.local_from_utc()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("local_from_utc"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.chrono.local_from_utc(time_utc)`
 
@@ -504,11 +504,11 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
   * Returns the number of milliseconds since `1970-01-01 00:00:00`
     in the local time zone, represented as an integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.local_from_utc"));
     // Parse arguments.
-    Ival time_utc;
+    V_integer time_utc;
     if(reader.I().v(time_utc).F()) {
       Reference_root::S_temporary xref = { std_chrono_local_from_utc(::std::move(time_utc)) };
       return self = ::std::move(xref);
@@ -521,7 +521,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     // `std.chrono.utc_from_local()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("utc_from_local"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.chrono.utc_from_local(time_local)`
 
@@ -532,11 +532,11 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
   * Returns the number of milliseconds since the Unix epoch,
     represented as an integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.utc_from_local"));
     // Parse arguments.
-    Ival time_local;
+    V_integer time_local;
     if(reader.I().v(time_local).F()) {
       Reference_root::S_temporary xref = { std_chrono_utc_from_local(::std::move(time_local)) };
       return self = ::std::move(xref);
@@ -549,7 +549,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     // `std.chrono.utc_format()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("utc_format"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.chrono.utc_format(time_point, [with_ms])`
 
@@ -561,12 +561,12 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
 
   * Returns a string representing the time point.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.utc_format"));
     // Parse arguments.
-    Ival time_point;
-    Bopt with_ms;
+    V_integer time_point;
+    optV_boolean with_ms;
     if(reader.I().v(time_point).o(with_ms).F()) {
       Reference_root::S_temporary xref = { std_chrono_utc_format(::std::move(time_point), ::std::move(with_ms)) };
       return self = ::std::move(xref);
@@ -579,7 +579,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     // `std.chrono.utc_parse()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("utc_parse"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.chrono.utc_parse(time_str)`
 
@@ -592,11 +592,11 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
 
   * Throws an exception if the string is invalid.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.utc_parse"));
     // Parse arguments.
-    Sval time_str;
+    V_string time_str;
     if(reader.I().v(time_str).F()) {
       Reference_root::S_temporary xref = { std_chrono_utc_parse(::std::move(time_str)) };
       return self = ::std::move(xref);

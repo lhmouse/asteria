@@ -127,7 +127,7 @@ do_write_loop(int fd, const void* buf, size_t count)
 
 }  // namespace
 
-Sval
+V_string
 std_filesystem_get_working_directory()
   {
     // Pass a null pointer to request dynamic allocation.
@@ -135,76 +135,76 @@ std_filesystem_get_working_directory()
     uptr<char, void (&)(void*)> qcwd(::getcwd(nullptr, 0), ::free);
     if(!qcwd)
       ASTERIA_THROW_SYSTEM_ERROR("getcwd");
-    return Sval(qcwd);
+    return V_string(qcwd);
   }
 
-Sval
-std_filesystem_get_real_path(Sval path)
+V_string
+std_filesystem_get_real_path(V_string path)
   {
     // Pass a null pointer to request dynamic allocation.
     uptr<char, void (&)(void*)> abspath(::realpath(path.safe_c_str(), nullptr), ::free);
     if(!abspath)
       ASTERIA_THROW_SYSTEM_ERROR("realpath");
-    return Sval(abspath);
+    return V_string(abspath);
   }
 
-Oopt
-std_filesystem_get_information(Sval path)
+optV_object
+std_filesystem_get_information(V_string path)
   {
     struct ::stat stb;
     if(::lstat(path.safe_c_str(), &stb) != 0) {
       return nullopt;
     }
     // Convert the result to an `object`.
-    Oval stat;
+    V_object stat;
     stat.try_emplace(::rocket::sref("i_dev"),
-      Ival(
+      V_integer(
         stb.st_dev  // unique device id on this machine
       ));
     stat.try_emplace(::rocket::sref("i_file"),
-      Ival(
+      V_integer(
         stb.st_ino  // unique file id on this device
       ));
     stat.try_emplace(::rocket::sref("n_ref"),
-      Ival(
+      V_integer(
         stb.st_nlink  // number of hard links to this file
       ));
     stat.try_emplace(::rocket::sref("b_dir"),
-      Bval(
+      V_boolean(
         S_ISDIR(stb.st_mode)  // whether this is a directory
       ));
     stat.try_emplace(::rocket::sref("b_sym"),
-      Bval(
+      V_boolean(
         S_ISLNK(stb.st_mode)  // whether this is a symbolic link
       ));
     stat.try_emplace(::rocket::sref("n_size"),
-      Ival(
+      V_integer(
         stb.st_size  // number of bytes this file contains
       ));
     stat.try_emplace(::rocket::sref("n_ocup"),
-      Ival(
+      V_integer(
         int64_t(stb.st_blocks) * 512  // number of bytes this file occupies
       ));
     stat.try_emplace(::rocket::sref("t_accs"),
-      Ival(
+      V_integer(
         int64_t(stb.st_atim.tv_sec) * 1000 + stb.st_atim.tv_nsec / 1000000  // timestamp of last access
       ));
     stat.try_emplace(::rocket::sref("t_mod"),
-      Ival(
+      V_integer(
         int64_t(stb.st_mtim.tv_sec) * 1000 + stb.st_mtim.tv_nsec / 1000000  // timestamp of last modification
       ));
     return ::std::move(stat);
   }
 
 void
-std_filesystem_move_from(Sval path_new, Sval path_old)
+std_filesystem_move_from(V_string path_new, V_string path_old)
   {
     if(::rename(path_old.safe_c_str(), path_new.safe_c_str()) != 0)
       ASTERIA_THROW_SYSTEM_ERROR("rename");
   }
 
-Ival
-std_filesystem_remove_recursive(Sval path)
+V_integer
+std_filesystem_remove_recursive(V_string path)
   {
     if(::rmdir(path.safe_c_str()) == 0) {
       // An empty directory has been removed.
@@ -232,8 +232,8 @@ std_filesystem_remove_recursive(Sval path)
     }
   }
 
-Oopt
-std_filesystem_directory_list(Sval path)
+optV_object
+std_filesystem_directory_list(V_string path)
   {
     ::rocket::unique_posix_dir dp(::opendir(path.safe_c_str()), closedir);
     if(!dp) {
@@ -243,13 +243,13 @@ std_filesystem_directory_list(Sval path)
       return nullopt;
     }
     // Write entries.
-    Oval entries;
+    V_object entries;
     cow_string child;
     struct ::dirent* next;
     while((next = ::readdir(dp)) != nullptr) {
       // Assume the name is in UTF-8.
       cow_string name(next->d_name);
-      Oval entry;
+      V_object entry;
       // Compose the full path of the child.
       // We want to reuse the storage so don't just assign to `child` here.
       child.clear();
@@ -260,11 +260,11 @@ std_filesystem_directory_list(Sval path)
       if(next->d_type != DT_UNKNOWN) {
         // Get the file type if it is available immediately.
         entry.try_emplace(::rocket::sref("b_dir"),
-          Bval(
+          V_boolean(
             next->d_type == DT_DIR
           ));
         entry.try_emplace(::rocket::sref("b_sym"),
-          Bval(
+          V_boolean(
             next->d_type == DT_LNK
           ));
       }
@@ -278,11 +278,11 @@ std_filesystem_directory_list(Sval path)
           ASTERIA_THROW_SYSTEM_ERROR("lstat");
         // Check whether the child path denotes a directory or symlink.
         entry.try_emplace(::rocket::sref("b_dir"),
-          Bval(
+          V_boolean(
             S_ISDIR(stb.st_mode)
           ));
         entry.try_emplace(::rocket::sref("b_sym"),
-          Bval(
+          V_boolean(
             S_ISLNK(stb.st_mode)
           ));
       }
@@ -292,8 +292,8 @@ std_filesystem_directory_list(Sval path)
     return ::std::move(entries);
   }
 
-Bval
-std_filesystem_directory_create(Sval path)
+V_boolean
+std_filesystem_directory_create(V_string path)
   {
     if(::mkdir(path.safe_c_str(), 0777) == 0) {
       // A new directory has been created.
@@ -313,8 +313,8 @@ std_filesystem_directory_create(Sval path)
     return false;
   }
 
-Bval
-std_filesystem_directory_remove(Sval path)
+V_boolean
+std_filesystem_directory_remove(V_string path)
   {
     if(::rmdir(path.safe_c_str()) == 0) {
       // The directory has been removed.
@@ -327,8 +327,8 @@ std_filesystem_directory_remove(Sval path)
     return false;
   }
 
-Sopt
-std_filesystem_file_read(Sval path, Iopt offset, Iopt limit)
+optV_string
+std_filesystem_file_read(V_string path, optV_integer offset, optV_integer limit)
   {
     if(offset && (*offset < 0)) {
       ASTERIA_THROW("negative file offset (offset `$1`)", *offset);
@@ -346,7 +346,7 @@ std_filesystem_file_read(Sval path, Iopt offset, Iopt limit)
 
     // Don't read too many bytes at a time.
     ::ssize_t nread;
-    Sval data;
+    V_string data;
     data.resize(static_cast<size_t>(rlimit));
     if(offset) {
       nread = ::pread(fd, data.mut_data(), data.size(), roffset);
@@ -362,8 +362,9 @@ std_filesystem_file_read(Sval path, Iopt offset, Iopt limit)
     return ::std::move(data);
   }
 
-Iopt
-std_filesystem_file_stream(Global& global, Sval path, Fval callback, Iopt offset, Iopt limit)
+optV_integer
+std_filesystem_file_stream(Global_Context& global, V_string path, V_function callback,
+                           optV_integer offset, optV_integer limit)
   {
     if(offset && (*offset < 0)) {
       ASTERIA_THROW("negative file offset (offset `$1`)", *offset);
@@ -384,7 +385,7 @@ std_filesystem_file_stream(Global& global, Sval path, Fval callback, Iopt offset
     // Read and process all data in blocks.
     cow_vector<Reference> args;
     ::ssize_t nread;
-    Sval data;
+    V_string data;
     for(;;) {
       // Check for the read limit.
       if(ntotal >= ntlimit)
@@ -423,7 +424,7 @@ std_filesystem_file_stream(Global& global, Sval path, Fval callback, Iopt offset
   }
 
 void
-std_filesystem_file_write(Sval path, Sval data, Iopt offset)
+std_filesystem_file_write(V_string path, V_string data, optV_integer offset)
   {
     if(offset && (*offset < 0)) {
       ASTERIA_THROW("negative file offset (offset `$1`)", *offset);
@@ -453,7 +454,7 @@ std_filesystem_file_write(Sval path, Sval data, Iopt offset)
   }
 
 void
-std_filesystem_file_append(Sval path, Sval data, Bopt exclusive)
+std_filesystem_file_append(V_string path, V_string data, optV_boolean exclusive)
   {
     int flags = O_WRONLY | O_CREAT | O_APPEND;
     if(exclusive == true)
@@ -469,7 +470,7 @@ std_filesystem_file_append(Sval path, Sval data, Bopt exclusive)
   }
 
 void
-std_filesystem_file_copy_from(Sval path_new, Sval path_old)
+std_filesystem_file_copy_from(V_string path_new, V_string path_old)
   {
     // Open the old file.
     ::rocket::unique_posix_fd fd_old(::open(path_old.safe_c_str(), O_RDONLY), ::close);
@@ -488,7 +489,7 @@ std_filesystem_file_copy_from(Sval path_new, Sval path_old)
 
     // Copy data in blocks.
     ::ssize_t nread, nwrtn;
-    Sval buff;
+    V_string buff;
     buff.resize(static_cast<size_t>(stb_old.st_blksize));
     for(;;) {
       // Read some bytes.
@@ -509,7 +510,7 @@ std_filesystem_file_copy_from(Sval path_new, Sval path_old)
   }
 
 bool
-std_filesystem_file_remove(Sval path)
+std_filesystem_file_remove(V_string path)
   {
     if(::unlink(path.safe_c_str()) == 0) {
       // The file has been removed.
@@ -529,7 +530,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // `std.filesystem.get_working_directory()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("get_working_directory"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.filesystem.get_working_directory()`
 
@@ -538,7 +539,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
   * Returns a string containing the path to the current working
     directory.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.get_working_directory"));
     // Parse arguments.
@@ -554,7 +555,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // `std.filesystem.get_real_path()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("get_real_path"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.filesystem.get_real_path(path)`
 
@@ -566,11 +567,11 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
 
   * Throws an exception if `path` is invalid or inaccessible.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.get_real_path"));
     // Parse arguments.
-    Sval path;
+    V_string path;
     if(reader.I().v(path).F()) {
       Reference_root::S_temporary xref = { std_filesystem_get_real_path(::std::move(path)) };
       return self = ::std::move(xref);
@@ -583,7 +584,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // `std.filesystem.get_information()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("get_information"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.filesystem.get_information(path)`
 
@@ -608,11 +609,11 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
 
     On failure, `null` is returned.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.get_information"));
     // Parse arguments.
-    Sval path;
+    V_string path;
     if(reader.I().v(path).F()) {
       Reference_root::S_temporary xref = { std_filesystem_get_information(::std::move(path)) };
       return self = ::std::move(xref);
@@ -625,7 +626,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // `std.filesystem.remove_recursive()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("remove_recursive"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.filesystem.move_from(path_new, path_old)`
 
@@ -634,11 +635,11 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
 
   * Throws an exception on failure.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.remove_recursive"));
     // Parse arguments.
-    Sval path;
+    V_string path;
     if(reader.I().v(path).F()) {
       Reference_root::S_temporary xref = { std_filesystem_remove_recursive(::std::move(path)) };
       return self = ::std::move(xref);
@@ -651,7 +652,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // `std.filesystem.move_from(path_new, path_old)`
     //===================================================================
     result.insert_or_assign(::rocket::sref("move_from"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.filesystem.remove_recursive(path)`
 
@@ -665,12 +666,12 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
   * Throws an exception if the file or directory at `path` cannot
     be removed.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.move_from"));
     // Parse arguments.
-    Sval path_new;
-    Sval path_old;
+    V_string path_new;
+    V_string path_old;
     if(reader.I().v(path_new).v(path_old).F()) {
       std_filesystem_move_from(path_new, path_old);
       return self = Reference_root::S_void();
@@ -683,7 +684,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // `std.filesystem.directory_list()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("directory_list"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.filesystem.directory_list(path)`
 
@@ -705,11 +706,11 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
   * Throws an exception if `path` designates a non-directory, or
     some other errors occur.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.directory_list"));
     // Parse arguments.
-    Sval path;
+    V_string path;
     if(reader.I().v(path).F()) {
       Reference_root::S_temporary xref = { std_filesystem_directory_list(::std::move(path)) };
       return self = ::std::move(xref);
@@ -722,7 +723,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // `std.filesystem.directory_create()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("directory_create"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.filesystem.directory_create(path)`
 
@@ -737,11 +738,11 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
   * Throws an exception if `path` designates a non-directory, or
     some other errors occur.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.directory_create"));
     // Parse arguments.
-    Sval path;
+    V_string path;
     if(reader.I().v(path).F()) {
       Reference_root::S_temporary xref = { std_filesystem_directory_create(::std::move(path)) };
       return self = ::std::move(xref);
@@ -754,7 +755,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // `std.filesystem.directory_remove()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("directory_remove"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.filesystem.directory_remove(path)`
 
@@ -767,11 +768,11 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
   * Throws an exception if `path` designates a non-directory, or
     some other errors occur.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.directory_remove"));
     // Parse arguments.
-    Sval path;
+    V_string path;
     if(reader.I().v(path).F()) {
       Reference_root::S_temporary xref = { std_filesystem_directory_remove(::std::move(path)) };
       return self = ::std::move(xref);
@@ -784,7 +785,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // `std.filesystem.file_read()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("file_read"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.filesystem.file_read(path, [offset], [limit])`
 
@@ -800,13 +801,13 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
   * Throws an exception if `offset` is negative, or a read error
     occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.file_read"));
     // Parse arguments.
-    Sval path;
-    Iopt offset;
-    Iopt limit;
+    V_string path;
+    optV_integer offset;
+    optV_integer limit;
     if(reader.I().v(path).o(offset).o(limit).F()) {
       Reference_root::S_temporary xref = { std_filesystem_file_read(::std::move(path), ::std::move(offset),
                                                                     ::std::move(limit)) };
@@ -820,7 +821,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // `std.filesystem.file_stream()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("file_stream"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.filesystem.file_stream(path, callback, [offset], [limit])`
 
@@ -843,14 +844,14 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
   * Throws an exception if `offset` is negative, or a read error
     occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.file_stream"));
     // Parse arguments.
-    Sval path;
-    Fval callback;
-    Iopt offset;
-    Iopt limit;
+    V_string path;
+    V_function callback;
+    optV_integer offset;
+    optV_integer limit;
     if(reader.I().v(path).v(callback).o(offset).o(limit).F()) {
       Reference_root::S_temporary xref = { std_filesystem_file_stream(global, path, callback, offset, limit) };
       return self = ::std::move(xref);
@@ -863,7 +864,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // `std.filesystem.file_write()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("file_write"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.filesystem.file_write(path, data, [offset])`
 
@@ -879,13 +880,13 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
   * Throws an exception if `offset` is negative, or a write error
     occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.file_write"));
     // Parse arguments.
-    Sval path;
-    Sval data;
-    Iopt offset;
+    V_string path;
+    V_string data;
+    optV_integer offset;
     if(reader.I().v(path).v(data).o(offset).F()) {
       std_filesystem_file_write(path, data, offset);
       return self = Reference_root::S_void();
@@ -898,7 +899,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // `std.filesystem.file_append()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("file_append"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.filesystem.file_append(path, data, [exclusive])`
 
@@ -913,13 +914,13 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
   * Throws an exception if `offset` is negative, or a write error
     occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.file_append"));
     // Parse arguments.
-    Sval path;
-    Sval data;
-    Bopt exclusive;
+    V_string path;
+    V_string data;
+    optV_boolean exclusive;
     if(reader.I().v(path).v(data).o(exclusive).F()) {
       std_filesystem_file_append(path, data, exclusive);
       return self = Reference_root::S_void();
@@ -932,7 +933,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // `std.filesystem.file_copy_from(path_new, path_old)`
     //===================================================================
     result.insert_or_assign(::rocket::sref("file_copy_from"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.filesystem.file_copy_from(path_new, path_old)`
 
@@ -943,12 +944,12 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
 
   * Throws an exception on failure.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.file_copy_from"));
     // Parse arguments.
-    Sval path_new;
-    Sval path_old;
+    V_string path_new;
+    V_string path_old;
     if(reader.I().v(path_new).v(path_old).F()) {
       std_filesystem_file_copy_from(path_new, path_old);
       return self = Reference_root::S_void();
@@ -961,7 +962,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // `std.filesystem.file_remove()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("file_remove"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.filesystem.file_remove(path)`
 
@@ -974,11 +975,11 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
   * Throws an exception if `path` designates a directory, or some
     other errors occur.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.filesystem.file_remove"));
     // Parse arguments.
-    Sval path;
+    V_string path;
     if(reader.I().v(path).F()) {
       Reference_root::S_temporary xref = { std_filesystem_file_remove(path) };
       return self = ::std::move(xref);

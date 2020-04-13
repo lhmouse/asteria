@@ -109,7 +109,7 @@ const
         if(parent.is_null()) {
           if(!create_new)
             return nullptr;
-          parent = V_array();
+          parent = cow_vector<Value>();
         }
         else if(!parent.is_array()) {
           ASTERIA_THROW("integer subscript applied to non-array (parent `$1`, index `$2`)",
@@ -140,7 +140,7 @@ const
         if(parent.is_null()) {
           if(!create_new)
             return nullptr;
-          parent = V_object();
+          parent = cow_dictionary<Value>();
         }
         else if(!parent.is_object()) {
           ASTERIA_THROW("string subscript applied to non-object (parent `$1`, key `$2`)", parent, altr.key);
@@ -148,7 +148,7 @@ const
         auto& obj = parent.open_object();
 
         // Return a pointer to the value with the given key if it is found; create a value otherwise.
-        V_object::iterator q;
+        cow_dictionary<Value>::iterator q;
         if(!create_new) {
           q = obj.find_mut(altr.key);
           if(q == obj.end())
@@ -165,7 +165,7 @@ const
         if(parent.is_null()) {
           if(!create_new)
             return nullptr;
-          parent = V_array();
+          parent = cow_vector<Value>();
         }
         else if(!parent.is_array()) {
           ASTERIA_THROW("head subscript applied to non-array (parent `$1`)", parent);
@@ -182,7 +182,7 @@ const
           if(!create_new)
             return nullptr;
           // Create elements as needed.
-          parent = V_array();
+          parent = cow_vector<Value>();
         }
         else if(!parent.is_array()) {
           ASTERIA_THROW("tail subscript applied to non-array (parent `$1`)", parent);

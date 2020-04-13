@@ -13,11 +13,11 @@
 
 namespace Asteria {
 
-Iopt
-std_system_gc_count_variables(Global& global, Ival generation)
+optV_integer
+std_system_gc_count_variables(Global_Context& global, V_integer generation)
   {
     auto gc_gen = static_cast<GC_Generation>(::rocket::clamp(generation,
-                        static_cast<Ival>(gc_generation_newest), static_cast<Ival>(gc_generation_oldest)));
+                        static_cast<V_integer>(gc_generation_newest), static_cast<V_integer>(gc_generation_oldest)));
     if(gc_gen != generation) {
       return nullopt;
     }
@@ -27,11 +27,11 @@ std_system_gc_count_variables(Global& global, Ival generation)
     return static_cast<int64_t>(count);
   }
 
-Iopt
-std_system_gc_get_threshold(Global& global, Ival generation)
+optV_integer
+std_system_gc_get_threshold(Global_Context& global, V_integer generation)
   {
     auto gc_gen = static_cast<GC_Generation>(::rocket::clamp(generation,
-                        static_cast<Ival>(gc_generation_newest), static_cast<Ival>(gc_generation_oldest)));
+                        static_cast<V_integer>(gc_generation_newest), static_cast<V_integer>(gc_generation_oldest)));
     if(gc_gen != generation) {
       return nullopt;
     }
@@ -41,11 +41,11 @@ std_system_gc_get_threshold(Global& global, Ival generation)
     return static_cast<int64_t>(thres);
   }
 
-Iopt
-std_system_gc_set_threshold(Global& global, Ival generation, Ival threshold)
+optV_integer
+std_system_gc_set_threshold(Global_Context& global, V_integer generation, V_integer threshold)
   {
     auto gc_gen = static_cast<GC_Generation>(::rocket::clamp(generation,
-                        static_cast<Ival>(gc_generation_newest), static_cast<Ival>(gc_generation_oldest)));
+                        static_cast<V_integer>(gc_generation_newest), static_cast<V_integer>(gc_generation_oldest)));
     if(gc_gen != generation) {
       return nullopt;
     }
@@ -57,14 +57,14 @@ std_system_gc_set_threshold(Global& global, Ival generation, Ival threshold)
     return static_cast<int64_t>(thres);
   }
 
-Ival
-std_system_gc_collect(Global& global, Iopt generation_limit)
+V_integer
+std_system_gc_collect(Global_Context& global, optV_integer generation_limit)
   {
     auto gc_limit = gc_generation_oldest;
     // Unlike others, this function does not fail if `generation_limit` is out of range.
     if(generation_limit) {
       gc_limit = static_cast<GC_Generation>(::rocket::clamp(*generation_limit,
-                       static_cast<Ival>(gc_generation_newest), static_cast<Ival>(gc_generation_oldest)));
+                       static_cast<V_integer>(gc_generation_newest), static_cast<V_integer>(gc_generation_oldest)));
     }
     // Perform garbage collection up to the generation specified.
     auto gcoll = global.genius_collector();
@@ -72,8 +72,8 @@ std_system_gc_collect(Global& global, Iopt generation_limit)
     return static_cast<int64_t>(nvars);
   }
 
-Ival
-std_system_execute(Sval cmd, Aopt argv, Aopt envp)
+V_integer
+std_system_execute(V_string cmd, optV_array argv, optV_array envp)
   {
     // Append arguments.
     cow_vector<const char*> ptrs = { cmd.safe_c_str() };
@@ -120,8 +120,8 @@ std_system_daemonize()
       ASTERIA_THROW_SYSTEM_ERROR("daemon");
   }
 
-Sopt
-std_system_env_get_variable(Sval name)
+optV_string
+std_system_env_get_variable(V_string name)
   {
     const char* val = ::getenv(name.safe_c_str());
     if(!val) {
@@ -130,10 +130,10 @@ std_system_env_get_variable(Sval name)
     return ::rocket::sref(val);
   }
 
-Oval
+V_object
 std_system_env_get_variables()
   {
-    Oval vars;
+    V_object vars;
     const char* const* vpos = ::environ;
     while(const char* str = *(vpos++)) {
       // The key is terminated by an equals sign.
@@ -153,7 +153,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     // `std.system.gc_count_variables()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("gc_count_variables"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.system.gc_count_variables(generation)`
 
@@ -165,11 +165,11 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     only informative. If `generation` is not valid, `null` is
     returned.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.gc_count_variables"));
     // Parse arguments.
-    Ival generation;
+    V_integer generation;
     if(reader.I().v(generation).F()) {
       Reference_root::S_temporary xref = { std_system_gc_count_variables(global, ::std::move(generation)) };
       return self = ::std::move(xref);
@@ -182,7 +182,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     // `std.system.gc_get_threshold()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("gc_get_threshold"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.system.gc_get_threshold(generation)`
 
@@ -192,11 +192,11 @@ create_bindings_system(V_object& result, API_Version /*version*/)
   * Returns the threshold. If `generation` is not valid, `null` is
     returned.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.gc_get_threshold"));
     // Parse arguments.
-    Ival generation;
+    V_integer generation;
     if(reader.I().v(generation).F()) {
       Reference_root::S_temporary xref = { std_system_gc_get_threshold(global, ::std::move(generation)) };
       return self = ::std::move(xref);
@@ -209,7 +209,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     // `std.system.gc_set_threshold()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("gc_set_threshold"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.system.gc_set_threshold(generation, threshold)`
 
@@ -224,12 +224,12 @@ create_bindings_system(V_object& result, API_Version /*version*/)
   * Returns the threshold before the call. If `generation` is not
     valid, `null` is returned.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.gc_set_threshold"));
     // Parse arguments.
-    Ival generation;
-    Ival threshold;
+    V_integer generation;
+    V_integer threshold;
     if(reader.I().v(generation).v(threshold).F()) {
       Reference_root::S_temporary xref = { std_system_gc_set_threshold(global, ::std::move(generation),
                                                                        ::std::move(threshold)) };
@@ -243,7 +243,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     // `std.system.gc_collect()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("gc_collect"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.system.gc_collect([generation_limit])`
 
@@ -254,11 +254,11 @@ create_bindings_system(V_object& result, API_Version /*version*/)
   * Returns the number of variables that have been collected in
     total.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.gc_collect"));
     // Parse arguments.
-    Iopt generation_limit;
+    optV_integer generation_limit;
     if(reader.I().o(generation_limit).F()) {
       Reference_root::S_temporary xref = { std_system_gc_collect(global, ::std::move(generation_limit)) };
       return self = ::std::move(xref);
@@ -271,7 +271,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     // `std.system.execute()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("execute"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.system.execute(cmd, [argv], [envp])`
 
@@ -289,13 +289,13 @@ create_bindings_system(V_object& result, API_Version /*version*/)
   * Throws an exception if the program could not be launched or its
     exit status could not be retrieved.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.execute"));
     // Parse arguments.
-    Sval cmd;
-    Aopt argv;
-    Aopt envp;
+    V_string cmd;
+    optV_array argv;
+    optV_array envp;
     if(reader.I().v(cmd).o(argv).o(envp).F()) {
       Reference_root::S_temporary xref = { std_system_execute(::std::move(cmd), ::std::move(argv),
                                                               ::std::move(envp)) };
@@ -309,7 +309,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     // `std.system.daemonize()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("daemonize"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.system.daemonize()`
 
@@ -319,7 +319,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 
   * Throws an exception on failure.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.daemonize"));
     // Parse arguments.
@@ -335,7 +335,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     // `std.system.env_get_variable()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("env_get_variable"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.system.env_get_variable(name)`
 
@@ -346,11 +346,11 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 
   * Throws an exception if `name` is not valid.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.env_get_variable"));
     // Parse arguments.
-    Sval name;
+    V_string name;
     if(reader.I().v(name).F()) {
       Reference_root::S_temporary xref = { std_system_env_get_variable(::std::move(name)) };
       return self = ::std::move(xref);
@@ -363,7 +363,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     // `std.system.env_get_variables()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("env_get_variables"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.system.env_get_variables()`
 
@@ -372,7 +372,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
   * Returns an object of strings which consists of copies of all
     environment variables.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.env_get_variables"));
     // Parse arguments.

@@ -29,17 +29,17 @@ do_verify_bounds(double lower, double upper)
     return upper;
   }
 
-Ival
+V_integer
 do_cast_to_integer(double value)
   {
     if(!::std::islessequal(-0x1p63, value) || !::std::islessequal(value, 0x1p63 - 0x1p10)) {
       ASTERIA_THROW("`real` value not representable as an `integer` (value `$1`)", value);
     }
-    return Ival(value);
+    return V_integer(value);
   }
 
 ROCKET_PURE_FUNCTION
-Ival
+V_integer
 do_saturating_add(int64_t lhs, int64_t rhs)
   {
     if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)) {
@@ -49,7 +49,7 @@ do_saturating_add(int64_t lhs, int64_t rhs)
   }
 
 ROCKET_PURE_FUNCTION
-Ival
+V_integer
 do_saturating_sub(int64_t lhs, int64_t rhs)
   {
     if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs)) {
@@ -59,7 +59,7 @@ do_saturating_sub(int64_t lhs, int64_t rhs)
   }
 
 ROCKET_PURE_FUNCTION
-Ival
+V_integer
 do_saturating_mul(int64_t lhs, int64_t rhs)
   {
     if((lhs == 0) || (rhs == 0)) {
@@ -86,27 +86,27 @@ do_saturating_mul(int64_t lhs, int64_t rhs)
   }
 
 ROCKET_PURE_FUNCTION
-Rval
+V_real
 do_saturating_add(double lhs, double rhs)
   {
     return lhs + rhs;
   }
 
 ROCKET_PURE_FUNCTION
-Rval
+V_real
 do_saturating_sub(double lhs, double rhs)
   {
     return lhs - rhs;
   }
 
 ROCKET_PURE_FUNCTION
-Rval
+V_real
 do_saturating_mul(double lhs, double rhs)
   {
     return lhs * rhs;
   }
 
-pair<Ival, int>
+pair<V_integer, int>
 do_decompose_integer(uint8_t ebase, int64_t value)
   {
     int64_t ireg = value;
@@ -123,8 +123,8 @@ do_decompose_integer(uint8_t ebase, int64_t value)
     return ::std::make_pair(ireg, iexp);
   }
 
-Sval&
-do_append_exponent(Sval& text, ::rocket::ascii_numput& nump, char delim, int exp)
+V_string&
+do_append_exponent(V_string& text, ::rocket::ascii_numput& nump, char delim, int exp)
   {
     // Write the delimiter.
     text.push_back(delim);
@@ -142,8 +142,8 @@ constexpr char s_spaces[] = " \f\n\r\t\v";
 
 }  // namespace
 
-Ival
-std_numeric_abs(Ival value)
+V_integer
+std_numeric_abs(V_integer value)
   {
     if(value == INT64_MIN) {
       ASTERIA_THROW("integer absolute value overflow (value `$1`)", value);
@@ -151,170 +151,170 @@ std_numeric_abs(Ival value)
     return ::std::abs(value);
   }
 
-Rval
-std_numeric_abs(Rval value)
+V_real
+std_numeric_abs(V_real value)
   {
     return ::std::fabs(value);
   }
 
-Ival
-std_numeric_sign(Ival value)
+V_integer
+std_numeric_sign(V_integer value)
   {
     return value >> 63;
   }
 
-Ival
-std_numeric_sign(Rval value)
+V_integer
+std_numeric_sign(V_real value)
   {
     return ::std::signbit(value) ? -1 : 0;
   }
 
-Bval
-std_numeric_is_finite(Ival /*value*/)
+V_boolean
+std_numeric_is_finite(V_integer /*value*/)
   {
     return true;
   }
 
-Bval
-std_numeric_is_finite(Rval value)
+V_boolean
+std_numeric_is_finite(V_real value)
   {
     return ::std::isfinite(value);
   }
 
-Bval
-std_numeric_is_infinity(Ival /*value*/)
+V_boolean
+std_numeric_is_infinity(V_integer /*value*/)
   {
     return false;
   }
 
-Bval
-std_numeric_is_infinity(Rval value)
+V_boolean
+std_numeric_is_infinity(V_real value)
   {
     return ::std::isinf(value);
   }
 
-Bval
-std_numeric_is_nan(Ival /*value*/)
+V_boolean
+std_numeric_is_nan(V_integer /*value*/)
   {
     return false;
   }
 
-Bval
-std_numeric_is_nan(Rval value)
+V_boolean
+std_numeric_is_nan(V_real value)
   {
     return ::std::isnan(value);
   }
 
-Ival
-std_numeric_clamp(Ival value, Ival lower, Ival upper)
+V_integer
+std_numeric_clamp(V_integer value, V_integer lower, V_integer upper)
   {
     return ::rocket::clamp(value, lower, do_verify_bounds(lower, upper));
   }
 
-Rval
-std_numeric_clamp(Rval value, Rval lower, Rval upper)
+V_real
+std_numeric_clamp(V_real value, V_real lower, V_real upper)
   {
     return ::rocket::clamp(value, lower, do_verify_bounds(lower, upper));
   }
 
-Ival
-std_numeric_round(Ival value)
+V_integer
+std_numeric_round(V_integer value)
   {
     return value;
   }
 
-Rval
-std_numeric_round(Rval value)
+V_real
+std_numeric_round(V_real value)
   {
     return ::std::round(value);
   }
 
-Ival
-std_numeric_floor(Ival value)
+V_integer
+std_numeric_floor(V_integer value)
   {
     return value;
   }
 
-Rval
-std_numeric_floor(Rval value)
+V_real
+std_numeric_floor(V_real value)
   {
     return ::std::floor(value);
   }
 
-Ival
-std_numeric_ceil(Ival value)
+V_integer
+std_numeric_ceil(V_integer value)
   {
     return value;
   }
 
-Rval
-std_numeric_ceil(Rval value)
+V_real
+std_numeric_ceil(V_real value)
   {
     return ::std::ceil(value);
   }
 
-Ival
-std_numeric_trunc(Ival value)
+V_integer
+std_numeric_trunc(V_integer value)
   {
     return value;
   }
 
-Rval
-std_numeric_trunc(Rval value)
+V_real
+std_numeric_trunc(V_real value)
   {
     return ::std::trunc(value);
   }
 
-Ival
-std_numeric_iround(Ival value)
+V_integer
+std_numeric_iround(V_integer value)
   {
     return value;
   }
 
-Ival
-std_numeric_iround(Rval value)
+V_integer
+std_numeric_iround(V_real value)
   {
     return do_cast_to_integer(::std::round(value));
   }
 
-Ival
-std_numeric_ifloor(Ival value)
+V_integer
+std_numeric_ifloor(V_integer value)
   {
     return value;
   }
 
-Ival
-std_numeric_ifloor(Rval value)
+V_integer
+std_numeric_ifloor(V_real value)
   {
     return do_cast_to_integer(::std::floor(value));
   }
 
-Ival
-std_numeric_iceil(Ival value)
+V_integer
+std_numeric_iceil(V_integer value)
   {
     return value;
   }
 
-Ival
-std_numeric_iceil(Rval value)
+V_integer
+std_numeric_iceil(V_real value)
   {
     return do_cast_to_integer(::std::ceil(value));
   }
 
-Ival
-std_numeric_itrunc(Ival value)
+V_integer
+std_numeric_itrunc(V_integer value)
   {
     return value;
   }
 
-Ival
-std_numeric_itrunc(Rval value)
+V_integer
+std_numeric_itrunc(V_real value)
   {
     return do_cast_to_integer(::std::trunc(value));
   }
 
-Rval
-std_numeric_random(Global& global, Ropt limit)
+V_real
+std_numeric_random(Global_Context& global, optV_real limit)
   {
     auto prng = global.random_engine();
 
@@ -339,95 +339,95 @@ std_numeric_random(Global& global, Ropt limit)
     return *limit * ratio;
   }
 
-Rval
-std_numeric_sqrt(Rval x)
+V_real
+std_numeric_sqrt(V_real x)
   {
     return ::std::sqrt(x);
   }
 
-Rval
-std_numeric_fma(Rval x, Rval y, Rval z)
+V_real
+std_numeric_fma(V_real x, V_real y, V_real z)
   {
     return ::std::fma(x, y, z);
   }
 
-Rval
-std_numeric_remainder(Rval x, Rval y)
+V_real
+std_numeric_remainder(V_real x, V_real y)
   {
     return ::std::remainder(x, y);
   }
 
-pair<Rval, Ival>
-std_numeric_frexp(Rval x)
+pair<V_real, V_integer>
+std_numeric_frexp(V_real x)
   {
     int exp;
     auto frac = ::std::frexp(x, &exp);
     return ::std::make_pair(frac, exp);
   }
 
-Rval
-std_numeric_ldexp(Rval frac, Ival exp)
+V_real
+std_numeric_ldexp(V_real frac, V_integer exp)
   {
     int rexp = static_cast<int>(::rocket::clamp(exp, INT_MIN, INT_MAX));
     return ::std::ldexp(frac, rexp);
   }
 
-Ival
-std_numeric_addm(Ival x, Ival y)
+V_integer
+std_numeric_addm(V_integer x, V_integer y)
   {
-    return Ival(static_cast<uint64_t>(x) + static_cast<uint64_t>(y));
+    return V_integer(static_cast<uint64_t>(x) + static_cast<uint64_t>(y));
   }
 
-Ival
-std_numeric_subm(Ival x, Ival y)
+V_integer
+std_numeric_subm(V_integer x, V_integer y)
   {
-    return Ival(static_cast<uint64_t>(x) - static_cast<uint64_t>(y));
+    return V_integer(static_cast<uint64_t>(x) - static_cast<uint64_t>(y));
   }
 
-Ival
-std_numeric_mulm(Ival x, Ival y)
+V_integer
+std_numeric_mulm(V_integer x, V_integer y)
   {
-    return Ival(static_cast<uint64_t>(x) * static_cast<uint64_t>(y));
+    return V_integer(static_cast<uint64_t>(x) * static_cast<uint64_t>(y));
   }
 
-Ival
-std_numeric_adds(Ival x, Ival y)
-  {
-    return do_saturating_add(x, y);
-  }
-
-Rval
-std_numeric_adds(Rval x, Rval y)
+V_integer
+std_numeric_adds(V_integer x, V_integer y)
   {
     return do_saturating_add(x, y);
   }
 
-Ival
-std_numeric_subs(Ival x, Ival y)
+V_real
+std_numeric_adds(V_real x, V_real y)
+  {
+    return do_saturating_add(x, y);
+  }
+
+V_integer
+std_numeric_subs(V_integer x, V_integer y)
   {
     return do_saturating_sub(x, y);
   }
 
-Rval
-std_numeric_subs(Rval x, Rval y)
+V_real
+std_numeric_subs(V_real x, V_real y)
   {
     return do_saturating_sub(x, y);
   }
 
-Ival
-std_numeric_muls(Ival x, Ival y)
+V_integer
+std_numeric_muls(V_integer x, V_integer y)
   {
     return do_saturating_mul(x, y);
   }
 
-Rval
-std_numeric_muls(Rval x, Rval y)
+V_real
+std_numeric_muls(V_real x, V_real y)
   {
     return do_saturating_mul(x, y);
   }
 
-Ival
-std_numeric_lzcnt(Ival x)
+V_integer
+std_numeric_lzcnt(V_integer x)
   {
     // TODO: Modern CPUs have intrinsics for this.
     uint64_t ireg = static_cast<uint64_t>(x);
@@ -445,8 +445,8 @@ std_numeric_lzcnt(Ival x)
     return count;
   }
 
-Ival
-std_numeric_tzcnt(Ival x)
+V_integer
+std_numeric_tzcnt(V_integer x)
   {
     // TODO: Modern CPUs have intrinsics for this.
     uint64_t ireg = static_cast<uint64_t>(x);
@@ -464,8 +464,8 @@ std_numeric_tzcnt(Ival x)
     return count;
   }
 
-Ival
-std_numeric_popcnt(Ival x)
+V_integer
+std_numeric_popcnt(V_integer x)
   {
     // TODO: Modern CPUs have intrinsics for this.
     uint64_t ireg = static_cast<uint64_t>(x);
@@ -482,8 +482,8 @@ std_numeric_popcnt(Ival x)
     return count;
   }
 
-Ival
-std_numeric_rotl(Ival m, Ival x, Ival n)
+V_integer
+std_numeric_rotl(V_integer m, V_integer x, V_integer n)
   {
     if((m < 0) || (m > 64)) {
       ASTERIA_THROW("invalid modulo bit count (`$1` is not between 0 and 64)", m);
@@ -507,8 +507,8 @@ std_numeric_rotl(Ival m, Ival x, Ival n)
     return static_cast<int64_t>(ireg & mask);
   }
 
-Ival
-std_numeric_rotr(Ival m, Ival x, Ival n)
+V_integer
+std_numeric_rotr(V_integer m, V_integer x, V_integer n)
   {
     if((m < 0) || (m > 64)) {
       ASTERIA_THROW("invalid modulo bit count (`$1` is not between 0 and 64)", m);
@@ -532,10 +532,10 @@ std_numeric_rotr(Ival m, Ival x, Ival n)
     return static_cast<int64_t>(ireg & mask);
   }
 
-Sval
-std_numeric_format(Ival value, Iopt base, Iopt ebase)
+V_string
+std_numeric_format(V_integer value, optV_integer base, optV_integer ebase)
   {
-    Sval text;
+    V_string text;
     ::rocket::ascii_numput nump;
 
     switch(base.value_or(10)) {
@@ -590,10 +590,10 @@ std_numeric_format(Ival value, Iopt base, Iopt ebase)
     return text;
   }
 
-Sval
-std_numeric_format(Rval value, Iopt base, Iopt ebase)
+V_string
+std_numeric_format(V_real value, optV_integer base, optV_integer ebase)
   {
-    Sval text;
+    V_string text;
     ::rocket::ascii_numput nump;
 
     switch(base.value_or(10)) {
@@ -642,17 +642,17 @@ std_numeric_format(Rval value, Iopt base, Iopt ebase)
     return text;
   }
 
-Ival
-std_numeric_parse_integer(Sval text)
+V_integer
+std_numeric_parse_integer(V_string text)
   {
     auto tpos = text.find_first_not_of(s_spaces);
-    if(tpos == Sval::npos) {
+    if(tpos == V_string::npos) {
       ASTERIA_THROW("blank string");
     }
     auto bptr = text.data() + tpos;
     auto eptr = text.data() + text.find_last_not_of(s_spaces) + 1;
 
-    Ival value;
+    V_integer value;
     ::rocket::ascii_numget numg;
     if(!numg.parse_I(bptr, eptr)) {
       ASTERIA_THROW("string not convertible to integer (text `$1`)", text);
@@ -666,17 +666,17 @@ std_numeric_parse_integer(Sval text)
     return value;
   }
 
-Rval
-std_numeric_parse_real(Sval text, Bopt saturating)
+V_real
+std_numeric_parse_real(V_string text, optV_boolean saturating)
   {
     auto tpos = text.find_first_not_of(s_spaces);
-    if(tpos == Sval::npos) {
+    if(tpos == V_string::npos) {
       ASTERIA_THROW("blank string");
     }
     auto bptr = text.data() + tpos;
     auto eptr = text.data() + text.find_last_not_of(s_spaces) + 1;
 
-    Rval value;
+    V_real value;
     ::rocket::ascii_numget numg;
     if(!numg.parse_F(bptr, eptr)) {
       ASTERIA_THROW("string not convertible to real number (text `$1`)", text);
@@ -701,47 +701,47 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.integer_max`
     //===================================================================
     result.insert_or_assign(::rocket::sref("integer_max"),
-      Ival(
+      V_integer(
         // The maximum value of an `integer`.
-        ::std::numeric_limits<Ival>::max()
+        ::std::numeric_limits<V_integer>::max()
       ));
     //===================================================================
     // `std.numeric.integer_min`
     //===================================================================
     result.insert_or_assign(::rocket::sref("integer_min"),
-      Ival(
+      V_integer(
         // The minimum value of an `integer`.
-        ::std::numeric_limits<Ival>::lowest()
+        ::std::numeric_limits<V_integer>::lowest()
       ));
     //===================================================================
     // `std.numeric.real_max`
     //===================================================================
     result.insert_or_assign(::rocket::sref("real_max"),
-      Rval(
+      V_real(
         // The maximum finite value of a `real`.
-        ::std::numeric_limits<Rval>::max()
+        ::std::numeric_limits<V_real>::max()
       ));
     //===================================================================
     // `std.numeric.real_min`
     //===================================================================
     result.insert_or_assign(::rocket::sref("real_min"),
-      Rval(
+      V_real(
         // The minimum finite value of a `real`.
-        ::std::numeric_limits<Rval>::lowest()
+        ::std::numeric_limits<V_real>::lowest()
       ));
     //===================================================================
     // `std.numeric.real_epsilon`
     //===================================================================
     result.insert_or_assign(::rocket::sref("real_epsilon"),
-      Rval(
+      V_real(
         // The minimum finite value of a `real` such that `1 + real_epsilon > 1`.
-        ::std::numeric_limits<Rval>::epsilon()
+        ::std::numeric_limits<V_real>::epsilon()
       ));
     //===================================================================
     // `std.numeric.size_max`
     //===================================================================
     result.insert_or_assign(::rocket::sref("size_max"),
-      Ival(
+      V_integer(
         // The maximum length of a `string` or `array`.
         ::std::numeric_limits<ptrdiff_t>::max()
       ));
@@ -749,7 +749,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.abs()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("abs"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.abs(value)`
 
@@ -763,16 +763,16 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Throws an exception if `value` is the integer `-0x1p63`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.abs"));
     // Parse arguments.
-    Ival ivalue;
+    V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_abs(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
-    Rval rvalue;
+    V_real rvalue;
     if(reader.I().v(rvalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_abs(::std::move(rvalue)) };
       return self = ::std::move(xref);
@@ -785,7 +785,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.sign()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("sign"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.sign(value)`
 
@@ -795,16 +795,16 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns `-1` if `value` is negative, or `0` otherwise.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.sign"));
     // Parse arguments.
-    Ival ivalue;
+    V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_sign(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
-    Rval rvalue;
+    V_real rvalue;
     if(reader.I().v(rvalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_sign(::std::move(rvalue)) };
       return self = ::std::move(xref);
@@ -817,7 +817,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.is_finite()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("is_finite"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.is_finite(value)`
 
@@ -829,16 +829,16 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
   * Returns `true` if `value` is an integer or is a real that
     is neither an infinity or a NaN, or `false` otherwise.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.is_finite"));
     // Parse arguments.
-    Ival ivalue;
+    V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_is_finite(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
-    Rval rvalue;
+    V_real rvalue;
     if(reader.I().v(rvalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_is_finite(::std::move(rvalue)) };
       return self = ::std::move(xref);
@@ -851,7 +851,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.is_infinity()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("is_infinity"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.is_infinity(value)`
 
@@ -863,16 +863,16 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
   * Returns `true` if `value` is a real that denotes an infinity;
     or `false` otherwise.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.is_infinity"));
     // Parse arguments.
-    Ival ivalue;
+    V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_is_infinity(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
-    Rval rvalue;
+    V_real rvalue;
     if(reader.I().v(rvalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_is_infinity(::std::move(rvalue)) };
       return self = ::std::move(xref);
@@ -885,7 +885,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.is_nan()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("is_nan"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.is_nan(value)`
 
@@ -896,16 +896,16 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
   * Returns `true` if `value` is a real denoting a NaN, or
     `false` otherwise.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.is_nan"));
     // Parse arguments.
-    Ival ivalue;
+    V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_is_nan(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
-    Rval rvalue;
+    V_real rvalue;
     if(reader.I().v(rvalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_is_nan(::std::move(rvalue)) };
       return self = ::std::move(xref);
@@ -918,7 +918,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.clamp()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("clamp"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.clamp(value, lower, upper)`
 
@@ -932,21 +932,21 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
   * Throws an exception if `lower` is not less than or equal to
     `upper`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.clamp"));
     // Parse arguments.
-    Ival ivalue;
-    Ival ilower;
-    Ival iupper;
+    V_integer ivalue;
+    V_integer ilower;
+    V_integer iupper;
     if(reader.I().v(ivalue).v(ilower).v(iupper).F()) {
       Reference_root::S_temporary xref = { std_numeric_clamp(::std::move(ivalue), ::std::move(ilower),
                                                              ::std::move(iupper)) };
       return self = ::std::move(xref);
     }
-    Rval rvalue;
-    Rval flower;
-    Rval fupper;
+    V_real rvalue;
+    V_real flower;
+    V_real fupper;
     if(reader.I().v(rvalue).v(flower).v(fupper).F()) {
       Reference_root::S_temporary xref = { std_numeric_clamp(::std::move(rvalue), ::std::move(flower),
                                                              ::std::move(fupper)) };
@@ -960,7 +960,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.round()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("round"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.round(value)`
 
@@ -970,16 +970,16 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the rounded value.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.round"));
     // Parse arguments.
-    Ival ivalue;
+    V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_round(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
-    Rval rvalue;
+    V_real rvalue;
     if(reader.I().v(rvalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_round(::std::move(rvalue)) };
       return self = ::std::move(xref);
@@ -992,7 +992,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.floor()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("floor"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.floor(value)`
 
@@ -1002,16 +1002,16 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the rounded value.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.floor"));
     // Parse arguments.
-    Ival ivalue;
+    V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_floor(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
-    Rval rvalue;
+    V_real rvalue;
     if(reader.I().v(rvalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_floor(::std::move(rvalue)) };
       return self = ::std::move(xref);
@@ -1024,7 +1024,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.ceil()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("ceil"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.ceil(value)`
 
@@ -1034,16 +1034,16 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the rounded value.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.ceil"));
     // Parse arguments.
-    Ival ivalue;
+    V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_ceil(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
-    Rval rvalue;
+    V_real rvalue;
     if(reader.I().v(rvalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_ceil(::std::move(rvalue)) };
       return self = ::std::move(xref);
@@ -1056,7 +1056,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.trunc()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("trunc"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.trunc(value)`
 
@@ -1066,16 +1066,16 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the rounded value.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.trunc"));
     // Parse arguments.
-    Ival ivalue;
+    V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_trunc(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
-    Rval rvalue;
+    V_real rvalue;
     if(reader.I().v(rvalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_trunc(::std::move(rvalue)) };
       return self = ::std::move(xref);
@@ -1088,7 +1088,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.iround()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("iround"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.iround(value)`
 
@@ -1102,16 +1102,16 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
   * Throws an exception if the result cannot be represented as an
     integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.iround"));
     // Parse arguments.
-    Ival ivalue;
+    V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_iround(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
-    Rval rvalue;
+    V_real rvalue;
     if(reader.I().v(rvalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_iround(::std::move(rvalue)) };
       return self = ::std::move(xref);
@@ -1124,7 +1124,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.ifloor()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("ifloor"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.ifloor(value)`
 
@@ -1138,16 +1138,16 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
   * Throws an exception if the result cannot be represented as an
     integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.ifloor"));
     // Parse arguments.
-    Ival ivalue;
+    V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_ifloor(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
-    Rval rvalue;
+    V_real rvalue;
     if(reader.I().v(rvalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_ifloor(::std::move(rvalue)) };
       return self = ::std::move(xref);
@@ -1160,7 +1160,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.iceil()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("iceil"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.iceil(value)`
 
@@ -1174,16 +1174,16 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
   * Throws an exception if the result cannot be represented as an
     integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.iceil"));
     // Parse arguments.
-    Ival ivalue;
+    V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_iceil(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
-    Rval rvalue;
+    V_real rvalue;
     if(reader.I().v(rvalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_iceil(::std::move(rvalue)) };
       return self = ::std::move(xref);
@@ -1196,7 +1196,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.itrunc()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("itrunc"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.itrunc(value)`
 
@@ -1209,16 +1209,16 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
   * Throws an exception if the result cannot be represented as an
     integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.itrunc"));
     // Parse arguments.
-    Ival ivalue;
+    V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_itrunc(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
-    Rval rvalue;
+    V_real rvalue;
     if(reader.I().v(rvalue).F()) {
       Reference_root::S_temporary xref = { std_numeric_itrunc(::std::move(rvalue)) };
       return self = ::std::move(xref);
@@ -1231,7 +1231,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.random()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("random"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.random([limit])`
 
@@ -1243,11 +1243,11 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Throws an exception if `limit` is zero or non-finite.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.random"));
     // Parse arguments.
-    Ropt limit;
+    optV_real limit;
     if(reader.I().o(limit).F()) {
       Reference_root::S_temporary xref = { std_numeric_random(global, ::std::move(limit)) };
       return self = ::std::move(xref);
@@ -1260,7 +1260,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.sqrt()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("sqrt"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.sqrt(x)`
 
@@ -1269,11 +1269,11 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the square root of `x` as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.sqrt"));
     // Parse arguments.
-    Rval x;
+    V_real x;
     if(reader.I().v(x).F()) {
       Reference_root::S_temporary xref = { std_numeric_sqrt(::std::move(x)) };
       return self = ::std::move(xref);
@@ -1286,7 +1286,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.fma()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("fma"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.fma(x, y, z)`
 
@@ -1296,13 +1296,13 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the value of `x * y + z` as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.fma"));
     // Parse arguments.
-    Rval x;
-    Rval y;
-    Rval z;
+    V_real x;
+    V_real y;
+    V_real z;
     if(reader.I().v(x).v(y).v(z).F()) {
       Reference_root::S_temporary xref = { std_numeric_fma(::std::move(x), ::std::move(y), ::std::move(z)) };
       return self = ::std::move(xref);
@@ -1315,7 +1315,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.remainder()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("remainder"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.remainder(x, y)`
 
@@ -1325,12 +1325,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the remainder as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.remainder"));
     // Parse arguments.
-    Rval x;
-    Rval y;
+    V_real x;
+    V_real y;
     if(reader.I().v(x).v(y).F()) {
       Reference_root::S_temporary xref = { std_numeric_remainder(::std::move(x), ::std::move(y)) };
       return self = ::std::move(xref);
@@ -1343,7 +1343,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.frexp()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("frexp"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.frexp(x)`
 
@@ -1357,11 +1357,11 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     `frac` that is of type real and whose second element is `exp`
     that is of type integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.frexp"));
     // Parse arguments.
-    Rval x;
+    V_real x;
     if(reader.I().v(x).F()) {
       auto pair = std_numeric_frexp(::std::move(x));
       // This function returns a `pair`, but we would like to return an array so convert it.
@@ -1376,7 +1376,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.ldexp()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("ldexp"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.ldexp(frac, exp)`
 
@@ -1386,12 +1386,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the product as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.ldexp"));
     // Parse arguments.
-    Rval frac;
-    Ival exp;
+    V_real frac;
+    V_integer exp;
     if(reader.I().v(frac).v(exp).F()) {
       Reference_root::S_temporary xref = { std_numeric_ldexp(::std::move(frac), ::std::move(exp)) };
       return self = ::std::move(xref);
@@ -1404,7 +1404,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.addm()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("addm"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.addm(x, y)`
 
@@ -1415,12 +1415,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the reduced sum of `x` and `y`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.addm"));
     // Parse arguments.
-    Ival x;
-    Ival y;
+    V_integer x;
+    V_integer y;
     if(reader.I().v(x).v(y).F()) {
       Reference_root::S_temporary xref = { std_numeric_addm(::std::move(x), ::std::move(y)) };
       return self = ::std::move(xref);
@@ -1433,7 +1433,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.subm()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("subm"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.subm(x, y)`
 
@@ -1445,12 +1445,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the reduced difference of `x` and `y`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.subm"));
     // Parse arguments.
-    Ival x;
-    Ival y;
+    V_integer x;
+    V_integer y;
     if(reader.I().v(x).v(y).F()) {
       Reference_root::S_temporary xref = { std_numeric_subm(::std::move(x), ::std::move(y)) };
       return self = ::std::move(xref);
@@ -1463,7 +1463,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.mulm()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("mulm"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.mulm(x, y)`
 
@@ -1475,12 +1475,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the reduced product of `x` and `y`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.mulm"));
     // Parse arguments.
-    Ival x;
-    Ival y;
+    V_integer x;
+    V_integer y;
     if(reader.I().v(x).v(y).F()) {
       Reference_root::S_temporary xref = { std_numeric_mulm(::std::move(x), ::std::move(y)) };
       return self = ::std::move(xref);
@@ -1493,7 +1493,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.adds()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("adds"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.adds(x, y)`
 
@@ -1506,18 +1506,18 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the saturated sum of `x` and `y`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.adds"));
     // Parse arguments.
-    Ival ix;
-    Ival iy;
+    V_integer ix;
+    V_integer iy;
     if(reader.I().v(ix).v(iy).F()) {
       Reference_root::S_temporary xref = { std_numeric_adds(::std::move(ix), ::std::move(iy)) };
       return self = ::std::move(xref);
     }
-    Rval fx;
-    Rval fy;
+    V_real fx;
+    V_real fy;
     if(reader.I().v(fx).v(fy).F()) {
       Reference_root::S_temporary xref = { std_numeric_adds(::std::move(fx), ::std::move(fy)) };
       return self = ::std::move(xref);
@@ -1530,7 +1530,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.subs()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("subs"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.subs(x, y)`
 
@@ -1543,18 +1543,18 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the saturated difference of `x` and `y`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.subs"));
     // Parse arguments.
-    Ival ix;
-    Ival iy;
+    V_integer ix;
+    V_integer iy;
     if(reader.I().v(ix).v(iy).F()) {
       Reference_root::S_temporary xref = { std_numeric_subs(::std::move(ix), ::std::move(iy)) };
       return self = ::std::move(xref);
     }
-    Rval fx;
-    Rval fy;
+    V_real fx;
+    V_real fy;
     if(reader.I().v(fx).v(fy).F()) {
       Reference_root::S_temporary xref = { std_numeric_subs(::std::move(fx), ::std::move(fy)) };
       return self = ::std::move(xref);
@@ -1567,7 +1567,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.muls()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("muls"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.muls(x, y)`
 
@@ -1580,18 +1580,18 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the saturated product of `x` and `y`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.muls"));
     // Parse arguments.
-    Ival ix;
-    Ival iy;
+    V_integer ix;
+    V_integer iy;
     if(reader.I().v(ix).v(iy).F()) {
       Reference_root::S_temporary xref = { std_numeric_muls(::std::move(ix), ::std::move(iy)) };
       return self = ::std::move(xref);
     }
-    Rval fx;
-    Rval fy;
+    V_real fx;
+    V_real fy;
     if(reader.I().v(fx).v(fy).F()) {
       Reference_root::S_temporary xref = { std_numeric_muls(::std::move(fx), ::std::move(fy)) };
       return self = ::std::move(xref);
@@ -1604,7 +1604,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.lzcnt()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("lzcnt"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.lzcnt(x)`
 
@@ -1614,11 +1614,11 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
   * Returns the bit count as an integer. If `x` is zero, `64` is
     returned.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.lzcnt"));
     // Parse arguments.
-    Ival x;
+    V_integer x;
     if(reader.I().v(x).F()) {
       Reference_root::S_temporary xref = { std_numeric_lzcnt(::std::move(x)) };
       return self = ::std::move(xref);
@@ -1631,7 +1631,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.tzcnt()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("tzcnt"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.tzcnt(x)`
 
@@ -1641,11 +1641,11 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
   * Returns the bit count as an integer. If `x` is zero, `64` is
     returned.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.tzcnt"));
     // Parse arguments.
-    Ival x;
+    V_integer x;
     if(reader.I().v(x).F()) {
       Reference_root::S_temporary xref = { std_numeric_tzcnt(::std::move(x)) };
       return self = ::std::move(xref);
@@ -1658,7 +1658,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.popcnt()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("popcnt"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.popcnt(x)`
 
@@ -1667,11 +1667,11 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the bit count as an integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.popcnt"));
     // Parse arguments.
-    Ival x;
+    V_integer x;
     if(reader.I().v(x).F()) {
       Reference_root::S_temporary xref = { std_numeric_popcnt(::std::move(x)) };
       return self = ::std::move(xref);
@@ -1684,7 +1684,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.rotl()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("rotl"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.rotl(m, x, n)`
 
@@ -1701,13 +1701,13 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Throws an exception if `m` is negative or greater than `64`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.rotl"));
     // Parse arguments.
-    Ival m;
-    Ival x;
-    Ival n;
+    V_integer m;
+    V_integer x;
+    V_integer n;
     if(reader.I().v(m).v(x).v(n).F()) {
       Reference_root::S_temporary xref = { std_numeric_rotl(::std::move(m), ::std::move(x), ::std::move(n)) };
       return self = ::std::move(xref);
@@ -1720,7 +1720,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.rotr()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("rotr"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.rotr(m, x, n)`
 
@@ -1737,13 +1737,13 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Throws an exception if `m` is negative or greater than `64`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.rotr"));
     // Parse arguments.
-    Ival m;
-    Ival x;
-    Ival n;
+    V_integer m;
+    V_integer x;
+    V_integer n;
     if(reader.I().v(m).v(x).v(n).F()) {
       Reference_root::S_temporary xref = { std_numeric_rotr(::std::move(m), ::std::move(x), ::std::move(n)) };
       return self = ::std::move(xref);
@@ -1756,7 +1756,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.format()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("format"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.format(value, [base], [ebase])`
 
@@ -1778,19 +1778,19 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     or if `ebase` is neither `2` nor `10`, or if `base` is not `10`
     but `ebase` is `10`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.format"));
     // Parse arguments.
-    Ival ivalue;
-    Iopt base;
-    Iopt ebase;
+    V_integer ivalue;
+    optV_integer base;
+    optV_integer ebase;
     if(reader.I().v(ivalue).o(base).o(ebase).F()) {
       Reference_root::S_temporary xref = { std_numeric_format(::std::move(ivalue), ::std::move(base),
                                                               ::std::move(ebase)) };
       return self = ::std::move(xref);
     }
-    Rval fvalue;
+    V_real fvalue;
     if(reader.I().v(fvalue).o(base).o(ebase).F()) {
       Reference_root::S_temporary xref = { std_numeric_format(::std::move(fvalue), ::std::move(base),
                                                               ::std::move(ebase)) };
@@ -1804,7 +1804,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.parse_integer()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("parse_integer"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.parse_integer(text)`
 
@@ -1828,11 +1828,11 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Throws an exception on failure.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.parse_integer"));
     // Parse arguments.
-    Sval text;
+    V_string text;
     if(reader.I().v(text).F()) {
       Reference_root::S_temporary xref = { std_numeric_parse_integer(::std::move(text)) };
       return self = ::std::move(xref);
@@ -1845,7 +1845,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // `std.numeric.parse_real()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("parse_real"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.numeric.parse_real(text, [saturating])`
 
@@ -1875,12 +1875,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Throws an exception on failure.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.numeric.parse_real"));
     // Parse arguments.
-    Sval text;
-    Bopt saturating;
+    V_string text;
+    optV_boolean saturating;
     if(reader.I().v(text).o(saturating).F()) {
       Reference_root::S_temporary xref = { std_numeric_parse_real(::std::move(text), ::std::move(saturating)) };
       return self = ::std::move(xref);

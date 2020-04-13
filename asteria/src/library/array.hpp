@@ -9,120 +9,128 @@
 namespace Asteria {
 
 // `std.array.slice`
-Aval
-std_array_slice(Aval data, Ival from, Iopt length);
+V_array
+std_array_slice(V_array data, V_integer from, optV_integer length);
 
 // `std.array.replace_slice`
-Aval
-std_array_replace_slice(Aval data, Ival from, Iopt length, Aval replacement);
+V_array
+std_array_replace_slice(V_array data, V_integer from, optV_integer length, V_array replacement);
 
 // `std.array.find`
-Iopt
-std_array_find(Aval data, Ival from, Iopt length, Value target);
+optV_integer
+std_array_find(V_array data, V_integer from, optV_integer length, Value target);
 
 // `std.array.find_if`
-Iopt
-std_array_find_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor);
+optV_integer
+std_array_find_if(Global_Context& global, V_array data, V_integer from, optV_integer length,
+                  V_function predictor);
 
 // `std.array.find_if_not`
-Iopt
-std_array_find_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor);
+optV_integer
+std_array_find_if_not(Global_Context& global, V_array data, V_integer from, optV_integer length,
+                      V_function predictor);
 
 // `std.array.rfind`
-Iopt
-std_array_rfind(Aval data, Ival from, Iopt length, Value target);
+optV_integer
+std_array_rfind(V_array data, V_integer from, optV_integer length, Value target);
 
 // `std.array.rfind_if`
-Iopt
-std_array_rfind_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor);
+optV_integer
+std_array_rfind_if(Global_Context& global, V_array data, V_integer from, optV_integer length,
+                   V_function predictor);
 
 // `std.array.rfind_if_not`
-Iopt
-std_array_rfind_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor);
+optV_integer
+std_array_rfind_if_not(Global_Context& global, V_array data, V_integer from, optV_integer length,
+                       V_function predictor);
 
 // `std.array.count`
-Ival
-std_array_count(Aval data, Ival from, Iopt length, Value target);
+V_integer
+std_array_count(V_array data, V_integer from, optV_integer length, Value target);
 
 // `std.array.count_if`
-Ival
-std_array_count_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor);
+V_integer
+std_array_count_if(Global_Context& global, V_array data, V_integer from, optV_integer length,
+                   V_function predictor);
 
 // `std.array.count_if_not`
-Ival
-std_array_count_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor);
+V_integer
+std_array_count_if_not(Global_Context& global, V_array data, V_integer from, optV_integer length,
+                       V_function predictor);
 
 // `std.array.exclude`
-Aval
-std_array_exclude(Aval data, Ival from, Iopt length, Value target);
+V_array
+std_array_exclude(V_array data, V_integer from, optV_integer length, Value target);
 
 // `std.array.exclude_if`
-Aval
-std_array_exclude_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor);
+V_array
+std_array_exclude_if(Global_Context& global, V_array data, V_integer from, optV_integer length,
+                     V_function predictor);
 
 // `std.array.exclude_if_not`
-Aval
-std_array_exclude_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor);
+V_array
+std_array_exclude_if_not(Global_Context& global, V_array data, V_integer from, optV_integer length,
+                         V_function predictor);
 
 // `std.array.is_sorted`
-Bval
-std_array_is_sorted(Global& global, Aval data, Fopt comparator);
+V_boolean
+std_array_is_sorted(Global_Context& global, V_array data, optV_function comparator);
 
 // `std.array.binary_search`
-Iopt
-std_array_binary_search(Global& global, Aval data, Value target, Fopt comparator);
+optV_integer
+std_array_binary_search(Global_Context& global, V_array data, Value target, optV_function comparator);
 
 // `std.array.lower_bound`
-Ival
-std_array_lower_bound(Global& global, Aval data, Value target, Fopt comparator);
+V_integer
+std_array_lower_bound(Global_Context& global, V_array data, Value target, optV_function comparator);
 
 // `std.array.upper_bound`
-Ival
-std_array_upper_bound(Global& global, Aval data, Value target, Fopt comparator);
+V_integer
+std_array_upper_bound(Global_Context& global, V_array data, Value target, optV_function comparator);
 
 // `std.array.equal_range`
-pair<Ival, Ival>
-std_array_equal_range(Global& global, Aval data, Value target, Fopt comparator);
+pair<V_integer, V_integer>
+std_array_equal_range(Global_Context& global, V_array data, Value target, optV_function comparator);
 
 // `std.array.sort`
-Aval
-std_array_sort(Global& global, Aval data, Fopt comparator);
+V_array
+std_array_sort(Global_Context& global, V_array data, optV_function comparator);
 
 // `std.array.sortu`
-Aval
-std_array_sortu(Global& global, Aval data, Fopt comparator);
+V_array
+std_array_sortu(Global_Context& global, V_array data, optV_function comparator);
 
 // `std.array.max_of`
 Value
-std_array_max_of(Global& global, Aval data, Fopt comparator);
+std_array_max_of(Global_Context& global, V_array data, optV_function comparator);
 
 // `std.array.min_of`
 Value
-std_array_min_of(Global& global, Aval data, Fopt comparator);
+std_array_min_of(Global_Context& global, V_array data, optV_function comparator);
 
 // `std.array.reverse`
-Aval
-std_array_reverse(Aval data);
+V_array
+std_array_reverse(V_array data);
 
 // `std.array.generate`
-Aval
-std_array_generate(Global& global, Fval generator, Ival length);
+V_array
+std_array_generate(Global_Context& global, V_function generator, V_integer length);
 
 // `std.array.shuffle`
-Aval
-std_array_shuffle(Aval data, Iopt seed);
+V_array
+std_array_shuffle(V_array data, optV_integer seed);
 
 // `std.array.rotate`
-Aval
-std_array_rotate(Aval data, Ival shift);
+V_array
+std_array_rotate(V_array data, V_integer shift);
 
 // `std.array.copy_keys`
-Aval
-std_array_copy_keys(Oval source);
+V_array
+std_array_copy_keys(V_object source);
 
 // `std.array.copy_values`
-Aval
-std_array_copy_values(Oval source);
+V_array
+std_array_copy_values(V_object source);
 
 // Create an object that is to be referenced as `std.array`.
 void

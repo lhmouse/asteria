@@ -8,8 +8,8 @@
 
 namespace Asteria {
 
-Iopt
-std_debug_logf(Sval templ, cow_vector<Value> values)
+optV_integer
+std_debug_logf(V_string templ, cow_vector<Value> values)
   {
     // Prepare inserters.
     cow_vector<::rocket::formatter> insts;
@@ -30,8 +30,8 @@ std_debug_logf(Sval templ, cow_vector<Value> values)
     return static_cast<int64_t>(nput);
   }
 
-Iopt
-std_debug_dump(Value value, Iopt indent)
+optV_integer
+std_debug_dump(Value value, optV_integer indent)
   {
     // Clamp the suggested indent so we don't produce overlong lines.
     size_t rindent = static_cast<size_t>(::rocket::clamp(indent.value_or(2), 0, 10));
@@ -52,7 +52,7 @@ create_bindings_debug(V_object& result, API_Version /*version*/)
     // `std.debug.logf()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("logf"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.debug.logf(templ, ...)`
 
@@ -63,11 +63,11 @@ create_bindings_debug(V_object& result, API_Version /*version*/)
   * Returns the number of bytes written if the operation succeeds,
     or `null` otherwise.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.debug.logf"));
     // Parse variadic arguments.
-    Sval templ;
+    V_string templ;
     cow_vector<Value> values;
     if(reader.I().v(templ).F(values)) {
       Reference_root::S_temporary xref = { std_debug_logf(templ, values) };
@@ -81,7 +81,7 @@ create_bindings_debug(V_object& result, API_Version /*version*/)
     // `std.debug.dump()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("dump"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.debug.dump(value, [indent])`
 
@@ -94,12 +94,12 @@ create_bindings_debug(V_object& result, API_Version /*version*/)
   * Returns the number of bytes written if the operation succeeds,
     or `null` otherwise.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.debug.dump"));
     // Parse arguments.
     Value value;
-    Iopt indent;
+    optV_integer indent;
     if(reader.I().o(value).o(indent).F()) {
       Reference_root::S_temporary xref = { std_debug_dump(value, indent) };
       return self = ::std::move(xref);

@@ -144,28 +144,28 @@ class Argument_Reader
     // The argument must exist and must be of the desired type; otherwise the operation
     // fails.
     Argument_Reader&
-    v(Bval& xval);
+    v(V_boolean& xval);
 
     Argument_Reader&
-    v(Ival& xval);
+    v(V_integer& xval);
 
     Argument_Reader&
-    v(Rval& xval);  // performs integer-to-real conversions as necessary
+    v(V_real& xval);  // performs integer-to-real conversions as necessary
 
     Argument_Reader&
-    v(Sval& xval);
+    v(V_string& xval);
 
     Argument_Reader&
-    v(Pval& xval);
+    v(V_opaque& xval);
 
     Argument_Reader&
-    v(Fval& xval);
+    v(V_function& xval);
 
     Argument_Reader&
-    v(Aval& xval);
+    v(V_array& xval);
 
     Argument_Reader&
-    v(Oval& xval);
+    v(V_object& xval);
 
     // Get an OPTIONAL argument.
     // The argument must exist and must be of the desired type or `null`; otherwise the
@@ -178,28 +178,28 @@ class Argument_Reader
     o(Value& val);
 
     Argument_Reader&
-    o(Bopt& xopt);
+    o(optV_boolean& xopt);
 
     Argument_Reader&
-    o(Iopt& xopt);
+    o(optV_integer& xopt);
 
     Argument_Reader&
-    o(Ropt& xopt);  // performs integer-to-real conversions as necessary
+    o(optV_real& xopt);  // performs integer-to-real conversions as necessary
 
     Argument_Reader&
-    o(Sopt& xopt);
+    o(optV_string& xopt);
 
     Argument_Reader&
-    o(Popt& xopt);
+    o(optV_opaque& xopt);
 
     Argument_Reader&
-    o(Fopt& xopt);
+    o(optV_function& xopt);
 
     Argument_Reader&
-    o(Aopt& xopt);
+    o(optV_array& xopt);
 
     Argument_Reader&
-    o(Oopt& xopt);
+    o(optV_object& xopt);
 
     // Throw an exception saying there are no viable overloads.
     [[noreturn]]

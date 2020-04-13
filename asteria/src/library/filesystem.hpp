@@ -9,60 +9,61 @@
 namespace Asteria {
 
 // `std.filesystem.get_working_directory`
-Sval
+V_string
 std_filesystem_get_working_directory();
 
 // `std.filesystem.get_real_path`
-Sval
-std_filesystem_get_real_path(Sval path);
+V_string
+std_filesystem_get_real_path(V_string path);
 
 // `std.filesystem.get_information`
-Oopt
-std_filesystem_get_information(Sval path);
+optV_object
+std_filesystem_get_information(V_string path);
 
 // `std.filesystem.move_from`
 void
-std_filesystem_move_from(Sval path_new, Sval path_old);
+std_filesystem_move_from(V_string path_new, V_string path_old);
 
 // `std.filesystem.remove_recursive`
-Ival
-std_filesystem_remove_recursive(Sval path);
+V_integer
+std_filesystem_remove_recursive(V_string path);
 
 // `std.filesystem.directory_list`
-Oopt
-std_filesystem_directory_list(Sval path);
+optV_object
+std_filesystem_directory_list(V_string path);
 
 // `std.filesystem.directory_create`
-Bval
-std_filesystem_directory_create(Sval path);
+V_boolean
+std_filesystem_directory_create(V_string path);
 
 // `std.filesystem.directoryr_remove`
-Bval
-std_filesystem_directory_remove(Sval path);
+V_boolean
+std_filesystem_directory_remove(V_string path);
 
 // `std.filesystem.file_read`
-Sopt
-std_filesystem_file_read(Sval path, Iopt offset, Iopt limit);
+optV_string
+std_filesystem_file_read(V_string path, optV_integer offset, optV_integer limit);
 
 // `std.filesystem.file_stream`
-Iopt
-std_filesystem_file_stream(Global& global, Sval path, Fval callback, Iopt offset, Iopt limit);
+optV_integer
+std_filesystem_file_stream(Global_Context& global, V_string path, V_function callback,
+                           optV_integer offset, optV_integer limit);
 
 // `std.filesystem.file_write`
 void
-std_filesystem_file_write(Sval path, Sval data, Iopt offset);
+std_filesystem_file_write(V_string path, V_string data, optV_integer offset);
 
 // `std.filesystem.file_append`
 void
-std_filesystem_file_append(Sval path, Sval data, Bopt exclusive);
+std_filesystem_file_append(V_string path, V_string data, optV_boolean exclusive);
 
 // `std.filesystem.file_copy_from`
 void
-std_filesystem_file_copy_from(Sval path_new, Sval path_old);
+std_filesystem_file_copy_from(V_string path_new, V_string path_old);
 
 // `std.filesystem.file_remove`
-Bval
-std_filesystem_file_remove(Sval path);
+V_boolean
+std_filesystem_file_remove(V_string path);
 
 // Create an object that is to be referenced as `std.filesystem`.
 void

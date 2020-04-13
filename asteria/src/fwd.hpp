@@ -548,6 +548,15 @@ using V_function  = cow_function;
 using V_array     = cow_vector<Value>;
 using V_object    = cow_dictionary<Value>;
 
+using optV_boolean   = opt<V_boolean>;
+using optV_integer   = opt<V_integer>;
+using optV_real      = opt<V_real>;
+using optV_string    = opt<V_string>;
+using optV_opaque    = V_opaque;
+using optV_function  = V_function;
+using optV_array     = opt<V_array>;
+using optV_object    = opt<V_object>;
+
 // Indices of fundamental types
 enum Vtype : uint8_t
   {
@@ -731,28 +740,6 @@ using Compiler_Options = Compiler_Options_v2;
 // This value is initialized statically and never destroyed.
 extern const unsigned char null_value_storage[];
 static const Value& null_value = reinterpret_cast<const Value&>(null_value_storage);
-
-// Aliases for bindings (shorter but less readable)
-using Global = Global_Context;
-using Null = V_null;
-
-using Bval = V_boolean;
-using Ival = V_integer;
-using Rval = V_real;
-using Sval = V_string;
-using Pval = V_opaque;
-using Fval = V_function;
-using Aval = V_array;
-using Oval = V_object;
-
-using Bopt = opt<V_boolean>;
-using Iopt = opt<V_integer>;
-using Ropt = opt<V_real>;
-using Sopt = opt<V_string>;
-using Popt = V_opaque;
-using Fopt = V_function;
-using Aopt = opt<V_array>;
-using Oopt = opt<V_object>;
 
 }  // namespace Asteria
 

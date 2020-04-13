@@ -1414,12 +1414,12 @@ do_accept_named_reference(cow_vector<Expression_Unit>& units, Token_Stream& tstr
     }
     // Replace special names. This is what macros in C do.
     if(*qname == "__file") {
-      Expression_Unit::S_literal xunit = { V_string(sloc.file()) };
+      Expression_Unit::S_literal xunit = { sloc.file() };
       units.emplace_back(::std::move(xunit));
       return true;
     }
     if(*qname == "__line") {
-      Expression_Unit::S_literal xunit = { V_integer(sloc.line()) };
+      Expression_Unit::S_literal xunit = { sloc.line() };
       units.emplace_back(::std::move(xunit));
       return true;
     }

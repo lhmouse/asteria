@@ -32,12 +32,12 @@ const
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("<built-in>.__varg"));
     // Extract arguments.
-    Iopt qindex;
+    optV_integer qindex;
     if(reader.I().o(qindex).F()) {
       auto nvargs = this->m_vargs.size();
       if(!qindex) {
         // Return the number of variadic arguments if `index` is `null` or absent.
-        Reference_root::S_constant xref = { V_integer(nvargs) };
+        Reference_root::S_constant xref = { static_cast<int64_t>(nvargs) };
         return self = ::std::move(xref);
       }
       // Return the argument at `index`.

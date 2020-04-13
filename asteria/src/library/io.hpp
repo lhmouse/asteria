@@ -9,35 +9,35 @@
 namespace Asteria {
 
 // `std.io.getc`
-Iopt
+optV_integer
 std_io_getc();
 
 // `std.io.getln`
-Sopt
+optV_string
 std_io_getln();
 
 // `std.io.putc`
-Iopt
-std_io_putc(Ival value);
+optV_integer
+std_io_putc(V_integer value);
 
-Iopt
-std_io_putc(Sval value);
+optV_integer
+std_io_putc(V_string value);
 
 // `std.io.putln`
-Iopt
-std_io_putln(Sval value);
+optV_integer
+std_io_putln(V_string value);
 
 // `std.io.putf`
-Iopt
-std_io_putf(Sval templ, cow_vector<Value> values);
+optV_integer
+std_io_putf(V_string templ, cow_vector<Value> values);
 
 // `std.io.read`
-Sopt
-std_io_read(Iopt limit);
+optV_string
+std_io_read(optV_integer limit);
 
 // `std.io.write`
-Iopt
-std_io_write(Sval data);
+optV_integer
+std_io_write(V_string data);
 
 // `std.io.flush`
 void

@@ -76,7 +76,7 @@ do_write_utf8_common(const IOF_Sentry& fp, const cow_string& text)
 
 }  // namespace
 
-Iopt
+optV_integer
 std_io_getc()
   {
     // Lock standard input for reading.
@@ -101,7 +101,7 @@ std_io_getc()
     return static_cast<uint32_t>(wch);
   }
 
-Sopt
+optV_string
 std_io_getln()
   {
     // Lock standard input for reading.
@@ -139,8 +139,8 @@ std_io_getln()
     return u8str;
   }
 
-Iopt
-std_io_putc(Ival value)
+optV_integer
+std_io_putc(V_integer value)
   {
     // Lock standard output for writing.
     const IOF_Sentry fp(stdout);
@@ -170,8 +170,8 @@ std_io_putc(Ival value)
     return 1;
   }
 
-Iopt
-std_io_putc(Sval value)
+optV_integer
+std_io_putc(V_string value)
   {
     // Lock standard output for writing.
     const IOF_Sentry fp(stdout);
@@ -188,8 +188,8 @@ std_io_putc(Sval value)
     return static_cast<int64_t>(ncps);
   }
 
-Iopt
-std_io_putln(Sval value)
+optV_integer
+std_io_putln(V_string value)
   {
     // Lock standard output for writing.
     const IOF_Sentry fp(stdout);
@@ -210,8 +210,8 @@ std_io_putln(Sval value)
     return static_cast<int64_t>(ncps + 1);
   }
 
-Iopt
-std_io_putf(Sval templ, cow_vector<Value> values)
+optV_integer
+std_io_putf(V_string templ, cow_vector<Value> values)
   {
     // Lock standard output for writing.
     const IOF_Sentry fp(stdout);
@@ -240,8 +240,8 @@ std_io_putf(Sval templ, cow_vector<Value> values)
     return static_cast<int64_t>(ncps);
   }
 
-Sopt
-std_io_read(Iopt limit)
+optV_string
+std_io_read(optV_integer limit)
   {
     // Lock standard input for reading.
     const IOF_Sentry fp(stdin);
@@ -268,8 +268,8 @@ std_io_read(Iopt limit)
     return ::std::move(data.erase(ntotal));
   }
 
-Iopt
-std_io_write(Sval data)
+optV_integer
+std_io_write(V_string data)
   {
     // Lock standard output for writing.
     const IOF_Sentry fp(stdout);
@@ -311,7 +311,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     // `std.io.getc()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("getc"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.io.getc()`
 
@@ -323,7 +323,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
   * Throws an exception if standard input is binary-oriented, or if
     a read error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.getc"));
     // Parse arguments.
@@ -339,7 +339,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     // `std.io.getln()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("getln"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.io.getln()`
 
@@ -354,7 +354,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     a read error occurs, or if source data cannot be converted to a
     valid UTF code point sequence.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.getln"));
     // Parse arguments.
@@ -370,7 +370,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     // `std.io.putc()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("putc"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.io.putc(value)`
 
@@ -383,16 +383,16 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     if source data cannot be converted to a valid UTF code point
     sequence, or if a write error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.putc"));
     // Parse arguments.
-    Ival ivalue;
+    V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
       Reference_root::S_temporary xref = { std_io_putc(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
-    Sval svalue;
+    V_string svalue;
     if(reader.I().v(svalue).F()) {
       Reference_root::S_temporary xref = { std_io_putc(::std::move(svalue)) };
       return self = ::std::move(xref);
@@ -405,7 +405,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     // `std.io.putln()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("putln"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.io.putln(text)`
 
@@ -420,11 +420,11 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     if source data cannot be converted to a valid UTF code point
     sequence, or if a write error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.putln"));
     // Parse arguments.
-    Sval text;
+    V_string text;
     if(reader.I().v(text).F()) {
       Reference_root::S_temporary xref = { std_io_putln(::std::move(text)) };
       return self = ::std::move(xref);
@@ -437,7 +437,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     // `std.io.putf()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("putf"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.io.putf(templ, ...)`
 
@@ -450,11 +450,11 @@ create_bindings_io(V_object& result, API_Version /*version*/)
    if source data cannot be converted to a valid UTF code point
    sequence, or if a write error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.putf"));
     // Parse arguments.
-    Sval templ;
+    V_string templ;
     cow_vector<Value> values;
     if(reader.I().v(templ).F(values)) {
       Reference_root::S_temporary xref = { std_io_putf(::std::move(templ), ::std::move(values)) };
@@ -468,7 +468,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     // `std.io.read()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("read"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.io.read([limit])`
 
@@ -482,11 +482,11 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     a read error occurs, or if source data cannot be converted to a
     valid UTF code point sequence.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.read"));
     // Parse arguments.
-    Iopt limit;
+    optV_integer limit;
     if(reader.I().o(limit).F()) {
       Reference_root::S_temporary xref = { std_io_read(::std::move(limit)) };
       return self = ::std::move(xref);
@@ -499,7 +499,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     // `std.io.write()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("write"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.io.write(data)`
 
@@ -511,11 +511,11 @@ create_bindings_io(V_object& result, API_Version /*version*/)
   * Throws an exception if standard output is text-oriented, or if
     a write error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.write"));
     // Parse arguments.
-    Sval data;
+    V_string data;
     if(reader.I().v(data).F()) {
       Reference_root::S_temporary xref = { std_io_write(::std::move(data)) };
       return self = ::std::move(xref);
@@ -528,7 +528,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     // `std.io.flush()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("flush"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.io.flush()`
 
@@ -538,7 +538,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
 
   * Throws an exception if a write error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.flush"));
     // Parse arguments.

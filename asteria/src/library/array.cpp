@@ -10,8 +10,8 @@
 namespace Asteria {
 namespace {
 
-pair<Aval::const_iterator, Aval::const_iterator>
-do_slice(const Aval& data, Aval::const_iterator tbegin, const Iopt& length)
+pair<V_array::const_iterator, V_array::const_iterator>
+do_slice(const V_array& data, V_array::const_iterator tbegin, const optV_integer& length)
   {
     if(!length || (*length >= data.end() - tbegin)) {
       // Get the subrange from `tbegin` to the end.
@@ -25,8 +25,8 @@ do_slice(const Aval& data, Aval::const_iterator tbegin, const Iopt& length)
     return ::std::make_pair(tbegin, tbegin + static_cast<ptrdiff_t>(*length));
   }
 
-pair<Aval::const_iterator, Aval::const_iterator>
-do_slice(const Aval& data, const Ival& from, const Iopt& length)
+pair<V_array::const_iterator, V_array::const_iterator>
+do_slice(const V_array& data, const V_integer& from, const optV_integer& length)
   {
     auto slen = static_cast<int64_t>(data.size());
     if(from >= 0) {
@@ -80,7 +80,7 @@ do_make_temporary(const Value& value)
 
 template<typename IterT>
 opt<IterT>
-do_find_if_opt(Global& global, IterT begin, IterT end, const Fval& pred, bool match)
+do_find_if_opt(Global_Context& global, IterT begin, IterT end, const V_function& pred, bool match)
   {
     cow_vector<Reference> args;
     for(auto it = ::std::move(begin);  it != end;  ++it) {
@@ -97,8 +97,8 @@ do_find_if_opt(Global& global, IterT begin, IterT end, const Fval& pred, bool ma
   }
 
 Compare
-do_compare(Global& global, cow_vector<Reference>& args,
-           const Fopt& kcomp, const Value& lhs, const Value& rhs)
+do_compare(Global_Context& global, cow_vector<Reference>& args,
+           const optV_function& kcomp, const Value& lhs, const Value& rhs)
   {
     if(ROCKET_EXPECT(!kcomp)) {
       // Use the builtin 3-way comparison operator.
@@ -110,13 +110,13 @@ do_compare(Global& global, cow_vector<Reference>& args,
     args.mut(1) = do_make_temporary(rhs);
     // Call the predictor function and compare the result with `0`.
     auto self = kcomp.invoke(global, ::std::move(args));
-    return self.read().compare(Ival(0));
+    return self.read().compare(V_integer(0));
   }
 
 template<typename IterT>
 pair<IterT, bool>
-do_bsearch(Global& global, cow_vector<Reference>& args, IterT begin, IterT end,
-           const Fopt& kcomp, const Value& target)
+do_bsearch(Global_Context& global, cow_vector<Reference>& args, IterT begin, IterT end,
+           const optV_function& kcomp, const Value& target)
   {
     auto bpos = ::std::move(begin);
     auto epos = ::std::move(end);
@@ -143,8 +143,8 @@ do_bsearch(Global& global, cow_vector<Reference>& args, IterT begin, IterT end,
 
 template<typename IterT, typename PredT>
 IterT
-do_bound(Global& global, cow_vector<Reference>& args, IterT begin, IterT end,
-         const Fopt& kcomp, const Value& target, PredT&& pred)
+do_bound(Global_Context& global, cow_vector<Reference>& args, IterT begin, IterT end,
+         const optV_function& kcomp, const Value& target, PredT&& pred)
   {
     auto bpos = ::std::move(begin);
     auto epos = ::std::move(end);
@@ -166,9 +166,9 @@ do_bound(Global& global, cow_vector<Reference>& args, IterT begin, IterT end,
     }
   }
 
-Aval::iterator&
-do_merge_range(Aval::iterator& opos, Global& global, cow_vector<Reference>& args,
-               const Fopt& kcomp, Aval::iterator ibegin, Aval::iterator iend, bool unique)
+V_array::iterator&
+do_merge_range(V_array::iterator& opos, Global_Context& global, cow_vector<Reference>& args,
+               const optV_function& kcomp, V_array::iterator ibegin, V_array::iterator iend, bool unique)
   {
     for(auto ipos = ibegin;  ipos != iend;  ++ipos)
       if(!unique || (do_compare(global, args, kcomp, ipos[0], opos[-1]) != compare_equal))
@@ -176,14 +176,14 @@ do_merge_range(Aval::iterator& opos, Global& global, cow_vector<Reference>& args
     return opos;
   }
 
-Aval::iterator
-do_merge_blocks(Aval& output, Global& global, cow_vector<Reference>& args,
-                const Fopt& kcomp, Aval&& input, ptrdiff_t bsize, bool unique)
+V_array::iterator
+do_merge_blocks(V_array& output, Global_Context& global, cow_vector<Reference>& args,
+                const optV_function& kcomp, V_array&& input, ptrdiff_t bsize, bool unique)
   {
     ROCKET_ASSERT(output.size() >= input.size());
     // Define the range information for a pair of contiguous blocks.
-    Aval::iterator bpos[2];
-    Aval::iterator bend[2];
+    V_array::iterator bpos[2];
+    V_array::iterator bend[2];
     // Merge adjacent blocks of `bsize` elements.
     auto opos = output.mut_begin();
     auto ipos = input.mut_begin();
@@ -243,23 +243,23 @@ do_merge_blocks(Aval& output, Global& global, cow_vector<Reference>& args,
 
 }  // namespace
 
-Aval
-std_array_slice(Aval data, Ival from, Iopt length)
+V_array
+std_array_slice(V_array data, V_integer from, optV_integer length)
   {
     auto range = do_slice(data, from, length);
     if((range.first == data.begin()) && (range.second == data.end())) {
       // Use reference counting as our advantage.
       return data;
     }
-    return Aval(range.first, range.second);
+    return V_array(range.first, range.second);
   }
 
-Aval
-std_array_replace_slice(Aval data, Ival from, Iopt length, Aval replacement)
+V_array
+std_array_replace_slice(V_array data, V_integer from, optV_integer length, V_array replacement)
   {
     auto range = do_slice(data, from, length);
     // Append segments.
-    Aval res;
+    V_array res;
     res.reserve(data.size() - static_cast<size_t>(range.second - range.first) + replacement.size());
     res.append(data.begin(), range.first);
     res.append(replacement.begin(), replacement.end());
@@ -267,8 +267,8 @@ std_array_replace_slice(Aval data, Ival from, Iopt length, Aval replacement)
     return res;
   }
 
-Iopt
-std_array_find(Aval data, Ival from, Iopt length, Value target)
+optV_integer
+std_array_find(V_array data, V_integer from, optV_integer length, Value target)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_opt(range.first, range.second, target);
@@ -278,8 +278,9 @@ std_array_find(Aval data, Ival from, Iopt length, Value target)
     return *qit - data.begin();
   }
 
-Iopt
-std_array_find_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
+optV_integer
+std_array_find_if(Global_Context& global, V_array data, V_integer from, optV_integer length,
+                  V_function predictor)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
@@ -289,8 +290,9 @@ std_array_find_if(Global& global, Aval data, Ival from, Iopt length, Fval predic
     return *qit - data.begin();
   }
 
-Iopt
-std_array_find_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
+optV_integer
+std_array_find_if_not(Global_Context& global, V_array data, V_integer from, optV_integer length,
+                      V_function predictor)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
@@ -300,8 +302,8 @@ std_array_find_if_not(Global& global, Aval data, Ival from, Iopt length, Fval pr
     return *qit - data.begin();
   }
 
-Iopt
-std_array_rfind(Aval data, Ival from, Iopt length, Value target)
+optV_integer
+std_array_rfind(V_array data, V_integer from, optV_integer length, Value target)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_opt(::std::make_reverse_iterator(range.second),
@@ -312,8 +314,9 @@ std_array_rfind(Aval data, Ival from, Iopt length, Value target)
     return data.rend() - *qit - 1;
   }
 
-Iopt
-std_array_rfind_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
+optV_integer
+std_array_rfind_if(Global_Context& global, V_array data, V_integer from, optV_integer length,
+                   V_function predictor)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second),
@@ -324,8 +327,9 @@ std_array_rfind_if(Global& global, Aval data, Ival from, Iopt length, Fval predi
     return data.rend() - *qit - 1;
   }
 
-Iopt
-std_array_rfind_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
+optV_integer
+std_array_rfind_if_not(Global_Context& global, V_array data, V_integer from, optV_integer length,
+                       V_function predictor)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second),
@@ -336,8 +340,8 @@ std_array_rfind_if_not(Global& global, Aval data, Ival from, Iopt length, Fval p
     return data.rend() - *qit - 1;
   }
 
-Ival
-std_array_count(Aval data, Ival from, Iopt length, Value target)
+V_integer
+std_array_count(V_array data, V_integer from, optV_integer length, Value target)
   {
     int64_t count = 0;
     auto range = do_slice(data, from, length);
@@ -352,8 +356,9 @@ std_array_count(Aval data, Ival from, Iopt length, Value target)
     return count;
   }
 
-Ival
-std_array_count_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
+V_integer
+std_array_count_if(Global_Context& global, V_array data, V_integer from, optV_integer length,
+                   V_function predictor)
   {
     int64_t count = 0;
     auto range = do_slice(data, from, length);
@@ -368,8 +373,9 @@ std_array_count_if(Global& global, Aval data, Ival from, Iopt length, Fval predi
     return count;
   }
 
-Ival
-std_array_count_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
+V_integer
+std_array_count_if_not(Global_Context& global, V_array data, V_integer from, optV_integer length,
+                       V_function predictor)
   {
     int64_t count = 0;
     auto range = do_slice(data, from, length);
@@ -384,8 +390,8 @@ std_array_count_if_not(Global& global, Aval data, Ival from, Iopt length, Fval p
     return count;
   }
 
-Aval
-std_array_exclude(Aval data, Ival from, Iopt length, Value target)
+V_array
+std_array_exclude(V_array data, V_integer from, optV_integer length, Value target)
   {
     auto range = do_slice(data, from, length);
     ptrdiff_t dist = data.end() - range.second;
@@ -400,8 +406,9 @@ std_array_exclude(Aval data, Ival from, Iopt length, Value target)
     return ::std::move(data);
   }
 
-Aval
-std_array_exclude_if(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
+V_array
+std_array_exclude_if(Global_Context& global, V_array data, V_integer from, optV_integer length,
+                     V_function predictor)
   {
     auto range = do_slice(data, from, length);
     ptrdiff_t dist = data.end() - range.second;
@@ -416,8 +423,9 @@ std_array_exclude_if(Global& global, Aval data, Ival from, Iopt length, Fval pre
     return ::std::move(data);
   }
 
-Aval
-std_array_exclude_if_not(Global& global, Aval data, Ival from, Iopt length, Fval predictor)
+V_array
+std_array_exclude_if_not(Global_Context& global, V_array data, V_integer from, optV_integer length,
+                         V_function predictor)
   {
     auto range = do_slice(data, from, length);
     ptrdiff_t dist = data.end() - range.second;
@@ -432,8 +440,8 @@ std_array_exclude_if_not(Global& global, Aval data, Ival from, Iopt length, Fval
     return ::std::move(data);
   }
 
-Bval
-std_array_is_sorted(Global& global, Aval data, Fopt comparator)
+V_boolean
+std_array_is_sorted(Global_Context& global, V_array data, optV_function comparator)
   {
     if(data.size() <= 1) {
       // If `data` contains no more than 2 elements, it is considered sorted.
@@ -449,8 +457,8 @@ std_array_is_sorted(Global& global, Aval data, Fopt comparator)
     return true;
   }
 
-Iopt
-std_array_binary_search(Global& global, Aval data, Value target, Fopt comparator)
+optV_integer
+std_array_binary_search(Global_Context& global, V_array data, Value target, optV_function comparator)
   {
     cow_vector<Reference> args;
     auto pair = do_bsearch(global, args, data.begin(), data.end(), comparator, target);
@@ -460,8 +468,8 @@ std_array_binary_search(Global& global, Aval data, Value target, Fopt comparator
     return pair.first - data.begin();
   }
 
-Ival
-std_array_lower_bound(Global& global, Aval data, Value target, Fopt comparator)
+V_integer
+std_array_lower_bound(Global_Context& global, V_array data, Value target, optV_function comparator)
   {
     cow_vector<Reference> args;
     auto lpos = do_bound(global, args, data.begin(), data.end(), comparator, target,
@@ -469,8 +477,8 @@ std_array_lower_bound(Global& global, Aval data, Value target, Fopt comparator)
     return lpos - data.begin();
   }
 
-Ival
-std_array_upper_bound(Global& global, Aval data, Value target, Fopt comparator)
+V_integer
+std_array_upper_bound(Global_Context& global, V_array data, Value target, optV_function comparator)
   {
     cow_vector<Reference> args;
     auto upos = do_bound(global, args, data.begin(), data.end(), comparator, target,
@@ -478,8 +486,8 @@ std_array_upper_bound(Global& global, Aval data, Value target, Fopt comparator)
     return upos - data.begin();
   }
 
-pair<Ival, Ival>
-std_array_equal_range(Global& global, Aval data, Value target, Fopt comparator)
+pair<V_integer, V_integer>
+std_array_equal_range(Global_Context& global, V_array data, Value target, optV_function comparator)
   {
     cow_vector<Reference> args;
     auto pair = do_bsearch(global, args, data.begin(), data.end(), comparator, target);
@@ -490,15 +498,15 @@ std_array_equal_range(Global& global, Aval data, Value target, Fopt comparator)
     return ::std::make_pair(lpos - data.begin(), upos - lpos);
   }
 
-Aval
-std_array_sort(Global& global, Aval data, Fopt comparator)
+V_array
+std_array_sort(Global_Context& global, V_array data, optV_function comparator)
   {
     if(data.size() <= 1) {
       // Use reference counting as our advantage.
       return ::std::move(data);
     }
     // The Merge Sort algorithm requires `O(n)` space.
-    Aval temp(data.size());
+    V_array temp(data.size());
     // Merge blocks of exponential sizes.
     cow_vector<Reference> args;
     ptrdiff_t bsize = 1;
@@ -510,15 +518,15 @@ std_array_sort(Global& global, Aval data, Fopt comparator)
     return ::std::move(data);
   }
 
-Aval
-std_array_sortu(Global& global, Aval data, Fopt comparator)
+V_array
+std_array_sortu(Global_Context& global, V_array data, optV_function comparator)
   {
     if(data.size() <= 1) {
       // Use reference counting as our advantage.
       return ::std::move(data);
     }
     // The Merge Sort algorithm requires `O(n)` space.
-    Aval temp(data.size());
+    V_array temp(data.size());
     // Merge blocks of exponential sizes.
     cow_vector<Reference> args;
     ptrdiff_t bsize = 1;
@@ -534,7 +542,7 @@ std_array_sortu(Global& global, Aval data, Fopt comparator)
   }
 
 Value
-std_array_max_of(Global& global, Aval data, Fopt comparator)
+std_array_max_of(Global_Context& global, V_array data, optV_function comparator)
   {
     auto qmax = data.begin();
     if(qmax == data.end()) {
@@ -552,7 +560,7 @@ std_array_max_of(Global& global, Aval data, Fopt comparator)
   }
 
 Value
-std_array_min_of(Global& global, Aval data, Fopt comparator)
+std_array_min_of(Global_Context& global, V_array data, optV_function comparator)
   {
     auto qmin = data.begin();
     if(qmin == data.end()) {
@@ -569,17 +577,17 @@ std_array_min_of(Global& global, Aval data, Fopt comparator)
     return *qmin;
   }
 
-Aval
-std_array_reverse(Aval data)
+V_array
+std_array_reverse(V_array data)
   {
     // This is an easy matter, isn't it?
-    return Aval(::std::make_move_iterator(data.rbegin()), ::std::make_move_iterator(data.rend()));
+    return V_array(::std::make_move_iterator(data.rbegin()), ::std::make_move_iterator(data.rend()));
   }
 
-Aval
-std_array_generate(Global& global, Fval generator, Ival length)
+V_array
+std_array_generate(Global_Context& global, V_function generator, V_integer length)
   {
-    Aval data;
+    V_array data;
     data.reserve(static_cast<size_t>(length));
     cow_vector<Reference> args;
     for(int64_t i = 0;  i < length;  ++i) {
@@ -594,8 +602,8 @@ std_array_generate(Global& global, Fval generator, Ival length)
     return data;
   }
 
-Aval
-std_array_shuffle(Aval data, Iopt seed)
+V_array
+std_array_shuffle(V_array data, optV_integer seed)
   {
     if(data.size() <= 1) {
       // Use reference counting as our advantage.
@@ -621,8 +629,8 @@ std_array_shuffle(Aval data, Iopt seed)
     return ::std::move(data);
   }
 
-Aval
-std_array_rotate(Aval data, Ival shift)
+V_array
+std_array_rotate(V_array data, V_integer shift)
   {
     if(data.size() <= 1) {
       // Use reference counting as our advantage.
@@ -639,19 +647,19 @@ std_array_rotate(Aval data, Ival shift)
     return ::std::move(data);
   }
 
-Aval
-std_array_copy_keys(Oval source)
+V_array
+std_array_copy_keys(V_object source)
   {
-    Aval data;
+    V_array data;
     data.reserve(source.size());
-    ::rocket::for_each(source, [&](const auto& p) { data.emplace_back(Sval(p.first));  });
+    ::rocket::for_each(source, [&](const auto& p) { data.emplace_back(V_string(p.first));  });
     return data;
   }
 
-Aval
-std_array_copy_values(Oval source)
+V_array
+std_array_copy_values(V_object source)
   {
-    Aval data;
+    V_array data;
     data.reserve(source.size());
     ::rocket::for_each(source, [&](const auto& p) { data.emplace_back(p.second);  });
     return data;
@@ -664,7 +672,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.slice()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("slice"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.slice(data, from, [length])`
 
@@ -678,13 +686,13 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 
   * Returns the specified subarray of `data`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.slice"));
     // Parse arguments.
-    Aval data;
-    Ival from;
-    Iopt length;
+    V_array data;
+    V_integer from;
+    optV_integer length;
     if(reader.I().v(data).v(from).o(length).F()) {
       Reference_root::S_temporary xref = { std_array_slice(::std::move(data), from, length) };
       return self = ::std::move(xref);
@@ -697,7 +705,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.replace_slice()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("replace_slice"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.replace_slice(data, from, replacement)`
 
@@ -720,20 +728,20 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 
   * Returns a new array with the subrange replaced.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.replace"));
     Argument_Reader::State state;
     // Parse arguments.
-    Aval data;
-    Ival from;
-    Aval replacement;
+    V_array data;
+    V_integer from;
+    V_array replacement;
     if(reader.I().v(data).v(from).S(state).v(replacement).F()) {
       Reference_root::S_temporary xref = { std_array_replace_slice(::std::move(data), from, nullopt,
                                                                    ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
-    Iopt length;
+    optV_integer length;
     if(reader.L(state).o(length).v(replacement).F()) {
       Reference_root::S_temporary xref = { std_array_replace_slice(::std::move(data), from, length,
                                                                    ::std::move(replacement)) };
@@ -747,7 +755,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.find()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("find"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.find(data, target)`
 
@@ -777,25 +785,25 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     if one is found, which is always non-negative, or `null`
     otherwise.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.find"));
     Argument_Reader::State state;
     // Parse arguments.
-    Aval data;
+    V_array data;
     Value target;
     if(reader.I().v(data).S(state).o(target).F()) {
       Reference_root::S_temporary xref = { std_array_find(::std::move(data), 0, nullopt,
                                                           ::std::move(target)) };
       return self = ::std::move(xref);
     }
-    Ival from;
+    V_integer from;
     if(reader.L(state).v(from).S(state).o(target).F()) {
       Reference_root::S_temporary xref = { std_array_find(::std::move(data), from, nullopt,
                                                           ::std::move(target)) };
       return self = ::std::move(xref);
     }
-    Iopt length;
+    optV_integer length;
     if(reader.L(state).o(length).o(target).F()) {
       Reference_root::S_temporary xref = { std_array_find(::std::move(data), from, length,
                                                           ::std::move(target)) };
@@ -809,7 +817,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.find_if()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("find_if"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.find_if(data, predictor)`
 
@@ -839,25 +847,25 @@ create_bindings_array(V_object& result, API_Version /*version*/)
   * Returns the subscript of such an element as an integer, if one
     is found, or `null` otherwise.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.find_if"));
     Argument_Reader::State state;
     // Parse arguments.
-    Aval data;
-    Fval predictor;
+    V_array data;
+    V_function predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
       Reference_root::S_temporary xref = { std_array_find_if(global, ::std::move(data), 0, nullopt,
                                                              ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
-    Ival from;
+    V_integer from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
       Reference_root::S_temporary xref = { std_array_find_if(global, ::std::move(data), from, nullopt,
                                                              ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
-    Iopt length;
+    optV_integer length;
     if(reader.L(state).o(length).v(predictor).F()) {
       Reference_root::S_temporary xref = { std_array_find_if(global, ::std::move(data), from, length,
                                                              ::std::move(predictor)) };
@@ -871,7 +879,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.find_if_not()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("find_if_not"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.find_if_not(data, predictor)`
 
@@ -901,25 +909,25 @@ create_bindings_array(V_object& result, API_Version /*version*/)
   * Returns the subscript of such an element as an integer, if one
     is found, or `null` otherwise.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.find_if_not"));
     Argument_Reader::State state;
     // Parse arguments.
-    Aval data;
-    Fval predictor;
+    V_array data;
+    V_function predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
       Reference_root::S_temporary xref = { std_array_find_if_not(global, ::std::move(data), 0, nullopt,
                                                                  ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
-    Ival from;
+    V_integer from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
       Reference_root::S_temporary xref = { std_array_find_if_not(global, ::std::move(data), from, nullopt,
                                                                  ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
-    Iopt length;
+    optV_integer length;
     if(reader.L(state).o(length).v(predictor).F()) {
       Reference_root::S_temporary xref = { std_array_find_if_not(global, ::std::move(data), from, length,
                                                                  ::std::move(predictor)) };
@@ -933,7 +941,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.rfind()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("rfind"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.rfind(data, target)`
 
@@ -963,25 +971,25 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     if one is found, which is always non-negative, or `null`
     otherwise.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.rfind"));
     Argument_Reader::State state;
     // Parse arguments.
-    Aval data;
+    V_array data;
     Value target;
     if(reader.I().v(data).S(state).o(target).F()) {
       Reference_root::S_temporary xref = { std_array_rfind(::std::move(data), 0, nullopt,
                                                            ::std::move(target)) };
       return self = ::std::move(xref);
     }
-    Ival from;
+    V_integer from;
     if(reader.L(state).v(from).S(state).o(target).F()) {
       Reference_root::S_temporary xref = { std_array_rfind(::std::move(data), from, nullopt,
                                                            ::std::move(target)) };
       return self = ::std::move(xref);
     }
-    Iopt length;
+    optV_integer length;
     if(reader.L(state).o(length).o(target).F()) {
       Reference_root::S_temporary xref = { std_array_rfind(::std::move(data), from, length,
                                                            ::std::move(target)) };
@@ -995,7 +1003,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.rfind_if()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("rfind_if"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.rfind_if(data, predictor)`
 
@@ -1025,25 +1033,25 @@ create_bindings_array(V_object& result, API_Version /*version*/)
   * Returns the subscript of such an element as an integer, if one
     is found, or `null` otherwise.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.rfind_if"));
     Argument_Reader::State state;
     // Parse arguments.
-    Aval data;
-    Fval predictor;
+    V_array data;
+    V_function predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
       Reference_root::S_temporary xref = { std_array_rfind_if(global, ::std::move(data), 0, nullopt,
                                                               ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
-    Ival from;
+    V_integer from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
       Reference_root::S_temporary xref = { std_array_rfind_if(global, ::std::move(data), from, nullopt,
                                                               ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
-    Iopt length;
+    optV_integer length;
     if(reader.L(state).o(length).v(predictor).F()) {
       Reference_root::S_temporary xref = { std_array_rfind_if(global, ::std::move(data), from, length,
                                                               ::std::move(predictor)) };
@@ -1057,7 +1065,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.rfind_if_not()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("rfind_if_not"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.rfind_if_not(data, predictor)`
 
@@ -1087,25 +1095,25 @@ create_bindings_array(V_object& result, API_Version /*version*/)
   * Returns the subscript of such an element as an integer, if one
     is found, or `null` otherwise.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.rfind_if_not"));
     Argument_Reader::State state;
     // Parse arguments.
-    Aval data;
-    Fval predictor;
+    V_array data;
+    V_function predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
       Reference_root::S_temporary xref = { std_array_rfind_if_not(global, ::std::move(data), 0, nullopt,
                                                                   ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
-    Ival from;
+    V_integer from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
       Reference_root::S_temporary xref = { std_array_rfind_if_not(global, ::std::move(data), from, nullopt,
                                                                   ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
-    Iopt length;
+    optV_integer length;
     if(reader.L(state).o(length).v(predictor).F()) {
       Reference_root::S_temporary xref = { std_array_rfind_if_not(global, ::std::move(data), from, length,
                                                                   ::std::move(predictor)) };
@@ -1119,7 +1127,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.count()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("count"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.count(data, target)`
 
@@ -1147,25 +1155,25 @@ create_bindings_array(V_object& result, API_Version /*version*/)
   * Returns the number of occurrences as an integer, which is
     always non-negative.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.count"));
     Argument_Reader::State state;
     // Parse arguments.
-    Aval data;
+    V_array data;
     Value target;
     if(reader.I().v(data).S(state).o(target).F()) {
       Reference_root::S_temporary xref = { std_array_count(::std::move(data), 0, nullopt,
                                                            ::std::move(target)) };
       return self = ::std::move(xref);
     }
-    Ival from;
+    V_integer from;
     if(reader.L(state).v(from).S(state).o(target).F()) {
       Reference_root::S_temporary xref = { std_array_count(::std::move(data), from, nullopt,
                                                            ::std::move(target)) };
       return self = ::std::move(xref);
     }
-    Iopt length;
+    optV_integer length;
     if(reader.L(state).o(length).o(target).F()) {
       Reference_root::S_temporary xref = { std_array_count(::std::move(data), from, length,
                                                            ::std::move(target)) };
@@ -1179,7 +1187,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.count_if()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("count_if"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.count_if(data, target, predictor)`
 
@@ -1211,25 +1219,25 @@ create_bindings_array(V_object& result, API_Version /*version*/)
   * Returns the number of occurrences as an integer, which is
     always non-negative.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.count_if"));
     Argument_Reader::State state;
     // Parse arguments.
-    Aval data;
-    Fval predictor;
+    V_array data;
+    V_function predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
       Reference_root::S_temporary xref = { std_array_count_if(global, ::std::move(data), 0, nullopt,
                                                               ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
-    Ival from;
+    V_integer from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
       Reference_root::S_temporary xref = { std_array_count_if(global, ::std::move(data), from, nullopt,
                                                               ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
-    Iopt length;
+    optV_integer length;
     if(reader.L(state).o(length).v(predictor).F()) {
       Reference_root::S_temporary xref = { std_array_count_if(global, ::std::move(data), from, length,
                                                               ::std::move(predictor)) };
@@ -1243,7 +1251,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.count_if_not()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("count_if_not"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.count_if_not(data, target, predictor)`
 
@@ -1275,25 +1283,25 @@ create_bindings_array(V_object& result, API_Version /*version*/)
   * Returns the number of occurrences as an integer, which is
     always non-negative.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.count_if_not"));
     Argument_Reader::State state;
     // Parse arguments.
-    Aval data;
-    Fval predictor;
+    V_array data;
+    V_function predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
       Reference_root::S_temporary xref = { std_array_count_if_not(global, ::std::move(data), 0, nullopt,
                                                                   ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
-    Ival from;
+    V_integer from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
       Reference_root::S_temporary xref = { std_array_count_if_not(global, ::std::move(data), from, nullopt,
                                                                   ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
-    Iopt length;
+    optV_integer length;
     if(reader.L(state).o(length).v(predictor).F()) {
       Reference_root::S_temporary xref = { std_array_count_if_not(global, ::std::move(data), from, length,
                                                                   ::std::move(predictor)) };
@@ -1307,7 +1315,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.exclude()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("exclude"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.exclude(data, target)`
 
@@ -1335,25 +1343,25 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 
   * Returns a new array with all occurrences removed.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.exclude"));
     Argument_Reader::State state;
     // Parse arguments.
-    Aval data;
+    V_array data;
     Value target;
     if(reader.I().v(data).S(state).o(target).F()) {
       Reference_root::S_temporary xref = { std_array_exclude(::std::move(data), 0, nullopt,
                                                              ::std::move(target)) };
       return self = ::std::move(xref);
     }
-    Ival from;
+    V_integer from;
     if(reader.L(state).v(from).S(state).o(target).F()) {
       Reference_root::S_temporary xref = { std_array_exclude(::std::move(data), from, nullopt,
                                                              ::std::move(target)) };
       return self = ::std::move(xref);
     }
-    Iopt length;
+    optV_integer length;
     if(reader.L(state).o(length).o(target).F()) {
       Reference_root::S_temporary xref = { std_array_exclude(::std::move(data), from, length,
                                                              ::std::move(target)) };
@@ -1367,7 +1375,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.exclude_if()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("exclude_if"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.exclude_if(data, target, predictor)`
 
@@ -1397,25 +1405,25 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 
   * Returns a new array with all occurrences removed.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.exclude_if"));
     Argument_Reader::State state;
     // Parse arguments.
-    Aval data;
-    Fval predictor;
+    V_array data;
+    V_function predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
       Reference_root::S_temporary xref = { std_array_exclude_if(global, ::std::move(data), 0, nullopt,
                                                                 ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
-    Ival from;
+    V_integer from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
       Reference_root::S_temporary xref = { std_array_exclude_if(global, ::std::move(data), from, nullopt,
                                                                 ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
-    Iopt length;
+    optV_integer length;
     if(reader.L(state).o(length).v(predictor).F()) {
       Reference_root::S_temporary xref = { std_array_exclude_if(global, ::std::move(data), from, length,
                                                                 ::std::move(predictor)) };
@@ -1429,7 +1437,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.exclude_if_not()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("exclude_if_not"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.exclude_if_not(data, target, predictor)`
 
@@ -1459,25 +1467,25 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 
   * Returns a new array with all occurrences removed.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.exclude_if_not"));
     Argument_Reader::State state;
     // Parse arguments.
-    Aval data;
-    Fval predictor;
+    V_array data;
+    V_function predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
       Reference_root::S_temporary xref = { std_array_exclude_if_not(global, ::std::move(data), 0, nullopt,
                                                                     ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
-    Ival from;
+    V_integer from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
       Reference_root::S_temporary xref = { std_array_exclude_if_not(global, ::std::move(data), from, nullopt,
                                                                     ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
-    Iopt length;
+    optV_integer length;
     if(reader.L(state).o(length).v(predictor).F()) {
       Reference_root::S_temporary xref = { std_array_exclude_if_not(global, ::std::move(data), from, length,
                                                                     ::std::move(predictor)) };
@@ -1491,7 +1499,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.is_sorted()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("is_sorted"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.is_sorted(data, [comparator])`
 
@@ -1510,12 +1518,12 @@ create_bindings_array(V_object& result, API_Version /*version*/)
   * Returns `true` if `data` is sorted or empty, or `false`
     otherwise.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.is_sorted"));
     // Parse arguments.
-    Aval data;
-    Fopt comparator;
+    V_array data;
+    optV_function comparator;
     if(reader.I().v(data).o(comparator).F()) {
       Reference_root::S_temporary xref = { std_array_is_sorted(global, ::std::move(data),
                                                                ::std::move(comparator)) };
@@ -1529,7 +1537,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.binary_search()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("binary_search"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.binary_search(data, target, [comparator])`
 
@@ -1546,13 +1554,13 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     advised that in this case there is no guarantee whether an
     exception will be thrown or not.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.binary_search"));
     // Parse arguments.
-    Aval data;
+    V_array data;
     Value target;
-    Fopt comparator;
+    optV_function comparator;
     if(reader.I().v(data).o(target).o(comparator).F()) {
       Reference_root::S_temporary xref = { std_array_binary_search(global, ::std::move(data), ::std::move(target),
                                                                    ::std::move(comparator)) };
@@ -1566,7 +1574,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.lower_bound()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("lower_bound"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.lower_bound(data, target, [comparator])`
 
@@ -1585,13 +1593,13 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     advised that in this case there is no guarantee whether an
     exception will be thrown or not.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.lower_bound"));
     // Parse arguments.
-    Aval data;
+    V_array data;
     Value target;
-    Fopt comparator;
+    optV_function comparator;
     if(reader.I().v(data).o(target).o(comparator).F()) {
       Reference_root::S_temporary xref = { std_array_lower_bound(global, ::std::move(data), ::std::move(target),
                                                                  ::std::move(comparator)) };
@@ -1605,7 +1613,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.upper_bound()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("upper_bound"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.upper_bound(data, target, [comparator])`
 
@@ -1624,13 +1632,13 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     advised that in this case there is no guarantee whether an
     exception will be thrown or not.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.upper_bound"));
     // Parse arguments.
-    Aval data;
+    V_array data;
     Value target;
-    Fopt comparator;
+    optV_function comparator;
     if(reader.I().v(data).o(target).o(comparator).F()) {
       Reference_root::S_temporary xref = { std_array_upper_bound(global, ::std::move(data), ::std::move(target),
                                                                  ::std::move(comparator)) };
@@ -1644,7 +1652,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.equal_range()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("equal_range"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.equal_range(data, target, [comparator])`
 
@@ -1662,13 +1670,13 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     advised that in this case there is no guarantee whether an
     exception will be thrown or not.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.lower_bound"));
     // Parse arguments.
-    Aval data;
+    V_array data;
     Value target;
-    Fopt comparator;
+    optV_function comparator;
     if(reader.I().v(data).o(target).o(comparator).F()) {
       auto pair = std_array_equal_range(global, ::std::move(data), ::std::move(target),
                                                 ::std::move(comparator));
@@ -1684,7 +1692,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.sort()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("sort"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.sort(data, [comparator])`
 
@@ -1700,12 +1708,12 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     that in this case there is no guarantee whether an exception
     will be thrown or not.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.sort"));
     // Parse arguments.
-    Aval data;
-    Fopt comparator;
+    V_array data;
+    optV_function comparator;
     if(reader.I().v(data).o(comparator).F()) {
       Reference_root::S_temporary xref = { std_array_sort(global, ::std::move(data), ::std::move(comparator)) };
       return self = ::std::move(xref);
@@ -1718,7 +1726,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.sortu()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("sortu"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.sortu(data, [comparator])`
 
@@ -1735,12 +1743,12 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     that in this case there is no guarantee whether an exception
     will be thrown or not.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.sortu"));
     // Parse arguments.
-    Aval data;
-    Fopt comparator;
+    V_array data;
+    optV_function comparator;
     if(reader.I().v(data).o(comparator).F()) {
       Reference_root::S_temporary xref = { std_array_sortu(global, ::std::move(data), ::std::move(comparator)) };
       return self = ::std::move(xref);
@@ -1753,7 +1761,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.max_of()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("max_of"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.max_of(data, [comparator])`
 
@@ -1765,12 +1773,12 @@ create_bindings_array(V_object& result, API_Version /*version*/)
   * Returns a copy of the maximum element, or `null` if `data` is
     empty.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.max_of"));
     // Parse arguments.
-    Aval data;
-    Fopt comparator;
+    V_array data;
+    optV_function comparator;
     if(reader.I().v(data).o(comparator).F()) {
       Reference_root::S_temporary xref = { std_array_max_of(global, ::std::move(data), ::std::move(comparator)) };
       return self = ::std::move(xref);
@@ -1783,7 +1791,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.min_of()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("min_of"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.min_of(data, [comparator])`
 
@@ -1795,12 +1803,12 @@ create_bindings_array(V_object& result, API_Version /*version*/)
   * Returns a copy of the minimum element, or `null` if `data` is
     empty.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.min_of"));
     // Parse arguments.
-    Aval data;
-    Fopt comparator;
+    V_array data;
+    optV_function comparator;
     if(reader.I().v(data).o(comparator).F()) {
       Reference_root::S_temporary xref = { std_array_min_of(global, ::std::move(data), ::std::move(comparator)) };
       return self = ::std::move(xref);
@@ -1813,7 +1821,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.reverse()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("reverse"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.reverse(data)`
 
@@ -1822,12 +1830,12 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 
   * Returns the reversed array.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.reverse"));
     // Parse arguments.
-    Aval data;
-    Fopt comparator;
+    V_array data;
+    optV_function comparator;
     if(reader.I().v(data).o(comparator).F()) {
       Reference_root::S_temporary xref = { std_array_reverse(::std::move(data)) };
       return self = ::std::move(xref);
@@ -1840,7 +1848,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.generate()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("generate"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.generate(generator, length)`
 
@@ -1853,12 +1861,12 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 
   * Returns an array containing all values generated.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& global) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.generate"));
     // Parse arguments.
-    Fval generator;
-    Ival length;
+    V_function generator;
+    V_integer length;
     if(reader.I().v(generator).v(length).F()) {
       Reference_root::S_temporary xref = { std_array_generate(global, ::std::move(generator), length) };
       return self = ::std::move(xref);
@@ -1871,7 +1879,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.shuffle()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("shuffle"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.shuffle(data, [seed])`
 
@@ -1884,12 +1892,12 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 
   * Returns the shuffled array.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.shuffle"));
     // Parse arguments.
-    Aval data;
-    Iopt seed;
+    V_array data;
+    optV_integer seed;
     if(reader.I().v(data).o(seed).F()) {
       Reference_root::S_temporary xref = { std_array_shuffle(::std::move(data), ::std::move(seed)) };
       return self = ::std::move(xref);
@@ -1902,7 +1910,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.rotate()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("rotate"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.rotate(data, shift)`
 
@@ -1913,12 +1921,12 @@ create_bindings_array(V_object& result, API_Version /*version*/)
   * Returns the rotated array. If `data` is empty, an empty array
     is returned.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.rotate"));
     // Parse arguments.
-    Aval data;
-    Ival shift;
+    V_array data;
+    V_integer shift;
     if(reader.I().v(data).v(shift).F()) {
       Reference_root::S_temporary xref = { std_array_rotate(::std::move(data), ::std::move(shift)) };
       return self = ::std::move(xref);
@@ -1931,7 +1939,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.copy_keys()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("copy_keys"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.copy_keys(source)`
 
@@ -1940,11 +1948,11 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 
   * Returns an array of all keys in `source`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.copy_keys"));
     // Parse arguments.
-    Oval source;
+    V_object source;
     if(reader.I().v(source).F()) {
       Reference_root::S_temporary xref = { std_array_copy_keys(::std::move(source)) };
       return self = ::std::move(xref);
@@ -1957,7 +1965,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // `std.array.copy_values()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("copy_values"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.array.copy_values(source)`
 
@@ -1966,11 +1974,11 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 
   * Returns an array of all values in `source`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.array.copy_values"));
     // Parse arguments.
-    Oval source;
+    V_object source;
     if(reader.I().v(source).F()) {
       Reference_root::S_temporary xref = { std_array_copy_values(::std::move(source)) };
       return self = ::std::move(xref);

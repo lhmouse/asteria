@@ -15,7 +15,7 @@ create_bindings_version(V_object& result, API_Version version)
     // `std.version.major`
     //===================================================================
     result.insert_or_assign(::rocket::sref("major"),
-      Ival(
+      V_integer(
         // The major version number of the standard library that has been enabled.
         version / 0x10000
       ));
@@ -23,7 +23,7 @@ create_bindings_version(V_object& result, API_Version version)
     // `std.version.minor`
     //===================================================================
     result.insert_or_assign(::rocket::sref("minor"),
-      Ival(
+      V_integer(
         // The minor version number of the standard library that has been enabled.
         version % 0x10000
       ));

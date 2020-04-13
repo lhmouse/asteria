@@ -9,22 +9,22 @@
 namespace Asteria {
 
 // `std.json.format`
-Sval
-std_json_format(Value value, Sopt indent);
+V_string
+std_json_format(Value value, optV_string indent);
 
-Sval
-std_json_format(Value value, Ival indent);
+V_string
+std_json_format(Value value, V_integer indent);
 
 // `std.json.format5`
-Sval
-std_json_format5(Value value, Sopt indent);
+V_string
+std_json_format5(Value value, optV_string indent);
 
-Sval
-std_json_format5(Value value, Ival indent);
+V_string
+std_json_format5(Value value, V_integer indent);
 
 // `std.json.parse`
 Value
-std_json_parse(Sval text);
+std_json_parse(V_string text);
 
 // Create an object that is to be referenced as `std.json`.
 void

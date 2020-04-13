@@ -9,195 +9,195 @@
 namespace Asteria {
 
 // `std.numeric.abs`
-Ival
-std_numeric_abs(Ival value);
+V_integer
+std_numeric_abs(V_integer value);
 
-Rval
-std_numeric_abs(Rval value);
+V_real
+std_numeric_abs(V_real value);
 
 // `std.numeric.sign`
-Ival
-std_numeric_sign(Ival value);
+V_integer
+std_numeric_sign(V_integer value);
 
-Ival
-std_numeric_sign(Rval value);
+V_integer
+std_numeric_sign(V_real value);
 
 // `std.numeric.is_finite`
-Bval
-std_numeric_is_finite(Ival value);
+V_boolean
+std_numeric_is_finite(V_integer value);
 
-Bval
-std_numeric_is_finite(Rval value);
+V_boolean
+std_numeric_is_finite(V_real value);
 
 // `std.numeric.is_infinity`
-Bval
-std_numeric_is_infinity(Ival value);
+V_boolean
+std_numeric_is_infinity(V_integer value);
 
-Bval
-std_numeric_is_infinity(Rval value);
+V_boolean
+std_numeric_is_infinity(V_real value);
 
 // `std.numeric.is_nan`
-Bval
-std_numeric_is_nan(Ival value);
+V_boolean
+std_numeric_is_nan(V_integer value);
 
-Bval
-std_numeric_is_nan(Rval value);
+V_boolean
+std_numeric_is_nan(V_real value);
 
 // `std.numeric.clamp`
-Ival
-std_numeric_clamp(Ival value, Ival lower, Ival upper);
+V_integer
+std_numeric_clamp(V_integer value, V_integer lower, V_integer upper);
 
-Rval
-std_numeric_clamp(Rval value, Rval lower, Rval upper);
+V_real
+std_numeric_clamp(V_real value, V_real lower, V_real upper);
 
 // `std.numeric.round`
-Ival
-std_numeric_round(Ival value);
+V_integer
+std_numeric_round(V_integer value);
 
-Rval
-std_numeric_round(Rval value);
+V_real
+std_numeric_round(V_real value);
 
 // `std.numeric.floor`
-Ival
-std_numeric_floor(Ival value);
+V_integer
+std_numeric_floor(V_integer value);
 
-Rval
-std_numeric_floor(Rval value);
+V_real
+std_numeric_floor(V_real value);
 
 // `std.numeric.ceil`
-Ival
-std_numeric_ceil(Ival value);
+V_integer
+std_numeric_ceil(V_integer value);
 
-Rval
-std_numeric_ceil(Rval value);
+V_real
+std_numeric_ceil(V_real value);
 
 // `std.numeric.trunc`
-Ival
-std_numeric_trunc(Ival value);
+V_integer
+std_numeric_trunc(V_integer value);
 
-Rval
-std_numeric_trunc(Rval value);
+V_real
+std_numeric_trunc(V_real value);
 
 // `std.numeric.iround`
-Ival
-std_numeric_iround(Ival value);
+V_integer
+std_numeric_iround(V_integer value);
 
-Ival
-std_numeric_iround(Rval value);
+V_integer
+std_numeric_iround(V_real value);
 
 // `std.numeric.ifloor`
-Ival
-std_numeric_ifloor(Ival value);
+V_integer
+std_numeric_ifloor(V_integer value);
 
-Ival
-std_numeric_ifloor(Rval value);
+V_integer
+std_numeric_ifloor(V_real value);
 
 // `std.numeric.iceil`
-Ival
-std_numeric_iceil(Ival value);
+V_integer
+std_numeric_iceil(V_integer value);
 
-Ival
-std_numeric_iceil(Rval value);
+V_integer
+std_numeric_iceil(V_real value);
 
 // `std.numeric.itrunc`
-Ival
-std_numeric_itrunc(Ival value);
+V_integer
+std_numeric_itrunc(V_integer value);
 
-Ival
-std_numeric_itrunc(Rval value);
+V_integer
+std_numeric_itrunc(V_real value);
 
 // `std.numeric.random`
-Rval
-std_numeric_random(Global& global, Ropt limit);
+V_real
+std_numeric_random(Global_Context& global, optV_real limit);
 
 // `std.numeric.sqrt`
-Rval
-std_numeric_sqrt(Rval x);
+V_real
+std_numeric_sqrt(V_real x);
 
 // `std.numeric.fma`
-Rval
-std_numeric_fma(Rval x, Rval y, Rval z);
+V_real
+std_numeric_fma(V_real x, V_real y, V_real z);
 
 // `std.numeric.remainder`
-Rval
-std_numeric_remainder(Rval x, Rval y);
+V_real
+std_numeric_remainder(V_real x, V_real y);
 
 // `std.numeric.frexp`
-pair<Rval, Ival>
-std_numeric_frexp(Rval x);
+pair<V_real, V_integer>
+std_numeric_frexp(V_real x);
 
 // `std.numeric.ldexp`
-Rval
-std_numeric_ldexp(Rval frac, Ival exp);
+V_real
+std_numeric_ldexp(V_real frac, V_integer exp);
 
 // `std.numeric.addm`
-Ival
-std_numeric_addm(Ival x, Ival y);
+V_integer
+std_numeric_addm(V_integer x, V_integer y);
 
 // `std.numeric.subm`
-Ival
-std_numeric_subm(Ival x, Ival y);
+V_integer
+std_numeric_subm(V_integer x, V_integer y);
 
 // `std.numeric.mulm`
-Ival
-std_numeric_mulm(Ival x, Ival y);
+V_integer
+std_numeric_mulm(V_integer x, V_integer y);
 
 // `std.numeric.adds`
-Ival
-std_numeric_adds(Ival x, Ival y);
+V_integer
+std_numeric_adds(V_integer x, V_integer y);
 
-Rval
-std_numeric_adds(Rval x, Rval y);
+V_real
+std_numeric_adds(V_real x, V_real y);
 
 // `std.numeric.subs`
-Ival
-std_numeric_subs(Ival x, Ival y);
+V_integer
+std_numeric_subs(V_integer x, V_integer y);
 
-Rval
-std_numeric_subs(Rval x, Rval y);
+V_real
+std_numeric_subs(V_real x, V_real y);
 
 // `std.numeric.muls`
-Ival
-std_numeric_muls(Ival x, Ival y);
+V_integer
+std_numeric_muls(V_integer x, V_integer y);
 
-Rval
-std_numeric_muls(Rval x, Rval y);
+V_real
+std_numeric_muls(V_real x, V_real y);
 
 // `std.numeric.lzcnt`
-Ival
-std_numeric_lzcnt(Ival x);
+V_integer
+std_numeric_lzcnt(V_integer x);
 
 // `std.numeric.tzcnt`
-Ival
-std_numeric_tzcnt(Ival x);
+V_integer
+std_numeric_tzcnt(V_integer x);
 
 // `std.numeric.popcnt`
-Ival
-std_numeric_popcnt(Ival x);
+V_integer
+std_numeric_popcnt(V_integer x);
 
 // `std.numeric.rotl`
-Ival
-std_numeric_rotl(Ival m, Ival x, Ival n);
+V_integer
+std_numeric_rotl(V_integer m, V_integer x, V_integer n);
 
 // `std.numeric.rotr`
-Ival
-std_numeric_rotr(Ival m, Ival x, Ival n);
+V_integer
+std_numeric_rotr(V_integer m, V_integer x, V_integer n);
 
 // `std.numeric.format`
-Sval
-std_numeric_format(Ival value, Iopt base, Iopt ebase);
+V_string
+std_numeric_format(V_integer value, optV_integer base, optV_integer ebase);
 
 // `std.numeric.format`
-Sval
-std_numeric_format(Rval value, Iopt base, Iopt ebase);
+V_string
+std_numeric_format(V_real value, optV_integer base, optV_integer ebase);
 
 // `std.numeric.parse_integer`
-Ival
-std_numeric_parse_integer(Sval text);
+V_integer
+std_numeric_parse_integer(V_string text);
 
 // `std.numeric.parse_real`
-Rval
-std_numeric_parse_real(Sval text, Bopt saturating);
+V_real
+std_numeric_parse_real(V_string text, optV_boolean saturating);
 
 // Create an object that is to be referenced as `std.numeric`.
 void

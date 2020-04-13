@@ -9,104 +9,104 @@
 namespace Asteria {
 
 // `std.checksum.crc32_new_private`
-Pval
+V_opaque
 std_checksum_crc32_new_private();
 
 // `std.checksum.crc32_new_update`
 void
-std_checksum_crc32_new_update(Pval& h, Sval data);
+std_checksum_crc32_new_update(V_opaque& h, V_string data);
 
 // `std.checksum.crc32_new_finish`
-Ival
-std_checksum_crc32_new_finish(Pval& h);
+V_integer
+std_checksum_crc32_new_finish(V_opaque& h);
 
 // `std.checksum.crc32_new`
-Oval
+V_object
 std_checksum_crc32_new();
 
 // `std.checksum.crc32`
-Ival
-std_checksum_crc32(Sval data);
+V_integer
+std_checksum_crc32(V_string data);
 
 // `std.checksum.fnv1a32_new_private`
-Pval
+V_opaque
 std_checksum_fnv1a32_new_private();
 
 // `std.checksum.fnv1a32_new_update`
 void
-std_checksum_fnv1a32_new_update(Pval& h, Sval data);
+std_checksum_fnv1a32_new_update(V_opaque& h, V_string data);
 
 // `std.checksum.fnv1a32_new_finish`
-Ival
-std_checksum_fnv1a32_new_finish(Pval& h);
+V_integer
+std_checksum_fnv1a32_new_finish(V_opaque& h);
 
 // `std.checksum.fnv1a32_new`
-Oval
+V_object
 std_checksum_fnv1a32_new();
 
 // `std.checksum.fnv1a32`
-Ival
-std_checksum_fnv1a32(Sval data);
+V_integer
+std_checksum_fnv1a32(V_string data);
 
 // `std.checksum.md5_new_private`
-Pval
+V_opaque
 std_checksum_md5_new_private();
 
 // `std.checksum.md5_new_update`
 void
-std_checksum_md5_new_update(Pval& h, Sval data);
+std_checksum_md5_new_update(V_opaque& h, V_string data);
 
 // `std.checksum.md5_new_finish`
-Sval
-std_checksum_md5_new_finish(Pval& h);
+V_string
+std_checksum_md5_new_finish(V_opaque& h);
 
 // `std.checksum.md5_new`
-Oval
+V_object
 std_checksum_md5_new();
 
 // `std.checksum.md5`
-Sval
-std_checksum_md5(Sval data);
+V_string
+std_checksum_md5(V_string data);
 
 // `std.checksum.sha1_new_private`
-Pval
+V_opaque
 std_checksum_sha1_new_private();
 
 // `std.checksum.sha1_new_update`
 void
-std_checksum_sha1_new_update(Pval& h, Sval data);
+std_checksum_sha1_new_update(V_opaque& h, V_string data);
 
 // `std.checksum.sha1_new_finish`
-Sval
-std_checksum_sha1_new_finish(Pval& h);
+V_string
+std_checksum_sha1_new_finish(V_opaque& h);
 
 // `std.checksum.sha1_new`
-Oval
+V_object
 std_checksum_sha1_new();
 
 // `std.checksum.sha1`
-Sval
-std_checksum_sha1(Sval data);
+V_string
+std_checksum_sha1(V_string data);
 
 // `std.checksum.sha256_new_private`
-Pval
+V_opaque
 std_checksum_sha256_new_private();
 
 // `std.checksum.sha256_new_update`
 void
-std_checksum_sha256_new_update(Pval& h, Sval data);
+std_checksum_sha256_new_update(V_opaque& h, V_string data);
 
 // `std.checksum.sha256_new_finish`
-Sval
-std_checksum_sha256_new_finish(Pval& h);
+V_string
+std_checksum_sha256_new_finish(V_opaque& h);
 
 // `std.checksum.sha256_new`
-Oval
+V_object
 std_checksum_sha256_new();
 
 // `std.checksum.sha256`
-Sval
-std_checksum_sha256(Sval data);
+V_string
+std_checksum_sha256(V_string data);
 
 // Create an object that is to be referenced as `std.checksum`.
 void

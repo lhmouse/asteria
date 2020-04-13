@@ -16,8 +16,8 @@ constexpr double s_const_lb10 = 3.3219280948873623478703194294893901758648313930
 
 }  // namespace
 
-Rval
-std_math_exp(Rval y, Ropt base)
+V_real
+std_math_exp(V_real y, optV_real base)
   {
     if(!base) {
       return ::std::exp(y);
@@ -31,20 +31,20 @@ std_math_exp(Rval y, Ropt base)
     return ::std::pow(*base, y);
   }
 
-Rval
-std_math_expm1(Rval y)
+V_real
+std_math_expm1(V_real y)
   {
     return ::std::expm1(y);
   }
 
-Rval
-std_math_pow(Rval x, Rval y)
+V_real
+std_math_pow(V_real x, V_real y)
   {
     return ::std::pow(x, y);
   }
 
-Rval
-std_math_log(Rval x, Ropt base)
+V_real
+std_math_log(V_real x, optV_real base)
   {
     if(!base) {
       return ::std::log(x);
@@ -56,60 +56,60 @@ std_math_log(Rval x, Ropt base)
       return ::std::log10(x);
     }
     if((*base == 1) || (*base <= 0)) {
-      return ::std::numeric_limits<Rval>::quiet_NaN();
+      return ::std::numeric_limits<V_real>::quiet_NaN();
     }
     return ::std::log2(x) / ::std::log2(*base);
   }
 
-Rval
-std_math_log1p(Rval x)
+V_real
+std_math_log1p(V_real x)
   {
     return ::std::log1p(x);
   }
 
-Rval
-std_math_sin(Rval x)
+V_real
+std_math_sin(V_real x)
   {
     return ::std::sin(x);
   }
 
-Rval
-std_math_cos(Rval x)
+V_real
+std_math_cos(V_real x)
   {
     return ::std::cos(x);
   }
 
-Rval
-std_math_tan(Rval x)
+V_real
+std_math_tan(V_real x)
   {
     return ::std::tan(x);
   }
 
-Rval
-std_math_asin(Rval x)
+V_real
+std_math_asin(V_real x)
   {
     return ::std::asin(x);
   }
 
-Rval
-std_math_acos(Rval x)
+V_real
+std_math_acos(V_real x)
   {
     return ::std::acos(x);
   }
 
-Rval
-std_math_atan(Rval x)
+V_real
+std_math_atan(V_real x)
   {
     return ::std::atan(x);
   }
 
-Rval
-std_math_atan2(Rval y, Rval x)
+V_real
+std_math_atan2(V_real y, V_real x)
   {
     return ::std::atan2(y, x);
   }
 
-Rval
+V_real
 std_math_hypot(cow_vector<Value> values)
   {
     // Return zero if no argument is provided.
@@ -127,62 +127,62 @@ std_math_hypot(cow_vector<Value> values)
     return res;
   }
 
-Rval
-std_math_sinh(Rval x)
+V_real
+std_math_sinh(V_real x)
   {
     return ::std::sinh(x);
   }
 
-Rval
-std_math_cosh(Rval x)
+V_real
+std_math_cosh(V_real x)
   {
     return ::std::cosh(x);
   }
 
-Rval
-std_math_tanh(Rval x)
+V_real
+std_math_tanh(V_real x)
   {
     return ::std::tanh(x);
   }
 
-Rval
-std_math_asinh(Rval x)
+V_real
+std_math_asinh(V_real x)
   {
     return ::std::asinh(x);
   }
 
-Rval
-std_math_acosh(Rval x)
+V_real
+std_math_acosh(V_real x)
   {
     return ::std::acosh(x);
   }
 
-Rval
-std_math_atanh(Rval x)
+V_real
+std_math_atanh(V_real x)
   {
     return ::std::atanh(x);
   }
 
-Rval
-std_math_erf(Rval x)
+V_real
+std_math_erf(V_real x)
   {
     return ::std::erf(x);
   }
 
-Rval
-std_math_cerf(Rval x)
+V_real
+std_math_cerf(V_real x)
   {
     return ::std::erfc(x);
   }
 
-Rval
-std_math_gamma(Rval x)
+V_real
+std_math_gamma(V_real x)
   {
     return ::std::tgamma(x);
   }
 
-Rval
-std_math_lgamma(Rval x)
+V_real
+std_math_lgamma(V_real x)
   {
     return ::std::lgamma(x);
   }
@@ -194,7 +194,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.e`
     //===================================================================
     result.insert_or_assign(::rocket::sref("e"),
-      Rval(
+      V_real(
         // The base of the natural logarithm.
         s_const_e
       ));
@@ -202,7 +202,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.pi`
     //===================================================================
     result.insert_or_assign(::rocket::sref("pi"),
-      Rval(
+      V_real(
         // The ratio of a circle's circumference to its diameter.
         s_const_pi
       ));
@@ -210,7 +210,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.lb10`
     //===================================================================
     result.insert_or_assign(::rocket::sref("real_max"),
-      Rval(
+      V_real(
         // The binary logarithm of the integer ten.
         s_const_lb10
       ));
@@ -218,7 +218,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.exp()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("exp"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.exp(y, [base])`
 
@@ -227,12 +227,12 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the power as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.exp"));
     // Parse arguments.
-    Rval y;
-    Ropt base;
+    V_real y;
+    optV_real base;
     if(reader.I().v(y).o(base).F()) {
       Reference_root::S_temporary xref = { std_math_exp(::std::move(y), ::std::move(base)) };
       return self = ::std::move(xref);
@@ -245,7 +245,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.expm1()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("expm1"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.expm1(y)`
 
@@ -254,11 +254,11 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.expm1"));
     // Parse arguments.
-    Rval y;
+    V_real y;
     if(reader.I().v(y).F()) {
       Reference_root::S_temporary xref = { std_math_expm1(::std::move(y)) };
       return self = ::std::move(xref);
@@ -271,7 +271,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.pow()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("pow"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.pow(x, y)`
 
@@ -281,12 +281,12 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the power as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.pow"));
     // Parse arguments.
-    Rval x;
-    Rval y;
+    V_real x;
+    V_real y;
     if(reader.I().v(x).v(y).F()) {
       Reference_root::S_temporary xref = { std_math_pow(::std::move(x), ::std::move(y)) };
       return self = ::std::move(xref);
@@ -299,7 +299,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.log()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("log"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.log(x, [base])`
 
@@ -308,12 +308,12 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the logarithm as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.log"));
     // Parse arguments.
-    Rval y;
-    Ropt base;
+    V_real y;
+    optV_real base;
     if(reader.I().v(y).o(base).F()) {
       Reference_root::S_temporary xref = { std_math_log(::std::move(y), ::std::move(base)) };
       return self = ::std::move(xref);
@@ -326,7 +326,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.log1p()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("log1p"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.log1p(x)`
 
@@ -335,11 +335,11 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.log1p"));
     // Parse arguments.
-    Rval y;
+    V_real y;
     if(reader.I().v(y).F()) {
       Reference_root::S_temporary xref = { std_math_log1p(::std::move(y)) };
       return self = ::std::move(xref);
@@ -352,7 +352,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.sin()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("sin"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.sin(x)`
 
@@ -360,11 +360,11 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.sin"));
     // Parse arguments.
-    Rval x;
+    V_real x;
     if(reader.I().v(x).F()) {
       Reference_root::S_temporary xref = { std_math_sin(::std::move(x)) };
       return self = ::std::move(xref);
@@ -377,7 +377,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.cos()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("cos"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.cos(x)`
 
@@ -385,11 +385,11 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.cos"));
     // Parse arguments.
-    Rval x;
+    V_real x;
     if(reader.I().v(x).F()) {
       Reference_root::S_temporary xref = { std_math_cos(::std::move(x)) };
       return self = ::std::move(xref);
@@ -402,7 +402,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.tan()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("tan"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.tan(x)`
 
@@ -410,11 +410,11 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.tan"));
     // Parse arguments.
-    Rval x;
+    V_real x;
     if(reader.I().v(x).F()) {
       Reference_root::S_temporary xref = { std_math_tan(::std::move(x)) };
       return self = ::std::move(xref);
@@ -427,7 +427,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.asin()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("asin"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.asin(x)`
 
@@ -435,11 +435,11 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.asin"));
     // Parse arguments.
-    Rval x;
+    V_real x;
     if(reader.I().v(x).F()) {
       Reference_root::S_temporary xref = { std_math_asin(::std::move(x)) };
       return self = ::std::move(xref);
@@ -452,7 +452,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.acos()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("acos"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.acos(x)`
 
@@ -460,11 +460,11 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.acos"));
     // Parse arguments.
-    Rval x;
+    V_real x;
     if(reader.I().v(x).F()) {
       Reference_root::S_temporary xref = { std_math_acos(::std::move(x)) };
       return self = ::std::move(xref);
@@ -477,7 +477,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.atan()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("atan"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.atan(x)`
 
@@ -485,11 +485,11 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.atan"));
     // Parse arguments.
-    Rval x;
+    V_real x;
     if(reader.I().v(x).F()) {
       Reference_root::S_temporary xref = { std_math_atan(::std::move(x)) };
       return self = ::std::move(xref);
@@ -502,7 +502,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.atan2()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("atan2"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.atan2(y, x)`
 
@@ -510,12 +510,12 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.atan2"));
     // Parse arguments.
-    Rval y;
-    Rval x;
+    V_real y;
+    V_real x;
     if(reader.I().v(y).v(x).F()) {
       Reference_root::S_temporary xref = { std_math_atan2(::std::move(y), ::std::move(x)) };
       return self = ::std::move(xref);
@@ -528,7 +528,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.hypot()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("hypot"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.hypot(...)`
 
@@ -540,7 +540,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the length as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.hypot"));
     // Parse variadic arguments.
@@ -557,7 +557,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.sinh()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("sinh"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.sinh(x)`
 
@@ -565,11 +565,11 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.sinh"));
     // Parse arguments.
-    Rval x;
+    V_real x;
     if(reader.I().v(x).F()) {
       Reference_root::S_temporary xref = { std_math_sinh(::std::move(x)) };
       return self = ::std::move(xref);
@@ -582,7 +582,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.cosh()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("cosh"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.cosh(x)`
 
@@ -590,11 +590,11 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.cosh"));
     // Parse arguments.
-    Rval x;
+    V_real x;
     if(reader.I().v(x).F()) {
       Reference_root::S_temporary xref = { std_math_cosh(::std::move(x)) };
       return self = ::std::move(xref);
@@ -607,7 +607,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.tanh()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("tanh"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.tanh(x)`
 
@@ -615,11 +615,11 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.tanh"));
     // Parse arguments.
-    Rval x;
+    V_real x;
     if(reader.I().v(x).F()) {
       Reference_root::S_temporary xref = { std_math_tanh(::std::move(x)) };
       return self = ::std::move(xref);
@@ -632,7 +632,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.asinh()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("asinh"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.asinh(x)`
 
@@ -640,11 +640,11 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.asinh"));
     // Parse arguments.
-    Rval x;
+    V_real x;
     if(reader.I().v(x).F()) {
       Reference_root::S_temporary xref = { std_math_asinh(::std::move(x)) };
       return self = ::std::move(xref);
@@ -657,7 +657,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.acosh()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("acosh"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.acosh(x)`
 
@@ -665,11 +665,11 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.acosh"));
     // Parse arguments.
-    Rval x;
+    V_real x;
     if(reader.I().v(x).F()) {
       Reference_root::S_temporary xref = { std_math_acosh(::std::move(x)) };
       return self = ::std::move(xref);
@@ -682,7 +682,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.atanh()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("atanh"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.atanh(x)`
 
@@ -690,11 +690,11 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.atanh"));
     // Parse arguments.
-    Rval x;
+    V_real x;
     if(reader.I().v(x).F()) {
       Reference_root::S_temporary xref = { std_math_atanh(::std::move(x)) };
       return self = ::std::move(xref);
@@ -707,7 +707,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.erf()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("erf"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.erf(x)`
 
@@ -715,11 +715,11 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.erf"));
     // Parse arguments.
-    Rval x;
+    V_real x;
     if(reader.I().v(x).F()) {
       Reference_root::S_temporary xref = { std_math_erf(::std::move(x)) };
       return self = ::std::move(xref);
@@ -732,7 +732,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.cerf()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("cerf"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.cerf(x)`
 
@@ -740,11 +740,11 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.cerf"));
     // Parse arguments.
-    Rval x;
+    V_real x;
     if(reader.I().v(x).F()) {
       Reference_root::S_temporary xref = { std_math_cerf(::std::move(x)) };
       return self = ::std::move(xref);
@@ -757,7 +757,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.gamma()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("gamma"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.gamma(x)`
 
@@ -765,11 +765,11 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.gamma"));
     // Parse arguments.
-    Rval x;
+    V_real x;
     if(reader.I().v(x).F()) {
       Reference_root::S_temporary xref = { std_math_gamma(::std::move(x)) };
       return self = ::std::move(xref);
@@ -782,7 +782,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // `std.math.lgamma()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("lgamma"),
-      Fval(
+      V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 `std.math.lgamma(x)`
 
@@ -791,11 +791,11 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global& /*global*/) -> Reference&
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
     Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.lgamma"));
     // Parse arguments.
-    Rval x;
+    V_real x;
     if(reader.I().v(x).F()) {
       Reference_root::S_temporary xref = { std_math_lgamma(::std::move(x)) };
       return self = ::std::move(xref);
