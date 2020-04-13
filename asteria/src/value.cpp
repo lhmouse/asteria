@@ -304,15 +304,13 @@ const
         // 123.456
         return fmt << this->m_stor.as<vtype_real>();
 
-      case vtype_string: {
-        const auto& altr = this->m_stor.as<vtype_string>();
+      case vtype_string:
         if(!escape)
           // hello
-          return fmt << altr;
+          return fmt << this->m_stor.as<vtype_string>();
         else
           // "hello"
-          return fmt << quote(altr);
-      }
+          return fmt << quote(this->m_stor.as<vtype_string>());
 
       case vtype_opaque:
         // <opaque> [[`my opaque`]]
