@@ -23,10 +23,10 @@ std_debug_logf(V_string templ, cow_vector<Value> values)
     // Compose the string into a stream.
     ::rocket::tinyfmt_str fmt;
     vformat(fmt, templ.data(), templ.size(), insts.data(), insts.size());
+
     auto nput = write_log_to_stderr(__FILE__, __LINE__, fmt.extract_string());
-    if(nput < 0) {
+    if(nput < 0)
       return nullopt;
-    }
     return static_cast<int64_t>(nput);
   }
 
@@ -38,10 +38,10 @@ std_debug_dump(Value value, optV_integer indent)
     // Format the value.
     ::rocket::tinyfmt_str fmt;
     value.dump(fmt, rindent);
+
     auto nput = write_log_to_stderr(__FILE__, __LINE__, fmt.extract_string());
-    if(nput < 0) {
+    if(nput < 0)
       return nullopt;
-    }
     return static_cast<int64_t>(nput);
   }
 
