@@ -271,7 +271,7 @@ bin_asteria_SOURCES =  \
   ${NOTHING}
 
 check_HEADERS =  \
-  asteria/test/test_utilities.hpp  \
+  asteria/test/utilities.hpp  \
   ${NOTHING}
 
 check_PROGRAMS =  \

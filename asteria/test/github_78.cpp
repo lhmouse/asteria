@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
-#include "test_utilities.hpp"
+#include "utilities.hpp"
 #include "../src/simple_script.hpp"
 #include "../src/runtime/global_context.hpp"
 
