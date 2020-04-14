@@ -131,11 +131,10 @@ vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl,
         case '6':
         case '7':
         case '8':
-        case '9': {
+        case '9':
           // Accept a single decimal digit.
           index = static_cast<size_t>(ch - '0');
           break;
-        }
 
         default:
           noadl::sprintf_and_throw<invalid_argument>("format: invalid placeholder (sequence `$%c`)", (int)ch);
