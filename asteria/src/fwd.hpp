@@ -77,6 +77,13 @@ using ::std::size_t;
 using ::std::wint_t;
 using ::std::exception;
 using ::std::type_info;
+using ::rocket::nullopt_t;
+using ::rocket::cow_string;
+using ::rocket::cow_u16string;
+using ::rocket::cow_u32string;
+using phsh_string = ::rocket::prehashed_string;
+using ::rocket::tinybuf;
+using ::rocket::tinyfmt;
 
 using ::rocket::cbegin;
 using ::rocket::cend;
@@ -87,14 +94,6 @@ using ::rocket::swap;
 using ::rocket::nullopt;
 
 // Aliases
-using cow_string = ::rocket::cow_string;
-using cow_wstring = ::rocket::cow_wstring;
-using cow_u16string = ::rocket::cow_u16string;
-using cow_u32string = ::rocket::cow_u32string;
-using phsh_string = ::rocket::prehashed_string;
-using tinybuf = ::rocket::tinybuf;
-using tinyfmt = ::rocket::tinyfmt;
-
 template<typename E, typename D = ::std::default_delete<const E>>
 using uptr = ::rocket::unique_ptr<E, D>;
 
