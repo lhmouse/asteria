@@ -62,7 +62,7 @@ class Token
       , S_string_literal   // 5,
       )>;
 
-    static_assert(::std::is_nothrow_copy_assignable<Storage>::value, "");
+    static_assert(::std::is_nothrow_copy_assignable<Storage>::value);
 
   private:
     Source_Location m_sloc;

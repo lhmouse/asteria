@@ -32,7 +32,7 @@ class AVMC_Queue
         Source_Location sloc;
       };
 
-    static_assert(::std::is_nothrow_copy_constructible<Symbols>::value, "");
+    static_assert(::std::is_nothrow_copy_constructible<Symbols>::value);
 
     // These are prototypes for callbacks.
     using Constructor  = void (ParamU paramu, void* paramv, intptr_t source);

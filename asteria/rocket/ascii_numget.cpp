@@ -839,7 +839,7 @@ constexpr s_decmult_F[] =
     { 0x71EC7CF2B1D0CC72, +1021 },  // 1.0e+307
     { 0x4733CE17AF227FC7, +1025 },  // 1.0e+308
   };
-static_assert(noadl::countof(s_decmult_F) == 652, "");
+static_assert(noadl::countof(s_decmult_F) == 652);
 
 double
 do_xldexp_I(uint64_t ireg, int bexp, bool single)

@@ -175,7 +175,7 @@ template<bool bigendT, typename WordT>
 V_string&
 do_pdigits_impl(V_string& str, const WordT& ref)
   {
-    static_assert(::std::is_unsigned<WordT>::value, "");
+    static_assert(::std::is_unsigned<WordT>::value);
     array<uint8_t, sizeof(WordT)> stor_le;
     uint64_t word = static_cast<uint64_t>(ref);
     // Write the word in little-endian order.

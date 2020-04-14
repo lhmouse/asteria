@@ -55,7 +55,7 @@ class Reference_root
       , S_tail_call  // 4,
       )>;
 
-    static_assert(::std::is_nothrow_copy_assignable<Storage>::value, "");
+    static_assert(::std::is_nothrow_copy_assignable<Storage>::value);
 
   private:
     Storage m_stor;
