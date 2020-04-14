@@ -179,7 +179,7 @@ class Tack
     clear()
     noexcept
       {
-        this->m_sloc = { };
+        this->m_sloc = nullopt;
         this->m_length = 0;
         return *this;
       }
@@ -197,9 +197,10 @@ do_push_token(cow_vector<Token>& tokens, Line_Reader& reader, size_t tlen, XToke
 bool
 do_may_infix_operators_follow(cow_vector<Token>& tokens)
   {
-    if(tokens.empty())
+    if(tokens.empty()) {
       // No previous token exists.
       return false;
+    }
     const auto& p = tokens.back();
 
     // Infix operators may follow if the keyword denotes a value or reference.
@@ -261,16 +262,15 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool i
     size_t tlen = 0;
     // Look for an explicit sign symbol.
     switch(reader.peek(tlen)) {
-      case '+': {
+      case '+':
         tstr = ::rocket::sref("+");
         tlen++;
         break;
-      }
-      case '-': {
+
+      case '-':
         tstr = ::rocket::sref("-");
         tlen++;
         break;
-      }
     }
     // If a sign symbol exists in a context where an infix operator is allowed, it is treated as the latter.
     if((tlen != 0) && do_may_infix_operators_follow(tokens)) {
@@ -503,6 +503,7 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
         throw Parser_Error(parser_status_string_literal_unclosed, reader.tell(), tlen);
       }
       tlen++;
+
       // Check it.
       if(next == head) {
         // The end of this string is encountered. Finish.
@@ -513,6 +514,7 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
         val.push_back(next);
         continue;
       }
+
       // Translate this escape sequence.
       // Read the next charactter.
       next = reader.peek(tlen);
@@ -520,6 +522,7 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
         throw Parser_Error(parser_status_escape_sequence_incomplete, reader.tell(), tlen);
       }
       tlen++;
+
       // Translate it.
       int xcnt = 0;
       switch(next) {
@@ -527,57 +530,57 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
         case '\"':
         case '\\':
         case '?':
-        case '/': {
+        case '/':
           val.push_back(next);
           break;
-        }
-        case 'a': {
+
+        case 'a':
           val.push_back('\a');
           break;
-        }
-        case 'b': {
+
+        case 'b':
           val.push_back('\b');
           break;
-        }
-        case 'f': {
+
+        case 'f':
           val.push_back('\f');
           break;
-        }
-        case 'n': {
+
+        case 'n':
           val.push_back('\n');
           break;
-        }
-        case 'r': {
+
+        case 'r':
           val.push_back('\r');
           break;
-        }
-        case 't': {
+
+        case 't':
           val.push_back('\t');
           break;
-        }
-        case 'v': {
+
+        case 'v':
           val.push_back('\v');
           break;
-        }
-        case '0': {
+
+        case '0':
           val.push_back('\0');
           break;
-        }
-        case 'Z': {
+
+        case 'Z':
           val.push_back('\x1A');
           break;
-        }
-        case 'e': {
+
+        case 'e':
           val.push_back('\x1B');
           break;
-        }
-        case 'U': {
+
+        case 'U':
           xcnt += 2;
           // Fallthrough
         case 'u':
           xcnt += 2;
           // Fallthrough
-        case 'x':
+        case 'x': {
           // How many hex digits are there?
           xcnt += 2;
           // Read hex digits.
@@ -607,10 +610,12 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
           }
           break;
         }
+
         default:
           throw Parser_Error(parser_status_escape_sequence_unknown, reader.tell(), tlen);
       }
     }
+
     Token::S_string_literal xtoken = { ::std::move(val) };
     return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
   }
