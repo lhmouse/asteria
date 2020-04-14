@@ -14,9 +14,9 @@ class Runtime_Error
   : public virtual exception
   {
   public:
-    struct T_native { };
-    struct T_throw { };
-    struct T_assert { };
+    enum class F_native  { };
+    enum class F_throw   { };
+    enum class F_assert  { };
 
   private:
     Value m_value;
@@ -26,18 +26,18 @@ class Runtime_Error
     cow_string m_what;  // a comprehensive string that is human-readable.
 
   public:
-    Runtime_Error(T_native, const exception& stdex)
+    Runtime_Error(F_native, const exception& stdex)
       : m_value(cow_string(stdex.what()))
       { this->do_backtrace(),
-        this->do_insert_frame(frame_type_native, Source_Location(), this->m_value);  }
+        this->do_insert_frame(frame_type_native, nullopt, this->m_value);  }
 
     template<typename XValT>
-    Runtime_Error(T_throw, XValT&& xval, const Source_Location& sloc)
+    Runtime_Error(F_throw, XValT&& xval, const Source_Location& sloc)
       : m_value(::std::forward<XValT>(xval))
       { this->do_backtrace(),
         this->do_insert_frame(frame_type_throw, sloc, this->m_value);  }
 
-    Runtime_Error(T_assert, const Source_Location& sloc, const cow_string& msg)
+    Runtime_Error(F_assert, const Source_Location& sloc, const cow_string& msg)
       : m_value("assertion failure: " + msg)
       { this->do_backtrace(),
         this->do_insert_frame(frame_type_assert, sloc, this->m_value);  }
@@ -138,7 +138,7 @@ class Runtime_Error
                                           { throw;  }  \
                                         catch(::std::exception& zTrSrvgK_)  \
                                           { throw ::Asteria::Runtime_Error(  \
-                                                ::Asteria::Runtime_Error::T_native(),  \
+                                                ::Asteria::Runtime_Error::F_native(),  \
                                                 zTrSrvgK_); }  \
                                       }  \
                                       catch(__VA_ARGS__)

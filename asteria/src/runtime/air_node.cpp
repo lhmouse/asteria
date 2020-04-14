@@ -744,7 +744,7 @@ do_throw_statement(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
 
     // Read the value to throw.
     // Note that the operand must not have been empty for this code.
-    throw Runtime_Error(Runtime_Error::T_throw(), ctx.stack().get_top().read(), sloc);
+    throw Runtime_Error(Runtime_Error::F_throw(), ctx.stack().get_top().read(), sloc);
   }
 
 AIR_Status
@@ -761,7 +761,7 @@ do_assert_statement(Executive_Context& ctx, ParamU pu, const void* pv)
       return air_status_next;
 
     // Throw a `Runtime_Error`.
-    throw Runtime_Error(Runtime_Error::T_assert(), sloc, msg);
+    throw Runtime_Error(Runtime_Error::F_assert(), sloc, msg);
   }
 
 AIR_Status
