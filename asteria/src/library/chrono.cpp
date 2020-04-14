@@ -156,8 +156,10 @@ std_chrono_utc_format(V_integer time_point, optV_boolean with_ms)
     // There are 36524 days in every 100 years.
     uint64_t y100 = temp / 36524;
     temp %= 36524;
-    if(y100 == 4)  // leap
-      y100 = 3, temp = 36524;
+    if(y100 == 4) {  // leap
+      y100 = 3;
+      temp = 36524;
+    }
     // There are 1461 days in every 4 years.
     uint64_t y4 = temp / 1461;
     temp %= 1461;
@@ -165,8 +167,10 @@ std_chrono_utc_format(V_integer time_point, optV_boolean with_ms)
     // Note we count from 03-01. The extra day of a leap year will be appended to the end.
     uint64_t year = temp / 365;
     temp %= 365;
-    if(year == 4)  // leap
-      year = 3, temp = 365;
+    if(year == 4) {  // leap
+      year = 3;
+      temp = 365;
+    }
     // Sum them up to get the number of years.
     year += y400 * 400;
     year += y100 * 100;
@@ -182,8 +186,9 @@ std_chrono_utc_format(V_integer time_point, optV_boolean with_ms)
     }
     uint64_t month = (mon_sh + 2) % 12 + 1;
     // Note our 'years' start from March.
-    if(month < 3)
+    if(month < 3) {
       year += 1;
+    }
     // `temp` now contains the number of days in the last month.
     uint64_t mday = temp + 1;
 
@@ -201,38 +206,48 @@ std_chrono_utc_format(V_integer time_point, optV_boolean with_ms)
     temp += sec;
     temp *= 1000;
     temp += msec;
+
     // Format it now.
     ::rocket::ascii_numput nump;
     const char* bp = nump.put_DU(temp).data();
 
     // Copy individual parts out.
-    cow_string time_str;
-    time_str.reserve(sizeof(s_strings_max[0]));
-    // `yyyy-mm-dd HH:MM:SS`
-    time_str.append(bp, 4);
-    bp += 4;
-    time_str.push_back('-');
-    time_str.append(bp, 2);
-    bp += 2;
-    time_str.push_back('-');
-    time_str.append(bp, 2);
-    bp += 2;
-    time_str.push_back(' ');
-    time_str.append(bp, 2);
-    bp += 2;
-    time_str.push_back(':');
-    time_str.append(bp, 2);
-    bp += 2;
-    time_str.push_back(':');
-    time_str.append(bp, 2);
-    bp += 2;
-    // Append the subsecond part if it is requested.
+    char sbuf[sizeof(s_strings_max[0])];
+    char* wp = sbuf;
+
+    // `yyyy`
+    *(wp++) = *(bp++);
+    *(wp++) = *(bp++);
+    *(wp++) = *(bp++);
+    *(wp++) = *(bp++);
+    // `-mm`
+    *(wp++) = '-';
+    *(wp++) = *(bp++);
+    *(wp++) = *(bp++);
+    // `-dd`
+    *(wp++) = '-';
+    *(wp++) = *(bp++);
+    *(wp++) = *(bp++);
+    // ` HH`
+    *(wp++) = ' ';
+    *(wp++) = *(bp++);
+    *(wp++) = *(bp++);
+    // `:MM`
+    *(wp++) = ':';
+    *(wp++) = *(bp++);
+    *(wp++) = *(bp++);
+    // `:SS`
+    *(wp++) = ':';
+    *(wp++) = *(bp++);
+    *(wp++) = *(bp++);
+    // `.sss`
     if(pms) {
-      time_str.push_back('.');
-      time_str.append(bp, 3);
-      bp += 3;
+      *(wp++) = '.';
+      *(wp++) = *(bp++);
+      *(wp++) = *(bp++);
+      *(wp++) = *(bp++);
     }
-    return time_str;
+    return cow_string(sbuf, wp);
   }
 
 V_integer
@@ -377,6 +392,7 @@ std_chrono_utc_parse(V_string time_str)
     temp += sec;
     temp *= 1000;
     temp += msec;
+
     // Shift the timestamp back.
     return static_cast<int64_t>(temp) + s_timestamp_1600_03_01;
   }
