@@ -229,9 +229,9 @@ do_collect_digits(cow_string& tstr, Line_Reader& reader, size_t& tlen, uint8_t m
         tlen++;
         continue;
       }
-      if(!is_cctype(c, mask)) {
+      if(!is_cctype(c, mask))
         break;
-      }
+
       // Collect a digit.
       tstr.push_back(c);
       tlen++;
@@ -273,12 +273,12 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool i
         break;
     }
     // If a sign symbol exists in a context where an infix operator is allowed, it is treated as the latter.
-    if((tlen != 0) && do_may_infix_operators_follow(tokens)) {
+    if((tlen != 0) && do_may_infix_operators_follow(tokens))
       return false;
-    }
-    if(!is_cctype(reader.peek(tlen), cctype_digit)) {
+
+    if(!is_cctype(reader.peek(tlen), cctype_digit))
       return false;
-    }
+
     // These are characterstics of the literal.
     uint8_t mmask = cctype_digit;
     uint8_t expch = 'e';
@@ -326,27 +326,27 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool i
     ::rocket::ascii_numget numg;
     const char* bp = tstr.c_str();
     const char* ep = bp + tstr.size();
-    if(!numg.parse_F(bp, ep)) {
+    if(!numg.parse_F(bp, ep))
       throw Parser_Error(parser_status_numeric_literal_invalid, reader.tell(), tlen);
-    }
-    if(bp != ep) {
+
+    if(bp != ep)
       throw Parser_Error(parser_status_numeric_literal_suffix_invalid, reader.tell(), tlen);
-    }
+
     // It is cast to an integer only when `integers_as_reals` is `false` and it does not contain a radix point.
     if(!integers_as_reals && !has_point) {
       // Try casting the value to an `integer`.
       Token::S_integer_literal xtoken;
       numg.cast_I(xtoken.val, INT64_MIN, INT64_MAX);
       // Check for errors. Note that integer casts never underflows.
-      if(numg.overflowed()) {
+      if(numg.overflowed())
         throw Parser_Error(parser_status_integer_literal_overflow, reader.tell(), tlen);
-      }
-      if(numg.inexact()) {
+
+      if(numg.inexact())
         throw Parser_Error(parser_status_integer_literal_inexact, reader.tell(), tlen);
-      }
-      if(!numg) {
+
+      if(!numg)
         throw Parser_Error(parser_status_numeric_literal_invalid, reader.tell(), tlen);
-      }
+
       return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
     }
     else {
@@ -354,15 +354,15 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool i
       Token::S_real_literal xtoken;
       numg.cast_F(xtoken.val, -DBL_MAX, DBL_MAX);
       // Check for errors. Note that integer casts are never inexact.
-      if(numg.overflowed()) {
+      if(numg.overflowed())
         throw Parser_Error(parser_status_real_literal_overflow, reader.tell(), tlen);
-      }
-      if(numg.underflowed()) {
+
+      if(numg.underflowed())
         throw Parser_Error(parser_status_real_literal_underflow, reader.tell(), tlen);
-      }
-      if(!numg) {
+
+      if(!numg)
         throw Parser_Error(parser_status_numeric_literal_invalid, reader.tell(), tlen);
-      }
+
       return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
     }
   }
@@ -490,18 +490,18 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
     //   PCRE("([^\\]|(\\([abfnrtveZ0'"?\\/]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|(U[0-9A-Fa-f]{6}))))*?")
     // noescape-string-literal ::=
     //   PCRE('[^']*?')
-    if(reader.peek() != head) {
+    if(reader.peek() != head)
       return false;
-    }
+
     // Get a string literal.
     size_t tlen = 1;
     cow_string val;
     for(;;) {
       // Read a character.
       char next = reader.peek(tlen);
-      if(next == 0) {
+      if(next == 0)
         throw Parser_Error(parser_status_string_literal_unclosed, reader.tell(), tlen);
-      }
+
       tlen++;
 
       // Check it.
@@ -518,9 +518,9 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
       // Translate this escape sequence.
       // Read the next charactter.
       next = reader.peek(tlen);
-      if(next == 0) {
+      if(next == 0)
         throw Parser_Error(parser_status_escape_sequence_incomplete, reader.tell(), tlen);
-      }
+
       tlen++;
 
       // Translate it.
@@ -588,12 +588,12 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
           for(int i = 0;  i < xcnt;  ++i) {
             // Read a hex digit.
             char c = reader.peek(tlen);
-            if(c == 0) {
+            if(c == 0)
               throw Parser_Error(parser_status_escape_sequence_incomplete, reader.tell(), tlen);
-            }
-            if(!is_cctype(c, cctype_xdigit)) {
+
+            if(!is_cctype(c, cctype_xdigit))
               throw Parser_Error(parser_status_escape_sequence_invalid_hex, reader.tell(), tlen);
-            }
+
             tlen++;
             // Accumulate this digit.
             cp *= 16;
@@ -605,9 +605,9 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
             break;
           }
           // Write a Unicode code point.
-          if(!utf8_encode(val, cp)) {
+          if(!utf8_encode(val, cp))
             throw Parser_Error(parser_status_escape_utf_code_point_invalid, reader.tell(), tlen);
-          }
+
           break;
         }
 
@@ -683,9 +683,9 @@ do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Line_Reader& reader, 
   {
     // identifier ::=
     //   PCRE([A-Za-z_][A-Za-z_0-9]*)
-    if(!is_cctype(reader.peek(), cctype_namei)) {
+    if(!is_cctype(reader.peek(), cctype_namei))
       return false;
-    }
+
     // Get the length of this identifier.
     size_t tlen = 1;
     for(;;) {
@@ -754,14 +754,14 @@ reload(tinybuf& cbuf, const cow_string& file)
         // Decode a code point.
         char32_t cp;
         auto tptr = reader.data();
-        if(!utf8_decode(cp, tptr, reader.navail())) {
+        if(!utf8_decode(cp, tptr, reader.navail()))
           throw Parser_Error(parser_status_utf8_sequence_invalid, reader.tell(), reader.navail());
-        }
+
         auto u8len = static_cast<size_t>(tptr - reader.data());
         // Disallow plain null characters in source data.
-        if(cp == 0) {
+        if(cp == 0)
           throw Parser_Error(parser_status_null_character_disallowed, reader.tell(), u8len);
-        }
+
         // Accept this code point.
         reader.consume(u8len);
       }
