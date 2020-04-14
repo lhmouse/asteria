@@ -11,7 +11,7 @@
 namespace Asteria {
 namespace {
 
-constexpr char s_lchars[][8] =
+constexpr char s_lcchars[][8] =
   {
     "[NUL]",  "[SOH]",  "[STX]",  "[ETX]",  "[EOT]",  "[ENQ]",  "[ACK]",  "[BEL]",
     "[BS]",   "\t",     "\n\t",   "[VT]",   "[FF]",   "",       "[SO]",   "[SI]",
@@ -70,43 +70,39 @@ noexcept
     ::clock_gettime(CLOCK_REALTIME, &ts);
     ::tm tr;
     ::localtime_r(&(ts.tv_sec), &tr);
+
     // 'yyyy-mmmm-dd HH:MM:SS.sss'
     ::rocket::ascii_numput nump;
-    fmt << nump.put_DU(static_cast<uint64_t>(tr.tm_year + 1900), 4)
-        << '-'
-        << nump.put_DU(static_cast<uint64_t>(tr.tm_mon + 1), 2)
-        << '-'
-        << nump.put_DU(static_cast<uint64_t>(tr.tm_mday), 2)
-        << ' '
-        << nump.put_DU(static_cast<uint64_t>(tr.tm_hour), 2)
-        << ':'
-        << nump.put_DU(static_cast<uint64_t>(tr.tm_min), 2)
-        << ':'
-        << nump.put_DU(static_cast<uint64_t>(tr.tm_sec), 2)
-        << '.'
-        << nump.put_DU(static_cast<uint64_t>(ts.tv_nsec), 9);
-    // Append the file name and line number, followed by a LF.
+    fmt << nump.put_DU(static_cast<uint64_t>(tr.tm_year + 1900), 4);
+    fmt << '-' << nump.put_DU(static_cast<uint64_t>(tr.tm_mon + 1), 2);
+    fmt << '-' << nump.put_DU(static_cast<uint64_t>(tr.tm_mday), 2);
+    fmt << ' ' << nump.put_DU(static_cast<uint64_t>(tr.tm_hour), 2);
+    fmt << ':' << nump.put_DU(static_cast<uint64_t>(tr.tm_min), 2);
+    fmt << ':' << nump.put_DU(static_cast<uint64_t>(tr.tm_sec), 2);
+    fmt << '.' << nump.put_DU(static_cast<uint64_t>(ts.tv_nsec), 9);
+
+    // Append the file name and line number, followed by a line feed.
     fmt << " @ " << file << ':' << line << "\n\t";
 
-    // Neutralize control characters.
+    // Neutralize control characters. That is ['\x00','\x1F'] and '\x7F'.
     for(size_t i = 0;  i < msg.size();  ++i) {
       size_t ch = msg[i] & 0xFF;
-      // Control characters are ['\x00','\x1F'] and '\x7F'.
       if(ch <= 0x1F)
-        fmt << s_lchars[ch];
+        fmt << s_lcchars[ch];
       else if(ch == 0x7F)
         fmt << "[DEL]";
       else
         fmt << static_cast<char>(ch);
     }
-    // Terminate the message with a line feed.
     fmt << '\n';
+
     // Write the string now.
+    // Note the string cannot be empty so a return value of zero always indicates failure.
     size_t nput = ::fwrite(fmt.get_c_string(), 1, fmt.get_length(), stderr);
-    if(nput == 0) {
-      // Note that the string cannot be empty so a return value of zero always indicates failure.
+    if(nput == 0)
       return -1;
-    }
+
+    // Return the number of characters that have been written.
     return static_cast<ptrdiff_t>(nput);
   }
 
