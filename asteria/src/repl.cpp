@@ -107,9 +107,9 @@ noexcept
 struct Command_Line_Options
   {
     // options
-    uint8_t optimize = 0;
     bool verbose = false;
     bool interactive = false;
+
     // non-options
     cow_string path;
     cow_vector<Value> args;
@@ -196,66 +196,72 @@ struct REPL_Hooks
       }
   };
 
-void
+[[noreturn]]
+int
 do_print_help(const char* self)
   {
     ::printf(
-      //        1         2         3         4         5         6         7      |
-      // 34567890123456789012345678901234567890123456789012345678901234567890123456|
-      "Usage: %s [OPTIONS] [[--] FILE [ARGUMENTS]...]\n"
-      "\n"
-      "  -h      show help message then exit\n"
-      "  -I      suppress interactive mode [default = auto]\n"
-      "  -i      force interactive mode [default = auto]\n"
-      "  -O      equivalent to `-O1`\n"
-      "  -O[nn]  set optimization level to `nn` [default = 2]\n"
-      "  -V      show version information then exit\n"
-      "  -v      print execution details to standard error\n"
-      "\n"
-      "Source code is read from standard input if no FILE is specified or `-` is\n"
-      "given as FILE, and from FILE otherwise. ARGUMENTS following FILE are passed\n"
-      "to the script as strings verbatim, which can be retrieved via `__varg`.\n"
-      "\n"
-      "If neither `-I` or `-i` is set, interactive mode is enabled when no FILE is\n"
-      "specified and standard input is connected to a terminal, and is disabled\n"
-      "otherwise. Be advised that specifying `-` explicitly disables interactive\n"
-      "mode.\n"
-      "\n"
-      "When running in non-interactive mode, characters are read from FILE, then\n"
-      "compiled and executed. If the script returns an `integer`, it is truncated\n"
-      "to 8 bits as an unsigned integer and the result denotes the exit status. If\n"
-      "the script returns no value, the exit status is zero. If the script returns\n"
-      "a value that is neither an `integer` nor `null`, or throws an exception, the\n"
-      "exit status is non-zero.\n"
-      "\n"
-      "Visit the homepage at <%s>.\n"
-      "Report bugs to <%s>.\n"
-      // 34567890123456789012345678901234567890123456789012345678901234567890123456|
-      //        1         2         3         4         5         6         7      |
-      ,
+//        1         2         3         4         5         6         7     |
+// 3456789012345678901234567890123456789012345678901234567890123456789012345|
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+Usage: %s [OPTIONS] [[--] FILE [ARGUMENTS]...]
+
+  -h      show help message then exit
+  -I      suppress interactive mode [default = auto]
+  -i      force interactive mode [default = auto]
+  -O      equivalent to `-O1`
+  -O[nn]  set optimization level to `nn` [default = 2]
+  -V      show version information then exit
+  -v      print execution details to standard error
+
+Source code is read from standard input if no FILE is specified or `-` is
+given as FILE, and from FILE otherwise. ARGUMENTS following FILE are passed
+to the script as strings verbatim, which can be retrieved via `__varg`.
+
+If neither `-I` or `-i` is set, interactive mode is enabled when no FILE is
+specified and standard input is connected to a terminal, and is disabled
+otherwise. Be advised that specifying `-` explicitly disables interactive
+mode.
+
+When running in non-interactive mode, characters are read from FILE, then
+compiled and executed. If the script returns an integer, it is truncated to
+an 8-bit unsigned integer and then used as the exit status. If the script
+returns no value, the exit status is zero. If the script returns a value
+that is neither an integer nor null, or throws an exception, the status is
+non-zero.
+
+Visit the homepage at <%s>.
+Report bugs to <%s>.
+)'''''''''''''''" """"""""""""""""""""""""""""""""""""""""""""""""""""""""+1,
+// 3456789012345678901234567890123456789012345678901234567890123456789012345|
+//        1         2         3         4         5         6         7     |
       self,
       PACKAGE_URL,
-      PACKAGE_BUGREPORT
-    );
+      PACKAGE_BUGREPORT);
+
+    do_exit(exit_success);
   }
 
-void
+[[noreturn]]
+int
 do_print_version()
   {
     ::printf(
-      //        1         2         3         4         5         6         7      |
-      // 34567890123456789012345678901234567890123456789012345678901234567890123456|
-      "%s [built on %s]\n"
-      "\n"
-      "Visit the homepage at <%s>.\n"
-      "Report bugs to <%s>.\n"
-      // 34567890123456789012345678901234567890123456789012345678901234567890123456|
-      //        1         2         3         4         5         6         7      |
-      ,
+//        1         2         3         4         5         6         7     |
+// 3456789012345678901234567890123456789012345678901234567890123456789012345|
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+%s [built on %s]
+
+Visit the homepage at <%s>.
+Report bugs to <%s>.
+)'''''''''''''''" """"""""""""""""""""""""""""""""""""""""""""""""""""""""+1,
+// 3456789012345678901234567890123456789012345678901234567890123456789012345|
+//        1         2         3         4         5         6         7     |
       PACKAGE_STRING, __DATE__,
       PACKAGE_URL,
-      PACKAGE_BUGREPORT
-    );
+      PACKAGE_BUGREPORT);
+
+    do_exit(exit_success);
   }
 
 void
@@ -264,77 +270,75 @@ do_parse_command_line(int argc, char** argv)
     bool help = false;
     bool version = false;
 
-    opt<long> optimize;
+    opt<int8_t> optimize;
     opt<bool> verbose;
     opt<bool> interactive;
     opt<cow_string> path;
     cow_vector<Value> args;
 
+    // Check for some common options before calling `getopt()`.
     if(argc > 1) {
-      // Rewrite some common options before calling `getopt()`.
       if(::strcmp(argv[1], "--help") == 0)
-        ::strcpy(argv[1], "-h");
-      else if(::strcmp(argv[1], "--version") == 0)
-        ::strcpy(argv[1], "-V");
+        do_print_help(argv[0]);
+
+      if(::strcmp(argv[1], "--version") == 0)
+        do_print_version();
     }
-    for(;;) {
-      int ch = ::getopt(argc, argv, "+hIiO::Vv");
-      if(ch == -1) {
-        // There are no more arguments.
-        break;
-      }
+
+    // Parse command-line options.
+    int ch;
+    while((ch = ::getopt(argc, argv, "+hIiO::Vv")) != -1) {
+      // Identify a single option.
       switch(ch) {
-        case 'h': {
+        case 'h':
           help = true;
-          break;
-        }
-        case 'I': {
+          continue;
+
+        case 'I':
           interactive = false;
-          break;
-        }
-        case 'i': {
+          continue;
+
+        case 'i':
           interactive = true;
-          break;
-        }
+          continue;
+
         case 'O': {
           // If `-O` is specified without an argument, it is equivalent to `-O1`.
-          if(!optarg || !*optarg) {
-            optimize = 1;
-            break;
-          }
-          // Parse the level.
+          optimize = int8_t(1);
+          if(!optarg || !*optarg)
+            continue;
+
           char* ep;
           long val = ::strtol(optarg, &ep, 10);
           if((*ep != 0) || (val < 0) || (val > 99)) {
             ::fprintf(stderr, "%s: invalid optimization level -- '%s'\n", argv[0], optarg);
             do_exit(exit_invalid_argument);
           }
-          optimize = val;
-          break;
+          optimize = int8_t(val);
+          continue;
         }
-        case 'V': {
+
+        case 'V':
           version = true;
-          break;
-        }
-        case 'v': {
+          continue;
+
+        case 'v':
           verbose = true;
-          break;
-        }
-        default:
-        // `getopt()` will have written an error message to standard error.
-        ::fprintf(stderr, "Try `%s -h` for help.\n", argv[0]);
-        do_exit(exit_invalid_argument);
+          continue;
       }
+
+      // `getopt()` will have written an error message to standard error.
+      ::fprintf(stderr, "Try `%s -h` for help.\n", argv[0]);
+      do_exit(exit_invalid_argument);
     }
+
     // Check for early exit conditions.
-    if(help) {
+    if(help)
       do_print_help(argv[0]);
-      do_exit(exit_success);
-    }
-    if(version) {
+
+    if(version)
       do_print_version();
-      do_exit(exit_success);
-    }
+
     // If more arguments follow, they denote the script to execute.
     if(optind < argc) {
       // The first non-option argument is the filename to execute. `-` is not special.
@@ -344,38 +348,50 @@ do_parse_command_line(int argc, char** argv)
                       [&](const char* arg) { args.emplace_back(cow_string(arg));  });
     }
 
+    // Verbose mode is off by default.
+    if(verbose)
+      cmdline.verbose = *verbose;
+
+    // Interactive mode is enabled when no FILE is given (not even `-`) and standard input is
+    // connected to a terminal.
+    if(interactive)
+      cmdline.interactive = *interactive;
+    else
+      cmdline.interactive = !path && ::isatty(STDIN_FILENO);
+
+    // These arguments are always overwritten.
+    cmdline.path = path.move_value_or(::rocket::sref("-"));
+    cmdline.args = ::std::move(args);
+
     // The default optimization level is `2`.
     // Note again that `-O` without an argument is equivalent to `-O1`, which effectively decreases
     // optimization in comparison to when it wasn't specified.
-    cmdline.optimize = static_cast<uint8_t>(::rocket::clamp(optimize.value_or(2), 0, UINT8_MAX));
-    cmdline.verbose = verbose.value_or(false);
-    // Interactive mode is enabled when no FILE is given (not even `-`) and standard input is
-    // connected to a terminal.
-    cmdline.interactive = interactive ? *interactive : (!path && ::isatty(STDIN_FILENO));
-    cmdline.path = path.move_value_or(::rocket::sref("-"));
-    cmdline.args = ::std::move(args);
+    if(optimize)
+      script.open_options().optimization_level = *optimize;
   }
 
 void
 do_REPL_help()
   {
-    ::fprintf(stderr,
-      //        1         2         3         4         5         6         7      |
-      // 34567890123456789012345678901234567890123456789012345678901234567890123456|
-      "* commands:\n"
-      "  :help    show this message\n"
-      // 34567890123456789012345678901234567890123456789012345678901234567890123456|
-      //        1         2         3         4         5         6         7      |
-    );
+    ::fputs(
+//        1         2         3         4         5         6         7     |
+// 3456789012345678901234567890123456789012345678901234567890123456789012345|
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+* list of commands:
+  :help      display information about a given command
+)'''''''''''''''" """"""""""""""""""""""""""""""""""""""""""""""""""""""""+1,
+// 3456789012345678901234567890123456789012345678901234567890123456789012345|
+//        1         2         3         4         5         6         7     |
+      stderr);
   }
 
 void
 do_handle_REPL_command(cow_string&& cmd)
   {
     // TODO tokenize
-    if(cmd == "help") {
+    if(cmd == "help")
       return do_REPL_help();
-    }
+
     ::fprintf(stderr, "! unknown command: %s\n", cmd.c_str());
   }
 
