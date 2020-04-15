@@ -65,11 +65,7 @@ class Variable_HashSet
   private:
     void
     do_destroy_buckets()
-    const noexcept;
-
-    void
-    do_enumerate_variables(Variable_Callback& callback)
-    const;
+    noexcept;
 
     Bucket*
     do_xprobe(const rcptr<Variable>& var)
@@ -128,10 +124,10 @@ class Variable_HashSet
     swap(Variable_HashSet& other)
     noexcept
       {
-        xswap(this->m_bptr, other.m_bptr);
-        xswap(this->m_eptr, other.m_eptr);
-        xswap(this->m_head, other.m_head);
-        xswap(this->m_size, other.m_size);
+        ::std::swap(this->m_bptr, other.m_bptr);
+        ::std::swap(this->m_eptr, other.m_eptr);
+        ::std::swap(this->m_head, other.m_head);
+        ::std::swap(this->m_size, other.m_size);
         return *this;
       }
 
@@ -140,15 +136,14 @@ class Variable_HashSet
     const noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.
-        if(!this->m_bptr) {
+        if(!this->m_bptr)
           return false;
-        }
+
         // Find the bucket for the variable.
         auto qbkt = this->do_xprobe(var);
-        if(!*qbkt) {
-          // Not found.
+        if(!*qbkt)
           return false;
-        }
+
         ROCKET_ASSERT(qbkt->kstor[0] == var);
         return true;
       }
@@ -159,16 +154,15 @@ class Variable_HashSet
       {
         // Reserve more room by rehashing if the load factor would exceed 0.5.
         auto nbkt = static_cast<size_t>(this->m_eptr - this->m_bptr);
-        if(ROCKET_UNEXPECT(this->m_size >= nbkt / 2)) {
+        if(ROCKET_UNEXPECT(this->m_size >= nbkt / 2))
           // Ensure the number of buckets is an odd number.
           this->do_rehash(this->m_size * 3 | 97);
-        }
-        // Find a bucket for the new variable.
+
+        // Find a bucket for the new variable. Fail if it already exists.
         auto qbkt = this->do_xprobe(var);
-        if(*qbkt) {
-          // Existent.
+        if(*qbkt)
           return false;
-        }
+
         // Insert the new variable into this empty bucket.
         this->do_attach(qbkt, var);
         return true;
@@ -179,15 +173,14 @@ class Variable_HashSet
     noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.
-        if(!this->m_bptr) {
+        if(!this->m_bptr)
           return false;
-        }
+
         // Find the bucket for the variable.
         auto qbkt = this->do_xprobe(var);
-        if(!*qbkt) {
-          // Not found.
+        if(!*qbkt)
           return false;
-        }
+
         // Detach this variable. It cannot be unique because `var` outlives this function.
         qbkt->kstor[0].release()->drop_reference();
         this->do_detach(qbkt);
@@ -200,10 +193,9 @@ class Variable_HashSet
       {
         // Get a random bucket that contains a variable.
         auto qbkt = this->m_head;
-        if(!qbkt) {
-          // Empty.
+        if(!qbkt)
           return nullptr;
-        }
+
         // Detach this variable and return it.
         auto var = ::std::move(qbkt->kstor[0]);
         this->do_detach(qbkt);
@@ -212,11 +204,7 @@ class Variable_HashSet
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const
-      {
-        this->do_enumerate_variables(callback);
-        return callback;
-      }
+    const;
   };
 
 inline
