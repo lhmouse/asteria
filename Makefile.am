@@ -1,6 +1,23 @@
 ACLOCAL_AMFLAGS = -I m4
 NOTHING =
 
+# Outputs
+EXTRA_DIST =  \
+  asteria/doc/operator-precedence.txt  \
+  asteria/doc/standard-library.txt  \
+  asteria/doc/syntax.txt  \
+  asteria/doc/examples.txt  \
+  ${NOTHING}
+
+bin_PROGRAMS =  \
+  bin/asteria  \
+  ${NOTHING}
+
+lib_LTLIBRARIES =  \
+  lib/libasteria.la  \
+  ${NOTHING}
+
+# Compiler options
 AM_CPPFLAGS = -pipe -pthread -Wall -Wextra  \
   -D_FILE_OFFSET_BITS=64 -D_POSIX_C_SOURCE=200809 -D_GNU_SOURCE -D_WIN32_WINNT=0x0600  \
   -f{inline-limit=2400,strict-{aliasing,overflow},merge-all-constants}  \
@@ -13,17 +30,11 @@ AM_CXXFLAGS = -std=gnu++14 -fno-gnu-keywords  \
   -Wzero-as-null-pointer-constant -Wno-redundant-move  \
   -Werror={non-virtual-dtor,missing-declarations}
 
+TESTS = ${check_PROGRAMS}
 AM_DEFAULT_SOURCE_EXT = .cpp
 LDADD = lib/libasteria.la
 
-.pch.hpp: ${srcdir}/asteria/src/precompiled.hpp
-	${AM_V_GEN}echo "#include \"$$(cygpath -m $< 2>/dev/null || readlink -f $<)\"" >$@
-
-.pch.hpp.gch: .pch.hpp config.h
-	${AM_V_CXX}${LTCXXCOMPILE} -x c++-header -Wno-error $< -o $@.o
-	@${LIBTOOL} ${AM_V_lt} --tag=CXX --mode=link sh -c 'mv -f "$$1" "$$2"' _ $@.lo $@ -o $@
-	@test -z "${EXEEXT}" || rm -f $@${EXEEXT}
-
+# Pre-compiled header
 BUILT_SOURCES =  \
   .pch.hpp  \
   .pch.hpp.gch  \
@@ -35,14 +46,20 @@ CLEANFILES =  \
   .pch.hpp.gch.lo  \
   ${NOTHING}
 
+.pch.hpp: ${srcdir}/asteria/src/precompiled.hpp
+	${AM_V_GEN}echo "#include \"$$(cygpath -m $< 2>/dev/null || readlink -f $<)\"" >$@
+
+.pch.hpp.gch: .pch.hpp config.h
+	${AM_V_CXX}${LTCXXCOMPILE} -x c++-header -Wno-error $< -o $@.o
+	@${LIBTOOL} ${AM_V_lt} --tag=CXX --mode=link sh -c 'mv -f "$$1" "$$2"' _ $@.lo $@ -o $@
+	@test -z "${EXEEXT}" || rm -f $@${EXEEXT}
+
+# Convenience libraries
 noinst_LTLIBRARIES =  \
   lib/librocket.la  \
   ${NOTHING}
 
-lib_LTLIBRARIES =  \
-  lib/libasteria.la  \
-  ${NOTHING}
-
+# `rocket`
 pkginclude_rocketdir = ${pkgincludedir}/rocket
 pkginclude_rocket_HEADERS =  \
   asteria/rocket/compiler.h  \
@@ -126,6 +143,11 @@ lib_librocket_la_SOURCES =  \
 
 lib_librocket_la_CXXFLAGS =  \
   ${AM_CXXFLAGS} -include .pch.hpp
+
+# Main programs and libraries
+bin_asteria_SOURCES =  \
+  asteria/src/repl.cpp  \
+  ${NOTHING}
 
 pkginclude_HEADERS =  \
   asteria/src/precompiled.hpp  \
@@ -265,14 +287,7 @@ lib_libasteria_la_LIBADD =  \
 lib_libasteria_la_LDFLAGS =  \
   -Wl,--no-undefined -no-undefined -version-info 0:0:0
 
-bin_PROGRAMS =  \
-  bin/asteria  \
-  ${NOTHING}
-
-bin_asteria_SOURCES =  \
-  asteria/src/repl.cpp  \
-  ${NOTHING}
-
+# Tests
 check_HEADERS =  \
   asteria/test/utilities.hpp  \
   ${NOTHING}
@@ -312,13 +327,4 @@ check_PROGRAMS =  \
   asteria/test/github_84.test  \
   asteria/test/github_85.test  \
   asteria/test/github_98.test  \
-  ${NOTHING}
-
-TESTS = ${check_PROGRAMS}
-
-EXTRA_DIST =  \
-  asteria/doc/operator-precedence.txt  \
-  asteria/doc/standard-library.txt  \
-  asteria/doc/syntax.txt  \
-  asteria/doc/examples.txt  \
   ${NOTHING}
