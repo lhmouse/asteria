@@ -65,7 +65,7 @@ Instantiated_Function::
 describe(tinyfmt& fmt)
 const
   {
-    return fmt << "closure `" << this->m_zvarg->func() << "` at '" << this->m_zvarg->sloc() << "'";
+    return fmt << this->m_zvarg->func() << " @ " << this->m_zvarg->sloc();
   }
 
 Variable_Callback&
