@@ -124,7 +124,7 @@ do_append_trivial(Executor* exec, ParamU paramu, const Symbols* syms_opt,
       ::std::memset(qnode->paramv(), 0, nbytes);
 
     // Set up symbols. This shall not throw exceptions.
-    if(syms_opt)
+    if(qnode->has_syms)
       ::rocket::construct_at(qnode->symbols(), *syms_opt);
 
     // Consume the storage.
@@ -148,7 +148,7 @@ do_append_nontrivial(const Vtable* vtbl, ParamU paramu, const Symbols* syms_opt,
       ::std::memset(qnode->paramv(), 0, nbytes);
 
     // Set up symbols. This shall not throw exceptions.
-    if(syms_opt)
+    if(qnode->has_syms)
       ::rocket::construct_at(qnode->symbols(), *syms_opt);
 
     // Consume the storage.
