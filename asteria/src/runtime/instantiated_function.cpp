@@ -86,6 +86,7 @@ const
     Executive_Context ctx_func(::rocket::ref(global), ::rocket::ref(stack), ::rocket::ref(this->m_zvarg),
                                this->m_params, ::std::move(self), ::std::move(args));
     stack.reserve(::std::move(args));
+
     // Execute the function body.
     AIR_Status status;
     ASTERIA_RUNTIME_TRY {
@@ -98,6 +99,7 @@ const
     }
     ctx_func.on_scope_exit(status);
     do_handle_status(self, stack, status);
+
     // Enable `args` to be reused after this call.
     stack.unreserve(args);
     return self;
