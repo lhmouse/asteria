@@ -357,6 +357,7 @@ class AIR_Node
     solidify(AVMC_Queue& queue, uint8_t ipass)
     const;
 
+    // This is needed because the body of a closure should not be solidified.
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
     const;
