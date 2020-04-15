@@ -19,10 +19,10 @@ do_generate_code_branch(const Compiler_Options& opts, PTC_Aware ptc, const Analy
   {
     // Expression units other than the last one cannot be PTC'd.
     cow_vector<AIR_Node> code;
-    for(size_t i = 0;  i < units.size();  ++i)
-      units[i].generate_code(code, opts, ctx,
-                   (i + 1 == units.size()) ? ptc     // last expression unit
-                                           : ptc_aware_none);
+    for(size_t i = 0;  i < units.size();  ++i) {
+      auto qnext = units.get_ptr(i + 1);
+      units[i].generate_code(code, opts, ctx, qnext ? ptc_aware_none : ptc);
+    }
     return code;
   }
 
