@@ -58,6 +58,7 @@ class Reference_Dictionary
 
         if(this->m_bptr)
           ::operator delete(this->m_bptr);
+
 #ifdef ROCKET_DEBUG
         ::std::memset(static_cast<void*>(this), 0xA6, sizeof(*this));
 #endif

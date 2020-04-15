@@ -57,6 +57,7 @@ class Variable_HashSet
 
         if(this->m_bptr)
           ::operator delete(this->m_bptr);
+
 #ifdef ROCKET_DEBUG
         ::std::memset(static_cast<void*>(this), 0x93, sizeof(*this));
 #endif
