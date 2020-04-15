@@ -1,4 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
+NOTHING =
+
 AM_CPPFLAGS = -pipe -pthread -Wall -Wextra  \
   -D_FILE_OFFSET_BITS=64 -D_POSIX_C_SOURCE=200809 -D_GNU_SOURCE -D_WIN32_WINNT=0x0600  \
   -f{inline-limit=2400,strict-{aliasing,overflow},merge-all-constants}  \
@@ -6,12 +8,13 @@ AM_CPPFLAGS = -pipe -pthread -Wall -Wextra  \
   -Werror={{,sign-}conversion,write-strings,return-type,double-promotion}  \
   -W{invalid-pch,switch-enum,suggest-attribute=noreturn,undef,shadow,missing-field-initializers}  \
   -Wunused-{function,label,local-typedefs,{,but-set-}{variable,parameter}}
+
 AM_CXXFLAGS = -std=gnu++14 -fno-gnu-keywords  \
   -Wzero-as-null-pointer-constant -Wno-redundant-move  \
   -Werror={non-virtual-dtor,missing-declarations}
+
 AM_DEFAULT_SOURCE_EXT = .cpp
 LDADD = lib/libasteria.la
-NOTHING =
 
 .pch.hpp: ${srcdir}/asteria/src/precompiled.hpp
 	${AM_V_GEN}echo "#include \"$$(cygpath -m $< 2>/dev/null || readlink -f $<)\"" >$@
