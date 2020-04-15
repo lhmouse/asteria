@@ -212,14 +212,6 @@ struct AVMC_Appender<void, void>
       { return queue.append<executorT>(this->pu, this->syms.value_ptr());  }
   };
 
-AVMC_Queue&
-do_solidify_queue(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
-  {
-    ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(queue, 0);  });  // 1st pass
-    ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(queue, 1);  });  // 2nd pass
-    return queue;
-  }
-
 ///////////////////////////////////////////////////////////////////////////
 // Parameter structs and variable enumeration callbacks
 ///////////////////////////////////////////////////////////////////////////
@@ -2879,7 +2871,7 @@ do_defer_expression(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
     auto pair = ::std::make_pair(false, code_body);
     do_rebind_nodes(pair.first, pair.second, ctx);
     AVMC_Queue queue;
-    do_solidify_queue(queue, pair.second);
+    queue.reload(pair.second);
 
     // Push this expression.
     ctx.defer_expression(sloc, ::std::move(queue));
@@ -3218,7 +3210,7 @@ const
           return avmcp.request(queue);
 
         // Encode arguments.
-        do_solidify_queue(avmcp.queues[0], altr.code_body);
+        avmcp.queues[0].reload(altr.code_body);
         return avmcp.output<do_execute_block>(queue);
       }
 
@@ -3261,8 +3253,8 @@ const
 
         // Encode arguments.
         avmcp.pu.u8s[0] = altr.negative;
-        do_solidify_queue(avmcp.queues[0], altr.code_true);
-        do_solidify_queue(avmcp.queues[1], altr.code_false);
+        avmcp.queues[0].reload(altr.code_true);
+        avmcp.queues[1].reload(altr.code_false);
         return avmcp.output<do_if_statement>(queue);
       }
 
@@ -3276,8 +3268,8 @@ const
 
         // Encode arguments.
         for(size_t i = 0;  i < altr.code_bodies.size();  ++i) {
-          do_solidify_queue(avmcp.queues_labels.emplace_back(), altr.code_labels.at(i));
-          do_solidify_queue(avmcp.queues_bodies.emplace_back(), altr.code_bodies.at(i));
+          avmcp.queues_labels.emplace_back().reload(altr.code_labels.at(i));
+          avmcp.queues_bodies.emplace_back().reload(altr.code_bodies.at(i));
         }
         avmcp.names_added = altr.names_added;
         return avmcp.output<do_switch_statement>(queue);
@@ -3292,9 +3284,9 @@ const
           return avmcp.request(queue);
 
         // Encode arguments.
-        do_solidify_queue(avmcp.queues[0], altr.code_body);
+        avmcp.queues[0].reload(altr.code_body);
         avmcp.pu.u8s[0] = altr.negative;
-        do_solidify_queue(avmcp.queues[1], altr.code_cond);
+        avmcp.queues[1].reload(altr.code_cond);
         return avmcp.output<do_do_while_statement>(queue);
       }
 
@@ -3308,8 +3300,8 @@ const
 
         // Encode arguments.
         avmcp.pu.u8s[0] = altr.negative;
-        do_solidify_queue(avmcp.queues[0], altr.code_cond);
-        do_solidify_queue(avmcp.queues[1], altr.code_body);
+        avmcp.queues[0].reload(altr.code_cond);
+        avmcp.queues[1].reload(altr.code_body);
         return avmcp.output<do_while_statement>(queue);
       }
 
@@ -3324,8 +3316,8 @@ const
         // Encode arguments.
         avmcp.name_key = altr.name_key;
         avmcp.name_mapped = altr.name_mapped;
-        do_solidify_queue(avmcp.queue_init, altr.code_init);
-        do_solidify_queue(avmcp.queue_body, altr.code_body);
+        avmcp.queue_init.reload(altr.code_init);
+        avmcp.queue_body.reload(altr.code_body);
         return avmcp.output<do_for_each_statement>(queue);
       }
 
@@ -3338,10 +3330,10 @@ const
           return avmcp.request(queue);
 
         // Encode arguments.
-        do_solidify_queue(avmcp.queues[0], altr.code_init);
-        do_solidify_queue(avmcp.queues[1], altr.code_cond);
-        do_solidify_queue(avmcp.queues[2], altr.code_step);
-        do_solidify_queue(avmcp.queues[3], altr.code_body);
+        avmcp.queues[0].reload(altr.code_init);
+        avmcp.queues[1].reload(altr.code_cond);
+        avmcp.queues[2].reload(altr.code_step);
+        avmcp.queues[3].reload(altr.code_body);
         return avmcp.output<do_for_statement>(queue);
       }
 
@@ -3354,10 +3346,10 @@ const
           return avmcp.request(queue);
 
         // Encode arguments.
-        do_solidify_queue(avmcp.queue_try, altr.code_try);
+        avmcp.queue_try.reload(altr.code_try);
         avmcp.sloc_catch = altr.sloc_catch;
         avmcp.name_except = altr.name_except;
-        do_solidify_queue(avmcp.queue_catch, altr.code_catch);
+        avmcp.queue_catch.reload(altr.code_catch);
         return avmcp.output<do_try_statement>(queue);
       }
 
@@ -3500,8 +3492,8 @@ const
           return avmcp.request(queue);
 
         // Encode arguments.
-        do_solidify_queue(avmcp.queues[0], altr.code_true);
-        do_solidify_queue(avmcp.queues[1], altr.code_false);
+        avmcp.queues[0].reload(altr.code_true);
+        avmcp.queues[1].reload(altr.code_false);
         avmcp.pu.u8s[0] = altr.assign;
         return avmcp.output<do_branch_expression>(queue);
       }
@@ -3516,7 +3508,7 @@ const
           return avmcp.request(queue);
 
         // Encode arguments.
-        do_solidify_queue(avmcp.queues[0], altr.code_null);
+        avmcp.queues[0].reload(altr.code_null);
         avmcp.pu.u8s[0] = altr.assign;
         return avmcp.output<do_coalescence>(queue);
       }

@@ -52,14 +52,6 @@ Instantiated_Function::
   {
   }
 
-void
-Instantiated_Function::
-do_solidify_code(const cow_vector<AIR_Node>& code)
-  {
-    ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(this->m_queue, 0);  });  // 1st pass
-    ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(this->m_queue, 1);  });  // 2nd pass
-  }
-
 tinyfmt&
 Instantiated_Function::
 describe(tinyfmt& fmt)

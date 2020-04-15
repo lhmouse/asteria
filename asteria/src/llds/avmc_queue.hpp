@@ -130,14 +130,6 @@ class AVMC_Queue
     do_deallocate_storage()
     const;
 
-    void
-    do_execute_all_break(AIR_Status& status, Executive_Context& ctx)
-    const;
-
-    void
-    do_enumerate_variables(Variable_Callback& callback)
-    const;
-
     // Reserve storage for another node. `nbytes` is the size of `paramv` to reserve in bytes.
     // Note: All calls to this function must precede calls to `do_check_node_storage()`.
     void
@@ -271,22 +263,16 @@ class AVMC_Queue
         return *this;
       }
 
+    AVMC_Queue&
+    reload(const cow_vector<AIR_Node>& code);
+
     AIR_Status
     execute(Executive_Context& ctx)
-    const
-      {
-        auto status = air_status_next;
-        this->do_execute_all_break(status, ctx);
-        return status;
-      }
+    const;
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const
-      {
-        this->do_enumerate_variables(callback);
-        return callback;
-      }
+    const;
   };
 
 inline

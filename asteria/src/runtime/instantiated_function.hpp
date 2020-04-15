@@ -23,14 +23,10 @@ final
     Instantiated_Function(const cow_vector<phsh_string>& params, rcptr<Variadic_Arguer>&& zvarg,
                           const cow_vector<AIR_Node>& code)
       : m_params(params), m_zvarg(::std::move(zvarg))
-      { this->do_solidify_code(code);  }
+      { this->m_queue.reload(code);  }
 
     ~Instantiated_Function()
     override;
-
-  private:
-    void
-    do_solidify_code(const cow_vector<AIR_Node>& code);
 
   public:
     tinyfmt&

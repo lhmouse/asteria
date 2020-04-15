@@ -3,8 +3,9 @@
 
 #include "../precompiled.hpp"
 #include "avmc_queue.hpp"
-#include "../runtime/runtime_error.hpp"
+#include "../runtime/air_node.hpp"
 #include "../runtime/variable_callback.hpp"
+#include "../runtime/runtime_error.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -36,56 +37,6 @@ const
     // Deallocate the storage if any.
     if(bptr)
       ::operator delete(bptr);
-  }
-
-void
-AVMC_Queue::
-do_execute_all_break(AIR_Status& status, Executive_Context& ctx)
-const
-  {
-    auto bptr = this->m_bptr;
-    auto eptr = bptr + this->m_used;
-
-    // Execute all nodes.
-    auto qnode = bptr;
-    while(ROCKET_EXPECT(qnode != eptr)) {
-      // Call the executor function for this node.
-      auto exec = qnode->has_vtbl ? qnode->vtbl->exec : qnode->exec;
-      ASTERIA_RUNTIME_TRY {
-        status = (*exec)(ctx, qnode->paramu(), qnode->paramv());
-      }
-      ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
-        if(qnode->has_syms)
-          except.push_frame_plain(qnode->symbols()->sloc, ::rocket::sref(""));
-        throw;
-      }
-      if(ROCKET_UNEXPECT(status != air_status_next))
-        return;
-
-      // Move to the next node.
-      qnode += qnode->total_size_in_headers();
-    }
-  }
-
-void
-AVMC_Queue::
-do_enumerate_variables(Variable_Callback& callback)
-const
-  {
-    auto bptr = this->m_bptr;
-    auto eptr = bptr + this->m_used;
-
-    // Enumerate variables from all nodes.
-    auto qnode = bptr;
-    while(ROCKET_EXPECT(qnode != eptr)) {
-      // Call the enumerator function for this node.
-      auto vnum = qnode->has_vtbl ? qnode->vtbl->vnum : nullptr;
-      if(ROCKET_UNEXPECT(vnum))
-        (*vnum)(callback, qnode->paramu(), qnode->paramv());
-
-      // Move to the next node.
-      qnode += qnode->total_size_in_headers();
-    }
   }
 
 void
@@ -202,6 +153,72 @@ do_append_nontrivial(const Vtable* vtbl, ParamU paramu, const Symbols* syms_opt,
 
     // Consume the storage.
     this->m_used += qnode->total_size_in_headers();
+  }
+
+AVMC_Queue&
+AVMC_Queue::
+reload(const cow_vector<AIR_Node>& code)
+  {
+    this->clear();
+
+    ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(*this, 0);  });  // 1
+    ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(*this, 1);  });  // 2
+    return *this;
+  }
+
+AIR_Status
+AVMC_Queue::
+execute(Executive_Context& ctx)
+const
+  {
+    auto status = air_status_next;
+    auto bptr = this->m_bptr;
+    auto eptr = bptr + this->m_used;
+
+    // Execute all nodes.
+    auto qnode = bptr;
+    while(ROCKET_EXPECT(qnode != eptr)) {
+      // Call the executor function for this node.
+      auto exec = qnode->has_vtbl ? qnode->vtbl->exec : qnode->exec;
+      ASTERIA_RUNTIME_TRY {
+        status = (*exec)(ctx, qnode->paramu(), qnode->paramv());
+      }
+      ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+        if(qnode->has_syms)
+          except.push_frame_plain(qnode->symbols()->sloc, ::rocket::sref(""));
+        throw;
+      }
+      if(ROCKET_UNEXPECT(status != air_status_next))
+        return status;
+
+      // Move to the next node.
+      qnode += qnode->total_size_in_headers();
+    }
+
+    return status;
+  }
+
+Variable_Callback&
+AVMC_Queue::
+enumerate_variables(Variable_Callback& callback)
+const
+  {
+    auto bptr = this->m_bptr;
+    auto eptr = bptr + this->m_used;
+
+    // Enumerate variables from all nodes.
+    auto qnode = bptr;
+    while(ROCKET_EXPECT(qnode != eptr)) {
+      // Call the enumerator function for this node.
+      auto vnum = qnode->has_vtbl ? qnode->vtbl->vnum : nullptr;
+      if(ROCKET_UNEXPECT(vnum))
+        (*vnum)(callback, qnode->paramu(), qnode->paramv());
+
+      // Move to the next node.
+      qnode += qnode->total_size_in_headers();
+    }
+
+    return callback;
   }
 
 }  // namespace Asteria
