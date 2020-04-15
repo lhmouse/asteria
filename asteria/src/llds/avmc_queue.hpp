@@ -13,7 +13,7 @@ namespace Asteria {
 class AVMC_Queue
   {
   public:
-    // This struct can be used to encapsulate trivial information in solidified nodes.
+    // This union can be used to encapsulate trivial information in solidified nodes.
     // At most 48 btis can be stored here. You may make appropriate use of them.
     // Fields of each struct here share a unique prefix. This helps you ensure that you don't
     // access fields of different structs at the same time.
