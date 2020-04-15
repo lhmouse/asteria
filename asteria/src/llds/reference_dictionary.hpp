@@ -68,14 +68,19 @@ class Reference_Dictionary
     do_destroy_buckets()
     noexcept;
 
+    // This function returns a pointer to either an empty bucket or a bucket containing
+    // a key which is equal to `name`, but in no case can a null pointer be returned.
     Bucket*
     do_xprobe(const phsh_string& name)
     const noexcept;
 
+    // This function is used for relocation after an element is erased.
+    inline
     void
     do_xrelocate_but(Bucket* qxcld)
     noexcept;
 
+    // Valid buckets are linked altogether for efficient iteration.
     inline
     void
     do_list_attach(Bucket* qbkt)
@@ -86,13 +91,18 @@ class Reference_Dictionary
     do_list_detach(Bucket* qbkt)
     noexcept;
 
+    // This function is primarily used to reallocate a larger table.
     void
     do_rehash(size_t nbkt);
 
+    // This functions stores `var` in the bucket `*qbkt`.
+    // `*qbkt` must be empty.
     void
     do_attach(Bucket* qbkt, const phsh_string& name)
     noexcept;
 
+    // This functions clears the bucket `*qbkt`
+    // `*qbkt` must not be empty.
     void
     do_detach(Bucket* qbkt)
     noexcept;
