@@ -13,20 +13,36 @@ namespace Asteria {
 class AVMC_Queue
   {
   public:
+    // This struct can be used to encapsulate trivial information in solidified nodes.
+    // At most 48 btis can be stored here. You may make appropriate use of them.
+    // Fields of each struct here share a unique prefix. This helps you ensure that you don't
+    // access fields of different structs at the same time.
     union ParamU
       {
         struct {
-          uint32_t x32;
+          uint16_t x_DO_NOT_USE_;
           uint16_t x16;
+          uint32_t x32;
         };
         struct {
+          uint16_t y_DO_NOT_USE_;
+          uint8_t y8s[2];
           uint32_t y32;
-          uint16_t y8s[2];
         };
-        uint8_t u8s[6];
-        uint16_t u16s[3];
+        struct {
+          uint16_t u_DO_NOT_USE_;
+          uint8_t u8s[6];
+        };
+        struct {
+          uint16_t v_DO_NOT_USE_;
+          uint16_t v16s[3];
+        };
       };
 
+    static_assert(sizeof(ParamU) == 8);
+
+    // The source location is used to generate backtrace frames.
+    // Symbols are optional. If no symbol is given, no backtrace frame is appended.
     struct Symbols
       {
         Source_Location sloc;
@@ -48,54 +64,7 @@ class AVMC_Queue
         Enumerator* vnum;
       };
 
-    struct Header
-      {
-        uint16_t nphdrs : 8;  // size of `paramv`, in number of `Header`s [!]
-        uint16_t : 6;
-        uint16_t has_vtbl : 1;  // vtable exists?
-        uint16_t has_syms : 1;  // symbols exist?
-        uint16_t paramu_x16;  // user-defined data [1]
-        uint32_t paramu_x32;  // user-defined data [2]
-        union {
-          Executor* exec;  // active if `has_vtbl`
-          const Vtable* vtbl;  // active otherwise
-        };
-        alignas(max_align_t) mutable char payload[];  // user-defined data [3]
-
-        constexpr
-        ParamU
-        paramu()
-        const noexcept
-          { return {{ this->paramu_x32, this->paramu_x16 }};  }
-
-        Symbols*
-        symbols()
-        const noexcept
-          { return !this->has_syms ? nullptr : static_cast<Symbols*>(static_cast<void*>(this->payload));  }
-
-        constexpr
-        uint32_t
-        symbol_size_in_headers()
-        const noexcept
-          { return !this->has_syms ? 0 : (sizeof(Symbols) - 1) / sizeof(Header) + 1;  }
-
-        void*
-        paramv()
-        const noexcept
-          { return this->payload + this->has_syms * this->symbol_size_in_headers() * sizeof(Header);  }
-
-        constexpr
-        uint32_t
-        paramv_size_in_headers()
-        const noexcept
-          { return this->nphdrs;  }
-
-        constexpr
-        uint32_t
-        total_size_in_headers()
-        const noexcept
-          { return 1 + this->symbol_size_in_headers() + this->paramv_size_in_headers();  }
-      };
+    struct Header;
 
     Header* m_bptr = nullptr;  // beginning of raw storage
     uint32_t m_rsrv = 0;  // size of raw storage, in number of `Header`s [!]
@@ -127,8 +96,7 @@ class AVMC_Queue
 
   private:
     void
-    do_deallocate_storage()
-    const;
+    do_deallocate_storage();
 
     // Reserve storage for another node. `nbytes` is the size of `paramv` to reserve in bytes.
     // Note: All calls to this function must precede calls to `do_check_node_storage()`.

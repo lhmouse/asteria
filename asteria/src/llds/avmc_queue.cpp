@@ -10,10 +10,61 @@
 
 namespace Asteria {
 
+struct AVMC_Queue::Header
+  {
+    uint16_t nphdrs : 8;  // size of `paramv`, in number of `Header`s [!]
+    uint16_t : 6;
+    uint16_t has_vtbl : 1;  // vtable exists?
+    uint16_t has_syms : 1;  // symbols exist?
+    uint16_t paramu_x16;  // user-defined data [1]
+    uint32_t paramu_x32;  // user-defined data [2]
+    union {
+      Executor* exec;  // active if `has_vtbl`
+      const Vtable* vtbl;  // active otherwise
+    };
+    alignas(max_align_t) char alignment[0];  // user-defined data [3]
+
+    constexpr
+    ParamU
+    paramu()
+    const noexcept
+      { return {{ 0xFFFF, this->paramu_x16, this->paramu_x32 }};  }
+
+    constexpr
+    uint32_t
+    symbol_size_in_headers()
+    const noexcept
+      { return this->has_syms * uint32_t((sizeof(Symbols) - 1) / sizeof(Header) + 1);  }
+
+    Symbols*
+    symbols()
+    const noexcept
+      {
+        auto ptr = const_cast<Header*>(this) + 1;
+        // Symbols are the first member in the payload.
+        return reinterpret_cast<Symbols*>(ptr);
+      }
+
+    void*
+    paramv()
+    const noexcept
+      {
+        auto ptr = const_cast<Header*>(this) + 1;
+        // Skip symbols if any.
+        ptr += this->symbol_size_in_headers();
+        return ptr;
+      }
+
+    constexpr
+    uint32_t
+    total_size_in_headers()
+    const noexcept
+      { return 1 + this->symbol_size_in_headers() + this->nphdrs;  }
+  };
+
 void
 AVMC_Queue::
 do_deallocate_storage()
-const
   {
     auto bptr = this->m_bptr;
     auto eptr = bptr + this->m_used;
@@ -37,6 +88,12 @@ const
     // Deallocate the storage if any.
     if(bptr)
       ::operator delete(bptr);
+
+#ifdef ROCKET_DEBUG
+    this->m_bptr = reinterpret_cast<Header*>(0xDEADBEEF);
+    this->m_used = 0xEFCDAB89;
+    this->m_rsrv = 0x87654321;
+#endif
   }
 
 void
@@ -124,7 +181,7 @@ do_append_trivial(Executor* exec, ParamU paramu, const Symbols* syms_opt,
       ::std::memset(qnode->paramv(), 0, nbytes);
 
     // Set up symbols. This shall not throw exceptions.
-    if(syms_opt)
+    if(qnode->has_syms)
       ::rocket::construct_at(qnode->symbols(), *syms_opt);
 
     // Consume the storage.
@@ -148,7 +205,7 @@ do_append_nontrivial(const Vtable* vtbl, ParamU paramu, const Symbols* syms_opt,
       ::std::memset(qnode->paramv(), 0, nbytes);
 
     // Set up symbols. This shall not throw exceptions.
-    if(syms_opt)
+    if(qnode->has_syms)
       ::rocket::construct_at(qnode->symbols(), *syms_opt);
 
     // Consume the storage.
