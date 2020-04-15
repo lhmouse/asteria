@@ -12,15 +12,20 @@
 #include <unistd.h>  // ::daemon()
 
 namespace Asteria {
+namespace {
+
+constexpr auto xgcgen_newest = static_cast<int64_t>(gc_generation_newest);
+constexpr auto xgcgen_oldest = static_cast<int64_t>(gc_generation_oldest);
+
+}  // namespace
 
 optV_integer
 std_system_gc_count_variables(Global_Context& global, V_integer generation)
   {
-    auto gc_gen = static_cast<GC_Generation>(::rocket::clamp(generation,
-                        static_cast<V_integer>(gc_generation_newest), static_cast<V_integer>(gc_generation_oldest)));
-    if(gc_gen != generation) {
+    auto gc_gen = static_cast<GC_Generation>(::rocket::clamp(generation, xgcgen_newest, xgcgen_oldest));
+    if(gc_gen != generation)
       return nullopt;
-    }
+
     // Get the current number of variables being tracked.
     auto gcoll = global.genius_collector();
     size_t count = gcoll->get_collector(gc_gen).count_tracked_variables();
@@ -30,11 +35,10 @@ std_system_gc_count_variables(Global_Context& global, V_integer generation)
 optV_integer
 std_system_gc_get_threshold(Global_Context& global, V_integer generation)
   {
-    auto gc_gen = static_cast<GC_Generation>(::rocket::clamp(generation,
-                        static_cast<V_integer>(gc_generation_newest), static_cast<V_integer>(gc_generation_oldest)));
-    if(gc_gen != generation) {
+    auto gc_gen = static_cast<GC_Generation>(::rocket::clamp(generation, xgcgen_newest, xgcgen_oldest));
+    if(gc_gen != generation)
       return nullopt;
-    }
+
     // Get the current threshold.
     auto gcoll = global.genius_collector();
     uint32_t thres = gcoll->get_collector(gc_gen).get_threshold();
@@ -44,16 +48,14 @@ std_system_gc_get_threshold(Global_Context& global, V_integer generation)
 optV_integer
 std_system_gc_set_threshold(Global_Context& global, V_integer generation, V_integer threshold)
   {
-    auto gc_gen = static_cast<GC_Generation>(::rocket::clamp(generation,
-                        static_cast<V_integer>(gc_generation_newest), static_cast<V_integer>(gc_generation_oldest)));
-    if(gc_gen != generation) {
+    auto gc_gen = static_cast<GC_Generation>(::rocket::clamp(generation, xgcgen_newest, xgcgen_oldest));
+    if(gc_gen != generation)
       return nullopt;
-    }
-    uint32_t thres_new = static_cast<uint32_t>(::rocket::clamp(threshold, 0, INT32_MAX));
+
     // Set the threshold and return its old value.
     auto gcoll = global.genius_collector();
     uint32_t thres = gcoll->get_collector(gc_gen).get_threshold();
-    gcoll->open_collector(gc_gen).set_threshold(thres_new);
+    gcoll->open_collector(gc_gen).set_threshold(static_cast<uint32_t>(::rocket::clamp(threshold, 0, INT32_MAX)));
     return static_cast<int64_t>(thres);
   }
 
@@ -61,11 +63,11 @@ V_integer
 std_system_gc_collect(Global_Context& global, optV_integer generation_limit)
   {
     auto gc_limit = gc_generation_oldest;
+
     // Unlike others, this function does not fail if `generation_limit` is out of range.
-    if(generation_limit) {
-      gc_limit = static_cast<GC_Generation>(::rocket::clamp(*generation_limit,
-                       static_cast<V_integer>(gc_generation_newest), static_cast<V_integer>(gc_generation_oldest)));
-    }
+    if(generation_limit)
+      gc_limit = static_cast<GC_Generation>(::rocket::clamp(*generation_limit, xgcgen_newest, xgcgen_oldest));
+
     // Perform garbage collection up to the generation specified.
     auto gcoll = global.genius_collector();
     size_t nvars = gcoll->collect_variables(gc_limit);
