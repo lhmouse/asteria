@@ -60,7 +60,7 @@ class AVMC_Queue
           Executor* exec;  // active if `has_vtbl`
           const Vtable* vtbl;  // active otherwise
         };
-        alignas(max_align_t) char alignment[0];  // user-defined data [3]
+        alignas(max_align_t) mutable char payload[];  // user-defined data [3]
 
         constexpr
         ParamU
@@ -68,33 +68,27 @@ class AVMC_Queue
         const noexcept
           { return {{ this->paramu_x32, this->paramu_x16 }};  }
 
-        constexpr
-        Header*
-        payload()
+        Symbols*
+        symbols()
         const noexcept
-          { return const_cast<Header*>(this) + 1;  }
+          { return !this->has_syms ? nullptr : static_cast<Symbols*>(static_cast<void*>(this->payload));  }
 
         constexpr
         uint32_t
         symbol_size_in_headers()
         const noexcept
-          { return this->has_syms * ((sizeof(Symbols) - 1) / sizeof(Header) + 1);  }
+          { return !this->has_syms ? 0 : (sizeof(Symbols) - 1) / sizeof(Header) + 1;  }
+
+        void*
+        paramv()
+        const noexcept
+          { return this->payload + this->has_syms * this->symbol_size_in_headers() * sizeof(Header);  }
 
         constexpr
         uint32_t
         paramv_size_in_headers()
         const noexcept
           { return this->nphdrs;  }
-
-        Symbols*
-        symbols()
-        const noexcept
-          { return reinterpret_cast<Symbols*>(this->payload());  }
-
-        void*
-        paramv()
-        const noexcept
-          { return this->payload() + this->symbol_size_in_headers();  }
 
         constexpr
         uint32_t
