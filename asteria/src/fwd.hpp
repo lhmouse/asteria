@@ -709,7 +709,7 @@ struct Compiler_Options_fragment<1>
     // Enable proper tail calls. [more commonly known as tail call optimization]
     bool proper_tail_calls = true;
     // Enable optimization. [master switch]
-    uint8_t optimization_level = true;
+    int8_t optimization_level = 2;
 
     // Generate calls to single-step hooks for every expression, not just function calls.
     bool verbose_single_step_traps = false;
