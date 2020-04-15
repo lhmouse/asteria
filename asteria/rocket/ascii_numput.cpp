@@ -27,9 +27,9 @@ do_pdigit_X(uint32_t dval)
 void
 do_xput_U_bkwd(char*& bp, const uint64_t& value, uint8_t base, size_t precision)
   {
+    // Write digits backwards.
     char* fp = bp - precision;
     uint64_t ireg = value;
-    // Write digits backwards.
     while(ireg != 0) {
       // Shift a digit out.
       uint8_t dval = uint8_t(ireg % base);
@@ -37,6 +37,7 @@ do_xput_U_bkwd(char*& bp, const uint64_t& value, uint8_t base, size_t precision)
       // Write this digit.
       *(--bp) = do_pdigit_X(dval);
     }
+
     // Pad the string to at least the precision requested.
     while(bp > fp)
       *(--bp) = '0';
@@ -52,18 +53,21 @@ do_check_special(char*& bp, char*& ep, const valueT& value)
         ep = bp + 9;
         return bp;
       }
+
       case FP_NAN: {
         bp = const_cast<char*>("-nan");
         ep = bp + 4;
         return bp;
       }
+
       case FP_ZERO: {
         bp = const_cast<char*>("-0");
         ep = bp + 2;
         return bp;
       }
+
       default:
-      return nullptr;
+        return nullptr;
     }
   }
 
@@ -92,6 +96,7 @@ do_xput_M_bin(char*& ep, const uint64_t& mant, const char* rdxp)
       // Write this digit.
       *(ep++) = do_pdigit_D(dval);
     }
+
     // If `rdxp` is set, fill zeroes until it is reached,
     // if no decimal point has been added so far.
     if(rdxp)
@@ -114,6 +119,7 @@ do_xput_M_hex(char*& ep, const uint64_t& mant, const char* rdxp)
       // Write this digit.
       *(ep++) = do_pdigit_X(dval);
     }
+
     // If `rdxp` is set, fill zeroes until it is reached,
     // if no decimal point has been added so far.
     if(rdxp)
@@ -129,11 +135,13 @@ do_xput_I_exp(char*& ep, const int& exp)
       *(ep++) = '-';
     else
       *(ep++) = '+';
+
     // Write the exponent in this temporary storage backwards.
     // The exponent shall contain at least two digits.
     char temps[8];
     char* tbp = end(temps);
     do_xput_U_bkwd(tbp, do_cast_U(::std::abs(exp)), 10, 2);
+
     // Append the exponent.
     noadl::ranged_for(tbp, end(temps), [&](const char* p) { *(ep++) = *p;  });
     return ep;
@@ -882,9 +890,11 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
     }
     // Get the multiplier.
     const auto& mult = s_decmult_F[bpos];
+
     // Extract the mantissa.
     freg = ::std::ldexp(freg, mult.bexp);
     uint64_t ireg = (uint64_t)(int64_t)freg | 1;
+
     // Multiply two 64-bit values and get the high-order half.
     // This produces 18 significant figures.
     // TODO: Modern CPUs have intrinsics for this.
@@ -893,6 +903,7 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
     uint64_t yhi = mult.mant >> 32;
     uint64_t ylo = mult.mant << 32 >> 32;
     ireg = xhi * yhi + (((xlo * yhi >> 30) + (xhi * ylo >> 30) + (xlo * ylo >> 62)) >> 2);
+
     // Round the mantissa. We now have 18 digits.
     // In the case of single precision we have to drop 8 digits before rounding.
     if(ROCKET_UNEXPECT(single))
@@ -905,6 +916,7 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
     // Re-fill zeroes in the case of single precision.
     if(ROCKET_UNEXPECT(single))
       ireg *= 100'000'000;
+
     // Return the mantissa and exponent.
     mant = ireg;
     exp = static_cast<int>(bpos) - 324;
@@ -927,6 +939,7 @@ do_xput_M_dec(char*& ep, const uint64_t& mant, const char* rdxp)
       // Write this digit.
       *(ep++) = do_pdigit_X(dval);
     }
+
     // If `rdxp` is set, fill zeroes until it is reached,
     // if no decimal point has been added so far.
     if(rdxp)
@@ -944,6 +957,7 @@ noexcept
     this->clear();
     char* bp;
     char* ep;
+
     // Get the template string literal. The string is immutable.
     if(value) {
       bp = const_cast<char*>("true");
@@ -953,6 +967,7 @@ noexcept
       bp = const_cast<char*>("false");
       ep = bp + 5;
     }
+
     // Set the string. The internal storage is unused.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -967,13 +982,16 @@ noexcept
     this->clear();
     char* bp = this->m_stor + M;
     char* ep = bp;
+
     // Append a null terminator.
     *bp = 0;
     // Write digits backwards.
     do_xput_U_bkwd(bp, reinterpret_cast<uintptr_t>(value), 16, sizeof(value) * 2);
+
     // Prepend the hexadecimal prefix.
     *(--bp) = 'x';
     *(--bp) = '0';
+
     // Set the string, which resides in the internal storage.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -988,13 +1006,16 @@ noexcept
     this->clear();
     char* bp = this->m_stor + M;
     char* ep = bp;
+
     // Append a null terminator.
     *bp = 0;
     // Write digits backwards.
     do_xput_U_bkwd(bp, value, 2, precision);
+
     // Prepend the binary prefix.
     *(--bp) = 'b';
     *(--bp) = '0';
+
     // Set the string, which resides in the internal storage.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -1009,13 +1030,16 @@ noexcept
     this->clear();
     char* bp = this->m_stor + M;
     char* ep = bp;
+
     // Append a null terminator.
     *bp = 0;
     // Write digits backwards.
     do_xput_U_bkwd(bp, value, 16, precision);
+
     // Prepend the hexadecimal prefix.
     *(--bp) = 'x';
     *(--bp) = '0';
+
     // Set the string, which resides in the internal storage.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -1030,10 +1054,12 @@ noexcept
     this->clear();
     char* bp = this->m_stor + M;
     char* ep = bp;
+
     // Append a null terminator.
     *bp = 0;
     // Write digits backwards.
     do_xput_U_bkwd(bp, value, 10, precision);
+
     // Set the string, which resides in the internal storage.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -1048,18 +1074,21 @@ noexcept
     this->clear();
     char* bp = this->m_stor + M;
     char* ep = bp;
+
     // Append a null terminator.
     *bp = 0;
     // Extend the sign bit to a word, assuming arithmetic shift.
     uint64_t sign = do_cast_U(value >> 63);
     // Write digits backwards using its absolute value without causing overflows.
     do_xput_U_bkwd(bp, (do_cast_U(value) ^ sign) - sign, 2, precision);
+
     // Prepend the binary prefix.
     *(--bp) = 'b';
     *(--bp) = '0';
     // If the number is negative, prepend a minus sign.
     if(sign)
       *(--bp) = '-';
+
     // Set the string, which resides in the internal storage.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -1074,18 +1103,21 @@ noexcept
     this->clear();
     char* bp = this->m_stor + M;
     char* ep = bp;
+
     // Append a null terminator.
     *bp = 0;
     // Extend the sign bit to a word, assuming arithmetic shift.
     uint64_t sign = do_cast_U(value >> 63);
     // Write digits backwards using its absolute value without causing overflows.
     do_xput_U_bkwd(bp, (do_cast_U(value) ^ sign) - sign, 16, precision);
+
     // Prepend the hexadecimal prefix.
     *(--bp) = 'x';
     *(--bp) = '0';
     // If the number is negative, prepend a minus sign.
     if(sign)
       *(--bp) = '-';
+
     // Set the string, which resides in the internal storage.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -1100,15 +1132,18 @@ noexcept
     this->clear();
     char* bp = this->m_stor + M;
     char* ep = bp;
+
     // Append a null terminator.
     *bp = 0;
     // Extend the sign bit to a word, assuming arithmetic shift.
     uint64_t sign = do_cast_U(value >> 63);
     // Write digits backwards using its absolute value without causing overflows.
     do_xput_U_bkwd(bp, (do_cast_U(value) ^ sign) - sign, 10, precision);
+
     // If the number is negative, prepend a minus sign.
     if(sign)
       *(--bp) = '-';
+
     // Set the string, which resides in the internal storage.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -1123,6 +1158,7 @@ noexcept
     this->clear();
     char* bp;
     char* ep;
+
     // Extract the sign bit and extend it to a word.
     int sign = ::std::signbit(value) ? -1 : 0;
     // Treat non-finite values and zeroes specially.
@@ -1135,16 +1171,19 @@ noexcept
       // Seek to the beginning of the internal buffer.
       bp = this->m_stor;
       ep = bp;
+
       // Prepend a minus sign if the number is negative.
       if(sign)
         *(ep++) = '-';
       // Prepend the binary prefix.
       *(ep++) = '0';
       *(ep++) = 'b';
+
       // Break the number down into fractional and exponential parts. This result is exact.
       uint64_t mant;
       int exp;
       do_xfrexp_F_bin(mant, exp, value);
+
       // Write the broken-down number...
       if((exp < -4) || ((single ? 24 : 53) <= exp)) {
         // ... in scientific notation.
@@ -1166,6 +1205,7 @@ noexcept
       // Append a null terminator.
       *ep = 0;
     }
+
     // Set the string. The internal storage is used for finite values only.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -1180,6 +1220,7 @@ noexcept
     this->clear();
     char* bp;
     char* ep;
+
     // Extract the sign bit and extend it to a word.
     int sign = ::std::signbit(value) ? -1 : 0;
     // Treat non-finite values and zeroes specially.
@@ -1192,12 +1233,14 @@ noexcept
       // Seek to the beginning of the internal buffer.
       bp = this->m_stor;
       ep = bp;
+
       // Prepend a minus sign if the number is negative.
       if(sign)
         *(ep++) = '-';
       // Prepend the binary prefix.
       *(ep++) = '0';
       *(ep++) = 'b';
+
       // Break the number down into fractional and exponential parts. This result is exact.
       uint64_t mant;
       int exp;
@@ -1209,6 +1252,7 @@ noexcept
       // Append a null terminator.
       *ep = 0;
     }
+
     // Set the string. The internal storage is used for finite values only.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -1223,6 +1267,7 @@ noexcept
     this->clear();
     char* bp;
     char* ep;
+
     // Extract the sign bit and extend it to a word.
     int sign = ::std::signbit(value) ? -1 : 0;
     // Treat non-finite values and zeroes specially.
@@ -1235,12 +1280,14 @@ noexcept
       // Seek to the beginning of the internal buffer.
       bp = this->m_stor;
       ep = bp;
+
       // Prepend a minus sign if the number is negative.
       if(sign)
         *(ep++) = '-';
       // Prepend the hexadecimal prefix.
       *(ep++) = '0';
       *(ep++) = 'x';
+
       // Break the number down into fractional and exponential parts. This result is exact.
       uint64_t mant;
       int exp;
@@ -1269,6 +1316,7 @@ noexcept
       // Append a null terminator.
       *ep = 0;
     }
+
     // Set the string. The internal storage is used for finite values only.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -1283,6 +1331,7 @@ noexcept
     this->clear();
     char* bp;
     char* ep;
+
     // Extract the sign bit and extend it to a word.
     int sign = ::std::signbit(value) ? -1 : 0;
     // Treat non-finite values and zeroes specially.
@@ -1295,12 +1344,14 @@ noexcept
       // Seek to the beginning of the internal buffer.
       bp = this->m_stor;
       ep = bp;
+
       // Prepend a minus sign if the number is negative.
       if(sign)
         *(ep++) = '-';
       // Prepend the hexadecimal prefix.
       *(ep++) = '0';
       *(ep++) = 'x';
+
       // Break the number down into fractional and exponential parts. This result is exact.
       uint64_t mant;
       int exp;
@@ -1315,6 +1366,7 @@ noexcept
       // Append a null terminator.
       *ep = 0;
     }
+
     // Set the string. The internal storage is used for finite values only.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -1329,6 +1381,7 @@ noexcept
     this->clear();
     char* bp;
     char* ep;
+
     // Extract the sign bit and extend it to a word.
     int sign = ::std::signbit(value) ? -1 : 0;
     // Treat non-finite values and zeroes specially.
@@ -1341,9 +1394,11 @@ noexcept
       // Seek to the beginning of the internal buffer.
       bp = this->m_stor;
       ep = bp;
+
       // Prepend a minus sign if the number is negative.
       if(sign)
         *(ep++) = '-';
+
       // Break the number down into fractional and exponential parts. This result is approximate.
       uint64_t mant;
       int exp;
@@ -1369,6 +1424,7 @@ noexcept
       // Append a null terminator.
       *ep = 0;
     }
+
     // Set the string. The internal storage is used for finite values only.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -1383,6 +1439,7 @@ noexcept
     this->clear();
     char* bp;
     char* ep;
+
     // Extract the sign bit and extend it to a word.
     int sign = ::std::signbit(value) ? -1 : 0;
     // Treat non-finite values and zeroes specially.
@@ -1395,9 +1452,11 @@ noexcept
       // Seek to the beginning of the internal buffer.
       bp = this->m_stor;
       ep = bp;
+
       // Prepend a minus sign if the number is negative.
       if(sign)
         *(ep++) = '-';
+
       // Break the number down into fractional and exponential parts. This result is approximate.
       uint64_t mant;
       int exp;
@@ -1409,6 +1468,7 @@ noexcept
       // Append a null terminator.
       *ep = 0;
     }
+
     // Set the string. The internal storage is used for finite values only.
     this->m_bptr = bp;
     this->m_eptr = ep;

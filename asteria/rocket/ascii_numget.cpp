@@ -20,30 +20,31 @@ bool
 do_get_sign(const char*& rp, const char* eptr)
   {
     // Look ahead for at most 1 character.
-    if(eptr - rp < 1) {
+    if(eptr - rp < 1)
       return 0;
-    }
+
     switch(rp[0]) {
-      case '+': {
+      case '+':
         // Skip the plus sign.
         rp += 1;
         return 0;
-      }
-      case '-': {
+
+      case '-':
         // Skip the minus sign.
         rp += 1;
         return 1;
-      }
+
+      default:
+        // Assume the number is non-negative.
+        return 0;
     }
-    // Assume the number is non-negative.
-    return 0;
   }
 
 uint8_t
 do_get_base(const char*& rp, const char* eptr, uint8_t ibase)
   {
     switch(ibase) {
-      case 0: {
+      case 0:
         // Look ahead for at most 2 characters.
         if((eptr - rp >= 2) && (rp[0] == '0')) {
           // Check for binary and hexadecimal prefixes.
@@ -58,7 +59,7 @@ do_get_base(const char*& rp, const char* eptr, uint8_t ibase)
         }
         // Assume the number is decimal.
         return 10;
-      }
+
       case 2:
       case 10:
       case 16:
@@ -862,50 +863,50 @@ parse_B(const char*& bptr, const char* eptr)
     const char* rp = bptr;
     // Check for "0", "1", "false" or "true".
     bool value;
-    if(rp == eptr) {
+    if(rp == eptr)
       return *this;
-    }
+
     switch(rp[0]) {
-      case '0': {
+      case '0':
         // Accept a "0".
         value = 0;
         rp += 1;
         break;
-      }
-      case '1': {
+
+      case '1':
         // Accept a "1".
         value = 1;
         rp += 1;
         break;
-      }
-      case 'f': {
+
+      case 'f':
         // Check whether the string starts with "false".
+        if(eptr - rp < 5)
+          return *this;
+
         // Compare characters in a quadruple which might be optimized better.
-        if(eptr - rp < 5) {
+        if(::std::memcmp(rp + 1, "false" + 1, 4) != 0)
           return *this;
-        }
-        if(::std::memcmp(rp + 1, "false" + 1, 4) != 0) {
-          return *this;
-        }
+
         // Accept a "false".
         value = 0;
         rp += 5;
         break;
-      }
-      case 't': {
+
+      case 't':
         // Check whether the string starts with "false".
+        if(eptr - rp < 4)
+          return *this;
+
         // Compare characters in a quadruple which might be optimized better.
-        if(eptr - rp < 4) {
+        if(::std::memcmp(rp, "true", 4) != 0)
           return *this;
-        }
-        if(::std::memcmp(rp, "true", 4) != 0) {
-          return *this;
-        }
+
         // Accept a "true".
         value = 1;
         rp += 4;
         break;
-      }
+
       default:
         // The character could not be consumed.
         return *this;
@@ -1067,6 +1068,7 @@ ascii_numget& ascii_numget::parse_F(const char*& bptr, const char* eptr, uint8_t
           }
           break;
         }
+
         case 10: {
           erdx = true;
           // A decimal exponent is expected.
@@ -1145,11 +1147,12 @@ noexcept
           this->m_inxc = true;
           break;
         }
+
         // Get the base.
         uint8_t base = 2;
-        if(this->m_erdx) {
+        if(this->m_erdx)
           base = this->m_base;
-        }
+
         // Raise the mantissa accordingly.
         if(this->m_expo > 0) {
           for(int32_t i = 0; i != this->m_expo; ++i) {
@@ -1167,9 +1170,8 @@ noexcept
           for(int32_t i = 0; i != this->m_expo; --i) {
             uint64_t next = ireg / base;
             // Set the inexact flag if a non-zero digit was shifted out.
-            if(ireg % base != 0) {
+            if(ireg % base != 0)
               this->m_inxc = true;
-            }
             // TODO: Overflow checks can be performed using intrinsics.
             if(next == 0) {
               ireg = 0;
@@ -1179,42 +1181,50 @@ noexcept
             ireg = next;
           }
         }
+
         // Set the inexact flag if some significant figures have been lost.
-        if(this->m_madd) {
+        if(this->m_madd)
           this->m_inxc = true;
-        }
+
         // Set the value.
         value = ireg;
         break;
       }
+
       case 1: {  // infinitesimal
         // Truncate the value to zero.
         value = 0;
+
         // If the value is negative we still have to set the overflow flag.
-        if(this->m_sign) {
+        if(this->m_sign)
           this->m_ovfl = true;
-        }
+
         // For integers this always underflows and is always inexact.
         this->m_udfl = true;
         this->m_inxc = true;
         break;
       }
+
       case 2: {  // infinity
         // Return the maximum value.
         value = numeric_limits<uint64_t>::max();
+
         // For integers this always overflows and is always inexact.
         this->m_ovfl = true;
         this->m_inxc = true;
         break;
       }
+
       default: {  // quiet NaN
         // Return zero.
         value = 0;
+
         // For integers this is always inexact.
         this->m_inxc = true;
         break;
       }
     }
+
     // Set the overflow flag if the value is out of range.
     if(value < lower) {
       value = lower;
@@ -1247,11 +1257,12 @@ noexcept
           value = 0;
           break;
         }
+
         // Get the base.
         uint8_t base = 2;
-        if(this->m_erdx) {
+        if(this->m_erdx)
           base = this->m_base;
-        }
+
         // Raise the mantissa accordingly.
         if(this->m_expo > 0) {
           for(int32_t i = 0; i != this->m_expo; ++i) {
@@ -1281,10 +1292,11 @@ noexcept
             ireg = next;
           }
         }
+
         // Set the inexact flag if some significant figures have been lost.
-        if(this->m_madd) {
+        if(this->m_madd)
           this->m_inxc = true;
-        }
+
         // Set the value.
         if(this->m_sign) {
           // The value is negative.
@@ -1306,6 +1318,7 @@ noexcept
         }
         break;
       }
+
       case 1: {  // infinitesimal
         // Truncate the value to zero.
         value = 0;
@@ -1314,6 +1327,7 @@ noexcept
         this->m_inxc = true;
         break;
       }
+
       case 2: {  // infinity
         // Return the maximum value.
         value = numeric_limits<int64_t>::max();
@@ -1322,6 +1336,7 @@ noexcept
         this->m_inxc = true;
         break;
       }
+
       default: {  // quiet NaN
         // Return zero.
         value = 0;
@@ -1330,6 +1345,7 @@ noexcept
         break;
       }
     }
+
     // Set the overflow flag if the value is out of range.
     if(value < lower) {
       value = lower;
@@ -1364,11 +1380,12 @@ noexcept
           value = ::std::copysign(0.0, sign);
           break;
         }
+
         // Get the base.
         uint8_t base = 2;
-        if(this->m_erdx) {
+        if(this->m_erdx)
           base = this->m_base;
-        }
+
         // Raise the mantissa accordingly.
         double freg;
         switch(base) {
@@ -1386,6 +1403,7 @@ noexcept
             }
             break;
           }
+
           case 10: {
             // Get the multiplier.
             uint32_t mpos = static_cast<uint32_t>(this->m_expo + 343);
@@ -1418,41 +1436,47 @@ noexcept
             freg = do_xldexp_I(ireg | 1, mult.bexp - lzcnt, single);
             break;
           }
+
           default:
             ROCKET_ASSERT_MSG(false, "non-decimal floating-point parsing not implemented");
         }
+
         // Examine the value. Note that `ireg` is non-zero.
         // If the result becomes infinity, it must have overflowed.
         // If the result becomes zero, it must have underflowed.
         switch(::std::fpclassify(freg)) {
-          case FP_INFINITE: {
+          case FP_INFINITE:
             this->m_ovfl = true;
             break;
-          }
-          case FP_ZERO: {
+
+          case FP_ZERO:
             this->m_udfl = true;
             break;
-          }
         }
+
         // Set the value.
         value = ::std::copysign(freg, sign);
         break;
       }
+
       case 1: {  // infinitesimal
         value = ::std::copysign(0.0, sign);
         // For floating-point numbers this always underflows.
         this->m_udfl = true;
         break;
       }
+
       case 2: {  // infinity
         value = ::std::copysign(numeric_limits<double>::infinity(), sign);
         break;
       }
+
       default: {  // quiet NaN
         value = ::std::copysign(numeric_limits<double>::quiet_NaN(), sign);
         break;
       }
     }
+
     // Set the overflow flag if the value is out of range.
     // Watch out for NaNs.
     if(::std::isless(value, lower)) {
