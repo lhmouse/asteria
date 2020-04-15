@@ -41,8 +41,8 @@ class AVMC_Queue
 
     static_assert(sizeof(ParamU) == 8);
 
-    // The source location is used to generate backtrace frames.
     // Symbols are optional. If no symbol is given, no backtrace frame is appended.
+    // The source location is used to generate backtrace frames.
     struct Symbols
       {
         Source_Location sloc;
