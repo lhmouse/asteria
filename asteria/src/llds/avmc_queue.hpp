@@ -200,7 +200,7 @@ class AVMC_Queue
     bool
     empty()
     const noexcept
-      { return this->m_bptr == nullptr;  }
+      { return this->m_rsrv == 0;  }
 
     AVMC_Queue&
     clear()
