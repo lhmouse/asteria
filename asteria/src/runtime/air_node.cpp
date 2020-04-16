@@ -32,11 +32,11 @@ using Enumerator  = AVMC_Queue::Enumerator;
 // Auxiliary functions
 ///////////////////////////////////////////////////////////////////////////
 
-bool
+bool&
 do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code, const Abstract_Context& ctx)
   {
     for(size_t i = 0;  i < code.size();  ++i) {
-      auto qnode = code.at(i).rebind_opt(ctx);
+      auto qnode = code[i].rebind_opt(ctx);
       if(!qnode)
         continue;
       dirty |= true;
@@ -45,19 +45,29 @@ do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code, const Abstract_Context&
     return dirty;
   }
 
-bool
+bool&
 do_rebind_nodes(bool& dirty, cow_vector<cow_vector<AIR_Node>>& code, const Abstract_Context& ctx)
   {
-    for(size_t i = 0;  i < code.size();  ++i) {
-      for(size_t k = 0;  k < code.at(i).size();  ++k) {
-        auto qnode = code.at(i).at(k).rebind_opt(ctx);
+    for(size_t k = 0;  k < code.size();  ++k) {
+      for(size_t i = 0;  i < code[k].size();  ++i) {
+        auto qnode = code[k][i].rebind_opt(ctx);
         if(!qnode)
           continue;
         dirty |= true;
-        code.mut(i).mut(k) = ::std::move(*qnode);
+        code.mut(k).mut(i) = ::std::move(*qnode);
       }
     }
     return dirty;
+  }
+
+template<typename XNodeT>
+opt<AIR_Node>
+do_forward_if_opt(bool dirty, XNodeT&& xnode)
+  {
+    if(dirty)
+      return ::std::forward<XNodeT>(xnode);
+    else
+      return nullopt;
   }
 
 template<typename XValT>
@@ -403,12 +413,15 @@ do_declare_variable(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
 
     // Allocate an uninitialized variable.
     auto var = gcoll->create_variable();
+
     // Inject the variable into the current context.
     Reference_root::S_variable xref = { ::std::move(var) };
     ctx.open_named_reference(name) = xref;
+
     // Call the hook function if any.
     if(qhooks)
       qhooks->on_variable_declare(sloc, inside, name);
+
     // Push a copy of the reference onto the stack.
     ctx.stack().push(::std::move(xref));
     return air_status_next;
@@ -424,9 +437,11 @@ do_initialize_variable(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
     // Note that the initializer must not have been empty for this function.
     auto val = ctx.stack().get_top().read();
     ctx.stack().pop();
+
     // Get the variable back.
     auto var = ctx.stack().get_top().get_variable_opt();
     ctx.stack().pop();
+
     // Initialize it.
     ROCKET_ASSERT(var && !var->is_initialized());
     var->initialize(::std::move(val), immutable);
@@ -456,47 +471,48 @@ do_switch_statement(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
     const auto& queues_bodies = do_pcast<Pv_switch>(pv)->queues_bodies;
     const auto& names_added = do_pcast<Pv_switch>(pv)->names_added;
 
-    // Read the value of the condition.
-    auto value = ctx.stack().get_top().read();
     // Get the number of clauses.
     auto nclauses = queues_labels.size();
     ROCKET_ASSERT(nclauses == queues_bodies.size());
     ROCKET_ASSERT(nclauses == names_added.size());
+
+    // Read the value of the condition.
+    auto cond = ctx.stack().get_top().read();
+
     // Find a target clause.
     // This is different from the `switch` statement in C, where `case` labels must have constant operands.
-    size_t target = SIZE_MAX;
+    opt<size_t> qtarget;
     for(size_t i = 0;  i < nclauses;  ++i) {
       // This is a `default` clause if the condition is empty, and a `case` clause otherwise.
       if(queues_labels[i].empty()) {
-        if(target != SIZE_MAX) {
+        if(qtarget)
           ASTERIA_THROW("multiple `default` clauses");
-        }
-        target = i;
+        qtarget = i;
         continue;
       }
-      // Evaluate the operand and check whether it equals `value`.
+      // Evaluate the operand and check whether it equals `cond`.
       auto status = queues_labels[i].execute(ctx);
       ROCKET_ASSERT(status == air_status_next);
-      if(ctx.stack().get_top().read().compare(value) == compare_equal) {
-        target = i;
+      if(ctx.stack().get_top().read().compare(cond) == compare_equal) {
+        qtarget = i;
         break;
       }
     }
-    if(target < nclauses)
-      // No matching clause has been found.
+    // Skip this statement if no matching clause has been found.
+    if(!qtarget)
       return air_status_next;
 
-    // Jump to the clause denoted by `target`.
+    // Jump to the clause denoted by `qtarget`.
     // Note that all clauses share the same context.
     Executive_Context ctx_body(::rocket::ref(ctx), nullptr);
     AIR_Status status;
     ASTERIA_RUNTIME_TRY {
+      // Fly over all clauses that precede `qtarget`.
       size_t k = SIZE_MAX;
-      // Fly over all clauses that precede `target`.
-      while(++k < target) {
+      while(++k < *qtarget)
         ::rocket::for_each(names_added[k], [&](const phsh_string& name) { do_declare(ctx_body, name);  });
-      }
-      // Execute all clauses from `target`.
+
+      // Execute all clauses from `qtarget`.
       do {
         status = queues_bodies[k].execute(ctx_body);
         if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch })) {
@@ -531,6 +547,7 @@ do_do_while_statement(Executive_Context& ctx, ParamU pu, const void* pv)
         break;
       if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_while }))
         return status;
+
       // Check the condition.
       status = queue_cond.execute(ctx);
       ROCKET_ASSERT(status == air_status_next);
@@ -555,6 +572,7 @@ do_while_statement(Executive_Context& ctx, ParamU pu, const void* pv)
       ROCKET_ASSERT(status == air_status_next);
       if(ctx.stack().get_top().read().test() == negative)
         break;
+
       // Execute the body.
       status = do_execute_block(queue_body, ctx);
       if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while }))
@@ -578,17 +596,19 @@ do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
     // We have to create an outer context due to the fact that the key and mapped
     // references outlast every iteration.
     Executive_Context ctx_for(::rocket::ref(ctx), nullptr);
+
     // Allocate an uninitialized variable for the key.
     const auto vkey = gcoll->create_variable();
     // Inject the variable into the current context.
     Reference_root::S_variable xref = { vkey };
     ctx_for.open_named_reference(name_key) = xref;
+
     // Create the mapped reference.
     auto& mapped = do_declare(ctx_for, name_mapped);
-
     // Evaluate the range initializer.
     auto status = queue_init.execute(ctx_for);
     ROCKET_ASSERT(status == air_status_next);
+
     // Set the range up, which isn't going to change even if the argument got modified by the loop body.
     mapped = ::std::move(ctx_for.stack().open_top());
     const auto range = mapped.read();
@@ -603,6 +623,7 @@ do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
         // Set the mapped reference.
         Reference_modifier::S_array_index xmod = { i };
         mapped.zoom_in(::std::move(xmod));
+
         // Execute the loop body.
         status = do_execute_block(queue_body, ctx_for);
         if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
@@ -621,6 +642,7 @@ do_for_each_statement(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
         // Set the mapped reference.
         Reference_modifier::S_object_key xmod = { it->first.rdstr() };
         mapped.zoom_in(::std::move(xmod));
+
         // Execute the loop body.
         status = do_execute_block(queue_body, ctx_for);
         if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
@@ -650,6 +672,7 @@ do_for_statement(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
     // We have to create an outer context due to the fact that names declared in the first segment
     // outlast every iteration.
     Executive_Context ctx_for(::rocket::ref(ctx), nullptr);
+
     // Execute the loop initializer, which shall only be a definition or an expression statement.
     auto status = queue_init.execute(ctx_for);
     ROCKET_ASSERT(status == air_status_next);
@@ -660,12 +683,14 @@ do_for_statement(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
       // This is a special case: If the condition is empty then the loop is infinite.
       if(!(ctx_for.stack().empty() || ctx_for.stack().get_top().read().test()))
         break;
+
       // Execute the body.
       status = do_execute_block(queue_body, ctx_for);
       if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
         break;
       if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_for }))
         return status;
+
       // Execute the increment.
       status = queue_step.execute(ctx_for);
       ROCKET_ASSERT(status == air_status_next);
@@ -694,6 +719,7 @@ do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
       // Reuse the exception object. Don't bother allocating a new one.
       except.push_frame_catch(sloc_catch);
+
       // This branch must be executed inside this `catch` block.
       // User-provided bindings may obtain the current exception using `::std::current_exception`.
       Executive_Context ctx_catch(::rocket::ref(ctx), nullptr);
@@ -701,6 +727,7 @@ do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
         // Set the exception reference.
         Reference_root::S_temporary xref_except = { except.value() };
         ctx_catch.open_named_reference(name_except) = ::std::move(xref_except);
+
         // Set backtrace frames.
         V_array backtrace;
         for(size_t i = 0;  i < except.count_frames();  ++i) {
@@ -716,6 +743,8 @@ do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
         }
         Reference_root::S_constant xref = { ::std::move(backtrace) };
         ctx_catch.open_named_reference(::rocket::sref("__backtrace")) = ::std::move(xref);
+
+        // Execute the `catch` clause.
         status = queue_catch.execute(ctx_catch);
       }
       ASTERIA_RUNTIME_CATCH(Runtime_Error& nested) {
@@ -2868,10 +2897,13 @@ do_defer_expression(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
     const auto& code_body = do_pcast<Pv_defer>(pv)->code_body;
 
     // Rebind the body here.
-    auto pair = ::std::make_pair(false, code_body);
-    do_rebind_nodes(pair.first, pair.second, ctx);
+    bool dirty = false;
+    auto bound_body = code_body;
+    do_rebind_nodes(dirty, bound_body, ctx);
+
+    // Solidify it.
     AVMC_Queue queue;
-    queue.reload(pair.second);
+    queue.reload(bound_body);
 
     // Push this expression.
     ctx.defer_expression(sloc, ::std::move(queue));
@@ -2959,119 +2991,119 @@ const
   {
     switch(this->index()) {
       case index_clear_stack:
-        // There is nothing to bind.
+        // There is nothing to rebind.
         return nullopt;
 
       case index_execute_block: {
         const auto& altr = this->m_stor.as<index_execute_block>();
 
-        // Check for rebinds recursively.
+        // Rebind the body.
         Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
-        auto pair = ::std::make_pair(false, altr);
-        do_rebind_nodes(pair.first, pair.second.code_body, ctx_body);
-        if(!pair.first)
-          return nullopt;
-        return ::std::move(pair.second);
+        bool dirty = false;
+        auto bound = altr;
+
+        do_rebind_nodes(dirty, bound.code_body, ctx_body);
+        return do_forward_if_opt(dirty, ::std::move(bound));
       }
 
       case index_declare_variable:
       case index_initialize_variable:
-        // There is nothing to bind.
+        // There is nothing to rebind.
         return nullopt;
 
       case index_if_statement: {
         const auto& altr = this->m_stor.as<index_if_statement>();
 
-        // Check for rebinds recursively.
+        // Rebind both branches.
         Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
-        auto pair = ::std::make_pair(false, altr);
-        do_rebind_nodes(pair.first, pair.second.code_true, ctx_body);
-        do_rebind_nodes(pair.first, pair.second.code_false, ctx_body);
-        if(!pair.first)
-          return nullopt;
-        return ::std::move(pair.second);
+        bool dirty = false;
+        auto bound = altr;
+
+        do_rebind_nodes(dirty, bound.code_true, ctx_body);
+        do_rebind_nodes(dirty, bound.code_false, ctx_body);
+        return do_forward_if_opt(dirty, ::std::move(bound));
       }
 
       case index_switch_statement: {
         const auto& altr = this->m_stor.as<index_switch_statement>();
 
-        // Check for rebinds recursively.
+        // Rebind all clauses.
         Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
-        auto pair = ::std::make_pair(false, altr);
-        do_rebind_nodes(pair.first, pair.second.code_labels, ctx_body);
-        do_rebind_nodes(pair.first, pair.second.code_bodies, ctx_body);
-        if(!pair.first)
-          return nullopt;
-        return ::std::move(pair.second);
+        bool dirty = false;
+        auto bound = altr;
+
+        do_rebind_nodes(dirty, bound.code_labels, ctx);  // this is not part of the body!
+        do_rebind_nodes(dirty, bound.code_bodies, ctx_body);
+        return do_forward_if_opt(dirty, ::std::move(bound));
       }
 
       case index_do_while_statement: {
         const auto& altr = this->m_stor.as<index_do_while_statement>();
 
-        // Check for rebinds recursively.
+        // Rebind the body and the condition.
         Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
-        auto pair = ::std::make_pair(false, altr);
-        do_rebind_nodes(pair.first, pair.second.code_body, ctx_body);
-        do_rebind_nodes(pair.first, pair.second.code_cond, ctx_body);
-        if(!pair.first)
-          return nullopt;
-        return ::std::move(pair.second);
+        bool dirty = false;
+        auto bound = altr;
+
+        do_rebind_nodes(dirty, bound.code_body, ctx_body);
+        do_rebind_nodes(dirty, bound.code_cond, ctx);  // this is not part of the body!
+        return do_forward_if_opt(dirty, ::std::move(bound));
       }
 
       case index_while_statement: {
         const auto& altr = this->m_stor.as<index_while_statement>();
 
-        // Check for rebinds recursively.
+        // Rebind the condition and the body.
         Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
-        auto pair = ::std::make_pair(false, altr);
-        do_rebind_nodes(pair.first, pair.second.code_cond, ctx_body);
-        do_rebind_nodes(pair.first, pair.second.code_body, ctx_body);
-        if(!pair.first)
-          return nullopt;
-        return ::std::move(pair.second);
+        bool dirty = false;
+        auto bound = altr;
+
+        do_rebind_nodes(dirty, bound.code_cond, ctx);  // this is not part of the body!
+        do_rebind_nodes(dirty, bound.code_body, ctx_body);
+        return do_forward_if_opt(dirty, ::std::move(bound));
       }
 
       case index_for_each_statement: {
         const auto& altr = this->m_stor.as<index_for_each_statement>();
 
-        // Check for rebinds recursively.
+        // Rebind the range initializer and the body.
         Analytic_Context ctx_for(::rocket::ref(ctx), nullptr);
         Analytic_Context ctx_body(::rocket::ref(ctx_for), nullptr);
-        auto pair = ::std::make_pair(false, altr);
-        do_rebind_nodes(pair.first, pair.second.code_init, ctx_for);
-        do_rebind_nodes(pair.first, pair.second.code_body, ctx_body);
-        if(!pair.first)
-          return nullopt;
-        return ::std::move(pair.second);
+        bool dirty = false;
+        auto bound = altr;
+
+        do_rebind_nodes(dirty, bound.code_init, ctx_for);
+        do_rebind_nodes(dirty, bound.code_body, ctx_body);
+        return do_forward_if_opt(dirty, ::std::move(bound));
       }
 
       case index_for_statement: {
         const auto& altr = this->m_stor.as<index_for_statement>();
 
-        // Check for rebinds recursively.
+        // Rebind the initializer, the condition, the loop increment and the body.
         Analytic_Context ctx_for(::rocket::ref(ctx), nullptr);
         Analytic_Context ctx_body(::rocket::ref(ctx_for), nullptr);
-        auto pair = ::std::make_pair(false, altr);
-        do_rebind_nodes(pair.first, pair.second.code_init, ctx_for);
-        do_rebind_nodes(pair.first, pair.second.code_cond, ctx_for);
-        do_rebind_nodes(pair.first, pair.second.code_step, ctx_for);
-        do_rebind_nodes(pair.first, pair.second.code_body, ctx_body);
-        if(!pair.first)
-          return nullopt;
-        return ::std::move(pair.second);
+        bool dirty = false;
+        auto bound = altr;
+
+        do_rebind_nodes(dirty, bound.code_init, ctx_for);
+        do_rebind_nodes(dirty, bound.code_cond, ctx_for);
+        do_rebind_nodes(dirty, bound.code_step, ctx_for);
+        do_rebind_nodes(dirty, bound.code_body, ctx_body);
+        return do_forward_if_opt(dirty, ::std::move(bound));
       }
 
       case index_try_statement: {
         const auto& altr = this->m_stor.as<index_try_statement>();
 
-        // Check for rebinds recursively.
+        // Rebind the `try` and `catch` clauses.
         Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
-        auto pair = ::std::make_pair(false, altr);
-        do_rebind_nodes(pair.first, pair.second.code_try, ctx_body);
-        do_rebind_nodes(pair.first, pair.second.code_catch, ctx_body);
-        if(!pair.first)
-          return nullopt;
-        return ::std::move(pair.second);
+        bool dirty = false;
+        auto bound = altr;
+
+        do_rebind_nodes(dirty, bound.code_try, ctx_body);
+        do_rebind_nodes(dirty, bound.code_catch, ctx_body);
+        return do_forward_if_opt(dirty, ::std::move(bound));
       }
 
       case index_throw_statement:
@@ -3080,17 +3112,17 @@ const
       case index_glvalue_to_prvalue:
       case index_push_immediate:
       case index_push_global_reference:
-        // There is nothing to bind.
+        // There is nothing to rebind.
         return nullopt;
 
       case index_push_local_reference: {
         const auto& altr = this->m_stor.as<index_push_local_reference>();
 
         // Get the context.
+        // Don't bind references in analytic contexts.
         const Abstract_Context* qctx = ::std::addressof(ctx);
         ::rocket::ranged_for(uint32_t(0), altr.depth, [&](uint32_t) { qctx = qctx->get_parent_opt();  });
         ROCKET_ASSERT(qctx);
-        // Don't bind references in analytic contexts.
         if(qctx->is_analytic())
           return nullopt;
 
@@ -3105,42 +3137,42 @@ const
       }
 
       case index_push_bound_reference:
-        // There is nothing to bind.
+        // There is nothing to rebind.
         return nullopt;
 
       case index_define_function: {
         const auto& altr = this->m_stor.as<index_define_function>();
 
-        // Check for rebinds recursively.
+        // Rebind the function body.
         Analytic_Context ctx_func(::std::addressof(ctx), altr.params);
-        auto pair = ::std::make_pair(false, altr);
-        do_rebind_nodes(pair.first, pair.second.code_body, ctx_func);
-        if(!pair.first)
-          return nullopt;
-        return ::std::move(pair.second);
+        bool dirty = false;
+        auto bound = altr;
+
+        do_rebind_nodes(dirty, bound.code_body, ctx_func);
+        return do_forward_if_opt(dirty, ::std::move(bound));
       }
 
       case index_branch_expression: {
         const auto& altr = this->m_stor.as<index_branch_expression>();
 
-        // Check for rebinds recursively.
-        auto pair = ::std::make_pair(false, altr);
-        do_rebind_nodes(pair.first, pair.second.code_true, ctx);
-        do_rebind_nodes(pair.first, pair.second.code_false, ctx);
-        if(!pair.first)
-          return nullopt;
-        return ::std::move(pair.second);
+        // Rebind the expression.
+        bool dirty = false;
+        auto bound = altr;
+
+        do_rebind_nodes(dirty, bound.code_true, ctx);
+        do_rebind_nodes(dirty, bound.code_false, ctx);
+        return do_forward_if_opt(dirty, ::std::move(bound));
       }
 
       case index_coalescence: {
         const auto& altr = this->m_stor.as<index_coalescence>();
 
-        // Check for rebinds recursively.
-        auto pair = ::std::make_pair(false, altr);
-        do_rebind_nodes(pair.first, pair.second.code_null, ctx);
-        if(!pair.first)
-          return nullopt;
-        return ::std::move(pair.second);
+        // Rebind the expression.
+        bool dirty = false;
+        auto bound = altr;
+
+        do_rebind_nodes(dirty, bound.code_null, ctx);
+        return do_forward_if_opt(dirty, ::std::move(bound));
       }
 
       case index_function_call:
@@ -3153,24 +3185,23 @@ const
       case index_define_null_variable:
       case index_single_step_trap:
       case index_variadic_call:
-        // There is nothing to bind.
+        // There is nothing to rebind.
         return nullopt;
 
       case index_defer_expression: {
         const auto& altr = this->m_stor.as<index_defer_expression>();
 
-        // Check for rebinds recursively.
-        auto pair = ::std::make_pair(false, altr);
-        do_rebind_nodes(pair.first, pair.second.code_body, ctx);
-        if(!pair.first)
-          return nullopt;
-        return ::std::move(pair.second);
+        // Rebind the expression.
+        bool dirty = false;
+        auto bound = altr;
+
+        do_rebind_nodes(dirty, bound.code_body, ctx);
+        return do_forward_if_opt(dirty, ::std::move(bound));
       }
 
       case index_import_call:
-        // There is nothing to bind.
+        // There is nothing to rebind.
         return nullopt;
-
 
       default:
         ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
