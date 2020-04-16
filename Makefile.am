@@ -190,6 +190,7 @@ pkginclude_runtime_HEADERS =  \
   asteria/src/runtime/evaluation_stack.hpp  \
   asteria/src/runtime/instantiated_function.hpp  \
   asteria/src/runtime/air_node.hpp  \
+  asteria/src/runtime/air_optimizer.hpp  \
   asteria/src/runtime/argument_reader.hpp  \
   ${NOTHING}
 
@@ -203,7 +204,6 @@ pkginclude_compiler_HEADERS =  \
   asteria/src/compiler/statement.hpp  \
   asteria/src/compiler/infix_element.hpp  \
   asteria/src/compiler/statement_sequence.hpp  \
-  asteria/src/compiler/air_optimizer.hpp  \
   ${NOTHING}
 
 pkginclude_librarydir = ${pkgincludedir}/library
@@ -254,6 +254,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/runtime/evaluation_stack.cpp  \
   asteria/src/runtime/instantiated_function.cpp  \
   asteria/src/runtime/air_node.cpp  \
+  asteria/src/runtime/air_optimizer.cpp  \
   asteria/src/runtime/argument_reader.cpp  \
   asteria/src/compiler/enums.cpp  \
   asteria/src/compiler/parser_error.cpp  \
@@ -263,7 +264,6 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/compiler/statement.cpp  \
   asteria/src/compiler/infix_element.cpp  \
   asteria/src/compiler/statement_sequence.cpp  \
-  asteria/src/compiler/air_optimizer.cpp  \
   asteria/src/library/version.cpp  \
   asteria/src/library/system.cpp  \
   asteria/src/library/debug.cpp  \

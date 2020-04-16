@@ -3,9 +3,9 @@
 
 #include "../precompiled.hpp"
 #include "air_optimizer.hpp"
-#include "statement.hpp"
-#include "../runtime/analytic_context.hpp"
-#include "../runtime/instantiated_function.hpp"
+#include "analytic_context.hpp"
+#include "instantiated_function.hpp"
+#include "../compiler/statement.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {

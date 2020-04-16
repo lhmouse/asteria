@@ -5,7 +5,7 @@
 #include "simple_script.hpp"
 #include "compiler/token_stream.hpp"
 #include "compiler/statement_sequence.hpp"
-#include "compiler/air_optimizer.hpp"
+#include "runtime/air_optimizer.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {

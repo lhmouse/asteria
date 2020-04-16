@@ -14,9 +14,9 @@
 #include "variable.hpp"
 #include "ptc_arguments.hpp"
 #include "loader_lock.hpp"
+#include "air_optimizer.hpp"
 #include "../compiler/token_stream.hpp"
 #include "../compiler/statement_sequence.hpp"
-#include "../compiler/air_optimizer.hpp"
 #include "../llds/avmc_queue.hpp"
 #include "../utilities.hpp"
 
