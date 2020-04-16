@@ -342,9 +342,9 @@ class cow_hashmap
         auto cap_new = this->m_sth.round_up_capacity(noadl::max(cnt, res_arg));
         // If the storage is shared with other hashmaps, force rellocation to prevent copy-on-write
         // upon modification.
-        if(this->unique() && (this->capacity() >= cap_new)) {
+        if(this->unique() && (this->capacity() >= cap_new))
           return *this;
-        }
+
         this->do_reallocate(0, 0, this->bucket_count(), cap_new);
         ROCKET_ASSERT(this->capacity() >= res_arg);
         return *this;
@@ -357,9 +357,9 @@ class cow_hashmap
         auto cnt = this->size();
         auto cap_min = this->m_sth.round_up_capacity(cnt);
         // Don't increase memory usage.
-        if(!this->unique() || (this->capacity() <= cap_min)) {
+        if(!this->unique() || (this->capacity() <= cap_min))
           return *this;
-        }
+
         this->do_reallocate(0, 0, cnt, cnt);
         ROCKET_ASSERT(this->capacity() <= cap_min);
         return *this;
