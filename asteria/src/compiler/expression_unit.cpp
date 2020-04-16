@@ -89,10 +89,12 @@ const
       case index_branch: {
         const auto& altr = this->m_stor.as<index_branch>();
 
+        // Both branches may be PTC'd unless this is a compound assignment operation.
+        auto real_ptc = altr.assign ? ptc_aware_none : ptc;
+
         // Generate code for both branches.
-        // Both branches may be PTC'd.
-        auto code_true = do_generate_code_branch(opts, ptc, ctx, altr.branch_true);
-        auto code_false = do_generate_code_branch(opts, ptc, ctx, altr.branch_false);
+        auto code_true = do_generate_code_branch(opts, real_ptc, ctx, altr.branch_true);
+        auto code_false = do_generate_code_branch(opts, real_ptc, ctx, altr.branch_false);
 
         // Encode arguments.
         AIR_Node::S_branch_expression xnode = { altr.sloc, ::std::move(code_true), ::std::move(code_false),
@@ -104,8 +106,11 @@ const
       case index_function_call: {
         const auto& altr = this->m_stor.as<index_function_call>();
 
+        // Check whether PTC is disabled.
+        auto real_ptc = !opts.proper_tail_calls ? ptc_aware_none : ptc;
+
         // Encode arguments.
-        AIR_Node::S_function_call xnode = { altr.sloc, altr.nargs, opts.proper_tail_calls ? ptc : ptc_aware_none };
+        AIR_Node::S_function_call xnode = { altr.sloc, altr.nargs, real_ptc };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -149,8 +154,11 @@ const
       case index_coalescence: {
         const auto& altr = this->m_stor.as<index_coalescence>();
 
-        // Generate code for the branch. This branch may be PTC'd.
-        auto code_null = do_generate_code_branch(opts, ptc, ctx, altr.branch_null);
+        // The branch may be PTC'd unless this is a compound assignment operation.
+        auto real_ptc = altr.assign ? ptc_aware_none : ptc;
+
+        // Generate code for the branch.
+        auto code_null = do_generate_code_branch(opts, real_ptc, ctx, altr.branch_null);
 
         // Encode arguments.
         AIR_Node::S_coalescence xnode = { altr.sloc, ::std::move(code_null), altr.assign };

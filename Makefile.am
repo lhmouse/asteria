@@ -327,4 +327,5 @@ check_PROGRAMS =  \
   asteria/test/github_84.test  \
   asteria/test/github_85.test  \
   asteria/test/github_98.test  \
+  asteria/test/github_101.test  \
   ${NOTHING}
