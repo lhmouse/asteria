@@ -16,13 +16,13 @@ noexcept
     auto next = this->m_head;
     while(ROCKET_EXPECT(next)) {
       auto qbkt = ::std::exchange(next, next->next);
+
       // Destroy this bucket.
       ROCKET_ASSERT(*qbkt);
       ::rocket::destroy_at(qbkt->kstor);
       ::rocket::destroy_at(qbkt->vstor);
       qbkt->next = nullptr;
     }
-
 #ifdef ROCKET_DEBUG
     this->m_head = reinterpret_cast<Bucket*>(0xDEADBEEF);
 #endif
@@ -48,7 +48,7 @@ noexcept
 
 void
 Reference_Dictionary::
-do_xrelocate_but(Reference_Dictionary::Bucket* qxcld)
+do_xrelocate_but(Bucket* qxcld)
 noexcept
   {
     auto bptr = this->m_bptr;
@@ -88,7 +88,7 @@ noexcept
 
 void
 Reference_Dictionary::
-do_list_attach(Reference_Dictionary::Bucket* qbkt)
+do_list_attach(Bucket* qbkt)
 noexcept
   {
     // Insert the bucket before `head`.
@@ -101,7 +101,7 @@ noexcept
 
 void
 Reference_Dictionary::
-do_list_detach(Reference_Dictionary::Bucket* qbkt)
+do_list_detach(Bucket* qbkt)
 noexcept
   {
     auto next = qbkt->next;
@@ -159,7 +159,6 @@ do_rehash(size_t nbkt)
       ::rocket::construct_at(qbkt->kstor, ::std::move(name));
       ::rocket::construct_at(qbkt->vstor, ::std::move(refr));
     }
-
     // Deallocate the old table.
     if(bold)
       ::operator delete(bold);
@@ -204,6 +203,7 @@ const
     auto next = this->m_head;
     while(ROCKET_EXPECT(next)) {
       auto qbkt = ::std::exchange(next, next->next);
+
       // Enumerate child variables.
       ROCKET_ASSERT(*qbkt);
       qbkt->vstor[0].enumerate_variables(callback);

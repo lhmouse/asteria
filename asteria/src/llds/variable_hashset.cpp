@@ -22,7 +22,6 @@ noexcept
       ::rocket::destroy_at(qbkt->kstor);
       qbkt->prev = nullptr;
     }
-
 #ifdef ROCKET_DEBUG
     this->m_head = reinterpret_cast<Bucket*>(0xDEADBEEF);
 #endif
@@ -48,7 +47,7 @@ noexcept
 
 void
 Variable_HashSet::
-do_xrelocate_but(Variable_HashSet::Bucket* qxcld)
+do_xrelocate_but(Bucket* qxcld)
 noexcept
   {
     auto bptr = this->m_bptr;
@@ -85,7 +84,7 @@ noexcept
 
 void
 Variable_HashSet::
-do_list_attach(Variable_HashSet::Bucket* qbkt)
+do_list_attach(Bucket* qbkt)
 noexcept
   {
     // Insert the bucket before `head`.
@@ -98,7 +97,7 @@ noexcept
 
 void
 Variable_HashSet::
-do_list_detach(Variable_HashSet::Bucket* qbkt)
+do_list_detach(Bucket* qbkt)
 noexcept
   {
     auto next = qbkt->next;
@@ -153,7 +152,6 @@ do_rehash(size_t nbkt)
       this->do_list_attach(qbkt);
       ::rocket::construct_at(qbkt->kstor, ::std::move(var));
     }
-
     // Deallocate the old table.
     if(bold)
       ::operator delete(bold);
@@ -161,7 +159,7 @@ do_rehash(size_t nbkt)
 
 void
 Variable_HashSet::
-do_attach(Variable_HashSet::Bucket* qbkt, const rcptr<Variable>& var)
+do_attach(Bucket* qbkt, const rcptr<Variable>& var)
 noexcept
   {
     // Construct the node, then attach it.
@@ -174,7 +172,7 @@ noexcept
 
 void
 Variable_HashSet::
-do_detach(Variable_HashSet::Bucket* qbkt)
+do_detach(Bucket* qbkt)
 noexcept
   {
     // Transfer ownership of the old variable, then detach the bucket.
