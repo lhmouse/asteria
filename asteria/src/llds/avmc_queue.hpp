@@ -15,9 +15,9 @@ class AVMC_Queue
   public:
     // This union can be used to encapsulate trivial information in solidified nodes.
     // At most 48 btis can be stored here. You may make appropriate use of them.
-    // Fields of each struct here share a unique prefix. This helps you ensure that you don't
-    // access fields of different structs at the same time.
-    union ParamU
+    // Fields of each struct here share a unique prefix. This helps you ensure that
+    // you don't mix access to fields of different structs at the same time.
+    union Uparam
       {
         struct {
           uint16_t x_DO_NOT_USE_;
@@ -30,16 +30,16 @@ class AVMC_Queue
           uint32_t y32;
         };
         struct {
-          uint16_t u_DO_NOT_USE_;
-          uint8_t u8s[6];
+          uint16_t z_DO_NOT_USE_;
+          uint16_t z16s[3];
         };
         struct {
           uint16_t v_DO_NOT_USE_;
-          uint16_t v16s[3];
+          uint8_t v8s[6];
         };
       };
 
-    static_assert(sizeof(ParamU) == 8);
+    static_assert(sizeof(Uparam) == sizeof(uint64_t));
 
     // Symbols are optional. If no symbol is given, no backtrace frame is appended.
     // The source location is used to generate backtrace frames.
@@ -48,24 +48,27 @@ class AVMC_Queue
         Source_Location sloc;
       };
 
-    static_assert(::std::is_nothrow_copy_constructible<Symbols>::value);
+    static_assert(::std::is_nothrow_move_constructible<Symbols>::value);
 
     // These are prototypes for callbacks.
-    using Constructor  = void (ParamU paramu, void* paramv, intptr_t source);
-    using Destructor   = void (ParamU paramu, void* paramv);
-    using Executor     = AIR_Status (Executive_Context& ctx, ParamU paramu, const void* paramv);
-    using Enumerator   = Variable_Callback& (Variable_Callback& callback, ParamU paramu, const void* paramv);
+    using Constructor  = void (Uparam uparam, void* sparam, intptr_t ctor_arg);
+    using Move_Ctor    = void (Uparam uparam, void* sparam, void* sp_old);
+    using Destructor   = void (Uparam uparam, void* sparam);
+    using Executor     = AIR_Status (Executive_Context& ctx, Uparam uparam, const void* sparam);
+    using Enumerator   = Variable_Callback& (Variable_Callback& callback, Uparam uparam, const void* sparam);
 
   private:
     struct Vtable
       {
-        Destructor* dtor;
-        Executor* exec;
-        Enumerator* vnum;
+        Move_Ctor* mvctor_opt;  // if null then bitwise copy is performed
+        Destructor* dtor_opt;  // if null then no cleanup is performed
+        Executor* executor;  // not nullable [!]
+        Enumerator* vnum_opt;  // if null then no variables shall exist
       };
 
     struct Header;
 
+  private:
     Header* m_bptr = nullptr;  // beginning of raw storage
     uint32_t m_rsrv = 0;  // size of raw storage, in number of `Header`s [!]
     uint32_t m_used = 0;  // size of used storage, in number of `Header`s [!]
@@ -87,8 +90,12 @@ class AVMC_Queue
 
     ~AVMC_Queue()
       {
+        if(this->m_used)
+          this->do_destroy_nodes();
+
         if(this->m_bptr)
-          this->do_deallocate_storage();
+          ::operator delete(this->m_bptr);
+
 #ifdef ROCKET_DEBUG
         ::std::memset(static_cast<void*>(this), 0xCA, sizeof(*this));
 #endif
@@ -96,83 +103,112 @@ class AVMC_Queue
 
   private:
     void
-    do_deallocate_storage();
+    do_destroy_nodes()
+    noexcept;
 
-    // Reserve storage for another node. `nbytes` is the size of `paramv` to reserve in bytes.
-    // Note: All calls to this function must precede calls to `do_check_node_storage()`.
     void
-    do_reserve_delta(size_t nbytes, const Symbols* syms_opt);
+    do_reallocate(uint32_t nadd);
 
-    // Allocate storage for all nodes that have been reserved so far, then checks whether there is enough room
-    // for a new node with `paramv` whose size is `nbytes` in bytes. An exception is thrown in case of failure.
+    // Reserve storage for the next node.
     inline
     Header*
-    do_allocate_node(ParamU paramu, const Symbols* syms_opt, size_t nbytes);
+    do_reserve_one(Uparam uparam, const opt<Symbols>& syms_opt, size_t nbytes);
 
-    // Append a new node to the end. `nbytes` is the size of `paramv` to initialize in bytes.
-    // Note: The storage must have been reserved using `do_reserve_delta()`.
-    void
-    do_append_trivial(Executor* exec, ParamU paramu, const Symbols* syms_opt,
-                      const void* source_opt, size_t nbytes);
-
-    void
-    do_append_nontrivial(const Vtable* vtbl, ParamU paramu, const Symbols* syms_opt,
-                         size_t nbytes, Constructor* ctor_opt, intptr_t source);
-
-    template<Executor execT, nullptr_t, typename XNodeT>
-    void
-    do_dispatch_append(::std::true_type, ParamU paramu, const Symbols* syms_opt, XNodeT&& xnode)
+    // This function returns a vtable struct that is allocated statically.
+    template<Executor execT, Enumerator* qvnumT, typename SparamT>
+    static
+    const Vtable*
+    do_get_vtable()
+    noexcept
       {
-        // The parameter type is trivial and no vtable is required.
-        // Append a node with a trivial parameter.
-        this->do_append_trivial(execT, paramu, syms_opt, ::std::addressof(xnode), sizeof(xnode));
-      }
+        static_assert(::std::is_object<SparamT>::value);
+        static_assert(::std::is_same<SparamT, typename ::std::decay<SparamT>::type>::value);
+        static_assert(::std::is_nothrow_move_constructible<SparamT>::value);
 
-    template<Executor execT, Enumerator* vnumT, typename XNodeT>
-    void
-    do_dispatch_append(::std::false_type, ParamU paramu, const Symbols* syms_opt, XNodeT&& xnode)
-      {
-        // The vtable must have static storage duration. As it is defined `constexpr` here, we need 'real'
-        // function pointers. Those converted from non-capturing lambdas are not an option.
-        struct Funcs
+        // The vtable must have static storage duration.
+        // As it is defined `constexpr` here, we need 'real' function pointers.
+        // Those converted from non-capturing lambdas are not an option.
+        struct Sfn
           {
             static
             void
-            construct(ParamU /*paramu*/, void* paramv, intptr_t source)
-              { ::rocket::construct_at((typename ::rocket::remove_cvref<XNodeT>::type*)paramv,
-                             ::std::forward<XNodeT>(*(typename ::std::remove_reference<XNodeT>::type*)source));  }
+            move_construct(Uparam, void* sparam, void* sp_old)
+            noexcept
+              { ::rocket::construct_at((SparamT*)sparam, ::std::move(*(SparamT*)sp_old));  }
 
             static
             void
-            destroy(ParamU /*paramu*/, void* paramv)
-              { ::rocket::destroy_at((typename ::rocket::remove_cvref<XNodeT>::type*)paramv);  }
+            destroy(Uparam, void* sparam)
+            noexcept
+              { ::rocket::destroy_at((SparamT*)sparam);  }
           };
 
-        // Define the virtual table.
-        static constexpr Vtable s_vtbl = { Funcs::destroy, execT, vnumT };
+        // Trivial operations can be optimized.
+        constexpr auto qmvct = ::std::is_trivially_move_constructible<SparamT>::value
+                                   ? nullptr : Sfn::move_construct;
+        constexpr auto qdtor = ::std::is_trivially_destructible<SparamT>::value
+                                   ? nullptr : Sfn::destroy;
+        static constexpr Vtable s_vtbl[1] = {{ qmvct, qdtor, execT, qvnumT }};
+        return s_vtbl;
+      }
 
-        // Append a node with a non-trivial parameter.
-        this->do_append_nontrivial(&s_vtbl, paramu, syms_opt,
-                                   sizeof(xnode), Funcs::construct, (intptr_t)::std::addressof(xnode));
+    // Append a new node to the end. `nbytes` is the size of `sparam` to initialize.
+    // If `src_opt` is specified, it should point to the buffer containing data to copy.
+    // Otherwise, `sparam` is filled with zeroes.
+    void
+    do_append_trivial(Executor* exec, Uparam uparam, opt<Symbols>&& syms_opt, size_t nbytes,
+                      const void* src_opt);
+
+    // Append a new node to the end. `nbytes` is the size of `sparam` to initialize.
+    // If `ctor_opt` is specified, it is called to initialize `sparam`.
+    // Otherwise, `sparam` is filled with zeroes.
+    void
+    do_append_nontrivial(const Vtable* vtbl, Uparam uparam, opt<Symbols>&& syms_opt, size_t nbytes,
+                         Constructor* ctor_opt, intptr_t ctor_arg);
+
+    // Append a trivial or non-trivial node basing on trivialness of the argument.
+    template<Executor execT, Enumerator* qvnumT, typename XSparamT>
+    void
+    do_append_chk(Uparam uparam, opt<Symbols>&& syms_opt, XSparamT&& xsparam)
+      {
+        using Sparam = typename ::std::decay<XSparamT>::type;
+
+        if(::std::is_trivial<Sparam>::value)
+          this->do_append_trivial(
+              execT, uparam, ::std::move(syms_opt), sizeof(Sparam), ::std::addressof(xsparam));
+        else
+          this->do_append_nontrivial(
+              this->do_get_vtable<execT, qvnumT, Sparam>(), uparam, ::std::move(syms_opt), sizeof(Sparam),
+              +[](Uparam /*uparam*/, void* sparam, intptr_t ctor_arg)
+                { ::rocket::construct_at((Sparam*)sparam, (XSparamT&&)*(Sparam*)ctor_arg);  },
+              (intptr_t)(const void*)::std::addressof(xsparam));
       }
 
   public:
     bool
     empty()
     const noexcept
-      { return this->m_rsrv == 0;  }
+      { return this->m_used == 0;  }
 
     AVMC_Queue&
     clear()
     noexcept
       {
-        if(this->m_bptr)
-          this->do_deallocate_storage();
+        if(this->m_used)
+          this->do_destroy_nodes();
 
         // Clean invalid data up.
-        this->m_bptr = nullptr;
-        this->m_rsrv = 0;
         this->m_used = 0;
+        return *this;
+      }
+
+    AVMC_Queue&
+    shrink_to_fit()
+      {
+        if(this->m_used == this->m_rsrv)
+          return *this;
+
+        this->do_reallocate(0);
         return *this;
       }
 
@@ -180,60 +216,114 @@ class AVMC_Queue
     swap(AVMC_Queue& other)
     noexcept
       {
-        xswap(this->m_bptr, other.m_bptr);
-        xswap(this->m_rsrv, other.m_rsrv);
-        xswap(this->m_used, other.m_used);
+        ::std::swap(this->m_bptr, other.m_bptr);
+        ::std::swap(this->m_rsrv, other.m_rsrv);
+        ::std::swap(this->m_used, other.m_used);
         return *this;
       }
 
+    // Append a trivial node. This allows you to bind an arbitrary function.
+    // If `sparam_opt` is a null pointer, `nbytes` zero bytes are allocated.
+    // Call `append()` if the parameter is non-trivial.
     AVMC_Queue&
-    request(size_t nbytes, const Symbols* syms_opt)
+    append_trivial(Executor& exec, Uparam uparam = { })
       {
-        // Reserve space for a node of size `nbytes`.
-        this->do_reserve_delta(nbytes, syms_opt);
+        this->do_append_trivial(exec, uparam, nullopt, 0, nullptr);
         return *this;
       }
 
-    template<Executor execT>
     AVMC_Queue&
-    append(ParamU paramu, const Symbols* syms_opt)
+    append_trivial(Executor& exec, Symbols syms, Uparam uparam = { })
       {
-        // Append a node with no parameter.
-        this->do_append_trivial(execT, paramu, syms_opt, nullptr, 0);
+        this->do_append_trivial(exec, uparam, ::std::move(syms), 0, nullptr);
         return *this;
       }
 
-    template<Executor execT, typename XNodeT>
     AVMC_Queue&
-    append(ParamU paramu, const Symbols* syms_opt, XNodeT&& xnode)
+    append_trivial(Executor& exec, const void* sparam_opt, size_t nbytes)
       {
-        // Append a node with a parameter of type `remove_cvref_t<XNodeT>`.
-        this->do_dispatch_append<execT, nullptr>(::std::is_trivial<typename ::std::remove_reference<XNodeT>::type>(),
-                                                 paramu, syms_opt, ::std::forward<XNodeT>(xnode));
+        this->do_append_trivial(exec, Uparam(), nullopt, nbytes, sparam_opt);
         return *this;
       }
 
-    template<Executor execT, Enumerator vnumT, typename XNodeT>
     AVMC_Queue&
-    append(ParamU paramu, const Symbols* syms_opt, XNodeT&& xnode)
+    append_trivial(Executor& exec, Symbols syms, const void* sparam_opt, size_t nbytes)
       {
-        // Append a node with a parameter of type `remove_cvref_t<XNodeT>`.
-        this->do_dispatch_append<execT, vnumT>(::std::false_type(),  // cannot be trivial
-                                               paramu, syms_opt, ::std::forward<XNodeT>(xnode));
+        this->do_append_trivial(exec, Uparam(), ::std::move(syms), nbytes, sparam_opt);
         return *this;
       }
 
     AVMC_Queue&
-    append_trivial(Executor* exec, ParamU paramu, const Symbols* syms_opt, const void* data, size_t size)
+    append_trivial(Executor& exec, Uparam uparam, const void* sparam_opt, size_t nbytes)
       {
-        // Append an arbitrary function with a trivial argument.
-        this->do_append_trivial(exec, paramu, syms_opt, data, size);
+        this->do_append_trivial(exec, uparam, nullopt, nbytes, sparam_opt);
         return *this;
       }
 
     AVMC_Queue&
-    reload(const cow_vector<AIR_Node>& code);
+    append_trivial(Executor& exec, Symbols syms, Uparam uparam, const void* sparam_opt, size_t nbytes)
+      {
+        this->do_append_trivial(exec, uparam, ::std::move(syms), nbytes, sparam_opt);
+        return *this;
+      }
 
+    // Append a node with type-generic semantics.
+    // Both trivial and non-trivial parameter types are supported.
+    // However, as this may result in a virtual call, the executor function has to be specified as
+    // a template argument.
+    template<Executor execT, Enumerator* = nullptr>
+    AVMC_Queue&
+    append(Uparam uparam = { })
+      {
+        this->do_append_trivial(execT, uparam, nullopt, 0, nullptr);
+        return *this;
+      }
+
+    template<Executor execT, Enumerator* = nullptr>
+    AVMC_Queue&
+    append(Symbols syms, Uparam uparam = { })
+      {
+        this->do_append_trivial(execT, uparam, ::std::move(syms), 0, nullptr);
+        return *this;
+      }
+
+    template<Executor execT, Enumerator* qvnumT, typename XSparamT,
+    ROCKET_DISABLE_IF(::rocket::disjunction<::std::is_convertible<XSparamT&&, Uparam>,
+                                            ::std::is_convertible<XSparamT&&, Symbols>>::value)>
+    AVMC_Queue&
+    append(XSparamT&& xsparam)
+      {
+        this->do_append_chk<execT, qvnumT>(Uparam(), nullopt, ::std::forward<XSparamT>(xsparam));
+        return *this;
+      }
+
+    template<Executor execT, Enumerator* qvnumT, typename XSparamT,
+    ROCKET_DISABLE_IF(::rocket::disjunction<::std::is_convertible<XSparamT&&, Uparam>,
+                                            ::std::is_convertible<XSparamT&&, Symbols>>::value)>
+    AVMC_Queue&
+    append(Symbols syms, XSparamT&& xsparam)
+      {
+        this->do_append_chk<execT, qvnumT>(Uparam(), ::std::move(syms), ::std::forward<XSparamT>(xsparam));
+        return *this;
+      }
+
+    template<Executor execT, Enumerator* qvnumT, typename XSparamT>
+    AVMC_Queue&
+    append(Uparam uparam, XSparamT&& xsparam)
+      {
+        this->do_append_chk<execT, qvnumT>(uparam, nullopt, ::std::forward<XSparamT>(xsparam));
+        return *this;
+      }
+
+    template<Executor execT, Enumerator* qvnumT, typename XSparamT>
+    AVMC_Queue&
+    append(Symbols syms, Uparam uparam, XSparamT&& xsparam)
+      {
+        this->do_append_chk<execT, qvnumT>(uparam, ::std::move(syms), ::std::forward<XSparamT>(xsparam));
+        return *this;
+      }
+
+    // These are interfaces called by the runtime.
     AIR_Status
     execute(Executive_Context& ctx)
     const;

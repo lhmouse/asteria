@@ -23,15 +23,6 @@
 namespace Asteria {
 namespace {
 
-using ParamU      = AVMC_Queue::ParamU;
-using Symbols     = AVMC_Queue::Symbols;
-using Executor    = AVMC_Queue::Executor;
-using Enumerator  = AVMC_Queue::Enumerator;
-
-///////////////////////////////////////////////////////////////////////////
-// Auxiliary functions
-///////////////////////////////////////////////////////////////////////////
-
 bool&
 do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code, const Abstract_Context& ctx)
   {
@@ -133,100 +124,6 @@ do_evaluate_branch(const AVMC_Queue& queue, bool assign, Executive_Context& ctx)
     // You must forward the status code as is, because PTCs may return `air_status_return_ref`.
     return queue.execute(ctx);
   }
-
-template<typename ParamV>
-inline
-const ParamV*
-do_pcast(const void* pv)
-noexcept
-  {
-    return static_cast<const ParamV*>(pv);
-  }
-
-template<typename ParamV>
-Variable_Callback&
-do_penum(Variable_Callback& callback, ParamU /*pu*/, const void* pv)
-  {
-    return static_cast<const ParamV*>(pv)->enumerate_variables(callback);
-  }
-
-// This defines common members of AVMC nodes.
-struct AVMC_Appender_common
-  {
-    ParamU pu = { };
-    opt<Symbols> syms;
-
-    void
-    set_symbols(const Source_Location& sloc)
-      { this->syms = { sloc };  }
-  };
-
-// This is the trait struct for parameter types that implement `enumerate_variables()`.
-template<typename ParamV, typename = void>
-struct AVMC_Appender
-  : AVMC_Appender_common, ParamV
-  {
-    constexpr
-    AVMC_Appender()
-      : ParamV()
-      { }
-
-    AVMC_Queue&
-    request(AVMC_Queue& queue)
-    const
-      { return queue.request(sizeof(ParamV), this->syms.value_ptr());  }
-
-    template<Executor executorT>
-    AVMC_Queue&
-    output(AVMC_Queue& queue)
-      { return queue.append<executorT, do_penum<ParamV>>(this->pu, this->syms.value_ptr(),
-                                                         static_cast<ParamV&&>(*this));  }
-  };
-
-// This is the trait struct for parameter types that do not implement `enumerate_variables()`.
-template<typename ParamV>
-struct AVMC_Appender<ParamV, ROCKET_VOID_T(typename ParamV::nonenumerable)>
-  : AVMC_Appender_common, ParamV
-  {
-    constexpr
-    AVMC_Appender()
-      : ParamV()
-      { }
-
-    AVMC_Queue&
-    request(AVMC_Queue& queue)
-    const
-      { return queue.request(sizeof(ParamV), this->syms.value_ptr());  }
-
-    template<Executor executorT>
-    AVMC_Queue&
-    output(AVMC_Queue& queue)
-      { return queue.append<executorT>(this->pu, this->syms.value_ptr(), static_cast<ParamV&&>(*this));  }
-  };
-
-// This is the trait struct when there is no parameter.
-template<>
-struct AVMC_Appender<void, void>
-  : AVMC_Appender_common
-  {
-    constexpr
-    AVMC_Appender()
-      { }
-
-    AVMC_Queue&
-    request(AVMC_Queue& queue)
-    const
-      { return queue.request(0, this->syms.value_ptr());  }
-
-    template<Executor executorT>
-    AVMC_Queue&
-    output(AVMC_Queue& queue)
-      { return queue.append<executorT>(this->pu, this->syms.value_ptr());  }
-  };
-
-///////////////////////////////////////////////////////////////////////////
-// Parameter structs and variable enumeration callbacks
-///////////////////////////////////////////////////////////////////////////
 
 template<size_t nqsT>
 struct Pv_queues_fixed
@@ -380,10 +277,6 @@ struct Pv_opts_sloc
 
     using nonenumerable = ::std::true_type;
   };
-
-///////////////////////////////////////////////////////////////////////////
-// Executor functions
-///////////////////////////////////////////////////////////////////////////
 
 AIR_Status
 do_clear_stack(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
@@ -3263,7 +3156,7 @@ const
     }
   }
 
-AVMC_Queue&
+bool
 AIR_Node::
 solidify(AVMC_Queue& queue, uint8_t ipass)
 const

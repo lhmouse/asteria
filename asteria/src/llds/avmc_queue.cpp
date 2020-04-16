@@ -12,23 +12,56 @@ namespace Asteria {
 
 struct AVMC_Queue::Header
   {
-    uint16_t nphdrs : 8;  // size of `paramv`, in number of `Header`s [!]
-    uint16_t : 6;
-    uint16_t has_vtbl : 1;  // vtable exists?
-    uint16_t has_syms : 1;  // symbols exist?
-    uint16_t paramu_x16;  // user-defined data [1]
-    uint32_t paramu_x32;  // user-defined data [2]
     union {
-      Executor* exec;  // active if `has_vtbl`
-      const Vtable* vtbl;  // active otherwise
+      struct {
+        uint8_t nphdrs;  // size of `sparam`, in number of `Header`s [!]
+        uint8_t has_vtbl : 1;  // vtable exists?
+        uint8_t has_syms : 1;  // symbols exist?
+      };
+      Uparam up_stor;
     };
-    alignas(max_align_t) char alignment[0];  // user-defined data [3]
+    union {
+      const Vtable* vtable;  // active if `has_vtbl`
+      Executor* exec;  // active otherwise
+    };
+    max_align_t alignment[0];
+
+    Move_Ctor*
+    mvctor_opt()
+    const noexcept
+      { return this->has_vtbl ? this->vtable->mvctor_opt : nullptr;  }
+
+    Destructor*
+    dtor_opt()
+    const noexcept
+      { return this->has_vtbl ? this->vtable->dtor_opt : nullptr;  }
+
+    Executor*
+    executor()
+    const noexcept
+      { return this->has_vtbl ? this->vtable->executor : this->exec;  }
+
+    Enumerator*
+    vnum_opt()
+    const noexcept
+      { return this->has_vtbl ? this->vtable->vnum_opt : nullptr;  }
 
     constexpr
-    ParamU
-    paramu()
+    const Uparam&
+    uparam()
     const noexcept
-      { return {{ 0xFFFF, this->paramu_x16, this->paramu_x32 }};  }
+      { return this->up_stor;  }
+
+    constexpr
+    void*
+    skip(uint32_t offset)
+    const noexcept
+      { return const_cast<Header*>(this) + 1 + offset;  }
+
+    Symbols*
+    syms_opt()
+    const noexcept
+      { return this->has_syms ? static_cast<Symbols*>(this->skip(0)) : nullptr;  }
 
     constexpr
     uint32_t
@@ -36,24 +69,10 @@ struct AVMC_Queue::Header
     const noexcept
       { return this->has_syms * uint32_t((sizeof(Symbols) - 1) / sizeof(Header) + 1);  }
 
-    Symbols*
-    symbols()
-    const noexcept
-      {
-        auto ptr = const_cast<Header*>(this) + 1;
-        // Symbols are the first member in the payload.
-        return reinterpret_cast<Symbols*>(ptr);
-      }
-
     void*
-    paramv()
+    sparam()
     const noexcept
-      {
-        auto ptr = const_cast<Header*>(this) + 1;
-        // Skip symbols if any.
-        ptr += this->symbol_size_in_headers();
-        return ptr;
-      }
+      { return this->skip(this->symbol_size_in_headers());  }
 
     constexpr
     uint32_t
@@ -64,163 +83,153 @@ struct AVMC_Queue::Header
 
 void
 AVMC_Queue::
-do_deallocate_storage()
+do_destroy_nodes()
+noexcept
   {
-    auto bptr = this->m_bptr;
-    auto eptr = bptr + this->m_used;
+    auto next = this->m_bptr;
+    while(ROCKET_EXPECT(next != this->m_bptr + this->m_used)) {
+      auto qnode = ::std::exchange(next, next + next->total_size_in_headers());
 
-    // Destroy all nodes.
-    auto qnode = bptr;
-    while(ROCKET_EXPECT(qnode != eptr)) {
-      // Call the destructor for this node.
-      auto dtor = qnode->has_vtbl ? qnode->vtbl->dtor : nullptr;
-      if(ROCKET_UNEXPECT(dtor))
-        (*dtor)(qnode->paramu(), qnode->paramv());
+      // Destroy user-defined data.
+      if(auto qdtor = qnode->dtor_opt())
+        (*qdtor)(qnode->uparam(), qnode->sparam());
 
       // Destroy symbols.
-      if(qnode->has_syms)
-        ::rocket::destroy_at(qnode->symbols());
-
-      // Move to the next node.
-      qnode += qnode->total_size_in_headers();
+      if(auto ksyms = qnode->syms_opt())
+        ::rocket::destroy_at(ksyms);
     }
 
-    // Deallocate the storage if any.
-    if(bptr)
-      ::operator delete(bptr);
-
 #ifdef ROCKET_DEBUG
-    this->m_bptr = reinterpret_cast<Header*>(0xDEADBEEF);
-    this->m_used = 0xEFCDAB89;
-    this->m_rsrv = 0x87654321;
+    this->m_used = 0xDEADBEEF;
 #endif
   }
 
 void
 AVMC_Queue::
-do_reserve_delta(size_t nbytes, const Symbols* syms_opt)
+do_reallocate(uint32_t nadd)
   {
-    // Once a node has been appended, reallocation is no longer allowed.
-    // Otherwise we would have to move nodes around, which complexifies things without any obvious benefits.
-    if(this->m_bptr)
-      ASTERIA_THROW("AVMC queue not resizable");
+    constexpr size_t nhdrs_max = UINT32_MAX / sizeof(Header);
+    if(nhdrs_max - this->m_used < nadd)
+      throw ::std::bad_array_new_length();
+    uint32_t rsrv = this->m_used + nadd;
+    auto bptr = static_cast<Header*>(::operator new(rsrv * sizeof(Header)));
 
-    // Get the maximum size of user-defined parameter that is allowed in a node.
-    Header qnode[1];
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-#pragma GCC diagnostic ignored "-Woverflow"
-    qnode->nphdrs = SIZE_MAX;
-#pragma GCC diagnostic pop
-    size_t nphdrs_max = qnode->nphdrs;
+    // Performa bitwise copy of all contents of the old block.
+    // This copies all existent headers and trivial data. Note that the size is unchanged.
+    auto bold = ::std::exchange(this->m_bptr, bptr);
+    this->m_rsrv = rsrv;
+    ::std::memcpy(bptr, bold, this->m_used * sizeof(Header));
 
-    // Check for overlarge `nbytes` values.
-    size_t nbytes_max = nphdrs_max * sizeof(Header);
+    // Move old non-trivial nodes if any.
+    // Warning: No exception shall be thrown from the code below.
+    uint32_t off = 0;
+    while(ROCKET_EXPECT(off != this->m_used)) {
+      auto qnode = bptr + off;
+      auto qxold = bold + off;
+      off += qnode->total_size_in_headers();
+
+      // Move-construct new user-defined data.
+      if(auto qmvct = qnode->mvctor_opt())
+        (*qmvct)(qnode->uparam(), qnode->sparam(), qxold->sparam());
+
+      // Move-construct new symbols.
+      if(auto ksyms = qnode->syms_opt())
+        ::rocket::construct_at(ksyms, ::std::move(*(qxold->syms_opt())));
+
+      // Destroy old user-defined data.
+      if(auto qdtor = qxold->dtor_opt())
+        (*qdtor)(qxold->uparam(), qxold->sparam());
+
+      // Destroy old symbols.
+      if(auto ksyms = qxold->syms_opt())
+        ::rocket::destroy_at(ksyms);
+    }
+    // Deallocate the old block.
+    if(bold)
+      ::operator delete(bold);
+  }
+
+AVMC_Queue::Header*
+AVMC_Queue::
+do_reserve_one(Uparam uparam, const opt<Symbols>& syms_opt, size_t nbytes)
+  {
+    constexpr size_t nbytes_max = UINT8_MAX * sizeof(Header) - 1;
     if(nbytes > nbytes_max)
       ASTERIA_THROW("invalid AVMC node size (`$1` > `$2`)", nbytes, nbytes_max);
 
-    // Create a dummy header and calculate its size.
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-    qnode->nphdrs = (nbytes + sizeof(Header) - 1) / sizeof(Header);
-#pragma GCC diagnostic pop
-    qnode->has_syms = !!syms_opt;
-    uint32_t nhdrs_total = qnode->total_size_in_headers();
-    constexpr uint32_t nhdrs_max = UINT32_MAX / sizeof(Header);
-    if(nhdrs_max - this->m_rsrv < nhdrs_total) {
-      ASTERIA_THROW("too many AVMC nodes (`$1` + `$2` > `$3`)", this->m_rsrv, nhdrs_total, nhdrs_max);
-    }
-    this->m_rsrv += nhdrs_total;
-  }
+    // Create a dummy header for calculation.
+    Header temph;
+    // Note `up_stor` is partially overlapped with other fields, so it must be assigned first.
+    temph.up_stor = uparam;
+    // The following may occur in any order.
+    temph.nphdrs = static_cast<uint8_t>((nbytes + sizeof(Header) - 1) / sizeof(Header));
+    temph.has_syms = !!syms_opt;
 
-AVMC_Queue::Header* AVMC_Queue::do_allocate_node(ParamU paramu, const Symbols* syms_opt, size_t nbytes)
-  {
-    // Check space for the very first header.
-    uint32_t nhdrs_avail = this->m_rsrv - this->m_used;
-    if(nhdrs_avail == 0)
-      ASTERIA_THROW("AVMC queue full");
-
-    // If no storage has been allocated so far, it shall be allocated now.
-    auto qnode = this->m_bptr;
-    if(ROCKET_UNEXPECT(!qnode)) {
-      qnode = static_cast<Header*>(::operator new(this->m_rsrv * sizeof(Header)));
-      this->m_bptr = qnode;
+    // Allocate a new memory block as needed.
+    uint32_t nadd = temph.total_size_in_headers();
+    if(ROCKET_UNEXPECT(this->m_rsrv - this->m_used < nadd)) {
+#ifndef ROCKET_DEBUG
+      // Reserve more space for non-debug builds.
+      nadd |= this->m_used * 4;
+#endif
+      this->do_reallocate(nadd);
     }
-    qnode += this->m_used;
+    ROCKET_ASSERT(this->m_rsrv - this->m_used >= nadd);
 
-    // Create a minimal header and calculate its size.
-    // The caller is responsible for setting other fields appropriately.
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-    qnode->nphdrs = (nbytes + sizeof(Header) - 1) / sizeof(Header);
-#pragma GCC diagnostic pop
-    qnode->has_syms = !!syms_opt;
-    uint32_t nhdrs_total = qnode->total_size_in_headers();
-    if(nhdrs_total > nhdrs_avail) {
-      ASTERIA_THROW("insufficient space in AVMC queue (`$1` > `$2`)", nhdrs_total > nhdrs_avail);
-    }
-    qnode->paramu_x16 = paramu.x16;
-    qnode->paramu_x32 = paramu.x32;
+    // Append a new node.
+    auto qnode = this->m_bptr + this->m_used;
+    ::std::memcpy(qnode, &temph, sizeof(temph));
     return qnode;
   }
 
 void
 AVMC_Queue::
-do_append_trivial(Executor* exec, ParamU paramu, const Symbols* syms_opt,
-                  const void* source_opt, size_t nbytes)
+do_append_trivial(Executor* exec, Uparam uparam, opt<Symbols>&& syms_opt, size_t nbytes,
+                  const void* src_opt)
   {
-    // Create a new node.
-    auto qnode = this->do_allocate_node(paramu, syms_opt, nbytes);
+    auto qnode = this->do_reserve_one(uparam, syms_opt, nbytes);
     qnode->has_vtbl = false;
     qnode->exec = exec;
 
-    // Copy source data if any.
-    if(ROCKET_EXPECT(source_opt))
-      ::std::memcpy(qnode->paramv(), source_opt, nbytes);
-    else if(nbytes != 0)
-      ::std::memset(qnode->paramv(), 0, nbytes);
+    // Copy source data if `src_opt` is non-null. Fill zeroes otherwise.
+    // This operation will not throw exceptions.
+    if(src_opt)
+      ::std::memcpy(qnode->sparam(), src_opt, nbytes);
+    else
+      ::std::memset(qnode->sparam(), 0, nbytes);
 
-    // Set up symbols. This shall not throw exceptions.
-    if(qnode->has_syms)
-      ::rocket::construct_at(qnode->symbols(), *syms_opt);
+    // Set up symbols.
+    // This operation will not throw exceptions.
+    if(auto qsyms = qnode->syms_opt())
+      ::rocket::construct_at(qsyms, ::std::move(*syms_opt));
 
-    // Consume the storage.
+    // Accept this node.
     this->m_used += qnode->total_size_in_headers();
   }
 
 void
 AVMC_Queue::
-do_append_nontrivial(const Vtable* vtbl, ParamU paramu, const Symbols* syms_opt,
-                     size_t nbytes, Constructor* ctor_opt, intptr_t source)
+do_append_nontrivial(const Vtable* vtbl, Uparam uparam, opt<Symbols>&& syms_opt, size_t nbytes,
+                     Constructor* ctor_opt, intptr_t ctor_arg)
   {
-    // Create a new node.
-    auto qnode = this->do_allocate_node(paramu, syms_opt, nbytes);
+    auto qnode = this->do_reserve_one(uparam, syms_opt, nbytes);
     qnode->has_vtbl = true;
-    qnode->vtbl = vtbl;
+    qnode->vtable = vtbl;
 
-    // Invoke the constructor. If an exception is thrown, there is no effect.
-    if(ROCKET_EXPECT(ctor_opt))
-      (*ctor_opt)(paramu, qnode->paramv(), source);
-    else if(nbytes != 0)
-      ::std::memset(qnode->paramv(), 0, nbytes);
+    // Invoke the constructor if `ctor_opt` is non-null. Fill zeroes otherwise.
+    // If an exception is thrown, there is no effect.
+    if(ctor_opt)
+      (*ctor_opt)(uparam, qnode->sparam(), ctor_arg);
+    else
+      ::std::memset(qnode->sparam(), 0, nbytes);
 
-    // Set up symbols. This shall not throw exceptions.
-    if(qnode->has_syms)
-      ::rocket::construct_at(qnode->symbols(), *syms_opt);
+    // Set up symbols.
+    // This operation will not throw exceptions.
+    if(auto qsyms = qnode->syms_opt())
+      ::rocket::construct_at(qsyms, ::std::move(*syms_opt));
 
-    // Consume the storage.
+    // Accept this node.
     this->m_used += qnode->total_size_in_headers();
-  }
-
-AVMC_Queue&
-AVMC_Queue::
-reload(const cow_vector<AIR_Node>& code)
-  {
-    this->clear();
-
-    ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(*this, 0);  });  // 1
-    ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(*this, 1);  });  // 2
-    return *this;
   }
 
 AIR_Status
@@ -229,29 +238,23 @@ execute(Executive_Context& ctx)
 const
   {
     auto status = air_status_next;
-    auto bptr = this->m_bptr;
-    auto eptr = bptr + this->m_used;
+    auto next = this->m_bptr;
+    while(ROCKET_EXPECT(next != this->m_bptr + this->m_used)) {
+      auto qnode = ::std::exchange(next, next + next->total_size_in_headers());
 
-    // Execute all nodes.
-    auto qnode = bptr;
-    while(ROCKET_EXPECT(qnode != eptr)) {
       // Call the executor function for this node.
-      auto exec = qnode->has_vtbl ? qnode->vtbl->exec : qnode->exec;
+      auto qexec = qnode->executor();
       ASTERIA_RUNTIME_TRY {
-        status = (*exec)(ctx, qnode->paramu(), qnode->paramv());
+        status = (*qexec)(ctx, qnode->uparam(), qnode->sparam());
       }
       ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
-        if(qnode->has_syms)
-          except.push_frame_plain(qnode->symbols()->sloc, ::rocket::sref(""));
+        if(auto qsyms = qnode->syms_opt())
+          except.push_frame_plain(qsyms->sloc, ::rocket::sref(""));
         throw;
       }
       if(ROCKET_UNEXPECT(status != air_status_next))
-        return status;
-
-      // Move to the next node.
-      qnode += qnode->total_size_in_headers();
+        break;
     }
-
     return status;
   }
 
@@ -260,21 +263,14 @@ AVMC_Queue::
 enumerate_variables(Variable_Callback& callback)
 const
   {
-    auto bptr = this->m_bptr;
-    auto eptr = bptr + this->m_used;
+    auto next = this->m_bptr;
+    while(ROCKET_EXPECT(next != this->m_bptr + this->m_used)) {
+      auto qnode = ::std::exchange(next, next + next->total_size_in_headers());
 
-    // Enumerate variables from all nodes.
-    auto qnode = bptr;
-    while(ROCKET_EXPECT(qnode != eptr)) {
-      // Call the enumerator function for this node.
-      auto vnum = qnode->has_vtbl ? qnode->vtbl->vnum : nullptr;
-      if(ROCKET_UNEXPECT(vnum))
-        (*vnum)(callback, qnode->paramu(), qnode->paramv());
-
-      // Move to the next node.
-      qnode += qnode->total_size_in_headers();
+      // Enumerate variables in this node.
+      if(auto qvnum = qnode->has_vtbl ? qnode->vtable->vnum_opt : nullptr)
+        (*qvnum)(callback, qnode->uparam(), qnode->sparam());
     }
-
     return callback;
   }
 
