@@ -132,10 +132,10 @@ do_rehash(size_t nbkt)
       qbkt->prev = nullptr;
     auto bold = ::std::exchange(this->m_bptr, bptr);
     this->m_eptr = eptr;
-    auto next = ::std::exchange(this->m_head, nullptr);
 
     // Move buckets into the new table.
     // Warning: No exception shall be thrown from the code below.
+    auto next = ::std::exchange(this->m_head, nullptr);
     while(ROCKET_EXPECT(next)) {
       auto qbkt = ::std::exchange(next, next->next);
 
