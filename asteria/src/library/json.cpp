@@ -166,34 +166,34 @@ do_quote_string(tinyfmt& fmt, const cow_string& str)
       }
       // Escape double quotes, backslashes, and control characters.
       switch(cp) {
-        case '\"': {
+        case '\"':
           fmt << "\\\"";
           break;
-        }
-        case '\\': {
+
+        case '\\':
           fmt << "\\\\";
           break;
-        }
-        case '\b': {
+
+        case '\b':
           fmt << "\\b";
           break;
-        }
-        case '\f': {
+
+        case '\f':
           fmt << "\\f";
           break;
-        }
-        case '\n': {
+
+        case '\n':
           fmt << "\\n";
           break;
-        }
-        case '\r': {
+
+        case '\r':
           fmt << "\\r";
           break;
-        }
-        case '\t': {
+
+        case '\t':
           fmt << "\\t";
           break;
-        }
+
         default: {
           if((0x20 <= cp) && (cp <= 0x7E)) {
             // Write printable characters as is.
@@ -257,26 +257,28 @@ do_format_scalar(tinyfmt& fmt, const Value& value, bool json5)
       case vtype_real: {
         // Is the value finite?
         switch(::std::fpclassify(value.as_real())) {
-          case FP_INFINITE: {
-            if(json5)
-              return fmt << "Infinity";
-            break;
-          }
-          case FP_NAN: {
-            if(json5)
-              return fmt << "NaN";
-            break;
-          }
+          case FP_INFINITE:
+            if(!json5)
+              break;
+            // JSON5 allows `Infinity` in ECMAScript form.
+            return fmt << "Infinity";
+
+          case FP_NAN:
+            if(!json5)
+              break;
+            // JSON5 allows `NaN` in ECMAScript form.
+            return fmt << "NaN";
+
           default:
             // Write the real in decimal.
             return fmt << value.as_real();
         }
         break;
       }
-      case vtype_string:  {
+
+      case vtype_string:
         // Write the quoted string.
         return do_quote_string(fmt, value.as_string());
-      }
     }
     // Anything else is censored to `null`.
     return fmt << "null";
