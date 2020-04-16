@@ -2962,7 +2962,6 @@ const
         // There is nothing to bind.
         return nullopt;
 
-
       case index_execute_block: {
         const auto& altr = this->m_stor.as<index_execute_block>();
 
@@ -2979,7 +2978,6 @@ const
       case index_initialize_variable:
         // There is nothing to bind.
         return nullopt;
-
 
       case index_if_statement: {
         const auto& altr = this->m_stor.as<index_if_statement>();
@@ -3085,7 +3083,6 @@ const
         // There is nothing to bind.
         return nullopt;
 
-
       case index_push_local_reference: {
         const auto& altr = this->m_stor.as<index_push_local_reference>();
 
@@ -3110,7 +3107,6 @@ const
       case index_push_bound_reference:
         // There is nothing to bind.
         return nullopt;
-
 
       case index_define_function: {
         const auto& altr = this->m_stor.as<index_define_function>();
@@ -3159,7 +3155,6 @@ const
       case index_variadic_call:
         // There is nothing to bind.
         return nullopt;
-
 
       case index_defer_expression: {
         const auto& altr = this->m_stor.as<index_defer_expression>();
@@ -3893,7 +3888,6 @@ const
       case index_clear_stack:
         return callback;
 
-
       case index_execute_block: {
         const auto& altr = this->m_stor.as<index_execute_block>();
         ::rocket::for_each(altr.code_body, callback);
@@ -3903,7 +3897,6 @@ const
       case index_declare_variable:
       case index_initialize_variable:
         return callback;
-
 
       case index_if_statement: {
         const auto& altr = this->m_stor.as<index_if_statement>();
@@ -3964,7 +3957,6 @@ const
       case index_glvalue_to_prvalue:
         return callback;
 
-
       case index_push_immediate: {
         const auto& altr = this->m_stor.as<index_push_immediate>();
         altr.value.enumerate_variables(callback);
@@ -3974,7 +3966,6 @@ const
       case index_push_global_reference:
       case index_push_local_reference:
         return callback;
-
 
       case index_push_bound_reference: {
         const auto& altr = this->m_stor.as<index_push_bound_reference>();
@@ -4012,7 +4003,6 @@ const
       case index_single_step_trap:
       case index_variadic_call:
         return callback;
-
 
       case index_defer_expression: {
         const auto& altr = this->m_stor.as<index_defer_expression>();
