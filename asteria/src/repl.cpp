@@ -21,24 +21,6 @@ using namespace Asteria;
 
 namespace {
 
-enum Exit_Code : uint8_t
-  {
-    exit_success            = 0,
-    exit_unspecified        = 1,
-    exit_invalid_argument   = 2,
-    exit_parser_error       = 3,
-    exit_runtime_error      = 4,
-  };
-
-[[noreturn]]
-int
-do_exit(Exit_Code code)
-noexcept
-  {
-    ::fflush(nullptr);
-    ::quick_exit(static_cast<int>(code));
-  }
-
 cow_string
 do_xindent(cow_string&& str)
   {
@@ -133,10 +115,6 @@ Command_Line_Options cmdline;
 Global_Context global;
 Simple_Script script;
 
-unsigned long index;  // snippet index
-cow_string code;  // snippet
-cow_string heredoc;
-
 // These hooks help debugging
 struct REPL_Hooks
   : Abstract_Hooks
@@ -145,9 +123,9 @@ struct REPL_Hooks
     on_variable_declare(const Source_Location& sloc, const cow_string& inside, const phsh_string& name)
     override
       {
-        if(ROCKET_EXPECT(!cmdline.verbose)) {
+        if(ROCKET_EXPECT(!cmdline.verbose))
           return;
-        }
+
         ::fprintf(stderr, "~ running: ['%s:%d' inside `%s`] declaring variable: %s\n",
                           sloc.c_file(), sloc.line(), inside.c_str(), name.c_str());
       }
@@ -156,9 +134,9 @@ struct REPL_Hooks
     on_function_call(const Source_Location& sloc, const cow_string& inside, const cow_function& target)
     override
       {
-        if(ROCKET_EXPECT(!cmdline.verbose)) {
+        if(ROCKET_EXPECT(!cmdline.verbose))
           return;
-        }
+
         ::fprintf(stderr, "~ running: ['%s:%d' inside `%s`] initiating function call: %s\n",
                           sloc.c_file(), sloc.line(), inside.c_str(), do_stringify(target).c_str());
       }
@@ -167,9 +145,9 @@ struct REPL_Hooks
     on_function_return(const Source_Location& sloc, const cow_string& inside, const Reference& result)
     override
       {
-        if(ROCKET_EXPECT(!cmdline.verbose)) {
+        if(ROCKET_EXPECT(!cmdline.verbose))
           return;
-        }
+
         ::fprintf(stderr, "~ running: ['%s:%d' inside `%s`] returned from function call: %s\n",
                           sloc.c_file(), sloc.line(), inside.c_str(), do_stringify(result).c_str());
       }
@@ -178,9 +156,9 @@ struct REPL_Hooks
     on_function_except(const Source_Location& sloc, const cow_string& inside, const Runtime_Error& except)
     override
       {
-        if(ROCKET_EXPECT(!cmdline.verbose)) {
+        if(ROCKET_EXPECT(!cmdline.verbose))
           return;
-        }
+
         ::fprintf(stderr, "~ running: ['%s:%d' inside `%s`] caught exception from function call: %s\n",
                           sloc.c_file(), sloc.line(), inside.c_str(), do_stringify(except).c_str());
       }
@@ -189,12 +167,35 @@ struct REPL_Hooks
     on_single_step_trap(const Source_Location& sloc, const cow_string& inside, Executive_Context* /*ctx*/)
     override
       {
-        if(ROCKET_EXPECT(!interrupted)) {
+        if(ROCKET_EXPECT(!interrupted))
           return;
-        }
+
         ASTERIA_THROW("interrupt received\n[received at '$1' inside `$2`]", sloc, inside);
       }
   };
+
+enum Exit_Code : uint8_t
+  {
+    exit_success            = 0,
+    exit_unspecified        = 1,
+    exit_invalid_argument   = 2,
+    exit_parser_error       = 3,
+    exit_runtime_error      = 4,
+  };
+
+[[noreturn]]
+int
+do_exit(Exit_Code code)
+noexcept
+  {
+    // Perform normal exit if verbose mode is on, which helps catching memory leaks upon exit.
+    if(ROCKET_UNEXPECT(cmdline.verbose))
+      ::exit(static_cast<int>(code));
+
+    // Perform fast exit by default.
+    ::fflush(nullptr);
+    ::quick_exit(static_cast<int>(code));
+  }
 
 [[noreturn]]
 int
@@ -212,7 +213,7 @@ Usage: %s [OPTIONS] [[--] FILE [ARGUMENTS]...]
   -O      equivalent to `-O1`
   -O[nn]  set optimization level to `nn` [default = 2]
   -V      show version information then exit
-  -v      print execution details to standard error
+  -v      enable verbose mode
 
 Source code is read from standard input if no FILE is specified or `-` is
 given as FILE, and from FILE otherwise. ARGUMENTS following FILE are passed
@@ -229,6 +230,10 @@ an 8-bit unsigned integer and then used as the exit status. If the script
 returns no value, the exit status is zero. If the script returns a value
 that is neither an integer nor null, or throws an exception, the status is
 non-zero.
+
+In verbose mode, execution details are printed to standard error. It also
+prevents quick termination, which enables some tools such as valgrind to
+discover memory leaks upon exit.
 
 Visit the homepage at <%s>.
 Report bugs to <%s>.
@@ -394,6 +399,10 @@ do_handle_REPL_command(cow_string&& cmd)
 
     ::fprintf(stderr, "! unknown command: %s\n", cmd.c_str());
   }
+
+unsigned long index;  // snippet index
+cow_string code;  // snippet
+cow_string heredoc;
 
 int
 do_REP_single()
