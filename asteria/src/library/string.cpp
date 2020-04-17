@@ -1504,7 +1504,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Copies a subrange of `text` to create a new byte string. Bytes
     are copied from `from` if it is non-negative, or from
-    `lengthof(text) + from` otherwise. If `length` is set to an
+    `countof(text) + from` otherwise. If `length` is set to an
     integer, no more than this number of bytes will be copied. If
     it is absent, all bytes from `from` to the end of `text` will
     be copied. If `from` is outside `text`, an empty string is

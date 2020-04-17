@@ -91,7 +91,7 @@ int main()
         assert std.json.parse("[0,1]") == [0,1];
         assert std.json.parse("[0,null,2]") == [0,null,2];
 
-        assert lengthof std.json.parse("{}") == 0;
+        assert countof std.json.parse("{}") == 0;
         assert std.json.parse("{\"a\":1}").a == 1;
         assert std.json.parse("{b:Infinity}").b == infinity;
         assert __isnan std.json.parse("{b:NaN}").b;
@@ -102,7 +102,7 @@ int main()
         assert r[0].a == 1;
         assert r[0].b == [];
         assert typeof r[1].c == "object";
-        assert lengthof r[1].c == 0;
+        assert countof r[1].c == 0;
         assert r[1].d == 4;
 
         const depth = 1000;

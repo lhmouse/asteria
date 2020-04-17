@@ -678,7 +678,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 
   * Copies a subrange of `data` to create a new array. Elements are
     copied from `from` if it is non-negative, or from
-    `lengthof(data) + from` otherwise. If `length` is set to an
+    `countof(data) + from` otherwise. If `length` is set to an
     integer, no more than this number of elements will be copied.
     If it is absent, all elements from `from` to the end of `data`
     will be copied. If `from` is outside `data`, an empty array
@@ -1586,7 +1586,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     prior to this call, otherwise the effect is undefined.
 
   * Returns the subscript of such an element as an integer. This
-    function returns `lengthof(data)` if all elements are less than
+    function returns `countof(data)` if all elements are less than
     `target`.
 
   * Throws an exception if `data` has not been sorted properly. Be
@@ -1625,7 +1625,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     prior to this call, otherwise the effect is undefined.
 
   * Returns the subscript of such an element as an integer. This
-    function returns `lengthof(data)` if all elements are less than
+    function returns `countof(data)` if all elements are less than
     or equal to `target`.
 
   * Throws an exception if `data` has not been sorted properly. Be
@@ -1916,7 +1916,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 
   * Rotates elements in `data` by `shift`. That is, unless `data`
     is empty, the element at subscript `x` is moved to subscript
-    `(x + shift) % lengthof(data)`. No element is added or removed.
+    `(x + shift) % countof(data)`. No element is added or removed.
 
   * Returns the rotated array. If `data` is empty, an empty array
     is returned.

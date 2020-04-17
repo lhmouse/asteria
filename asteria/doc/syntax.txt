@@ -213,7 +213,7 @@ prefix-operator-list ::=
 
 prefix-operator ::=
 	"+" | "-" | "~" | "!" | "++" | "--" |
-	"unset" | "lengthof" | "typeof" | "not" |
+	"unset" | "countof" | "typeof" | "not" |
 	"__abs" | "__sqrt" | "__sign" | "__isnan" | "__isinf" |
 	"__round" | "__floor" | "__ceil" | "__trunc" | "__iround" | "__ifloor" | "__iceil" | "__itrunc"
 

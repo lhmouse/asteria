@@ -270,8 +270,8 @@ noexcept
       case keyword_unset:
         return "unset";
 
-      case keyword_lengthof:
-        return "lengthof";
+      case keyword_countof:
+        return "countof";
 
       case keyword_typeof:
         return "typeof";

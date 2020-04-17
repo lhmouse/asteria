@@ -104,7 +104,7 @@ enum Keyword : uint8_t
     keyword_infinity  = 23,
     keyword_this      = 24,
     keyword_unset     = 25,
-    keyword_lengthof  = 26,
+    keyword_countof   = 26,
     keyword_typeof    = 27,
     keyword_and       = 28,
     keyword_or        = 29,

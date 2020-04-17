@@ -196,7 +196,7 @@
 
 	* Copies a subrange of `text` to create a new byte string. Bytes
 	  are copied from `from` if it is non-negative, or from
-	  `lengthof(text) + from` otherwise. If `length` is set to an
+	  `countof(text) + from` otherwise. If `length` is set to an
 	  integer, no more than this number of bytes will be copied. If
 	  it is absent, all bytes from `from` to the end of `text` will
 	  be copied. If `from` is outside `text`, an empty string is
@@ -980,7 +980,7 @@
 
 	* Copies a subrange of `data` to create a new array. Elements are
 	  copied from `from` if it is non-negative, or from
-	  `lengthof(data) + from` otherwise. If `length` is set to an
+	  `countof(data) + from` otherwise. If `length` is set to an
 	  integer, no more than this number of elements will be copied.
 	  If it is absent, all elements from `from` to the end of `data`
 	  will be copied. If `from` is outside `data`, an empty array
@@ -1387,7 +1387,7 @@
 	  prior to this call, otherwise the effect is undefined.
 
 	* Returns the subscript of such an element as an integer. This
-	  function returns `lengthof(data)` if all elements are less than
+	  function returns `countof(data)` if all elements are less than
 	  `target`.
 
 	* Throws an exception if `data` has not been sorted properly. Be
@@ -1404,7 +1404,7 @@
 	  prior to this call, otherwise the effect is undefined.
 
 	* Returns the subscript of such an element as an integer. This
-	  function returns `lengthof(data)` if all elements are less than
+	  function returns `countof(data)` if all elements are less than
 	  or equal to `target`.
 
 	* Throws an exception if `data` has not been sorted properly. Be
@@ -1509,7 +1509,7 @@
 
 	* Rotates elements in `data` by `shift`. That is, unless `data`
 	  is empty, the element at subscript `x` is moved to subscript
-	  `(x + shift) % lengthof(data)`. No element is added or removed.
+	  `(x + shift) % countof(data)`. No element is added or removed.
 
 	* Returns the rotated array. If `data` is empty, an empty array
 	  is returned.

@@ -1873,7 +1873,7 @@ do_apply_xop_LENGTHOF(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
         break;
       }
       default:
-        ASTERIA_THROW("prefix `lengthof` not applicable (operand was `$1`)", rhs);
+        ASTERIA_THROW("prefix `countof` not applicable (operand was `$1`)", rhs);
     }
     do_set_temporary(ctx.stack(), assign, nelems);
     return air_status_next;
@@ -3682,7 +3682,7 @@ const
           case xop_unset:
             return avmcp.output<do_apply_xop_UNSET>(queue);
 
-          case xop_lengthof:
+          case xop_countof:
             return avmcp.output<do_apply_xop_LENGTHOF>(queue);
 
           case xop_typeof:

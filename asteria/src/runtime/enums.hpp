@@ -21,7 +21,7 @@ enum Xop : uint8_t
     xop_inc_pre   =  7,  // ++ (prefix)
     xop_dec_pre   =  8,  // -- (prefix)
     xop_unset     =  9,  // unset
-    xop_lengthof  = 10,  // lengthof
+    xop_countof   = 10,  // countof
     xop_typeof    = 11,  // typeof
     xop_sqrt      = 12,  // __sqrt
     xop_isnan     = 13,  // __isnan

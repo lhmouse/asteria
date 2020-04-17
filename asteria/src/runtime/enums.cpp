@@ -41,8 +41,8 @@ noexcept
       case xop_unset:
         return "prefix `unset`";
 
-      case xop_lengthof:
-        return "prefix `lengthof`";
+      case xop_countof:
+        return "prefix `countof`";
 
       case xop_typeof:
         return "prefix `typeof`";
