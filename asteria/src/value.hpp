@@ -79,7 +79,7 @@ class Value
       { this->do_xassign<V_opaque&&>(xval, ::std::addressof(xval));  }
 
     template<typename OpaqueT,
-    ASTERIA_SFINAE_CONVERT(OpaqueT*, Abstract_Opaque*)>
+    ROCKET_ENABLE_IF(::std::is_convertible<OpaqueT*, Abstract_Opaque*>::value)>
     Value(rcptr<OpaqueT> xval)
     noexcept
       { this->do_xassign<V_opaque>(xval, ::std::addressof(xval));  }
@@ -89,7 +89,7 @@ class Value
       { this->do_xassign<V_function&&>(xval, ::std::addressof(xval));  }
 
     template<typename FunctionT,
-    ASTERIA_SFINAE_CONVERT(FunctionT*, Abstract_Function*)>
+    ROCKET_ENABLE_IF(::std::is_convertible<FunctionT*, Abstract_Function*>::value)>
     Value(rcptr<FunctionT> xval)
     noexcept
       { this->do_xassign<V_function>(xval, ::std::addressof(xval));  }
@@ -262,7 +262,7 @@ class Value
       }
 
     template<typename OpaqueT,
-    ASTERIA_SFINAE_CONVERT(OpaqueT*, Abstract_Opaque*)>
+    ROCKET_ENABLE_IF(::std::is_convertible<OpaqueT*, Abstract_Opaque*>::value)>
     Value&
     operator=(rcptr<OpaqueT> xval)
     noexcept
@@ -280,7 +280,7 @@ class Value
       }
 
     template<typename FunctionT,
-    ASTERIA_SFINAE_CONVERT(FunctionT*, Abstract_Function*)>
+    ROCKET_ENABLE_IF(::std::is_convertible<FunctionT*, Abstract_Function*>::value)>
     Value&
     operator=(rcptr<FunctionT> xval)
     noexcept

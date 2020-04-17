@@ -39,20 +39,19 @@
 namespace Asteria {
 
 // Macros
-#define ASTERIA_SFINAE_CONSTRUCT(T, ...)    ROCKET_ENABLE_IF(::std::is_constructible<T, __VA_ARGS__>::value)
-#define ASTERIA_SFINAE_ASSIGN(T, ...)       ROCKET_ENABLE_IF(::std::is_assignable<T&, __VA_ARGS__>::value)
-#define ASTERIA_SFINAE_CONVERT(T, ...)      ROCKET_ENABLE_IF(::std::is_convertible<T, __VA_ARGS__>::value)
-
 #define ASTERIA_VARIANT_CONSTRUCTOR(C, V, T, t)   template<typename T,  \
-                                                  ASTERIA_SFINAE_CONSTRUCT(V, T&&)>  \
-                                                  C(T&& t)
+                                                  ROCKET_ENABLE_IF(::std::is_constructible<V, T&&>::value)>  \
+                                                  C(T&& t)  \
+                                                  noexcept(::std::is_nothrow_constructible<V, T&&>::value)
 
 #define ASTERIA_VARIANT_ASSIGNMENT(C, V, T, t)    template<typename T,  \
-                                                  ASTERIA_SFINAE_ASSIGN(V, T&&)>  \
+                                                  ROCKET_ENABLE_IF(::std::is_assignable<V&, T&&>::value)>  \
                                                   C&  \
-                                                  operator=(T&& t)
+                                                  operator=(T&& t)  \
+                                                  noexcept(::std::is_nothrow_assignable<V&, T&&>::value)
 
-#define ASTERIA_INCOMPLET(T)     template<typename T##_1_ = T, typename T = T##_1_>
+#define ASTERIA_INCOMPLET(T)                      template<typename T##_otbUYGrp_ = T,  \
+                                                           typename T = T##_otbUYGrp_>
 
 // `using`-directives
 using ::std::initializer_list;
