@@ -52,6 +52,13 @@ Instantiated_Function::
   {
   }
 
+void
+Instantiated_Function::
+do_solidify(const cow_vector<AIR_Node>& code)
+  {
+    ::rocket::all_of(code, [&](const AIR_Node& node) { return node.solidify(this->m_queue);  });
+  }
+
 tinyfmt&
 Instantiated_Function::
 describe(tinyfmt& fmt)
