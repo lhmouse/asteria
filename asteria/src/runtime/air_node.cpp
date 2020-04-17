@@ -1100,9 +1100,9 @@ ROCKET_PURE_FUNCTION
 V_integer
 do_operator_NEG(int64_t rhs)
   {
-    if(rhs == INT64_MIN) {
+    if(rhs == INT64_MIN)
       ASTERIA_THROW("integer negation overflow (operand was `$1`)", rhs);
-    }
+
     return -rhs;
   }
 
@@ -1131,9 +1131,9 @@ ROCKET_PURE_FUNCTION
 V_integer
 do_operator_ABS(int64_t rhs)
   {
-    if(rhs == INT64_MIN) {
+    if(rhs == INT64_MIN)
       ASTERIA_THROW("integer absolute value overflow (operand was `$1`)", rhs);
-    }
+
     return ::std::abs(rhs);
   }
 
@@ -1148,9 +1148,9 @@ ROCKET_PURE_FUNCTION
 V_integer
 do_operator_ADD(int64_t lhs, int64_t rhs)
   {
-    if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)) {
+    if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs))
       ASTERIA_THROW("integer addition overflow (operands were `$1` and `$2`)", lhs, rhs);
-    }
+
     return lhs + rhs;
   }
 
@@ -1158,9 +1158,9 @@ ROCKET_PURE_FUNCTION
 V_integer
 do_operator_SUB(int64_t lhs, int64_t rhs)
   {
-    if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs)) {
+    if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs))
       ASTERIA_THROW("integer subtraction overflow (operands were `$1` and `$2`)", lhs, rhs);
-    }
+
     return lhs - rhs;
   }
 
@@ -1168,26 +1168,25 @@ ROCKET_PURE_FUNCTION
 V_integer
 do_operator_MUL(int64_t lhs, int64_t rhs)
   {
-    if((lhs == 0) || (rhs == 0)) {
+    if((lhs == 0) || (rhs == 0))
       return 0;
-    }
-    if((lhs == 1) || (rhs == 1)) {
+
+    if((lhs == 1) || (rhs == 1))
       return (lhs ^ rhs) ^ 1;
-    }
-    if((lhs == INT64_MIN) || (rhs == INT64_MIN)) {
+
+    if((lhs == INT64_MIN) || (rhs == INT64_MIN))
       ASTERIA_THROW("integer multiplication overflow (operands were `$1` and `$2`)", lhs, rhs);
-    }
-    if((lhs == -1) || (rhs == -1)) {
+
+    if((lhs == -1) || (rhs == -1))
       return (lhs ^ rhs) + 1;
-    }
+
     // absolute lhs and signed rhs
     auto m = lhs >> 63;
-    auto alhs = (lhs ^ m) - m;
+    auto alhs = (lhs ^ m) - m;  // may only be positive
     auto srhs = (rhs ^ m) - m;
-    // `alhs` may only be positive here.
-    if((srhs >= 0) ? (alhs > INT64_MAX / srhs) : (alhs > INT64_MIN / srhs)) {
+    if((srhs >= 0) ? (alhs > INT64_MAX / srhs) : (alhs > INT64_MIN / srhs))
       ASTERIA_THROW("integer multiplication overflow (operands were `$1` and `$2`)", lhs, rhs);
-    }
+
     return alhs * srhs;
   }
 
@@ -1195,12 +1194,12 @@ ROCKET_PURE_FUNCTION
 V_integer
 do_operator_DIV(int64_t lhs, int64_t rhs)
   {
-    if(rhs == 0) {
+    if(rhs == 0)
       ASTERIA_THROW("integer divided by zero (operands were `$1` and `$2`)", lhs, rhs);
-    }
-    if((lhs == INT64_MIN) && (rhs == -1)) {
+
+    if((lhs == INT64_MIN) && (rhs == -1))
       ASTERIA_THROW("integer division overflow (operands were `$1` and `$2`)", lhs, rhs);
-    }
+
     return lhs / rhs;
   }
 
@@ -1208,12 +1207,12 @@ ROCKET_PURE_FUNCTION
 V_integer
 do_operator_MOD(int64_t lhs, int64_t rhs)
   {
-    if(rhs == 0) {
+    if(rhs == 0)
       ASTERIA_THROW("integer divided by zero (operands were `$1` and `$2`)", lhs, rhs);
-    }
-    if((lhs == INT64_MIN) && (rhs == -1)) {
+
+    if((lhs == INT64_MIN) && (rhs == -1))
       ASTERIA_THROW("integer division overflow (operands were `$1` and `$2`)", lhs, rhs);
-    }
+
     return lhs % rhs;
   }
 
@@ -1221,12 +1220,12 @@ ROCKET_PURE_FUNCTION
 V_integer
 do_operator_SLL(int64_t lhs, int64_t rhs)
   {
-    if(rhs < 0) {
+    if(rhs < 0)
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
-    }
-    if(rhs >= 64) {
+
+    if(rhs >= 64)
       return 0;
-    }
+
     return int64_t(uint64_t(lhs) << rhs);
   }
 
@@ -1234,12 +1233,12 @@ ROCKET_PURE_FUNCTION
 V_integer
 do_operator_SRL(int64_t lhs, int64_t rhs)
   {
-    if(rhs < 0) {
+    if(rhs < 0)
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
-    }
-    if(rhs >= 64) {
+
+    if(rhs >= 64)
       return 0;
-    }
+
     return int64_t(uint64_t(lhs) >> rhs);
   }
 
@@ -1247,21 +1246,21 @@ ROCKET_PURE_FUNCTION
 V_integer
 do_operator_SLA(int64_t lhs, int64_t rhs)
   {
-    if(rhs < 0) {
+    if(rhs < 0)
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
-    }
-    if(lhs == 0) {
+
+    if(lhs == 0)
       return 0;
-    }
-    if(rhs >= 64) {
+
+    if(rhs >= 64)
       ASTERIA_THROW("integer left shift overflow (operands were `$1` and `$2`)", lhs, rhs);
-    }
+
     auto bc = 63 - int(rhs);
     auto mask_out = uint64_t(lhs) >> bc << bc;
     auto mask_sbt = uint64_t(lhs >> 63) << bc;
-    if(mask_out != mask_sbt) {
+    if(mask_out != mask_sbt)
       ASTERIA_THROW("integer left shift overflow (operands were `$1` and `$2`)", lhs, rhs);
-    }
+
     return int64_t(uint64_t(lhs) << rhs);
   }
 
@@ -1269,12 +1268,12 @@ ROCKET_PURE_FUNCTION
 V_integer
 do_operator_SRA(int64_t lhs, int64_t rhs)
   {
-    if(rhs < 0) {
+    if(rhs < 0)
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
-    }
-    if(rhs >= 64) {
+
+    if(rhs >= 64)
       return lhs >> 63;
-    }
+
     return lhs >> rhs;
   }
 
@@ -1379,9 +1378,9 @@ do_operator_TRUNC(double rhs)
 V_integer
 do_cast_to_integer(double value)
   {
-    if(!::std::islessequal(-0x1p63, value) || !::std::islessequal(value, 0x1p63 - 0x1p10)) {
+    if(!::std::islessequal(-0x1p63, value) || !::std::islessequal(value, 0x1p63 - 0x1p10))
       ASTERIA_THROW("value not representable as an `integer` (operand was `$1`)", value);
-    }
+
     return int64_t(value);
   }
 
@@ -1459,29 +1458,34 @@ V_string
 do_duplicate_string(const cow_string& source, uint64_t count)
   {
     V_string res;
-    auto nchars = source.size();
-    if((nchars == 0) || (count == 0)) {
+    size_t nchars = source.size();
+    if((nchars == 0) || (count == 0))
       return res;
-    }
-    if(nchars > res.max_size() / count) {
+
+    if(nchars > res.max_size() / count)
       ASTERIA_THROW("string length overflow (`$1` * `$2` > `$3`)", nchars, count, res.max_size());
-    }
-    auto times = static_cast<size_t>(count);
+
+    size_t times = static_cast<size_t>(count);
     if(nchars == 1) {
       // Fast fill.
-      res.assign(times, source.front());
+      res.append(times, source.front());
       return res;
     }
+
     // Reserve space for the result string.
-    char* ptr = res.assign(nchars * times, '*').mut_data();
+    res.append(nchars * times, '*');
+    char* ptr = res.mut_data();
+
     // Copy the source string once.
     ::std::memcpy(ptr, source.data(), nchars);
-    // Append the result string to itself, doubling its length, until more than half of the result string
-    // has been populated.
+
+    // Append the result string to itself, doubling its length, until more than half of
+    // the result string has been populated.
     while(nchars <= res.size() / 2) {
       ::std::memcpy(ptr + nchars, ptr, nchars);
       nchars *= 2;
     }
+
     // Copy remaining characters, if any.
     if(nchars < res.size()) {
       ::std::memcpy(ptr + nchars, ptr, res.size() - nchars);
@@ -1494,9 +1498,9 @@ ROCKET_PURE_FUNCTION
 V_string
 do_operator_MUL(const cow_string& lhs, int64_t rhs)
   {
-    if(rhs < 0) {
+    if(rhs < 0)
       ASTERIA_THROW("negative duplicate count (operands were `$1` and `$2`)", lhs, rhs);
-    }
+
     return do_duplicate_string(lhs, static_cast<uint64_t>(rhs));
   }
 
@@ -1504,9 +1508,9 @@ ROCKET_PURE_FUNCTION
 V_string
 do_operator_MUL(int64_t lhs, const cow_string& rhs)
   {
-    if(lhs < 0) {
+    if(lhs < 0)
       ASTERIA_THROW("negative duplicate count (operands were `$1` and `$2`)", lhs, rhs);
-    }
+
     return do_duplicate_string(rhs, static_cast<uint64_t>(lhs));
   }
 
@@ -1514,15 +1518,15 @@ ROCKET_PURE_FUNCTION
 V_string
 do_operator_SLL(const cow_string& lhs, int64_t rhs)
   {
-    if(rhs < 0) {
+    if(rhs < 0)
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
-    }
-    V_string res;
+
     // Reserve space for the result string.
+    V_string res;
     char* ptr = &*(res.insert(res.begin(), lhs.size(), ' '));
-    if(static_cast<uint64_t>(rhs) >= lhs.size()) {
+    if(static_cast<uint64_t>(rhs) >= lhs.size())
       return res;
-    }
+
     // Copy the substring in the right.
     size_t count = static_cast<size_t>(rhs);
     ::std::memcpy(ptr, lhs.data() + count, lhs.size() - count);
@@ -1533,15 +1537,15 @@ ROCKET_PURE_FUNCTION
 V_string
 do_operator_SRL(const cow_string& lhs, int64_t rhs)
   {
-    if(rhs < 0) {
+    if(rhs < 0)
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
-    }
-    V_string res;
+
     // Reserve space for the result string.
+    V_string res;
     char* ptr = &*(res.insert(res.begin(), lhs.size(), ' '));
-    if(static_cast<uint64_t>(rhs) >= lhs.size()) {
+    if(static_cast<uint64_t>(rhs) >= lhs.size())
       return res;
-    }
+
     // Copy the substring in the left.
     size_t count = static_cast<size_t>(rhs);
     ::std::memcpy(ptr + count, lhs.data(), lhs.size() - count);
@@ -1552,17 +1556,16 @@ ROCKET_PURE_FUNCTION
 V_string
 do_operator_SLA(const cow_string& lhs, int64_t rhs)
   {
-    if(rhs < 0) {
+    if(rhs < 0)
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
-    }
+
     V_string res;
-    if(static_cast<uint64_t>(rhs) >= res.max_size() - lhs.size()) {
+    if(static_cast<uint64_t>(rhs) >= res.max_size() - lhs.size())
       ASTERIA_THROW("string length overflow (`$1` + `$2` > `$3`)", lhs.size(), rhs, res.max_size());
-    }
+
     // Append spaces in the right and return the result.
     size_t count = static_cast<size_t>(rhs);
-    res.assign(::rocket::sref(lhs));
-    res.append(count, ' ');
+    res.assign(lhs).append(count, ' ');
     return res;
   }
 
@@ -1570,13 +1573,13 @@ ROCKET_PURE_FUNCTION
 V_string
 do_operator_SRA(const cow_string& lhs, int64_t rhs)
   {
-    if(rhs < 0) {
+    if(rhs < 0)
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
-    }
+
     V_string res;
-    if(static_cast<uint64_t>(rhs) >= lhs.size()) {
+    if(static_cast<uint64_t>(rhs) >= lhs.size())
       return res;
-    }
+
     // Return the substring in the left.
     size_t count = static_cast<size_t>(rhs);
     res.append(lhs.data(), lhs.size() - count);
@@ -1649,6 +1652,7 @@ do_apply_xop_INC_POST(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // This operator is unary.
     auto& lhs = ctx.stack().get_top().open();
+
     // Increment the operand and return the old value. `assign` is ignored.
     if(lhs.is_integer()) {
       auto& reg = lhs.open_integer();
@@ -1671,6 +1675,7 @@ do_apply_xop_DEC_POST(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // This operator is unary.
     auto& lhs = ctx.stack().get_top().open();
+
     // Decrement the operand and return the old value. `assign` is ignored.
     if(lhs.is_integer()) {
       auto& reg = lhs.open_integer();
@@ -1695,6 +1700,7 @@ do_apply_xop_SUBSCR(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
     auto rhs = ctx.stack().get_top().read();
     ctx.stack().pop();
     auto& lref = ctx.stack().open_top();
+
     // Append a reference modifier. `assign` is ignored.
     if(rhs.is_integer()) {
       auto& reg = rhs.open_integer();
@@ -1720,6 +1726,7 @@ do_apply_xop_POS(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
 
     // This operator is unary.
     auto rhs = ctx.stack().get_top().read();
+
     // Copy the operand to create a temporary value, then return it.
     // N.B. This is one of the few operators that work on all types.
     do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
@@ -1734,6 +1741,7 @@ do_apply_xop_NEG(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
 
     // This operator is unary.
     auto rhs = ctx.stack().get_top().read();
+
     // Get the opposite of the operand as a temporary value, then return it.
     if(rhs.is_integer()) {
       auto& reg = rhs.open_integer();
@@ -1758,6 +1766,7 @@ do_apply_xop_NOTB(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
 
     // This operator is unary.
     auto rhs = ctx.stack().get_top().read();
+
     // Perform bitwise NOT operation on the operand to create a temporary value, then return it.
     if(rhs.is_boolean()) {
       auto& reg = rhs.open_boolean();
@@ -1786,6 +1795,7 @@ do_apply_xop_NOTL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
 
     // This operator is unary.
     const auto& rhs = ctx.stack().get_top().read();
+
     // Perform logical NOT operation on the operand to create a temporary value, then return it.
     // N.B. This is one of the few operators that work on all types.
     do_set_temporary(ctx.stack(), assign, do_operator_NOT(rhs.test()));
@@ -1797,6 +1807,7 @@ do_apply_xop_INC_PRE(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // This operator is unary.
     auto& rhs = ctx.stack().get_top().open();
+
     // Increment the operand and return it. `assign` is ignored.
     if(rhs.is_integer()) {
       auto& reg = rhs.open_integer();
@@ -1817,6 +1828,7 @@ do_apply_xop_DEC_PRE(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // This operator is unary.
     auto& rhs = ctx.stack().get_top().open();
+
     // Decrement the operand and return it. `assign` is ignored.
     if(rhs.is_integer()) {
       auto& reg = rhs.open_integer();
@@ -1840,6 +1852,7 @@ do_apply_xop_UNSET(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
 
     // This operator is unary.
     auto rhs = ctx.stack().get_top().unset();
+
     // Unset the reference and return the old value.
     do_set_temporary(ctx.stack(), assign, ::std::move(rhs));
     return air_status_next;
@@ -1853,25 +1866,26 @@ do_apply_xop_LENGTHOF(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
 
     // This operator is unary.
     const auto& rhs = ctx.stack().get_top().read();
+
     // Return the number of elements in the operand.
     ptrdiff_t nelems;
     switch(weaken_enum(rhs.vtype())) {
-      case vtype_null: {
+      case vtype_null:
         nelems = 0;
         break;
-      }
-      case vtype_string: {
+
+      case vtype_string:
         nelems = rhs.as_string().ssize();
         break;
-      }
-      case vtype_array: {
+
+      case vtype_array:
         nelems = rhs.as_array().ssize();
         break;
-      }
-      case vtype_object: {
+
+      case vtype_object:
         nelems = rhs.as_object().ssize();
         break;
-      }
+
       default:
         ASTERIA_THROW("prefix `countof` not applicable (operand was `$1`)", rhs);
     }
@@ -1887,6 +1901,7 @@ do_apply_xop_TYPEOF(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
 
     // This operator is unary.
     const auto& rhs = ctx.stack().get_top().read();
+
     // Return the type name of the operand.
     // N.B. This is one of the few operators that work on all types.
     do_set_temporary(ctx.stack(), assign, ::rocket::sref(rhs.what_vtype()));
@@ -1901,6 +1916,7 @@ do_apply_xop_SQRT(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
 
     // This operator is unary.
     auto rhs = ctx.stack().get_top().read();
+
     // Get the square root of the operand as a temporary value, then return it.
     if(rhs.is_integer()) {
       // Note that `rhs` does not have type `V_real`, thus this branch can't be optimized.
@@ -1925,6 +1941,7 @@ do_apply_xop_ISNAN(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
 
     // This operator is unary.
     auto rhs = ctx.stack().get_top().read();
+
     // Check whether the operand is a NaN, store the result in a temporary value, then return it.
     if(rhs.is_integer()) {
       // Note that `rhs` does not have type `V_boolean`, thus this branch can't be optimized.
@@ -1949,6 +1966,7 @@ do_apply_xop_ISINF(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
 
     // This operator is unary.
     auto rhs = ctx.stack().get_top().read();
+
     // Check whether the operand is an infinity, store the result in a temporary value, then return it.
     if(rhs.is_integer()) {
       // Note that `rhs` does not have type `V_boolean`, thus this branch can't be optimized.
@@ -1973,6 +1991,7 @@ do_apply_xop_ABS(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
 
     // This operator is unary.
     auto rhs = ctx.stack().get_top().read();
+
     // Get the absolute value of the operand as a temporary value, then return it.
     if(rhs.is_integer()) {
       auto& reg = rhs.open_integer();
@@ -1997,6 +2016,7 @@ do_apply_xop_SIGN(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
 
     // This operator is unary.
     auto rhs = ctx.stack().get_top().read();
+
     // Get the sign bit of the operand as a temporary value, then return it.
     if(rhs.is_integer()) {
       auto& reg = rhs.open_integer();
@@ -2021,6 +2041,7 @@ do_apply_xop_ROUND(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
 
     // This operator is unary.
     auto rhs = ctx.stack().get_top().read();
+
     // Round the operand to the nearest integer as a temporary value, then return it.
     if(rhs.is_integer()) {
       // No conversion is required.
@@ -2045,6 +2066,7 @@ do_apply_xop_FLOOR(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
 
     // This operator is unary.
     auto rhs = ctx.stack().get_top().read();
+
     // Round the operand towards negative infinity as a temporary value, then return it.
     if(rhs.is_integer()) {
       // No conversion is required.
@@ -2069,6 +2091,7 @@ do_apply_xop_CEIL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
 
     // This operator is unary.
     auto rhs = ctx.stack().get_top().read();
+
     // Round the operand towards negative infinity as a temporary value, then return it.
     if(rhs.is_integer()) {
       // No conversion is required.
@@ -2093,6 +2116,7 @@ do_apply_xop_TRUNC(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
 
     // This operator is unary.
     auto rhs = ctx.stack().get_top().read();
+
     // Round the operand towards negative infinity as a temporary value, then return it.
     if(rhs.is_integer()) {
       // No conversion is required.
@@ -2117,6 +2141,7 @@ do_apply_xop_IROUND(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
 
     // This operator is unary.
     auto rhs = ctx.stack().get_top().read();
+
     // Round the operand to the nearest integer as a temporary value, then return it as an `integer`.
     if(rhs.is_integer()) {
       // No conversion is required.
@@ -2141,6 +2166,7 @@ do_apply_xop_IFLOOR(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
 
     // This operator is unary.
     auto rhs = ctx.stack().get_top().read();
+
     // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
     if(rhs.is_integer()) {
       // No conversion is required.
@@ -2165,6 +2191,7 @@ do_apply_xop_ICEIL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
 
     // This operator is unary.
     auto rhs = ctx.stack().get_top().read();
+
     // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
     if(rhs.is_integer()) {
       // No conversion is required.
@@ -2189,6 +2216,7 @@ do_apply_xop_ITRUNC(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
 
     // This operator is unary.
     auto rhs = ctx.stack().get_top().read();
+
     // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
     if(rhs.is_integer()) {
       // No conversion is required.
@@ -2217,6 +2245,7 @@ do_apply_xop_CMP_XEQ(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
     auto rhs = ctx.stack().get_top().read();
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
+
     // Report unordered operands as being unequal.
     // N.B. This is one of the few operators that work on all types.
     auto comp = lhs.compare(rhs);
@@ -2236,12 +2265,13 @@ do_apply_xop_CMP_XREL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
     auto rhs = ctx.stack().get_top().read();
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
+
     // Report unordered operands as being unequal.
     // N.B. This is one of the few operators that work on all types.
     auto comp = lhs.compare(rhs);
-    if(comp == compare_unordered) {
+    if(comp == compare_unordered)
       ASTERIA_THROW("values not comparable (operands were `$1` and `$2`)", lhs, rhs);
-    }
+
     do_set_temporary(ctx.stack(), assign, (comp == expect) != negative);
     return air_status_next;
   }
@@ -2256,26 +2286,27 @@ do_apply_xop_CMP_3WAY(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
     auto rhs = ctx.stack().get_top().read();
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
+
     // Report unordered operands as being unequal.
     // N.B. This is one of the few operators that work on all types.
     auto comp = lhs.compare(rhs);
     switch(comp) {
-      case compare_greater: {
+      case compare_greater:
         do_set_temporary(ctx.stack(), assign, +1);
         break;
-      }
-      case compare_less: {
+
+      case compare_less:
         do_set_temporary(ctx.stack(), assign, -1);
         break;
-      }
-      case compare_equal: {
+
+      case compare_equal:
         do_set_temporary(ctx.stack(), assign, 0);
         break;
-      }
-      case compare_unordered: {
+
+      case compare_unordered:
         do_set_temporary(ctx.stack(), assign, ::rocket::sref("<unordered>"));
         break;
-      }
+
       default:
         ROCKET_ASSERT(false);
     }
@@ -2292,6 +2323,7 @@ do_apply_xop_ADD(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
     auto rhs = ctx.stack().get_top().read();
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
+
     if(lhs.is_boolean() && rhs.is_boolean()) {
       // For the `boolean` type, return the logical OR'd result of both operands.
       auto& reg = rhs.open_boolean();
@@ -2328,6 +2360,7 @@ do_apply_xop_SUB(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
     auto rhs = ctx.stack().get_top().read();
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
+
     if(lhs.is_boolean() && rhs.is_boolean()) {
       // For the `boolean` type, return the logical XOR'd result of both operands.
       auto& reg = rhs.open_boolean();
@@ -2359,6 +2392,7 @@ do_apply_xop_MUL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
     auto rhs = ctx.stack().get_top().read();
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
+
     if(lhs.is_boolean() && rhs.is_boolean()) {
       // For the `boolean` type, return the logical AND'd result of both operands.
       auto& reg = rhs.open_boolean();
@@ -2400,6 +2434,7 @@ do_apply_xop_DIV(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
     auto rhs = ctx.stack().get_top().read();
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
+
     if(lhs.is_integer() && rhs.is_integer()) {
       // For the `integer` and `real` types, return the quotient of both operands.
       auto& reg = rhs.open_integer();
@@ -2426,6 +2461,7 @@ do_apply_xop_MOD(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
     auto rhs = ctx.stack().get_top().read();
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
+
     if(lhs.is_integer() && rhs.is_integer()) {
       // For the `integer` and `real` types, return the remainder of both operands.
       auto& reg = rhs.open_integer();
@@ -2452,6 +2488,7 @@ do_apply_xop_SLL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
     auto rhs = ctx.stack().get_top().read();
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
+
     if(lhs.is_integer() && rhs.is_integer()) {
       // If the LHS operand has type `integer`, shift the LHS operand to the left by the number of bits specified
       // by the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with zeroes.
@@ -2481,6 +2518,7 @@ do_apply_xop_SRL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
     auto rhs = ctx.stack().get_top().read();
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
+
     if(lhs.is_integer() && rhs.is_integer()) {
       // If the LHS operand has type `integer`, shift the LHS operand to the right by the number of bits
       // specified by the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with zeroes.
@@ -2510,6 +2548,7 @@ do_apply_xop_SLA(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
     auto rhs = ctx.stack().get_top().read();
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
+
     if(lhs.is_integer() && rhs.is_integer()) {
       // If the LHS operand is of type `integer`, shift the LHS operand to the left by the number of bits
       // specified by the RHS operand. Bits shifted out that are equal to the sign bit are discarded. Bits
@@ -2540,6 +2579,7 @@ do_apply_xop_SRA(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
     auto rhs = ctx.stack().get_top().read();
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
+
     if(lhs.is_integer() && rhs.is_integer()) {
       // If the LHS operand is of type `integer`, shift the LHS operand to the right by the number of bits
       // specified by the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with the
@@ -2569,6 +2609,7 @@ do_apply_xop_ANDB(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
     auto rhs = ctx.stack().get_top().read();
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
+
     if(lhs.is_boolean() && rhs.is_boolean()) {
       // For the `boolean` type, return the logical AND'd result of both operands.
       auto& reg = rhs.open_boolean();
@@ -2602,6 +2643,7 @@ do_apply_xop_ORB(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
     auto rhs = ctx.stack().get_top().read();
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
+
     if(lhs.is_boolean() && rhs.is_boolean()) {
       // For the `boolean` type, return the logical OR'd result of both operands.
       auto& reg = rhs.open_boolean();
@@ -2635,6 +2677,7 @@ do_apply_xop_XORB(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
     auto rhs = ctx.stack().get_top().read();
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
+
     if(lhs.is_boolean() && rhs.is_boolean()) {
       // For the `boolean` type, return the logical XOR'd result of both operands.
       auto& reg = rhs.open_boolean();
@@ -2664,6 +2707,7 @@ do_apply_xop_ASSIGN(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
     // Pop the RHS operand.
     auto rhs = ctx.stack().get_top().read();
     ctx.stack().pop();
+
     // Copy the value to the LHS operand which is write-only. `assign` is ignored.
     do_set_temporary(ctx.stack(), true, ::std::move(rhs));
     return air_status_next;
@@ -2681,6 +2725,7 @@ do_apply_xop_FMA(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
     auto mid = ctx.stack().get_top().read();
     ctx.stack().pop();
     const auto& lhs = ctx.stack().get_top().read();
+
     if(lhs.is_convertible_to_real() && mid.is_convertible_to_real() && rhs.is_convertible_to_real()) {
       // Calculate the fused multiply-add result of the operands.
       // Note that `rhs` might not have type `V_real`, thus this branch can't be optimized.
@@ -2698,6 +2743,7 @@ do_apply_xop_HEAD(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // This operator is unary.
     auto& lref = ctx.stack().open_top();
+
     Reference_modifier::S_array_head xmod = { };
     lref.zoom_in(::std::move(xmod));
     return air_status_next;
@@ -2708,6 +2754,7 @@ do_apply_xop_TAIL(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // This operator is unary.
     auto& lref = ctx.stack().open_top();
+
     Reference_modifier::S_array_tail xmod = { };
     lref.zoom_in(::std::move(xmod));
     return air_status_next;
@@ -2724,18 +2771,19 @@ do_unpack_struct_array(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
     // Note that the initializer must not have been empty for this function.
     auto val = ctx.stack().get_top().read();
     ctx.stack().pop();
+
     // Make sure it is really an `array`.
     V_array arr;
-    if(!val.is_null()) {
-      if(!val.is_array()) {
-        ASTERIA_THROW("invalid argument for structured array binding (initializer was `$1`)", val);
-      }
+    if(!val.is_null() && !val.is_array())
+      ASTERIA_THROW("invalid argument for structured array binding (initializer was `$1`)", val);
+    if(val.is_array())
       arr = ::std::move(val.open_array());
-    }
+
     for(size_t i = nelems - 1;  i != SIZE_MAX;  --i) {
       // Get the variable back.
       auto var = ctx.stack().get_top().get_variable_opt();
       ctx.stack().pop();
+
       // Initialize it.
       ROCKET_ASSERT(var && !var->is_initialized());
       auto qinit = arr.mut_ptr(i);
@@ -2758,18 +2806,19 @@ do_unpack_struct_object(Executive_Context& ctx, ParamU pu, const void* pv)
     // Note that the initializer must not have been empty for this function.
     auto val = ctx.stack().get_top().read();
     ctx.stack().pop();
+
     // Make sure it is really an `object`.
     V_object obj;
-    if(!val.is_null()) {
-      if(!val.is_object()) {
-        ASTERIA_THROW("invalid argument for structured object binding (initializer was `$1`)", val);
-      }
+    if(!val.is_null() && !val.is_object())
+      ASTERIA_THROW("invalid argument for structured object binding (initializer was `$1`)", val);
+    if(val.is_object())
       obj = ::std::move(val.open_object());
-    }
+
     for(auto it = keys.rbegin();  it != keys.rend();  ++it) {
       // Get the variable back.
       auto var = ctx.stack().get_top().get_variable_opt();
       ctx.stack().pop();
+
       // Initialize it.
       ROCKET_ASSERT(var && !var->is_initialized());
       auto qinit = obj.mut_ptr(*it);
@@ -2794,12 +2843,15 @@ do_define_null_variable(Executive_Context& ctx, ParamU pu, const void* pv)
 
     // Allocate an uninitialized variable.
     auto var = gcoll->create_variable();
+
     // Inject the variable into the current context.
     Reference_root::S_variable xref = { var };
     ctx.open_named_reference(name) = ::std::move(xref);
+
     // Call the hook function if any.
     if(qhooks)
       qhooks->on_variable_declare(sloc, inside, name);
+
     // Initialize the variable to `null`.
     var->initialize(nullptr, immutable);
     return air_status_next;
@@ -2843,6 +2895,7 @@ do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
     else if(value.is_array()) {
       auto source = ::std::move(value.open_array());
       ctx.stack().pop();
+
       // Convert all elements to temporaries.
       args.assign(source.size(), Reference_root::S_void());
       for(size_t i = 0;  i < args.size();  ++i) {
@@ -2854,25 +2907,28 @@ do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
     else if(value.is_function()) {
       const auto generator = ::std::move(value.open_function());
       auto gself = ctx.stack().open_top().zoom_out();
+
       // Pass an empty argument list to get the number of arguments to generate.
       cow_vector<Reference> gargs;
       do_invoke_nontail(ctx.stack().open_top(), sloc, ctx, generator, ::std::move(gargs));
       value = ctx.stack().get_top().read();
       ctx.stack().pop();
+
       // Verify the argument count.
-      if(!value.is_integer()) {
+      if(!value.is_integer())
         ASTERIA_THROW("invalid number of variadic arguments (value `$1`)", value);
-      }
+
       int64_t nvargs = value.as_integer();
-      if((nvargs < 0) || (nvargs > INT_MAX)) {
+      if((nvargs < 0) || (nvargs > INT_MAX))
         ASTERIA_THROW("number of variadic arguments not acceptable (nvargs `$1`)", nvargs);
-      }
+
       // Generate arguments.
       args.assign(static_cast<size_t>(nvargs), gself);
       for(size_t i = 0;  i < args.size();  ++i) {
         // Initialize the argument list for the generator.
         Reference_root::S_constant xref = { int64_t(i) };
         gargs.clear().emplace_back(::std::move(xref));
+
         // Generate an argument. Ensure it is dereferenceable.
         do_invoke_nontail(args.mut(i), sloc, ctx, generator, ::std::move(gargs));
         static_cast<void>(args[i].read());
@@ -2883,9 +2939,8 @@ do_variadic_call(Executive_Context& ctx, ParamU pu, const void* pv)
 
     // Copy the target, which shall be of type `function`.
     value = ctx.stack().get_top().read();
-    if(!value.is_function()) {
+    if(!value.is_function())
       ASTERIA_THROW("attempt to call a non-function (value `$1`)", value);
-    }
     auto& self = ctx.stack().open_top().zoom_out();
 
     return do_function_call_common(self, sloc, ctx, value.as_function(), ptc, ::std::move(args));
@@ -2934,20 +2989,19 @@ do_import_call(Executive_Context& ctx, ParamU pu, const void* pv)
 
     // Copy the filename, which shall be of type `string`.
     auto value = ctx.stack().get_top().read();
-    if(!value.is_string()) {
+    if(!value.is_string())
       ASTERIA_THROW("invalid path specified for `import` (value `$1` not a string)", value);
-    }
+
     auto path = value.as_string();
-    if(path.empty()) {
+    if(path.empty())
       ASTERIA_THROW("empty path specified for `import`");
-    }
+
     // Rewrite the path if it is not absolute.
     if((path[0] != '/') && (sloc.c_file()[0] == '/')) {
       path.assign(sloc.file());
       path.erase(path.rfind('/') + 1);
       path.append(value.as_string());
     }
-    // Canonicalize it.
     uptr<char, void (&)(void*)> abspath(::realpath(path.safe_c_str(), nullptr), ::free);
     if(!abspath) {
       int err = errno;
@@ -2976,9 +3030,8 @@ do_import_call(Executive_Context& ctx, ParamU pu, const void* pv)
     // Update the first argument to `import` if it was passed by reference.
     // `this` is null for imported scripts.
     auto& self = ctx.stack().open_top();
-    if(self.is_lvalue()) {
+    if(self.is_lvalue())
       self.open() = path;
-    }
     self = Reference_root::S_constant();
 
     return do_function_call_common(self, sloc, ctx, qtarget, ptc_aware_none, ::std::move(args));
@@ -4045,7 +4098,6 @@ const
 
       case index_import_call:
         return callback;
-
 
       default:
         ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
