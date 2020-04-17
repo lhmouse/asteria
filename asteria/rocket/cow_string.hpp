@@ -316,7 +316,7 @@ class basic_cow_string
         if(!this->unique() || ROCKET_UNEXPECT(this->capacity() < cap)) {
 #ifndef ROCKET_DEBUG
           // Reserve more space for non-debug builds.
-          cap = noadl::max(cap, len + len / 2 + 31);
+          cap |= len / 2 + 31;
 #endif
           this->do_reallocate(0, 0, len, cap | 1);
         }

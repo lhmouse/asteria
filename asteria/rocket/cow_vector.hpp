@@ -182,7 +182,7 @@ class cow_vector
         if(!this->unique() || ROCKET_UNEXPECT(this->capacity() < cap)) {
 #ifndef ROCKET_DEBUG
           // Reserve more space for non-debug builds.
-          cap = noadl::max(cap, cnt + cnt / 2 + 7);
+          cap |= cnt / 2 + 7;
 #endif
           this->do_reallocate(0, 0, cnt, cap | 1);
         }
