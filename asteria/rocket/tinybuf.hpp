@@ -124,50 +124,60 @@ class basic_tinybuf
     // * Estimates how many characters are available for non-blocking reads.
     // * Returns `0` if the number is unknown.
     //   Returns `-1` if no character is available.
-    // The default implementation indicates an unknown number.
     virtual
     off_type
     do_fortell()
     const
-      { return 0;  }
+      {
+        // The default implementation indicates an unknown number.
+        return 0;
+      }
 
     // * Synchronizes the get and put areas with the external device.
     // * Throws an exception on failure.
-    // The default implementation does nothing.
     virtual
     basic_tinybuf&
     do_flush(const char_type*& /*gcur*/, const char_type*& /*gend*/, char_type*& /*pcur*/, char_type*& /*pend*/)
-      { return *this;  }
+      {
+        // The default implementation does nothing.
+        return *this;
+      }
 
     // * Sets the stream position.
     // * Returns its absolute value.
     // * Throws an exception on failure.
-    // The default implementation fails.
     virtual
     off_type
     do_seek(off_type /*off*/, seek_dir /*dir*/)
-      { noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not seekable");  }
+      {
+        // The default implementation always fails.
+        noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not seekable");
+      }
 
     // * Reads data from the external device into the get area and discards it unless `peek` is set.
     // * Returns the first character that has been read, or `traits::eof()` if there are no more
     //   characters.
     // * Throws an exception in case of failure.
     // This function may reallocate the get area as needed.
-    // The default implementation fails.
     virtual
     int_type
     do_underflow(const char_type*& /*gcur*/, const char_type*& /*gend*/, bool /*peek*/)
-      { noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not readable");  }
+      {
+        // The default implementation always fails.
+        noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not readable");
+      }
 
     // * Writes the contents of the put area, followed by the sequence denoted by `sadd`
     //   unless `nadd` is zero, to the external device.
     // * Throws an exception on failure.
     // This function may reallocate the put area as needed.
-    // The default implementation fails.
     virtual
     basic_tinybuf&
     do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/, const char_type* /*sadd*/, size_type /*nadd*/)
-      { noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not writable");  }
+      {
+       // The default implementation always fails.
+        noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not writable");
+      }
 
     // * Calls `do_flush()` only when either the get or put area is active.
     // This function may be useful when handling interleaving reads and writes.
