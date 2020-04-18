@@ -7,6 +7,20 @@
 
 namespace details_utilities {
 
+// `is_input_iterator`
+template<typename tagT>
+constexpr
+bool
+is_input_iterator_tag(tagT&&)
+noexcept
+  { return false;  }
+
+constexpr
+bool
+is_input_iterator_tag(::std::input_iterator_tag)
+noexcept
+  { return true;  }
+
 // `estimate_distance()`
 template<typename iteratorT>
 constexpr

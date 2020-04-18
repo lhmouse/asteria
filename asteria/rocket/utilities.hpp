@@ -197,14 +197,10 @@ clamp(xvT&& xv, loT&& lo, upT&& up)
                                  : ::std::forward<xvT>(xv);
   }
 
-template<typename typeT, typename = void>
+template<typename iteratorT>
 struct is_input_iterator
-  : integral_constant<bool, false>
-  { };
-
-template<typename typeT>
-struct is_input_iterator<typeT, ROCKET_VOID_T(typename iterator_traits<typeT>::iterator_category)>
-  : integral_constant<bool, true>
+  : integral_constant<bool, details_utilities::is_input_iterator_tag(
+                                typename iterator_traits<iteratorT>::iterator_category())>
   { };
 
 template<typename firstT, typename lastT, typename funcT, typename... paramsT>
