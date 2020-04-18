@@ -8,10 +8,9 @@
 namespace details_utilities {
 
 // `is_input_iterator`
-template<typename tagT>
 constexpr
 bool
-is_input_iterator_tag(tagT&&)
+is_input_iterator_tag(::std::output_iterator_tag)
 noexcept
   { return false;  }
 
