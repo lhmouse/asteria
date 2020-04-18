@@ -250,8 +250,9 @@ constexpr
 size_t
 estimate_distance(iteratorT first, iteratorT last)
   {
-    return details_utilities::estimate_distance_aux(typename iterator_traits<iteratorT>::iterator_category(),
-                                                    ::std::move(first), ::std::move(last));
+    return details_utilities::estimate_distance_aux(
+                        typename iterator_traits<iteratorT>::iterator_category(),
+                        ::std::move(first), ::std::move(last));
   }
 
 template<typename elementT, typename... paramsT>
