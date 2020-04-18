@@ -53,25 +53,25 @@ constexpr
 tinybuf_base::open_mode
 operator~(tinybuf_base::open_mode rhs)
 noexcept
-  { return tinybuf_base::open_mode(~uint32_t(rhs));  }
+  { return tinybuf_base::open_mode(~(uint32_t)rhs);  }
 
 constexpr
 tinybuf_base::open_mode
 operator&(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs)
 noexcept
-  { return tinybuf_base::open_mode(uint32_t(lhs) & uint32_t(rhs));  }
+  { return tinybuf_base::open_mode((uint32_t)lhs & (uint32_t)rhs);  }
 
 constexpr
 tinybuf_base::open_mode
 operator|(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs)
 noexcept
-  { return tinybuf_base::open_mode(uint32_t(lhs) | uint32_t(rhs));  }
+  { return tinybuf_base::open_mode((uint32_t)lhs | (uint32_t)rhs);  }
 
 constexpr
 tinybuf_base::open_mode
 operator^(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs)
 noexcept
-  { return tinybuf_base::open_mode(uint32_t(lhs) ^ uint32_t(rhs));  }
+  { return tinybuf_base::open_mode((uint32_t)lhs ^ (uint32_t)rhs);  }
 
 template<typename charT, typename traitsT>
 class basic_tinybuf
