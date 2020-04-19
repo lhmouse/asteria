@@ -24,17 +24,13 @@ do_unpack_frames(Runtime_Error& except, Global_Context& global, Evaluation_Stack
       auto tca = ::std::move(frames.mut_back());
       frames.pop_back();
 
-      // Unpack arguments.
-      const auto& sloc = tca->sloc();
-      const auto& inside = tca->zvarg()->func();
-      const auto& qhooks = global.get_hooks_opt();
-
       // Push the function call.
-      except.push_frame_plain(sloc, ::rocket::sref("<proper tail call>"));
+      except.push_frame_plain(tca->sloc(), ::rocket::sref("<proper tail call>"));
 
       // Call the hook function if any.
+      const auto qhooks = global.get_hooks_opt();
       if(qhooks)
-        qhooks->on_function_except(sloc, inside, except);
+        qhooks->on_function_except(tca->sloc(), tca->zvarg()->func(), except);
 
       // Evaluate deferred expressions if any.
       if(tca->get_defer_stack().size())
@@ -43,7 +39,7 @@ do_unpack_frames(Runtime_Error& except, Global_Context& global, Evaluation_Stack
           .on_scope_exit(except);
 
       // Push the caller.
-      except.push_frame_func(tca->zvarg()->sloc(), inside);
+      except.push_frame_func(tca->zvarg()->sloc(), tca->zvarg()->func());
     }
     return except;
   }
@@ -61,11 +57,6 @@ do_unpack_tail_calls(Reference& self, Global_Context& global)
     // Unpack all frames recursively.
     // Note that `self` is overwritten before the wrapped function is called.
     while(!!(tca = self.get_tail_call_opt())) {
-      // Unpack arguments.
-      const auto& sloc = tca->sloc();
-      const auto& inside = tca->zvarg()->func();
-      const auto& qhooks = global.get_hooks_opt();
-
       // Figure out how to forward the result.
       if(tca->ptc_aware() == ptc_aware_void) {
         ptc_conj = ptc_aware_void;
@@ -77,8 +68,9 @@ do_unpack_tail_calls(Reference& self, Global_Context& global)
       frames.emplace_back(tca);
 
       // Generate a single-step trap.
+      const auto qhooks = global.get_hooks_opt();
       if(qhooks)
-        qhooks->on_single_step_trap(sloc, inside, nullptr);
+        qhooks->on_single_step_trap(tca->sloc(), tca->zvarg()->func(), nullptr);
 
       // Get the `this` reference and all the other arguments.
       const auto& target = tca->get_target();
@@ -88,7 +80,7 @@ do_unpack_tail_calls(Reference& self, Global_Context& global)
 
       // Call the hook function if any.
       if(qhooks)
-        qhooks->on_function_call(sloc, inside, target);
+        qhooks->on_function_call(tca->sloc(), tca->zvarg()->func(), target);
 
       // Perform a non-tail call.
       ASTERIA_RUNTIME_TRY {
