@@ -26,7 +26,7 @@ AM_CPPFLAGS = -pipe -pthread -Wall -Wextra  \
   -W{invalid-pch,switch-enum,suggest-attribute=noreturn,undef,shadow,missing-field-initializers}  \
   -Wunused-{function,label,local-typedefs,{,but-set-}{variable,parameter}}
 
-AM_CXXFLAGS = -std=gnu++14 -fno-gnu-keywords  \
+AM_CXXFLAGS = -std=gnu++14 -Wp,-std=c++11 -fno-gnu-keywords  \
   -Wzero-as-null-pointer-constant -Wno-redundant-move  \
   -Werror={non-virtual-dtor,missing-declarations}
 
