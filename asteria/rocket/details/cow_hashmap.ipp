@@ -90,8 +90,7 @@ class bucket
   };
 
 template<typename allocT>
-struct pointer_storage
-  : storage_header
+struct pointer_storage : storage_header
   {
     using allocator_type   = allocT;
     using bucket_type      = bucket<allocator_type>;

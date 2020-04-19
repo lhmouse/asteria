@@ -116,8 +116,7 @@ Global_Context global;
 Simple_Script script;
 
 // These hooks help debugging
-struct REPL_Hooks
-  : Abstract_Hooks
+struct REPL_Hooks : Abstract_Hooks
   {
     void
     on_variable_declare(const Source_Location& sloc, const cow_string& inside, const phsh_string& name)

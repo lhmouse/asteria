@@ -41,9 +41,7 @@ class Sentry
   };
 
 template<typename FuncT>
-struct Variable_Walker
-final
-  : Variable_Callback
+struct Variable_Walker : Variable_Callback
   {
     FuncT func;  // If `FunctionT` is a reference type then this is a reference.
 
@@ -68,9 +66,7 @@ do_traverse(const ContT& cont, FuncT&& func)
     return ::std::forward<FuncT>(walker.func);
   }
 
-struct Variable_Wiper
-final
-  : Variable_Callback
+struct Variable_Wiper : Variable_Callback
   {
     bool
     process(const rcptr<Variable>& var)

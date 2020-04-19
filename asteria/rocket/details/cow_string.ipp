@@ -19,8 +19,7 @@ struct storage_header
   };
 
 template<typename allocT>
-struct basic_storage
-  : storage_header
+struct basic_storage : storage_header
   {
     using allocator_type   = allocT;
     using value_type       = typename allocator_type::value_type;

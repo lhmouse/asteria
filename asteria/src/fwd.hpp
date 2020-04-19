@@ -180,15 +180,13 @@ class Statement_Sequence;
 class AIR_Optimizer;
 
 // Type erasure
-struct Rcbase
-  : virtual ::rocket::refcnt_base<Rcbase>
+struct Rcbase : virtual ::rocket::refcnt_base<Rcbase>
   {
     virtual ~Rcbase();
   };
 
 template<typename RealT>
-struct Rcfwd
-  : Rcbase
+struct Rcfwd : Rcbase
   { };
 
 template<typename RealT>
@@ -227,8 +225,7 @@ struct StdIO_Sentry
   };
 
 // Opaque (user-defined) type support
-struct Abstract_Opaque
-  : Rcbase
+struct Abstract_Opaque : Rcbase
   {
     ~Abstract_Opaque()
     override;
@@ -266,8 +263,7 @@ operator<<(tinyfmt& fmt, const Abstract_Opaque& opaq)
   { return opaq.describe(fmt);  }
 
 struct
-Abstract_Function
-  : Rcbase
+Abstract_Function : Rcbase
   {
     ~Abstract_Function()
     override;
