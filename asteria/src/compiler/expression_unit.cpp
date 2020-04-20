@@ -38,8 +38,53 @@ const
       case index_literal: {
         const auto& altr = this->m_stor.as<index_literal>();
 
-        // Encode arguments.
-        AIR_Node::S_push_immediate xnode = { altr.val };
+        switch(weaken_enum(altr.value.vtype())) {
+          case vtype_null: {
+            // This can be optimized.
+            AIR_Node::S_immediate_null xnode = { };
+            code.emplace_back(::std::move(xnode));
+            return code;
+          }
+
+          case vtype_boolean: {
+            // This can be optimized.
+            AIR_Node::S_immediate_boolean xnode = { altr.value.as_boolean() };
+            code.emplace_back(::std::move(xnode));
+            return code;
+          }
+
+          case vtype_integer: {
+            // Values that fit in 48-bit range may be optimized a bit further.
+            int64_t value = altr.value.as_integer();
+            if((-0x8000'0000'0000 <= value) && (value <= +0x7FFF'FFFF'FFFF)) {
+              AIR_Node::S_immediate_int_x48 xnode = { int16_t(value >> 32), uint32_t(value) };
+              code.emplace_back(::std::move(xnode));
+              return code;
+            }
+
+            // Use the full-width alternative.
+            AIR_Node::S_immediate_integer xnode = { value };
+            code.emplace_back(::std::move(xnode));
+            return code;
+          }
+
+          case vtype_real: {
+            // This can be optimized.
+            AIR_Node::S_immediate_real xnode = { altr.value.as_real() };
+            code.emplace_back(::std::move(xnode));
+            return code;
+          }
+
+          case vtype_string: {
+            // This can be optimized.
+            AIR_Node::S_immediate_string xnode = { altr.value.as_string() };
+            code.emplace_back(::std::move(xnode));
+            return code;
+          }
+        }
+
+        // Use the generic alternative.
+        AIR_Node::S_push_immediate xnode = { altr.value };
         code.emplace_back(::std::move(xnode));
         return code;
       }

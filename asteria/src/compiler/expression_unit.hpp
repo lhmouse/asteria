@@ -15,7 +15,7 @@ class Expression_Unit
   public:
     struct S_literal
       {
-        Value val;
+        Value value;
       };
 
     struct S_named_reference

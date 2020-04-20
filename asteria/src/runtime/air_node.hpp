@@ -233,6 +233,36 @@ class AIR_Node
         uint32_t nargs;
       };
 
+    struct S_immediate_null
+      {
+      };
+
+    struct S_immediate_boolean
+      {
+        V_boolean value;
+      };
+
+    struct S_immediate_int_x48
+      {
+        int16_t high;
+        uint32_t low;
+      };
+
+    struct S_immediate_integer
+      {
+        V_integer value;
+      };
+
+    struct S_immediate_real
+      {
+        V_real value;
+      };
+
+    struct S_immediate_string
+      {
+        V_string value;
+      };
+
     enum Index : uint8_t
       {
         index_clear_stack            =  0,
@@ -269,6 +299,12 @@ class AIR_Node
         index_variadic_call          = 31,
         index_defer_expression       = 32,
         index_import_call            = 33,
+        index_immediate_null         = 34,
+        index_immediate_boolean      = 35,
+        index_immediate_int_x48      = 36,
+        index_immediate_integer      = 37,
+        index_immediate_real         = 38,
+        index_immediate_string       = 39,
       };
 
     using Storage = variant<
@@ -307,6 +343,12 @@ class AIR_Node
       , S_variadic_call          // 31,
       , S_defer_expression       // 32,
       , S_import_call            // 33,
+      , S_immediate_null         // 34,
+      , S_immediate_boolean      // 35,
+      , S_immediate_int_x48      // 36,
+      , S_immediate_integer      // 37,
+      , S_immediate_real         // 38,
+      , S_immediate_string       // 39,
       )>;
 
     static_assert(::std::is_nothrow_copy_assignable<Storage>::value);

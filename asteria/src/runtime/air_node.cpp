@@ -3831,6 +3831,153 @@ struct AIR_Traits<AIR_Node::S_import_call>
       }
   };
 
+template<>
+struct AIR_Traits<AIR_Node::S_immediate_null>
+  {
+    // `Uparam` is unused.
+    // `Sparam` is unused.
+
+    static
+    AIR_Status
+    execute(Executive_Context& ctx)
+      {
+        // Push a constant `null`.
+        Reference_root::S_constant xref = { V_null() };
+        ctx.stack().push(::std::move(xref));
+        return air_status_next;
+      }
+  };
+
+template<>
+struct AIR_Traits<AIR_Node::S_immediate_boolean>
+  {
+    // `Uparam` is the value to push.
+    // `Sparam` is unused.
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_immediate_boolean& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.v8s[0] = altr.value;
+        return up;
+      }
+
+    static
+    AIR_Status
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+      {
+        // Push a constant boolean value.
+        Reference_root::S_constant xref = { V_boolean(up.v8s[0]) };
+        ctx.stack().push(::std::move(xref));
+        return air_status_next;
+      }
+  };
+
+template<>
+struct AIR_Traits<AIR_Node::S_immediate_int_x48>
+  {
+    // `Uparam` is the value to push.
+    // `Sparam` is unused.
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_immediate_int_x48& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.x16 = static_cast<uint16_t>(altr.high);
+        up.x32 = altr.low;
+        return up;
+      }
+
+    static
+    AIR_Status
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+      {
+        // Compose the integer using sign extension.
+        uint64_t iword = static_cast<uint64_t>(static_cast<int16_t>(up.x16));
+        iword <<= 32;
+        iword |= up.x32;
+
+        // Push a constant integer value.
+        Reference_root::S_constant xref = { V_integer(iword) };
+        ctx.stack().push(::std::move(xref));
+        return air_status_next;
+      }
+  };
+
+template<>
+struct AIR_Traits<AIR_Node::S_immediate_integer>
+  {
+    // `Uparam` is unused.
+    // `Sparam` is the value to push.
+
+    static
+    V_integer
+    make_sparam(bool& /*reachable*/, const AIR_Node::S_immediate_integer& altr)
+      {
+        return altr.value;
+      }
+
+    static
+    AIR_Status
+    execute(Executive_Context& ctx, const V_integer& sp)
+      {
+        // Push a constant integer value.
+        Reference_root::S_constant xref = { sp };
+        ctx.stack().push(::std::move(xref));
+        return air_status_next;
+      }
+  };
+
+template<>
+struct AIR_Traits<AIR_Node::S_immediate_real>
+  {
+    // `Uparam` is unused.
+    // `Sparam` is the value to push.
+
+    static
+    V_real
+    make_sparam(bool& /*reachable*/, const AIR_Node::S_immediate_real& altr)
+      {
+        return altr.value;
+      }
+
+    static
+    AIR_Status
+    execute(Executive_Context& ctx, const V_real& sp)
+      {
+        // Push a constant real value.
+        Reference_root::S_constant xref = { sp };
+        ctx.stack().push(::std::move(xref));
+        return air_status_next;
+      }
+  };
+
+template<>
+struct AIR_Traits<AIR_Node::S_immediate_string>
+  {
+    // `Uparam` is unused.
+    // `Sparam` is the value to push.
+
+    static
+    V_string
+    make_sparam(bool& /*reachable*/, const AIR_Node::S_immediate_string& altr)
+      {
+        return altr.value;
+      }
+
+    static
+    AIR_Status
+    execute(Executive_Context& ctx, const V_string& sp)
+      {
+        // Push a constant string value.
+        Reference_root::S_constant xref = { sp };
+        ctx.stack().push(::std::move(xref));
+        return air_status_next;
+      }
+  };
+
 // These are helper type traits.
 // Depending on the existence of Uparam, Sparam and Symbols, the code will look very different.
 
@@ -4303,6 +4450,12 @@ const
       }
 
       case index_import_call:
+      case index_immediate_null:
+      case index_immediate_boolean:
+      case index_immediate_int_x48:
+      case index_immediate_integer:
+      case index_immediate_real:
+      case index_immediate_string:
         // There is nothing to rebind.
         return nullopt;
 
@@ -4635,6 +4788,36 @@ const
         return do_solidify(queue, altr);
       }
 
+      case index_immediate_null: {
+        const auto& altr = this->m_stor.as<index_immediate_null>();
+        return do_solidify(queue, altr);
+      }
+
+      case index_immediate_boolean: {
+        const auto& altr = this->m_stor.as<index_immediate_boolean>();
+        return do_solidify(queue, altr);
+      }
+
+      case index_immediate_int_x48: {
+        const auto& altr = this->m_stor.as<index_immediate_int_x48>();
+        return do_solidify(queue, altr);
+      }
+
+      case index_immediate_integer: {
+        const auto& altr = this->m_stor.as<index_immediate_integer>();
+        return do_solidify(queue, altr);
+      }
+
+      case index_immediate_real: {
+        const auto& altr = this->m_stor.as<index_immediate_real>();
+        return do_solidify(queue, altr);
+      }
+
+      case index_immediate_string: {
+        const auto& altr = this->m_stor.as<index_immediate_string>();
+        return do_solidify(queue, altr);
+      }
+
       default:
         ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
     }
@@ -4772,6 +4955,12 @@ const
       }
 
       case index_import_call:
+      case index_immediate_null:
+      case index_immediate_boolean:
+      case index_immediate_int_x48:
+      case index_immediate_integer:
+      case index_immediate_real:
+      case index_immediate_string:
         return callback;
 
       default:
