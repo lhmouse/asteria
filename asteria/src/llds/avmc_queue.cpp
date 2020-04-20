@@ -117,8 +117,9 @@ do_reallocate(uint32_t nadd)
     // Performa bitwise copy of all contents of the old block.
     // This copies all existent headers and trivial data. Note that the size is unchanged.
     auto bold = ::std::exchange(this->m_bptr, bptr);
+    if(this->m_used)
+      ::std::memcpy(bptr, bold, this->m_used * sizeof(Header));
     this->m_rsrv = rsrv;
-    ::std::memcpy(bptr, bold, this->m_used * sizeof(Header));
 
     // Move old non-trivial nodes if any.
     // Warning: No exception shall be thrown from the code below.
