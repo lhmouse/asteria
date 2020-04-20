@@ -3364,7 +3364,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       if(!kpair) {
         return self = Reference_root::S_temporary();
       }
-      // This function returns a `pair`, but we would like to return an array so convert it.
+      // The binding function returns a `pair`, but we would like to return an array so convert it.
       Reference_root::S_temporary xref = { { kpair->first, kpair->second } };
       return self = ::std::move(xref);
     }
@@ -3374,7 +3374,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       if(!kpair) {
         return self = Reference_root::S_temporary();
       }
-      // This function returns a `pair`, but we would like to return an array so convert it.
+      // The binding function returns a `pair`, but we would like to return an array so convert it.
       Reference_root::S_temporary xref = { { kpair->first, kpair->second } };
       return self = ::std::move(xref);
     }
@@ -3384,7 +3384,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       if(!kpair) {
         return self = Reference_root::S_temporary();
       }
-      // This function returns a `pair`, but we would like to return an array so convert it.
+      // The binding function returns a `pair`, but we would like to return an array so convert it.
       Reference_root::S_temporary xref = { { kpair->first, kpair->second } };
       return self = ::std::move(xref);
     }

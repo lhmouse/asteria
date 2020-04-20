@@ -1680,7 +1680,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     if(reader.I().v(data).o(target).o(comparator).F()) {
       auto pair = std_array_equal_range(global, ::std::move(data), ::std::move(target),
                                                 ::std::move(comparator));
-      // This function returns a `pair`, but we would like to return an array so convert it.
+      // The binding function returns a `pair`, but we would like to return an array so convert it.
       Reference_root::S_temporary xref = { { pair.first, pair.second } };
       return self = ::std::move(xref);
     }
