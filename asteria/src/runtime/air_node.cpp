@@ -146,7 +146,7 @@ struct Uparam_uint8
         this->value = up.v8s[0];
       }
 
-    constexpr operator
+    operator
     AVMC_Queue::Uparam()
     const noexcept
       {
@@ -170,7 +170,7 @@ struct Uparam_uint32
         this->value = up.x32;
       }
 
-    constexpr operator
+    operator
     AVMC_Queue::Uparam()
     const noexcept
       {
@@ -194,7 +194,7 @@ struct Uparam_status
         this->status = AIR_Status(up.v8s[0]);
       }
 
-    constexpr operator
+    operator
     AVMC_Queue::Uparam()
     const noexcept
       {
@@ -220,7 +220,7 @@ struct Uparam_call
         this->ptc = PTC_Aware(up.y8s[0]);
       }
 
-    constexpr operator
+    operator
     AVMC_Queue::Uparam()
     const noexcept
       {
@@ -247,7 +247,7 @@ struct Uparam_array
         this->immutable = up.y8s[0];
       }
 
-    constexpr operator
+    operator
     AVMC_Queue::Uparam()
     const noexcept
       {
@@ -4031,7 +4031,7 @@ struct executor_of<TraitsT, void, void>
 template<typename SparamT, typename = void>
 struct enumerator_of
   {
-    static constexpr nullptr_t thunk = nullptr;
+    static constexpr AVMC_Queue::Enumerator* thunk = nullptr;
   };
 
 template<typename SparamT>
