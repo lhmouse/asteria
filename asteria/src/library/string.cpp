@@ -3361,9 +3361,8 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string pattern;
     if(reader.I().v(text).S(state).v(pattern).F()) {
       auto kpair = std_string_regex_find(::std::move(text), 0, nullopt, ::std::move(pattern));
-      if(!kpair) {
+      if(!kpair)
         return self = Reference_root::S_temporary();
-      }
       // The binding function returns a `pair`, but we would like to return an array so convert it.
       Reference_root::S_temporary xref = { { kpair->first, kpair->second } };
       return self = ::std::move(xref);
@@ -3371,9 +3370,8 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_integer from;
     if(reader.L(state).v(from).S(state).v(pattern).F()) {
       auto kpair = std_string_regex_find(::std::move(text), from, nullopt, ::std::move(pattern));
-      if(!kpair) {
+      if(!kpair)
         return self = Reference_root::S_temporary();
-      }
       // The binding function returns a `pair`, but we would like to return an array so convert it.
       Reference_root::S_temporary xref = { { kpair->first, kpair->second } };
       return self = ::std::move(xref);
@@ -3381,9 +3379,8 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     optV_integer length;
     if(reader.L(state).o(length).v(pattern).F()) {
       auto kpair = std_string_regex_find(::std::move(text), from, length, ::std::move(pattern));
-      if(!kpair) {
+      if(!kpair)
         return self = Reference_root::S_temporary();
-      }
       // The binding function returns a `pair`, but we would like to return an array so convert it.
       Reference_root::S_temporary xref = { { kpair->first, kpair->second } };
       return self = ::std::move(xref);
