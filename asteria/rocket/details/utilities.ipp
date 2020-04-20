@@ -28,6 +28,7 @@ estimate_distance_aux(input_iterator_tag, iteratorT /*first*/, iteratorT /*last*
   { return 0;  }
 
 template<typename iteratorT>
+constexpr  // c++14
 size_t
 estimate_distance_aux(forward_iterator_tag, iteratorT first, iteratorT last)
   {
@@ -39,6 +40,7 @@ estimate_distance_aux(forward_iterator_tag, iteratorT first, iteratorT last)
 
 // `for_each()`
 template<typename containerT, typename callbackT>
+constexpr  // c++14
 void
 for_each_nonconstexpr(containerT&& cont, callbackT&& callback)
   {
@@ -48,6 +50,7 @@ for_each_nonconstexpr(containerT&& cont, callbackT&& callback)
 
 // `any_of()`
 template<typename containerT, typename callbackT>
+constexpr  // c++14
 bool
 any_of_nonconstexpr(containerT&& cont, callbackT&& callback)
   {
@@ -59,6 +62,7 @@ any_of_nonconstexpr(containerT&& cont, callbackT&& callback)
 
 // `none_of()`
 template<typename containerT, typename callbackT>
+constexpr  // c++14
 bool
 none_of_nonconstexpr(containerT&& cont, callbackT&& callback)
   {
@@ -70,6 +74,7 @@ none_of_nonconstexpr(containerT&& cont, callbackT&& callback)
 
 // `all_of()`
 template<typename containerT, typename callbackT>
+constexpr  // c++14
 bool
 all_of_nonconstexpr(containerT&& cont, callbackT&& callback)
   {
@@ -81,6 +86,7 @@ all_of_nonconstexpr(containerT&& cont, callbackT&& callback)
 
 // `is_any_of()`
 template<typename targetT, typename containerT>
+constexpr  // c++14
 bool
 is_any_of_nonconstexpr(targetT&& targ, containerT&& cont)
   {
@@ -92,6 +98,7 @@ is_any_of_nonconstexpr(targetT&& targ, containerT&& cont)
 
 // `is_none_of()`
 template<typename targetT, typename containerT>
+constexpr  // c++14
 bool
 is_none_of_nonconstexpr(targetT&& targ, containerT&& cont)
   {
