@@ -398,6 +398,24 @@ none_of(initializer_list<elementT> init, callbackT&& callback)
                   init, ::std::forward<callbackT>(callback));
   }
 
+template<typename containerT, typename callbackT>
+constexpr
+bool
+all_of(containerT&& cont, callbackT&& callback)
+  {
+    return details_utilities::all_of_nonconstexpr(
+                  ::std::forward<containerT>(cont), ::std::forward<callbackT>(callback));
+  }
+
+template<typename elementT, typename callbackT>
+constexpr
+bool
+all_of(initializer_list<elementT> init, callbackT&& callback)
+  {
+    return details_utilities::all_of_nonconstexpr(
+                  init, ::std::forward<callbackT>(callback));
+  }
+
 template<typename targetT, typename containerT>
 constexpr
 bool

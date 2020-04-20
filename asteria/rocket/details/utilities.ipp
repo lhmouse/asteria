@@ -68,6 +68,17 @@ none_of_nonconstexpr(containerT&& cont, callbackT&& callback)
     return true;
   }
 
+// `all_of()`
+template<typename containerT, typename callbackT>
+bool
+all_of_nonconstexpr(containerT&& cont, callbackT&& callback)
+  {
+    for(auto&& qelem : cont)
+      if(!bool(::std::forward<callbackT>(callback)(qelem)))
+        return false;
+    return true;
+  }
+
 // `is_any_of()`
 template<typename targetT, typename containerT>
 bool
