@@ -64,9 +64,11 @@ do_write_utf8_common(const IOF_Sentry& fp, const cow_string& text)
       char32_t cp;
       if(!utf8_decode(cp, text, off))
         ASTERIA_THROW("invalid UTF-8 string (text `$1`, byte offset `$2`)", text, off);
+
       // Insert it into the output stream.
       if(::fputwc_unlocked(static_cast<wchar_t>(cp), fp) == WEOF)
         ASTERIA_THROW_SYSTEM_ERROR("fputwc_unlocked");
+
       // The return value is the number of code points rather than bytes.
       ncps += 1;
     }
@@ -91,9 +93,9 @@ std_io_getc()
     wint_t wch = ::fgetwc_unlocked(fp);
     if(wch == WEOF) {
       // Throw an exception on error.
+      // Return `null` on EOF.
       if(int err = do_recover(fp))
         ASTERIA_THROW_SYSTEM_ERROR("fgetc_unlocked", err);
-      // Return `null` on EOF.
       return nullopt;
     }
     // Zero-extend the code point to an integer.
@@ -120,15 +122,17 @@ std_io_getln()
         // If at least a character has been read, don't fail.
         if(!u8str.empty())
           break;
+
         // Throw an exception on error.
+        // Return `null` on EOF.
         if(int err = do_recover(fp))
           ASTERIA_THROW_SYSTEM_ERROR("fgetc_unlocked", err);
-        // Return `null` on EOF.
         return nullopt;
       }
       // If a LF is encountered, finish this line.
       if(wch == L'\n')
         break;
+
       // Append the non-LF character to the result string.
       char32_t cp = static_cast<uint32_t>(wch);
       if(!utf8_encode(u8str, cp))
@@ -233,6 +237,7 @@ std_io_putf(V_string templ, cow_vector<Value> values)
     // Compose the string into a stream.
     ::rocket::tinyfmt_str fmt;
     vformat(fmt, templ.data(), templ.size(), insts.data(), insts.size());
+
     // Write the string now.
     size_t ncps = do_write_utf8_common(fp, fmt.get_string());
     // Return the number of code points that have been written.
@@ -258,9 +263,9 @@ std_io_read(optV_integer limit)
     size_t ntotal = ::fread_unlocked(data.mut_data(), 1, data.size(), fp);
     if(ntotal == 0) {
       // Throw an exception on error.
+      // Return `null` on EOF.
       if(int err = do_recover(fp))
         ASTERIA_THROW_SYSTEM_ERROR("fread_unlocked", err);
-      // Return `null` on EOF.
       return nullopt;
     }
     // Return the byte string verbatim.
@@ -285,9 +290,8 @@ std_io_write(V_string data)
 
     // Write the byte string verbatim.
     size_t ntotal = ::fwrite_unlocked(data.data(), 1, data.size(), fp);
-    if(ntotal == 0) {
+    if(ntotal == 0)
       ASTERIA_THROW_SYSTEM_ERROR("fwrite_unlocked");
-    }
     // Return the number of bytes written.
     return static_cast<int64_t>(ntotal);
   }
