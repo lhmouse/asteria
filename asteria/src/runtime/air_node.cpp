@@ -129,134 +129,7 @@ do_execute_block(const AVMC_Queue& queue, const Executive_Context& ctx)
   }
 
 // These are user-defined parameter types for AVMC nodes.
-// For `Uparam_*` structs, the conversions between `AVMC_Queue::Uparam` are required.
-// For `Sparam_*` structs, the `enumerate_variables()` callback is optional.
-
-struct Uparam_uint8
-  {
-    uint8_t value;
-
-    Uparam_uint8()
-    noexcept
-      = default;
-
-    Uparam_uint8(AVMC_Queue::Uparam up)
-    noexcept
-      {
-        this->value = up.v8s[0];
-      }
-
-    operator
-    AVMC_Queue::Uparam()
-    const noexcept
-      {
-        AVMC_Queue::Uparam up;
-        up.v8s[0] = this->value;
-        return up;
-      }
-  };
-
-struct Uparam_uint32
-  {
-    uint32_t value;
-
-    Uparam_uint32()
-    noexcept
-      = default;
-
-    Uparam_uint32(AVMC_Queue::Uparam up)
-    noexcept
-      {
-        this->value = up.x32;
-      }
-
-    operator
-    AVMC_Queue::Uparam()
-    const noexcept
-      {
-        AVMC_Queue::Uparam up;
-        up.x32 = this->value;
-        return up;
-      }
-  };
-
-struct Uparam_status
-  {
-    AIR_Status status;
-
-    Uparam_status()
-    noexcept
-      = default;
-
-    Uparam_status(AVMC_Queue::Uparam up)
-    noexcept
-      {
-        this->status = AIR_Status(up.v8s[0]);
-      }
-
-    operator
-    AVMC_Queue::Uparam()
-    const noexcept
-      {
-        AVMC_Queue::Uparam up;
-        up.v8s[0] = weaken_enum(this->status);
-        return up;
-      }
-  };
-
-struct Uparam_call
-  {
-    uint32_t nargs;
-    PTC_Aware ptc;
-
-    Uparam_call()
-    noexcept
-      = default;
-
-    Uparam_call(AVMC_Queue::Uparam up)
-    noexcept
-      {
-        this->nargs = up.y32;
-        this->ptc = PTC_Aware(up.y8s[0]);
-      }
-
-    operator
-    AVMC_Queue::Uparam()
-    const noexcept
-      {
-        AVMC_Queue::Uparam up;
-        up.y32 = this->nargs;
-        up.y8s[0] = weaken_enum(this->ptc);
-        return up;
-      }
-  };
-
-struct Uparam_array
-  {
-    uint32_t nelems;
-    uint8_t immutable;
-
-    Uparam_array()
-    noexcept
-      = default;
-
-    Uparam_array(AVMC_Queue::Uparam up)
-    noexcept
-      {
-        this->nelems = up.y32;
-        this->immutable = up.y8s[0];
-      }
-
-    operator
-    AVMC_Queue::Uparam()
-    const noexcept
-      {
-        AVMC_Queue::Uparam up;
-        up.y32 = this->nelems;
-        up.y8s[0] = this->immutable;
-        return up;
-      }
-  };
+// The `enumerate_variables()` callback is optional.
 
 struct Sparam_sloc_text
   {
@@ -485,11 +358,11 @@ struct AIR_Traits<AIR_Node::S_initialize_variable>
     // `Sparam` is unused.
 
     static
-    Uparam_uint8
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_initialize_variable& altr)
       {
-        Uparam_uint8 up;
-        up.value = altr.immutable;
+        AVMC_Queue::Uparam up;
+        up.v8s[0] = altr.immutable;
         return up;
       }
 
@@ -504,7 +377,7 @@ struct AIR_Traits<AIR_Node::S_initialize_variable>
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this function.
@@ -517,7 +390,7 @@ struct AIR_Traits<AIR_Node::S_initialize_variable>
         ctx.stack().pop();
 
         // Initialize it.
-        var->initialize(::std::move(val), up.value);
+        var->initialize(::std::move(val), up.v8s[0]);
         return air_status_next;
       }
   };
@@ -529,11 +402,11 @@ struct AIR_Traits<AIR_Node::S_if_statement>
     // `Sparam` is the two branches.
 
     static
-    Uparam_uint8
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_if_statement& altr)
       {
-        Uparam_uint8 up;
-        up.value = altr.negative;
+        AVMC_Queue::Uparam up;
+        up.v8s[0] = altr.negative;
         return up;
       }
 
@@ -550,10 +423,10 @@ struct AIR_Traits<AIR_Node::S_if_statement>
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up, const Sparam_queues_2& sp)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Sparam_queues_2& sp)
       {
         // Check the value of the condition.
-        if(ctx.stack().get_top().read().test() != up.value)
+        if(ctx.stack().get_top().read().test() != up.v8s[0])
           // Execute the true branch and forward the status verbatim.
           return do_execute_block(sp.queues[0], ctx);
 
@@ -660,11 +533,11 @@ struct AIR_Traits<AIR_Node::S_do_while_statement>
     // `Sparam` is the loop body and condition.
 
     static
-    Uparam_uint8
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_do_while_statement& altr)
       {
-        Uparam_uint8 up;
-        up.value = altr.negative;
+        AVMC_Queue::Uparam up;
+        up.v8s[0] = altr.negative;
         return up;
       }
 
@@ -680,7 +553,7 @@ struct AIR_Traits<AIR_Node::S_do_while_statement>
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up, const Sparam_queues_2& sp)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Sparam_queues_2& sp)
       {
         // This is the same as the `do...while` statement in C.
         for(;;) {
@@ -695,7 +568,7 @@ struct AIR_Traits<AIR_Node::S_do_while_statement>
           // Check the condition.
           status = sp.queues[1].execute(ctx);
           ROCKET_ASSERT(status == air_status_next);
-          if(ctx.stack().get_top().read().test() == up.value)
+          if(ctx.stack().get_top().read().test() == up.v8s[0])
             break;
         }
         return air_status_next;
@@ -709,11 +582,11 @@ struct AIR_Traits<AIR_Node::S_while_statement>
     // `Sparam` is the condition and loop body.
 
     static
-    Uparam_uint8
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_while_statement& altr)
       {
-        Uparam_uint8 up;
-        up.value = altr.negative;
+        AVMC_Queue::Uparam up;
+        up.v8s[0] = altr.negative;
         return up;
       }
 
@@ -729,14 +602,14 @@ struct AIR_Traits<AIR_Node::S_while_statement>
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up, const Sparam_queues_2& sp)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Sparam_queues_2& sp)
       {
         // This is the same as the `while` statement in C.
         for(;;) {
           // Check the condition.
           auto status = sp.queues[0].execute(ctx);
           ROCKET_ASSERT(status == air_status_next);
-          if(ctx.stack().get_top().read().test() == up.value)
+          if(ctx.stack().get_top().read().test() == up.v8s[0])
             break;
 
           // Execute the body.
@@ -1006,11 +879,11 @@ struct AIR_Traits<AIR_Node::S_assert_statement>
     // `Sparam` is the source location.
 
     static
-    Uparam_uint8
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_assert_statement& altr)
       {
-        Uparam_uint8 up;
-        up.value = altr.negative;
+        AVMC_Queue::Uparam up;
+        up.v8s[0] = altr.negative;
         return up;
       }
 
@@ -1026,10 +899,10 @@ struct AIR_Traits<AIR_Node::S_assert_statement>
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up, const Sparam_sloc_text& sp)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Sparam_sloc_text& sp)
       {
         // Check the value of the condition.
-        if(ROCKET_EXPECT(ctx.stack().get_top().read().test() != up.value))
+        if(ROCKET_EXPECT(ctx.stack().get_top().read().test() != up.v8s[0]))
           // When the assertion succeeds, there is nothing to do.
           return air_status_next;
 
@@ -1045,20 +918,20 @@ struct AIR_Traits<AIR_Node::S_simple_status>
     // `Sparam` is unused.
 
     static
-    Uparam_status
+    AVMC_Queue::Uparam
     make_uparam(bool& reachable, const AIR_Node::S_simple_status& altr)
       {
-        Uparam_status up;
-        up.status = altr.status;
+        AVMC_Queue::Uparam up;
+        up.v8s[0] = weaken_enum(altr.status);
         reachable &= (altr.status == air_status_next);
         return up;
       }
 
     static
     AIR_Status
-    execute(Executive_Context& /*ctx*/, const Uparam_status& up)
+    execute(Executive_Context& /*ctx*/, const AVMC_Queue::Uparam& up)
       {
-        return up.status;
+        return static_cast<AIR_Status>(up.v8s[0]);
       }
   };
 
@@ -1165,11 +1038,11 @@ struct AIR_Traits<AIR_Node::S_push_local_reference>
     // `Sparam` is the source location and name;
 
     static
-    Uparam_uint32
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_push_local_reference& altr)
       {
-        Uparam_uint32 up;
-        up.value = altr.depth;
+        AVMC_Queue::Uparam up;
+        up.x32 = altr.depth;
         return up;
       }
 
@@ -1194,11 +1067,11 @@ struct AIR_Traits<AIR_Node::S_push_local_reference>
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint32& up, const Sparam_sloc_name& sp)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Sparam_sloc_name& sp)
       {
         // Get the context.
         const Executive_Context* qctx = &ctx;
-        ::rocket::ranged_for(UINT32_C(0), up.value, [&](uint32_t) { qctx = qctx->get_parent_opt();  });
+        ::rocket::ranged_for(UINT32_C(0), up.x32, [&](uint32_t) { qctx = qctx->get_parent_opt();  });
         ROCKET_ASSERT(qctx);
 
         // Look for the name in the context.
@@ -1277,11 +1150,11 @@ struct AIR_Traits<AIR_Node::S_branch_expression>
     // `Sparam` is the branches.
 
     static
-    Uparam_uint8
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_branch_expression& altr)
       {
-        Uparam_uint8 up;
-        up.value = altr.assign;
+        AVMC_Queue::Uparam up;
+        up.v8s[0] = altr.assign;
         return up;
       }
 
@@ -1307,15 +1180,15 @@ struct AIR_Traits<AIR_Node::S_branch_expression>
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up, const Sparam_queues_2& sp)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Sparam_queues_2& sp)
       {
         // Check the value of the condition.
         if(ctx.stack().get_top().read().test())
           // Execute the true branch and forward the status verbatim.
-          return do_evaluate_subexpression(ctx, up.value, sp.queues[0]);
+          return do_evaluate_subexpression(ctx, up.v8s[0], sp.queues[0]);
 
         // Execute the false branch and forward the status verbatim.
-        return do_evaluate_subexpression(ctx, up.value, sp.queues[1]);
+        return do_evaluate_subexpression(ctx, up.v8s[0], sp.queues[1]);
       }
   };
 
@@ -1326,11 +1199,11 @@ struct AIR_Traits<AIR_Node::S_coalescence>
     // `Sparam` is the null branch.
 
     static
-    Uparam_uint8
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_coalescence& altr)
       {
-        Uparam_uint8 up;
-        up.value = altr.assign;
+        AVMC_Queue::Uparam up;
+        up.v8s[0] = altr.assign;
         return up;
       }
 
@@ -1354,7 +1227,7 @@ struct AIR_Traits<AIR_Node::S_coalescence>
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up, const AVMC_Queue& queue)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const AVMC_Queue& queue)
       {
         // Check the value of the condition.
         if(!ctx.stack().get_top().read().is_null())
@@ -1362,7 +1235,7 @@ struct AIR_Traits<AIR_Node::S_coalescence>
           return air_status_next;
 
         // Execute the null branch and forward the status verbatim.
-        return do_evaluate_subexpression(ctx, up.value, queue);
+        return do_evaluate_subexpression(ctx, up.v8s[0], queue);
       }
   };
 
@@ -1438,12 +1311,12 @@ struct AIR_Traits<AIR_Node::S_function_call>
     // `Sparam` is the source location.
 
     static
-    Uparam_call
+    AVMC_Queue::Uparam
     make_uparam(bool& reachable, const AIR_Node::S_function_call& altr)
       {
-        Uparam_call up;
-        up.nargs = altr.nargs;
-        up.ptc = altr.ptc;
+        AVMC_Queue::Uparam up;
+        up.y32 = altr.nargs;
+        up.y8s[0] = weaken_enum(altr.ptc);
         reachable &= (altr.ptc == ptc_aware_none);
         return up;
       }
@@ -1466,7 +1339,7 @@ struct AIR_Traits<AIR_Node::S_function_call>
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_call& up, const Source_Location& sloc)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Source_Location& sloc)
       {
         // Check for stack overflows.
         const auto sentry = ctx.global().copy_recursion_sentry();
@@ -1477,7 +1350,7 @@ struct AIR_Traits<AIR_Node::S_function_call>
           qhooks->on_single_step_trap(sloc, ctx.zvarg()->func(), &ctx);
 
         // Pop arguments off the stack backwards.
-        auto args = do_pop_positional_arguments(ctx, up.nargs);
+        auto args = do_pop_positional_arguments(ctx, up.y32);
 
         // Copy the target, which shall be of type `function`.
         auto value = ctx.stack().get_top().read();
@@ -1486,7 +1359,8 @@ struct AIR_Traits<AIR_Node::S_function_call>
         }
         auto& self = ctx.stack().open_top().zoom_out();
 
-        return do_function_call_common(self, sloc, ctx, value.as_function(), up.ptc, ::std::move(args));
+        return do_function_call_common(self, sloc, ctx, value.as_function(),
+                                       static_cast<PTC_Aware>(up.y8s[0]), ::std::move(args));
       }
   };
 
@@ -1530,11 +1404,11 @@ struct AIR_Traits<AIR_Node::S_push_unnamed_array>
     // `Sparam` is unused.
 
     static
-    Uparam_array
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_push_unnamed_array& altr)
       {
-        Uparam_array up;
-        up.nelems = altr.nelems;
+        AVMC_Queue::Uparam up;
+        up.x32 = altr.nelems;
         return up;
       }
 
@@ -1549,16 +1423,17 @@ struct AIR_Traits<AIR_Node::S_push_unnamed_array>
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_array& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // Pop elements from the stack and store them in an array backwards.
         V_array array;
-        array.resize(up.nelems);
+        array.resize(up.x32);
         for(auto it = array.mut_rbegin();  it != array.rend();  ++it) {
           // Write elements backwards.
           *it = ctx.stack().get_top().read();
           ctx.stack().pop();
         }
+
         // Push the array as a temporary.
         Reference_root::S_temporary xref = { ::std::move(array) };
         ctx.stack().push(::std::move(xref));
@@ -1601,6 +1476,7 @@ struct AIR_Traits<AIR_Node::S_push_unnamed_object>
           object.try_emplace(*it, ctx.stack().get_top().read());
           ctx.stack().pop();
         }
+
         // Push the object as a temporary.
         Reference_root::S_temporary xref = { ::std::move(object) };
         ctx.stack().push(::std::move(xref));
@@ -2162,11 +2038,11 @@ struct AIR_Traits<AIR_Node::S_apply_operator>
     // `Sparam` is unused.
 
     static
-    Uparam_uint8
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
-        Uparam_uint8 up;
-        up.value = altr.assign;
+        AVMC_Queue::Uparam up;
+        up.v8s[0] = altr.assign;
         return up;
       }
 
@@ -2185,7 +2061,7 @@ struct AIR_Traits_Xop<xop_inc_post> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& /*up*/)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
       {
         // This operator is unary.
         auto& lhs = ctx.stack().get_top().open();
@@ -2213,7 +2089,7 @@ struct AIR_Traits_Xop<xop_dec_post> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& /*up*/)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
       {
         // This operator is unary.
         auto& lhs = ctx.stack().get_top().open();
@@ -2241,7 +2117,7 @@ struct AIR_Traits_Xop<xop_subscr> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& /*up*/)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
       {
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -2271,14 +2147,14 @@ struct AIR_Traits_Xop<xop_pos> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
 
         // Copy the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -2288,7 +2164,7 @@ struct AIR_Traits_Xop<xop_neg> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -2305,7 +2181,7 @@ struct AIR_Traits_Xop<xop_neg> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("prefix negation not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -2315,7 +2191,7 @@ struct AIR_Traits_Xop<xop_notb> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -2336,7 +2212,7 @@ struct AIR_Traits_Xop<xop_notb> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("prefix bitwise NOT not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -2346,14 +2222,14 @@ struct AIR_Traits_Xop<xop_notl> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
         const auto& rhs = ctx.stack().get_top().read();
 
         // Perform logical NOT operation on the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
-        do_set_temporary(ctx, up.value, do_operator_NOT(rhs.test()));
+        do_set_temporary(ctx, up.v8s[0], do_operator_NOT(rhs.test()));
         return air_status_next;
       }
   };
@@ -2363,7 +2239,7 @@ struct AIR_Traits_Xop<xop_inc_pre> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& /*up*/)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
       {
         // This operator is unary.
         auto& rhs = ctx.stack().get_top().open();
@@ -2389,7 +2265,7 @@ struct AIR_Traits_Xop<xop_dec_pre> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& /*up*/)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
       {
         // This operator is unary.
         auto& rhs = ctx.stack().get_top().open();
@@ -2415,13 +2291,13 @@ struct AIR_Traits_Xop<xop_unset> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
         auto rhs = ctx.stack().get_top().unset();
 
         // Unset the reference and return the old value.
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -2431,7 +2307,7 @@ struct AIR_Traits_Xop<xop_countof> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
         const auto& rhs = ctx.stack().get_top().read();
@@ -2458,7 +2334,7 @@ struct AIR_Traits_Xop<xop_countof> : AIR_Traits<AIR_Node::S_apply_operator>
           default:
             ASTERIA_THROW("prefix `countof` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.value, nelems);
+        do_set_temporary(ctx, up.v8s[0], nelems);
         return air_status_next;
       }
   };
@@ -2468,14 +2344,14 @@ struct AIR_Traits_Xop<xop_typeof> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
         const auto& rhs = ctx.stack().get_top().read();
 
         // Return the type name of the operand.
         // N.B. This is one of the few operators that work on all types.
-        do_set_temporary(ctx, up.value, ::rocket::sref(rhs.what_vtype()));
+        do_set_temporary(ctx, up.v8s[0], ::rocket::sref(rhs.what_vtype()));
         return air_status_next;
       }
   };
@@ -2485,7 +2361,7 @@ struct AIR_Traits_Xop<xop_sqrt> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -2502,7 +2378,7 @@ struct AIR_Traits_Xop<xop_sqrt> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("prefix `__sqrt` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -2512,7 +2388,7 @@ struct AIR_Traits_Xop<xop_isnan> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -2529,7 +2405,7 @@ struct AIR_Traits_Xop<xop_isnan> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("prefix `__isnan` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -2539,7 +2415,7 @@ struct AIR_Traits_Xop<xop_isinf> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -2556,7 +2432,7 @@ struct AIR_Traits_Xop<xop_isinf> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("prefix `__isinf` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -2566,7 +2442,7 @@ struct AIR_Traits_Xop<xop_abs> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -2583,7 +2459,7 @@ struct AIR_Traits_Xop<xop_abs> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("prefix `__abs` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -2593,7 +2469,7 @@ struct AIR_Traits_Xop<xop_sign> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -2610,7 +2486,7 @@ struct AIR_Traits_Xop<xop_sign> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("prefix `__sign` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -2620,7 +2496,7 @@ struct AIR_Traits_Xop<xop_round> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -2637,7 +2513,7 @@ struct AIR_Traits_Xop<xop_round> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("prefix `__round` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -2647,7 +2523,7 @@ struct AIR_Traits_Xop<xop_floor> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -2664,7 +2540,7 @@ struct AIR_Traits_Xop<xop_floor> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("prefix `__floor` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -2674,7 +2550,7 @@ struct AIR_Traits_Xop<xop_ceil> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -2691,7 +2567,7 @@ struct AIR_Traits_Xop<xop_ceil> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("prefix `__ceil` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -2701,7 +2577,7 @@ struct AIR_Traits_Xop<xop_trunc> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -2718,7 +2594,7 @@ struct AIR_Traits_Xop<xop_trunc> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("prefix `__trunc` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -2728,7 +2604,7 @@ struct AIR_Traits_Xop<xop_iround> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -2745,7 +2621,7 @@ struct AIR_Traits_Xop<xop_iround> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("prefix `__iround` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -2755,7 +2631,7 @@ struct AIR_Traits_Xop<xop_ifloor> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -2772,7 +2648,7 @@ struct AIR_Traits_Xop<xop_ifloor> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("prefix `__ifloor` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -2782,7 +2658,7 @@ struct AIR_Traits_Xop<xop_iceil> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -2799,7 +2675,7 @@ struct AIR_Traits_Xop<xop_iceil> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("prefix `__iceil` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -2809,7 +2685,7 @@ struct AIR_Traits_Xop<xop_itrunc> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -2826,7 +2702,7 @@ struct AIR_Traits_Xop<xop_itrunc> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("prefix `__itrunc` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -2836,7 +2712,7 @@ struct AIR_Traits_Xop<xop_cmp_eq> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -2846,7 +2722,7 @@ struct AIR_Traits_Xop<xop_cmp_eq> : AIR_Traits<AIR_Node::S_apply_operator>
         // Report unordered operands as being unequal.
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(rhs);
-        do_set_temporary(ctx, up.value, comp == compare_equal);
+        do_set_temporary(ctx, up.v8s[0], comp == compare_equal);
         return air_status_next;
       }
   };
@@ -2856,7 +2732,7 @@ struct AIR_Traits_Xop<xop_cmp_ne> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -2866,7 +2742,7 @@ struct AIR_Traits_Xop<xop_cmp_ne> : AIR_Traits<AIR_Node::S_apply_operator>
         // Report unordered operands as being unequal.
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(rhs);
-        do_set_temporary(ctx, up.value, comp != compare_equal);
+        do_set_temporary(ctx, up.v8s[0], comp != compare_equal);
         return air_status_next;
       }
   };
@@ -2876,7 +2752,7 @@ struct AIR_Traits_Xop<xop_cmp_lt> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -2887,7 +2763,7 @@ struct AIR_Traits_Xop<xop_cmp_lt> : AIR_Traits<AIR_Node::S_apply_operator>
         auto comp = lhs.compare(rhs);
         if(comp == compare_unordered)
           ASTERIA_THROW("values not comparable (operands were `$1` and `$2`)", lhs, rhs);
-        do_set_temporary(ctx, up.value, comp == compare_less);
+        do_set_temporary(ctx, up.v8s[0], comp == compare_less);
         return air_status_next;
       }
   };
@@ -2897,7 +2773,7 @@ struct AIR_Traits_Xop<xop_cmp_gt> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -2908,7 +2784,7 @@ struct AIR_Traits_Xop<xop_cmp_gt> : AIR_Traits<AIR_Node::S_apply_operator>
         auto comp = lhs.compare(rhs);
         if(comp == compare_unordered)
           ASTERIA_THROW("values not comparable (operands were `$1` and `$2`)", lhs, rhs);
-        do_set_temporary(ctx, up.value, comp == compare_greater);
+        do_set_temporary(ctx, up.v8s[0], comp == compare_greater);
         return air_status_next;
       }
   };
@@ -2918,7 +2794,7 @@ struct AIR_Traits_Xop<xop_cmp_lte> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -2929,7 +2805,7 @@ struct AIR_Traits_Xop<xop_cmp_lte> : AIR_Traits<AIR_Node::S_apply_operator>
         auto comp = lhs.compare(rhs);
         if(comp == compare_unordered)
           ASTERIA_THROW("values not comparable (operands were `$1` and `$2`)", lhs, rhs);
-        do_set_temporary(ctx, up.value, comp != compare_greater);
+        do_set_temporary(ctx, up.v8s[0], comp != compare_greater);
         return air_status_next;
       }
   };
@@ -2939,7 +2815,7 @@ struct AIR_Traits_Xop<xop_cmp_gte> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -2950,7 +2826,7 @@ struct AIR_Traits_Xop<xop_cmp_gte> : AIR_Traits<AIR_Node::S_apply_operator>
         auto comp = lhs.compare(rhs);
         if(comp == compare_unordered)
           ASTERIA_THROW("values not comparable (operands were `$1` and `$2`)", lhs, rhs);
-        do_set_temporary(ctx, up.value, comp != compare_less);
+        do_set_temporary(ctx, up.v8s[0], comp != compare_less);
         return air_status_next;
       }
   };
@@ -2960,7 +2836,7 @@ struct AIR_Traits_Xop<xop_cmp_3way> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -2972,19 +2848,19 @@ struct AIR_Traits_Xop<xop_cmp_3way> : AIR_Traits<AIR_Node::S_apply_operator>
         auto comp = lhs.compare(rhs);
         switch(comp) {
           case compare_greater:
-            do_set_temporary(ctx, up.value, +1);
+            do_set_temporary(ctx, up.v8s[0], +1);
             break;
 
           case compare_less:
-            do_set_temporary(ctx, up.value, -1);
+            do_set_temporary(ctx, up.v8s[0], -1);
             break;
 
           case compare_equal:
-            do_set_temporary(ctx, up.value, 0);
+            do_set_temporary(ctx, up.v8s[0], 0);
             break;
 
           case compare_unordered:
-            do_set_temporary(ctx, up.value, ::rocket::sref("<unordered>"));
+            do_set_temporary(ctx, up.v8s[0], ::rocket::sref("<unordered>"));
             break;
 
           default:
@@ -2999,7 +2875,7 @@ struct AIR_Traits_Xop<xop_add> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -3028,7 +2904,7 @@ struct AIR_Traits_Xop<xop_add> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("infix addition not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -3038,7 +2914,7 @@ struct AIR_Traits_Xop<xop_sub> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -3062,7 +2938,7 @@ struct AIR_Traits_Xop<xop_sub> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("infix subtraction not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -3072,7 +2948,7 @@ struct AIR_Traits_Xop<xop_mul> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -3106,7 +2982,7 @@ struct AIR_Traits_Xop<xop_mul> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("infix multiplication not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -3116,7 +2992,7 @@ struct AIR_Traits_Xop<xop_div> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -3135,7 +3011,7 @@ struct AIR_Traits_Xop<xop_div> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("infix division not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -3145,7 +3021,7 @@ struct AIR_Traits_Xop<xop_mod> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -3164,7 +3040,7 @@ struct AIR_Traits_Xop<xop_mod> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("infix modulo not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -3174,7 +3050,7 @@ struct AIR_Traits_Xop<xop_sll> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -3196,7 +3072,7 @@ struct AIR_Traits_Xop<xop_sll> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("infix logical left shift not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -3206,7 +3082,7 @@ struct AIR_Traits_Xop<xop_srl> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -3228,7 +3104,7 @@ struct AIR_Traits_Xop<xop_srl> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("infix logical right shift not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -3238,7 +3114,7 @@ struct AIR_Traits_Xop<xop_sla> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -3261,7 +3137,7 @@ struct AIR_Traits_Xop<xop_sla> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("infix arithmetic left shift not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -3271,7 +3147,7 @@ struct AIR_Traits_Xop<xop_sra> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -3293,7 +3169,7 @@ struct AIR_Traits_Xop<xop_sra> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("infix arithmetic right shift not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -3303,7 +3179,7 @@ struct AIR_Traits_Xop<xop_andb> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -3329,7 +3205,7 @@ struct AIR_Traits_Xop<xop_andb> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("infix bitwise AND not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -3339,7 +3215,7 @@ struct AIR_Traits_Xop<xop_orb> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -3365,7 +3241,7 @@ struct AIR_Traits_Xop<xop_orb> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("infix bitwise OR not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -3375,7 +3251,7 @@ struct AIR_Traits_Xop<xop_xorb> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -3401,7 +3277,7 @@ struct AIR_Traits_Xop<xop_xorb> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("infix bitwise XOR not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -3411,7 +3287,7 @@ struct AIR_Traits_Xop<xop_assign> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& /*up*/)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
       {
         // Pop the RHS operand.
         auto rhs = ctx.stack().get_top().read();
@@ -3428,7 +3304,7 @@ struct AIR_Traits_Xop<xop_fma> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is ternary.
         auto rhs = ctx.stack().get_top().read();
@@ -3445,7 +3321,7 @@ struct AIR_Traits_Xop<xop_fma> : AIR_Traits<AIR_Node::S_apply_operator>
         else {
           ASTERIA_THROW("fused multiply-add not defined (operands were `$1`, `$2` and `$3`)", lhs, mid, rhs);
         }
-        do_set_temporary(ctx, up.value, ::std::move(rhs));
+        do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
   };
@@ -3455,7 +3331,7 @@ struct AIR_Traits_Xop<xop_head> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& /*up*/)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
       {
         // This operator is unary.
         auto& lref = ctx.stack().open_top();
@@ -3471,7 +3347,7 @@ struct AIR_Traits_Xop<xop_tail> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& /*up*/)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
       {
         // This operator is unary.
         auto& lref = ctx.stack().open_top();
@@ -3489,12 +3365,12 @@ struct AIR_Traits<AIR_Node::S_unpack_struct_array>
     // `Sparam` is unused.
 
     static
-    Uparam_array
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_unpack_struct_array& altr)
       {
-        Uparam_array up;
-        up.nelems = altr.nelems;
-        up.immutable = altr.immutable;
+        AVMC_Queue::Uparam up;
+        up.y32 = altr.nelems;
+        up.y8s[0] = altr.immutable;
         return up;
       }
 
@@ -3509,7 +3385,7 @@ struct AIR_Traits<AIR_Node::S_unpack_struct_array>
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_array& up)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this function.
@@ -3523,7 +3399,7 @@ struct AIR_Traits<AIR_Node::S_unpack_struct_array>
         if(val.is_array())
           arr = ::std::move(val.open_array());
 
-        for(size_t i = size_t(up.nelems) - 1;  i != SIZE_MAX;  --i) {
+        for(uint32_t i = up.y32 - 1;  i != UINT32_MAX;  --i) {
           // Get the variable back.
           auto var = ctx.stack().get_top().get_variable_opt();
           ctx.stack().pop();
@@ -3532,9 +3408,9 @@ struct AIR_Traits<AIR_Node::S_unpack_struct_array>
           ROCKET_ASSERT(var && !var->is_initialized());
           auto qinit = arr.mut_ptr(i);
           if(qinit)
-            var->initialize(::std::move(*qinit), up.immutable);
+            var->initialize(::std::move(*qinit), up.y8s[0]);
           else
-            var->initialize(nullptr, up.immutable);
+            var->initialize(nullptr, up.y8s[0]);
         }
         return air_status_next;
       }
@@ -3547,11 +3423,11 @@ struct AIR_Traits<AIR_Node::S_unpack_struct_object>
     // `Sparam` is the list of keys.
 
     static
-    Uparam_array
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_unpack_struct_object& altr)
       {
-        Uparam_array up;
-        up.immutable = altr.immutable;
+        AVMC_Queue::Uparam up;
+        up.v8s[0] = altr.immutable;
         return up;
       }
 
@@ -3573,7 +3449,7 @@ struct AIR_Traits<AIR_Node::S_unpack_struct_object>
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_array& up, const cow_vector<phsh_string>& keys)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const cow_vector<phsh_string>& keys)
       {
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this function.
@@ -3596,9 +3472,9 @@ struct AIR_Traits<AIR_Node::S_unpack_struct_object>
           ROCKET_ASSERT(var && !var->is_initialized());
           auto qinit = obj.mut_ptr(*it);
           if(qinit)
-            var->initialize(::std::move(*qinit), up.immutable);
+            var->initialize(::std::move(*qinit), up.v8s[0]);
           else
-            var->initialize(nullptr, up.immutable);
+            var->initialize(nullptr, up.v8s[0]);
         }
         return air_status_next;
       }
@@ -3611,11 +3487,11 @@ struct AIR_Traits<AIR_Node::S_define_null_variable>
     // `Sparam` is the source location and name.
 
     static
-    Uparam_uint8
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_define_null_variable& altr)
       {
-        Uparam_uint8 up;
-        up.value = altr.immutable;
+        AVMC_Queue::Uparam up;
+        up.v8s[0] = altr.immutable;
         return up;
       }
 
@@ -3640,7 +3516,7 @@ struct AIR_Traits<AIR_Node::S_define_null_variable>
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_uint8& up, const Sparam_sloc_name& sp)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Sparam_sloc_name& sp)
       {
         // Allocate an uninitialized variable.
         auto gcoll = ctx.global().genius_collector();
@@ -3656,7 +3532,7 @@ struct AIR_Traits<AIR_Node::S_define_null_variable>
           qhooks->on_variable_declare(sp.sloc, ctx.zvarg()->func(), sp.name);
 
         // Initialize the variable to `null`.
-        var->initialize(nullptr, up.value);
+        var->initialize(nullptr, up.v8s[0]);
         return air_status_next;
       }
   };
@@ -3702,11 +3578,11 @@ struct AIR_Traits<AIR_Node::S_variadic_call>
     // `Sparam` is the source location.
 
     static
-    Uparam_call
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_variadic_call& altr)
       {
-        Uparam_call up;
-        up.ptc = altr.ptc;
+        AVMC_Queue::Uparam up;
+        up.y8s[0] = weaken_enum(altr.ptc);
         return up;
       }
 
@@ -3728,7 +3604,7 @@ struct AIR_Traits<AIR_Node::S_variadic_call>
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_call& up, const Source_Location& sloc)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Source_Location& sloc)
       {
         // Check for stack overflows.
         const auto sentry = ctx.global().copy_recursion_sentry();
@@ -3803,7 +3679,8 @@ struct AIR_Traits<AIR_Node::S_variadic_call>
         }
         auto& self = ctx.stack().open_top().zoom_out();
 
-        return do_function_call_common(self, sloc, ctx, value.as_function(), up.ptc, ::std::move(args));
+        return do_function_call_common(self, sloc, ctx, value.as_function(),
+                                       static_cast<PTC_Aware>(up.y8s[0]), ::std::move(args));
       }
   };
 
@@ -3858,11 +3735,11 @@ struct AIR_Traits<AIR_Node::S_import_call>
     // `Sparam` is the source location and compiler options.
 
     static
-    Uparam_call
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_import_call& altr)
       {
-        Uparam_call up;
-        up.nargs = altr.nargs;
+        AVMC_Queue::Uparam up;
+        up.y32 = altr.nargs;
         return up;
       }
 
@@ -3887,7 +3764,7 @@ struct AIR_Traits<AIR_Node::S_import_call>
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Uparam_call& up, const Sparam_import& sp)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Sparam_import& sp)
       {
         // Check for stack overflows.
         const auto sentry = ctx.global().copy_recursion_sentry();
@@ -3898,8 +3775,8 @@ struct AIR_Traits<AIR_Node::S_import_call>
           qhooks->on_single_step_trap(sp.sloc, ctx.zvarg()->func(), &ctx);
 
         // Pop arguments off the stack backwards.
-        ROCKET_ASSERT(up.nargs != 0);
-        auto args = do_pop_positional_arguments(ctx, up.nargs - 1);
+        ROCKET_ASSERT(up.y32 != 0);
+        auto args = do_pop_positional_arguments(ctx, up.y32 - 1);
 
         // Copy the filename, which shall be of type `string`.
         auto value = ctx.stack().get_top().read();
