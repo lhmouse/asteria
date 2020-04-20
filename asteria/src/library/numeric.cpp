@@ -14,27 +14,24 @@ namespace {
 int64_t
 do_verify_bounds(int64_t lower, int64_t upper)
   {
-    if(!(lower <= upper)) {
+    if(!(lower <= upper))
       ASTERIA_THROW("bounds not valid (`$1` is not less than or equal to `$2`)", lower, upper);
-    }
     return upper;
   }
 
 double
 do_verify_bounds(double lower, double upper)
   {
-    if(!::std::islessequal(lower, upper)) {
+    if(!::std::islessequal(lower, upper))
       ASTERIA_THROW("bounds not valid (`$1` is not less than or equal to `$2`)", lower, upper);
-    }
     return upper;
   }
 
 V_integer
 do_cast_to_integer(double value)
   {
-    if(!::std::islessequal(-0x1p63, value) || !::std::islessequal(value, 0x1p63 - 0x1p10)) {
+    if(!::std::islessequal(-0x1p63, value) || !::std::islessequal(value, 0x1p63 - 0x1p10))
       ASTERIA_THROW("`real` value not representable as an `integer` (value `$1`)", value);
-    }
     return V_integer(value);
   }
 
@@ -42,9 +39,8 @@ ROCKET_PURE_FUNCTION
 V_integer
 do_saturating_add(int64_t lhs, int64_t rhs)
   {
-    if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)) {
+    if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs))
       return (rhs >> 63) ^ INT64_MAX;
-    }
     return lhs + rhs;
   }
 
@@ -52,9 +48,8 @@ ROCKET_PURE_FUNCTION
 V_integer
 do_saturating_sub(int64_t lhs, int64_t rhs)
   {
-    if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs)) {
+    if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs))
       return (rhs >> 63) ^ INT64_MIN;
-    }
     return lhs - rhs;
   }
 
@@ -62,26 +57,22 @@ ROCKET_PURE_FUNCTION
 V_integer
 do_saturating_mul(int64_t lhs, int64_t rhs)
   {
-    if((lhs == 0) || (rhs == 0)) {
+    if((lhs == 0) || (rhs == 0))
       return 0;
-    }
-    if((lhs == 1) || (rhs == 1)) {
+    if((lhs == 1) || (rhs == 1))
       return (lhs ^ rhs) ^ 1;
-    }
-    if((lhs == INT64_MIN) || (rhs == INT64_MIN)) {
+    if((lhs == INT64_MIN) || (rhs == INT64_MIN))
       return (lhs >> 63) ^ (rhs >> 63) ^ INT64_MAX;
-    }
-    if((lhs == -1) || (rhs == -1)) {
+    if((lhs == -1) || (rhs == -1))
       return (lhs ^ rhs) + 1;
-    }
+
     // absolute lhs and signed rhs
     auto m = lhs >> 63;
     auto alhs = (lhs ^ m) - m;
     auto srhs = (rhs ^ m) - m;
     // `alhs` may only be positive here.
-    if((srhs >= 0) ? (alhs > INT64_MAX / srhs) : (alhs > INT64_MIN / srhs)) {
+    if((srhs >= 0) ? (alhs > INT64_MAX / srhs) : (alhs > INT64_MIN / srhs))
       return (srhs >> 63) ^ INT64_MAX;
-    }
     return alhs * srhs;
   }
 
@@ -145,9 +136,8 @@ constexpr char s_spaces[] = " \f\n\r\t\v";
 V_integer
 std_numeric_abs(V_integer value)
   {
-    if(value == INT64_MIN) {
+    if(value == INT64_MIN)
       ASTERIA_THROW("integer absolute value overflow (value `$1`)", value);
-    }
     return ::std::abs(value);
   }
 
@@ -326,17 +316,20 @@ std_numeric_random(Global_Context& global, optV_real limit)
 
     // If a limit is specified, magnify the value.
     // The default magnitude is 1.0 so no action is taken.
-    if(!limit) {
-      return ratio;
+    if(limit) {
+      switch(::std::fpclassify(*limit)) {
+        case FP_ZERO:
+          ASTERIA_THROW("random number limit shall not be zero");
+
+        case FP_INFINITE:
+        case FP_NAN:
+          ASTERIA_THROW("random number limit shall be finite (limit `$1`)", *limit);
+
+        default:
+          ratio *= *limit;
+      }
     }
-    switch(::std::fpclassify(*limit)) {
-      case FP_ZERO:
-        ASTERIA_THROW("random number limit shall not be zero");
-      case FP_INFINITE:
-      case FP_NAN:
-        ASTERIA_THROW("random number limit shall be finite (limit `$1`)", *limit);
-    }
-    return *limit * ratio;
+    return ratio;
   }
 
 V_real
@@ -431,11 +424,11 @@ std_numeric_lzcnt(V_integer x)
   {
     // TODO: Modern CPUs have intrinsics for this.
     uint64_t ireg = static_cast<uint64_t>(x);
-    if(ireg == 0) {
+    if(ireg == 0)
       return 64;
-    }
-    uint32_t count = 0;
+
     // Scan bits from left to right.
+    uint32_t count = 0;
     for(unsigned i = 32;  i != 0;  i /= 2) {
       if(ireg >> (64 - i))
         continue;
@@ -450,11 +443,11 @@ std_numeric_tzcnt(V_integer x)
   {
     // TODO: Modern CPUs have intrinsics for this.
     uint64_t ireg = static_cast<uint64_t>(x);
-    if(ireg == 0) {
+    if(ireg == 0)
       return 64;
-    }
-    uint32_t count = 0;
+
     // Scan bits from right to left.
+    uint32_t count = 0;
     for(unsigned i = 32;  i != 0;  i /= 2) {
       if(ireg << (64 - i))
         continue;
@@ -469,11 +462,11 @@ std_numeric_popcnt(V_integer x)
   {
     // TODO: Modern CPUs have intrinsics for this.
     uint64_t ireg = static_cast<uint64_t>(x);
-    if(ireg == 0) {
+    if(ireg == 0)
       return 0;
-    }
-    uint32_t count = 0;
+
     // Scan bits from right to left.
+    uint32_t count = 0;
     for(unsigned i = 0;  i < 64;  ++i) {
       uint32_t n = ireg & 1;
       ireg >>= 1;
@@ -485,22 +478,20 @@ std_numeric_popcnt(V_integer x)
 V_integer
 std_numeric_rotl(V_integer m, V_integer x, V_integer n)
   {
-    if((m < 0) || (m > 64)) {
+    if((m < 0) || (m > 64))
       ASTERIA_THROW("invalid modulo bit count (`$1` is not between 0 and 64)", m);
-    }
-    if(m == 0) {
+    if(m == 0)
       return 0;
-    }
+
+    // The shift count is modulo `m` so all values are defined.
     uint64_t ireg = static_cast<uint64_t>(x);
     uint64_t mask = (UINT64_C(1) << (m - 1) << 1) - 1;
-    // The shift count is modulo `m` so all values are defined.
     int64_t sh = n % m;
     if(sh != 0) {
       // Normalize the shift count.
       // Note that `sh + m` cannot be zero.
-      if(sh < 0) {
+      if(sh < 0)
         sh += m;
-      }
       ireg = (ireg << sh) | ((ireg & mask) >> (m - sh));
     }
     // Clear the other bits.
@@ -510,22 +501,20 @@ std_numeric_rotl(V_integer m, V_integer x, V_integer n)
 V_integer
 std_numeric_rotr(V_integer m, V_integer x, V_integer n)
   {
-    if((m < 0) || (m > 64)) {
+    if((m < 0) || (m > 64))
       ASTERIA_THROW("invalid modulo bit count (`$1` is not between 0 and 64)", m);
-    }
-    if(m == 0) {
+    if(m == 0)
       return 0;
-    }
+
+    // The shift count is modulo `m` so all values are defined.
     uint64_t ireg = static_cast<uint64_t>(x);
     uint64_t mask = (UINT64_C(1) << (m - 1) << 1) - 1;
-    // The shift count is modulo `m` so all values are defined.
     int64_t sh = n % m;
     if(sh != 0) {
       // Normalize the shift count.
       // Note that `sh + m` cannot be zero.
-      if(sh < 0) {
+      if(sh < 0)
         sh += m;
-      }
       ireg = ((ireg & mask) >> sh) | (ireg << (m - sh));
     }
     // Clear the other bits.
@@ -545,6 +534,7 @@ std_numeric_format(V_integer value, optV_integer base, optV_integer ebase)
           text.append(nump.begin(), nump.end());
           break;
         }
+
         if(*ebase == 2) {
           auto p = do_decompose_integer(2, value);
           nump.put_BI(p.first);  // binary, long
@@ -552,14 +542,17 @@ std_numeric_format(V_integer value, optV_integer base, optV_integer ebase)
           do_append_exponent(text, nump, 'p', p.second);
           break;
         }
+
         ASTERIA_THROW("invalid exponent base for binary notation (`$1` is not 2)", *ebase);
       }
+
       case 16: {
         if(!ebase) {
           nump.put_XI(value);  // hexadecimal, long
           text.append(nump.begin(), nump.end());
           break;
         }
+
         if(*ebase == 2) {
           auto p = do_decompose_integer(2, value);
           nump.put_XI(p.first);  // hexadecimal, long
@@ -567,14 +560,17 @@ std_numeric_format(V_integer value, optV_integer base, optV_integer ebase)
           do_append_exponent(text, nump, 'p', p.second);
           break;
         }
+
         ASTERIA_THROW("invalid exponent base for hexadecimal notation (`$1` is not 2)", *ebase);
       }
+
       case 10: {
         if(!ebase) {
           nump.put_DI(value);  // decimal, long
           text.append(nump.begin(), nump.end());
           break;
         }
+
         if(*ebase == 10) {
           auto p = do_decompose_integer(10, value);
           nump.put_DI(p.first);  // decimal, long
@@ -582,8 +578,10 @@ std_numeric_format(V_integer value, optV_integer base, optV_integer ebase)
           do_append_exponent(text, nump, 'e', p.second);
           break;
         }
+
         ASTERIA_THROW("invalid exponent base for decimal notation (`$1` is not 10)", *ebase);
       }
+
       default:
         ASTERIA_THROW("invalid number base (base `$1` is not one of { 2, 10, 16 })", *base);
     }
@@ -603,6 +601,7 @@ std_numeric_format(V_real value, optV_integer base, optV_integer ebase)
           text.append(nump.begin(), nump.end());
           break;
         }
+
         if(*ebase == 2) {
           nump.put_BE(value);  // binary, scientific
           text.append(nump.begin(), nump.end());
@@ -610,32 +609,39 @@ std_numeric_format(V_real value, optV_integer base, optV_integer ebase)
         }
         ASTERIA_THROW("invalid exponent base for binary notation (`$1` is not 2)", *ebase);
       }
+
       case 16: {
         if(!ebase) {
           nump.put_XF(value);  // hexadecimal, float
           text.append(nump.begin(), nump.end());
           break;
         }
+
         if(*ebase == 2) {
           nump.put_XE(value);  // hexadecimal, scientific
           text.append(nump.begin(), nump.end());
           break;
         }
+
         ASTERIA_THROW("invalid exponent base for hexadecimal notation (`$1` is not 2)", *ebase);
       }
+
       case 10: {
         if(!ebase) {
           nump.put_DF(value);  // decimal, float
           text.append(nump.begin(), nump.end());
           break;
         }
+
         if(*ebase == 10) {
           nump.put_DE(value);  // decimal, scientific
           text.append(nump.begin(), nump.end());
           break;
         }
+
         ASTERIA_THROW("invalid exponent base for decimal notation (`$1` is not 10)", *ebase);
       }
+
       default:
         ASTERIA_THROW("invalid number base (base `$1` is not one of { 2, 10, 16 })", *base);
     }
@@ -646,23 +652,20 @@ V_integer
 std_numeric_parse_integer(V_string text)
   {
     auto tpos = text.find_first_not_of(s_spaces);
-    if(tpos == V_string::npos) {
+    if(tpos == V_string::npos)
       ASTERIA_THROW("blank string");
-    }
     auto bptr = text.data() + tpos;
     auto eptr = text.data() + text.find_last_not_of(s_spaces) + 1;
 
     V_integer value;
     ::rocket::ascii_numget numg;
-    if(!numg.parse_I(bptr, eptr)) {
+    if(!numg.parse_I(bptr, eptr))
       ASTERIA_THROW("string not convertible to integer (text `$1`)", text);
-    }
-    if(bptr != eptr) {
+    if(bptr != eptr)
       ASTERIA_THROW("non-integer character in string (character `$1`)", *bptr);
-    }
-    if(!numg.cast_I(value, INT64_MIN, INT64_MAX)) {
+
+    if(!numg.cast_I(value, INT64_MIN, INT64_MAX))
       ASTERIA_THROW("integer overflow (text `$1`)", text);
-    }
     return value;
   }
 
@@ -670,20 +673,18 @@ V_real
 std_numeric_parse_real(V_string text, optV_boolean saturating)
   {
     auto tpos = text.find_first_not_of(s_spaces);
-    if(tpos == V_string::npos) {
+    if(tpos == V_string::npos)
       ASTERIA_THROW("blank string");
-    }
     auto bptr = text.data() + tpos;
     auto eptr = text.data() + text.find_last_not_of(s_spaces) + 1;
 
     V_real value;
     ::rocket::ascii_numget numg;
-    if(!numg.parse_F(bptr, eptr)) {
+    if(!numg.parse_F(bptr, eptr))
       ASTERIA_THROW("string not convertible to real number (text `$1`)", text);
-    }
-    if(bptr != eptr) {
+    if(bptr != eptr)
       ASTERIA_THROW("non-real-number character in string (character `$1`)", *bptr);
-    }
+
     if(!numg.cast_F(value, -HUGE_VAL, HUGE_VAL)) {
       // The value is out of range.
       // Unlike integers, underflows are accepted unconditionally.
