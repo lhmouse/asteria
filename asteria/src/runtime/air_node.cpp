@@ -3574,32 +3574,32 @@ struct AIR_Traits<AIR_Node::S_unpack_struct_object>
     AIR_Status
     execute(Executive_Context& ctx, const Uparam_array& up, const cow_vector<phsh_string>& keys)
       {
-          // Read the value of the initializer.
-          // Note that the initializer must not have been empty for this function.
-          auto val = ctx.stack().get_top().read();
+        // Read the value of the initializer.
+        // Note that the initializer must not have been empty for this function.
+        auto val = ctx.stack().get_top().read();
+        ctx.stack().pop();
+
+        // Make sure it is really an `object`.
+        V_object obj;
+        if(!val.is_null() && !val.is_object())
+          ASTERIA_THROW("invalid argument for structured object binding (initializer was `$1`)", val);
+        if(val.is_object())
+          obj = ::std::move(val.open_object());
+
+        for(auto it = keys.rbegin();  it != keys.rend();  ++it) {
+          // Get the variable back.
+          auto var = ctx.stack().get_top().get_variable_opt();
           ctx.stack().pop();
 
-          // Make sure it is really an `object`.
-          V_object obj;
-          if(!val.is_null() && !val.is_object())
-            ASTERIA_THROW("invalid argument for structured object binding (initializer was `$1`)", val);
-          if(val.is_object())
-            obj = ::std::move(val.open_object());
-
-          for(auto it = keys.rbegin();  it != keys.rend();  ++it) {
-            // Get the variable back.
-            auto var = ctx.stack().get_top().get_variable_opt();
-            ctx.stack().pop();
-
-            // Initialize it.
-            ROCKET_ASSERT(var && !var->is_initialized());
-            auto qinit = obj.mut_ptr(*it);
-            if(qinit)
-              var->initialize(::std::move(*qinit), up.immutable);
-            else
-              var->initialize(nullptr, up.immutable);
-          }
-          return air_status_next;
+          // Initialize it.
+          ROCKET_ASSERT(var && !var->is_initialized());
+          auto qinit = obj.mut_ptr(*it);
+          if(qinit)
+            var->initialize(::std::move(*qinit), up.immutable);
+          else
+            var->initialize(nullptr, up.immutable);
+        }
+        return air_status_next;
       }
   };
 
