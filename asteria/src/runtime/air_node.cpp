@@ -1439,11 +1439,12 @@ struct AIR_Traits<AIR_Node::S_function_call>
 
     static
     Uparam_call
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_function_call& altr)
+    make_uparam(bool& reachable, const AIR_Node::S_function_call& altr)
       {
         Uparam_call up;
         up.nargs = altr.nargs;
         up.ptc = altr.ptc;
+        reachable &= (altr.ptc == ptc_aware_none);
         return up;
       }
 
