@@ -20,7 +20,6 @@ class Statement
 
     struct S_block
       {
-        Source_Location sloc;
         cow_vector<Statement> stmts;
       };
 
@@ -107,17 +106,20 @@ class Statement
 
     struct S_throw
       {
+        Source_Location sloc;
         S_expression expr;
       };
 
     struct S_return
       {
+        Source_Location sloc;
         bool by_ref;
         S_expression expr;
       };
 
     struct S_assert
       {
+        Source_Location sloc;
         bool negative;
         S_expression expr;
         cow_string msg;
@@ -125,6 +127,7 @@ class Statement
 
     struct S_defer
       {
+        Source_Location sloc;
         S_expression expr;
       };
 

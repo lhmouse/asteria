@@ -124,7 +124,6 @@ do_generate_block(cow_vector<AIR_Node>& code, const Compiler_Options& opts, PTC_
                   const Analytic_Context& ctx, const Statement::S_block& block)
   {
     Analytic_Context ctx_stmts(::rocket::ref(ctx), nullptr);
-    do_generate_single_step_trap(code, opts, block.sloc);
     do_generate_statement_list(code, nullptr, ctx_stmts, opts, ptc, block);
     return code;
   }
@@ -488,7 +487,7 @@ const
         do_generate_expression(code, opts, ptc_aware_none, ctx, altr.expr);
 
         // Encode arguments.
-        AIR_Node::S_throw_statement xnode = { altr.expr.sloc };
+        AIR_Node::S_throw_statement xnode = { altr.sloc };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -528,7 +527,7 @@ const
         do_generate_expression(code, opts, ptc_aware_none, ctx, altr.expr);
 
         // Encode arguments.
-        AIR_Node::S_assert_statement xnode = { altr.expr.sloc, altr.negative, altr.msg };
+        AIR_Node::S_assert_statement xnode = { altr.sloc, altr.negative, altr.msg };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -541,7 +540,7 @@ const
         auto code_body = do_generate_expression(opts, ptc_aware_none, ctx, altr.expr);
 
         // Encode arguments.
-        AIR_Node::S_defer_expression xnode = { altr.expr.sloc, ::std::move(code_body) };
+        AIR_Node::S_defer_expression xnode = { altr.sloc, ::std::move(code_body) };
         code.emplace_back(::std::move(xnode));
         return code;
       }

@@ -124,18 +124,21 @@ do_accept_json5_key_opt(Token_Stream& tstrm)
       tstrm.shift();
       return ::rocket::sref(stringify_keyword(kwrd));
     }
+
     if(qtok->is_identifier()) {
       // Return the identifier and discard this token.
       auto name = qtok->as_identifier();
       tstrm.shift();
       return name;
     }
+
     if(qtok->is_string_literal()) {
       // Return the string literal and discard this token.
       auto val = qtok->as_string_literal();
       tstrm.shift();
       return val;
     }
+
     return nullopt;
   }
 
@@ -384,7 +387,6 @@ do_accept_block_opt(Token_Stream& tstrm)
     //   statement-list | ""
     // statement-list ::=
     //   statement statement-list-opt
-    auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
     if(!kpunct)
       return nullopt;
@@ -398,7 +400,7 @@ do_accept_block_opt(Token_Stream& tstrm)
       throw Parser_Error(parser_status_closed_brace_or_statement_expected, tstrm.next_sloc(),
                          tstrm.next_length());
 
-    Statement::S_block xstmt = { ::std::move(sloc), ::std::move(body) };
+    Statement::S_block xstmt = {  ::std::move(body) };
     return ::std::move(xstmt);
   }
 
@@ -844,12 +846,12 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm)
   }
 
 Statement::S_block
-do_blockify_statement(Source_Location&& sloc, Statement&& stmt)
+do_blockify_statement(Statement&& stmt)
   {
+    // Make a block consisting of a single statement.
     cow_vector<Statement> stmts;
     stmts.emplace_back(::std::move(stmt));
-    // Make a block consisting of a single statement.
-    Statement::S_block xblock = { ::std::move(sloc), ::std::move(stmts) };
+    Statement::S_block xblock = { ::std::move(stmts) };
     return xblock;
   }
 
@@ -858,18 +860,17 @@ do_accept_for_initializer_opt(Token_Stream& tstrm)
   {
     // for-initializer ::=
     //   null-statement | variable-definition | immutable-variable-definition | expression-statement
-    auto sloc = tstrm.next_sloc();
     auto qinit = do_accept_null_statement_opt(tstrm);
     if(qinit)
-      return do_blockify_statement(::std::move(sloc), ::std::move(*qinit));
+      return do_blockify_statement(::std::move(*qinit));
 
     qinit = do_accept_variable_definition_opt(tstrm);
     if(qinit)
-      return do_blockify_statement(::std::move(sloc), ::std::move(*qinit));
+      return do_blockify_statement(::std::move(*qinit));
 
     qinit = do_accept_immutable_variable_definition_opt(tstrm);
     if(qinit)
-      return do_blockify_statement(::std::move(sloc), ::std::move(*qinit));
+      return do_blockify_statement(::std::move(*qinit));
 
     return nullopt;
   }
@@ -1025,6 +1026,7 @@ do_accept_throw_statement_opt(Token_Stream& tstrm)
   {
     // throw-statement ::=
     //   "throw" expression ";"
+    auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_throw });
     if(!qkwrd)
       return nullopt;
@@ -1037,7 +1039,7 @@ do_accept_throw_statement_opt(Token_Stream& tstrm)
     if(!kpunct)
       throw Parser_Error(parser_status_semicolon_expected, tstrm.next_sloc(), tstrm.next_length());
 
-    Statement::S_throw xstmt = { ::std::move(*kexpr) };
+    Statement::S_throw xstmt = { ::std::move(sloc), ::std::move(*kexpr) };
     return ::std::move(xstmt);
   }
 
@@ -1077,26 +1079,38 @@ do_accept_function_argument_opt(cow_vector<Expression_Unit>& units, Token_Stream
     return *qref;
   }
 
+opt<pair<bool, Statement::S_expression>>
+do_accept_return_argument_opt(Token_Stream& tstrm)
+  {
+    auto sloc = tstrm.next_sloc();
+    cow_vector<Expression_Unit> units;
+    auto qref = do_accept_argument_no_conversion_opt(units, tstrm);
+    if(!qref)
+      return nullopt;
+
+    Statement::S_expression xexpr = { ::std::move(sloc), ::std::move(units) };
+    return ::std::make_pair(*qref, ::std::move(xexpr));
+  }
+
 opt<Statement>
 do_accept_return_statement_opt(Token_Stream& tstrm)
   {
     // return-statement ::=
     //   "return" ( argument | "" ) ";"
+    auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_return });
     if(!qkwrd)
       return nullopt;
 
-    auto sloc = tstrm.next_sloc();
-    cow_vector<Expression_Unit> units;
-    auto qref = do_accept_argument_no_conversion_opt(units, tstrm);
-    if(!qref)
-      qref.emplace();
+    auto kpair = do_accept_return_argument_opt(tstrm);
+    if(!kpair)
+      kpair.emplace();  // returns void
 
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
       throw Parser_Error(parser_status_semicolon_expected, tstrm.next_sloc(), tstrm.next_length());
 
-    Statement::S_return xstmt = { *qref, { ::std::move(sloc), ::std::move(units) } };
+    Statement::S_return xstmt = { ::std::move(sloc), kpair->first, ::std::move(kpair->second) };
     return ::std::move(xstmt);
   }
 
@@ -1121,6 +1135,7 @@ do_accept_assert_statement_opt(Token_Stream& tstrm)
   {
     // assert-statement ::=
     //   "assert" negation-opt expression assert-message-opt ";"
+    auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_assert });
     if(!qkwrd)
       return nullopt;
@@ -1141,7 +1156,7 @@ do_accept_assert_statement_opt(Token_Stream& tstrm)
     if(!kpunct)
       throw Parser_Error(parser_status_semicolon_expected, tstrm.next_sloc(), tstrm.next_length());
 
-    Statement::S_assert xstmt = { *kneg, ::std::move(*kexpr), ::std::move(*kmsg) };
+    Statement::S_assert xstmt = { ::std::move(sloc), *kneg, ::std::move(*kexpr), ::std::move(*kmsg) };
     return ::std::move(xstmt);
   }
 
@@ -1190,6 +1205,7 @@ do_accept_defer_statement_opt(Token_Stream& tstrm)
   {
     // defer-statement ::=
     //  "defer" expression ";"
+    auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_defer });
     if(!qkwrd)
       return nullopt;
@@ -1202,7 +1218,7 @@ do_accept_defer_statement_opt(Token_Stream& tstrm)
     if(!kpunct)
       throw Parser_Error(parser_status_semicolon_expected, tstrm.next_sloc(), tstrm.next_length());
 
-    Statement::S_defer xstmt = { ::std::move(*kexpr) };
+    Statement::S_defer xstmt = { ::std::move(sloc), ::std::move(*kexpr) };
     return ::std::move(xstmt);
   }
 
@@ -1273,10 +1289,10 @@ do_accept_nonblock_statement_opt(Token_Stream& tstrm)
 opt<Statement>
 do_accept_statement_opt(Token_Stream& tstrm)
   {
-    // Check for stack overflows.
-    const auto sentry = tstrm.copy_recursion_sentry();
     // statement ::=
     //   block | nonblock-statement
+    const auto sentry = tstrm.copy_recursion_sentry();
+
     if(auto qstmt = do_accept_block_statement_opt(tstrm))
       return qstmt;
 
@@ -1289,18 +1305,17 @@ do_accept_statement_opt(Token_Stream& tstrm)
 opt<Statement::S_block>
 do_accept_statement_as_block_opt(Token_Stream& tstrm)
   {
-    // Check for stack overflows.
-    const auto sentry = tstrm.copy_recursion_sentry();
     // statement ::=
     //   block | nonblock-statement
+    const auto sentry = tstrm.copy_recursion_sentry();
+
     auto qblock = do_accept_block_opt(tstrm);
     if(qblock)
       return qblock;
 
-    auto sloc = tstrm.next_sloc();
     auto qstmt = do_accept_nonblock_statement_opt(tstrm);
     if(qstmt)
-      return do_blockify_statement(::std::move(sloc), ::std::move(*qstmt));
+      return do_blockify_statement(::std::move(*qstmt));
 
     return nullopt;
   }
@@ -1489,8 +1504,8 @@ do_accept_closure_body_opt(Token_Stream& tstrm)
     if(qinit) {
       // In the case of an `equal-initializer`, behave as if it was a `return-statement`.
       // Note that the result is returned by value.
-      Statement::S_return xstmt = { false, ::std::move(*qinit) };
-      return do_blockify_statement(::std::move(sloc), ::std::move(xstmt));
+      Statement::S_return xstmt = { ::std::move(sloc), false, ::std::move(*qinit) };
+      return do_blockify_statement(::std::move(xstmt));
     }
     return nullopt;
   }
