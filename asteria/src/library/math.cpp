@@ -19,94 +19,94 @@ constexpr double s_const_lb10 = 3.3219280948873623478703194294893901758648313930
 V_real
 std_math_exp(V_real y, optV_real base)
   {
-    if(!base) {
-      return ::std::exp(y);
-    }
-    if(*base == 2) {
-      return ::std::exp2(y);
-    }
-    if(*base == s_const_e) {
-      return ::std::exp(y);
-    }
-    return ::std::pow(*base, y);
+    if(!base)
+      return ::exp(y);
+
+    if(*base == 2)
+      return ::exp2(y);
+
+    if(*base == s_const_e)
+      return ::exp(y);
+
+    return ::pow(*base, y);
   }
 
 V_real
 std_math_expm1(V_real y)
   {
-    return ::std::expm1(y);
+    return ::expm1(y);
   }
 
 V_real
 std_math_pow(V_real x, V_real y)
   {
-    return ::std::pow(x, y);
+    return ::pow(x, y);
   }
 
 V_real
 std_math_log(V_real x, optV_real base)
   {
-    if(!base) {
-      return ::std::log(x);
-    }
-    if(*base == 2) {
-      return ::std::log2(x);
-    }
-    if(*base == 10) {
-      return ::std::log10(x);
-    }
-    if((*base == 1) || (*base <= 0)) {
-      return ::std::numeric_limits<V_real>::quiet_NaN();
-    }
-    return ::std::log2(x) / ::std::log2(*base);
+    if(!base)
+      return ::log(x);
+
+    if(*base == 2)
+      return ::log2(x);
+
+    if(*base == 10)
+      return ::log10(x);
+
+    if((*base == 1) || (*base <= 0))
+      return ::std::numeric_limits<double>::quiet_NaN();
+
+    return ::log2(x) / ::log2(*base);
   }
 
 V_real
 std_math_log1p(V_real x)
   {
-    return ::std::log1p(x);
+    return ::log1p(x);
   }
 
 V_real
 std_math_sin(V_real x)
   {
-    return ::std::sin(x);
+    return ::sin(x);
   }
 
 V_real
 std_math_cos(V_real x)
   {
-    return ::std::cos(x);
+    return ::cos(x);
   }
 
 V_real
 std_math_tan(V_real x)
   {
-    return ::std::tan(x);
+    return ::tan(x);
   }
 
 V_real
 std_math_asin(V_real x)
   {
-    return ::std::asin(x);
+    return ::asin(x);
   }
 
 V_real
 std_math_acos(V_real x)
   {
-    return ::std::acos(x);
+    return ::acos(x);
   }
 
 V_real
 std_math_atan(V_real x)
   {
-    return ::std::atan(x);
+    return ::atan(x);
   }
 
 V_real
 std_math_atan2(V_real y, V_real x)
   {
-    return ::std::atan2(y, x);
+    return ::atan2(y, x);
   }
 
 V_real
@@ -118,73 +118,73 @@ std_math_hypot(cow_vector<Value> values)
 
     // Return the absolute value of the only argument.
     if(values.size() == 1)
-      return ::std::fabs(values[0].convert_to_real());
+      return ::fabs(values[0].convert_to_real());
 
     // Call the C `hypot()` function for every two values.
-    auto res = ::std::hypot(values[0].convert_to_real(), values[1].convert_to_real());
+    auto res = ::hypot(values[0].convert_to_real(), values[1].convert_to_real());
     for(size_t i = 2;  i < values.size();  ++i)
-      res = ::std::hypot(res, values[i].convert_to_real());
+      res = ::hypot(res, values[i].convert_to_real());
     return res;
   }
 
 V_real
 std_math_sinh(V_real x)
   {
-    return ::std::sinh(x);
+    return ::sinh(x);
   }
 
 V_real
 std_math_cosh(V_real x)
   {
-    return ::std::cosh(x);
+    return ::cosh(x);
   }
 
 V_real
 std_math_tanh(V_real x)
   {
-    return ::std::tanh(x);
+    return ::tanh(x);
   }
 
 V_real
 std_math_asinh(V_real x)
   {
-    return ::std::asinh(x);
+    return ::asinh(x);
   }
 
 V_real
 std_math_acosh(V_real x)
   {
-    return ::std::acosh(x);
+    return ::acosh(x);
   }
 
 V_real
 std_math_atanh(V_real x)
   {
-    return ::std::atanh(x);
+    return ::atanh(x);
   }
 
 V_real
 std_math_erf(V_real x)
   {
-    return ::std::erf(x);
+    return ::erf(x);
   }
 
 V_real
 std_math_cerf(V_real x)
   {
-    return ::std::erfc(x);
+    return ::erfc(x);
   }
 
 V_real
 std_math_gamma(V_real x)
   {
-    return ::std::tgamma(x);
+    return ::tgamma(x);
   }
 
 V_real
 std_math_lgamma(V_real x)
   {
-    return ::std::lgamma(x);
+    return ::lgamma(x);
   }
 
 void
