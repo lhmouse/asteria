@@ -36,6 +36,10 @@ std_math_sin(V_real x);
 V_real
 std_math_cos(V_real x);
 
+// `std.math.sincos`
+pair<V_real, V_real>
+std_math_sincos(V_real x);
+
 // `std.math.tan`
 V_real
 std_math_tan(V_real x);

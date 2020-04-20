@@ -79,6 +79,14 @@ std_math_cos(V_real x)
     return ::cos(x);
   }
 
+pair<V_real, V_real>
+std_math_sincos(V_real x)
+  {
+    double sinv, cosv;
+    ::sincos(x, &sinv, &cosv);
+    return ::std::make_pair(sinv, cosv);
+  }
+
 V_real
 std_math_tan(V_real x)
   {
@@ -392,6 +400,34 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     V_real x;
     if(reader.I().v(x).F()) {
       Reference_root::S_temporary xref = { std_math_cos(::std::move(x)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
+      ));
+    //===================================================================
+    // `std.math.sincos()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("sincos"),
+      V_function(
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.math.sincos(x)`
+
+ * Calculates the sine and cosine of `x` in radians.
+
+ * Returns an array of two reals. The first element is the sine
+   and the other is the cosine.
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.sincos"));
+    // Parse arguments.
+    V_real x;
+    if(reader.I().v(x).F()) {
+      auto pair = std_math_sincos(::std::move(x));
+      // The binding function returns a `pair`, but we would like to return an array so convert it.
+      Reference_root::S_temporary xref = { { pair.first, pair.second } };
       return self = ::std::move(xref);
     }
     // Fail.

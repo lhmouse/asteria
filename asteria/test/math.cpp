@@ -64,6 +64,12 @@ int main()
         assert lt_3ups(std.math.cos(std.math.pi *  8 / 6), -0.5);
         assert lt_3ups(std.math.cos(std.math.pi * 10 / 6), +0.5);
 
+        for(var i = 0;  i < 100;  ++i) {
+          var r = std.math.sincos(i);
+          assert r[0] == std.math.sin(i);
+          assert r[1] == std.math.cos(i);
+        }
+
         assert std.math.tan(0) == 0;
         //assert __isnan std.math.tan(std.math.pi / 2);
         assert lt_3ups(std.math.tan(std.math.pi *  1 / 4), +1.0);
