@@ -545,17 +545,15 @@ Value
 std_array_max_of(Global_Context& global, V_array data, optV_function comparator)
   {
     auto qmax = data.begin();
-    if(qmax == data.end()) {
+    if(qmax == data.end())
       // Return `null` if `data` is empty.
-      return nullptr;
-    }
+      return V_null();
+
+    // Compare `*qmax` with the other elements, ignoring unordered elements.
     cow_vector<Reference> args;
-    for(auto it = qmax + 1;  it != data.end();  ++it) {
-      // Compare `*qmax` with the other elements, ignoring unordered elements.
-      if(do_compare(global, args, comparator, *qmax, *it) != compare_less)
-        continue;
-      qmax = it;
-    }
+    for(auto it = qmax + 1;  it != data.end();  ++it)
+      if(do_compare(global, args, comparator, *qmax, *it) == compare_less)
+        qmax = it;
     return *qmax;
   }
 
@@ -563,17 +561,15 @@ Value
 std_array_min_of(Global_Context& global, V_array data, optV_function comparator)
   {
     auto qmin = data.begin();
-    if(qmin == data.end()) {
+    if(qmin == data.end())
       // Return `null` if `data` is empty.
-      return nullptr;
-    }
+      return V_null();
+
+    // Compare `*qmin` with the other elements, ignoring unordered elements.
     cow_vector<Reference> args;
-    for(auto it = qmin + 1;  it != data.end();  ++it) {
-      // Compare `*qmin` with the other elements, ignoring unordered elements.
-      if(do_compare(global, args, comparator, *qmin, *it) != compare_greater)
-        continue;
-      qmin = it;
-    }
+    for(auto it = qmin + 1;  it != data.end();  ++it)
+      if(do_compare(global, args, comparator, *qmin, *it) == compare_greater)
+        qmin = it;
     return *qmin;
   }
 

@@ -144,23 +144,23 @@ do_accept_json5_key_opt(Token_Stream& tstrm)
 
 Value
 do_generate_null()
-  { return nullptr;  }
+  { return V_null();  }
 
 Value
 do_generate_false()
-  { return false;  }
+  { return V_boolean(false);  }
 
 Value
 do_generate_true()
-  { return true;  }
+  { return V_boolean(true);  }
 
 Value
 do_generate_nan()
-  { return ::std::numeric_limits<double>::quiet_NaN();  }
+  { return ::std::numeric_limits<V_real>::quiet_NaN();  }
 
 Value
 do_generate_infinity()
-  { return ::std::numeric_limits<double>::infinity();  }
+  { return ::std::numeric_limits<V_real>::infinity();  }
 
 struct Literal_Element
   {

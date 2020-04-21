@@ -522,36 +522,40 @@ opt<Value>
 do_accept_scalar_opt(Token_Stream& tstrm)
   {
     auto qnum = do_accept_number_opt(tstrm);
-    if(qnum) {
+    if(qnum)
       // Accept a `Number`.
       return *qnum;
-    }
+
     auto qstr = do_accept_string_opt(tstrm);
-    if(qstr) {
+    if(qstr)
       // Accept a `String`.
       return ::std::move(*qstr);
-    }
+
     qstr = do_accept_identifier_opt(tstrm, { "true", "false", "Infinity", "NaN", "null" });
     if(qstr) {
-      if(qstr->front() == 't') {
-        // Accept a `Boolean` of value `true`.
-        return true;
+      switch(qstr->front()) {
+        case 't':
+          // Accept a `Boolean` of value `true`.
+          return true;
+
+        case 'f':
+          // Accept a `Boolean` of value `false`.
+          return false;
+
+        case 'I':
+          // Accept a `Number` of value `Infinity`.
+          return ::std::numeric_limits<V_real>::infinity();
+
+        case 'N':
+          // Accept a `Number` of value `NaN`.
+          return ::std::numeric_limits<V_real>::quiet_NaN();
+
+        default:
+          // Accept an explicit `null`.
+          return V_null();
       }
-      if(qstr->front() == 'f') {
-        // Accept a `Boolean` of value `false`.
-        return false;
-      }
-      if(qstr->front() == 'I') {
-        // Accept a `Number` of value `Infinity`.
-        return ::std::numeric_limits<V_real>::infinity();
-      }
-      if(qstr->front() == 'N') {
-        // Accept a `Number` of value `NaN`.
-        return ::std::numeric_limits<V_real>::quiet_NaN();
-      }
-      // Accept an explicit `null`.
-      return nullptr;
     }
+
     return nullopt;
   }
 

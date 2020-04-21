@@ -383,7 +383,7 @@ o(Value& val)
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
-      val = nullptr;
+      val = V_null();
       return *this;
     }
     val = karg->read();

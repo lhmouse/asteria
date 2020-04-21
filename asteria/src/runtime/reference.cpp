@@ -179,7 +179,7 @@ const
       // Apply a modifier.
       qref = mods[i].apply_mutable_opt(*qref, false);  // no create
       if(!qref)
-        return nullptr;
+        return V_null();
     }
     // Apply the last modifier.
     return last.apply_and_erase(*qref);

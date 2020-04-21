@@ -3410,7 +3410,7 @@ struct AIR_Traits<AIR_Node::S_unpack_struct_array>
           if(qinit)
             var->initialize(::std::move(*qinit), up.y8s[0]);
           else
-            var->initialize(nullptr, up.y8s[0]);
+            var->initialize(V_null(), up.y8s[0]);
         }
         return air_status_next;
       }
@@ -3474,7 +3474,7 @@ struct AIR_Traits<AIR_Node::S_unpack_struct_object>
           if(qinit)
             var->initialize(::std::move(*qinit), up.v8s[0]);
           else
-            var->initialize(nullptr, up.v8s[0]);
+            var->initialize(V_null(), up.v8s[0]);
         }
         return air_status_next;
       }
@@ -3532,7 +3532,7 @@ struct AIR_Traits<AIR_Node::S_define_null_variable>
           qhooks->on_variable_declare(sp.sloc, ctx.zvarg()->func(), sp.name);
 
         // Initialize the variable to `null`.
-        var->initialize(nullptr, up.v8s[0]);
+        var->initialize(V_null(), up.v8s[0]);
         return air_status_next;
       }
   };
