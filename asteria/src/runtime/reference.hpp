@@ -38,15 +38,15 @@ class Reference
     const;
 
     const Value&
-    do_read(const Reference_modifier* mods, size_t nmod, const Reference_modifier& last)
+    do_read(size_t nmod, const Reference_modifier& last)
     const;
 
     Value&
-    do_open(const Reference_modifier* mods, size_t nmod, const Reference_modifier& last)
+    do_open(size_t nmod, const Reference_modifier& last)
     const;
 
     Value
-    do_unset(const Reference_modifier* mods, size_t nmod, const Reference_modifier& last)
+    do_unset(size_t nmod, const Reference_modifier& last)
     const;
 
     Reference&
@@ -135,7 +135,7 @@ class Reference
         if(ROCKET_EXPECT(this->m_mods.empty()))
           return this->m_root.dereference_const();
         else
-          return this->do_read(this->m_mods.data(), this->m_mods.size() - 1, this->m_mods.back());
+          return this->do_read(this->m_mods.size() - 1, this->m_mods.back());
       }
 
     Value&
@@ -145,7 +145,7 @@ class Reference
         if(ROCKET_EXPECT(this->m_mods.empty()))
           return this->m_root.dereference_mutable();
         else
-          return this->do_open(this->m_mods.data(), this->m_mods.size() - 1, this->m_mods.back());
+          return this->do_open(this->m_mods.size() - 1, this->m_mods.back());
       }
 
     Value
@@ -155,23 +155,23 @@ class Reference
         if(ROCKET_EXPECT(this->m_mods.empty()))
           this->do_throw_unset_no_modifier();
         else
-          return this->do_unset(this->m_mods.data(), this->m_mods.size() - 1, this->m_mods.back());
+          return this->do_unset(this->m_mods.size() - 1, this->m_mods.back());
       }
 
     const Value&
     read(const Reference_modifier& last)
     const
-      { return this->do_read(this->m_mods.data(), this->m_mods.size(), last);  }
+      { return this->do_read(this->m_mods.size(), last);  }
 
     Value&
     open(const Reference_modifier& last)
     const
-      { return this->do_open(this->m_mods.data(), this->m_mods.size(), last);  }
+      { return this->do_open(this->m_mods.size(), last);  }
 
     Value
     unset(const Reference_modifier& last)
     const
-      { return this->do_unset(this->m_mods.data(), this->m_mods.size(), last);  }
+      { return this->do_unset(this->m_mods.size(), last);  }
 
     ASTERIA_INCOMPLET(Variable)
     rcptr<Variable>

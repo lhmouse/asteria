@@ -139,50 +139,56 @@ const
 
 const Value&
 Reference::
-do_read(const Reference_modifier* mods, size_t nmod, const Reference_modifier& last)
+do_read(size_t nmod, const Reference_modifier& last)
 const
   {
     auto qref = ::std::addressof(this->m_root.dereference_const());
-    for(size_t i = 0;  i < nmod;  ++i) {
-      // Apply a modifier.
-      qref = mods[i].apply_const_opt(*qref);
-      if(!qref)
+
+    // Apply the first `nmod` modifiers.
+    for(size_t i = 0;  i < nmod;  ++i)
+      if(!(qref = this->m_mods[i].apply_const_opt(*qref)))
         return null_value;
-    }
+
     // Apply the last modifier.
-    return (qref = last.apply_const_opt(*qref)) ? *qref : null_value;
+    if(!(qref = last.apply_const_opt(*qref)))
+      return null_value;
+
+    return *qref;
   }
 
 Value&
 Reference::
-do_open(const Reference_modifier* mods, size_t nmod, const Reference_modifier& last)
+do_open(size_t nmod, const Reference_modifier& last)
 const
   {
-    auto qref = ::std::addressof(this->m_root.dereference_mutable());
-    for(size_t i = 0;  i < nmod;  ++i) {
-      // Apply a modifier.
-      qref = mods[i].apply_mutable_opt(*qref, true);  // create new
-      if(!qref)
-        ROCKET_ASSERT(false);
-    }
+    auto rref = ::std::ref(this->m_root.dereference_mutable());
+
+    // Apply the first `nmod` modifiers.
+    for(size_t i = 0;  i < nmod;  ++i)
+      rref = ::std::ref(this->m_mods[i].apply_and_create(rref));
+
     // Apply the last modifier.
-    return *(last.apply_mutable_opt(*qref, true));
+    rref = ::std::ref(last.apply_and_create(rref));
+
+    return rref;
   }
 
 Value
 Reference::
-do_unset(const Reference_modifier* mods, size_t nmod, const Reference_modifier& last)
+do_unset(size_t nmod, const Reference_modifier& last)
 const
   {
     auto qref = ::std::addressof(this->m_root.dereference_mutable());
-    for(size_t i = 0;  i < nmod;  ++i) {
-      // Apply a modifier.
-      qref = mods[i].apply_mutable_opt(*qref, false);  // no create
-      if(!qref)
+
+    // Apply the first `nmod` modifiers.
+    for(size_t i = 0;  i < nmod;  ++i)
+      if(!(qref = this->m_mods[i].apply_mutable_opt(*qref)))
         return V_null();
-    }
+
     // Apply the last modifier.
-    return last.apply_and_erase(*qref);
+    auto val = last.apply_and_erase(*qref);
+
+    return val;
   }
 
 Reference&

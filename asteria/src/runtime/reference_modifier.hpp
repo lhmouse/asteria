@@ -80,7 +80,11 @@ class Reference_modifier
     const;
 
     Value*
-    apply_mutable_opt(Value& parent, bool create_new)
+    apply_mutable_opt(Value& parent)
+    const;
+
+    Value&
+    apply_and_create(Value& parent)
     const;
 
     Value
