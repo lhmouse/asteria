@@ -28,6 +28,7 @@
         && defined(ROCKET_ARTIFICIAL_FUNCTION)  \
         && defined(ROCKET_CONSTANT_P)  \
         && defined(ROCKET_FLATTEN_FUNCTION)  \
+        && defined(ROCKET_FORCED_INLINE_FUNCTION)  \
       )
 #  error Some macros are missing.
 #endif

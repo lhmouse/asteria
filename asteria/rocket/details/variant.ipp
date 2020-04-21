@@ -37,14 +37,14 @@ struct type_getter<0, firstT, restT...>
   : enable_if<1, firstT>  // found
   { };
 
-// In a `catch` block that is conditionally unreachable, direct use of `throw` is subject to compiler
-// warnings. Wrapping the `throw` expression in a function could silence this warning.
-[[noreturn]] inline
+// In a `catch` block that is conditionally unreachable, direct use of `throw` is subject to compiler warnings.
+// Wrapping the `throw` expression in a function could silence this warning.
+[[noreturn]] ROCKET_FORCED_INLINE_FUNCTION
 void
 rethrow_current_exception()
   { throw;  }
 
-ROCKET_PURE_FUNCTION inline
+ROCKET_PURE_FUNCTION ROCKET_FORCED_INLINE_FUNCTION
 bool
 test_bit(const bool* table, size_t count, size_t index)
 noexcept
@@ -67,7 +67,7 @@ wrapped_copy_construct(void* dptr, const void* sptr)
   { noadl::construct_at(static_cast<alternativeT*>(dptr), *static_cast<const alternativeT*>(sptr));  }
 
 template<typename... alternativesT>
-inline
+ROCKET_FORCED_INLINE_FUNCTION
 void
 dispatch_copy_construct(size_t rindex, void* dptr, const void* sptr)
   {
@@ -89,7 +89,7 @@ wrapped_move_construct(void* dptr, void* sptr)
   { noadl::construct_at(static_cast<alternativeT*>(dptr), ::std::move(*static_cast<alternativeT*>(sptr)));  }
 
 template<typename... alternativesT>
-inline
+ROCKET_FORCED_INLINE_FUNCTION
 void
 dispatch_move_construct(size_t rindex, void* dptr, void* sptr)
   {
@@ -111,7 +111,7 @@ wrapped_copy_assign(void* dptr, const void* sptr)
   { *static_cast<alternativeT*>(dptr) = *static_cast<const alternativeT*>(sptr);  }
 
 template<typename... alternativesT>
-inline
+ROCKET_FORCED_INLINE_FUNCTION
 void
 dispatch_copy_assign(size_t rindex, void* dptr, const void* sptr)
   {
@@ -133,7 +133,7 @@ wrapped_move_assign(void* dptr, void* sptr)
   { *static_cast<alternativeT*>(dptr) = ::std::move(*static_cast<alternativeT*>(sptr));  }
 
 template<typename... alternativesT>
-inline
+ROCKET_FORCED_INLINE_FUNCTION
 void
 dispatch_move_assign(size_t rindex, void* dptr, void* sptr)
   {
@@ -155,7 +155,7 @@ wrapped_destroy(void* dptr)
   { noadl::destroy_at(static_cast<alternativeT*>(dptr));  }
 
 template<typename... alternativesT>
-inline
+ROCKET_FORCED_INLINE_FUNCTION
 void
 dispatch_destroy(size_t rindex, void* dptr)
   {
@@ -178,7 +178,7 @@ wrapped_move_then_destroy(void* dptr, void* sptr)
   }
 
 template<typename... alternativesT>
-inline
+ROCKET_FORCED_INLINE_FUNCTION
 void
 dispatch_move_then_destroy(size_t rindex, void* dptr, void* sptr)
   {
@@ -201,7 +201,7 @@ wrapped_adl_swap(void* dptr, void* sptr)
   { noadl::xswap(*static_cast<alternativeT*>(dptr), *static_cast<alternativeT*>(sptr));  }
 
 template<typename... alternativesT>
-inline
+ROCKET_FORCED_INLINE_FUNCTION
 void
 dispatch_swap(size_t rindex, void* dptr, void* sptr)
   {
