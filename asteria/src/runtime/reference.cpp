@@ -139,7 +139,7 @@ const
 
 const Value&
 Reference::
-do_read(const Modifier* mods, size_t nmod, const Modifier& last)
+do_read(const Reference_modifier* mods, size_t nmod, const Reference_modifier& last)
 const
   {
     auto qref = ::std::addressof(this->m_root.dereference_const());
@@ -155,7 +155,7 @@ const
 
 Value&
 Reference::
-do_open(const Modifier* mods, size_t nmod, const Modifier& last)
+do_open(const Reference_modifier* mods, size_t nmod, const Reference_modifier& last)
 const
   {
     auto qref = ::std::addressof(this->m_root.dereference_mutable());
@@ -171,7 +171,7 @@ const
 
 Value
 Reference::
-do_unset(const Modifier* mods, size_t nmod, const Modifier& last)
+do_unset(const Reference_modifier* mods, size_t nmod, const Reference_modifier& last)
 const
   {
     auto qref = ::std::addressof(this->m_root.dereference_mutable());

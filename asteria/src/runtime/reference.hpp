@@ -12,21 +12,17 @@ namespace Asteria {
 
 class Reference
   {
-  public:
-    using Root      = Reference_root;
-    using Modifier  = Reference_modifier;
-
   private:
-    Root m_root;
-    cow_vector<Modifier> m_mods;
+    Reference_root m_root;
+    cow_vector<Reference_modifier> m_mods;
 
   public:
-    ASTERIA_VARIANT_CONSTRUCTOR(Reference, Root, XRootT, xroot)
+    ASTERIA_VARIANT_CONSTRUCTOR(Reference, Reference_root, XRootT, xroot)
       : m_root(::std::forward<XRootT>(xroot)),
         m_mods()
       { }
 
-    ASTERIA_VARIANT_ASSIGNMENT(Reference, Root, XRootT, xroot)
+    ASTERIA_VARIANT_ASSIGNMENT(Reference, Reference_root, XRootT, xroot)
       {
         this->m_root = ::std::forward<XRootT>(xroot);
         this->m_mods.clear();
@@ -42,15 +38,15 @@ class Reference
     const;
 
     const Value&
-    do_read(const Modifier* mods, size_t nmod, const Modifier& last)
+    do_read(const Reference_modifier* mods, size_t nmod, const Reference_modifier& last)
     const;
 
     Value&
-    do_open(const Modifier* mods, size_t nmod, const Modifier& last)
+    do_open(const Reference_modifier* mods, size_t nmod, const Reference_modifier& last)
     const;
 
     Value
-    do_unset(const Modifier* mods, size_t nmod, const Modifier& last)
+    do_unset(const Reference_modifier* mods, size_t nmod, const Reference_modifier& last)
     const;
 
     Reference&
@@ -117,7 +113,7 @@ class Reference
     zoom_out()
       {
         if(ROCKET_EXPECT(this->m_mods.empty()))
-          this->m_root = Root::S_constant();
+          this->m_root = Reference_root::S_constant();
         else
           this->m_mods.pop_back();
         return *this;
@@ -163,17 +159,17 @@ class Reference
       }
 
     const Value&
-    read(const Modifier& last)
+    read(const Reference_modifier& last)
     const
       { return this->do_read(this->m_mods.data(), this->m_mods.size(), last);  }
 
     Value&
-    open(const Modifier& last)
+    open(const Reference_modifier& last)
     const
       { return this->do_open(this->m_mods.data(), this->m_mods.size(), last);  }
 
     Value
-    unset(const Modifier& last)
+    unset(const Reference_modifier& last)
     const
       { return this->do_unset(this->m_mods.data(), this->m_mods.size(), last);  }
 
