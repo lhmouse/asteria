@@ -26,65 +26,78 @@ enum RM_Disp
 struct RM_Element
   {
     RM_Disp disp;
-    cow_string path;
+    V_string path;
   };
 
 int64_t
 do_remove_recursive(const char* path)
   {
-    int64_t nremoved = 0;
     // Push the first element.
     cow_vector<RM_Element> stack;
     stack.push_back({ rm_disp_expand, ::rocket::sref(path) });
+
     // Expand non-empty directories and remove all contents.
+    int64_t nremoved = 0;
     while(stack.size()) {
       auto elem = ::std::move(stack.mut_back());
       stack.pop_back();
+
       // Process this element.
       switch(elem.disp) {
         case rm_disp_rmdir: {
           // This is an empty directory. Remove it.
-          if(::rmdir(elem.path.c_str()) != 0)
-            ASTERIA_THROW_SYSTEM_ERROR("rmdir");
-          // An element has been removed.
-          nremoved++;
-          break;
+          if(::rmdir(elem.path.c_str()) == 0) {
+            nremoved++;
+            break;
+          }
+
+          // Hmm... avoid TOCTTOU errors.
+          if(errno == ENOENT)
+            break;
+          ASTERIA_THROW_SYSTEM_ERROR("rmdir");
         }
+
         case rm_disp_unlink: {
-          // This is a plain file. Unlink it.
-          if(::unlink(elem.path.c_str()) != 0)
-            ASTERIA_THROW_SYSTEM_ERROR("unlink");
-          // An element has been removed.
-          nremoved++;
-          break;
+          // This is a non-directory. Unlink it.
+          if(::unlink(elem.path.c_str()) == 0) {
+            nremoved++;
+            break;
+          }
+
+          // Hmm... avoid TOCTTOU errors.
+          if(errno == ENOENT)
+            break;
+          ASTERIA_THROW_SYSTEM_ERROR("unlink");
         }
+
         case rm_disp_expand: {
-          // This is a subdirectory that has not been expanded. Expand it.
-          // Push the directory itself. Since elements are maintained in LIFO order, only when this
-          // element is encountered for a second time, will all of its children have been removed.
+          // This is a subdirectory that has not been expanded.
+          // Push the directory itself.
+          // Since elements are maintained in LIFO order, only when this element is encountered
+          // for a second time, will all of its children have been removed.
           stack.push_back({ rm_disp_rmdir, elem.path });
-          // Append all entries.
+
+          // Open the directory for listing.
           ::rocket::unique_posix_dir dp(::opendir(elem.path.c_str()), ::closedir);
           if(!dp)
             ASTERIA_THROW_SYSTEM_ERROR("opendir");
-          // Write entries.
-          struct ::dirent* next;
-          while((next = ::readdir(dp)) != nullptr) {
+
+          // Append all entries.
+          while(auto next = ::readdir(dp)) {
             // Skip special entries.
-            if(next->d_name[0] == '.') {
-              if(next->d_name[1] == 0)  // "."
-                continue;
-              if((next->d_name[1] == '.') && (next->d_name[2] == 0))  // ".."
-                continue;
-            }
+            if(::strcmp(next->d_name, ".") == 0)
+              continue;
+            if(::strcmp(next->d_name, "..") == 0)
+              continue;
+
             // Get the name and type of this entry.
-            RM_Disp disp = rm_disp_unlink;
             cow_string child = elem.path + '/' + next->d_name;
+            bool is_dir = false;
+
 #ifdef _DIRENT_HAVE_D_TYPE
-            if(ROCKET_EXPECT(next->d_type != DT_UNKNOWN)) {
+            if(next->d_type != DT_UNKNOWN) {
               // Get the file type if it is available immediately.
-              if(next->d_type == DT_DIR)
-                disp = rm_disp_expand;
+              is_dir = next->d_type == DT_DIR;
             }
             else
 #endif
@@ -93,15 +106,17 @@ do_remove_recursive(const char* path)
               struct ::stat stb;
               if(::lstat(child.c_str(), &stb) != 0)
                 ASTERIA_THROW_SYSTEM_ERROR("lstat");
+
               // Check whether the child path denotes a directory.
-              if(S_ISDIR(stb.st_mode))
-                disp = rm_disp_expand;
+              is_dir = S_ISDIR(stb.st_mode);
             }
-            // Append the entry.
-            stack.push_back({ disp, ::std::move(child) });
+
+            // Append this entry.
+            stack.push_back({ is_dir ? rm_disp_expand : rm_disp_unlink, ::std::move(child) });
           }
           break;
         }
+
         default:
           ROCKET_ASSERT(false);
       }
@@ -109,20 +124,19 @@ do_remove_recursive(const char* path)
     return nremoved;
   }
 
-::ssize_t
-do_write_loop(int fd, const void* buf, size_t count)
+const void*
+do_write_loop(int fd, const void* data, size_t size)
   {
-    auto bp = static_cast<const char*>(buf);
-    auto ep = bp + count;
-    for(;;) {
-      if(bp >= ep)
-        break;
+    auto bp = static_cast<const char*>(data);
+    auto ep = bp + size;
+
+    while(bp < ep) {
       ::ssize_t nwrtn = ::write(fd, bp, static_cast<size_t>(ep - bp));
       if(nwrtn < 0)
-        break;
+        ASTERIA_THROW_SYSTEM_ERROR("write");
       bp += nwrtn;
     }
-    return bp - static_cast<const char*>(buf);
+    return bp;
   }
 
 }  // namespace
@@ -152,9 +166,9 @@ optV_object
 std_filesystem_get_information(V_string path)
   {
     struct ::stat stb;
-    if(::lstat(path.safe_c_str(), &stb) != 0) {
+    if(::lstat(path.safe_c_str(), &stb) != 0)
       return nullopt;
-    }
+
     // Convert the result to an `object`.
     V_object stat;
     stat.try_emplace(::rocket::sref("i_dev"),
@@ -206,147 +220,159 @@ std_filesystem_move_from(V_string path_new, V_string path_old)
 V_integer
 std_filesystem_remove_recursive(V_string path)
   {
-    if(::rmdir(path.safe_c_str()) == 0) {
-      // An empty directory has been removed.
+    // Try removing an empty directory
+    if(::rmdir(path.safe_c_str()) == 0)
       return 1;
-    }
+
+    // Get some detailed information from `errno`.
     switch(errno) {
       case ENOENT:
-        // The path does not denote an existent file or directory.
+        // The path does not exist.
         return 0;
 
       case ENOTDIR: {
         // This is something not a directory.
-        if(::unlink(path.safe_c_str()) != 0)
-          ASTERIA_THROW_SYSTEM_ERROR("unlink");
-        // A file has been removed.
-        return 1;
+        if(::unlink(path.safe_c_str()) == 0)
+          return 1;
+
+        // Hmm... avoid TOCTTOU errors.
+        if(errno == ENOENT)
+          return 0;
+        ASTERIA_THROW_SYSTEM_ERROR("unlink");
       }
+
       case EEXIST:
       case ENOTEMPTY:
         // Remove contents first.
         return do_remove_recursive(path.safe_c_str());
-
-      default:
-        ASTERIA_THROW_SYSTEM_ERROR("rmdir");
     }
+
+    // Throw an exception for general failures.
+    ASTERIA_THROW_SYSTEM_ERROR("rmdir");
   }
 
 optV_object
 std_filesystem_directory_list(V_string path)
   {
-    ::rocket::unique_posix_dir dp(::opendir(path.safe_c_str()), closedir);
+    // Try opening t he directory.
+    ::rocket::unique_posix_dir dp(::opendir(path.safe_c_str()), ::closedir);
     if(!dp) {
-      if(errno != ENOENT)
-        ASTERIA_THROW_SYSTEM_ERROR("opendir");
-      // The path denotes a non-existent directory.
-      return nullopt;
+      // If the path does not exist, return `null`. Don't throw exceptions.
+      if(errno == ENOENT)
+        return nullopt;
+      ASTERIA_THROW_SYSTEM_ERROR("opendir");
     }
-    // Write entries.
+
+    // Append all entries.
     V_object entries;
-    cow_string child;
-    struct ::dirent* next;
-    while((next = ::readdir(dp)) != nullptr) {
-      // Assume the name is in UTF-8.
-      cow_string name(next->d_name);
-      V_object entry;
+    while(auto next = ::readdir(dp)) {
+      // Skip special entries.
+      if(::strcmp(next->d_name, ".") == 0)
+        continue;
+      if(::strcmp(next->d_name, "..") == 0)
+        continue;
+
       // Compose the full path of the child.
-      // We want to reuse the storage so don't just assign to `child` here.
-      child.clear();
-      child += path;
-      child += '/';
-      child += next->d_name;
+      cow_string child = path + '/' + next->d_name;
+      bool is_dir = false;
+      bool is_sym = false;
+
 #ifdef _DIRENT_HAVE_D_TYPE
       if(next->d_type != DT_UNKNOWN) {
         // Get the file type if it is available immediately.
-        entry.try_emplace(::rocket::sref("b_dir"),
-          V_boolean(
-            next->d_type == DT_DIR
-          ));
-        entry.try_emplace(::rocket::sref("b_sym"),
-          V_boolean(
-            next->d_type == DT_LNK
-          ));
+        is_dir = next->d_type == DT_DIR;
+        is_dir = next->d_type == DT_LNK;
       }
       else
 #endif
       {
         // If the file type is unknown, ask for it.
-        // Identify the entry.
         struct ::stat stb;
         if(::lstat(child.c_str(), &stb) != 0)
           ASTERIA_THROW_SYSTEM_ERROR("lstat");
-        // Check whether the child path denotes a directory or symlink.
+
+        // Check whether the child path denotes a directory.
+        is_dir = S_ISDIR(stb.st_mode);
+        is_sym = S_ISLNK(stb.st_mode);
+      }
+
+      // Append this entry, assuming the name is in UTF-8.
+      V_object entry;
         entry.try_emplace(::rocket::sref("b_dir"),
           V_boolean(
-            S_ISDIR(stb.st_mode)
+            is_dir
           ));
         entry.try_emplace(::rocket::sref("b_sym"),
           V_boolean(
-            S_ISLNK(stb.st_mode)
+            is_sym
           ));
-      }
-      // Insert the entry.
-      entries.try_emplace(::std::move(name), ::std::move(entry));
+      entries.try_emplace(cow_string(next->d_name), ::std::move(entry));
     }
     return ::std::move(entries);
   }
 
-V_boolean
+V_integer
 std_filesystem_directory_create(V_string path)
   {
-    if(::mkdir(path.safe_c_str(), 0777) == 0) {
-      // A new directory has been created.
-      return true;
-    }
-    if(errno != EEXIST)
-      ASTERIA_THROW_SYSTEM_ERROR("mkdir");
+    // Try creating an empty directory.
+    if(::mkdir(path.safe_c_str(), 0777) == 0)
+      return 1;
 
-    // Check whether a directory or a symlink to a directory already exists.
-    struct ::stat stb;
-    if(::stat(path.c_str(), &stb) != 0)
-      ASTERIA_THROW_SYSTEM_ERROR("stat");
-    if(!S_ISDIR(stb.st_mode))
+    // If the path references a directory or a symlink to a directory, don't fail.
+    if(errno == EEXIST) {
+      struct ::stat stb;
+      if(::stat(path.c_str(), &stb) != 0)
+        ASTERIA_THROW_SYSTEM_ERROR("stat");
+      if(S_ISDIR(stb.st_mode))
+        return 0;
+
+      // Throw an exception about the previous error.
       ASTERIA_THROW_SYSTEM_ERROR("mkdir", EEXIST);
+    }
 
-    // A directory already exists.
-    return false;
+    // Throw an exception for general failures.
+    ASTERIA_THROW_SYSTEM_ERROR("mkdir");
   }
 
-V_boolean
+V_integer
 std_filesystem_directory_remove(V_string path)
   {
-    if(::rmdir(path.safe_c_str()) == 0) {
-      // The directory has been removed.
-      return true;
-    }
-    if(errno != ENOENT)
-      ASTERIA_THROW_SYSTEM_ERROR("rmdir");
-    // The directory does not exist.
-    return false;
+    // Try removing an empty directory.
+    if(::rmdir(path.safe_c_str()) == 0)
+      return 1;
+
+    // If the path does not exist, don't fail.
+    if(errno == ENOENT)
+      return 0;
+
+    // Throw an exception for general failures.
+    ASTERIA_THROW_SYSTEM_ERROR("rmdir");
   }
 
 optV_string
 std_filesystem_file_read(V_string path, optV_integer offset, optV_integer limit)
   {
-    if(offset && (*offset < 0)) {
+    if(offset && (*offset < 0))
       ASTERIA_THROW("negative file offset (offset `$1`)", *offset);
-    }
     int64_t roffset = offset.value_or(0);
     int64_t rlimit = ::rocket::clamp(limit.value_or(INT32_MAX), 0, 0x10'00000);
 
     // Open the file for reading.
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
     if(!fd) {
-      if(errno != ENOENT)
-        ASTERIA_THROW_SYSTEM_ERROR("open");
-      // The path denotes a non-existent file.
-      return nullopt;
+      // If the file doesn't exist, return `null`. Don't throw exceptions.
+      if(errno == ENOENT)
+        return nullopt;
+
+      // Throw an exception for general failures.
+      ASTERIA_THROW_SYSTEM_ERROR("open");
     }
 
-    // Don't read too many bytes at a time.
-    ::ssize_t nread;
+    // We return data that have been read as a byte string.
     V_string data;
+    ::ssize_t nread;
+
+    // Don't read too many bytes at a time.
     data.resize(static_cast<size_t>(rlimit));
     if(offset) {
       nread = ::pread(fd, data.mut_data(), data.size(), roffset);
@@ -369,26 +395,29 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
     if(offset && (*offset < 0))
       ASTERIA_THROW("negative file offset (offset `$1`)", *offset);
     int64_t roffset = offset.value_or(0);
-
     int64_t rlimit = ::rocket::clamp(limit.value_or(INT32_MAX), 0, 0x10'00000);
-    int64_t ntotal = 0;
-    int64_t ntlimit = ::rocket::max(limit.value_or(INT64_MAX), 0);
 
     // Open the file for reading.
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
     if(!fd) {
-      if(errno != ENOENT)
-        ASTERIA_THROW_SYSTEM_ERROR("open");
-      // The path denotes a non-existent file.
-      return nullopt;
+      // If the file doesn't exist, return `null`. Don't throw exceptions.
+      if(errno == ENOENT)
+        return nullopt;
+
+      // Throw an exception for general failures.
+      ASTERIA_THROW_SYSTEM_ERROR("open");
     }
+
+    // These are reused for each iteration.
+    V_string data;
+    ::ssize_t nread;
 
     // Read and process all data in blocks.
     cow_vector<Reference> args;
-    ::ssize_t nread;
-    V_string data;
+    int64_t ntlimit = ::rocket::max(limit.value_or(INT64_MAX), 0);
+    int64_t ntotal = 0;
     for(;;) {
-      // Check for the read limit.
+      // Check for user-provided limit.
       if(ntotal >= ntlimit)
         break;
 
@@ -405,18 +434,20 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
           ASTERIA_THROW_SYSTEM_ERROR("read");
       }
       data.erase(static_cast<size_t>(nread));
+
       // Check for EOF.
       if(data.empty())
         break;
 
       // Prepare arguments for the user-defined function.
-      args.clear().reserve(2);
+      args.resize(2, Reference_root::S_void());
       Reference_root::S_temporary xref_offset = { roffset };
-      args.emplace_back(::std::move(xref_offset));
+      args.mut(0) = ::std::move(xref_offset);
       Reference_root::S_temporary xref_data = { ::std::move(data) };
-      args.emplace_back(::std::move(xref_data));
+      args.mut(1) = ::std::move(xref_data);
       // Call the function but discard its return value.
       callback.invoke(global, ::std::move(args));
+
       // Read the next block.
       roffset += nread;
       ntotal += nread;
@@ -444,36 +475,30 @@ std_filesystem_file_write(V_string path, V_string data, optV_integer offset)
 
     // Set the file pointer when an offset is specified, even when it is an explicit zero.
     if(offset) {
-      // If `roffset` is not zero, truncate the file there.
       // This also ensures it is a normal file (not a pipe or socket whatsoever).
-      // Otherwise, the file will have been truncate at creation.
       if(::ftruncate(fd, roffset) != 0)
         ASTERIA_THROW_SYSTEM_ERROR("ftruncate");
     }
 
     // Write all data.
-    ::ssize_t nwrtn = do_write_loop(fd, data.data(), data.size());
-    if(nwrtn < data.ssize())
-      ASTERIA_THROW_SYSTEM_ERROR("write");
+    do_write_loop(fd, data.data(), data.size());
   }
 
 void
 std_filesystem_file_append(V_string path, V_string data, optV_boolean exclusive)
   {
+    // Calculate the `flags` argument.
     int flags = O_WRONLY | O_CREAT | O_APPEND;
     if(exclusive == true)
       flags |= O_EXCL;
 
-    // Calculate the `flags` argument.
-    // Open the file for writing.
+    // Open the file for appending.
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), flags, 0666), ::close);
     if(!fd)
       ASTERIA_THROW_SYSTEM_ERROR("open");
 
-    // Write all data.
-    ::ssize_t nwrtn = do_write_loop(fd, data.data(), data.size());
-    if(nwrtn < data.ssize())
-      ASTERIA_THROW_SYSTEM_ERROR("write");
+    // Append all data to the end.
+    do_write_loop(fd, data.data(), data.size());
   }
 
 void
@@ -484,51 +509,52 @@ std_filesystem_file_copy_from(V_string path_new, V_string path_old)
     if(!fd_old)
       ASTERIA_THROW_SYSTEM_ERROR("open");
 
+    // Create the new file, discarding its contents.
+    // The file is initially write-only.
+    ::rocket::unique_posix_fd fd_new(::open(path_new.safe_c_str(),
+                                            O_WRONLY | O_CREAT | O_TRUNC | O_APPEND,
+                                            0200), ::close);
+    if(!fd_new)
+      ASTERIA_THROW_SYSTEM_ERROR("open");
+
     // Get the file mode and preferred I/O block size.
     struct ::stat stb_old;
     if(::fstat(fd_old, &stb_old) != 0)
       ASTERIA_THROW_SYSTEM_ERROR("fstat");
-    // We always overwrite the destination file.
-    int flags = O_WRONLY | O_CREAT | O_TRUNC | O_APPEND;
 
-    // Create the new file, discarding its contents.
-    ::rocket::unique_posix_fd fd_new(::open(path_new.safe_c_str(), flags, 0200), ::close);
-    if(!fd_new)
-      ASTERIA_THROW_SYSTEM_ERROR("open");
+    // Allocate the I/O buffer.
+    size_t nbuf = static_cast<size_t>(stb_old.st_blksize | 0x10'00000);
+    uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)),
+                                        ::operator delete);
 
-    // Copy data in blocks.
-    ::ssize_t nread, nwrtn;
-    V_string buff;
-    buff.resize(static_cast<size_t>(stb_old.st_blksize));
+    // Copy all contents.
     for(;;) {
-      // Read some bytes.
-      nread = ::read(fd_old, buff.mut_data(), buff.size());
+      ::ssize_t nread = ::read(fd_old, pbuf, nbuf);
       if(nread < 0)
         ASTERIA_THROW_SYSTEM_ERROR("read");
-      // Check for EOF.
       if(nread == 0)
         break;
-      // Write them all.
-      nwrtn = do_write_loop(fd_new, buff.data(), static_cast<size_t>(nread));
-      if(nwrtn < nread)
-        ASTERIA_THROW_SYSTEM_ERROR("write");
+      do_write_loop(fd_new, pbuf, static_cast<size_t>(nread));
     }
-    // Set the file mode. This must be at the last.
+
+    // Set the file mode. This must be the last operation.
     if(::fchmod(fd_new, stb_old.st_mode) != 0)
       ASTERIA_THROW_SYSTEM_ERROR("fchmod");
   }
 
-bool
+V_integer
 std_filesystem_file_remove(V_string path)
   {
-    if(::unlink(path.safe_c_str()) == 0) {
-      // The file has been removed.
-      return true;
-    }
-    if(errno != ENOENT)
-      ASTERIA_THROW_SYSTEM_ERROR("unlink");
-    // The file does not exist.
-    return false;
+    // Try removing a non-directory.
+    if(::unlink(path.safe_c_str()) == 0)
+      return 1;
+
+    // If the path does not exist, don't fail.
+    if(errno == ENOENT)
+      return 0;
+
+    // Throw an exception for general failures.
+    ASTERIA_THROW_SYSTEM_ERROR("unlink");
   }
 
 void
@@ -699,7 +725,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
   * Lists the contents of the directory at `path`.
 
   * Returns an object containing all entries of the directory at
-    `path`, including the special subdirectories '.' and '..'. For
+    `path`, excluding the special subdirectories '.' and '..'. For
     each element, its key specifies the filename and the value is
     an object consisting of the following members (names that
     start with `b_` are boolean values; names that start with `i_`
@@ -740,8 +766,8 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     directory or a symbolic link to a directory already exists on
     `path`.
 
-  * Returns `true` if a new directory has been created, or `false`
-    if a directory already exists.
+  * Returns `1` if a new directory has been created, or `0` if a
+    directory already exists.
 
   * Throws an exception if `path` designates a non-directory, or
     some other errors occur.
@@ -770,8 +796,8 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
   * Removes the directory at `path`. The directory must be empty.
     This function fails if `path` does not designate a directory.
 
-  * Returns `true` if a directory has been removed successfully, or
-    `false` if no such directory exists.
+  * Returns `1` if a directory has been removed successfully, or
+    `0` if no such directory exists.
 
   * Throws an exception if `path` designates a non-directory, or
     some other errors occur.
@@ -883,8 +909,6 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     any existent contents after the write point are discarded. This
     function fails if the data can only be written partially.
 
-  * Returns `true` if all data have been written successfully.
-
   * Throws an exception if `offset` is negative, or a write error
     occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
@@ -916,8 +940,6 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     are left intact. If `exclusive` is `true` and a file exists on
     `path`, this function fails. This function also fails if the
     data can only be written partially.
-
-  * Returns `true` if all data have been written successfully.
 
   * Throws an exception if `offset` is negative, or a write error
     occurs.
@@ -977,8 +999,8 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
   * Removes the file at `path`. This function fails if `path`
     designates a directory.
 
-  * Returns `true` if a file has been removed successfully, or
-    `false` if no such file exists.
+  * Returns `1` if a file has been removed successfully, or `0` if
+    no such file exists.
 
   * Throws an exception if `path` designates a directory, or some
     other errors occur.

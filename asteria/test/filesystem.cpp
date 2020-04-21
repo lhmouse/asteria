@@ -20,19 +20,19 @@ int main()
         assert std.filesystem.get_information(dname) == null;
         assert std.filesystem.get_information(fname) == null;
 
-        assert std.filesystem.directory_create(dname) == true;
+        assert std.filesystem.directory_create(dname) == 1;
         assert std.filesystem.get_information(dname).b_dir == true;
-        assert std.filesystem.directory_create(dname) == false;
+        assert std.filesystem.directory_create(dname) == 0;
 
         std.filesystem.file_append(dname + "/f1", "1");
         std.filesystem.file_append(dname + "/f2", "2");
-        assert std.filesystem.directory_create(dname + "/f3") == true;
+        assert std.filesystem.directory_create(dname + "/f3") == 1;
         std.filesystem.file_append(dname + "/f3/a", "3");
-        assert std.filesystem.directory_create(dname + "/f4") == true;
-        assert std.filesystem.directory_create(dname + "/f4/f5") == true;
+        assert std.filesystem.directory_create(dname + "/f4") == 1;
+        assert std.filesystem.directory_create(dname + "/f4/f5") == 1;
         std.filesystem.file_append(dname + "/f4/f5/a", "4");
         std.filesystem.file_append(dname + "/f4/f5/b", "5");
-        assert std.array.sort(std.array.copy_keys(std.filesystem.directory_list(dname))) == [".","..","f1","f2","f3","f4"];
+        assert std.array.sort(std.array.copy_keys(std.filesystem.directory_list(dname))) == ["f1","f2","f3","f4"];
 
         assert std.filesystem.remove_recursive(dname + "/f1") == 1;
         assert std.filesystem.remove_recursive(dname + "/f1") == 0;
@@ -40,14 +40,14 @@ int main()
         std.filesystem.move_from(dname + "/f5", dname + "/f2");
         try { std.filesystem.move_from(dname + "/f5", dname + "/f2");  assert false;  }
           catch(e) { assert std.string.find(e, "assertion failure") == null;  }
-        assert std.array.sort(std.array.copy_keys(std.filesystem.directory_list(dname))) == [".","..","f3","f4","f5"];
+        assert std.array.sort(std.array.copy_keys(std.filesystem.directory_list(dname))) == ["f3","f4","f5"];
 
         try { std.filesystem.file_remove(dname);  assert false;  }
           catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         try { std.filesystem.directory_remove(dname);  assert false;  }
           catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         assert std.filesystem.remove_recursive(dname) == 8;
-        assert std.filesystem.directory_remove(dname) == false;
+        assert std.filesystem.directory_remove(dname) == 0;
 
         assert std.filesystem.file_read(fname) == null;
         std.filesystem.file_append(fname, "@@@@$$", true);  // "@@@@$$"
@@ -95,14 +95,14 @@ int main()
 
         try { std.filesystem.directory_create(fname);  assert false;  }
           catch(e) { assert std.string.find(e, "assertion failure") == null;  }
-        assert std.filesystem.file_remove(fname) == true;
-        assert std.filesystem.file_remove(fname) == false;
-        assert std.filesystem.file_remove(fname + ".2") == true;
+        assert std.filesystem.file_remove(fname) == 1;
+        assert std.filesystem.file_remove(fname) == 0;
+        assert std.filesystem.file_remove(fname + ".2") == 1;
 
-        assert std.filesystem.directory_create(fname) == true;
+        assert std.filesystem.directory_create(fname) == 1;
         try { std.filesystem.file_remove(fname);  assert false;  }
           catch(e) { assert std.string.find(e, "assertion failure") == null;  }
-        assert std.filesystem.directory_remove(fname) == true;
+        assert std.filesystem.directory_remove(fname) == 1;
       )__"), tinybuf::open_read);
 
     Simple_Script code(cbuf, ::rocket::sref(__FILE__));

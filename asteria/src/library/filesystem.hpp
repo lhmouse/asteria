@@ -33,11 +33,11 @@ optV_object
 std_filesystem_directory_list(V_string path);
 
 // `std.filesystem.directory_create`
-V_boolean
+V_integer
 std_filesystem_directory_create(V_string path);
 
 // `std.filesystem.directoryr_remove`
-V_boolean
+V_integer
 std_filesystem_directory_remove(V_string path);
 
 // `std.filesystem.file_read`
@@ -62,7 +62,7 @@ void
 std_filesystem_file_copy_from(V_string path_new, V_string path_old);
 
 // `std.filesystem.file_remove`
-V_boolean
+V_integer
 std_filesystem_file_remove(V_string path);
 
 // Create an object that is to be referenced as `std.filesystem`.
