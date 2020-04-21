@@ -4076,11 +4076,11 @@ struct AVMC_Appender
     do_append(AVMC_Queue& queue, const XaNodeT& altr)
       {
         bool reachable = true;
-        queue.append<executor_of<TraitsT, UparamT, SparamT>::thunk,
-                     enumerator_of<SparamT>::thunk>(
-                     TraitsT::make_symbols(altr),
-                     TraitsT::make_uparam(reachable, altr),
-                     TraitsT::make_sparam(reachable, altr));
+        queue.template append<executor_of<TraitsT, UparamT, SparamT>::thunk,
+                              enumerator_of<SparamT>::thunk>(
+                              TraitsT::make_symbols(altr),
+                              TraitsT::make_uparam(reachable, altr),
+                              TraitsT::make_sparam(reachable, altr));
         queue.shrink_to_fit();
         return reachable;
       }
@@ -4094,10 +4094,10 @@ struct AVMC_Appender<TraitsT, XaNodeT, UparamT, SparamT, void>
     do_append(AVMC_Queue& queue, const XaNodeT& altr)
       {
         bool reachable = true;
-        queue.append<executor_of<TraitsT, UparamT, SparamT>::thunk,
-                     enumerator_of<SparamT>::thunk>(
-                     TraitsT::make_uparam(reachable, altr),
-                     TraitsT::make_sparam(reachable, altr));
+        queue.template append<executor_of<TraitsT, UparamT, SparamT>::thunk,
+                              enumerator_of<SparamT>::thunk>(
+                              TraitsT::make_uparam(reachable, altr),
+                              TraitsT::make_sparam(reachable, altr));
         queue.shrink_to_fit();
         return reachable;
       }
@@ -4111,10 +4111,10 @@ struct AVMC_Appender<TraitsT, XaNodeT, UparamT, void, SymbolT>
     do_append(AVMC_Queue& queue, const XaNodeT& altr)
       {
         bool reachable = true;
-        queue.append<executor_of<TraitsT, UparamT, void>::thunk,
-                     nullptr>(
-                     TraitsT::make_symbols(altr),
-                     TraitsT::make_uparam(reachable, altr));
+        queue.template append<executor_of<TraitsT, UparamT, void>::thunk,
+                              nullptr>(
+                              TraitsT::make_symbols(altr),
+                              TraitsT::make_uparam(reachable, altr));
         queue.shrink_to_fit();
         return reachable;
       }
@@ -4128,9 +4128,9 @@ struct AVMC_Appender<TraitsT, XaNodeT, UparamT, void, void>
     do_append(AVMC_Queue& queue, const XaNodeT& altr)
       {
         bool reachable = true;
-        queue.append<executor_of<TraitsT, UparamT, void>::thunk,
-                     nullptr>(
-                     TraitsT::make_uparam(reachable, altr));
+        queue.template append<executor_of<TraitsT, UparamT, void>::thunk,
+                              nullptr>(
+                              TraitsT::make_uparam(reachable, altr));
         queue.shrink_to_fit();
         return reachable;
       }
@@ -4144,11 +4144,11 @@ struct AVMC_Appender<TraitsT, XaNodeT, void, SparamT, SymbolT>
     do_append(AVMC_Queue& queue, const XaNodeT& altr)
       {
         bool reachable = true;
-        queue.append<executor_of<TraitsT, void, SparamT>::thunk,
-                     enumerator_of<SparamT>::thunk>(
-                     TraitsT::make_symbols(altr),
-                     AVMC_Queue::Uparam(),
-                     TraitsT::make_sparam(reachable, altr));
+        queue.template append<executor_of<TraitsT, void, SparamT>::thunk,
+                              enumerator_of<SparamT>::thunk>(
+                              TraitsT::make_symbols(altr),
+                              AVMC_Queue::Uparam(),
+                              TraitsT::make_sparam(reachable, altr));
         queue.shrink_to_fit();
         return reachable;
       }
@@ -4162,10 +4162,10 @@ struct AVMC_Appender<TraitsT, XaNodeT, void, SparamT, void>
     do_append(AVMC_Queue& queue, const XaNodeT& altr)
       {
         bool reachable = true;
-        queue.append<executor_of<TraitsT, void, SparamT>::thunk,
-                     enumerator_of<SparamT>::thunk>(
-                     AVMC_Queue::Uparam(),
-                     TraitsT::make_sparam(reachable, altr));
+        queue.template append<executor_of<TraitsT, void, SparamT>::thunk,
+                              enumerator_of<SparamT>::thunk>(
+                              AVMC_Queue::Uparam(),
+                              TraitsT::make_sparam(reachable, altr));
         queue.shrink_to_fit();
         return reachable;
       }
@@ -4179,10 +4179,10 @@ struct AVMC_Appender<TraitsT, XaNodeT, void, void, SymbolT>
     do_append(AVMC_Queue& queue, const XaNodeT& altr)
       {
         bool reachable = true;
-        queue.append<executor_of<TraitsT, void, void>::thunk,
-                     nullptr>(
-                     TraitsT::make_symbols(altr),
-                     AVMC_Queue::Uparam());
+        queue.template append<executor_of<TraitsT, void, void>::thunk,
+                              nullptr>(
+                              TraitsT::make_symbols(altr),
+                              AVMC_Queue::Uparam());
         queue.shrink_to_fit();
         return reachable;
       }
@@ -4196,9 +4196,9 @@ struct AVMC_Appender<TraitsT, XaNodeT, void, void, void>
     do_append(AVMC_Queue& queue, const XaNodeT& /*altr*/)
       {
         bool reachable = true;
-        queue.append<executor_of<TraitsT, void, void>::thunk,
-                     nullptr>(
-                     AVMC_Queue::Uparam());
+        queue.template append<executor_of<TraitsT, void, void>::thunk,
+                              nullptr>(
+                              AVMC_Queue::Uparam());
         queue.shrink_to_fit();
         return reachable;
       }
