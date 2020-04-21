@@ -1131,7 +1131,8 @@ std_checksum_crc32_file(V_string path)
 
     // Allocate the I/O buffer.
     static constexpr size_t nbuf = 16384;
-    uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)), ::operator delete);
+    uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)),
+                                        ::operator delete);
 
     // Read the file and hash data.
     CRC32_Hasher h;
@@ -1251,7 +1252,8 @@ std_checksum_fnv1a32_file(V_string path)
 
     // Allocate the I/O buffer.
     static constexpr size_t nbuf = 16384;
-    uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)), ::operator delete);
+    uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)),
+                                        ::operator delete);
 
     // Read the file and hash data.
     FNV1a32_Hasher h;
@@ -1371,7 +1373,8 @@ std_checksum_md5_file(V_string path)
 
     // Allocate the I/O buffer.
     static constexpr size_t nbuf = 16384;
-    uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)), ::operator delete);
+    uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)),
+                                        ::operator delete);
 
     // Read the file and hash data.
     MD5_Hasher h;
@@ -1491,7 +1494,8 @@ std_checksum_sha1_file(V_string path)
 
     // Allocate the I/O buffer.
     static constexpr size_t nbuf = 16384;
-    uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)), ::operator delete);
+    uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)),
+                                        ::operator delete);
 
     // Read the file and hash data.
     SHA1_Hasher h;
@@ -1611,7 +1615,8 @@ std_checksum_sha256_file(V_string path)
 
     // Allocate the I/O buffer.
     static constexpr size_t nbuf = 16384;
-    uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)), ::operator delete);
+    uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)),
+                                        ::operator delete);
 
     // Read the file and hash data.
     SHA256_Hasher h;
