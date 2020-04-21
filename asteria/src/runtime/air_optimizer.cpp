@@ -75,8 +75,8 @@ create_function(const Source_Location& sloc, const cow_string& name)
 
     // Instantiate the function.
     return ::rocket::make_refcnt<Instantiated_Function>(this->m_params,
-                             ::rocket::make_refcnt<Variadic_Arguer>(sloc, func),
-                             this->m_code);
+                         ::rocket::make_refcnt<Variadic_Arguer>(sloc, ::std::move(func)),
+                         this->m_code);
   }
 
 }  // namespace Asteria

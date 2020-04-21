@@ -21,8 +21,8 @@ final
 
   public:
     template<typename... XVargsT>
-    Variadic_Arguer(const Source_Location& xsloc, const cow_string& xfunc, XVargsT&&... xvargs)
-      : m_sloc(xsloc), m_func(xfunc),
+    Variadic_Arguer(const Source_Location& xsloc, cow_string&& xfunc, XVargsT&&... xvargs)
+      : m_sloc(xsloc), m_func(::std::move(xfunc)),
         m_vargs(::std::forward<XVargsT>(xvargs)...)
       { }
 
