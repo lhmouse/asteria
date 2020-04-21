@@ -161,14 +161,14 @@ Reference::
 do_open(size_t nmod, const Reference_modifier& last)
 const
   {
-    auto rref = ::std::ref(this->m_root.dereference_mutable());
+    auto rref = ::rocket::ref(this->m_root.dereference_mutable());
 
     // Apply the first `nmod` modifiers.
     for(size_t i = 0;  i < nmod;  ++i)
-      rref = ::std::ref(this->m_mods[i].apply_and_create(rref));
+      rref = ::rocket::ref(this->m_mods[i].apply_and_create(rref));
 
     // Apply the last modifier.
-    rref = ::std::ref(last.apply_and_create(rref));
+    rref = ::rocket::ref(last.apply_and_create(rref));
 
     return rref;
   }
