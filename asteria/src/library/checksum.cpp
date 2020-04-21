@@ -64,16 +64,16 @@ final
       }
 
     void
-    update(const V_string& data)
+    update(const void* data, size_t size)
     noexcept
       {
-        const auto p = reinterpret_cast<const uint8_t*>(data.data());
-        const auto n = data.size();
-        uint32_t r = this->m_reg;
+        auto bp = static_cast<const uint8_t*>(data);
+        auto ep = bp + size;
 
         // Hash bytes one by one.
-        for(size_t i = 0;  i < n;  ++i)
-          r = s_iso3309_CRC32_table[((r ^ p[i]) & 0xFF)] ^ (r >> 8);
+        uint32_t r = this->m_reg;
+        while(bp != ep)
+          r = s_iso3309_CRC32_table[((r ^ *(bp++)) & 0xFF)] ^ (r >> 8);
         this->m_reg = r;
       }
 
@@ -125,16 +125,16 @@ final
       }
 
     void
-    update(const V_string& data)
+    update(const void* data, size_t size)
     noexcept
       {
-        const auto p = reinterpret_cast<const uint8_t*>(data.data());
-        const auto n = data.size();
-        uint32_t r = this->m_reg;
+        auto bp = static_cast<const uint8_t*>(data);
+        auto ep = bp + size;
+
         // Hash bytes one by one.
-        for(size_t i = 0;  i < n;  ++i) {
-          r = (r ^ p[i]) * prime;
-        }
+        uint32_t r = this->m_reg;
+        while(bp != ep)
+          r = (r ^ *(bp++)) * prime;
         this->m_reg = r;
       }
 
@@ -279,8 +279,8 @@ final
         uint32_t f, g;
 
         // https://en.wikipedia.org/wiki/MD5
-        auto update = [&](uint32_t i, auto&& specx, uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
-                          uint32_t k, uint8_t rb)
+        auto xhash = [&](uint32_t i, auto&& specx, uint32_t& a, uint32_t& b,
+                         uint32_t& c, uint32_t& d, uint32_t k, uint8_t rb)
           {
             specx(i, b, c, d);
             do_load_le(w, p + g * 4);
@@ -311,76 +311,76 @@ final
         auto r = this->m_regs;
 
         // 0 * 16
-        update( 0, spec0, r[0], r[1], r[2], r[3], 0xD76AA478,  7);
-        update( 1, spec0, r[3], r[0], r[1], r[2], 0xE8C7B756, 12);
-        update( 2, spec0, r[2], r[3], r[0], r[1], 0x242070DB, 17);
-        update( 3, spec0, r[1], r[2], r[3], r[0], 0xC1BDCEEE, 22);
-        update( 4, spec0, r[0], r[1], r[2], r[3], 0xF57C0FAF,  7);
-        update( 5, spec0, r[3], r[0], r[1], r[2], 0x4787C62A, 12);
-        update( 6, spec0, r[2], r[3], r[0], r[1], 0xA8304613, 17);
-        update( 7, spec0, r[1], r[2], r[3], r[0], 0xFD469501, 22);
-        update( 8, spec0, r[0], r[1], r[2], r[3], 0x698098D8,  7);
-        update( 9, spec0, r[3], r[0], r[1], r[2], 0x8B44F7AF, 12);
-        update(10, spec0, r[2], r[3], r[0], r[1], 0xFFFF5BB1, 17);
-        update(11, spec0, r[1], r[2], r[3], r[0], 0x895CD7BE, 22);
-        update(12, spec0, r[0], r[1], r[2], r[3], 0x6B901122,  7);
-        update(13, spec0, r[3], r[0], r[1], r[2], 0xFD987193, 12);
-        update(14, spec0, r[2], r[3], r[0], r[1], 0xA679438E, 17);
-        update(15, spec0, r[1], r[2], r[3], r[0], 0x49B40821, 22);
+        xhash( 0, spec0, r[0], r[1], r[2], r[3], 0xD76AA478,  7);
+        xhash( 1, spec0, r[3], r[0], r[1], r[2], 0xE8C7B756, 12);
+        xhash( 2, spec0, r[2], r[3], r[0], r[1], 0x242070DB, 17);
+        xhash( 3, spec0, r[1], r[2], r[3], r[0], 0xC1BDCEEE, 22);
+        xhash( 4, spec0, r[0], r[1], r[2], r[3], 0xF57C0FAF,  7);
+        xhash( 5, spec0, r[3], r[0], r[1], r[2], 0x4787C62A, 12);
+        xhash( 6, spec0, r[2], r[3], r[0], r[1], 0xA8304613, 17);
+        xhash( 7, spec0, r[1], r[2], r[3], r[0], 0xFD469501, 22);
+        xhash( 8, spec0, r[0], r[1], r[2], r[3], 0x698098D8,  7);
+        xhash( 9, spec0, r[3], r[0], r[1], r[2], 0x8B44F7AF, 12);
+        xhash(10, spec0, r[2], r[3], r[0], r[1], 0xFFFF5BB1, 17);
+        xhash(11, spec0, r[1], r[2], r[3], r[0], 0x895CD7BE, 22);
+        xhash(12, spec0, r[0], r[1], r[2], r[3], 0x6B901122,  7);
+        xhash(13, spec0, r[3], r[0], r[1], r[2], 0xFD987193, 12);
+        xhash(14, spec0, r[2], r[3], r[0], r[1], 0xA679438E, 17);
+        xhash(15, spec0, r[1], r[2], r[3], r[0], 0x49B40821, 22);
 
         // 1 * 16
-        update(16, spec1, r[0], r[1], r[2], r[3], 0xF61E2562,  5);
-        update(17, spec1, r[3], r[0], r[1], r[2], 0xC040B340,  9);
-        update(18, spec1, r[2], r[3], r[0], r[1], 0x265E5A51, 14);
-        update(19, spec1, r[1], r[2], r[3], r[0], 0xE9B6C7AA, 20);
-        update(20, spec1, r[0], r[1], r[2], r[3], 0xD62F105D,  5);
-        update(21, spec1, r[3], r[0], r[1], r[2], 0x02441453,  9);
-        update(22, spec1, r[2], r[3], r[0], r[1], 0xD8A1E681, 14);
-        update(23, spec1, r[1], r[2], r[3], r[0], 0xE7D3FBC8, 20);
-        update(24, spec1, r[0], r[1], r[2], r[3], 0x21E1CDE6,  5);
-        update(25, spec1, r[3], r[0], r[1], r[2], 0xC33707D6,  9);
-        update(26, spec1, r[2], r[3], r[0], r[1], 0xF4D50D87, 14);
-        update(27, spec1, r[1], r[2], r[3], r[0], 0x455A14ED, 20);
-        update(28, spec1, r[0], r[1], r[2], r[3], 0xA9E3E905,  5);
-        update(29, spec1, r[3], r[0], r[1], r[2], 0xFCEFA3F8,  9);
-        update(30, spec1, r[2], r[3], r[0], r[1], 0x676F02D9, 14);
-        update(31, spec1, r[1], r[2], r[3], r[0], 0x8D2A4C8A, 20);
+        xhash(16, spec1, r[0], r[1], r[2], r[3], 0xF61E2562,  5);
+        xhash(17, spec1, r[3], r[0], r[1], r[2], 0xC040B340,  9);
+        xhash(18, spec1, r[2], r[3], r[0], r[1], 0x265E5A51, 14);
+        xhash(19, spec1, r[1], r[2], r[3], r[0], 0xE9B6C7AA, 20);
+        xhash(20, spec1, r[0], r[1], r[2], r[3], 0xD62F105D,  5);
+        xhash(21, spec1, r[3], r[0], r[1], r[2], 0x02441453,  9);
+        xhash(22, spec1, r[2], r[3], r[0], r[1], 0xD8A1E681, 14);
+        xhash(23, spec1, r[1], r[2], r[3], r[0], 0xE7D3FBC8, 20);
+        xhash(24, spec1, r[0], r[1], r[2], r[3], 0x21E1CDE6,  5);
+        xhash(25, spec1, r[3], r[0], r[1], r[2], 0xC33707D6,  9);
+        xhash(26, spec1, r[2], r[3], r[0], r[1], 0xF4D50D87, 14);
+        xhash(27, spec1, r[1], r[2], r[3], r[0], 0x455A14ED, 20);
+        xhash(28, spec1, r[0], r[1], r[2], r[3], 0xA9E3E905,  5);
+        xhash(29, spec1, r[3], r[0], r[1], r[2], 0xFCEFA3F8,  9);
+        xhash(30, spec1, r[2], r[3], r[0], r[1], 0x676F02D9, 14);
+        xhash(31, spec1, r[1], r[2], r[3], r[0], 0x8D2A4C8A, 20);
 
         // 2 * 16
-        update(32, spec2, r[0], r[1], r[2], r[3], 0xFFFA3942,  4);
-        update(33, spec2, r[3], r[0], r[1], r[2], 0x8771F681, 11);
-        update(34, spec2, r[2], r[3], r[0], r[1], 0x6D9D6122, 16);
-        update(35, spec2, r[1], r[2], r[3], r[0], 0xFDE5380C, 23);
-        update(36, spec2, r[0], r[1], r[2], r[3], 0xA4BEEA44,  4);
-        update(37, spec2, r[3], r[0], r[1], r[2], 0x4BDECFA9, 11);
-        update(38, spec2, r[2], r[3], r[0], r[1], 0xF6BB4B60, 16);
-        update(39, spec2, r[1], r[2], r[3], r[0], 0xBEBFBC70, 23);
-        update(40, spec2, r[0], r[1], r[2], r[3], 0x289B7EC6,  4);
-        update(41, spec2, r[3], r[0], r[1], r[2], 0xEAA127FA, 11);
-        update(42, spec2, r[2], r[3], r[0], r[1], 0xD4EF3085, 16);
-        update(43, spec2, r[1], r[2], r[3], r[0], 0x04881D05, 23);
-        update(44, spec2, r[0], r[1], r[2], r[3], 0xD9D4D039,  4);
-        update(45, spec2, r[3], r[0], r[1], r[2], 0xE6DB99E5, 11);
-        update(46, spec2, r[2], r[3], r[0], r[1], 0x1FA27CF8, 16);
-        update(47, spec2, r[1], r[2], r[3], r[0], 0xC4AC5665, 23);
+        xhash(32, spec2, r[0], r[1], r[2], r[3], 0xFFFA3942,  4);
+        xhash(33, spec2, r[3], r[0], r[1], r[2], 0x8771F681, 11);
+        xhash(34, spec2, r[2], r[3], r[0], r[1], 0x6D9D6122, 16);
+        xhash(35, spec2, r[1], r[2], r[3], r[0], 0xFDE5380C, 23);
+        xhash(36, spec2, r[0], r[1], r[2], r[3], 0xA4BEEA44,  4);
+        xhash(37, spec2, r[3], r[0], r[1], r[2], 0x4BDECFA9, 11);
+        xhash(38, spec2, r[2], r[3], r[0], r[1], 0xF6BB4B60, 16);
+        xhash(39, spec2, r[1], r[2], r[3], r[0], 0xBEBFBC70, 23);
+        xhash(40, spec2, r[0], r[1], r[2], r[3], 0x289B7EC6,  4);
+        xhash(41, spec2, r[3], r[0], r[1], r[2], 0xEAA127FA, 11);
+        xhash(42, spec2, r[2], r[3], r[0], r[1], 0xD4EF3085, 16);
+        xhash(43, spec2, r[1], r[2], r[3], r[0], 0x04881D05, 23);
+        xhash(44, spec2, r[0], r[1], r[2], r[3], 0xD9D4D039,  4);
+        xhash(45, spec2, r[3], r[0], r[1], r[2], 0xE6DB99E5, 11);
+        xhash(46, spec2, r[2], r[3], r[0], r[1], 0x1FA27CF8, 16);
+        xhash(47, spec2, r[1], r[2], r[3], r[0], 0xC4AC5665, 23);
 
         // 3 * 16
-        update(48, spec3, r[0], r[1], r[2], r[3], 0xF4292244,  6);
-        update(49, spec3, r[3], r[0], r[1], r[2], 0x432AFF97, 10);
-        update(50, spec3, r[2], r[3], r[0], r[1], 0xAB9423A7, 15);
-        update(51, spec3, r[1], r[2], r[3], r[0], 0xFC93A039, 21);
-        update(52, spec3, r[0], r[1], r[2], r[3], 0x655B59C3,  6);
-        update(53, spec3, r[3], r[0], r[1], r[2], 0x8F0CCC92, 10);
-        update(54, spec3, r[2], r[3], r[0], r[1], 0xFFEFF47D, 15);
-        update(55, spec3, r[1], r[2], r[3], r[0], 0x85845DD1, 21);
-        update(56, spec3, r[0], r[1], r[2], r[3], 0x6FA87E4F,  6);
-        update(57, spec3, r[3], r[0], r[1], r[2], 0xFE2CE6E0, 10);
-        update(58, spec3, r[2], r[3], r[0], r[1], 0xA3014314, 15);
-        update(59, spec3, r[1], r[2], r[3], r[0], 0x4E0811A1, 21);
-        update(60, spec3, r[0], r[1], r[2], r[3], 0xF7537E82,  6);
-        update(61, spec3, r[3], r[0], r[1], r[2], 0xBD3AF235, 10);
-        update(62, spec3, r[2], r[3], r[0], r[1], 0x2AD7D2BB, 15);
-        update(63, spec3, r[1], r[2], r[3], r[0], 0xEB86D391, 21);
+        xhash(48, spec3, r[0], r[1], r[2], r[3], 0xF4292244,  6);
+        xhash(49, spec3, r[3], r[0], r[1], r[2], 0x432AFF97, 10);
+        xhash(50, spec3, r[2], r[3], r[0], r[1], 0xAB9423A7, 15);
+        xhash(51, spec3, r[1], r[2], r[3], r[0], 0xFC93A039, 21);
+        xhash(52, spec3, r[0], r[1], r[2], r[3], 0x655B59C3,  6);
+        xhash(53, spec3, r[3], r[0], r[1], r[2], 0x8F0CCC92, 10);
+        xhash(54, spec3, r[2], r[3], r[0], r[1], 0xFFEFF47D, 15);
+        xhash(55, spec3, r[1], r[2], r[3], r[0], 0x85845DD1, 21);
+        xhash(56, spec3, r[0], r[1], r[2], r[3], 0x6FA87E4F,  6);
+        xhash(57, spec3, r[3], r[0], r[1], r[2], 0xFE2CE6E0, 10);
+        xhash(58, spec3, r[2], r[3], r[0], r[1], 0xA3014314, 15);
+        xhash(59, spec3, r[1], r[2], r[3], r[0], 0x4E0811A1, 21);
+        xhash(60, spec3, r[0], r[1], r[2], r[3], 0xF7537E82,  6);
+        xhash(61, spec3, r[3], r[0], r[1], r[2], 0xBD3AF235, 10);
+        xhash(62, spec3, r[2], r[3], r[0], r[1], 0x2AD7D2BB, 15);
+        xhash(63, spec3, r[1], r[2], r[3], r[0], 0xEB86D391, 21);
 
         // Accumulate the result.
         do_padd(this->m_regs, r);
@@ -407,11 +407,11 @@ final
       }
 
     void
-    update(const V_string& data)
+    update(const void* data, size_t size)
     noexcept
       {
-        auto bp = reinterpret_cast<const uint8_t*>(data.data());
-        auto ep = bp + data.size();
+        auto bp = static_cast<const uint8_t*>(data);
+        auto ep = bp + size;
         auto bc = this->m_chunk.mut_begin() + this->m_size % 64;
         auto ec = this->m_chunk.mut_end();
         ptrdiff_t n;
@@ -525,8 +525,8 @@ final
         uint32_t f, k;
 
         // https://en.wikipedia.org/wiki/SHA-1
-        auto update = [&](uint32_t i, auto&& specx, uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
-                          uint32_t& e)
+        auto xhash = [&](uint32_t i, auto&& specx, uint32_t& a, uint32_t& b,
+                         uint32_t& c, uint32_t& d, uint32_t& e)
           {
             specx(b, c, d);
             e += do_rotl(a, 5) + f + k + w[i];
@@ -566,92 +566,92 @@ final
           w[i] = do_rotl(w[i-6] ^ w[i-16] ^ w[i-28] ^ w[i-32], 2);
 
         // 0 * 20
-        update( 0, spec0, r[0], r[1], r[2], r[3], r[4]);
-        update( 1, spec0, r[4], r[0], r[1], r[2], r[3]);
-        update( 2, spec0, r[3], r[4], r[0], r[1], r[2]);
-        update( 3, spec0, r[2], r[3], r[4], r[0], r[1]);
-        update( 4, spec0, r[1], r[2], r[3], r[4], r[0]);
-        update( 5, spec0, r[0], r[1], r[2], r[3], r[4]);
-        update( 6, spec0, r[4], r[0], r[1], r[2], r[3]);
-        update( 7, spec0, r[3], r[4], r[0], r[1], r[2]);
-        update( 8, spec0, r[2], r[3], r[4], r[0], r[1]);
-        update( 9, spec0, r[1], r[2], r[3], r[4], r[0]);
-        update(10, spec0, r[0], r[1], r[2], r[3], r[4]);
-        update(11, spec0, r[4], r[0], r[1], r[2], r[3]);
-        update(12, spec0, r[3], r[4], r[0], r[1], r[2]);
-        update(13, spec0, r[2], r[3], r[4], r[0], r[1]);
-        update(14, spec0, r[1], r[2], r[3], r[4], r[0]);
-        update(15, spec0, r[0], r[1], r[2], r[3], r[4]);
-        update(16, spec0, r[4], r[0], r[1], r[2], r[3]);
-        update(17, spec0, r[3], r[4], r[0], r[1], r[2]);
-        update(18, spec0, r[2], r[3], r[4], r[0], r[1]);
-        update(19, spec0, r[1], r[2], r[3], r[4], r[0]);
+        xhash( 0, spec0, r[0], r[1], r[2], r[3], r[4]);
+        xhash( 1, spec0, r[4], r[0], r[1], r[2], r[3]);
+        xhash( 2, spec0, r[3], r[4], r[0], r[1], r[2]);
+        xhash( 3, spec0, r[2], r[3], r[4], r[0], r[1]);
+        xhash( 4, spec0, r[1], r[2], r[3], r[4], r[0]);
+        xhash( 5, spec0, r[0], r[1], r[2], r[3], r[4]);
+        xhash( 6, spec0, r[4], r[0], r[1], r[2], r[3]);
+        xhash( 7, spec0, r[3], r[4], r[0], r[1], r[2]);
+        xhash( 8, spec0, r[2], r[3], r[4], r[0], r[1]);
+        xhash( 9, spec0, r[1], r[2], r[3], r[4], r[0]);
+        xhash(10, spec0, r[0], r[1], r[2], r[3], r[4]);
+        xhash(11, spec0, r[4], r[0], r[1], r[2], r[3]);
+        xhash(12, spec0, r[3], r[4], r[0], r[1], r[2]);
+        xhash(13, spec0, r[2], r[3], r[4], r[0], r[1]);
+        xhash(14, spec0, r[1], r[2], r[3], r[4], r[0]);
+        xhash(15, spec0, r[0], r[1], r[2], r[3], r[4]);
+        xhash(16, spec0, r[4], r[0], r[1], r[2], r[3]);
+        xhash(17, spec0, r[3], r[4], r[0], r[1], r[2]);
+        xhash(18, spec0, r[2], r[3], r[4], r[0], r[1]);
+        xhash(19, spec0, r[1], r[2], r[3], r[4], r[0]);
 
         // 1
-        update(20, spec1, r[0], r[1], r[2], r[3], r[4]);
-        update(21, spec1, r[4], r[0], r[1], r[2], r[3]);
-        update(22, spec1, r[3], r[4], r[0], r[1], r[2]);
-        update(23, spec1, r[2], r[3], r[4], r[0], r[1]);
-        update(24, spec1, r[1], r[2], r[3], r[4], r[0]);
-        update(25, spec1, r[0], r[1], r[2], r[3], r[4]);
-        update(26, spec1, r[4], r[0], r[1], r[2], r[3]);
-        update(27, spec1, r[3], r[4], r[0], r[1], r[2]);
-        update(28, spec1, r[2], r[3], r[4], r[0], r[1]);
-        update(29, spec1, r[1], r[2], r[3], r[4], r[0]);
-        update(30, spec1, r[0], r[1], r[2], r[3], r[4]);
-        update(31, spec1, r[4], r[0], r[1], r[2], r[3]);
-        update(32, spec1, r[3], r[4], r[0], r[1], r[2]);
-        update(33, spec1, r[2], r[3], r[4], r[0], r[1]);
-        update(34, spec1, r[1], r[2], r[3], r[4], r[0]);
-        update(35, spec1, r[0], r[1], r[2], r[3], r[4]);
-        update(36, spec1, r[4], r[0], r[1], r[2], r[3]);
-        update(37, spec1, r[3], r[4], r[0], r[1], r[2]);
-        update(38, spec1, r[2], r[3], r[4], r[0], r[1]);
-        update(39, spec1, r[1], r[2], r[3], r[4], r[0]);
+        xhash(20, spec1, r[0], r[1], r[2], r[3], r[4]);
+        xhash(21, spec1, r[4], r[0], r[1], r[2], r[3]);
+        xhash(22, spec1, r[3], r[4], r[0], r[1], r[2]);
+        xhash(23, spec1, r[2], r[3], r[4], r[0], r[1]);
+        xhash(24, spec1, r[1], r[2], r[3], r[4], r[0]);
+        xhash(25, spec1, r[0], r[1], r[2], r[3], r[4]);
+        xhash(26, spec1, r[4], r[0], r[1], r[2], r[3]);
+        xhash(27, spec1, r[3], r[4], r[0], r[1], r[2]);
+        xhash(28, spec1, r[2], r[3], r[4], r[0], r[1]);
+        xhash(29, spec1, r[1], r[2], r[3], r[4], r[0]);
+        xhash(30, spec1, r[0], r[1], r[2], r[3], r[4]);
+        xhash(31, spec1, r[4], r[0], r[1], r[2], r[3]);
+        xhash(32, spec1, r[3], r[4], r[0], r[1], r[2]);
+        xhash(33, spec1, r[2], r[3], r[4], r[0], r[1]);
+        xhash(34, spec1, r[1], r[2], r[3], r[4], r[0]);
+        xhash(35, spec1, r[0], r[1], r[2], r[3], r[4]);
+        xhash(36, spec1, r[4], r[0], r[1], r[2], r[3]);
+        xhash(37, spec1, r[3], r[4], r[0], r[1], r[2]);
+        xhash(38, spec1, r[2], r[3], r[4], r[0], r[1]);
+        xhash(39, spec1, r[1], r[2], r[3], r[4], r[0]);
 
         // 2
-        update(40, spec2, r[0], r[1], r[2], r[3], r[4]);
-        update(41, spec2, r[4], r[0], r[1], r[2], r[3]);
-        update(42, spec2, r[3], r[4], r[0], r[1], r[2]);
-        update(43, spec2, r[2], r[3], r[4], r[0], r[1]);
-        update(44, spec2, r[1], r[2], r[3], r[4], r[0]);
-        update(45, spec2, r[0], r[1], r[2], r[3], r[4]);
-        update(46, spec2, r[4], r[0], r[1], r[2], r[3]);
-        update(47, spec2, r[3], r[4], r[0], r[1], r[2]);
-        update(48, spec2, r[2], r[3], r[4], r[0], r[1]);
-        update(49, spec2, r[1], r[2], r[3], r[4], r[0]);
-        update(50, spec2, r[0], r[1], r[2], r[3], r[4]);
-        update(51, spec2, r[4], r[0], r[1], r[2], r[3]);
-        update(52, spec2, r[3], r[4], r[0], r[1], r[2]);
-        update(53, spec2, r[2], r[3], r[4], r[0], r[1]);
-        update(54, spec2, r[1], r[2], r[3], r[4], r[0]);
-        update(55, spec2, r[0], r[1], r[2], r[3], r[4]);
-        update(56, spec2, r[4], r[0], r[1], r[2], r[3]);
-        update(57, spec2, r[3], r[4], r[0], r[1], r[2]);
-        update(58, spec2, r[2], r[3], r[4], r[0], r[1]);
-        update(59, spec2, r[1], r[2], r[3], r[4], r[0]);
+        xhash(40, spec2, r[0], r[1], r[2], r[3], r[4]);
+        xhash(41, spec2, r[4], r[0], r[1], r[2], r[3]);
+        xhash(42, spec2, r[3], r[4], r[0], r[1], r[2]);
+        xhash(43, spec2, r[2], r[3], r[4], r[0], r[1]);
+        xhash(44, spec2, r[1], r[2], r[3], r[4], r[0]);
+        xhash(45, spec2, r[0], r[1], r[2], r[3], r[4]);
+        xhash(46, spec2, r[4], r[0], r[1], r[2], r[3]);
+        xhash(47, spec2, r[3], r[4], r[0], r[1], r[2]);
+        xhash(48, spec2, r[2], r[3], r[4], r[0], r[1]);
+        xhash(49, spec2, r[1], r[2], r[3], r[4], r[0]);
+        xhash(50, spec2, r[0], r[1], r[2], r[3], r[4]);
+        xhash(51, spec2, r[4], r[0], r[1], r[2], r[3]);
+        xhash(52, spec2, r[3], r[4], r[0], r[1], r[2]);
+        xhash(53, spec2, r[2], r[3], r[4], r[0], r[1]);
+        xhash(54, spec2, r[1], r[2], r[3], r[4], r[0]);
+        xhash(55, spec2, r[0], r[1], r[2], r[3], r[4]);
+        xhash(56, spec2, r[4], r[0], r[1], r[2], r[3]);
+        xhash(57, spec2, r[3], r[4], r[0], r[1], r[2]);
+        xhash(58, spec2, r[2], r[3], r[4], r[0], r[1]);
+        xhash(59, spec2, r[1], r[2], r[3], r[4], r[0]);
 
         // 3
-        update(60, spec3, r[0], r[1], r[2], r[3], r[4]);
-        update(61, spec3, r[4], r[0], r[1], r[2], r[3]);
-        update(62, spec3, r[3], r[4], r[0], r[1], r[2]);
-        update(63, spec3, r[2], r[3], r[4], r[0], r[1]);
-        update(64, spec3, r[1], r[2], r[3], r[4], r[0]);
-        update(65, spec3, r[0], r[1], r[2], r[3], r[4]);
-        update(66, spec3, r[4], r[0], r[1], r[2], r[3]);
-        update(67, spec3, r[3], r[4], r[0], r[1], r[2]);
-        update(68, spec3, r[2], r[3], r[4], r[0], r[1]);
-        update(69, spec3, r[1], r[2], r[3], r[4], r[0]);
-        update(70, spec3, r[0], r[1], r[2], r[3], r[4]);
-        update(71, spec3, r[4], r[0], r[1], r[2], r[3]);
-        update(72, spec3, r[3], r[4], r[0], r[1], r[2]);
-        update(73, spec3, r[2], r[3], r[4], r[0], r[1]);
-        update(74, spec3, r[1], r[2], r[3], r[4], r[0]);
-        update(75, spec3, r[0], r[1], r[2], r[3], r[4]);
-        update(76, spec3, r[4], r[0], r[1], r[2], r[3]);
-        update(77, spec3, r[3], r[4], r[0], r[1], r[2]);
-        update(78, spec3, r[2], r[3], r[4], r[0], r[1]);
-        update(79, spec3, r[1], r[2], r[3], r[4], r[0]);
+        xhash(60, spec3, r[0], r[1], r[2], r[3], r[4]);
+        xhash(61, spec3, r[4], r[0], r[1], r[2], r[3]);
+        xhash(62, spec3, r[3], r[4], r[0], r[1], r[2]);
+        xhash(63, spec3, r[2], r[3], r[4], r[0], r[1]);
+        xhash(64, spec3, r[1], r[2], r[3], r[4], r[0]);
+        xhash(65, spec3, r[0], r[1], r[2], r[3], r[4]);
+        xhash(66, spec3, r[4], r[0], r[1], r[2], r[3]);
+        xhash(67, spec3, r[3], r[4], r[0], r[1], r[2]);
+        xhash(68, spec3, r[2], r[3], r[4], r[0], r[1]);
+        xhash(69, spec3, r[1], r[2], r[3], r[4], r[0]);
+        xhash(70, spec3, r[0], r[1], r[2], r[3], r[4]);
+        xhash(71, spec3, r[4], r[0], r[1], r[2], r[3]);
+        xhash(72, spec3, r[3], r[4], r[0], r[1], r[2]);
+        xhash(73, spec3, r[2], r[3], r[4], r[0], r[1]);
+        xhash(74, spec3, r[1], r[2], r[3], r[4], r[0]);
+        xhash(75, spec3, r[0], r[1], r[2], r[3], r[4]);
+        xhash(76, spec3, r[4], r[0], r[1], r[2], r[3]);
+        xhash(77, spec3, r[3], r[4], r[0], r[1], r[2]);
+        xhash(78, spec3, r[2], r[3], r[4], r[0], r[1]);
+        xhash(79, spec3, r[1], r[2], r[3], r[4], r[0]);
 
         // Accumulate the result.
         do_padd(this->m_regs, r);
@@ -678,11 +678,11 @@ final
       }
 
     void
-    update(const V_string& data)
+    update(const void* data, size_t size)
     noexcept
       {
-        auto bp = reinterpret_cast<const uint8_t*>(data.data());
-        auto ep = bp + data.size();
+        auto bp = static_cast<const uint8_t*>(data);
+        auto ep = bp + size;
         auto bc = this->m_chunk.mut_begin() + this->m_size % 64;
         auto ec = this->m_chunk.mut_end();
         ptrdiff_t n;
@@ -797,8 +797,8 @@ final
         uint32_t s0, maj, t2, s1, ch, t1;
 
         // https://en.wikipedia.org/wiki/SHA-2
-        auto update = [&](uint32_t i, uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
-                          uint32_t& e, uint32_t& f, uint32_t& g, uint32_t& h, uint32_t k)
+        auto xhash = [&](uint32_t i, uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
+                         uint32_t& e, uint32_t& f, uint32_t& g, uint32_t& h, uint32_t k)
           {
             s0 = do_rotl(a, 10) ^ do_rotl(a, 19) ^ do_rotl(a, 30);
             maj = (a & b) | (c & (a ^ b));
@@ -825,76 +825,76 @@ final
         }
 
         // 0 * 16
-        update( 0, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x428A2F98);
-        update( 1, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0x71374491);
-        update( 2, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0xB5C0FBCF);
-        update( 3, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0xE9B5DBA5);
-        update( 4, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x3956C25B);
-        update( 5, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0x59F111F1);
-        update( 6, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x923F82A4);
-        update( 7, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0xAB1C5ED5);
-        update( 8, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0xD807AA98);
-        update( 9, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0x12835B01);
-        update(10, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0x243185BE);
-        update(11, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0x550C7DC3);
-        update(12, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x72BE5D74);
-        update(13, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0x80DEB1FE);
-        update(14, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x9BDC06A7);
-        update(15, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0xC19BF174);
+        xhash( 0, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x428A2F98);
+        xhash( 1, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0x71374491);
+        xhash( 2, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0xB5C0FBCF);
+        xhash( 3, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0xE9B5DBA5);
+        xhash( 4, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x3956C25B);
+        xhash( 5, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0x59F111F1);
+        xhash( 6, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x923F82A4);
+        xhash( 7, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0xAB1C5ED5);
+        xhash( 8, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0xD807AA98);
+        xhash( 9, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0x12835B01);
+        xhash(10, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0x243185BE);
+        xhash(11, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0x550C7DC3);
+        xhash(12, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x72BE5D74);
+        xhash(13, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0x80DEB1FE);
+        xhash(14, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x9BDC06A7);
+        xhash(15, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0xC19BF174);
 
         // 1 * 16
-        update(16, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0xE49B69C1);
-        update(17, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0xEFBE4786);
-        update(18, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0x0FC19DC6);
-        update(19, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0x240CA1CC);
-        update(20, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x2DE92C6F);
-        update(21, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0x4A7484AA);
-        update(22, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x5CB0A9DC);
-        update(23, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0x76F988DA);
-        update(24, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x983E5152);
-        update(25, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0xA831C66D);
-        update(26, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0xB00327C8);
-        update(27, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0xBF597FC7);
-        update(28, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0xC6E00BF3);
-        update(29, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0xD5A79147);
-        update(30, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x06CA6351);
-        update(31, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0x14292967);
+        xhash(16, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0xE49B69C1);
+        xhash(17, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0xEFBE4786);
+        xhash(18, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0x0FC19DC6);
+        xhash(19, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0x240CA1CC);
+        xhash(20, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x2DE92C6F);
+        xhash(21, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0x4A7484AA);
+        xhash(22, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x5CB0A9DC);
+        xhash(23, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0x76F988DA);
+        xhash(24, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x983E5152);
+        xhash(25, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0xA831C66D);
+        xhash(26, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0xB00327C8);
+        xhash(27, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0xBF597FC7);
+        xhash(28, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0xC6E00BF3);
+        xhash(29, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0xD5A79147);
+        xhash(30, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x06CA6351);
+        xhash(31, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0x14292967);
 
         // 2 * 16
-        update(32, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x27B70A85);
-        update(33, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0x2E1B2138);
-        update(34, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0x4D2C6DFC);
-        update(35, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0x53380D13);
-        update(36, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x650A7354);
-        update(37, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0x766A0ABB);
-        update(38, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x81C2C92E);
-        update(39, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0x92722C85);
-        update(40, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0xA2BFE8A1);
-        update(41, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0xA81A664B);
-        update(42, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0xC24B8B70);
-        update(43, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0xC76C51A3);
-        update(44, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0xD192E819);
-        update(45, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0xD6990624);
-        update(46, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0xF40E3585);
-        update(47, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0x106AA070);
+        xhash(32, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x27B70A85);
+        xhash(33, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0x2E1B2138);
+        xhash(34, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0x4D2C6DFC);
+        xhash(35, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0x53380D13);
+        xhash(36, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x650A7354);
+        xhash(37, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0x766A0ABB);
+        xhash(38, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x81C2C92E);
+        xhash(39, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0x92722C85);
+        xhash(40, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0xA2BFE8A1);
+        xhash(41, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0xA81A664B);
+        xhash(42, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0xC24B8B70);
+        xhash(43, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0xC76C51A3);
+        xhash(44, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0xD192E819);
+        xhash(45, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0xD6990624);
+        xhash(46, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0xF40E3585);
+        xhash(47, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0x106AA070);
 
         // 3 * 16
-        update(48, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x19A4C116);
-        update(49, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0x1E376C08);
-        update(50, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0x2748774C);
-        update(51, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0x34B0BCB5);
-        update(52, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x391C0CB3);
-        update(53, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0x4ED8AA4A);
-        update(54, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x5B9CCA4F);
-        update(55, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0x682E6FF3);
-        update(56, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x748F82EE);
-        update(57, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0x78A5636F);
-        update(58, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0x84C87814);
-        update(59, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0x8CC70208);
-        update(60, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x90BEFFFA);
-        update(61, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0xA4506CEB);
-        update(62, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0xBEF9A3F7);
-        update(63, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0xC67178F2);
+        xhash(48, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x19A4C116);
+        xhash(49, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0x1E376C08);
+        xhash(50, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0x2748774C);
+        xhash(51, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0x34B0BCB5);
+        xhash(52, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x391C0CB3);
+        xhash(53, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0x4ED8AA4A);
+        xhash(54, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x5B9CCA4F);
+        xhash(55, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0x682E6FF3);
+        xhash(56, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x748F82EE);
+        xhash(57, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0x78A5636F);
+        xhash(58, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0x84C87814);
+        xhash(59, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0x8CC70208);
+        xhash(60, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x90BEFFFA);
+        xhash(61, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0xA4506CEB);
+        xhash(62, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0xBEF9A3F7);
+        xhash(63, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0xC67178F2);
 
         // Accumulate the result.
         do_padd(this->m_regs, r);
@@ -921,11 +921,11 @@ final
       }
 
     void
-    update(const V_string& data)
+    update(const void* data, size_t size)
     noexcept
       {
-        auto bp = reinterpret_cast<const uint8_t*>(data.data());
-        auto ep = bp + data.size();
+        auto bp = static_cast<const uint8_t*>(data);
+        auto ep = bp + size;
         auto bc = this->m_chunk.mut_begin() + this->m_size % 64;
         auto ec = this->m_chunk.mut_end();
         ptrdiff_t n;
@@ -1035,7 +1035,7 @@ std_checksum_crc32_new_private()
 void
 std_checksum_crc32_new_update(V_opaque& h, V_string data)
   {
-    return do_cast_hasher<CRC32_Hasher>(h)->update(data);
+    return do_cast_hasher<CRC32_Hasher>(h)->update(data.data(), data.size());
   }
 
 V_integer
@@ -1118,7 +1118,31 @@ V_integer
 std_checksum_crc32(V_string data)
   {
     CRC32_Hasher h;
-    h.update(data);
+    h.update(data.data(), data.size());
+    return h.finish();
+  }
+
+V_integer
+std_checksum_crc32_file(V_string path)
+  {
+    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
+    if(!fd)
+      ASTERIA_THROW_SYSTEM_ERROR("open");
+
+    // Allocate the I/O buffer.
+    static constexpr size_t nbuf = 16384;
+    uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)), ::operator delete);
+
+    // Read the file and hash data.
+    CRC32_Hasher h;
+    for(;;) {
+      ::ssize_t nread = ::read(fd, pbuf, nbuf);
+      if(nread < 0)
+        ASTERIA_THROW_SYSTEM_ERROR("read");
+      if(nread == 0)
+        break;  // EOF
+      h.update(pbuf, static_cast<size_t>(nread));
+    }
     return h.finish();
   }
 
@@ -1131,7 +1155,7 @@ std_checksum_fnv1a32_new_private()
 void
 std_checksum_fnv1a32_new_update(V_opaque& h, V_string data)
   {
-    return do_cast_hasher<FNV1a32_Hasher>(h)->update(data);
+    return do_cast_hasher<FNV1a32_Hasher>(h)->update(data.data(), data.size());
   }
 
 V_integer
@@ -1214,7 +1238,31 @@ V_integer
 std_checksum_fnv1a32(V_string data)
   {
     FNV1a32_Hasher h;
-    h.update(data);
+    h.update(data.data(), data.size());
+    return h.finish();
+  }
+
+V_integer
+std_checksum_fnv1a32_file(V_string path)
+  {
+    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
+    if(!fd)
+      ASTERIA_THROW_SYSTEM_ERROR("open");
+
+    // Allocate the I/O buffer.
+    static constexpr size_t nbuf = 16384;
+    uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)), ::operator delete);
+
+    // Read the file and hash data.
+    FNV1a32_Hasher h;
+    for(;;) {
+      ::ssize_t nread = ::read(fd, pbuf, nbuf);
+      if(nread < 0)
+        ASTERIA_THROW_SYSTEM_ERROR("read");
+      if(nread == 0)
+        break;  // EOF
+      h.update(pbuf, static_cast<size_t>(nread));
+    }
     return h.finish();
   }
 
@@ -1227,7 +1275,7 @@ std_checksum_md5_new_private()
 void
 std_checksum_md5_new_update(V_opaque& h, V_string data)
   {
-    return do_cast_hasher<MD5_Hasher>(h)->update(data);
+    return do_cast_hasher<MD5_Hasher>(h)->update(data.data(), data.size());
   }
 
 V_string
@@ -1310,7 +1358,31 @@ V_string
 std_checksum_md5(V_string data)
   {
     MD5_Hasher h;
-    h.update(data);
+    h.update(data.data(), data.size());
+    return h.finish();
+  }
+
+V_string
+std_checksum_md5_file(V_string path)
+  {
+    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
+    if(!fd)
+      ASTERIA_THROW_SYSTEM_ERROR("open");
+
+    // Allocate the I/O buffer.
+    static constexpr size_t nbuf = 16384;
+    uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)), ::operator delete);
+
+    // Read the file and hash data.
+    MD5_Hasher h;
+    for(;;) {
+      ::ssize_t nread = ::read(fd, pbuf, nbuf);
+      if(nread < 0)
+        ASTERIA_THROW_SYSTEM_ERROR("read");
+      if(nread == 0)
+        break;  // EOF
+      h.update(pbuf, static_cast<size_t>(nread));
+    }
     return h.finish();
   }
 
@@ -1323,7 +1395,7 @@ std_checksum_sha1_new_private()
 void
 std_checksum_sha1_new_update(V_opaque& h, V_string data)
   {
-    return do_cast_hasher<SHA1_Hasher>(h)->update(data);
+    return do_cast_hasher<SHA1_Hasher>(h)->update(data.data(), data.size());
   }
 
 V_string
@@ -1406,7 +1478,31 @@ V_string
 std_checksum_sha1(V_string data)
   {
     SHA1_Hasher h;
-    h.update(data);
+    h.update(data.data(), data.size());
+    return h.finish();
+  }
+
+V_string
+std_checksum_sha1_file(V_string path)
+  {
+    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
+    if(!fd)
+      ASTERIA_THROW_SYSTEM_ERROR("open");
+
+    // Allocate the I/O buffer.
+    static constexpr size_t nbuf = 16384;
+    uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)), ::operator delete);
+
+    // Read the file and hash data.
+    SHA1_Hasher h;
+    for(;;) {
+      ::ssize_t nread = ::read(fd, pbuf, nbuf);
+      if(nread < 0)
+        ASTERIA_THROW_SYSTEM_ERROR("read");
+      if(nread == 0)
+        break;  // EOF
+      h.update(pbuf, static_cast<size_t>(nread));
+    }
     return h.finish();
   }
 
@@ -1419,7 +1515,7 @@ std_checksum_sha256_new_private()
 void
 std_checksum_sha256_new_update(V_opaque& h, V_string data)
   {
-    return do_cast_hasher<SHA256_Hasher>(h)->update(data);
+    return do_cast_hasher<SHA256_Hasher>(h)->update(data.data(), data.size());
   }
 
 V_string
@@ -1502,7 +1598,31 @@ V_string
 std_checksum_sha256(V_string data)
   {
     SHA256_Hasher h;
-    h.update(data);
+    h.update(data.data(), data.size());
+    return h.finish();
+  }
+
+V_string
+std_checksum_sha256_file(V_string path)
+  {
+    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
+    if(!fd)
+      ASTERIA_THROW_SYSTEM_ERROR("open");
+
+    // Allocate the I/O buffer.
+    static constexpr size_t nbuf = 16384;
+    uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)), ::operator delete);
+
+    // Read the file and hash data.
+    SHA256_Hasher h;
+    for(;;) {
+      ::ssize_t nread = ::read(fd, pbuf, nbuf);
+      if(nread < 0)
+        ASTERIA_THROW_SYSTEM_ERROR("read");
+      if(nread == 0)
+        break;  // EOF
+      h.update(pbuf, static_cast<size_t>(nread));
+    }
     return h.finish();
   }
 
@@ -1577,6 +1697,46 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     V_string data;
     if(reader.I().v(data).F()) {
       Reference_root::S_temporary xref = { std_checksum_crc32(::std::move(data)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
+      ));
+    //===================================================================
+    // `std.checksum.crc32_file()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("crc32_file"),
+      V_function(
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.checksum.crc32_file(path)`
+
+  * Calculates the CRC-32 checksum of the file denoted by `path`,
+    as if this function was defined as
+
+    ```
+    std.checksum.crc32_file = func(path) {
+      var h = this.crc32_new();
+      var r = this.file_stream(path,
+                func(off, data) = h.update(data));
+      assert r != null;  // exposition only
+      return h.finish();
+    };
+    ```
+
+    This function is expected to be both more efficient and easier
+    to use.
+
+  * Returns the CRC-32 checksum as an integer. The high-order 32
+    bits are always zeroes.
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.crc32_file"));
+    // Parse arguments.
+    V_string path;
+    if(reader.I().v(path).F()) {
+      Reference_root::S_temporary xref = { std_checksum_crc32_file(::std::move(path)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1659,6 +1819,46 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
   }
       ));
     //===================================================================
+    // `std.checksum.fnv1a32_file()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("fnv1a32_file"),
+      V_function(
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.checksum.fnv1a32_file(path)`
+
+  * Calculates the 32-bit FNV-1a checksum of the file denoted by
+    `path`, as if this function was defined as
+
+    ```
+    std.checksum.fnv1a32_file = func(path) {
+      var h = this.fnv1a32_new();
+      var r = this.file_stream(path,
+                func(off, data) = h.update(data));
+      assert r != null;  // exposition only
+      return h.finish();
+    };
+    ```
+
+    This function is expected to be both more efficient and easier
+    to use.
+
+  * Returns the 32-bit FNV-1a checksum as an integer. The
+    high-order 32 bits are always zeroes.
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.fnv1a32_file"));
+    // Parse arguments.
+    V_string path;
+    if(reader.I().v(path).F()) {
+      Reference_root::S_temporary xref = { std_checksum_fnv1a32_file(::std::move(path)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
+      ));
+    //===================================================================
     // `std.checksum.md5_new()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("md5_new"),
@@ -1724,6 +1924,46 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     V_string data;
     if(reader.I().v(data).F()) {
       Reference_root::S_temporary xref = { std_checksum_md5(::std::move(data)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
+      ));
+    //===================================================================
+    // `std.checksum.md5_file()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("md5_file"),
+      V_function(
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.checksum.md5_file(path)`
+
+  * Calculates the MD5 checksum of the file denoted by `path`, as
+    if this function was defined as
+
+    ```
+    std.checksum.md5_file = func(path) {
+      var h = this.md5_new();
+      var r = this.file_stream(path,
+                func(off, data) = h.update(data));
+      assert r != null;  // exposition only
+      return h.finish();
+    };
+    ```
+
+    This function is expected to be both more efficient and easier
+    to use.
+
+  * Returns the MD5 checksum as a string of 32 hexadecimal digits
+    in uppercase.
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.md5_file"));
+    // Parse arguments.
+    V_string path;
+    if(reader.I().v(path).F()) {
+      Reference_root::S_temporary xref = { std_checksum_md5_file(::std::move(path)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1803,6 +2043,46 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
   }
       ));
     //===================================================================
+    // `std.checksum.sha1_file()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("sha1_file"),
+      V_function(
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.checksum.sha1_file(path)`
+
+  * Calculates the SHA-1 checksum of the file denoted by `path`, as
+    if this function was defined as
+
+    ```
+    std.checksum.sha1_file = func(path) {
+      var h = this.sha1_new();
+      var r = this.file_stream(path,
+                func(off, data) = h.update(data));
+      assert r != null;  // exposition only
+      return h.finish();
+    };
+    ```
+
+    This function is expected to be both more efficient and easier
+    to use.
+
+  * Returns the SHA-1 checksum as a string of 40 hexadecimal
+    digits in uppercase.
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha1_file"));
+    // Parse arguments.
+    V_string path;
+    if(reader.I().v(path).F()) {
+      Reference_root::S_temporary xref = { std_checksum_sha1_file(::std::move(path)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
+      ));
+    //===================================================================
     // `std.checksum.sha256_new()`
     //===================================================================
     result.insert_or_assign(::rocket::sref("sha256_new"),
@@ -1868,6 +2148,46 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     V_string data;
     if(reader.I().v(data).F()) {
       Reference_root::S_temporary xref = { std_checksum_sha256(::std::move(data)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
+      ));
+    //===================================================================
+    // `std.checksum.sha256_file()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("sha256_file"),
+      V_function(
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.checksum.sha256_file(path)`
+
+  * Calculates the SHA-256 checksum of the file denoted by `path`,
+    as if this function was defined as
+
+    ```
+    std.checksum.sha256_file = func(path) {
+      var h = this.sha256_new();
+      var r = this.file_stream(path,
+                func(off, data) = h.update(data));
+      assert r != null;  // exposition only
+      return h.finish();
+    };
+    ```
+
+    This function is expected to be both more efficient and easier
+    to use.
+
+  * Returns the SHA-256 checksum as a string of 64 hexadecimal
+    digits in uppercase.
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha256_file"));
+    // Parse arguments.
+    V_string path;
+    if(reader.I().v(path).F()) {
+      Reference_root::S_temporary xref = { std_checksum_sha256_file(::std::move(path)) };
       return self = ::std::move(xref);
     }
     // Fail.

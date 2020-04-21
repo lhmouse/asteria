@@ -52,6 +52,8 @@ int main()
         q.update("2");
         assert q.finish() == 0x1E3888BE;
 
+        assert std.checksum.crc32_file((__file>>3)+"txt") == 3626666760;
+
         // FNV1a-32
         const fnv1a32_results = [
           0x811C9DC5, 0x2A9EB737, 0x7EA29A85, 0x1831BDF7, 0x52A4B745, 0xFBB9B7B7, 0x62CA1805, 0xA783CA77,
@@ -88,6 +90,8 @@ int main()
         assert h.finish() == 0xF193366E;
         q.update("2");
         assert q.finish() == 0xF09334DB;
+
+        assert std.checksum.fnv1a32_file((__file>>3)+"txt") == 3790343712;
 
         // MD5
         const md5_results = [
@@ -174,6 +178,8 @@ int main()
         q.update("2");
         assert q.finish() == "6E809CBDA0732AC4845916A59016F954";
 
+        assert std.checksum.md5_file((__file>>3)+"txt") == "67C62663B722611BA87041EB05870EB9";
+
         // SHA-1
         const sha1_results = [
           "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709", "2FB5E13419FC89246865E7A324F476EC624E8740",
@@ -258,6 +264,8 @@ int main()
         assert h.finish() == "88FDD585121A4CCB3D1540527AEE53A77C77ABB8";
         q.update("2");
         assert q.finish() == "0F1DEFD5135596709273B3A1A07E466EA2BF4FFF";
+
+        assert std.checksum.sha1_file((__file>>3)+"txt") == "6BD103FB2F8F84E6A7B36D27E1FD6243B6320BE8";
 
         // SHA-256
         const sha256_results = [
@@ -407,6 +415,8 @@ int main()
         assert h.finish() == "91E9240F415223982EDC345532630710E94A7F52CD5F48F5EE1AFC555078F0AB";
         q.update("2");
         assert q.finish() == "87298CC2F31FBA73181EA2A9E6EF10DCE21ED95E98BDAC9C4E1504EA16F486E4";
+
+        assert std.checksum.sha256_file((__file>>3)+"txt") == "F5C962601B413CCDA2FC14D64D98479D9FC74C90C2DDE15F25EE9922E57F5074";
 
       )__"), tinybuf::open_read);
 

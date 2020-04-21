@@ -2335,6 +2335,27 @@
 	* Returns the CRC-32 checksum as an integer. The high-order 32
 	  bits are always zeroes.
 
+`std.checksum.crc32_file(path)`
+
+	* Calculates the CRC-32 checksum of the file denoted by `path`,
+	  as if this function was defined as
+
+	  ```
+	  std.checksum.crc32_file = func(path) {
+	    var h = this.crc32_new();
+	    var r = this.file_stream(path,
+	              func(off, data) = h.update(data));
+	    assert r != null;  // exposition only
+	    return h.finish();
+	  };
+	  ```
+
+	  This function is expected to be both more efficient and easier
+	  to use.
+
+	* Returns the CRC-32 checksum as an integer. The high-order 32
+	  bits are always zeroes.
+
 `std.checksum.fnv1a32_new()`
 
 	* Creates a 32-bit Fowler-Noll-Vo (a.k.a. FNV) hasher of the
@@ -2363,6 +2384,27 @@
 	  std.checksum.fnv1a32 = func(data) {
 	    var h = this.fnv1a32_new();
 	    h.update(data);
+	    return h.finish();
+	  };
+	  ```
+
+	  This function is expected to be both more efficient and easier
+	  to use.
+
+	* Returns the 32-bit FNV-1a checksum as an integer. The
+	  high-order 32 bits are always zeroes.
+
+`std.checksum.fnv1a32_file(path)`
+
+	* Calculates the 32-bit FNV-1a checksum of the file denoted by
+	  `path`, as if this function was defined as
+
+	  ```
+	  std.checksum.fnv1a32_file = func(path) {
+	    var h = this.fnv1a32_new();
+	    var r = this.file_stream(path,
+	              func(off, data) = h.update(data));
+	    assert r != null;  // exposition only
 	    return h.finish();
 	  };
 	  ```
@@ -2408,6 +2450,27 @@
 	* Returns the MD5 checksum as a string of 32 hexadecimal digits
 	  in uppercase.
 
+`std.checksum.md5_file(path)`
+
+	* Calculates the MD5 checksum of the file denoted by `path`, as
+	  if this function was defined as
+
+	  ```
+	  std.checksum.md5_file = func(path) {
+	    var h = this.md5_new();
+	    var r = this.file_stream(path,
+	              func(off, data) = h.update(data));
+	    assert r != null;  // exposition only
+	    return h.finish();
+	  };
+	  ```
+
+	  This function is expected to be both more efficient and easier
+	  to use.
+
+	* Returns the MD5 checksum as a string of 32 hexadecimal digits
+	  in uppercase.
+
 `std.checksum.sha1_new()`
 
 	* Creates an SHA-1 hasher.
@@ -2443,6 +2506,27 @@
 	* Returns the SHA-1 checksum as a string of 40 hexadecimal
 	  digits in uppercase.
 
+`std.checksum.sha1_file(path)`
+
+	* Calculates the SHA-1 checksum of the file denoted by `path`, as
+	  if this function was defined as
+
+	  ```
+	  std.checksum.sha1_file = func(path) {
+	    var h = this.sha1_new();
+	    var r = this.file_stream(path,
+	              func(off, data) = h.update(data));
+	    assert r != null;  // exposition only
+	    return h.finish();
+	  };
+	  ```
+
+	  This function is expected to be both more efficient and easier
+	  to use.
+
+	* Returns the SHA-1 checksum as a string of 40 hexadecimal
+	  digits in uppercase.
+
 `std.checksum.sha256_new()`
 
 	* Creates an SHA-256 hasher.
@@ -2468,6 +2552,27 @@
 	  std.checksum.sha256 = func(data) {
 	    var h = this.sha256_new();
 	    h.update(data);
+	    return h.finish();
+	  };
+	  ```
+
+	  This function is expected to be both more efficient and easier
+	  to use.
+
+	* Returns the SHA-256 checksum as a string of 64 hexadecimal
+	  digits in uppercase.
+
+`std.checksum.sha256_file(path)`
+
+	* Calculates the SHA-256 checksum of the file denoted by `path`,
+	  as if this function was defined as
+
+	  ```
+	  std.checksum.sha256_file = func(path) {
+	    var h = this.sha256_new();
+	    var r = this.file_stream(path,
+	              func(off, data) = h.update(data));
+	    assert r != null;  // exposition only
 	    return h.finish();
 	  };
 	  ```
