@@ -18,7 +18,7 @@
 #define ROCKET_ARTIFICIAL_FUNCTION          __attribute__((__artificial__, __always_inline__))
 #define ROCKET_CONSTANT_P(...)              __builtin_constant_p(__VA_ARGS__)
 #define ROCKET_FLATTEN_FUNCTION             __attribute__((__flatten__))
-#define ROCKET_FORCED_INLINE_FUNCTION       __attribute__((__gnu_inline__, __always_inline__)) __inline__
+#define ROCKET_FORCED_INLINE_FUNCTION       __attribute__((__gnu_inline__, __always_inline__)) extern __inline__
 
 // Check for either libc++ or libstdc++.
 #if defined(_LIBCPP_DEBUG) || defined(_GLIBCXX_DEBUG)
