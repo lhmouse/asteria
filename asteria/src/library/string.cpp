@@ -2778,14 +2778,12 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_integer code_point;
     optV_boolean permissive;
     if(reader.I().v(code_point).o(permissive).F()) {
-      Reference_root::S_temporary xref = { std_string_utf8_encode(::std::move(code_point),
-                                                                  ::std::move(permissive)) };
+      Reference_root::S_temporary xref = { std_string_utf8_encode(::std::move(code_point), permissive) };
       return self = ::std::move(xref);
     }
     V_array code_points;
     if(reader.I().v(code_points).o(permissive).F()) {
-      Reference_root::S_temporary xref = { std_string_utf8_encode(::std::move(code_points),
-                                                                  ::std::move(permissive)) };
+      Reference_root::S_temporary xref = { std_string_utf8_encode(::std::move(code_points), permissive) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2818,7 +2816,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string text;
     optV_boolean permissive;
     if(reader.I().v(text).o(permissive).F()) {
-      Reference_root::S_temporary xref = { std_string_utf8_decode(::std::move(text), ::std::move(permissive)) };
+      Reference_root::S_temporary xref = { std_string_utf8_decode(::std::move(text), permissive) };
       return self = ::std::move(xref);
     }
     // Fail.

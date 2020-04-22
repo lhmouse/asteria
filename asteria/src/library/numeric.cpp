@@ -1883,7 +1883,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     V_string text;
     optV_boolean saturating;
     if(reader.I().v(text).o(saturating).F()) {
-      Reference_root::S_temporary xref = { std_numeric_parse_real(::std::move(text), ::std::move(saturating)) };
+      Reference_root::S_temporary xref = { std_numeric_parse_real(::std::move(text), saturating) };
       return self = ::std::move(xref);
     }
     // Fail.
