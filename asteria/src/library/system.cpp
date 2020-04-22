@@ -14,8 +14,8 @@
 namespace Asteria {
 namespace {
 
-constexpr auto xgcgen_newest = static_cast<int64_t>(gc_generation_newest);
-constexpr auto xgcgen_oldest = static_cast<int64_t>(gc_generation_oldest);
+constexpr int64_t xgcgen_newest = static_cast<int64_t>(gc_generation_newest);
+constexpr int64_t xgcgen_oldest = static_cast<int64_t>(gc_generation_oldest);
 
 }  // namespace
 
@@ -126,10 +126,9 @@ optV_string
 std_system_env_get_variable(V_string name)
   {
     const char* val = ::getenv(name.safe_c_str());
-    if(!val) {
+    if(!val)
       return nullopt;
-    }
-    return ::rocket::sref(val);
+    return cow_string(val);
   }
 
 V_object
@@ -141,9 +140,9 @@ std_system_env_get_variables()
       // The key is terminated by an equals sign.
       const char* equ = ::std::strchr(str, '=');
       if(ROCKET_UNEXPECT(!equ))
-        vars.insert_or_assign(::rocket::sref(str), ::rocket::sref(""));  // no equals sign?
+        vars.insert_or_assign(cow_string(str), ::rocket::sref(""));  // no equals sign?
       else
-        vars.insert_or_assign(cow_string(str, equ), ::rocket::sref(equ + 1));
+        vars.insert_or_assign(cow_string(str, equ), cow_string(equ + 1));
     }
     return vars;
   }
