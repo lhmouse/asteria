@@ -6,6 +6,7 @@
 #include "../runtime/argument_reader.hpp"
 #include "../runtime/global_context.hpp"
 #include "../runtime/genius_collector.hpp"
+#include "../runtime/random_engine.hpp"
 #include "../utilities.hpp"
 #include <spawn.h>  // ::posix_spawnp()
 #include <sys/wait.h>  // ::waitpid()
@@ -16,6 +17,7 @@ namespace {
 
 constexpr int64_t xgcgen_newest = static_cast<int64_t>(gc_generation_newest);
 constexpr int64_t xgcgen_oldest = static_cast<int64_t>(gc_generation_oldest);
+constexpr char s_hex_digits[] = "00112233445566778899AaBbCcDdEeFf";
 
 }  // namespace
 
@@ -145,6 +147,56 @@ std_system_env_get_variables()
         vars.insert_or_assign(cow_string(str, equ), cow_string(equ + 1));
     }
     return vars;
+  }
+
+V_string
+std_system_uuid(Global_Context& global, optV_boolean lowercase)
+  {
+    // Canonical form: `xxxxxxxx-xxxx-Myyy-Nzzz-wwwwwwwwwwww`
+    //  * x: number of 1/10,000 seconds since UNIX Epoch
+    //  * M: always `4` (UUID version)
+    //  * y: process ID
+    //  * N: any of `0`-`7` (UUID variant)
+    //  * z: context ID
+    //  * w: random bytes
+    bool rlowerc = lowercase.value_or(false);
+    const auto prng = global.random_engine();
+    ::timespec ts;
+    ::clock_gettime(CLOCK_REALTIME, &ts);
+
+    uint64_t x = static_cast<uint64_t>(ts.tv_sec) * 10'000 + static_cast<uint64_t>(ts.tv_nsec) / 100'000;
+    uint64_t y = static_cast<uint32_t>(::getpid());
+    uint64_t z = reinterpret_cast<uintptr_t>(::std::addressof(global)) >> 12;
+    uint64_t w = static_cast<uint64_t>(prng->bump()) << 32 | static_cast<uint64_t>(prng->bump());
+
+    // Set version and variant.
+    y &= 0x0FFF;
+    y |= 0x4000;
+    z &= 0x7FFF;
+
+    // Compose the string backwards.
+    char sbuf[36];
+    size_t bp = 36;
+
+    auto put_field_bkwd = [&](uint64_t& value, size_t n)
+      {
+        for(size_t k = 0;  k != n;  ++k)
+          sbuf[--bp] = s_hex_digits[((value << 1) & 0x1E) + rlowerc],
+          value >>= 4;
+      };
+
+    put_field_bkwd(w, 12);
+    sbuf[--bp] = '-';
+    put_field_bkwd(z,  4);
+    sbuf[--bp] = '-';
+    put_field_bkwd(y,  4);
+    sbuf[--bp] = '-';
+    put_field_bkwd(x,  4);
+    sbuf[--bp] = '-';
+    put_field_bkwd(x,  8);
+
+    // Return the string. Note there is no null terminator in `sbuf`.
+    return cow_string(sbuf, sizeof(sbuf));
   }
 
 void
@@ -379,6 +431,45 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     // Parse arguments.
     if(reader.I().F()) {
       Reference_root::S_temporary xref = { std_system_env_get_variables() };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
+      ));
+    //===================================================================
+    // `std.system.uuid()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("uuid"),
+      V_function(
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+  * Generates a UUID according to the following specification:
+
+    Canonical form: `xxxxxxxx-xxxx-Myyy-Nzzz-wwwwwwwwwwww`
+
+     * x: number of 1/10,000 seconds since UNIX Epoch
+     * M: always `4` (UUID version)
+     * y: process ID
+     * N: any of `0`-`7` (UUID variant)
+     * z: context ID
+     * w: random bytes
+
+     Unlike version-1 UUIDs in RFC 4122, the timestamp is written
+     in pure big-endian order. This ensures the case-insensitive
+     lexicographical order of such UUIDs will match their order of
+     creation. If `lowercase` is set to `true`, hexadecimal digits
+     above `9` are encoded as `abcdef`; otherwise they are encoded
+     as `ABCDEF`.
+
+  * Returns a UUID as a string of 36 characters without braces.
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.system.uuid"));
+    // Parse arguments.
+    optV_boolean lowercase;
+    if(reader.I().o(lowercase).F()) {
+      Reference_root::S_temporary xref = { std_system_uuid(global, lowercase) };
       return self = ::std::move(xref);
     }
     // Fail.

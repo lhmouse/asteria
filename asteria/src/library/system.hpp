@@ -40,6 +40,10 @@ std_system_env_get_variable(V_string name);
 V_object
 std_system_env_get_variables();
 
+// `std.system.uuid`
+V_string
+std_system_uuid(Global_Context& global, optV_boolean lowercase);
+
 // Create an object that is to be referenced as `std.system`.
 void
 create_bindings_system(V_object& result, API_Version version);
