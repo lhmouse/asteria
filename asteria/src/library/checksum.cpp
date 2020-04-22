@@ -1015,13 +1015,51 @@ final
 
 template<typename HasherT>
 rcptr<HasherT>
-do_cast_hasher(V_opaque& h)
+do_cast_hasher(V_opaque& oh)
   {
-    auto qh = h.open_opt<HasherT>();
+    auto qh = oh.open_opt<HasherT>();
     if(!qh)
       ASTERIA_THROW("invalid dynamic cast to type `$1` from type `$2`",
-                    typeid(HasherT).name(), h.type().name());
+                    typeid(HasherT).name(), oh.type().name());
     return qh;
+  }
+
+template<typename HasherT>
+decltype(::std::declval<HasherT&>().finish())
+do_hash_bytes(const V_string& data)
+  {
+    HasherT h;
+    h.update(data.data(), data.size());
+    return h.finish();
+  }
+
+template<typename HasherT>
+opt<typename ::std::decay<decltype(::std::declval<HasherT&>().finish())>::type>
+do_hash_file_opt(const V_string& path)
+  {
+    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
+    if(fd) {
+      // The file has been opened successfully. Hash it.
+      HasherT h;
+      static constexpr size_t nbuf = 16384;
+      uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)),
+                                          ::operator delete);
+      for(;;) {
+        ::ssize_t nread = ::read(fd, pbuf, nbuf);
+        if(nread < 0)
+          ASTERIA_THROW_SYSTEM_ERROR("read");
+        if(nread == 0)
+          break;  // EOF
+        h.update(pbuf, static_cast<size_t>(nread));
+      }
+      return h.finish();
+    }
+
+    if(errno == ENOENT)
+      // The file does not exist.
+      return nullopt;
+
+    ASTERIA_THROW_SYSTEM_ERROR("open");
   }
 
 }  // namespace
@@ -1117,34 +1155,13 @@ std_checksum_crc32_new()
 V_integer
 std_checksum_crc32(V_string data)
   {
-    CRC32_Hasher h;
-    h.update(data.data(), data.size());
-    return h.finish();
+    return do_hash_bytes<CRC32_Hasher>(data);
   }
 
-V_integer
+optV_integer
 std_checksum_crc32_file(V_string path)
   {
-    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
-    if(!fd)
-      ASTERIA_THROW_SYSTEM_ERROR("open");
-
-    // Allocate the I/O buffer.
-    static constexpr size_t nbuf = 16384;
-    uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)),
-                                        ::operator delete);
-
-    // Read the file and hash data.
-    CRC32_Hasher h;
-    for(;;) {
-      ::ssize_t nread = ::read(fd, pbuf, nbuf);
-      if(nread < 0)
-        ASTERIA_THROW_SYSTEM_ERROR("read");
-      if(nread == 0)
-        break;  // EOF
-      h.update(pbuf, static_cast<size_t>(nread));
-    }
-    return h.finish();
+    return do_hash_file_opt<CRC32_Hasher>(path);
   }
 
 V_opaque
@@ -1238,34 +1255,13 @@ std_checksum_fnv1a32_new()
 V_integer
 std_checksum_fnv1a32(V_string data)
   {
-    FNV1a32_Hasher h;
-    h.update(data.data(), data.size());
-    return h.finish();
+    return do_hash_bytes<FNV1a32_Hasher>(data);
   }
 
-V_integer
+optV_integer
 std_checksum_fnv1a32_file(V_string path)
   {
-    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
-    if(!fd)
-      ASTERIA_THROW_SYSTEM_ERROR("open");
-
-    // Allocate the I/O buffer.
-    static constexpr size_t nbuf = 16384;
-    uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)),
-                                        ::operator delete);
-
-    // Read the file and hash data.
-    FNV1a32_Hasher h;
-    for(;;) {
-      ::ssize_t nread = ::read(fd, pbuf, nbuf);
-      if(nread < 0)
-        ASTERIA_THROW_SYSTEM_ERROR("read");
-      if(nread == 0)
-        break;  // EOF
-      h.update(pbuf, static_cast<size_t>(nread));
-    }
-    return h.finish();
+    return do_hash_file_opt<FNV1a32_Hasher>(path);
   }
 
 V_opaque
@@ -1359,34 +1355,13 @@ std_checksum_md5_new()
 V_string
 std_checksum_md5(V_string data)
   {
-    MD5_Hasher h;
-    h.update(data.data(), data.size());
-    return h.finish();
+    return do_hash_bytes<MD5_Hasher>(data);
   }
 
-V_string
+optV_string
 std_checksum_md5_file(V_string path)
   {
-    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
-    if(!fd)
-      ASTERIA_THROW_SYSTEM_ERROR("open");
-
-    // Allocate the I/O buffer.
-    static constexpr size_t nbuf = 16384;
-    uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)),
-                                        ::operator delete);
-
-    // Read the file and hash data.
-    MD5_Hasher h;
-    for(;;) {
-      ::ssize_t nread = ::read(fd, pbuf, nbuf);
-      if(nread < 0)
-        ASTERIA_THROW_SYSTEM_ERROR("read");
-      if(nread == 0)
-        break;  // EOF
-      h.update(pbuf, static_cast<size_t>(nread));
-    }
-    return h.finish();
+    return do_hash_file_opt<MD5_Hasher>(path);
   }
 
 V_opaque
@@ -1480,34 +1455,13 @@ std_checksum_sha1_new()
 V_string
 std_checksum_sha1(V_string data)
   {
-    SHA1_Hasher h;
-    h.update(data.data(), data.size());
-    return h.finish();
+    return do_hash_bytes<SHA1_Hasher>(data);
   }
 
-V_string
+optV_string
 std_checksum_sha1_file(V_string path)
   {
-    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
-    if(!fd)
-      ASTERIA_THROW_SYSTEM_ERROR("open");
-
-    // Allocate the I/O buffer.
-    static constexpr size_t nbuf = 16384;
-    uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)),
-                                        ::operator delete);
-
-    // Read the file and hash data.
-    SHA1_Hasher h;
-    for(;;) {
-      ::ssize_t nread = ::read(fd, pbuf, nbuf);
-      if(nread < 0)
-        ASTERIA_THROW_SYSTEM_ERROR("read");
-      if(nread == 0)
-        break;  // EOF
-      h.update(pbuf, static_cast<size_t>(nread));
-    }
-    return h.finish();
+    return do_hash_file_opt<SHA1_Hasher>(path);
   }
 
 V_opaque
@@ -1601,34 +1555,13 @@ std_checksum_sha256_new()
 V_string
 std_checksum_sha256(V_string data)
   {
-    SHA256_Hasher h;
-    h.update(data.data(), data.size());
-    return h.finish();
+    return do_hash_bytes<SHA256_Hasher>(data);
   }
 
-V_string
+optV_string
 std_checksum_sha256_file(V_string path)
   {
-    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
-    if(!fd)
-      ASTERIA_THROW_SYSTEM_ERROR("open");
-
-    // Allocate the I/O buffer.
-    static constexpr size_t nbuf = 16384;
-    uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)),
-                                        ::operator delete);
-
-    // Read the file and hash data.
-    SHA256_Hasher h;
-    for(;;) {
-      ::ssize_t nread = ::read(fd, pbuf, nbuf);
-      if(nread < 0)
-        ASTERIA_THROW_SYSTEM_ERROR("read");
-      if(nread == 0)
-        break;  // EOF
-      h.update(pbuf, static_cast<size_t>(nread));
-    }
-    return h.finish();
+    return do_hash_file_opt<SHA256_Hasher>(path);
   }
 
 void
@@ -1724,7 +1657,8 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       var h = this.crc32_new();
       var r = this.file_stream(path,
                 func(off, data) = h.update(data));
-      assert r != null;  // exposition only
+      if(r == null)
+        return r;
       return h.finish();
     };
     ```
@@ -1733,7 +1667,8 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     to use.
 
   * Returns the CRC-32 checksum as an integer. The high-order 32
-    bits are always zeroes.
+    bits are always zeroes. If the file does not exist, `null` is
+    returned.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
@@ -1839,7 +1774,8 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       var h = this.fnv1a32_new();
       var r = this.file_stream(path,
                 func(off, data) = h.update(data));
-      assert r != null;  // exposition only
+      if(r == null)
+        return r;
       return h.finish();
     };
     ```
@@ -1848,7 +1784,8 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     to use.
 
   * Returns the 32-bit FNV-1a checksum as an integer. The
-    high-order 32 bits are always zeroes.
+    high-order 32 bits are always zeroes. If the file does not
+    exist, `null` is returned.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
@@ -1951,7 +1888,8 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       var h = this.md5_new();
       var r = this.file_stream(path,
                 func(off, data) = h.update(data));
-      assert r != null;  // exposition only
+      if(r == null)
+        return r;
       return h.finish();
     };
     ```
@@ -1960,7 +1898,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     to use.
 
   * Returns the MD5 checksum as a string of 32 hexadecimal digits
-    in uppercase.
+    in uppercase. If the file does not exist, `null` is returned.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
@@ -2063,7 +2001,8 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       var h = this.sha1_new();
       var r = this.file_stream(path,
                 func(off, data) = h.update(data));
-      assert r != null;  // exposition only
+      if(r == null)
+        return r;
       return h.finish();
     };
     ```
@@ -2071,8 +2010,8 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     This function is expected to be both more efficient and easier
     to use.
 
-  * Returns the SHA-1 checksum as a string of 40 hexadecimal
-    digits in uppercase.
+  * Returns the SHA-1 checksum as a string of 40 hexadecimal digits
+    in uppercase. If the file does not exist, `null` is returned.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
@@ -2175,7 +2114,8 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       var h = this.sha256_new();
       var r = this.file_stream(path,
                 func(off, data) = h.update(data));
-      assert r != null;  // exposition only
+      if(r == null)
+        return r;
       return h.finish();
     };
     ```
@@ -2184,7 +2124,8 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     to use.
 
   * Returns the SHA-256 checksum as a string of 64 hexadecimal
-    digits in uppercase.
+    digits in uppercase. If the file does not exist, `null` is
+    returned.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {

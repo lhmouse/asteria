@@ -2345,7 +2345,8 @@
 	    var h = this.crc32_new();
 	    var r = this.file_stream(path,
 	              func(off, data) = h.update(data));
-	    assert r != null;  // exposition only
+	    if(r == null)
+	      return r;
 	    return h.finish();
 	  };
 	  ```
@@ -2354,7 +2355,8 @@
 	  to use.
 
 	* Returns the CRC-32 checksum as an integer. The high-order 32
-	  bits are always zeroes.
+	  bits are always zeroes. If the file does not exist, `null` is
+	  returned.
 
 `std.checksum.fnv1a32_new()`
 
@@ -2404,7 +2406,8 @@
 	    var h = this.fnv1a32_new();
 	    var r = this.file_stream(path,
 	              func(off, data) = h.update(data));
-	    assert r != null;  // exposition only
+	    if(r == null)
+	      return r;
 	    return h.finish();
 	  };
 	  ```
@@ -2413,7 +2416,8 @@
 	  to use.
 
 	* Returns the 32-bit FNV-1a checksum as an integer. The
-	  high-order 32 bits are always zeroes.
+	  high-order 32 bits are always zeroes. If the file does not
+	  exist, `null` is returned.
 
 `std.checksum.md5_new()`
 
@@ -2460,7 +2464,8 @@
 	    var h = this.md5_new();
 	    var r = this.file_stream(path,
 	              func(off, data) = h.update(data));
-	    assert r != null;  // exposition only
+	    if(r == null)
+	      return r;
 	    return h.finish();
 	  };
 	  ```
@@ -2469,7 +2474,7 @@
 	  to use.
 
 	* Returns the MD5 checksum as a string of 32 hexadecimal digits
-	  in uppercase.
+	  in uppercase. If the file does not exist, `null` is returned.
 
 `std.checksum.sha1_new()`
 
@@ -2516,7 +2521,8 @@
 	    var h = this.sha1_new();
 	    var r = this.file_stream(path,
 	              func(off, data) = h.update(data));
-	    assert r != null;  // exposition only
+	    if(r == null)
+	      return r;
 	    return h.finish();
 	  };
 	  ```
@@ -2524,8 +2530,8 @@
 	  This function is expected to be both more efficient and easier
 	  to use.
 
-	* Returns the SHA-1 checksum as a string of 40 hexadecimal
-	  digits in uppercase.
+	* Returns the SHA-1 checksum as a string of 40 hexadecimal digits
+	  in uppercase. If the file does not exist, `null` is returned.
 
 `std.checksum.sha256_new()`
 
@@ -2572,7 +2578,8 @@
 	    var h = this.sha256_new();
 	    var r = this.file_stream(path,
 	              func(off, data) = h.update(data));
-	    assert r != null;  // exposition only
+	    if(r == null)
+	      return r;
 	    return h.finish();
 	  };
 	  ```
@@ -2581,7 +2588,8 @@
 	  to use.
 
 	* Returns the SHA-256 checksum as a string of 64 hexadecimal
-	  digits in uppercase.
+	  digits in uppercase. If the file does not exist, `null` is
+	  returned.
 
 ### `std.json`
 

@@ -27,7 +27,7 @@ V_integer
 std_checksum_crc32(V_string data);
 
 // `std.checksum.crc32_file`
-V_integer
+optV_integer
 std_checksum_crc32_file(V_string path);
 
 // members of `std.checksum.fnv1a32_new()`
@@ -49,7 +49,7 @@ V_integer
 std_checksum_fnv1a32(V_string data);
 
 // `std.checksum.fnv1a32_file`
-V_integer
+optV_integer
 std_checksum_fnv1a32_file(V_string path);
 
 // members of `std.checksum.md5_new()`
@@ -71,7 +71,7 @@ V_string
 std_checksum_md5(V_string data);
 
 // `std.checksum.md5_file`
-V_string
+optV_string
 std_checksum_md5_file(V_string path);
 
 // members of `std.checksum.sha1_new()`
@@ -93,7 +93,7 @@ V_string
 std_checksum_sha1(V_string data);
 
 // `std.checksum.sha1_file`
-V_string
+optV_string
 std_checksum_sha1_file(V_string path);
 
 // members of `std.checksum.sha256_new()`
@@ -115,7 +115,7 @@ V_string
 std_checksum_sha256(V_string data);
 
 // `std.checksum.sha256_file`
-V_string
+optV_string
 std_checksum_sha256_file(V_string path);
 
 // Create an object that is to be referenced as `std.checksum`.
