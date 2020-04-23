@@ -406,6 +406,7 @@ const
 
         // Generate code for the `try` body.
         auto code_try = do_generate_block(opts, ptc, ctx, altr.body_try);
+
         // Create a fresh context for the `catch` clause.
         Analytic_Context ctx_catch(::rocket::ref(ctx), nullptr);
         do_user_declare(names_opt, ctx_catch, altr.name_except, "exception placeholder");
