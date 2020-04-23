@@ -825,12 +825,15 @@ struct AIR_Traits<AIR_Node::S_try_statement>
           V_array backtrace;
           for(size_t i = 0;  i < except.count_frames();  ++i) {
             const auto& f = except.frame(i);
+
             // Translate each frame into a human-readable format.
             V_object r;
             r.try_emplace(::rocket::sref("frame"), ::rocket::sref(f.what_type()));
             r.try_emplace(::rocket::sref("file"), f.file());
             r.try_emplace(::rocket::sref("line"), f.line());
+            r.try_emplace(::rocket::sref("offset"), f.offset());
             r.try_emplace(::rocket::sref("value"), f.value());
+
             // Append this frame.
             backtrace.emplace_back(::std::move(r));
           }
