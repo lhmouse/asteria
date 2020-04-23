@@ -94,9 +94,9 @@ track_variable(const rcptr<Variable>& var)
     // Perform automatic garbage collection on `*this`.
     if(ROCKET_UNEXPECT(this->m_counter > this->m_threshold)) {
       auto qnext = this;
-      do {
+      do
         qnext = qnext->collect_single_opt();
-      } while(qnext);
+      while(qnext);
     }
     return true;
   }

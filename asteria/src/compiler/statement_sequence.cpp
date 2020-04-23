@@ -1961,25 +1961,27 @@ do_accept_infix_element(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
     //   postfix-operator | postfix-function-call | postfix-subscript | postfix-member-access
     cow_vector<Expression_Unit> prefixes;
     bool succ;
-    do {
+    do
       succ = do_accept_prefix_operator(prefixes, tstrm);
-    } while(succ);
+    while(succ);
 
-    // Get a `primary-expression` with suffixes.
+    // Get a `primary-expression` without suffixes.
     // Fail if some prefixes have been consumed but no primary expression can be accepted.
     succ = do_accept_primary_expression(units, tstrm);
     if(!succ) {
-      if(!prefixes.empty())
-        throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
+      if(prefixes.empty())
+        return false;
 
-      return false;
+      throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
     }
-    do {
+
+    // Collect suffixes.
+    do
       succ = do_accept_postfix_operator(units, tstrm) ||
              do_accept_postfix_function_call(units, tstrm) ||
              do_accept_postfix_subscript(units, tstrm) ||
              do_accept_postfix_member_access(units, tstrm);
-    } while(succ);
+    while(succ);
 
     // Append prefixes in reverse order.
     // N.B. Prefix operators have lower precedence than postfix ones.

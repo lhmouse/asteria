@@ -216,9 +216,9 @@ void
 ranged_do_while(firstT first, lastT last, funcT&& func, const paramsT&... params)
   {
     auto qit = ::std::move(first);
-    do {
+    do
       ::std::forward<funcT>(func)(qit, params...);
-    } while(++qit != last);
+    while(++qit != last);
   }
 
 template<typename... typesT>
@@ -294,17 +294,17 @@ rotate(elementT* ptr, size_t begin, size_t seek, size_t end)
   {
     auto bot = begin;
     auto brk = seek;
+
     //   |<- isl ->|<- isr ->|
     //   bot       brk       end
     // > 0 1 2 3 4 5 6 7 8 9 -
     auto isl = brk - bot;
-    if(isl == 0) {
+    if(isl == 0)
       return;
-    }
     auto isr = end - brk;
-    if(isr == 0) {
+    if(isr == 0)
       return;
-    }
+
     auto stp = brk;
   r:
     if(isl < isr) {
@@ -312,9 +312,10 @@ rotate(elementT* ptr, size_t begin, size_t seek, size_t end)
       //        > 0 1 2 3 4 5 6 7 8 9 -
       // After:         bot   brk     end
       //        > 3 4 5 0 1 2 6 7 8 9 -
-      do {
+      do
         swap(ptr[bot++], ptr[brk++]);
-      } while(bot != stp);
+      while(bot != stp);
+
       // `isr` will have been decreased by `isl`, which will not result in zero.
       isr = end - brk;
       // `isl` is unchanged.
@@ -326,22 +327,24 @@ rotate(elementT* ptr, size_t begin, size_t seek, size_t end)
       //        > 0 1 2 3 4 5 6 7 8 9 -
       // After:       bot       brk   end
       //        > 7 8 9 3 4 5 6 0 1 2 -
-      do {
+      do
         swap(ptr[bot++], ptr[brk++]);
-      } while(brk != end);
+      while(brk != end);
+
       // `isl` will have been decreased by `isr`, which will not result in zero.
       isl = stp - bot;
       // `isr` is unchanged.
       brk = stp;
       goto r;
     }
+
     // Before:  bot       brk       end
     //        > 0 1 2 3 4 5 6 7 8 9 -
     // After:             bot       brk
     //        > 5 6 7 8 9 0 1 2 3 4 -
-    do {
+    do
       swap(ptr[bot++], ptr[brk++]);
-    } while(bot != stp);
+    while(bot != stp);
   }
 
 template<typename containerT, typename callbackT>

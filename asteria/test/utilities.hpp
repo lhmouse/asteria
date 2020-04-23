@@ -8,7 +8,7 @@
 #include "../src/utilities.hpp"
 
 #define ASTERIA_TEST_CHECK(expr)  \
-    do {  \
+    do  \
       try {  \
         if(expr) {  \
           /* successful */  \
@@ -22,10 +22,10 @@
         ASTERIA_TERMINATE("ASTERIA_TEST_CHECK: $1\n  caught an exception: $2", #expr, stdex.what());  \
       }  \
       /* unreachable */  \
-    } while(false)
+    while(false)
 
 #define ASTERIA_TEST_CHECK_CATCH(expr)  \
-    do {  \
+    do  \
       try {  \
         static_cast<void>(expr);  \
         /* failed */  \
@@ -36,6 +36,6 @@
         break;  \
       }  \
       /* unreachable */  \
-    } while(false)
+    while(false)
 
 #endif
