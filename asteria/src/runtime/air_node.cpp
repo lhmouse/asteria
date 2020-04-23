@@ -474,55 +474,54 @@ struct AIR_Traits<AIR_Node::S_switch_statement>
         auto cond = ctx.stack().get_top().read();
 
         // Find a target clause.
+        size_t bp = SIZE_MAX;
+
         // This is different from the `switch` statement in C, where `case` labels must have constant operands.
-        opt<size_t> qtarget;
         for(size_t i = 0;  i < nclauses;  ++i) {
           // This is a `default` clause if the condition is empty, and a `case` clause otherwise.
           if(sp.queues_labels[i].empty()) {
-            if(qtarget)
+            if(bp != SIZE_MAX)
               ASTERIA_THROW("multiple `default` clauses");
-            qtarget = i;
+            bp = i;
             continue;
           }
           // Evaluate the operand and check whether it equals `cond`.
           auto status = sp.queues_labels[i].execute(ctx);
           ROCKET_ASSERT(status == air_status_next);
           if(ctx.stack().get_top().read().compare(cond) == compare_equal) {
-            qtarget = i;
+            bp = i;
             break;
           }
         }
+
         // Skip this statement if no matching clause has been found.
-        if(!qtarget)
-          return air_status_next;
+        if(bp != SIZE_MAX) {
+          // Note that all clauses share the same context.
+          Executive_Context ctx_body(::rocket::ref(ctx), nullptr);
 
-        // Jump to the clause denoted by `qtarget`.
-        // Note that all clauses share the same context.
-        Executive_Context ctx_body(::rocket::ref(ctx), nullptr);
-        AIR_Status status;
-        ASTERIA_RUNTIME_TRY {
-          // Fly over all clauses that precede `qtarget`.
-          size_t bp = SIZE_MAX;
-          while(++bp < *qtarget)
-            ::rocket::for_each(sp.names_added[bp], [&](const auto& name) { do_declare(ctx_body, name);  });
+          // Inject all bypassed variables into the scope.
+          for(const auto& name : sp.names_added[bp])
+            do_declare(ctx_body, name);
 
-          // Execute all clauses from `qtarget`.
-          do {
-            status = sp.queues_bodies[bp].execute(ctx_body);
-            if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch })) {
-              status = air_status_next;
-              break;
+          AIR_Status status;
+          ASTERIA_RUNTIME_TRY {
+            do {
+              // Execute the body.
+              status = sp.queues_bodies[bp].execute(ctx_body);
+              if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch }))
+                break;
+              if(status != air_status_next)
+                return status;
             }
-            if(status != air_status_next)
-              break;
-          } while(++bp < nclauses);
+            while(++bp < nclauses);
+          }
+          ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+            ctx_body.on_scope_exit(except);
+            throw;
+          }
+          ctx_body.on_scope_exit(status);
         }
-        ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
-          ctx_body.on_scope_exit(except);
-          throw;
-        }
-        ctx_body.on_scope_exit(status);
-        return status;
+        return air_status_next;
       }
   };
 
