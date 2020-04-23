@@ -1082,6 +1082,10 @@ struct AIR_Traits<AIR_Node::S_push_local_reference>
         if(!qref)
           ASTERIA_THROW("undeclared identifier `$1`", sp.name);
 
+        // Check if control flow has bypassed its initialization.
+        if(qref->is_void())
+          ASTERIA_THROW("use of bypassed variable `$1`", sp.name);
+
         // Push a copy of it.
         ctx.stack().push(*qref);
         return air_status_next;

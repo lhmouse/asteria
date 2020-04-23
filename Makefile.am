@@ -321,6 +321,7 @@ check_PROGRAMS =  \
   asteria/test/checksum.test  \
   asteria/test/json.test  \
   asteria/test/import.test  \
+  asteria/test/bypassed_variable.test  \
   asteria/test/github_65.test  \
   asteria/test/github_71.test  \
   asteria/test/github_78.test  \
