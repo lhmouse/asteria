@@ -27,7 +27,7 @@ const
 
         // Return a pointer to the element at the given index.
         auto w = wrap_index(altr.index, arr.size());
-        size_t nadd = w.nprepend | w.nappend;
+        uint64_t nadd = w.nprepend | w.nappend;
         if(nadd != 0)
           return nullptr;
 
@@ -109,7 +109,7 @@ const
 
         // Return a pointer to the element at the given index.
         auto w = wrap_index(altr.index, arr.size());
-        size_t nadd = w.nprepend | w.nappend;
+        uint64_t nadd = w.nprepend | w.nappend;
         if(nadd != 0)
           return nullptr;
 
@@ -191,7 +191,7 @@ const
 
         // Return a pointer to the element at the given index if the index is valid.
         auto w = wrap_index(altr.index, arr.size());
-        size_t nadd = w.nprepend | w.nappend;
+        uint64_t nadd = w.nprepend | w.nappend;
         if(nadd != 0) {
           // Create elements as needed.
           if(nadd > arr.max_size() - arr.size())
@@ -269,7 +269,7 @@ const
 
         // Erase the element at the given index and return it.
         auto w = wrap_index(altr.index, arr.size());
-        size_t nadd = w.nprepend | w.nappend;
+        uint64_t nadd = w.nprepend | w.nappend;
         if(nadd != 0)
           return V_null();
 
