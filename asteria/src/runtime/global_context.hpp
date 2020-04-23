@@ -30,6 +30,13 @@ class Global_Context
     ~Global_Context()
     override;
 
+    Global_Context(const Global_Context&)
+      = delete;
+
+    Global_Context&
+    operator=(const Global_Context&)
+      = delete;
+
   protected:
     bool
     do_is_analytic()

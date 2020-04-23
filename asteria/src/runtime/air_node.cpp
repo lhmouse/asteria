@@ -115,7 +115,7 @@ AIR_Status
 do_execute_block(const AVMC_Queue& queue, const Executive_Context& ctx)
   {
     // Execute the body on a new context.
-    Executive_Context ctx_next(::rocket::ref(ctx), nullptr);
+    Executive_Context ctx_next(::rocket::ref(ctx));
     AIR_Status status;
     ASTERIA_RUNTIME_TRY {
       status = queue.execute(ctx_next);
@@ -497,7 +497,7 @@ struct AIR_Traits<AIR_Node::S_switch_statement>
         // Skip this statement if no matching clause has been found.
         if(bp != SIZE_MAX) {
           // Note that all clauses share the same context.
-          Executive_Context ctx_body(::rocket::ref(ctx), nullptr);
+          Executive_Context ctx_body(::rocket::ref(ctx));
 
           // Inject all bypassed variables into the scope.
           for(const auto& name : sp.names_added[bp])
@@ -650,7 +650,7 @@ struct AIR_Traits<AIR_Node::S_for_each_statement>
 
         // We have to create an outer context due to the fact that the key and mapped
         // references outlast every iteration.
-        Executive_Context ctx_for(::rocket::ref(ctx), nullptr);
+        Executive_Context ctx_for(::rocket::ref(ctx));
 
         // Allocate an uninitialized variable for the key.
         const auto vkey = gcoll->create_variable();
@@ -747,7 +747,7 @@ struct AIR_Traits<AIR_Node::S_for_statement>
         // This is the same as the `for` statement in C.
         // We have to create an outer context due to the fact that names declared in the first segment
         // outlast every iteration.
-        Executive_Context ctx_for(::rocket::ref(ctx), nullptr);
+        Executive_Context ctx_for(::rocket::ref(ctx));
 
         // Execute the loop initializer, which shall only be a definition or an expression statement.
         auto status = sp.queues[0].execute(ctx_for);
@@ -813,7 +813,7 @@ struct AIR_Traits<AIR_Node::S_try_statement>
 
         // This branch must be executed inside this `catch` block.
         // User-provided bindings may obtain the current exception using `::std::current_exception`.
-        Executive_Context ctx_catch(::rocket::ref(ctx), nullptr);
+        Executive_Context ctx_catch(::rocket::ref(ctx));
         AIR_Status status;
         ASTERIA_RUNTIME_TRY {
           // Set the exception reference.
@@ -4254,7 +4254,7 @@ const
         const auto& altr = this->m_stor.as<index_execute_block>();
 
         // Rebind the body.
-        Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
+        Analytic_Context ctx_body(::rocket::ref(ctx));
         bool dirty = false;
         auto bound = altr;
 
@@ -4271,7 +4271,7 @@ const
         const auto& altr = this->m_stor.as<index_if_statement>();
 
         // Rebind both branches.
-        Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
+        Analytic_Context ctx_body(::rocket::ref(ctx));
         bool dirty = false;
         auto bound = altr;
 
@@ -4284,7 +4284,7 @@ const
         const auto& altr = this->m_stor.as<index_switch_statement>();
 
         // Rebind all clauses.
-        Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
+        Analytic_Context ctx_body(::rocket::ref(ctx));
         bool dirty = false;
         auto bound = altr;
 
@@ -4297,7 +4297,7 @@ const
         const auto& altr = this->m_stor.as<index_do_while_statement>();
 
         // Rebind the body and the condition.
-        Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
+        Analytic_Context ctx_body(::rocket::ref(ctx));
         bool dirty = false;
         auto bound = altr;
 
@@ -4310,7 +4310,7 @@ const
         const auto& altr = this->m_stor.as<index_while_statement>();
 
         // Rebind the condition and the body.
-        Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
+        Analytic_Context ctx_body(::rocket::ref(ctx));
         bool dirty = false;
         auto bound = altr;
 
@@ -4323,8 +4323,8 @@ const
         const auto& altr = this->m_stor.as<index_for_each_statement>();
 
         // Rebind the range initializer and the body.
-        Analytic_Context ctx_for(::rocket::ref(ctx), nullptr);
-        Analytic_Context ctx_body(::rocket::ref(ctx_for), nullptr);
+        Analytic_Context ctx_for(::rocket::ref(ctx));
+        Analytic_Context ctx_body(::rocket::ref(ctx_for));
         bool dirty = false;
         auto bound = altr;
 
@@ -4337,8 +4337,8 @@ const
         const auto& altr = this->m_stor.as<index_for_statement>();
 
         // Rebind the initializer, the condition, the loop increment and the body.
-        Analytic_Context ctx_for(::rocket::ref(ctx), nullptr);
-        Analytic_Context ctx_body(::rocket::ref(ctx_for), nullptr);
+        Analytic_Context ctx_for(::rocket::ref(ctx));
+        Analytic_Context ctx_body(::rocket::ref(ctx_for));
         bool dirty = false;
         auto bound = altr;
 
@@ -4353,7 +4353,7 @@ const
         const auto& altr = this->m_stor.as<index_try_statement>();
 
         // Rebind the `try` and `catch` clauses.
-        Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
+        Analytic_Context ctx_body(::rocket::ref(ctx));
         bool dirty = false;
         auto bound = altr;
 

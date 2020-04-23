@@ -25,13 +25,6 @@ class Abstract_Context
     virtual
     ~Abstract_Context();
 
-    Abstract_Context(const Abstract_Context&)
-      = delete;
-
-    Abstract_Context&
-    operator=(const Abstract_Context&)
-      = delete;
-
   protected:
     virtual
     bool

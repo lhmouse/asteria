@@ -31,7 +31,9 @@ class Executive_Context
     cow_bivector<Source_Location, AVMC_Queue> m_defer;
 
   public:
-    Executive_Context(ref_to<const Executive_Context> parent, nullptr_t)  // for non-functions
+    template<typename ContextT,
+    ROCKET_ENABLE_IF(::std::is_base_of<Abstract_Context, ContextT>::value)>
+    Executive_Context(ref_to<ContextT> parent)  // for non-functions
       : m_parent_opt(parent.ptr()),
         m_global(parent->m_global), m_stack(parent->m_stack), m_zvarg(parent->m_zvarg),
         m_self(Reference_root::S_void())
@@ -55,6 +57,13 @@ class Executive_Context
 
     ~Executive_Context()
     override;
+
+    Executive_Context(const Executive_Context&)
+      = delete;
+
+    Executive_Context&
+    operator=(const Executive_Context&)
+      = delete;
 
   private:
     void

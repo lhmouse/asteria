@@ -123,7 +123,7 @@ cow_vector<AIR_Node>&
 do_generate_block(cow_vector<AIR_Node>& code, const Compiler_Options& opts, PTC_Aware ptc,
                   const Analytic_Context& ctx, const Statement::S_block& block)
   {
-    Analytic_Context ctx_stmts(::rocket::ref(ctx), nullptr);
+    Analytic_Context ctx_stmts(::rocket::ref(ctx));
     do_generate_statement_list(code, nullptr, ctx_stmts, opts, ptc, block);
     return code;
   }
@@ -297,7 +297,7 @@ const
 
         // Create a fresh context for the `switch` body.
         // Be advised that all clauses inside a `switch` statement share the same context.
-        Analytic_Context ctx_body(::rocket::ref(ctx), nullptr);
+        Analytic_Context ctx_body(::rocket::ref(ctx));
         cow_vector<phsh_string> names;
         // Get the number of clauses.
         auto nclauses = altr.labels.size();
@@ -359,7 +359,7 @@ const
 
         // Note that the key and value references outlasts every iteration, so we have to create
         // an outer contexts here.
-        Analytic_Context ctx_for(::rocket::ref(ctx), nullptr);
+        Analytic_Context ctx_for(::rocket::ref(ctx));
         do_user_declare(names_opt, ctx_for, altr.name_key, "key placeholder");
         do_user_declare(names_opt, ctx_for, altr.name_mapped, "value placeholder");
 
@@ -383,7 +383,7 @@ const
 
         // Note that names declared in the first segment of a for-statement outlasts every iteration,
         // so we have to create an outer contexts here.
-        Analytic_Context ctx_for(::rocket::ref(ctx), nullptr);
+        Analytic_Context ctx_for(::rocket::ref(ctx));
 
         // Generate code for the initializer, the condition and the loop increment.
         auto code_init = do_generate_statement_list(nullptr, ctx_for, opts, ptc_aware_none, altr.init);
@@ -408,7 +408,7 @@ const
         auto code_try = do_generate_block(opts, ptc, ctx, altr.body_try);
 
         // Create a fresh context for the `catch` clause.
-        Analytic_Context ctx_catch(::rocket::ref(ctx), nullptr);
+        Analytic_Context ctx_catch(::rocket::ref(ctx));
         do_user_declare(names_opt, ctx_catch, altr.name_except, "exception placeholder");
         ctx_catch.open_named_reference(::rocket::sref("__backtrace"));
         // Generate code for the `catch` body.
