@@ -335,7 +335,7 @@ std_chrono_utc_parse(V_string time_str)
           ASTERIA_THROW("invalid date-time string (expecting second-subsecond separator in `$1`)", time_str);
 
         // Parse at most three digits. Excess digits are ignored.
-        uint32_t weight = 100;
+        uintptr_t weight = 100;
         while(bp != ep) {
           uint32_t dval = static_cast<uint32_t>(*(bp++) - '0');
           if(dval > 9)
