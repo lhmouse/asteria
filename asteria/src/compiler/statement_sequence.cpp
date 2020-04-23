@@ -691,6 +691,7 @@ do_accept_switch_statement_opt(Token_Stream& tstrm)
     // Parse the block by hand.
     cow_vector<Statement::S_expression> labels;
     cow_vector<Statement::S_block> bodies;
+
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
     if(!kpunct)
       throw Parser_Error(parser_status_open_brace_expected, tstrm.next_sloc(), tstrm.next_length());
@@ -700,26 +701,30 @@ do_accept_switch_statement_opt(Token_Stream& tstrm)
       if(!qkwrd)
         break;
 
-      Statement::S_expression label;
       if(*qkwrd == keyword_case) {
         // The `case` label requires an expression argument.
         auto qlabel = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
         if(!qlabel)
           throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
-        label = ::std::move(*qlabel);
+
+        labels.emplace_back(::std::move(*qlabel));
       }
+      else
+        // The `default` label takes no argument.
+        labels.emplace_back();
 
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
       if(!kpunct)
         throw Parser_Error(parser_status_colon_expected, tstrm.next_sloc(), tstrm.next_length());
 
-      auto qblock = do_accept_statement_as_block_opt(tstrm);
-      if(!qblock)
-        qblock.emplace();
+      cow_vector<Statement> body;
+      while(auto qstmt = do_accept_statement_opt(tstrm))
+        body.emplace_back(::std::move(*qstmt));
 
-      labels.emplace_back(::std::move(label));
-      bodies.emplace_back(::std::move(*qblock));
+      Statement::S_block xstmt = { ::std::move(body) };
+      bodies.emplace_back(::std::move(xstmt));
     }
+
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
     if(!kpunct)
       throw Parser_Error(parser_status_closed_brace_or_switch_clause_expected, tstrm.next_sloc(),
