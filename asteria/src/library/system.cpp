@@ -164,7 +164,7 @@ std_system_uuid(Global_Context& global, optV_boolean lowercase)
     ::timespec ts;
     ::clock_gettime(CLOCK_REALTIME, &ts);
 
-    uint64_t x = static_cast<uint64_t>(ts.tv_sec) * 10'000 + static_cast<uint64_t>(ts.tv_nsec) / 100'000;
+    uint64_t x = static_cast<uint64_t>(ts.tv_sec) * 30518 + static_cast<uint64_t>(ts.tv_nsec) / 32768;
     uint64_t y = static_cast<uint32_t>(::getpid());
     uint64_t z = reinterpret_cast<uintptr_t>(::std::addressof(global)) >> 12;
     uint64_t w = static_cast<uint64_t>(prng->bump()) << 32 | static_cast<uint64_t>(prng->bump());
@@ -447,7 +447,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 
     Canonical form: `xxxxxxxx-xxxx-Myyy-Nzzz-wwwwwwwwwwww`
 
-     * x: number of 1/10,000 seconds since UNIX Epoch
+     * x: number of 1/30,518 seconds since UNIX Epoch
      * M: always `4` (UUID version)
      * y: process ID
      * N: any of `0`-`7` (UUID variant)

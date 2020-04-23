@@ -100,7 +100,7 @@
 
 	  Canonical form: `xxxxxxxx-xxxx-Myyy-Nzzz-wwwwwwwwwwww`
 
-          * x: number of 1/10,000 seconds since UNIX Epoch
+          * x: number of 1/30,518 seconds since UNIX Epoch
           * M: always `4` (UUID version)
           * y: process ID
           * N: any of `0`-`7` (UUID variant)
