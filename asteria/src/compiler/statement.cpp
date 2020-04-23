@@ -173,6 +173,7 @@ const
         auto nvars = altr.slocs.size();
         ROCKET_ASSERT(nvars == altr.decls.size());
         ROCKET_ASSERT(nvars == altr.inits.size());
+
         // Declare all variables from left to right.
         for(size_t i = 0;  i < nvars;  ++i) {
           // Validate the declaration.
@@ -195,13 +196,13 @@ const
             epos = altr.decls[i].size() - 1;
             sb_obj = true;
           }
-          else {
+          else
             ROCKET_ASSERT(altr.decls[i].size() == 1);
-          }
+
           // Create dummy references for further name lookups.
-          for(size_t k = bpos;  k < epos;  ++k) {
+          for(size_t k = bpos;  k < epos;  ++k)
             do_user_declare(names_opt, ctx, altr.decls[i][k], "variable placeholder");
-          }
+
           if(altr.inits[i].units.empty()) {
             // If no initializer is provided, no further initialization is required.
             for(size_t k = bpos;  k < epos;  ++k) {
@@ -217,9 +218,11 @@ const
               AIR_Node::S_declare_variable xnode = { altr.slocs[i], altr.decls[i][k] };
               code.emplace_back(::std::move(xnode));
             }
+
             // Generate code for the initializer.
             // Note: Do not destroy the stack.
             do_generate_subexpression(code, opts, ptc_aware_none, ctx, altr.inits[i]);
+
             // Initialize variables.
             if(sb_arr) {
               AIR_Node::S_unpack_struct_array xnode = { altr.slocs[i], altr.immutable,
