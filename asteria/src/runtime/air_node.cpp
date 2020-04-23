@@ -502,20 +502,20 @@ struct AIR_Traits<AIR_Node::S_switch_statement>
         AIR_Status status;
         ASTERIA_RUNTIME_TRY {
           // Fly over all clauses that precede `qtarget`.
-          size_t k = SIZE_MAX;
-          while(++k < *qtarget)
-            ::rocket::for_each(sp.names_added[k], [&](const auto& name) { do_declare(ctx_body, name);  });
+          size_t bp = SIZE_MAX;
+          while(++bp < *qtarget)
+            ::rocket::for_each(sp.names_added[bp], [&](const auto& name) { do_declare(ctx_body, name);  });
 
           // Execute all clauses from `qtarget`.
           do {
-            status = sp.queues_bodies[k].execute(ctx_body);
+            status = sp.queues_bodies[bp].execute(ctx_body);
             if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch })) {
               status = air_status_next;
               break;
             }
             if(status != air_status_next)
               break;
-          } while(++k < nclauses);
+          } while(++bp < nclauses);
         }
         ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
           ctx_body.on_scope_exit(except);
