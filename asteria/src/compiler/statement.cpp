@@ -398,8 +398,8 @@ const
         auto code_body = do_generate_block(opts, ptc_aware_none, ctx_for, altr.body);
 
         // Encode arguments.
-        AIR_Node::S_for_statement xnode = { ::std::move(code_init), ::std::move(code_cond), ::std::move(code_step),
-                                            ::std::move(code_body) };
+        AIR_Node::S_for_statement xnode = { ::std::move(code_init), ::std::move(code_cond),
+                                            ::std::move(code_step), ::std::move(code_body) };
         code.emplace_back(::std::move(xnode));
         return code;
       }
