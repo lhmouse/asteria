@@ -76,7 +76,7 @@ class Collector
     collect_single_opt();
 
     void
-    collect_recursive();
+    auto_collect();
 
     Collector&
     wipe_out_variables()

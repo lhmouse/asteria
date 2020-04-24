@@ -88,7 +88,7 @@ track_variable(const rcptr<Variable>& var)
     this->m_counter++;
     // The variable has been inserted successfully.
     if(ROCKET_UNEXPECT(this->m_counter > this->m_threshold))
-      this->collect_recursive();
+      this->auto_collect();
     return true;
   }
 
@@ -258,7 +258,7 @@ collect_single_opt()
 
 void
 Collector::
-collect_recursive()
+auto_collect()
   {
     auto qnext = this;
     do
