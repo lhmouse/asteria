@@ -688,6 +688,7 @@ struct AIR_Traits<AIR_Node::S_for_each_statement>
               if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
                                                 air_status_continue_for }))
                 return status;
+
               // Restore the mapped reference.
               mapped.zoom_out();
             }
@@ -710,6 +711,7 @@ struct AIR_Traits<AIR_Node::S_for_each_statement>
               if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
                                                 air_status_continue_for }))
                 return status;
+
               // Restore the mapped reference.
               mapped.zoom_out();
             }
@@ -801,8 +803,8 @@ struct AIR_Traits<AIR_Node::S_try_statement>
       ASTERIA_RUNTIME_TRY {
         // This is almost identical to JavaScript.
         // Execute the `try` block. If no exception is thrown, this will have little overhead.
-        auto status = do_execute_block(sp.queue_try, ctx);
         // This must not be PTC'd, otherwise exceptions thrown from tail calls won't be caught.
+        auto status = do_execute_block(sp.queue_try, ctx);
         if(status == air_status_return_ref)
           ctx.stack().open_top().finish_call(ctx.global());
         return status;
