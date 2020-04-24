@@ -202,6 +202,7 @@ struct Sparam_for_each
 
 struct Sparam_try_catch
   {
+    Source_Location sloc_try;
     AVMC_Queue queue_try;
     Source_Location sloc_catch;
     phsh_string name_except;
@@ -789,6 +790,7 @@ struct AIR_Traits<AIR_Node::S_try_statement>
     make_sparam(bool& reachable, const AIR_Node::S_try_statement& altr)
       {
         Sparam_try_catch sp;
+        sp.sloc_try = altr.sloc_try;
         bool rtry = do_solidify_code(sp.queue_try, altr.code_try);
         sp.sloc_catch = altr.sloc_catch;
         sp.name_except = altr.name_except;
@@ -810,8 +812,9 @@ struct AIR_Traits<AIR_Node::S_try_statement>
         return status;
       }
       ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+        // Append a frame due to exit of the `try` clause.
         // Reuse the exception object. Don't bother allocating a new one.
-        except.push_frame_catch(sp.sloc_catch);
+        except.push_frame_try(sp.sloc_try);
 
         // This branch must be executed inside this `catch` block.
         // User-provided bindings may obtain the current exception using `::std::current_exception`.
@@ -846,6 +849,7 @@ struct AIR_Traits<AIR_Node::S_try_statement>
         }
         ASTERIA_RUNTIME_CATCH(Runtime_Error& nested) {
           ctx_catch.on_scope_exit(nested);
+          nested.push_frame_catch(sp.sloc_catch, except.value());
           throw;
         }
         ctx_catch.on_scope_exit(status);

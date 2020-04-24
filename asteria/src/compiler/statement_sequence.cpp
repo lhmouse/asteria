@@ -1170,6 +1170,7 @@ do_accept_try_statement_opt(Token_Stream& tstrm)
   {
     // try-statement ::=
     //   "try" statement "catch" "(" identifier ")" statement
+    auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_try });
     if(!qkwrd)
       return nullopt;
@@ -1179,7 +1180,7 @@ do_accept_try_statement_opt(Token_Stream& tstrm)
       throw Parser_Error(parser_status_statement_expected, tstrm.next_sloc(), tstrm.next_length());
 
     // Note that this is the location of the `catch` block.
-    auto sloc = tstrm.next_sloc();
+    auto sloc_catch = tstrm.next_sloc();
     qkwrd = do_accept_keyword_opt(tstrm, { keyword_catch });
     if(!qkwrd)
       throw Parser_Error(parser_status_keyword_catch_expected, tstrm.next_sloc(), tstrm.next_length());
@@ -1200,8 +1201,8 @@ do_accept_try_statement_opt(Token_Stream& tstrm)
     if(!qbcatch)
       throw Parser_Error(parser_status_statement_expected, tstrm.next_sloc(), tstrm.next_length());
 
-    Statement::S_try xstmt = { ::std::move(*qbtry), ::std::move(sloc), ::std::move(*kexcept),
-                               ::std::move(*qbcatch) };
+    Statement::S_try xstmt = { ::std::move(sloc), ::std::move(*qbtry),
+                               ::std::move(sloc_catch), ::std::move(*kexcept), ::std::move(*qbcatch) };
     return ::std::move(xstmt);
   }
 

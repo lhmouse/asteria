@@ -192,6 +192,9 @@ noexcept
       case frame_type_assert:
         return "assertion failure";
 
+      case frame_type_try:
+        return "try clause";
+
       default:
         return "<unknown frame type>";
     }

@@ -81,6 +81,7 @@ class AIR_Node
 
     struct S_try_statement
       {
+        Source_Location sloc_try;
         cow_vector<AIR_Node> code_try;
         Source_Location sloc_catch;
         phsh_string name_except;

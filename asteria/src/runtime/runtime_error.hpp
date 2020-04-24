@@ -93,16 +93,18 @@ class Runtime_Error
         // Start a new backtrace.
         this->m_value = ::std::forward<XValT>(xval);
         this->m_ipos = 0;
+
         // Append the first frame to the current backtrace.
         this->do_insert_frame(frame_type_throw, sloc, this->m_value);
         return *this;
       }
 
+    template<typename XValT>
     Runtime_Error&
-    push_frame_catch(const Source_Location& sloc)
+    push_frame_catch(const Source_Location& sloc, XValT&& xval)
       {
         // Append a new frame to the current backtrace.
-        this->do_insert_frame(frame_type_catch, sloc, this->m_value);
+        this->do_insert_frame(frame_type_catch, sloc, ::std::forward<XValT>(xval));
         return *this;
       }
 
@@ -127,6 +129,14 @@ class Runtime_Error
       {
         // Append a new frame to the current backtrace.
         this->do_insert_frame(frame_type_defer, sloc, this->m_value);
+        return *this;
+      }
+
+    Runtime_Error&
+    push_frame_try(const Source_Location& sloc)
+      {
+        // Append a new frame to the current backtrace.
+        this->do_insert_frame(frame_type_try, sloc, this->m_value);
         return *this;
       }
   };

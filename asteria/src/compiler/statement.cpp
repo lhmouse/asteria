@@ -419,8 +419,8 @@ const
         auto code_catch = do_generate_statement_list(nullptr, ctx_catch, opts, ptc, altr.body_catch);
 
         // Encode arguments.
-        AIR_Node::S_try_statement xnode = { ::std::move(code_try), altr.sloc, altr.name_except,
-                                            ::std::move(code_catch) };
+        AIR_Node::S_try_statement xnode = { altr.sloc_try, ::std::move(code_try),
+                                            altr.sloc_catch, altr.name_except, ::std::move(code_catch) };
         code.emplace_back(::std::move(xnode));
         return code;
       }

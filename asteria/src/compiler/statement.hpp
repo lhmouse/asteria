@@ -86,8 +86,9 @@ class Statement
 
     struct S_try
       {
+        Source_Location sloc_try;
         S_block body_try;
-        Source_Location sloc;
+        Source_Location sloc_catch;
         phsh_string name_except;
         S_block body_catch;
       };
