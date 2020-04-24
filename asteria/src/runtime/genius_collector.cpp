@@ -40,13 +40,13 @@ create_variable(GC_Generation gc_hint)
   {
     // Locate the collector, which will be responsible for tracking the new variable.
     auto& coll = this->*(this->do_locate(gc_hint));
+
     // Try allocating a variable from the pool.
     auto var = this->m_pool.erase_random_opt();
-    if(ROCKET_UNEXPECT(!var)) {
-      // Create a new one if the pool has been exhausted.
+    if(ROCKET_UNEXPECT(!var))
       var = ::rocket::make_refcnt<Variable>();
-    }
     coll.track_variable(var);
+
     // Mark it uninitialized.
     var->uninitialize();
     return var;
@@ -60,6 +60,7 @@ collect_variables(GC_Generation gc_limit)
     for(auto p = ::std::make_pair(&(this->m_newest), gc_limit + 1);
           p.first && p.second;  p.first = p.first->get_tied_collector_opt(), p.second--)
       p.first->collect_single_opt();
+
     // Clear the variable pool.
     auto nvars = this->m_pool.size();
     this->m_pool.clear();
