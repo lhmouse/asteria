@@ -115,6 +115,14 @@ class Runtime_Error
       }
 
     Runtime_Error&
+    push_frame_func(const Source_Location& sloc, const cow_string& func)
+      {
+        // Append a new frame to the current backtrace.
+        this->do_insert_frame(frame_type_func, sloc, func);
+        return *this;
+      }
+
+    Runtime_Error&
     push_frame_defer(const Source_Location& sloc)
       {
         // Append a new frame to the current backtrace.

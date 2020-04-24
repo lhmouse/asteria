@@ -579,8 +579,9 @@ enum Frame_Type : uint8_t
     frame_type_throw   = 1,  // An exception was thrown here [initiates a new chain].
     frame_type_catch   = 2,  // An exception was caught here.
     frame_type_plain   = 3,  // An exception propagated across an IR node.
-    frame_type_defer   = 4,  // A new exception was thrown here.
-    frame_type_assert  = 5,  // An assertion failed here [initiates a new chain].
+    frame_type_func    = 4,  // An exception propagated across a function boundary.
+    frame_type_defer   = 5,  // A new exception was thrown here.
+    frame_type_assert  = 6,  // An assertion failed here [initiates a new chain].
   };
 
 ROCKET_PURE_FUNCTION

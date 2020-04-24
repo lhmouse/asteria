@@ -37,6 +37,9 @@ do_unpack_frames(Runtime_Error& except, Global_Context& global, Evaluation_Stack
         Executive_Context(::rocket::ref(global), ::rocket::ref(stack),
                           ::std::move(tca->open_defer_stack()))
           .on_scope_exit(except);
+
+      // Push the caller.
+      except.push_frame_func(tca->enclosing_sloc(), tca->enclosing_func());
     }
     return except;
   }

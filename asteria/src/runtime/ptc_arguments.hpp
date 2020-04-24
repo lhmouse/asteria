@@ -27,6 +27,10 @@ final
     // We can't store a `Reference` directly as the class `Reference` is incomplete here.
     cow_vector<Reference> m_args_self;
 
+    // These are source information of the enclosing function.
+    Source_Location m_enclosing_sloc;
+    cow_string m_enclosing_func;
+
   public:
     PTC_Arguments(const Source_Location& sloc, PTC_Aware ptc,
                   const cow_function& target, cow_vector<Reference>&& args_self)
@@ -74,6 +78,24 @@ final
     open_arguments_and_self()
     noexcept
       { return this->m_args_self;  }
+
+    const Source_Location&
+    enclosing_sloc()
+    const noexcept
+      { return this->m_enclosing_sloc;  }
+
+    const cow_string&
+    enclosing_func()
+    const noexcept
+      { return this->m_enclosing_func;  }
+
+    PTC_Arguments&
+    set_enclosing_function(const Source_Location& xsloc, const cow_string& xfunc)
+      {
+        this->m_enclosing_sloc = xsloc;
+        this->m_enclosing_func = xfunc;
+        return *this;
+      }
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)

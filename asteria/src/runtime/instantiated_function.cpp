@@ -7,6 +7,7 @@
 #include "executive_context.hpp"
 #include "global_context.hpp"
 #include "runtime_error.hpp"
+#include "ptc_arguments.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -59,6 +60,7 @@ const
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
       ctx_func.on_scope_exit(except);
+      except.push_frame_func(this->m_zvarg->sloc(), this->m_zvarg->func());
       throw;
     }
     ctx_func.on_scope_exit(status);
@@ -73,6 +75,11 @@ const
       case air_status_return_ref:
         // Return the reference at the top of `stack`.
         self = ::std::move(stack.open_top());
+
+        // In case of PTCs, set up source location.
+        // This cannot be set at the call site where such information isn't available.
+        if(auto tca = self.get_tail_call_opt())
+          tca->set_enclosing_function(this->m_zvarg->sloc(), this->m_zvarg->func());
         break;
 
       case air_status_break_unspec:
