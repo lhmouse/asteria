@@ -64,6 +64,11 @@ class Reference
       { return this->m_root.is_constant();  }
 
     bool
+    is_constant_null()
+    const noexcept
+      { return this->m_root.is_constant() && this->m_root.as_constant().is_null();  }
+
+    bool
     is_temporary()
     const noexcept
       { return this->m_root.is_temporary();  }

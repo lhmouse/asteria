@@ -22,38 +22,35 @@ class Executive_Context
     // so they are not passed here and there upon each native call.
     refp<Global_Context> m_global;
     refp<Evaluation_Stack> m_stack;
-    refp<const rcptr<Variadic_Arguer>> m_zvarg;
+    rcptr<Variadic_Arguer> m_zvarg;
 
     // These members are used for lazy initialization.
-    Reference m_self;
-    cow_vector<Reference> m_args;
+    cow_vector<Reference> m_lazy_args;
+
     // This stores deferred expressions.
     cow_bivector<Source_Location, AVMC_Queue> m_defer;
 
   public:
     template<typename ContextT,
-    ROCKET_ENABLE_IF(::std::is_base_of<Abstract_Context, ContextT>::value)>
+    ROCKET_ENABLE_IF(::std::is_base_of<Executive_Context, ContextT>::value)>
     Executive_Context(refp<ContextT> parent)  // for non-functions
       : m_parent_opt(parent.ptr()),
-        m_global(parent->m_global), m_stack(parent->m_stack), m_zvarg(parent->m_zvarg),
-        m_self(Reference_root::S_void())
+        m_global(parent->m_global), m_stack(parent->m_stack), m_zvarg(parent->m_zvarg)
       { }
 
     Executive_Context(refp<Global_Context> xglobal, refp<Evaluation_Stack> xstack,
                       refp<const rcptr<Variadic_Arguer>> xzvarg,
                       cow_bivector<Source_Location, AVMC_Queue>&& defer)  // for proper tail calls
       : m_parent_opt(nullptr),
-        m_global(xglobal), m_stack(xstack), m_zvarg(xzvarg),
-        m_self(Reference_root::S_void()), m_defer(::std::move(defer))
-      { }
+        m_global(xglobal), m_stack(xstack), m_zvarg(xzvarg)
+      { this->m_defer = ::std::move(defer);  }
 
     Executive_Context(refp<Global_Context> xglobal, refp<Evaluation_Stack> xstack,
-                      refp<const rcptr<Variadic_Arguer>> xzvarg, const cow_vector<phsh_string>& params,
+                      const rcptr<Variadic_Arguer>& xzvarg, const cow_vector<phsh_string>& params,
                       Reference&& self, cow_vector<Reference>&& args)  // for functions
       : m_parent_opt(nullptr),
-        m_global(xglobal), m_stack(xstack), m_zvarg(xzvarg),
-        m_self(::std::move(self))
-      { this->do_bind_parameters(params, ::std::move(args));  }
+        m_global(xglobal), m_stack(xstack), m_zvarg(xzvarg)
+      { this->do_bind_parameters(params, ::std::move(self), ::std::move(args));  }
 
     ~Executive_Context()
     override;
@@ -62,7 +59,8 @@ class Executive_Context
 
   private:
     void
-    do_bind_parameters(const cow_vector<phsh_string>& params, cow_vector<Reference>&& args);
+    do_bind_parameters(const cow_vector<phsh_string>& params,
+                       Reference&& self, cow_vector<Reference>&& args);
 
     void
     do_defer_expression(const Source_Location& sloc, AVMC_Queue&& queue);
@@ -127,7 +125,8 @@ class Executive_Context
       }
 
     // These functions must be called before exiting a scope.
-    // Note that these functions may throw exceptions on their own, which is why RAII is inapplicable.
+    // Note that these functions may throw arbitrary exceptions, which
+    // is why RAII is inapplicable.
     AIR_Status
     on_scope_exit(AIR_Status status)
       {

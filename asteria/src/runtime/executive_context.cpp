@@ -9,6 +9,19 @@
 #include "../utilities.hpp"
 
 namespace Asteria {
+namespace {
+
+template<typename XRefT>
+inline
+Reference*
+do_set_lazy_reference(Executive_Context& ctx, const phsh_string& name, XRefT&& xref)
+  {
+    auto& ref = ctx.open_named_reference(name);
+    ref = ::std::forward<XRefT>(xref);
+    return ::std::addressof(ref);
+  }
+
+}  // namespace
 
 Executive_Context::
 ~Executive_Context()
@@ -17,24 +30,25 @@ Executive_Context::
 
 void
 Executive_Context::
-do_bind_parameters(const cow_vector<phsh_string>& params, cow_vector<Reference>&& args)
+do_bind_parameters(const cow_vector<phsh_string>& params, Reference&&self, cow_vector<Reference>&& args)
   {
     // This is the subscript of the special parameter placeholder `...`.
     size_t elps = SIZE_MAX;
+
     // Set parameters, which are local references.
     for(size_t i = 0;  i < params.size();  ++i) {
       const auto& name = params.at(i);
-      if(name.empty()) {
+      if(name.empty())
         continue;
-      }
+
+      if(name.rdstr().starts_with("__"))
+        ASTERIA_THROW("reserved name not declarable as parameter (name `$1`)", name);
+
       if(name == "...") {
         // Nothing is set for the parameter placeholder, but the parameter list terminates here.
         ROCKET_ASSERT(i == params.size() - 1);
         elps = i;
         break;
-      }
-      if(name.rdstr().starts_with("__")) {
-        ASTERIA_THROW("reserved name not declarable as parameter (name `$1`)", name);
       }
       // Set the parameter.
       if(ROCKET_UNEXPECT(i >= args.size()))
@@ -42,15 +56,23 @@ do_bind_parameters(const cow_vector<phsh_string>& params, cow_vector<Reference>&
       else
         this->open_named_reference(name) = ::std::move(args.mut(i));
     }
+
+    // Disallow exceess arguments if the function is not variadic.
     if((elps == SIZE_MAX) && (args.size() > params.size())) {
-      // Disallow exceess arguments if the function is not variadic.
       ASTERIA_THROW("too many arguments (`$1` > `$2`)", args.size(), params.size());
     }
     args.erase(0, elps);
+
     // Stash variadic arguments for lazy initialization.
     // If all arguments are positional, `args` may be reused for the evaluation stack, so don't move it.
-    if(!args.empty())
-      this->m_args = ::std::move(args);
+    if(args.size())
+      this->m_lazy_args = ::std::move(args);
+
+    // Set the `this` reference.
+    // If the self reference is null, it is likely that `this` isn't ever referenced in this function,
+    // so perform lazy initialization.
+    if(!self.is_void() && !self.is_constant_null())
+      this->open_named_reference(::rocket::sref("__this")) = ::std::move(self);
   }
 
 void
@@ -69,6 +91,7 @@ do_on_scope_exit_void()
       // Pop an expression.
       auto pair = ::std::move(this->m_defer.mut_back());
       this->m_defer.pop_back();
+
       // Execute it. If an exception is thrown, append a frame and rethrow it.
       ASTERIA_RUNTIME_TRY {
         auto status = pair.second.execute(*this);
@@ -80,34 +103,34 @@ do_on_scope_exit_void()
         throw;
       }
     }
-    ROCKET_ASSERT(this->m_defer.empty());
   }
 
 void
 Executive_Context::
 do_on_scope_exit_return()
   {
-    // Stash the return reference.
-    this->m_self = this->m_stack->get_top();
-    // If a PTC wrapper is returned, prepend all deferred expressions to it.
-    if(auto tca = this->m_self.get_tail_call_opt()) {
-      // Take advantage of reference counting.
+    if(auto tca = this->m_stack->get_top().get_tail_call_opt()) {
+      // If a PTC wrapper was returned, prepend all deferred expressions to it.
       auto& defer = tca->open_defer_stack();
-      if(defer.empty()) {
-        defer.swap(this->m_defer);
-      }
-      else {
+      if(defer.size()) {
         defer.insert(defer.begin(), ::std::make_move_iterator(this->m_defer.mut_begin()),
                                     ::std::make_move_iterator(this->m_defer.mut_end()));
         this->m_defer.clear();
       }
-      return;
+      else
+        defer.swap(this->m_defer);
     }
-    // Evaluate all deferred expressions.
-    this->do_on_scope_exit_void();
-    // Restore the return reference.
-    this->m_stack->clear();
-    this->m_stack->push(::std::move(this->m_self));
+    else {
+      // Stash the return reference.
+      auto self = ::std::move(this->m_stack->open_top());
+
+      // Evaluate all deferred expressions.
+      this->do_on_scope_exit_void();
+
+      // Restore the return reference.
+      this->m_stack->clear();
+      this->m_stack->push(::std::move(self));
+    }
   }
 
 void
@@ -119,6 +142,7 @@ do_on_scope_exit_exception(Runtime_Error& except)
       // Pop an expression.
       auto pair = ::std::move(this->m_defer.mut_back());
       this->m_defer.pop_back();
+
       // Execute it. If an exception is thrown, replace `except` with it.
       ASTERIA_RUNTIME_TRY {
         auto status = pair.second.execute(*this);
@@ -129,7 +153,6 @@ do_on_scope_exit_exception(Runtime_Error& except)
         except.push_frame_defer(pair.first);
       }
     }
-    ROCKET_ASSERT(this->m_defer.empty());
   }
 
 Reference*
@@ -139,30 +162,25 @@ do_lazy_lookup_opt(const phsh_string& name)
     // Create pre-defined references as needed.
     // N.B. If you have ever changed these, remember to update 'analytic_context.cpp' as well.
     if(name == "__func") {
-      auto& ref = this->open_named_reference(::rocket::sref("__func"));
-      // Copy the function name as a constant.
-      Reference_root::S_constant xref = { this->m_zvarg.get()->func() };
-      ref = ::std::move(xref);
-      return &ref;
+      Reference_root::S_constant xref = { this->m_zvarg->func() };
+      return do_set_lazy_reference(*this, name, ::std::move(xref));
     }
+
     if(name == "__this") {
-      auto& ref = this->open_named_reference(::rocket::sref("__this"));
-      // Copy the `this` reference.
-      ref = ::std::move(this->m_self);
-      return &ref;
+      return do_set_lazy_reference(*this, name, Reference_root::S_constant());
     }
+
     if(name == "__varg") {
-      auto& ref = this->open_named_reference(::rocket::sref("__varg"));
-      // Use the pre-allocated zero-ary variadic argument getter if there is no variadic argument.
-      // Allocate a new one otherwise.
-      auto varg = this->m_zvarg.get();
-      if(ROCKET_UNEXPECT(this->m_args.size()))
-        varg = ::rocket::make_refcnt<Variadic_Arguer>(*varg, ::std::move(this->m_args));
-      // Set the `__varg` function.
+      cow_function varg;
+      if(ROCKET_EXPECT(this->m_lazy_args.size()))
+        varg = ::rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg), ::std::move(this->m_lazy_args));
+      else
+        varg = this->m_zvarg;
+
       Reference_root::S_constant xref = { ::std::move(varg) };
-      ref = ::std::move(xref);
-      return &ref;
+      return do_set_lazy_reference(*this, name, ::std::move(xref));
     }
+
     return nullptr;
   }
 
