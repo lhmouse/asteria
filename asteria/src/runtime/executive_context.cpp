@@ -30,8 +30,18 @@ Executive_Context::
 
 void
 Executive_Context::
-do_bind_parameters(const cow_vector<phsh_string>& params, Reference&&self, cow_vector<Reference>&& args)
+do_bind_parameters(const rcptr<Variadic_Arguer>& zvarg, const cow_vector<phsh_string>& params,
+                   Reference&& self, cow_vector<Reference>&& args)
   {
+    // Set the zero-ary argument getter.
+    this->m_zvarg = zvarg;
+
+    // Set the `this` reference.
+    // If the self reference is null, it is likely that `this` isn't ever referenced in this function,
+    // so perform lazy initialization.
+    if(!self.is_void() && !self.is_constant_null())
+      this->open_named_reference(::rocket::sref("__this")) = ::std::move(self);
+
     // This is the subscript of the special parameter placeholder `...`.
     size_t elps = SIZE_MAX;
 
@@ -67,12 +77,6 @@ do_bind_parameters(const cow_vector<phsh_string>& params, Reference&&self, cow_v
     // If all arguments are positional, `args` may be reused for the evaluation stack, so don't move it.
     if(args.size())
       this->m_lazy_args = ::std::move(args);
-
-    // Set the `this` reference.
-    // If the self reference is null, it is likely that `this` isn't ever referenced in this function,
-    // so perform lazy initialization.
-    if(!self.is_void() && !self.is_constant_null())
-      this->open_named_reference(::rocket::sref("__this")) = ::std::move(self);
   }
 
 void
@@ -162,15 +166,18 @@ do_lazy_lookup_opt(const phsh_string& name)
     // Create pre-defined references as needed.
     // N.B. If you have ever changed these, remember to update 'analytic_context.cpp' as well.
     if(name == "__func") {
+      // Note: This can only happen inside a function context.
       Reference_root::S_constant xref = { this->m_zvarg->func() };
       return do_set_lazy_reference(*this, name, ::std::move(xref));
     }
 
     if(name == "__this") {
+      // Note: This can only happen inside a function context and the `this` argument is null.
       return do_set_lazy_reference(*this, name, Reference_root::S_constant());
     }
 
     if(name == "__varg") {
+      // Note: This can only happen inside a function context.
       cow_function varg;
       if(ROCKET_EXPECT(this->m_lazy_args.size()))
         varg = ::rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg), ::std::move(this->m_lazy_args));

@@ -343,7 +343,7 @@ struct AIR_Traits<AIR_Node::S_declare_variable>
         // Call the hook function if any.
         const auto qhooks = ctx.global().get_hooks_opt();
         if(qhooks)
-          qhooks->on_variable_declare(sp.sloc, ctx.zvarg()->func(), sp.name);
+          qhooks->on_variable_declare(sp.sloc, sp.name);
 
         // Push a copy of the reference onto the stack.
         ctx.stack().push(::std::move(xref));
@@ -1255,7 +1255,7 @@ do_invoke_nontail(Reference& self, const Source_Location& sloc, Executive_Contex
     // Note exceptions thrown here are not caught.
     const auto qhooks = ctx.global().get_hooks_opt();
     if(qhooks)
-      qhooks->on_function_call(sloc, ctx.zvarg()->func(), target);
+      qhooks->on_function_call(sloc, target);
 
     // Execute the target function
     ASTERIA_RUNTIME_TRY {
@@ -1263,11 +1263,11 @@ do_invoke_nontail(Reference& self, const Source_Location& sloc, Executive_Contex
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
       if(qhooks)
-        qhooks->on_function_except(sloc, ctx.zvarg()->func(), except);
+        qhooks->on_function_except(sloc, except);
       throw;
     }
     if(qhooks)
-      qhooks->on_function_return(sloc, ctx.zvarg()->func(), self);
+      qhooks->on_function_return(sloc, self);
     return self;
   }
 
@@ -1284,7 +1284,7 @@ do_function_call_common(Reference& self, const Source_Location& sloc, Executive_
 
     // Pack arguments for this proper tail call.
     args.emplace_back(::std::move(self));
-    auto tca = ::rocket::make_refcnt<PTC_Arguments>(sloc, ctx.zvarg(), ptc, target, ::std::move(args));
+    auto tca = ::rocket::make_refcnt<PTC_Arguments>(sloc, ptc, target, ::std::move(args));
 
     // Set the result, which will be unpacked outside this scope.
     Reference_root::S_tail_call xref = { ::std::move(tca) };
@@ -1355,7 +1355,7 @@ struct AIR_Traits<AIR_Node::S_function_call>
         // Generate a single-step trap.
         const auto qhooks = ctx.global().get_hooks_opt();
         if(qhooks)
-          qhooks->on_single_step_trap(sloc, ctx.zvarg()->func(), &ctx);
+          qhooks->on_single_step_trap(sloc, &ctx);
 
         // Pop arguments off the stack backwards.
         auto args = do_pop_positional_arguments(ctx, up.y32);
@@ -3537,7 +3537,7 @@ struct AIR_Traits<AIR_Node::S_define_null_variable>
         // Call the hook function if any.
         const auto qhooks = ctx.global().get_hooks_opt();
         if(qhooks)
-          qhooks->on_variable_declare(sp.sloc, ctx.zvarg()->func(), sp.name);
+          qhooks->on_variable_declare(sp.sloc, sp.name);
 
         // Initialize the variable to `null`.
         var->initialize(V_null(), up.v8s[0]);
@@ -3574,7 +3574,7 @@ struct AIR_Traits<AIR_Node::S_single_step_trap>
         // Call the hook function if any.
         const auto qhooks = ctx.global().get_hooks_opt();
         if(qhooks)
-          qhooks->on_single_step_trap(sloc, ctx.zvarg()->func(), &ctx);
+          qhooks->on_single_step_trap(sloc, &ctx);
         return air_status_next;
       }
   };
@@ -3620,7 +3620,7 @@ struct AIR_Traits<AIR_Node::S_variadic_call>
         // Generate a single-step trap.
         const auto qhooks = ctx.global().get_hooks_opt();
         if(qhooks)
-          qhooks->on_single_step_trap(sloc, ctx.zvarg()->func(), &ctx);
+          qhooks->on_single_step_trap(sloc, &ctx);
 
         // Pop the argument generator.
         cow_vector<Reference> args;
@@ -3780,7 +3780,7 @@ struct AIR_Traits<AIR_Node::S_import_call>
         // Generate a single-step trap.
         const auto qhooks = ctx.global().get_hooks_opt();
         if(qhooks)
-          qhooks->on_single_step_trap(sp.sloc, ctx.zvarg()->func(), &ctx);
+          qhooks->on_single_step_trap(sp.sloc, &ctx);
 
         // Pop arguments off the stack backwards.
         ROCKET_ASSERT(up.y32 != 0);

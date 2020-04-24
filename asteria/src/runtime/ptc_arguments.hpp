@@ -5,7 +5,6 @@
 #define ASTERIA_RUNTIME_PTC_ARGUMENTS_HPP_
 
 #include "../fwd.hpp"
-#include "variadic_arguer.hpp"
 #include "../source_location.hpp"
 
 namespace Asteria {
@@ -17,7 +16,6 @@ final
   private:
     // These describe characteristics of the function call.
     Source_Location m_sloc;
-    rcptr<Variadic_Arguer> m_zvarg;
     PTC_Aware m_ptc;
 
     // These are deferred expressions.
@@ -30,9 +28,9 @@ final
     cow_vector<Reference> m_args_self;
 
   public:
-    PTC_Arguments(const Source_Location& sloc, const rcptr<Variadic_Arguer>& zvarg, PTC_Aware ptc,
+    PTC_Arguments(const Source_Location& sloc, PTC_Aware ptc,
                   const cow_function& target, cow_vector<Reference>&& args_self)
-      : m_sloc(sloc), m_zvarg(zvarg), m_ptc(ptc),
+      : m_sloc(sloc), m_ptc(ptc),
         m_target(target), m_args_self(::std::move(args_self))
       { }
 
@@ -46,11 +44,6 @@ final
     sloc()
     const noexcept
       { return this->m_sloc;  }
-
-    const rcptr<Variadic_Arguer>&
-    zvarg()
-    const noexcept
-      { return this->m_zvarg;  }
 
     PTC_Aware
     ptc_aware()

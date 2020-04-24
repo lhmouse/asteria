@@ -22,9 +22,9 @@ class Executive_Context
     // so they are not passed here and there upon each native call.
     refp<Global_Context> m_global;
     refp<Evaluation_Stack> m_stack;
-    rcptr<Variadic_Arguer> m_zvarg;
 
     // These members are used for lazy initialization.
+    rcptr<Variadic_Arguer> m_zvarg;
     cow_vector<Reference> m_lazy_args;
 
     // This stores deferred expressions.
@@ -35,22 +35,21 @@ class Executive_Context
     ROCKET_ENABLE_IF(::std::is_base_of<Executive_Context, ContextT>::value)>
     Executive_Context(refp<ContextT> parent)  // for non-functions
       : m_parent_opt(parent.ptr()),
-        m_global(parent->m_global), m_stack(parent->m_stack), m_zvarg(parent->m_zvarg)
+        m_global(parent->m_global), m_stack(parent->m_stack)
       { }
 
     Executive_Context(refp<Global_Context> xglobal, refp<Evaluation_Stack> xstack,
-                      refp<const rcptr<Variadic_Arguer>> xzvarg,
                       cow_bivector<Source_Location, AVMC_Queue>&& defer)  // for proper tail calls
       : m_parent_opt(nullptr),
-        m_global(xglobal), m_stack(xstack), m_zvarg(xzvarg)
+        m_global(xglobal), m_stack(xstack)
       { this->m_defer = ::std::move(defer);  }
 
     Executive_Context(refp<Global_Context> xglobal, refp<Evaluation_Stack> xstack,
-                      const rcptr<Variadic_Arguer>& xzvarg, const cow_vector<phsh_string>& params,
+                      const rcptr<Variadic_Arguer>& zvarg, const cow_vector<phsh_string>& params,
                       Reference&& self, cow_vector<Reference>&& args)  // for functions
       : m_parent_opt(nullptr),
-        m_global(xglobal), m_stack(xstack), m_zvarg(xzvarg)
-      { this->do_bind_parameters(params, ::std::move(self), ::std::move(args));  }
+        m_global(xglobal), m_stack(xstack)
+      { this->do_bind_parameters(zvarg, params, ::std::move(self), ::std::move(args));  }
 
     ~Executive_Context()
     override;
@@ -59,7 +58,7 @@ class Executive_Context
 
   private:
     void
-    do_bind_parameters(const cow_vector<phsh_string>& params,
+    do_bind_parameters(const rcptr<Variadic_Arguer>& zvarg, const cow_vector<phsh_string>& params,
                        Reference&& self, cow_vector<Reference>&& args);
 
     void
@@ -109,11 +108,6 @@ class Executive_Context
     stack()
     const noexcept
       { return this->m_stack;  }
-
-    const rcptr<Variadic_Arguer>&
-    zvarg()
-    const noexcept
-      { return this->m_zvarg;  }
 
     // Defer an expression which will be evaluated at scope exit.
     // The result of such expressions are discarded.

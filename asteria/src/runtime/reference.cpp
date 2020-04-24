@@ -30,16 +30,13 @@ do_unpack_frames(Runtime_Error& except, Global_Context& global, Evaluation_Stack
       // Call the hook function if any.
       const auto qhooks = global.get_hooks_opt();
       if(qhooks)
-        qhooks->on_function_except(tca->sloc(), tca->zvarg()->func(), except);
+        qhooks->on_function_except(tca->sloc(), except);
 
       // Evaluate deferred expressions if any.
       if(tca->get_defer_stack().size())
         Executive_Context(::rocket::ref(global), ::rocket::ref(stack),
-                          ::rocket::ref(tca->zvarg()), ::std::move(tca->open_defer_stack()))
+                          ::std::move(tca->open_defer_stack()))
           .on_scope_exit(except);
-
-      // Push the caller.
-      except.push_frame_func(tca->zvarg()->sloc(), tca->zvarg()->func());
     }
     return except;
   }
@@ -70,7 +67,7 @@ do_unpack_tail_calls(Reference& self, Global_Context& global)
       // Generate a single-step trap.
       const auto qhooks = global.get_hooks_opt();
       if(qhooks)
-        qhooks->on_single_step_trap(tca->sloc(), tca->zvarg()->func(), nullptr);
+        qhooks->on_single_step_trap(tca->sloc(), nullptr);
 
       // Get the `this` reference and all the other arguments.
       const auto& target = tca->get_target();
@@ -80,7 +77,7 @@ do_unpack_tail_calls(Reference& self, Global_Context& global)
 
       // Call the hook function if any.
       if(qhooks)
-        qhooks->on_function_call(tca->sloc(), tca->zvarg()->func(), target);
+        qhooks->on_function_call(tca->sloc(), target);
 
       // Perform a non-tail call.
       ASTERIA_RUNTIME_TRY {
@@ -100,7 +97,7 @@ do_unpack_tail_calls(Reference& self, Global_Context& global)
       ASTERIA_RUNTIME_TRY {
         if(tca->get_defer_stack().size())
           Executive_Context(::rocket::ref(global), ::rocket::ref(stack),
-                            ::rocket::ref(tca->zvarg()), ::std::move(tca->open_defer_stack()))
+                            ::std::move(tca->open_defer_stack()))
             .on_scope_exit(air_status_next);
       }
       ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {

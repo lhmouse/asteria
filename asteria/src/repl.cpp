@@ -119,57 +119,61 @@ Simple_Script script;
 struct REPL_Hooks : Abstract_Hooks
   {
     void
-    on_variable_declare(const Source_Location& sloc, const cow_string& inside, const phsh_string& name)
+    on_variable_declare(const Source_Location& sloc, const phsh_string& name)
     override
       {
         if(ROCKET_EXPECT(!cmdline.verbose))
           return;
 
-        ::fprintf(stderr, "~ running: ['%s:%d' inside `%s`] declaring variable: %s\n",
-                          sloc.c_file(), sloc.line(), inside.c_str(), name.c_str());
+        ::fprintf(stderr, "~ running '%s:%d:%d': declaring variable: %s\n",
+                          sloc.c_file(), sloc.line(), sloc.offset(),
+                          name.c_str());
       }
 
     void
-    on_function_call(const Source_Location& sloc, const cow_string& inside, const cow_function& target)
+    on_function_call(const Source_Location& sloc, const cow_function& target)
     override
       {
         if(ROCKET_EXPECT(!cmdline.verbose))
           return;
 
-        ::fprintf(stderr, "~ running: ['%s:%d' inside `%s`] initiating function call: %s\n",
-                          sloc.c_file(), sloc.line(), inside.c_str(), do_stringify(target).c_str());
+        ::fprintf(stderr, "~ running '%s:%d:%d': initiating function call: %s\n",
+                          sloc.c_file(), sloc.line(), sloc.offset(),
+                          do_stringify(target).c_str());
       }
 
     void
-    on_function_return(const Source_Location& sloc, const cow_string& inside, const Reference& result)
+    on_function_return(const Source_Location& sloc, const Reference& result)
     override
       {
         if(ROCKET_EXPECT(!cmdline.verbose))
           return;
 
-        ::fprintf(stderr, "~ running: ['%s:%d' inside `%s`] returned from function call: %s\n",
-                          sloc.c_file(), sloc.line(), inside.c_str(), do_stringify(result).c_str());
+        ::fprintf(stderr, "~ running '%s:%d:%d': returned from function call: %s\n",
+                          sloc.c_file(), sloc.line(), sloc.offset(),
+                          do_stringify(result).c_str());
       }
 
     void
-    on_function_except(const Source_Location& sloc, const cow_string& inside, const Runtime_Error& except)
+    on_function_except(const Source_Location& sloc, const Runtime_Error& except)
     override
       {
         if(ROCKET_EXPECT(!cmdline.verbose))
           return;
 
-        ::fprintf(stderr, "~ running: ['%s:%d' inside `%s`] caught exception from function call: %s\n",
-                          sloc.c_file(), sloc.line(), inside.c_str(), do_stringify(except).c_str());
+        ::fprintf(stderr, "~ running '%s:%d:%d': caught exception from function call: %s\n",
+                          sloc.c_file(), sloc.line(), sloc.offset(),
+                          do_stringify(except).c_str());
       }
 
     void
-    on_single_step_trap(const Source_Location& sloc, const cow_string& inside, Executive_Context* /*ctx*/)
+    on_single_step_trap(const Source_Location& sloc, Executive_Context* /*ctx*/)
     override
       {
         if(ROCKET_EXPECT(!interrupted))
           return;
 
-        ASTERIA_THROW("interrupt received\n[received at '$1' inside `$2`]", sloc, inside);
+        ASTERIA_THROW("interrupt received\n[received at '$1']", sloc);
       }
   };
 

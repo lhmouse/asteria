@@ -183,9 +183,6 @@ noexcept
       case frame_type_plain:
         return "frame";
 
-      case frame_type_func:
-        return "function";
-
       case frame_type_defer:
         return "defer statement";
 
