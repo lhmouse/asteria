@@ -104,7 +104,14 @@ initialize(API_Version version)
     }
     catch(exception& stdex) {
       // Ignore this exception, but notify the user about this error.
-      ::fprintf(stderr, "-- WARNING: garbage collection failed: %s\n", stdex.what());
+      cow_string str;
+      str << "WARNING: An exception was thrown while performing garbage collection.\n"
+          << "         Some resources might have leaked.\n"
+          << "\n"
+          << stdex.what() << "\n"
+          << "[exception class `" << typeid(stdex).name() << "`]";
+
+      write_log_to_stderr(__FILE__, __LINE__, ::std::move(str));
     }
     if(!gcoll)
       gcoll = ::rocket::make_refcnt<Genius_Collector>();
