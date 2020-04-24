@@ -178,22 +178,22 @@ noexcept
         return "throw statement";
 
       case frame_type_catch:
-        return "catch clause";
+        return "  catch clause";
 
       case frame_type_plain:
-        return "frame";
+        return "  frame";
 
       case frame_type_func:
-        return "function";
+        return "  function";
 
       case frame_type_defer:
-        return "defer statement";
+        return "  defer statement";
 
       case frame_type_assert:
         return "assertion failure";
 
       case frame_type_try:
-        return "try clause";
+        return "  try clause";
 
       default:
         return "<unknown frame type>";
