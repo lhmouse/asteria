@@ -58,12 +58,7 @@ class Executive_Context
     ~Executive_Context()
     override;
 
-    Executive_Context(const Executive_Context&)
-      = delete;
-
-    Executive_Context&
-    operator=(const Executive_Context&)
-      = delete;
+    ASTERIA_DECLARE_NONCOPYABLE(Executive_Context);
 
   private:
     void

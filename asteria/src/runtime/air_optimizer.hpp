@@ -25,12 +25,7 @@ class AIR_Optimizer
 
     ~AIR_Optimizer();
 
-    AIR_Optimizer(const AIR_Optimizer&)
-      = delete;
-
-    AIR_Optimizer&
-    operator=(const AIR_Optimizer&)
-      = delete;
+    ASTERIA_DECLARE_NONCOPYABLE(AIR_Optimizer);
 
   public:
     // These are accessors and modifiers of options for optimizing.

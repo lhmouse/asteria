@@ -37,12 +37,7 @@ class Argument_Reader
       : m_args(args), m_name(name)
       { }
 
-    Argument_Reader(const Argument_Reader&)
-      = delete;
-
-    Argument_Reader&
-    operator=(const Argument_Reader&)
-      = delete;
+    ASTERIA_DECLARE_NONCOPYABLE(Argument_Reader);
 
   private:
     inline

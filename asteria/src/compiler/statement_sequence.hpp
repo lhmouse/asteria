@@ -24,12 +24,7 @@ class Statement_Sequence
 
     ~Statement_Sequence();
 
-    Statement_Sequence(const Statement_Sequence&)
-      = delete;
-
-    Statement_Sequence&
-    operator=(const Statement_Sequence&)
-      = delete;
+    ASTERIA_DECLARE_NONCOPYABLE(Statement_Sequence);
 
   public:
     // These are accessors and modifiers of options for parsing.

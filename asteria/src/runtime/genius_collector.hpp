@@ -32,12 +32,7 @@ final
     ~Genius_Collector()
     override;
 
-    Genius_Collector(const Genius_Collector&)
-      = delete;
-
-    Genius_Collector&
-    operator=(const Genius_Collector&)
-      = delete;
+    ASTERIA_DECLARE_NONCOPYABLE(Genius_Collector);
 
   private:
     Collector Genius_Collector::*

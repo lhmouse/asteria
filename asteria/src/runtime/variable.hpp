@@ -33,12 +33,7 @@ final
     ~Variable()
     override;
 
-    Variable(const Variable&)
-      = delete;
-
-    Variable&
-    operator=(const Variable&)
-      = delete;
+    ASTERIA_DECLARE_NONCOPYABLE(Variable);
 
   public:
     const Value&

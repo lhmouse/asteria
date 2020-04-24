@@ -50,6 +50,12 @@ namespace Asteria {
                                                   operator=(T&& t)  \
                                                   noexcept(::std::is_nothrow_assignable<V&, T&&>::value)
 
+#define ASTERIA_DECLARE_NONCOPYABLE(C)            C(const C&)  \
+                                                    = delete;  \
+                                                  C&  \
+                                                  operator=(const C&)  \
+                                                    = delete  // no semicolon
+
 #define ASTERIA_INCOMPLET(T)                      template<typename T##_otbUYGrp_ = T,  \
                                                            typename T = T##_otbUYGrp_>
 
@@ -216,12 +222,7 @@ struct StdIO_Sentry
     ~StdIO_Sentry()
       { ::fflush(nullptr);  }
 
-    StdIO_Sentry(const StdIO_Sentry&)
-      = delete;
-
-    StdIO_Sentry&
-    operator=(const StdIO_Sentry&)
-      = delete;
+    ASTERIA_DECLARE_NONCOPYABLE(StdIO_Sentry);
   };
 
 // Opaque (user-defined) type support

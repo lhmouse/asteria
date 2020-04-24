@@ -26,12 +26,7 @@ class Sentry
     ~Sentry()
       { this->m_ref--;  }
 
-    Sentry(const Sentry&)
-      = delete;
-
-    Sentry&
-    operator=(const Sentry&)
-      = delete;
+    ASTERIA_DECLARE_NONCOPYABLE(Sentry);
 
   public:
     explicit operator

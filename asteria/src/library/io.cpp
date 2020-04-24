@@ -24,12 +24,7 @@ class IOF_Sentry
     ~IOF_Sentry()
       { ::funlockfile(this->m_fp);  }
 
-    IOF_Sentry(const IOF_Sentry&)
-      = delete;
-
-    IOF_Sentry&
-    operator=(const IOF_Sentry&)
-      = delete;
+    ASTERIA_DECLARE_NONCOPYABLE(IOF_Sentry);
 
   public:
     operator

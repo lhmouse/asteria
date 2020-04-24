@@ -27,12 +27,7 @@ class Collector
       : m_output_opt(output_opt), m_tied_opt(tied_opt), m_threshold(threshold)
       { }
 
-    Collector(const Collector&)
-      = delete;
-
-    Collector&
-    operator=(const Collector&)
-      = delete;
+    ASTERIA_DECLARE_NONCOPYABLE(Collector);
 
   public:
     Variable_HashSet*

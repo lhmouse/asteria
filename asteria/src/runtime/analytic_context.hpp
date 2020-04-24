@@ -31,12 +31,7 @@ class Analytic_Context
     ~Analytic_Context()
     override;
 
-    Analytic_Context(const Analytic_Context&)
-      = delete;
-
-    Analytic_Context&
-    operator=(const Analytic_Context&)
-      = delete;
+    ASTERIA_DECLARE_NONCOPYABLE(Analytic_Context);
 
   private:
     void

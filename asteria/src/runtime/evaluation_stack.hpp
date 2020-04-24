@@ -23,12 +23,7 @@ class Evaluation_Stack
 
     ~Evaluation_Stack();
 
-    Evaluation_Stack(const Evaluation_Stack&)
-      = delete;
-
-    Evaluation_Stack&
-    operator=(const Evaluation_Stack&)
-      = delete;
+    ASTERIA_DECLARE_NONCOPYABLE(Evaluation_Stack);
 
   public:
     bool

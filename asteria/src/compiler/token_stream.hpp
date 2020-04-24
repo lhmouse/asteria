@@ -26,12 +26,7 @@ class Token_Stream
 
     ~Token_Stream();
 
-    Token_Stream(const Token_Stream&)
-      = delete;
-
-    Token_Stream&
-    operator=(const Token_Stream&)
-      = delete;
+    ASTERIA_DECLARE_NONCOPYABLE(Token_Stream);
 
   public:
     // This provides stack overflow protection.

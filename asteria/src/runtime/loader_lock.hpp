@@ -28,12 +28,7 @@ final
     ~Loader_Lock()
     override;
 
-    Loader_Lock(const Loader_Lock&)
-      = delete;
-
-    Loader_Lock&
-    operator=(const Loader_Lock&)
-      = delete;
+    ASTERIA_DECLARE_NONCOPYABLE(Loader_Lock);
 
   private:
     element_type*

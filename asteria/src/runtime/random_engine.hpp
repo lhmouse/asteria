@@ -53,12 +53,7 @@ final
     ~Random_Engine()
     override;
 
-    Random_Engine(const Random_Engine&)
-      = delete;
-
-    Random_Engine&
-    operator=(const Random_Engine&)
-      = delete;
+    ASTERIA_DECLARE_NONCOPYABLE(Random_Engine);
 
   private:
     inline

@@ -30,12 +30,7 @@ class Global_Context
     ~Global_Context()
     override;
 
-    Global_Context(const Global_Context&)
-      = delete;
-
-    Global_Context&
-    operator=(const Global_Context&)
-      = delete;
+    ASTERIA_DECLARE_NONCOPYABLE(Global_Context);
 
   protected:
     bool

@@ -39,12 +39,7 @@ final
     ~PTC_Arguments()
     override;
 
-    PTC_Arguments(const PTC_Arguments&)
-      = delete;
-
-    PTC_Arguments&
-    operator=(const PTC_Arguments&)
-      = delete;
+    ASTERIA_DECLARE_NONCOPYABLE(PTC_Arguments);
 
   public:
     const Source_Location&
