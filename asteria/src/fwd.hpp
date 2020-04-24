@@ -125,7 +125,7 @@ template<typename E, size_t... k>
 using array = ::rocket::array<E, k...>;
 
 template<typename E>
-using ref_to = ::rocket::reference_wrapper<E>;
+using refp = ::rocket::reference_wrapper<E>;
 
 // Core
 class Value;

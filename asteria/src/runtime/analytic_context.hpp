@@ -18,7 +18,7 @@ class Analytic_Context
   public:
     template<typename ContextT,
     ROCKET_ENABLE_IF(::std::is_base_of<Abstract_Context, ContextT>::value)>
-    Analytic_Context(ref_to<ContextT> parent)  // for non-functions
+    Analytic_Context(refp<ContextT> parent)  // for non-functions
       : m_parent_opt(parent.ptr())
       { }
 

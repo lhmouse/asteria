@@ -13,7 +13,7 @@ namespace {
 class Sentry
   {
   private:
-    ref_to<long> m_ref;
+    refp<long> m_ref;
     long m_old;
 
   public:

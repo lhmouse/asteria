@@ -20,9 +20,9 @@ class Executive_Context
 
     // Store some references to the enclosing function,
     // so they are not passed here and there upon each native call.
-    ref_to<Global_Context> m_global;
-    ref_to<Evaluation_Stack> m_stack;
-    ref_to<const rcptr<Variadic_Arguer>> m_zvarg;
+    refp<Global_Context> m_global;
+    refp<Evaluation_Stack> m_stack;
+    refp<const rcptr<Variadic_Arguer>> m_zvarg;
 
     // These members are used for lazy initialization.
     Reference m_self;
@@ -33,22 +33,22 @@ class Executive_Context
   public:
     template<typename ContextT,
     ROCKET_ENABLE_IF(::std::is_base_of<Abstract_Context, ContextT>::value)>
-    Executive_Context(ref_to<ContextT> parent)  // for non-functions
+    Executive_Context(refp<ContextT> parent)  // for non-functions
       : m_parent_opt(parent.ptr()),
         m_global(parent->m_global), m_stack(parent->m_stack), m_zvarg(parent->m_zvarg),
         m_self(Reference_root::S_void())
       { }
 
-    Executive_Context(ref_to<Global_Context> xglobal, ref_to<Evaluation_Stack> xstack,
-                      ref_to<const rcptr<Variadic_Arguer>> xzvarg,
+    Executive_Context(refp<Global_Context> xglobal, refp<Evaluation_Stack> xstack,
+                      refp<const rcptr<Variadic_Arguer>> xzvarg,
                       cow_bivector<Source_Location, AVMC_Queue>&& defer)  // for proper tail calls
       : m_parent_opt(nullptr),
         m_global(xglobal), m_stack(xstack), m_zvarg(xzvarg),
         m_self(Reference_root::S_void()), m_defer(::std::move(defer))
       { }
 
-    Executive_Context(ref_to<Global_Context> xglobal, ref_to<Evaluation_Stack> xstack,
-                      ref_to<const rcptr<Variadic_Arguer>> xzvarg, const cow_vector<phsh_string>& params,
+    Executive_Context(refp<Global_Context> xglobal, refp<Evaluation_Stack> xstack,
+                      refp<const rcptr<Variadic_Arguer>> xzvarg, const cow_vector<phsh_string>& params,
                       Reference&& self, cow_vector<Reference>&& args)  // for functions
       : m_parent_opt(nullptr),
         m_global(xglobal), m_stack(xstack), m_zvarg(xzvarg),

@@ -286,13 +286,13 @@ do_format_scalar(tinyfmt& fmt, const Value& value, bool json5)
 
 struct S_xformat_array
   {
-    ref_to<const V_array> refa;
+    refp<const V_array> refa;
     V_array::const_iterator curp;
   };
 
 struct S_xformat_object
   {
-    ref_to<const V_object> refo;
+    refp<const V_object> refo;
     V_object::const_iterator curp;
   };
 
