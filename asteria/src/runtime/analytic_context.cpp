@@ -19,20 +19,21 @@ do_prepare_function(const cow_vector<phsh_string>& params)
     // Set parameters, which are local references.
     for(size_t i = 0;  i < params.size();  ++i) {
       const auto& name = params.at(i);
-      if(name.empty()) {
+      if(name.empty())
         continue;
-      }
+
+      if(name.rdstr().starts_with("__"))
+        ASTERIA_THROW("reserved name not declarable as parameter (name `", name, "`)");
+
       if(name == "...") {
         // Nothing is set for the variadic placeholder, but the parameter list terminates here.
         ROCKET_ASSERT(i == params.size() - 1);
         break;
       }
-      if(name.rdstr().starts_with("__")) {
-        ASTERIA_THROW("reserved name not declarable as parameter (name `", name, "`)");
-      }
       // Its contents are out of interest.
       this->open_named_reference(name) /*= Reference_root::S_void()*/;
     }
+
     // Set pre-defined references.
     // N.B. If you have ever changed these, remember to update 'executive_context.cpp' as well.
     this->open_named_reference(::rocket::sref("__varg")) /*= Reference_root::S_void()*/;
