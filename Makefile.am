@@ -55,8 +55,8 @@ lib_LTLIBRARIES =
 bin_PROGRAMS =
 
 check_HEADERS =
-check_LTRARIES =
 check_LIBRARIES =
+check_LTLIBRARIES =
 check_PROGRAMS =
 
 # Programs and libraries
