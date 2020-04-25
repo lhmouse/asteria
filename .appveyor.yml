@@ -6,7 +6,7 @@ environment:
   CXX: g++
 
 build_script:
-  - bash ci/build.sh
+  - ci/build.sh
 
 on_success:
   - python3 ci/appveyor_irc-notify.py mcfproj "[ lh_mouse {repo_name}#{short_commit}] passed on {branch} by {author} ({build_url})"

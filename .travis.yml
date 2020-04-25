@@ -9,7 +9,7 @@ compiler:
   - clang
 
 script:
-  - bash ci/build.sh
+  - ci/build.sh
 
 notifications:
   email: false
