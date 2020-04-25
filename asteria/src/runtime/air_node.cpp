@@ -299,8 +299,7 @@ struct AIR_Traits<AIR_Node::S_execute_block>
     AIR_Status
     execute(Executive_Context& ctx, const AVMC_Queue& queue)
       {
-        auto status = do_execute_block(queue, ctx);
-        return status;
+        return do_execute_block(queue, ctx);
       }
   };
 
