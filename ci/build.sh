@@ -8,7 +8,7 @@ export CXXFLAGS='-O2 -g0 -std=gnu++14 -fno-gnu-keywords -Wno-zero-as-null-pointe
 ${CXX} --version
 mkdir -p m4
 autoreconf -ifv
-./configure --disable-silent-rules --enable-debug-checks --disable-static
+./configure --disable-silent-rules --enable-debug-checks --disable-shared
 make -j$(nproc)
 
 # test
