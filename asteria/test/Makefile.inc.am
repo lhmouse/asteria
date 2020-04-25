@@ -1,0 +1,42 @@
+check_HEADERS +=  \
+  %reldir%/utilities.hpp  \
+  ${NOTHING}
+
+check_PROGRAMS +=  \
+  %reldir%/utilities.test  \
+  %reldir%/value.test  \
+  %reldir%/variable.test  \
+  %reldir%/reference.test  \
+  %reldir%/token_stream.test  \
+  %reldir%/statement_sequence.test  \
+  %reldir%/simple_script.test  \
+  %reldir%/gc.test  \
+  %reldir%/varg.test  \
+  %reldir%/operators.test  \
+  %reldir%/proper_tail_call.test  \
+  %reldir%/stack_overflow.test  \
+  %reldir%/structured_binding.test  \
+  %reldir%/global_identifier.test  \
+  %reldir%/variadic_function_call.test  \
+  %reldir%/defer.test  \
+  %reldir%/defer_ptc.test  \
+  %reldir%/trailing_commas.test  \
+  %reldir%/system.test  \
+  %reldir%/chrono.test  \
+  %reldir%/string.test  \
+  %reldir%/array.test  \
+  %reldir%/numeric.test  \
+  %reldir%/math.test  \
+  %reldir%/filesystem.test  \
+  %reldir%/checksum.test  \
+  %reldir%/json.test  \
+  %reldir%/import.test  \
+  %reldir%/bypassed_variable.test  \
+  %reldir%/github_65.test  \
+  %reldir%/github_71.test  \
+  %reldir%/github_78.test  \
+  %reldir%/github_84.test  \
+  %reldir%/github_85.test  \
+  %reldir%/github_98.test  \
+  %reldir%/github_101.test  \
+  ${NOTHING}

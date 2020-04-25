@@ -1,0 +1,82 @@
+noinst_LTLIBRARIES += lib/librocket.la
+
+include_rocketdir = ${pkgincludedir}/rocket
+include_rocket_HEADERS =  \
+  %reldir%/compiler.h  \
+  %reldir%/preprocessor_utilities.h  \
+  %reldir%/assert.hpp  \
+  %reldir%/utilities.hpp  \
+  %reldir%/throw.hpp  \
+  %reldir%/allocator_utilities.hpp  \
+  %reldir%/hash_table_utilities.hpp  \
+  %reldir%/variant.hpp  \
+  %reldir%/fill_iterator.hpp  \
+  %reldir%/unique_handle.hpp  \
+  %reldir%/unique_posix_file.hpp  \
+  %reldir%/unique_posix_dir.hpp  \
+  %reldir%/unique_posix_fd.hpp  \
+  %reldir%/reference_counter.hpp  \
+  %reldir%/char_traits.hpp  \
+  %reldir%/cow_string.hpp  \
+  %reldir%/cow_vector.hpp  \
+  %reldir%/cow_hashmap.hpp  \
+  %reldir%/unique_ptr.hpp  \
+  %reldir%/refcnt_ptr.hpp  \
+  %reldir%/prehashed_string.hpp  \
+  %reldir%/static_vector.hpp  \
+  %reldir%/optional.hpp  \
+  %reldir%/array.hpp  \
+  %reldir%/reference_wrapper.hpp  \
+  %reldir%/linear_buffer.hpp  \
+  %reldir%/tinybuf.hpp  \
+  %reldir%/tinybuf_str.hpp  \
+  %reldir%/tinybuf_file.hpp  \
+  %reldir%/ascii_numput.hpp  \
+  %reldir%/ascii_numget.hpp  \
+  %reldir%/tinyfmt.hpp  \
+  %reldir%/tinyfmt_str.hpp  \
+  %reldir%/tinyfmt_file.hpp  \
+  %reldir%/format.hpp  \
+  %reldir%/atomic_flag.hpp  \
+  ${NOTHING}
+
+include_rocket_platformdir = ${pkgincludedir}/rocket/platform
+include_rocket_platform_HEADERS =  \
+  %reldir%/platform/compiler_clang.h  \
+  %reldir%/platform/compiler_gcc.h  \
+  %reldir%/platform/compiler_msvc.h  \
+  ${NOTHING}
+
+include_rocket_detailsdir = ${pkgincludedir}/rocket/details
+include_rocket_details_HEADERS =  \
+  %reldir%/details/utilities.ipp  \
+  %reldir%/details/allocator_utilities.ipp  \
+  %reldir%/details/variant.ipp  \
+  %reldir%/details/unique_handle.ipp  \
+  %reldir%/details/char_traits.ipp  \
+  %reldir%/details/cow_string.ipp  \
+  %reldir%/details/cow_vector.ipp  \
+  %reldir%/details/cow_hashmap.ipp  \
+  %reldir%/details/prehashed_string.ipp  \
+  %reldir%/details/unique_ptr.ipp  \
+  %reldir%/details/refcnt_ptr.ipp  \
+  %reldir%/details/static_vector.ipp  \
+  %reldir%/details/array.ipp  \
+  %reldir%/details/linear_buffer.ipp  \
+  ${NOTHING}
+
+lib_librocket_la_SOURCES =  \
+  %reldir%/assert.cpp  \
+  %reldir%/throw.cpp  \
+  %reldir%/cow_string.cpp  \
+  %reldir%/linear_buffer.cpp  \
+  %reldir%/tinybuf.cpp  \
+  %reldir%/tinybuf_str.cpp  \
+  %reldir%/tinybuf_file.cpp  \
+  %reldir%/ascii_numput.cpp  \
+  %reldir%/ascii_numget.cpp  \
+  %reldir%/tinyfmt.cpp  \
+  %reldir%/tinyfmt_str.cpp  \
+  %reldir%/tinyfmt_file.cpp  \
+  %reldir%/format.cpp  \
+  ${NOTHING}

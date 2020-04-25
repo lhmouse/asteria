@@ -1,0 +1,144 @@
+lib_LTLIBRARIES += lib/libasteria.la
+bin_PROGRAMS += bin/asteria
+
+include_asteriadir = ${pkgincludedir}/asteria
+include_asteria_HEADERS =  \
+  %reldir%/precompiled.hpp  \
+  %reldir%/fwd.hpp  \
+  %reldir%/utilities.hpp  \
+  %reldir%/recursion_sentry.hpp  \
+  %reldir%/value.hpp  \
+  %reldir%/source_location.hpp  \
+  %reldir%/simple_script.hpp  \
+  ${NOTHING}
+
+include_asteria_lldsdir = ${pkgincludedir}/asteria/llds
+include_asteria_llds_HEADERS =  \
+  %reldir%/llds/variable_hashset.hpp  \
+  %reldir%/llds/reference_dictionary.hpp  \
+  %reldir%/llds/avmc_queue.hpp  \
+  ${NOTHING}
+
+include_asteria_runtimedir = ${pkgincludedir}/asteria/runtime
+include_asteria_runtime_HEADERS =  \
+  %reldir%/runtime/enums.hpp  \
+  %reldir%/runtime/abstract_hooks.hpp  \
+  %reldir%/runtime/reference_root.hpp  \
+  %reldir%/runtime/reference_modifier.hpp  \
+  %reldir%/runtime/reference.hpp  \
+  %reldir%/runtime/variable.hpp  \
+  %reldir%/runtime/variable_callback.hpp  \
+  %reldir%/runtime/ptc_arguments.hpp  \
+  %reldir%/runtime/collector.hpp  \
+  %reldir%/runtime/backtrace_frame.hpp  \
+  %reldir%/runtime/runtime_error.hpp  \
+  %reldir%/runtime/abstract_context.hpp  \
+  %reldir%/runtime/analytic_context.hpp  \
+  %reldir%/runtime/executive_context.hpp  \
+  %reldir%/runtime/global_context.hpp  \
+  %reldir%/runtime/genius_collector.hpp  \
+  %reldir%/runtime/random_engine.hpp  \
+  %reldir%/runtime/loader_lock.hpp  \
+  %reldir%/runtime/variadic_arguer.hpp  \
+  %reldir%/runtime/evaluation_stack.hpp  \
+  %reldir%/runtime/instantiated_function.hpp  \
+  %reldir%/runtime/air_node.hpp  \
+  %reldir%/runtime/air_optimizer.hpp  \
+  %reldir%/runtime/argument_reader.hpp  \
+  ${NOTHING}
+
+include_asteria_compilerdir = ${pkgincludedir}/asteria/compiler
+include_asteria_compiler_HEADERS =  \
+  %reldir%/compiler/enums.hpp  \
+  %reldir%/compiler/parser_error.hpp  \
+  %reldir%/compiler/token.hpp  \
+  %reldir%/compiler/token_stream.hpp  \
+  %reldir%/compiler/expression_unit.hpp  \
+  %reldir%/compiler/statement.hpp  \
+  %reldir%/compiler/infix_element.hpp  \
+  %reldir%/compiler/statement_sequence.hpp  \
+  ${NOTHING}
+
+include_asteria_librarydir = ${pkgincludedir}/asteria/library
+include_asteria_library_HEADERS =  \
+  %reldir%/library/version.hpp  \
+  %reldir%/library/system.hpp  \
+  %reldir%/library/debug.hpp  \
+  %reldir%/library/chrono.hpp  \
+  %reldir%/library/string.hpp  \
+  %reldir%/library/array.hpp  \
+  %reldir%/library/numeric.hpp  \
+  %reldir%/library/math.hpp  \
+  %reldir%/library/filesystem.hpp  \
+  %reldir%/library/checksum.hpp  \
+  %reldir%/library/json.hpp  \
+  %reldir%/library/io.hpp  \
+  ${NOTHING}
+
+lib_libasteria_la_SOURCES =  \
+  %reldir%/fwd.cpp  \
+  %reldir%/utilities.cpp  \
+  %reldir%/recursion_sentry.cpp  \
+  %reldir%/value.cpp  \
+  %reldir%/source_location.cpp  \
+  %reldir%/simple_script.cpp  \
+  %reldir%/llds/variable_hashset.cpp  \
+  %reldir%/llds/reference_dictionary.cpp  \
+  %reldir%/llds/avmc_queue.cpp  \
+  %reldir%/runtime/enums.cpp  \
+  %reldir%/runtime/abstract_hooks.cpp  \
+  %reldir%/runtime/reference_root.cpp  \
+  %reldir%/runtime/reference_modifier.cpp  \
+  %reldir%/runtime/reference.cpp  \
+  %reldir%/runtime/variable.cpp  \
+  %reldir%/runtime/variable_callback.cpp  \
+  %reldir%/runtime/ptc_arguments.cpp  \
+  %reldir%/runtime/collector.cpp  \
+  %reldir%/runtime/backtrace_frame.cpp  \
+  %reldir%/runtime/runtime_error.cpp  \
+  %reldir%/runtime/abstract_context.cpp  \
+  %reldir%/runtime/analytic_context.cpp  \
+  %reldir%/runtime/executive_context.cpp  \
+  %reldir%/runtime/global_context.cpp  \
+  %reldir%/runtime/genius_collector.cpp  \
+  %reldir%/runtime/random_engine.cpp  \
+  %reldir%/runtime/loader_lock.cpp  \
+  %reldir%/runtime/variadic_arguer.cpp  \
+  %reldir%/runtime/evaluation_stack.cpp  \
+  %reldir%/runtime/instantiated_function.cpp  \
+  %reldir%/runtime/air_node.cpp  \
+  %reldir%/runtime/air_optimizer.cpp  \
+  %reldir%/runtime/argument_reader.cpp  \
+  %reldir%/compiler/enums.cpp  \
+  %reldir%/compiler/parser_error.cpp  \
+  %reldir%/compiler/token.cpp  \
+  %reldir%/compiler/token_stream.cpp  \
+  %reldir%/compiler/expression_unit.cpp  \
+  %reldir%/compiler/statement.cpp  \
+  %reldir%/compiler/infix_element.cpp  \
+  %reldir%/compiler/statement_sequence.cpp  \
+  %reldir%/library/version.cpp  \
+  %reldir%/library/system.cpp  \
+  %reldir%/library/debug.cpp  \
+  %reldir%/library/chrono.cpp  \
+  %reldir%/library/string.cpp  \
+  %reldir%/library/array.cpp  \
+  %reldir%/library/numeric.cpp  \
+  %reldir%/library/math.cpp  \
+  %reldir%/library/filesystem.cpp  \
+  %reldir%/library/checksum.cpp  \
+  %reldir%/library/json.cpp  \
+  %reldir%/library/io.cpp  \
+  ${NOTHING}
+
+lib_libasteria_la_LIBADD =  \
+  lib/librocket.la
+
+lib_libasteria_la_LDFLAGS =  \
+  -Wl,--no-undefined -no-undefined -version-info 0:0:0
+
+bin_asteria_SOURCES =  \
+  %reldir%/repl.cpp
+
+bin_asteria_LDADD =  \
+  lib/libasteria.la
