@@ -213,6 +213,7 @@ const
           else {
             // Clear the stack before pushing variables.
             do_generate_clear_stack(code);
+
             // Push uninitialized variables from left to right.
             for(size_t k = bpos;  k < epos;  ++k) {
               AIR_Node::S_declare_variable xnode = { altr.slocs[i], altr.decls[i][k] };
@@ -302,9 +303,11 @@ const
         // Be advised that all clauses inside a `switch` statement share the same context.
         Analytic_Context ctx_body(::rocket::ref(ctx));
         cow_vector<phsh_string> names;
+
         // Get the number of clauses.
         auto nclauses = altr.labels.size();
         ROCKET_ASSERT(nclauses == altr.bodies.size());
+
         for(size_t i = 0;  i < nclauses;  ++i) {
           // Generate code for the label.
           // Note labels are not part of the body.
