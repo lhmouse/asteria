@@ -49,7 +49,7 @@ noinst_LIBRARIES =
 noinst_LTLIBRARIES =
 TESTS = ${check_PROGRAMS}
 
-pkginclude_HEADERS =
+include_HEADERS =
 lib_LIBRARIES =
 lib_LTLIBRARIES =
 bin_PROGRAMS =

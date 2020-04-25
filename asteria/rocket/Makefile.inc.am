@@ -1,6 +1,6 @@
 noinst_LTLIBRARIES += lib/librocket.la
 
-include_rocketdir = ${pkgincludedir}/rocket
+include_rocketdir = ${includedir}/rocket
 include_rocket_HEADERS =  \
   %reldir%/compiler.h  \
   %reldir%/preprocessor_utilities.h  \
@@ -40,14 +40,14 @@ include_rocket_HEADERS =  \
   %reldir%/atomic_flag.hpp  \
   ${NOTHING}
 
-include_rocket_platformdir = ${pkgincludedir}/rocket/platform
+include_rocket_platformdir = ${includedir}/rocket/platform
 include_rocket_platform_HEADERS =  \
   %reldir%/platform/compiler_clang.h  \
   %reldir%/platform/compiler_gcc.h  \
   %reldir%/platform/compiler_msvc.h  \
   ${NOTHING}
 
-include_rocket_detailsdir = ${pkgincludedir}/rocket/details
+include_rocket_detailsdir = ${includedir}/rocket/details
 include_rocket_details_HEADERS =  \
   %reldir%/details/utilities.ipp  \
   %reldir%/details/allocator_utilities.ipp  \

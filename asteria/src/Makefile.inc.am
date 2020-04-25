@@ -1,7 +1,7 @@
 lib_LTLIBRARIES += lib/libasteria.la
 bin_PROGRAMS += bin/asteria
 
-include_asteriadir = ${pkgincludedir}/asteria
+include_asteriadir = ${includedir}/asteria
 include_asteria_HEADERS =  \
   %reldir%/precompiled.hpp  \
   %reldir%/fwd.hpp  \
@@ -12,14 +12,14 @@ include_asteria_HEADERS =  \
   %reldir%/simple_script.hpp  \
   ${NOTHING}
 
-include_asteria_lldsdir = ${pkgincludedir}/asteria/llds
+include_asteria_lldsdir = ${includedir}/asteria/llds
 include_asteria_llds_HEADERS =  \
   %reldir%/llds/variable_hashset.hpp  \
   %reldir%/llds/reference_dictionary.hpp  \
   %reldir%/llds/avmc_queue.hpp  \
   ${NOTHING}
 
-include_asteria_runtimedir = ${pkgincludedir}/asteria/runtime
+include_asteria_runtimedir = ${includedir}/asteria/runtime
 include_asteria_runtime_HEADERS =  \
   %reldir%/runtime/enums.hpp  \
   %reldir%/runtime/abstract_hooks.hpp  \
@@ -47,7 +47,7 @@ include_asteria_runtime_HEADERS =  \
   %reldir%/runtime/argument_reader.hpp  \
   ${NOTHING}
 
-include_asteria_compilerdir = ${pkgincludedir}/asteria/compiler
+include_asteria_compilerdir = ${includedir}/asteria/compiler
 include_asteria_compiler_HEADERS =  \
   %reldir%/compiler/enums.hpp  \
   %reldir%/compiler/parser_error.hpp  \
@@ -59,7 +59,7 @@ include_asteria_compiler_HEADERS =  \
   %reldir%/compiler/statement_sequence.hpp  \
   ${NOTHING}
 
-include_asteria_librarydir = ${pkgincludedir}/asteria/library
+include_asteria_librarydir = ${includedir}/asteria/library
 include_asteria_library_HEADERS =  \
   %reldir%/library/version.hpp  \
   %reldir%/library/system.hpp  \
