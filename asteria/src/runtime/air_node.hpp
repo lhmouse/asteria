@@ -245,8 +245,8 @@ class AIR_Node
 
     struct S_immediate_int_x48
       {
-        int16_t high;
         uint32_t low;
+        int16_t high;
       };
 
     struct S_immediate_integer

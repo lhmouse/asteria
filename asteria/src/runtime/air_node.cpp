@@ -3896,8 +3896,8 @@ struct AIR_Traits<AIR_Node::S_immediate_int_x48>
     make_uparam(bool& /*reachable*/, const AIR_Node::S_immediate_int_x48& altr)
       {
         AVMC_Queue::Uparam up;
-        up.x16 = static_cast<uint16_t>(altr.high);
         up.x32 = altr.low;
+        up.x16 = static_cast<uint16_t>(altr.high);
         return up;
       }
 
