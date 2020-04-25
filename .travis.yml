@@ -15,6 +15,7 @@ compiler:
 
 script:
   - ./ci/build.sh
+  - ./check_includes.sh
 
 notifications:
   email: false
