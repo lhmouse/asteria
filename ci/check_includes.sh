@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -xe
 
 # setup
 export CXX=${CXX:-"g++"}

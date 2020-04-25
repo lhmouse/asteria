@@ -4,6 +4,11 @@ os: linux
 dist: bionic
 sudo: false
 
+addons:
+  apt:
+    packages:
+      - parallel
+
 compiler:
   - gcc
   - clang
