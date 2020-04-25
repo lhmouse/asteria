@@ -14,7 +14,7 @@ compiler:
   - clang
 
 script:
-  - ci/build.sh
+  - ./ci/build.sh
 
 notifications:
   email: false
