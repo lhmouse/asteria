@@ -1,0 +1,2853 @@
+#!/bin/bash
+##############################################################################
+#         $Id: checkinstall,v 1.6.2.17 2009/12/26 13:15:21 izto Exp $ 
+#                           ########################                         
+#                                                                            
+#
+#                             CheckInstall v1.6.2
+#
+#  Installs a compiled program from the program's source directory using     
+#  "make install" or any other command supplied on checkinstall's command  
+#  line. checkinstall will create a Slackware, RPM or Debian compatible package
+#  named after the source directory's name and install it using your standard  
+#  package administration utilities.                                      
+#                                                                            
+#  This version of checkinstall needs enough free space on the partition     
+#  holding the temp dir (see BASE_TEMP_DIR below) to write there a temporary 
+#  copy of the package.              
+#                                                                            
+#  Copyright (C) 2004 Felipe Eduardo Sanchez Diaz Duran <izto@asic-linux.com.mx>
+#  
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the version 2 of the GNU General Public License
+#    as published by the Free Software Foundation
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+############################################################################
+
+
+# Trap the INT signal (ctrl-c, for example)
+trap trapint 2
+
+CHECKINSTALL_VERSION=1.6.2
+
+# locate the file or directory that the parameter corresponds to;
+# always prints absolute path
+function followlinks () {
+    local entry="$1"
+    local symlink
+
+    case "$entry" in /*) true ;;
+        *) entry="`pwd`/$entry";;
+    esac
+    if [ -L "$entry" ]; then
+        symlink=`ls -l "$entry" | sed -e 's/.* -> //'`
+        
+        case "$symlink" in /*) entry="$symlink";;
+            *) entry=`dirname "$entry"`/$symlink;;
+        esac
+        followlinks "$entry"
+    else
+        echo "$entry"
+    fi
+}
+
+INSTALLDIR=`followlinks "$0"`
+INSTALLDIR=`dirname "$INSTALLDIR"`/..
+
+# gettext variables
+export TEXTDOMAINDIR=/usr/share/locale
+export TEXTDOMAIN=checkinstall
+
+# .spec file path
+DIRECTORIO_FUENTE=`pwd`
+PKG_BASENAME="`basename "$DIRECTORIO_FUENTE"`"
+SPEC_PATH=${PKG_BASENAME}.spec
+
+#############################################################################
+                           # Function definitions #
+                           ########################
+
+# Enable alias expansion in command substitution
+shopt -s expand_aliases 
+
+# Vefify that we have gettext available
+gettext "Bye." &> /dev/null
+
+if [ $? -gt 0 ]; then
+   alias ck_gettext="echo -e"
+else
+   alias ck_gettext="gettext -s --"
+fi
+
+## gettext echo with newline at the end
+function echog() {
+   local format="$1"
+   shift
+   printf -- "$(ck_gettext "$format")\n" "$@" >&2
+}
+
+## gettext echo with NO newline at the end
+function   echogn() {
+   local format="$1"
+   shift
+   printf -- "$(ck_gettext "$format")" "$@" >&2
+}
+
+
+
+function ckversion {
+   echo
+   echo "checkinstall $CHECKINSTALL_VERSION, Copyright 2009 Felipe Eduardo Sanchez Diaz Duran"
+   echog "           This software is released under the GNU GPL."
+}
+
+
+
+function usage() {
+
+# If the user has a default pager defined in the PAGER environment variable,
+# we'll use that. If not, we'll use "more".
+
+! [ "$PAGER" ] && PAGER=more
+
+
+   echo
+   echog "Usage: checkinstall [options] [command [command arguments]]"
+   echog "Options:"
+   echo
+   echog "*Package type selection*"
+   echo
+   echog "-t,--type=<slackware|rpm|debian> Choose packaging system"
+   echog "-S                               Build a Slackware package"
+   echog "-R                               Build a RPM package"
+   echog "-D                               Build a Debian package"
+   echo
+   echog "*Install options*"
+   echo
+   echog "--install=<yes|no>             Toggle created package installation"
+   echog "--fstrans=<yes|no>             Enable/disable the filesystem translation code"
+   echo
+   echog "*Scripting options*"
+   echo
+   echog "-y, --default                  Accept default answers to all questions"
+   echog "--pkgname=<name>               Set name"
+   echog "--pkgversion=<version>         Set version"
+   echog "-A, --arch, --pkgarch=<arch>   Set architecture"
+   echog "--pkgrelease=<release>         Set release"
+   echog "--pkglicense=<license>         Set license"
+   echog "--pkggroup=<group>             Set software group"
+   echog "--pkgsource=<source>           Set source location"
+   echog "--pkgaltsource=<altsource>     Set alternate source location"
+   echog "--pakdir=<directory>           The new package will be saved here"
+   echog "--maintainer=<email addr>      The package maintainer (.deb)"
+   echog "--provides=<list>              Features provided by this package"
+   echog "--requires=<list>              Features required by this package"
+   echog "--conflicts=<list>             Packages that this package cannot be installed with (.deb)"
+   echog "--replaces=<list>              Packages that this package replaces (.deb)"
+   echog "--rpmflags=<flags>             Pass this flags to the rpm installer"
+   echog "--rpmi                         Use the -i flag for rpm when installing a .rpm"
+   echog "--rpmu                         Use the -U flag for rpm when installing a .rpm"
+   echog "--dpkgflags=<flags>            Pass this flags to the dpkg installer"
+   echog "--spec=<path>                  .spec file location"
+   echog "--nodoc                        Do not include documentation files"
+   echo
+   echog "*Info display options*"
+   echo
+   echog "-d<0|1|2>                      Set debug level"
+   echog "-si                            Run an interactive install command"
+   echog "--showinstall=<yes|no>         Toggle interactive install command"
+   echog "-ss                            Run an interactive Slackware installation script"	
+   echog "--showslack=<yes|no>           Toggle interactive Slackware installation script"
+   echo
+   echog "*Package tuning options*"
+   echo
+   echog "--autodoinst=<yes|no>          Toggle the creation of a doinst.sh script"
+   echog "--strip=<yes|no>               Strip any ELF binaries found inside the package"
+   echog "--stripso=<yes|no>             Strip any ELF binary libraries (.so files)" 
+   echog "--addso=<yes|no>               Search for any shared libs and add"
+   echog "                               them to /etc/ld.so.conf"
+   echog "--reset-uids=<yes|no>          Reset perms for all files to o=g, dirs to 755 and"
+   echog "                               the owner/group for all dirs to root.root"
+   echog "--gzman=<yes|no>               Compress any man pages found inside the package"
+   echog "--docdir=<path>                Where to put documentation files"
+   echog "                               The package name+version gets automatically appended."
+   echog "                               To avoid that prefix the path with a colon (:)."
+   echog "--umask=<mask>                 Set the umask value"
+   echog "--exclude=<file|dir[,...]>     Exclude these files/directories from the package"
+   echog "--include=<listfile>           Force the inclusion in the package of the"
+   echog "                               files/dirs listed in \"listfile\""
+   echog "--inspect                      Inspect the package's file list"
+   echog "--review-spec                  Review the spec file before creating a .rpm"
+   echog "--review-control               Review the control file before creating a .deb"
+   echog "--newslack                     Use the new (8.1+) Slackware description format"
+   echog "                               (\"--newslack\" implies \"-S\")"
+   echog "--with-tar=/path/to/tar        Manually set the path to the tar binary" 
+   echog "                               in this system"
+   echo
+   echog "*Cleanup options*"
+   echo
+   echog "--deldoc=<yes|no>              Delete doc-pak upon termination"
+   echog "--deldesc=<yes|no>             Delete description-pak upon termination"
+   echog "--delspec=<yes|no>             Delete spec file upon termination"
+   echog "--bk                           Backup any overwritten files"
+   echog "--backup=<yes|no>              Toggle backup"
+   echo
+   echog "*About CheckInstall*"
+   echo
+   echog "--help, -h                     Show this message"
+   echog "--copyright                    Show Copyright information"
+   echog "--version                      Show version information"
+   echo
+   exit 1
+}
+
+function help_notice() {
+ 
+echo
+echog "Use --help or -h to get more information"
+echo
+exit 1 
+
+}
+
+function boolean_usage() {
+   echo
+   echog "%s is an invalid value for %s" "$2" "$1"
+   help_notice
+   exit 1
+}
+
+
+# 001117-BaP: Define a function or two
+
+function yorn {
+
+
+   if [ "$1" ]; then     # If there is no default value specified
+       DEFAULTYN="$1"     # then the default is "y"
+    else
+       DEFAULTYN="y"
+    fi
+    DEFAULTYN=`echo $DEFAULTYN | tr 'A-Z' 'a-z'`
+
+    if [ "$DEFAULTYN" = "y" ]; then  
+       echo -n " [y]: "              # Print the default option
+    else
+       echo -n " [n]: "
+    fi
+    
+if [ $ACCEPT_DEFAULT -eq 0 ]; then     # Should we accept all the defaults?
+
+    read YN
+    YN=`echo $YN | tr 'A-Z' 'a-z'`
+    ! [ "$YN" ] && YN=$DEFAULTYN          # If the user pressed ENTER then 
+
+else
+   YN=$DEFAULTYN
+   echo $YN
+fi
+
+    if [ "$YN" = "y" ] ;then    # We return something useful for a 
+       return 0                 # simpler sintax ahead (12/dic/2000-Izto)
+    else
+       return 1
+    fi
+
+
+}
+
+
+
+# dec/10/2000-Izto
+# Prints OK or FAILED! depending on previous command return value
+
+function okfail () {
+ if [ $? -gt 0 ]; then
+    echog ' FAILED!'
+    return 1
+ else
+    echog 'OK'
+    return 0
+ fi
+}
+
+function restore_backup {
+ # If we have translation turned on then we didn't do a backup
+ if [ "${TRANSLATE}" = "1" ]; then return 0; fi
+
+ # Else, restore the backup if it exists
+ 
+ rm -rf ${TMP_DIR}/BACKUP/no-backup &> /dev/null
+
+ ls ${TMP_DIR}/BACKUP/*  &> /dev/null
+ if [ $? -eq 0 ]; then
+    echogn "Restoring overwritten files from backup..."
+    cd ${TMP_DIR}/BACKUP
+       files=$(ls -A)
+       $TAR -cpf - $files | $TAR -f - -xvpC / &> /dev/null
+    okfail
+    echo
+ fi
+} 
+
+
+function trapint {
+ echo
+ echo
+ echog "*** SIGINT received ***"
+ cleanup
+}
+
+function cleanup {
+ echo
+ restore_backup
+ echogn "Cleaning up..."
+ cd "$DIRECTORIO_FUENTE"
+ [ -n "${BUILDROOT}" ] && [ -d ${BUILDROOT} ] && rm -rf "${BUILDROOT}"
+ if [ "$DEBUG" -eq 0 ]; then
+    [ -n "${TMP_DIR}" ] && [ -d ${TMP_DIR} ] && rm -rf ${TMP_DIR}
+    rm -f checkinstall-debug*
+ else
+    echogn "(Debugging mode on, KEEPING temp dir $TMP_DIR)..."
+ fi
+ [ -n "${RPMSOURCEDIR}" ] &&
+   [ -f "${RPMSOURCEDIR}/SOURCES/${PKG_BASENAME}.tgz" ] &&
+   rm -f "${RPMSOURCEDIR}/SOURCES/${PKG_BASENAME}.tgz"
+
+ # If we had a pre-existing postinstall-pak, we keep it as it was.
+ if [ -f ${DIRECTORIO_FUENTE}/postinstall-pak.tmp ]; then
+    mv ${DIRECTORIO_FUENTE}/postinstall-pak.tmp ${DIRECTORIO_FUENTE}/postinstall-pak
+ fi
+
+ true; okfail
+ echo
+ echog "Bye."
+ echo
+ exit 1
+}
+
+# Function to copy a directory with permissions, honours setuid, setgid,
+# sticky bits, owner, group etc.
+#
+# A bit lengthy and slow but very few directories in the largest of
+# packages have to be copied like this.
+ 
+function  dircopy() {
+   src_dir="$1" dest_dir="$2"
+   getflags() {
+     col=$1 dir="$2"
+     permissions="`ls -ld "$dir" | awk '{print $1}'`"
+     mask="."
+     bit=2
+     while [ $bit -lt $col ]; do mask="$mask."; bit=`expr $bit + 1`; done
+     mask="$mask\(.\)"
+     bit=$col
+     while [ $bit -lt 10 ]; do mask="$mask."; bit=`expr $bit + 1`; done
+     permission="`echo $permissions | sed "s/$mask/\1/" | grep -v -- '-'`"
+     case "$permission" in
+       s) echo "xs";; S) echo "s";; t) echo "xt";; T) echo "t";;
+       *) echo $permission;;
+     esac
+   }
+   col=2 chmod_args=""
+   set=u flags=""
+   while [ $col -le 4 ]; do
+     flags="$flags`getflags $col "$src_dir"`"; col=`expr $col + 1`
+   done
+   [ -n "$flags" ] && {
+     chmod_args="$set+$flags"
+   }
+   set=g flags=""
+   while [ $col -le 7 ]; do
+     flags="$flags`getflags $col "$src_dir"`"; col=`expr $col + 1`
+   done
+   [ -n "$flags" ] && {
+     [ -n "$chmod_args" ] && chmod_args="$chmod_args,"
+     chmod_args="$chmod_args$set+$flags"
+   }
+   set=o flags=""
+   while [ $col -le 10 ]; do
+     flags="$flags`getflags $col "$src_dir"`"; col=`expr $col + 1`
+   done
+   [ -n "$flags" ] && {
+     [ -n "$chmod_args" ] && chmod_args="$chmod_args,"
+     chmod_args="$chmod_args$set+$flags"
+   }
+   [ -d "$dest_dir" ] || {
+     mkdir -p "$dest_dir"
+     chmod 700 "$dest_dir"
+   }
+   [ -n "$chmod_args" ] && chmod $chmod_args "$dest_dir"
+   chown "`ls -ld "$src_dir" | awk '{print $3}'`" "$dest_dir"
+   chgrp "`ls -ld "$src_dir" | awk '{print $4}'`" "$dest_dir"
+ }
+
+#
+# Read spec file if it exists or (pre)set variables if they don't exist
+#
+
+function getparameter () {
+
+   RES=`egrep "$1" < ${SPEC_PATH} \
+    | cut -f2 -d: | sed 's/^ *//g' | sed 's/ *$//g' `
+   shift
+   echo "$RES" | sed 's/^ *//g' | sed 's/ *$//g' 
+
+}
+
+# This function is used to properly escape shell commands, so
+# we don't interpret the install command twice. This is useful
+# for making commands like 'make CC="gcc -some -options" install'
+# work as expected.
+
+function shell_escape() {
+	for str in "$@" ; do
+		echo -n "\"$str\" "
+	done;
+	echo
+}
+
+# Output all the parents of the files given as arguments to stdout. Remove
+# duplicates.
+function list_parents {
+    src="$*"
+    files=`for f in $src; do
+    echo "$f" | awk '
+    BEGIN{
+        FS = "/"
+    }
+    {
+        for (i=1;i<NF;i++){
+            for (j=1;j<=i;j++){
+                printf "%s",$(j)
+                if (j != i){
+                        printf "/"
+                    }
+            }
+            printf " "
+        }
+    }'
+    done`
+
+    echo "${files}"  | tr ' ' '\n' | uniq | tr '\n' ' '
+    return $?
+}
+
+# Copy some file ($1) whose path is given relatively to some root ($2) to a
+# destination ($3). If --deref-parents appear as first argument, then symlink
+# parents will not be copied as symlinks but as ordinary directories. All
+# permissions are preserved. The directories the source file was in are
+# preserved up to the root. The files that were copied are displayed on stdout
+function copy_dir_hierarchy {
+    deref_parents=0
+    if [ `echo "${1}" | egrep '^--deref-parents'` ]; then
+        deref_parents=1
+        shift
+    fi
+    src="${1}"
+    root="${2}"
+    dest="${3}"
+
+    # All directories the file is in, e.g if src is
+    # ./usr/local/lib/installwatch.so, then files will be . ./usr ./usr/local
+    # ./usr/local/lib
+    files=`list_parents ${src}`
+
+    # Only use tar if there are parents
+    echo "${files}" | egrep '[^[:space:]]' >/dev/null
+    if [ $? -eq 0 ]; then
+        if [ deref_parents -eq 1 ]; then
+            # Add the -h option to the tar command for dereferencing
+            $TAR --no-recursion -C "${root}" -cphf - $files | $TAR -f - -xvpC \
+                "${dest}"
+        else 
+            $TAR --no-recursion -C "${root}" -cpf - $files | $TAR -f - -xvpC \
+                "${dest}"
+        fi
+
+    fi
+
+    $TAR -C "${root}" -cpf - $src | $TAR -f - -xvpC \
+        "${dest}"
+
+    return $?
+}
+
+
+                      #################################
+                      # Function definition ends here #
+#############################################################################
+
+# Show the version information
+ckversion
+echo
+
+CHECKINSTALLRC=${CHECKINSTALLRC:-/etc/checkinstallrc}
+if ! [ -f $CHECKINSTALLRC ]; then
+   echog "The checkinstallrc file was not found at:\n$CHECKINSTALLRC"
+   echo
+   echog "Assuming default values."
+else
+# Get our default settings from the rc file
+source $CHECKINSTALLRC
+fi
+
+
+# Arguments parsing
+
+CKNAME=`basename "$0"`
+PARAMS=`getopt -a -n $CKNAME -o +d:DA:t:RShHy -l arch:,type:,si,showinstall::,ss,showslack::,deldoc::,delspec::,deldesc::,strip::,addso::,install::,stripso::,gzman::,bk,backup::,autodoinst::,reset-uids::,fstrans::,spec:,exclude:,include:,pkgname:,pkgversion:,pkgrelease:,pkglicense:,pkggroup:,pkgsource:,pkgaltsource:,pakdir:,docdir:,requires:,provides:,conflicts:,replaces:,maintainer:,dpkgflags:,rpmflags:,pkgarch:,umask:,with-tar:,inspect,review-spec,review-control,newslack,help,nodoc,rpmi,rpmu,version,copyright,default -- "$@"`
+
+[ $? -gt 0 ] && help_notice
+
+eval set -- $PARAMS
+
+while [ "$1" != "--" ]; do
+   case "$1" in
+      -h|-H|--help)
+         usage;;
+      -d)
+         shift
+         case $1 in
+            0) DEBUG=0;;
+            1|'') DEBUG=1;;
+            2) DEBUG=2;;
+            3) DEBUG=3;;
+            4) DEBUG=4;;
+            *)
+               boolean_usage "-D" $1
+         esac
+         ;;
+      -A|--arch|--pkgarch)
+         shift
+         ARCHITECTURE=$1
+         ;;
+      --umask)
+         shift
+         CKUMASK=$1
+         ;;
+      --pkgname)
+         shift
+         NAME=$1
+         ;;
+      --pkgversion)
+         shift
+         VERSION=$1
+         ;;
+      --pkgrelease)
+         shift
+         RELEASE=$1
+         ;;
+      --pkglicense)
+         shift
+         LICENSE=$1
+         ;;
+      --pkggroup)
+         shift
+	 # note: we use PKG_GROUP instead of GROUP since (t)csh sets GROUP.
+         PKG_GROUP=$1
+         ;;
+      --pkgsource)
+         shift
+         SOURCE=$1
+         ;;
+      --pkgaltsource)
+         shift
+         ALTSOURCE=$1
+         ;;
+      --pakdir)
+         shift
+         PAK_DIR=$1
+         ;;
+      --with-tar)
+         shift
+         TAR=$1
+         ;;
+      --docdir)
+         shift
+         DOC_DIR=$1
+         ;;
+      --provides)
+         shift
+         PROVIDES=$1
+         ;;
+      --conflicts)
+         shift
+         CONFLICTS=$1
+         ;;
+      --replaces)
+         shift
+         REPLACES=$1
+         ;;
+      --requires)
+         shift
+         REQUIRES=$1
+         ;;
+      --maintainer)
+         shift
+         MAINTAINER=$1
+         ;;
+      --dpkgflags)
+         shift
+         DPKG_FLAGS=$1
+         ;;
+      --rpmflags)
+         shift
+         RPM_FLAGS=$1
+         ;;
+      -t|--type)
+         shift
+         INSTYPE=`echo $1 | tr 'a-z' 'A-Z'`
+         case $INSTYPE in
+            RPM|R)
+               INSTYPE=R;;
+            SLACKWARE|S)
+               INSTYPE=S;;
+            DEBIAN|D)
+               INSTYPE=D;;
+            *)
+               echo
+               echo "$1 is not a valid packaging system. Please use \'rpm\', \'slackware\' or \'debian\'"
+               echo 
+               echo
+               exit 1
+          esac
+          ;;
+       -R)
+          INSTYPE=R
+          CK_REDHAT=1
+          ;;
+       -S)
+          INSTYPE=S
+          CK_SLACKWARE=1
+          ;;
+       -D)
+          INSTYPE=D
+          CK_DEBIAN=1
+          ;;
+       --install)
+          shift
+          case $1 in
+             1|yes|'')
+                INSTALL=1;;
+             0|no)
+                INSTALL=0;;
+             *)
+                boolean_usage "--install" $1
+          esac
+          ;;
+       --si)
+          SHOW_INSTALL=1;;
+       --showinstall)
+          shift
+          case $1 in
+             1|yes|'')
+                SHOW_INSTALL=1;;
+             0|no)
+                SHOW_INSTALL=0;;
+             *)
+                boolean_usage "--showinstall" $1
+          esac
+          ;;
+       --ss)
+          SHOW_SLACK_INSTALL=1;;
+       --showslack)
+          shift
+          case $1 in
+             1|yes|'')
+                SHOW_SLACK_INSTALL=1;;
+             0|no)
+                SHOW_SLACK_INSTALL=0;;
+             *)
+                boolean_usage "--showslack" $1
+          esac
+          ;;
+       --deldoc)
+          shift
+          case $1 in
+             1|yes|'')
+                DEL_DOCPAK=1;;
+             0|no)
+                DEL_DOCPAK=0;;
+             *)
+                boolean_usage "--deldoc" $1
+          esac
+          ;;
+       --delspec)
+          shift
+          case $1 in
+             1|yes|'')
+                DEL_SPEC=1;;
+             0|no)
+                DEL_SPEC=0;;
+             *)
+                boolean_usage "--delspec" $1
+          esac
+          ;;
+       --deldesc)
+          shift
+          case $1 in
+             1|yes|'')
+                DEL_DESC=1;;
+             0|no)
+                DEL_DESC=0;;
+             *)
+                boolean_usage "--deldesc" $1
+          esac
+          ;;
+       --strip)
+          shift
+          case $1 in
+             1|yes|'')
+                STRIP_ELF=1;;
+             0|no)
+                STRIP_ELF=0;;
+             *)
+                boolean_usage "--strip" $1
+          esac
+          ;;
+
+       --addso)
+          shift
+          case $1 in
+             1|yes|'')
+                ADD_SO=1;;
+             0|no)
+                ADD_SO=0;;
+             *)
+                boolean_usage "--strip" $1
+          esac
+          ;;
+ 
+
+       --stripso)
+          shift
+          case $1 in
+             1|yes|'')
+                STRIP_SO_ELF=1
+                ;;
+             0|no)
+                STRIP_SO_ELF=0;;
+             *)
+                boolean_usage "--stripso" $1
+             esac
+          ;;
+       --gzman)
+          shift
+          case $1 in
+             1|yes|'')
+                COMPRESS_MAN=1;;
+             0|no)
+                COMPRESS_MAN=0;;
+             *)
+                boolean_usage "--gzman" $1
+          esac
+          ;;
+       --bk)
+          BACKUP=1;;
+       --backup)
+          shift
+          case $1 in
+             1|yes|'')
+                BACKUP=1;;
+             0|no)
+                BACKUP=0;;
+             *)
+                boolean_usage "--backup" $1
+          esac
+          ;;
+       --default)
+          ACCEPT_DEFAULT=1;;
+       -y)
+          ACCEPT_DEFAULT=1;;
+       --nodoc)
+          NODOC=1;;
+       --rpmi)
+          RPM_IU=i;;
+       --rpmu)
+          RPM_IU=U;;
+       --newslack)
+          NEW_SLACK=1;;
+       --inspect)
+          CK_INSPECT=1;;
+       --review-spec)
+          REVIEW_SPEC=1;;
+       --review-control)
+          REVIEW_CONTROL=1;;
+       --spec)
+	  shift
+	  SPEC_PATH=$1
+          if ! [ -f "$SPEC_PATH" ]; then
+             echog "Warning: .spec file path \"%s\" not found.\nWarning: Defaulting to \"%s\"." "$SPEC_PATH" "${PKG_BASENAME}.spec"
+          fi
+          ;;
+       --copyright|--version)
+          cat << EOF
+
+Copyright (c) 2009 Felipe Eduardo Sanchez Diaz Duran <izto@asic-linux.com.mx>
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the version 2 of the GNU General Public License
+    as published by the Free Software Foundation.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+EOF
+         exit 0;;
+       --autodoinst)
+          shift
+          case $1 in
+             1|yes|'')
+                AUTODOINST=1;;
+             0|no)
+                AUTODOINST=0;;
+             *)
+                boolean_usage "--autodoinst" $1
+          esac
+          ;;
+       --reset-uids)
+          shift
+          case $1 in
+             1|yes|'')
+                RESET_UIDS=1;;
+             0|no)
+                RESET_UIDS=0;;
+             *)
+                boolean_usage "--reset-uids" $1
+          esac
+          ;;
+        --fstrans)
+          shift
+          case $1 in
+             1|yes|'')
+                TRANSLATE=1;;
+             0|no)
+                TRANSLATE=0;;
+             *)
+                boolean_usage "--fstrans" $1
+          esac
+          ;;
+      --exclude)
+         shift
+         EXCLUDE=$1
+         ;;
+      --include)
+         shift
+         CK_INCLUDE_FILE=$1
+         ;;
+   esac
+   shift
+done
+
+# See if we have and install command
+shift
+
+[ "$1" = "" ] && set -- make install
+
+# End of argument parsing
+
+#############################################################################
+                   # We initialize some useful variables #
+                   #######################################
+
+################################################################
+# User-configurable variables were moved to the checkinstallrc #
+# file which is probably found at /usr/local/lib/checkinstall  #          
+#                                                              #
+#                  DO NOT modify them here!!                   #
+################################################################
+
+
+# Debug level
+! [ "$DEBUG" ] && DEBUG=0
+
+! [ "$INSTALLWATCH_PREFIX" ] && INSTALLWATCH_PREFIX="$INSTALLDIR"
+! [ "$INSTALLWATCH" ] && INSTALLWATCH=${INSTALLWATCH_PREFIX}/bin/installwatch
+
+# Which makepkg to use
+! [ "$MAKEPKG" ] && MAKEPKG=/sbin/makepkg
+
+# Default MAKEPKG flags
+! [ "$MAKEPKG_FLAGS" ] && MAKEPKG_FLAGS="-l y -c n"
+
+# Default architecture type
+! [ "$ARCHITECTURE" ] && ARCHITECTURE=""
+
+# Default package type
+! [ "$INSTYPE" ] && INSTYPE=""
+
+# Interactively show the results of the install command
+# This is useful for interactive installation commands
+! [ "$SHOW_INSTALL" ] && SHOW_INSTALL=1
+
+# Show Slackware package installation script while it runs? Again, useful if
+# it's an interactive script
+! [ "$SHOW_SLACK_INSTALL" ] && SHOW_SLACK_INSTALL=0
+
+# Automatic deletion of "doc-pak" upon termination
+! [ "$DEL_DOCPAK" ] && DEL_DOCPAK=1
+
+# Automatic deletion of the spec file
+! [ "$DEL_SPEC" ] && DEL_SPEC=1
+
+# Automatic deletion of "description-pak" 
+! [ "$DEL_DESC" ] && DEL_DESC=1
+
+
+# Automatically strip all ELF binaries
+! [ "$STRIP_ELF" ] && STRIP_ELF=1
+
+# Don't automatically strip all ELF binaries
+! [ "$STRIP_SO_ELF" ] && STRIP_SO_ELF=0
+
+# Don't automatically search shared libraries
+# nor add them to /etc/ld.so.conf
+! [ "$ADD_SO" ] && ADD_SO=0
+
+# Automatically compress all man pages
+! [ "$COMPRESS_MAN" ] && COMPRESS_MAN=1
+
+# Backup all files modified by the install command supplied by the user
+! [ "$BACKUP" ] && BACKUP=1 
+
+# Write description installing code to doinst.sh
+! [ "$AUTODOINST" ] && AUTODOINST=1 
+
+# Are we going to use filesystem translation?
+! [ "$TRANSLATE" ] && TRANSLATE=1
+
+# Reset the owner/group of all files to root.root?
+! [ "$RESET_UIDS" ] && RESET_UIDS=0
+
+# We won't include anything under this directories
+! [ "$EXCLUDE" ] && EXCLUDE=""
+
+# We will include anything listed in this file
+! [ "$CK_INCLUDE_FILE" ] && CK_INCLUDE_FILE=""
+
+# Accept the default answer for all the questions
+! [ "$ACCEPT_DEFAULT" ] && ACCEPT_DEFAULT=0
+
+# Use the default doc directory of /usr/doc
+! [ "$DOC_DIR" ] && DOC_DIR=/usr/doc
+
+# Do not include common documentation
+! [ "$NODOC" ] && NODOC=0
+
+# Use "-U" flag in rpm by default when installing a rpm package
+# This tells rpm to (U)pdate the package instead of (i)nstalling it.
+! [ "$RPM_IU" ] && RPM_IU=U
+
+# Use the new (8.1+) Slackware description format
+! [ "$NEW_SLACK" ] && NEW_SLACK=1
+
+# Inspect the file list before creating the package
+! [ "$CK_INSPECT" ] && CK_INSPECT=0
+
+# Review the .spec file before creating a .rpm
+! [ "$REVIEW_SPEC" ] && REVIEW_SPEC=0
+
+# Review the control file before creating a .deb
+! [ "$REVIEW_CONTROL" ] && REVIEW_CONTROL=0
+
+# Set the umask
+! [ "$CKUMASK" ] && CKUMASK=0022
+
+# No real installation if not explicitly asked
+! [ "$INSTALL" ] && INSTALL=0
+
+# The place where we will be storing the temp files
+! [ "$BASE_TMP_DIR" ] && BASE_TMP_DIR=/var/tmp
+
+# Default RPM FLAGS
+! [ "$RPM_FLAGS" ] && RPM_FLAGS=" --force --nodeps --replacepkgs "
+
+# Default DPKG FLAGS
+! [ "$DPKG_FLAGS" ] && DPKG_FLAGS=""
+
+# Default MAKEPKG FLAGS
+! [ "$MAKEPKG_FLAGS" ] && MAKEPKG_FLAGS=""
+
+# Show the makepkg program's output?
+! [ "$SHOW_MAKEPKG" ] && SHOW_MAKEPKG=0
+
+####################
+# Non-configurable #
+####################
+
+# Existing configuration files are always preserved
+[ -f description-pak ] && DEL_DESC=0
+[ -f SPEC_PATH ] && DEL_SPEC=0
+[ -d doc-pak ] && DEL_DOCPAK=0
+
+
+
+INSTALLCMD=("$@")
+[ -z "${INSTALLCMD[*]}" ] && INSTALLCMD=(make install)
+
+# The editor we use to review the file list and .spec or control file
+if ! [ -x "$VISUAL" ]; then
+   if [ -x "$EDITOR" ]; then
+      VISUAL=$EDITOR
+   else
+      VISUAL=`which vi`
+   fi
+fi
+
+# pkgtools in Slackware 8.1+ don't like the default tar binary and instead
+# use "tar-1.13". We'll use that too if we can find it.
+
+BADTAR=0
+
+if [ "$TAR" ]; then
+   ! [ -x "$TAR" ] && BADTAR=1 
+else
+   TAR=`which tar-1.13 2> /dev/null`
+fi
+
+if ! [ -x "$TAR" ]; then
+   TAR="tar"
+fi
+
+# If the user gave us a bad path to tar then we should warn him/her about it
+if [ $BADTAR -gt 0 ]; then
+   echo
+   echog "Warning: The path to tar specified in the command line is invalid.\nWarning: It has been set to %s" "$TAR"
+   echo
+fi
+
+[ $DEBUG -gt 0 ] && echo "debug: TAR=$TAR"
+[ $DEBUG -gt 0 ] && echo "debug: VISUAL=$VISUAL"
+
+                      #################################
+                      # Variable definition ends here #
+#############################################################################
+
+
+
+if [ ! -x $INSTALLWATCH ]; then
+   echo
+   echog "I can't find $INSTALLWATCH."
+   echo
+   echog "I can't continue. Either install installwatch or\nmodify the INSTALLWATCH variable in this script,\nthen run checkinstall again."
+   echo
+   exit 1
+fi
+
+echo
+
+# Set the umask. If not specified with "--umask" then we'll use 0022, a 
+# standard, non-paranoid reasonable value.
+
+if [ $DEBUG -gt 0 ] ;then 
+   echo "debug: Setting umask => $CKUMASK"
+fi
+umask $CKUMASK
+
+
+# Find a safe TMP_DIR
+
+TMP_DIR=`mktemp -q -d -p "${BASE_TMP_DIR}"`
+RETURN=$?
+
+if [ "$TMP_DIR" = "$BASE_TMP_DIR" -o "$TMP_DIR" = "/" ]; then
+  echo 
+  echog "%s is an unacceptable value for the temp dir. Please \nedit the variable definition for %s and try again." "$TMP_DIR" "$TMP_DIR"
+  echo
+  echog "*** Aborting"
+  echo
+  exit 1
+fi
+
+if [ $RETURN -gt 0 ]; then
+   echo
+   echog "**** Failed to create temp dir! \n**** Do you have write permission for %s? \n\n**** Aborting installation." "$BASE_TMP_DIR"
+   echo
+   exit  $RETURN
+fi
+
+BUILD_DIR=${TMP_DIR}/package
+mkdir $BUILD_DIR
+
+if [ $DEBUG -gt 0 ] ;then 
+   echo "debug: The temporary directory is: [ $TMP_DIR ]"
+   echo
+fi
+
+
+# 001117-BaP: We can create a default set of docs on the fly . . .
+#   The list I've included should cover most packages adequately. If not,
+#   then you should really create the package doc set *manually*
+
+
+# Check if --nodoc was specified
+if [ "$NODOC" = "0" ]; then 
+
+if  ! [ -d "$DIRECTORIO_FUENTE/doc-pak" ]; then
+    echogn "The package documentation directory ./doc-pak does not exist. \nShould I create a default set of package docs? "
+    if  yorn ; then
+        echo
+        echogn "Preparing package documentation..."
+        mkdir doc-pak
+         for f in ABOUT ABOUT-NLS ANNOUNCE AUTHORS *BUGS* CHANGES CONFIGURATION *COPYING* *COPYRIGHT* CREDITS ChangeLog Changelog CHANGELOG CONTRIBUTORS *FAQ* FEATURES FILES HACKING History HISTORY INSTALL* LICENSE LSM MANIFEST NEWS *README* *Readme* SITES *RELEASE* RELNOTES THANKS TIPS TODO VERSION CONFIGURATION* GPL License  Doc doc Docs* docs* Roadmap ROADMAP; do
+            if [ -e $f ]; then
+               if ! [ -L $f ]; then
+                  cp -a $f doc-pak
+               else
+                  cp -LpR $f doc-pak
+               fi
+
+            fi
+        done
+        okfail
+        DOCS=`ls doc-pak`
+        if ! [ "$DOCS" ]; then
+           echo
+           echog "*** No known documentation files were found. The new package \n*** won\'t include a documentation directory."
+           rm -rf doc-pak                 # If doc-pak is empty then we
+        fi                                # don't need it
+    fi                                    
+    
+fi
+
+fi # End of NODOC
+
+##############################################################################
+#
+# Find out the packaging method to use
+#
+
+
+while ! [ "$INSTYPE" ]; do
+
+   echo
+   echog "Please choose the packaging method you want to use."
+   echogn "Slackware [S], RPM [R] or Debian [D]? "
+   read INSTYPE
+
+echo
+
+       case $INSTYPE in
+         S|s) 
+            INSTYPE=S
+            CK_SLACKWARE=1
+            ;;
+         R|r)
+            INSTYPE=R
+            CK_REDHAT=1
+            ;;
+         D|d)
+            INSTYPE=D
+            CK_DEBIAN=1
+            ;;
+         *)
+           echo
+           echog '*** Invalid type.'
+           echo
+           INSTYPE=""
+           ;;
+       esac
+done
+
+## Do we have a package description file? If we don't then 
+## we should write one
+
+cd "$DIRECTORIO_FUENTE"
+
+# If we already have a slack-desc we use it unless
+# we have a description-pak too
+
+if [ -r slack-desc -a ! -r description-pak ]; then
+   cat -s slack-desc | grep -v \#  | grep -v \| | cut -d : -f 2 | sed '/./,/^$/!d' > description-pak
+fi
+
+
+if [ $ACCEPT_DEFAULT -eq 0 ]; then  # If --default is given, we skip this 
+ if ! [ -r description-pak ]; then
+   DESCRIPTION="Package created with checkinstall $CHECKINSTALL_VERSION"
+   echo
+   echogn "Please write a description for the package."
+
+   # If we selected Slackware, then give the pkgtool warning
+
+   if [ "$CK_SLACKWARE" ]; then 
+      echog " Remember that pkgtool shows\nonly the first one when listing packages so make that one descriptive."
+   fi
+   echo
+   echog "End your description with an empty line or EOF."
+   while [ "$DESCRIPTION" ]; do
+      echo -n ">> " 
+      read DESCRIPTION
+      [ "$DESCRIPTION" ] && echo "$DESCRIPTION" >> description-pak
+   done
+ fi
+fi
+
+# We still don't have it??
+! [ -r description-pak ] && echo "Package created with checkinstall $CHECKINSTALL_VERSION" > description-pak
+
+# Warn the user if we're using the new Slackware description format
+# and the description is bigger than 11 lines
+
+if [ $NEW_SLACK -gt 0 ]; then
+   if [ `wc -l < description-pak` -gt 11 ]; then
+      echo
+      echog "Warning: Your package description is bigger than 11 lines.\nWarning: The Slackware 8.1+ pkgtools might not like it."
+      echo
+   fi
+fi
+
+
+INSTYPE=`echo $INSTYPE | tr a-z A-Z`
+
+case $INSTYPE in
+   S|s) 
+      CK_SLACKWARE=1
+      echo
+      echog "********************************************\n**** Slackware package creation selected ***\n********************************************"
+   ;;
+   R|r)
+      CK_REDHAT=1
+      echo
+      echog "**************************************\n**** RPM package creation selected ***\n**************************************"
+   ;;
+   D|d)
+      CK_DEBIAN=1
+      echo
+      echog "*****************************************\n**** Debian package creation selected ***\n*****************************************"
+esac
+
+########## Acquire some info about the package ##########
+
+
+# Figure out what kind of machine are we running on
+
+if ! [ "$ARCHITECTURE" ]; then
+   ARCHITECTURE=`uname -m`
+   echo $ARCHITECTURE | grep -e "i[3456]86" &> /dev/null
+   [ $? -eq 0 ] && ARCHITECTURE=i386  # Arch will be "i386" for any of
+                                    # i386, i486, i586 or i686.
+                                      # You can change this with "--arch"
+
+   # Fix the PowerPC & Amd64 architecture description if we're on Debian
+   
+   if [ "$CK_DEBIAN" = "1" ] ; then
+      ARCHITECTURE=`dpkg-architecture -qDEB_HOST_ARCH`
+   fi
+fi
+
+if [ -f "$SPEC_PATH" ]; then 
+   SUMMARY=`getparameter "^[Ss]ummary"`
+   NAME=`getparameter "^[Nn]ame"`
+   VERSION=`getparameter "^[Vv]ersion"`
+   RELEASE=`getparameter "^[Rr]elease"`
+   LICENSE=`getparameter "^[Cc]opyright"`
+   PKG_GROUP=`getparameter "^[Gg]roup"`
+   PROVIDES=`getparameter "^[Pp]rovides"`
+   REQUIRES=`getparameter "^[Rr]equires"`
+fi
+      
+   OPTION=junk
+   while [ "$OPTION" ]; do
+
+      # Some sanity checks
+      ! [ "$SUMMARY" ] && SUMMARY=`head -1 description-pak`
+      ! [ "$NAME" ] && NAME=`echo "$PKG_BASENAME" | rev | cut -f2- -d"-" | rev`
+
+      if [ "$CK_DEBIAN" ]; then       # Make the name policy compliant
+      echo $NAME | grep -e "[[:upper:]]" &> /dev/null
+
+         if [ $? -eq 0 ]; then
+            echo
+            echog "*** Warning: The package name \"%s\" contains upper case\n*** Warning: letters. dpkg might not like that so I changed\n*** Warning: them to lower case." "$NAME"
+            NAME=`echo $NAME | tr 'A-Z' 'a-z'`
+
+
+         fi
+      echo $NAME | grep -e '^[^0-9a-z]' &> /dev/null
+         if [ $? -eq 0 ]; then
+            echo
+	    echog "*** Warning: The package name \"%s\" does not start with\n*** Warning: an alphanumetic character. dpkg might not like that so I prefixed\n*** Warning: it with a number 0." "$NAME"
+            NAME=`echo $NAME | sed -e 's/^/0/'`
+         fi
+      echo $NAME | grep -e '[^0-9a-z+.-]' &> /dev/null
+         if [ $? -eq 0 ]; then
+            echo
+            echog "*** Warning: The package name \"%s\" contains illegal\n*** Warning: characters. dpkg might not like that so I changed\n*** Warning: them to dashes." "$NAME"
+            NAME=`echo $NAME | sed -e 's/[^0-9a-z+.-]/-/g'`
+         fi
+      fi
+
+
+      ! [ "$VERSION" ] && VERSION=`echo "$PKG_BASENAME" | rev | cut -f1 -d"-" | rev`
+
+      ## Did we get a usable version?
+
+      if [  "$VERSION" = "$PKG_BASENAME" ]; then
+
+         # If we did not then try getting it from the config.log file
+         if [ -f "$DIRECTORIO_FUENTE/config.log" ]; then
+            VERSION=`grep '#define VERSION' config.log| awk -F \" '{print $ 2}'`
+
+         else
+
+            # We use the current that if everything else fails
+            VERSION=`date +%Y%m%d` 
+         fi
+      fi
+
+
+
+      if [ "$CK_DEBIAN" ]; then       # Check for a valid version for dpkg
+	NEWVERS=$(echo $VERSION | egrep '^([[:alnum:]]+:)?[[:alnum:]]+([-:.+~][[:alnum:]]+)*(-[.[:alnum:]]+)?$' 2> /dev/null)
+	while [ "$NEWVERS" != "$VERSION" ]; do
+            echo
+	    echog "*** Warning: The package version \"%s\" is not a\n*** Warning: debian policy compliant one. Please specify an alternate one" "$VERSION"
+	    if [ $ACCEPT_DEFAULT -eq 0 ] ; then
+		read VERSION
+		NEWVERS=$(echo $VERSION | egrep '^([[:alnum:]]+:)?[[:alnum:]]+([-:.+~][[:alnum:]]+)*(-[.[:alnum:]]+)?$' 2> /dev/null)
+	    else
+		VERSION=0
+		NEWVERS=0
+	    fi
+	done
+      fi
+
+
+
+      if [ ! "$PAGER" ]; then         # no default pager defined
+         if [ "$CK_DEBIAN" ]; then    # use Debian's pager if on Debian
+            PAGER=/usr/bin/sensible-pager
+         else
+            PAGER=less             # use less otherwise
+         fi
+      fi
+
+
+
+      ! [ "$RELEASE" ] && RELEASE="1"
+      ! [ "$LICENSE" ] && LICENSE="GPL"
+      ! [ "$PKG_GROUP" ] && [ "$CK_REDHAT" ] && PKG_GROUP="Applications/System"
+      ! [ "$PKG_GROUP" ] && [ "$CK_DEBIAN" ] && PKG_GROUP="checkinstall"
+      ! [ "$PKG_GROUP" ] && [ "$CK_SLACKWARE" ] && PKG_GROUP="Applications/System"
+
+      ! [ "$ARCHITECTURE" ] && ARCHITECTURE="i386"
+      ! [ "$SOURCE" ] && SOURCE="$PKG_BASENAME"
+      ! [ "$ALTSOURCE" ] && ALTSOURCE=""
+      ! [ "$PROVIDES" ] && PROVIDES="$NAME"
+      ! [ "$REQUIRES" ] && REQUIRES=""
+      # bond: added this so it is easy to change the Maintainer: field
+      # just by setting the MAINTAINER environment variable
+
+      # Try to find the hostname in the environment
+      if [ "$HOSTNAME" ]; then 
+         MAINTDOMAIN=$HOSTNAME
+      else
+         hostname -f &> /dev/null
+         if [ $? -gt 0]; then
+            MAINTDOMAIN="localhost"
+         else
+            MAINTDOMAIN=`hostname -f`
+         fi
+      fi
+      ! [ "$MAINTAINER" ] && MAINTAINER=${LOGNAME:-root}@${MAINTDOMAIN}
+      
+
+      echo
+      echog "This package will be built according to these values: "
+      echo
+      # Debian maintainers use the Maintainer: field and want to be able
+      # to change it. If we are not on debian we don't need the field...
+      [ "$CK_DEBIAN" ] && echog "0 -  Maintainer: [ %s ]" "$MAINTAINER"
+
+      echog "1 -  Summary: [ %s ]" "$SUMMARY"
+      echog "2 -  Name:    [ %s ]" "$NAME"
+      echog "3 -  Version: [ %s ]" "$VERSION"
+      echog "4 -  Release: [ %s ]" "$RELEASE"
+      echog "5 -  License: [ %s ]" "$LICENSE"
+      echog "6 -  Group:   [ %s ]" "$PKG_GROUP"
+      echog "7 -  Architecture: [ %s ]" "$ARCHITECTURE"
+      echog "8 -  Source location: [ %s ]" "$SOURCE"
+      echog "9 -  Alternate source location: [ %s ]" "$ALTSOURCE"
+      [ "$CK_REDHAT" -o "$CK_DEBIAN" ] &&
+          echog "10 - Requires: [ %s ]" "$REQUIRES"
+      [ "$CK_REDHAT" -o "$CK_DEBIAN" ] &&
+          echog "11 - Provides: [ %s ]" "$PROVIDES"
+      [ "$CK_DEBIAN" ] && echog "12 - Conflicts: [ %s ]" "$CONFLICTS"
+      [ "$CK_DEBIAN" ] && echog "13 - Replaces: [ %s ]" "$REPLACES"
+
+      echo
+      echogn "Enter a number to change any of them or press ENTER to continue: "
+      if [ $ACCEPT_DEFAULT -eq 1 ]; then
+         echo
+         OPTION=""
+      else
+         read OPTION
+      fi
+
+      case $OPTION in
+         1)
+            echog "Enter new summary: "
+            echo -n ">> "
+            read SUMMARY
+            ;;
+         2)
+            echog "Enter new name: "
+            echo -n ">> "
+            read NAME
+            ;;
+         3)
+            echog "Enter new version: "
+            echo -n ">> "
+            read VERSION
+            ;;
+         4)
+            echog "Enter new release number: "
+            echo -n ">> "
+            read RELEASE
+            ;;
+         5)
+            echog "Enter the license type: "
+            echo -n ">> "
+            read LICENSE
+            ;;
+         6)
+            echog "Enter the new software group: "
+            echo -n ">> "
+            read PKG_GROUP
+            ;;
+         7)
+            echog "Enter the architecture type: "
+            echo -n ">> "
+            read ARCHITECTURE
+            ;;
+         8)
+            echog "Enter the source location: "
+            echo -n ">> "
+            read SOURCE
+            ;;
+         9)
+            echog "Enter the alternate source location: "
+            echo -n ">> "
+            read ALTSOURCE
+            ;;
+         0) # bond: again, debian-specific
+	    [ "$CK_DEBIAN" ] && {
+            echog "Enter the maintainer's name and e-mail address: "
+            echo -n ">> "
+            read MAINTAINER
+	    }
+            ;;
+        10)
+            [ "$CK_REDHAT" -o "$CK_DEBIAN" ] && {
+            echog "Enter the additional requirements: "
+            echo -n ">> "
+            read REQUIRES
+            }
+            ;;
+        11)
+            # 01-12-06 UKo: new feature
+	    [ "$CK_REDHAT" -o "$CK_DEBIAN" ] && {
+            echog "Enter the provided features: "
+            echo -n ">> "
+            read PROVIDES
+            }
+            ;;
+        12)
+            [ "$CK_DEBIAN" ] && { echog "Enter the conflicting packages: "
+            echo -n ">> "
+            read CONFLICTS
+            }
+            ;;
+        13)
+            [ "$CK_DEBIAN" ] && { echog "Enter the replaced packages: "
+            echo -n ">> "
+            read REPLACES
+            }
+            ;;
+      esac
+   done
+   
+   # The PKG_BASENAME is adjusted to reflect any changes
+   # in the NAME and VERSION of the package
+   # NOTE: on debian we use NAME alone, instead - see below
+
+   PKG_BASENAME="$NAME-$VERSION" 
+
+##############################################################################
+
+
+#
+# We run the program installation from the source directory       
+#
+
+# Write a small script to run the install command. This way the LD_PRELOAD
+# environment variable will be available to it, wich among other things
+# will allow proper detection of new symbolic links and files created by
+# subshells.
+
+[ $DEBUG -gt 0 ] && echo "debug: CK_INCLUDE_FILE = $CK_INCLUDE_FILE"
+
+TMP_SCRIPT=${TMP_DIR}/installscript.sh
+
+cat << EOF > $TMP_SCRIPT
+#!/bin/sh
+
+cd "$DIRECTORIO_FUENTE"
+EOF
+
+shell_escape "${INSTALLCMD[@]}" >> $TMP_SCRIPT
+
+cat << EOF >> $TMP_SCRIPT
+# Report success or failure
+if [ \$? -eq 0 ]; then
+   exit 0
+else
+   exit 1
+fi
+
+EOF
+
+# No one needs to see what we are doing. It's safer this way.
+chmod 700 $TMP_SCRIPT
+
+
+echo
+echogn "Installing with %s..." "${INSTALLCMD[*]}"
+
+
+#
+#   We exclude as many "dangerous" directories as possible from translation.
+# installwatch excludes itself some directories, but we put them all here,
+# to be explicit.
+#
+IEXCLUDE="${DIRECTORIO_FUENTE},/dev,/proc,/tmp,/var/tmp"
+  
+
+# Run the install command, showing the results interactively if we were asked
+# to do so in the configuration section (see the SHOW_INSTALL switch above)
+INSTALL_FAILED=0
+if [ $SHOW_INSTALL -eq 0 ]; then
+
+   $INSTALLWATCH --logfile=${TMP_DIR}/newfiles.tmp --exclude="${IEXCLUDE}" \
+   --root=${TMP_DIR} --transl=${TRANSLATE} --backup=${BACKUP} --dbglvl=$DEBUG\
+   $TMP_SCRIPT &> /${TMP_DIR}/install.log
+
+   okfail
+   INSTALL_FAILED=$?
+else
+   echo
+   echo
+   echog "========================= Installation results ==========================="
+   $INSTALLWATCH --logfile=${TMP_DIR}/newfiles.tmp --exclude="${IEXCLUDE}" \
+   --root=${TMP_DIR} --transl=${TRANSLATE} --backup=${BACKUP} --dbglvl=$DEBUG\
+   $TMP_SCRIPT 2>&1
+   if [ $? -eq 0 ]; then 
+      echo
+      echog "======================== Installation successful =========================="
+   else        
+      INSTALL_FAILED=1
+   fi
+fi
+
+# preserve LD_PRELOAD, might have been set by fakeroot 
+# unset LD_PRELOAD
+
+
+VIEWLOG="n"
+if [ $INSTALL_FAILED -gt 0 ]; then 
+   echo
+   echog "****  Installation failed. Aborting package creation."
+   VIEWLOG="y"
+fi
+
+if [ $SHOW_INSTALL -eq 0 ]; then
+   echo
+   echogn "Do you want to view the installation log file? "
+
+   if  yorn $VIEWLOG ; then
+
+      (echo
+       echogn ' ***************************************************************\n         Installation results. You can find them in\n       %s\n ***************************************************************\n' "${TMP_DIR}/install.log"
+       cat /${TMP_DIR}/install.log)  | $PAGER
+   fi
+fi
+
+if [ $INSTALL_FAILED -gt 0 ]; then 
+   cleanup
+	   exit $INSTALL_FAILED
+	fi
+
+	# If translation was active, the installed files are under /transl
+	TRANSLROOT="/"
+	if [ "${TRANSLATE}" = "1" ]; then
+		TRANSLROOT="${TMP_DIR}/TRANSL"
+	fi
+
+
+	# Copy the documentation files           
+
+
+	if [ -d "$DIRECTORIO_FUENTE/doc-pak" ]; then    # Are there any files? 
+	   echo
+	   echo "Copying documentation directory..."
+           case "${DOC_DIR}" in
+               :*) doc_dir=`echo "${DOC_DIR}" | sed -e 's/://'`;;
+               *) doc_dir="${DOC_DIR}/${NAME}";;
+           esac
+	   mkdir -p "${BUILD_DIR}/${doc_dir}"
+	   copy_dir_hierarchy . "$DIRECTORIO_FUENTE/doc-pak" \
+               "${BUILD_DIR}/${doc_dir}"
+	   chown -R root.root "${BUILD_DIR}/${doc_dir}"
+	fi
+	
+	# If we have a --include list file, copy the files listed there to /
+	# If translation is on, it will catch these too.
+	
+	if [ -f "${DIRECTORIO_FUENTE}/${CK_INCLUDE_FILE}" ]; then
+   	   cat "${DIRECTORIO_FUENTE}/${CK_INCLUDE_FILE}" | while read include_file; do
+	       copy_dir_hierarchy --deref-parents "$include_file" "." "${BUILD_DIR}" &>/dev/null
+           done
+
+	fi
+
+
+	#
+	# Extract the relevant files from the modified files list
+	#
+
+	# Find regular files first
+	[ $DEBUG -gt 0 ] && echo "debug: BASE_TMP_DIR: $BASE_TMP_DIR"
+	cat /${TMP_DIR}/newfiles.tmp | egrep -v '^[-0-9][0-9]*[[:space:]]*(unlink|access)' | cut -f 3 | egrep -v "^(/dev|$BASE_TMP_DIR|/tmp)" | sort -u > /${TMP_DIR}/newfiles
+
+	# symlinks are next
+	cat /${TMP_DIR}/newfiles.tmp | egrep -v '^[-0-9][0-9]*[[:space:]]*(unlink|access)' | cut -f 4 | egrep -v "^(/dev|$BASE_TMP_DIR|/tmp)" | grep -v "#success" | sort -u  >> /${TMP_DIR}/newfiles
+        # Create another list of modified files that exclude all files the
+        # install script wanted to create but did not, e.g because they already
+        # existed.
+        egrep "#success$" /${TMP_DIR}/newfiles.tmp | cut -f 3 | sort -u \
+            >/${TMP_DIR}/modified
+        egrep "#success$" /${TMP_DIR}/newfiles.tmp | cut -f 4 \
+            | egrep -v "#success" | sort -u >> /${TMP_DIR}/modified
+
+	# OK, now we clean it up a bit
+	mv /${TMP_DIR}/newfiles.tmp /${TMP_DIR}/newfiles.installwatch
+	sort -u <  /${TMP_DIR}/newfiles | uniq  | while read file; do
+	   if [ -e "${TRANSLROOT}${file}" ]; then
+	      echo $file >> /${TMP_DIR}/newfiles.tmp
+	   else
+	      FILE_SYM=`file "${TRANSLROOT}${file}" | grep 'symbolic link'`
+	      [ "${FILE_SYM}" != "" ] && echo $file >> /${TMP_DIR}/newfiles.tmp
+	   fi
+	done
+
+	cp /${TMP_DIR}/newfiles.tmp /${TMP_DIR}/newfiles
+
+	# Don't include anything under the directories specified with "--exclude"
+
+	[ $DEBUG -gt 0 ] && echo "debug: EXCLUDE=$EXCLUDE"
+
+	for exclude in `echo $EXCLUDE | awk '{ split ($0, files,","); for(i=1; files[i] != ""; i++) print files[i];}'`; do
+	   if [ -d $exclude ]; then  # If it's a directory, ignore everything below it
+	      egrep -v "^$exclude" < /${TMP_DIR}/newfiles > /${TMP_DIR}/newfiles.tmp
+	   else
+	      if [ -f $exclude ]; then  # If it's a file, ignore just this one
+		 egrep -v "^$exclude$" < /${TMP_DIR}/newfiles > /${TMP_DIR}/newfiles.tmp
+	      fi
+	   fi
+	   cp /${TMP_DIR}/newfiles.tmp /${TMP_DIR}/newfiles
+	done
+
+	# Find files created under /home
+	grep '^/home' ${TMP_DIR}/newfiles > /${TMP_DIR}/unwanted
+	if [ $? -eq 0 ]; then
+	   echo
+	   echog "Some of the files created by the installation are inside the home directory: /home"
+	   echo
+	   echog "You probably don't want them to be included in the package."
+   	   echogn "Do you want me to list them? "
+	   if yorn "n"; then
+	       $PAGER ${TMP_DIR}/unwanted
+           fi
+	   echogn "Should I exclude them from the package? (Saying yes is a good idea) "
+	   if yorn ; then
+	       sed -i -e '/^\/home/d' ${TMP_DIR}/newfiles
+           fi
+	fi
+
+	## Find any files created in `pwd`. We probably don't want them here
+
+	grep "^`pwd`" ${TMP_DIR}/newfiles > /${TMP_DIR}/unwanted 
+	if [ $? = 0 ]; then 
+	   echo
+	   echog "Some of the files created by the installation are inside the build\ndirectory: %s" "`pwd`"
+	   echo
+	   echogn "You probably don't want them to be included in the package,\nespecially if they are inside your home directory.\nDo you want me to list them? "
+	   if  yorn "n"; then
+	      $PAGER ${TMP_DIR}/unwanted
+	   fi
+	   echogn "Should I exclude them from the package? (Saying yes is a good idea) "
+	   if  yorn ; then
+	      grep -v "`pwd`" ${TMP_DIR}/newfiles > /${TMP_DIR}/newfiles.tmp
+	      mv /${TMP_DIR}/newfiles.tmp /${TMP_DIR}/newfiles
+	   fi
+	fi
+
+	# If requested with "--inspect" we run an editor on the newfiles list
+	if [ $CK_INSPECT -gt 0 ]; then
+	   echo
+	   echog "You requested to review the list of files that will be\nincluded in this package.\n\nNow you'll have the chance to review and optionally modify it."
+	   echo
+	   echog "Press ENTER to continue."
+	   read junk
+	   $VISUAL ${TMP_DIR}/newfiles
+
+	   # Check if new files were added by the user
+	   cat /${TMP_DIR}/newfiles | while read file; do 
+	      if ! [ -e "${TRANSLROOT}${file}" ]; then
+		  copy_dir_hierarchy --deref-parents "${file}" "/" "${BUILD_DIR}" >> /${TMP_DIR}/updated-by-user.log 2>&1
+	      fi
+	   done
+
+	fi
+
+
+	# Copy the files to the temporary directory
+	#
+
+	echo
+	echogn "Copying files to the temporary directory..."
+
+	cd /
+
+	( cat /${TMP_DIR}/newfiles | while read i; do 
+	      if [ ! -d "${TRANSLROOT}${i}" -o -L "${TRANSLROOT}${i}" ]; then
+	      echo ".${i}"
+	   fi
+	done ) > /${TMP_DIR}/newfiles-tar
+
+        # Here it gets tricky: we need to copy all new files to our build dir,
+        # keeping permissions as they are for parents directories as well as for
+        # the files themselves. If the parents or the file are symlinks, we
+        # dereference them only if they were not modified by the installation
+        # script. 
+        NEWFILES="${TMP_DIR}/modified"
+        LOGFILE="/${TMP_DIR}/checkinstall.log"
+
+ 	cat /${TMP_DIR}/newfiles-tar | while read file; do
+            parents=`list_parents ${file} | sed s/^\.//`
+            for p in $parents; do
+            # We have to remove the ./ at the beginning
+		truep=`echo ${p} | sed s/^\.//`
+                # Parent has been modified: do _not_ dereference
+		grep "${truep}$" "${NEWFILES}" &>/dev/null
+		if [ $? -eq 0 ]; then
+                    $TAR --no-recursion -C "${TRANSLROOT}" -cpf - $p \
+			| $TAR -f - -xvpC "${BUILD_DIR}" >> $LOGFILE 2>&1
+		else
+                    # Parent wasn't touched by the install script: dereference
+                    $TAR --no-recursion -C "${TRANSLROOT}" -cphf - $p \
+			| $TAR -f - -xvpC "${BUILD_DIR}"  >> $LOGFILE 2>&1
+		fi
+            done
+            truefile=`echo ${file} | sed 's/^\.//'`
+            # No recursion here: if $file is a directory, then the files created
+            # in it will follow.
+            grep "${truefile}$" "${NEWFILES}" &>/dev/null
+            if [ $? -eq 0 ]; then
+		$TAR --no-recursion -C "${TRANSLROOT}" -cpf - "$file" \
+                    | $TAR -f - -xvpC "${BUILD_DIR}" >> $LOGFILE 2>&1
+            else 
+		$TAR --no-recursion -C "${TRANSLROOT}" -cphf - "$file" \
+                    | $TAR -f - -xvpC "${BUILD_DIR}" >> $LOGFILE 2>&1
+            fi
+	done
+
+	okfail
+
+	cd /
+
+
+	# Reset all files' owner/group to root.root, and all dirs' perms to 755
+	#
+	# We do this if asked with "--reset-uids" in the command line, like the
+	# similar option in Slackware's makepkg.
+
+	if [ $RESET_UIDS -gt 0 ]; then
+	   find "$BUILD_DIR" -exec chown root.root {} \;
+	   find "$BUILD_DIR" -type d -exec chmod 755 {} \;
+	   find "$BUILD_DIR" -type f -exec chmod o=g {} \;
+	fi
+
+	##############################################################################
+				    # Strip ELF binaries # 
+				    ######################
+
+
+	#
+	# Note: The code in this section was taken from the brp-strip script included 
+	# in rpm-4.0.2, which is distributed under the GNU GPL. The copyright
+	# for this code belongs to its owner. See the file COPYING for details.
+	#
+
+	if [ $STRIP_ELF -eq 1 ]; then
+	   echo
+	   if [ $STRIP_SO_ELF -eq 1 ]; then
+	       echogn "Stripping ELF binaries and libraries..."
+	   else
+	       echogn "Stripping ELF binaries..."
+	   fi
+	   for f in `find ${BUILD_DIR} -type f \( -perm -0100 -or -perm -0010 -or -perm -0001 \)` ; do
+
+	       if [ $STRIP_SO_ELF -eq "0" -a "`file $f | grep -v ' shared object,'`" = "" ]; then
+	       #if this is a *.so* file and we don't have to strip it, then filter 'em
+		   continue
+	       fi
+	       if [ "`file $f | sed -n -e 's/^\(.*\):[  ]*ELF.*, not stripped/\1/p'`" = "" ]; then
+		   continue
+	       fi
+	       strip -p $f || :
+	   done
+	   okfail
+	fi
+				     ###################
+				     # End of stripping #
+	##############################################################################
+
+
+	##############################################################################
+				    # Compress man pages #
+				    ######################
+
+#
+# Note: The code in this section is based on the brp-compress script
+# included in rpm-4.0.2, which is distributed under the GNU GPL. The
+# copyright for this code belongs to its owner. See the file COPYING for
+# details.
+#
+
+if [ $COMPRESS_MAN -eq 1 ]; then
+ echo
+ echogn "Compressing man pages..."
+ cd $BUILD_DIR
+ 
+ # Compress man pages
+ COMPRESS="gzip -9"
+ COMPRESS_EXT=.gz
+ 
+ for d in ./usr/local/man/man* ./usr/local/man/*/man* ./usr/local/info \
+ 	./usr/local/share/man/man* ./usr/local/share/man/*/man* \
+ 	./usr/local/share/info \
+ 	./usr/local/kerberos/man \
+ 	./usr/local/share/doc/*/man/man* ./usr/local/lib/*/man/man* \
+ 	././usr/man/man* ./usr/man/*/man* ./usr/info \
+ 	./usr/share/man/man* ./usr/share/man/*/man* ./usr/share/info \
+ 	./usr/kerberos/man ./usr/X11R6/man/man* ./usr/lib/perl5/man/man* \
+ 	./usr/share/doc/*/man/man* ./usr/lib/*/man/man*
+ do
+     [ -d $d ] || continue
+     for f in `find $d -type f`
+     do
+        [ -f "$f" ] || continue
+ 	[ "`basename $f`" = "dir" ] && continue
+
+         # decompress manpage by "cat"ing it, this allows decompression of
+         # hardlinked manpages and allows gunzip of a compressed page which is
+         # actually called "man.1" and not "man.1.gz", something it won't do
+         # when operating directly on file.
+         # this overcomes installs that create (un)compressed pages with names
+         # that don't correspond with the compression.
+         # this is done to a temporary file so we can detect hardlinks to
+         # original file.
+       b=`echo $f | sed -e 's/\.Z$//;s/\.gz$//;s/\.bz2$//'`
+         cp -p $f $b.tmp # setup up permissions on our new file
+         cat $f | gunzip -c 2>/dev/null >$b.tmp || {
+           cat $f | bunzip2 -c 2>/dev/null >$b.tmp || {
+             cat $f >$b.tmp
+           }
+         }
+ 
+       $COMPRESS $b.tmp
+         # find any hard links to the old manpage and link to the new one..
+         inode=`ls -i $f | awk '{ print $1 }'`
+         others=`find $d -type f -inum $inode`
+       if [ -n "$others" ]; then
+         for afile in $others ; do
+           [ "$afile" = "$f" ] && continue
+             rm -f ${TRANSLROOT}/${afile} ${afile}
+             afile=`echo $afile | sed -e 's/\.Z$//;s/\.gz$//;s/\.bz2$//'`
+           ln $b.tmp$COMPRESS_EXT $afile$COMPRESS_EXT
+         done
+         fi
+         rm -f ${TRANSLROOT}/${f} ${f}
+         mv $b.tmp$COMPRESS_EXT $b$COMPRESS_EXT
+    done
+ 
+     for f in `find $d -type l`
+     do
+ 	l=`ls -l $f | awk '{ print $11 }' | sed -e 's/\.gz$//' -e 's/\.bz2$//' -e 's/\.Z$//'`
+ 	rm -f ${TRANSLROOT}/${f}
+ 	b=`echo $f | sed -e 's/\.gz$//' -e 's/\.bz2$//' -e 's/\.Z$//'`
+ 	ln -sf $l$COMPRESS_EXT $b$COMPRESS_EXT
+     done
+ done
+ okfail
+fi
+
+                       ################################
+                       # End of man pages compressing #
+##############################################################################
+
+
+# Now we get the TRUE list of files from the directory listing (kind of)
+# of the BUILD_DIR. This is the true one simply because THESE are the files
+# that will actually get packaged.
+
+
+echo
+echogn "Building file list..."
+rm ${TMP_DIR}/newfiles
+cd $BUILD_DIR
+$TAR -cpf -  . | $TAR -f - -t 2>&1 | sed -e 's#^\./#/#' | egrep -v "^/$" > ${TMP_DIR}/newfiles
+okfail
+
+
+# Do we have a postinstall script?
+PINST_EXISTS=0
+[ -f ${DIRECTORIO_FUENTE}/postinstall-pak ] && PINST_EXISTS=1
+
+##############################################################################
+                         # Identify shared libraries # 
+                         #############################
+
+if [ $ADD_SO -eq 1 ]; then
+
+# Here we identify the shared libraries locations so we can add them
+# to /etc/ld.so.conf file if they're not already there. This will be done
+# in the postinstall script.
+
+cat ${TMP_DIR}/newfiles | while read libfile; do
+  FILETYPE=`file $libfile` 
+  if echo /$FILETYPE | grep -e ".*ELF.*hared.*bject" &> /dev/null; then
+     echo `dirname $libfile` >> ${TMP_DIR}/libdirs
+  fi
+done
+
+# Did we find any libdirs?
+if [ -f ${TMP_DIR}/libdirs ]; then
+
+ echo
+ echog "Shared libraries found. Adding them to the postinstall script."
+ # If we have a pre-existing postinstall-pak we save it
+
+ if [ $PINST_EXISTS -gt 0 ]; then
+    mv ${DIRECTORIO_FUENTE}/postinstall-pak ${DIRECTORIO_FUENTE}/postinstall-pak.tmp 
+    PINST_EXISTS=1
+ fi
+ 
+ if ! [ $PINST_EXISTS -gt 0 ]; then
+    cat << EOF > ${DIRECTORIO_FUENTE}/postinstall-pak
+#!/bin/bash
+#
+# postinstall script, created by checkinstall-${CHECKINSTALL_VERSION}
+#
+EOF
+ fi
+
+ echo "echo" >>  ${DIRECTORIO_FUENTE}/postinstall-pak
+
+ cat ${TMP_DIR}/libdirs | while read libdir; do
+   (
+    echo "if ! egrep \"^/${libdir} *$\" /etc/ld.so.conf &> /dev/null; then"
+    echo "   echo \"Adding \"/$libdir\" to /etc/ld.so.conf\"" 
+    echo "   echo /$libdir >> /etc/ld.so.conf"
+    echo fi
+   ) >> ${DIRECTORIO_FUENTE}/postinstall-pak
+ done
+
+ echo ldconfig >> ${DIRECTORIO_FUENTE}/postinstall-pak
+
+ # If we had an existing postinstall-pak, append it to the new one
+ 
+ if [ -f ${DIRECTORIO_FUENTE}/postinstall-pak.tmp ]; then
+    cat ${DIRECTORIO_FUENTE}/postinstall-pak.tmp >> ${DIRECTORIO_FUENTE}/postinstall-pak
+ fi
+
+fi  # End of did we find any libdirs?
+
+fi
+
+                       ####################################
+                       # End of Identify shared libraries # 
+##############################################################################
+
+##############################################################################
+                          # Identify kernel modules #
+			  ###########################
+
+# Find out if we installed a kernel module, and if so run depmod in the postinst
+# and delete the files depmod touches (they conflict with other packages)
+# These files are modules.* inside the kernel modules directory.
+
+DEPFILES=$(cat ${TMP_DIR}/newfiles | grep -E 'modules\.(dep|pcimap|usbmap|ccwmap|ieee1394map|isapnpmap|inputmap|ofmap|seriomap|alias|symbols)' )
+if [ ! -z "$DEPFILES" ] ; then
+	echo
+	echog "Kernel modules found. Calling depmod in the postinstall script"
+	# Delete references to the depmod generated files
+	sed -r -i -e '\,modules\.(dep|pcimap|usbmap|ccwmap|ieee1394map|isapnpmap|inputmap|ofmap|seriomap|alias|symbols),d' ${TMP_DIR}/newfiles
+	# And the files themselves
+	for file in $DEPFILES ; do
+		rm ${BUILD_DIR}/$file
+	done
+	# Find out the kernel version.
+	# Ugly hack, but works in Debian and should on many other systems.
+	# The file must be /any/dir/<version>/modules.*
+	KVER=$(echo $DEPFILES | awk '{print $1}' | sed -e 's|/modules\..*||' | xargs basename )
+	# Add depmod to the postinst
+	# This will be redundant if we already have a postinstall script.
+	# Nevertheless, it is harmless.
+	echo "#!/bin/sh" >> ${DIRECTORIO_FUENTE}/postinstall-pak
+	echo "#" >> ${DIRECTORIO_FUENTE}/postinstall-pak
+	echo "# postinstall script, created by checkinstall-${CHECKINSTALL_VERSION}" >> ${DIRECTORIO_FUENTE}/postinstall-pak
+	echo "#" >> ${DIRECTORIO_FUENTE}/postinstall-pak
+	echo "depmod $KVER" >> ${DIRECTORIO_FUENTE}/postinstall-pak
+fi
+
+                        ##################################
+		        # End of Identify kernel modules #
+##############################################################################
+
+cd $DIRECTORIO_FUENTE
+
+FAILED=0
+
+case $INSTYPE in
+
+##############################################################################
+                    # Create Slackware compatible tarball #
+                    #######################################
+
+
+s|S)  
+
+
+# The new Slackware naming scheme
+SLACK_PKG_BASENAME="${PKG_BASENAME}-${ARCHITECTURE}-${RELEASE}"
+
+FAILED=0
+
+# If we're not installing the package then there is no problem if 
+# installpkg is not in our execution path
+
+if [ $INSTALL -gt 0 ]; then
+   # Verify that we have the "installpkg" command in our path 
+
+   INSTALLPKG_PATH=`which installpkg 2> /dev/null`
+
+   if ! [ -x "$INSTALLPKG_PATH" ]; then
+      echo
+      echog "*** The \"installpkg\" program is not in your PATH!"
+      echo
+      echog "*** Slackware package creation aborted"
+      FAILED=1
+   fi
+fi
+
+if ! [ $FAILED -gt 0 ]; then
+
+# Create the Slackware installation script
+
+echo
+echogn "Preparing Slackware install directory..."
+mkdir -p ${BUILD_DIR}/install
+touch ${BUILD_DIR}/install/doinst.sh
+okfail
+
+echo
+echogn "Writing package description..."
+
+# If we're building for Slackware 8.1+, then we use the new description
+# file format
+
+if [ $NEW_SLACK -gt 0 ]; then
+
+cat << EOF > ${BUILD_DIR}/install/slack-desc
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|' on
+# the right side marks the last column you can put a character in. You must make
+# exactly 11 lines for the formatting to be correct.  It's also customary to
+# leave one space after the ':'.
+
+EOF
+
+# Calculate the spaces before the "handy-ruler"
+HR_SPACES=`echo $NAME | wc -c| awk '{ for (i=1;substr ($0,i,1) ~ /[[:blank:]]/ ;i++); print substr ($0,i);}'`
+
+
+awk -v S=$HR_SPACES 'BEGIN {ORS=""; for (i=1; i < S; i++) print " ";}' >> ${BUILD_DIR}/install/slack-desc
+
+echo "|-----handy-ruler------------------------------------------------------|" >> ${BUILD_DIR}/install/slack-desc
+
+
+# Add the prefixed description
+ cat description-pak | while read line; do
+    echo "$NAME: $line" >> ${BUILD_DIR}/install/slack-desc
+ done
+
+okfail
+
+# End of NEW_SLACK block
+
+else 
+
+#
+# Generate the description-installing doinst.sh
+#
+
+if [ $AUTODOINST -eq 1 ]; then
+   echo "PACKAGE DESCRIPTION:" > ${BUILD_DIR}/install/description
+   cat description-pak | while read line; do
+      echo $line >> ${BUILD_DIR}/install/description
+   done
+   okfail 
+
+   echo
+   echogn "Writing Slackware install script..."
+   cat << EOF >> ${BUILD_DIR}/install/doinst.sh
+# 
+# doinst.sh, auto-generated by checkinstall-${CHECKINSTALL_VERSION}
+#
+
+echo 
+cat /install/description
+
+sed '/PACKAGE LOCATION/r /install/description' < "/var/log/packages/$SLACK_PKG_BASENAME" > description.tmp
+mv description.tmp "/var/log/packages/${SLACK_PKG_BASENAME}"
+rm /install/description
+
+EOF
+   okfail
+fi
+
+fi # End of description creation
+
+# If we have a Slackware install script already, add it to this one
+# and force an interactive slackware install script
+for file in postinstall-pak install-pak; do
+   if [ -f $file ]; then
+      INSTALL_PAK=${file}
+   fi
+done
+if [ -f "$INSTALL_PAK" ]; then 
+   echo
+   # We want to say this only if we actually had a preexisting postinstall-pak
+   if [ $PINST_EXISTS -gt 0 ]; then
+      echogn "Appending your script to the main install script..."
+      cat $INSTALL_PAK >> ${BUILD_DIR}/install/doinst.sh
+      okfail
+      echo
+   else
+      cat $INSTALL_PAK >> ${BUILD_DIR}/install/doinst.sh
+   fi
+   SHOW_SLACK_INSTALL=1
+fi
+
+
+echo
+echogn "Creating package ${SLACK_PKG_BASENAME}..."
+
+cd $BUILD_DIR
+chmod 755 $BUILD_DIR
+
+# Make the "TAR" variable available to MAKEPKG
+export TAR
+
+if [ $SHOW_MAKEPKG -gt 0 ]; then
+   $MAKEPKG $MAKEPKG_FLAGS "${SLACK_PKG_BASENAME}.tgz"
+   okfail
+else
+   $MAKEPKG $MAKEPKG_FLAGS "${SLACK_PKG_BASENAME}.tgz" &> /dev/null
+   okfail
+fi
+
+mv "${SLACK_PKG_BASENAME}.tgz" "$DIRECTORIO_FUENTE"
+
+#
+# If requested, we install the package to register it in Slackware's
+# installed packages list so we can list it's contents with pkgtool 
+# or remove it with removepkg
+#
+
+if [ "$INSTALL" = "1" ]; then
+
+   # Go back to where we started
+   cd "$DIRECTORIO_FUENTE"
+   
+   echo
+   
+   if [ $SHOW_SLACK_INSTALL -eq 0 ]; then
+      echogn "Installing package..."
+      installpkg "${SLACK_PKG_BASENAME}.tgz" &> ${TMP_DIR}/slackinstall.log
+      okfail
+      [ $? -gt 0 ] && FAILED=1
+   
+   else
+   echog "========================= Installation results ==========================="
+      echo
+      installpkg "${SLACK_PKG_BASENAME}.tgz" 
+      if [ $? -gt 0 ]; then
+         FAILED=1
+      else
+         echo
+      echog "======================== Installation successful =========================="
+      fi
+   fi
+   
+   if [ $FAILED -eq 1 ]; then
+      echo
+      echog "*** Failed to install the package"
+      echo
+      if [ $SHOW_SLACK_INSTALL -eq 0 ]; then
+         echogn "Do you want to see the log file? "
+         if yorn ; then
+            $PAGER ${TMP_DIR}/slackinstall.log
+            cleanup
+            exit 1
+         fi
+      fi
+   fi
+
+else
+        echo
+        echog "NOTE: The package will not be installed."
+fi
+ 
+
+PKG_LOCATION="${DIRECTORIO_FUENTE}/${SLACK_PKG_BASENAME}.tgz"
+INSTALLSTRING="installpkg ${SLACK_PKG_BASENAME}.tgz"
+REMOVESTRING="removepkg ${SLACK_PKG_BASENAME}"
+
+fi
+;;
+
+
+                       #################################
+                       # End Slackware package section #
+##############################################################################
+
+
+##############################################################################
+                          # RPM package installation #
+                          ############################
+
+
+r|R)
+
+
+FAILED=0
+
+# Verify that we have the rpm command in our path
+
+RPM_PATH=`which rpm 2> /dev/null`
+
+if ! [ -x "$RPM_PATH" ]; then
+   echo
+   echog "*** The \"rpm\" program is not in your PATH!"
+   echo
+   echog "*** RPM package creation aborted"
+   FAILED=1
+fi
+   
+if ! [ $FAILED -gt 0 ]; then
+
+# Identify the rpm version
+
+RPM_VERSION=`rpm --version | awk '{ print $3 }'`
+RPM_MAJOR_VERSION=`echo $RPM_VERSION | cut -f1 -d"."`
+RPM_MINOR_VERSION=`echo $RPM_VERSION | cut -f2 -d"."`
+RPM_PATCH_LEVEL=`echo $RPM_VERSION | cut -f3 -d"."`
+
+if [ "$RPM_PATCH_LEVEL" = "" ]; then 
+   RPM_PATCH_LEVEL=0
+fi
+
+
+if [ $DEBUG -gt 0 ]; then
+   echo "debug: RPM_VERSION=${RPM_VERSION}"
+   echo "debug: RPM_MAJOR_VERSION=$RPM_MAJOR_VERSION"
+   echo "debug: RPM_MINOR_VERSION=$RPM_MINOR_VERSION"
+   echo "debug: RPM_PATCH_LEVEL=$RPM_PATCH_LEVEL"
+   echo "debug: RPM_IU=$RPM_IU"
+fi
+
+# AFAIK, the only rpm versions that accept
+# "--target=arch" instead of "--target arch"
+# are 3.x < version < 4.0.3
+
+if [ $RPM_MAJOR_VERSION -eq 4 -a $RPM_PATCH_LEVEL -lt 3 ]; then
+   RPM_TARGET_FLAG="--target="
+else
+   RPM_TARGET_FLAG="--target "
+fi
+
+# rpmbuild seems to exist only in RPM 4
+
+if [ $RPM_MAJOR_VERSION -eq 4 ]; then
+   RPMBUILD="rpmbuild"
+else
+   RPMBUILD="rpm"
+fi
+
+if [ "$RPMBUILD" = "rpmbuild" -a ! -x "`which rpmbuild 2> /dev/null`" ]; then
+   echo
+   echo "*** The \"rpmbuild\" program is not in your PATH!"
+   echo
+   echo "*** RPM package creation aborted"
+   FAILED=1
+fi
+   
+if ! [ $FAILED -gt 0 ]; then
+
+
+# Find out the RPM source directory path
+
+if ! [ "$RPMSOURCEDIR" ]; then
+   if [ $RPM_MAJOR_VERSION -eq 3 -a $RPM_PATCH_LEVEL -ge 3 -o $RPM_MAJOR_VERSION -gt 3 ]; then
+      RPMSOURCEDIR="`rpm --eval=%_topdir`"
+   else
+      RPMSOURCEDIR="NOT-FOUND"
+      for directory in packages OpenLinux redhat RedHat rpm RPM "" ; do
+         [ -d /usr/src/${directory}/SOURCES ] && RPMSOURCEDIR="/usr/src/${directory}"
+      done
+   fi
+fi
+
+[ $DEBUG -gt 0 ] && echo "debug: RPMSOURCEDIR=$RPMSOURCEDIR"
+
+
+while ! [ -d "$RPMSOURCEDIR/SOURCES" ]; do
+   echo
+   echogn "%s has no SOURCES directory. Please write the path to\nthe RPM source directory tree: " "$RPMSOURCEDIR"
+   read RPMSOURCEDIR
+   ! [ "$RPMSOURCEDIR" ] && RPMSOURCEDIR="NOT-FOUND"
+done
+
+   
+# We'll write a basic spec file
+
+if ! [ -f "$SPEC_PATH" ]; then
+
+# If the buildroot path has spaces then we'll use the BUILD_DIR instead.
+# rpm can't have a buildroot path with spaces in it (Bug?)
+#
+# This is obviously a hack, I hope we can do it the right way when rpm is
+# fixed.
+
+if ( echo $DIRECTORIO_FUENTE | grep " " &> /dev/null ); then
+   BROOTPATH="${DIRECTORIO_FUENTE}/buildroot"
+else
+   BROOTPATH=$BUILD_DIR
+fi
+
+# Here comes the .spec file:
+
+   cat > "$SPEC_PATH" << EOF
+Summary:   $SUMMARY
+Name:      $NAME
+Version:   $VERSION
+Release:   $RELEASE
+License: $LICENSE
+Packager:  checkinstall-$CHECKINSTALL_VERSION
+Group:     $PKG_GROUP          
+BuildRoot: $BROOTPATH
+Provides:  $PROVIDES
+Requires:  $REQUIRES,/bin/sh
+
+%description
+EOF
+   cat description-pak >> "$SPEC_PATH"
+
+
+# Use the preinstall-pak script if we have it
+if [ -f preinstall-pak ]; then
+   echo  >> "$SPEC_PATH" 
+   echo '%pre' >> "$SPEC_PATH" 
+   cat preinstall-pak  >> "$SPEC_PATH"
+fi
+
+# Use the postinstall-pak script if we have it
+if [ -f postinstall-pak ]; then
+   echo >> "$SPEC_PATH" 
+   echo '%post' >> "$SPEC_PATH" 
+   cat postinstall-pak  >> "$SPEC_PATH"
+fi
+
+# Use the preremove-pak script if we have it
+if [ -f preremove-pak ]; then
+   echo >> "$SPEC_PATH" 
+   echo '%preun' >> "$SPEC_PATH" 
+   cat preremove-pak  >> "$SPEC_PATH"
+fi
+
+# Use the postremove-pak script if we have it
+if [ -f postremove-pak ]; then
+   echo >> "$SPEC_PATH" 
+   echo '%postun' >> "$SPEC_PATH" 
+   cat postremove-pak  >> "$SPEC_PATH"
+fi
+
+   cat >> "$SPEC_PATH" << EOF
+
+%files
+EOF
+
+# Prepare directories to be included in the .spec file
+mv ${TMP_DIR}/newfiles ${TMP_DIR}/newfiles.tmp
+cat ${TMP_DIR}/newfiles.tmp | while read line; do
+   [ -d "${BUILD_DIR}/${line}" -o -L "${BUILD_DIR}/${line}" ] && echo -n "%dir " >> ${TMP_DIR}/newfiles
+   echo "\"/${line}\"" >> ${TMP_DIR}/newfiles
+done
+
+# Append the file list to the .spec file
+cat ${TMP_DIR}/newfiles >> "$SPEC_PATH" 
+fi
+
+
+# If requested with --review-spec, we run an editor on the .spec file
+if [ $REVIEW_SPEC -gt 0 ]; then
+   echo
+   echog "You requested to review the .spec file for this package.\nNow you\'ll have the chance to review and optionally modify this file."
+   echo
+   echog "Press ENTER to continue."
+   read junk
+   $VISUAL "$SPEC_PATH" 
+fi
+
+BUILDROOT=`egrep '^[Bb]uild[Rr]oot' < "$SPEC_PATH" | cut -f2 -d:| sed 's/^ *//g'| sed 's/ *$//g'` # The sed commands remove leading/trailing whitespaces
+
+# We make sure that we have a valid RELEASE number
+
+! [ "$RELEASE" ] && RELEASE=`egrep '^Release:' < "$SPEC_PATH"|cut -f2 -d: | awk '{ for (i=1;substr ($0,i,1) ~ /[[:blank:]]/ ;i++); print substr ($0,i); }'`
+
+[ $DEBUG -gt 0 ] && echo "debug: BUILDROOT=$BUILDROOT"
+
+! [ -d "$BUILDROOT" ] &&  ln -s "$BUILD_DIR" "$BUILDROOT"
+
+# We make sure that the architecture directory exists
+
+! [ -d "${RPMSOURCEDIR}/RPMS/${ARCHITECTURE}" ] && mkdir -p "${RPMSOURCEDIR}/RPMS/${ARCHITECTURE}"
+
+
+mkdir "${TMP_DIR}/$PKG_BASENAME"
+cd $TMP_DIR
+$TAR -cz -f "${RPMSOURCEDIR}/SOURCES/${PKG_BASENAME}.tgz" "$PKG_BASENAME"
+rm -rf "${TMP_DIR}/$PKG_BASENAME"
+cd "$DIRECTORIO_FUENTE"
+
+echo
+echogn "Building RPM package..."
+$RPMBUILD -bb ${RPM_TARGET_FLAG}${ARCHITECTURE} "$SPEC_PATH" &> ${TMP_DIR}/rpmbuild.log
+okfail
+
+if [ $? -gt 0 ]; then
+   echo
+   echog "*** Failed to build the package"
+   echo
+   echogn "Do you want to see the log file? "
+   if yorn ; then
+      $PAGER ${TMP_DIR}/rpmbuild.log
+   fi
+   FAILED=1
+fi
+ 
+RPMPKG="${RPMSOURCEDIR}/RPMS/${ARCHITECTURE}/${PKG_BASENAME}-${RELEASE}.${ARCHITECTURE}.rpm"
+
+# Check for the old RPMFLAGS
+if [ "$RPMFLAGS" ]; then
+   echo
+   echog "Warning: the use of RPMFLAGS is deprecated.\nWarning: You should now use RPM_FLAGS,\nWarning: please update your checkinstallrc file."
+fi
+
+if ! [ $FAILED -gt 0 ]; then 
+   if [ "$INSTALL" = "1" ]; then
+
+      echo
+      echogn "Installing RPM package..."
+      rpm -$RPM_IU $RPM_FLAGS "${RPMPKG}" &>  ${TMP_DIR}/rpminstall.log
+      okfail
+      if [ $? -gt 0 ]; then
+         echo
+         echog "*** Failed to install the package"
+         echo
+         echogn "Do you want to see the log file? "
+         if yorn ; then
+            $PAGER ${TMP_DIR}/rpminstall.log
+         fi
+         FAILED=1
+      fi
+   else
+      echo
+      echog "NOTE: The package will not be installed"
+   fi
+fi
+   
+if ! [ $FAILED -gt 0 ]; then
+   PKG_LOCATION="$RPMPKG"
+   INSTALLSTRING="rpm -i `basename "$RPMPKG"`"
+   REMOVESTRING="rpm -e ${PKG_BASENAME}-${RELEASE}"
+fi
+   
+   
+fi  # End of the "no rpmbuild in the path" if
+fi  # End of the "no rpm in the path" if
+
+;;
+
+                       #################################
+                       #    End RPM package section    #
+##############################################################################
+
+
+
+##############################################################################
+                        # Debian  package installation #
+                        ################################
+
+
+d|D)
+
+# As we said before:
+PKG_BASENAME=$NAME
+# maybe PKG_BASENAME should be defined locally for all the install
+# types, and not only on debian...
+
+FAILED=0
+
+
+# Verify that we have the dpkg command in our path
+
+DPKG_PATH=`which dpkg 2> /dev/null`
+
+if ! [ -x "$DPKG_PATH" ]; then
+   echo
+   echog "*** The \"dpkg\" program is not in your PATH!"
+   echo
+   echog "*** Debian package creation aborted"
+   FAILED=1
+fi
+   
+if ! [ $FAILED -gt 0 ]; then
+
+cd "$DIRECTORIO_FUENTE"
+
+# We'll write a basic Debian control file
+
+
+mkdir $BUILD_DIR/DEBIAN
+
+cat << EOF | sed "s/ $//" | egrep ": " >> $BUILD_DIR/DEBIAN/control
+Package: $PKG_BASENAME
+Priority: extra
+Section: $PKG_GROUP
+Installed-Size: `du -s $BUILD_DIR | awk '{print $1}'`
+Maintainer: $MAINTAINER
+Architecture: $ARCHITECTURE
+Version: ${VERSION}-${RELEASE}
+Depends: $REQUIRES
+Provides: $PROVIDES
+Conflicts: $CONFLICTS
+Replaces: $REPLACES
+Description: $SUMMARY
+EOF
+
+# Add the description
+cat "$DIRECTORIO_FUENTE/description-pak"| egrep -v "$SUMMARY|^[ 	]*$" | while read line; do
+   echo " "$line >> $BUILD_DIR/DEBIAN/control
+done
+
+
+# Use the preinstall-pak script if we have it
+if [ -f preinstall-pak ]; then
+   cat preinstall-pak > $BUILD_DIR/DEBIAN/preinst
+   chmod 755 $BUILD_DIR/DEBIAN/preinst
+fi
+
+# Use the postinstall-pak script if we have it
+if [ -f postinstall-pak ]; then
+   cat postinstall-pak > $BUILD_DIR/DEBIAN/postinst
+   chmod 755 $BUILD_DIR/DEBIAN/postinst
+fi
+
+# Use the preremove-pak script if we have it
+if [ -f preremove-pak ]; then
+   cat preremove-pak > $BUILD_DIR/DEBIAN/prerm
+   chmod 755 $BUILD_DIR/DEBIAN/prerm
+fi
+
+# Use the postremove-pak script if we have it
+if [ -f postremove-pak ]; then
+   cat postremove-pak > $BUILD_DIR/DEBIAN/postrm
+   chmod 755 $BUILD_DIR/DEBIAN/postrm
+fi
+
+# Tag files in /etc to be conffiles
+find -L $BUILD_DIR/etc -type f 2> /dev/null | sed -e "s,$BUILD_DIR,," | \
+        > $BUILD_DIR/DEBIAN/conffiles
+
+# The package will be saved here (ignores <epoch>: prefix):
+DEBPKG="${DIRECTORIO_FUENTE}/${NAME}_`echo ${VERSION} | sed -e 's/^[0123456789]*://'`-${RELEASE}_${ARCHITECTURE}.deb"
+# This one is for 2.2 "Potato" (or older) style packages
+#DEBPKG="${DIRECTORIO_FUENTE}/${NAME}_${VERSION}-${RELEASE}.deb"
+
+if [ $DEBUG -gt 0 ]; then
+  echo
+  echo debug: PKG_BASENAME=${PKG_BASENAME}
+  echo debug: BUILD_DIR=${BUILD_DIR}
+  echo debug: DEBPKG=${DEBPKG}
+  echo debug: dpkg command:
+  echo "   \"dpkg-deb -b $BUILD_DIR $DEBPKG &> ${TMP_DIR}/dpkgbuild.log\""
+fi
+
+# If requested with --review-control, we run an editor on the control file
+if [ $REVIEW_CONTROL -gt 0 ]; then
+   echo
+   echog "You requested to review the control file for this package.\nNow you'll have the chance to review and optionally modify this file."
+   echo
+   echog "Press ENTER to continue."
+   read junk
+   $VISUAL ${BUILD_DIR}/DEBIAN/control
+fi
+
+echo
+echogn "Building Debian package..."
+dpkg-deb -b $BUILD_DIR "$DEBPKG" &> ${TMP_DIR}/dpkgbuild.log
+okfail
+      
+if [ $? -gt 0 ]; then
+   echo
+   echog "*** Failed to build the package"
+   echo
+   echogn "Do you want to see the log file? "
+   if yorn ; then
+      $PAGER ${TMP_DIR}/dpkgbuild.log
+   fi
+   FAILED=1
+fi
+
+
+if ! [ $FAILED -gt 0 ]; then
+   if [ "$INSTALL" = "1" ]; then
+
+      echo
+      echogn "Installing Debian package..." 
+      dpkg -i $DPKG_FLAGS "$DEBPKG" &>  ${TMP_DIR}/dpkginstall.log
+      okfail
+      if [ $? -gt 0 ]; then
+         echo
+         echog "*** Failed to install the package"
+         echo
+         echogn "Do you want to see the log file? "
+         if yorn ; then
+            $PAGER ${TMP_DIR}/dpkginstall.log
+         fi
+         FAILED=1
+      fi
+   else
+      echo
+      echog "NOTE: The package will not be installed"
+   fi
+fi
+ 
+if ! [ $FAILED -gt 0 ]; then
+   PKG_LOCATION="$DEBPKG"
+   INSTALLSTRING="dpkg -i `basename "$DEBPKG"`"
+   REMOVESTRING="dpkg -r ${PKG_BASENAME}"
+fi
+
+
+fi
+
+;;
+
+
+                       ################################
+                       #  End Debian package section  #
+##############################################################################
+
+
+esac
+
+# If we have a package repository set, move the package there
+
+if ! [ $FAILED -gt 0 ]; then
+
+   if [ "$PAK_DIR" ]; then
+      if ! [ -d "$PAK_DIR" ]; then
+         echo
+         echogn "The package storage directory [ %s ]\ndoesn\'t exist. Do you want to create it?" "$PAK_DIR"
+         if yorn ; then
+            echo
+            echogn "Creating package storage directory..."
+            mkdir -p "$PAK_DIR" &> ${TMP_DIR}/mkpakdir.log
+            okfail 
+            if [ $? -gt 0 ]; then
+               echo 
+               echog "*** Unable to create %s" "$PAK_DIR"
+               echo "*** `cat ${TMP_DIR}/mkpakdir.log`"
+               echo
+            fi
+         fi
+      fi
+      if [ -d "$PAK_DIR" ]; then 
+         echo
+         echogn "Transferring package to %s..." "$PAK_DIR"
+         mv "$PKG_LOCATION" "${PAK_DIR}" &> $TMP_DIR/transfer.log
+         okfail
+         if [ $? -gt 0 ]; then
+            echo
+            echogn "*** Transfer failed:"
+            cat $TMP_DIR/transfer.log
+            echo
+         else
+            # Update the package location
+            PKG_LOCATION="${PAK_DIR}/`basename "$PKG_LOCATION"`"
+         fi
+      else 
+         echo
+         echog "There\'s no package storage directory, the package\nwill be stored at the default location."
+      fi
+   fi
+fi
+
+#
+# Remove trash from TMP_DIR
+#
+
+echo 
+echogn "Erasing temporary files..."
+
+# Preserve the Debian control file if debug is on
+if [ $DEBUG -gt 0 ]; then
+   if [ -d ${BUILD_DIR}/DEBIAN ]; then
+       mv ${BUILD_DIR}/DEBIAN $TMP_DIR
+   fi
+fi
+
+[ $DEBUG -lt 2 ] && rm -rf ${BUILD_DIR}
+rm -f checkinstall-debug*
+rm -f "$BUILDROOT"
+rm -f "${RPMSOURCEDIR}/SOURCES/${PKG_BASENAME}.tgz"
+okfail
+
+# Delete doc-pak directory
+if [ $DEL_DOCPAK -gt 0 ]; then
+   echo
+   echogn "Deleting doc-pak directory..."
+   rm -rf doc-pak
+   okfail
+fi
+
+# Preserve the spec file if debugging is on
+[ $DEBUG -gt 0 ] && [ -f "$SPEC_PATH" ] && cp "$SPEC_PATH" $TMP_DIR
+
+# Delete spec file
+ [ $DEL_SPEC -gt 0 ] && rm -f "$SPEC_PATH"
+
+# Delete the package description file
+ [ $DEL_DESC -gt 0 ] && rm -f description-pak
+
+
+# If we had a pre-existing postinstall-pak, we keep it as it was.
+
+# If PINST_EXISTS=0 and there is a postinstall-pak file, then
+# it's the one we created and has to be deleted 
+if [ $PINST_EXISTS -eq 0 ]; then  
+   rm -f ${DIRECTORIO_FUENTE}/postinstall-pak
+fi
+
+if [ -f ${DIRECTORIO_FUENTE}/postinstall-pak.tmp ]; then
+   mv ${DIRECTORIO_FUENTE}/postinstall-pak.tmp ${DIRECTORIO_FUENTE}/postinstall-pak
+fi
+
+
+# If we have a backup, pack it up
+
+rm -rf ${TMP_DIR}/BACKUP/no-backup &> /dev/null
+ls ${TMP_DIR}/BACKUP/* &> /dev/null
+if [ $? -eq 0 ]; then
+   cd ${TMP_DIR}/BACKUP
+   echo
+   echogn "Writing backup package..."
+   # We do this for the same reason as in restore_backup
+   FILES=$(ls -A)
+   $TAR -cpf - $FILES | gzip -9 > "${DIRECTORIO_FUENTE}/backup-`date +%m%d%Y%H%M`-pre-${PKG_BASENAME}.tgz"
+    okfail
+
+   okfail
+fi
+
+
+if [ $DEBUG -eq 0 ]; then
+   echo
+   echogn "Deleting temp dir..."
+   rm -rf ${TMP_DIR}
+   okfail
+   echo
+else
+   echo
+   echogn "Building debug information package..."
+   cd ${TMP_DIR}
+   echo `uname -a` > sysinfo
+   echo `rpm --version` >> sysinfo
+   $TAR -cpzvf "${DIRECTORIO_FUENTE}/checkinstall-debug.$$.tgz" * &> /dev/null
+   okfail
+fi
+
+
+if ! [ $FAILED -gt 0 ]; then
+
+   if [ "${INSTALL}" = "1" ]; then
+
+      echo
+      echo '**********************************************************************'
+      echo
+      echog " Done. The new package has been installed and saved to\n\n %s\n\n You can remove it from your system anytime using: \n\n      %s" "$PKG_LOCATION"  "$REMOVESTRING"
+      echo
+      echo '**********************************************************************'
+      echo
+
+   else
+
+      echo
+      echo '**********************************************************************'
+      echo
+      echog " Done. The new package has been saved to\n\n %s\n You can install it in your system anytime using: \n\n      %s" "$PKG_LOCATION" "$INSTALLSTRING"
+      echo
+      echo '**********************************************************************'
+      echo
+
+   fi
+      
+fi
+
+
+
+

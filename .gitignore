@@ -39,7 +39,6 @@ test-driver
 *.tar
 *.tar.*
 *.deb
-description-pak
 callgrind.*
 
 lib/
