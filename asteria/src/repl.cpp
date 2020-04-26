@@ -24,7 +24,7 @@ namespace {
 cow_string
 do_xindent(cow_string&& str)
   {
-    size_t bp = SIZE_MAX;
+    size_t bp = cow_string::npos;
     while((bp = str.find('\n', ++bp)) != cow_string::npos)
       str.insert(++bp, 1, '\t');
     return ::std::move(str);
