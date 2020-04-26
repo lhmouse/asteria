@@ -19,5 +19,6 @@ sudo ./ci/checkinstall  \
   --pkgsource="${_pkgsource}"  \
   --pkglicense="${_pkglicense}"  \
   --pkgversion="${_pkgversion}"  \
+  --pkgrelease=1  \
   --maintainer="${_maintainer}"  \
   --exclude="${_tmpdir}"
