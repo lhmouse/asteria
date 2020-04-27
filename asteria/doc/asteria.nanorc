@@ -1,0 +1,42 @@
+## Here is an example for Asteria.
+
+syntax asteria "\.ast$"
+comment "//"
+
+# Declarations
+color green "\<(var|const|func)\>"
+
+# Statements
+color brightyellow "\<(if|else|switch|case|default|do|while|for|each|try|catch)\>"
+color brightmagenta "\<(break|continue|throw|return)\>"
+color brightred "\<(assert|defer)\>"
+
+# Values
+color brightgreen "\<(null|true|false|nan|infinity|this)\>"
+color brightgreen "\<__(file|line|func|varg)\>"
+
+# Modifiers
+color brightcyan "\<(__global)\>"
+
+# Operators
+color cyan "[].+*/%=&|!^~?:,;(){}<>$[-]"
+color cyan "\<(unset|(count|type)of|and|or|not|import)\>"
+color cyan "\<__(sqrt|is(nan|inf)|abs|sign|(round|floor|ceil|trunc)i?|fma|vcall)\>"
+
+# Literals
+color yellow "'[^']*?'"
+color yellow ""(\\.|[^\\"])*?""
+icolor yellow "\<0b([01]`?)+(\.([01]`?)+)?([ep][-+]?([0-9]`?)+)?\>"
+icolor yellow "\<([0-9]`?)+(\.([0-9]`?)+)?([ep][-+]?([0-9]`?)+)?\>"
+icolor yellow "\<0x([0-9a-f]`?)+(\.([0-9a-f]`?)+)?(p[-+]?([0-9]`?)+)?\>"
+
+# Comments
+color brightblue "//.*"
+color brightblue start="/\*" end="\*/"
+color brightblue "^#!.*"
+
+# Reminders
+color red,yellow "\<(FIXME|TODO|XXX)\>"
+
+# Trailing whitespace
+color ,green "[[:space:]]+$"
