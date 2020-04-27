@@ -341,8 +341,7 @@ struct AIR_Traits<AIR_Node::S_declare_variable>
         ctx.open_named_reference(sp.name) = xref;  // it'll be used later so don't move!
 
         // Call the hook function if any.
-        const auto qhooks = ctx.global().get_hooks_opt();
-        if(qhooks)
+        if(auto qhooks = ctx.global().get_hooks_opt())
           qhooks->on_variable_declare(sp.sloc, sp.name);
 
         // Push a copy of the reference onto the stack.
@@ -1256,8 +1255,7 @@ do_invoke_nontail(Reference& self, const Source_Location& sloc, Executive_Contex
                   const cow_function& target, cow_vector<Reference>&& args)
   {
     // Note exceptions thrown here are not caught.
-    const auto qhooks = ctx.global().get_hooks_opt();
-    if(qhooks)
+    if(auto qhooks = ctx.global().get_hooks_opt())
       qhooks->on_function_call(sloc, target);
 
     // Execute the target function
@@ -1265,11 +1263,11 @@ do_invoke_nontail(Reference& self, const Source_Location& sloc, Executive_Contex
       target.invoke(self, ctx.global(), ::std::move(args));
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
-      if(qhooks)
+      if(auto qhooks = ctx.global().get_hooks_opt())
         qhooks->on_function_except(sloc, except);
       throw;
     }
-    if(qhooks)
+    if(auto qhooks = ctx.global().get_hooks_opt())
       qhooks->on_function_return(sloc, self);
     return self;
   }
@@ -1355,9 +1353,8 @@ struct AIR_Traits<AIR_Node::S_function_call>
         // Check for stack overflows.
         const auto sentry = ctx.global().copy_recursion_sentry();
 
-        // Generate a single-step trap.
-        const auto qhooks = ctx.global().get_hooks_opt();
-        if(qhooks)
+        // Generate a single-step trap before unpacking arguments.
+        if(auto qhooks = ctx.global().get_hooks_opt())
           qhooks->on_single_step_trap(sloc, &ctx);
 
         // Pop arguments off the stack backwards.
@@ -3538,8 +3535,7 @@ struct AIR_Traits<AIR_Node::S_define_null_variable>
         ctx.open_named_reference(sp.name) = ::std::move(xref);
 
         // Call the hook function if any.
-        const auto qhooks = ctx.global().get_hooks_opt();
-        if(qhooks)
+        if(auto qhooks = ctx.global().get_hooks_opt())
           qhooks->on_variable_declare(sp.sloc, sp.name);
 
         // Initialize the variable to `null`.
@@ -3575,9 +3571,9 @@ struct AIR_Traits<AIR_Node::S_single_step_trap>
     execute(Executive_Context& ctx, const Source_Location& sloc)
       {
         // Call the hook function if any.
-        const auto qhooks = ctx.global().get_hooks_opt();
-        if(qhooks)
+        if(auto qhooks = ctx.global().get_hooks_opt())
           qhooks->on_single_step_trap(sloc, &ctx);
+
         return air_status_next;
       }
   };
@@ -3621,8 +3617,7 @@ struct AIR_Traits<AIR_Node::S_variadic_call>
         const auto sentry = ctx.global().copy_recursion_sentry();
 
         // Generate a single-step trap.
-        const auto qhooks = ctx.global().get_hooks_opt();
-        if(qhooks)
+        if(auto qhooks = ctx.global().get_hooks_opt())
           qhooks->on_single_step_trap(sloc, &ctx);
 
         // Pop the argument generator.
@@ -3781,8 +3776,7 @@ struct AIR_Traits<AIR_Node::S_import_call>
         const auto sentry = ctx.global().copy_recursion_sentry();
 
         // Generate a single-step trap.
-        const auto qhooks = ctx.global().get_hooks_opt();
-        if(qhooks)
+        if(auto qhooks = ctx.global().get_hooks_opt())
           qhooks->on_single_step_trap(sp.sloc, &ctx);
 
         // Pop arguments off the stack backwards.

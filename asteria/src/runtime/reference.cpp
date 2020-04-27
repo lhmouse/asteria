@@ -16,106 +16,97 @@
 namespace Asteria {
 namespace {
 
-Runtime_Error&
-do_unpack_frames(Runtime_Error& except, Global_Context& global, Evaluation_Stack& stack,
-                 cow_vector<rcptr<PTC_Arguments>>&& frames)
-  {
-    while(frames.size()) {
-      auto tca = ::std::move(frames.mut_back());
-      frames.pop_back();
-
-      // Push the function call.
-      except.push_frame_plain(tca->sloc(), ::rocket::sref("<proper tail call>"));
-
-      // Call the hook function if any.
-      const auto qhooks = global.get_hooks_opt();
-      if(qhooks)
-        qhooks->on_function_except(tca->sloc(), except);
-
-      // Evaluate deferred expressions if any.
-      if(tca->get_defer_stack().size())
-        Executive_Context(::rocket::ref(global), ::rocket::ref(stack),
-                          ::std::move(tca->open_defer_stack()))
-          .on_scope_exit(except);
-
-      // Push the caller.
-      except.push_frame_func(tca->enclosing_sloc(), tca->enclosing_func());
-    }
-    return except;
-  }
-
 Reference&
 do_unpack_tail_calls(Reference& self, Global_Context& global)
   {
     // The function call shall yield an rvalue unless all wrapped calls return by reference.
     PTC_Aware ptc_conj = ptc_aware_by_ref;
     rcptr<PTC_Arguments> tca;
+
     // We must rebuild the backtrace using this queue if an exception is thrown.
     cow_vector<rcptr<PTC_Arguments>> frames;
     Evaluation_Stack stack;
 
-    // Unpack all frames recursively.
-    // Note that `self` is overwritten before the wrapped function is called.
-    while(!!(tca = self.get_tail_call_opt())) {
-      // Figure out how to forward the result.
-      if(tca->ptc_aware() == ptc_aware_void) {
-        ptc_conj = ptc_aware_void;
-      }
-      else if((tca->ptc_aware() == ptc_aware_by_val) && (ptc_conj == ptc_aware_by_ref)) {
-        ptc_conj = ptc_aware_by_val;
-      }
-      // Record this frame.
-      frames.emplace_back(tca);
+    ASTERIA_RUNTIME_TRY {
+      // Unpack all frames recursively.
+      // Note that `self` is overwritten before the wrapped function is called.
+      while(!!(tca = self.get_tail_call_opt())) {
+        // Generate a single-step trap before unpacking arguments.
+        if(auto qhooks = global.get_hooks_opt())
+          qhooks->on_single_step_trap(tca->sloc(), nullptr);
 
-      // Generate a single-step trap.
-      const auto qhooks = global.get_hooks_opt();
-      if(qhooks)
-        qhooks->on_single_step_trap(tca->sloc(), nullptr);
+        // Get the `this` reference and all the other arguments.
+        const auto& target = tca->get_target();
+        auto args = ::std::move(tca->open_arguments_and_self());
+        self = ::std::move(args.mut_back());
+        args.pop_back();
 
-      // Get the `this` reference and all the other arguments.
-      const auto& target = tca->get_target();
-      auto args = ::std::move(tca->open_arguments_and_self());
-      self = ::std::move(args.mut_back());
-      args.pop_back();
+        // Call the hook function if any.
+        if(auto qhooks = global.get_hooks_opt())
+          qhooks->on_function_call(tca->sloc(), target);
 
-      // Call the hook function if any.
-      if(qhooks)
-        qhooks->on_function_call(tca->sloc(), target);
+        // Figure out how to forward the result.
+        if(tca->ptc_aware() == ptc_aware_void) {
+          ptc_conj = ptc_aware_void;
+        }
+        else if((tca->ptc_aware() == ptc_aware_by_val) && (ptc_conj == ptc_aware_by_ref)) {
+          ptc_conj = ptc_aware_by_val;
+        }
+        // Record this frame.
+        frames.emplace_back(tca);
 
-      // Perform a non-tail call.
-      ASTERIA_RUNTIME_TRY {
+        // Perform a non-tail call.
         target.invoke_ptc_aware(self, global, ::std::move(args));
       }
-      ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
-        do_unpack_frames(except, global, stack, ::std::move(frames));
-        throw;
-      }
-    }
 
-    // Check for deferred expressions.
-    while(frames.size()) {
-      tca = ::std::move(frames.mut_back());
-      frames.pop_back();
-      // Evaluate deferred expressions if any.
-      ASTERIA_RUNTIME_TRY {
+      // Check for deferred expressions.
+      while(frames.size()) {
+        // Pop frames in reverse order.
+        tca = ::std::move(frames.mut_back());
+        frames.pop_back();
+
+        // Evaluate deferred expressions if any.
         if(tca->get_defer_stack().size())
           Executive_Context(::rocket::ref(global), ::rocket::ref(stack),
                             ::std::move(tca->open_defer_stack()))
             .on_scope_exit(air_status_next);
-      }
-      ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
-        do_unpack_frames(except, global, stack, ::std::move(frames));
-        throw;
+
+        // Call the hook function if any.
+        if(auto qhooks = global.get_hooks_opt())
+          qhooks->on_function_return(tca->sloc(), self);
       }
     }
+    ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+      // Check for deferred expressions.
+      while(frames.size()) {
+        // Pop frames in reverse order.
+        tca = ::std::move(frames.mut_back());
+        frames.pop_back();
 
-    // Process the result.
+        // Push the function call.
+        except.push_frame_plain(tca->sloc(), ::rocket::sref("<proper tail call>"));
+
+        // Call the hook function if any.
+        if(auto qhooks = global.get_hooks_opt())
+          qhooks->on_function_except(tca->sloc(), except);
+
+        // Evaluate deferred expressions if any.
+        if(tca->get_defer_stack().size())
+          Executive_Context(::rocket::ref(global), ::rocket::ref(stack),
+                            ::std::move(tca->open_defer_stack()))
+            .on_scope_exit(except);
+
+        // Push the caller.
+        except.push_frame_func(tca->enclosing_sloc(), tca->enclosing_func());
+      }
+      throw;
+    }
+
+    // Convert the result.
     if(ptc_conj == ptc_aware_void) {
-      // Return `void`.
       self = Reference_root::S_void();
     }
     else if((ptc_conj == ptc_aware_by_val) && self.is_glvalue()) {
-      // Convert the result to an rvalue if it shouldn't be passed by reference.
       Reference_root::S_temporary xref = { self.read() };
       self = ::std::move(xref);
     }
