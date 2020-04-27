@@ -187,7 +187,8 @@ class refcnt_ptr
     operator=(const refcnt_ptr& other)
     noexcept
       {
-        this->reset(other.m_sth.fork());
+        if(this->m_sth.get() != other.m_sth.get())
+          this->reset(other.m_sth.fork());
         return *this;
       }
 
