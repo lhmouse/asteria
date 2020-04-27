@@ -32,10 +32,10 @@ enum Xop : uint8_t
     xop_floor     = 18,  // __floor
     xop_ceil      = 19,  // __ceil
     xop_trunc     = 20,  // __trunc
-    xop_roundi    = 21,  // __roundi
-    xop_floori    = 22,  // __floori
-    xop_ceili     = 23,  // __ceili
-    xop_trunci    = 24,  // __trunci
+    xop_iround    = 21,  // __iround
+    xop_ifloor    = 22,  // __ifloor
+    xop_iceil     = 23,  // __iceil
+    xop_itrunc    = 24,  // __itrunc
     xop_cmp_eq    = 25,  // ==
     xop_cmp_ne    = 26,  // !=
     xop_cmp_lt    = 27,  // <

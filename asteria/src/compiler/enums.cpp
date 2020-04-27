@@ -318,17 +318,17 @@ noexcept
       case keyword_trunc:
         return "__trunc";
 
-      case keyword_roundi:
-        return "__roundi";
+      case keyword_iround:
+        return "__iround";
 
-      case keyword_floori:
-        return "__floori";
+      case keyword_ifloor:
+        return "__ifloor";
 
-      case keyword_ceili:
-        return "__ceili";
+      case keyword_iceil:
+        return "__iceil";
 
-      case keyword_trunci:
-        return "__trunci";
+      case keyword_itrunc:
+        return "__itrunc";
 
       case keyword_fma:
         return "__fma";

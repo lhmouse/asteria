@@ -57,12 +57,12 @@ std_numeric_round(V_integer value);
 V_real
 std_numeric_round(V_real value);
 
-// `std.numeric.roundi`
+// `std.numeric.iround`
 V_integer
-std_numeric_roundi(V_integer value);
+std_numeric_iround(V_integer value);
 
 V_integer
-std_numeric_roundi(V_real value);
+std_numeric_iround(V_real value);
 
 // `std.numeric.floor`
 V_integer
@@ -71,12 +71,12 @@ std_numeric_floor(V_integer value);
 V_real
 std_numeric_floor(V_real value);
 
-// `std.numeric.floori`
+// `std.numeric.ifloor`
 V_integer
-std_numeric_floori(V_integer value);
+std_numeric_ifloor(V_integer value);
 
 V_integer
-std_numeric_floori(V_real value);
+std_numeric_ifloor(V_real value);
 
 // `std.numeric.ceil`
 V_integer
@@ -85,12 +85,12 @@ std_numeric_ceil(V_integer value);
 V_real
 std_numeric_ceil(V_real value);
 
-// `std.numeric.ceili`
+// `std.numeric.iceil`
 V_integer
-std_numeric_ceili(V_integer value);
+std_numeric_iceil(V_integer value);
 
 V_integer
-std_numeric_ceili(V_real value);
+std_numeric_iceil(V_real value);
 
 // `std.numeric.trunc`
 V_integer
@@ -99,12 +99,12 @@ std_numeric_trunc(V_integer value);
 V_real
 std_numeric_trunc(V_real value);
 
-// `std.numeric.trunci`
+// `std.numeric.itrunc`
 V_integer
-std_numeric_trunci(V_integer value);
+std_numeric_itrunc(V_integer value);
 
 V_integer
-std_numeric_trunci(V_real value);
+std_numeric_itrunc(V_real value);
 
 // `std.numeric.random`
 V_real

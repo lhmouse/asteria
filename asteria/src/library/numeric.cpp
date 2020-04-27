@@ -223,13 +223,13 @@ std_numeric_round(V_real value)
   }
 
 V_integer
-std_numeric_roundi(V_integer value)
+std_numeric_iround(V_integer value)
   {
     return value;
   }
 
 V_integer
-std_numeric_roundi(V_real value)
+std_numeric_iround(V_real value)
   {
     return do_cast_to_integer(::std::round(value));
   }
@@ -247,13 +247,13 @@ std_numeric_floor(V_real value)
   }
 
 V_integer
-std_numeric_floori(V_integer value)
+std_numeric_ifloor(V_integer value)
   {
     return value;
   }
 
 V_integer
-std_numeric_floori(V_real value)
+std_numeric_ifloor(V_real value)
   {
     return do_cast_to_integer(::std::floor(value));
   }
@@ -271,13 +271,13 @@ std_numeric_ceil(V_real value)
   }
 
 V_integer
-std_numeric_ceili(V_integer value)
+std_numeric_iceil(V_integer value)
   {
     return value;
   }
 
 V_integer
-std_numeric_ceili(V_real value)
+std_numeric_iceil(V_real value)
   {
     return do_cast_to_integer(::std::ceil(value));
   }
@@ -295,13 +295,13 @@ std_numeric_trunc(V_real value)
   }
 
 V_integer
-std_numeric_trunci(V_integer value)
+std_numeric_itrunc(V_integer value)
   {
     return value;
   }
 
 V_integer
-std_numeric_trunci(V_real value)
+std_numeric_itrunc(V_real value)
   {
     return do_cast_to_integer(::std::trunc(value));
   }
@@ -976,12 +976,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       ));
 
     //===================================================================
-    // `std.numeric.roundi()`
+    // `std.numeric.iround()`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("roundi"),
+    result.insert_or_assign(::rocket::sref("iround"),
       V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.roundi(value)`
+`std.numeric.iround(value)`
 
   * Rounds `value`, which may be an integer or real, to the nearest
     integer; halfway values are rounded away from zero. If `value`
@@ -995,16 +995,16 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.numeric.roundi"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.numeric.iround"));
     // Parse arguments.
     V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_roundi(::std::move(ivalue)) };
+      Reference_root::S_temporary xref = { std_numeric_iround(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
     V_real rvalue;
     if(reader.I().v(rvalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_roundi(::std::move(rvalue)) };
+      Reference_root::S_temporary xref = { std_numeric_iround(::std::move(rvalue)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1046,12 +1046,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       ));
 
     //===================================================================
-    // `std.numeric.floori()`
+    // `std.numeric.ifloor()`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("floori"),
+    result.insert_or_assign(::rocket::sref("ifloor"),
       V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.floori(value)`
+`std.numeric.ifloor(value)`
 
   * Rounds `value`, which may be an integer or real, to the nearest
     integer towards negative infinity. If `value` is an integer, it
@@ -1065,16 +1065,16 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.numeric.floori"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.numeric.ifloor"));
     // Parse arguments.
     V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_floori(::std::move(ivalue)) };
+      Reference_root::S_temporary xref = { std_numeric_ifloor(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
     V_real rvalue;
     if(reader.I().v(rvalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_floori(::std::move(rvalue)) };
+      Reference_root::S_temporary xref = { std_numeric_ifloor(::std::move(rvalue)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1116,12 +1116,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       ));
 
     //===================================================================
-    // `std.numeric.ceili()`
+    // `std.numeric.iceil()`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("ceili"),
+    result.insert_or_assign(::rocket::sref("iceil"),
       V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.ceili(value)`
+`std.numeric.iceil(value)`
 
   * Rounds `value`, which may be an integer or real, to the nearest
     integer towards positive infinity. If `value` is an integer, it
@@ -1135,16 +1135,16 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.numeric.ceili"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.numeric.iceil"));
     // Parse arguments.
     V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_ceili(::std::move(ivalue)) };
+      Reference_root::S_temporary xref = { std_numeric_iceil(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
     V_real rvalue;
     if(reader.I().v(rvalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_ceili(::std::move(rvalue)) };
+      Reference_root::S_temporary xref = { std_numeric_iceil(::std::move(rvalue)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1186,12 +1186,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       ));
 
     //===================================================================
-    // `std.numeric.trunci()`
+    // `std.numeric.itrunc()`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("trunci"),
+    result.insert_or_assign(::rocket::sref("itrunc"),
       V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.trunci(value)`
+`std.numeric.itrunc(value)`
 
   * Rounds `value`, which may be an integer or real, to the nearest
     integer towards zero. If `value` is an integer, it is returned
@@ -1204,16 +1204,16 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.numeric.trunci"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.numeric.itrunc"));
     // Parse arguments.
     V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_trunci(::std::move(ivalue)) };
+      Reference_root::S_temporary xref = { std_numeric_itrunc(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
     V_real rvalue;
     if(reader.I().v(rvalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_trunci(::std::move(rvalue)) };
+      Reference_root::S_temporary xref = { std_numeric_itrunc(::std::move(rvalue)) };
       return self = ::std::move(xref);
     }
     // Fail.

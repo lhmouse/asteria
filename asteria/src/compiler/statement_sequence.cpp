@@ -1388,10 +1388,10 @@ constexpr s_keyword_table[] =
     { keyword_floor,     xop_floor    },
     { keyword_ceil,      xop_ceil     },
     { keyword_trunc,     xop_trunc    },
-    { keyword_roundi,    xop_roundi   },
-    { keyword_floori,    xop_floori   },
-    { keyword_ceili,     xop_ceili    },
-    { keyword_trunci,    xop_trunci   },
+    { keyword_iround,    xop_iround   },
+    { keyword_ifloor,    xop_ifloor   },
+    { keyword_iceil,     xop_iceil    },
+    { keyword_itrunc,    xop_itrunc   },
   };
 
 constexpr
@@ -1432,7 +1432,7 @@ do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tstr
     //   "+" | "-" | "~" | "!" | "++" | "--" |
     //   "unset" | "countof" | "typeof" | "not" |
     //   "__abs" | "__sqrt" | "__sign" | "__isnan" | "__isinf" |
-    //   "__round" | "__floor" | "__ceil" | "__trunc" | "__roundi" | "__floori" | "__ceili" | "__trunci"
+    //   "__round" | "__floor" | "__ceil" | "__trunc" | "__iround" | "__ifloor" | "__iceil" | "__itrunc"
     auto qtok = tstrm.peek_opt();
     if(!qtok)
       return false;

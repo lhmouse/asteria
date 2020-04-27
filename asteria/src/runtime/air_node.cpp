@@ -1653,7 +1653,7 @@ do_check_sra(int64_t lhs, int64_t rhs)
 
 ROCKET_CONST_FUNCTION
 int64_t
-do_check_trunci(double value)
+do_check_itrunc(double value)
   {
     if(!::std::islessequal(-0x1p63, value) || !::std::islessequal(value, 0x1p63 - 0x1p10))
       ASTERIA_THROW("Value not representable as an `integer` (operand was `$1`)", value);
@@ -2440,7 +2440,7 @@ struct AIR_Traits_Xop<xop_trunc> : AIR_Traits<AIR_Node::S_apply_operator>
   };
 
 template<>
-struct AIR_Traits_Xop<xop_roundi> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_Xop<xop_iround> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
@@ -2457,11 +2457,11 @@ struct AIR_Traits_Xop<xop_roundi> : AIR_Traits<AIR_Node::S_apply_operator>
 
           case vmask_real:
             // Round the operand to the nearest integer as a temporary integer.
-            rhs = do_check_trunci(::std::round(rhs.as_real()));
+            rhs = do_check_itrunc(::std::round(rhs.as_real()));
             break;
 
           default:
-            ASTERIA_THROW("Prefix `__roundi` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__iround` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2469,7 +2469,7 @@ struct AIR_Traits_Xop<xop_roundi> : AIR_Traits<AIR_Node::S_apply_operator>
   };
 
 template<>
-struct AIR_Traits_Xop<xop_floori> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_Xop<xop_ifloor> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
@@ -2486,11 +2486,11 @@ struct AIR_Traits_Xop<xop_floori> : AIR_Traits<AIR_Node::S_apply_operator>
 
           case vmask_real:
             // Round the operand to negative infinity as a temporary integer.
-            rhs = do_check_trunci(::std::floor(rhs.as_real()));
+            rhs = do_check_itrunc(::std::floor(rhs.as_real()));
             break;
 
           default:
-            ASTERIA_THROW("Prefix `__floori` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__ifloor` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2498,7 +2498,7 @@ struct AIR_Traits_Xop<xop_floori> : AIR_Traits<AIR_Node::S_apply_operator>
   };
 
 template<>
-struct AIR_Traits_Xop<xop_ceili> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_Xop<xop_iceil> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
@@ -2515,11 +2515,11 @@ struct AIR_Traits_Xop<xop_ceili> : AIR_Traits<AIR_Node::S_apply_operator>
 
           case vmask_real:
             // Round the operand to positive infinity as a temporary integer.
-            rhs = do_check_trunci(::std::ceil(rhs.as_real()));
+            rhs = do_check_itrunc(::std::ceil(rhs.as_real()));
             break;
 
           default:
-            ASTERIA_THROW("Prefix `__ceili` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__iceil` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2527,7 +2527,7 @@ struct AIR_Traits_Xop<xop_ceili> : AIR_Traits<AIR_Node::S_apply_operator>
   };
 
 template<>
-struct AIR_Traits_Xop<xop_trunci> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_Xop<xop_itrunc> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
@@ -2544,11 +2544,11 @@ struct AIR_Traits_Xop<xop_trunci> : AIR_Traits<AIR_Node::S_apply_operator>
 
           case vmask_real:
             // Round the operand to zero as a temporary integer.
-            rhs = do_check_trunci(rhs.as_real());
+            rhs = do_check_itrunc(rhs.as_real());
             break;
 
           default:
-            ASTERIA_THROW("Prefix `__trunci` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__itrunc` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -4537,17 +4537,17 @@ const
           case xop_trunc:
             return do_solidify<xop_trunc>(queue, altr);
 
-          case xop_roundi:
-            return do_solidify<xop_roundi>(queue, altr);
+          case xop_iround:
+            return do_solidify<xop_iround>(queue, altr);
 
-          case xop_floori:
-            return do_solidify<xop_floori>(queue, altr);
+          case xop_ifloor:
+            return do_solidify<xop_ifloor>(queue, altr);
 
-          case xop_ceili:
-            return do_solidify<xop_ceili>(queue, altr);
+          case xop_iceil:
+            return do_solidify<xop_iceil>(queue, altr);
 
-          case xop_trunci:
-            return do_solidify<xop_trunci>(queue, altr);
+          case xop_itrunc:
+            return do_solidify<xop_itrunc>(queue, altr);
 
           case xop_cmp_eq:
             return do_solidify<xop_cmp_eq>(queue, altr);

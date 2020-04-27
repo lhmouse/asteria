@@ -1691,7 +1691,7 @@
 
 	* Returns the rounded value.
 
-`std.numeric.roundi(value)`
+`std.numeric.iround(value)`
 
 	* Rounds `value`, which may be an integer or real, to the nearest
 	  integer; halfway values are rounded away from zero. If `value`
@@ -1711,7 +1711,7 @@
 
 	* Returns the rounded value.
 
-`std.numeric.floori(value)`
+`std.numeric.ifloor(value)`
 
 	* Rounds `value`, which may be an integer or real, to the nearest
 	  integer towards negative infinity. If `value` is an integer, it
@@ -1731,7 +1731,7 @@
 
 	* Returns the rounded value.
 
-`std.numeric.ceili(value)`
+`std.numeric.iceil(value)`
 
 	* Rounds `value`, which may be an integer or real, to the nearest
 	  integer towards positive infinity. If `value` is an integer, it
@@ -1751,7 +1751,7 @@
 
 	* Returns the rounded value.
 
-`std.numeric.trunci(value)`
+`std.numeric.itrunc(value)`
 
 	* Rounds `value`, which may be an integer or real, to the nearest
 	  integer towards zero. If `value` is an integer, it is returned

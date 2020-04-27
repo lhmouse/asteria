@@ -120,10 +120,10 @@ enum Keyword : uint8_t
     keyword_floor     = 38,  // __floor
     keyword_ceil      = 39,  // __ceil
     keyword_trunc     = 40,  // __trunc
-    keyword_roundi    = 41,  // __roundi
-    keyword_floori    = 42,  // __floori
-    keyword_ceili     = 43,  // __ceili
-    keyword_trunci    = 44,  // __trunci
+    keyword_iround    = 41,  // __iround
+    keyword_ifloor    = 42,  // __ifloor
+    keyword_iceil     = 43,  // __iceil
+    keyword_itrunc    = 44,  // __itrunc
     keyword_fma       = 45,  // __fma
     keyword_global    = 46,  // __global
     keyword_vcall     = 47,  // __vcall
