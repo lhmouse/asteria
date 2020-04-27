@@ -13,7 +13,7 @@ color brightred "\<(assert|defer)\>"
 
 # Values
 color brightgreen "\<(null|true|false|nan|infinity|this)\>"
-color brightgreen "\<__(file|line|func|varg)\>"
+color brightgreen "\<__(file|line|func|varg|this|backtrace)\>"
 
 # Modifiers
 color brightcyan "\<(__global)\>"
