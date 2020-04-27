@@ -1792,28 +1792,28 @@ do_cast_to_integer(double value)
 
 ROCKET_PURE_FUNCTION
 V_integer
-do_operator_IROUND(double rhs)
+do_operator_ROUNDi(double rhs)
   {
     return do_cast_to_integer(::std::round(rhs));
   }
 
 ROCKET_PURE_FUNCTION
 V_integer
-do_operator_IFLOOR(double rhs)
+do_operator_FLOORi(double rhs)
   {
     return do_cast_to_integer(::std::floor(rhs));
   }
 
 ROCKET_PURE_FUNCTION
 V_integer
-do_operator_ICEIL(double rhs)
+do_operator_CEILi(double rhs)
   {
     return do_cast_to_integer(::std::ceil(rhs));
   }
 
 ROCKET_PURE_FUNCTION
 V_integer
-do_operator_ITRUNC(double rhs)
+do_operator_TRUNCi(double rhs)
   {
     return do_cast_to_integer(::std::trunc(rhs));
   }
@@ -2611,7 +2611,7 @@ struct AIR_Traits_Xop<xop_trunc> : AIR_Traits<AIR_Node::S_apply_operator>
   };
 
 template<>
-struct AIR_Traits_Xop<xop_iround> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_Xop<xop_roundi> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
@@ -2627,10 +2627,10 @@ struct AIR_Traits_Xop<xop_iround> : AIR_Traits<AIR_Node::S_apply_operator>
         }
         else if(rhs.is_real()) {
           // Note that `rhs` does not have type `V_integer`, thus this branch can't be optimized.
-          rhs = do_operator_IROUND(rhs.as_real());
+          rhs = do_operator_ROUNDi(rhs.as_real());
         }
         else {
-          ASTERIA_THROW("prefix `__iround` not applicable (operand was `$1`)", rhs);
+          ASTERIA_THROW("prefix `__roundi` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
@@ -2638,7 +2638,7 @@ struct AIR_Traits_Xop<xop_iround> : AIR_Traits<AIR_Node::S_apply_operator>
   };
 
 template<>
-struct AIR_Traits_Xop<xop_ifloor> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_Xop<xop_floori> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
@@ -2654,10 +2654,10 @@ struct AIR_Traits_Xop<xop_ifloor> : AIR_Traits<AIR_Node::S_apply_operator>
         }
         else if(rhs.is_real()) {
           // Note that `rhs` does not have type `V_integer`, thus this branch can't be optimized.
-          rhs = do_operator_IFLOOR(rhs.as_real());
+          rhs = do_operator_FLOORi(rhs.as_real());
         }
         else {
-          ASTERIA_THROW("prefix `__ifloor` not applicable (operand was `$1`)", rhs);
+          ASTERIA_THROW("prefix `__floori` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
@@ -2665,7 +2665,7 @@ struct AIR_Traits_Xop<xop_ifloor> : AIR_Traits<AIR_Node::S_apply_operator>
   };
 
 template<>
-struct AIR_Traits_Xop<xop_iceil> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_Xop<xop_ceili> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
@@ -2681,10 +2681,10 @@ struct AIR_Traits_Xop<xop_iceil> : AIR_Traits<AIR_Node::S_apply_operator>
         }
         else if(rhs.is_real()) {
           // Note that `rhs` does not have type `V_integer`, thus this branch can't be optimized.
-          rhs = do_operator_ICEIL(rhs.as_real());
+          rhs = do_operator_CEILi(rhs.as_real());
         }
         else {
-          ASTERIA_THROW("prefix `__iceil` not applicable (operand was `$1`)", rhs);
+          ASTERIA_THROW("prefix `__ceili` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
@@ -2692,7 +2692,7 @@ struct AIR_Traits_Xop<xop_iceil> : AIR_Traits<AIR_Node::S_apply_operator>
   };
 
 template<>
-struct AIR_Traits_Xop<xop_itrunc> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_Xop<xop_trunci> : AIR_Traits<AIR_Node::S_apply_operator>
   {
     static
     AIR_Status
@@ -2708,10 +2708,10 @@ struct AIR_Traits_Xop<xop_itrunc> : AIR_Traits<AIR_Node::S_apply_operator>
         }
         else if(rhs.is_real()) {
           // Note that `rhs` does not have type `V_integer`, thus this branch can't be optimized.
-          rhs = do_operator_ITRUNC(rhs.as_real());
+          rhs = do_operator_TRUNCi(rhs.as_real());
         }
         else {
-          ASTERIA_THROW("prefix `__itrunc` not applicable (operand was `$1`)", rhs);
+          ASTERIA_THROW("prefix `__trunci` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
@@ -4678,17 +4678,17 @@ const
           case xop_trunc:
             return do_solidify<xop_trunc>(queue, altr);
 
-          case xop_iround:
-            return do_solidify<xop_iround>(queue, altr);
+          case xop_roundi:
+            return do_solidify<xop_roundi>(queue, altr);
 
-          case xop_ifloor:
-            return do_solidify<xop_ifloor>(queue, altr);
+          case xop_floori:
+            return do_solidify<xop_floori>(queue, altr);
 
-          case xop_iceil:
-            return do_solidify<xop_iceil>(queue, altr);
+          case xop_ceili:
+            return do_solidify<xop_ceili>(queue, altr);
 
-          case xop_itrunc:
-            return do_solidify<xop_itrunc>(queue, altr);
+          case xop_trunci:
+            return do_solidify<xop_trunci>(queue, altr);
 
           case xop_cmp_eq:
             return do_solidify<xop_cmp_eq>(queue, altr);

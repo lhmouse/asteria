@@ -74,17 +74,17 @@ noexcept
       case xop_trunc:
         return "prefix `__trunc`";
 
-      case xop_iround:
-        return "prefix `__iround`";
+      case xop_roundi:
+        return "prefix `__roundi`";
 
-      case xop_ifloor:
-        return "prefix `__ifloor`";
+      case xop_floori:
+        return "prefix `__floori`";
 
-      case xop_iceil:
-        return "prefix `__iceil`";
+      case xop_ceili:
+        return "prefix `__ceili`";
 
-      case xop_itrunc:
-        return "prefix `__itrunc`";
+      case xop_trunci:
+        return "prefix `__trunci`";
 
       case xop_cmp_eq:
         return "infix `==`";

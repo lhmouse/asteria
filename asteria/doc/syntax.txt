@@ -215,7 +215,7 @@ prefix-operator ::=
 	"+" | "-" | "~" | "!" | "++" | "--" |
 	"unset" | "countof" | "typeof" | "not" |
 	"__abs" | "__sqrt" | "__sign" | "__isnan" | "__isinf" |
-	"__round" | "__floor" | "__ceil" | "__trunc" | "__iround" | "__ifloor" | "__iceil" | "__itrunc"
+	"__round" | "__floor" | "__ceil" | "__trunc" | "__roundi" | "__floori" | "__ceili" | "__trunci"
 
 primary-expression ::=
 	identifier | global-identifier | literal | "this" | closure-function | unnamed-array | unnamed-object |

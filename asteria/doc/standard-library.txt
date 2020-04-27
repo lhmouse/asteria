@@ -1653,31 +1653,7 @@
 
 	* Returns the rounded value.
 
-`std.numeric.floor(value)`
-
-	* Rounds `value`, which may be an integer or real, to the nearest
-	  integer towards negative infinity. If `value` is an integer, it
-	  is returned intact.
-
-	* Returns the rounded value.
-
-`std.numeric.ceil(value)`
-
-	* Rounds `value`, which may be an integer or real, to the nearest
-	  integer towards positive infinity. If `value` is an integer,
-	  it is returned intact.
-
-	* Returns the rounded value.
-
-`std.numeric.trunc(value)`
-
-	* Rounds `value`, which may be an integer or real, to the nearest
-	  integer towards zero. If `value` is an integer, it is returned
-	  intact.
-
-	* Returns the rounded value.
-
-`std.numeric.iround(value)`
+`std.numeric.roundi(value)`
 
 	* Rounds `value`, which may be an integer or real, to the nearest
 	  integer; halfway values are rounded away from zero. If `value`
@@ -1689,7 +1665,15 @@
 	* Throws an exception if the result cannot be represented as an
 	  integer.
 
-`std.numeric.ifloor(value)`
+`std.numeric.floor(value)`
+
+	* Rounds `value`, which may be an integer or real, to the nearest
+	  integer towards negative infinity. If `value` is an integer, it
+	  is returned intact.
+
+	* Returns the rounded value.
+
+`std.numeric.floori(value)`
 
 	* Rounds `value`, which may be an integer or real, to the nearest
 	  integer towards negative infinity. If `value` is an integer, it
@@ -1701,7 +1685,15 @@
 	* Throws an exception if the result cannot be represented as an
 	  integer.
 
-`std.numeric.iceil(value)`
+`std.numeric.ceil(value)`
+
+	* Rounds `value`, which may be an integer or real, to the nearest
+	  integer towards positive infinity. If `value` is an integer,
+	  it is returned intact.
+
+	* Returns the rounded value.
+
+`std.numeric.ceili(value)`
 
 	* Rounds `value`, which may be an integer or real, to the nearest
 	  integer towards positive infinity. If `value` is an integer, it
@@ -1713,7 +1705,15 @@
 	* Throws an exception if the result cannot be represented as an
 	  integer.
 
-`std.numeric.itrunc(value)`
+`std.numeric.trunc(value)`
+
+	* Rounds `value`, which may be an integer or real, to the nearest
+	  integer towards zero. If `value` is an integer, it is returned
+	  intact.
+
+	* Returns the rounded value.
+
+`std.numeric.trunci(value)`
 
 	* Rounds `value`, which may be an integer or real, to the nearest
 	  integer towards zero. If `value` is an integer, it is returned

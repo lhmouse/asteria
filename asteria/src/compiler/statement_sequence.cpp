@@ -1333,23 +1333,23 @@ struct Keyword_Element
   }
 constexpr s_keyword_table[] =
   {
-    { keyword_unset,     xop_unset     },
-    { keyword_countof,   xop_countof   },
-    { keyword_typeof,    xop_typeof    },
-    { keyword_not,       xop_notl      },
-    { keyword_abs,       xop_abs       },
-    { keyword_sign,      xop_sign      },
-    { keyword_sqrt,      xop_sqrt      },
-    { keyword_isnan,     xop_isnan     },
-    { keyword_isinf,     xop_isinf     },
-    { keyword_round,     xop_round     },
-    { keyword_floor,     xop_floor     },
-    { keyword_ceil,      xop_ceil      },
-    { keyword_trunc,     xop_trunc     },
-    { keyword_iround,    xop_iround    },
-    { keyword_ifloor,    xop_ifloor    },
-    { keyword_iceil,     xop_iceil     },
-    { keyword_itrunc,    xop_itrunc    },
+    { keyword_unset,     xop_unset    },
+    { keyword_countof,   xop_countof  },
+    { keyword_typeof,    xop_typeof   },
+    { keyword_not,       xop_notl     },
+    { keyword_abs,       xop_abs      },
+    { keyword_sign,      xop_sign     },
+    { keyword_sqrt,      xop_sqrt     },
+    { keyword_isnan,     xop_isnan    },
+    { keyword_isinf,     xop_isinf    },
+    { keyword_round,     xop_round    },
+    { keyword_floor,     xop_floor    },
+    { keyword_ceil,      xop_ceil     },
+    { keyword_trunc,     xop_trunc    },
+    { keyword_roundi,    xop_roundi   },
+    { keyword_floori,    xop_floori   },
+    { keyword_ceili,     xop_ceili    },
+    { keyword_trunci,    xop_trunci   },
   };
 
 constexpr
@@ -1390,7 +1390,7 @@ do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tstr
     //   "+" | "-" | "~" | "!" | "++" | "--" |
     //   "unset" | "countof" | "typeof" | "not" |
     //   "__abs" | "__sqrt" | "__sign" | "__isnan" | "__isinf" |
-    //   "__round" | "__floor" | "__ceil" | "__trunc" | "__iround" | "__ifloor" | "__iceil" | "__itrunc"
+    //   "__round" | "__floor" | "__ceil" | "__trunc" | "__roundi" | "__floori" | "__ceili" | "__trunci"
     auto qtok = tstrm.peek_opt();
     if(!qtok)
       return false;

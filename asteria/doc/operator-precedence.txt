@@ -8,9 +8,9 @@ Postfix operators          | ()    []     .                 | Left-to-right
                            | unset     countof    typeof    |
                            | __abs     __sign     __sqrt    |
 Prefix operators           | __isnan   __isinf              | Right-to-left
-                           | __round   __floor    __ceil    |
-                           | __trunc   __iround   __ifloor  |
-                           | __iceil   __itrunc             |
+                           | __round   __roundi   __floor   |
+                           | __floori  __ceil     __ceili   |
+                           | __trunc   __trunci             |
 ---------------------------+--------------------------------+------------------
 Multiplicative operators   | *    /    %                    |
 ---------------------------+--------------------------------+
