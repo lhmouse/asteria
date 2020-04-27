@@ -177,12 +177,12 @@ class basic_tinybuf_str
       { return this->m_stor;  }
 
     const char_type*
-    get_c_string()
+    c_str()
     const noexcept
       { return this->m_stor.c_str();  }
 
     size_type
-    get_length()
+    length()
     const noexcept
       { return this->m_stor.length();  }
 

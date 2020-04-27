@@ -74,14 +74,14 @@ class basic_tinyfmt_str
       { return this->m_buf.get_string();  }
 
     const char_type*
-    get_c_string()
+    c_str()
     const noexcept
-      { return this->m_buf.get_c_string();  }
+      { return this->m_buf.c_str();  }
 
     size_type
-    get_length()
+    length()
     const noexcept
-      { return this->m_buf.get_length();  }
+      { return this->m_buf.length();  }
 
     basic_tinyfmt_str&
     clear_string(open_mode mode = tinybuf_base::open_write)

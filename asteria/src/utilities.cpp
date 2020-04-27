@@ -4,7 +4,7 @@
 #include "precompiled.hpp"
 #include "utilities.hpp"
 #include <time.h>  // ::timespec, ::clock_gettime(), ::localtime()
-#include <stdio.h>  // ::fwrite(), stderr
+#include <unistd.h>  // ::write
 #include <errno.h>  // errno
 #include <string.h>  // ::strerror_r()
 
@@ -96,14 +96,8 @@ noexcept
     }
     fmt << '\n';
 
-    // Write the string now.
-    // Note the string cannot be empty so a return value of zero always indicates failure.
-    size_t nput = ::fwrite(fmt.get_c_string(), 1, fmt.get_length(), stderr);
-    if(nput == 0)
-      return -1;
-
-    // Return the number of characters that have been written.
-    return static_cast<ptrdiff_t>(nput);
+    // Write the string now. If the operation fails, we don't retry.
+    return ::write(STDERR_FILENO, fmt.c_str(), fmt.length());
   }
 
 bool
@@ -115,6 +109,7 @@ noexcept
       *(pos++) = static_cast<char>(cp);
       return true;
     }
+
     if((0xD800 <= cp) && (cp < 0xE000)) {
       // Surrogates are reserved for UTF-16.
       return false;
@@ -406,14 +401,17 @@ noexcept
     // Get the system time of very high resolution.
     ::timespec ts;
     ::clock_gettime(CLOCK_MONOTONIC, &ts);
-    uint64_t source = (static_cast<uint64_t>(ts.tv_sec) << 30) + static_cast<uint32_t>(ts.tv_nsec);
+    uint64_t ireg = static_cast<uint64_t>(ts.tv_sec);
+    ireg <<= 30;
+    ireg |= static_cast<uint32_t>(ts.tv_nsec);
+
     // Hash it using FNV-1a to erase sensitive information.
     //   https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function
-    // The source is read in little-endian byte order.
+    // The source value is read in little-endian byte order.
     uint64_t seed = 0xCBF29CE484222325;
     for(size_t i = 0;  i < 8;  ++i) {
-      seed = (seed ^ (source & 0xFF)) * 0x100000001B3;
-      source >>= 8;
+      seed = (seed ^ (ireg & 0xFF)) * 0x100000001B3;
+      ireg >>= 8;
     }
     return seed;
   }
