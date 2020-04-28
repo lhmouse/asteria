@@ -167,7 +167,7 @@ struct REPL_Hooks : Abstract_Hooks
       }
 
     void
-    on_single_step_trap(const Source_Location& sloc, Executive_Context* /*ctx*/)
+    on_single_step_trap(const Source_Location& sloc)
     override
       {
         if(ROCKET_EXPECT(!interrupted))

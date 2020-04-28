@@ -1355,7 +1355,7 @@ struct AIR_Traits<AIR_Node::S_function_call>
 
         // Generate a single-step trap before unpacking arguments.
         if(auto qhooks = ctx.global().get_hooks_opt())
-          qhooks->on_single_step_trap(sloc, &ctx);
+          qhooks->on_single_step_trap(sloc);
 
         // Pop arguments off the stack backwards.
         auto args = do_pop_positional_arguments(ctx, up.y32);
@@ -3572,7 +3572,7 @@ struct AIR_Traits<AIR_Node::S_single_step_trap>
       {
         // Call the hook function if any.
         if(auto qhooks = ctx.global().get_hooks_opt())
-          qhooks->on_single_step_trap(sloc, &ctx);
+          qhooks->on_single_step_trap(sloc);
 
         return air_status_next;
       }
@@ -3618,7 +3618,7 @@ struct AIR_Traits<AIR_Node::S_variadic_call>
 
         // Generate a single-step trap.
         if(auto qhooks = ctx.global().get_hooks_opt())
-          qhooks->on_single_step_trap(sloc, &ctx);
+          qhooks->on_single_step_trap(sloc);
 
         // Pop the argument generator.
         cow_vector<Reference> args;
@@ -3777,7 +3777,7 @@ struct AIR_Traits<AIR_Node::S_import_call>
 
         // Generate a single-step trap.
         if(auto qhooks = ctx.global().get_hooks_opt())
-          qhooks->on_single_step_trap(sp.sloc, &ctx);
+          qhooks->on_single_step_trap(sp.sloc);
 
         // Pop arguments off the stack backwards.
         ROCKET_ASSERT(up.y32 != 0);

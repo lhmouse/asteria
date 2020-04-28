@@ -38,7 +38,7 @@ on_function_except(const Source_Location& /*sloc*/, const Runtime_Error& /*excep
 
 void
 Abstract_Hooks::
-on_single_step_trap(const Source_Location& /*sloc*/, Executive_Context* /*ctx_opt*/)
+on_single_step_trap(const Source_Location& /*sloc*/)
   {
   }
 

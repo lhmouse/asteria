@@ -48,7 +48,7 @@ class Abstract_Hooks
     // setting `verbose_single_step_traps` in `Compiler_Options`.
     virtual
     void
-    on_single_step_trap(const Source_Location& sloc, Executive_Context* ctx_opt);
+    on_single_step_trap(const Source_Location& sloc);
   };
 
 }  // namespace Asteria

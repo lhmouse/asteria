@@ -33,7 +33,7 @@ do_unpack_tail_calls(Reference& self, Global_Context& global)
       while(!!(tca = self.get_tail_call_opt())) {
         // Generate a single-step trap before unpacking arguments.
         if(auto qhooks = global.get_hooks_opt())
-          qhooks->on_single_step_trap(tca->sloc(), nullptr);
+          qhooks->on_single_step_trap(tca->sloc());
 
         // Get the `this` reference and all the other arguments.
         const auto& target = tca->get_target();
