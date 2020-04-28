@@ -378,11 +378,11 @@ class basic_tinybuf_file
     swap(basic_tinybuf_file& other)
     noexcept(is_nothrow_swappable<file_buffer>::value)
       {
+        this->tinybuf_type::swap(other);
+
         noadl::xswap(this->m_gbuf, other.m_gbuf);
-        // No exception shall be thrown afterwards.
         noadl::xswap(this->m_goff, other.m_goff);
         noadl::xswap(this->m_file, other.m_file);
-        noadl::xswap<tinybuf_type>(*this, other);
         return *this;
       }
   };

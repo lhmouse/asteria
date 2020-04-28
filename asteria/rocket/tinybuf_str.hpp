@@ -33,7 +33,7 @@ class basic_tinybuf_str
   private:
     string_type m_stor;
     size_type m_goff = 0;  // offset of the beginning of the get area
-    bool m_mapp = false;  // append mode
+    bool m_appm = false;  // append mode
 
   public:
     basic_tinybuf_str()
@@ -157,7 +157,7 @@ class basic_tinybuf_str
 
         // Notice that we don't use put areas.
         // If `open_append` is in effect, always append to the end.
-        if(ROCKET_EXPECT((this->m_goff == this->m_stor.size()) || this->m_mapp)) {
+        if(ROCKET_EXPECT((this->m_goff == this->m_stor.size()) || this->m_appm)) {
           // Append the string to the end.
           this->m_stor.append(sadd, nadd);
           this->m_goff = this->m_stor.size();
@@ -190,10 +190,11 @@ class basic_tinybuf_str
     clear_string(open_mode mode)
       {
         this->do_purge_areas();
+
         // Clear the string and set the new mode.
         this->m_stor.clear();
         this->m_goff = 0;
-        this->m_mapp = tinybuf_base::has_mode(mode, tinybuf_base::open_append);
+        this->m_appm = tinybuf_base::has_mode(mode, tinybuf_base::open_append);
       }
 
     template<typename xstrT>
@@ -201,21 +202,23 @@ class basic_tinybuf_str
     set_string(xstrT&& xstr, open_mode mode)
       {
         this->do_purge_areas();
+
         // Set the new string and mode.
         this->m_stor = ::std::forward<xstrT>(xstr);
         this->m_goff = 0;
-        this->m_mapp = tinybuf_base::has_mode(mode, tinybuf_base::open_append);
+        this->m_appm = tinybuf_base::has_mode(mode, tinybuf_base::open_append);
       }
 
     string_type
     extract_string(open_mode mode)
       {
         this->do_purge_areas();
+
         // Swap the string with an empty one and set the new mode.
         string_type str;
         this->m_stor.swap(str);
         this->m_goff = 0;
-        this->m_mapp = tinybuf_base::has_mode(mode, tinybuf_base::open_append);
+        this->m_appm = tinybuf_base::has_mode(mode, tinybuf_base::open_append);
         return str;
       }
 
@@ -223,11 +226,11 @@ class basic_tinybuf_str
     swap(basic_tinybuf_str& other)
     noexcept(is_nothrow_swappable<string_type>::value)
       {
+        this->tinybuf_type::swap(other);
+
         noadl::xswap(this->m_stor, other.m_stor);
-        // No exception shall be thrown afterwards.
         noadl::xswap(this->m_goff, other.m_goff);
-        noadl::xswap(this->m_mapp, other.m_mapp);
-        noadl::xswap<tinybuf_type>(*this, other);
+        noadl::xswap(this->m_appm, other.m_appm);
         return *this;
       }
   };
