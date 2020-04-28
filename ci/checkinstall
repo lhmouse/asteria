@@ -1508,7 +1508,7 @@ fi
 TMP_SCRIPT=${TMP_DIR}/installscript.sh
 
 cat << EOF > $TMP_SCRIPT
-#!/bin/sh
+#!/bin/bash
 
 cd "$DIRECTORIO_FUENTE"
 EOF
@@ -2023,7 +2023,7 @@ if [ ! -z "$DEPFILES" ] ; then
 	# Add depmod to the postinst
 	# This will be redundant if we already have a postinstall script.
 	# Nevertheless, it is harmless.
-	echo "#!/bin/sh" >> ${DIRECTORIO_FUENTE}/postinstall-pak
+	echo "#!/bin/bash" >> ${DIRECTORIO_FUENTE}/postinstall-pak
 	echo "#" >> ${DIRECTORIO_FUENTE}/postinstall-pak
 	echo "# postinstall script, created by checkinstall-${CHECKINSTALL_VERSION}" >> ${DIRECTORIO_FUENTE}/postinstall-pak
 	echo "#" >> ${DIRECTORIO_FUENTE}/postinstall-pak
@@ -2379,7 +2379,7 @@ Packager:  checkinstall-$CHECKINSTALL_VERSION
 Group:     $PKG_GROUP          
 BuildRoot: $BROOTPATH
 Provides:  $PROVIDES
-Requires:  $REQUIRES,/bin/sh
+Requires:  $REQUIRES,/bin/bash
 
 %description
 EOF
