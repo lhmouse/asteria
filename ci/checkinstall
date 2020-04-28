@@ -1975,6 +1975,7 @@ EOF
 
  cat ${TMP_DIR}/libdirs | while read libdir; do
    (
+    libdir=$(echo $libdir | sed 's:^/*::')
     echo "if ! egrep \"^/${libdir} *$\" /etc/ld.so.conf &> /dev/null; then"
     echo "   echo \"Adding \"/$libdir\" to /etc/ld.so.conf\"" 
     echo "   echo /$libdir >> /etc/ld.so.conf"
