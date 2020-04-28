@@ -119,21 +119,13 @@ do_generate_statement_list(cow_vector<phsh_string>* names_opt, Analytic_Context&
     return code;
   }
 
-cow_vector<AIR_Node>&
-do_generate_block(cow_vector<AIR_Node>& code, const Compiler_Options& opts, PTC_Aware ptc,
-                  const Analytic_Context& ctx, const Statement::S_block& block)
-  {
-    Analytic_Context ctx_stmts(::rocket::ref(ctx));
-    do_generate_statement_list(code, nullptr, ctx_stmts, opts, ptc, block);
-    return code;
-  }
-
 cow_vector<AIR_Node>
 do_generate_block(const Compiler_Options& opts, PTC_Aware ptc, const Analytic_Context& ctx,
                   const Statement::S_block& block)
   {
     cow_vector<AIR_Node> code;
-    do_generate_block(code, opts, ptc, ctx, block);
+    Analytic_Context ctx_stmts(::rocket::ref(ctx));
+    do_generate_statement_list(code, nullptr, ctx_stmts, opts, ptc, block);
     return code;
   }
 
