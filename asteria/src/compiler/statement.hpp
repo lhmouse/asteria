@@ -199,8 +199,12 @@ class Statement
     bool
     is_empty_return()
     const noexcept
-      { return (this->m_stor.index() == index_return) &&
-               this->m_stor.as<index_return>().expr.units.empty();  }
+      {
+        if(this->index() != index_return)
+          return false;
+        else
+          return this->m_stor.as<index_return>().expr.units.empty();
+      }
 
     Statement&
     swap(Statement& other)

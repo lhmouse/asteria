@@ -308,10 +308,10 @@ class Value
     Value&
     operator=(initializer_list<Value> list)
       {
-        if(this->m_stor.index() != vtype_array)
-          this->m_stor.emplace<V_array>();
-
-        this->m_stor.as<vtype_array>().assign(list.begin(), list.end());
+        if(this->is_array())
+          this->m_stor.as<vtype_array>().assign(list.begin(), list.end());
+        else
+          this->m_stor.emplace<vtype_array>(list);
         return *this;
       }
 
@@ -319,10 +319,10 @@ class Value
     Value&
     operator=(initializer_list<pair<KeyT, Value>> list)
       {
-        if(this->m_stor.index() != vtype_object)
-          this->m_stor.emplace<V_object>();
-
-        this->m_stor.as<vtype_object>().assign(list.begin(), list.end());
+        if(this->is_object())
+          this->m_stor.as<vtype_object>().assign(list.begin(), list.end());
+        else
+          this->m_stor.emplace<vtype_object>(list);
         return *this;
       }
 
@@ -458,7 +458,7 @@ class Value
     const char*
     what_vtype()
     const noexcept
-      { return describe_vtype(static_cast<Vtype>(this->m_stor.index()));  }
+      { return describe_vtype(this->vtype());  }
 
     bool
     is_null()
