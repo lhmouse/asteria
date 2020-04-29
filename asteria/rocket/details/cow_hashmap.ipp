@@ -317,9 +317,10 @@ class storage_handle
         auto ptr = ::std::exchange(this->m_ptr, ptr_new);
         if(ROCKET_EXPECT(!ptr))
           return;
+
         // This is needed for incomplete type support.
         auto dtor = reinterpret_cast<const storage_header*>(noadl::unfancy(ptr))->dtor;
-        (*reinterpret_cast<void (*)(storage_pointer)>(dtor))(ptr);
+        reinterpret_cast<void (*)(storage_pointer)>(dtor)(ptr);
       }
 
     ROCKET_NOINLINE static
