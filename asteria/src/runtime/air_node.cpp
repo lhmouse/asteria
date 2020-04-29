@@ -1264,11 +1264,11 @@ do_invoke_nontail(Reference& self, const Source_Location& sloc, Executive_Contex
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
       if(auto qhooks = ctx.global().get_hooks_opt())
-        qhooks->on_function_except(sloc, except);
+        qhooks->on_function_except(sloc, target, except);
       throw;
     }
     if(auto qhooks = ctx.global().get_hooks_opt())
-      qhooks->on_function_return(sloc, self);
+      qhooks->on_function_return(sloc, target, self);
     return self;
   }
 
@@ -1362,9 +1362,8 @@ struct AIR_Traits<AIR_Node::S_function_call>
 
         // Copy the target, which shall be of type `function`.
         auto value = ctx.stack().get_top().read();
-        if(!value.is_function()) {
+        if(!value.is_function())
           ASTERIA_THROW("attempt to call a non-function (value `$1`)", value);
-        }
         auto& self = ctx.stack().open_top().zoom_out();
 
         return do_function_call_common(self, sloc, ctx, value.as_function(),
@@ -3680,9 +3679,8 @@ struct AIR_Traits<AIR_Node::S_variadic_call>
 
         // Copy the target, which shall be of type `function`.
         value = ctx.stack().get_top().read();
-        if(!value.is_function()) {
+        if(!value.is_function())
           ASTERIA_THROW("attempt to call a non-function (value `$1`)", value);
-        }
         auto& self = ctx.stack().open_top().zoom_out();
 
         return do_function_call_common(self, sloc, ctx, value.as_function(),
@@ -3827,9 +3825,8 @@ struct AIR_Traits<AIR_Node::S_import_call>
         // Update the first argument to `import` if it was passed by reference.
         // `this` is null for imported scripts.
         auto& self = ctx.stack().open_top();
-        if(self.is_lvalue()) {
+        if(self.is_lvalue())
           self.open() = path;
-        }
         self = Reference_root::S_constant();
 
         return do_function_call_common(self, sp.sloc, ctx, qtarget, ptc_aware_none, ::std::move(args));

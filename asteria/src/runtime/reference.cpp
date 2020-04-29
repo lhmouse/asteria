@@ -36,14 +36,13 @@ do_unpack_tail_calls(Reference& self, Global_Context& global)
           qhooks->on_single_step_trap(tca->sloc());
 
         // Get the `this` reference and all the other arguments.
-        const auto& target = tca->get_target();
         auto args = ::std::move(tca->open_arguments_and_self());
         self = ::std::move(args.mut_back());
         args.pop_back();
 
         // Call the hook function if any.
         if(auto qhooks = global.get_hooks_opt())
-          qhooks->on_function_call(tca->sloc(), target);
+          qhooks->on_function_call(tca->sloc(), tca->get_target());
 
         // Figure out how to forward the result.
         if(tca->ptc_aware() == ptc_aware_void) {
@@ -56,7 +55,7 @@ do_unpack_tail_calls(Reference& self, Global_Context& global)
         frames.emplace_back(tca);
 
         // Perform a non-tail call.
-        target.invoke_ptc_aware(self, global, ::std::move(args));
+        tca->get_target().invoke_ptc_aware(self, global, ::std::move(args));
       }
 
       // Check for deferred expressions.
@@ -73,7 +72,7 @@ do_unpack_tail_calls(Reference& self, Global_Context& global)
 
         // Call the hook function if any.
         if(auto qhooks = global.get_hooks_opt())
-          qhooks->on_function_return(tca->sloc(), self);
+          qhooks->on_function_return(tca->sloc(), tca->get_target(), self);
       }
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
@@ -88,7 +87,7 @@ do_unpack_tail_calls(Reference& self, Global_Context& global)
 
         // Call the hook function if any.
         if(auto qhooks = global.get_hooks_opt())
-          qhooks->on_function_except(tca->sloc(), except);
+          qhooks->on_function_except(tca->sloc(), tca->get_target(), except);
 
         // Evaluate deferred expressions if any.
         if(tca->get_defer_stack().size())
