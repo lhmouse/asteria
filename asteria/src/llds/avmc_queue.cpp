@@ -92,7 +92,7 @@ noexcept
 
       // Destroy user-defined data.
       if(auto qdtor = qnode->dtor_opt())
-        (*qdtor)(qnode->uparam(), qnode->sparam());
+        qdtor(qnode->uparam(), qnode->sparam());
 
       // Destroy symbols.
       if(auto ksyms = qnode->syms_opt())
@@ -131,7 +131,7 @@ do_reallocate(uint32_t nadd)
 
       // Move-construct new user-defined data.
       if(auto qmvct = qnode->mvctor_opt())
-        (*qmvct)(qnode->uparam(), qnode->sparam(), qxold->sparam());
+        qmvct(qnode->uparam(), qnode->sparam(), qxold->sparam());
 
       // Move-construct new symbols.
       if(auto ksyms = qnode->syms_opt())
@@ -139,7 +139,7 @@ do_reallocate(uint32_t nadd)
 
       // Destroy old user-defined data.
       if(auto qdtor = qxold->dtor_opt())
-        (*qdtor)(qxold->uparam(), qxold->sparam());
+        qdtor(qxold->uparam(), qxold->sparam());
 
       // Destroy old symbols.
       if(auto ksyms = qxold->syms_opt())
@@ -220,7 +220,7 @@ do_append_nontrivial(const Vtable* vtbl, Uparam uparam, opt<Symbols>&& syms_opt,
     // Invoke the constructor if `ctor_opt` is non-null. Fill zeroes otherwise.
     // If an exception is thrown, there is no effect.
     if(ctor_opt)
-      (*ctor_opt)(uparam, qnode->sparam(), ctor_arg);
+      ctor_opt(uparam, qnode->sparam(), ctor_arg);
     else
       ::std::memset(qnode->sparam(), 0, nbytes);
 
@@ -246,7 +246,7 @@ const
       // Call the executor function for this node.
       auto qexec = qnode->executor();
       ASTERIA_RUNTIME_TRY {
-        status = (*qexec)(ctx, qnode->uparam(), qnode->sparam());
+        status = qexec(ctx, qnode->uparam(), qnode->sparam());
       }
       ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
         if(auto qsyms = qnode->syms_opt())
@@ -270,7 +270,7 @@ const
 
       // Enumerate variables in this node.
       if(auto qvnum = qnode->has_vtbl ? qnode->vtable->vnum_opt : nullptr)
-        (*qvnum)(callback, qnode->uparam(), qnode->sparam());
+        qvnum(callback, qnode->uparam(), qnode->sparam());
     }
     return callback;
   }

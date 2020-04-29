@@ -37,11 +37,10 @@ cow_opaque::
 describe(tinyfmt& fmt)
 const
   {
-    auto ptr = this->m_sptr.get();
-    if(ptr) {
+    if(auto ptr = this->m_sptr.get())
       return ptr->describe(fmt);
-    }
-    return fmt.puts("<null opaque pointer>");
+
+    return fmt << "<null opaque pointer>";
   }
 
 Variable_Callback&
@@ -49,10 +48,9 @@ cow_opaque::
 enumerate_variables(Variable_Callback& callback)
 const
   {
-    auto ptr = this->m_sptr.get();
-    if(ptr) {
-      ptr->enumerate_variables(callback);
-    }
+    if(auto ptr = this->m_sptr.get())
+      return ptr->enumerate_variables(callback);
+
     return callback;
   }
 
@@ -69,15 +67,13 @@ cow_function::
 describe(tinyfmt& fmt)
 const
   {
-    auto fptr = this->m_fptr;
-    if(fptr) {
+    if(auto fptr = this->m_fptr)
       return format(fmt, "$1\n[native function at $2]", this->m_desc, (void*)(intptr_t)fptr);  // static
-    }
-    auto ptr = this->m_sptr.get();
-    if(ptr) {
+
+    if(auto ptr = this->m_sptr.get())
       return ptr->describe(fmt);  // dynamic
-    }
-    return fmt.puts("<null function pointer>");
+
+    return fmt << "<null function pointer>";
   }
 
 Variable_Callback&
@@ -85,10 +81,9 @@ cow_function::
 enumerate_variables(Variable_Callback& callback)
 const
   {
-    auto ptr = this->m_sptr.get();
-    if(ptr) {
+    if(auto ptr = this->m_sptr.get())
       ptr->enumerate_variables(callback);  // dynamic
-    }
+
     return callback;
   }
 
@@ -97,15 +92,13 @@ cow_function::
 invoke_ptc_aware(Reference& self, Global_Context& global, cow_vector<Reference>&& args)
 const
   {
-    auto fptr = this->m_fptr;
-    if(fptr) {
-      return (*fptr)(self, ::std::move(args), global);  // static
-    }
-    auto ptr = this->m_sptr.get();
-    if(!ptr) {
-      this->do_throw_null_pointer();
-    }
-    return ptr->invoke_ptc_aware(self, global, ::std::move(args));  // dynamic
+    if(auto fptr = this->m_fptr)
+      return fptr(self, ::std::move(args), global);  // static
+
+    if(auto ptr = this->m_sptr.get())
+      return ptr->invoke_ptc_aware(self, global, ::std::move(args));  // dynamic
+
+    this->do_throw_null_pointer();
   }
 
 Reference&

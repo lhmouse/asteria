@@ -214,6 +214,7 @@ struct StdIO_Sentry
         // Discard unread data. Clear EOF and error bits. Clear orientation.
         if(!::freopen(nullptr, "r", stdin))
           ::abort();
+
         // Flush buffered data. clear error bit. Clear orientation.
         if(!::freopen(nullptr, "w", stdout))
           ::abort();
