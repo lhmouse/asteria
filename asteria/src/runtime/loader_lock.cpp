@@ -22,6 +22,7 @@ do_lock_stream(const char* path)
     ::rocket::unique_posix_file file(::fopen(path, "r"), ::fclose);
     if(!file)
       ASTERIA_THROW_SYSTEM_ERROR("fopen");
+    ::setbuf(file, nullptr);
 
     // Make the unique identifier of this file from its device ID and inode number.
     struct ::stat info;

@@ -784,8 +784,8 @@ std_json_parse_file(V_string path)
     ::rocket::unique_posix_file fp(::fopen(path.safe_c_str(), "rb"), ::fclose);
     if(fp) {
       // Parse characters from the file.
+      ::setbuf(fp, nullptr);
       ::rocket::tinybuf_file cbuf(::std::move(fp));
-      cbuf.set_string(text, tinybuf::open_read);
       return do_json_parse(cbuf);
     }
 
