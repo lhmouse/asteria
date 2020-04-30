@@ -782,18 +782,13 @@ std_json_parse_file(V_string path)
   {
     // Try opening the file.
     ::rocket::unique_posix_file fp(::fopen(path.safe_c_str(), "rb"), ::fclose);
-    if(fp) {
-      // Parse characters from the file.
-      ::setbuf(fp, nullptr);
-      ::rocket::tinybuf_file cbuf(::std::move(fp));
-      return do_json_parse(cbuf);
-    }
+    if(!fp)
+      ASTERIA_THROW_SYSTEM_ERROR("fopen");
 
-    if(errno == ENOENT)
-      // The file does not exist.
-      return V_null();
-
-    ASTERIA_THROW_SYSTEM_ERROR("fopen");
+    // Parse characters from the file.
+    ::setbuf(fp, nullptr);
+    ::rocket::tinybuf_file cbuf(::std::move(fp));
+    return do_json_parse(cbuf);
   }
 
 void
@@ -935,9 +930,7 @@ create_bindings_json(V_object& result, API_Version /*version*/)
   * Parses the contents of the file denoted by `path` as a JSON
     string. This function behaves identical to `parse()` otherwise.
 
-  * Returns the parsed value. If the file does not exist, `null` is
-    returned. Note there is no way to distinguish explicit `null`s
-    from non-existent files.
+  * Returns the parsed value.
 
   * Throws an exception if a read error occurs, or if the string is
     invalid.

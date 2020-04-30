@@ -349,7 +349,7 @@ std_filesystem_directory_remove(V_string path)
     ASTERIA_THROW_SYSTEM_ERROR("rmdir");
   }
 
-optV_string
+V_string
 std_filesystem_file_read(V_string path, optV_integer offset, optV_integer limit)
   {
     if(offset && (*offset < 0))
@@ -359,14 +359,8 @@ std_filesystem_file_read(V_string path, optV_integer offset, optV_integer limit)
 
     // Open the file for reading.
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
-    if(!fd) {
-      // If the file doesn't exist, return `null`. Don't throw exceptions.
-      if(errno == ENOENT)
-        return nullopt;
-
-      // Throw an exception for general failures.
+    if(!fd)
       ASTERIA_THROW_SYSTEM_ERROR("open");
-    }
 
     // We return data that have been read as a byte string.
     V_string data;
@@ -385,10 +379,10 @@ std_filesystem_file_read(V_string path, optV_integer offset, optV_integer limit)
         ASTERIA_THROW_SYSTEM_ERROR("read");
     }
     data.erase(static_cast<size_t>(nread));
-    return ::std::move(data);
+    return data;
   }
 
-optV_integer
+V_integer
 std_filesystem_file_stream(Global_Context& global, V_string path, V_function callback,
                            optV_integer offset, optV_integer limit)
   {
@@ -399,14 +393,8 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
 
     // Open the file for reading.
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
-    if(!fd) {
-      // If the file doesn't exist, return `null`. Don't throw exceptions.
-      if(errno == ENOENT)
-        return nullopt;
-
-      // Throw an exception for general failures.
+    if(!fd)
       ASTERIA_THROW_SYSTEM_ERROR("open");
-    }
 
     // These are reused for each iteration.
     V_string data;
@@ -837,8 +825,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     `limit` is specified, no more than this number of bytes will be
     read.
 
-  * Returns the bytes that have been read as a string, or `null` if
-    the file does not exist.
+  * Returns the bytes that have been read as a string.
 
   * Throws an exception if `offset` is negative, or a read error
     occurs.
@@ -882,7 +869,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     read.
 
   * Returns the number of bytes that have been read and processed
-    as an integer, or `null` if the file does not exist.
+    as an integer.
 
   * Throws an exception if `offset` is negative, or a read error
     occurs.

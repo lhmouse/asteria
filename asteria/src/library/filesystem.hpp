@@ -41,11 +41,11 @@ V_integer
 std_filesystem_directory_remove(V_string path);
 
 // `std.filesystem.file_read`
-optV_string
+V_string
 std_filesystem_file_read(V_string path, optV_integer offset, optV_integer limit);
 
 // `std.filesystem.file_stream`
-optV_integer
+V_integer
 std_filesystem_file_stream(Global_Context& global, V_string path, V_function callback,
                            optV_integer offset, optV_integer limit);
 

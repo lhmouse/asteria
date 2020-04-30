@@ -2248,8 +2248,7 @@
 	  `limit` is specified, no more than this number of bytes will be
 	  read.
 
-	* Returns the bytes that have been read as a string, or `null` if
-	  the file does not exist.
+	* Returns the bytes that have been read as a string.
 
 	* Throws an exception if `offset` is negative, or a read error
 	  occurs.
@@ -2270,7 +2269,7 @@
 	  read.
 
 	* Returns the number of bytes that have been read and processed
-	  as an integer, or `null` if the file does not exist.
+	  as an integer.
 
 	* Throws an exception if `offset` is negative, or a read error
 	  occurs.
@@ -2365,10 +2364,7 @@
 	  ```
 	  std.checksum.crc32_file = func(path) {
 	    var h = this.crc32_new();
-	    var r = this.file_stream(path,
-	              func(off, data) = h.update(data));
-	    if(r == null)
-	      return r;
+	    this.file_stream(path, func(off, data) = h.update(data));
 	    return h.finish();
 	  };
 	  ```
@@ -2377,8 +2373,7 @@
 	  to use.
 
 	* Returns the CRC-32 checksum as an integer. The high-order 32
-	  bits are always zeroes. If the file does not exist, `null` is
-	  returned.
+	  bits are always zeroes.
 
 	* Throws an exception if a read error occurs.
 
@@ -2428,10 +2423,7 @@
 	  ```
 	  std.checksum.fnv1a32_file = func(path) {
 	    var h = this.fnv1a32_new();
-	    var r = this.file_stream(path,
-	              func(off, data) = h.update(data));
-	    if(r == null)
-	      return r;
+	    this.file_stream(path, func(off, data) = h.update(data));
 	    return h.finish();
 	  };
 	  ```
@@ -2440,8 +2432,7 @@
 	  to use.
 
 	* Returns the 32-bit FNV-1a checksum as an integer. The
-	  high-order 32 bits are always zeroes. If the file does not
-	  exist, `null` is returned.
+	  high-order 32 bits are always zeroes.
 
 	* Throws an exception if a read error occurs.
 
@@ -2488,10 +2479,7 @@
 	  ```
 	  std.checksum.md5_file = func(path) {
 	    var h = this.md5_new();
-	    var r = this.file_stream(path,
-	              func(off, data) = h.update(data));
-	    if(r == null)
-	      return r;
+	    this.file_stream(path, func(off, data) = h.update(data));
 	    return h.finish();
 	  };
 	  ```
@@ -2500,7 +2488,7 @@
 	  to use.
 
 	* Returns the MD5 checksum as a string of 32 hexadecimal digits
-	  in uppercase. If the file does not exist, `null` is returned.
+	  in uppercase.
 
 	* Throws an exception if a read error occurs.
 
@@ -2547,10 +2535,7 @@
 	  ```
 	  std.checksum.sha1_file = func(path) {
 	    var h = this.sha1_new();
-	    var r = this.file_stream(path,
-	              func(off, data) = h.update(data));
-	    if(r == null)
-	      return r;
+	    this.file_stream(path, func(off, data) = h.update(data));
 	    return h.finish();
 	  };
 	  ```
@@ -2559,7 +2544,7 @@
 	  to use.
 
 	* Returns the SHA-1 checksum as a string of 40 hexadecimal digits
-	  in uppercase. If the file does not exist, `null` is returned.
+	  in uppercase.
 
 	* Throws an exception if a read error occurs.
 
@@ -2606,10 +2591,7 @@
 	  ```
 	  std.checksum.sha256_file = func(path) {
 	    var h = this.sha256_new();
-	    var r = this.file_stream(path,
-	              func(off, data) = h.update(data));
-	    if(r == null)
-	      return r;
+	    this.file_stream(path, func(off, data) = h.update(data));
 	    return h.finish();
 	  };
 	  ```
@@ -2618,8 +2600,7 @@
 	  to use.
 
 	* Returns the SHA-256 checksum as a string of 64 hexadecimal
-	  digits in uppercase. If the file does not exist, `null` is
-	  returned.
+	  digits in uppercase.
 
 	* Throws an exception if a read error occurs.
 
@@ -2681,9 +2662,7 @@
 	* Parses the contents of the file denoted by `path` as a JSON
 	  string. This function behaves identical to `parse()` otherwise.
 
-	* Returns the parsed value. If the file does not exist, `null` is
-          returned. Note there is no way to distinguish explicit `null`s
-          from non-existent files.
+	* Returns the parsed value.
 
 	* Throws an exception if a read error occurs, or if the string is
 	  invalid.

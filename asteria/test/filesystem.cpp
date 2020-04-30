@@ -49,7 +49,8 @@ int main()
         assert std.filesystem.remove_recursive(dname) == 8;
         assert std.filesystem.directory_remove(dname) == 0;
 
-        assert std.filesystem.file_read(fname) == null;
+        try { std.filesystem.file_read("/nonexistent") == null;  assert false;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         std.filesystem.file_append(fname, "@@@@$$", true);  // "@@@@$$"
         assert std.filesystem.get_information(fname).b_dir == false;
         assert std.filesystem.get_information(fname).n_size == 6;
@@ -78,6 +79,8 @@ int main()
 
         var data = "";
         var appender = func(off, str) { data += str;  };
+        try { std.filesystem.file_stream("/nonexistent", appender);  assert false;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         assert std.filesystem.file_stream(fname, appender) == 10;
         assert data == "helHE#??!!";
         data = "";

@@ -1369,32 +1369,26 @@ do_hash_bytes(const V_string& data)
   }
 
 template<typename HasherT>
-opt<typename ::std::decay<decltype(::std::declval<HasherT&>().finish())>::type>
-do_hash_file_opt(const V_string& path)
+decltype(::std::declval<HasherT&>().finish())
+do_hash_file(const V_string& path)
   {
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
-    if(fd) {
-      // The file has been opened successfully. Hash it.
-      HasherT h;
-      static constexpr size_t nbuf = 16384;
-      uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)),
-                                          ::operator delete);
-      for(;;) {
-        ::ssize_t nread = ::read(fd, pbuf, nbuf);
-        if(nread < 0)
-          ASTERIA_THROW_SYSTEM_ERROR("read");
-        if(nread == 0)
-          break;  // EOF
-        h.update(pbuf, static_cast<size_t>(nread));
-      }
-      return h.finish();
+    if(!fd)
+      ASTERIA_THROW_SYSTEM_ERROR("open");
+
+    HasherT h;
+    static constexpr size_t nbuf = 16384;
+    uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)),
+                                        ::operator delete);
+    for(;;) {
+      ::ssize_t nread = ::read(fd, pbuf, nbuf);
+      if(nread < 0)
+        ASTERIA_THROW_SYSTEM_ERROR("read");
+      if(nread == 0)
+        break;  // EOF
+      h.update(pbuf, static_cast<size_t>(nread));
     }
-
-    if(errno == ENOENT)
-      // The file does not exist.
-      return nullopt;
-
-    ASTERIA_THROW_SYSTEM_ERROR("open");
+    return h.finish();
   }
 
 }  // namespace
@@ -1431,10 +1425,10 @@ std_checksum_crc32(V_string data)
     return do_hash_bytes<CRC32_Hasher>(data);
   }
 
-optV_integer
+V_integer
 std_checksum_crc32_file(V_string path)
   {
-    return do_hash_file_opt<CRC32_Hasher>(path);
+    return do_hash_file<CRC32_Hasher>(path);
   }
 
 V_opaque
@@ -1469,10 +1463,10 @@ std_checksum_fnv1a32(V_string data)
     return do_hash_bytes<FNV1a32_Hasher>(data);
   }
 
-optV_integer
+V_integer
 std_checksum_fnv1a32_file(V_string path)
   {
-    return do_hash_file_opt<FNV1a32_Hasher>(path);
+    return do_hash_file<FNV1a32_Hasher>(path);
   }
 
 V_opaque
@@ -1507,10 +1501,10 @@ std_checksum_md5(V_string data)
     return do_hash_bytes<MD5_Hasher>(data);
   }
 
-optV_string
+V_string
 std_checksum_md5_file(V_string path)
   {
-    return do_hash_file_opt<MD5_Hasher>(path);
+    return do_hash_file<MD5_Hasher>(path);
   }
 
 V_opaque
@@ -1545,10 +1539,10 @@ std_checksum_sha1(V_string data)
     return do_hash_bytes<SHA1_Hasher>(data);
   }
 
-optV_string
+V_string
 std_checksum_sha1_file(V_string path)
   {
-    return do_hash_file_opt<SHA1_Hasher>(path);
+    return do_hash_file<SHA1_Hasher>(path);
   }
 
 V_opaque
@@ -1583,10 +1577,10 @@ std_checksum_sha256(V_string data)
     return do_hash_bytes<SHA256_Hasher>(data);
   }
 
-optV_string
+V_string
 std_checksum_sha256_file(V_string path)
   {
-    return do_hash_file_opt<SHA256_Hasher>(path);
+    return do_hash_file<SHA256_Hasher>(path);
   }
 
 void
@@ -1682,10 +1676,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     ```
     std.checksum.crc32_file = func(path) {
       var h = this.crc32_new();
-      var r = this.file_stream(path,
-                func(off, data) = h.update(data));
-      if(r == null)
-        return r;
+      this.file_stream(path, func(off, data) = h.update(data));
       return h.finish();
     };
     ```
@@ -1694,8 +1685,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     to use.
 
   * Returns the CRC-32 checksum as an integer. The high-order 32
-    bits are always zeroes. If the file does not exist, `null` is
-    returned.
+    bits are always zeroes.
 
   * Throws an exception if a read error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
@@ -1923,10 +1913,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     ```
     std.checksum.md5_file = func(path) {
       var h = this.md5_new();
-      var r = this.file_stream(path,
-                func(off, data) = h.update(data));
-      if(r == null)
-        return r;
+      this.file_stream(path, func(off, data) = h.update(data));
       return h.finish();
     };
     ```
@@ -1935,7 +1922,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     to use.
 
   * Returns the MD5 checksum as a string of 32 hexadecimal digits
-    in uppercase. If the file does not exist, `null` is returned.
+    in uppercase.
 
   * Throws an exception if a read error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
@@ -2041,10 +2028,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     ```
     std.checksum.sha1_file = func(path) {
       var h = this.sha1_new();
-      var r = this.file_stream(path,
-                func(off, data) = h.update(data));
-      if(r == null)
-        return r;
+      this.file_stream(path, func(off, data) = h.update(data));
       return h.finish();
     };
     ```
@@ -2053,7 +2037,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     to use.
 
   * Returns the SHA-1 checksum as a string of 40 hexadecimal digits
-    in uppercase. If the file does not exist, `null` is returned.
+    in uppercase.
 
   * Throws an exception if a read error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
@@ -2159,10 +2143,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     ```
     std.checksum.sha256_file = func(path) {
       var h = this.sha256_new();
-      var r = this.file_stream(path,
-                func(off, data) = h.update(data));
-      if(r == null)
-        return r;
+      this.file_stream(path, func(off, data) = h.update(data));
       return h.finish();
     };
     ```
@@ -2171,8 +2152,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     to use.
 
   * Returns the SHA-256 checksum as a string of 64 hexadecimal
-    digits in uppercase. If the file does not exist, `null` is
-    returned.
+    digits in uppercase.
 
   * Throws an exception if a read error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",

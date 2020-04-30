@@ -53,7 +53,8 @@ int main()
         assert q.finish() == 0x1E3888BE;
 
         assert std.checksum.crc32_file((__file>>3)+"txt") == 3626666760;
-        assert std.checksum.crc32_file("nonexistent") == null;
+        try { std.checksum.crc32_file("nonexistent") == null;  assert false;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
 
         // FNV1a-32
         const fnv1a32_results = [
@@ -93,7 +94,8 @@ int main()
         assert q.finish() == 0xF09334DB;
 
         assert std.checksum.fnv1a32_file((__file>>3)+"txt") == 3790343712;
-        assert std.checksum.fnv1a32_file("nonexistent") == null;
+        try { std.checksum.fnv1a32_file("nonexistent") == null;  assert false;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
 
         // MD5
         const md5_results = [
@@ -181,7 +183,8 @@ int main()
         assert q.finish() == "6E809CBDA0732AC4845916A59016F954";
 
         assert std.checksum.md5_file((__file>>3)+"txt") == "67C62663B722611BA87041EB05870EB9";
-        assert std.checksum.md5_file("nonexistent") == null;
+        try { std.checksum.md5_file("nonexistent") == null;  assert false;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
 
         // SHA-1
         const sha1_results = [
@@ -269,7 +272,8 @@ int main()
         assert q.finish() == "0F1DEFD5135596709273B3A1A07E466EA2BF4FFF";
 
         assert std.checksum.sha1_file((__file>>3)+"txt") == "6BD103FB2F8F84E6A7B36D27E1FD6243B6320BE8";
-        assert std.checksum.sha1_file("nonexistent") == null;
+        try { std.checksum.sha1_file("nonexistent") == null;  assert false;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
 
         // SHA-256
         const sha256_results = [
@@ -421,7 +425,8 @@ int main()
         assert q.finish() == "87298CC2F31FBA73181EA2A9E6EF10DCE21ED95E98BDAC9C4E1504EA16F486E4";
 
         assert std.checksum.sha256_file((__file>>3)+"txt") == "F5C962601B413CCDA2FC14D64D98479D9FC74C90C2DDE15F25EE9922E57F5074";
-        assert std.checksum.sha256_file("nonexistent") == null;
+        try { std.checksum.sha256_file("nonexistent") == null;  assert false;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
 
       )__"), tinybuf::open_read);
 
