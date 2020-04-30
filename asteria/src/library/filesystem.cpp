@@ -323,6 +323,7 @@ std_filesystem_directory_create(V_string path)
       struct ::stat stb;
       if(::stat(path.c_str(), &stb) != 0)
         ASTERIA_THROW_SYSTEM_ERROR("stat");
+
       if(S_ISDIR(stb.st_mode))
         return 0;
 
