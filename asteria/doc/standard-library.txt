@@ -2380,6 +2380,8 @@
 	  bits are always zeroes. If the file does not exist, `null` is
 	  returned.
 
+	* Throws an exception if a read error occurs.
+
 `std.checksum.fnv1a32_new()`
 
 	* Creates a 32-bit Fowler-Noll-Vo (a.k.a. FNV) hasher of the
@@ -2441,6 +2443,8 @@
 	  high-order 32 bits are always zeroes. If the file does not
 	  exist, `null` is returned.
 
+	* Throws an exception if a read error occurs.
+
 `std.checksum.md5_new()`
 
 	* Creates an MD5 hasher.
@@ -2497,6 +2501,8 @@
 
 	* Returns the MD5 checksum as a string of 32 hexadecimal digits
 	  in uppercase. If the file does not exist, `null` is returned.
+
+	* Throws an exception if a read error occurs.
 
 `std.checksum.sha1_new()`
 
@@ -2555,6 +2561,8 @@
 	* Returns the SHA-1 checksum as a string of 40 hexadecimal digits
 	  in uppercase. If the file does not exist, `null` is returned.
 
+	* Throws an exception if a read error occurs.
+
 `std.checksum.sha256_new()`
 
 	* Creates an SHA-256 hasher.
@@ -2612,6 +2620,8 @@
 	* Returns the SHA-256 checksum as a string of 64 hexadecimal
 	  digits in uppercase. If the file does not exist, `null` is
 	  returned.
+
+	* Throws an exception if a read error occurs.
 
 ### `std.json`
 

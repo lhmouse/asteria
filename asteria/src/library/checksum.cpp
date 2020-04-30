@@ -1669,6 +1669,8 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
   * Returns the CRC-32 checksum as an integer. The high-order 32
     bits are always zeroes. If the file does not exist, `null` is
     returned.
+
+  * Throws an exception if a read error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
@@ -1786,6 +1788,8 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
   * Returns the 32-bit FNV-1a checksum as an integer. The
     high-order 32 bits are always zeroes. If the file does not
     exist, `null` is returned.
+
+  * Throws an exception if a read error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
@@ -1899,6 +1903,8 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
 
   * Returns the MD5 checksum as a string of 32 hexadecimal digits
     in uppercase. If the file does not exist, `null` is returned.
+
+  * Throws an exception if a read error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
@@ -2012,6 +2018,8 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
 
   * Returns the SHA-1 checksum as a string of 40 hexadecimal digits
     in uppercase. If the file does not exist, `null` is returned.
+
+  * Throws an exception if a read error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
@@ -2126,6 +2134,8 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
   * Returns the SHA-256 checksum as a string of 64 hexadecimal
     digits in uppercase. If the file does not exist, `null` is
     returned.
+
+  * Throws an exception if a read error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
