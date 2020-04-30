@@ -246,9 +246,8 @@ const
 
       // Call the executor function for this node.
       AIR_Status status;
-      auto qexec = qnode->executor();
       ASTERIA_RUNTIME_TRY {
-        status = qexec(ctx, qnode->uparam(), qnode->sparam());
+        status = qnode->executor()(ctx, qnode->uparam(), qnode->sparam());
       }
       ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
         if(auto qsyms = qnode->syms_opt())
