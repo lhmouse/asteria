@@ -89,7 +89,8 @@ noexcept
     auto eptr = this->m_bptr + this->m_used;
     auto next = this->m_bptr;
     while(ROCKET_EXPECT(next != eptr)) {
-      auto qnode = ::std::exchange(next, next + next->total_size_in_headers());
+      auto qnode = next;
+      next += qnode->total_size_in_headers();
 
       // Destroy user-defined data.
       if(auto qdtor = qnode->dtor_opt())
@@ -124,11 +125,11 @@ do_reallocate(uint32_t nadd)
 
     // Move old non-trivial nodes if any.
     // Warning: No exception shall be thrown from the code below.
-    uint32_t off = 0;
-    while(ROCKET_EXPECT(off != this->m_used)) {
-      auto qnode = bptr + off;
-      auto qxold = bold + off;
-      off += qnode->total_size_in_headers();
+    uint32_t offset = 0;
+    while(ROCKET_EXPECT(offset != this->m_used)) {
+      auto qnode = bptr + offset;
+      auto qxold = bold + offset;
+      offset += qnode->total_size_in_headers();
 
       // Move-construct new user-defined data.
       if(auto qmvct = qnode->mvctor_opt())
@@ -242,7 +243,8 @@ const
     auto eptr = this->m_bptr + this->m_used;
     auto next = this->m_bptr;
     while(ROCKET_EXPECT(next != eptr)) {
-      auto qnode = ::std::exchange(next, next + next->total_size_in_headers());
+      auto qnode = next;
+      next += qnode->total_size_in_headers();
 
       // Call the executor function for this node.
       AIR_Status status;
@@ -268,7 +270,8 @@ const
     auto eptr = this->m_bptr + this->m_used;
     auto next = this->m_bptr;
     while(ROCKET_EXPECT(next != eptr)) {
-      auto qnode = ::std::exchange(next, next + next->total_size_in_headers());
+      auto qnode = next;
+      next += qnode->total_size_in_headers();
 
       // Enumerate variables in this node.
       if(auto qvnum = qnode->vnum_opt())
