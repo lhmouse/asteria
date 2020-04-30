@@ -15,7 +15,8 @@ noexcept
   {
     auto next = this->m_head;
     while(ROCKET_EXPECT(next)) {
-      auto qbkt = ::std::exchange(next, next->next);
+      auto qbkt = next;
+      next = qbkt->next;
 
       // Destroy this bucket.
       ROCKET_ASSERT(*qbkt);
@@ -137,7 +138,8 @@ do_rehash(size_t nbkt)
     // Warning: No exception shall be thrown from the code below.
     auto next = ::std::exchange(this->m_head, nullptr);
     while(ROCKET_EXPECT(next)) {
-      auto qbkt = ::std::exchange(next, next->next);
+      auto qbkt = next;
+      next = qbkt->next;
 
       // Move the old name and reference out, then destroy the bucket.
       ROCKET_ASSERT(*qbkt);
@@ -202,7 +204,8 @@ const
   {
     auto next = this->m_head;
     while(ROCKET_EXPECT(next)) {
-      auto qbkt = ::std::exchange(next, next->next);
+      auto qbkt = next;
+      next = qbkt->next;
 
       // Enumerate child variables.
       ROCKET_ASSERT(*qbkt);
