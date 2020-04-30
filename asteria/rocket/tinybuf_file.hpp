@@ -353,7 +353,6 @@ class basic_tinybuf_file
         if(!fd)
           noadl::sprintf_and_throw<runtime_error>("tinybuf_file: open error (errno `%d`, path `%s`, mode `%u`)",
                                                   errno, path, mode);
-
         // Convert it to a `FILE*`.
         unique_posix_file file(::fdopen(fd, mstr), ::fclose);
         if(!file)
