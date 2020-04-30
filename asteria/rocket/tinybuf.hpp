@@ -89,6 +89,7 @@ class basic_tinybuf
     // get area
     const char_type* m_gcur = nullptr;
     const char_type* m_gend = nullptr;
+
     // put area
     char_type* m_pcur = nullptr;
     char_type* m_pend = nullptr;
@@ -201,6 +202,7 @@ class basic_tinybuf
         // Purge the get area.
         this->m_gcur = nullptr;
         this->m_gend = nullptr;
+
         // Purge the put area.
         this->m_pcur = nullptr;
         this->m_pend = nullptr;
