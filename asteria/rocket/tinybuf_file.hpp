@@ -287,6 +287,7 @@ class basic_tinybuf_file
     noexcept
       {
         this->do_purge_areas();
+
         // Discard the input buffer and reset the file handle, ignoring any errors.
         this->m_goff = -1;
         this->m_file = ::std::move(file);
@@ -298,6 +299,7 @@ class basic_tinybuf_file
     noexcept
       {
         this->do_purge_areas();
+
         // Discard the input buffer and reset the file handle, ignoring any errors.
         this->m_goff = -1;
         this->m_file.reset(fp, cl);
@@ -360,6 +362,8 @@ class basic_tinybuf_file
                                                   errno, path, mode);
         // If `fdopen()` succeeds it will have taken the ownership of `fd`.
         fd.release();
+        // Disable stdio buffering, as we provide our own.
+        ::setbuf(file, nullptr);
 
         // Discard the input buffer and close the file, ignoring any errors.
         return this->reset(::std::move(file));
