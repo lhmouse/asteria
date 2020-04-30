@@ -841,6 +841,7 @@ create_bindings_json(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.json.format5()`
     //===================================================================
@@ -879,6 +880,7 @@ create_bindings_json(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.json.parse()`
     //===================================================================
@@ -921,6 +923,7 @@ create_bindings_json(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.json.parse_file()`
     //===================================================================
@@ -952,9 +955,6 @@ create_bindings_json(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
-    //===================================================================
-    // End of `std.json`
-    //===================================================================
   }
 
 }  // namespace Asteria

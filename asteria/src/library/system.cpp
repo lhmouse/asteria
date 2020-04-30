@@ -231,6 +231,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.system.gc_get_threshold()`
     //===================================================================
@@ -258,6 +259,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.system.gc_set_threshold()`
     //===================================================================
@@ -292,6 +294,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.system.gc_collect()`
     //===================================================================
@@ -320,6 +323,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.system.execute()`
     //===================================================================
@@ -358,6 +362,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.system.daemonize()`
     //===================================================================
@@ -384,6 +389,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.system.env_get_variable()`
     //===================================================================
@@ -412,6 +418,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.system.env_get_variables()`
     //===================================================================
@@ -437,6 +444,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.system.uuid()`
     //===================================================================
@@ -476,9 +484,6 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
-    //===================================================================
-    // End of `std.system`
-    //===================================================================
   }
 
 }  // namespace Asteria

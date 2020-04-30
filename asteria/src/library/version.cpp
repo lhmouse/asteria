@@ -19,6 +19,7 @@ create_bindings_version(V_object& result, API_Version version)
         // The major version number of the standard library that has been enabled.
         version / 0x10000
       ));
+
     //===================================================================
     // `std.version.minor`
     //===================================================================
@@ -27,9 +28,6 @@ create_bindings_version(V_object& result, API_Version version)
         // The minor version number of the standard library that has been enabled.
         version % 0x10000
       ));
-    //===================================================================
-    // End of `std.version`
-    //===================================================================
   }
 
 }  // namespace Asteria

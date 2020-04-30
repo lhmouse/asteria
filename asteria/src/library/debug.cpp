@@ -77,6 +77,7 @@ create_bindings_debug(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.debug.dump()`
     //===================================================================
@@ -108,9 +109,6 @@ create_bindings_debug(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
-    //===================================================================
-    // End of `std.debug`
-    //===================================================================
   }
 
 }  // namespace Asteria

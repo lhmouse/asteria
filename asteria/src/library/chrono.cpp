@@ -425,6 +425,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.chrono.local_now()`
     //===================================================================
@@ -450,6 +451,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.chrono.hires_now()`
     //===================================================================
@@ -478,6 +480,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.chrono.steady_now()`
     //===================================================================
@@ -506,6 +509,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.chrono.local_from_utc()`
     //===================================================================
@@ -533,6 +537,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.chrono.utc_from_local()`
     //===================================================================
@@ -561,6 +566,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.chrono.utc_format()`
     //===================================================================
@@ -591,6 +597,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.chrono.utc_parse()`
     //===================================================================
@@ -621,9 +628,6 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
-    //===================================================================
-    // End of `std.chrono`
-    //===================================================================
   }
 
 }  // namespace Asteria

@@ -333,6 +333,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.io.getln()`
     //===================================================================
@@ -364,6 +365,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.io.putc()`
     //===================================================================
@@ -399,6 +401,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.io.putln()`
     //===================================================================
@@ -431,6 +434,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.io.putf()`
     //===================================================================
@@ -462,6 +466,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.io.read()`
     //===================================================================
@@ -493,6 +498,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.io.write()`
     //===================================================================
@@ -522,6 +528,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.io.flush()`
     //===================================================================
@@ -548,9 +555,6 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
-    //===================================================================
-    // End of `std.io`
-    //===================================================================
   }
 
 }  // namespace Asteria

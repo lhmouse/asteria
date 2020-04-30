@@ -585,6 +585,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.filesystem.get_real_path()`
     //===================================================================
@@ -614,6 +615,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.filesystem.get_information()`
     //===================================================================
@@ -656,6 +658,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.filesystem.remove_recursive()`
     //===================================================================
@@ -682,6 +685,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.filesystem.move_from(path_new, path_old)`
     //===================================================================
@@ -714,6 +718,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.filesystem.directory_list()`
     //===================================================================
@@ -753,6 +758,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.filesystem.directory_create()`
     //===================================================================
@@ -785,6 +791,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.filesystem.directory_remove()`
     //===================================================================
@@ -815,6 +822,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.filesystem.file_read()`
     //===================================================================
@@ -851,6 +859,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.filesystem.file_stream()`
     //===================================================================
@@ -894,6 +903,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.filesystem.file_write()`
     //===================================================================
@@ -927,6 +937,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.filesystem.file_append()`
     //===================================================================
@@ -959,6 +970,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.filesystem.file_copy_from(path_new, path_old)`
     //===================================================================
@@ -988,6 +1000,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.filesystem.file_remove()`
     //===================================================================
@@ -1018,9 +1031,6 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
-    //===================================================================
-    // End of `std.filesystem`
-    //===================================================================
   }
 
 }  // namespace Asteria

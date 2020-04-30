@@ -706,6 +706,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         // The maximum value of an `integer`.
         ::std::numeric_limits<V_integer>::max()
       ));
+
     //===================================================================
     // `std.numeric.integer_min`
     //===================================================================
@@ -714,6 +715,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         // The minimum value of an `integer`.
         ::std::numeric_limits<V_integer>::lowest()
       ));
+
     //===================================================================
     // `std.numeric.real_max`
     //===================================================================
@@ -722,6 +724,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         // The maximum finite value of a `real`.
         ::std::numeric_limits<V_real>::max()
       ));
+
     //===================================================================
     // `std.numeric.real_min`
     //===================================================================
@@ -730,6 +733,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         // The minimum finite value of a `real`.
         ::std::numeric_limits<V_real>::lowest()
       ));
+
     //===================================================================
     // `std.numeric.real_epsilon`
     //===================================================================
@@ -738,6 +742,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         // The minimum finite value of a `real` such that `1 + real_epsilon > 1`.
         ::std::numeric_limits<V_real>::epsilon()
       ));
+
     //===================================================================
     // `std.numeric.size_max`
     //===================================================================
@@ -746,6 +751,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         // The maximum length of a `string` or `array`.
         ::std::numeric_limits<ptrdiff_t>::max()
       ));
+
     //===================================================================
     // `std.numeric.abs()`
     //===================================================================
@@ -782,6 +788,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.sign()`
     //===================================================================
@@ -814,6 +821,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.is_finite()`
     //===================================================================
@@ -848,6 +856,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.is_infinity()`
     //===================================================================
@@ -882,6 +891,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.is_nan()`
     //===================================================================
@@ -915,6 +925,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.clamp()`
     //===================================================================
@@ -957,6 +968,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.round()`
     //===================================================================
@@ -989,6 +1001,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.roundi()`
     //===================================================================
@@ -1025,6 +1038,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.floor()`
     //===================================================================
@@ -1057,6 +1071,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.floori()`
     //===================================================================
@@ -1093,6 +1108,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.ceil()`
     //===================================================================
@@ -1125,6 +1141,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.ceili()`
     //===================================================================
@@ -1161,6 +1178,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.trunc()`
     //===================================================================
@@ -1193,6 +1211,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.trunci()`
     //===================================================================
@@ -1228,6 +1247,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.random()`
     //===================================================================
@@ -1257,6 +1277,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.sqrt()`
     //===================================================================
@@ -1283,6 +1304,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.fma()`
     //===================================================================
@@ -1312,6 +1334,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.remainder()`
     //===================================================================
@@ -1340,6 +1363,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.frexp()`
     //===================================================================
@@ -1373,6 +1397,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.ldexp()`
     //===================================================================
@@ -1401,6 +1426,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.addm()`
     //===================================================================
@@ -1430,6 +1456,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.subm()`
     //===================================================================
@@ -1460,6 +1487,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.mulm()`
     //===================================================================
@@ -1490,6 +1518,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.adds()`
     //===================================================================
@@ -1527,6 +1556,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.subs()`
     //===================================================================
@@ -1564,6 +1594,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.muls()`
     //===================================================================
@@ -1601,6 +1632,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.lzcnt()`
     //===================================================================
@@ -1628,6 +1660,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.tzcnt()`
     //===================================================================
@@ -1655,6 +1688,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.popcnt()`
     //===================================================================
@@ -1681,6 +1715,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.rotl()`
     //===================================================================
@@ -1717,6 +1752,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.rotr()`
     //===================================================================
@@ -1753,6 +1789,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.format()`
     //===================================================================
@@ -1801,6 +1838,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.parse_integer()`
     //===================================================================
@@ -1842,6 +1880,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.numeric.parse_real()`
     //===================================================================
@@ -1890,9 +1929,6 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
-    //===================================================================
-    // End of `std.numeric`
-    //===================================================================
   }
 
 }  // namespace Asteria

@@ -1086,11 +1086,13 @@ V_object
 std_checksum_crc32_new()
   {
     V_object result;
+
     //===================================================================
     // * private data
     //===================================================================
     result.insert_or_assign(::rocket::sref("$h"),
       std_checksum_crc32_new_private());
+
     //===================================================================
     // `.update(data)`
     //===================================================================
@@ -1117,6 +1119,7 @@ std_checksum_crc32_new()
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `.finish()`
     //===================================================================
@@ -1146,9 +1149,7 @@ std_checksum_crc32_new()
     reader.throw_no_matching_function_call();
   }
       ));
-    //===================================================================
-    // End of `std.checksum.crc32_new()`
-    //===================================================================
+
     return result;
   }
 
@@ -1186,11 +1187,13 @@ V_object
 std_checksum_fnv1a32_new()
   {
     V_object result;
+
     //===================================================================
     // * private data
     //===================================================================
     result.insert_or_assign(::rocket::sref("$h"),
       std_checksum_fnv1a32_new_private());
+
     //===================================================================
     // `.update(data)`
     //===================================================================
@@ -1217,6 +1220,7 @@ std_checksum_fnv1a32_new()
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `.finish()`
     //===================================================================
@@ -1246,9 +1250,7 @@ std_checksum_fnv1a32_new()
     reader.throw_no_matching_function_call();
   }
       ));
-    //===================================================================
-    // End of `std.checksum.fnv1a32_new()`
-    //===================================================================
+
     return result;
   }
 
@@ -1286,11 +1288,13 @@ V_object
 std_checksum_md5_new()
   {
     V_object result;
+
     //===================================================================
     // * private data
     //===================================================================
     result.insert_or_assign(::rocket::sref("$h"),
       std_checksum_md5_new_private());
+
     //===================================================================
     // `.update(data)`
     //===================================================================
@@ -1317,6 +1321,7 @@ std_checksum_md5_new()
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `.finish()`
     //===================================================================
@@ -1346,9 +1351,7 @@ std_checksum_md5_new()
     reader.throw_no_matching_function_call();
   }
       ));
-    //===================================================================
-    // End of `std.checksum.md5_new()`
-    //===================================================================
+
     return result;
   }
 
@@ -1386,11 +1389,13 @@ V_object
 std_checksum_sha1_new()
   {
     V_object result;
+
     //===================================================================
     // * private data
     //===================================================================
     result.insert_or_assign(::rocket::sref("$h"),
       std_checksum_sha1_new_private());
+
     //===================================================================
     // `.update(data)`
     //===================================================================
@@ -1417,6 +1422,7 @@ std_checksum_sha1_new()
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `.finish()`
     //===================================================================
@@ -1446,9 +1452,7 @@ std_checksum_sha1_new()
     reader.throw_no_matching_function_call();
   }
       ));
-    //===================================================================
-    // End of `std.checksum.sha1_new()`
-    //===================================================================
+
     return result;
   }
 
@@ -1486,11 +1490,13 @@ V_object
 std_checksum_sha256_new()
   {
     V_object result;
+
     //===================================================================
     // * private data
     //===================================================================
     result.insert_or_assign(::rocket::sref("$h"),
       std_checksum_sha256_new_private());
+
     //===================================================================
     // `.update(data)`
     //===================================================================
@@ -1517,6 +1523,7 @@ std_checksum_sha256_new()
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `.finish()`
     //===================================================================
@@ -1546,9 +1553,7 @@ std_checksum_sha256_new()
     reader.throw_no_matching_function_call();
   }
       ));
-    //===================================================================
-    // End of `std.checksum.sha256_new()`
-    //===================================================================
+
     return result;
   }
 
@@ -1603,6 +1608,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.checksum.crc32()`
     //===================================================================
@@ -1641,6 +1647,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.checksum.crc32_file()`
     //===================================================================
@@ -1685,6 +1692,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.checksum.fnv1a32_new()`
     //===================================================================
@@ -1722,6 +1730,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.checksum.fnv1a32()`
     //===================================================================
@@ -1760,6 +1769,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.checksum.fnv1a32_file()`
     //===================================================================
@@ -1804,6 +1814,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.checksum.md5_new()`
     //===================================================================
@@ -1838,6 +1849,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.checksum.md5()`
     //===================================================================
@@ -1876,6 +1888,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.checksum.md5_file()`
     //===================================================================
@@ -1919,6 +1932,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.checksum.sha1_new()`
     //===================================================================
@@ -1953,6 +1967,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.checksum.sha1()`
     //===================================================================
@@ -1991,6 +2006,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.checksum.sha1_file()`
     //===================================================================
@@ -2034,6 +2050,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.checksum.sha256_new()`
     //===================================================================
@@ -2068,6 +2085,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.checksum.sha256()`
     //===================================================================
@@ -2106,6 +2124,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.checksum.sha256_file()`
     //===================================================================
@@ -2150,9 +2169,6 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
-    //===================================================================
-    // End of `std.checksum`
-    //===================================================================
   }
 
 }  // namespace Asteria

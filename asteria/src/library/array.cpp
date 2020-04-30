@@ -697,6 +697,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.replace_slice()`
     //===================================================================
@@ -747,6 +748,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.find()`
     //===================================================================
@@ -809,6 +811,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.find_if()`
     //===================================================================
@@ -871,6 +874,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.find_if_not()`
     //===================================================================
@@ -933,6 +937,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.rfind()`
     //===================================================================
@@ -995,6 +1000,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.rfind_if()`
     //===================================================================
@@ -1057,6 +1063,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.rfind_if_not()`
     //===================================================================
@@ -1119,6 +1126,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.count()`
     //===================================================================
@@ -1179,6 +1187,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.count_if()`
     //===================================================================
@@ -1243,6 +1252,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.count_if_not()`
     //===================================================================
@@ -1307,6 +1317,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.exclude()`
     //===================================================================
@@ -1367,6 +1378,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.exclude_if()`
     //===================================================================
@@ -1429,6 +1441,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.exclude_if_not()`
     //===================================================================
@@ -1491,6 +1504,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.is_sorted()`
     //===================================================================
@@ -1529,6 +1543,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.binary_search()`
     //===================================================================
@@ -1566,6 +1581,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.lower_bound()`
     //===================================================================
@@ -1605,6 +1621,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.upper_bound()`
     //===================================================================
@@ -1644,6 +1661,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.equal_range()`
     //===================================================================
@@ -1684,6 +1702,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.sort()`
     //===================================================================
@@ -1718,6 +1737,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.sortu()`
     //===================================================================
@@ -1753,6 +1773,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.max_of()`
     //===================================================================
@@ -1783,6 +1804,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.min_of()`
     //===================================================================
@@ -1813,6 +1835,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.reverse()`
     //===================================================================
@@ -1840,6 +1863,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.generate()`
     //===================================================================
@@ -1871,6 +1895,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.shuffle()`
     //===================================================================
@@ -1902,6 +1927,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.rotate()`
     //===================================================================
@@ -1931,6 +1957,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.copy_keys()`
     //===================================================================
@@ -1957,6 +1984,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.array.copy_values()`
     //===================================================================
@@ -1983,9 +2011,6 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
-    //===================================================================
-    // End of `std.array`
-    //===================================================================
   }
 
 }  // namespace Asteria

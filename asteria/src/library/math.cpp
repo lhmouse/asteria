@@ -206,6 +206,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         // The base of the natural logarithm.
         s_const_e
       ));
+
     //===================================================================
     // `std.math.pi`
     //===================================================================
@@ -214,6 +215,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         // The ratio of a circle's circumference to its diameter.
         s_const_pi
       ));
+
     //===================================================================
     // `std.math.lb10`
     //===================================================================
@@ -222,6 +224,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         // The binary logarithm of the integer ten.
         s_const_lb10
       ));
+
     //===================================================================
     // `std.math.exp()`
     //===================================================================
@@ -249,6 +252,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.math.expm1()`
     //===================================================================
@@ -275,6 +279,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.math.pow()`
     //===================================================================
@@ -303,6 +308,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.math.log()`
     //===================================================================
@@ -330,6 +336,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.math.log1p()`
     //===================================================================
@@ -356,6 +363,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.math.sin()`
     //===================================================================
@@ -381,6 +389,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.math.cos()`
     //===================================================================
@@ -406,6 +415,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.math.sincos()`
     //===================================================================
@@ -434,6 +444,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.math.tan()`
     //===================================================================
@@ -459,6 +470,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.math.asin()`
     //===================================================================
@@ -484,6 +496,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.math.acos()`
     //===================================================================
@@ -509,6 +522,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.math.atan()`
     //===================================================================
@@ -534,6 +548,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.math.atan2()`
     //===================================================================
@@ -560,6 +575,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.math.hypot()`
     //===================================================================
@@ -589,6 +605,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.math.sinh()`
     //===================================================================
@@ -614,6 +631,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.math.cosh()`
     //===================================================================
@@ -639,6 +657,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.math.tanh()`
     //===================================================================
@@ -664,6 +683,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.math.asinh()`
     //===================================================================
@@ -689,6 +709,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.math.acosh()`
     //===================================================================
@@ -714,6 +735,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.math.atanh()`
     //===================================================================
@@ -739,6 +761,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.math.erf()`
     //===================================================================
@@ -764,6 +787,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.math.cerf()`
     //===================================================================
@@ -789,6 +813,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.math.gamma()`
     //===================================================================
@@ -814,6 +839,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
+
     //===================================================================
     // `std.math.lgamma()`
     //===================================================================
@@ -840,9 +866,6 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     reader.throw_no_matching_function_call();
   }
       ));
-    //===================================================================
-    // End of `std.math`
-    //===================================================================
   }
 
 }  // namespace Asteria
