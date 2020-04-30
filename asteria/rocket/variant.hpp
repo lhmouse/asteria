@@ -262,8 +262,8 @@ class variant
     type()
     const noexcept
       {
-        static const type_info* const s_table[] = { ::std::addressof(typeid(alternativesT))... };
-        return *(s_table[this->m_index]);
+        static constexpr const type_info* table[] = { &(typeid(alternativesT))... };
+        return *(table[this->m_index]);
       }
 
     // accessors
@@ -348,18 +348,18 @@ class variant
     visit(visitorT&& visitor)
     const
       {
-        static constexpr void (*const s_jump_table[])(const void*, visitorT&&) =
-          { details_variant::wrapped_visit<const alternativesT>... };
-        s_jump_table[this->m_index](this->m_stor, ::std::forward<visitorT>(visitor));
+        using function_type = void (const void*, visitorT&&);
+        static constexpr function_type* table[] = { details_variant::wrapped_visit<const alternativesT>... };
+        table[this->m_index](this->m_stor, ::std::forward<visitorT>(visitor));
       }
 
     template<typename visitorT>
     void
     visit(visitorT&& visitor)
       {
-        static constexpr void (*const s_jump_table[])(void*, visitorT&&) =
-          { details_variant::wrapped_visit<alternativesT>... };
-        s_jump_table[this->m_index](this->m_stor, ::std::forward<visitorT>(visitor));
+        using function_type = void (void*, visitorT&&);
+        static constexpr function_type* table[] = { details_variant::wrapped_visit<alternativesT>... };
+        table[this->m_index](this->m_stor, ::std::forward<visitorT>(visitor));
       }
 
     // 23.7.3.4, modifiers

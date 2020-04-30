@@ -7,7 +7,7 @@
 
 namespace details_variant {
 
-template<size_t indexT, typename targetT, typename... alternativesT>
+template<size_t indexT, typename targetT, typename... alternsT>
 struct type_finder
   // no value
   { };
@@ -22,7 +22,7 @@ struct type_finder<indexT, targetT, targetT, restT...>
   : integral_constant<size_t, indexT>  // found
   { };
 
-template<size_t indexT, typename... alternativesT>
+template<size_t indexT, typename... alternsT>
 struct type_getter
   // no type
   { };
@@ -44,194 +44,170 @@ void
 rethrow_current_exception()
   { throw;  }
 
-template<size_t sizeT>
-ROCKET_PURE_FUNCTION ROCKET_FORCED_INLINE_FUNCTION
-bool
-test_bit(const bool (& table)[sizeT], size_t k)
-  {
-    size_t sum = 0;
-    for(bool b : table)
-      sum += b;
-
-    if(sum == sizeT)  // all set
-      return true;
-    else if(sum == 0)  // none set
-      return false;
-    else
-      return table[k];
-  }
-
-template<typename alternativeT>
+template<typename alternT>
 void*
 wrapped_copy_construct(void* dptr, const void* sptr)
   {
-    return noadl::construct_at(static_cast<alternativeT*>(dptr), *static_cast<const alternativeT*>(sptr));
+    return noadl::construct_at(static_cast<alternT*>(dptr), *static_cast<const alternT*>(sptr));
   }
 
-template<typename... alternativesT>
+template<typename... alternsT>
 ROCKET_FORCED_INLINE_FUNCTION
 void*
 dispatch_copy_construct(size_t k, void* dptr, const void* sptr)
   {
-    // Copy it trivially if possible.
-    static constexpr bool s_trivial_table[] = { is_trivially_copy_constructible<alternativesT>::value... };
-    if(ROCKET_EXPECT(test_bit<>(s_trivial_table, k)))
-      return ::std::memcpy(dptr, sptr, sizeof(typename aligned_union<1, alternativesT...>::type));
-
-    // Invoke the copy constructor.
     using function_type = void* (void*, const void*);
-    static constexpr function_type* s_jump_table[] = { wrapped_copy_construct<alternativesT>... };
-    return s_jump_table[k](dptr, sptr);
+    static constexpr function_type* table[] = { (is_trivially_copy_constructible<alternsT>::value
+                                                   ? nullptr
+                                                   : wrapped_copy_construct<alternsT>)... };
+    if(auto qfunc = table[k])
+      return qfunc(dptr, sptr);
+    else
+      return ::std::memcpy(dptr, sptr, sizeof(typename aligned_union<1, alternsT...>::type));
   }
 
-template<typename alternativeT>
+template<typename alternT>
 void*
 wrapped_move_construct(void* dptr, void* sptr)
   {
-    return noadl::construct_at(static_cast<alternativeT*>(dptr), ::std::move(*static_cast<alternativeT*>(sptr)));
+    return noadl::construct_at(static_cast<alternT*>(dptr), ::std::move(*static_cast<alternT*>(sptr)));
   }
 
-template<typename... alternativesT>
+template<typename... alternsT>
 ROCKET_FORCED_INLINE_FUNCTION
 void*
 dispatch_move_construct(size_t k, void* dptr, void* sptr)
   {
-    // Move it trivially if possible.
-    static constexpr bool s_trivial_table[] = { is_trivially_move_constructible<alternativesT>::value... };
-    if(ROCKET_EXPECT(test_bit<>(s_trivial_table, k)))
-      return ::std::memcpy(dptr, sptr, sizeof(typename aligned_union<1, alternativesT...>::type));
-
-    // Invoke the move constructor.
     using function_type = void* (void*, void*);
-    static constexpr function_type* s_jump_table[] = { wrapped_move_construct<alternativesT>... };
-    return s_jump_table[k](dptr, sptr);
+    static constexpr function_type* table[] = { (is_trivially_move_constructible<alternsT>::value
+                                                   ? nullptr
+                                                   : wrapped_move_construct<alternsT>)... };
+    if(auto qfunc = table[k])
+      return qfunc(dptr, sptr);
+    else
+      return ::std::memcpy(dptr, sptr, sizeof(typename aligned_union<1, alternsT...>::type));
   }
 
-template<typename alternativeT>
+template<typename alternT>
 void*
 wrapped_copy_assign(void* dptr, const void* sptr)
   {
-    return ::std::addressof(*static_cast<alternativeT*>(dptr) = *static_cast<const alternativeT*>(sptr));
+    return ::std::addressof(*static_cast<alternT*>(dptr) = *static_cast<const alternT*>(sptr));
   }
 
-template<typename... alternativesT>
+template<typename... alternsT>
 ROCKET_FORCED_INLINE_FUNCTION
 void*
 dispatch_copy_assign(size_t k, void* dptr, const void* sptr)
   {
-    // Copy it trivially if possible. Note that both areas may overlap in the case of self assignment.
-    static constexpr bool s_trivial_table[] = { is_trivially_copy_assignable<alternativesT>::value... };
-    if(ROCKET_EXPECT(test_bit<>(s_trivial_table, k)))
-      return ::std::memmove(dptr, sptr, sizeof(typename aligned_union<1, alternativesT...>::type));
-
-    // Invoke the copy assignment operator.
     using function_type = void* (void*, const void*);
-    static constexpr function_type* s_jump_table[] = { wrapped_copy_assign<alternativesT>... };
-    return s_jump_table[k](dptr, sptr);
+    static constexpr function_type* table[] = { (is_trivially_copy_assignable<alternsT>::value
+                                                   ? nullptr
+                                                   : wrapped_copy_assign<alternsT>)... };
+    if(auto qfunc = table[k])
+      return qfunc(dptr, sptr);
+    else
+      return ::std::memmove(dptr, sptr, sizeof(typename aligned_union<1, alternsT...>::type));
   }
 
-template<typename alternativeT>
+template<typename alternT>
 void*
 wrapped_move_assign(void* dptr, void* sptr)
   {
-    return ::std::addressof(*static_cast<alternativeT*>(dptr) = ::std::move(*static_cast<alternativeT*>(sptr)));
+    return ::std::addressof(*static_cast<alternT*>(dptr) = ::std::move(*static_cast<alternT*>(sptr)));
   }
 
-template<typename... alternativesT>
+template<typename... alternsT>
 ROCKET_FORCED_INLINE_FUNCTION
 void*
 dispatch_move_assign(size_t k, void* dptr, void* sptr)
   {
-    // Move it trivially if possible.
-    static constexpr bool s_trivial_table[] = { is_trivially_move_assignable<alternativesT>::value... };
-    if(ROCKET_EXPECT(test_bit<>(s_trivial_table, k)))
-      return ::std::memcpy(dptr, sptr, sizeof(typename aligned_union<1, alternativesT...>::type));
-
-    // Invoke the move assignment operator.
     using function_type = void* (void*, void*);
-    static constexpr function_type* s_jump_table[] = { wrapped_move_assign<alternativesT>... };
-    return s_jump_table[k](dptr, sptr);
+    static constexpr function_type* table[] = { (is_trivially_move_assignable<alternsT>::value
+                                                   ? nullptr
+                                                   : wrapped_move_assign<alternsT>)... };
+    if(auto qfunc = table[k])
+      return qfunc(dptr, sptr);
+    else
+      return ::std::memcpy(dptr, sptr, sizeof(typename aligned_union<1, alternsT...>::type));
   }
 
-template<typename alternativeT>
+template<typename alternT>
 void
 wrapped_destroy(void* dptr)
   {
-    return noadl::destroy_at(static_cast<alternativeT*>(dptr));
+    return noadl::destroy_at(static_cast<alternT*>(dptr));
   }
 
-template<typename... alternativesT>
+template<typename... alternsT>
 ROCKET_FORCED_INLINE_FUNCTION
 void
 dispatch_destroy(size_t k, void* dptr)
   {
-    // Destroy it trivially if possible.
-    static constexpr bool s_trivial_table[] = { is_trivially_destructible<alternativesT>::value... };
-    if(ROCKET_EXPECT(test_bit<>(s_trivial_table, k)))
-      return;
-
-    // Invoke the destructor.
     using function_type = void (void*);
-    static constexpr function_type* s_jump_table[] = { wrapped_destroy<alternativesT>... };
-    return s_jump_table[k](dptr);
+    static constexpr function_type* table[] = { (is_trivially_destructible<alternsT>::value
+                                                   ? nullptr
+                                                   : wrapped_destroy<alternsT>)... };
+    if(auto qfunc = table[k])
+      return qfunc(dptr);
+    else
+      return;  // do nothing
   }
 
-template<typename alternativeT>
+template<typename alternT>
 void*
 wrapped_move_then_destroy(void* dptr, void* sptr)
   {
-    auto p = noadl::construct_at(static_cast<alternativeT*>(dptr), ::std::move(*static_cast<alternativeT*>(sptr)));
-    noadl::destroy_at(static_cast<alternativeT*>(sptr));
+    auto p = noadl::construct_at(static_cast<alternT*>(dptr), ::std::move(*static_cast<alternT*>(sptr)));
+    noadl::destroy_at(static_cast<alternT*>(sptr));
     return p;
   }
 
-template<typename... alternativesT>
+template<typename... alternsT>
 ROCKET_FORCED_INLINE_FUNCTION
 void*
 dispatch_move_then_destroy(size_t k, void* dptr, void* sptr)
   {
-    // Move it trivially if possible.
-    static constexpr bool s_trivial_table[] = { conjunction<is_trivially_move_constructible<alternativesT>,
-                                                            is_trivially_destructible<alternativesT>>::value... };
-    if(ROCKET_EXPECT(test_bit<>(s_trivial_table, k)))
-      return ::std::memcpy(dptr, sptr, sizeof(typename aligned_union<1, alternativesT...>::type));
-
-    // Invoke the move constructor followed by the destructor.
     using function_type = void* (void*, void*);
-    static constexpr function_type* s_jump_table[] = { wrapped_move_then_destroy<alternativesT>... };
-    return s_jump_table[k](dptr, sptr);
+    static constexpr function_type* table[] = { (is_trivially_move_constructible<alternsT>::value &&
+                                                 is_trivially_destructible<alternsT>::value
+                                                   ? nullptr
+                                                   : wrapped_move_then_destroy<alternsT>)... };
+    if(auto qfunc = table[k])
+      return qfunc(dptr, sptr);
+    else
+      return ::std::memcpy(dptr, sptr, sizeof(typename aligned_union<1, alternsT...>::type));
   }
 
-template<typename alternativeT>
+template<typename alternT>
 void
 wrapped_xswap(void* dptr, void* sptr)
   {
-    return noadl::xswap(*static_cast<alternativeT*>(dptr), *static_cast<alternativeT*>(sptr));
+    return noadl::xswap(*static_cast<alternT*>(dptr), *static_cast<alternT*>(sptr));
   }
 
-template<typename... alternativesT>
+template<typename... alternsT>
 ROCKET_FORCED_INLINE_FUNCTION
 void
 dispatch_swap(size_t k, void* dptr, void* sptr)
   {
-    // Swap them trivially if possible.
-    static constexpr bool s_trivial_table[] = { conjunction<is_trivially_move_constructible<alternativesT>...,
-                                                            is_trivially_move_assignable<alternativesT>...,
-                                                            is_trivially_destructible<alternativesT>...>::value };
-    if(ROCKET_EXPECT(test_bit<>(s_trivial_table, k)))
-      return wrapped_xswap<typename aligned_union<1, alternativesT...>::type>(dptr, sptr);
-
-    // Invoke the `swap()` function via ADL.
     using function_type = void (void*, void*);
-    static constexpr function_type* s_jump_table[] = { wrapped_xswap<alternativesT>... };
-    return s_jump_table[k](dptr, sptr);
+    static constexpr function_type* table[] = { (is_trivially_move_constructible<alternsT>::value &&
+                                                 is_trivially_move_assignable<alternsT>::value &&
+                                                 is_trivially_destructible<alternsT>::value
+                                                   ? nullptr
+                                                   : wrapped_xswap<alternsT>)... };
+    if(auto qfunc = table[k])
+      return qfunc(dptr, sptr);
+    else
+      return wrapped_xswap<typename aligned_union<1, alternsT...>::type>(dptr, sptr);
   }
 
-template<typename alternativeT, typename voidT, typename visitorT>
+template<typename alternT, typename voidT, typename visitorT>
 void
 wrapped_visit(voidT* sptr, visitorT&& visitor)
   {
-    ::std::forward<visitorT>(visitor)(*static_cast<alternativeT*>(sptr));
+    ::std::forward<visitorT>(visitor)(*static_cast<alternT*>(sptr));
   }
 
 }  // namespace details_variant
