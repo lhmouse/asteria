@@ -2084,9 +2084,9 @@ struct AIR_Traits_Xop<xop_inc_post> : AIR_Traits<AIR_Node::S_apply_operator>
           do_set_temporary(ctx, false, ::std::move(lhs));
           reg = do_operator_ADD(reg, V_real(1));
         }
-        else {
+        else
           ASTERIA_THROW("postfix increment not applicable (operand was `$1`)", lhs);
-        }
+
         return air_status_next;
       }
   };
@@ -2112,11 +2112,11 @@ struct AIR_Traits_Xop<xop_dec_post> : AIR_Traits<AIR_Node::S_apply_operator>
           do_set_temporary(ctx, false, ::std::move(lhs));
           reg = do_operator_SUB(reg, V_real(1));
         }
-        else {
+        else
           ASTERIA_THROW("postfix decrement not applicable (operand was `$1`)", lhs);
-        }
+
         return air_status_next;
-     }
+      }
   };
 
 template<>
@@ -2142,9 +2142,9 @@ struct AIR_Traits_Xop<xop_subscr> : AIR_Traits<AIR_Node::S_apply_operator>
           Reference_modifier::S_object_key xmod = { ::std::move(reg) };
           lref.zoom_in(::std::move(xmod));
         }
-        else {
+        else
           ASTERIA_THROW("subscript value not valid (subscript was `$1`)", rhs);
-        }
+
         return air_status_next;
       }
   };
@@ -2185,9 +2185,9 @@ struct AIR_Traits_Xop<xop_neg> : AIR_Traits<AIR_Node::S_apply_operator>
           auto& reg = rhs.open_real();
           reg = do_operator_NEG(reg);
         }
-        else {
+        else
           ASTERIA_THROW("prefix negation not applicable (operand was `$1`)", rhs);
-        }
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -2216,9 +2216,9 @@ struct AIR_Traits_Xop<xop_notb> : AIR_Traits<AIR_Node::S_apply_operator>
           auto& reg = rhs.open_string();
           reg = do_operator_NOT(::std::move(reg));
         }
-        else {
+        else
           ASTERIA_THROW("prefix bitwise NOT not applicable (operand was `$1`)", rhs);
-        }
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -2260,9 +2260,9 @@ struct AIR_Traits_Xop<xop_inc_pre> : AIR_Traits<AIR_Node::S_apply_operator>
           auto& reg = rhs.open_real();
           reg = do_operator_ADD(reg, V_real(1));
         }
-        else {
+        else
           ASTERIA_THROW("prefix increment not applicable (operand was `$1`)", rhs);
-        }
+
         return air_status_next;
       }
   };
@@ -2286,9 +2286,9 @@ struct AIR_Traits_Xop<xop_dec_pre> : AIR_Traits<AIR_Node::S_apply_operator>
           auto& reg = rhs.open_real();
           reg = do_operator_SUB(reg, V_real(1));
         }
-        else {
+        else
           ASTERIA_THROW("prefix decrement not applicable (operand was `$1`)", rhs);
-        }
+
         return air_status_next;
       }
   };
@@ -2382,9 +2382,9 @@ struct AIR_Traits_Xop<xop_sqrt> : AIR_Traits<AIR_Node::S_apply_operator>
           auto& reg = rhs.open_real();
           reg = do_operator_SQRT(reg);
         }
-        else {
+        else
           ASTERIA_THROW("prefix `__sqrt` not applicable (operand was `$1`)", rhs);
-        }
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -2409,9 +2409,9 @@ struct AIR_Traits_Xop<xop_isnan> : AIR_Traits<AIR_Node::S_apply_operator>
           // Note that `rhs` does not have type `V_boolean`, thus this branch can't be optimized.
           rhs = do_operator_ISNAN(rhs.as_real());
         }
-        else {
+        else
           ASTERIA_THROW("prefix `__isnan` not applicable (operand was `$1`)", rhs);
-        }
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -2436,9 +2436,9 @@ struct AIR_Traits_Xop<xop_isinf> : AIR_Traits<AIR_Node::S_apply_operator>
           // Note that `rhs` does not have type `V_boolean`, thus this branch can't be optimized.
           rhs = do_operator_ISINF(rhs.as_real());
         }
-        else {
+        else
           ASTERIA_THROW("prefix `__isinf` not applicable (operand was `$1`)", rhs);
-        }
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -2463,9 +2463,9 @@ struct AIR_Traits_Xop<xop_abs> : AIR_Traits<AIR_Node::S_apply_operator>
           auto& reg = rhs.open_real();
           reg = do_operator_ABS(reg);
         }
-        else {
+        else
           ASTERIA_THROW("prefix `__abs` not applicable (operand was `$1`)", rhs);
-        }
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -2490,9 +2490,9 @@ struct AIR_Traits_Xop<xop_sign> : AIR_Traits<AIR_Node::S_apply_operator>
           // Note that `rhs` does not have type `V_integer`, thus this branch can't be optimized.
           rhs = do_operator_SIGN(rhs.as_real());
         }
-        else {
+        else
           ASTERIA_THROW("prefix `__sign` not applicable (operand was `$1`)", rhs);
-        }
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -2517,9 +2517,9 @@ struct AIR_Traits_Xop<xop_round> : AIR_Traits<AIR_Node::S_apply_operator>
           auto& reg = rhs.open_real();
           reg = do_operator_ROUND(reg);
         }
-        else {
+        else
           ASTERIA_THROW("prefix `__round` not applicable (operand was `$1`)", rhs);
-        }
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -2544,9 +2544,9 @@ struct AIR_Traits_Xop<xop_floor> : AIR_Traits<AIR_Node::S_apply_operator>
           auto& reg = rhs.open_real();
           reg = do_operator_FLOOR(reg);
         }
-        else {
+        else
           ASTERIA_THROW("prefix `__floor` not applicable (operand was `$1`)", rhs);
-        }
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -2571,9 +2571,9 @@ struct AIR_Traits_Xop<xop_ceil> : AIR_Traits<AIR_Node::S_apply_operator>
           auto& reg = rhs.open_real();
           reg = do_operator_CEIL(reg);
         }
-        else {
+        else
           ASTERIA_THROW("prefix `__ceil` not applicable (operand was `$1`)", rhs);
-        }
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -2598,9 +2598,9 @@ struct AIR_Traits_Xop<xop_trunc> : AIR_Traits<AIR_Node::S_apply_operator>
           auto& reg = rhs.open_real();
           reg = do_operator_TRUNC(reg);
         }
-        else {
+        else
           ASTERIA_THROW("prefix `__trunc` not applicable (operand was `$1`)", rhs);
-        }
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -2625,9 +2625,9 @@ struct AIR_Traits_Xop<xop_roundi> : AIR_Traits<AIR_Node::S_apply_operator>
           // Note that `rhs` does not have type `V_integer`, thus this branch can't be optimized.
           rhs = do_operator_ROUNDi(rhs.as_real());
         }
-        else {
+        else
           ASTERIA_THROW("prefix `__roundi` not applicable (operand was `$1`)", rhs);
-        }
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -2652,9 +2652,9 @@ struct AIR_Traits_Xop<xop_floori> : AIR_Traits<AIR_Node::S_apply_operator>
           // Note that `rhs` does not have type `V_integer`, thus this branch can't be optimized.
           rhs = do_operator_FLOORi(rhs.as_real());
         }
-        else {
+        else
           ASTERIA_THROW("prefix `__floori` not applicable (operand was `$1`)", rhs);
-        }
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -2679,9 +2679,9 @@ struct AIR_Traits_Xop<xop_ceili> : AIR_Traits<AIR_Node::S_apply_operator>
           // Note that `rhs` does not have type `V_integer`, thus this branch can't be optimized.
           rhs = do_operator_CEILi(rhs.as_real());
         }
-        else {
+        else
           ASTERIA_THROW("prefix `__ceili` not applicable (operand was `$1`)", rhs);
-        }
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -2706,9 +2706,9 @@ struct AIR_Traits_Xop<xop_trunci> : AIR_Traits<AIR_Node::S_apply_operator>
           // Note that `rhs` does not have type `V_integer`, thus this branch can't be optimized.
           rhs = do_operator_TRUNCi(rhs.as_real());
         }
-        else {
+        else
           ASTERIA_THROW("prefix `__trunci` not applicable (operand was `$1`)", rhs);
-        }
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -2908,9 +2908,9 @@ struct AIR_Traits_Xop<xop_add> : AIR_Traits<AIR_Node::S_apply_operator>
           auto& reg = rhs.open_string();
           reg = do_operator_ADD(lhs.as_string(), reg);
         }
-        else {
-          ASTERIA_THROW("infix addition not defined (operands were `$1` and `$2`)", lhs, rhs);
-        }
+        else
+          ASTERIA_THROW("infix addition not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -2942,9 +2942,9 @@ struct AIR_Traits_Xop<xop_sub> : AIR_Traits<AIR_Node::S_apply_operator>
           // Note that `rhs` might not have type `V_real`, thus this branch can't be optimized.
           rhs = do_operator_SUB(lhs.convert_to_real(), rhs.convert_to_real());
         }
-        else {
-          ASTERIA_THROW("infix subtraction not defined (operands were `$1` and `$2`)", lhs, rhs);
-        }
+        else
+          ASTERIA_THROW("infix subtraction not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -2986,9 +2986,9 @@ struct AIR_Traits_Xop<xop_mul> : AIR_Traits<AIR_Node::S_apply_operator>
           auto& reg = rhs.open_string();
           reg = do_operator_MUL(lhs.as_integer(), reg);
         }
-        else {
-          ASTERIA_THROW("infix multiplication not defined (operands were `$1` and `$2`)", lhs, rhs);
-        }
+        else
+          ASTERIA_THROW("infix multiplication not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -3015,9 +3015,9 @@ struct AIR_Traits_Xop<xop_div> : AIR_Traits<AIR_Node::S_apply_operator>
           // Note that `rhs` might not have type `V_real`, thus this branch can't be optimized.
           rhs = do_operator_DIV(lhs.convert_to_real(), rhs.convert_to_real());
         }
-        else {
-          ASTERIA_THROW("infix division not defined (operands were `$1` and `$2`)", lhs, rhs);
-        }
+        else
+          ASTERIA_THROW("infix division not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -3044,9 +3044,9 @@ struct AIR_Traits_Xop<xop_mod> : AIR_Traits<AIR_Node::S_apply_operator>
           // Note that `rhs` might not have type `V_real`, thus this branch can't be optimized.
           rhs = do_operator_MOD(lhs.convert_to_real(), rhs.convert_to_real());
         }
-        else {
-          ASTERIA_THROW("infix modulo not defined (operands were `$1` and `$2`)", lhs, rhs);
-        }
+        else
+          ASTERIA_THROW("infix modulo not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -3076,9 +3076,9 @@ struct AIR_Traits_Xop<xop_sll> : AIR_Traits<AIR_Node::S_apply_operator>
           // Note that `rhs` does not have type `V_string`, thus this branch can't be optimized.
           rhs = do_operator_SLL(lhs.as_string(), rhs.as_integer());
         }
-        else {
-          ASTERIA_THROW("infix logical left shift not defined (operands were `$1` and `$2`)", lhs, rhs);
-        }
+        else
+          ASTERIA_THROW("infix logical left shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -3108,9 +3108,9 @@ struct AIR_Traits_Xop<xop_srl> : AIR_Traits<AIR_Node::S_apply_operator>
           // Note that `rhs` does not have type `V_string`, thus this branch can't be optimized.
           rhs = do_operator_SRL(lhs.as_string(), rhs.as_integer());
         }
-        else {
-          ASTERIA_THROW("infix logical right shift not defined (operands were `$1` and `$2`)", lhs, rhs);
-        }
+        else
+          ASTERIA_THROW("infix logical right shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -3141,9 +3141,9 @@ struct AIR_Traits_Xop<xop_sla> : AIR_Traits<AIR_Node::S_apply_operator>
           // Note that `rhs` does not have type `V_string`, thus this branch can't be optimized.
           rhs = do_operator_SLA(lhs.as_string(), rhs.as_integer());
         }
-        else {
-          ASTERIA_THROW("infix arithmetic left shift not defined (operands were `$1` and `$2`)", lhs, rhs);
-        }
+        else
+          ASTERIA_THROW("infix arithmetic left shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -3173,9 +3173,9 @@ struct AIR_Traits_Xop<xop_sra> : AIR_Traits<AIR_Node::S_apply_operator>
           // Note that `rhs` does not have type `V_string`, thus this branch can't be optimized.
           rhs = do_operator_SRA(lhs.as_string(), rhs.as_integer());
         }
-        else {
-          ASTERIA_THROW("infix arithmetic right shift not defined (operands were `$1` and `$2`)", lhs, rhs);
-        }
+        else
+          ASTERIA_THROW("infix arithmetic right shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -3209,9 +3209,9 @@ struct AIR_Traits_Xop<xop_andb> : AIR_Traits<AIR_Node::S_apply_operator>
           auto& reg = rhs.open_string();
           reg = do_operator_AND(lhs.as_string(), ::std::move(reg));
         }
-        else {
-          ASTERIA_THROW("infix bitwise AND not defined (operands were `$1` and `$2`)", lhs, rhs);
-        }
+        else
+          ASTERIA_THROW("infix bitwise AND not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -3245,9 +3245,9 @@ struct AIR_Traits_Xop<xop_orb> : AIR_Traits<AIR_Node::S_apply_operator>
           auto& reg = rhs.open_string();
           reg = do_operator_OR(lhs.as_string(), ::std::move(reg));
         }
-        else {
-          ASTERIA_THROW("infix bitwise OR not defined (operands were `$1` and `$2`)", lhs, rhs);
-        }
+        else
+          ASTERIA_THROW("infix bitwise OR not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -3281,9 +3281,9 @@ struct AIR_Traits_Xop<xop_xorb> : AIR_Traits<AIR_Node::S_apply_operator>
           auto& reg = rhs.open_string();
           reg = do_operator_XOR(lhs.as_string(), ::std::move(reg));
         }
-        else {
-          ASTERIA_THROW("infix bitwise XOR not defined (operands were `$1` and `$2`)", lhs, rhs);
-        }
+        else
+          ASTERIA_THROW("infix bitwise XOR not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
@@ -3325,9 +3325,9 @@ struct AIR_Traits_Xop<xop_fma> : AIR_Traits<AIR_Node::S_apply_operator>
           // Note that `rhs` might not have type `V_real`, thus this branch can't be optimized.
           rhs = ::std::fma(lhs.convert_to_real(), mid.convert_to_real(), rhs.convert_to_real());
         }
-        else {
-          ASTERIA_THROW("fused multiply-add not defined (operands were `$1`, `$2` and `$3`)", lhs, mid, rhs);
-        }
+        else
+          ASTERIA_THROW("fused multiply-add not applicable (operands were `$1`, `$2` and `$3`)", lhs, mid, rhs);
+
         do_set_temporary(ctx, up.v8s[0], ::std::move(rhs));
         return air_status_next;
       }
