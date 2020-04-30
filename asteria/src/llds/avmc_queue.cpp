@@ -86,8 +86,9 @@ AVMC_Queue::
 do_destroy_nodes()
 noexcept
   {
+    auto eptr = this->m_bptr + this->m_used;
     auto next = this->m_bptr;
-    while(ROCKET_EXPECT(next != this->m_bptr + this->m_used)) {
+    while(ROCKET_EXPECT(next != eptr)) {
       auto qnode = ::std::exchange(next, next + next->total_size_in_headers());
 
       // Destroy user-defined data.
@@ -238,8 +239,9 @@ AVMC_Queue::
 execute(Executive_Context& ctx)
 const
   {
+    auto eptr = this->m_bptr + this->m_used;
     auto next = this->m_bptr;
-    while(ROCKET_EXPECT(next != this->m_bptr + this->m_used)) {
+    while(ROCKET_EXPECT(next != eptr)) {
       auto qnode = ::std::exchange(next, next + next->total_size_in_headers());
 
       // Call the executor function for this node.
@@ -264,12 +266,13 @@ AVMC_Queue::
 enumerate_variables(Variable_Callback& callback)
 const
   {
+    auto eptr = this->m_bptr + this->m_used;
     auto next = this->m_bptr;
-    while(ROCKET_EXPECT(next != this->m_bptr + this->m_used)) {
+    while(ROCKET_EXPECT(next != eptr)) {
       auto qnode = ::std::exchange(next, next + next->total_size_in_headers());
 
       // Enumerate variables in this node.
-      if(auto qvnum = qnode->has_vtbl ? qnode->vtable->vnum_opt : nullptr)
+      if(auto qvnum = qnode->vnum_opt())
         qvnum(callback, qnode->uparam(), qnode->sparam());
     }
     return callback;
