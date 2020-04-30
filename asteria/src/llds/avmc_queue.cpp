@@ -238,12 +238,12 @@ AVMC_Queue::
 execute(Executive_Context& ctx)
 const
   {
-    auto status = air_status_next;
     auto next = this->m_bptr;
     while(ROCKET_EXPECT(next != this->m_bptr + this->m_used)) {
       auto qnode = ::std::exchange(next, next + next->total_size_in_headers());
 
       // Call the executor function for this node.
+      AIR_Status status;
       auto qexec = qnode->executor();
       ASTERIA_RUNTIME_TRY {
         status = qexec(ctx, qnode->uparam(), qnode->sparam());
@@ -254,9 +254,9 @@ const
         throw;
       }
       if(ROCKET_UNEXPECT(status != air_status_next))
-        break;
+        return status;
     }
-    return status;
+    return air_status_next;
   }
 
 Variable_Callback&
