@@ -2676,6 +2676,18 @@
 
 	* Throws an exception if the string is invalid.
 
+`std.json.parse_file(path)`
+
+	* Parses the contents of the file denoted by `path` as a JSON
+	  string. This function behaves identical to `parse()` otherwise.
+
+	* Returns the parsed value. If the file does not exist, `null` is
+          returned. Note there is no way to distinguish explicit `null`s
+          from non-existent files.
+
+	* Throws an exception if a read error occurs, or if the string is
+	  invalid.
+
 ### `std.io`
 
 `std.io.getc()`

@@ -708,6 +708,32 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
     }
   }
 
+Value
+do_json_parse(tinybuf& cbuf)
+  try {
+    // We reuse the lexer of Asteria here, allowing quite a few extensions e.g. binary numeric
+    // literals and comments.
+    Compiler_Options opts;
+    opts.escapable_single_quotes = true;
+    opts.keywords_as_identifiers = true;
+    opts.integers_as_reals = true;
+
+    Token_Stream tstrm(opts);
+    tstrm.reload(cbuf, ::rocket::sref("<JSON text>"));
+    if(tstrm.empty())
+      ASTERIA_THROW("empty JSON string");
+
+    // Parse a single value.
+    auto value = do_json_parse_nonrecursive(tstrm);
+    if(!tstrm.empty())
+      ASTERIA_THROW("excess text at end of JSON string");
+    return value;
+  }
+  catch(Parser_Error& except) {
+    ASTERIA_THROW("invalid JSON string: $3 (line $1, offset $2)", except.line(), except.offset(),
+                                                                  describe_parser_status(except.status()));
+  }
+
 }  // namespace
 
 V_string
@@ -744,32 +770,30 @@ std_json_format5(Value value, V_integer indent)
 
 Value
 std_json_parse(V_string text)
-  try {
-    // We reuse the lexer of Asteria here, allowing quite a few extensions e.g. binary numeric
-    // literals and comments.
-    Compiler_Options opts;
-    opts.escapable_single_quotes = true;
-    opts.keywords_as_identifiers = true;
-    opts.integers_as_reals = true;
-
-    // Tokenize the source string.
+  {
+    // Parse characters from the string.
     ::rocket::tinybuf_str cbuf;
     cbuf.set_string(text, tinybuf::open_read);
-
-    Token_Stream tstrm(opts);
-    tstrm.reload(cbuf, ::rocket::sref("<JSON text>"));
-    if(tstrm.empty())
-      ASTERIA_THROW("empty JSON string");
-
-    // Parse a single value.
-    auto value = do_json_parse_nonrecursive(tstrm);
-    if(!tstrm.empty())
-      ASTERIA_THROW("excess text at end of JSON string");
-    return value;
+    return do_json_parse(cbuf);
   }
-  catch(Parser_Error& except) {
-    ASTERIA_THROW("invalid JSON string: $3 (line $1, offset $2)", except.line(), except.offset(),
-                                                                  describe_parser_status(except.status()));
+
+Value
+std_json_parse_file(V_string path)
+  {
+    // Try opening the file.
+    ::rocket::unique_posix_file fp(::fopen(path.safe_c_str(), "rb"), ::fclose);
+    if(fp) {
+      // Parse characters from the file.
+      ::rocket::tinybuf_file cbuf(::std::move(fp));
+      cbuf.set_string(text, tinybuf::open_read);
+      return do_json_parse(cbuf);
+    }
+
+    if(errno == ENOENT)
+      // The file does not exist.
+      return V_null();
+
+    ASTERIA_THROW_SYSTEM_ERROR("fopen");
   }
 
 void
@@ -891,6 +915,37 @@ create_bindings_json(V_object& result, API_Version /*version*/)
     V_string text;
     if(reader.I().v(text).F()) {
       Reference_root::S_temporary xref = { std_json_parse(::std::move(text)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
+      ));
+    //===================================================================
+    // `std.json.parse_file()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("parse_file"),
+      V_function(
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.json.parse_file(path)`
+
+  * Parses the contents of the file denoted by `path` as a JSON
+    string. This function behaves identical to `parse()` otherwise.
+
+  * Returns the parsed value. If the file does not exist, `null` is
+    returned. Note there is no way to distinguish explicit `null`s
+    from non-existent files.
+
+  * Throws an exception if a read error occurs, or if the string is
+    invalid.
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.json.parse_file"));
+    // Parse arguments.
+    V_string path;
+    if(reader.I().v(path).F()) {
+      Reference_root::S_temporary xref = { std_json_parse_file(::std::move(path)) };
       return self = ::std::move(xref);
     }
     // Fail.

@@ -26,6 +26,10 @@ std_json_format5(Value value, V_integer indent);
 Value
 std_json_parse(V_string text);
 
+// `std.json.parse_file`
+Value
+std_json_parse_file(V_string path);
+
 // Create an object that is to be referenced as `std.json`.
 void
 create_bindings_json(V_object& result, API_Version version);
