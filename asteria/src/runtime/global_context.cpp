@@ -110,7 +110,6 @@ initialize(API_Version version)
           << "\n"
           << stdex.what() << "\n"
           << "[exception class `" << typeid(stdex).name() << "`]";
-
       write_log_to_stderr(__FILE__, __LINE__, ::std::move(str));
     }
     if(!gcoll)
