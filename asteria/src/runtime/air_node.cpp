@@ -4255,6 +4255,7 @@ const
         auto bound = altr;
 
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
+
         return do_forward_if_opt(dirty, ::std::move(bound));
       }
 
@@ -4273,6 +4274,7 @@ const
 
         do_rebind_nodes(dirty, bound.code_true, ctx_body);
         do_rebind_nodes(dirty, bound.code_false, ctx_body);
+
         return do_forward_if_opt(dirty, ::std::move(bound));
       }
 
@@ -4286,6 +4288,7 @@ const
 
         do_rebind_nodes(dirty, bound.code_labels, ctx);  // this is not part of the body!
         do_rebind_nodes(dirty, bound.code_bodies, ctx_body);
+
         return do_forward_if_opt(dirty, ::std::move(bound));
       }
 
@@ -4299,6 +4302,7 @@ const
 
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
         do_rebind_nodes(dirty, bound.code_cond, ctx);  // this is not part of the body!
+
         return do_forward_if_opt(dirty, ::std::move(bound));
       }
 
@@ -4312,6 +4316,7 @@ const
 
         do_rebind_nodes(dirty, bound.code_cond, ctx);  // this is not part of the body!
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
+
         return do_forward_if_opt(dirty, ::std::move(bound));
       }
 
@@ -4326,6 +4331,7 @@ const
 
         do_rebind_nodes(dirty, bound.code_init, ctx_for);
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
+
         return do_forward_if_opt(dirty, ::std::move(bound));
       }
 
@@ -4342,6 +4348,7 @@ const
         do_rebind_nodes(dirty, bound.code_cond, ctx_for);
         do_rebind_nodes(dirty, bound.code_step, ctx_for);
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
+
         return do_forward_if_opt(dirty, ::std::move(bound));
       }
 
@@ -4355,6 +4362,7 @@ const
 
         do_rebind_nodes(dirty, bound.code_try, ctx_body);
         do_rebind_nodes(dirty, bound.code_catch, ctx_body);
+
         return do_forward_if_opt(dirty, ::std::move(bound));
       }
 
@@ -4401,6 +4409,7 @@ const
         auto bound = altr;
 
         do_rebind_nodes(dirty, bound.code_body, ctx_func);
+
         return do_forward_if_opt(dirty, ::std::move(bound));
       }
 
@@ -4413,6 +4422,7 @@ const
 
         do_rebind_nodes(dirty, bound.code_true, ctx);
         do_rebind_nodes(dirty, bound.code_false, ctx);
+
         return do_forward_if_opt(dirty, ::std::move(bound));
       }
 
@@ -4424,6 +4434,7 @@ const
         auto bound = altr;
 
         do_rebind_nodes(dirty, bound.code_null, ctx);
+
         return do_forward_if_opt(dirty, ::std::move(bound));
       }
 
@@ -4448,6 +4459,7 @@ const
         auto bound = altr;
 
         do_rebind_nodes(dirty, bound.code_body, ctx);
+
         return do_forward_if_opt(dirty, ::std::move(bound));
       }
 
