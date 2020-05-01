@@ -488,7 +488,7 @@ do_REP_single()
     }
 
     // Execute the script as a function, which returns a `Reference`.
-    try {
+    ASTERIA_RUNTIME_TRY {
       const auto ref = script.execute(global, ::std::move(cmdline.args));
 
       fmt.clear_string();
@@ -499,7 +499,7 @@ do_REP_single()
 
       return ::fprintf(stderr, "* result #%lu: %s\n", index, fmt.c_str());
     }
-    catch(::std::exception& except)
+    ASTERIA_RUNTIME_CATCH(Runtime_Error& except)
       // If an exception was thrown, print something informative.
       { return ::fprintf(stderr, "! %s\n", except.what());  }
   }
@@ -561,7 +561,7 @@ do_single_noreturn()
       { do_bail_out(exit_parser_error, "! %s\n", except.what());  }
 
     // Execute the script.
-    try {
+    ASTERIA_RUNTIME_TRY {
       const auto ref = script.execute(global, ::std::move(cmdline.args));
 
       if(ref.is_void())
@@ -573,7 +573,7 @@ do_single_noreturn()
 
       do_bail_out(static_cast<Exit_Code>(val.as_integer()));
     }
-    catch(::std::exception& except)
+    ASTERIA_RUNTIME_CATCH(Runtime_Error& except)
       // If an exception was thrown, print something informative.
       { do_bail_out(exit_runtime_error, "! %s\n", except.what());  }
   }
