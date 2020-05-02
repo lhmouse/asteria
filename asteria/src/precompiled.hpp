@@ -46,5 +46,9 @@
 #include <cfenv>
 #include <cfloat>
 #include <cstring>
+#include <cerrno>
+
+#include <sys/types.h>
+#include <unistd.h>
 
 #endif
