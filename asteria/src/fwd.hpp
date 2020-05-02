@@ -12,15 +12,6 @@
 #  error Please turn off `-ffast-math`.
 #endif
 
-#include <initializer_list>  // ::std::initializer_list<>
-#include <utility>  // ::std::pair<>, ::std::move(), ::std::forward(), ::std::integer_sequence<>
-#include <stdexcept>
-#include <typeinfo>
-#include <cstddef>
-#include <cstdint>
-#include <climits>
-#include <cstdio>
-#include <cwchar>
 #include "../rocket/preprocessor_utilities.h"
 #include "../rocket/cow_string.hpp"
 #include "../rocket/cow_vector.hpp"
@@ -35,6 +26,14 @@
 #include "../rocket/array.hpp"
 #include "../rocket/reference_wrapper.hpp"
 #include "../rocket/tinyfmt.hpp"
+#include <utility>
+#include <stdexcept>
+#include <typeinfo>
+#include <cstddef>
+#include <cstdint>
+#include <climits>
+#include <cstdio>
+#include <cwchar>
 
 namespace Asteria {
 
