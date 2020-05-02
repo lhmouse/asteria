@@ -62,6 +62,7 @@ do_forward_if_opt(bool dirty, XNodeT&& xnode)
   }
 
 template<typename XValT>
+ROCKET_FORCED_INLINE_FUNCTION
 Executive_Context&
 do_set_temporary(Executive_Context& ctx, bool assign, XValT&& xval)
   {
@@ -79,6 +80,7 @@ do_set_temporary(Executive_Context& ctx, bool assign, XValT&& xval)
     return ctx;
   }
 
+ROCKET_FORCED_INLINE_FUNCTION
 AIR_Status
 do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVMC_Queue& queue)
   {
