@@ -1790,28 +1790,28 @@ do_cast_to_integer(double value)
 
 ROCKET_PURE_FUNCTION
 V_integer
-do_operator_ROUNDi(double rhs)
+do_operator_ROUNDI(double rhs)
   {
     return do_cast_to_integer(::std::round(rhs));
   }
 
 ROCKET_PURE_FUNCTION
 V_integer
-do_operator_FLOORi(double rhs)
+do_operator_FLOORI(double rhs)
   {
     return do_cast_to_integer(::std::floor(rhs));
   }
 
 ROCKET_PURE_FUNCTION
 V_integer
-do_operator_CEILi(double rhs)
+do_operator_CEILI(double rhs)
   {
     return do_cast_to_integer(::std::ceil(rhs));
   }
 
 ROCKET_PURE_FUNCTION
 V_integer
-do_operator_TRUNCi(double rhs)
+do_operator_TRUNCI(double rhs)
   {
     return do_cast_to_integer(::std::trunc(rhs));
   }
@@ -2076,14 +2076,13 @@ struct AIR_Traits_Xop<xop_inc_post> : AIR_Traits<AIR_Node::S_apply_operator>
         auto& lhs = ctx.stack().get_top().open();
         Reference_root::S_temporary xref = { lhs };
 
-        // Increment the operand and return the old value. `assign` is ignored.
         if(lhs.is_integer()) {
-          auto& reg = lhs.open_integer();
-          reg = do_operator_ADD(reg, V_integer(1));
+          // Increment the operand and return the old value. `assign` is ignored.
+          lhs.open_integer() += 1;
         }
         else if(lhs.is_real()) {
-          auto& reg = lhs.open_real();
-          reg = do_operator_ADD(reg, V_real(1));
+          // Increment the operand and return the old value. `assign` is ignored.
+          lhs.open_real() += 1;
         }
         else
           ASTERIA_THROW("postfix increment not applicable (operand was `$1`)", lhs);
@@ -2104,14 +2103,13 @@ struct AIR_Traits_Xop<xop_dec_post> : AIR_Traits<AIR_Node::S_apply_operator>
         auto& lhs = ctx.stack().get_top().open();
         Reference_root::S_temporary xref = { lhs };
 
-        // Decrement the operand and return the old value. `assign` is ignored.
         if(lhs.is_integer()) {
-          auto& reg = lhs.open_integer();
-          reg = do_operator_SUB(reg, V_integer(1));
+          // Decrement the operand and return the old value. `assign` is ignored.
+          lhs.open_integer() -= 1;
         }
         else if(lhs.is_real()) {
-          auto& reg = lhs.open_real();
-          reg = do_operator_SUB(reg, V_real(1));
+          // Decrement the operand and return the old value. `assign` is ignored.
+          lhs.open_real() -= 1;
         }
         else
           ASTERIA_THROW("postfix decrement not applicable (operand was `$1`)", lhs);
@@ -2134,15 +2132,14 @@ struct AIR_Traits_Xop<xop_subscr> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         auto& lref = ctx.stack().open_top();
 
-        // Append a reference modifier. `assign` is ignored.
         if(rhs.is_integer()) {
-          auto& reg = rhs.open_integer();
-          Reference_modifier::S_array_index xmod = { ::std::move(reg) };
+          // Append an array subscript. `assign` is ignored.
+          Reference_modifier::S_array_index xmod = { rhs.as_integer() };
           lref.zoom_in(::std::move(xmod));
         }
         else if(rhs.is_string()) {
-          auto& reg = rhs.open_string();
-          Reference_modifier::S_object_key xmod = { ::std::move(reg) };
+          // Append an object subscript. `assign` is ignored.
+          Reference_modifier::S_object_key xmod = { ::std::move(rhs.open_string()) };
           lref.zoom_in(::std::move(xmod));
         }
         else
@@ -2162,7 +2159,7 @@ struct AIR_Traits_Xop<xop_pos> : AIR_Traits<AIR_Node::S_apply_operator>
         // This operator is unary.
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
 
-        // Copy the operand to create a temporary value, then return it.
+        // Copy the operand to create a temporary value.
         // N.B. This is one of the few operators that work on all types.
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2180,14 +2177,13 @@ struct AIR_Traits_Xop<xop_neg> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        // Get the opposite of the operand as a temporary value, then return it.
         if(rhs.is_integer()) {
-          auto& reg = rhs.open_integer();
-          reg = do_operator_NEG(reg);
+          // Get the opposite of the operand as a temporary value.
+          rhs = do_operator_NEG(rhs.as_integer());
         }
         else if(rhs.is_real()) {
-          auto& reg = rhs.open_real();
-          reg = do_operator_NEG(reg);
+          // Get the opposite of the operand as a temporary value.
+          rhs = do_operator_NEG(rhs.as_real());
         }
         else
           ASTERIA_THROW("prefix negation not applicable (operand was `$1`)", rhs);
@@ -2208,18 +2204,17 @@ struct AIR_Traits_Xop<xop_notb> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        // Perform bitwise NOT operation on the operand to create a temporary value, then return it.
         if(rhs.is_boolean()) {
-          auto& reg = rhs.open_boolean();
-          reg = do_operator_NOT(reg);
+          // Perform logical NOT operation on the operand to create a temporary value.
+          rhs = do_operator_NOT(rhs.as_boolean());
         }
         else if(rhs.is_integer()) {
-          auto& reg = rhs.open_integer();
-          reg = do_operator_NOT(reg);
+          // Perform bitwise NOT operation on the operand to create a temporary value.
+          rhs = do_operator_NOT(rhs.as_integer());
         }
         else if(rhs.is_string()) {
-          auto& reg = rhs.open_string();
-          reg = do_operator_NOT(::std::move(reg));
+          // Perform bitwise NOT operation on all bytes in the operand to create a temporary value.
+          rhs = do_operator_NOT(::std::move(rhs.open_string()));
         }
         else
           ASTERIA_THROW("prefix bitwise NOT not applicable (operand was `$1`)", rhs);
@@ -2240,7 +2235,7 @@ struct AIR_Traits_Xop<xop_notl> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        // Perform logical NOT operation on the operand to create a temporary value, then return it.
+        // Perform logical NOT operation on the operand to create a temporary value.
         // N.B. This is one of the few operators that work on all types.
         rhs = do_operator_NOT(rhs.test());
 
@@ -2259,14 +2254,13 @@ struct AIR_Traits_Xop<xop_inc_pre> : AIR_Traits<AIR_Node::S_apply_operator>
         // This operator is unary.
         auto& rhs = ctx.stack().get_top().open();
 
-        // Increment the operand and return it. `assign` is ignored.
         if(rhs.is_integer()) {
-          auto& reg = rhs.open_integer();
-          reg = do_operator_ADD(reg, V_integer(1));
+          // Increment the operand and return it. `assign` is ignored.
+          rhs.open_integer() += 1;
         }
         else if(rhs.is_real()) {
-          auto& reg = rhs.open_real();
-          reg = do_operator_ADD(reg, V_real(1));
+          // Increment the operand and return it. `assign` is ignored.
+          rhs.open_real() += 1;
         }
         else
           ASTERIA_THROW("prefix increment not applicable (operand was `$1`)", rhs);
@@ -2285,14 +2279,13 @@ struct AIR_Traits_Xop<xop_dec_pre> : AIR_Traits<AIR_Node::S_apply_operator>
         // This operator is unary.
         auto& rhs = ctx.stack().get_top().open();
 
-        // Decrement the operand and return it. `assign` is ignored.
         if(rhs.is_integer()) {
-          auto& reg = rhs.open_integer();
-          reg = do_operator_SUB(reg, V_integer(1));
+          // Decrement the operand and return it. `assign` is ignored.
+          rhs.open_integer() -= 1;
         }
         else if(rhs.is_real()) {
-          auto& reg = rhs.open_real();
-          reg = do_operator_SUB(reg, V_real(1));
+          // Decrement the operand and return it. `assign` is ignored.
+          rhs.open_real() -= 1;
         }
         else
           ASTERIA_THROW("prefix decrement not applicable (operand was `$1`)", rhs);
@@ -2388,14 +2381,13 @@ struct AIR_Traits_Xop<xop_sqrt> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        // Get the square root of the operand as a temporary value, then return it.
         if(rhs.is_integer()) {
-          // Note that `rhs` does not have type `V_real`, thus this branch can't be optimized.
+          // Get the square root of the operand as a temporary value.
           rhs = do_operator_SQRT(rhs.as_integer());
         }
         else if(rhs.is_real()) {
-          auto& reg = rhs.open_real();
-          reg = do_operator_SQRT(reg);
+          // Get the square root of the operand as a temporary value.
+          rhs = do_operator_SQRT(rhs.as_real());
         }
         else
           ASTERIA_THROW("prefix `__sqrt` not applicable (operand was `$1`)", rhs);
@@ -2416,13 +2408,12 @@ struct AIR_Traits_Xop<xop_isnan> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        // Check whether the operand is a NaN, store the result in a temporary value, then return it.
         if(rhs.is_integer()) {
-          // Note that `rhs` does not have type `V_boolean`, thus this branch can't be optimized.
+          // Check whether the operand is a NaN, store the result in a temporary value.
           rhs = do_operator_ISNAN(rhs.as_integer());
         }
         else if(rhs.is_real()) {
-          // Note that `rhs` does not have type `V_boolean`, thus this branch can't be optimized.
+          // Check whether the operand is a NaN, store the result in a temporary value.
           rhs = do_operator_ISNAN(rhs.as_real());
         }
         else
@@ -2444,13 +2435,12 @@ struct AIR_Traits_Xop<xop_isinf> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        // Check whether the operand is an infinity, store the result in a temporary value, then return it.
         if(rhs.is_integer()) {
-          // Note that `rhs` does not have type `V_boolean`, thus this branch can't be optimized.
+          // Check whether the operand is an infinity, store the result in a temporary value.
           rhs = do_operator_ISINF(rhs.as_integer());
         }
         else if(rhs.is_real()) {
-          // Note that `rhs` does not have type `V_boolean`, thus this branch can't be optimized.
+          // Check whether the operand is an infinity, store the result in a temporary value.
           rhs = do_operator_ISINF(rhs.as_real());
         }
         else
@@ -2472,14 +2462,13 @@ struct AIR_Traits_Xop<xop_abs> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        // Get the absolute value of the operand as a temporary value, then return it.
         if(rhs.is_integer()) {
-          auto& reg = rhs.open_integer();
-          reg = do_operator_ABS(reg);
+          // Get the absolute value of the operand as a temporary value.
+          rhs = do_operator_ABS(rhs.as_integer());
         }
         else if(rhs.is_real()) {
-          auto& reg = rhs.open_real();
-          reg = do_operator_ABS(reg);
+          // Get the absolute value of the operand as a temporary value.
+          rhs = do_operator_ABS(rhs.as_real());
         }
         else
           ASTERIA_THROW("prefix `__abs` not applicable (operand was `$1`)", rhs);
@@ -2500,13 +2489,12 @@ struct AIR_Traits_Xop<xop_sign> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        // Get the sign bit of the operand as a temporary value, then return it.
         if(rhs.is_integer()) {
-          auto& reg = rhs.open_integer();
-          reg = do_operator_SIGN(reg);
+          // Get the sign bit of the operand as a temporary value.
+          rhs = do_operator_SIGN(rhs.as_integer());
         }
         else if(rhs.is_real()) {
-          // Note that `rhs` does not have type `V_integer`, thus this branch can't be optimized.
+          // Get the sign bit of the operand as a temporary value.
           rhs = do_operator_SIGN(rhs.as_real());
         }
         else
@@ -2528,14 +2516,13 @@ struct AIR_Traits_Xop<xop_round> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        // Round the operand to the nearest integer as a temporary value, then return it.
         if(rhs.is_integer()) {
           // No conversion is required.
           // Return `rhs` as is.
         }
         else if(rhs.is_real()) {
-          auto& reg = rhs.open_real();
-          reg = do_operator_ROUND(reg);
+          // Round the operand to the nearest integer as a temporary value.
+          rhs = do_operator_ROUND(rhs.as_real());
         }
         else
           ASTERIA_THROW("prefix `__round` not applicable (operand was `$1`)", rhs);
@@ -2556,14 +2543,13 @@ struct AIR_Traits_Xop<xop_floor> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        // Round the operand towards negative infinity as a temporary value, then return it.
         if(rhs.is_integer()) {
           // No conversion is required.
           // Return `rhs` as is.
         }
         else if(rhs.is_real()) {
-          auto& reg = rhs.open_real();
-          reg = do_operator_FLOOR(reg);
+          // Round the operand towards negative infinity as a temporary value.
+          rhs = do_operator_FLOOR(rhs.as_real());
         }
         else
           ASTERIA_THROW("prefix `__floor` not applicable (operand was `$1`)", rhs);
@@ -2584,14 +2570,13 @@ struct AIR_Traits_Xop<xop_ceil> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        // Round the operand towards negative infinity as a temporary value, then return it.
         if(rhs.is_integer()) {
           // No conversion is required.
           // Return `rhs` as is.
         }
         else if(rhs.is_real()) {
-          auto& reg = rhs.open_real();
-          reg = do_operator_CEIL(reg);
+          // Round the operand towards negative infinity as a temporary value.
+          rhs = do_operator_CEIL(rhs.as_real());
         }
         else
           ASTERIA_THROW("prefix `__ceil` not applicable (operand was `$1`)", rhs);
@@ -2612,14 +2597,13 @@ struct AIR_Traits_Xop<xop_trunc> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        // Round the operand towards negative infinity as a temporary value, then return it.
         if(rhs.is_integer()) {
           // No conversion is required.
           // Return `rhs` as is.
         }
         else if(rhs.is_real()) {
-          auto& reg = rhs.open_real();
-          reg = do_operator_TRUNC(reg);
+          // Round the operand towards negative infinity as a temporary value.
+          rhs = do_operator_TRUNC(rhs.as_real());
         }
         else
           ASTERIA_THROW("prefix `__trunc` not applicable (operand was `$1`)", rhs);
@@ -2640,14 +2624,13 @@ struct AIR_Traits_Xop<xop_roundi> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        // Round the operand to the nearest integer as a temporary value, then return it as an `integer`.
         if(rhs.is_integer()) {
           // No conversion is required.
           // Return `rhs` as is.
         }
         else if(rhs.is_real()) {
-          // Note that `rhs` does not have type `V_integer`, thus this branch can't be optimized.
-          rhs = do_operator_ROUNDi(rhs.as_real());
+          // Round the operand to the nearest integer as a temporary value.
+          rhs = do_operator_ROUNDI(rhs.as_real());
         }
         else
           ASTERIA_THROW("prefix `__roundi` not applicable (operand was `$1`)", rhs);
@@ -2668,14 +2651,13 @@ struct AIR_Traits_Xop<xop_floori> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
         if(rhs.is_integer()) {
           // No conversion is required.
           // Return `rhs` as is.
         }
         else if(rhs.is_real()) {
-          // Note that `rhs` does not have type `V_integer`, thus this branch can't be optimized.
-          rhs = do_operator_FLOORi(rhs.as_real());
+          // Round the operand towards negative infinity as a temporary value.
+          rhs = do_operator_FLOORI(rhs.as_real());
         }
         else
           ASTERIA_THROW("prefix `__floori` not applicable (operand was `$1`)", rhs);
@@ -2696,14 +2678,13 @@ struct AIR_Traits_Xop<xop_ceili> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
         if(rhs.is_integer()) {
           // No conversion is required.
           // Return `rhs` as is.
         }
         else if(rhs.is_real()) {
-          // Note that `rhs` does not have type `V_integer`, thus this branch can't be optimized.
-          rhs = do_operator_CEILi(rhs.as_real());
+          // Round the operand towards negative infinity as a temporary value.
+          rhs = do_operator_CEILI(rhs.as_real());
         }
         else
           ASTERIA_THROW("prefix `__ceili` not applicable (operand was `$1`)", rhs);
@@ -2724,14 +2705,13 @@ struct AIR_Traits_Xop<xop_trunci> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
         if(rhs.is_integer()) {
           // No conversion is required.
           // Return `rhs` as is.
         }
         else if(rhs.is_real()) {
-          // Note that `rhs` does not have type `V_integer`, thus this branch can't be optimized.
-          rhs = do_operator_TRUNCi(rhs.as_real());
+          // Round the operand towards negative infinity as a temporary value.
+          rhs = do_operator_TRUNCI(rhs.as_real());
         }
         else
           ASTERIA_THROW("prefix `__trunci` not applicable (operand was `$1`)", rhs);
@@ -2940,22 +2920,19 @@ struct AIR_Traits_Xop<xop_add> : AIR_Traits<AIR_Node::S_apply_operator>
 
         if(lhs.is_boolean() && rhs.is_boolean()) {
           // For the `boolean` type, return the logical OR'd result of both operands.
-          auto& reg = rhs.open_boolean();
-          reg = do_operator_OR(lhs.as_boolean(), reg);
+          rhs = do_operator_OR(lhs.as_boolean(), rhs.as_boolean());
         }
         else if(lhs.is_integer() && rhs.is_integer()) {
-          // For the `integer` and `real` types, return the sum of both operands.
-          auto& reg = rhs.open_integer();
-          reg = do_operator_ADD(lhs.as_integer(), reg);
+          // For the `integer` type, return the sum of both operands.
+          rhs = do_operator_ADD(lhs.as_integer(), rhs.as_integer());
         }
         else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
-          // Note that `rhs` might not have type `V_real`, thus this branch can't be optimized.
+          // For the `integer` and `real` types, return the sum of both operands as `real`.
           rhs = do_operator_ADD(lhs.convert_to_real(), rhs.convert_to_real());
         }
         else if(lhs.is_string() && rhs.is_string()) {
           // For the `string` type, concatenate the operands in lexical order to create a new string.
-          auto& reg = rhs.open_string();
-          reg = do_operator_ADD(lhs.as_string(), reg);
+          rhs = do_operator_ADD(lhs.as_string(), rhs.as_string());
         }
         else
           ASTERIA_THROW("infix addition not applicable (operands were `$1` and `$2`)", lhs, rhs);
@@ -2980,16 +2957,14 @@ struct AIR_Traits_Xop<xop_sub> : AIR_Traits<AIR_Node::S_apply_operator>
 
         if(lhs.is_boolean() && rhs.is_boolean()) {
           // For the `boolean` type, return the logical XOR'd result of both operands.
-          auto& reg = rhs.open_boolean();
-          reg = do_operator_XOR(lhs.as_boolean(), reg);
+          rhs = do_operator_XOR(lhs.as_boolean(), rhs.as_boolean());
         }
         else if(lhs.is_integer() && rhs.is_integer()) {
-          // For the `integer` and `real` types, return the difference of both operands.
-          auto& reg = rhs.open_integer();
-          reg = do_operator_SUB(lhs.as_integer(), reg);
+          // For the `integer` type, return the difference of both operands.
+          rhs = do_operator_SUB(lhs.as_integer(), rhs.as_integer());
         }
         else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
-          // Note that `rhs` might not have type `V_real`, thus this branch can't be optimized.
+          // For the `integer` and `real` types, return the difference of both operands as `real`.
           rhs = do_operator_SUB(lhs.convert_to_real(), rhs.convert_to_real());
         }
         else
@@ -3015,27 +2990,25 @@ struct AIR_Traits_Xop<xop_mul> : AIR_Traits<AIR_Node::S_apply_operator>
 
         if(lhs.is_boolean() && rhs.is_boolean()) {
           // For the `boolean` type, return the logical AND'd result of both operands.
-          auto& reg = rhs.open_boolean();
-          reg = do_operator_AND(lhs.as_boolean(), reg);
+          rhs = do_operator_AND(lhs.as_boolean(), rhs.as_boolean());
         }
         else if(lhs.is_integer() && rhs.is_integer()) {
-          // For the `integer` and `real` types, return the product of both operands.
-          auto& reg = rhs.open_integer();
-          reg = do_operator_MUL(lhs.as_integer(), reg);
+          // For the `integer` type, return the product of both operands.
+          rhs = do_operator_MUL(lhs.as_integer(), rhs.as_integer());
         }
         else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
-          // Note that `rhs` might not have type `V_real`, thus this branch can't be optimized.
+          // For the `integer` and `real` types, return the product of both operands as `real`.
           rhs = do_operator_MUL(lhs.convert_to_real(), rhs.convert_to_real());
         }
         else if(lhs.is_string() && rhs.is_integer()) {
-          // If either operand has type `string` and the other has type `integer`, duplicate the string up to
-          // the specified number of times and return the result.
-          // Note that `rhs` does not have type `V_string`, thus this branch can't be optimized.
+          // If either operand has type `string` and the other has type `integer`, duplicate
+          // the string up to the specified number of times and return the result.
           rhs = do_operator_MUL(lhs.as_string(), rhs.as_integer());
         }
         else if(lhs.is_integer() && rhs.is_string()) {
-          auto& reg = rhs.open_string();
-          reg = do_operator_MUL(lhs.as_integer(), reg);
+          // If either operand has type `string` and the other has type `integer`, duplicate
+          // the string up to the specified number of times and return the result.
+          rhs = do_operator_MUL(lhs.as_integer(), rhs.as_string());
         }
         else
           ASTERIA_THROW("infix multiplication not applicable (operands were `$1` and `$2`)", lhs, rhs);
@@ -3059,12 +3032,11 @@ struct AIR_Traits_Xop<xop_div> : AIR_Traits<AIR_Node::S_apply_operator>
         const auto& lhs = ctx.stack().get_top().read();
 
         if(lhs.is_integer() && rhs.is_integer()) {
-          // For the `integer` and `real` types, return the quotient of both operands.
-          auto& reg = rhs.open_integer();
-          reg = do_operator_DIV(lhs.as_integer(), reg);
+          // For the `integer` type, return the quotient of both operands.
+          rhs = do_operator_DIV(lhs.as_integer(), rhs.as_integer());
         }
         else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
-          // Note that `rhs` might not have type `V_real`, thus this branch can't be optimized.
+          // For the `integer` and `real` types, return the quotient of both operands as `real`.
           rhs = do_operator_DIV(lhs.convert_to_real(), rhs.convert_to_real());
         }
         else
@@ -3089,12 +3061,11 @@ struct AIR_Traits_Xop<xop_mod> : AIR_Traits<AIR_Node::S_apply_operator>
         const auto& lhs = ctx.stack().get_top().read();
 
         if(lhs.is_integer() && rhs.is_integer()) {
-          // For the `integer` and `real` types, return the remainder of both operands.
-          auto& reg = rhs.open_integer();
-          reg = do_operator_MOD(lhs.as_integer(), reg);
+          // For the `integer` type, return the remainder of both operands.
+          rhs = do_operator_MOD(lhs.as_integer(), rhs.as_integer());
         }
         else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
-          // Note that `rhs` might not have type `V_real`, thus this branch can't be optimized.
+          // For the `integer` and `real` types, return the remainder of both operands.
           rhs = do_operator_MOD(lhs.convert_to_real(), rhs.convert_to_real());
         }
         else
@@ -3121,13 +3092,11 @@ struct AIR_Traits_Xop<xop_sll> : AIR_Traits<AIR_Node::S_apply_operator>
         if(lhs.is_integer() && rhs.is_integer()) {
           // If the LHS operand has type `integer`, shift the LHS operand to the left by the number of bits
           // specified by the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with zeroes.
-          auto& reg = rhs.open_integer();
-          reg = do_operator_SLL(lhs.as_integer(), reg);
+          rhs = do_operator_SLL(lhs.as_integer(), rhs.as_integer());
         }
         else if(lhs.is_string() && rhs.is_integer()) {
           // If the LHS operand has type `string`, fill space characters in the right and discard characters from
           // the left. The number of bytes in the LHS operand will be preserved.
-          // Note that `rhs` does not have type `V_string`, thus this branch can't be optimized.
           rhs = do_operator_SLL(lhs.as_string(), rhs.as_integer());
         }
         else
@@ -3154,13 +3123,11 @@ struct AIR_Traits_Xop<xop_srl> : AIR_Traits<AIR_Node::S_apply_operator>
         if(lhs.is_integer() && rhs.is_integer()) {
           // If the LHS operand has type `integer`, shift the LHS operand to the right by the number of bits
           // specified by the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with zeroes.
-          auto& reg = rhs.open_integer();
-          reg = do_operator_SRL(lhs.as_integer(), reg);
+          rhs = do_operator_SRL(lhs.as_integer(), rhs.as_integer());
         }
         else if(lhs.is_string() && rhs.is_integer()) {
           // If the LHS operand has type `string`, fill space characters in the left and discard characters from
           // the right. The number of bytes in the LHS operand will be preserved.
-          // Note that `rhs` does not have type `V_string`, thus this branch can't be optimized.
           rhs = do_operator_SRL(lhs.as_string(), rhs.as_integer());
         }
         else
@@ -3189,12 +3156,10 @@ struct AIR_Traits_Xop<xop_sla> : AIR_Traits<AIR_Node::S_apply_operator>
           // specified by the RHS operand. Bits shifted out that are equal to the sign bit are discarded. Bits
           // shifted in are filled with zeroes. If any bits that are different from the sign bit would be shifted
           // out, an exception is thrown.
-          auto& reg = rhs.open_integer();
-          reg = do_operator_SLA(lhs.as_integer(), reg);
+          rhs = do_operator_SLA(lhs.as_integer(), rhs.as_integer());
         }
         else if(lhs.is_string() && rhs.is_integer()) {
           // If the LHS operand has type `string`, fill space characters in the right.
-          // Note that `rhs` does not have type `V_string`, thus this branch can't be optimized.
           rhs = do_operator_SLA(lhs.as_string(), rhs.as_integer());
         }
         else
@@ -3222,12 +3187,10 @@ struct AIR_Traits_Xop<xop_sra> : AIR_Traits<AIR_Node::S_apply_operator>
           // If the LHS operand is of type `integer`, shift the LHS operand to the right by the number of bits
           // specified by the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with the
           // sign bit.
-          auto& reg = rhs.open_integer();
-          reg = do_operator_SRA(lhs.as_integer(), reg);
+          rhs = do_operator_SRA(lhs.as_integer(), rhs.as_integer());
         }
         else if(lhs.is_string() && rhs.is_integer()) {
           // If the LHS operand has type `string`, discard characters from the right.
-          // Note that `rhs` does not have type `V_string`, thus this branch can't be optimized.
           rhs = do_operator_SRA(lhs.as_string(), rhs.as_integer());
         }
         else
@@ -3253,19 +3216,16 @@ struct AIR_Traits_Xop<xop_andb> : AIR_Traits<AIR_Node::S_apply_operator>
 
         if(lhs.is_boolean() && rhs.is_boolean()) {
           // For the `boolean` type, return the logical AND'd result of both operands.
-          auto& reg = rhs.open_boolean();
-          reg = do_operator_AND(lhs.as_boolean(), reg);
+          rhs = do_operator_AND(lhs.as_boolean(), rhs.as_boolean());
         }
         else if(lhs.is_integer() && rhs.is_integer()) {
           // For the `integer` type, return bitwise AND'd result of both operands.
-          auto& reg = rhs.open_integer();
-          reg = do_operator_AND(lhs.as_integer(), reg);
+          rhs = do_operator_AND(lhs.as_integer(), rhs.as_integer());
         }
         else if(lhs.is_string() && rhs.is_string()) {
           // For the `string` type, return bitwise AND'd result of bytes from operands.
           // The result contains no more bytes than either operand.
-          auto& reg = rhs.open_string();
-          reg = do_operator_AND(lhs.as_string(), ::std::move(reg));
+          rhs = do_operator_AND(lhs.as_string(), ::std::move(rhs.open_string()));
         }
         else
           ASTERIA_THROW("infix bitwise AND not applicable (operands were `$1` and `$2`)", lhs, rhs);
@@ -3290,19 +3250,16 @@ struct AIR_Traits_Xop<xop_orb> : AIR_Traits<AIR_Node::S_apply_operator>
 
         if(lhs.is_boolean() && rhs.is_boolean()) {
           // For the `boolean` type, return the logical OR'd result of both operands.
-          auto& reg = rhs.open_boolean();
-          reg = do_operator_OR(lhs.as_boolean(), reg);
+          rhs = do_operator_OR(lhs.as_boolean(), rhs.as_boolean());
         }
         else if(lhs.is_integer() && rhs.is_integer()) {
           // For the `integer` type, return bitwise OR'd result of both operands.
-          auto& reg = rhs.open_integer();
-          reg = do_operator_OR(lhs.as_integer(), reg);
+          rhs = do_operator_OR(lhs.as_integer(), rhs.as_integer());
         }
         else if(lhs.is_string() && rhs.is_string()) {
           // For the `string` type, return bitwise OR'd result of bytes from operands.
           // The result contains no fewer bytes than either operand.
-          auto& reg = rhs.open_string();
-          reg = do_operator_OR(lhs.as_string(), ::std::move(reg));
+          rhs = do_operator_OR(lhs.as_string(), ::std::move(rhs.open_string()));
         }
         else
           ASTERIA_THROW("infix bitwise OR not applicable (operands were `$1` and `$2`)", lhs, rhs);
@@ -3327,19 +3284,16 @@ struct AIR_Traits_Xop<xop_xorb> : AIR_Traits<AIR_Node::S_apply_operator>
 
         if(lhs.is_boolean() && rhs.is_boolean()) {
           // For the `boolean` type, return the logical XOR'd result of both operands.
-          auto& reg = rhs.open_boolean();
-          reg = do_operator_XOR(lhs.as_boolean(), reg);
+          rhs = do_operator_XOR(lhs.as_boolean(), rhs.as_boolean());
         }
         else if(lhs.is_integer() && rhs.is_integer()) {
           // For the `integer` type, return bitwise XOR'd result of both operands.
-          auto& reg = rhs.open_integer();
-          reg = do_operator_XOR(lhs.as_integer(), reg);
+          rhs = do_operator_XOR(lhs.as_integer(), rhs.as_integer());
         }
         else if(lhs.is_string() && rhs.is_string()) {
           // For the `string` type, return bitwise XOR'd result of bytes from operands.
           // The result contains no fewer bytes than either operand.
-          auto& reg = rhs.open_string();
-          reg = do_operator_XOR(lhs.as_string(), ::std::move(reg));
+          rhs = do_operator_XOR(lhs.as_string(), ::std::move(rhs.open_string()));
         }
         else
           ASTERIA_THROW("infix bitwise XOR not applicable (operands were `$1` and `$2`)", lhs, rhs);
@@ -3383,7 +3337,6 @@ struct AIR_Traits_Xop<xop_fma> : AIR_Traits<AIR_Node::S_apply_operator>
 
         if(lhs.is_convertible_to_real() && mid.is_convertible_to_real() && rhs.is_convertible_to_real()) {
           // Calculate the fused multiply-add result of the operands.
-          // Note that `rhs` might not have type `V_real`, thus this branch can't be optimized.
           rhs = ::std::fma(lhs.convert_to_real(), mid.convert_to_real(), rhs.convert_to_real());
         }
         else
