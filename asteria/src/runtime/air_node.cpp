@@ -2078,11 +2078,11 @@ struct AIR_Traits_Xop<xop_inc_post> : AIR_Traits<AIR_Node::S_apply_operator>
 
         if(lhs.is_integer()) {
           // Increment the operand and return the old value. `assign` is ignored.
-          lhs.open_integer() += 1;
+          lhs = do_operator_ADD(lhs.as_integer(), V_integer(1));
         }
         else if(lhs.is_real()) {
           // Increment the operand and return the old value. `assign` is ignored.
-          lhs.open_real() += 1;
+          lhs = do_operator_ADD(lhs.as_real(), V_real(1));
         }
         else
           ASTERIA_THROW("postfix increment not applicable (operand was `$1`)", lhs);
@@ -2105,11 +2105,11 @@ struct AIR_Traits_Xop<xop_dec_post> : AIR_Traits<AIR_Node::S_apply_operator>
 
         if(lhs.is_integer()) {
           // Decrement the operand and return the old value. `assign` is ignored.
-          lhs.open_integer() -= 1;
+          lhs = do_operator_SUB(lhs.as_integer(), V_integer(1));
         }
         else if(lhs.is_real()) {
           // Decrement the operand and return the old value. `assign` is ignored.
-          lhs.open_real() -= 1;
+          lhs = do_operator_SUB(lhs.as_real(), V_real(1));
         }
         else
           ASTERIA_THROW("postfix decrement not applicable (operand was `$1`)", lhs);
@@ -2256,11 +2256,11 @@ struct AIR_Traits_Xop<xop_inc_pre> : AIR_Traits<AIR_Node::S_apply_operator>
 
         if(rhs.is_integer()) {
           // Increment the operand and return it. `assign` is ignored.
-          rhs.open_integer() += 1;
+          rhs = do_operator_ADD(rhs.as_integer(), V_integer(1));
         }
         else if(rhs.is_real()) {
           // Increment the operand and return it. `assign` is ignored.
-          rhs.open_real() += 1;
+          rhs = do_operator_ADD(rhs.as_real(), V_real(1));
         }
         else
           ASTERIA_THROW("prefix increment not applicable (operand was `$1`)", rhs);
@@ -2281,11 +2281,11 @@ struct AIR_Traits_Xop<xop_dec_pre> : AIR_Traits<AIR_Node::S_apply_operator>
 
         if(rhs.is_integer()) {
           // Decrement the operand and return it. `assign` is ignored.
-          rhs.open_integer() -= 1;
+          rhs = do_operator_SUB(rhs.as_integer(), V_integer(1));
         }
         else if(rhs.is_real()) {
           // Decrement the operand and return it. `assign` is ignored.
-          rhs.open_real() -= 1;
+          rhs = do_operator_SUB(rhs.as_real(), V_real(1));
         }
         else
           ASTERIA_THROW("prefix decrement not applicable (operand was `$1`)", rhs);
