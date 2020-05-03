@@ -1569,6 +1569,18 @@ operator+(basic_cow_string<charT, traitsT, allocT>&& lhs, basic_cow_string<charT
 template<typename charT, typename traitsT, typename allocT>
 inline
 basic_cow_string<charT, traitsT, allocT>
+operator+(basic_cow_string<charT, traitsT, allocT>&& lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
+  { return ::std::move(lhs.append(rhs));  }
+
+template<typename charT, typename traitsT, typename allocT>
+inline
+basic_cow_string<charT, traitsT, allocT>
+operator+(const basic_cow_string<charT, traitsT, allocT>& lhs, basic_cow_string<charT, traitsT, allocT>&& rhs)
+  { return ::std::move(rhs.insert(0, lhs));  }
+
+template<typename charT, typename traitsT, typename allocT>
+inline
+basic_cow_string<charT, traitsT, allocT>
 operator+(const basic_cow_string<charT, traitsT, allocT>& lhs, const charT* rhs)
   {
     auto res = lhs;
