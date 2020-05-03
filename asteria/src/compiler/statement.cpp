@@ -426,25 +426,29 @@ const
         // Translate jump targets to AIR status codes.
         switch(altr.target) {
           case jump_target_unspec: {
-            AIR_Node::S_simple_status xnode = { air_status_break_unspec };
+            AIR_Node::S_break_or_continue xnode = { altr.sloc, air_status_break_unspec };
             code.emplace_back(::std::move(xnode));
             return code;
           }
+
           case jump_target_switch: {
-            AIR_Node::S_simple_status xnode = { air_status_break_switch };
+            AIR_Node::S_break_or_continue xnode = { altr.sloc, air_status_break_switch };
             code.emplace_back(::std::move(xnode));
             return code;
           }
+
           case jump_target_while: {
-            AIR_Node::S_simple_status xnode = { air_status_break_while };
+            AIR_Node::S_break_or_continue xnode = { altr.sloc, air_status_break_while };
             code.emplace_back(::std::move(xnode));
             return code;
           }
+
           case jump_target_for: {
-            AIR_Node::S_simple_status xnode = { air_status_break_for };
+            AIR_Node::S_break_or_continue xnode = { altr.sloc, air_status_break_for };
             code.emplace_back(::std::move(xnode));
             return code;
           }
+
           default:
             ASTERIA_TERMINATE("invalid target scope type (target `$1`)", altr.target);
         }
@@ -456,23 +460,26 @@ const
         // Translate jump targets to AIR status codes.
         switch(altr.target) {
           case jump_target_unspec: {
-            AIR_Node::S_simple_status xnode = { air_status_continue_unspec };
+            AIR_Node::S_break_or_continue xnode = { altr.sloc, air_status_continue_unspec };
             code.emplace_back(::std::move(xnode));
             return code;
           }
+
           case jump_target_switch:
             ASTERIA_TERMINATE("`target_switch` not allowed to follow `continue`");
 
           case jump_target_while: {
-            AIR_Node::S_simple_status xnode = { air_status_continue_while };
+            AIR_Node::S_break_or_continue xnode = { altr.sloc, air_status_continue_while };
             code.emplace_back(::std::move(xnode));
             return code;
           }
+
           case jump_target_for: {
-            AIR_Node::S_simple_status xnode = { air_status_continue_for };
+            AIR_Node::S_break_or_continue xnode = { altr.sloc, air_status_continue_for };
             code.emplace_back(::std::move(xnode));
             return code;
           }
+
           default:
             ASTERIA_TERMINATE("invalid target scope type (target `$1`)", altr.target);
         }
@@ -497,7 +504,7 @@ const
         // We don't tell empty return statements from non-empty ones here.
         if(altr.expr.units.empty()) {
           // If no expression is provided, return a void reference.
-          AIR_Node::S_simple_status xnode = { air_status_return_void };
+          AIR_Node::S_return_statement xnode = { air_status_return_void };
           code.emplace_back(::std::move(xnode));
         }
         else {
@@ -512,7 +519,7 @@ const
             do_generate_glvalue_to_prvalue(code, altr.expr.sloc);
           }
           // Forward the result as is.
-          AIR_Node::S_simple_status xnode = { air_status_return_ref };
+          AIR_Node::S_return_statement xnode = { air_status_return_ref };
           code.emplace_back(::std::move(xnode));
         }
         return code;

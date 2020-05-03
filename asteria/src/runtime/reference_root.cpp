@@ -40,6 +40,9 @@ const
       case index_tail_call:
         ASTERIA_THROW("tail call wrapper not dereferenceable");
 
+      case index_jump_src:
+        ASTERIA_THROW("jump marker not dereferenceable");
+
       default:
         ASTERIA_TERMINATE("invalid reference root type enumeration (index `$1`)", this->index());
     }
@@ -76,6 +79,9 @@ const
 
       case index_tail_call:
         ASTERIA_THROW("tail call wrapper not dereferenceable");
+
+      case index_jump_src:
+        ASTERIA_THROW("jump marker not dereferenceable");
 
       default:
         ASTERIA_TERMINATE("invalid reference root type enumeration (index `$1`)", this->index());
@@ -115,6 +121,9 @@ const
         }
         return ptc->enumerate_variables(callback);
       }
+
+      case index_jump_src:
+        return callback;
 
       default:
         ASTERIA_TERMINATE("invalid reference root type enumeration (index `$1`)", this->index());

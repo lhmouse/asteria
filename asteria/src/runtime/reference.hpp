@@ -84,6 +84,11 @@ class Reference
       { return this->m_root.is_tail_call();  }
 
     bool
+    is_jump_src()
+    const noexcept
+      { return this->m_root.is_jump_src();  }
+
+    bool
     is_lvalue()
     const noexcept
       { return this->is_variable();  }
@@ -96,7 +101,7 @@ class Reference
     bool
     is_glvalue()
     const noexcept
-      { return this->is_lvalue() || !this->m_mods.empty();  }
+      { return this->is_lvalue() || (this->is_rvalue() && !this->m_mods.empty());  }
 
     bool
     is_prvalue()
@@ -199,6 +204,11 @@ class Reference
         else
           return unerase_cast<PTC_Arguments>(this->m_root.as_tail_call());
       }
+
+    const Source_Location&
+    as_jump_src()
+    const
+      { return this->m_root.as_jump_src();  }
 
     Reference&
     finish_call(Global_Context& global)

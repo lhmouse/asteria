@@ -86,12 +86,12 @@ const
       case air_status_break_switch:
       case air_status_break_while:
       case air_status_break_for:
-        ASTERIA_THROW("stray `break` statement");
+        ASTERIA_THROW("stray `break` statement\n[jumped from '$1']", stack.open_top().as_jump_src());
 
       case air_status_continue_unspec:
       case air_status_continue_while:
       case air_status_continue_for:
-        ASTERIA_THROW("stray `continue` statement");
+        ASTERIA_THROW("stray `continue` statement\n[jumped from '$1']", stack.open_top().as_jump_src());
 
       default:
         ASTERIA_TERMINATE("invalid AIR status code (status `$1`)", status);

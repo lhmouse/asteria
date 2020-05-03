@@ -918,18 +918,18 @@ struct AIR_Traits<AIR_Node::S_assert_statement>
   };
 
 template<>
-struct AIR_Traits<AIR_Node::S_simple_status>
+struct AIR_Traits<AIR_Node::S_return_statement>
   {
     // `Uparam` is `status`.
     // `Sparam` is unused.
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& reachable, const AIR_Node::S_simple_status& altr)
+    make_uparam(bool& reachable, const AIR_Node::S_return_statement& altr)
       {
         AVMC_Queue::Uparam up;
         up.v8s[0] = weaken_enum(altr.status);
-        reachable &= (altr.status == air_status_next);
+        reachable = false;
         return up;
       }
 
@@ -937,7 +937,9 @@ struct AIR_Traits<AIR_Node::S_simple_status>
     AIR_Status
     execute(Executive_Context& /*ctx*/, const AVMC_Queue::Uparam& up)
       {
-        return static_cast<AIR_Status>(up.v8s[0]);
+        auto status = static_cast<AIR_Status>(up.v8s[0]);
+        ROCKET_ASSERT(::rocket::is_any_of(status, { air_status_return_void, air_status_return_ref }));
+        return status;
       }
   };
 
@@ -4039,6 +4041,45 @@ struct AIR_Traits<AIR_Node::S_immediate_string>
       }
   };
 
+template<>
+struct AIR_Traits<AIR_Node::S_break_or_continue>
+  {
+    // `Uparam` is `status`.
+    // `Sparam` is the source location.
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& reachable, const AIR_Node::S_break_or_continue& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.v8s[0] = weaken_enum(altr.status);
+        reachable = false;
+        return up;
+      }
+
+    static
+    Source_Location
+    make_sparam(bool& /*reachable*/, const AIR_Node::S_break_or_continue& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AIR_Status
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Source_Location& sloc)
+      {
+        Reference_root::S_jump_src xref = { sloc };
+        ctx.stack().push(::std::move(xref));
+
+        auto status = static_cast<AIR_Status>(up.v8s[0]);
+        ROCKET_ASSERT(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch,
+                                                    air_status_break_while, air_status_break_for,
+                                                    air_status_continue_unspec, air_status_continue_while,
+                                                    air_status_continue_for }));
+        return status;
+      }
+  };
+
 // These are helper type traits.
 // Depending on the existence of Uparam, Sparam and Symbols, the code will look very different.
 
@@ -4427,7 +4468,7 @@ const
 
       case index_throw_statement:
       case index_assert_statement:
-      case index_simple_status:
+      case index_return_statement:
       case index_glvalue_to_prvalue:
       case index_push_immediate:
       case index_push_global_reference:
@@ -4529,6 +4570,7 @@ const
       case index_immediate_integer:
       case index_immediate_real:
       case index_immediate_string:
+      case index_break_or_continue:
         // There is nothing to rebind.
         return nullopt;
 
@@ -4608,8 +4650,8 @@ const
         return do_solidify(queue, altr);
       }
 
-      case index_simple_status: {
-        const auto& altr = this->m_stor.as<index_simple_status>();
+      case index_return_statement: {
+        const auto& altr = this->m_stor.as<index_return_statement>();
         return do_solidify(queue, altr);
       }
 
@@ -4891,6 +4933,11 @@ const
         return do_solidify(queue, altr);
       }
 
+      case index_break_or_continue: {
+        const auto& altr = this->m_stor.as<index_break_or_continue>();
+        return do_solidify(queue, altr);
+      }
+
       default:
         ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
     }
@@ -4970,7 +5017,7 @@ const
 
       case index_throw_statement:
       case index_assert_statement:
-      case index_simple_status:
+      case index_return_statement:
       case index_glvalue_to_prvalue:
         return callback;
 
@@ -5034,6 +5081,7 @@ const
       case index_immediate_integer:
       case index_immediate_real:
       case index_immediate_string:
+      case index_break_or_continue:
         return callback;
 
       default:

@@ -100,7 +100,7 @@ class AIR_Node
         cow_string msg;
       };
 
-    struct S_simple_status
+    struct S_return_statement
       {
         AIR_Status status;
       };
@@ -264,6 +264,12 @@ class AIR_Node
         V_string value;
       };
 
+    struct S_break_or_continue
+      {
+        Source_Location sloc;
+        AIR_Status status;
+      };
+
     enum Index : uint8_t
       {
         index_clear_stack            =  0,
@@ -279,7 +285,7 @@ class AIR_Node
         index_try_statement          = 10,
         index_throw_statement        = 11,
         index_assert_statement       = 12,
-        index_simple_status          = 13,
+        index_return_statement       = 13,
         index_glvalue_to_prvalue     = 14,
         index_push_immediate         = 15,
         index_push_global_reference  = 16,
@@ -306,6 +312,7 @@ class AIR_Node
         index_immediate_integer      = 37,
         index_immediate_real         = 38,
         index_immediate_string       = 39,
+        index_break_or_continue      = 40,
       };
 
     using Storage = variant<
@@ -323,7 +330,7 @@ class AIR_Node
       , S_try_statement          // 10,
       , S_throw_statement        // 11,
       , S_assert_statement       // 12,
-      , S_simple_status          // 13,
+      , S_return_statement       // 13,
       , S_glvalue_to_prvalue     // 14,
       , S_push_immediate         // 15,
       , S_push_global_reference  // 16,
@@ -350,6 +357,7 @@ class AIR_Node
       , S_immediate_integer      // 37,
       , S_immediate_real         // 38,
       , S_immediate_string       // 39,
+      , S_break_or_continue      // 40,
       )>;
 
     static_assert(::std::is_nothrow_copy_assignable<Storage>::value);

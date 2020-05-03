@@ -37,13 +37,19 @@ class Reference_root
         rcfwdp<PTC_Arguments> tca;
       };
 
+    struct S_jump_src
+      {
+        Source_Location sloc;
+      };
+
     enum Index : uint8_t
       {
-        index_void       = 0,
-        index_constant   = 1,
-        index_temporary  = 2,
-        index_variable   = 3,
-        index_tail_call  = 4,
+        index_void        = 0,
+        index_constant    = 1,
+        index_temporary   = 2,
+        index_variable    = 3,
+        index_tail_call   = 4,
+        index_jump_src    = 5,
       };
 
     using Storage = variant<
@@ -53,6 +59,7 @@ class Reference_root
       , S_temporary  // 2,
       , S_variable   // 3,
       , S_tail_call  // 4,
+      , S_jump_src   // 5,
       )>;
 
     static_assert(::std::is_nothrow_copy_assignable<Storage>::value);
@@ -121,6 +128,16 @@ class Reference_root
     as_tail_call()
     const
       { return this->m_stor.as<index_tail_call>().tca;  }
+
+    bool
+    is_jump_src()
+    const noexcept
+      { return this->index() == index_jump_src;  }
+
+    const Source_Location&
+    as_jump_src()
+    const
+      { return this->m_stor.as<index_jump_src>().sloc;  }
 
     Reference_root&
     swap(Reference_root& other)
