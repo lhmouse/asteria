@@ -422,18 +422,17 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
         if(nread < 0)
           ASTERIA_THROW_SYSTEM_ERROR("read");
       }
+      // Check for EOF.
+      if(nread == 0)
+        break;
       data.erase(static_cast<size_t>(nread));
 
-      // Check for EOF.
-      if(data.empty())
-        break;
-
       // Prepare arguments for the user-defined function.
-      args.resize(2, Reference_root::S_void());
-      Reference_root::S_temporary xref_offset = { roffset };
-      args.mut(0) = ::std::move(xref_offset);
-      Reference_root::S_temporary xref_data = { ::std::move(data) };
-      args.mut(1) = ::std::move(xref_data);
+      args.reserve(2);
+      Reference_root::S_temporary xref = { roffset };
+      args.emplace_back(::std::move(xref));
+      xref.val = ::std::move(data);
+      args.emplace_back(::std::move(xref));
       // Call the function but discard its return value.
       callback.invoke(global, ::std::move(args));
 
