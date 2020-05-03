@@ -71,6 +71,7 @@ class BMH_Searcher
         // Build a table according to the Bad Character Rule.
         for(size_t i = 0;  i < 0x100;  ++i)
           this->m_bcrs[i] = this->m_plen;
+
         for(ptrdiff_t i = this->m_plen - 1;  i != 0;  --i)
           this->m_bcrs[uint8_t(pend[~i])] = i;
       }
@@ -147,9 +148,11 @@ do_find_and_replace(V_string& res, IterT tbegin, IterT tend, IterT pbegin, IterT
         res.append(tcur, tend);
         break;
       }
+
       // Append all characters that precede the match, followed by the replacement string.
       res.append(tcur, *qtnext);
       res.append(rbegin, rend);
+
       // Move `tcur` past the match.
       tcur = *qtnext + srch.pattern_length();
     }
@@ -347,10 +350,10 @@ V_string do_url_decode(const V_string& text)
       // Parse the first digit.
       c = data[nread++];
       const char* pos = do_xstrchr(s_base16_table, c);
-      if(!pos) {
+      if(!pos)
         ASTERIA_THROW("invalid hexadecimal digit (character `$1`)", c);
-      }
       uint32_t reg = static_cast<uint32_t>(pos - s_base16_table) / 2 * 16;
+
       // Parse the second digit.
       c = data[nread++];
       pos = do_xstrchr(s_base16_table, c);
