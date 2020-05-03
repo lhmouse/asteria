@@ -256,13 +256,24 @@ std_array_slice(V_array data, V_integer from, optV_integer length)
 V_array
 std_array_replace_slice(V_array data, V_integer from, optV_integer length, V_array replacement)
   {
-    auto range = do_slice(data, from, length);
-    // Append segments.
-    V_array res;
-    res.reserve(data.size() - static_cast<size_t>(range.second - range.first) + replacement.size());
-    res.append(data.begin(), range.first);
-    res.append(replacement.begin(), replacement.end());
-    res.append(range.second, data.end());
+    V_array res = data;
+    auto range = do_slice(res, from, length);
+
+    // Convert iterators to subscripts.
+    auto offset = ::std::distance(res.begin(), range.first);
+    auto dist = ::std::distance(range.first, range.second);
+
+    if(dist >= replacement.ssize())
+      // Overwrite the subrange in place.
+      res.erase(::std::move(replacement.mut_begin(), replacement.mut_end(),
+                            res.mut_begin() + offset),
+                res.mut_begin() + offset + dist);
+    else
+      // Extend the range.
+      res.insert(::std::move(replacement.mut_begin(), replacement.mut_begin() + dist,
+                             res.mut_begin() + offset),
+                 ::std::make_move_iterator(replacement.mut_begin() + dist),
+                 ::std::make_move_iterator(replacement.mut_end()));
     return res;
   }
 
