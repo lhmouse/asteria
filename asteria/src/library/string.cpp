@@ -13,14 +13,12 @@ namespace {
 pair<V_string::const_iterator, V_string::const_iterator>
 do_slice(const V_string& text, V_string::const_iterator tbegin, const optV_integer& length)
   {
-    if(!length || (*length >= text.end() - tbegin)) {
-      // Get the subrange from `tbegin` to the end.
+    if(!length || (*length >= text.end() - tbegin))
       return ::std::make_pair(tbegin, text.end());
-    }
-    if(*length <= 0) {
-      // Return an empty range.
+
+    if(*length <= 0)
       return ::std::make_pair(tbegin, tbegin);
-    }
+
     // Don't go past the end.
     return ::std::make_pair(tbegin, tbegin + static_cast<ptrdiff_t>(*length));
   }
@@ -32,27 +30,25 @@ do_slice(const V_string& text, const V_integer& from, const optV_integer& length
     if(from >= 0) {
       // Behave like `::std::string::substr()` except that no exception is thrown when `from` is
       // greater than `text.size()`.
-      if(from >= slen) {
+      if(from >= slen)
         return ::std::make_pair(text.end(), text.end());
-      }
+
       return do_slice(text, text.begin() + static_cast<ptrdiff_t>(from), length);
     }
+
     // Wrap `from` from the end. Notice that `from + slen` will not overflow when `from` is negative
     // and `slen` is not.
     auto rfrom = from + slen;
-    if(rfrom >= 0) {
-      // Get a subrange from the wrapped index.
+    if(rfrom >= 0)
       return do_slice(text, text.begin() + static_cast<ptrdiff_t>(rfrom), length);
-    }
+
     // Get a subrange from the beginning of `text`, if the wrapped index is before the first byte.
-    if(!length) {
-      // Get the subrange from the beginning to the end.
+    if(!length)
       return ::std::make_pair(text.begin(), text.end());
-    }
-    if(*length <= 0) {
-      // Return an empty range.
+
+    if(*length <= 0)
       return ::std::make_pair(text.begin(), text.begin());
-    }
+
     // Get a subrange excluding the part before the beginning.
     // Notice that `rfrom + *length` will not overflow when `rfrom` is negative and `*length` is not.
     return do_slice(text, text.begin(), rfrom + *length);
@@ -71,6 +67,7 @@ class BMH_Searcher
       {
         // Calculate the pattern length.
         this->m_plen = ::std::distance(pbegin, pend);
+
         // Build a table according to the Bad Character Rule.
         for(size_t i = 0;  i < 0x100;  ++i)
           this->m_bcrs[i] = this->m_plen;
@@ -135,10 +132,11 @@ do_find_and_replace(V_string& res, IterT tbegin, IterT tend, IterT pbegin, IterT
       res.append(rbegin, rend);
       return res;
     }
+
     // If the text is empty but the pattern is not, there cannot be matches.
-    if(tbegin == tend) {
+    if(tbegin == tend)
       return res;
-    }
+
     // This is the slow path.
     BMH_Searcher srch(pbegin, pend);
     auto tcur = tbegin;
@@ -164,6 +162,7 @@ opt<IterT> do_find_of_opt(IterT begin, IterT end, const V_string& set, bool matc
     // Make a lookup table.
     array<bool, 256> table = { };
     ::rocket::for_each(set, [&](char c) { table[uint8_t(c)] = true;  });
+
     // Search the range.
     for(auto it = begin;  it != end;  ++it)
       if(table[uint8_t(*it)] == match)
@@ -307,9 +306,11 @@ do_url_encode(const V_string& data, bool lcase)
         if(do_is_url_unreserved_char(c))
           continue;
       }
+
       // Escape it.
       char rep[3] = { '%', s_base16_table[((c >> 3) & 0x1E) + lcase],
                            s_base16_table[((c << 1) & 0x1E) + lcase] };
+
       // Replace this character with the escape string.
       text.replace(nread - 1, 1, rep, 3);
       nread += 2;
@@ -334,15 +335,15 @@ V_string do_url_decode(const V_string& text)
         }
       }
       if(c != '%') {
-        if(do_is_url_invalid_char(c)) {
+        if(do_is_url_invalid_char(c))
           ASTERIA_THROW("invalid character in URL (character `$1`)", c);
-        }
         continue;
       }
+
       // Two hexadecimal characters shall follow.
-      if(data.size() - nread < 2) {
+      if(data.size() - nread < 2)
         ASTERIA_THROW("no enough hexadecimal digits after `%`");
-      }
+
       // Parse the first digit.
       c = data[nread++];
       const char* pos = do_xstrchr(s_base16_table, c);
@@ -353,10 +354,10 @@ V_string do_url_decode(const V_string& text)
       // Parse the second digit.
       c = data[nread++];
       pos = do_xstrchr(s_base16_table, c);
-      if(!pos) {
+      if(!pos)
         ASTERIA_THROW("invalid hexadecimal digit (character `$1`)", c);
-      }
       reg |= static_cast<uint32_t>(pos - s_base16_table) / 2;
+
       // Replace this sequence with the decoded byte.
       data.replace(nread - 3, 3, 1, static_cast<char>(reg));
       nread -= 2;
@@ -371,17 +372,18 @@ do_pack_one_impl(V_string& text, const V_integer& value)
     // Define temporary storage.
     array<char, sizeof(WordT)> stor_le;
     uint64_t word = static_cast<uint64_t>(value);
+
     // Write it in little-endian order.
     for(size_t i = 0;  i < stor_le.size();  ++i) {
       stor_le[i] = static_cast<char>(word);
       word >>= 8;
     }
+
     // Append this word.
     if(bigendT)
       text.append(stor_le.rbegin(), stor_le.rend());
     else
       text.append(stor_le.begin(), stor_le.end());
-    // Return  the output string.
     return text;
   }
 
@@ -400,15 +402,17 @@ V_array
 do_unpack_impl(const V_string& text)
   {
     V_array values;
+
     // Define temporary storage.
     array<char, sizeof(WordT)> stor_be;
     uint64_t word = 0;
+
     // How many words will the result have?
     auto nwords = text.size() / stor_be.size();
-    if(text.size() != nwords * stor_be.size()) {
+    if(text.size() != nwords * stor_be.size())
       ASTERIA_THROW("invalid source string length (`$1` not divisible by `$2`)", text.size(), stor_be.size());
-    }
     values.reserve(nwords);
+
     // Unpack integers.
     for(size_t i = 0;  i < nwords;  ++i) {
       // Read some bytes in big-endian order.
@@ -416,12 +420,12 @@ do_unpack_impl(const V_string& text)
         ::std::copy_n(text.data() + i * stor_be.size(), stor_be.size(), stor_be.mut_begin());
       else
         ::std::copy_n(text.data() + i * stor_be.size(), stor_be.size(), stor_be.mut_rbegin());
+
       // Assemble the word.
       for(const auto& byte : stor_be) {
         word <<= 8;
         word |= static_cast<uint8_t>(byte);
       }
-      // Append the word.
       values.emplace_back(V_integer(static_cast<WordT>(word)));
     }
     return values;
@@ -500,10 +504,9 @@ V_string
 std_string_slice(V_string text, V_integer from, optV_integer length)
   {
     auto range = do_slice(text, from, length);
-    if((range.first == text.begin()) && (range.second == text.end())) {
+    if((range.first == text.begin()) && (range.second == text.end()))
       // Use reference counting as our advantage.
       return text;
-    }
     return V_string(range.first, range.second);
   }
 
@@ -520,14 +523,14 @@ std_string_replace_slice(V_string text, V_integer from, optV_integer length, V_s
 V_integer
 std_string_compare(V_string text1, V_string text2, optV_integer length)
   {
-    if(!length || (*length >= PTRDIFF_MAX)) {
+    if(!length || (*length >= PTRDIFF_MAX))
       // Compare the entire strings.
       return text1.compare(text2);
-    }
-    if(*length <= 0) {
+
+    if(*length <= 0)
       // There is nothing to compare.
       return 0;
-    }
+
     // Compare two substrings.
     return text1.compare(0, static_cast<size_t>(*length), text2, 0, static_cast<size_t>(*length));
   }
@@ -549,9 +552,8 @@ std_string_find(V_string text, V_integer from, optV_integer length, V_string pat
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
-    if(!qit) {
+    if(!qit)
       return nullopt;
-    }
     return *qit - text.begin();
   }
 
@@ -561,9 +563,8 @@ std_string_rfind(V_string text, V_integer from, optV_integer length, V_string pa
     auto range = do_slice(text, from, length);
     auto qit = do_find_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
                            pattern.rbegin(), pattern.rend());
-    if(!qit) {
+    if(!qit)
       return nullopt;
-    }
     return text.rend() - *qit - pattern.ssize();
   }
 
@@ -585,9 +586,8 @@ std_string_find_any_of(V_string text, V_integer from, optV_integer length, V_str
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(range.first, range.second, accept, true);
-    if(!qit) {
+    if(!qit)
       return nullopt;
-    }
     return *qit - text.begin();
   }
 
@@ -596,9 +596,8 @@ std_string_find_not_of(V_string text, V_integer from, optV_integer length, V_str
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(range.first, range.second, reject, false);
-    if(!qit) {
+    if(!qit)
       return nullopt;
-    }
     return *qit - text.begin();
   }
 
@@ -608,9 +607,8 @@ std_string_rfind_any_of(V_string text, V_integer from, optV_integer length, V_st
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(::std::make_reverse_iterator(range.second),
                               ::std::make_reverse_iterator(range.first), accept, true);
-    if(!qit) {
+    if(!qit)
       return nullopt;
-    }
     return text.rend() - *qit - 1;
   }
 
@@ -620,9 +618,8 @@ std_string_rfind_not_of(V_string text, V_integer from, optV_integer length, V_st
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(::std::make_reverse_iterator(range.second),
                               ::std::make_reverse_iterator(range.first), reject, false);
-    if(!qit) {
+    if(!qit)
       return nullopt;
-    }
     return text.rend() - *qit - 1;
   }
 
@@ -637,22 +634,22 @@ V_string
 std_string_trim(V_string text, optV_string reject)
   {
     auto rchars = do_get_reject(reject);
-    if(rchars.length() == 0) {
+    if(rchars.length() == 0)
       // There is no byte to strip. Make use of reference counting.
       return text;
-    }
+
     // Get the index of the first byte to keep.
     auto start = text.find_first_not_of(rchars);
-    if(start == V_string::npos) {
+    if(start == V_string::npos)
       // There is no byte to keep. Return an empty string.
       return nullopt;
-    }
+
     // Get the index of the last byte to keep.
     auto end = text.find_last_not_of(rchars);
-    if((start == 0) && (end == text.size() - 1)) {
+    if((start == 0) && (end == text.size() - 1))
       // There is no byte to strip. Make use of reference counting.
       return text;
-    }
+
     // Return the remaining part of `text`.
     return text.substr(start, end + 1 - start);
   }
@@ -661,20 +658,20 @@ V_string
 std_string_triml(V_string text, optV_string reject)
   {
     auto rchars = do_get_reject(reject);
-    if(rchars.length() == 0) {
+    if(rchars.length() == 0)
       // There is no byte to strip. Make use of reference counting.
       return text;
-    }
+
     // Get the index of the first byte to keep.
     auto start = text.find_first_not_of(rchars);
-    if(start == V_string::npos) {
+    if(start == V_string::npos)
       // There is no byte to keep. Return an empty string.
       return nullopt;
-    }
-    if(start == 0) {
+
+    if(start == 0)
       // There is no byte to strip. Make use of reference counting.
       return text;
-    }
+
     // Return the remaining part of `text`.
     return text.substr(start);
   }
@@ -683,20 +680,20 @@ V_string
 std_string_trimr(V_string text, optV_string reject)
   {
     auto rchars = do_get_reject(reject);
-    if(rchars.length() == 0) {
+    if(rchars.length() == 0)
       // There is no byte to strip. Make use of reference counting.
       return text;
-    }
+
     // Get the index of the last byte to keep.
     auto end = text.find_last_not_of(rchars);
-    if(end == V_string::npos) {
+    if(end == V_string::npos)
       // There is no byte to keep. Return an empty string.
       return nullopt;
-    }
-    if(end == text.size() - 1) {
+
+    if(end == text.size() - 1)
       // There is no byte to strip. Make use of reference counting.
       return text;
-    }
+
     // Return the remaining part of `text`.
     return text.substr(0, end + 1);
   }
@@ -706,15 +703,14 @@ std_string_padl(V_string text, V_integer length, optV_string padding)
   {
     V_string res = text;
     auto rpadding = do_get_padding(padding);
-    if(length <= 0) {
+    if(length <= 0)
       // There is nothing to do.
       return res;
-    }
+
     // Fill `rpadding` at the front.
     res.reserve(static_cast<size_t>(length));
-    while(res.size() + rpadding.length() <= static_cast<uint64_t>(length)) {
+    while(res.size() + rpadding.length() <= static_cast<uint64_t>(length))
       res.insert(res.end() - text.ssize(), rpadding);
-    }
     return res;
   }
 
@@ -723,34 +719,33 @@ std_string_padr(V_string text, V_integer length, optV_string padding)
   {
     V_string res = text;
     auto rpadding = do_get_padding(padding);
-    if(length <= 0) {
+    if(length <= 0)
       // There is nothing to do.
       return res;
-    }
+
     // Fill `rpadding` at the back.
     res.reserve(static_cast<size_t>(length));
-    while(res.size() + rpadding.length() <= static_cast<uint64_t>(length)) {
+    while(res.size() + rpadding.length() <= static_cast<uint64_t>(length))
       res.append(rpadding);
-    }
     return res;
   }
 
 V_string
 std_string_to_upper(V_string text)
   {
-    // Use reference counting as our advantage.
     V_string res = text;
     char* wptr = nullptr;
+
     // Translate each character.
     for(size_t i = 0;  i < res.size();  ++i) {
       char c = res[i];
-      if((c < 'a') || ('z' < c)) {
+      if((c < 'a') || ('z' < c))
         continue;
-      }
+
       // Fork the string as needed.
-      if(ROCKET_UNEXPECT(!wptr)) {
+      if(ROCKET_UNEXPECT(!wptr))
         wptr = res.mut_data();
-      }
+
       wptr[i] = static_cast<char>(c - 'a' + 'A');
     }
     return res;
@@ -759,19 +754,19 @@ std_string_to_upper(V_string text)
 V_string
 std_string_to_lower(V_string text)
   {
-    // Use reference counting as our advantage.
     V_string res = text;
     char* wptr = nullptr;
+
     // Translate each character.
     for(size_t i = 0;  i < res.size();  ++i) {
       char c = res[i];
-      if((c < 'A') || ('Z' < c)) {
+      if((c < 'A') || ('Z' < c))
         continue;
-      }
+
       // Fork the string as needed.
-      if(ROCKET_UNEXPECT(!wptr)) {
+      if(ROCKET_UNEXPECT(!wptr))
         wptr = res.mut_data();
-      }
+
       wptr[i] = static_cast<char>(c - 'A' + 'a');
     }
     return res;
@@ -783,24 +778,25 @@ std_string_translate(V_string text, V_string inputs, optV_string outputs)
     // Use reference counting as our advantage.
     V_string res = text;
     char* wptr = nullptr;
+
     // Translate each character.
     for(size_t i = 0;  i < res.size();  ++i) {
       char c = res[i];
       auto ipos = inputs.find(c);
-      if(ipos == V_string::npos) {
+      if(ipos == V_string::npos)
         continue;
-      }
+
       // Fork the string as needed.
-      if(ROCKET_UNEXPECT(!wptr)) {
+      if(ROCKET_UNEXPECT(!wptr))
         wptr = res.mut_data();
-      }
-      if(!outputs || (ipos >= outputs->size())) {
+
+      if(!outputs || (ipos >= outputs->size()))
         // Erase the byte if there is no replacement.
         // N.B. This must cause no reallocation.
         res.erase(i--, 1);
-        continue;
-      }
-      wptr[i] = outputs->data()[ipos];
+      else
+        // Replace the character.
+        wptr[i] = outputs->data()[ipos];
     }
     return res;
   }
@@ -810,16 +806,16 @@ std_string_explode(V_string text, optV_string delim, optV_integer limit)
   {
     uint64_t rlimit = UINT64_MAX;
     if(limit) {
-      if(*limit <= 0) {
+      if(*limit <= 0)
         ASTERIA_THROW("max number of segments must be positive (limit `$1`)", *limit);
-      }
       rlimit = static_cast<uint64_t>(*limit);
     }
+
     V_array segments;
-    if(text.empty()) {
+    if(text.empty())
       // Return an empty array.
       return segments;
-    }
+
     if(!delim || delim->empty()) {
       // Split every byte.
       segments.reserve(text.size());
@@ -831,6 +827,7 @@ std_string_explode(V_string text, optV_string delim, optV_integer limit)
       }
       return segments;
     }
+
     // Break `text` down.
     auto bpos = text.begin();
     auto epos = text.end();
@@ -855,17 +852,16 @@ std_string_implode(V_array segments, optV_string delim)
   {
     V_string text;
     auto nsegs = segments.size();
-    if(nsegs == 0) {
+    if(nsegs == 0)
       // Return an empty string.
       return text;
-    }
+
     // Append the first string.
     text = segments.front().as_string();
     // Any segment other than the first one follows a delimiter.
     for(size_t i = 1;  i != nsegs;  ++i) {
-      if(delim) {
+      if(delim)
         text += *delim;
-      }
       text += segments[i].as_string();
     }
     return text;
@@ -878,18 +874,21 @@ std_string_hex_encode(V_string data, optV_boolean lowercase, optV_string delim)
     auto rdelim = delim ? ::rocket::sref(*delim) : ::rocket::sref("");
     bool rlowerc = lowercase.value_or(false);
     text.reserve(data.size() * (2 + rdelim.length()));
+
     // These shall be operated in big-endian order.
     uint32_t reg = 0;
+
     // Encode source data.
     size_t nread = 0;
     while(nread != data.size()) {
       // Insert a delimiter before every byte other than the first one.
-      if(!text.empty()) {
+      if(!text.empty())
         text += rdelim;
-      }
+
       // Read a byte.
       reg = data[nread++] & 0xFF;
       reg <<= 24;
+
       // Encode it.
       for(size_t i = 0;  i < 2;  ++i) {
         uint32_t b = ((reg >> 28) * 2 + rlowerc) & 0xFF;
@@ -904,8 +903,10 @@ V_string
 std_string_hex_decode(V_string text)
   {
     V_string data;
+
     // These shall be operated in big-endian order.
     uint32_t reg = 1;
+
     // Decode source data.
     size_t nread = 0;
     while(nread != text.size()) {
@@ -914,28 +915,27 @@ std_string_hex_decode(V_string text)
       const char* pos = do_xstrchr(s_spaces, c);
       if(pos) {
         // The character is a whitespace.
-        if(reg != 1) {
+        if(reg != 1)
           ASTERIA_THROW("unpaired hexadecimal digit");
-        }
         continue;
       }
       reg <<= 4;
+
       // Decode a digit.
       pos = do_xstrchr(s_base16_table, c);
-      if(!pos) {
+      if(!pos)
         ASTERIA_THROW("invalid hexadecimal digit (character `$1`)", c);
-      }
       reg |= static_cast<uint32_t>(pos - s_base16_table) / 2;
+
       // Decode the current group if it is complete.
-      if(!(reg & 0x1'00)) {
+      if(!(reg & 0x1'00))
         continue;
-      }
+
       data += static_cast<char>(reg);
       reg = 1;
     }
-    if(reg != 1) {
+    if(reg != 1)
       ASTERIA_THROW("unpaired hexadecimal digit");
-    }
     return data;
   }
 
@@ -945,8 +945,10 @@ std_string_base32_encode(V_string data, optV_boolean lowercase)
     V_string text;
     bool rlowerc = lowercase.value_or(false);
     text.reserve((data.size() + 4) / 5 * 8);
+
     // These shall be operated in big-endian order.
     uint64_t reg = 0;
+
     // Encode source data.
     size_t nread = 0;
     while(data.size() - nread >= 5) {
@@ -957,6 +959,7 @@ std_string_base32_encode(V_string data, optV_boolean lowercase)
         reg |= b;
       }
       reg <<= 24;
+
       // Encode them.
       for(size_t i = 0;  i < 8;  ++i) {
         uint32_t b = ((reg >> 59) * 2 + rlowerc) & 0xFF;
@@ -968,6 +971,7 @@ std_string_base32_encode(V_string data, optV_boolean lowercase)
       // Get the start of padding characters.
       size_t m = data.size() - nread;
       size_t p = (m * 8 + 4) / 5;
+
       // Read all remaining bytes that cannot fill up a unit.
       for(size_t i = 0;  i < m;  ++i) {
         uint32_t b = data[nread++] & 0xFF;
@@ -975,16 +979,17 @@ std_string_base32_encode(V_string data, optV_boolean lowercase)
         reg |= b;
       }
       reg <<= 64 - m * 8;
+
       // Encode them.
       for(size_t i = 0;  i < p;  ++i) {
         uint32_t b = ((reg >> 59) * 2 + rlowerc) & 0xFF;
         reg <<= 5;
         text += s_base32_table[b];
       }
+
       // Fill padding characters.
-      for(size_t i = p;  i != 8;  ++i) {
+      for(size_t i = p;  i != 8;  ++i)
         text += s_base32_table[64];
-      }
     }
     return text;
   }
@@ -993,9 +998,11 @@ V_string
 std_string_base32_decode(V_string text)
   {
     V_string data;
+
     // These shall be operated in big-endian order.
     uint64_t reg = 1;
     uint32_t npad = 0;
+
     // Decode source data.
     size_t nread = 0;
     while(nread != text.size()) {
@@ -1004,39 +1011,37 @@ std_string_base32_decode(V_string text)
       const char* pos = do_xstrchr(s_spaces, c);
       if(pos) {
         // The character is a whitespace.
-        if(reg != 1) {
+        if(reg != 1)
           ASTERIA_THROW("incomplete base32 group");
-        }
         continue;
       }
       reg <<= 5;
+
       if(c == s_base32_table[64]) {
         // The character is a padding character.
-        if(reg < 0x100) {
+        if(reg < 0x100)
           ASTERIA_THROW("unexpected base32 padding character");
-        }
         npad += 1;
       }
       else {
         // Decode a digit.
         pos = do_xstrchr(s_base32_table, c);
-        if(!pos) {
+        if(!pos)
           ASTERIA_THROW("invalid base32 digit (character `$1`)", c);
-        }
-        if(npad != 0) {
+        if(npad != 0)
           ASTERIA_THROW("unexpected base32 digit following padding character");
-        }
         reg |= static_cast<uint32_t>(pos - s_base32_table) / 2;
       }
+
       // Decode the current group if it is complete.
-      if(!(reg & 0x1'00'00'00'00'00)) {
+      if(!(reg & 0x1'00'00'00'00'00))
         continue;
-      }
+
       size_t m = (40 - npad * 5) / 8;
       size_t p = (m * 8 + 4) / 5;
-      if(p + npad != 8) {
+      if(p + npad != 8)
         ASTERIA_THROW("unexpected number of base32 padding characters (got `$1`)", npad);
-      }
+
       for(size_t i = 0; i < m; ++i) {
         reg <<= 8;
         data += static_cast<char>(reg >> 40);
@@ -1044,9 +1049,8 @@ std_string_base32_decode(V_string text)
       reg = 1;
       npad = 0;
     }
-    if(reg != 1) {
+    if(reg != 1)
       ASTERIA_THROW("incomplete base32 group");
-    }
     return data;
   }
 
@@ -1055,8 +1059,10 @@ std_string_base64_encode(V_string data)
   {
     V_string text;
     text.reserve((data.size() + 2) / 3 * 4);
+
     // These shall be operated in big-endian order.
     uint32_t reg = 0;
+
     // Encode source data.
     size_t nread = 0;
     while(data.size() - nread >= 3) {
@@ -1067,6 +1073,7 @@ std_string_base64_encode(V_string data)
         reg |= b;
       }
       reg <<= 8;
+
       // Encode them.
       for(size_t i = 0;  i < 4;  ++i) {
         uint32_t b = (reg >> 26) & 0xFF;
@@ -1078,6 +1085,7 @@ std_string_base64_encode(V_string data)
       // Get the start of padding characters.
       size_t m = data.size() - nread;
       size_t p = (m * 8 + 5) / 6;
+
       // Read all remaining bytes that cannot fill up a unit.
       for(size_t i = 0;  i < m;  ++i) {
         uint32_t b = data[nread++] & 0xFF;
@@ -1085,16 +1093,17 @@ std_string_base64_encode(V_string data)
         reg |= b;
       }
       reg <<= 32 - m * 8;
+
       // Encode them.
       for(size_t i = 0;  i < p;  ++i) {
         uint32_t b = (reg >> 26) & 0xFF;
         reg <<= 6;
         text += s_base64_table[b];
       }
+
       // Fill padding characters.
-      for(size_t i = p;  i != 4;  ++i) {
+      for(size_t i = p;  i != 4;  ++i)
         text += s_base64_table[64];
-      }
     }
     return text;
   }
@@ -1103,9 +1112,11 @@ V_string
 std_string_base64_decode(V_string text)
   {
     V_string data;
+
     // These shall be operated in big-endian order.
     uint32_t reg = 1;
     uint32_t npad = 0;
+
     // Decode source data.
     size_t nread = 0;
     while(nread != text.size()) {
@@ -1114,39 +1125,37 @@ std_string_base64_decode(V_string text)
       const char* pos = do_xstrchr(s_spaces, c);
       if(pos) {
         // The character is a whitespace.
-        if(reg != 1) {
+        if(reg != 1)
           ASTERIA_THROW("incomplete base64 group");
-        }
         continue;
       }
       reg <<= 6;
+
       if(c == s_base64_table[64]) {
         // The character is a padding character.
-        if(reg < 0x100) {
+        if(reg < 0x100)
           ASTERIA_THROW("unexpected base64 padding character");
-        }
         npad += 1;
       }
       else {
         // Decode a digit.
         pos = do_xstrchr(s_base64_table, c);
-        if(!pos) {
+        if(!pos)
           ASTERIA_THROW("invalid base64 digit (character `$1`)", c);
-        }
-        if(npad != 0) {
+        if(npad != 0)
           ASTERIA_THROW("unexpected base64 digit following padding character");
-        }
         reg |= static_cast<uint32_t>(pos - s_base64_table);
       }
+
       // Decode the current group if it is complete.
-      if(!(reg & 0x1'00'00'00)) {
+      if(!(reg & 0x1'00'00'00))
         continue;
-      }
+
       size_t m = (24 - npad * 6) / 8;
       size_t p = (m * 8 + 5) / 6;
-      if(p + npad != 4) {
+      if(p + npad != 4)
         ASTERIA_THROW("unexpected number of base64 padding characters (got `$1`)", npad);
-      }
+
       for(size_t i = 0; i < m; ++i) {
         reg <<= 8;
         data += static_cast<char>(reg >> 24);
@@ -1154,9 +1163,8 @@ std_string_base64_decode(V_string text)
       reg = 1;
       npad = 0;
     }
-    if(reg != 1) {
+    if(reg != 1)
       ASTERIA_THROW("incomplete base64 group");
-    }
     return data;
   }
 
@@ -1203,13 +1211,13 @@ std_string_utf8_encode(V_integer code_point, optV_boolean permissive)
   {
     V_string text;
     text.reserve(4);
+
     // Try encoding the code point.
     auto cp = static_cast<char32_t>(::rocket::clamp(code_point, -1, INT32_MAX));
     if(!utf8_encode(text, cp)) {
       // This comparison with `true` is by intention, because it may be unset.
       if(permissive != true)
         ASTERIA_THROW("invalid UTF code point (value `$1`)", code_point);
-      // Encode the replacement character.
       utf8_encode(text, 0xFFFD);
     }
     return text;
@@ -1221,14 +1229,13 @@ std_string_utf8_encode(V_array code_points, optV_boolean permissive)
     V_string text;
     text.reserve(code_points.size() * 3);
     for(const auto& elem : code_points) {
-      V_integer code_point = elem.as_integer();
       // Try encoding the code point.
-      auto cp = static_cast<char32_t>(::rocket::clamp(code_point, -1, INT32_MAX));
+      V_integer value = elem.as_integer();
+      auto cp = static_cast<char32_t>(::rocket::clamp(value, -1, INT32_MAX));
       if(!utf8_encode(text, cp)) {
         // This comparison with `true` is by intention, because it may be unset.
         if(permissive != true)
-          ASTERIA_THROW("invalid UTF code point (value `$1`)", code_point);
-        // Encode the replacement character.
+          ASTERIA_THROW("invalid UTF code point (value `$1`)", value);
         utf8_encode(text, 0xFFFD);
       }
     }
@@ -1240,6 +1247,7 @@ std_string_utf8_decode(V_string text, optV_boolean permissive)
   {
     V_array code_points;
     code_points.reserve(text.size());
+
     size_t offset = 0;
     while(offset < text.size()) {
       // Try decoding a code point.
@@ -1248,7 +1256,6 @@ std_string_utf8_decode(V_string text, optV_boolean permissive)
         // This comparison with `true` is by intention, because it may be unset.
         if(permissive != true)
           ASTERIA_THROW("invalid UTF-8 string");
-        // Re-interpret it as an isolated byte.
         cp = text[offset++] & 0xFF;
       }
       code_points.emplace_back(V_integer(cp));
@@ -1270,9 +1277,8 @@ std_string_pack_8(V_array values)
   {
     V_string text;
     text.reserve(values.size());
-    for(const auto& elem : values) {
+    for(const auto& elem : values)
       do_pack_one_le<int8_t>(text, elem.as_integer());
-    }
     return text;
   }
 
@@ -1296,9 +1302,8 @@ std_string_pack_16be(V_array values)
   {
     V_string text;
     text.reserve(values.size() * 2);
-    for(const auto& elem : values) {
+    for(const auto& elem : values)
       do_pack_one_be<int16_t>(text, elem.as_integer());
-    }
     return text;
   }
 
@@ -1322,9 +1327,8 @@ std_string_pack_16le(V_array values)
   {
     V_string text;
     text.reserve(values.size() * 2);
-    for(const auto& elem : values) {
+    for(const auto& elem : values)
       do_pack_one_le<int16_t>(text, elem.as_integer());
-    }
     return text;
   }
 
@@ -1348,9 +1352,8 @@ std_string_pack_32be(V_array values)
   {
     V_string text;
     text.reserve(values.size() * 4);
-    for(const auto& elem : values) {
+    for(const auto& elem : values)
       do_pack_one_be<int32_t>(text, elem.as_integer());
-    }
     return text;
   }
 
@@ -1374,9 +1377,8 @@ std_string_pack_32le(V_array values)
   {
     V_string text;
     text.reserve(values.size() * 4);
-    for(const auto& elem : values) {
+    for(const auto& elem : values)
       do_pack_one_le<int32_t>(text, elem.as_integer());
-    }
     return text;
   }
 
@@ -1400,9 +1402,8 @@ std_string_pack_64be(V_array values)
   {
     V_string text;
     text.reserve(values.size() * 8);
-    for(const auto& elem : values) {
+    for(const auto& elem : values)
       do_pack_one_be<int64_t>(text, elem.as_integer());
-    }
     return text;
   }
 
@@ -1426,9 +1427,8 @@ std_string_pack_64le(V_array values)
   {
     V_string text;
     text.reserve(values.size() * 8);
-    for(const auto& elem : values) {
+    for(const auto& elem : values)
       do_pack_one_le<int64_t>(text, elem.as_integer());
-    }
     return text;
   }
 
@@ -1450,6 +1450,7 @@ std_string_format(V_string templ, cow_vector<Value> values)
           { return static_cast<const Value*>(ptr)->print(fmt);  },
         values.data() + i
       });
+
     // Compose the string into a stream.
     ::rocket::tinyfmt_str fmt;
     vformat(fmt, templ.data(), templ.size(), insts.data(), insts.size());
@@ -1461,9 +1462,8 @@ std_string_regex_find(V_string text, V_integer from, optV_integer length, V_stri
   {
     auto range = do_slice(text, from, length);
     auto match = do_regex_search(range.first, range.second, do_make_regex(pattern));
-    if(!match.matched) {
+    if(!match.matched)
       return nullopt;
-    }
     return ::std::make_pair(match.first - text.begin(), match.second - match.first);
   }
 
@@ -1472,9 +1472,8 @@ std_string_regex_match(V_string text, V_integer from, optV_integer length, V_str
   {
     auto range = do_slice(text, from, length);
     auto matches = do_regex_match(range.first, range.second, do_make_regex(pattern));
-    if(matches.empty()) {
+    if(matches.empty())
       return nullopt;
-    }
     return do_regex_copy_matches(matches);
   }
 
