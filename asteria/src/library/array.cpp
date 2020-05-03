@@ -13,14 +13,12 @@ namespace {
 pair<V_array::const_iterator, V_array::const_iterator>
 do_slice(const V_array& data, V_array::const_iterator tbegin, const optV_integer& length)
   {
-    if(!length || (*length >= data.end() - tbegin)) {
-      // Get the subrange from `tbegin` to the end.
+    if(!length || (*length >= data.end() - tbegin))
       return ::std::make_pair(tbegin, data.end());
-    }
-    if(*length <= 0) {
-      // Return an empty range.
+
+    if(*length <= 0)
       return ::std::make_pair(tbegin, tbegin);
-    }
+
     // Don't go past the end.
     return ::std::make_pair(tbegin, tbegin + static_cast<ptrdiff_t>(*length));
   }
@@ -32,27 +30,25 @@ do_slice(const V_array& data, const V_integer& from, const optV_integer& length)
     if(from >= 0) {
       // Behave like `::std::string::substr()` except that no exception is thrown when `from` is
       // greater than `data.size()`.
-      if(from >= slen) {
+      if(from >= slen)
         return ::std::make_pair(data.end(), data.end());
-      }
+
       return do_slice(data, data.begin() + static_cast<ptrdiff_t>(from), length);
     }
+
     // Wrap `from` from the end. Notice that `from + slen` will not overflow when `from` is negative
     // and `slen` is not.
     auto rfrom = from + slen;
-    if(rfrom >= 0) {
-      // Get a subrange from the wrapped index.
+    if(rfrom >= 0)
       return do_slice(data, data.begin() + static_cast<ptrdiff_t>(rfrom), length);
-    }
+
     // Get a subrange from the beginning of `data`, if the wrapped index is before the first byte.
-    if(!length) {
-      // Get the subrange from the beginning to the end.
+    if(!length)
       return ::std::make_pair(data.begin(), data.end());
-    }
-    if(*length <= 0) {
-      // Return an empty range.
+
+    if(*length <= 0)
       return ::std::make_pair(data.begin(), data.begin());
-    }
+
     // Get a subrange excluding the part before the beginning.
     // Notice that `rfrom + *length` will not overflow when `rfrom` is negative and `*length` is not.
     return do_slice(data, data.begin(), rfrom + *length);
@@ -100,10 +96,10 @@ Compare
 do_compare(Global_Context& global, cow_vector<Reference>& args,
            const optV_function& kcomp, const Value& lhs, const Value& rhs)
   {
-    if(ROCKET_EXPECT(!kcomp)) {
-      // Use the builtin 3-way comparison operator.
+    // Use the builtin 3-way comparison operator if no comparator is provided.
+    if(ROCKET_EXPECT(!kcomp))
       return lhs.compare(rhs);
-    }
+
     // Set up arguments for the user-defined comparator.
     args.resize(2, Reference_root::S_void());
     args.mut(0) = do_make_temporary(lhs);
@@ -122,18 +118,18 @@ do_bsearch(Global_Context& global, cow_vector<Reference>& args, IterT begin, Ite
     auto epos = ::std::move(end);
     for(;;) {
       auto dist = epos - bpos;
-      if(dist <= 0) {
+      if(dist <= 0)
         return { ::std::move(bpos), false };
-      }
+
+      // Compare `target` to the element in the middle.
       auto mpos = bpos + dist / 2;
-      // Compare `target` with the element in the middle.
       auto cmp = do_compare(global, args, kcomp, target, *mpos);
-      if(cmp == compare_unordered) {
+      if(cmp == compare_unordered)
         ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)", target, *mpos);
-      }
-      if(cmp == compare_equal) {
+
+      if(cmp == compare_equal)
         return { ::std::move(mpos), true };
-      }
+
       if(cmp == compare_less)
         epos = mpos;
       else
@@ -150,15 +146,15 @@ do_bound(Global_Context& global, cow_vector<Reference>& args, IterT begin, IterT
     auto epos = ::std::move(end);
     for(;;) {
       auto dist = epos - bpos;
-      if(dist <= 0) {
+      if(dist <= 0)
         return bpos;
-      }
+
+      // Compare `target` to the element in the middle.
       auto mpos = bpos + dist / 2;
-      // Compare `target` with the element in the middle.
       auto cmp = do_compare(global, args, kcomp, target, *mpos);
-      if(cmp == compare_unordered) {
+      if(cmp == compare_unordered)
         ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)", target, *mpos);
-      }
+
       if(pred(cmp))
         epos = mpos;
       else
@@ -181,9 +177,11 @@ do_merge_blocks(V_array& output, Global_Context& global, cow_vector<Reference>& 
                 const optV_function& kcomp, V_array&& input, ptrdiff_t bsize, bool unique)
   {
     ROCKET_ASSERT(output.size() >= input.size());
+
     // Define the range information for a pair of contiguous blocks.
     V_array::iterator bpos[2];
     V_array::iterator bend[2];
+
     // Merge adjacent blocks of `bsize` elements.
     auto opos = output.mut_begin();
     auto ipos = input.mut_begin();
@@ -193,27 +191,30 @@ do_merge_blocks(V_array& output, Global_Context& global, cow_vector<Reference>& 
       bpos[0] = ipos;
       ipos += bsize;
       bend[0] = ipos;
+
       // Get the range of the second block to merge.
       bpos[1] = ipos;
       ipos += ::rocket::min(iend - ipos, bsize);
       bend[1] = ipos;
+
       // Merge elements one by one, until either block has been exhausted, then store the index of it here.
       size_t bi;
       for(;;) {
         auto cmp = do_compare(global, args, kcomp, *(bpos[0]), *(bpos[1]));
-        if(cmp == compare_unordered) {
+        if(cmp == compare_unordered)
           ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)", *(bpos[0]), *(bpos[1]));
-        }
+
         // For Merge Sort to be stable, the two elements will only be swapped if the first one is greater
         // than the second one.
         bi = (cmp == compare_greater);
+
         // Move this element unless uniqueness is requested and it is equal to the previous output.
         bool discard = unique && (opos != output.begin())
                               && (do_compare(global, args, kcomp, *(bpos[bi]), opos[-1]) == compare_equal);
-        if(!discard) {
+        if(!discard)
           *(opos++) = ::std::move(*(bpos[bi]));
-        }
         bpos[bi]++;
+
         // When uniqueness is requested, if elements from the two blocks are equal, discard the one from
         // the second block. This may exhaust the second block.
         if(unique && (cmp == compare_equal)) {
@@ -225,10 +226,9 @@ do_merge_blocks(V_array& output, Global_Context& global, cow_vector<Reference>& 
             break;
           }
         }
-        if(bpos[bi] == bend[bi]) {
+        if(bpos[bi] == bend[bi])
           // `bi` is the index of the block that has been exhausted.
           break;
-        }
       }
       // Move all elements from the other block.
       ROCKET_ASSERT(opos != output.begin());
@@ -247,10 +247,9 @@ V_array
 std_array_slice(V_array data, V_integer from, optV_integer length)
   {
     auto range = do_slice(data, from, length);
-    if((range.first == data.begin()) && (range.second == data.end())) {
+    if((range.first == data.begin()) && (range.second == data.end()))
       // Use reference counting as our advantage.
       return data;
-    }
     return V_array(range.first, range.second);
   }
 
@@ -272,9 +271,8 @@ std_array_find(V_array data, V_integer from, optV_integer length, Value target)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_opt(range.first, range.second, target);
-    if(!qit) {
+    if(!qit)
       return nullopt;
-    }
     return *qit - data.begin();
   }
 
@@ -284,9 +282,8 @@ std_array_find_if(Global_Context& global, V_array data, V_integer from, optV_int
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
-    if(!qit) {
+    if(!qit)
       return nullopt;
-    }
     return *qit - data.begin();
   }
 
@@ -296,9 +293,8 @@ std_array_find_if_not(Global_Context& global, V_array data, V_integer from, optV
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
-    if(!qit) {
+    if(!qit)
       return nullopt;
-    }
     return *qit - data.begin();
   }
 
@@ -308,9 +304,8 @@ std_array_rfind(V_array data, V_integer from, optV_integer length, Value target)
     auto range = do_slice(data, from, length);
     auto qit = do_find_opt(::std::make_reverse_iterator(range.second),
                            ::std::make_reverse_iterator(range.first), target);
-    if(!qit) {
+    if(!qit)
       return nullopt;
-    }
     return data.rend() - *qit - 1;
   }
 
@@ -321,9 +316,8 @@ std_array_rfind_if(Global_Context& global, V_array data, V_integer from, optV_in
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second),
                                       ::std::make_reverse_iterator(range.first), predictor, true);
-    if(!qit) {
+    if(!qit)
       return nullopt;
-    }
     return data.rend() - *qit - 1;
   }
 
@@ -334,9 +328,8 @@ std_array_rfind_if_not(Global_Context& global, V_array data, V_integer from, opt
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second),
                                       ::std::make_reverse_iterator(range.first), predictor, false);
-    if(!qit) {
+    if(!qit)
       return nullopt;
-    }
     return data.rend() - *qit - 1;
   }
 
@@ -347,9 +340,8 @@ std_array_count(V_array data, V_integer from, optV_integer length, Value target)
     auto range = do_slice(data, from, length);
     for(;;) {
       auto qit = do_find_opt(range.first, range.second, target);
-      if(!qit) {
+      if(!qit)
         break;
-      }
       ++count;
       range.first = ::std::move(++*qit);
     }
@@ -364,9 +356,8 @@ std_array_count_if(Global_Context& global, V_array data, V_integer from, optV_in
     auto range = do_slice(data, from, length);
     for(;;) {
       auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
-      if(!qit) {
+      if(!qit)
         break;
-      }
       ++count;
       range.first = ::std::move(++*qit);
     }
@@ -381,9 +372,8 @@ std_array_count_if_not(Global_Context& global, V_array data, V_integer from, opt
     auto range = do_slice(data, from, length);
     for(;;) {
       auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
-      if(!qit) {
+      if(!qit)
         break;
-      }
       ++count;
       range.first = ::std::move(++*qit);
     }
@@ -397,9 +387,8 @@ std_array_exclude(V_array data, V_integer from, optV_integer length, Value targe
     ptrdiff_t dist = data.end() - range.second;
     for(;;) {
       auto qit = do_find_opt(range.first, range.second, target);
-      if(!qit) {
+      if(!qit)
         break;
-      }
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
@@ -414,9 +403,8 @@ std_array_exclude_if(Global_Context& global, V_array data, V_integer from, optV_
     ptrdiff_t dist = data.end() - range.second;
     for(;;) {
       auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
-      if(!qit) {
+      if(!qit)
         break;
-      }
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
@@ -431,9 +419,8 @@ std_array_exclude_if_not(Global_Context& global, V_array data, V_integer from, o
     ptrdiff_t dist = data.end() - range.second;
     for(;;) {
       auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
-      if(!qit) {
+      if(!qit)
         break;
-      }
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
@@ -443,10 +430,10 @@ std_array_exclude_if_not(Global_Context& global, V_array data, V_integer from, o
 V_boolean
 std_array_is_sorted(Global_Context& global, V_array data, optV_function comparator)
   {
-    if(data.size() <= 1) {
+    if(data.size() <= 1)
       // If `data` contains no more than 2 elements, it is considered sorted.
       return true;
-    }
+
     cow_vector<Reference> args;
     for(auto it = data.begin() + 1;  it != data.end();  ++it) {
       // Compare the two elements.
@@ -462,9 +449,8 @@ std_array_binary_search(Global_Context& global, V_array data, Value target, optV
   {
     cow_vector<Reference> args;
     auto pair = do_bsearch(global, args, data.begin(), data.end(), comparator, target);
-    if(!pair.second) {
+    if(!pair.second)
       return nullopt;
-    }
     return pair.first - data.begin();
   }
 
@@ -501,10 +487,10 @@ std_array_equal_range(Global_Context& global, V_array data, Value target, optV_f
 V_array
 std_array_sort(Global_Context& global, V_array data, optV_function comparator)
   {
-    if(data.size() <= 1) {
+    if(data.size() <= 1)
       // Use reference counting as our advantage.
       return ::std::move(data);
-    }
+
     // The Merge Sort algorithm requires `O(n)` space.
     V_array temp(data.size());
     // Merge blocks of exponential sizes.
@@ -521,10 +507,10 @@ std_array_sort(Global_Context& global, V_array data, optV_function comparator)
 V_array
 std_array_sortu(Global_Context& global, V_array data, optV_function comparator)
   {
-    if(data.size() <= 1) {
+    if(data.size() <= 1)
       // Use reference counting as our advantage.
       return ::std::move(data);
-    }
+
     // The Merge Sort algorithm requires `O(n)` space.
     V_array temp(data.size());
     // Merge blocks of exponential sizes.
@@ -591,6 +577,7 @@ std_array_generate(Global_Context& global, V_function generator, V_integer lengt
       args.resize(2, Reference_root::S_void());
       args.mut(0) = do_make_temporary(i);
       args.mut(1) = do_make_temporary(data.empty() ? null_value : data.back());
+
       // Call the generator function and push the return value.
       auto self = generator.invoke(global, ::std::move(args));
       data.emplace_back(self.read());
@@ -601,12 +588,13 @@ std_array_generate(Global_Context& global, V_function generator, V_integer lengt
 V_array
 std_array_shuffle(V_array data, optV_integer seed)
   {
-    if(data.size() <= 1) {
+    if(data.size() <= 1)
       // Use reference counting as our advantage.
       return ::std::move(data);
-    }
+
     // Create a linear congruential generator.
     uint64_t lcg = seed ? static_cast<uint64_t>(*seed) : generate_random_seed();
+
     // Shuffle elements.
     for(size_t i = 0;  i < data.size();  ++i) {
       // These arguments are the same as glibc's `drand48()` function.
@@ -614,6 +602,7 @@ std_array_shuffle(V_array data, optV_integer seed)
       lcg *= 0x5DEECE66D;     // a
       lcg += 0xB;             // c
       lcg &= 0xFFFFFFFFFFFF;  // m
+
       // N.B. Conversion from an unsigned type to a floating-point type would result in performance penalty.
       // ratio <= [0.0, 1.0)
       double ratio = static_cast<double>(static_cast<int64_t>(lcg)) * 0x1p-48;
@@ -628,15 +617,15 @@ std_array_shuffle(V_array data, optV_integer seed)
 V_array
 std_array_rotate(V_array data, V_integer shift)
   {
-    if(data.size() <= 1) {
+    if(data.size() <= 1)
       // Use reference counting as our advantage.
       return ::std::move(data);
-    }
+
     int64_t seek = shift % data.ssize();
-    if(seek == 0) {
+    if(seek == 0)
       // Use reference counting as our advantage.
       return ::std::move(data);
-    }
+
     // Rotate it.
     seek = ((~seek >> 63) & data.ssize()) - seek;
     ::rocket::rotate(data.mut_data(), 0, static_cast<size_t>(seek), data.size());
