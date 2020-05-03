@@ -820,8 +820,8 @@ struct AIR_Traits<AIR_Node::S_try_statement>
         AIR_Status status;
         ASTERIA_RUNTIME_TRY {
           // Set the exception reference.
-          Reference_root::S_temporary xref_except = { except.value() };
-          ctx_catch.open_named_reference(sp.name_except) = ::std::move(xref_except);
+          Reference_root::S_temporary xref = { except.value() };
+          ctx_catch.open_named_reference(sp.name_except) = ::std::move(xref);
 
           // Set backtrace frames.
           V_array backtrace;
@@ -839,7 +839,7 @@ struct AIR_Traits<AIR_Node::S_try_statement>
             // Append this frame.
             backtrace.emplace_back(::std::move(r));
           }
-          Reference_root::S_constant xref = { ::std::move(backtrace) };
+          xref.val = ::std::move(backtrace);
           ctx_catch.open_named_reference(::rocket::sref("__backtrace")) = ::std::move(xref);
 
           // Execute the `catch` clause.
