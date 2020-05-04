@@ -64,6 +64,7 @@ class reference_counter
     const noexcept
       { return ROCKET_EXPECT(this->m_nref.load(::std::memory_order_relaxed) == 1);  }
 
+    ROCKET_PURE_FUNCTION
     valueT
     get()
     const noexcept
