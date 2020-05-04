@@ -1,7 +1,7 @@
 ACLOCAL_AMFLAGS = -I m4
 NOTHING =
 
-# Compiler options
+## Compiler options
 AM_CPPFLAGS = -pipe -pthread -Wall -Wextra -fPIC -DPIC  \
   -D_FILE_OFFSET_BITS=64 -D_POSIX_C_SOURCE=200809 -D_GNU_SOURCE -D_WIN32_WINNT=0x0600  \
   -f{inline-limit=2400,strict-{aliasing,overflow},merge-all-constants}  \
@@ -17,7 +17,7 @@ AM_CXXFLAGS = -include .pch.hpp -std=gnu++14 -Wp,-std=c++11 -fno-gnu-keywords  \
 AM_DEFAULT_SOURCE_EXT = .cpp
 LDADD = lib/libasteria.la
 
-# Pre-compiled header
+## Pre-compiled header
 BUILT_SOURCES =  \
   .pch.hpp  \
   .pch.hpp.gch  \
@@ -42,7 +42,7 @@ CLEANFILES =  \
 	## ..., then libtool creates another text file as the 'executable', so delete it.
 	@test -z "${EXEEXT}" || rm -f $@${EXEEXT}
 
-# Initialization
+## Initialization
 EXTRA_DIST =  \
   asteria/doc/operator-precedence.txt  \
   asteria/doc/standard-library.txt  \
@@ -64,9 +64,9 @@ check_LIBRARIES =
 check_LTLIBRARIES =
 check_PROGRAMS =
 
-# Programs and libraries
+## Programs and libraries
 include asteria/rocket/Makefile.inc.am
 include asteria/src/Makefile.inc.am
 
-# Tests
+## Tests
 include asteria/test/Makefile.inc.am
