@@ -243,12 +243,6 @@ class AIR_Node
         V_boolean value;
       };
 
-    struct S_immediate_int_x48
-      {
-        uint32_t low;
-        int16_t high;
-      };
-
     struct S_immediate_integer
       {
         V_integer value;
@@ -308,11 +302,10 @@ class AIR_Node
         index_import_call            = 33,
         index_immediate_null         = 34,
         index_immediate_boolean      = 35,
-        index_immediate_int_x48      = 36,
-        index_immediate_integer      = 37,
-        index_immediate_real         = 38,
-        index_immediate_string       = 39,
-        index_break_or_continue      = 40,
+        index_immediate_integer      = 36,
+        index_immediate_real         = 37,
+        index_immediate_string       = 38,
+        index_break_or_continue      = 39,
       };
 
     using Storage = variant<
@@ -353,11 +346,10 @@ class AIR_Node
       , S_import_call            // 33,
       , S_immediate_null         // 34,
       , S_immediate_boolean      // 35,
-      , S_immediate_int_x48      // 36,
-      , S_immediate_integer      // 37,
-      , S_immediate_real         // 38,
-      , S_immediate_string       // 39,
-      , S_break_or_continue      // 40,
+      , S_immediate_integer      // 36,
+      , S_immediate_real         // 37,
+      , S_immediate_string       // 38,
+      , S_break_or_continue      // 39,
       )>;
 
     static_assert(::std::is_nothrow_copy_assignable<Storage>::value);

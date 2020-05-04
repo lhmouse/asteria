@@ -54,16 +54,8 @@ const
           }
 
           case vtype_integer: {
-            // Values that fit in 48-bit range may be optimized a bit further.
-            int64_t value = altr.value.as_integer();
-            if((-0x8000'0000'0000 <= value) && (value <= +0x7FFF'FFFF'FFFF)) {
-              AIR_Node::S_immediate_int_x48 xnode = { uint32_t(value), int16_t(value >> 32) };
-              code.emplace_back(::std::move(xnode));
-              return code;
-            }
-
-            // Use the full-width alternative.
-            AIR_Node::S_immediate_integer xnode = { value };
+            // This can be optimized.
+            AIR_Node::S_immediate_integer xnode = { altr.value.as_integer() };
             code.emplace_back(::std::move(xnode));
             return code;
           }

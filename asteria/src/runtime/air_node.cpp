@@ -3912,38 +3912,6 @@ struct AIR_Traits<AIR_Node::S_immediate_boolean>
   };
 
 template<>
-struct AIR_Traits<AIR_Node::S_immediate_int_x48>
-  {
-    // `Uparam` is the value to push.
-    // `Sparam` is unused.
-
-    static
-    AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_immediate_int_x48& altr)
-      {
-        AVMC_Queue::Uparam up;
-        up.x32 = altr.low;
-        up.x16 = static_cast<uint16_t>(altr.high);
-        return up;
-      }
-
-    static
-    AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
-      {
-        // Compose the integer using sign extension.
-        uint64_t iword = static_cast<uint64_t>(static_cast<int16_t>(up.x16));
-        iword <<= 32;
-        iword |= up.x32;
-
-        // Push a constant integer value.
-        Reference_root::S_constant xref = { V_integer(iword) };
-        ctx.stack().push(::std::move(xref));
-        return air_status_next;
-      }
-  };
-
-template<>
 struct AIR_Traits<AIR_Node::S_immediate_integer>
   {
     // `Uparam` is unused.
@@ -4540,7 +4508,6 @@ const
       case index_import_call:
       case index_immediate_null:
       case index_immediate_boolean:
-      case index_immediate_int_x48:
       case index_immediate_integer:
       case index_immediate_real:
       case index_immediate_string:
@@ -4887,11 +4854,6 @@ const
         return do_solidify(queue, altr);
       }
 
-      case index_immediate_int_x48: {
-        const auto& altr = this->m_stor.as<index_immediate_int_x48>();
-        return do_solidify(queue, altr);
-      }
-
       case index_immediate_integer: {
         const auto& altr = this->m_stor.as<index_immediate_integer>();
         return do_solidify(queue, altr);
@@ -5051,7 +5013,6 @@ const
       case index_import_call:
       case index_immediate_null:
       case index_immediate_boolean:
-      case index_immediate_int_x48:
       case index_immediate_integer:
       case index_immediate_real:
       case index_immediate_string:
