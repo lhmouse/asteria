@@ -1714,13 +1714,13 @@ do_string_sll(const cow_string& lhs, int64_t rhs)
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
 
     cow_string res;
-    char* ptr = &*(res.insert(res.begin(), lhs.size(), ' '));
+    res.append(lhs.size(), ' ');
     if(static_cast<uint64_t>(rhs) >= lhs.size())
       return res;
 
     // Copy the substring in the right.
     size_t count = static_cast<size_t>(rhs);
-    ::std::memcpy(ptr, lhs.data() + count, lhs.size() - count);
+    ::std::memcpy(res.mut_data(), lhs.data() + count, lhs.size() - count);
     return res;
   }
 
@@ -1732,13 +1732,13 @@ do_string_srl(const cow_string& lhs, int64_t rhs)
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
 
     cow_string res;
-    char* ptr = &*(res.insert(res.begin(), lhs.size(), ' '));
+    res.append(lhs.size(), ' ');
     if(static_cast<uint64_t>(rhs) >= lhs.size())
       return res;
 
     // Copy the substring in the left.
     size_t count = static_cast<size_t>(rhs);
-    ::std::memcpy(ptr + count, lhs.data(), lhs.size() - count);
+    ::std::memcpy(res.mut_data() + count, lhs.data(), lhs.size() - count);
     return res;
   }
 
