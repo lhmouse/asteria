@@ -30,11 +30,16 @@ CLEANFILES =  \
   ${NOTHING}
 
 .pch.hpp: ${srcdir}/asteria/src/precompiled.hpp
+	# Build the wrapper header, which contains the absolute path to the plain header.
 	${AM_V_GEN}echo "#include \"$$(cygpath -m $< 2>/dev/null || readlink -f $<)\"" >$@
 
 .pch.hpp.gch: .pch.hpp config.h
+	# Compile the header. This must use LTCXXCOMPILE due to some nasty PIC flags...
 	${AM_V_CXX}${LTCXXCOMPILE} -x c++-header -Wno-error $< -o $@.o
+	# ..., but it causes the 'real' output to go into './libs/' and leaves a text file outside,
+	# so move it to the correct location, ...
 	@${LIBTOOL} ${AM_V_lt} --tag=CXX --mode=link sh -c 'mv -f "$$1" "$$2"' _ $@.lo $@ -o $@
+	# ..., then libtool creates another text file as the 'executable', so delete it.
 	@test -z "${EXEEXT}" || rm -f $@${EXEEXT}
 
 # Initialization
