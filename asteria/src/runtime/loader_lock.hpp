@@ -25,10 +25,7 @@ final
     noexcept
       = default;
 
-    ~Loader_Lock()
-    override;
-
-    ASTERIA_DECLARE_NONCOPYABLE(Loader_Lock);
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(Loader_Lock);
 
   private:
     element_type*

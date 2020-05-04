@@ -22,9 +22,7 @@ class Statement_Sequence
       : m_opts(opts)
       { }
 
-    ~Statement_Sequence();
-
-    ASTERIA_DECLARE_NONCOPYABLE(Statement_Sequence);
+    ASTERIA_COPYABLE_DESTRUCTOR(Statement_Sequence);
 
   public:
     // These are accessors and modifiers of options for parsing.

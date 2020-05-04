@@ -23,10 +23,8 @@ class Sentry
       : m_ref(ref), m_old(ref)
       { this->m_ref++;  }
 
-    ~Sentry()
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(Sentry)
       { this->m_ref--;  }
-
-    ASTERIA_DECLARE_NONCOPYABLE(Sentry);
 
   public:
     explicit operator
@@ -78,6 +76,11 @@ struct Variable_Wiper : Variable_Callback
   };
 
 }  // namespace
+
+Collector::
+~Collector()
+  {
+  }
 
 bool
 Collector::

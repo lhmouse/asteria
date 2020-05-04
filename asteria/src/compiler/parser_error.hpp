@@ -25,8 +25,7 @@ class Parser_Error
       : m_stat(xstat), m_sloc(xsloc), m_length(xlength)
       { this->do_compose_message();  }
 
-    ~Parser_Error()
-    override;
+    ASTERIA_COPYABLE_DESTRUCTOR(Parser_Error);
 
   private:
     void

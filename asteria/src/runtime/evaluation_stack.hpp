@@ -21,9 +21,7 @@ class Evaluation_Stack
       : m_etop(nullptr), m_refs()
       { }
 
-    ~Evaluation_Stack();
-
-    ASTERIA_DECLARE_NONCOPYABLE(Evaluation_Stack);
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(Evaluation_Stack);
 
   public:
     bool

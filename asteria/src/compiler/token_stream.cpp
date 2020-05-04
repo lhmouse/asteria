@@ -26,7 +26,8 @@ class Line_Reader
       : m_cbuf(xcbuf), m_file(xfile)
       { }
 
-    ASTERIA_DECLARE_NONCOPYABLE(Line_Reader);
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(Line_Reader)
+      { }
 
   public:
     tinybuf&

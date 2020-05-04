@@ -28,10 +28,7 @@ class Analytic_Context
       : m_parent_opt(parent_opt)
       { this->do_prepare_function(params);  }
 
-    ~Analytic_Context()
-    override;
-
-    ASTERIA_DECLARE_NONCOPYABLE(Analytic_Context);
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(Analytic_Context);
 
   private:
     void

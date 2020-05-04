@@ -38,10 +38,7 @@ final
         m_target(target), m_args_self(::std::move(args_self))
       { }
 
-    ~PTC_Arguments()
-    override;
-
-    ASTERIA_DECLARE_NONCOPYABLE(PTC_Arguments);
+    ASTERIA_COPYABLE_DESTRUCTOR(PTC_Arguments);
 
   public:
     const Source_Location&

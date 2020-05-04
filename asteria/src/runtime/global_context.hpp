@@ -27,10 +27,7 @@ class Global_Context
     Global_Context(API_Version version = api_version_latest)
       { this->initialize(version);  }
 
-    ~Global_Context()
-    override;
-
-    ASTERIA_DECLARE_NONCOPYABLE(Global_Context);
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(Global_Context);
 
   protected:
     bool

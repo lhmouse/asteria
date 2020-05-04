@@ -16,8 +16,7 @@ class Abstract_Hooks
     noexcept
       = default;
 
-    ~Abstract_Hooks()
-    override;
+    ASTERIA_COPYABLE_DESTRUCTOR(Abstract_Hooks);
 
   public:
     // This hook is called when a variable (mutable or immutable) or function is declared, before

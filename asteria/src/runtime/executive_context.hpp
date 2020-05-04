@@ -51,10 +51,7 @@ class Executive_Context
         m_global(xglobal), m_stack(xstack)
       { this->do_bind_parameters(zvarg, params, ::std::move(self), ::std::move(args));  }
 
-    ~Executive_Context()
-    override;
-
-    ASTERIA_DECLARE_NONCOPYABLE(Executive_Context);
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(Executive_Context);
 
   private:
     void

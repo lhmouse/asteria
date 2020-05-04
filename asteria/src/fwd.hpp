@@ -45,18 +45,28 @@ namespace Asteria {
 
 #define ASTERIA_VARIANT_ASSIGNMENT(C, V, T, t)    template<typename T,  \
                                                   ROCKET_ENABLE_IF(::std::is_assignable<V&, T&&>::value)>  \
-                                                  C&  \
-                                                  operator=(T&& t)  \
+                                                  C& operator=(T&& t)  \
                                                   noexcept(::std::is_nothrow_assignable<V&, T&&>::value)
 
-#define ASTERIA_DECLARE_NONCOPYABLE(C)            C(const C&)  \
-                                                    = delete;  \
-                                                  C&  \
-                                                  operator=(const C&)  \
-                                                    = delete  // no semicolon
+#define ASTERIA_COPYABLE_DESTRUCTOR(C)            C(const C&) = default;  \
+                                                  C(C&&) noexcept = default;  \
+                                                  C& operator=(const C&) = default;  \
+                                                  C& operator=(C&&) noexcept = default;  \
+                                                  ~C()  // no semicolon
 
-#define ASTERIA_INCOMPLET(T)                      template<typename T##_otbUYGrp_ = T,  \
-                                                           typename T = T##_otbUYGrp_>
+#define ASTERIA_MOVABLE_DESTRUCTOR(C)             C(const C&) = delete;  \
+                                                  C(C&&) noexcept = default;  \
+                                                  C& operator=(const C&) = delete;  \
+                                                  C& operator=(C&&) noexcept = default;  \
+                                                  ~C()  // no semicolon
+
+#define ASTERIA_NONCOPYABLE_DESTRUCTOR(C)         C(const C&) = delete;  \
+                                                  C(C&&) noexcept = delete;  \
+                                                  C& operator=(const C&) = delete;  \
+                                                  C& operator=(C&&) noexcept = delete;  \
+                                                  ~C()  // no semicolon
+
+#define ASTERIA_INCOMPLET(T)                      template<typename T##_otbUYGrp = T, typename T = T##_otbUYGrp>
 
 // `using`-directives
 using ::std::initializer_list;
@@ -187,7 +197,21 @@ class AIR_Optimizer;
 // Type erasure
 struct Rcbase : virtual ::rocket::refcnt_base<Rcbase>
   {
-    virtual ~Rcbase();
+    Rcbase()
+    noexcept
+      = default;
+
+    Rcbase(const Rcbase&)
+    noexcept
+      = default;
+
+    Rcbase&
+    operator=(const Rcbase&)
+    noexcept
+      = default;
+
+    virtual
+    ~Rcbase();
   };
 
 template<typename RealT>
@@ -219,17 +243,18 @@ struct StdIO_Sentry
           ::abort();
       }
 
-    ~StdIO_Sentry()
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(StdIO_Sentry)
       { ::fflush(nullptr);  }
-
-    ASTERIA_DECLARE_NONCOPYABLE(StdIO_Sentry);
   };
 
 // Opaque (user-defined) type support
 struct Abstract_Opaque : Rcbase
   {
-    ~Abstract_Opaque()
-    override;
+    Abstract_Opaque()
+    noexcept
+      = default;
+
+    ASTERIA_COPYABLE_DESTRUCTOR(Abstract_Opaque);
 
     // This function is called to convert this object to a human-readble string.
     virtual
@@ -266,8 +291,11 @@ operator<<(tinyfmt& fmt, const Abstract_Opaque& opaq)
 struct
 Abstract_Function : Rcbase
   {
-    ~Abstract_Function()
-    override;
+    Abstract_Function()
+    noexcept
+      = default;
+
+    ASTERIA_COPYABLE_DESTRUCTOR(Abstract_Function);
 
     // This function is called to convert this object to a human-readble string.
     virtual

@@ -25,8 +25,7 @@ final
       : m_params(params), m_zvarg(::std::move(zvarg))
       { this->do_solidify(code);  }
 
-    ~Instantiated_Function()
-    override;
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(Instantiated_Function);
 
   private:
     void do_solidify(const cow_vector<AIR_Node>& code);

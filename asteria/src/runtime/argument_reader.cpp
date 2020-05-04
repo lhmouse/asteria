@@ -7,6 +7,11 @@
 
 namespace Asteria {
 
+Argument_Reader::
+~Argument_Reader()
+  {
+  }
+
 void
 Argument_Reader::
 do_record_parameter_required(Vtype vtype)

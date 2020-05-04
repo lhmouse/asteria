@@ -23,9 +23,7 @@ class AIR_Optimizer
       : m_opts(opts)
       { }
 
-    ~AIR_Optimizer();
-
-    ASTERIA_DECLARE_NONCOPYABLE(AIR_Optimizer);
+    ASTERIA_COPYABLE_DESTRUCTOR(AIR_Optimizer);
 
   public:
     // These are accessors and modifiers of options for optimizing.

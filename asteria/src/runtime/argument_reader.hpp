@@ -37,7 +37,7 @@ class Argument_Reader
       : m_args(args), m_name(name)
       { }
 
-    ASTERIA_DECLARE_NONCOPYABLE(Argument_Reader);
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(Argument_Reader);
 
   private:
     inline

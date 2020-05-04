@@ -30,10 +30,7 @@ final
     noexcept
       = default;
 
-    ~Variable()
-    override;
-
-    ASTERIA_DECLARE_NONCOPYABLE(Variable);
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(Variable);
 
   public:
     const Value&

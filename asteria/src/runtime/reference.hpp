@@ -29,7 +29,7 @@ class Reference
         return *this;
       }
 
-    ~Reference();
+    ASTERIA_COPYABLE_DESTRUCTOR(Reference);
 
   private:
     [[noreturn]]

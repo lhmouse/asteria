@@ -29,10 +29,7 @@ final
         m_newest(&(this->m_pool), &(this->m_middle), 800)
       { }
 
-    ~Genius_Collector()
-    override;
-
-    ASTERIA_DECLARE_NONCOPYABLE(Genius_Collector);
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(Genius_Collector);
 
   private:
     Collector Genius_Collector::*

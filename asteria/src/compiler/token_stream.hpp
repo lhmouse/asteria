@@ -24,9 +24,7 @@ class Token_Stream
       : m_opts(opts)
       { }
 
-    ~Token_Stream();
-
-    ASTERIA_DECLARE_NONCOPYABLE(Token_Stream);
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(Token_Stream);
 
   public:
     // This provides stack overflow protection.

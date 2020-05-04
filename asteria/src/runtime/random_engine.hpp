@@ -50,10 +50,7 @@ final
     noexcept
       { this->init();  }
 
-    ~Random_Engine()
-    override;
-
-    ASTERIA_DECLARE_NONCOPYABLE(Random_Engine);
+    ASTERIA_COPYABLE_DESTRUCTOR(Random_Engine);
 
   private:
     inline

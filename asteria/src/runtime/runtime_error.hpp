@@ -43,8 +43,7 @@ class Runtime_Error
       { this->do_backtrace(),
         this->do_insert_frame(frame_type_assert, sloc, this->m_value);  }
 
-    ~Runtime_Error()
-    override;
+    ASTERIA_COPYABLE_DESTRUCTOR(Runtime_Error);
 
   private:
     void
