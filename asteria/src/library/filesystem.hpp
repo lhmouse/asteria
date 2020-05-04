@@ -29,7 +29,7 @@ V_integer
 std_filesystem_remove_recursive(V_string path);
 
 // `std.filesystem.directory_list`
-optV_object
+V_object
 std_filesystem_directory_list(V_string path);
 
 // `std.filesystem.directory_create`

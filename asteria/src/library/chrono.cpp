@@ -85,6 +85,7 @@ std_chrono_local_from_utc(V_integer time_utc)
     // Handle special time values.
     if(time_utc <= s_timestamp_min)
       return INT64_MIN;
+
     if(time_utc >= s_timestamp_max)
       return INT64_MAX;
 
@@ -97,10 +98,11 @@ std_chrono_local_from_utc(V_integer time_utc)
     // Ensure the value is within the range of finite values.
     if(time_local <= s_timestamp_min)
       return INT64_MIN;
+
     if(time_local >= s_timestamp_max)
       return INT64_MAX;
-    else
-      return time_local;
+
+    return time_local;
   }
 
 V_integer
@@ -109,6 +111,7 @@ std_chrono_utc_from_local(V_integer time_local)
     // Handle special time values.
     if(time_local <= s_timestamp_min)
       return INT64_MIN;
+
     if(time_local >= s_timestamp_max)
       return INT64_MAX;
 
@@ -121,10 +124,11 @@ std_chrono_utc_from_local(V_integer time_local)
     // Ensure the value is within the range of finite values.
     if(time_utc <= s_timestamp_min)
       return INT64_MIN;
+
     if(time_utc >= s_timestamp_max)
       return INT64_MAX;
-    else
-      return time_utc;
+
+    return time_utc;
   }
 
 V_string
@@ -135,6 +139,7 @@ std_chrono_utc_format(V_integer time_point, optV_boolean with_ms)
     // Handle special time points.
     if(time_point <= s_timestamp_min)
       return ::rocket::sref(s_strings_min[pms]);
+
     if(time_point >= s_timestamp_max)
       return ::rocket::sref(s_strings_max[pms]);
 
@@ -255,9 +260,9 @@ std_chrono_utc_parse(V_string time_str)
   {
     // Trim leading and trailing spaces. Fail if the string becomes empty.
     size_t off = time_str.find_first_not_of(s_spaces);
-    if(off == V_string::npos) {
+    if(off == V_string::npos)
       ASTERIA_THROW("blank time string");
-    }
+
     // Get the start and end of the non-empty sequence.
     const char* bp = time_str.data() + off;
     off = time_str.find_last_not_of(s_spaces) + 1;
@@ -355,6 +360,7 @@ std_chrono_utc_parse(V_string time_str)
     // Handle special time values.
     if(year <= 1600)
       return INT64_MIN;
+
     if(year >= 9999)
       return INT64_MAX;
 

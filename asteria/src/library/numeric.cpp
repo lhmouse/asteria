@@ -59,10 +59,13 @@ do_saturating_mul(int64_t lhs, int64_t rhs)
   {
     if((lhs == 0) || (rhs == 0))
       return 0;
+
     if((lhs == 1) || (rhs == 1))
       return (lhs ^ rhs) ^ 1;
+
     if((lhs == INT64_MIN) || (rhs == INT64_MIN))
       return (lhs >> 63) ^ (rhs >> 63) ^ INT64_MAX;
+
     if((lhs == -1) || (rhs == -1))
       return (lhs ^ rhs) + 1;
 
@@ -480,6 +483,7 @@ std_numeric_rotl(V_integer m, V_integer x, V_integer n)
   {
     if((m < 0) || (m > 64))
       ASTERIA_THROW("invalid modulo bit count (`$1` is not between 0 and 64)", m);
+
     if(m == 0)
       return 0;
 
@@ -490,8 +494,7 @@ std_numeric_rotl(V_integer m, V_integer x, V_integer n)
     if(sh != 0) {
       // Normalize the shift count.
       // Note that `sh + m` cannot be zero.
-      if(sh < 0)
-        sh += m;
+      sh += (sh >> 63) & m;
       ireg = (ireg << sh) | ((ireg & mask) >> (m - sh));
     }
     // Clear the other bits.
@@ -503,6 +506,7 @@ std_numeric_rotr(V_integer m, V_integer x, V_integer n)
   {
     if((m < 0) || (m > 64))
       ASTERIA_THROW("invalid modulo bit count (`$1` is not between 0 and 64)", m);
+
     if(m == 0)
       return 0;
 
@@ -513,8 +517,7 @@ std_numeric_rotr(V_integer m, V_integer x, V_integer n)
     if(sh != 0) {
       // Normalize the shift count.
       // Note that `sh + m` cannot be zero.
-      if(sh < 0)
-        sh += m;
+      sh += (sh >> 63) & m;
       ireg = ((ireg & mask) >> sh) | (ireg << (m - sh));
     }
     // Clear the other bits.
@@ -661,6 +664,7 @@ std_numeric_parse_integer(V_string text)
     ::rocket::ascii_numget numg;
     if(!numg.parse_I(bptr, eptr))
       ASTERIA_THROW("string not convertible to integer (text `$1`)", text);
+
     if(bptr != eptr)
       ASTERIA_THROW("non-integer character in string (character `$1`)", *bptr);
 
@@ -682,6 +686,7 @@ std_numeric_parse_real(V_string text, optV_boolean saturating)
     ::rocket::ascii_numget numg;
     if(!numg.parse_F(bptr, eptr))
       ASTERIA_THROW("string not convertible to real number (text `$1`)", text);
+
     if(bptr != eptr)
       ASTERIA_THROW("non-real-number character in string (character `$1`)", *bptr);
 

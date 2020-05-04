@@ -340,6 +340,7 @@ V_string do_url_decode(const V_string& text)
       if(c != '%') {
         if(do_is_url_invalid_char(c))
           ASTERIA_THROW("invalid character in URL (character `$1`)", c);
+
         continue;
       }
 
@@ -920,6 +921,7 @@ std_string_hex_decode(V_string text)
         // The character is a whitespace.
         if(reg != 1)
           ASTERIA_THROW("unpaired hexadecimal digit");
+
         continue;
       }
       reg <<= 4;
@@ -1016,6 +1018,7 @@ std_string_base32_decode(V_string text)
         // The character is a whitespace.
         if(reg != 1)
           ASTERIA_THROW("incomplete base32 group");
+
         continue;
       }
       reg <<= 5;
@@ -1024,6 +1027,7 @@ std_string_base32_decode(V_string text)
         // The character is a padding character.
         if(reg < 0x100)
           ASTERIA_THROW("unexpected base32 padding character");
+
         npad += 1;
       }
       else {
@@ -1031,8 +1035,10 @@ std_string_base32_decode(V_string text)
         pos = do_xstrchr(s_base32_table, c);
         if(!pos)
           ASTERIA_THROW("invalid base32 digit (character `$1`)", c);
+
         if(npad != 0)
           ASTERIA_THROW("unexpected base32 digit following padding character");
+
         reg |= static_cast<uint32_t>(pos - s_base32_table) / 2;
       }
 
@@ -1130,6 +1136,7 @@ std_string_base64_decode(V_string text)
         // The character is a whitespace.
         if(reg != 1)
           ASTERIA_THROW("incomplete base64 group");
+
         continue;
       }
       reg <<= 6;
@@ -1138,6 +1145,7 @@ std_string_base64_decode(V_string text)
         // The character is a padding character.
         if(reg < 0x100)
           ASTERIA_THROW("unexpected base64 padding character");
+
         npad += 1;
       }
       else {
@@ -1145,8 +1153,10 @@ std_string_base64_decode(V_string text)
         pos = do_xstrchr(s_base64_table, c);
         if(!pos)
           ASTERIA_THROW("invalid base64 digit (character `$1`)", c);
+
         if(npad != 0)
           ASTERIA_THROW("unexpected base64 digit following padding character");
+
         reg |= static_cast<uint32_t>(pos - s_base64_table);
       }
 

@@ -81,6 +81,7 @@ std_io_getc()
     // Check stream status.
     if(::ferror_unlocked(fp))
       ASTERIA_THROW("standard input failure (error bit set)");
+
     if(::fwide(fp, +1) < 0)
       ASTERIA_THROW("invalid text read from binary-oriented input");
 
@@ -106,6 +107,7 @@ std_io_getln()
     // Check stream status.
     if(::ferror_unlocked(fp))
       ASTERIA_THROW("standard input failure (error bit set)");
+
     if(::fwide(fp, +1) < 0)
       ASTERIA_THROW("invalid text read from binary-oriented input");
 
@@ -146,6 +148,7 @@ std_io_putc(V_integer value)
     // Check stream status.
     if(::ferror_unlocked(fp))
       ASTERIA_THROW("standard output failure (error bit set)");
+
     if(::fwide(fp, +1) < 0)
       ASTERIA_THROW("invalid text write to binary-oriented output");
 
@@ -177,6 +180,7 @@ std_io_putc(V_string value)
     // Check stream status.
     if(::ferror_unlocked(fp))
       ASTERIA_THROW("standard output failure (error bit set)");
+
     if(::fwide(fp, +1) < 0)
       ASTERIA_THROW("invalid text write to binary-oriented output");
 
@@ -195,6 +199,7 @@ std_io_putln(V_string value)
     // Check stream status.
     if(::ferror_unlocked(fp))
       ASTERIA_THROW("standard output failure (error bit set)");
+
     if(::fwide(fp, +1) < 0)
       ASTERIA_THROW("invalid text write to binary-oriented output");
 
@@ -217,6 +222,7 @@ std_io_putf(V_string templ, cow_vector<Value> values)
     // Check stream status.
     if(::ferror_unlocked(fp))
       ASTERIA_THROW("standard output failure (error bit set)");
+
     if(::fwide(fp, +1) < 0)
       ASTERIA_THROW("invalid text write to binary-oriented output");
 
@@ -248,6 +254,7 @@ std_io_read(optV_integer limit)
     // Check stream status.
     if(::ferror_unlocked(fp))
       ASTERIA_THROW("standard input failure (error bit set)");
+
     if(::fwide(fp, -1) > 0)
       ASTERIA_THROW("invalid binary read from text-oriented input");
 
@@ -276,6 +283,7 @@ std_io_write(V_string data)
     // Check stream status.
     if(::ferror_unlocked(fp))
       ASTERIA_THROW("standard output failure (error bit set)");
+
     if(::fwide(fp, -1) > 0)
       ASTERIA_THROW("invalid binary write to text-oriented output");
 

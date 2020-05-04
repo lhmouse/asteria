@@ -1380,12 +1380,15 @@ do_hash_file(const V_string& path)
     static constexpr size_t nbuf = 16384;
     uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)),
                                         ::operator delete);
+
     for(;;) {
       ::ssize_t nread = ::read(fd, pbuf, nbuf);
       if(nread < 0)
         ASTERIA_THROW_SYSTEM_ERROR("read");
+
       if(nread == 0)
         break;  // EOF
+
       h.update(pbuf, static_cast<size_t>(nread));
     }
     return h.finish();

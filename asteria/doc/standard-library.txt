@@ -2210,11 +2210,8 @@
 	  * `b_dir`   whether this is a directory.
 	  * `b_sym`   whether this is a symbolic link.
 
-	  If `path` references a non-existent directory, `null` is
-	  returned.
-
-	* Throws an exception if `path` designates a non-directory, or
-	  some other errors occur.
+	* Throws an exception if `path` does not designate a directory,
+	  or some other errors occur.
 
 `std.filesystem.directory_create(path)`
 

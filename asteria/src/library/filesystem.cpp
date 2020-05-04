@@ -87,6 +87,7 @@ do_remove_recursive(const char* path)
             // Skip special entries.
             if(::strcmp(next->d_name, ".") == 0)
               continue;
+
             if(::strcmp(next->d_name, "..") == 0)
               continue;
 
@@ -251,17 +252,13 @@ std_filesystem_remove_recursive(V_string path)
     ASTERIA_THROW_SYSTEM_ERROR("rmdir");
   }
 
-optV_object
+V_object
 std_filesystem_directory_list(V_string path)
   {
     // Try opening t he directory.
     ::rocket::unique_posix_dir dp(::opendir(path.safe_c_str()), ::closedir);
-    if(!dp) {
-      // If the path does not exist, return `null`. Don't throw exceptions.
-      if(errno == ENOENT)
-        return nullopt;
+    if(!dp)
       ASTERIA_THROW_SYSTEM_ERROR("opendir");
-    }
 
     // Append all entries.
     V_object entries;
@@ -422,9 +419,9 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
         if(nread < 0)
           ASTERIA_THROW_SYSTEM_ERROR("read");
       }
-      // Check for EOF.
       if(nread == 0)
         break;
+
       data.erase(static_cast<size_t>(nread));
 
       // Prepare arguments for the user-defined function.
@@ -520,8 +517,10 @@ std_filesystem_file_copy_from(V_string path_new, V_string path_old)
       ::ssize_t nread = ::read(fd_old, pbuf, nbuf);
       if(nread < 0)
         ASTERIA_THROW_SYSTEM_ERROR("read");
+
       if(nread == 0)
         break;
+
       do_write_loop(fd_new, pbuf, static_cast<size_t>(nread));
     }
 
@@ -730,8 +729,8 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     If `path` references a non-existent directory, `null` is
     returned.
 
-  * Throws an exception if `path` designates a non-directory, or
-    some other errors occur.
+  * Throws an exception if `path` does not designate a directory,
+    or some other errors occur.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {

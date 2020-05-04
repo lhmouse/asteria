@@ -1527,6 +1527,7 @@ do_operator_NEG(int64_t rhs)
   {
     if(rhs == INT64_MIN)
       ASTERIA_THROW("integer negation overflow (operand was `$1`)", rhs);
+
     return -rhs;
   }
 
@@ -1557,6 +1558,7 @@ do_operator_ABS(int64_t rhs)
   {
     if(rhs == INT64_MIN)
       ASTERIA_THROW("integer absolute value overflow (operand was `$1`)", rhs);
+
     return ::std::abs(rhs);
   }
 
@@ -1573,6 +1575,7 @@ do_operator_ADD(int64_t lhs, int64_t rhs)
   {
     if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs))
       ASTERIA_THROW("integer addition overflow (operands were `$1` and `$2`)", lhs, rhs);
+
     return lhs + rhs;
   }
 
@@ -1582,6 +1585,7 @@ do_operator_SUB(int64_t lhs, int64_t rhs)
   {
     if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs))
       ASTERIA_THROW("integer subtraction overflow (operands were `$1` and `$2`)", lhs, rhs);
+
     return lhs - rhs;
   }
 
@@ -1591,10 +1595,13 @@ do_operator_MUL(int64_t lhs, int64_t rhs)
   {
     if((lhs == 0) || (rhs == 0))
       return 0;
+
     if((lhs == 1) || (rhs == 1))
       return (lhs ^ rhs) ^ 1;
+
     if((lhs == INT64_MIN) || (rhs == INT64_MIN))
       ASTERIA_THROW("integer multiplication overflow (operands were `$1` and `$2`)", lhs, rhs);
+
     if((lhs == -1) || (rhs == -1))
       return (lhs ^ rhs) + 1;
 
@@ -1604,6 +1611,7 @@ do_operator_MUL(int64_t lhs, int64_t rhs)
     auto srhs = (rhs ^ m) - m;
     if((srhs >= 0) ? (alhs > INT64_MAX / srhs) : (alhs > INT64_MIN / srhs))
       ASTERIA_THROW("integer multiplication overflow (operands were `$1` and `$2`)", lhs, rhs);
+
     return alhs * srhs;
   }
 
@@ -1613,8 +1621,10 @@ do_operator_DIV(int64_t lhs, int64_t rhs)
   {
     if(rhs == 0)
       ASTERIA_THROW("integer divided by zero (operands were `$1` and `$2`)", lhs, rhs);
+
     if((lhs == INT64_MIN) && (rhs == -1))
       ASTERIA_THROW("integer division overflow (operands were `$1` and `$2`)", lhs, rhs);
+
     return lhs / rhs;
   }
 
@@ -1624,8 +1634,10 @@ do_operator_MOD(int64_t lhs, int64_t rhs)
   {
     if(rhs == 0)
       ASTERIA_THROW("integer divided by zero (operands were `$1` and `$2`)", lhs, rhs);
+
     if((lhs == INT64_MIN) && (rhs == -1))
       ASTERIA_THROW("integer division overflow (operands were `$1` and `$2`)", lhs, rhs);
+
     return lhs % rhs;
   }
 
@@ -1635,8 +1647,10 @@ do_operator_SLL(int64_t lhs, int64_t rhs)
   {
     if(rhs < 0)
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
+
     if(rhs >= 64)
       return 0;
+
     return int64_t(uint64_t(lhs) << rhs);
   }
 
@@ -1646,6 +1660,7 @@ do_operator_SRL(int64_t lhs, int64_t rhs)
   {
     if(rhs < 0)
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
+
     if(rhs >= 64)
       return 0;
     return int64_t(uint64_t(lhs) >> rhs);
@@ -1657,8 +1672,10 @@ do_operator_SLA(int64_t lhs, int64_t rhs)
   {
     if(rhs < 0)
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
+
     if(lhs == 0)
       return 0;
+
     if(rhs >= 64)
       ASTERIA_THROW("integer left shift overflow (operands were `$1` and `$2`)", lhs, rhs);
 
@@ -1677,6 +1694,7 @@ do_operator_SRA(int64_t lhs, int64_t rhs)
   {
     if(rhs < 0)
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
+
     if(rhs >= 64)
       return lhs >> 63;
     return lhs >> rhs;
@@ -1865,6 +1883,7 @@ do_duplicate_string(const cow_string& source, uint64_t count)
     size_t nchars = source.size();
     if((nchars == 0) || (count == 0))
       return res;
+
     if(nchars > res.max_size() / count)
       ASTERIA_THROW("string length overflow (`$1` * `$2` > `$3`)", nchars, count, res.max_size());
 
@@ -3417,6 +3436,7 @@ struct AIR_Traits<AIR_Node::S_unpack_struct_array>
         V_array arr;
         if(!val.is_null() && !val.is_array())
           ASTERIA_THROW("invalid argument for structured array binding (initializer was `$1`)", val);
+
         if(val.is_array())
           arr = ::std::move(val.open_array());
 
@@ -3481,6 +3501,7 @@ struct AIR_Traits<AIR_Node::S_unpack_struct_object>
         V_object obj;
         if(!val.is_null() && !val.is_object())
           ASTERIA_THROW("invalid argument for structured object binding (initializer was `$1`)", val);
+
         if(val.is_object())
           obj = ::std::move(val.open_object());
 
