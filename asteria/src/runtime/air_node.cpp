@@ -61,7 +61,6 @@ do_forward_if_opt(bool dirty, XNodeT&& xnode)
       return nullopt;
   }
 
-ROCKET_FORCED_INLINE_FUNCTION
 Executive_Context&
 do_set_temporary(Executive_Context& ctx, bool assign, Reference_root::S_temporary&& xref)
   {
@@ -78,7 +77,6 @@ do_set_temporary(Executive_Context& ctx, bool assign, Reference_root::S_temporar
     return ctx;
   }
 
-ROCKET_FORCED_INLINE_FUNCTION
 AIR_Status
 do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVMC_Queue& queue)
   {
