@@ -2937,19 +2937,19 @@ struct AIR_Traits_Xop<xop_add> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(lhs.is_boolean() && rhs.is_boolean()) {
+        if(rhs.is_boolean() && lhs.is_boolean()) {
           // For the `boolean` type, return the logical OR'd result of both operands.
           rhs = do_operator_OR(lhs.as_boolean(), rhs.as_boolean());
         }
-        else if(lhs.is_integer() && rhs.is_integer()) {
+        else if(rhs.is_integer() && lhs.is_integer()) {
           // For the `integer` type, return the sum of both operands.
           rhs = do_operator_ADD(lhs.as_integer(), rhs.as_integer());
         }
-        else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
+        else if(rhs.is_convertible_to_real() && lhs.is_convertible_to_real()) {
           // For the `integer` and `real` types, return the sum of both operands as `real`.
           rhs = do_operator_ADD(lhs.convert_to_real(), rhs.convert_to_real());
         }
-        else if(lhs.is_string() && rhs.is_string()) {
+        else if(rhs.is_string() && lhs.is_string()) {
           // For the `string` type, concatenate the operands in lexical order to create a new string.
           rhs = do_operator_ADD(lhs.as_string(), rhs.as_string());
         }
@@ -2974,15 +2974,15 @@ struct AIR_Traits_Xop<xop_sub> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(lhs.is_boolean() && rhs.is_boolean()) {
+        if(rhs.is_boolean() && lhs.is_boolean()) {
           // For the `boolean` type, return the logical XOR'd result of both operands.
           rhs = do_operator_XOR(lhs.as_boolean(), rhs.as_boolean());
         }
-        else if(lhs.is_integer() && rhs.is_integer()) {
+        else if(rhs.is_integer() && lhs.is_integer()) {
           // For the `integer` type, return the difference of both operands.
           rhs = do_operator_SUB(lhs.as_integer(), rhs.as_integer());
         }
-        else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
+        else if(rhs.is_convertible_to_real() && lhs.is_convertible_to_real()) {
           // For the `integer` and `real` types, return the difference of both operands as `real`.
           rhs = do_operator_SUB(lhs.convert_to_real(), rhs.convert_to_real());
         }
@@ -3007,24 +3007,24 @@ struct AIR_Traits_Xop<xop_mul> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(lhs.is_boolean() && rhs.is_boolean()) {
+        if(rhs.is_boolean() && lhs.is_boolean()) {
           // For the `boolean` type, return the logical AND'd result of both operands.
           rhs = do_operator_AND(lhs.as_boolean(), rhs.as_boolean());
         }
-        else if(lhs.is_integer() && rhs.is_integer()) {
+        else if(rhs.is_integer() && lhs.is_integer()) {
           // For the `integer` type, return the product of both operands.
           rhs = do_operator_MUL(lhs.as_integer(), rhs.as_integer());
         }
-        else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
+        else if(rhs.is_convertible_to_real() && lhs.is_convertible_to_real()) {
           // For the `integer` and `real` types, return the product of both operands as `real`.
           rhs = do_operator_MUL(lhs.convert_to_real(), rhs.convert_to_real());
         }
-        else if(lhs.is_string() && rhs.is_integer()) {
+        else if(rhs.is_integer() && lhs.is_string()) {
           // If either operand has type `string` and the other has type `integer`, duplicate
           // the string up to the specified number of times and return the result.
           rhs = do_operator_MUL(lhs.as_string(), rhs.as_integer());
         }
-        else if(lhs.is_integer() && rhs.is_string()) {
+        else if(rhs.is_string() && lhs.is_integer()) {
           // If either operand has type `string` and the other has type `integer`, duplicate
           // the string up to the specified number of times and return the result.
           rhs = do_operator_MUL(lhs.as_integer(), rhs.as_string());
@@ -3050,11 +3050,11 @@ struct AIR_Traits_Xop<xop_div> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(lhs.is_integer() && rhs.is_integer()) {
+        if(rhs.is_integer() && lhs.is_integer()) {
           // For the `integer` type, return the quotient of both operands.
           rhs = do_operator_DIV(lhs.as_integer(), rhs.as_integer());
         }
-        else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
+        else if(rhs.is_convertible_to_real() && lhs.is_convertible_to_real()) {
           // For the `integer` and `real` types, return the quotient of both operands as `real`.
           rhs = do_operator_DIV(lhs.convert_to_real(), rhs.convert_to_real());
         }
@@ -3079,11 +3079,11 @@ struct AIR_Traits_Xop<xop_mod> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(lhs.is_integer() && rhs.is_integer()) {
+        if(rhs.is_integer() && lhs.is_integer()) {
           // For the `integer` type, return the remainder of both operands.
           rhs = do_operator_MOD(lhs.as_integer(), rhs.as_integer());
         }
-        else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
+        else if(rhs.is_convertible_to_real() && lhs.is_convertible_to_real()) {
           // For the `integer` and `real` types, return the remainder of both operands.
           rhs = do_operator_MOD(lhs.convert_to_real(), rhs.convert_to_real());
         }
@@ -3108,12 +3108,12 @@ struct AIR_Traits_Xop<xop_sll> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(lhs.is_integer() && rhs.is_integer()) {
+        if(rhs.is_integer() && lhs.is_integer()) {
           // If the LHS operand has type `integer`, shift the LHS operand to the left by the number of bits
           // specified by the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with zeroes.
           rhs = do_operator_SLL(lhs.as_integer(), rhs.as_integer());
         }
-        else if(lhs.is_string() && rhs.is_integer()) {
+        else if(rhs.is_integer() && lhs.is_string()) {
           // If the LHS operand has type `string`, fill space characters in the right and discard characters from
           // the left. The number of bytes in the LHS operand will be preserved.
           rhs = do_operator_SLL(lhs.as_string(), rhs.as_integer());
@@ -3139,12 +3139,12 @@ struct AIR_Traits_Xop<xop_srl> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(lhs.is_integer() && rhs.is_integer()) {
+        if(rhs.is_integer() && lhs.is_integer()) {
           // If the LHS operand has type `integer`, shift the LHS operand to the right by the number of bits
           // specified by the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with zeroes.
           rhs = do_operator_SRL(lhs.as_integer(), rhs.as_integer());
         }
-        else if(lhs.is_string() && rhs.is_integer()) {
+        else if(rhs.is_integer() && lhs.is_string()) {
           // If the LHS operand has type `string`, fill space characters in the left and discard characters from
           // the right. The number of bytes in the LHS operand will be preserved.
           rhs = do_operator_SRL(lhs.as_string(), rhs.as_integer());
@@ -3170,14 +3170,14 @@ struct AIR_Traits_Xop<xop_sla> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(lhs.is_integer() && rhs.is_integer()) {
+        if(rhs.is_integer() && lhs.is_integer()) {
           // If the LHS operand is of type `integer`, shift the LHS operand to the left by the number of bits
           // specified by the RHS operand. Bits shifted out that are equal to the sign bit are discarded. Bits
           // shifted in are filled with zeroes. If any bits that are different from the sign bit would be shifted
           // out, an exception is thrown.
           rhs = do_operator_SLA(lhs.as_integer(), rhs.as_integer());
         }
-        else if(lhs.is_string() && rhs.is_integer()) {
+        else if(rhs.is_integer() && lhs.is_string()) {
           // If the LHS operand has type `string`, fill space characters in the right.
           rhs = do_operator_SLA(lhs.as_string(), rhs.as_integer());
         }
@@ -3202,13 +3202,13 @@ struct AIR_Traits_Xop<xop_sra> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(lhs.is_integer() && rhs.is_integer()) {
+        if(rhs.is_integer() && lhs.is_integer()) {
           // If the LHS operand is of type `integer`, shift the LHS operand to the right by the number of bits
           // specified by the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with the
           // sign bit.
           rhs = do_operator_SRA(lhs.as_integer(), rhs.as_integer());
         }
-        else if(lhs.is_string() && rhs.is_integer()) {
+        else if(rhs.is_integer() && lhs.is_string()) {
           // If the LHS operand has type `string`, discard characters from the right.
           rhs = do_operator_SRA(lhs.as_string(), rhs.as_integer());
         }
@@ -3233,15 +3233,15 @@ struct AIR_Traits_Xop<xop_andb> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(lhs.is_boolean() && rhs.is_boolean()) {
+        if(rhs.is_boolean() && lhs.is_boolean()) {
           // For the `boolean` type, return the logical AND'd result of both operands.
           rhs = do_operator_AND(lhs.as_boolean(), rhs.as_boolean());
         }
-        else if(lhs.is_integer() && rhs.is_integer()) {
+        else if(rhs.is_integer() && lhs.is_integer()) {
           // For the `integer` type, return bitwise AND'd result of both operands.
           rhs = do_operator_AND(lhs.as_integer(), rhs.as_integer());
         }
-        else if(lhs.is_string() && rhs.is_string()) {
+        else if(rhs.is_string() && lhs.is_string()) {
           // For the `string` type, return bitwise AND'd result of bytes from operands.
           // The result contains no more bytes than either operand.
           rhs = do_operator_AND(lhs.as_string(), ::std::move(rhs.open_string()));
@@ -3267,15 +3267,15 @@ struct AIR_Traits_Xop<xop_orb> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(lhs.is_boolean() && rhs.is_boolean()) {
+        if(rhs.is_boolean() && lhs.is_boolean()) {
           // For the `boolean` type, return the logical OR'd result of both operands.
           rhs = do_operator_OR(lhs.as_boolean(), rhs.as_boolean());
         }
-        else if(lhs.is_integer() && rhs.is_integer()) {
+        else if(rhs.is_integer() && lhs.is_integer()) {
           // For the `integer` type, return bitwise OR'd result of both operands.
           rhs = do_operator_OR(lhs.as_integer(), rhs.as_integer());
         }
-        else if(lhs.is_string() && rhs.is_string()) {
+        else if(rhs.is_string() && lhs.is_string()) {
           // For the `string` type, return bitwise OR'd result of bytes from operands.
           // The result contains no fewer bytes than either operand.
           rhs = do_operator_OR(lhs.as_string(), ::std::move(rhs.open_string()));
@@ -3301,15 +3301,15 @@ struct AIR_Traits_Xop<xop_xorb> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(lhs.is_boolean() && rhs.is_boolean()) {
+        if(rhs.is_boolean() && lhs.is_boolean()) {
           // For the `boolean` type, return the logical XOR'd result of both operands.
           rhs = do_operator_XOR(lhs.as_boolean(), rhs.as_boolean());
         }
-        else if(lhs.is_integer() && rhs.is_integer()) {
+        else if(rhs.is_integer() && lhs.is_integer()) {
           // For the `integer` type, return bitwise XOR'd result of both operands.
           rhs = do_operator_XOR(lhs.as_integer(), rhs.as_integer());
         }
-        else if(lhs.is_string() && rhs.is_string()) {
+        else if(rhs.is_string() && lhs.is_string()) {
           // For the `string` type, return bitwise XOR'd result of bytes from operands.
           // The result contains no fewer bytes than either operand.
           rhs = do_operator_XOR(lhs.as_string(), ::std::move(rhs.open_string()));
@@ -3354,7 +3354,7 @@ struct AIR_Traits_Xop<xop_fma> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(lhs.is_convertible_to_real() && mid.is_convertible_to_real() && rhs.is_convertible_to_real()) {
+        if(rhs.is_convertible_to_real() && mid.is_convertible_to_real() && lhs.is_convertible_to_real()) {
           // Calculate the fused multiply-add result of the operands.
           rhs = ::std::fma(lhs.convert_to_real(), mid.convert_to_real(), rhs.convert_to_real());
         }
