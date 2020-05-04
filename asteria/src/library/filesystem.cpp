@@ -266,6 +266,7 @@ std_filesystem_directory_list(V_string path)
       // Skip special entries.
       if(::strcmp(next->d_name, ".") == 0)
         continue;
+
       if(::strcmp(next->d_name, "..") == 0)
         continue;
 
@@ -305,7 +306,7 @@ std_filesystem_directory_list(V_string path)
           ));
       entries.try_emplace(cow_string(next->d_name), ::std::move(entry));
     }
-    return ::std::move(entries);
+    return entries;
   }
 
 V_integer
