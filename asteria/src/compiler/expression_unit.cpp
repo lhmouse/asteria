@@ -38,44 +38,7 @@ const
       case index_literal: {
         const auto& altr = this->m_stor.as<index_literal>();
 
-        switch(weaken_enum(altr.value.vtype())) {
-          case vtype_null: {
-            // This can be optimized.
-            AIR_Node::S_immediate_null xnode = { };
-            code.emplace_back(::std::move(xnode));
-            return code;
-          }
-
-          case vtype_boolean: {
-            // This can be optimized.
-            AIR_Node::S_immediate_boolean xnode = { altr.value.as_boolean() };
-            code.emplace_back(::std::move(xnode));
-            return code;
-          }
-
-          case vtype_integer: {
-            // This can be optimized.
-            AIR_Node::S_immediate_integer xnode = { altr.value.as_integer() };
-            code.emplace_back(::std::move(xnode));
-            return code;
-          }
-
-          case vtype_real: {
-            // This can be optimized.
-            AIR_Node::S_immediate_real xnode = { altr.value.as_real() };
-            code.emplace_back(::std::move(xnode));
-            return code;
-          }
-
-          case vtype_string: {
-            // This can be optimized.
-            AIR_Node::S_immediate_string xnode = { altr.value.as_string() };
-            code.emplace_back(::std::move(xnode));
-            return code;
-          }
-        }
-
-        // Use the generic alternative.
+        // Copy the value as is.
         AIR_Node::S_push_immediate xnode = { altr.value };
         code.emplace_back(::std::move(xnode));
         return code;
