@@ -1493,37 +1493,30 @@ struct AIR_Traits<AIR_Node::S_push_unnamed_object>
       }
   };
 
-ROCKET_PURE_FUNCTION
-V_boolean
-do_operator_NOT(bool rhs)
+enum Vmask : uint32_t
   {
-    return !rhs;
+    vmask_null        = 1 << vtype_null,
+    vmask_boolean     = 1 << vtype_boolean,
+    vmask_integer     = 1 << vtype_integer,
+    vmask_real        = 1 << vtype_real,
+    vmask_string      = 1 << vtype_string,
+    vmask_opaque      = 1 << vtype_opaque,
+    vmask_function    = 1 << vtype_function,
+    vmask_array       = 1 << vtype_array,
+    vmask_object      = 1 << vtype_object,
+  };
+
+ROCKET_PURE_FUNCTION
+inline
+uint32_t do_vmask_of(const Value& val)
+noexcept
+  {
+    return UINT32_C(1) << val.vtype();
   }
 
 ROCKET_PURE_FUNCTION
-V_boolean
-do_operator_AND(bool lhs, bool rhs)
-  {
-    return lhs & rhs;
-  }
-
-ROCKET_PURE_FUNCTION
-V_boolean
-do_operator_OR(bool lhs, bool rhs)
-  {
-    return lhs | rhs;
-  }
-
-ROCKET_PURE_FUNCTION
-V_boolean
-do_operator_XOR(bool lhs, bool rhs)
-  {
-    return lhs ^ rhs;
-  }
-
-ROCKET_PURE_FUNCTION
-V_integer
-do_operator_NEG(int64_t rhs)
+int64_t
+do_check_neg(int64_t rhs)
   {
     if(rhs == INT64_MIN)
       ASTERIA_THROW("integer negation overflow (operand was `$1`)", rhs);
@@ -1532,46 +1525,8 @@ do_operator_NEG(int64_t rhs)
   }
 
 ROCKET_PURE_FUNCTION
-V_real
-do_operator_SQRT(int64_t rhs)
-  {
-    return ::std::sqrt(double(rhs));
-  }
-
-ROCKET_PURE_FUNCTION
-V_boolean
-do_operator_ISINF(int64_t /*rhs*/)
-  {
-    return false;
-  }
-
-ROCKET_PURE_FUNCTION
-V_boolean
-do_operator_ISNAN(int64_t /*rhs*/)
-  {
-    return false;
-  }
-
-ROCKET_PURE_FUNCTION
-V_integer
-do_operator_ABS(int64_t rhs)
-  {
-    if(rhs == INT64_MIN)
-      ASTERIA_THROW("integer absolute value overflow (operand was `$1`)", rhs);
-
-    return ::std::abs(rhs);
-  }
-
-ROCKET_PURE_FUNCTION
-V_integer
-do_operator_SIGN(int64_t rhs)
-  {
-    return rhs >> 63;
-  }
-
-ROCKET_PURE_FUNCTION
-V_integer
-do_operator_ADD(int64_t lhs, int64_t rhs)
+int64_t
+do_check_add(int64_t lhs, int64_t rhs)
   {
     if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs))
       ASTERIA_THROW("integer addition overflow (operands were `$1` and `$2`)", lhs, rhs);
@@ -1580,8 +1535,8 @@ do_operator_ADD(int64_t lhs, int64_t rhs)
   }
 
 ROCKET_PURE_FUNCTION
-V_integer
-do_operator_SUB(int64_t lhs, int64_t rhs)
+int64_t
+do_check_sub(int64_t lhs, int64_t rhs)
   {
     if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs))
       ASTERIA_THROW("integer subtraction overflow (operands were `$1` and `$2`)", lhs, rhs);
@@ -1590,8 +1545,8 @@ do_operator_SUB(int64_t lhs, int64_t rhs)
   }
 
 ROCKET_PURE_FUNCTION
-V_integer
-do_operator_MUL(int64_t lhs, int64_t rhs)
+int64_t
+do_check_mul(int64_t lhs, int64_t rhs)
   {
     if((lhs == 0) || (rhs == 0))
       return 0;
@@ -1616,8 +1571,8 @@ do_operator_MUL(int64_t lhs, int64_t rhs)
   }
 
 ROCKET_PURE_FUNCTION
-V_integer
-do_operator_DIV(int64_t lhs, int64_t rhs)
+int64_t
+do_check_div(int64_t lhs, int64_t rhs)
   {
     if(rhs == 0)
       ASTERIA_THROW("integer divided by zero (operands were `$1` and `$2`)", lhs, rhs);
@@ -1629,8 +1584,8 @@ do_operator_DIV(int64_t lhs, int64_t rhs)
   }
 
 ROCKET_PURE_FUNCTION
-V_integer
-do_operator_MOD(int64_t lhs, int64_t rhs)
+int64_t
+do_check_mod(int64_t lhs, int64_t rhs)
   {
     if(rhs == 0)
       ASTERIA_THROW("integer divided by zero (operands were `$1` and `$2`)", lhs, rhs);
@@ -1642,8 +1597,8 @@ do_operator_MOD(int64_t lhs, int64_t rhs)
   }
 
 ROCKET_PURE_FUNCTION
-V_integer
-do_operator_SLL(int64_t lhs, int64_t rhs)
+int64_t
+do_check_sll(int64_t lhs, int64_t rhs)
   {
     if(rhs < 0)
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1655,20 +1610,21 @@ do_operator_SLL(int64_t lhs, int64_t rhs)
   }
 
 ROCKET_PURE_FUNCTION
-V_integer
-do_operator_SRL(int64_t lhs, int64_t rhs)
+int64_t
+do_check_srl(int64_t lhs, int64_t rhs)
   {
     if(rhs < 0)
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
 
     if(rhs >= 64)
       return 0;
+
     return int64_t(uint64_t(lhs) >> rhs);
   }
 
 ROCKET_PURE_FUNCTION
-V_integer
-do_operator_SLA(int64_t lhs, int64_t rhs)
+int64_t
+do_check_sla(int64_t lhs, int64_t rhs)
   {
     if(rhs < 0)
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1685,224 +1641,66 @@ do_operator_SLA(int64_t lhs, int64_t rhs)
     auto mask_sbt = uint64_t(lhs >> 63) << bc;
     if(mask_out != mask_sbt)
       ASTERIA_THROW("integer left shift overflow (operands were `$1` and `$2`)", lhs, rhs);
+
     return int64_t(uint64_t(lhs) << rhs);
   }
 
 ROCKET_PURE_FUNCTION
-V_integer
-do_operator_SRA(int64_t lhs, int64_t rhs)
+int64_t
+do_check_sra(int64_t lhs, int64_t rhs)
   {
     if(rhs < 0)
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
 
     if(rhs >= 64)
       return lhs >> 63;
+
     return lhs >> rhs;
   }
 
 ROCKET_PURE_FUNCTION
-V_integer
-do_operator_NOT(int64_t rhs)
-  {
-    return ~rhs;
-  }
-
-ROCKET_PURE_FUNCTION
-V_integer
-do_operator_AND(int64_t lhs, int64_t rhs)
-  {
-    return lhs & rhs;
-  }
-
-ROCKET_PURE_FUNCTION
-V_integer
-do_operator_OR(int64_t lhs, int64_t rhs)
-  {
-    return lhs | rhs;
-  }
-
-ROCKET_PURE_FUNCTION
-V_integer
-do_operator_XOR(int64_t lhs, int64_t rhs)
-  {
-    return lhs ^ rhs;
-  }
-
-ROCKET_PURE_FUNCTION
-V_real
-do_operator_NEG(double rhs)
-  {
-    return -rhs;
-  }
-
-ROCKET_PURE_FUNCTION
-V_real
-do_operator_SQRT(double rhs)
-  {
-    return ::std::sqrt(rhs);
-  }
-
-ROCKET_PURE_FUNCTION
-V_boolean
-do_operator_ISINF(double rhs)
-  {
-    return ::std::isinf(rhs);
-  }
-
-ROCKET_PURE_FUNCTION
-V_boolean
-do_operator_ISNAN(double rhs)
-  {
-    return ::std::isnan(rhs);
-  }
-
-ROCKET_PURE_FUNCTION
-V_real
-do_operator_ABS(double rhs)
-  {
-    return ::std::fabs(rhs);
-  }
-
-ROCKET_PURE_FUNCTION
-V_integer
-do_operator_SIGN(double rhs)
-  {
-    return ::std::signbit(rhs) ? -1 : 0;
-  }
-
-ROCKET_PURE_FUNCTION
-V_real
-do_operator_ROUND(double rhs)
-  {
-    return ::std::round(rhs);
-  }
-
-ROCKET_PURE_FUNCTION
-V_real
-do_operator_FLOOR(double rhs)
-  {
-    return ::std::floor(rhs);
-  }
-
-ROCKET_PURE_FUNCTION
-V_real
-do_operator_CEIL(double rhs)
-  {
-    return ::std::ceil(rhs);
-  }
-
-ROCKET_PURE_FUNCTION
-V_real
-do_operator_TRUNC(double rhs)
-  {
-    return ::std::trunc(rhs);
-  }
-
-V_integer
-do_cast_to_integer(double value)
+int64_t
+do_check_trunci(double value)
   {
     if(!::std::islessequal(-0x1p63, value) || !::std::islessequal(value, 0x1p63 - 0x1p10))
       ASTERIA_THROW("value not representable as an `integer` (operand was `$1`)", value);
+
     return int64_t(value);
   }
 
 ROCKET_PURE_FUNCTION
-V_integer
-do_operator_ROUNDI(double rhs)
+cow_string
+do_string_dup(const cow_string& src, int64_t count)
   {
-    return do_cast_to_integer(::std::round(rhs));
-  }
+    if(count < 0)
+      ASTERIA_THROW("negative duplicate count (count was `$2`)", count);
 
-ROCKET_PURE_FUNCTION
-V_integer
-do_operator_FLOORI(double rhs)
-  {
-    return do_cast_to_integer(::std::floor(rhs));
-  }
-
-ROCKET_PURE_FUNCTION
-V_integer
-do_operator_CEILI(double rhs)
-  {
-    return do_cast_to_integer(::std::ceil(rhs));
-  }
-
-ROCKET_PURE_FUNCTION
-V_integer
-do_operator_TRUNCI(double rhs)
-  {
-    return do_cast_to_integer(::std::trunc(rhs));
-  }
-
-ROCKET_PURE_FUNCTION
-V_real
-do_operator_ADD(double lhs, double rhs)
-  {
-    return lhs + rhs;
-  }
-
-ROCKET_PURE_FUNCTION
-V_real
-do_operator_SUB(double lhs, double rhs)
-  {
-    return lhs - rhs;
-  }
-
-ROCKET_PURE_FUNCTION
-V_real
-do_operator_MUL(double lhs, double rhs)
-  {
-    return lhs * rhs;
-  }
-
-ROCKET_PURE_FUNCTION
-V_real
-do_operator_DIV(double lhs, double rhs)
-  {
-    return lhs / rhs;
-  }
-
-ROCKET_PURE_FUNCTION
-V_real
-do_operator_MOD(double lhs, double rhs)
-  {
-    return ::std::fmod(lhs, rhs);
-  }
-
-ROCKET_PURE_FUNCTION
-V_string
-do_operator_ADD(const cow_string& lhs, const cow_string& rhs)
-  {
-    return lhs + rhs;
-  }
-
-V_string
-do_duplicate_string(const cow_string& source, uint64_t count)
-  {
-    V_string res;
-    size_t nchars = source.size();
+    cow_string res;
+    size_t nchars = src.size();
     if((nchars == 0) || (count == 0))
       return res;
 
-    if(nchars > res.max_size() / count)
+    if(nchars > res.max_size() / static_cast<uint64_t>(count))
       ASTERIA_THROW("string length overflow (`$1` * `$2` > `$3`)", nchars, count, res.max_size());
 
     size_t times = static_cast<size_t>(count);
     if(nchars == 1) {
       // Fast fill.
-      res.append(times, source.front());
+      res.append(times, src.front());
     }
     else {
       // Reserve space for the result string.
       res.append(nchars * times, '*');
       char* ptr = res.mut_data();
-      // Make the first copy of the source string.
-      ::std::memcpy(ptr, source.data(), nchars);
+
+      // Make the first copy of the src string.
+      ::std::memcpy(ptr, src.data(), nchars);
 
       // Append the result string to itself, doubling its length, until more than half of
       // the result string has been populated.
       for(; nchars <= res.size() / 2; nchars *= 2)
         ::std::memcpy(ptr + nchars, ptr, nchars);
+
       // Copy remaining characters, if any.
       if(nchars < res.size())
         ::std::memcpy(ptr + nchars, ptr, res.size() - nchars);
@@ -1911,31 +1709,13 @@ do_duplicate_string(const cow_string& source, uint64_t count)
   }
 
 ROCKET_PURE_FUNCTION
-V_string
-do_operator_MUL(const cow_string& lhs, int64_t rhs)
-  {
-    if(rhs < 0)
-      ASTERIA_THROW("negative duplicate count (operands were `$1` and `$2`)", lhs, rhs);
-    return do_duplicate_string(lhs, static_cast<uint64_t>(rhs));
-  }
-
-ROCKET_PURE_FUNCTION
-V_string
-do_operator_MUL(int64_t lhs, const cow_string& rhs)
-  {
-    if(lhs < 0)
-      ASTERIA_THROW("negative duplicate count (operands were `$1` and `$2`)", lhs, rhs);
-    return do_duplicate_string(rhs, static_cast<uint64_t>(lhs));
-  }
-
-ROCKET_PURE_FUNCTION
-V_string
-do_operator_SLL(const cow_string& lhs, int64_t rhs)
+cow_string
+do_string_sll(const cow_string& lhs, int64_t rhs)
   {
     if(rhs < 0)
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
 
-    V_string res;
+    cow_string res;
     char* ptr = &*(res.insert(res.begin(), lhs.size(), ' '));
     if(static_cast<uint64_t>(rhs) >= lhs.size())
       return res;
@@ -1947,13 +1727,13 @@ do_operator_SLL(const cow_string& lhs, int64_t rhs)
   }
 
 ROCKET_PURE_FUNCTION
-V_string
-do_operator_SRL(const cow_string& lhs, int64_t rhs)
+cow_string
+do_string_srl(const cow_string& lhs, int64_t rhs)
   {
     if(rhs < 0)
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
 
-    V_string res;
+    cow_string res;
     char* ptr = &*(res.insert(res.begin(), lhs.size(), ' '));
     if(static_cast<uint64_t>(rhs) >= lhs.size())
       return res;
@@ -1965,13 +1745,13 @@ do_operator_SRL(const cow_string& lhs, int64_t rhs)
   }
 
 ROCKET_PURE_FUNCTION
-V_string
-do_operator_SLA(const cow_string& lhs, int64_t rhs)
+cow_string
+do_string_sla(const cow_string& lhs, int64_t rhs)
   {
     if(rhs < 0)
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
 
-    V_string res;
+    cow_string res;
     if(static_cast<uint64_t>(rhs) >= res.max_size() - lhs.size())
       ASTERIA_THROW("string length overflow (`$1` + `$2` > `$3`)", lhs.size(), rhs, res.max_size());
 
@@ -1982,13 +1762,13 @@ do_operator_SLA(const cow_string& lhs, int64_t rhs)
   }
 
 ROCKET_PURE_FUNCTION
-V_string
-do_operator_SRA(const cow_string& lhs, int64_t rhs)
+cow_string
+do_string_sra(const cow_string& lhs, int64_t rhs)
   {
     if(rhs < 0)
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
 
-    V_string res;
+    cow_string res;
     if(static_cast<uint64_t>(rhs) >= lhs.size())
       return res;
 
@@ -1999,8 +1779,8 @@ do_operator_SRA(const cow_string& lhs, int64_t rhs)
   }
 
 ROCKET_PURE_FUNCTION
-V_string
-do_operator_NOT(cow_string&& rhs)
+cow_string
+do_string_notb(cow_string&& rhs)
   {
     // The length of the result is the same as the operand.
     auto tp = reinterpret_cast<uint8_t*>(rhs.mut_data());
@@ -2012,8 +1792,8 @@ do_operator_NOT(cow_string&& rhs)
   }
 
 ROCKET_PURE_FUNCTION
-V_string
-do_operator_AND(const cow_string& lhs, cow_string&& rhs)
+cow_string
+do_string_andb(const cow_string& lhs, cow_string&& rhs)
   {
     // The length of the result is the shorter from both operands.
     auto sp = reinterpret_cast<const uint8_t*>(lhs.data());
@@ -2028,8 +1808,8 @@ do_operator_AND(const cow_string& lhs, cow_string&& rhs)
   }
 
 ROCKET_PURE_FUNCTION
-V_string
-do_operator_OR(const cow_string& lhs, cow_string&& rhs)
+cow_string
+do_string_orb(const cow_string& lhs, cow_string&& rhs)
   {
     // The length of the result is the longer from both operands.
     auto sp = reinterpret_cast<const uint8_t*>(lhs.data());
@@ -2044,8 +1824,8 @@ do_operator_OR(const cow_string& lhs, cow_string&& rhs)
   }
 
 ROCKET_PURE_FUNCTION
-V_string
-do_operator_XOR(const cow_string& lhs, cow_string&& rhs)
+cow_string
+do_string_xorb(const cow_string& lhs, cow_string&& rhs)
   {
     // The length of the result is the longer from both operands.
     auto sp = reinterpret_cast<const uint8_t*>(lhs.data());
@@ -2095,17 +1875,20 @@ struct AIR_Traits_Xop<xop_inc_post> : AIR_Traits<AIR_Node::S_apply_operator>
         auto& lhs = ctx.stack().get_top().open();
         Reference_root::S_temporary xref = { lhs };
 
-        if(lhs.is_integer()) {
-          // Increment the operand and return the old value. `assign` is ignored.
-          lhs = do_operator_ADD(lhs.as_integer(), V_integer(1));
-        }
-        else if(lhs.is_real()) {
-          // Increment the operand and return the old value. `assign` is ignored.
-          lhs = do_operator_ADD(lhs.as_real(), V_real(1));
-        }
-        else
-          ASTERIA_THROW("postfix increment not applicable (operand was `$1`)", lhs);
+        switch(do_vmask_of(lhs)) {
+          case vmask_integer:
+            // Increment the operand and return the old value. `assign` is ignored.
+            lhs = do_check_add(lhs.as_integer(), 1);
+            break;
 
+          case vmask_real:
+            // Increment the operand and return the old value. `assign` is ignored.
+            lhs.open_real() += 1;
+            break;
+
+          default:
+            ASTERIA_THROW("postfix increment not applicable (operand was `$1`)", lhs);
+        }
         ctx.stack().open_top() = ::std::move(xref);
         return air_status_next;
       }
@@ -2122,17 +1905,20 @@ struct AIR_Traits_Xop<xop_dec_post> : AIR_Traits<AIR_Node::S_apply_operator>
         auto& lhs = ctx.stack().get_top().open();
         Reference_root::S_temporary xref = { lhs };
 
-        if(lhs.is_integer()) {
-          // Decrement the operand and return the old value. `assign` is ignored.
-          lhs = do_operator_SUB(lhs.as_integer(), V_integer(1));
-        }
-        else if(lhs.is_real()) {
-          // Decrement the operand and return the old value. `assign` is ignored.
-          lhs = do_operator_SUB(lhs.as_real(), V_real(1));
-        }
-        else
-          ASTERIA_THROW("postfix decrement not applicable (operand was `$1`)", lhs);
+        switch(do_vmask_of(lhs)) {
+          case vmask_integer:
+            // Decrement the operand and return the old value. `assign` is ignored.
+            lhs = do_check_sub(lhs.as_integer(), 1);
+            break;
 
+          case vmask_real:
+            // Decrement the operand and return the old value. `assign` is ignored.
+            lhs.open_real() -= 1;
+            break;
+
+          default:
+            ASTERIA_THROW("postfix decrement not applicable (operand was `$1`)", lhs);
+        }
         ctx.stack().open_top() = ::std::move(xref);
         return air_status_next;
       }
@@ -2151,19 +1937,24 @@ struct AIR_Traits_Xop<xop_subscr> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         auto& lref = ctx.stack().open_top();
 
-        if(rhs.is_integer()) {
-          // Append an array subscript. `assign` is ignored.
-          Reference_modifier::S_array_index xmod = { rhs.as_integer() };
-          lref.zoom_in(::std::move(xmod));
-        }
-        else if(rhs.is_string()) {
-          // Append an object subscript. `assign` is ignored.
-          Reference_modifier::S_object_key xmod = { ::std::move(rhs.open_string()) };
-          lref.zoom_in(::std::move(xmod));
-        }
-        else
-          ASTERIA_THROW("subscript value not valid (subscript was `$1`)", rhs);
+        switch(do_vmask_of(rhs)) {
+          case vmask_integer: {
+            // Append an array subscript. `assign` is ignored.
+            Reference_modifier::S_array_index xmod = { rhs.as_integer() };
+            lref.zoom_in(::std::move(xmod));
+            break;
+          }
 
+          case vmask_string: {
+            // Append an object subscript. `assign` is ignored.
+            Reference_modifier::S_object_key xmod = { ::std::move(rhs.open_string()) };
+            lref.zoom_in(::std::move(xmod));
+            break;
+          }
+
+          default:
+            ASTERIA_THROW("subscript value not valid (subscript was `$1`)", rhs);
+        }
         return air_status_next;
       }
   };
@@ -2196,17 +1987,20 @@ struct AIR_Traits_Xop<xop_neg> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        if(rhs.is_integer()) {
-          // Get the opposite of the operand as a temporary value.
-          rhs = do_operator_NEG(rhs.as_integer());
-        }
-        else if(rhs.is_real()) {
-          // Get the opposite of the operand as a temporary value.
-          rhs = do_operator_NEG(rhs.as_real());
-        }
-        else
-          ASTERIA_THROW("prefix negation not applicable (operand was `$1`)", rhs);
+        switch(do_vmask_of(rhs)) {
+          case vmask_integer:
+            // Get the opposite of the operand as a temporary value.
+            rhs = do_check_neg(rhs.as_integer());
+            break;
 
+          case vmask_real:
+            // Get the opposite of the operand as a temporary value.
+            rhs = -rhs.as_real();
+            break;
+
+          default:
+            ASTERIA_THROW("prefix negation not applicable (operand was `$1`)", rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -2223,21 +2017,25 @@ struct AIR_Traits_Xop<xop_notb> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        if(rhs.is_boolean()) {
-          // Perform logical NOT operation on the operand to create a temporary value.
-          rhs = do_operator_NOT(rhs.as_boolean());
-        }
-        else if(rhs.is_integer()) {
-          // Perform bitwise NOT operation on the operand to create a temporary value.
-          rhs = do_operator_NOT(rhs.as_integer());
-        }
-        else if(rhs.is_string()) {
-          // Perform bitwise NOT operation on all bytes in the operand to create a temporary value.
-          rhs = do_operator_NOT(::std::move(rhs.open_string()));
-        }
-        else
-          ASTERIA_THROW("prefix bitwise NOT not applicable (operand was `$1`)", rhs);
+        switch(do_vmask_of(rhs)) {
+          case vmask_boolean:
+            // Perform logical NOT operation on the operand to create a temporary value.
+            rhs = !rhs.as_boolean();
+            break;
 
+          case vmask_integer:
+            // Perform bitwise NOT operation on the operand to create a temporary value.
+            rhs = ~rhs.as_integer();
+            break;
+
+          case vmask_string:
+            // Perform bitwise NOT operation on all bytes in the operand to create a temporary value.
+            rhs = do_string_notb(::std::move(rhs.open_string()));
+            break;
+
+          default:
+            ASTERIA_THROW("prefix bitwise NOT not applicable (operand was `$1`)", rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -2256,7 +2054,7 @@ struct AIR_Traits_Xop<xop_notl> : AIR_Traits<AIR_Node::S_apply_operator>
 
         // Perform logical NOT operation on the operand to create a temporary value.
         // N.B. This is one of the few operators that work on all types.
-        rhs = do_operator_NOT(rhs.test());
+        rhs = !rhs.test();
 
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2273,17 +2071,20 @@ struct AIR_Traits_Xop<xop_inc_pre> : AIR_Traits<AIR_Node::S_apply_operator>
         // This operator is unary.
         auto& rhs = ctx.stack().get_top().open();
 
-        if(rhs.is_integer()) {
-          // Increment the operand and return it. `assign` is ignored.
-          rhs = do_operator_ADD(rhs.as_integer(), V_integer(1));
-        }
-        else if(rhs.is_real()) {
-          // Increment the operand and return it. `assign` is ignored.
-          rhs = do_operator_ADD(rhs.as_real(), V_real(1));
-        }
-        else
-          ASTERIA_THROW("prefix increment not applicable (operand was `$1`)", rhs);
+        switch(do_vmask_of(rhs)) {
+          case vmask_integer:
+            // Increment the operand and return it. `assign` is ignored.
+            rhs = do_check_add(rhs.as_integer(), 1);
+            break;
 
+          case vmask_real:
+            // Increment the operand and return it. `assign` is ignored.
+            rhs.open_real() += 1;
+            break;
+
+          default:
+            ASTERIA_THROW("prefix increment not applicable (operand was `$1`)", rhs);
+        }
         return air_status_next;
       }
   };
@@ -2298,17 +2099,20 @@ struct AIR_Traits_Xop<xop_dec_pre> : AIR_Traits<AIR_Node::S_apply_operator>
         // This operator is unary.
         auto& rhs = ctx.stack().get_top().open();
 
-        if(rhs.is_integer()) {
-          // Decrement the operand and return it. `assign` is ignored.
-          rhs = do_operator_SUB(rhs.as_integer(), V_integer(1));
-        }
-        else if(rhs.is_real()) {
-          // Decrement the operand and return it. `assign` is ignored.
-          rhs = do_operator_SUB(rhs.as_real(), V_real(1));
-        }
-        else
-          ASTERIA_THROW("prefix decrement not applicable (operand was `$1`)", rhs);
+        switch(do_vmask_of(rhs)) {
+          case vmask_integer:
+            // Decrement the operand and return it. `assign` is ignored.
+            rhs = do_check_sub(rhs.as_integer(), 1);
+            break;
 
+          case vmask_real:
+            // Decrement the operand and return it. `assign` is ignored.
+            rhs.open_real() -= 1;
+            break;
+
+          default:
+            ASTERIA_THROW("prefix decrement not applicable (operand was `$1`)", rhs);
+        }
         return air_status_next;
       }
   };
@@ -2341,29 +2145,26 @@ struct AIR_Traits_Xop<xop_countof> : AIR_Traits<AIR_Node::S_apply_operator>
         auto& rhs = xref.val;
 
         // Return the number of elements in the operand.
-        int64_t nelems;
-        switch(weaken_enum(rhs.vtype())) {
-          case vtype_null:
-            nelems = 0;
+        switch(do_vmask_of(rhs)) {
+          case vmask_null:
+            rhs = 0;
             break;
 
-          case vtype_string:
-            nelems = rhs.as_string().ssize();
+          case vmask_string:
+            rhs = rhs.as_string().ssize();
             break;
 
-          case vtype_array:
-            nelems = rhs.as_array().ssize();
+          case vmask_array:
+            rhs = rhs.as_array().ssize();
             break;
 
-          case vtype_object:
-            nelems = rhs.as_object().ssize();
+          case vmask_object:
+            rhs = rhs.as_object().ssize();
             break;
 
           default:
             ASTERIA_THROW("prefix `countof` not applicable (operand was `$1`)", rhs);
         }
-        rhs = nelems;
-
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -2400,17 +2201,20 @@ struct AIR_Traits_Xop<xop_sqrt> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        if(rhs.is_integer()) {
-          // Get the square root of the operand as a temporary value.
-          rhs = do_operator_SQRT(rhs.as_integer());
-        }
-        else if(rhs.is_real()) {
-          // Get the square root of the operand as a temporary value.
-          rhs = do_operator_SQRT(rhs.as_real());
-        }
-        else
-          ASTERIA_THROW("prefix `__sqrt` not applicable (operand was `$1`)", rhs);
+        switch(do_vmask_of(rhs)) {
+          case vmask_integer:
+            // Get the square root of the operand as a temporary value.
+            rhs = ::std::sqrt(static_cast<double>(rhs.as_integer()));
+            break;
 
+          case vmask_real:
+            // Get the square root of the operand as a temporary value.
+            rhs = ::std::sqrt(rhs.as_real());
+            break;
+
+          default:
+            ASTERIA_THROW("prefix `__sqrt` not applicable (operand was `$1`)", rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -2427,17 +2231,20 @@ struct AIR_Traits_Xop<xop_isnan> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        if(rhs.is_integer()) {
-          // Check whether the operand is a NaN, store the result in a temporary value.
-          rhs = do_operator_ISNAN(rhs.as_integer());
-        }
-        else if(rhs.is_real()) {
-          // Check whether the operand is a NaN, store the result in a temporary value.
-          rhs = do_operator_ISNAN(rhs.as_real());
-        }
-        else
-          ASTERIA_THROW("prefix `__isnan` not applicable (operand was `$1`)", rhs);
+        switch(do_vmask_of(rhs)) {
+          case vmask_integer:
+            // An integer is never a NaN.
+            rhs = false;
+            break;
 
+          case vmask_real:
+            // Check whether the operand is a NaN, store the result in a temporary value.
+            rhs = ::std::isnan(rhs.as_real());
+            break;
+
+          default:
+            ASTERIA_THROW("prefix `__isnan` not applicable (operand was `$1`)", rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -2454,17 +2261,20 @@ struct AIR_Traits_Xop<xop_isinf> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        if(rhs.is_integer()) {
-          // Check whether the operand is an infinity, store the result in a temporary value.
-          rhs = do_operator_ISINF(rhs.as_integer());
-        }
-        else if(rhs.is_real()) {
-          // Check whether the operand is an infinity, store the result in a temporary value.
-          rhs = do_operator_ISINF(rhs.as_real());
-        }
-        else
-          ASTERIA_THROW("prefix `__isinf` not applicable (operand was `$1`)", rhs);
+        switch(do_vmask_of(rhs)) {
+          case vmask_integer:
+            // An integer is never an infinity.
+            rhs = false;
+            break;
 
+          case vmask_real:
+            // Check whether the operand is an infinity, store the result in a temporary value.
+            rhs = ::std::isinf(rhs.as_real());
+            break;
+
+          default:
+            ASTERIA_THROW("prefix `__isinf` not applicable (operand was `$1`)", rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -2481,17 +2291,20 @@ struct AIR_Traits_Xop<xop_abs> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        if(rhs.is_integer()) {
-          // Get the absolute value of the operand as a temporary value.
-          rhs = do_operator_ABS(rhs.as_integer());
-        }
-        else if(rhs.is_real()) {
-          // Get the absolute value of the operand as a temporary value.
-          rhs = do_operator_ABS(rhs.as_real());
-        }
-        else
-          ASTERIA_THROW("prefix `__abs` not applicable (operand was `$1`)", rhs);
+        switch(do_vmask_of(rhs)) {
+          case vmask_integer:
+            // Get the absolute value of the operand as a temporary value.
+            rhs = ::std::abs(do_check_neg(rhs.as_integer()));
+            break;
 
+          case vmask_real:
+            // Get the absolute value of the operand as a temporary value.
+            rhs = ::std::fabs(rhs.as_real());
+            break;
+
+          default:
+            ASTERIA_THROW("prefix `__abs` not applicable (operand was `$1`)", rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -2508,17 +2321,20 @@ struct AIR_Traits_Xop<xop_sign> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        if(rhs.is_integer()) {
-          // Get the sign bit of the operand as a temporary value.
-          rhs = do_operator_SIGN(rhs.as_integer());
-        }
-        else if(rhs.is_real()) {
-          // Get the sign bit of the operand as a temporary value.
-          rhs = do_operator_SIGN(rhs.as_real());
-        }
-        else
-          ASTERIA_THROW("prefix `__sign` not applicable (operand was `$1`)", rhs);
+        switch(do_vmask_of(rhs)) {
+          case vmask_integer:
+            // Get the sign bit of the operand as a temporary value.
+            rhs.open_integer() >>= 63;
+            break;
 
+          case vmask_real:
+            // Get the sign bit of the operand as a temporary value.
+            rhs = ::std::signbit(rhs.as_real()) ? INT64_C(-1) : 0;
+            break;
+
+          default:
+            ASTERIA_THROW("prefix `__sign` not applicable (operand was `$1`)", rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -2535,17 +2351,19 @@ struct AIR_Traits_Xop<xop_round> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        if(rhs.is_integer()) {
-          // No conversion is required.
-          // Return `rhs` as is.
-        }
-        else if(rhs.is_real()) {
-          // Round the operand to the nearest integer as a temporary value.
-          rhs = do_operator_ROUND(rhs.as_real());
-        }
-        else
-          ASTERIA_THROW("prefix `__round` not applicable (operand was `$1`)", rhs);
+        switch(do_vmask_of(rhs)) {
+          case vmask_integer:
+            // No conversion is needed.
+            break;
 
+          case vmask_real:
+            // Round the operand to the nearest integer as a temporary real.
+            rhs = ::std::round(rhs.as_real());
+            break;
+
+          default:
+            ASTERIA_THROW("prefix `__round` not applicable (operand was `$1`)", rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -2562,17 +2380,19 @@ struct AIR_Traits_Xop<xop_floor> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        if(rhs.is_integer()) {
-          // No conversion is required.
-          // Return `rhs` as is.
-        }
-        else if(rhs.is_real()) {
-          // Round the operand towards negative infinity as a temporary value.
-          rhs = do_operator_FLOOR(rhs.as_real());
-        }
-        else
-          ASTERIA_THROW("prefix `__floor` not applicable (operand was `$1`)", rhs);
+        switch(do_vmask_of(rhs)) {
+          case vmask_integer:
+            // No conversion is needed.
+            break;
 
+          case vmask_real:
+            // Round the operand towards positive infinity as a temporary real.
+            rhs = ::std::floor(rhs.as_real());
+            break;
+
+          default:
+            ASTERIA_THROW("prefix `__floor` not applicable (operand was `$1`)", rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -2589,17 +2409,19 @@ struct AIR_Traits_Xop<xop_ceil> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        if(rhs.is_integer()) {
-          // No conversion is required.
-          // Return `rhs` as is.
-        }
-        else if(rhs.is_real()) {
-          // Round the operand towards negative infinity as a temporary value.
-          rhs = do_operator_CEIL(rhs.as_real());
-        }
-        else
-          ASTERIA_THROW("prefix `__ceil` not applicable (operand was `$1`)", rhs);
+        switch(do_vmask_of(rhs)) {
+          case vmask_integer:
+            // No conversion is needed.
+            break;
 
+          case vmask_real:
+            // Round the operand towards negative infinity as a temporary real.
+            rhs = ::std::ceil(rhs.as_real());
+            break;
+
+          default:
+            ASTERIA_THROW("prefix `__ceil` not applicable (operand was `$1`)", rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -2616,17 +2438,19 @@ struct AIR_Traits_Xop<xop_trunc> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        if(rhs.is_integer()) {
-          // No conversion is required.
-          // Return `rhs` as is.
-        }
-        else if(rhs.is_real()) {
-          // Round the operand towards negative infinity as a temporary value.
-          rhs = do_operator_TRUNC(rhs.as_real());
-        }
-        else
-          ASTERIA_THROW("prefix `__trunc` not applicable (operand was `$1`)", rhs);
+        switch(do_vmask_of(rhs)) {
+          case vmask_integer:
+            // No conversion is needed.
+            break;
 
+          case vmask_real:
+            // Round the operand to zero as a temporary real.
+            rhs = ::std::trunc(rhs.as_real());
+            break;
+
+          default:
+            ASTERIA_THROW("prefix `__trunc` not applicable (operand was `$1`)", rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -2643,17 +2467,19 @@ struct AIR_Traits_Xop<xop_roundi> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        if(rhs.is_integer()) {
-          // No conversion is required.
-          // Return `rhs` as is.
-        }
-        else if(rhs.is_real()) {
-          // Round the operand to the nearest integer as a temporary value.
-          rhs = do_operator_ROUNDI(rhs.as_real());
-        }
-        else
-          ASTERIA_THROW("prefix `__roundi` not applicable (operand was `$1`)", rhs);
+        switch(do_vmask_of(rhs)) {
+          case vmask_integer:
+            // No conversion is needed.
+            break;
 
+          case vmask_real:
+            // Round the operand to the nearest integer as a temporary integer.
+            rhs = do_check_trunci(::std::round(rhs.as_real()));
+            break;
+
+          default:
+            ASTERIA_THROW("prefix `__roundi` not applicable (operand was `$1`)", rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -2670,17 +2496,19 @@ struct AIR_Traits_Xop<xop_floori> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        if(rhs.is_integer()) {
-          // No conversion is required.
-          // Return `rhs` as is.
-        }
-        else if(rhs.is_real()) {
-          // Round the operand towards negative infinity as a temporary value.
-          rhs = do_operator_FLOORI(rhs.as_real());
-        }
-        else
-          ASTERIA_THROW("prefix `__floori` not applicable (operand was `$1`)", rhs);
+        switch(do_vmask_of(rhs)) {
+          case vmask_integer:
+            // No conversion is needed.
+            break;
 
+          case vmask_real:
+            // Round the operand to negative infinity as a temporary integer.
+            rhs = do_check_trunci(::std::floor(rhs.as_real()));
+            break;
+
+          default:
+            ASTERIA_THROW("prefix `__floori` not applicable (operand was `$1`)", rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -2697,17 +2525,19 @@ struct AIR_Traits_Xop<xop_ceili> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        if(rhs.is_integer()) {
-          // No conversion is required.
-          // Return `rhs` as is.
-        }
-        else if(rhs.is_real()) {
-          // Round the operand towards negative infinity as a temporary value.
-          rhs = do_operator_CEILI(rhs.as_real());
-        }
-        else
-          ASTERIA_THROW("prefix `__ceili` not applicable (operand was `$1`)", rhs);
+        switch(do_vmask_of(rhs)) {
+          case vmask_integer:
+            // No conversion is needed.
+            break;
 
+          case vmask_real:
+            // Round the operand to positive infinity as a temporary integer.
+            rhs = do_check_trunci(::std::ceil(rhs.as_real()));
+            break;
+
+          default:
+            ASTERIA_THROW("prefix `__ceili` not applicable (operand was `$1`)", rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -2724,17 +2554,19 @@ struct AIR_Traits_Xop<xop_trunci> : AIR_Traits<AIR_Node::S_apply_operator>
         Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
-        if(rhs.is_integer()) {
-          // No conversion is required.
-          // Return `rhs` as is.
-        }
-        else if(rhs.is_real()) {
-          // Round the operand towards negative infinity as a temporary value.
-          rhs = do_operator_TRUNCI(rhs.as_real());
-        }
-        else
-          ASTERIA_THROW("prefix `__trunci` not applicable (operand was `$1`)", rhs);
+        switch(do_vmask_of(rhs)) {
+          case vmask_integer:
+            // No conversion is needed.
+            break;
 
+          case vmask_real:
+            // Round the operand to zero as a temporary integer.
+            rhs = do_check_trunci(rhs.as_real());
+            break;
+
+          default:
+            ASTERIA_THROW("prefix `__trunci` not applicable (operand was `$1`)", rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -2918,7 +2750,6 @@ struct AIR_Traits_Xop<xop_cmp_3way> : AIR_Traits<AIR_Node::S_apply_operator>
           default:
             ROCKET_ASSERT(false);
         }
-
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -2937,25 +2768,31 @@ struct AIR_Traits_Xop<xop_add> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(rhs.is_boolean() && lhs.is_boolean()) {
-          // For the `boolean` type, return the logical OR'd result of both operands.
-          rhs = do_operator_OR(lhs.as_boolean(), rhs.as_boolean());
-        }
-        else if(rhs.is_integer() && lhs.is_integer()) {
-          // For the `integer` type, return the sum of both operands.
-          rhs = do_operator_ADD(lhs.as_integer(), rhs.as_integer());
-        }
-        else if(rhs.is_convertible_to_real() && lhs.is_convertible_to_real()) {
-          // For the `integer` and `real` types, return the sum of both operands as `real`.
-          rhs = do_operator_ADD(lhs.convert_to_real(), rhs.convert_to_real());
-        }
-        else if(rhs.is_string() && lhs.is_string()) {
-          // For the `string` type, concatenate the operands in lexical order to create a new string.
-          rhs = do_operator_ADD(lhs.as_string(), rhs.as_string());
-        }
-        else
-          ASTERIA_THROW("infix addition not applicable (operands were `$1` and `$2`)", lhs, rhs);
+        switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
+          case vmask_boolean:
+            // For the `boolean` type, return the logical OR'd result of both operands.
+            rhs.open_boolean() |= lhs.as_boolean();
+            break;
 
+          case vmask_integer:
+            // For the `integer` type, return the sum of both operands.
+            rhs = do_check_add(lhs.as_integer(), rhs.as_integer());
+            break;
+
+          case vmask_integer | vmask_real:
+          case vmask_real:
+            // For the `integer` and `real` types, return the sum of both operands as `real`.
+            rhs.mutate_into_real() += lhs.convert_to_real();
+            break;
+
+          case vmask_string:
+            // For the `string` type, concatenate the operands in lexical order to create a new string.
+            rhs.open_string().insert(0, lhs.as_string());
+            break;
+
+          default:
+            ASTERIA_THROW("infix addition not applicable (operands were `$1` and `$2`)", lhs, rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -2974,21 +2811,26 @@ struct AIR_Traits_Xop<xop_sub> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(rhs.is_boolean() && lhs.is_boolean()) {
-          // For the `boolean` type, return the logical XOR'd result of both operands.
-          rhs = do_operator_XOR(lhs.as_boolean(), rhs.as_boolean());
-        }
-        else if(rhs.is_integer() && lhs.is_integer()) {
-          // For the `integer` type, return the difference of both operands.
-          rhs = do_operator_SUB(lhs.as_integer(), rhs.as_integer());
-        }
-        else if(rhs.is_convertible_to_real() && lhs.is_convertible_to_real()) {
-          // For the `integer` and `real` types, return the difference of both operands as `real`.
-          rhs = do_operator_SUB(lhs.convert_to_real(), rhs.convert_to_real());
-        }
-        else
-          ASTERIA_THROW("infix subtraction not applicable (operands were `$1` and `$2`)", lhs, rhs);
+        switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
+          case vmask_boolean:
+            // For the `boolean` type, return the logical XOR'd result of both operands.
+            rhs.open_boolean() ^= lhs.as_boolean();
+            break;
 
+          case vmask_integer:
+            // For the `integer` type, return the difference of both operands.
+            rhs = do_check_sub(lhs.as_integer(), rhs.as_integer());
+            break;
+
+          case vmask_integer | vmask_real:
+          case vmask_real:
+            // For the `integer` and `real` types, return the difference of both operands as `real`.
+            rhs = lhs.convert_to_real() - rhs.convert_to_real();
+            break;
+
+          default:
+            ASTERIA_THROW("infix subtraction not applicable (operands were `$1` and `$2`)", lhs, rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -3007,31 +2849,33 @@ struct AIR_Traits_Xop<xop_mul> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(rhs.is_boolean() && lhs.is_boolean()) {
-          // For the `boolean` type, return the logical AND'd result of both operands.
-          rhs = do_operator_AND(lhs.as_boolean(), rhs.as_boolean());
-        }
-        else if(rhs.is_integer() && lhs.is_integer()) {
-          // For the `integer` type, return the product of both operands.
-          rhs = do_operator_MUL(lhs.as_integer(), rhs.as_integer());
-        }
-        else if(rhs.is_convertible_to_real() && lhs.is_convertible_to_real()) {
-          // For the `integer` and `real` types, return the product of both operands as `real`.
-          rhs = do_operator_MUL(lhs.convert_to_real(), rhs.convert_to_real());
-        }
-        else if(rhs.is_integer() && lhs.is_string()) {
-          // If either operand has type `string` and the other has type `integer`, duplicate
-          // the string up to the specified number of times and return the result.
-          rhs = do_operator_MUL(lhs.as_string(), rhs.as_integer());
-        }
-        else if(rhs.is_string() && lhs.is_integer()) {
-          // If either operand has type `string` and the other has type `integer`, duplicate
-          // the string up to the specified number of times and return the result.
-          rhs = do_operator_MUL(lhs.as_integer(), rhs.as_string());
-        }
-        else
-          ASTERIA_THROW("infix multiplication not applicable (operands were `$1` and `$2`)", lhs, rhs);
+        switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
+          case vmask_boolean:
+            // For the `boolean` type, return the logical AND'd result of both operands.
+            rhs.open_boolean() &= lhs.as_boolean();
+            break;
 
+          case vmask_integer:
+            // For the `integer` type, return the product of both operands.
+            rhs = do_check_mul(lhs.as_integer(), rhs.as_integer());
+            break;
+
+          case vmask_integer | vmask_real:
+          case vmask_real:
+            // For the `integer` and `real` types, return the product of both operands as `real`.
+            rhs.mutate_into_real() *= lhs.convert_to_real();
+            break;
+
+          case vmask_integer | vmask_string:
+            // If either operand has type `string` and the other has type `integer`, duplicate
+            // the string up to the specified number of times and return the result.
+            rhs = lhs.is_string() ? do_string_dup(lhs.as_string(), rhs.as_integer())
+                                  : do_string_dup(rhs.as_string(), lhs.as_integer());
+            break;
+
+          default:
+            ASTERIA_THROW("infix multiplication not applicable (operands were `$1` and `$2`)", lhs, rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -3050,17 +2894,21 @@ struct AIR_Traits_Xop<xop_div> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(rhs.is_integer() && lhs.is_integer()) {
-          // For the `integer` type, return the quotient of both operands.
-          rhs = do_operator_DIV(lhs.as_integer(), rhs.as_integer());
-        }
-        else if(rhs.is_convertible_to_real() && lhs.is_convertible_to_real()) {
-          // For the `integer` and `real` types, return the quotient of both operands as `real`.
-          rhs = do_operator_DIV(lhs.convert_to_real(), rhs.convert_to_real());
-        }
-        else
-          ASTERIA_THROW("infix division not applicable (operands were `$1` and `$2`)", lhs, rhs);
+        switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
+          case vmask_integer:
+            // For the `integer` type, return the quotient of both operands.
+            rhs = do_check_div(lhs.as_integer(), rhs.as_integer());
+            break;
 
+          case vmask_integer | vmask_real:
+          case vmask_real:
+            // For the `integer` and `real` types, return the quotient of both operands as `real`.
+            rhs = lhs.convert_to_real() / rhs.convert_to_real();
+            break;
+
+          default:
+            ASTERIA_THROW("infix division not applicable (operands were `$1` and `$2`)", lhs, rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -3079,17 +2927,21 @@ struct AIR_Traits_Xop<xop_mod> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(rhs.is_integer() && lhs.is_integer()) {
-          // For the `integer` type, return the remainder of both operands.
-          rhs = do_operator_MOD(lhs.as_integer(), rhs.as_integer());
-        }
-        else if(rhs.is_convertible_to_real() && lhs.is_convertible_to_real()) {
-          // For the `integer` and `real` types, return the remainder of both operands.
-          rhs = do_operator_MOD(lhs.convert_to_real(), rhs.convert_to_real());
-        }
-        else
-          ASTERIA_THROW("infix modulo not applicable (operands were `$1` and `$2`)", lhs, rhs);
+        switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
+          case vmask_integer:
+            // For the `integer` type, return the remainder of both operands.
+            rhs = do_check_mod(lhs.as_integer(), rhs.as_integer());
+            break;
 
+          case vmask_integer | vmask_real:
+          case vmask_real:
+            // For the `integer` and `real` types, return the remainder of both operands.
+            rhs = ::std::fmod(lhs.convert_to_real(), rhs.convert_to_real());
+            break;
+
+          default:
+            ASTERIA_THROW("infix modulo not applicable (operands were `$1` and `$2`)", lhs, rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -3108,19 +2960,25 @@ struct AIR_Traits_Xop<xop_sll> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(rhs.is_integer() && lhs.is_integer()) {
-          // If the LHS operand has type `integer`, shift the LHS operand to the left by the number of bits
-          // specified by the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with zeroes.
-          rhs = do_operator_SLL(lhs.as_integer(), rhs.as_integer());
-        }
-        else if(rhs.is_integer() && lhs.is_string()) {
-          // If the LHS operand has type `string`, fill space characters in the right and discard characters from
-          // the left. The number of bytes in the LHS operand will be preserved.
-          rhs = do_operator_SLL(lhs.as_string(), rhs.as_integer());
-        }
-        else
-          ASTERIA_THROW("infix logical left shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+        if(!rhs.is_integer())
+          ASTERIA_THROW("shift count not an integer (operands were `$1` and `$2`)", lhs, rhs);
 
+        switch(do_vmask_of(lhs)) {
+          case vmask_integer:
+            // If the LHS operand has type `integer`, shift the LHS operand to the left by the number of bits
+            // specified by the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with zeroes.
+            rhs = do_check_sll(lhs.as_integer(), rhs.as_integer());
+            break;
+
+          case vmask_string:
+            // If the LHS operand has type `string`, fill space characters in the right and discard characters from
+            // the left. The number of bytes in the LHS operand will be preserved.
+            rhs = do_string_sll(lhs.as_string(), rhs.as_integer());
+            break;
+
+          default:
+            ASTERIA_THROW("infix logical left shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -3139,19 +2997,25 @@ struct AIR_Traits_Xop<xop_srl> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(rhs.is_integer() && lhs.is_integer()) {
-          // If the LHS operand has type `integer`, shift the LHS operand to the right by the number of bits
-          // specified by the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with zeroes.
-          rhs = do_operator_SRL(lhs.as_integer(), rhs.as_integer());
-        }
-        else if(rhs.is_integer() && lhs.is_string()) {
-          // If the LHS operand has type `string`, fill space characters in the left and discard characters from
-          // the right. The number of bytes in the LHS operand will be preserved.
-          rhs = do_operator_SRL(lhs.as_string(), rhs.as_integer());
-        }
-        else
-          ASTERIA_THROW("infix logical right shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+        if(!rhs.is_integer())
+          ASTERIA_THROW("shift count not an integer (operands were `$1` and `$2`)", lhs, rhs);
 
+        switch(do_vmask_of(lhs)) {
+          case vmask_integer:
+            // If the LHS operand has type `integer`, shift the LHS operand to the right by the number of bits
+            // specified by the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with zeroes.
+            rhs = do_check_srl(lhs.as_integer(), rhs.as_integer());
+            break;
+
+          case vmask_string:
+            // If the LHS operand has type `string`, fill space characters in the left and discard characters from
+            // the right. The number of bytes in the LHS operand will be preserved.
+            rhs = do_string_srl(lhs.as_string(), rhs.as_integer());
+            break;
+
+          default:
+            ASTERIA_THROW("infix logical right shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -3170,20 +3034,26 @@ struct AIR_Traits_Xop<xop_sla> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(rhs.is_integer() && lhs.is_integer()) {
-          // If the LHS operand is of type `integer`, shift the LHS operand to the left by the number of bits
-          // specified by the RHS operand. Bits shifted out that are equal to the sign bit are discarded. Bits
-          // shifted in are filled with zeroes. If any bits that are different from the sign bit would be shifted
-          // out, an exception is thrown.
-          rhs = do_operator_SLA(lhs.as_integer(), rhs.as_integer());
-        }
-        else if(rhs.is_integer() && lhs.is_string()) {
-          // If the LHS operand has type `string`, fill space characters in the right.
-          rhs = do_operator_SLA(lhs.as_string(), rhs.as_integer());
-        }
-        else
-          ASTERIA_THROW("infix arithmetic left shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+        if(!rhs.is_integer())
+          ASTERIA_THROW("shift count not an integer (operands were `$1` and `$2`)", lhs, rhs);
 
+        switch(do_vmask_of(lhs)) {
+          case vmask_integer:
+            // If the LHS operand is of type `integer`, shift the LHS operand to the left by the number of bits
+            // specified by the RHS operand. Bits shifted out that are equal to the sign bit are discarded. Bits
+            // shifted in are filled with zeroes. If any bits that are different from the sign bit would be shifted
+            // out, an exception is thrown.
+            rhs = do_check_sla(lhs.as_integer(), rhs.as_integer());
+            break;
+
+          case vmask_string:
+            // If the LHS operand has type `string`, fill space characters in the right.
+            rhs = do_string_sla(lhs.as_string(), rhs.as_integer());
+            break;
+
+          default:
+            ASTERIA_THROW("infix arithmetic left shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -3202,19 +3072,25 @@ struct AIR_Traits_Xop<xop_sra> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(rhs.is_integer() && lhs.is_integer()) {
-          // If the LHS operand is of type `integer`, shift the LHS operand to the right by the number of bits
-          // specified by the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with the
-          // sign bit.
-          rhs = do_operator_SRA(lhs.as_integer(), rhs.as_integer());
-        }
-        else if(rhs.is_integer() && lhs.is_string()) {
-          // If the LHS operand has type `string`, discard characters from the right.
-          rhs = do_operator_SRA(lhs.as_string(), rhs.as_integer());
-        }
-        else
-          ASTERIA_THROW("infix arithmetic right shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+        if(!rhs.is_integer())
+          ASTERIA_THROW("shift count not an integer (operands were `$1` and `$2`)", lhs, rhs);
 
+        switch(do_vmask_of(lhs)) {
+          case vmask_integer:
+            // If the LHS operand is of type `integer`, shift the LHS operand to the right by the number of bits
+            // specified by the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with the
+            // sign bit.
+            rhs = do_check_sra(lhs.as_integer(), rhs.as_integer());
+            break;
+
+          case vmask_string:
+            // If the LHS operand has type `string`, discard characters from the right.
+            rhs = do_string_sra(lhs.as_string(), rhs.as_integer());
+            break;
+
+          default:
+            ASTERIA_THROW("infix arithmetic right shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -3233,22 +3109,26 @@ struct AIR_Traits_Xop<xop_andb> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(rhs.is_boolean() && lhs.is_boolean()) {
-          // For the `boolean` type, return the logical AND'd result of both operands.
-          rhs = do_operator_AND(lhs.as_boolean(), rhs.as_boolean());
-        }
-        else if(rhs.is_integer() && lhs.is_integer()) {
-          // For the `integer` type, return bitwise AND'd result of both operands.
-          rhs = do_operator_AND(lhs.as_integer(), rhs.as_integer());
-        }
-        else if(rhs.is_string() && lhs.is_string()) {
-          // For the `string` type, return bitwise AND'd result of bytes from operands.
-          // The result contains no more bytes than either operand.
-          rhs = do_operator_AND(lhs.as_string(), ::std::move(rhs.open_string()));
-        }
-        else
-          ASTERIA_THROW("infix bitwise AND not applicable (operands were `$1` and `$2`)", lhs, rhs);
+        switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
+          case vmask_boolean:
+            // For the `boolean` type, return the logical AND'd result of both operands.
+            rhs.open_boolean() &= lhs.as_boolean();
+            break;
 
+          case vmask_integer:
+            // For the `integer` type, return bitwise AND'd result of both operands.
+            rhs.open_integer() &= lhs.as_integer();
+            break;
+
+          case vmask_string:
+            // For the `string` type, return bitwise AND'd result of bytes from operands.
+            // The result contains no more bytes than either operand.
+            rhs = do_string_andb(lhs.as_string(), ::std::move(rhs.open_string()));
+            break;
+
+          default:
+            ASTERIA_THROW("infix bitwise AND not applicable (operands were `$1` and `$2`)", lhs, rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -3267,22 +3147,26 @@ struct AIR_Traits_Xop<xop_orb> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(rhs.is_boolean() && lhs.is_boolean()) {
-          // For the `boolean` type, return the logical OR'd result of both operands.
-          rhs = do_operator_OR(lhs.as_boolean(), rhs.as_boolean());
-        }
-        else if(rhs.is_integer() && lhs.is_integer()) {
-          // For the `integer` type, return bitwise OR'd result of both operands.
-          rhs = do_operator_OR(lhs.as_integer(), rhs.as_integer());
-        }
-        else if(rhs.is_string() && lhs.is_string()) {
-          // For the `string` type, return bitwise OR'd result of bytes from operands.
-          // The result contains no fewer bytes than either operand.
-          rhs = do_operator_OR(lhs.as_string(), ::std::move(rhs.open_string()));
-        }
-        else
-          ASTERIA_THROW("infix bitwise OR not applicable (operands were `$1` and `$2`)", lhs, rhs);
+        switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
+          case vmask_boolean:
+            // For the `boolean` type, return the logical OR'd result of both operands.
+            rhs.open_boolean() |= lhs.as_boolean();
+            break;
 
+          case vmask_integer:
+            // For the `integer` type, return bitwise OR'd result of both operands.
+            rhs.open_integer() |= lhs.as_integer();
+            break;
+
+          case vmask_string:
+            // For the `string` type, return bitwise OR'd result of bytes from operands.
+            // The result contains no fewer bytes than either operand.
+            rhs = do_string_orb(lhs.as_string(), ::std::move(rhs.open_string()));
+            break;
+
+          default:
+            ASTERIA_THROW("infix bitwise OR not applicable (operands were `$1` and `$2`)", lhs, rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -3301,22 +3185,26 @@ struct AIR_Traits_Xop<xop_xorb> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(rhs.is_boolean() && lhs.is_boolean()) {
-          // For the `boolean` type, return the logical XOR'd result of both operands.
-          rhs = do_operator_XOR(lhs.as_boolean(), rhs.as_boolean());
-        }
-        else if(rhs.is_integer() && lhs.is_integer()) {
-          // For the `integer` type, return bitwise XOR'd result of both operands.
-          rhs = do_operator_XOR(lhs.as_integer(), rhs.as_integer());
-        }
-        else if(rhs.is_string() && lhs.is_string()) {
-          // For the `string` type, return bitwise XOR'd result of bytes from operands.
-          // The result contains no fewer bytes than either operand.
-          rhs = do_operator_XOR(lhs.as_string(), ::std::move(rhs.open_string()));
-        }
-        else
-          ASTERIA_THROW("infix bitwise XOR not applicable (operands were `$1` and `$2`)", lhs, rhs);
+        switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
+          case vmask_boolean:
+            // For the `boolean` type, return the logical XOR'd result of both operands.
+            rhs.open_boolean() ^= lhs.as_boolean();
+            break;
 
+          case vmask_integer:
+            // For the `integer` type, return bitwise XOR'd result of both operands.
+            rhs.open_integer() ^= lhs.as_integer();
+            break;
+
+          case vmask_string:
+            // For the `string` type, return bitwise XOR'd result of bytes from operands.
+            // The result contains no fewer bytes than either operand.
+            rhs = do_string_xorb(lhs.as_string(), ::std::move(rhs.open_string()));
+            break;
+
+          default:
+            ASTERIA_THROW("infix bitwise XOR not applicable (operands were `$1` and `$2`)", lhs, rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -3354,13 +3242,17 @@ struct AIR_Traits_Xop<xop_fma> : AIR_Traits<AIR_Node::S_apply_operator>
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
 
-        if(rhs.is_convertible_to_real() && mid.is_convertible_to_real() && lhs.is_convertible_to_real()) {
-          // Calculate the fused multiply-add result of the operands.
-          rhs = ::std::fma(lhs.convert_to_real(), mid.convert_to_real(), rhs.convert_to_real());
-        }
-        else
-          ASTERIA_THROW("fused multiply-add not applicable (operands were `$1`, `$2` and `$3`)", lhs, mid, rhs);
+        switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
+          case vmask_integer:
+          case vmask_integer | vmask_real:
+          case vmask_real:
+            // Calculate the fused multiply-add result of the operands.
+            rhs = ::std::fma(lhs.convert_to_real(), mid.convert_to_real(), rhs.convert_to_real());
+            break;
 
+          default:
+            ASTERIA_THROW("fused multiply-add not applicable (operands were `$1`, `$2` and `$3`)", lhs, mid, rhs);
+        }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
       }
@@ -3468,7 +3360,7 @@ struct AIR_Traits<AIR_Node::S_unpack_struct_object>
     make_uparam(bool& /*reachable*/, const AIR_Node::S_unpack_struct_object& altr)
       {
         AVMC_Queue::Uparam up;
-        up.v8s[0] = altr.immutable;
+        up.y8s[0] = altr.immutable;
         return up;
       }
 
@@ -3514,9 +3406,9 @@ struct AIR_Traits<AIR_Node::S_unpack_struct_object>
           ROCKET_ASSERT(var && !var->is_initialized());
           auto qinit = obj.mut_ptr(*it);
           if(qinit)
-            var->initialize(::std::move(*qinit), up.v8s[0]);
+            var->initialize(::std::move(*qinit), up.y8s[0]);
           else
-            var->initialize(V_null(), up.v8s[0]);
+            var->initialize(V_null(), up.y8s[0]);
         }
         return air_status_next;
       }
