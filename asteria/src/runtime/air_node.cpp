@@ -1305,9 +1305,9 @@ do_pop_positional_arguments(Executive_Context& ctx, size_t nargs)
       // Get an argument. Ensure it is dereferenceable.
       auto& arg = ctx.stack().open_top();
       static_cast<void>(arg.read());
+
       // Set the argument as is.
       args.mut(i) = ::std::move(arg);
-      args.mut(i) = ::std::move(ctx.stack().open_top());
       ctx.stack().pop();
     }
     return args;
