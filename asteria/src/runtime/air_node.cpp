@@ -2018,12 +2018,12 @@ struct AIR_Traits_Xop<xop_notb> : AIR_Traits<AIR_Node::S_apply_operator>
         switch(do_vmask_of(rhs)) {
           case vmask_boolean:
             // Perform logical NOT operation on the operand to create a temporary value.
-            rhs = !rhs.as_boolean();
+            rhs.open_boolean() ^= true;
             break;
 
           case vmask_integer:
             // Perform bitwise NOT operation on the operand to create a temporary value.
-            rhs = ~rhs.as_integer();
+            rhs.open_integer() ^= -1;
             break;
 
           case vmask_string:
