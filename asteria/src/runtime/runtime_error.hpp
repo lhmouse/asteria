@@ -60,6 +60,7 @@ class Runtime_Error
         size_t ipos = this->m_ipos;
         this->m_frames.insert(ipos, Backtrace_Frame(::std::forward<ParamsT>(params)...));
         this->m_ipos = ipos + 1;
+
         // Rebuild the message using new frames.
         this->do_compose_message();
       }
