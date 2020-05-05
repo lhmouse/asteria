@@ -36,43 +36,53 @@ class Value
 
     Value(bool xval)
     noexcept
-      : m_stor(V_boolean(xval))  { }
+      : m_stor(V_boolean(xval))
+      { }
 
     Value(signed char xval)
     noexcept
-      : m_stor(V_integer(xval))  { }
+      : m_stor(V_integer(xval))
+      { }
 
     Value(signed short xval)
     noexcept
-      : m_stor(V_integer(xval))  { }
+      : m_stor(V_integer(xval))
+      { }
 
     Value(signed xval)
     noexcept
-      : m_stor(V_integer(xval))  { }
+      : m_stor(V_integer(xval))
+      { }
 
     Value(signed long xval)
     noexcept
-      : m_stor(V_integer(xval))  { }
+      : m_stor(V_integer(xval))
+      { }
 
     Value(signed long long xval)
     noexcept
-      : m_stor(V_integer(xval))  { }
+      : m_stor(V_integer(xval))
+      { }
 
     Value(float xval)
     noexcept
-      : m_stor(V_real(xval))  { }
+      : m_stor(V_real(xval))
+      { }
 
     Value(double xval)
     noexcept
-      : m_stor(V_real(xval))  { }
+      : m_stor(V_real(xval))
+      { }
 
     Value(cow_string xval)
     noexcept
-      : m_stor(::std::move(xval))  { }
+      : m_stor(::std::move(xval))
+      { }
 
     Value(cow_string::shallow_type xval)
     noexcept
-      : m_stor(V_string(xval))  { }
+      : m_stor(V_string(xval))
+      { }
 
     Value(cow_opaque xval)
     noexcept
@@ -96,18 +106,22 @@ class Value
 
     Value(cow_vector<Value> xval)
     noexcept
-      : m_stor(::std::move(xval))  { }
+      : m_stor(::std::move(xval))
+      { }
 
     Value(cow_dictionary<Value> xval)
     noexcept
-      : m_stor(::std::move(xval))  { }
+      : m_stor(::std::move(xval))
+      { }
 
     Value(initializer_list<Value> list)
-      : m_stor(V_array(list.begin(), list.end()))  { }
+      : m_stor(V_array(list.begin(), list.end()))
+      { }
 
     template<typename KeyT>
     Value(initializer_list<pair<KeyT, Value>> list)
-      : m_stor(V_object(list.begin(), list.end()))  { }
+      : m_stor(V_object(list.begin(), list.end()))
+      { }
 
     Value(const opt<bool>& xval)
     noexcept
