@@ -72,6 +72,21 @@ Report bugs to <%s>.
     ::exit(0);
   }
 
+const char*
+do_tell_build_time()
+  {
+    static char s_time_str[64];
+    if(ROCKET_EXPECT(s_time_str[0]))
+      return s_time_str;
+
+    // Convert the build time to ISO 8601 format.
+    ::tm tr;
+    ::std::memset(&tr, 0, sizeof(tr));
+    ::strptime(__DATE__ " " __TIME__, "%b %d %Y %H:%M:%S", &tr);
+    ::strftime(s_time_str, sizeof(s_time_str), "%Y-%m-%d %H:%M:%S", &tr);
+    return s_time_str;
+  }
+
 [[noreturn]]
 int
 do_print_version_and_exit()
@@ -87,7 +102,7 @@ Report bugs to <%s>.
 )'''''''''''''''" """"""""""""""""""""""""""""""""""""""""""""""""""""""""+1,
 // 3456789012345678901234567890123456789012345678901234567890123456789012345|
 //        1         2         3         4         5         6         7     |
-      PACKAGE_STRING, __DATE__,
+      PACKAGE_STRING, do_tell_build_time(),
       PACKAGE_URL,
       PACKAGE_BUGREPORT);
 
@@ -521,8 +536,8 @@ do_repl_noreturn()
 )'''''''''''''''" """"""""""""""""""""""""""""""""""""""""""""""""""""""""+1,
 // 34567890123456789012345678901234567890123456789012345678901234567890123456|
 //        1         2         3         4         5         6         7      |
-PACKAGE_STRING, __DATE__,
-::setlocale(LC_ALL, nullptr)
+      PACKAGE_STRING, do_tell_build_time(),
+      ::setlocale(LC_ALL, nullptr)
     );
 
     // Trap Ctrl-C. Failure to set the signal handler is ignored.
