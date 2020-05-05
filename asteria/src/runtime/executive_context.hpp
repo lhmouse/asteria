@@ -10,7 +10,7 @@
 #include "evaluation_stack.hpp"
 #include "enums.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Executive_Context
   : public Abstract_Context
@@ -142,6 +142,6 @@ class Executive_Context
       }
   };
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

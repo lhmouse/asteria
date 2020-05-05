@@ -4,7 +4,7 @@
 #include "../precompiled.hpp"
 #include "runtime_error.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 static_assert(::std::is_nothrow_copy_constructible<Runtime_Error>::value &&
               ::std::is_nothrow_move_constructible<Runtime_Error>::value &&
@@ -65,4 +65,4 @@ do_compose_message()
     this->m_what = fmt.extract_string();
   }
 
-}  // namespace Asteria
+}  // namespace asteria

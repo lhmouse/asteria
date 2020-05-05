@@ -8,7 +8,7 @@
 #include "../runtime/enums.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 Precedence
 Infix_Element::
@@ -200,4 +200,4 @@ noexcept
     }
   }
 
-}  // namespace Asteria
+}  // namespace asteria

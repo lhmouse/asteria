@@ -5,7 +5,7 @@
 #include "recursion_sentry.hpp"
 #include "utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 void
 Recursion_Sentry::
@@ -15,4 +15,4 @@ const
     ASTERIA_THROW("stack overflow averted (stack usage `$1` exceeded `$2`)", usage, limit);
   }
 
-}  // namespace Asteria
+}  // namespace asteria

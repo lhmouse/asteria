@@ -8,7 +8,7 @@
 #include "../runtime/runtime_error.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 struct AVMC_Queue::Header
   {
@@ -280,4 +280,4 @@ const
     return callback;
   }
 
-}  // namespace Asteria
+}  // namespace asteria

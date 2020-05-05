@@ -8,7 +8,7 @@
 #include "reference.hpp"
 #include "../source_location.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Variadic_Arguer
 final
@@ -86,6 +86,6 @@ final
     const override;
   };
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

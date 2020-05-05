@@ -7,7 +7,7 @@
 #include <sys/stat.h>
 #include <unistd.h>  // ::fstat()
 
-namespace Asteria {
+namespace asteria {
 
 Loader_Lock::
 ~Loader_Lock()
@@ -48,4 +48,4 @@ noexcept
     ROCKET_ASSERT(count == 1);
   }
 
-}  // namespace Asteria
+}  // namespace asteria

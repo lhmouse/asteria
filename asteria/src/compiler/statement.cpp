@@ -11,7 +11,7 @@
 #include "../runtime/enums.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 namespace {
 
 void
@@ -556,4 +556,4 @@ const
     }
   }
 
-}  // namespace Asteria
+}  // namespace asteria

@@ -7,7 +7,7 @@
 #include "../fwd.hpp"
 #include "../runtime/reference.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Reference_Dictionary
   {
@@ -208,6 +208,6 @@ swap(Reference_Dictionary& lhs, Reference_Dictionary& rhs)
 noexcept
   { lhs.swap(rhs);  }
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

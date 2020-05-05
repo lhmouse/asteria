@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-using namespace Asteria;
+using namespace asteria;
 
 namespace {
 

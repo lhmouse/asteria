@@ -7,7 +7,7 @@
 #include "variable_callback.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 namespace {
 
 class Sentry
@@ -285,4 +285,4 @@ noexcept
     return *this;
   }
 
-}  // namespace Asteria
+}  // namespace asteria

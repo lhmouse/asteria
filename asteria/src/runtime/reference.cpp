@@ -13,7 +13,7 @@
 #include "enums.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 namespace {
 
 Reference&
@@ -196,4 +196,4 @@ const
     return this->m_root.enumerate_variables(callback);
   }
 
-}  // namespace Asteria
+}  // namespace asteria

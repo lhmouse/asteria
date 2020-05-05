@@ -4,11 +4,11 @@
 #include "../precompiled.hpp"
 #include "evaluation_stack.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 Evaluation_Stack::
 ~Evaluation_Stack()
   {
   }
 
-}  // namespace Asteria
+}  // namespace asteria

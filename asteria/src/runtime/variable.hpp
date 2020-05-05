@@ -7,7 +7,7 @@
 #include "../fwd.hpp"
 #include "../value.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Variable
 final
@@ -119,6 +119,6 @@ final
     const;
   };
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

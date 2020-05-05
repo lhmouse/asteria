@@ -7,7 +7,7 @@
 #include "../fwd.hpp"
 #include "../llds/reference_dictionary.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Abstract_Context
   {
@@ -76,6 +76,6 @@ class Abstract_Context
       { return this->m_named_refs.clear(), *this;  }
   };
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

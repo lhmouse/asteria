@@ -9,7 +9,7 @@
 #include "../source_location.hpp"
 #include <exception>
 
-namespace Asteria {
+namespace asteria {
 
 class Backtrace_Frame
   {
@@ -63,6 +63,6 @@ class Backtrace_Frame
       { return this->m_value;  }
   };
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

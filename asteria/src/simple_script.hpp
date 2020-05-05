@@ -6,7 +6,7 @@
 
 #include "fwd.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Simple_Script
   {
@@ -90,6 +90,6 @@ class Simple_Script
     const;
   };
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

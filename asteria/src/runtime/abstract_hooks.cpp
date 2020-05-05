@@ -5,11 +5,11 @@
 #include "abstract_hooks.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 Abstract_Hooks::
 ~Abstract_Hooks()
   {
   }
 
-}  // namespace Asteria
+}  // namespace asteria

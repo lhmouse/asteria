@@ -5,7 +5,7 @@
 #include "variable.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 Variable::
 ~Variable()
@@ -20,4 +20,4 @@ const
     return this->m_value.enumerate_variables(callback);
   }
 
-}  // namespace Asteria
+}  // namespace asteria

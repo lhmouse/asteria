@@ -6,7 +6,7 @@
 
 #include "../fwd.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 // `std.system.gc_count_variables`
 optV_integer
@@ -48,6 +48,6 @@ std_system_uuid(Global_Context& global, optV_boolean lowercase);
 void
 create_bindings_system(V_object& result, API_Version version);
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

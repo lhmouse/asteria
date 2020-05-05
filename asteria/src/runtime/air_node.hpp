@@ -9,7 +9,7 @@
 #include "../value.hpp"
 #include "../source_location.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class AIR_Node
   {
@@ -374,6 +374,6 @@ swap(AIR_Node& lhs, AIR_Node& rhs)
 noexcept
   { lhs.swap(rhs);  }
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

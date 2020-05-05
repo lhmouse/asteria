@@ -8,7 +8,7 @@
 #include "../llds/avmc_queue.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 namespace {
 
 template<typename XRefT>
@@ -191,4 +191,4 @@ do_lazy_lookup_opt(const phsh_string& name)
     return nullptr;
   }
 
-}  // namespace Asteria
+}  // namespace asteria

@@ -6,7 +6,7 @@
 
 #include "fwd.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Source_Location
   {
@@ -73,6 +73,6 @@ tinyfmt&
 operator<<(tinyfmt& fmt, const Source_Location& sloc)
   { return sloc.print(fmt);  }
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

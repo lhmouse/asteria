@@ -8,7 +8,7 @@
 #include "collector.hpp"
 #include "../llds/variable_hashset.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Genius_Collector
 final
@@ -67,6 +67,6 @@ final
     noexcept;
   };
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

@@ -10,7 +10,7 @@
 #include "ptc_arguments.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 Instantiated_Function::
 ~Instantiated_Function()
@@ -102,4 +102,4 @@ const
     return self;
   }
 
-}  // namespace Asteria
+}  // namespace asteria

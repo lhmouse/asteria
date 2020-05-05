@@ -8,7 +8,7 @@
 #include "parser_error.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 namespace {
 
 class Line_Reader
@@ -819,4 +819,4 @@ reload(tinybuf& cbuf, const cow_string& file)
     return *this;
   }
 
-}  // namespace Asteria
+}  // namespace asteria

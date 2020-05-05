@@ -6,7 +6,7 @@
 
 #include "../fwd.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 // `std.numeric.abs`
 V_integer
@@ -203,6 +203,6 @@ std_numeric_parse_real(V_string text, optV_boolean saturating);
 void
 create_bindings_numeric(V_object& result, API_Version version);
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

@@ -8,7 +8,7 @@
 #include "../rocket/tinyfmt_str.hpp"
 #include "../rocket/format.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 // Error handling
 ptrdiff_t
@@ -26,15 +26,15 @@ format_string(const ParamsT&... params)
   }
 
 // Note the format string must be a string literal.
-#define ASTERIA_TERMINATE(...)     (::Asteria::write_log_to_stderr(__FILE__, __LINE__,  \
-                                      __func__ + ::Asteria::format_string(": " __VA_ARGS__)  \
+#define ASTERIA_TERMINATE(...)     (::asteria::write_log_to_stderr(__FILE__, __LINE__,  \
+                                      __func__ + ::asteria::format_string(": " __VA_ARGS__)  \
                                                + "\nThis is likely a bug. Please report."),  \
                                     ::std::terminate())
 
 // Note the format string must be a string literal.
 #define ASTERIA_THROW(...)         (::rocket::sprintf_and_throw<::std::runtime_error>(  \
                                       "%s: %s\n[thrown from native code at '%s:%ld']", __func__,  \
-                                        ::Asteria::format_string("" __VA_ARGS__).c_str(), __FILE__,  \
+                                        ::asteria::format_string("" __VA_ARGS__).c_str(), __FILE__,  \
                                         static_cast<long>(__LINE__)))
 
 // UTF-8 conversion functions
@@ -169,8 +169,8 @@ throw_system_error(const char* func, int err);
 void
 throw_system_error(const char* func);
 
-#define ASTERIA_THROW_SYSTEM_ERROR(...)       (::Asteria::throw_system_error(__VA_ARGS__))
+#define ASTERIA_THROW_SYSTEM_ERROR(...)       (::asteria::throw_system_error(__VA_ARGS__))
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

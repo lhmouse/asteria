@@ -6,7 +6,7 @@
 
 #include "../fwd.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Abstract_Hooks
   : public Rcfwd<Abstract_Hooks>
@@ -71,6 +71,6 @@ class Abstract_Hooks
       }
   };
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

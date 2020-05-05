@@ -7,7 +7,7 @@
 #include "../utilities.hpp"
 #include <time.h>  // ::clock_gettime(), ::timespec
 
-namespace Asteria {
+namespace asteria {
 namespace {
 
 constexpr int64_t s_timestamp_min = -11644473600'000;
@@ -636,4 +636,4 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
       ));
   }
 
-}  // namespace Asteria
+}  // namespace asteria

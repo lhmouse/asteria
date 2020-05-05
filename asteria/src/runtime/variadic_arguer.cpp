@@ -7,7 +7,7 @@
 #include "argument_reader.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 tinyfmt&
 Variadic_Arguer::
@@ -53,4 +53,4 @@ const
     reader.throw_no_matching_function_call();
   }
 
-}  // namespace Asteria
+}  // namespace asteria

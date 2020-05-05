@@ -8,7 +8,7 @@
 #include "../recursion_sentry.hpp"
 #include "token.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Token_Stream
   {
@@ -112,6 +112,6 @@ class Token_Stream
     reload(tinybuf& cbuf, const cow_string& file);
   };
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

@@ -7,7 +7,7 @@
 #include "../utilities.hpp"
 #include <regex>
 
-namespace Asteria {
+namespace asteria {
 namespace {
 
 pair<V_string::const_iterator, V_string::const_iterator>
@@ -3608,4 +3608,4 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       ));
   }
 
-}  // namespace Asteria
+}  // namespace asteria

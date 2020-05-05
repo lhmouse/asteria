@@ -7,7 +7,7 @@
 #include "../fwd.hpp"
 #include "../source_location.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Infix_Element
   {
@@ -125,6 +125,6 @@ swap(Infix_Element& lhs, Infix_Element& rhs)
 noexcept
   { lhs.swap(rhs);  }
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

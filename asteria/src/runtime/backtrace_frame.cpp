@@ -5,11 +5,11 @@
 #include "backtrace_frame.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 Backtrace_Frame::
 ~Backtrace_Frame()
   {
   }
 
-}  // namespace Asteria
+}  // namespace asteria

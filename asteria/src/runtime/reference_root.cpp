@@ -9,7 +9,7 @@
 #include "ptc_arguments.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 const Value&
 Reference_root::
@@ -130,4 +130,4 @@ const
     }
   }
 
-}  // namespace Asteria
+}  // namespace asteria

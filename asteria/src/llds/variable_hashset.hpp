@@ -7,7 +7,7 @@
 #include "../fwd.hpp"
 #include "../runtime/variable.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Variable_HashSet
   {
@@ -224,6 +224,6 @@ swap(Variable_HashSet& lhs, Variable_HashSet& rhs)
 noexcept
   { lhs.swap(rhs);  }
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

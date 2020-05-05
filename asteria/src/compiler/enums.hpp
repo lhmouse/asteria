@@ -6,7 +6,7 @@
 
 #include "../fwd.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 // Punctuators
 enum Punctuator : uint8_t
@@ -161,6 +161,6 @@ enum Precedence : uint8_t
     precedence_lowest          = 99,
   };
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

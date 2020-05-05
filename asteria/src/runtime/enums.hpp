@@ -6,7 +6,7 @@
 
 #include "../fwd.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 // Operators
 enum Xop : uint8_t
@@ -90,6 +90,6 @@ enum PTC_Aware : uint8_t
     ptc_aware_void    = 3,  // The call is forwarded but its result is discarded.
   };
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

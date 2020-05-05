@@ -5,7 +5,7 @@
 #include "argument_reader.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 Argument_Reader::
 ~Argument_Reader()
@@ -658,4 +658,4 @@ const
     ASTERIA_THROW("no matching function call for `$1($2)`$3", this->m_name, args_str, ovlds_str);
   }
 
-}  // namespace Asteria
+}  // namespace asteria

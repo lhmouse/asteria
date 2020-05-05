@@ -7,7 +7,7 @@
 #include "../fwd.hpp"
 #include "air_node.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class AIR_Optimizer
   {
@@ -75,6 +75,6 @@ class AIR_Optimizer
     create_function(const Source_Location& sloc, const cow_string& name);
   };
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

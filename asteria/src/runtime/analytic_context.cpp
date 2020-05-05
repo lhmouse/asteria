@@ -5,7 +5,7 @@
 #include "analytic_context.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 Analytic_Context::
 ~Analytic_Context()
@@ -41,4 +41,4 @@ do_prepare_function(const cow_vector<phsh_string>& params)
     this->open_named_reference(::rocket::sref("__func")) /*= Reference_root::S_void()*/;
   }
 
-}  // namespace Asteria
+}  // namespace asteria

@@ -4,7 +4,7 @@
 #include "utilities.hpp"
 #include "../src/runtime/variable.hpp"
 
-using namespace Asteria;
+using namespace asteria;
 
 int main()
   {

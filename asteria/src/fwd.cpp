@@ -7,7 +7,7 @@
 #include "value.hpp"
 #include "utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 Rcbase::
 ~Rcbase()
@@ -351,4 +351,4 @@ noexcept
 // This is effectively undefined behavior. Don't play with this at home!
 alignas(Value) const unsigned char null_value_storage[sizeof(Value)] = { };
 
-}  // namespace Asteria
+}  // namespace asteria

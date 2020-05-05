@@ -7,7 +7,7 @@
 #include "../src/runtime/genius_collector.hpp"
 #include "../src/runtime/variable.hpp"
 
-using namespace Asteria;
+using namespace asteria;
 
 ::std::atomic<long> bcnt;
 

@@ -8,7 +8,7 @@
 #include "../compiler/statement.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 AIR_Optimizer::
 ~AIR_Optimizer()
@@ -79,4 +79,4 @@ create_function(const Source_Location& sloc, const cow_string& name)
                          this->m_code);
   }
 
-}  // namespace Asteria
+}  // namespace asteria

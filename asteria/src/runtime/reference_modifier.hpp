@@ -6,7 +6,7 @@
 
 #include "../fwd.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Reference_modifier
   {
@@ -98,6 +98,6 @@ swap(Reference_modifier& lhs, Reference_modifier& rhs)
 noexcept
   { lhs.swap(rhs);  }
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

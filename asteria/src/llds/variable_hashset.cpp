@@ -6,7 +6,7 @@
 #include "../runtime/variable_callback.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 void
 Variable_HashSet::
@@ -209,4 +209,4 @@ const
     return callback;
   }
 
-}  // namespace Asteria
+}  // namespace asteria

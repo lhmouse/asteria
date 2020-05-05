@@ -5,11 +5,11 @@
 #include "abstract_context.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 Abstract_Context::
 ~Abstract_Context()
   {
   }
 
-}  // namespace Asteria
+}  // namespace asteria

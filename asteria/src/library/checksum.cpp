@@ -7,7 +7,7 @@
 #include "../runtime/global_context.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 namespace {
 
 template<uint32_t valueT, uint32_t divisorT, int roundT>
@@ -2174,4 +2174,4 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       ));
   }
 
-}  // namespace Asteria
+}  // namespace asteria

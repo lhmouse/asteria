@@ -8,7 +8,7 @@
 #include "runtime/air_optimizer.hpp"
 #include "utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 Simple_Script&
 Simple_Script::
@@ -94,4 +94,4 @@ const
     return this->execute(global, ::std::move(args));
   }
 
-}  // namespace Asteria
+}  // namespace asteria

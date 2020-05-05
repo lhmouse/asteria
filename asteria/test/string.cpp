@@ -5,7 +5,7 @@
 #include "../src/simple_script.hpp"
 #include "../src/runtime/global_context.hpp"
 
-using namespace Asteria;
+using namespace asteria;
 
 int main()
   {

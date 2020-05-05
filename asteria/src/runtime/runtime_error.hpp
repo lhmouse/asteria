@@ -8,7 +8,7 @@
 #include "backtrace_frame.hpp"
 #include <exception>
 
-namespace Asteria {
+namespace asteria {
 
 class Runtime_Error
   : public virtual exception
@@ -145,15 +145,15 @@ class Runtime_Error
                                         try
                                           // Perform operations that might throw
                                           // exceptions here.
-#define ASTERIA_RUNTIME_CATCH(...)      catch(::Asteria::Runtime_Error&)  \
+#define ASTERIA_RUNTIME_CATCH(...)      catch(::asteria::Runtime_Error&)  \
                                           { throw;  }  \
                                         catch(::std::exception& zTrSrvgK_)  \
-                                          { throw ::Asteria::Runtime_Error(  \
-                                                ::Asteria::Runtime_Error::F_native(),  \
+                                          { throw ::asteria::Runtime_Error(  \
+                                                ::asteria::Runtime_Error::F_native(),  \
                                                 zTrSrvgK_); }  \
                                       }  \
                                       catch(__VA_ARGS__)
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

@@ -7,7 +7,7 @@
 #include "reference.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 Genius_Collector::
 ~Genius_Collector()
@@ -79,4 +79,4 @@ noexcept
     return *this;
   }
 
-}  // namespace Asteria
+}  // namespace asteria

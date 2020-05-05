@@ -8,7 +8,7 @@
 #include "reference_root.hpp"
 #include "reference_modifier.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Reference
   {
@@ -230,6 +230,6 @@ swap(Reference& lhs, Reference& rhs)
 noexcept
   { lhs.swap(rhs);  }
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

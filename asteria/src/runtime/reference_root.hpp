@@ -8,7 +8,7 @@
 #include "../value.hpp"
 #include "../source_location.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Reference_root
   {
@@ -166,6 +166,6 @@ swap(Reference_root& lhs, Reference_root& rhs)
 noexcept
   { lhs.swap(rhs);  }
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

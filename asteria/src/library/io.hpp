@@ -6,7 +6,7 @@
 
 #include "../fwd.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 // `std.io.getc`
 optV_integer
@@ -47,6 +47,6 @@ std_io_flush();
 void
 create_bindings_io(V_object& result, API_Version version);
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

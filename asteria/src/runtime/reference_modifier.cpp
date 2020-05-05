@@ -6,7 +6,7 @@
 #include "../value.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 const Value*
 Reference_modifier::
@@ -340,4 +340,4 @@ const
     }
   }
 
-}  // namespace Asteria
+}  // namespace asteria

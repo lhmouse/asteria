@@ -6,7 +6,7 @@
 
 #include "fwd.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Value
   {
@@ -671,6 +671,6 @@ tinyfmt&
 operator<<(tinyfmt& fmt, const Value& value)
   { return value.dump(fmt);  }
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

@@ -7,7 +7,7 @@
 #include <fcntl.h>  // ::open()
 #include <unistd.h>  // ::close(), ::read()
 
-namespace Asteria {
+namespace asteria {
 namespace {
 
 constexpr
@@ -114,4 +114,4 @@ noexcept
     return this->m_pool[k];
   }
 
-}  // namespace Asteria
+}  // namespace asteria

@@ -8,7 +8,7 @@
 #include "../runtime/enums.hpp"
 #include "../source_location.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class AVMC_Queue
   {
@@ -339,6 +339,6 @@ swap(AVMC_Queue& lhs, AVMC_Queue& rhs)
 noexcept
   { lhs.swap(rhs);  }
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

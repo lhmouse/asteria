@@ -4,7 +4,7 @@
 #include "../precompiled.hpp"
 #include "enums.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 const char*
 describe_xop(Xop xop)
@@ -160,4 +160,4 @@ noexcept
     }
   }
 
-}  // namespace Asteria
+}  // namespace asteria

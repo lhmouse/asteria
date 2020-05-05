@@ -7,7 +7,7 @@
 #include "../fwd.hpp"
 #include "../source_location.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Statement
   {
@@ -226,6 +226,6 @@ swap(Statement& lhs, Statement& rhs)
 noexcept
   { lhs.swap(rhs);  }
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

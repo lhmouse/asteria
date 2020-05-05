@@ -4,7 +4,7 @@
 #include "../precompiled.hpp"
 #include "enums.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 const char*
 stringify_punctuator(Punctuator punct)
@@ -344,4 +344,4 @@ noexcept
     }
   }
 
-}  // namespace Asteria
+}  // namespace asteria

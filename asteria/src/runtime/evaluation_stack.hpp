@@ -7,7 +7,7 @@
 #include "../fwd.hpp"
 #include "reference.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Evaluation_Stack
   {
@@ -106,6 +106,6 @@ class Evaluation_Stack
       }
   };
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

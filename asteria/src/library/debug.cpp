@@ -6,7 +6,7 @@
 #include "../runtime/argument_reader.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 optV_integer
 std_debug_logf(V_string templ, cow_vector<Value> values)
@@ -111,4 +111,4 @@ create_bindings_debug(V_object& result, API_Version /*version*/)
       ));
   }
 
-}  // namespace Asteria
+}  // namespace asteria

@@ -6,7 +6,7 @@
 
 #include "../fwd.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 // `std.string.slice`
 V_string
@@ -262,6 +262,6 @@ std_string_regex_replace(V_string text, V_integer from, optV_integer length, V_s
 void
 create_bindings_string(V_object& result, API_Version version);
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

@@ -7,7 +7,7 @@
 #include "../runtime/global_context.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 namespace {
 
 constexpr double s_const_e    = 2.7182818284590452353602874713526624977572470937000;
@@ -868,4 +868,4 @@ create_bindings_math(V_object& result, API_Version /*version*/)
       ));
   }
 
-}  // namespace Asteria
+}  // namespace asteria

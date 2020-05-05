@@ -4,11 +4,11 @@
 #include "../precompiled.hpp"
 #include "variable_callback.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 Variable_Callback::
 ~Variable_Callback()
   {
   }
 
-}  // namespace Asteria
+}  // namespace asteria

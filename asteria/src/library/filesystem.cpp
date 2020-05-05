@@ -13,7 +13,7 @@
 #include <stdio.h>  // ::rename()
 #include <errno.h>  // errno
 
-namespace Asteria {
+namespace asteria {
 namespace {
 
 enum RM_Disp
@@ -1020,4 +1020,4 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
       ));
   }
 
-}  // namespace Asteria
+}  // namespace asteria

@@ -22,7 +22,7 @@
 #include "../library/io.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 namespace {
 
 // N.B. Please keep this list sorted by the `version` member.
@@ -158,4 +158,4 @@ initialize(API_Version version)
     this->m_vstd = vstd;
   }
 
-}  // namespace Asteria
+}  // namespace asteria

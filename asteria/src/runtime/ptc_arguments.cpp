@@ -7,7 +7,7 @@
 #include "variable_callback.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 PTC_Arguments::
 ~PTC_Arguments()
@@ -24,4 +24,4 @@ const
     return callback;
   }
 
-}  // namespace Asteria
+}  // namespace asteria

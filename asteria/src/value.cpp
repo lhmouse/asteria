@@ -5,7 +5,7 @@
 #include "value.hpp"
 #include "utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 namespace {
 
 template<typename ValT,
@@ -418,4 +418,4 @@ const
     }
   }
 
-}  // namespace Asteria
+}  // namespace asteria

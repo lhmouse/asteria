@@ -8,7 +8,7 @@
 #include "variadic_arguer.hpp"
 #include "../llds/avmc_queue.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Instantiated_Function
 final
@@ -44,6 +44,6 @@ final
     const override;
   };
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

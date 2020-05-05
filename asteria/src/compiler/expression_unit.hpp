@@ -8,7 +8,7 @@
 #include "../value.hpp"
 #include "../source_location.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Expression_Unit
   {
@@ -179,6 +179,6 @@ swap(Expression_Unit& lhs, Expression_Unit& rhs)
 noexcept
   { lhs.swap(rhs);  }
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

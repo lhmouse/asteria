@@ -8,7 +8,7 @@
 #include "../runtime/random_engine.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 namespace {
 
 int64_t
@@ -1936,4 +1936,4 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       ));
   }
 
-}  // namespace Asteria
+}  // namespace asteria

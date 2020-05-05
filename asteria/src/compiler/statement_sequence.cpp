@@ -13,7 +13,7 @@
 #include "../runtime/enums.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 namespace {
 
 opt<Keyword>
@@ -2262,4 +2262,4 @@ reload(Token_Stream& tstrm)
     return *this;
   }
 
-}  // namespace Asteria
+}  // namespace asteria

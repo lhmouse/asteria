@@ -7,7 +7,7 @@
 #include "../fwd.hpp"
 #include "../source_location.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class PTC_Arguments
 final
@@ -99,6 +99,6 @@ final
     const;
   };
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

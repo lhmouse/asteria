@@ -6,7 +6,7 @@
 
 #include "../fwd.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 // `std.filesystem.get_working_directory`
 V_string
@@ -69,6 +69,6 @@ std_filesystem_file_remove(V_string path);
 void
 create_bindings_filesystem(V_object& result, API_Version version);
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

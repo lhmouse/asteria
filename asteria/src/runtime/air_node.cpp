@@ -20,7 +20,7 @@
 #include "../llds/avmc_queue.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 namespace {
 
 bool&
@@ -4764,4 +4764,4 @@ const
     }
   }
 
-}  // namespace Asteria
+}  // namespace asteria

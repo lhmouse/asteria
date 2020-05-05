@@ -6,7 +6,7 @@
 
 #include "../fwd.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 // `std.array.slice`
 V_array
@@ -136,6 +136,6 @@ std_array_copy_values(V_object source);
 void
 create_bindings_array(V_object& result, API_Version version);
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

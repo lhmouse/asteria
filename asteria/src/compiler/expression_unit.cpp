@@ -10,7 +10,7 @@
 #include "../runtime/enums.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 namespace {
 
 cow_vector<AIR_Node>
@@ -211,4 +211,4 @@ const
     }
   }
 
-}  // namespace Asteria
+}  // namespace asteria

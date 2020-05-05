@@ -7,7 +7,7 @@
 #include "../fwd.hpp"
 #include "../../rocket/tinybuf_file.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Loader_Lock
 final
@@ -127,6 +127,6 @@ swap(Loader_Lock::Unique_Stream& lhs, Loader_Lock::Unique_Stream& rhs)
 noexcept
   { lhs.swap(rhs);  }
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

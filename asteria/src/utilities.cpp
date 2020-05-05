@@ -8,7 +8,7 @@
 #include <errno.h>  // errno
 #include <string.h>  // ::strerror_r()
 
-namespace Asteria {
+namespace asteria {
 namespace {
 
 constexpr char s_lcchars[][8] =
@@ -430,4 +430,4 @@ throw_system_error(const char* func)
     throw_system_error(func, errno);
   }
 
-}  // namespace Asteria
+}  // namespace asteria

@@ -6,7 +6,7 @@
 #include "../runtime/variable_callback.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 void
 Reference_Dictionary::
@@ -214,4 +214,4 @@ const
     return callback;
   }
 
-}  // namespace Asteria
+}  // namespace asteria

@@ -6,12 +6,12 @@
 
 #include "../fwd.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 // Create an object that is to be referenced as `std.version`.
 void
 create_bindings_version(V_object& result, API_Version version);
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

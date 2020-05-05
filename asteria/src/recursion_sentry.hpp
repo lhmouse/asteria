@@ -6,7 +6,7 @@
 
 #include "fwd.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Recursion_Sentry
   {
@@ -73,6 +73,6 @@ class Recursion_Sentry
       { return this->m_base = base, *this;  }
   };
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

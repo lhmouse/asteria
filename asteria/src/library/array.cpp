@@ -7,7 +7,7 @@
 #include "../runtime/global_context.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 namespace {
 
 pair<V_array::const_iterator, V_array::const_iterator>
@@ -2013,4 +2013,4 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       ));
   }
 
-}  // namespace Asteria
+}  // namespace asteria

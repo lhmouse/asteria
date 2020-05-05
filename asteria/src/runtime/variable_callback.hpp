@@ -6,7 +6,7 @@
 
 #include "../fwd.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Variable_Callback
   {
@@ -32,6 +32,6 @@ class Variable_Callback
       { return cont.enumerate_variables(*this);  }
   };
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

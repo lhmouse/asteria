@@ -6,7 +6,7 @@
 #include "enums.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 tinyfmt&
 Token::
@@ -43,4 +43,4 @@ const
     }
   }
 
-}  // namespace Asteria
+}  // namespace asteria

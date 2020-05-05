@@ -13,7 +13,7 @@
 #include <unistd.h>  // ::daemon()
 #include <time.h>  // ::clock_gettime()
 
-namespace Asteria {
+namespace asteria {
 namespace {
 
 constexpr int64_t xgcgen_newest = static_cast<int64_t>(gc_generation_newest);
@@ -487,4 +487,4 @@ create_bindings_system(V_object& result, API_Version /*version*/)
       ));
   }
 
-}  // namespace Asteria
+}  // namespace asteria

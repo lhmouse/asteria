@@ -7,7 +7,7 @@
 #include "../fwd.hpp"
 #include "abstract_context.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Analytic_Context
   : public Abstract_Context
@@ -62,6 +62,6 @@ class Analytic_Context
       { return this->m_parent_opt;  }
   };
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

@@ -8,7 +8,7 @@
 #include "reference.hpp"
 #include "../value.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Argument_Reader
   {
@@ -200,6 +200,6 @@ class Argument_Reader
     const;
   };
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

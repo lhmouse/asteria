@@ -7,7 +7,7 @@
 #include "../fwd.hpp"
 #include "../source_location.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Token
   {
@@ -192,6 +192,6 @@ tinyfmt&
 operator<<(tinyfmt& fmt, const Token& token)
   { return token.print(fmt);  }
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

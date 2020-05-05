@@ -6,7 +6,7 @@
 #include "../value.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 void
 create_bindings_version(V_object& result, API_Version version)
@@ -30,4 +30,4 @@ create_bindings_version(V_object& result, API_Version version)
       ));
   }
 
-}  // namespace Asteria
+}  // namespace asteria

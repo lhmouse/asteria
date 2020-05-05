@@ -6,7 +6,7 @@
 
 #include "../fwd.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 // `std.math.exp`
 V_real
@@ -108,6 +108,6 @@ std_math_lgamma(V_real x);
 void
 create_bindings_math(V_object& result, API_Version version);
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

@@ -5,7 +5,7 @@
 #include "../src/value.hpp"
 #include <cmath>
 
-using namespace Asteria;
+using namespace asteria;
 
 int main()
   {

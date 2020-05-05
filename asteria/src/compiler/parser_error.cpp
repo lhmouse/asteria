@@ -4,7 +4,7 @@
 #include "../precompiled.hpp"
 #include "parser_error.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 static_assert(::std::is_nothrow_copy_constructible<Parser_Error>::value &&
               ::std::is_nothrow_move_constructible<Parser_Error>::value &&
@@ -35,4 +35,4 @@ do_compose_message()
     this->m_what = fmt.extract_string();
   }
 
-}  // namespace Asteria
+}  // namespace asteria

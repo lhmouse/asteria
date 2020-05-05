@@ -35,7 +35,7 @@
 #include <cstdio>
 #include <cwchar>
 
-namespace Asteria {
+namespace asteria {
 
 // Macros
 #define ASTERIA_VARIANT_CONSTRUCTOR(C, V, T, t)   template<typename T,  \
@@ -757,6 +757,6 @@ using Compiler_Options = Compiler_Options_v2;
 extern const unsigned char null_value_storage[];
 static const Value& null_value = reinterpret_cast<const Value&>(null_value_storage);
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

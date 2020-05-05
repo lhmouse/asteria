@@ -6,7 +6,7 @@
 
 #include "../fwd.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 // `std.debug.logf`
 optV_integer
@@ -20,6 +20,6 @@ std_debug_dump(Value value, optV_integer indent);
 void
 create_bindings_debug(V_object& result, API_Version version);
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

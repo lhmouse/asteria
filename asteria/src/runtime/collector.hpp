@@ -7,7 +7,7 @@
 #include "../fwd.hpp"
 #include "../llds/variable_hashset.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Collector
   {
@@ -83,6 +83,6 @@ class Collector
     noexcept;
   };
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

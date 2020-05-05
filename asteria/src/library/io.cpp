@@ -6,7 +6,7 @@
 #include "../runtime/argument_reader.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 namespace {
 
 class IOF_Sentry
@@ -563,4 +563,4 @@ create_bindings_io(V_object& result, API_Version /*version*/)
       ));
   }
 
-}  // namespace Asteria
+}  // namespace asteria

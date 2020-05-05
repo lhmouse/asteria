@@ -8,7 +8,7 @@
 #include "abstract_context.hpp"
 #include "../recursion_sentry.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Global_Context
   : public Abstract_Context
@@ -121,6 +121,6 @@ class Global_Context
     initialize(API_Version version = api_version_latest);
   };
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

@@ -6,7 +6,7 @@
 
 #include "../fwd.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 // `std.chrono.utc_now`
 V_integer
@@ -44,6 +44,6 @@ std_chrono_utc_parse(V_string time_str);
 void
 create_bindings_chrono(V_object& result, API_Version version);
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

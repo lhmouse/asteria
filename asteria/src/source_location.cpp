@@ -4,7 +4,7 @@
 #include "precompiled.hpp"
 #include "source_location.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 tinyfmt&
 Source_Location::
@@ -14,4 +14,4 @@ const
     return fmt << this->m_file << ':' << this->m_line << ':' << this->m_offset;
   }
 
-}  // namespace Asteria
+}  // namespace asteria

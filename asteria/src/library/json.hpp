@@ -6,7 +6,7 @@
 
 #include "../fwd.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 // `std.json.format`
 V_string
@@ -34,6 +34,6 @@ std_json_parse_file(V_string path);
 void
 create_bindings_json(V_object& result, API_Version version);
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

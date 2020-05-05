@@ -7,7 +7,7 @@
 #include "../fwd.hpp"
 #include "statement.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Statement_Sequence
   {
@@ -65,6 +65,6 @@ class Statement_Sequence
     reload(Token_Stream& tstrm);
   };
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

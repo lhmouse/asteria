@@ -6,7 +6,7 @@
 
 #include "../fwd.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 // members of `std.checksum.crc32_new()`
 V_opaque
@@ -122,6 +122,6 @@ std_checksum_sha256_file(V_string path);
 void
 create_bindings_checksum(V_object& result, API_Version version);
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

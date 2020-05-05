@@ -10,7 +10,7 @@
 #include "../compiler/enums.hpp"
 #include "../utilities.hpp"
 
-namespace Asteria {
+namespace asteria {
 namespace {
 
 class Indenter
@@ -950,4 +950,4 @@ create_bindings_json(V_object& result, API_Version /*version*/)
       ));
   }
 
-}  // namespace Asteria
+}  // namespace asteria

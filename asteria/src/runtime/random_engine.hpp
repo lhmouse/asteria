@@ -6,7 +6,7 @@
 
 #include "../fwd.hpp"
 
-namespace Asteria {
+namespace asteria {
 
 class Random_Engine
 final
@@ -80,6 +80,6 @@ final
       { return this->bump();  }
   };
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif

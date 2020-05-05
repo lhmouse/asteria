@@ -8,7 +8,7 @@
 #include "../source_location.hpp"
 #include <exception>
 
-namespace Asteria {
+namespace asteria {
 
 class Parser_Error
   : public virtual exception
@@ -97,6 +97,6 @@ operator!=(Parser_Status lhs, const Parser_Error& rhs)
 noexcept
   { return lhs != rhs.status();  }
 
-}  // namespace Asteria
+}  // namespace asteria
 
 #endif
