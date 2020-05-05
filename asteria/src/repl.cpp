@@ -151,7 +151,7 @@ enum Exit_Code : uint8_t
 
 [[noreturn]]
 int
-do_bail_out(Exit_Code code, const char* fmt = nullptr, ...)
+do_exit(Exit_Code code, const char* fmt = nullptr, ...)
 noexcept
   {
     // Output the string to standard error.
@@ -287,9 +287,8 @@ do_parse_command_line(int argc, char** argv)
           char* ep;
           long val = ::strtol(optarg, &ep, 10);
           if((*ep != 0) || (val < 0) || (val > 99))
-            do_bail_out(exit_invalid_argument,
-                        "%s: invalid optimization level -- '%s'\n",
-                        argv[0], optarg);
+            do_exit(exit_invalid_argument,
+                    "%s: invalid optimization level -- '%s'\n", argv[0], optarg);
 
           optimize = static_cast<int8_t>(val);
           continue;
@@ -305,9 +304,7 @@ do_parse_command_line(int argc, char** argv)
       }
 
       // `getopt()` will have written an error message to standard error.
-      do_bail_out(exit_invalid_argument,
-                  "Try `%s -h` for help.\n",
-                  argv[0]);
+      do_exit(exit_invalid_argument, "Try `%s -h` for help.\n", argv[0]);
     }
 
     // Check for early exit conditions.
@@ -384,14 +381,10 @@ do_REP_single()
   {
     // Reset standard streams.
     if(!::freopen(nullptr, "r", stdin))
-      do_bail_out(exit_system_error,
-                  "! could not reopen standard input (errno was `%d`)\n",
-                  errno);
+      do_exit(exit_system_error, "! could not reopen standard input (errno was `%d`)\n", errno);
 
     if(!::freopen(nullptr, "w", stdout))
-      do_bail_out(exit_system_error,
-                  "! could not reopen standard output (errno was `%d`)\n",
-                  errno);
+      do_exit(exit_system_error, "! could not reopen standard output (errno was `%d`)\n", errno);
 
     // Read the next snippet.
     ::fputc('\n', stderr);
@@ -459,12 +452,10 @@ do_REP_single()
 
     // Check for termination.
     if(::ferror(stdin))
-      do_bail_out(exit_system_error,
-                  "! could not read standard input (errno was `%d`)\n",
-                  errno);
+      do_exit(exit_system_error, "! could not read standard input (errno was `%d`)\n", errno);
 
     if(::feof(stdin) && code.empty())
-      do_bail_out(exit_success, "* have a nice day :)\n");
+      do_exit(exit_success, "* have a nice day :)\n");
 
     // If user input was empty, don't do anything.
     if(code.find_first_not_of(" \f\n\r\t\v") == cow_string::npos)
@@ -499,7 +490,7 @@ do_REP_single()
 
       // Bail out upon irrecoverable errors.
       if(!retry)
-        return ::fprintf(stderr, "! %s\n", except.what());
+        return ::fprintf(stderr, "! error: %s\n", except.what());
     }
 
     // Execute the script as a function, which returns a `Reference`.
@@ -516,7 +507,7 @@ do_REP_single()
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except)
       // If an exception was thrown, print something informative.
-      { return ::fprintf(stderr, "! %s\n", except.what());  }
+      { return ::fprintf(stderr, "! error: %s\n", except.what());  }
   }
 
 [[noreturn]]
@@ -573,24 +564,24 @@ do_single_noreturn()
     }
     catch(Parser_Error& except)
       // Report the error and exit.
-      { do_bail_out(exit_parser_error, "! %s\n", except.what());  }
+      { do_exit(exit_parser_error, "! error: %s\n", except.what());  }
 
     // Execute the script.
     ASTERIA_RUNTIME_TRY {
       const auto ref = script.execute(global, ::std::move(cmdline.args));
 
       if(ref.is_void())
-        do_bail_out(exit_success);
+        do_exit(exit_success);
 
       const auto& val = ref.read();
       if(!val.is_integer())
-        do_bail_out(exit_system_error);
+        do_exit(exit_system_error);
 
-      do_bail_out(static_cast<Exit_Code>(val.as_integer()));
+      do_exit(static_cast<Exit_Code>(val.as_integer()));
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except)
       // If an exception was thrown, print something informative.
-      { do_bail_out(exit_runtime_error, "! %s\n", except.what());  }
+      { do_exit(exit_runtime_error, "! error: %s\n", except.what());  }
   }
 
 }  // namespace
@@ -616,4 +607,4 @@ main(int argc, char** argv)
   }
   catch(::std::exception& except)
     // Print a message followed by the backtrace if it is available. There isn't much we can do.
-    { do_bail_out(exit_system_error, "! %s\n", except.what());  }
+    { do_exit(exit_system_error, "! uncaught exception: %s\n", except.what());  }
