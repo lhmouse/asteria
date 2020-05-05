@@ -591,6 +591,24 @@ class Value
     open_object()
       { return this->m_stor.as<vtype_object>();  }
 
+    bool
+    is_convertible_to_real()
+    const noexcept
+      { return this->is_integer() || this->is_real();  }
+
+    V_real
+    convert_to_real()
+    const
+      { return this->is_integer()
+                 ? V_real(this->as_integer())
+                 : this->as_real();  }
+
+    V_real&
+    mutate_into_real()
+      { return this->is_integer()
+                 ? this->m_stor.emplace<vtype_real>(V_real(this->as_integer()))
+                 : this->open_real();  }
+
     Value&
     swap(Value& other)
     noexcept
@@ -598,18 +616,6 @@ class Value
         this->m_stor.swap(other.m_stor);
         return *this;
       }
-
-    // Note null and boolean values are not convertible to reals.
-    bool
-    is_convertible_to_real()
-    const noexcept;
-
-    V_real
-    convert_to_real()
-    const;
-
-    V_real&
-    mutate_into_real();
 
     // This performs the builtin conversion to boolean values.
     ROCKET_PURE_FUNCTION

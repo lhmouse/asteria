@@ -37,57 +37,6 @@ noexcept
 
 bool
 Value::
-is_convertible_to_real()
-const
-noexcept
-  {
-    switch(weaken_enum(this->vtype())) {
-      case vtype_integer:
-        return true;
-
-      case vtype_real:
-        return true;
-
-      default:
-        return false;
-    }
-  }
-
-V_real
-Value::
-convert_to_real()
-const
-  {
-    switch(weaken_enum(this->vtype())) {
-      case vtype_integer:
-        return static_cast<V_real>(this->m_stor.as<vtype_integer>());
-
-      case vtype_real:
-        return this->m_stor.as<vtype_real>();
-
-      default:
-        ASTERIA_THROW("value not convertible to real (value `$1`)", *this);
-    }
-  }
-
-V_real&
-Value::
-mutate_into_real()
-  {
-    switch(weaken_enum(this->vtype())) {
-      case vtype_integer:
-        return this->m_stor.emplace<vtype_real>(static_cast<V_real>(this->m_stor.as<vtype_integer>()));
-
-      case vtype_real:
-        return this->m_stor.as<vtype_real>();
-
-      default:
-        ASTERIA_THROW("value not convertible to real (value `$1`)", *this);
-    }
-  }
-
-bool
-Value::
 test()
 const
 noexcept
