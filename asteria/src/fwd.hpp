@@ -48,25 +48,25 @@ namespace Asteria {
                                                   C& operator=(T&& t)  \
                                                   noexcept(::std::is_nothrow_assignable<V&, T&&>::value)
 
-#define ASTERIA_COPYABLE_DESTRUCTOR(C)            C(const C&) = default;  \
-                                                  C(C&&) noexcept = default;  \
-                                                  C& operator=(const C&) = default;  \
-                                                  C& operator=(C&&) noexcept = default;  \
-                                                  ~C()  // no semicolon
+#define ASTERIA_COPYABLE_DESTRUCTOR(C)         C(const C&) = default;  \
+                                               C(C&&) noexcept = default;  \
+                                               C& operator=(const C&) = default;  \
+                                               C& operator=(C&&) noexcept = default;  \
+                                               ~C()  // no semicolon
 
-#define ASTERIA_MOVABLE_DESTRUCTOR(C)             C(const C&) = delete;  \
-                                                  C(C&&) noexcept = default;  \
-                                                  C& operator=(const C&) = delete;  \
-                                                  C& operator=(C&&) noexcept = default;  \
-                                                  ~C()  // no semicolon
+#define ASTERIA_MOVABLE_DESTRUCTOR(C)          C(const C&) = delete;  \
+                                               C(C&&) noexcept = default;  \
+                                               C& operator=(const C&) = delete;  \
+                                               C& operator=(C&&) noexcept = default;  \
+                                               ~C()  // no semicolon
 
-#define ASTERIA_NONCOPYABLE_DESTRUCTOR(C)         C(const C&) = delete;  \
-                                                  C(C&&) noexcept = delete;  \
-                                                  C& operator=(const C&) = delete;  \
-                                                  C& operator=(C&&) noexcept = delete;  \
-                                                  ~C()  // no semicolon
+#define ASTERIA_NONCOPYABLE_DESTRUCTOR(C)      C(const C&) = delete;  \
+                                               C(C&&) noexcept = delete;  \
+                                               C& operator=(const C&) = delete;  \
+                                               C& operator=(C&&) noexcept = delete;  \
+                                               ~C()  // no semicolon
 
-#define ASTERIA_INCOMPLET(T)                      template<typename T##_otbUYGrp = T, typename T = T##_otbUYGrp>
+#define ASTERIA_INCOMPLET(T)          template<typename T##_otbUYGrp_ = T, typename T = T##_otbUYGrp_>
 
 // `using`-directives
 using ::std::initializer_list;
