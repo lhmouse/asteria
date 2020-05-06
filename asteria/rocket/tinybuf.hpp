@@ -19,7 +19,7 @@ class basic_tinybuf;
  * 2. Putting back is not supported.
  * 3. The design has been simplified.
  * 4. `off_type` is always `int64_t` regardless of the traits in effect.
- */
+**/
 
 struct tinybuf_base
   {

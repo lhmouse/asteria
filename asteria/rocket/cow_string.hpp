@@ -27,17 +27,17 @@ class basic_cow_string;
 
 /* Differences from `std::basic_string`:
  * 1. All functions guarantee only basic exception safety rather than strong exception safety, hence
-      are more efficient.
+ *    are more efficient.
  * 2. `begin()` and `end()` always return `const_iterator`s. `at()`, `front()` and `back()` always
-      return `const_reference`s.
+ *    return `const_reference`s.
  * 3. The copy constructor and copy assignment operator will not throw exceptions.
  * 4. The constructor taking a sole const pointer is made `explicit`.
  * 5. The assignment operator taking a character and the one taking a const pointer are not provided.
  * 6. It is possible to create strings holding non-owning references of null-terminated character
-      arrays allocated externally.
+ *    arrays allocated externally.
  * 7. `data()` returns a null pointer if the string is empty.
  * 8. `erase()` and `substr()` cannot be called without arguments.
- */
+**/
 
 template<typename charT, typename traitsT>
 class basic_shallow_string

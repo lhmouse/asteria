@@ -138,7 +138,7 @@ do_collect_U(mantissa& m, const char*& rp, const char* eptr, uint8_t base, uint6
  *
  * Compile with:
  *   gcc -std=c99 -W{all,extra,{sign-,}conversion} table.c -lquadmath
- */
+**/
 
 #include <quadmath.h>
 #include <stdio.h>

@@ -20,16 +20,16 @@ class cow_vector;
 
 /* Differences from `std::vector`:
  * 1. All functions guarantee only basic exception safety rather than strong exception safety, hence
-      are more efficient.
+ *    are more efficient.
  * 2. `begin()` and `end()` always return `const_iterator`s. `at()`, `front()` and `back()` always
-      return `const_reference`s.
+ *    return `const_reference`s.
  * 3. The copy constructor and copy assignment operator will not throw exceptions.
  * 4. The specialization for `bool` is not provided.
  * 5. `emplace()` is not provided.
  * 6. Comparison operators are not provided.
  * 7. The value type may be incomplete. It need be neither copy-assignable nor move-assignable, but
-      must be swappable.
- */
+ *    must be swappable.
+**/
 
 template<typename valueT, typename allocT>
 class cow_vector

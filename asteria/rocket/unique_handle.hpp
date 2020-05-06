@@ -29,7 +29,7 @@ class basic_tinyfmt;
  *       N.B. There could more than one null handle value. It is required that `Closer().is_null(Closer().null())`
  *            is always `true`.
  *    3) `Closer().close(hv)` closes the handle `hv`. Null handle values will not be passed to this function.
- */
+**/
 
 template<typename handleT, typename closerT>
 class unique_handle

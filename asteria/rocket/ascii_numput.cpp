@@ -154,7 +154,7 @@ do_xput_I_exp(char*& ep, const int& exp)
  *
  * Compile with:
  *   gcc -std=c99 -W{all,extra,{sign-,}conversion} table.c -lquadmath
- */
+**/
 
 #include <quadmath.h>
 #include <stdio.h>

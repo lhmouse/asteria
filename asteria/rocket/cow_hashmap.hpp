@@ -23,18 +23,18 @@ class cow_hashmap;
 
 /* Differences from `std::unordered_map`:
  * 1. `begin()` and `end()` always return `const_iterator`s. `at()`, `front()` and `back()` always
-      return `const_reference`s.
+ *    return `const_reference`s.
  * 2. The copy constructor and copy assignment operator will not throw exceptions.
  * 3. Comparison operators are not provided.
  * 4. `emplace()` and `emplace_hint()` functions are not provided. `try_emplace()` is recommended
-      as an alternative.
+ *    as an alternative.
  * 5. There are no buckets. Bucket lookups and local iterators are not provided. Multimap cannot
-      be implemented.
+ *    be implemented.
  * 6. The key and mapped types may be incomplete. The mapped type need be neither copy-assignable
-      nor move-assignable.
+ *    nor move-assignable.
  * 7. `erase()` may move elements around and invalidate iterators.
  * 8. `operator[]()` is not provided.
- */
+**/
 
 template<typename keyT, typename mappedT, typename hashT, typename eqT, typename allocT>
 class cow_hashmap

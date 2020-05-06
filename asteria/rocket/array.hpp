@@ -20,7 +20,7 @@ class array;
  * 1. Multi-dimensional arrays are supported natively.
  * 2. `fill()` takes different parameters.
  * 3. Comparison operators are not provided.
- */
+**/
 
 template<typename valueT, size_t capacityT, size_t... nestedT>
 class array

@@ -18,7 +18,7 @@ class basic_tinyfmt;
  * 1. Locales are not supported.
  * 2. Formatting is not supported.
  * 3. The stream is stateless. Exceptions are preferred when reporting errors.
- */
+**/
 
 template<typename charT, typename traitsT>
 class basic_tinyfmt

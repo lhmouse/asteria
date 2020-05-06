@@ -25,7 +25,7 @@ class static_vector;
  * 5. `capacity()` is a `static constexpr` member function.
  * 6. Comparison operators are not provided.
  * 7. Incomplete element types are not supported.
- */
+**/
 
 template<typename valueT, size_t capacityT, typename allocT>
 class static_vector

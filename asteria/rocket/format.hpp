@@ -33,7 +33,7 @@ format(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, const paramsT&..
  *   rocket::format(fmt, "funny $0 string");             // outputs "funny funny $0 string string"
  *   rocket::format(fmt, "$123", 'x');                   // outputs "x23"
  *   rocket::format(fmt, "${12}3", 'x');                 // throws an exception
- */
+**/
 
 template<typename charT, typename traitsT>
 struct basic_formatter
