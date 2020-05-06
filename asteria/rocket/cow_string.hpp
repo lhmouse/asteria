@@ -1510,6 +1510,11 @@ class basic_cow_string
       { return (1 <= this->size()) && traits_type::eq(this->back(), ch);  }
   };
 
+#if __cpp_inline_variables + 0 < 201606  // < c++17
+template<typename charT, typename traitsT, typename allocT>
+const typename basic_cow_string<charT, traitsT, allocT>::size_type basic_cow_string<charT, traitsT, allocT>::npos;
+#endif
+
 template<typename charT, typename traitsT, typename allocT>
 const charT basic_cow_string<charT, traitsT, allocT>::null_char[1] = { };
 

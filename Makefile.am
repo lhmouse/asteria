@@ -7,7 +7,7 @@ AM_CPPFLAGS = -pipe -pthread -Wall -Wextra -fPIC -DPIC  \
   -f{inline-limit=2400,strict-{aliasing,overflow},merge-all-constants}  \
   -fno-{math-errno,trapping-math,devirtualize-speculatively}  \
   -Werror={{,sign-}conversion,write-strings,return-type,double-promotion}  \
-  -W{invalid-pch,switch-enum,suggest-attribute=noreturn,undef,shadow,missing-field-initializers}  \
+  -W{invalid-pch,switch-enum,suggest-attribute=noreturn,shadow,missing-field-initializers}  \
   -Wunused-{function,label,local-typedefs,{,but-set-}{variable,parameter}}
 
 AM_CXXFLAGS = -include .pch.hpp -std=gnu++14 -Wp,-std=c++11 -fno-gnu-keywords  \

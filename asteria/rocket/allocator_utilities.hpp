@@ -64,6 +64,15 @@ struct is_std_allocator<::std::allocator<valueT>>
   : true_type
   { };
 
+template<typename allocT>
+struct is_always_equal_allocator
+#if __cpp_lib_allocator_traits_is_always_equal + 0 < 201411  // < c++17
+  : is_std_allocator<allocT>
+#else  // >= c++17
+  : allocator_traits<allocT>::is_always_equal
+#endif
+  { };
+
 }  // namespace rocket
 
 #endif

@@ -430,6 +430,11 @@ class variant
       }
   };
 
+#if __cpp_inline_variables + 0 < 201606  // < c++17
+template<typename... alternativesT>
+const size_t variant<alternativesT...>::alternative_size;
+#endif
+
 template<typename... alternativesT>
 inline
 void

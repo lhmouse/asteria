@@ -59,7 +59,7 @@ class basic_linear_buffer
       { this->do_exchange_with(other);  }
 
     basic_linear_buffer(basic_linear_buffer&& other, const allocator_type& alloc)
-    noexcept(is_std_allocator<allocator_type>::value /* TODO: is_always_equal */)
+    noexcept(is_always_equal_allocator<allocator_type>::value)
       : m_stor(alloc)
       {
         if(ROCKET_EXPECT(this->m_stor.as_allocator() == alloc))
@@ -100,7 +100,7 @@ class basic_linear_buffer
 
     basic_linear_buffer&
     operator=(basic_linear_buffer&& other)
-    noexcept(is_std_allocator<allocator_type>::value /* TODO: is_always_equal */ ||
+    noexcept(is_always_equal_allocator<allocator_type>::value ||
              allocator_traits<allocator_type>::propagate_on_container_move_assignment::value)
       {
         if(ROCKET_EXPECT(this->m_stor.as_allocator() == other.m_stor.as_allocator())) {
@@ -342,7 +342,7 @@ class basic_linear_buffer
 
     basic_linear_buffer&
     swap(basic_linear_buffer& other)
-    noexcept(is_std_allocator<allocator_type>::value /* TODO: is_always_equal */ ||
+    noexcept(is_always_equal_allocator<allocator_type>::value ||
              allocator_traits<allocator_type>::propagate_on_container_swap::value)
       {
         ROCKET_ASSERT((this->m_stor.as_allocator() == other.m_stor.as_allocator()) ||
