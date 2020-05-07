@@ -223,59 +223,37 @@ do_quote_string(tinyfmt& fmt, const cow_string& str)
   }
 
 tinyfmt&
-do_quote_object_key(tinyfmt& fmt, bool json5, const cow_string& name)
+do_format_object_key(tinyfmt& fmt, bool json5, const Indenter& indent, const cow_string& name)
   {
+    // Write the key.
     if(json5 && name.size() && is_cctype(name[0], cctype_namei) &&
                 ::std::all_of(name.begin() + 1, name.end(),
                               [](char c) { return is_cctype(c, cctype_namei | cctype_digit);  }))
-      return fmt << name;
+      fmt << name;
     else
-      return do_quote_string(fmt, name);
+      do_quote_string(fmt, name);
+
+    // Write the colon.
+    if(indent.has_indention())
+      fmt << ": ";
+    else
+      fmt << ':';
+
+    return fmt;
   }
 
-V_object::const_iterator
-do_find_uncensored(const V_object& object, V_object::const_iterator from)
+bool
+do_find_uncensored(V_object::const_iterator& curp, const V_object& object)
   {
-    return ::std::find_if(from, object.end(),
-        [](const auto& pair) {
-          return ::rocket::is_any_of(pair.second.vtype(),
-              { vtype_null, vtype_boolean, vtype_integer, vtype_real, vtype_string,
-                vtype_array, vtype_object });
-        });
-  }
-
-tinyfmt&
-do_format_scalar(tinyfmt& fmt, const Value& value, bool json5)
-  {
-    switch(weaken_enum(value.vtype())) {
-      case vtype_boolean:
-        // Write `true` or `false`.
-        return fmt << value.as_boolean();
-
-      case vtype_integer:
-        // Write the integer in decimal.
-        return fmt << V_real(value.as_integer());
-
-      case vtype_real:
-        if(::std::isinf(value.as_real()))
-          // JSON5 allows `Infinity` in ECMAScript form.
-          return fmt << (json5 ? "Infinity" : "null");
-
-        if(::std::isnan(value.as_real()))
-          // JSON5 allows `NaN` in ECMAScript form.
-          return fmt << (json5 ? "NaN" : "null");
-
-        // Write the real in decimal.
-        return fmt << value.as_real();
-
-      case vtype_string:
-        // Write the quoted string.
-        return do_quote_string(fmt, value.as_string());
-
-      default:
-        // Anything else is censored to `null`.
-        return fmt << "null";
-    }
+    for(;;)
+      if(curp == object.end())
+        return false;
+      else if(::rocket::is_any_of(curp->second.vtype(),
+                     { vtype_null, vtype_boolean, vtype_integer, vtype_real, vtype_string,
+                       vtype_array, vtype_object }))
+        return true;
+      else
+        ++curp;
   }
 
 struct S_xformat_array
@@ -298,62 +276,98 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
     ::rocket::tinyfmt_str fmt;
 
     // Transform recursion to iteration using a handwritten stack.
-    auto qvalue = ::std::addressof(value);
+    auto qvalue = ::rocket::ref(value);
     cow_vector<Xformat> stack;
 
     for(;;) {
-      // Find a leaf value. `qvalue` must always point to a valid value here.
-      if(qvalue->is_array()){
-        const auto& array = qvalue->as_array();
+      // Format a value. `qvalue` must always point to a valid value here.
+      switch(weaken_enum(qvalue->vtype())) {
+        case vtype_boolean:
+          // Write `true` or `false`.
+          fmt << qvalue->as_boolean();
+          break;
 
-        // Open an array.
-        fmt << '[';
-        auto curp = array.begin();
-        if(curp != array.end()) {
-          // Indent the body.
-          indent.increment_level();
-          indent.break_line(fmt);
+        case vtype_integer:
+          // Write the integer in decimal.
+          fmt << static_cast<double>(qvalue->as_integer());
+          break;
 
-          // Decend into the array.
-          S_xformat_array ctxa = { ::rocket::ref(array), curp };
-          stack.emplace_back(::std::move(ctxa));
-          qvalue = ::std::addressof(*curp);
-          continue;
+        case vtype_real: {
+          double real = qvalue->as_real();
+          if(::std::isfinite(real)) {
+            // Write the real in decimal.
+            fmt << real;
+          }
+          else if(!json5) {
+            // Censor the value.
+            fmt << "null";
+          }
+          else if(!::std::isnan(real)) {
+            // JSON5 allows infinities in ECMAScript form.
+            fmt << "Infinity";
+          }
+          else {
+            // JSON5 allows NaNs in ECMAScript form.
+            fmt << "NaN";
+          }
+          break;
         }
 
-        // Write an empty array.
-        fmt << ']';
-      }
-      else if(qvalue->is_object()) {
-        const auto& object = qvalue->as_object();
+        case vtype_string:
+          // Write the quoted string.
+          do_quote_string(fmt, qvalue->as_string());
+          break;
 
-        // Open an object.
-        fmt << '{';
-        auto curp = do_find_uncensored(object, object.begin());
-        if(curp != object.end()) {
-          // Indent the body.
-          indent.increment_level();
-          indent.break_line(fmt);
+        case vtype_array: {
+          const auto& array = qvalue->as_array();
+          fmt << '[';
 
-          // Write the key followed by a colon.
-          do_quote_object_key(fmt, json5, curp->first);
-          fmt << ':';
-          if(indent.has_indention())
-            fmt << ' ';
+          // Open an array.
+          S_xformat_array ctxa = { ::rocket::ref(array), array.begin() };
+          if(ctxa.curp != array.end()) {
+            indent.increment_level();
+            indent.break_line(fmt);
 
-          // Decend into the object.
-          S_xformat_object ctxo = { ::rocket::ref(object), curp };
-          stack.emplace_back(::std::move(ctxo));
-          qvalue = ::std::addressof(curp->second);
-          continue;
+            // Decend into the array.
+            qvalue = ::rocket::ref(ctxa.curp[0]);
+            stack.emplace_back(::std::move(ctxa));
+            continue;
+          }
+
+          // Write an empty array.
+          fmt << ']';
+          break;
         }
 
-        // Write an empty object.
-        fmt << '}';
+        case vtype_object: {
+          const auto& object = qvalue->as_object();
+          fmt << '{';
+
+          // Open an object.
+          S_xformat_object ctxo = { ::rocket::ref(object), object.begin() };
+          if(do_find_uncensored(ctxo.curp, object)) {
+            indent.increment_level();
+            indent.break_line(fmt);
+
+            // Write the key followed by a colon.
+            do_format_object_key(fmt, json5, indent, ctxo.curp->first);
+
+            // Decend into the object.
+            qvalue = ::rocket::ref(ctxo.curp->second);
+            stack.emplace_back(::std::move(ctxo));
+            continue;
+          }
+
+          // Write an empty object.
+          fmt << '}';
+          break;
+        }
+
+        default:
+          // Anything else is censored to `null`.
+          fmt << "null";
+          break;
       }
-      else
-        // Just write a scalar value which is never recursive.
-        do_format_scalar(fmt, *qvalue, json5);
 
       // A complete value has been written. Advance to the next element if any.
       for(;;) {
@@ -361,60 +375,46 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
           // Finish the root value.
           return fmt.extract_string();
 
+        // Advance to the next element.
         if(stack.back().index() == 0) {
           auto& ctxa = stack.mut_back().as<0>();
-
-          // Advance to the next element.
-          auto curp = ++(ctxa.curp);
-          if(curp != ctxa.refa->end()) {
-            // Add a comma between elements.
+          if(++(ctxa.curp) != ctxa.refa->end()) {
             fmt << ',';
             indent.break_line(fmt);
 
             // Format the next element.
-            ctxa.curp = curp;
-            qvalue = ::std::addressof(*curp);
+            qvalue = ::rocket::ref(ctxa.curp[0]);
             break;
           }
+
+          // Close this array.
           if(json5 && indent.has_indention())
             fmt << ',';
 
-          // Unindent the body.
           indent.decrement_level();
           indent.break_line(fmt);
-
-          // Finish this array.
           fmt << ']';
         }
         else {
           auto& ctxo = stack.mut_back().as<1>();
-
-          // Advance to the next key-value pair.
-          auto curp = do_find_uncensored(ctxo.refo, ++(ctxo.curp));
-          if(curp != ctxo.refo->end()) {
-            // Add a comma between elements.
+          if(do_find_uncensored(++(ctxo.curp), ctxo.refo)) {
             fmt << ',';
             indent.break_line(fmt);
 
             // Write the key followed by a colon.
-            do_quote_object_key(fmt, json5, curp->first);
-            fmt << ':';
-            if(indent.has_indention())
-              fmt << ' ';
+            do_format_object_key(fmt, json5, indent, ctxo.curp->first);
 
             // Format the next value.
-            ctxo.curp = curp;
-            qvalue = ::std::addressof(curp->second);
+            qvalue = ::rocket::ref(ctxo.curp->second);
             break;
           }
+
+          // Close this object.
           if(json5 && indent.has_indention())
             fmt << ',';
 
-          // Unindent the body.
           indent.decrement_level();
           indent.break_line(fmt);
-
-          // Finish this array.
           fmt << '}';
         }
         stack.pop_back();
@@ -426,25 +426,6 @@ V_string
 do_format_nonrecursive(const Value& value, bool json5, Indenter&& indent)
   {
     return do_format_nonrecursive(value, json5, indent);
-  }
-
-optV_string
-do_accept_identifier_opt(Token_Stream& tstrm, initializer_list<const char*> accept)
-  {
-    auto qtok = tstrm.peek_opt();
-    if(!qtok)
-      return nullopt;
-
-    if(!qtok->is_identifier())
-      return nullopt;
-
-    auto name = qtok->as_identifier();
-    if(::rocket::is_none_of(name, accept))
-      return nullopt;
-
-    // A match has been found.
-    tstrm.shift();
-    return ::std::move(name);
   }
 
 opt<Punctuator>
@@ -461,139 +442,36 @@ do_accept_punctuator_opt(Token_Stream& tstrm, initializer_list<Punctuator> accep
     if(::rocket::is_none_of(punct, accept))
       return nullopt;
 
-    // A match has been found.
     tstrm.shift();
     return punct;
   }
 
-optV_real
-do_accept_number_opt(Token_Stream& tstrm)
+phsh_string
+do_accept_object_key(Token_Stream& tstrm)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok)
-      return nullopt;
+      throw Parser_Error(parser_status_closed_brace_or_json5_key_expected, tstrm.next_sloc(),
+                         tstrm.next_length());
 
-    if(qtok->is_integer_literal()) {
-      // Convert integers to reals, as JSON does not have an integral type.
-      auto val = qtok->as_integer_literal();
-      tstrm.shift();
-      return V_real(val);
-    }
-
-    if(qtok->is_real_literal()) {
-      // This real can be copied as is.
-      auto val = qtok->as_real_literal();
-      tstrm.shift();
-      return V_real(val);
-    }
-
-    if(qtok->is_punctuator()) {
-      auto punct = qtok->as_punctuator();
-      if(::rocket::is_none_of(punct, { punctuator_add, punctuator_sub }))
-        return nullopt;
-
-      // Only `Infinity` and `NaN` may follow.
-      // Please note that the tokenizer will have merged sign symbols into adjacent number literals.
-      qtok = tstrm.peek_opt(1);
-      if(!qtok)
-        return nullopt;
-
-      if(!qtok->is_identifier())
-        return nullopt;
-
-      const auto& name = qtok->as_identifier();
-      if(::rocket::is_none_of(name, { "Infinity", "NaN" }))
-        return nullopt;
-
-      // Assemble the value.
-      return ::std::copysign(
-          (name[0] == 'I') ? ::std::numeric_limits<V_real>::infinity()
-                           : ::std::numeric_limits<V_real>::quiet_NaN(),
-          (punct == punctuator_add) - 1);
-    }
-
-    return nullopt;
-  }
-
-optV_string
-do_accept_string_opt(Token_Stream& tstrm)
-  {
-    auto qtok = tstrm.peek_opt();
-    if(!qtok)
-      return nullopt;
-
-    if(!qtok->is_string_literal())
-      return nullopt;
-
-    // This string literal can be copied verbatim in UTF-8.
-    auto val = qtok->as_string_literal();
-    tstrm.shift();
-    return ::std::move(val);
-  }
-
-opt<Value>
-do_accept_scalar_opt(Token_Stream& tstrm)
-  {
-    auto qnum = do_accept_number_opt(tstrm);
-    if(qnum)
-      // Accept a `Number`.
-      return *qnum;
-
-    auto qstr = do_accept_string_opt(tstrm);
-    if(qstr)
-      // Accept a `String`.
-      return ::std::move(*qstr);
-
-    qstr = do_accept_identifier_opt(tstrm, { "true", "false", "Infinity", "NaN", "null" });
-    if(qstr) {
-      switch(qstr->front()) {
-        case 't':
-          // Accept a `Boolean` of value `true`.
-          return true;
-
-        case 'f':
-          // Accept a `Boolean` of value `false`.
-          return false;
-
-        case 'I':
-          // Accept a `Number` of value `Infinity`.
-          return ::std::numeric_limits<V_real>::infinity();
-
-        case 'N':
-          // Accept a `Number` of value `NaN`.
-          return ::std::numeric_limits<V_real>::quiet_NaN();
-
-        default:
-          // Accept an explicit `null`.
-          return V_null();
-      }
-    }
-
-    return nullopt;
-  }
-
-optV_string
-do_accept_key_opt(Token_Stream& tstrm)
-  {
-    auto qtok = tstrm.peek_opt();
-    if(!qtok)
-      return nullopt;
-
+    cow_string name;
     if(qtok->is_identifier()) {
-      // Identifiers are allowed unquoted in JSON5.
-      auto name = qtok->as_identifier();
-      tstrm.shift();
-      return ::std::move(name);
+      name = qtok->as_identifier();
     }
-
-    if(qtok->is_string_literal()) {
-      // This string literal can be copied as is in UTF-8.
-      auto val = qtok->as_string_literal();
-      tstrm.shift();
-      return ::std::move(val);
+    else if(qtok->is_string_literal()) {
+      name = qtok->as_string_literal();
     }
+    else {
+      throw Parser_Error(parser_status_closed_brace_or_json5_key_expected, tstrm.next_sloc(),
+                         tstrm.next_length());
+    }
+    tstrm.shift();
 
-    return nullopt;
+    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
+    if(!kpunct)
+      throw Parser_Error(parser_status_colon_expected, tstrm.next_sloc(), tstrm.next_length());
+
+    return name;
   }
 
 struct S_xparse_array
@@ -604,7 +482,7 @@ struct S_xparse_array
 struct S_xparse_object
   {
     V_object object;
-    V_string key;
+    phsh_string key;
   };
 
 using Xparse = variant<S_xparse_array, S_xparse_object>;
@@ -618,51 +496,128 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
     cow_vector<Xparse> stack;
 
     for(;;) {
-      // Accept a leaf value. No other things such as closed brackets are allowed.
-      auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_op, punctuator_brace_op });
-      if(kpunct == punctuator_bracket_op) {
-        // An open bracket has been accepted.
-        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
-        if(!kpunct) {
-          // Descend into the new array.
-          S_xparse_array ctxa = { nullopt };
-          stack.emplace_back(::std::move(ctxa));
-          continue;
+      // Accept a value. No other things such as closed brackets are allowed.
+      auto qtok = tstrm.peek_opt();
+      if(!qtok)
+        throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
+
+      switch(weaken_enum(qtok->index())) {
+        case Token::index_punctuator: {
+          // Accept a `+`, `-`, `[` or `{`.
+          auto punct = qtok->as_punctuator();
+          switch(weaken_enum(punct)) {
+            case punctuator_add:
+            case punctuator_sub: {
+              // Only `Infinity` and `NaN` may follow.
+              // Note that the tokenizer will have merged sign symbols into adjacent number literals.
+              cow_string name;
+
+              qtok = tstrm.peek_opt(1);
+              if(qtok && qtok->is_identifier())
+                name = qtok->as_identifier();
+
+              if(::rocket::is_none_of(name, { "Infinity", "NaN" }))
+                throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(),
+                                   tstrm.next_length());
+
+              // Accept a special numeric value.
+              double sign = (punct == punctuator_add) - 1;
+              double real = (name[0] == 'I') ? ::std::numeric_limits<double>::infinity()
+                                             : ::std::numeric_limits<double>::quiet_NaN();
+
+              value = ::std::copysign(real, sign);
+              tstrm.shift(2);
+              break;
+            }
+
+            case punctuator_bracket_op: {
+              tstrm.shift();
+
+              // Open an array.
+              auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
+              if(!kpunct) {
+                // Descend into the new array.
+                S_xparse_array ctxa = { V_array() };
+                stack.emplace_back(::std::move(ctxa));
+                continue;
+              }
+
+              // Accept an empty array.
+              value = V_array();
+              break;
+            }
+
+            case punctuator_brace_op: {
+              tstrm.shift();
+
+              // Open an object.
+              auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
+              if(!kpunct) {
+                // Descend into the new object.
+                S_xparse_object ctxo = { V_object(), do_accept_object_key(tstrm) };
+                stack.emplace_back(::std::move(ctxo));
+                continue;
+              }
+
+              // Accept an empty object.
+              value = V_object();
+              break;
+            }
+
+            default:
+              throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
+          }
+          break;
         }
 
-        // Accept an empty array.
-        value = V_array();
-      }
-      else if(kpunct == punctuator_brace_op) {
-        // An open brace has been accepted.
-        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
-        if(!kpunct) {
-          // A key followed by a colon is expected.
-          auto qkey = do_accept_key_opt(tstrm);
-          if(!qkey)
-            throw Parser_Error(parser_status_closed_brace_or_json5_key_expected, tstrm.next_sloc(),
-                               tstrm.next_length());
+        case Token::index_identifier: {
+          // Accept a literal.
+          const auto& name = qtok->as_identifier();
+          if(::rocket::is_none_of(name, { "null", "true", "false", "Infinity", "NaN" }))
+            throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
 
-          kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
-          if(!kpunct)
-            throw Parser_Error(parser_status_colon_expected, tstrm.next_sloc(), tstrm.next_length());
+          switch(name[0]) {
+            case 'n':
+              value = nullptr;
+              break;
 
-          // Descend into a new object.
-          S_xparse_object ctxo = { nullopt, ::std::move(*qkey) };
-          stack.emplace_back(::std::move(ctxo));
-          continue;
+            case 't':
+              value = true;
+              break;
+
+            case 'f':
+              value = false;
+              break;
+
+            case 'I':
+              value = ::std::numeric_limits<double>::infinity();
+              break;
+
+            case 'N':
+              value = ::std::numeric_limits<double>::quiet_NaN();
+              break;
+
+            default:
+              ROCKET_ASSERT(false);
+          }
+          tstrm.shift();
+          break;
         }
 
-        // Accept an empty object.
-        value = V_object();
-      }
-      else {
-        // Just accept a scalar value which is never recursive.
-        auto qvalue = do_accept_scalar_opt(tstrm);
-        if(!qvalue)
+        case Token::index_real_literal:
+          // Accept a number.
+          value = qtok->as_real_literal();
+          tstrm.shift();
+          break;
+
+        case Token::index_string_literal:
+          // Accept a UTF-8 string.
+          value = qtok->as_string_literal();
+          tstrm.shift();
+          break;
+
+        default:
           throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
-
-        value = ::std::move(*qvalue);
       }
 
       // A complete value has been accepted. Insert it into its parent array or object.
@@ -673,59 +628,47 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
 
         if(stack.back().index() == 0) {
           auto& ctxa = stack.mut_back().as<0>();
-
-          // Append the value to its parent array.
           ctxa.array.emplace_back(::std::move(value));
 
           // Look for the next element.
-          kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl, punctuator_comma });
+          auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl, punctuator_comma });
           if(!kpunct)
-            throw Parser_Error(parser_status_comma_expected, tstrm.next_sloc(), tstrm.next_length());
-
-          if(*kpunct == punctuator_comma) {
-            // Check for termination of this array.
-            kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
-            if(!kpunct)
-              // Look for the next element.
-              break;
-          }
-
-          // The array has been terminated. Pop it.
-          value = ::std::move(ctxa.array);
-        }
-        else {
-          auto& ctxo = stack.mut_back().as<1>();
-
-          // Insert the value into its parent object.
-          ctxo.object.insert_or_assign(::std::move(ctxo.key), ::std::move(value));
-
-          // Look for the next element.
-          kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl, punctuator_comma });
-          if(!kpunct)
-            throw Parser_Error(parser_status_closed_brace_or_comma_expected, tstrm.next_sloc(),
+            throw Parser_Error(parser_status_closed_bracket_or_comma_expected, tstrm.next_sloc(),
                                tstrm.next_length());
 
-          if(*kpunct == punctuator_comma) {
-            // Check for termination of this object.
-            kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
+          // Check for termination of this array.
+          if(*kpunct != punctuator_bracket_cl) {
+            kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
             if(!kpunct) {
-              // Look for the next key.
-              auto qkey = do_accept_key_opt(tstrm);
-              if(!qkey)
-                throw Parser_Error(parser_status_closed_brace_or_json5_key_expected, tstrm.next_sloc(),
-                                   tstrm.next_length());
-
-              kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
-              if(!kpunct)
-                throw Parser_Error(parser_status_colon_expected, tstrm.next_sloc(), tstrm.next_length());
-
-              ctxo.key = ::std::move(*qkey);
-              // Look for the next value.
+              // Look for the next element.
               break;
             }
           }
 
-          // The object has been terminated. Pop it.
+          // Close this array.
+          value = ::std::move(ctxa.array);
+        }
+        else {
+          auto& ctxo = stack.mut_back().as<1>();
+          ctxo.object.insert_or_assign(::std::move(ctxo.key), ::std::move(value));
+
+          // Look for the next element.
+          auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl, punctuator_comma });
+          if(!kpunct)
+            throw Parser_Error(parser_status_closed_brace_or_comma_expected, tstrm.next_sloc(),
+                               tstrm.next_length());
+
+          // Check for termination of this array.
+          if(*kpunct != punctuator_brace_cl) {
+            kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
+            if(!kpunct) {
+              // Look for the next element.
+              ctxo.key = do_accept_object_key(tstrm);
+              break;
+            }
+          }
+
+          // Close this object.
           value = ::std::move(ctxo.object);
         }
         stack.pop_back();
