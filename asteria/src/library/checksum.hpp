@@ -10,13 +10,13 @@ namespace asteria {
 
 // members of `std.checksum.crc32_new()`
 V_opaque
-std_checksum_crc32_new_private();
+std_checksum_CRC32_private();
 
 void
-std_checksum_crc32_new_update(V_opaque& h, V_string data);
+std_checksum_CRC32_update(V_opaque& h, V_string data);
 
 V_integer
-std_checksum_crc32_new_finish(V_opaque& h);
+std_checksum_CRC32_finish(V_opaque& h);
 
 // `std.checksum.crc32_new`
 V_object
@@ -32,13 +32,13 @@ std_checksum_crc32_file(V_string path);
 
 // members of `std.checksum.fnv1a32_new()`
 V_opaque
-std_checksum_fnv1a32_new_private();
+std_checksum_FNV1a32_private();
 
 void
-std_checksum_fnv1a32_new_update(V_opaque& h, V_string data);
+std_checksum_FNV1a32_update(V_opaque& h, V_string data);
 
 V_integer
-std_checksum_fnv1a32_new_finish(V_opaque& h);
+std_checksum_FNV1a32_finish(V_opaque& h);
 
 // `std.checksum.fnv1a32_new`
 V_object
@@ -54,13 +54,13 @@ std_checksum_fnv1a32_file(V_string path);
 
 // members of `std.checksum.md5_new()`
 V_opaque
-std_checksum_md5_new_private();
+std_checksum_MD5_private();
 
 void
-std_checksum_md5_new_update(V_opaque& h, V_string data);
+std_checksum_MD5_update(V_opaque& h, V_string data);
 
 V_string
-std_checksum_md5_new_finish(V_opaque& h);
+std_checksum_MD5_finish(V_opaque& h);
 
 // `std.checksum.md5_new`
 V_object
@@ -76,13 +76,13 @@ std_checksum_md5_file(V_string path);
 
 // members of `std.checksum.sha1_new()`
 V_opaque
-std_checksum_sha1_new_private();
+std_checksum_SHA1_private();
 
 void
-std_checksum_sha1_new_update(V_opaque& h, V_string data);
+std_checksum_SHA1_update(V_opaque& h, V_string data);
 
 V_string
-std_checksum_sha1_new_finish(V_opaque& h);
+std_checksum_SHA1_finish(V_opaque& h);
 
 // `std.checksum.sha1_new`
 V_object
@@ -98,13 +98,13 @@ std_checksum_sha1_file(V_string path);
 
 // members of `std.checksum.sha256_new()`
 V_opaque
-std_checksum_sha256_new_private();
+std_checksum_SHA256_private();
 
 void
-std_checksum_sha256_new_update(V_opaque& h, V_string data);
+std_checksum_SHA256_update(V_opaque& h, V_string data);
 
 V_string
-std_checksum_sha256_new_finish(V_opaque& h);
+std_checksum_SHA256_finish(V_opaque& h);
 
 // `std.checksum.sha256_new`
 V_object

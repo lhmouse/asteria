@@ -97,7 +97,7 @@ do_construct_crc32(V_object& result)
     // * private data
     //===================================================================
     result.insert_or_assign(::rocket::sref("$h"),
-      std_checksum_crc32_new_private());
+      std_checksum_CRC32_private());
 
     //===================================================================
     // `.update(data)`
@@ -119,7 +119,7 @@ do_construct_crc32(V_object& result)
     // Parse arguments.
     V_string data;
     if(reader.I().v(data).F()) {
-      std_checksum_crc32_new_update(self.open().open_opaque(), ::std::move(data));
+      std_checksum_CRC32_update(self.open().open_opaque(), ::std::move(data));
       return self = Reference_root::S_void();
     }
     reader.throw_no_matching_function_call();
@@ -149,7 +149,7 @@ do_construct_crc32(V_object& result)
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_checksum_crc32_new_finish(self.open().open_opaque()) };
+      Reference_root::S_temporary xref = { std_checksum_CRC32_finish(self.open().open_opaque()) };
       return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
@@ -224,7 +224,7 @@ do_construct_fnv1a32(V_object& result)
     // * private data
     //===================================================================
     result.insert_or_assign(::rocket::sref("$h"),
-      std_checksum_fnv1a32_new_private());
+      std_checksum_FNV1a32_private());
 
     //===================================================================
     // `.update(data)`
@@ -246,7 +246,7 @@ do_construct_fnv1a32(V_object& result)
     // Parse arguments.
     V_string data;
     if(reader.I().v(data).F()) {
-      std_checksum_fnv1a32_new_update(self.open().open_opaque(), ::std::move(data));
+      std_checksum_FNV1a32_update(self.open().open_opaque(), ::std::move(data));
       return self = Reference_root::S_void();
     }
     reader.throw_no_matching_function_call();
@@ -276,7 +276,7 @@ do_construct_fnv1a32(V_object& result)
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_checksum_fnv1a32_new_finish(self.open().open_opaque()) };
+      Reference_root::S_temporary xref = { std_checksum_FNV1a32_finish(self.open().open_opaque()) };
       return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
@@ -640,7 +640,7 @@ do_construct_md5(V_object& result)
     // * private data
     //===================================================================
     result.insert_or_assign(::rocket::sref("$h"),
-      std_checksum_md5_new_private());
+      std_checksum_MD5_private());
 
     //===================================================================
     // `.update(data)`
@@ -662,7 +662,7 @@ do_construct_md5(V_object& result)
     // Parse arguments.
     V_string data;
     if(reader.I().v(data).F()) {
-      std_checksum_md5_new_update(self.open().open_opaque(), ::std::move(data));
+      std_checksum_MD5_update(self.open().open_opaque(), ::std::move(data));
       return self = Reference_root::S_void();
     }
     reader.throw_no_matching_function_call();
@@ -692,7 +692,7 @@ do_construct_md5(V_object& result)
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_checksum_md5_new_finish(self.open().open_opaque()) };
+      Reference_root::S_temporary xref = { std_checksum_MD5_finish(self.open().open_opaque()) };
       return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
@@ -978,7 +978,7 @@ do_construct_sha1(V_object& result)
     // * private data
     //===================================================================
     result.insert_or_assign(::rocket::sref("$h"),
-      std_checksum_sha1_new_private());
+      std_checksum_SHA1_private());
 
     //===================================================================
     // `.update(data)`
@@ -1000,7 +1000,7 @@ do_construct_sha1(V_object& result)
     // Parse arguments.
     V_string data;
     if(reader.I().v(data).F()) {
-      std_checksum_sha1_new_update(self.open().open_opaque(), ::std::move(data));
+      std_checksum_SHA1_update(self.open().open_opaque(), ::std::move(data));
       return self = Reference_root::S_void();
     }
     reader.throw_no_matching_function_call();
@@ -1030,7 +1030,7 @@ do_construct_sha1(V_object& result)
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_checksum_sha1_new_finish(self.open().open_opaque()) };
+      Reference_root::S_temporary xref = { std_checksum_SHA1_finish(self.open().open_opaque()) };
       return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
@@ -1288,7 +1288,7 @@ do_construct_sha256(V_object& result)
     // * private data
     //===================================================================
     result.insert_or_assign(::rocket::sref("$h"),
-      std_checksum_sha256_new_private());
+      std_checksum_SHA256_private());
 
     //===================================================================
     // `.update(data)`
@@ -1310,7 +1310,7 @@ do_construct_sha256(V_object& result)
     // Parse arguments.
     V_string data;
     if(reader.I().v(data).F()) {
-      std_checksum_sha256_new_update(self.open().open_opaque(), ::std::move(data));
+      std_checksum_SHA256_update(self.open().open_opaque(), ::std::move(data));
       return self = Reference_root::S_void();
     }
     reader.throw_no_matching_function_call();
@@ -1340,7 +1340,7 @@ do_construct_sha256(V_object& result)
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_checksum_sha256_new_finish(self.open().open_opaque()) };
+      Reference_root::S_temporary xref = { std_checksum_SHA256_finish(self.open().open_opaque()) };
       return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
@@ -1397,19 +1397,19 @@ do_hash_file(const V_string& path)
 }  // namespace
 
 V_opaque
-std_checksum_crc32_new_private()
+std_checksum_CRC32_private()
   {
     return ::rocket::make_refcnt<CRC32_Hasher>();
   }
 
 void
-std_checksum_crc32_new_update(V_opaque& h, V_string data)
+std_checksum_CRC32_update(V_opaque& h, V_string data)
   {
     return do_cast_hasher<CRC32_Hasher>(h)->update(data.data(), data.size());
   }
 
 V_integer
-std_checksum_crc32_new_finish(V_opaque& h)
+std_checksum_CRC32_finish(V_opaque& h)
   {
     return do_cast_hasher<CRC32_Hasher>(h)->finish();
   }
@@ -1435,19 +1435,19 @@ std_checksum_crc32_file(V_string path)
   }
 
 V_opaque
-std_checksum_fnv1a32_new_private()
+std_checksum_FNV1a32_private()
   {
     return ::rocket::make_refcnt<FNV1a32_Hasher>();
   }
 
 void
-std_checksum_fnv1a32_new_update(V_opaque& h, V_string data)
+std_checksum_FNV1a32_update(V_opaque& h, V_string data)
   {
     return do_cast_hasher<FNV1a32_Hasher>(h)->update(data.data(), data.size());
   }
 
 V_integer
-std_checksum_fnv1a32_new_finish(V_opaque& h)
+std_checksum_FNV1a32_finish(V_opaque& h)
   {
     return do_cast_hasher<FNV1a32_Hasher>(h)->finish();
   }
@@ -1473,19 +1473,19 @@ std_checksum_fnv1a32_file(V_string path)
   }
 
 V_opaque
-std_checksum_md5_new_private()
+std_checksum_MD5_private()
   {
     return ::rocket::make_refcnt<MD5_Hasher>();
   }
 
 void
-std_checksum_md5_new_update(V_opaque& h, V_string data)
+std_checksum_MD5_update(V_opaque& h, V_string data)
   {
     return do_cast_hasher<MD5_Hasher>(h)->update(data.data(), data.size());
   }
 
 V_string
-std_checksum_md5_new_finish(V_opaque& h)
+std_checksum_MD5_finish(V_opaque& h)
   {
     return do_cast_hasher<MD5_Hasher>(h)->finish();
   }
@@ -1511,19 +1511,19 @@ std_checksum_md5_file(V_string path)
   }
 
 V_opaque
-std_checksum_sha1_new_private()
+std_checksum_SHA1_private()
   {
     return ::rocket::make_refcnt<SHA1_Hasher>();
   }
 
 void
-std_checksum_sha1_new_update(V_opaque& h, V_string data)
+std_checksum_SHA1_update(V_opaque& h, V_string data)
   {
     return do_cast_hasher<SHA1_Hasher>(h)->update(data.data(), data.size());
   }
 
 V_string
-std_checksum_sha1_new_finish(V_opaque& h)
+std_checksum_SHA1_finish(V_opaque& h)
   {
     return do_cast_hasher<SHA1_Hasher>(h)->finish();
   }
@@ -1549,19 +1549,19 @@ std_checksum_sha1_file(V_string path)
   }
 
 V_opaque
-std_checksum_sha256_new_private()
+std_checksum_SHA256_private()
   {
     return ::rocket::make_refcnt<SHA256_Hasher>();
   }
 
 void
-std_checksum_sha256_new_update(V_opaque& h, V_string data)
+std_checksum_SHA256_update(V_opaque& h, V_string data)
   {
     return do_cast_hasher<SHA256_Hasher>(h)->update(data.data(), data.size());
   }
 
 V_string
-std_checksum_sha256_new_finish(V_opaque& h)
+std_checksum_SHA256_finish(V_opaque& h)
   {
     return do_cast_hasher<SHA256_Hasher>(h)->finish();
   }
