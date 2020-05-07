@@ -421,26 +421,23 @@ final
             w = a + f + k + w;
             a = b + do_rotl(w, rb);
           };
+
         auto spec0 = [&](uint32_t i, uint32_t& b, uint32_t& c, uint32_t& d)
-          {
-            f = d ^ (b & (c ^ d));
-            g = i;
-          };
+          { f = d ^ (b & (c ^ d));
+            g = i;  };
+
         auto spec1 = [&](uint32_t i, uint32_t& b, uint32_t& c, uint32_t& d)
-          {
-            f = c ^ (d & (b ^ c));
-            g = (5 * i + 1) % 16;
-          };
+          { f = c ^ (d & (b ^ c));
+            g = (5 * i + 1) % 16;  };
+
         auto spec2 = [&](uint32_t i, uint32_t& b, uint32_t& c, uint32_t& d)
-          {
-            f = b ^ c ^ d;
-            g = (3 * i + 5) % 16;
-          };
+          { f = b ^ c ^ d;
+            g = (3 * i + 5) % 16;  };
+
         auto spec3 = [&](uint32_t i, uint32_t& b, uint32_t& c, uint32_t& d)
-          {
-            f = c ^ (b | ~d);
-            g = (7 * i) % 16;
-          };
+          { f = c ^ (b | ~d);
+            g = (7 * i) % 16;  };
+
         // Unroll loops by hand.
         auto r = this->m_regs;
 
@@ -733,26 +730,23 @@ final
             e += do_rotl(a, 5) + f + k + w[i];
             b = do_rotl(b, 30);
           };
+
         auto spec0 = [&](uint32_t& b, uint32_t& c, uint32_t& d)
-          {
-            f = d ^ (b & (c ^ d));
-            k = 0x5A827999;
-          };
+          { f = d ^ (b & (c ^ d));
+            k = 0x5A827999;  };
+
         auto spec1 = [&](uint32_t& b, uint32_t& c, uint32_t& d)
-          {
-            f = b ^ c ^ d;
-            k = 0x6ED9EBA1;
-          };
+          { f = b ^ c ^ d;
+            k = 0x6ED9EBA1;  };
+
         auto spec2 = [&](uint32_t& b, uint32_t& c, uint32_t& d)
-          {
-            f = (b & (c | d)) | (c & d);
-            k = 0x8F1BBCDC;
-          };
+          { f = (b & (c | d)) | (c & d);
+            k = 0x8F1BBCDC;  };
+
         auto spec3 = [&](uint32_t& b, uint32_t& c, uint32_t& d)
-          {
-            f = b ^ c ^ d;
-            k = 0xCA62C1D6;
-          };
+          { f = b ^ c ^ d;
+            k = 0xCA62C1D6;  };
+
         // Unroll loops by hand.
         auto r = this->m_regs;
 
