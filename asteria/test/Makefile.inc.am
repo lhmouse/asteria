@@ -32,7 +32,6 @@ check_PROGRAMS +=  \
   %reldir%/json.test  \
   %reldir%/import.test  \
   %reldir%/bypassed_variable.test  \
-  %reldir%/github_65.test  \
   %reldir%/github_71.test  \
   %reldir%/github_78.test  \
   %reldir%/github_84.test  \
