@@ -1573,8 +1573,8 @@ do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
 
       if(nelems >= INT32_MAX)
         throw Parser_Error(parser_status_too_many_elements, tstrm.next_sloc(), tstrm.next_length());
-
       nelems += 1;
+
       // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
       comma_allowed = !kpunct;
@@ -1609,10 +1609,17 @@ do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm
     cow_vector<phsh_string> keys;
     bool comma_allowed = false;
     for(;;) {
+      auto sloc_k = tstrm.next_sloc();
+      auto length_k = tstrm.next_length();
       auto qkey = do_accept_json5_key_opt(tstrm);
       if(!qkey)
         break;
 
+      if(::std::find(keys.begin(), keys.end(), *qkey) != keys.end())
+        throw Parser_Error(parser_status_duplicate_key_in_object, sloc_k, length_k);
+      keys.emplace_back(::std::move(*qkey));
+
+      // Look for the value with an initiator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_assign, punctuator_colon });
       if(!kpunct)
         throw Parser_Error(parser_status_equals_sign_or_colon_expected, tstrm.next_sloc(), tstrm.next_length());
@@ -1620,8 +1627,6 @@ do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm
       bool succ = do_accept_expression_and_convert_to_rvalue(units, tstrm);
       if(!succ)
         throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
-
-      keys.emplace_back(::std::move(*qkey));
 
       // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
@@ -1760,8 +1765,8 @@ do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream&
 
       if(nargs >= INT32_MAX)
         throw Parser_Error(parser_status_too_many_elements, tstrm.next_sloc(), tstrm.next_length());
-
       nargs += 1;
+
       // Look for the next argument.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
       if(!kpunct)
@@ -1886,8 +1891,8 @@ do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_Stream
 
       if(nargs >= INT32_MAX)
         throw Parser_Error(parser_status_too_many_elements, tstrm.next_sloc(), tstrm.next_length());
-
       nargs += 1;
+
       // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
       comma_allowed = !kpunct;

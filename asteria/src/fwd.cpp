@@ -255,6 +255,9 @@ noexcept
       case parser_status_digit_separator_following_nondigit:
         return "digit separator not following a digit";
 
+      case parser_status_duplicate_key_in_object:
+        return "duplicate key in unnamed object";
+
       case parser_status_identifier_expected:
         return "identifier expected";
 

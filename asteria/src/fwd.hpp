@@ -650,6 +650,7 @@ enum Parser_Status : uint32_t
     parser_status_numeric_literal_suffix_invalid             = 2012,
     parser_status_block_comment_unclosed                     = 2014,
     parser_status_digit_separator_following_nondigit         = 2015,
+    parser_status_duplicate_key_in_object                    = 3001,
     parser_status_identifier_expected                        = 3002,
     parser_status_semicolon_expected                         = 3003,
     parser_status_string_literal_expected                    = 3004,
