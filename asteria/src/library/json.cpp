@@ -508,14 +508,13 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
           switch(weaken_enum(punct)) {
             case punctuator_add:
             case punctuator_sub: {
-              // Only `Infinity` and `NaN` may follow.
-              // Note that the tokenizer will have merged sign symbols into adjacent number literals.
               cow_string name;
-
               qtok = tstrm.peek_opt(1);
               if(qtok && qtok->is_identifier())
                 name = qtok->as_identifier();
 
+              // Only `Infinity` and `NaN` may follow.
+              // Note that the tokenizer will have merged sign symbols into adjacent number literals.
               if(::rocket::is_none_of(name, { "Infinity", "NaN" }))
                 throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(),
                                    tstrm.next_length());
