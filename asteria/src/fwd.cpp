@@ -258,9 +258,9 @@ noexcept
       case parser_status_identifier_expected:
         return "identifier expected";
 
-      case parser_status_semicolon_expected: {
+      case parser_status_semicolon_expected:
         return "`;` expected";
-      }
+
       case parser_status_string_literal_expected:
         return "string literal expected";
 
@@ -303,12 +303,12 @@ noexcept
       case parser_status_comma_expected:
         return "`,` expected";
 
-      case parser_status_for_statement_initializer_expected: {
+      case parser_status_for_statement_initializer_expected:
         return "`each`, `;`, variable definition or expression statement expected";
-      }
-      case parser_status_semicolon_or_expression_expected: {
+
+      case parser_status_semicolon_or_expression_expected:
         return "`;` or expression expected";
-      }
+
       case parser_status_closed_brace_expected:
         return "`}` expected";
 
