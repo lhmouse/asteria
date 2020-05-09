@@ -395,8 +395,10 @@ tinyfmt&
 operator<<(tinyfmt& fmt, const Formatted_errno& e)
   {
     // Describe the error.
-    ::rocket::unique_handle<::locale_t, locale_deleter> qloc(::duplocale(LC_GLOBAL_LOCALE));
-    const char* desc = qloc ? ::strerror_l(e.err, qloc) : "No description";
+    const char* desc = "No description";
+    ::rocket::unique_handle<::locale_t, locale_deleter> qloc;
+    if(qloc.reset(::newlocale(LC_ALL_MASK, "C", qloc.get_closer().null())))
+      desc = ::strerror_l(e.err, qloc);
 
     // Write the error number, followed by its description.
     fmt << desc << " (errno `" << e.err << "`)";
