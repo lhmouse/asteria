@@ -1,6 +1,3 @@
-lib_LTLIBRARIES += lib/libasteria.la
-bin_PROGRAMS += bin/asteria
-
 include_asteriadir = ${includedir}/asteria
 include_asteria_HEADERS =  \
   %reldir%/precompiled.hpp  \
@@ -75,6 +72,8 @@ include_asteria_library_HEADERS =  \
   %reldir%/library/io.hpp  \
   ${NOTHING}
 
+lib_LTLIBRARIES += lib/libasteria.la
+
 lib_libasteria_la_SOURCES =  \
   %reldir%/fwd.cpp  \
   %reldir%/utilities.cpp  \
@@ -136,6 +135,8 @@ lib_libasteria_la_LIBADD =  \
 
 lib_libasteria_la_LDFLAGS =  \
   -Wl,--no-undefined -no-undefined -version-info 0:0:0
+
+bin_PROGRAMS += bin/asteria
 
 bin_asteria_SOURCES =  \
   %reldir%/repl.cpp
