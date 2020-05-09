@@ -60,7 +60,9 @@ do_write_utf8_common(const IOF_Sentry& fp, const cow_string& text)
 
       // Insert it into the output stream.
       if(::fputwc_unlocked(static_cast<wchar_t>(cp), fp) == WEOF)
-        ASTERIA_THROW_SYSTEM_ERROR("fputwc_unlocked");
+        ASTERIA_THROW("error writing standard output\n"
+                      "[`fputwc_unlocked()` failed: $1]'",
+                      format_errno(errno));
 
       // The return value is the number of code points rather than bytes.
       ncps += 1;
@@ -88,10 +90,15 @@ std_io_getc()
     if(wch == WEOF) {
       // Throw an exception on error.
       // Return `null` on EOF.
-      if(int err = do_recover(fp))
-        ASTERIA_THROW_SYSTEM_ERROR("fgetc_unlocked", err);
+      int err = do_recover(fp);
+      if(err != 0)
+        ASTERIA_THROW("error reading standard input\n"
+                      "[`fgetwc_unlocked()` failed: $1]'",
+                      format_errno(err));
+
       return nullopt;
     }
+
     // Zero-extend the code point to an integer.
     return static_cast<uint32_t>(wch);
   }
@@ -120,8 +127,12 @@ std_io_getln()
 
         // Throw an exception on error.
         // Return `null` on EOF.
-        if(int err = do_recover(fp))
-          ASTERIA_THROW_SYSTEM_ERROR("fgetc_unlocked", err);
+        int err = do_recover(fp);
+        if(err != 0)
+          ASTERIA_THROW("error reading standard input\n"
+                        "[`fgetwc_unlocked()` failed: $1]'",
+                        format_errno(err));
+
         return nullopt;
       }
       // If a LF is encountered, finish this line.
@@ -154,6 +165,7 @@ std_io_putc(V_integer value)
     char32_t cp = static_cast<uint32_t>(value);
     if(cp != value)
       ASTERIA_THROW("invalid UTF code point (value `$1`)", value);
+
     // Check whether it is valid by try encoding it.
     // The result is discarded.
     char16_t sbuf[2];
@@ -163,7 +175,10 @@ std_io_putc(V_integer value)
 
     // Write a UTF code point.
     if(::fputwc_unlocked(static_cast<wchar_t>(cp), fp) == WEOF)
-      ASTERIA_THROW_SYSTEM_ERROR("fputwc_unlocked");
+      ASTERIA_THROW("error writing standard output\n"
+                    "[`fputwc_unlocked()` failed: $1]'",
+                    format_errno(errno));
+
     // Return the number of code points that have been written.
     // This is always 1 for this function.
     return 1;
@@ -184,6 +199,7 @@ std_io_putc(V_string value)
 
     // Write only the string.
     size_t ncps = do_write_utf8_common(fp, value);
+
     // Return the number of code points that have been written.
     return static_cast<int64_t>(ncps);
   }
@@ -203,9 +219,13 @@ std_io_putln(V_string value)
 
     // Write the string itself.
     size_t ncps = do_write_utf8_common(fp, value);
+
     // Append a line feed and flush.
     if(::fputwc_unlocked(L'\n', fp) == WEOF)
-      ASTERIA_THROW_SYSTEM_ERROR("fputwc_unlocked");
+      ASTERIA_THROW("error writing standard output\n"
+                    "[`fputwc_unlocked()` failed: $1]'",
+                    format_errno(errno));
+
     // Return the number of code points that have been written.
     // The implicit LF also counts.
     return static_cast<int64_t>(ncps + 1);
@@ -233,12 +253,14 @@ std_io_putf(V_string templ, cow_vector<Value> values)
           { return static_cast<const Value*>(ptr)->print(fmt);  },
         values.data() + i
       });
+
     // Compose the string into a stream.
     ::rocket::tinyfmt_str fmt;
     vformat(fmt, templ.data(), templ.size(), insts.data(), insts.size());
 
     // Write the string now.
     size_t ncps = do_write_utf8_common(fp, fmt.get_string());
+
     // Return the number of code points that have been written.
     return static_cast<int64_t>(ncps);
   }
@@ -246,6 +268,8 @@ std_io_putf(V_string templ, cow_vector<Value> values)
 optV_string
 std_io_read(optV_integer limit)
   {
+    size_t rlimit = (size_t)::rocket::clamp(limit.value_or(INT32_MAX), 0, 0x10'00000);
+
     // Lock standard input for reading.
     const IOF_Sentry fp(stdin);
 
@@ -256,18 +280,21 @@ std_io_read(optV_integer limit)
     if(::fwide(fp, -1) > 0)
       ASTERIA_THROW("invalid binary read from text-oriented input");
 
-    // If no limit is given, use a hard-coded value.
-    size_t rlimit = (size_t)::rocket::clamp(limit.value_or(INT32_MAX), 0, 0x10'00000);
     // Read some bytes from the stream.
     cow_string data(rlimit, '\0');
     size_t ntotal = ::fread_unlocked(data.mut_data(), 1, data.size(), fp);
     if(ntotal == 0) {
       // Throw an exception on error.
       // Return `null` on EOF.
-      if(int err = do_recover(fp))
-        ASTERIA_THROW_SYSTEM_ERROR("fread_unlocked", err);
+      int err = do_recover(fp);
+      if(err != 0)
+        ASTERIA_THROW("error reading standard input\n"
+                      "[`fread_unlocked()` failed: $1]'",
+                      format_errno(err));
+
       return nullopt;
     }
+
     // Return the byte string verbatim.
     return ::std::move(data.erase(ntotal));
   }
@@ -291,8 +318,15 @@ std_io_write(V_string data)
 
     // Write the byte string verbatim.
     size_t ntotal = ::fwrite_unlocked(data.data(), 1, data.size(), fp);
-    if(ntotal == 0)
-      ASTERIA_THROW_SYSTEM_ERROR("fwrite_unlocked");
+    if(ntotal == 0) {
+      // Throw an exception on error.
+      int err = do_recover(fp);
+      if(err != 0)
+        ASTERIA_THROW("error writing standard output\n"
+                      "[`fwrite_unlocked()` failed: $1]'",
+                      format_errno(errno));
+    }
+
     // Return the number of bytes written.
     return static_cast<int64_t>(ntotal);
   }
@@ -300,12 +334,11 @@ std_io_write(V_string data)
 void
 std_io_flush()
   {
-    // Lock standard output for writing.
-    const IOF_Sentry fp(stdout);
-
     // Flush standard output only.
-    if(::fflush_unlocked(fp) == EOF)
-      ASTERIA_THROW_SYSTEM_ERROR("fflush_unlocked");
+    if(::fflush(stdout) == EOF)
+      ASTERIA_THROW("error flushing standard output\n"
+                    "[`fflush()` failed: $1]'",
+                    format_errno(errno));
   }
 
 void

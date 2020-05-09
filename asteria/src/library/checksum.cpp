@@ -1368,7 +1368,9 @@ do_hash_file(const V_string& path)
   {
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
     if(!fd)
-      ASTERIA_THROW_SYSTEM_ERROR("open");
+      ASTERIA_THROW("could not open file '$2'\n"
+                    "[`open()` failed: $1]'",
+                    format_errno(errno), path);
 
     HasherT h;
     static constexpr size_t nbuf = 16384;
@@ -1378,7 +1380,9 @@ do_hash_file(const V_string& path)
     for(;;) {
       ::ssize_t nread = ::read(fd, pbuf, nbuf);
       if(nread < 0)
-        ASTERIA_THROW_SYSTEM_ERROR("read");
+        ASTERIA_THROW("error reading file '$2'\n"
+                      "[`read()` failed: $1]'",
+                      format_errno(errno), path);
 
       if(nread == 0)
         break;  // EOF

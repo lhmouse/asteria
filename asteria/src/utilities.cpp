@@ -5,8 +5,6 @@
 #include "utilities.hpp"
 #include <time.h>  // ::timespec, ::clock_gettime(), ::localtime()
 #include <unistd.h>  // ::write
-#include <errno.h>  // errno
-#include <string.h>  // ::strerror_r()
 
 namespace asteria {
 namespace {
@@ -372,6 +370,21 @@ operator<<(tinyfmt& fmt, const Paragraph_Wrapper& q)
     return fmt;
   }
 
+tinyfmt&
+operator<<(tinyfmt& fmt, const Formatted_errno& e)
+  {
+    char sbuf[256];
+    const char* e_msg;
+#ifdef __USE_GNU
+    e_msg = ::strerror_r(e.err, sbuf, sizeof(sbuf));
+#else
+    ::strerror_r(e.err, sbuf, sizeof(sbuf));
+    e_msg = sbuf;
+#endif
+    fmt << "errno was " << e.err << " (" << e_msg << ")";
+    return fmt;
+  }
+
 Wrapped_Index
 wrap_index(int64_t index, size_t size)
 noexcept
@@ -419,20 +432,6 @@ noexcept
       ireg >>= 8;
     }
     return seed;
-  }
-
-void
-throw_system_error(const char* func, int err)
-  {
-    char sbuf[256];
-    const char* msg = ::strerror_r(err, sbuf, sizeof(sbuf));
-    ASTERIA_THROW("`$1()` failed (errno was `$2`: $3)", func, err, msg);
-  }
-
-void
-throw_system_error(const char* func)
-  {
-    throw_system_error(func, errno);
   }
 
 }  // namespace asteria

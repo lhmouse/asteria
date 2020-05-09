@@ -143,6 +143,21 @@ noexcept
 tinyfmt&
 operator<<(tinyfmt& fmt, const Paragraph_Wrapper& q);
 
+// Error numbers
+struct Formatted_errno
+  {
+    int err;
+  };
+
+constexpr
+Formatted_errno
+format_errno(int err)
+noexcept
+  { return { err };  }
+
+tinyfmt&
+operator<<(tinyfmt& fmt, const Formatted_errno& e);
+
 // Negative array index wrapper
 struct Wrapped_Index
   {
@@ -159,17 +174,6 @@ noexcept;
 uint64_t
 generate_random_seed()
 noexcept;
-
-// The second overload takes the error code from `errno`.
-[[noreturn]]
-void
-throw_system_error(const char* func, int err);
-
-[[noreturn]]
-void
-throw_system_error(const char* func);
-
-#define ASTERIA_THROW_SYSTEM_ERROR(...)       (::asteria::throw_system_error(__VA_ARGS__))
 
 }  // namespace asteria
 

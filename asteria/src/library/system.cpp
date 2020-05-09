@@ -101,17 +101,23 @@ std_system_execute(V_string cmd, optV_array argv, optV_array envp)
     // Launch the program.
     ::pid_t pid;
     if(::posix_spawnp(&pid, cmd.c_str(), nullptr, nullptr, pargv, penvp) != 0)
-      ASTERIA_THROW_SYSTEM_ERROR("posix_spawnp");
+      ASTERIA_THROW("could not spawn process '$2'\n"
+                    "[`posix_spawnp()` failed: $1]'",
+                    format_errno(errno), cmd);
 
     // Await its termination.
     for(;;) {
       // Note: `waitpid()` may return if the child has been stopped or continued.
       int wstat;
       if(::waitpid(pid, &wstat, 0) == -1)
-        ASTERIA_THROW_SYSTEM_ERROR("waitpid");
+        ASTERIA_THROW("error awaiting child process '$2'\n"
+                      "[`waitpid()` failed: $1]'",
+                      format_errno(errno), pid);
+
       // Check whether the process has terminated normally.
       if(WIFEXITED(wstat))
         return WEXITSTATUS(wstat);
+
       // Check whether the process has been terminated by a signal.
       if(WIFSIGNALED(wstat))
         return 128 + WTERMSIG(wstat);
@@ -122,7 +128,9 @@ void
 std_system_daemonize()
   {
     if(::daemon(1, 0) != 0)
-      ASTERIA_THROW_SYSTEM_ERROR("daemon");
+      ASTERIA_THROW("could not daemonize process\n"
+                    "[`daemon()` failed: $1]'",
+                    format_errno(errno));
   }
 
 optV_string

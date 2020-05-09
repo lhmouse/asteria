@@ -14,7 +14,8 @@ Simple_Script&
 Simple_Script::
 reload(tinybuf& cbuf, const cow_string& name)
   {
-    // Initialize the parameter list. This is the same for all scripts so we only do this once.
+    // Initialize the parameter list.
+    // This is the same for all scripts so we only do this once.
     if(ROCKET_UNEXPECT(this->m_params.empty()))
       this->m_params.emplace_back(::rocket::sref("..."));
 
@@ -28,7 +29,8 @@ reload(tinybuf& cbuf, const cow_string& name)
     // Instantiate the function.
     AIR_Optimizer optmz(this->m_opts);
     optmz.reload(nullptr, this->m_params, stmtq);
-    this->m_func = optmz.create_function(Source_Location(name, 0, 0), ::rocket::sref("<file scope>"));
+    this->m_func = optmz.create_function(Source_Location(name, 0, 0),
+                                         ::rocket::sref("<file scope>"));
     return *this;
   }
 
@@ -48,7 +50,9 @@ reload_file(const char* path)
     // Resolve the path to an absolute one.
     uptr<char, void (&)(void*)> abspath(::realpath(path, nullptr), ::free);
     if(!abspath)
-      ASTERIA_THROW_SYSTEM_ERROR("realpath");
+      ASTERIA_THROW("could not open script file '$2'\n"
+                    "[`realpath()` failed: $1]'",
+                    format_errno(errno), path);
 
     // Open the file denoted by this path.
     ::rocket::tinybuf_file cbuf;

@@ -7,6 +7,21 @@
 #include "../utilities.hpp"
 
 namespace asteria {
+namespace {
+
+optV_integer
+do_write_stderr_common(::rocket::tinyfmt_str&& fmt)
+  {
+    // Try writing standard output. Errors are ignored.
+    auto nput = write_log_to_stderr(__FILE__, __LINE__, fmt.extract_string());
+    if(nput < 0)
+      return nullopt;
+
+    // Return the number of bytes that have been written.
+    return static_cast<int64_t>(nput);
+  }
+
+}  // namespace
 
 optV_integer
 std_debug_logf(V_string templ, cow_vector<Value> values)
@@ -20,14 +35,11 @@ std_debug_logf(V_string templ, cow_vector<Value> values)
           { return static_cast<const Value*>(ptr)->print(fmt);  },
         values.data() + i
       });
+
     // Compose the string into a stream.
     ::rocket::tinyfmt_str fmt;
     vformat(fmt, templ.data(), templ.size(), insts.data(), insts.size());
-
-    auto nput = write_log_to_stderr(__FILE__, __LINE__, fmt.extract_string());
-    if(nput < 0)
-      return nullopt;
-    return static_cast<int64_t>(nput);
+    return do_write_stderr_common(::std::move(fmt));
   }
 
 optV_integer
@@ -35,14 +47,11 @@ std_debug_dump(Value value, optV_integer indent)
   {
     // Clamp the suggested indent so we don't produce overlong lines.
     size_t rindent = static_cast<size_t>(::rocket::clamp(indent.value_or(2), 0, 10));
+
     // Format the value.
     ::rocket::tinyfmt_str fmt;
     value.dump(fmt, rindent);
-
-    auto nput = write_log_to_stderr(__FILE__, __LINE__, fmt.extract_string());
-    if(nput < 0)
-      return nullopt;
-    return static_cast<int64_t>(nput);
+    return do_write_stderr_common(::std::move(fmt));
   }
 
 void
