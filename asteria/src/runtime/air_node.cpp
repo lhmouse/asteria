@@ -3721,14 +3721,13 @@ struct AIR_Traits<AIR_Node::S_import_call>
           path.erase(path.rfind('/') + 1);
           path.append(value.as_string());
         }
+
         uptr<char, void (&)(void*)> abspath(::realpath(path.safe_c_str(), nullptr), ::free);
-        if(!abspath) {
-          int err = errno;
-          char sbuf[256];
-          const char* msg = ::strerror_r(err, sbuf, sizeof(sbuf));
-          ASTERIA_THROW("could not open script file to import (path `$1` => '$2', errno was `$3`: $4)",
-                        value.as_string(), path, err, msg);
-        }
+        if(!abspath)
+          ASTERIA_THROW("could not open script file '$2'\n"
+                        "[`realpath()` failed: $1]'",
+                        format_errno(errno), path);
+
         path.assign(abspath);
 
         // Compile the script file into a function object.
