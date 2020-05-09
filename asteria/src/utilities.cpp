@@ -110,14 +110,13 @@ noexcept
       return true;
     }
 
-    if((0xD800 <= cp) && (cp < 0xE000)) {
+    if((0xD800 <= cp) && (cp < 0xE000))
       // Surrogates are reserved for UTF-16.
       return false;
-    }
-    if(cp >= 0x110000) {
+
+    if(cp >= 0x110000)
       // Code point is too large.
       return false;
-    }
 
     // Encode bits into a byte.
     auto encode_one = [&](int sh, char32_t m)
@@ -145,12 +144,12 @@ noexcept
 bool
 utf8_encode(cow_string& text, char32_t cp)
   {
+    // Encode the code point into this temporary buffer.
     char str[4];
     char* pos = str;
-    // Encode the code point into this temporary buffer.
-    if(!utf8_encode(pos, cp)) {
+    if(!utf8_encode(pos, cp))
       return false;
-    }
+
     // Append all bytes encoded.
     text.append(str, pos);
     return true;
@@ -160,66 +159,67 @@ bool
 utf8_decode(char32_t& cp, const char*& pos, size_t avail)
 noexcept
   {
-    if(avail == 0) {
+    if(avail == 0)
       return false;
-    }
+
     // Read the first byte.
     cp = *(pos++) & 0xFF;
-    if(cp < 0x80) {
+    if(cp < 0x80)
       // This sequence contains only one byte.
       return true;
-    }
-    if((cp < 0xC0) || (0xF8 <= cp)) {
+
+    if((cp < 0xC0) || (0xF8 <= cp))
       // This is not a leading character.
       return false;
-    }
+
     // Calculate the number of bytes in this code point.
     auto u8len = static_cast<size_t>(2 + (cp >= 0xE0) + (cp >= 0xF0));
     ROCKET_ASSERT(u8len >= 2);
     ROCKET_ASSERT(u8len <= 4);
-    if(u8len > avail) {
+    if(u8len > avail)
       // No enough characters have been provided.
       return false;
-    }
+
     // Unset bits that are not part of the payload.
     cp &= UINT32_C(0xFF) >> u8len;
+
     // Accumulate trailing code units.
     for(size_t i = 1;  i < u8len;  ++i) {
       char32_t cu = *(pos++) & 0xFF;
-      if((cu < 0x80) || (0xC0 <= cu)) {
+      if((cu < 0x80) || (0xC0 <= cu))
         // This trailing character is not valid.
         return false;
-      }
       cp = (cp << 6) | (cu & 0x3F);
     }
-    if((0xD800 <= cp) && (cp < 0xE000)) {
+
+    if((0xD800 <= cp) && (cp < 0xE000))
       // Surrogates are reserved for UTF-16.
       return false;
-    }
-    if(cp >= 0x110000) {
+
+    if(cp >= 0x110000)
       // Code point is too large.
       return false;
-    }
+
     // Re-encode it and check for overlong sequences.
     auto milen = static_cast<size_t>(1 + (cp >= 0x80) + (cp >= 0x800) + (cp >= 0x10000));
-    if(milen != u8len) {
+    if(milen != u8len)
       // Overlong sequences are not allowed.
       return false;
-    }
+
     return true;
   }
 
 bool
 utf8_decode(char32_t& cp, const cow_string& text, size_t& offset)
   {
-    if(offset >= text.size()) {
+    if(offset >= text.size())
       return false;
-    }
-    const char* pos = text.data() + offset;
+
     // Decode bytes.
-    if(!utf8_decode(cp, pos, text.size() - offset)) {
+    const char* pos = text.data() + offset;
+    if(!utf8_decode(cp, pos, text.size() - offset))
       return false;
-    }
+
     // Update the offset.
     offset = static_cast<size_t>(pos - text.data());
     return true;
@@ -229,19 +229,20 @@ bool
 utf16_encode(char16_t*& pos, char32_t cp)
 noexcept
   {
-    if((0xD800 <= cp) && (cp < 0xE000)) {
+    if((0xD800 <= cp) && (cp < 0xE000))
       // Surrogates are reserved for UTF-16.
       return false;
-    }
+
     if(cp < 0x10000) {
       // This character takes only one code unit.
       *(pos++) = static_cast<char16_t>(cp);
       return true;
     }
-    if(cp >= 0x110000) {
+
+    if(cp >= 0x110000)
       // Code point is too large.
       return false;
-    }
+
     // Write surrogates.
     *(pos++) = static_cast<char16_t>(0xD800 + ((cp - 0x10000) >> 10));
     *(pos++) = static_cast<char16_t>(0xDC00 + (cp & 0x3FF));
@@ -251,12 +252,12 @@ noexcept
 bool
 utf16_encode(cow_u16string& text, char32_t cp)
   {
+    // Encode the code point into this temporary buffer.
     char16_t str[2];
     char16_t* pos = str;
-    // Encode the code point into this temporary buffer.
-    if(!utf16_encode(pos, cp)) {
+    if(!utf16_encode(pos, cp))
       return false;
-    }
+
     // Append all bytes encoded.
     text.append(str, pos);
     return true;
@@ -266,29 +267,29 @@ bool
 utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail)
 noexcept
   {
-    if(avail == 0) {
+    if(avail == 0)
       return false;
-    }
+
     // Read the first code unit.
     cp = *(pos++) & 0xFFFF;
-    if((cp < 0xD800) || (0xE000 <= cp)) {
+    if((cp < 0xD800) || (0xE000 <= cp))
       // This sequence contains only one code unit.
       return true;
-    }
-    if(cp >= 0xDC00) {
+
+    if(cp >= 0xDC00)
       // A trailing surrogate is not allowed unless following a leading surrogate.
       return false;
-    }
-    if(avail < 2) {
+
+    if(avail < 2)
       // No enough code units have been provided.
       return false;
-    }
+
     // Read the trailing surrogate.
     char16_t cu = *(pos++);
-    if((cu < 0xDC00) || (0xE000 <= cu)) {
+    if((cu < 0xDC00) || (0xE000 <= cu))
       // Only a trailing surrogate is allowed to follow a leading surrogate.
       return false;
-    }
+
     cp = 0x10000 + ((cp & 0x3FF) << 10) + (cu & 0x3FF);
     return true;
   }
@@ -296,14 +297,14 @@ noexcept
 bool
 utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset)
   {
-    if(offset >= text.size()) {
+    if(offset >= text.size())
       return false;
-    }
-    const char16_t* pos = text.data() + offset;
+
     // Decode bytes.
-    if(!utf16_decode(cp, pos, text.size() - offset)) {
+    const char16_t* pos = text.data() + offset;
+    if(!utf16_decode(cp, pos, text.size() - offset))
       return false;
-    }
+
     // Update the offset.
     offset = static_cast<size_t>(pos - text.data());
     return true;
@@ -334,17 +335,20 @@ operator<<(tinyfmt& fmt, const Quote_Wrapper& q)
   {
     // Insert the leading quote mark.
     fmt << '\"';
+
     // Quote all bytes from the source string.
     for(size_t i = 0;  i < q.len;  ++i) {
       size_t ch = q.str[i] & 0xFF;
+      const auto& sq = s_escapes[ch];
+
       // Insert this quoted sequence.
       // Optimize the operation a little if it consists of only one character.
-      const auto& sq = s_escapes[ch];
       if(ROCKET_EXPECT(sq[1] == 0))
         fmt << sq[0];
       else
         fmt << sq;
     }
+
     // Insert the trailing quote mark.
     fmt << '\"';
     return fmt;
@@ -360,6 +364,7 @@ operator<<(tinyfmt& fmt, const Paragraph_Wrapper& q)
     else {
       // Terminate the current line.
       fmt << '\n';
+
       // Indent the next line accordingly.
       for(size_t i = 0;  i < q.hanging;  ++i)
         fmt << ' ';
