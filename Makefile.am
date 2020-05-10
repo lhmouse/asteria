@@ -48,6 +48,7 @@ EXTRA_DIST =  \
   asteria/doc/standard-library.txt  \
   asteria/doc/syntax.txt  \
   asteria/doc/examples.txt  \
+  asteria/doc/asteria.nanorc  \
   ${NOTHING}
 
 noinst_LIBRARIES =
