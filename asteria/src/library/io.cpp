@@ -362,7 +362,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.getc"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.io.getc"));
     // Parse arguments.
     if(reader.I().F()) {
       Reference_root::S_temporary xref = { std_io_getc() };
@@ -394,7 +394,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.getln"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.io.getln"));
     // Parse arguments.
     if(reader.I().F()) {
       Reference_root::S_temporary xref = { std_io_getln() };
@@ -424,7 +424,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.putc"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.io.putc"));
     // Parse arguments.
     V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
@@ -462,7 +462,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.putln"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.io.putln"));
     // Parse arguments.
     V_string text;
     if(reader.I().v(text).F()) {
@@ -493,7 +493,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.putf"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.io.putf"));
     // Parse arguments.
     V_string templ;
     cow_vector<Value> values;
@@ -526,7 +526,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.read"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.io.read"));
     // Parse arguments.
     optV_integer limit;
     if(reader.I().o(limit).F()) {
@@ -556,7 +556,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.write"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.io.write"));
     // Parse arguments.
     V_string data;
     if(reader.I().v(data).F()) {
@@ -584,7 +584,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.io.flush"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.io.flush"));
     // Parse arguments.
     if(reader.I().F()) {
       std_io_flush();

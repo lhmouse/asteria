@@ -421,7 +421,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.utc_now"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.chrono.utc_now"));
     // Parse arguments.
     if(reader.I().F()) {
       Reference_root::S_temporary xref = { std_chrono_utc_now() };
@@ -447,7 +447,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.local_now"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.chrono.local_now"));
     // Parse arguments.
     if(reader.I().F()) {
       Reference_root::S_temporary xref = { std_chrono_local_now() };
@@ -476,7 +476,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.hires_now"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.chrono.hires_now"));
     // Parse arguments.
     if(reader.I().F()) {
       Reference_root::S_temporary xref = { std_chrono_hires_now() };
@@ -505,7 +505,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.steady_now"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.chrono.steady_now"));
     // Parse arguments.
     if(reader.I().F()) {
       Reference_root::S_temporary xref = { std_chrono_steady_now() };
@@ -532,7 +532,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.local_from_utc"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.chrono.local_from_utc"));
     // Parse arguments.
     V_integer time_utc;
     if(reader.I().v(time_utc).F()) {
@@ -561,7 +561,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.utc_from_local"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.chrono.utc_from_local"));
     // Parse arguments.
     V_integer time_local;
     if(reader.I().v(time_local).F()) {
@@ -591,7 +591,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.utc_format"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.chrono.utc_format"));
     // Parse arguments.
     V_integer time_point;
     optV_boolean with_ms;
@@ -623,7 +623,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.chrono.utc_parse"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.chrono.utc_parse"));
     // Parse arguments.
     V_string time_str;
     if(reader.I().v(time_str).F()) {

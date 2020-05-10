@@ -240,7 +240,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.exp"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.math.exp"));
     // Parse arguments.
     V_real y;
     optV_real base;
@@ -268,7 +268,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.expm1"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.math.expm1"));
     // Parse arguments.
     V_real y;
     if(reader.I().v(y).F()) {
@@ -296,7 +296,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.pow"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.math.pow"));
     // Parse arguments.
     V_real x;
     V_real y;
@@ -324,7 +324,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.log"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.math.log"));
     // Parse arguments.
     V_real y;
     optV_real base;
@@ -352,7 +352,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.log1p"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.math.log1p"));
     // Parse arguments.
     V_real y;
     if(reader.I().v(y).F()) {
@@ -378,7 +378,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.sin"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.math.sin"));
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
@@ -404,7 +404,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.cos"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.math.cos"));
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
@@ -431,7 +431,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.sincos"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.math.sincos"));
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
@@ -459,7 +459,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.tan"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.math.tan"));
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
@@ -485,7 +485,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.asin"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.math.asin"));
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
@@ -511,7 +511,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.acos"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.math.acos"));
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
@@ -537,7 +537,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.atan"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.math.atan"));
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
@@ -563,7 +563,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.atan2"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.math.atan2"));
     // Parse arguments.
     V_real y;
     V_real x;
@@ -594,7 +594,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.hypot"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.math.hypot"));
     // Parse variadic arguments.
     cow_vector<Value> values;
     if(reader.I().F(values)) {
@@ -620,7 +620,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.sinh"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.math.sinh"));
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
@@ -646,7 +646,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.cosh"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.math.cosh"));
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
@@ -672,7 +672,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.tanh"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.math.tanh"));
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
@@ -698,7 +698,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.asinh"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.math.asinh"));
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
@@ -724,7 +724,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.acosh"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.math.acosh"));
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
@@ -750,7 +750,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.atanh"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.math.atanh"));
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
@@ -776,7 +776,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.erf"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.math.erf"));
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
@@ -802,7 +802,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.cerf"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.math.cerf"));
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
@@ -828,7 +828,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.gamma"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.math.gamma"));
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
@@ -855,7 +855,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.math.lgamma"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.math.lgamma"));
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {

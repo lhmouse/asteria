@@ -112,7 +112,7 @@ do_construct_crc32(V_object& result)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.crc32_new().update"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.checksum.crc32_new().update"));
     // Get the hasher.
     Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
     self.zoom_in(::std::move(xmod));
@@ -143,7 +143,7 @@ do_construct_crc32(V_object& result)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.crc32_new().finish"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.checksum.crc32_new().finish"));
     // Get the hasher.
     Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
     self.zoom_in(::std::move(xmod));
@@ -239,7 +239,7 @@ do_construct_fnv1a32(V_object& result)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.fnv1a32_new().update"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.checksum.fnv1a32_new().update"));
     // Get the hasher.
     Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
     self.zoom_in(::std::move(xmod));
@@ -270,7 +270,7 @@ do_construct_fnv1a32(V_object& result)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.fnv1a32_new().finish"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.checksum.fnv1a32_new().finish"));
     // Get the hasher.
     Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
     self.zoom_in(::std::move(xmod));
@@ -652,7 +652,7 @@ do_construct_md5(V_object& result)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.md5_new().update"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.checksum.md5_new().update"));
     // Get the hasher.
     Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
     self.zoom_in(::std::move(xmod));
@@ -683,7 +683,7 @@ do_construct_md5(V_object& result)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.md5_new().finish"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.checksum.md5_new().finish"));
     // Get the hasher.
     Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
     self.zoom_in(::std::move(xmod));
@@ -987,7 +987,7 @@ do_construct_sha1(V_object& result)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha1_new().update"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.checksum.sha1_new().update"));
     // Get the hasher.
     Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
     self.zoom_in(::std::move(xmod));
@@ -1018,7 +1018,7 @@ do_construct_sha1(V_object& result)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha1_new().finish"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.checksum.sha1_new().finish"));
     // Get the hasher.
     Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
     self.zoom_in(::std::move(xmod));
@@ -1297,7 +1297,7 @@ do_construct_sha256(V_object& result)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha256_new().update"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.checksum.sha256_new().update"));
     // Get the hasher.
     Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
     self.zoom_in(::std::move(xmod));
@@ -1328,7 +1328,7 @@ do_construct_sha256(V_object& result)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha256_new().finish"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.checksum.sha256_new().finish"));
     // Get the hasher.
     Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
     self.zoom_in(::std::move(xmod));
@@ -1613,7 +1613,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.crc32_new"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.checksum.crc32_new"));
     // Parse arguments.
     if(reader.I().F()) {
       Reference_root::S_temporary xref = { std_checksum_crc32_new() };
@@ -1651,7 +1651,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.crc32"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.checksum.crc32"));
     // Parse arguments.
     V_string data;
     if(reader.I().v(data).F()) {
@@ -1692,7 +1692,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.crc32_file"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.checksum.crc32_file"));
     // Parse arguments.
     V_string path;
     if(reader.I().v(path).F()) {
@@ -1731,7 +1731,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.fnv1a32_new"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.checksum.fnv1a32_new"));
     // Parse arguments.
     if(reader.I().F()) {
       Reference_root::S_temporary xref = { std_checksum_fnv1a32_new() };
@@ -1769,7 +1769,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.fnv1a32"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.checksum.fnv1a32"));
     // Parse arguments.
     V_string data;
     if(reader.I().v(data).F()) {
@@ -1814,7 +1814,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.fnv1a32_file"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.checksum.fnv1a32_file"));
     // Parse arguments.
     V_string path;
     if(reader.I().v(path).F()) {
@@ -1850,7 +1850,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.md5_new"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.checksum.md5_new"));
     // Parse arguments.
     if(reader.I().F()) {
       Reference_root::S_temporary xref = { std_checksum_md5_new() };
@@ -1888,7 +1888,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.md5"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.checksum.md5"));
     // Parse arguments.
     V_string data;
     if(reader.I().v(data).F()) {
@@ -1929,7 +1929,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.md5_file"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.checksum.md5_file"));
     // Parse arguments.
     V_string path;
     if(reader.I().v(path).F()) {
@@ -1965,7 +1965,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha1_new"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.checksum.sha1_new"));
     // Parse arguments.
     if(reader.I().F()) {
       Reference_root::S_temporary xref = { std_checksum_sha1_new() };
@@ -2003,7 +2003,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha1"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.checksum.sha1"));
     // Parse arguments.
     V_string data;
     if(reader.I().v(data).F()) {
@@ -2044,7 +2044,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha1_file"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.checksum.sha1_file"));
     // Parse arguments.
     V_string path;
     if(reader.I().v(path).F()) {
@@ -2080,7 +2080,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha256_new"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.checksum.sha256_new"));
     // Parse arguments.
     if(reader.I().F()) {
       Reference_root::S_temporary xref = { std_checksum_sha256_new() };
@@ -2118,7 +2118,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha256"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.checksum.sha256"));
     // Parse arguments.
     V_string data;
     if(reader.I().v(data).F()) {
@@ -2159,7 +2159,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::ref(args), ::rocket::sref("std.checksum.sha256_file"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.checksum.sha256_file"));
     // Parse arguments.
     V_string path;
     if(reader.I().v(path).F()) {
