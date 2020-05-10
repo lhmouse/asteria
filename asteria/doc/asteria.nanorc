@@ -4,7 +4,7 @@ syntax asteria "\.ast$"
 comment "//"
 
 # Declarations
-color brightcyan "\<(var|const|func|each)\>"
+color green "\<(var|const|func|each)\>"
 
 # Statements
 color brightyellow "\<(if|else|switch|case|default|do|while|for|try|catch)\>"
@@ -12,13 +12,13 @@ color brightmagenta "\<(break|continue|throw|return)\>"
 color brightred "\<(assert|defer)\>"
 
 # Values
-color brightgreen "\<(null|true|false|nan|infinity|this)\>"
-color brightgreen "\<__(file|line|func|varg|this|backtrace)\>"
+color yellow "\<(null|true|false|nan|infinity|this)\>"
+color yellow "\<__(file|line|func|varg|this|backtrace)\>"
 
 # Operators
 color cyan "[].+*/%=&|!^~?:,;(){}<>$[-]"
-color green "\<(unset|(count|type)of|and|or|not|import)\>"
-color green "\<__(sqrt|is(nan|inf)|abs|sign|(round|floor|ceil|trunc)i?|fma|vcall)\>"
+color brightgreen "\<(unset|(count|type)of|and|or|not|import)\>"
+color brightgreen "\<__(sqrt|is(nan|inf)|abs|sign|(round|floor|ceil|trunc)i?|fma|vcall)\>"
 
 # Modifiers
 color brightcyan "\<(__global)\>"
