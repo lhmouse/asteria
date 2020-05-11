@@ -3933,7 +3933,6 @@ struct AVMC_Appender<TraitsT, XaNodeT, UparamT, void, SymbolT>
                               nullptr>(
                               TraitsT::make_symbols(altr),
                               TraitsT::make_uparam(reachable, altr));
-        queue.shrink_to_fit();
         return reachable;
       }
   };
@@ -3949,7 +3948,6 @@ struct AVMC_Appender<TraitsT, XaNodeT, UparamT, void, void>
         queue.template append<executor_of<TraitsT, UparamT, void>::thunk,
                               nullptr>(
                               TraitsT::make_uparam(reachable, altr));
-        queue.shrink_to_fit();
         return reachable;
       }
   };
@@ -3967,7 +3965,6 @@ struct AVMC_Appender<TraitsT, XaNodeT, void, SparamT, SymbolT>
                               TraitsT::make_symbols(altr),
                               AVMC_Queue::Uparam(),
                               TraitsT::make_sparam(reachable, altr));
-        queue.shrink_to_fit();
         return reachable;
       }
   };
@@ -3984,7 +3981,6 @@ struct AVMC_Appender<TraitsT, XaNodeT, void, SparamT, void>
                               enumerator_of<SparamT>::thunk>(
                               AVMC_Queue::Uparam(),
                               TraitsT::make_sparam(reachable, altr));
-        queue.shrink_to_fit();
         return reachable;
       }
   };
@@ -4001,7 +3997,6 @@ struct AVMC_Appender<TraitsT, XaNodeT, void, void, SymbolT>
                               nullptr>(
                               TraitsT::make_symbols(altr),
                               AVMC_Queue::Uparam());
-        queue.shrink_to_fit();
         return reachable;
       }
   };
@@ -4017,7 +4012,6 @@ struct AVMC_Appender<TraitsT, XaNodeT, void, void, void>
         queue.template append<executor_of<TraitsT, void, void>::thunk,
                               nullptr>(
                               AVMC_Queue::Uparam());
-        queue.shrink_to_fit();
         return reachable;
       }
   };
@@ -4027,11 +4021,13 @@ inline
 bool
 do_solidify_explicit(AVMC_Queue& queue, const XaNodeT& altr)
   {
-    return AVMC_Appender<TraitsT, XaNodeT,
-                         typename Uparam_of<TraitsT, XaNodeT>::type,
-                         typename Sparam_of<TraitsT, XaNodeT>::type,
-                         typename Symbols_of<TraitsT, XaNodeT>::type>
-             ::do_append(queue, altr);
+    bool r = AVMC_Appender<TraitsT, XaNodeT,
+                           typename Uparam_of<TraitsT, XaNodeT>::type,
+                           typename Sparam_of<TraitsT, XaNodeT>::type,
+                           typename Symbols_of<TraitsT, XaNodeT>::type>
+               ::do_append(queue, altr);
+    queue.shrink_to_fit();
+    return r;
   }
 
 template<typename XaNodeT>
