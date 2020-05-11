@@ -42,9 +42,9 @@ struct AVMC_Queue::Header
       { return this->has_vtbl ? this->vtable->executor : this->exec;  }
 
     Enumerator*
-    vnum_opt()
+    venum_opt()
     const noexcept
-      { return this->has_vtbl ? this->vtable->vnum_opt : nullptr;  }
+      { return this->has_vtbl ? this->vtable->venum_opt : nullptr;  }
 
     constexpr
     const Uparam&
@@ -274,8 +274,8 @@ const
       next += qnode->total_size_in_headers();
 
       // Enumerate variables in this node.
-      if(auto qvnum = qnode->vnum_opt())
-        qvnum(callback, qnode->uparam(), qnode->sparam());
+      if(auto qvenum = qnode->venum_opt())
+        qvenum(callback, qnode->uparam(), qnode->sparam());
     }
     return callback;
   }

@@ -63,7 +63,7 @@ class AVMC_Queue
         Move_Ctor* mvctor_opt;  // if null then bitwise copy is performed
         Destructor* dtor_opt;  // if null then no cleanup is performed
         Executor* executor;  // not nullable [!]
-        Enumerator* vnum_opt;  // if null then no variables shall exist
+        Enumerator* venum_opt;  // if null then no variables shall exist
       };
 
     struct Header;
@@ -115,7 +115,7 @@ class AVMC_Queue
     do_reserve_one(Uparam uparam, const opt<Symbols>& syms_opt, size_t nbytes);
 
     // This function returns a vtable struct that is allocated statically.
-    template<Executor execT, Enumerator* qvnumT, typename SparamT>
+    template<Executor execT, Enumerator* qvenumT, typename SparamT>
     static
     const Vtable*
     do_get_vtable()
@@ -148,7 +148,7 @@ class AVMC_Queue
                                    ? nullptr : Sfn::move_construct;
         constexpr auto qdtor = ::std::is_trivially_destructible<SparamT>::value
                                    ? nullptr : Sfn::destroy;
-        static constexpr Vtable s_vtbl[1] = {{ qmvct, qdtor, execT, qvnumT }};
+        static constexpr Vtable s_vtbl[1] = {{ qmvct, qdtor, execT, qvenumT }};
         return s_vtbl;
       }
 
@@ -167,7 +167,7 @@ class AVMC_Queue
                          Constructor* ctor_opt, intptr_t ctor_arg);
 
     // Append a trivial or non-trivial node basing on trivialness of the argument.
-    template<Executor execT, Enumerator* qvnumT, typename XSparamT>
+    template<Executor execT, Enumerator* qvenumT, typename XSparamT>
     void
     do_append_chk(Uparam uparam, opt<Symbols>&& syms_opt, XSparamT&& xsparam)
       {
@@ -178,7 +178,7 @@ class AVMC_Queue
               execT, uparam, ::std::move(syms_opt), sizeof(Sparam), ::std::addressof(xsparam));
         else
           this->do_append_nontrivial(
-              this->do_get_vtable<execT, qvnumT, Sparam>(), uparam, ::std::move(syms_opt), sizeof(Sparam),
+              this->do_get_vtable<execT, qvenumT, Sparam>(), uparam, ::std::move(syms_opt), sizeof(Sparam),
               +[](Uparam /*uparam*/, void* sparam, intptr_t ctor_arg)
                 { ::rocket::construct_at((Sparam*)sparam, (XSparamT&&)*(Sparam*)ctor_arg);  },
               (intptr_t)(const void*)::std::addressof(xsparam));
@@ -287,39 +287,39 @@ class AVMC_Queue
         return *this;
       }
 
-    template<Executor execT, Enumerator* qvnumT, typename XSparamT,
+    template<Executor execT, Enumerator* qvenumT, typename XSparamT,
     ROCKET_DISABLE_IF(::rocket::disjunction<::std::is_convertible<XSparamT&&, Uparam>,
                                             ::std::is_convertible<XSparamT&&, Symbols>>::value)>
     AVMC_Queue&
     append(XSparamT&& xsparam)
       {
-        this->do_append_chk<execT, qvnumT>(Uparam(), nullopt, ::std::forward<XSparamT>(xsparam));
+        this->do_append_chk<execT, qvenumT>(Uparam(), nullopt, ::std::forward<XSparamT>(xsparam));
         return *this;
       }
 
-    template<Executor execT, Enumerator* qvnumT, typename XSparamT,
+    template<Executor execT, Enumerator* qvenumT, typename XSparamT,
     ROCKET_DISABLE_IF(::rocket::disjunction<::std::is_convertible<XSparamT&&, Uparam>,
                                             ::std::is_convertible<XSparamT&&, Symbols>>::value)>
     AVMC_Queue&
     append(Symbols syms, XSparamT&& xsparam)
       {
-        this->do_append_chk<execT, qvnumT>(Uparam(), ::std::move(syms), ::std::forward<XSparamT>(xsparam));
+        this->do_append_chk<execT, qvenumT>(Uparam(), ::std::move(syms), ::std::forward<XSparamT>(xsparam));
         return *this;
       }
 
-    template<Executor execT, Enumerator* qvnumT, typename XSparamT>
+    template<Executor execT, Enumerator* qvenumT, typename XSparamT>
     AVMC_Queue&
     append(Uparam uparam, XSparamT&& xsparam)
       {
-        this->do_append_chk<execT, qvnumT>(uparam, nullopt, ::std::forward<XSparamT>(xsparam));
+        this->do_append_chk<execT, qvenumT>(uparam, nullopt, ::std::forward<XSparamT>(xsparam));
         return *this;
       }
 
-    template<Executor execT, Enumerator* qvnumT, typename XSparamT>
+    template<Executor execT, Enumerator* qvenumT, typename XSparamT>
     AVMC_Queue&
     append(Symbols syms, Uparam uparam, XSparamT&& xsparam)
       {
-        this->do_append_chk<execT, qvnumT>(uparam, ::std::move(syms), ::std::forward<XSparamT>(xsparam));
+        this->do_append_chk<execT, qvenumT>(uparam, ::std::move(syms), ::std::forward<XSparamT>(xsparam));
         return *this;
       }
 
