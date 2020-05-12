@@ -403,7 +403,7 @@ operator<<(tinyfmt& fmt, const Formatted_errno& e)
   {
     // Write the error number, followed by its description.
     char sbuf[256];
-    fmt << "Error " << e.err << ": " << do_xstrerror_r(e.err, sbuf, sizeof(sbuf));
+    fmt << "error " << e.err << ": " << do_xstrerror_r(e.err, sbuf, sizeof(sbuf));
     return fmt;
   }
 
