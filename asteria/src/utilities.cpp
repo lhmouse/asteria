@@ -5,7 +5,6 @@
 #include "utilities.hpp"
 #include <time.h>  // ::timespec, ::clock_gettime(), ::localtime()
 #include <unistd.h>  // ::write
-#include <locale.h>  // ::duplocale(), ::freelocale()
 
 namespace asteria {
 namespace {
@@ -54,25 +53,33 @@ constexpr char s_escapes[][8] =
     "\\xF8",  "\\xF9",  "\\xFA",  "\\xFB",  "\\xFC",  "\\xFD",  "\\xFE",  "\\xFF",
   };
 
-struct locale_deleter
+// POSIX
+constexpr
+const char*
+do_result_of_strerror_r(int /*r*/, char* s)
+noexcept
   {
-    constexpr
-    ::locale_t
-    null()
-    const noexcept
-      { return (::locale_t)0;  }
+    return s;
+  }
 
-    constexpr
-    bool
-    is_null(::locale_t loc)
-    const noexcept
-      { return loc == (::locale_t)0;  }
+// GNU
+constexpr
+const char*
+do_result_of_strerror_r(char* r, char* /*s*/)
+noexcept
+  {
+    return r;
+  }
 
-    void
-    close(::locale_t loc)
-    noexcept
-      { ::freelocale(loc);  }
-  };
+inline
+const char*
+do_xstrerror_r(int errnum, char *strerrbuf, size_t buflen)
+noexcept
+  {
+    return do_result_of_strerror_r(
+               ::strerror_r(errnum, strerrbuf, buflen),
+               strerrbuf);
+  }
 
 }  // namespace
 
@@ -394,14 +401,9 @@ operator<<(tinyfmt& fmt, const Paragraph_Wrapper& q)
 tinyfmt&
 operator<<(tinyfmt& fmt, const Formatted_errno& e)
   {
-    // Describe the error.
-    const char* desc = "No description";
-    ::rocket::unique_handle<::locale_t, locale_deleter> qloc;
-    if(qloc.reset(::newlocale(LC_ALL_MASK, "C", qloc.get_closer().null())))
-      desc = ::strerror_l(e.err, qloc);
-
     // Write the error number, followed by its description.
-    fmt << desc << " (errno `" << e.err << "`)";
+    char sbuf[256];
+    fmt << "Error " << e.err << ": " << do_xstrerror_r(e.err, sbuf, sizeof(sbuf));
     return fmt;
   }
 
