@@ -36,6 +36,10 @@ include_rocket_HEADERS =  \
   %reldir%/tinyfmt_file.hpp  \
   %reldir%/format.hpp  \
   %reldir%/atomic_flag.hpp  \
+  %reldir%/mutex.hpp  \
+  %reldir%/recursive_mutex.hpp  \
+  %reldir%/condition_variable.hpp  \
+  %reldir%/once_flag.hpp  \
   ${NOTHING}
 
 include_rocket_platformdir = ${includedir}/rocket/platform
@@ -61,6 +65,10 @@ include_rocket_details_HEADERS =  \
   %reldir%/details/static_vector.ipp  \
   %reldir%/details/array.ipp  \
   %reldir%/details/linear_buffer.ipp  \
+  %reldir%/details/mutex.ipp  \
+  %reldir%/details/recursive_mutex.ipp  \
+  %reldir%/details/condition_variable.ipp  \
+  %reldir%/details/once_flag.ipp  \
   ${NOTHING}
 
 noinst_LTLIBRARIES += lib/librocket.la
