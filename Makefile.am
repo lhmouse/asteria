@@ -11,7 +11,7 @@ AM_CPPFLAGS = -pipe -pthread -Wall -Wextra -fPIC -DPIC  \
   -Wunused-{function,label,local-typedefs,{,but-set-}{variable,parameter}}
 
 AM_CXXFLAGS = -include .pch.hpp -std=gnu++14 -Wp,-std=c++11 -fno-gnu-keywords  \
-  -Wzero-as-null-pointer-constant -Wno-redundant-move  \
+  -Wno-redundant-move  \
   -Werror={non-virtual-dtor,missing-declarations}
 
 AM_DEFAULT_SOURCE_EXT = .cpp
