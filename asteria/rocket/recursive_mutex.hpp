@@ -66,7 +66,7 @@ class recursive_mutex::unique_lock
       { return this->swap(other);  }
 
     ~unique_lock()
-      { this->clear();  }
+      { this->unlock();  }
 
   public:
     explicit operator
@@ -75,7 +75,7 @@ class recursive_mutex::unique_lock
       { return this->m_sth.get() != nullptr;  }
 
     unique_lock&
-    clear()
+    unlock()
     noexcept
       {
         this->m_sth.reset(nullptr);
