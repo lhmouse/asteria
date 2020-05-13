@@ -147,10 +147,10 @@ class Runtime_Error
                                           // exceptions here.
 #define ASTERIA_RUNTIME_CATCH(...)      catch(::asteria::Runtime_Error&)  \
                                           { throw;  }  \
-                                        catch(::std::exception& zTrSrvgK_)  \
+                                        catch(::std::exception& yPb8wL9v)  \
                                           { throw ::asteria::Runtime_Error(  \
                                                 ::asteria::Runtime_Error::F_native(),  \
-                                                zTrSrvgK_); }  \
+                                                yPb8wL9v); }  \
                                       }  \
                                       catch(__VA_ARGS__)
 
