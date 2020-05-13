@@ -26,16 +26,18 @@ format_string(const ParamsT&... params)
   }
 
 // Note the format string must be a string literal.
-#define ASTERIA_TERMINATE(...)     (::asteria::write_log_to_stderr(__FILE__, __LINE__,  \
-                                      __func__ + ::asteria::format_string(": " __VA_ARGS__)  \
-                                               + "\nThis is likely a bug. Please report."),  \
-                                    ::std::terminate())
+#define ASTERIA_TERMINATE(...)  \
+    (::asteria::write_log_to_stderr(__FILE__, __LINE__,  \
+       __func__ + ::asteria::format_string(": " __VA_ARGS__)  \
+                + "\nThis is likely a bug. Please report."),  \
+     ::std::terminate())
 
 // Note the format string must be a string literal.
-#define ASTERIA_THROW(...)         (::rocket::sprintf_and_throw<::std::runtime_error>(  \
-                                      "%s: %s\n[thrown from native code at '%s:%ld']", __func__,  \
-                                        ::asteria::format_string("" __VA_ARGS__).c_str(), __FILE__,  \
-                                        static_cast<long>(__LINE__)))
+#define ASTERIA_THROW(...)  \
+    (::rocket::sprintf_and_throw<::std::runtime_error>(  \
+       "%s: %s\n[thrown from native code at '%s:%ld']", __func__,  \
+         ::asteria::format_string("" __VA_ARGS__).c_str(), __FILE__,  \
+         static_cast<long>(__LINE__)))
 
 // UTF-8 conversion functions
 bool
