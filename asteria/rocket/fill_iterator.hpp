@@ -14,8 +14,8 @@ class fill_iterator
   public:
     using iterator_category  = random_access_iterator_tag;
     using value_type         = typename remove_cv<elementT>::type;
-    using pointer            = elementT*;
-    using reference          = elementT&;
+    using pointer            = const elementT*;
+    using reference          = const elementT&;
     using difference_type    = ptrdiff_t;
 
   private:
