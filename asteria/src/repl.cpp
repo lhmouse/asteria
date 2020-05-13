@@ -605,6 +605,7 @@ main(int argc, char** argv)
     else
       do_single_noreturn();
   }
-  catch(::std::exception& except)
+  catch(exception& stdex) {
     // Print a message followed by the backtrace if it is available. There isn't much we can do.
-    { do_exit(exit_system_error, "! uncaught exception: %s\n", except.what());  }
+    do_exit(exit_system_error, "! uncaught exception: %s\n", stdex.what());
+  }
