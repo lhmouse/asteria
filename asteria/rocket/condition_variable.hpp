@@ -61,7 +61,7 @@ class condition_variable
       }
 
     void
-    wait_for(mutex::unique_lock& lock, double secs)
+    wait_for(mutex::unique_lock& lock, long msecs)
       {
         // Get the current time.
         ::timespec ts;
@@ -69,9 +69,9 @@ class condition_variable
         ROCKET_ASSERT(r == 0);
 
         // Get the end time.
-        double end = noadl::clamp(double(ts.tv_sec) + double(ts.tv_nsec) * 1e-9 + secs,
-                                  double(0),
-                                  double(::std::numeric_limits<::time_t>::max()));
+        double end = noadl::clamp(
+            double(ts.tv_sec) + double(ts.tv_nsec) * 1e-9 + double(msecs) * 1e-3,
+            double(0), double(::std::numeric_limits<::time_t>::max()));
 
         // Break the time down into second and subsecond parts.
         ts.tv_sec = static_cast<::time_t>(end);
@@ -91,10 +91,10 @@ class condition_variable
 
     template<typename predT>
     void
-    wait_for(mutex::unique_lock& lock, double secs, predT&& pred)
+    wait_for(mutex::unique_lock& lock, long msecs, predT&& pred)
       {
         while(!pred())
-          this->wait_for(lock, secs);
+          this->wait_for(lock, msecs);
       }
 
     void
