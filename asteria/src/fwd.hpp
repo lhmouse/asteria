@@ -203,7 +203,7 @@ class Statement_Sequence;
 class AIR_Optimizer;
 
 // Type erasure
-struct Rcbase : virtual ::rocket::refcnt_base<Rcbase>
+struct Rcbase : ::rocket::refcnt_base<Rcbase>
   {
     Rcbase()
     noexcept
@@ -223,7 +223,7 @@ struct Rcbase : virtual ::rocket::refcnt_base<Rcbase>
   };
 
 template<typename RealT>
-struct Rcfwd : Rcbase
+struct Rcfwd : virtual Rcbase
   { };
 
 template<typename RealT>
@@ -256,7 +256,7 @@ struct StdIO_Sentry
   };
 
 // Opaque (user-defined) type support
-struct Abstract_Opaque : Rcbase
+struct Abstract_Opaque : virtual Rcbase
   {
     Abstract_Opaque()
     noexcept
@@ -296,8 +296,7 @@ tinyfmt&
 operator<<(tinyfmt& fmt, const Abstract_Opaque& opaq)
   { return opaq.describe(fmt);  }
 
-struct
-Abstract_Function : Rcbase
+struct Abstract_Function : virtual Rcbase
   {
     Abstract_Function()
     noexcept
