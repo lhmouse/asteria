@@ -99,7 +99,7 @@ inline
 bool
 is_cctype(char c, uint8_t mask)
 noexcept
-  { return get_cctype(c) & mask;  }
+  { return noadl::get_cctype(c) & mask;  }
 
 // C-style quoting
 struct Quote_Wrapper
@@ -118,13 +118,13 @@ inline
 Quote_Wrapper
 quote(const char* str)
 noexcept
-  { return quote(str, ::std::strlen(str));  }
+  { return noadl::quote(str, ::std::strlen(str));  }
 
 inline
 Quote_Wrapper
 quote(const cow_string& str)
 noexcept
-  { return quote(str.data(), str.size());  }
+  { return noadl::quote(str.data(), str.size());  }
 
 tinyfmt&
 operator<<(tinyfmt& fmt, const Quote_Wrapper& q);

@@ -173,7 +173,7 @@ utf8_encode(cow_string& text, char32_t cp)
     // Encode the code point into this temporary buffer.
     char str[4];
     char* pos = str;
-    if(!utf8_encode(pos, cp))
+    if(!noadl::utf8_encode(pos, cp))
       return false;
 
     // Append all bytes encoded.
@@ -243,7 +243,7 @@ utf8_decode(char32_t& cp, const cow_string& text, size_t& offset)
 
     // Decode bytes.
     const char* pos = text.data() + offset;
-    if(!utf8_decode(cp, pos, text.size() - offset))
+    if(!noadl::utf8_decode(cp, pos, text.size() - offset))
       return false;
 
     // Update the offset.
@@ -281,7 +281,7 @@ utf16_encode(cow_u16string& text, char32_t cp)
     // Encode the code point into this temporary buffer.
     char16_t str[2];
     char16_t* pos = str;
-    if(!utf16_encode(pos, cp))
+    if(!noadl::utf16_encode(pos, cp))
       return false;
 
     // Append all bytes encoded.
@@ -328,7 +328,7 @@ utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset)
 
     // Decode bytes.
     const char16_t* pos = text.data() + offset;
-    if(!utf16_decode(cp, pos, text.size() - offset))
+    if(!noadl::utf16_decode(cp, pos, text.size() - offset))
       return false;
 
     // Update the offset.

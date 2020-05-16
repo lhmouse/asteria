@@ -664,7 +664,7 @@ struct AIR_Traits<AIR_Node::S_for_each_statement>
         mapped = ::std::move(ctx_for.stack().open_top());
 
         const auto range = mapped.read();
-        switch(weaken_enum(range.vtype())) {
+        switch(noadl::weaken_enum(range.vtype())) {
           case vtype_null:
             // Do nothing.
             return air_status_next;
@@ -926,7 +926,7 @@ struct AIR_Traits<AIR_Node::S_return_statement>
     make_uparam(bool& reachable, const AIR_Node::S_return_statement& altr)
       {
         AVMC_Queue::Uparam up;
-        up.v8s[0] = weaken_enum(altr.status);
+        up.v8s[0] = noadl::weaken_enum(altr.status);
         reachable = false;
         return up;
       }
@@ -1325,7 +1325,7 @@ struct AIR_Traits<AIR_Node::S_function_call>
       {
         AVMC_Queue::Uparam up;
         up.y32 = altr.nargs;
-        up.y8s[0] = weaken_enum(altr.ptc);
+        up.y8s[0] = noadl::weaken_enum(altr.ptc);
         reachable &= (altr.ptc == ptc_aware_none);
         return up;
       }
@@ -3513,7 +3513,7 @@ struct AIR_Traits<AIR_Node::S_variadic_call>
     make_uparam(bool& /*reachable*/, const AIR_Node::S_variadic_call& altr)
       {
         AVMC_Queue::Uparam up;
-        up.y8s[0] = weaken_enum(altr.ptc);
+        up.y8s[0] = noadl::weaken_enum(altr.ptc);
         return up;
       }
 
@@ -3547,7 +3547,7 @@ struct AIR_Traits<AIR_Node::S_variadic_call>
         // Pop the argument generator.
         cow_vector<Reference> args;
         auto value = ctx.stack().get_top().read();
-        switch(weaken_enum(value.vtype())) {
+        switch(noadl::weaken_enum(value.vtype())) {
           case vtype_null:
             // Leave `args` empty.
             break;
@@ -3726,7 +3726,7 @@ struct AIR_Traits<AIR_Node::S_import_call>
         if(!abspath)
           ASTERIA_THROW("could not open script file '$2'\n"
                         "[`realpath()` failed: $1]'",
-                        format_errno(errno), path);
+                        noadl::format_errno(errno), path);
 
         path.assign(abspath);
 
@@ -3768,7 +3768,7 @@ struct AIR_Traits<AIR_Node::S_break_or_continue>
     make_uparam(bool& reachable, const AIR_Node::S_break_or_continue& altr)
       {
         AVMC_Queue::Uparam up;
-        up.v8s[0] = weaken_enum(altr.status);
+        up.v8s[0] = noadl::weaken_enum(altr.status);
         reachable = false;
         return up;
       }

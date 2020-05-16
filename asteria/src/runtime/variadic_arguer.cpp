@@ -41,7 +41,7 @@ const
         return self = ::std::move(xref);
       }
       // Return the argument at `index`.
-      auto w = wrap_index(*qindex, nvargs);
+      auto w = noadl::wrap_index(*qindex, nvargs);
       auto nadd = w.nprepend | w.nappend;
       if(nadd != 0) {
         // Return a `null`.

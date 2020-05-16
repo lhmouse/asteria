@@ -13,7 +13,7 @@ optV_integer
 do_write_stderr_common(::rocket::tinyfmt_str&& fmt)
   {
     // Try writing standard output. Errors are ignored.
-    auto nput = write_log_to_stderr(__FILE__, __LINE__, fmt.extract_string());
+    auto nput = noadl::write_log_to_stderr(__FILE__, __LINE__, fmt.extract_string());
     if(nput < 0)
       return nullopt;
 

@@ -55,14 +55,14 @@ do_write_utf8_common(const IOF_Sentry& fp, const cow_string& text)
     while(off < text.size()) {
       // Decode a code point from `text`.
       char32_t cp;
-      if(!utf8_decode(cp, text, off))
+      if(!noadl::utf8_decode(cp, text, off))
         ASTERIA_THROW("invalid UTF-8 string (text `$1`, byte offset `$2`)", text, off);
 
       // Insert it into the output stream.
       if(::fputwc_unlocked(static_cast<wchar_t>(cp), fp) == WEOF)
         ASTERIA_THROW("error writing standard output\n"
                       "[`fputwc_unlocked()` failed: $1]'",
-                      format_errno(errno));
+                      noadl::format_errno(errno));
 
       // The return value is the number of code points rather than bytes.
       ncps += 1;
@@ -94,7 +94,7 @@ std_io_getc()
       if(err != 0)
         ASTERIA_THROW("error reading standard input\n"
                       "[`fgetwc_unlocked()` failed: $1]'",
-                      format_errno(err));
+                      noadl::format_errno(err));
 
       return nullopt;
     }
@@ -131,7 +131,7 @@ std_io_getln()
         if(err != 0)
           ASTERIA_THROW("error reading standard input\n"
                         "[`fgetwc_unlocked()` failed: $1]'",
-                        format_errno(err));
+                        noadl::format_errno(err));
 
         return nullopt;
       }
@@ -141,7 +141,7 @@ std_io_getln()
 
       // Append the non-LF character to the result string.
       char32_t cp = static_cast<uint32_t>(wch);
-      if(!utf8_encode(u8str, cp))
+      if(!noadl::utf8_encode(u8str, cp))
         ASTERIA_THROW("invalid UTF code point from standard input (value `$1`)", wch);
     }
     // Return the UTF-8 string.
@@ -170,14 +170,14 @@ std_io_putc(V_integer value)
     // The result is discarded.
     char16_t sbuf[2];
     char16_t* sp = sbuf;
-    if(!utf16_encode(sp, cp))
+    if(!noadl::utf16_encode(sp, cp))
       ASTERIA_THROW("invalid UTF code point (value `$1`)", value);
 
     // Write a UTF code point.
     if(::fputwc_unlocked(static_cast<wchar_t>(cp), fp) == WEOF)
       ASTERIA_THROW("error writing standard output\n"
                     "[`fputwc_unlocked()` failed: $1]'",
-                    format_errno(errno));
+                    noadl::format_errno(errno));
 
     // Return the number of code points that have been written.
     // This is always 1 for this function.
@@ -224,7 +224,7 @@ std_io_putln(V_string value)
     if(::fputwc_unlocked(L'\n', fp) == WEOF)
       ASTERIA_THROW("error writing standard output\n"
                     "[`fputwc_unlocked()` failed: $1]'",
-                    format_errno(errno));
+                    noadl::format_errno(errno));
 
     // Return the number of code points that have been written.
     // The implicit LF also counts.
@@ -290,7 +290,7 @@ std_io_read(optV_integer limit)
       if(err != 0)
         ASTERIA_THROW("error reading standard input\n"
                       "[`fread_unlocked()` failed: $1]'",
-                      format_errno(err));
+                      noadl::format_errno(err));
 
       return nullopt;
     }
@@ -324,7 +324,7 @@ std_io_write(V_string data)
       if(err != 0)
         ASTERIA_THROW("error writing standard output\n"
                       "[`fwrite_unlocked()` failed: $1]'",
-                      format_errno(errno));
+                      noadl::format_errno(errno));
     }
 
     // Return the number of bytes written.
@@ -338,7 +338,7 @@ std_io_flush()
     if(::fflush(stdout) == EOF)
       ASTERIA_THROW("error flushing standard output\n"
                     "[`fflush()` failed: $1]'",
-                    format_errno(errno));
+                    noadl::format_errno(errno));
   }
 
 void

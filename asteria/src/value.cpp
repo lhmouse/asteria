@@ -259,7 +259,7 @@ const
           return fmt << this->m_stor.as<vtype_string>();
         else
           // "hello"
-          return fmt << quote(this->m_stor.as<vtype_string>());
+          return fmt << noadl::quote(this->m_stor.as<vtype_string>());
 
       case vtype_opaque:
         // <opaque> [[`my opaque`]]
@@ -287,7 +287,7 @@ const
         // { "one" = 1, "two" = 2, "three" = 3, }
         fmt << '{';
         for(auto q = altr.begin();  q != altr.end();  ++q) {
-          fmt << ' ' << quote(q->first) << " = ";
+          fmt << ' ' << noadl::quote(q->first) << " = ";
           q->second.print(fmt, true);
           fmt << ',';
         }
@@ -325,7 +325,7 @@ const
       case vtype_string: {
         const auto& altr = this->m_stor.as<vtype_string>();
         // string(5) "hello"
-        fmt << "string(" << altr.size() << ") " << quote(altr);
+        fmt << "string(" << altr.size() << ") " << noadl::quote(altr);
         return fmt;
       }
 
@@ -352,12 +352,12 @@ const
         //   2 = integer 3;
         //  ]
         fmt << "array(" << altr.size() << ")";
-        fmt << pwrap(indent, hanging + 1) << '[';
+        fmt << noadl::pwrap(indent, hanging + 1) << '[';
         for(size_t i = 0;  i < altr.size();  ++i) {
-          fmt << pwrap(indent, hanging + indent) << i << " = ";
+          fmt << noadl::pwrap(indent, hanging + indent) << i << " = ";
           altr[i].dump(fmt, indent, hanging + indent) << ';';
         }
-        fmt << pwrap(indent, hanging + 1) << ']';
+        fmt << noadl::pwrap(indent, hanging + 1) << ']';
         return fmt;
       }
 
@@ -370,12 +370,12 @@ const
         //   "three" = integer 3;
         //  }
         fmt << "object(" << altr.size() << ")";
-        fmt << pwrap(indent, hanging + 1) << '{';
+        fmt << noadl::pwrap(indent, hanging + 1) << '{';
         for(auto q = altr.begin();  q != altr.end();  ++q) {
-          fmt << pwrap(indent, hanging + indent) << quote(q->first) << " = ";
+          fmt << noadl::pwrap(indent, hanging + indent) << noadl::quote(q->first) << " = ";
           q->second.dump(fmt, indent, hanging + indent) << ';';
         }
-        fmt << pwrap(indent, hanging + 1) << '}';
+        fmt << noadl::pwrap(indent, hanging + 1) << '}';
         return fmt;
       }
 

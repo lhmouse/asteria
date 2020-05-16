@@ -196,7 +196,7 @@ final
         // Extract the string and write it to standard error.
         // Errors are ignored.
         auto str = this->m_fmt.extract_string();
-        write_log_to_stderr(__FILE__, __LINE__, ::std::move(str));
+        noadl::write_log_to_stderr(__FILE__, __LINE__, ::std::move(str));
 
         // Reuse the storage.
         this->m_fmt.set_string(::std::move(str));

@@ -23,17 +23,17 @@ do_lock_stream(const char* path)
     if(!file)
       ASTERIA_THROW("could not open script file '$2'\n"
                     "[`fopen()` failed: $1]'",
-                    format_errno(errno), path);
+                    noadl::format_errno(errno), path);
 
     // Make the unique identifier of this file from its device ID and inode number.
     struct ::stat info;
     if(::fstat(::fileno(file), &info))
       ASTERIA_THROW("could not get information about script file '$2'\n"
                     "[`fstat()` failed: $1]'",
-                    format_errno(errno), path);
+                    noadl::format_errno(errno), path);
 
     // Mark the stream locked.
-    auto skey = format_string("dev:$1/ino:$2", info.st_dev, info.st_ino);
+    auto skey = noadl::format_string("dev:$1/ino:$2", info.st_dev, info.st_ino);
     ::setbuf(file, nullptr);
 
     auto result = this->m_strms.try_emplace(::std::move(skey), ::std::move(file));

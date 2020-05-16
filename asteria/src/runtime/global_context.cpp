@@ -110,7 +110,7 @@ initialize(API_Version version)
           << "\n"
           << stdex.what() << "\n"
           << "[exception class `" << typeid(stdex).name() << "`]";
-      write_log_to_stderr(__FILE__, __LINE__, ::std::move(str));
+      noadl::write_log_to_stderr(__FILE__, __LINE__, ::std::move(str));
     }
     if(!gcoll)
       gcoll = ::rocket::make_refcnt<Genius_Collector>();
