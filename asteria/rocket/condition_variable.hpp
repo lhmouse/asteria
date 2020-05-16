@@ -70,7 +70,7 @@ class condition_variable
 
         // Get the end time.
         double end = noadl::clamp(
-            double(ts.tv_sec) + double(ts.tv_nsec) * 1.0e-6 + double(msecs) * 1.0e-3,
+            double(ts.tv_sec) + double(ts.tv_nsec) * 1.0e-9 + double(msecs) * 1.0e-3,
             double(0), double(::std::numeric_limits<::time_t>::max()));
 
         // Break the time down into second and subsecond parts.
