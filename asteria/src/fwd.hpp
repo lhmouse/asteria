@@ -36,8 +36,7 @@
 #include <cwchar>
 
 namespace asteria {
-
-namespace noadl = ::asteria;
+namespace noadl = asteria;
 
 // Macros
 #define ASTERIA_VARIANT_CONSTRUCTOR(C, V, T, t)  \

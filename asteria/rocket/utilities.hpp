@@ -21,6 +21,7 @@
 #include <cstddef>  // std::size_t, std::ptrdiff_t
 
 namespace rocket {
+namespace noadl = rocket;
 
 using ::std::nullptr_t;
 using ::std::ptrdiff_t;
@@ -130,8 +131,6 @@ using ::std::cend;
 using ::std::begin;
 using ::std::end;
 using ::std::swap;
-
-namespace noadl = ::rocket;
 
 #define ROCKET_VOID_T(...)               typename ::std::conditional<1, void, __VA_ARGS__>::type
 #define ROCKET_ENABLE_IF(...)            typename ::std::enable_if<+bool(__VA_ARGS__)>::type* = nullptr
