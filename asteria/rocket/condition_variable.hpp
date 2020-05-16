@@ -75,7 +75,7 @@ class condition_variable
 
         // Break the time down into second and subsecond parts.
         ts.tv_sec = static_cast<::time_t>(end);
-        ts.tv_nsec = static_cast<long>(end - static_cast<double>(ts.tv_sec));
+        ts.tv_nsec = static_cast<long>((end - static_cast<double>(ts.tv_sec)) * 1.0e9);
 
         // The mutex will be unlocked, so release the lock.
         auto owns = lock.m_sth.release();
