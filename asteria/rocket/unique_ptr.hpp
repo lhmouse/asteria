@@ -264,30 +264,24 @@ inline
 unique_ptr<targetT>
 static_pointer_cast(unique_ptr<sourceT>&& sptr)
 noexcept
-  {
-    return details_unique_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
-                               [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });
-  }
+  { return details_unique_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
+                               [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });  }
 
 template<typename targetT, typename sourceT>
 inline
 unique_ptr<targetT>
 dynamic_pointer_cast(unique_ptr<sourceT>&& sptr)
 noexcept
-  {
-    return details_unique_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
-                               [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });
-  }
+  { return details_unique_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
+                               [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });  }
 
 template<typename targetT, typename sourceT>
 inline
 unique_ptr<targetT>
 const_pointer_cast(unique_ptr<sourceT>&& sptr)
 noexcept
-  {
-    return details_unique_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
-                               [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });
-  }
+  { return details_unique_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
+                               [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });  }
 
 }  // namespace rocket
 
