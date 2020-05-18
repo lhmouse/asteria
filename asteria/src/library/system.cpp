@@ -102,7 +102,7 @@ std_system_execute(V_string cmd, optV_array argv, optV_array envp)
     ::pid_t pid;
     if(::posix_spawnp(&pid, cmd.c_str(), nullptr, nullptr, pargv, penvp) != 0)
       ASTERIA_THROW("could not spawn process '$2'\n"
-                    "[`posix_spawnp()` failed: $1]'",
+                    "[`posix_spawnp()` failed: $1]",
                     noadl::format_errno(errno), cmd);
 
     // Await its termination.
@@ -111,7 +111,7 @@ std_system_execute(V_string cmd, optV_array argv, optV_array envp)
       int wstat;
       if(::waitpid(pid, &wstat, 0) == -1)
         ASTERIA_THROW("error awaiting child process '$2'\n"
-                      "[`waitpid()` failed: $1]'",
+                      "[`waitpid()` failed: $1]",
                       noadl::format_errno(errno), pid);
 
       // Check whether the process has terminated normally.
@@ -129,7 +129,7 @@ std_system_daemonize()
   {
     if(::daemon(1, 0) != 0)
       ASTERIA_THROW("could not daemonize process\n"
-                    "[`daemon()` failed: $1]'",
+                    "[`daemon()` failed: $1]",
                     noadl::format_errno(errno));
   }
 
