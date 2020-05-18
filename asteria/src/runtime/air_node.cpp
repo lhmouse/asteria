@@ -3725,7 +3725,7 @@ struct AIR_Traits<AIR_Node::S_import_call>
         uptr<char, void (&)(void*)> abspath(::realpath(path.safe_c_str(), nullptr), ::free);
         if(!abspath)
           ASTERIA_THROW("could not open script file '$2'\n"
-                        "[`realpath()` failed: $1]'",
+                        "[`realpath()` failed: $1]",
                         noadl::format_errno(errno), path);
 
         path.assign(abspath);

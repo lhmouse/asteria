@@ -61,7 +61,7 @@ do_write_utf8_common(const IOF_Sentry& fp, const cow_string& text)
       // Insert it into the output stream.
       if(::fputwc_unlocked(static_cast<wchar_t>(cp), fp) == WEOF)
         ASTERIA_THROW("error writing standard output\n"
-                      "[`fputwc_unlocked()` failed: $1]'",
+                      "[`fputwc_unlocked()` failed: $1]",
                       noadl::format_errno(errno));
 
       // The return value is the number of code points rather than bytes.
@@ -93,7 +93,7 @@ std_io_getc()
       int err = do_recover(fp);
       if(err != 0)
         ASTERIA_THROW("error reading standard input\n"
-                      "[`fgetwc_unlocked()` failed: $1]'",
+                      "[`fgetwc_unlocked()` failed: $1]",
                       noadl::format_errno(err));
 
       return nullopt;
@@ -130,7 +130,7 @@ std_io_getln()
         int err = do_recover(fp);
         if(err != 0)
           ASTERIA_THROW("error reading standard input\n"
-                        "[`fgetwc_unlocked()` failed: $1]'",
+                        "[`fgetwc_unlocked()` failed: $1]",
                         noadl::format_errno(err));
 
         return nullopt;
@@ -176,7 +176,7 @@ std_io_putc(V_integer value)
     // Write a UTF code point.
     if(::fputwc_unlocked(static_cast<wchar_t>(cp), fp) == WEOF)
       ASTERIA_THROW("error writing standard output\n"
-                    "[`fputwc_unlocked()` failed: $1]'",
+                    "[`fputwc_unlocked()` failed: $1]",
                     noadl::format_errno(errno));
 
     // Return the number of code points that have been written.
@@ -223,7 +223,7 @@ std_io_putln(V_string value)
     // Append a line feed and flush.
     if(::fputwc_unlocked(L'\n', fp) == WEOF)
       ASTERIA_THROW("error writing standard output\n"
-                    "[`fputwc_unlocked()` failed: $1]'",
+                    "[`fputwc_unlocked()` failed: $1]",
                     noadl::format_errno(errno));
 
     // Return the number of code points that have been written.
@@ -289,7 +289,7 @@ std_io_read(optV_integer limit)
       int err = do_recover(fp);
       if(err != 0)
         ASTERIA_THROW("error reading standard input\n"
-                      "[`fread_unlocked()` failed: $1]'",
+                      "[`fread_unlocked()` failed: $1]",
                       noadl::format_errno(err));
 
       return nullopt;
@@ -323,7 +323,7 @@ std_io_write(V_string data)
       int err = do_recover(fp);
       if(err != 0)
         ASTERIA_THROW("error writing standard output\n"
-                      "[`fwrite_unlocked()` failed: $1]'",
+                      "[`fwrite_unlocked()` failed: $1]",
                       noadl::format_errno(errno));
     }
 
@@ -337,7 +337,7 @@ std_io_flush()
     // Flush standard output only.
     if(::fflush(stdout) == EOF)
       ASTERIA_THROW("error flushing standard output\n"
-                    "[`fflush()` failed: $1]'",
+                    "[`fflush()` failed: $1]",
                     noadl::format_errno(errno));
   }
 
