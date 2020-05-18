@@ -22,14 +22,14 @@ do_lock_stream(const char* path)
     ::rocket::unique_posix_file file(::fopen(path, "r"), ::fclose);
     if(!file)
       ASTERIA_THROW("could not open script file '$2'\n"
-                    "[`fopen()` failed: $1]",
+                    "[`fopen()` failed: $1]'",
                     noadl::format_errno(errno), path);
 
     // Make the unique identifier of this file from its device ID and inode number.
     struct ::stat info;
     if(::fstat(::fileno(file), &info))
       ASTERIA_THROW("could not get information about script file '$2'\n"
-                    "[`fstat()` failed: $1]",
+                    "[`fstat()` failed: $1]'",
                     noadl::format_errno(errno), path);
 
     // Mark the stream locked.
