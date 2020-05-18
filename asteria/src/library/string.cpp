@@ -5,6 +5,7 @@
 #include "string.hpp"
 #include "../runtime/argument_reader.hpp"
 #include "../utilities.hpp"
+#include <endian.h>
 #include <regex>
 
 namespace asteria {
@@ -369,68 +370,119 @@ V_string do_url_decode(const V_string& text)
     return data;
   }
 
+template<bool bigendT>
+struct Bswap;
+
+template<>
+struct Bswap<true>  // big endian
+  {
+    static inline
+    int64_t
+    conv(int64_t word)
+    noexcept
+      { return int64_t(be64toh(uint64_t(word)));  }
+
+    static inline
+    int32_t
+    conv(int32_t word)
+    noexcept
+      { return int32_t(be32toh(uint32_t(word)));  }
+
+    static inline
+    int16_t
+    conv(int16_t word)
+    noexcept
+      { return int16_t(be16toh(uint16_t(word)));  }
+
+    static inline
+    int8_t
+    conv(int8_t word)
+    noexcept
+      { return word;  }
+
+    static inline
+    int
+    conv(...)
+    noexcept
+      = delete;
+  };
+
+template<>
+struct Bswap<false>  // little endian
+  {
+    static inline
+    int64_t
+    conv(int64_t word)
+    noexcept
+      { return int64_t(le64toh(uint64_t(word)));  }
+
+    static inline
+    int32_t
+    conv(int32_t word)
+    noexcept
+      { return int32_t(le32toh(uint32_t(word)));  }
+
+    static inline
+    int16_t
+    conv(int16_t word)
+    noexcept
+      { return int16_t(le16toh(uint16_t(word)));  }
+
+    static inline
+    int8_t
+    conv(int8_t word)
+    noexcept
+      { return word;  }
+
+    static inline
+    int
+    conv(...)
+    noexcept
+      = delete;
+  };
+
 template<bool bigendT, typename WordT>
 V_string&
 do_pack_one_impl(V_string& text, const V_integer& value)
   {
-    // Define temporary storage.
-    array<char, sizeof(WordT)> stor_le;
-    uint64_t word = static_cast<uint64_t>(value);
-
-    // Write it in little-endian order.
-    for(size_t i = 0;  i < stor_le.size();  ++i) {
-      stor_le[i] = static_cast<char>(word);
-      word >>= 8;
-    }
-
-    // Append this word.
-    if(bigendT)
-      text.append(stor_le.rbegin(), stor_le.rend());
-    else
-      text.append(stor_le.begin(), stor_le.end());
+    // Convert the value into the specified byte order.
+    auto word = Bswap<bigendT>::conv(static_cast<WordT>(value));
+    text.append((char (&)[])word, sizeof(word));
     return text;
   }
 
 template<typename WordT>
 V_string&
 do_pack_one_be(V_string& text, const V_integer& value)
-  { return do_pack_one_impl<1, WordT>(text, value);  }
+  {
+    return do_pack_one_impl<1, WordT>(text, value);
+  }
 
 template<typename WordT>
 V_string&
 do_pack_one_le(V_string& text, const V_integer& value)
-  { return do_pack_one_impl<0, WordT>(text, value);  }
+  {
+    return do_pack_one_impl<0, WordT>(text, value);
+  }
 
 template<bool bigendT, typename WordT>
 V_array
 do_unpack_impl(const V_string& text)
   {
-    V_array values;
-
-    // Define temporary storage.
-    array<char, sizeof(WordT)> stor_be;
-    uint64_t word = 0;
-
     // How many words will the result have?
-    auto nwords = text.size() / stor_be.size();
-    if(text.size() != nwords * stor_be.size())
-      ASTERIA_THROW("invalid source string length (`$1` not divisible by `$2`)", text.size(), stor_be.size());
+    auto nwords = text.size() / sizeof(WordT);
+    if(text.size() != nwords * sizeof(WordT))
+      ASTERIA_THROW("invalid source string length (`$1` not divisible by `$2`)",
+                    text.size(), sizeof(WordT));
+    const auto pwords = reinterpret_cast<const WordT*>(text.data());
+
+    V_array values;
     values.reserve(nwords);
 
     // Unpack integers.
     for(size_t i = 0;  i < nwords;  ++i) {
-      // Read some bytes in big-endian order.
-      if(bigendT)
-        ::std::copy_n(text.data() + i * stor_be.size(), stor_be.size(), stor_be.mut_begin());
-      else
-        ::std::copy_n(text.data() + i * stor_be.size(), stor_be.size(), stor_be.mut_rbegin());
-
-      // Assemble the word.
-      for(const auto& byte : stor_be) {
-        word <<= 8;
-        word |= static_cast<uint8_t>(byte);
-      }
-      values.emplace_back(V_integer(static_cast<WordT>(word)));
+      auto word = Bswap<bigendT>::conv(pwords[i]);
+      values.emplace_back(V_integer(word));
     }
     return values;
   }
@@ -438,12 +490,16 @@ do_unpack_impl(const V_string& text)
 template<typename WordT>
 V_array
 do_unpack_be(const V_string& text)
-  { return do_unpack_impl<1, WordT>(text);  }
+  {
+    return do_unpack_impl<1, WordT>(text);
+  }
 
 template<typename WordT>
 V_array
 do_unpack_le(const V_string& text)
-  { return do_unpack_impl<0, WordT>(text);  }
+  {
+    return do_unpack_impl<0, WordT>(text);
+  }
 
 ::std::regex
 do_make_regex(const V_string& pattern)
