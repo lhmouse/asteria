@@ -18,10 +18,10 @@ noexcept;
 template<typename... ParamsT>
 ROCKET_NOINLINE
 cow_string
-format_string(const ParamsT&... params)
+format_string(const char* templ, const ParamsT&... params)
   {
     ::rocket::tinyfmt_str fmt;
-    format(fmt, params...);  // ADL intended
+    format(fmt, templ, params...);  // ADL intended
     return fmt.extract_string();
   }
 
