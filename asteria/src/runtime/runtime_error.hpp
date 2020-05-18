@@ -14,9 +14,9 @@ class Runtime_Error
   : public virtual exception
   {
   public:
-    enum class F_native  { };
-    enum class F_throw   { };
-    enum class F_assert  { };
+    struct F_native  { };
+    struct F_throw   { };
+    struct F_assert  { };
 
   private:
     Value m_value;
