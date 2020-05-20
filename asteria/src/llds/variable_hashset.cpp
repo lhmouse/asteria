@@ -31,8 +31,7 @@ noexcept
 Variable_HashSet::Bucket*
 Variable_HashSet::
 do_xprobe(const rcptr<Variable>& var)
-const
-noexcept
+const noexcept
   {
     auto bptr = this->m_bptr;
     auto eptr = this->m_eptr;

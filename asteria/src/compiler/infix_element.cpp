@@ -13,8 +13,7 @@ namespace asteria {
 Precedence
 Infix_Element::
 tell_precedence()
-const
-noexcept
+const noexcept
   {
     switch(this->index()) {
       case index_head:

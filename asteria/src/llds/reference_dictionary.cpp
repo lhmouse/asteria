@@ -32,8 +32,7 @@ noexcept
 Reference_Dictionary::Bucket*
 Reference_Dictionary::
 do_xprobe(const phsh_string& name)
-const
-noexcept
+const noexcept
   {
     auto bptr = this->m_bptr;
     auto eptr = this->m_eptr;

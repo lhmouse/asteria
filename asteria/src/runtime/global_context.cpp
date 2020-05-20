@@ -82,8 +82,7 @@ Global_Context::
 API_Version
 Global_Context::
 max_api_version()
-const
-noexcept
+const noexcept
   {
     return static_cast<API_Version>(api_version_sentinel - 1);
   }

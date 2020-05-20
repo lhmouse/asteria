@@ -38,8 +38,7 @@ noexcept
 bool
 Value::
 test()
-const
-noexcept
+const noexcept
   {
     switch(this->vtype()) {
       case vtype_null:
@@ -75,8 +74,7 @@ noexcept
 Compare
 Value::
 compare(const Value& other)
-const
-noexcept
+const noexcept
   {
     // Compare values of different types
     if(this->vtype() != other.vtype()) {
@@ -133,8 +131,7 @@ noexcept
 bool
 Value::
 unique()
-const
-noexcept
+const noexcept
   {
     switch(this->vtype()) {
       case vtype_null:
@@ -168,8 +165,7 @@ noexcept
 long
 Value::
 use_count()
-const
-noexcept
+const noexcept
   {
     switch(this->vtype()) {
       case vtype_null:
@@ -203,8 +199,7 @@ noexcept
 long
 Value::
 gcref_split()
-const
-noexcept
+const noexcept
   {
     switch(this->vtype()) {
       case vtype_null:
