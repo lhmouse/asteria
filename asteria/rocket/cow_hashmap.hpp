@@ -493,7 +493,9 @@ class cow_hashmap
         return this->try_emplace(::std::forward<ykeyT>(key), ::std::forward<paramsT>(params)...).first;
       }
 
-    template<typename ykeyT, typename yvalueT> pair<iterator, bool> insert_or_assign(ykeyT&& key, yvalueT&& yvalue)
+    template<typename ykeyT, typename yvalueT>
+    pair<iterator, bool>
+    insert_or_assign(ykeyT&& key, yvalueT&& yvalue)
       {
         this->do_reserve_more(1);
         auto result = this->m_sth.keyed_emplace_unchecked(key,
