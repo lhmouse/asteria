@@ -107,6 +107,7 @@ class storage_handle
         auto ptr = ::std::exchange(this->m_ptr, ptr_new);
         if(ROCKET_EXPECT(!ptr))
           return;
+
         storage_handle::do_drop_reference(ptr);
       }
 
@@ -148,6 +149,7 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return false;
+
         return ptr->nref.unique();
       }
 
@@ -158,6 +160,7 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return 0;
+
         auto nref = ptr->nref.get();
         ROCKET_ASSERT(nref > 0);
         return nref;
@@ -170,6 +173,7 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return 0;
+
         auto cap = storage::max_nchar_for_nblk(ptr->nblk);
         ROCKET_ASSERT(cap > 0);
         return cap;
@@ -213,6 +217,7 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return nullptr;
+
         return ptr->data;
       }
 
@@ -302,6 +307,7 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return nullptr;
+
         ROCKET_ASSERT(this->unique());
         return ptr->data;
       }
@@ -570,10 +576,11 @@ struct comparator
       {
         if(n1 != n2)
           return 2;
+
         if(s1 == s2)
           return 0;
-        else
-          return traits_type::compare(s1, s2, n1);
+
+        return traits_type::compare(s1, s2, n1);
       }
 
     static
@@ -581,18 +588,12 @@ struct comparator
     relation(const char_type* s1, size_type n1, const char_type* s2, size_type n2)
     noexcept
       {
-        if(n1 < n2) {
-          int res = traits_type::compare(s1, s2, n1);
-          if(res == 0)
-            res = -1;
-          return res;
-        }
-        if(n1 > n2) {
-          int res = traits_type::compare(s1, s2, n2);
-          if(res == 0)
-            res = +1;
-          return res;
-        }
+        if(n1 < n2)
+          return (traits_type::compare(s1, s2, n1) > 0) ? +1 : -1;
+
+        if(n1 > n2)
+          return (traits_type::compare(s1, s2, n1) < 0) ? -1 : +1;
+
         return traits_type::compare(s1, s2, n1);
       }
   };

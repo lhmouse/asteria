@@ -172,6 +172,7 @@ class storage_handle
     using storage_pointer   = typename allocator_traits<storage_allocator>::pointer;
 
   private:
+
     storage_pointer m_ptr;
 
   public:
@@ -249,6 +250,7 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return false;
+
         return ptr->nref.unique();
       }
 
@@ -259,6 +261,7 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return 0;
+
         auto nref = ptr->nref.get();
         ROCKET_ASSERT(nref > 0);
         return nref;
@@ -271,6 +274,7 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return 0;
+
         auto cap = storage::max_nelem_for_nblk(ptr->nblk);
         ROCKET_ASSERT(cap > 0);
         return cap;
@@ -314,6 +318,7 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return nullptr;
+
         return ptr->data;
       }
 
@@ -324,6 +329,7 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return true;
+
         return reinterpret_cast<const storage_header*>(ptr)->nelem == 0;
       }
 
@@ -334,6 +340,7 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return 0;
+
         return reinterpret_cast<const storage_header*>(ptr)->nelem;
       }
 
@@ -432,6 +439,7 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return nullptr;
+
         ROCKET_ASSERT(this->unique());
         return ptr->data;
       }

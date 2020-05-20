@@ -137,12 +137,15 @@ struct pointer_storage : storage_header
           auto eptr = this->data[i].reset();
           if(!eptr)
             continue;
+
           allocator_traits<allocator_type>::destroy(this->alloc, noadl::unfancy(eptr));
           allocator_traits<allocator_type>::deallocate(this->alloc, eptr, size_t(1));
         }
+
         // `allocator_type::pointer` need not be a trivial type.
         for(size_type i = 0; i < nbkt; ++i)
           noadl::destroy_at(this->data + i);
+
 #ifdef ROCKET_DEBUG
         this->nelem = 0xEECD;
 #endif
@@ -174,15 +177,18 @@ dispatch_copy_storage(true_type, ptrT ptr, const hashT& hf, ptrT ptr_old, size_t
     // Get table bounds.
     auto data = ptr->data;
     auto end = data + pointer_storage<allocT>::max_nbkt_for_nblk(ptr->nblk);
+
     // Copy elements one by one.
     for(size_t i = off; i != off + cnt; ++i) {
       auto eptr_old = ptr_old->data[i].get();
       if(!eptr_old)
         continue;
+
       // Find a bucket for the new element.
       auto origin = noadl::get_probing_origin(data, end, hf(eptr_old->first));
       auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const auto&) { return false;  });
       ROCKET_ASSERT(bkt);
+
       // Allocate a new element by copy-constructing from the old one.
       auto eptr = allocator_traits<allocT>::allocate(ptr->alloc, size_t(1));
       try {
@@ -217,18 +223,22 @@ move_storage(ptrT ptr, const hashT& hf, ptrT ptr_old, size_t off, size_t cnt)
     // Get table bounds.
     auto data = ptr->data;
     auto end = data + pointer_storage<allocT>::max_nbkt_for_nblk(ptr->nblk);
+
     // Move elements one by one.
     for(size_t i = off; i != off + cnt; ++i) {
       auto eptr_old = ptr_old->data[i].get();
       if(!eptr_old)
         continue;
+
       // Find a bucket for the new element.
       auto origin = noadl::get_probing_origin(data, end, hf(eptr_old->first));
       auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const auto&) { return false;  });
       ROCKET_ASSERT(bkt);
+
       // Detach the old element.
       auto eptr = ptr_old->data[i].reset();
       ptr_old->nelem--;
+
       // Insert it into the new bucket.
       ROCKET_ASSERT(!*bkt);
       bkt->reset(eptr);
@@ -380,6 +390,7 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return false;
+
         return ptr->nref.unique();
       }
 
@@ -390,6 +401,7 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return 0;
+
         auto nref = ptr->nref.get();
         ROCKET_ASSERT(nref > 0);
         return nref;
@@ -408,6 +420,7 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return 0;
+
         return storage::max_nbkt_for_nblk(ptr->nblk);
       }
 
@@ -418,6 +431,7 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return 0;
+
         auto cap = storage::max_nbkt_for_nblk(ptr->nblk) / max_load_factor_reciprocal;
         ROCKET_ASSERT(cap > 0);
         return cap;
@@ -461,6 +475,7 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return nullptr;
+
         return ptr->data;
       }
 
@@ -471,6 +486,7 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return true;
+
         return reinterpret_cast<const storage_header*>(ptr)->nelem == 0;
       }
 
@@ -481,6 +497,7 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return 0;
+
         return reinterpret_cast<const storage_header*>(ptr)->nelem;
       }
 
@@ -589,6 +606,7 @@ class storage_handle
         // Get table bounds.
         auto data = ptr->data;
         auto end = data + storage::max_nbkt_for_nblk(ptr->nblk);
+
         // Find the desired element using linear probing.
         auto origin = noadl::get_probing_origin(data, end, this->as_hasher()(ykey));
         auto bkt = noadl::linear_probe(data, origin, origin, end,
@@ -598,10 +616,11 @@ class storage_handle
           ROCKET_ASSERT(max_load_factor_reciprocal == 1);
           return false;
         }
-        if(!*bkt) {
+
+        if(!*bkt)
           // The previous probing has stopped due to an empty bucket. No equivalent key has been found so far.
           return false;
-        }
+
         ROCKET_ASSERT(data <= bkt);
         index = static_cast<size_type>(bkt - data);
         return true;
@@ -627,18 +646,20 @@ class storage_handle
         ROCKET_ASSERT(this->element_count() < this->capacity());
         auto ptr = this->m_ptr;
         ROCKET_ASSERT(ptr);
+
         // Get table bounds.
         auto data = ptr->data;
         auto end = data + storage::max_nbkt_for_nblk(ptr->nblk);
+
         // Find an empty bucket using linear probing.
         auto origin = noadl::get_probing_origin(data, end, this->as_hasher()(ykey));
         auto bkt = noadl::linear_probe(data, origin, origin, end,
                        [&](const bucket_type& rbkt) { return this->as_key_equal()(rbkt->first, ykey);  });
         ROCKET_ASSERT(bkt);
-        if(*bkt) {
+        if(*bkt)
           // A duplicate key has been found.
           return ::std::make_pair(bkt, false);
-        }
+
         // Allocate a new element.
         auto eptr = allocator_traits<allocator_type>::allocate(ptr->alloc, size_t(1));
         try {
@@ -663,24 +684,28 @@ class storage_handle
         ROCKET_ASSERT(this->unique());
         ROCKET_ASSERT(tpos <= this->bucket_count());
         ROCKET_ASSERT(tn <= this->bucket_count() - tpos);
-        if(tn == 0) {
+        if(tn == 0)
           return;
-        }
+
         auto ptr = this->m_ptr;
         ROCKET_ASSERT(ptr);
+
         // Erase all elements in [tpos,tpos+tn).
         for(size_type i = tpos; i != tpos + tn; ++i) {
           auto eptr = ptr->data[i].reset();
           if(!eptr)
             continue;
+
           ptr->nelem--;
           // Destroy the element and deallocate its storage.
           allocator_traits<allocator_type>::destroy(ptr->alloc, noadl::unfancy(eptr));
           allocator_traits<allocator_type>::deallocate(ptr->alloc, eptr, size_t(1));
         }
+
         // Get table bounds.
         auto data = ptr->data;
         auto end = data + storage::max_nbkt_for_nblk(ptr->nblk);
+
         // Relocate elements that are not placed in their immediate locations.
         noadl::linear_probe(
           // Only probe non-erased buckets.
@@ -690,10 +715,12 @@ class storage_handle
             {
               // Release the old element.
               auto eptr = rbkt.reset();
+
               // Find a new bucket for it using linear probing.
               auto origin = noadl::get_probing_origin(data, end, this->as_hasher()(eptr->first));
               auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const auto&) { return false;  });
               ROCKET_ASSERT(bkt);
+
               // Insert it into the new bucket.
               ROCKET_ASSERT(!*bkt);
               bkt->reset(eptr);

@@ -340,6 +340,7 @@ class cow_hashmap
       {
         auto cnt = this->size();
         auto cap_new = this->m_sth.round_up_capacity(noadl::max(cnt, res_arg));
+
         // If the storage is shared with other hashmaps, force rellocation to prevent copy-on-write
         // upon modification.
         if(this->unique() && (this->capacity() >= cap_new))
@@ -356,6 +357,7 @@ class cow_hashmap
       {
         auto cnt = this->size();
         auto cap_min = this->m_sth.round_up_capacity(cnt);
+
         // Don't increase memory usage.
         if(!this->unique() || (this->capacity() <= cap_min))
           return *this;
@@ -443,6 +445,7 @@ class cow_hashmap
                                  [&](const inputT& it) { this->insert(*it);  });
           return *this;
         }
+
         this->do_reserve_more(dist);
         noadl::ranged_do_while(::std::move(first), ::std::move(last),
                                [&](const inputT& it) { this->m_sth.keyed_emplace_unchecked(it->first, *it);  });
@@ -500,9 +503,8 @@ class cow_hashmap
         this->do_reserve_more(1);
         auto result = this->m_sth.keyed_emplace_unchecked(key,
                           ::std::forward<ykeyT>(key), ::std::forward<yvalueT>(yvalue));
-        if(!result.second) {
+        if(!result.second)
           result.first->get()->second = ::std::forward<yvalueT>(yvalue);
-        }
         return ::std::make_pair(iterator(this->m_sth, result.first), result.second);
       }
 
@@ -543,6 +545,7 @@ class cow_hashmap
         size_type tpos;
         if(!this->m_sth.index_of(tpos, key))
           return false;
+
         this->do_erase_no_bound_check(tpos, 1);
         return true;
       }
@@ -557,6 +560,7 @@ class cow_hashmap
         size_type tpos;
         if(!this->m_sth.index_of(tpos, key))
           return this->end();
+
         return const_iterator(this->m_sth, ptr + tpos);
       }
 
@@ -570,6 +574,7 @@ class cow_hashmap
         size_type tpos;
         if(!this->m_sth.index_of(tpos, key))
           return this->mut_end();
+
         return iterator(this->m_sth, ptr + tpos);
       }
 
@@ -579,9 +584,7 @@ class cow_hashmap
     const
       {
         size_type tpos;
-        if(!this->m_sth.index_of(tpos, key))
-          return 0;
-        return 1;
+        return this->m_sth.index_of(tpos, key);
       }
 
     // N.B. This is a non-standard extension.
@@ -594,6 +597,7 @@ class cow_hashmap
         size_type tpos;
         if(!this->m_sth.index_of(tpos, key))
           return ::std::forward<ydefaultT>(ydef);
+
         return ptr[tpos]->second;
       }
 
@@ -607,6 +611,7 @@ class cow_hashmap
         size_type tpos;
         if(!this->m_sth.index_of(tpos, key))
           return ::std::forward<ydefaultT>(ydef);
+
         return ::std::move(ptr[tpos]->second);
       }
 
@@ -620,6 +625,7 @@ class cow_hashmap
         size_type tpos;
         if(!this->m_sth.index_of(tpos, key))
           this->do_throw_key_not_found();
+
         return ptr[tpos]->second;
       }
 
@@ -633,6 +639,7 @@ class cow_hashmap
         size_type tpos;
         if(!this->m_sth.index_of(tpos, key))
           return nullptr;
+
         return ::std::addressof(ptr[tpos]->second);
       }
 
@@ -657,6 +664,7 @@ class cow_hashmap
         size_type tpos;
         if(!this->m_sth.index_of(tpos, key))
           return nullptr;
+
         return ::std::addressof(ptr[tpos]->second);
       }
 

@@ -454,6 +454,7 @@ class cow_vector
         auto cnt = this->size();
         if(pos >= cnt)
           return nullptr;
+
         return this->data() + pos;
       }
 
@@ -466,6 +467,7 @@ class cow_vector
         auto cnt = this->size();
         if(pos >= cnt)
           this->do_throw_subscript_out_of_range(pos);
+
         return this->mut_data()[pos];
       }
 
@@ -495,6 +497,7 @@ class cow_vector
         auto cnt = this->size();
         if(pos >= cnt)
           return nullptr;
+
         return this->mut_data() + pos;
       }
 
@@ -533,6 +536,7 @@ class cow_vector
                                  [&](const inputT& it) { this->emplace_back(*it);  });
           return *this;
         }
+
         this->do_reserve_more(dist);
         noadl::ranged_do_while(::std::move(first), ::std::move(last),
                                [&](const inputT& it) { this->m_sth.emplace_back_unchecked(*it);  });
@@ -561,6 +565,7 @@ class cow_vector
           auto ptr = this->m_sth.emplace_back_unchecked(this->data()[srpos]);
           return *ptr;
         }
+
         auto ptr = this->m_sth.emplace_back_unchecked(value);
         return *ptr;
       }
@@ -709,6 +714,7 @@ class cow_vector
           this->do_reallocate(0, 0, cnt_old - n, cnt_old);
           return *this;
         }
+
         this->m_sth.pop_back_n_unchecked(n);
         return *this;
       }
@@ -797,10 +803,10 @@ class cow_vector
     value_type*
     mut_data()
       {
-        if(ROCKET_UNEXPECT(!this->empty() && !this->unique())) {
+        if(ROCKET_UNEXPECT(!this->empty() && !this->unique()))
           return this->do_reallocate(0, 0, this->size(), this->size() | 1);
-        }
-        return this->m_sth.mut_data_unchecked();
+        else
+          return this->m_sth.mut_data_unchecked();
       }
 
     // N.B. The return type differs from `std::vector`.

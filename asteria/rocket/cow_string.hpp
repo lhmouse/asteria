@@ -342,6 +342,7 @@ class basic_cow_string
         auto tlen = this->size();
         if(tpos > tlen)
           this->do_throw_subscript_out_of_range(tpos);
+
         return noadl::min(tlen - tpos, tn);
       }
 
@@ -372,6 +373,7 @@ class basic_cow_string
           auto ptr = this->do_reallocate(tpos, tpos + tn, len_old - (tpos + tn), len_old);
           return ptr + tpos;
         }
+
         auto ptr = this->m_sth.mut_data_unchecked();
         traits_type::move(ptr + tpos, ptr + tpos + tn, len_old - (tpos + tn));
         this->do_set_length(len_old - tn);
@@ -389,8 +391,10 @@ class basic_cow_string
           auto ptr = this->data() + cur;
           if(pred(ptr))
             return ROCKET_ASSERT(cur != npos), cur;
+
           if(cur == last)
             return npos;
+
           cur += static_cast<size_type>(step);
         }
       }
@@ -737,6 +741,7 @@ class basic_cow_string
           this->do_set_length(len_old + n);
           return *this;
         }
+
         traits_type::copy(ptr + len_old, s, n);
         this->do_set_length(len_old + n);
         return *this;
@@ -789,6 +794,7 @@ class basic_cow_string
         other.append(this->data(), this->size());
         noadl::ranged_do_while(::std::move(first), ::std::move(last),
                                [&](const inputT& it) { other.push_back(*it);  });
+
         this->assign(::std::move(other));
         return *this;
       }
@@ -846,6 +852,7 @@ class basic_cow_string
           this->do_reallocate(0, 0, len_old - n, len_old);
           return *this;
         }
+
         this->do_set_length(len_old - n);
         return *this;
       }
@@ -1179,10 +1186,10 @@ class basic_cow_string
     value_type*
     mut_data()
       {
-        if(ROCKET_UNEXPECT(!this->empty() && !this->unique())) {
+        if(ROCKET_UNEXPECT(!this->empty() && !this->unique()))
           return this->do_reallocate(0, 0, this->size(), this->size() | 1);
-        }
-        return this->m_sth.mut_data_unchecked();
+        else
+          return this->m_sth.mut_data_unchecked();
       }
 
     // N.B. The return type differs from `std::basic_string`.
