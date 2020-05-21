@@ -59,24 +59,31 @@ noexcept
       bptr, qxcld, qxcld + 1, eptr,
       // Relocate every bucket found.
       [&](Bucket& rb) {
-        auto qbkt = &rb;
+        auto sbkt = &rb;
 
-        // Transfer ownership of the old variable, then detach the bucket.
-        ROCKET_ASSERT(*qbkt);
-        auto var = ::std::move(qbkt->kstor[0]);
-        ::rocket::destroy_at(qbkt->kstor);
-        this->do_list_detach(qbkt);
+        // Mark this bucket empty, without destroying its contents.
+        ROCKET_ASSERT(*sbkt);
+        this->do_list_detach(sbkt);
 
         // Find a new bucket for the variable using linear probing.
         // Uniqueness has already been implied for all elements, so there is no need to check for collisions.
-        auto mptr = ::rocket::get_probing_origin(bptr, eptr, reinterpret_cast<uintptr_t>(var.get()));
-        qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr, [&](const Bucket&) { return false;  });
+        auto mptr = ::rocket::get_probing_origin(bptr, eptr, reinterpret_cast<uintptr_t>(sbkt->kstor->get()));
+        auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr, [&](const Bucket&) { return false;  });
         ROCKET_ASSERT(qbkt);
 
-        // Insert the variable into the new bucket.
+        // Mark the new bucket non-empty.
         ROCKET_ASSERT(!*qbkt);
         this->do_list_attach(qbkt);
-        ::rocket::construct_at(qbkt->kstor, ::std::move(var));
+
+        // If the two pointers reference the same one, no relocation is needed.
+        if(ROCKET_EXPECT(qbkt == sbkt))
+          return false;
+
+        // Relocate the bucket.
+        //   ::rocket::construct_at(qbkt->kstor, ::std::move(sbkt->kstor[0]));
+        //   ::rocket::destroy_at(sbkt->kstor);
+        ::std::memcpy(qbkt->kstor, sbkt->kstor, sizeof(sbkt->kstor));
+
         // Keep probing until an empty bucket is found.
         return false;
       });
@@ -131,28 +138,30 @@ do_rehash(size_t nbkt)
 
     // Move buckets into the new table.
     // Warning: No exception shall be thrown from the code below.
-    auto next = ::std::exchange(this->m_head, nullptr);
-    while(ROCKET_EXPECT(next)) {
-      auto qbkt = next;
-      next = qbkt->next;
-
-      // Transfer ownership of the old variable, then destroy the bucket.
-      ROCKET_ASSERT(*qbkt);
-      auto var = ::std::move(qbkt->kstor[0]);
-      ::rocket::destroy_at(qbkt->kstor);
-      qbkt->prev = nullptr;
+    auto sbkt = ::std::exchange(this->m_head, nullptr);
+    while(ROCKET_EXPECT(sbkt)) {
+      // Mark this bucket empty, without destroying its contents.
+      ROCKET_ASSERT(*sbkt);
 
       // Find a new bucket for the variable using linear probing.
       // Uniqueness has already been implied for all elements, so there is no need to check for collisions.
-      auto mptr = ::rocket::get_probing_origin(bptr, eptr, reinterpret_cast<uintptr_t>(var.get()));
-      qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr, [&](const Bucket&) { return false;  });
+      auto mptr = ::rocket::get_probing_origin(bptr, eptr, reinterpret_cast<uintptr_t>(sbkt->kstor->get()));
+      auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr, [&](const Bucket&) { return false;  });
       ROCKET_ASSERT(qbkt);
 
-      // Insert the variable into the new bucket.
+      // Mark the new bucket non-empty.
       ROCKET_ASSERT(!*qbkt);
       this->do_list_attach(qbkt);
-      ::rocket::construct_at(qbkt->kstor, ::std::move(var));
+
+      // Relocate the bucket.
+      //   ::rocket::construct_at(qbkt->kstor, ::std::move(sbkt->kstor[0]));
+      //   ::rocket::destroy_at(sbkt->kstor);
+      ::std::memcpy(qbkt->kstor, sbkt->kstor, sizeof(sbkt->kstor));
+
+      // Process the next bucket.
+      sbkt = sbkt->next;
     }
+
     // Deallocate the old table.
     if(bold)
       ::operator delete(bold);
