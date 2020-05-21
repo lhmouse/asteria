@@ -144,11 +144,13 @@ class AVMC_Queue
           };
 
         // Trivial operations can be optimized.
-        constexpr auto qmvct = ::std::is_trivially_move_constructible<SparamT>::value
-                                   ? nullptr : Sfn::move_construct;
-        constexpr auto qdtor = ::std::is_trivially_destructible<SparamT>::value
-                                   ? nullptr : Sfn::destroy;
-        static constexpr Vtable s_vtbl[1] = {{ qmvct, qdtor, execT, qvenumT }};
+        static constexpr Vtable s_vtbl[1] =
+          {{
+            ::std::is_trivially_move_constructible<SparamT>::value ? nullptr : Sfn::move_construct,
+            ::std::is_trivially_destructible<SparamT>::value ? nullptr : Sfn::destroy,
+            execT,
+            qvenumT,
+          }};
         return s_vtbl;
       }
 
