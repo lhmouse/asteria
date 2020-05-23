@@ -77,7 +77,7 @@ class recursive_mutex::unique_lock
     bool
     is_locking(recursive_mutex& m)
     const noexcept
-      { return this->m_sth.get() == ::std::addressof(m.m_mutex);  }
+      { return this->m_sth.get() == ::std::addressof(m.m_rmutex);  }
 
     unique_lock&
     unlock()
