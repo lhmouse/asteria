@@ -82,8 +82,6 @@ const noexcept
             return precedence_bitwise_and;
 
           case xop_xorb:
-            return precedence_bitwise_xor;
-
           case xop_orb:
             return precedence_bitwise_or;
 
