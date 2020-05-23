@@ -76,6 +76,11 @@ class mutex::unique_lock
     const noexcept
       { return this->m_sth.get() != nullptr;  }
 
+    bool
+    is_locking(mutex& m)
+    const noexcept
+      { return this->m_sth.get() == ::std::addressof(m.m_mutex);  }
+
     unique_lock&
     unlock()
     noexcept
