@@ -77,7 +77,7 @@ class mutex::unique_lock
       { return this->m_sth.get() != nullptr;  }
 
     bool
-    is_locking(mutex& m)
+    is_locking(const volatile mutex& m)  // `volatile` prevents temporaries
     const noexcept
       { return this->m_sth.get() == ::std::addressof(m.m_mutex);  }
 
