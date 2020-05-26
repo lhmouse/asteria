@@ -230,6 +230,7 @@ class basic_linear_buffer
         size_type nread = noadl::min(n, this->size());
         if(nread <= 0)
           return 0;
+
         traits_type::copy(s, this->begin(), nread);
         return nread;
       }
@@ -241,6 +242,7 @@ class basic_linear_buffer
         size_type nread = noadl::min(n, this->size());
         if(nread <= 0)
           return 0;
+
         traits_type::copy(s, this->begin(), nread);
         this->discard(nread);
         return nread;
@@ -253,6 +255,7 @@ class basic_linear_buffer
         value_type s[1];
         if(this->peekn(s, 1) == 0)
           return traits_type::eof();
+
         int_type ch = traits_type::to_int_type(s[0]);
         return ch;
       }
@@ -264,6 +267,7 @@ class basic_linear_buffer
         value_type s[1];
         if(this->getn(s, 1) == 0)
           return traits_type::eof();
+
         int_type ch = traits_type::to_int_type(s[0]);
         return ch;
       }
@@ -347,6 +351,7 @@ class basic_linear_buffer
       {
         ROCKET_ASSERT((this->m_stor.as_allocator() == other.m_stor.as_allocator()) ||
                       allocator_traits<allocator_type>::propagate_on_container_swap::value);
+
         // Note that, as with standard containers, if the allocators are not swapped and they compare
         // unequal, the behavior is undefined.
         noadl::propagate_allocator_on_swap(this->m_stor.as_allocator(), other.m_stor.as_allocator());
