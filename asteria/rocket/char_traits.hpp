@@ -42,13 +42,13 @@ struct char_traits<char>
     noexcept
       { return r = c;  }
 
-    static
+    static constexpr
     bool
     eq(char_type x, char_type y)
     noexcept
       { return x == y;  }
 
-    static
+    static constexpr
     bool
     lt(char_type x, char_type y)
     noexcept
@@ -172,13 +172,13 @@ struct char_traits<wchar_t>
     noexcept
       { return r = c;  }
 
-    static
+    static constexpr
     bool
     eq(char_type x, char_type y)
     noexcept
       { return x == y;  }
 
-    static
+    static constexpr
     bool
     lt(char_type x, char_type y)
     noexcept
@@ -302,13 +302,13 @@ struct char_traits<char16_t>
     noexcept
       { return r = c;  }
 
-    static
+    static constexpr
     bool
     eq(char_type x, char_type y)
     noexcept
       { return x == y;  }
 
-    static
+    static constexpr
     bool
     lt(char_type x, char_type y)
     noexcept
@@ -408,13 +408,13 @@ struct char_traits<char32_t>
     noexcept
       { return r = c;  }
 
-    static
+    static constexpr
     bool
     eq(char_type x, char_type y)
     noexcept
       { return x == y;  }
 
-    static
+    static constexpr
     bool
     lt(char_type x, char_type y)
     noexcept
