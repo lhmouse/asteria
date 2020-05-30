@@ -1535,13 +1535,17 @@ struct basic_cow_string<charT, traitsT, allocT>::hash
     result_type
     operator()(const argument_type& str)
     const noexcept
-      { return details_cow_string::basic_hasher<charT, traitsT>().append(str.data(), str.size()).finish();  }
+      { return details_cow_string::basic_hasher<charT, traitsT>()
+                   .append(str.data(), str.size())
+                   .finish();  }
 
     constexpr
     result_type
     operator()(const charT* s)
     const noexcept
-      { return details_cow_string::basic_hasher<charT, traitsT>().append(s).finish();  }
+      { return details_cow_string::basic_hasher<charT, traitsT>()
+                   .append(s)
+                   .finish();  }
   };
 
 extern template
