@@ -631,56 +631,50 @@ class basic_hasher
 
   public:
     constexpr
-    basic_hasher()
-    noexcept
-      { }
-
-  private:
-    void
-    do_init()
-    noexcept
-      { this->m_reg = xoffset;  }
-
-    void
-    do_append(const unsigned char* s, size_t n)
+    basic_hasher&
+    append(const charT& c)
     noexcept
       {
+        auto ch = static_cast<typename ::std::common_type<unsigned,
+                      typename make_unsigned<charT>::type>::type>(c);
         char32_t reg = this->m_reg;
-        for(size_t i = 0; i < n; ++i)
-          reg = (reg ^ s[i]) * xprime;
+        for(size_t k = 0;  k < sizeof(c);  ++k) {
+          reg ^= static_cast<unsigned char>(ch);
+          ch >>= 8;
+          reg *= xprime;
+        }
         this->m_reg = reg;
+        return *this;
       }
 
-    char32_t
-    do_finish()
-    noexcept
-      { return this->m_reg;  }
-
-  public:
+    constexpr
     basic_hasher&
     append(const charT* s, size_t n)
-    noexcept
       {
-        this->do_append(reinterpret_cast<const unsigned char*>(s), sizeof(charT) * n);
+        const charT* sp = s;
+        while(sp != s + n)
+          this->append(*(sp++));
         return *this;
       }
 
+    constexpr
     basic_hasher&
-    append(const charT* sz)
-    noexcept
+    append(const charT* s)
       {
-        for(auto s = sz; !traitsT::eq(*s, charT()); ++s)
-          this->do_append(reinterpret_cast<const unsigned char*>(s), sizeof(charT));
+        const charT* sp = s;
+        while(!traitsT::eq(*sp, charT()))
+          this->append(*(sp++));
         return *this;
       }
 
+    constexpr
     size_t
     finish()
     noexcept
       {
-        char32_t r = this->do_finish();
-        this->do_init();
-        return r;
+        char32_t reg = this->m_reg;
+        this->m_reg = xoffset;
+        return reg;
       }
   };
 
