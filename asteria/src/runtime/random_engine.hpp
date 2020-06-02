@@ -10,7 +10,7 @@ namespace asteria {
 
 class Random_Engine
 final
-  :public Rcfwd<Random_Engine>
+  : public Rcfwd<Random_Engine>
   {
   public:
     using result_type  = uint32_t;
