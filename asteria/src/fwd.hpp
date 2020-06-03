@@ -225,7 +225,28 @@ struct Rcbase : ::rocket::refcnt_base<Rcbase>
 
 template<typename RealT>
 struct Rcfwd : virtual Rcbase
-  { };
+  {
+    Rcfwd()
+    noexcept
+      = default;
+
+    Rcfwd(const Rcfwd&)
+    noexcept
+      = default;
+
+    Rcfwd&
+    operator=(const Rcfwd&)
+    noexcept
+      = default;
+
+    virtual
+    ~Rcfwd();
+  };
+
+template<typename RealT>
+Rcfwd<RealT>::
+~Rcfwd()
+  = default;
 
 template<typename RealT>
 using rcfwdp = rcptr<Rcfwd<RealT>>;
