@@ -257,7 +257,7 @@ struct StdIO_Sentry
   };
 
 // Opaque (user-defined) type support
-struct Abstract_Opaque : virtual Rcbase
+struct Abstract_Opaque : Rcfwd<Abstract_Opaque>
   {
     Abstract_Opaque()
     noexcept
@@ -297,7 +297,7 @@ tinyfmt&
 operator<<(tinyfmt& fmt, const Abstract_Opaque& opaq)
   { return opaq.describe(fmt);  }
 
-struct Abstract_Function : virtual Rcbase
+struct Abstract_Function : Rcfwd<Abstract_Function>
   {
     Abstract_Function()
     noexcept
