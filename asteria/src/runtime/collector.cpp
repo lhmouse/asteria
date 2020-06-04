@@ -159,7 +159,7 @@ collect_single_opt()
             // N.B. If this variable is encountered later from `m_tracked`, the gcref counter
             // will be overwritten with 1.
             child->reset_gcref(0);
-            // Decend into grandchildren.
+            // Descend into grandchildren.
             return true;
           });
         return false;
