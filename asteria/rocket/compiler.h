@@ -25,6 +25,7 @@
         && defined(ROCKET_SECTION)  \
         && defined(ROCKET_NOINLINE)  \
         && defined(ROCKET_PURE_FUNCTION)  \
+        && defined(ROCKET_CONST_FUNCTION)  \
         && defined(ROCKET_ARTIFICIAL_FUNCTION)  \
         && defined(ROCKET_CONSTANT_P)  \
         && defined(ROCKET_FLATTEN_FUNCTION)  \
