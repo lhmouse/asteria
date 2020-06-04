@@ -615,7 +615,7 @@ enum Vtype : uint8_t
     vtype_object    = 8,
   };
 
-ROCKET_PURE_FUNCTION
+ROCKET_CONST_FUNCTION
 const char*
 describe_vtype(Vtype vtype)
 noexcept;
@@ -642,7 +642,7 @@ enum Frame_Type : uint8_t
     frame_type_try     = 7,  // An exception propagated across a try block.
   };
 
-ROCKET_PURE_FUNCTION
+ROCKET_CONST_FUNCTION
 const char*
 describe_frame_type(Frame_Type type)
 noexcept;
@@ -709,7 +709,7 @@ enum Parser_Status : uint32_t
     parser_status_closed_parenthesis_or_argument_expected    = 3030,
   };
 
-ROCKET_PURE_FUNCTION
+ROCKET_CONST_FUNCTION
 const char*
 describe_parser_status(Parser_Status status)
 noexcept;

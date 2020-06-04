@@ -1504,7 +1504,6 @@ enum Vmask : uint32_t
     vmask_object      = 1 << vtype_object,
   };
 
-ROCKET_PURE_FUNCTION
 inline
 uint32_t do_vmask_of(const Value& val)
 noexcept
@@ -1512,7 +1511,7 @@ noexcept
     return UINT32_C(1) << val.vtype();
   }
 
-ROCKET_PURE_FUNCTION
+ROCKET_CONST_FUNCTION
 int64_t
 do_check_neg(int64_t rhs)
   {
@@ -1522,7 +1521,7 @@ do_check_neg(int64_t rhs)
     return -rhs;
   }
 
-ROCKET_PURE_FUNCTION
+ROCKET_CONST_FUNCTION
 int64_t
 do_check_add(int64_t lhs, int64_t rhs)
   {
@@ -1532,7 +1531,7 @@ do_check_add(int64_t lhs, int64_t rhs)
     return lhs + rhs;
   }
 
-ROCKET_PURE_FUNCTION
+ROCKET_CONST_FUNCTION
 int64_t
 do_check_sub(int64_t lhs, int64_t rhs)
   {
@@ -1542,7 +1541,7 @@ do_check_sub(int64_t lhs, int64_t rhs)
     return lhs - rhs;
   }
 
-ROCKET_PURE_FUNCTION
+ROCKET_CONST_FUNCTION
 int64_t
 do_check_mul(int64_t lhs, int64_t rhs)
   {
@@ -1568,7 +1567,7 @@ do_check_mul(int64_t lhs, int64_t rhs)
     return alhs * srhs;
   }
 
-ROCKET_PURE_FUNCTION
+ROCKET_CONST_FUNCTION
 int64_t
 do_check_div(int64_t lhs, int64_t rhs)
   {
@@ -1581,7 +1580,7 @@ do_check_div(int64_t lhs, int64_t rhs)
     return lhs / rhs;
   }
 
-ROCKET_PURE_FUNCTION
+ROCKET_CONST_FUNCTION
 int64_t
 do_check_mod(int64_t lhs, int64_t rhs)
   {
@@ -1594,7 +1593,7 @@ do_check_mod(int64_t lhs, int64_t rhs)
     return lhs % rhs;
   }
 
-ROCKET_PURE_FUNCTION
+ROCKET_CONST_FUNCTION
 int64_t
 do_check_sll(int64_t lhs, int64_t rhs)
   {
@@ -1607,7 +1606,7 @@ do_check_sll(int64_t lhs, int64_t rhs)
     return int64_t(uint64_t(lhs) << rhs);
   }
 
-ROCKET_PURE_FUNCTION
+ROCKET_CONST_FUNCTION
 int64_t
 do_check_srl(int64_t lhs, int64_t rhs)
   {
@@ -1620,7 +1619,7 @@ do_check_srl(int64_t lhs, int64_t rhs)
     return int64_t(uint64_t(lhs) >> rhs);
   }
 
-ROCKET_PURE_FUNCTION
+ROCKET_CONST_FUNCTION
 int64_t
 do_check_sla(int64_t lhs, int64_t rhs)
   {
@@ -1643,7 +1642,7 @@ do_check_sla(int64_t lhs, int64_t rhs)
     return int64_t(uint64_t(lhs) << rhs);
   }
 
-ROCKET_PURE_FUNCTION
+ROCKET_CONST_FUNCTION
 int64_t
 do_check_sra(int64_t lhs, int64_t rhs)
   {
@@ -1656,7 +1655,7 @@ do_check_sra(int64_t lhs, int64_t rhs)
     return lhs >> rhs;
   }
 
-ROCKET_PURE_FUNCTION
+ROCKET_CONST_FUNCTION
 int64_t
 do_check_trunci(double value)
   {
@@ -1666,7 +1665,6 @@ do_check_trunci(double value)
     return int64_t(value);
   }
 
-ROCKET_PURE_FUNCTION
 cow_string
 do_string_dup(const cow_string& src, int64_t count)
   {
@@ -1706,7 +1704,6 @@ do_string_dup(const cow_string& src, int64_t count)
     return res;
   }
 
-ROCKET_PURE_FUNCTION
 cow_string
 do_string_sll(const cow_string& lhs, int64_t rhs)
   {
@@ -1724,7 +1721,6 @@ do_string_sll(const cow_string& lhs, int64_t rhs)
     return res;
   }
 
-ROCKET_PURE_FUNCTION
 cow_string
 do_string_srl(const cow_string& lhs, int64_t rhs)
   {
@@ -1742,7 +1738,6 @@ do_string_srl(const cow_string& lhs, int64_t rhs)
     return res;
   }
 
-ROCKET_PURE_FUNCTION
 cow_string
 do_string_sla(const cow_string& lhs, int64_t rhs)
   {
@@ -1759,7 +1754,6 @@ do_string_sla(const cow_string& lhs, int64_t rhs)
     return res;
   }
 
-ROCKET_PURE_FUNCTION
 cow_string
 do_string_sra(const cow_string& lhs, int64_t rhs)
   {
@@ -1776,7 +1770,6 @@ do_string_sra(const cow_string& lhs, int64_t rhs)
     return res;
   }
 
-ROCKET_PURE_FUNCTION
 cow_string
 do_string_notb(cow_string&& rhs)
   {
@@ -1789,7 +1782,6 @@ do_string_notb(cow_string&& rhs)
     return ::std::move(rhs);
   }
 
-ROCKET_PURE_FUNCTION
 cow_string
 do_string_andb(const cow_string& lhs, cow_string&& rhs)
   {
@@ -1805,7 +1797,6 @@ do_string_andb(const cow_string& lhs, cow_string&& rhs)
     return ::std::move(rhs);
   }
 
-ROCKET_PURE_FUNCTION
 cow_string
 do_string_orb(const cow_string& lhs, cow_string&& rhs)
   {
@@ -1821,7 +1812,6 @@ do_string_orb(const cow_string& lhs, cow_string&& rhs)
     return ::std::move(rhs);
   }
 
-ROCKET_PURE_FUNCTION
 cow_string
 do_string_xorb(const cow_string& lhs, cow_string&& rhs)
   {

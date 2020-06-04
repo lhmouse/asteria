@@ -16,6 +16,7 @@ do_verify_bounds(int64_t lower, int64_t upper)
   {
     if(!(lower <= upper))
       ASTERIA_THROW("bounds not valid (`$1` is not less than or equal to `$2`)", lower, upper);
+
     return upper;
   }
 
@@ -24,6 +25,7 @@ do_verify_bounds(double lower, double upper)
   {
     if(!::std::islessequal(lower, upper))
       ASTERIA_THROW("bounds not valid (`$1` is not less than or equal to `$2`)", lower, upper);
+
     return upper;
   }
 
@@ -32,28 +34,31 @@ do_cast_to_integer(double value)
   {
     if(!::std::islessequal(-0x1p63, value) || !::std::islessequal(value, 0x1p63 - 0x1p10))
       ASTERIA_THROW("`real` value not representable as an `integer` (value `$1`)", value);
+
     return V_integer(value);
   }
 
-ROCKET_PURE_FUNCTION
+ROCKET_CONST_FUNCTION
 V_integer
 do_saturating_add(int64_t lhs, int64_t rhs)
   {
     if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs))
       return (rhs >> 63) ^ INT64_MAX;
+
     return lhs + rhs;
   }
 
-ROCKET_PURE_FUNCTION
+ROCKET_CONST_FUNCTION
 V_integer
 do_saturating_sub(int64_t lhs, int64_t rhs)
   {
     if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs))
       return (rhs >> 63) ^ INT64_MIN;
+
     return lhs - rhs;
   }
 
-ROCKET_PURE_FUNCTION
+ROCKET_CONST_FUNCTION
 V_integer
 do_saturating_mul(int64_t lhs, int64_t rhs)
   {
@@ -76,24 +81,25 @@ do_saturating_mul(int64_t lhs, int64_t rhs)
     // `alhs` may only be positive here.
     if((srhs >= 0) ? (alhs > INT64_MAX / srhs) : (alhs > INT64_MIN / srhs))
       return (srhs >> 63) ^ INT64_MAX;
+
     return alhs * srhs;
   }
 
-ROCKET_PURE_FUNCTION
+ROCKET_CONST_FUNCTION
 V_real
 do_saturating_add(double lhs, double rhs)
   {
     return lhs + rhs;
   }
 
-ROCKET_PURE_FUNCTION
+ROCKET_CONST_FUNCTION
 V_real
 do_saturating_sub(double lhs, double rhs)
   {
     return lhs - rhs;
   }
 
-ROCKET_PURE_FUNCTION
+ROCKET_CONST_FUNCTION
 V_real
 do_saturating_mul(double lhs, double rhs)
   {
@@ -141,6 +147,7 @@ std_numeric_abs(V_integer value)
   {
     if(value == INT64_MIN)
       ASTERIA_THROW("integer absolute value overflow (value `$1`)", value);
+
     return ::std::abs(value);
   }
 

@@ -70,7 +70,7 @@ enum Punctuator : uint8_t
     punctuator_tail        = 56,  // [$]
   };
 
-ROCKET_PURE_FUNCTION
+ROCKET_CONST_FUNCTION
 const char*
 stringify_punctuator(Punctuator punct)
 noexcept;
@@ -129,7 +129,7 @@ enum Keyword : uint8_t
     keyword_import    = 48,  // import
   };
 
-ROCKET_PURE_FUNCTION
+ROCKET_CONST_FUNCTION
 const char*
 stringify_keyword(Keyword kwrd)
 noexcept;

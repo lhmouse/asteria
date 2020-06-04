@@ -61,7 +61,7 @@ enum Xop : uint8_t
     xop_tail      = 47,  // [$]
   };
 
-ROCKET_PURE_FUNCTION
+ROCKET_CONST_FUNCTION
 const char*
 describe_xop(Xop xop)
 noexcept;
