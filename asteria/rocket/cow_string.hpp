@@ -736,13 +736,10 @@ class basic_cow_string
         auto srpos = static_cast<uintptr_t>(s - this->data());
         this->do_reserve_more(n);
         auto ptr = this->m_sth.mut_data_unchecked();
-        if(srpos < len_old) {
+        if(srpos < len_old)
           traits_type::move(ptr + len_old, ptr + srpos, n);
-          this->do_set_length(len_old + n);
-          return *this;
-        }
-
-        traits_type::copy(ptr + len_old, s, n);
+        else
+          traits_type::copy(ptr + len_old, s, n);
         this->do_set_length(len_old + n);
         return *this;
       }
@@ -1233,9 +1230,11 @@ class basic_cow_string
         // This can be optimized.
         if(from >= this->size())
           return npos;
+
         auto ptr = traits_type::find(this->data() + from, this->size() - from, ch);
         if(!ptr)
           return npos;
+
         auto tpos = static_cast<size_type>(ptr - this->data());
         ROCKET_ASSERT(tpos < npos);
         return tpos;
