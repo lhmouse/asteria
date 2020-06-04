@@ -328,7 +328,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
             indent.increment_level();
             indent.break_line(fmt);
 
-            // Decend into the array.
+            // Descend into the array.
             qvalue = ::rocket::ref(ctxa.curp[0]);
             stack.emplace_back(::std::move(ctxa));
             continue;
@@ -352,7 +352,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
             // Write the key followed by a colon.
             do_format_object_key(fmt, json5, indent, ctxo.curp->first);
 
-            // Decend into the object.
+            // Descend into the object.
             qvalue = ::rocket::ref(ctxo.curp->second);
             stack.emplace_back(::std::move(ctxo));
             continue;
