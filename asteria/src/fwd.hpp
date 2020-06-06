@@ -241,6 +241,29 @@ struct Rcfwd : virtual Rcbase
 
     virtual
     ~Rcfwd();
+
+    template<typename XRealT = RealT>
+    rcptr<const XRealT>
+    share_this()
+    const
+      {
+        rcptr<const XRealT> dptr(::rocket::static_or_dynamic_cast<const XRealT*>(this));
+        if(!dptr)
+          this->do_throw_bad_cast(typeid(XRealT), typeid(*this));
+        dptr->Rcbase::add_reference();
+        return dptr;
+      }
+
+    template<typename XRealT = RealT>
+    rcptr<XRealT>
+    share_this()
+      {
+        rcptr<XRealT> dptr(::rocket::static_or_dynamic_cast<XRealT*>(this));
+        if(!dptr)
+          this->do_throw_bad_cast(typeid(XRealT), typeid(*this));
+        dptr->Rcbase::add_reference();
+        return dptr;
+      }
   };
 
 template<typename RealT>
