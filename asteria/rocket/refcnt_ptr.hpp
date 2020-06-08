@@ -78,27 +78,29 @@ class refcnt_base
     const noexcept
       { return this->details_refcnt_ptr::reference_counter_base::drop_reference();  }
 
-    template<typename yelementT = elementT>
+    template<typename yelementT = elementT, typename selfT = refcnt_base>
     refcnt_ptr<const yelementT>
     share_this()
     const
       {
-        refcnt_ptr<const yelementT> dptr(noadl::static_or_dynamic_cast<const yelementT*>(this));
-        if(!dptr)
+        auto yptr = noadl::static_or_dynamic_cast<const yelementT*, const selfT*>(this);
+        if(!yptr)
           this->do_throw_bad_cast(typeid(yelementT), typeid(*this));
-        dptr->details_refcnt_ptr::reference_counter_base::add_reference();
-        return dptr;
+
+        yptr->reference_counter_base::add_reference();
+        return refcnt_ptr<const yelementT>(yptr);
       }
 
-    template<typename yelementT = elementT>
+    template<typename yelementT = elementT, typename selfT = refcnt_base>
     refcnt_ptr<yelementT>
     share_this()
       {
-        refcnt_ptr<yelementT> dptr(noadl::static_or_dynamic_cast<yelementT*>(this));
-        if(!dptr)
+        auto yptr = noadl::static_or_dynamic_cast<yelementT*, selfT*>(this);
+        if(!yptr)
           this->do_throw_bad_cast(typeid(yelementT), typeid(*this));
-        dptr->details_refcnt_ptr::reference_counter_base::add_reference();
-        return dptr;
+
+        yptr->reference_counter_base::add_reference();
+        return refcnt_ptr<yelementT>(yptr);
       }
   };
 
