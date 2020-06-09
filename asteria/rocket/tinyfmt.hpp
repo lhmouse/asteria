@@ -173,7 +173,7 @@ template<typename charT, typename traitsT, typename valueT,
 ROCKET_ENABLE_IF(!is_same<charT, typename remove_cv<valueT>::type>::value)>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT* value)
-  { return fmt << ascii_numput(static_cast<const void*>(value));  }
+  { return fmt << ascii_numput(reinterpret_cast<const void*>(value));  }
 
 // rvalue inserter
 template<typename charT, typename traitsT, typename xvalueT>
