@@ -11,9 +11,6 @@ namespace rocket {
 
 class once_flag;
 
-template<typename funcT, typename... paramsT>
-void call_once(once_flag& flag, funcT&& func, paramsT&&... params);
-
 #include "details/once_flag.ipp"
 
 class once_flag
@@ -35,40 +32,33 @@ class once_flag
       = delete;
 
   public:
-    details_once_flag::guard*
-    get_guard()
-    noexcept
+    template<typename funcT, typename... paramsT>
+    void
+    call(funcT&& func, paramsT&&... params)
       {
-        return this->m_guard;
+        // Load the first byte with acquire semantics.
+        // The value is 0 prior to any initialization and 1 afterwards.
+        const volatile uint8_t* bytes = this->m_guard->bytes;
+        if(ROCKET_EXPECT(__atomic_load_n(bytes, __ATOMIC_ACQUIRE)))
+          return;
+
+        // Try acquiring the guard.
+        // If 0 is returned, another thread will have finished initialization.
+        int status = details_once_flag::__cxa_guard_acquire(this->m_guard);
+        if(ROCKET_EXPECT(status == 0))
+          return;
+
+        // Perform initialization the now.
+        try {
+          ::std::forward<funcT>(func)(::std::forward<paramsT>(params)...);
+        }
+        catch(...) {
+          details_once_flag::__cxa_guard_abort(this->m_guard);
+          throw;
+        }
+        details_once_flag::__cxa_guard_release(this->m_guard);
       }
   };
-
-template<typename funcT, typename... paramsT>
-void call_once(once_flag& flag, funcT&& func, paramsT&&... params)
-  {
-    details_once_flag::guard* const g = flag.get_guard();
-
-    // Load the first byte with acquire semantics.
-    // The value is 0 prior to any initialization and 1 afterwards.
-    if(ROCKET_EXPECT(__atomic_load_n(g->bytes, __ATOMIC_ACQUIRE)))
-      return;
-
-    // Try acquiring the guard.
-    // If 0 is returned, another thread will have finished initialization.
-    int status = details_once_flag::__cxa_guard_acquire(g);
-    if(ROCKET_EXPECT(status == 0))
-      return;
-
-    // Perform initialization now.
-    try {
-      ::std::forward<funcT>(func)(::std::forward<paramsT>(params)...);
-    }
-    catch(...) {
-      details_once_flag::__cxa_guard_abort(g);
-      throw;
-    }
-    details_once_flag::__cxa_guard_release(g);
-  }
 
 }  // namespace rocket
 
