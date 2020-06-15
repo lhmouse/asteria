@@ -22,7 +22,7 @@ const
           return nullptr;
 
         if(!parent.is_array())
-          ASTERIA_THROW("integer subscript applied to non-array (parent `$1`, index `$2`)", parent, altr.index);
+          ASTERIA_THROW("Integer subscript applied to non-array (parent `$1`, index `$2`)", parent, altr.index);
         const auto& arr = parent.as_array();
 
         // Return a pointer to the element at the given index.
@@ -42,7 +42,7 @@ const
           return nullptr;
 
         if(!parent.is_object())
-          ASTERIA_THROW("string subscript applied to non-object (parent `$1`, key `$2`)", parent, altr.key);
+          ASTERIA_THROW("String subscript applied to non-object (parent `$1`, key `$2`)", parent, altr.key);
         const auto& obj = parent.as_object();
 
         // Return a pointer to the value with the given key.
@@ -59,7 +59,7 @@ const
           return nullptr;
 
         if(!parent.is_array())
-          ASTERIA_THROW("head subscript applied to non-array (parent `$1`)", parent);
+          ASTERIA_THROW("Head subscript applied to non-array (parent `$1`)", parent);
         const auto& arr = parent.as_array();
 
         // Returns the first element.
@@ -75,7 +75,7 @@ const
           return nullptr;
 
         if(!parent.is_array())
-          ASTERIA_THROW("tail subscript applied to non-array (parent `$1`)", parent);
+          ASTERIA_THROW("Tail subscript applied to non-array (parent `$1`)", parent);
         const auto& arr = parent.as_array();
 
         // Returns the last element.
@@ -104,7 +104,7 @@ const
           return nullptr;
 
         if(!parent.is_array())
-          ASTERIA_THROW("integer subscript applied to non-array (parent `$1`, index `$2`)", parent, altr.index);
+          ASTERIA_THROW("Integer subscript applied to non-array (parent `$1`, index `$2`)", parent, altr.index);
         auto& arr = parent.open_array();
 
         // Return a pointer to the element at the given index.
@@ -124,7 +124,7 @@ const
           return nullptr;
 
         if(!parent.is_object())
-          ASTERIA_THROW("string subscript applied to non-object (parent `$1`, key `$2`)", parent, altr.key);
+          ASTERIA_THROW("String subscript applied to non-object (parent `$1`, key `$2`)", parent, altr.key);
         auto& obj = parent.open_object();
 
         // Return a pointer to the value with the given key.
@@ -141,7 +141,7 @@ const
           return nullptr;
 
         if(!parent.is_array())
-          ASTERIA_THROW("head subscript applied to non-array (parent `$1`)", parent);
+          ASTERIA_THROW("Head subscript applied to non-array (parent `$1`)", parent);
         auto& arr = parent.open_array();
 
         // Returns the first element.
@@ -157,7 +157,7 @@ const
           return nullptr;
 
         if(!parent.is_array())
-          ASTERIA_THROW("tail subscript applied to non-array (parent `$1`)", parent);
+          ASTERIA_THROW("Tail subscript applied to non-array (parent `$1`)", parent);
         auto& arr = parent.open_array();
 
         // Returns the last element.
@@ -186,7 +186,7 @@ const
           parent = V_array();
 
         if(!parent.is_array())
-          ASTERIA_THROW("integer subscript applied to non-array (parent `$1`, index `$2`)", parent, altr.index);
+          ASTERIA_THROW("Integer subscript applied to non-array (parent `$1`, index `$2`)", parent, altr.index);
         auto& arr = parent.open_array();
 
         // Return a pointer to the element at the given index if the index is valid.
@@ -195,7 +195,7 @@ const
         if(nadd != 0) {
           // Create elements as needed.
           if(nadd > arr.max_size() - arr.size())
-            ASTERIA_THROW("array length overflow (`$1` + `$2` > `$3`)", arr.size(), nadd, arr.max_size());
+            ASTERIA_THROW("Array length overflow (`$1` + `$2` > `$3`)", arr.size(), nadd, arr.max_size());
 
           arr.insert(arr.begin(), static_cast<size_t>(w.nprepend));
           arr.insert(arr.end(), static_cast<size_t>(w.nappend));
@@ -212,7 +212,7 @@ const
           parent = V_object();
 
         if(!parent.is_object())
-          ASTERIA_THROW("string subscript applied to non-object (parent `$1`, key `$2`)", parent, altr.key);
+          ASTERIA_THROW("String subscript applied to non-object (parent `$1`, key `$2`)", parent, altr.key);
         auto& obj = parent.open_object();
 
         // Create a value as needed.
@@ -227,7 +227,7 @@ const
           parent = V_array();
 
         if(!parent.is_array())
-          ASTERIA_THROW("head subscript applied to non-array (parent `$1`)", parent);
+          ASTERIA_THROW("Head subscript applied to non-array (parent `$1`)", parent);
         auto& arr = parent.open_array();
 
         return *(arr.insert(arr.begin(), V_null()));
@@ -239,7 +239,7 @@ const
           parent = V_array();
 
         if(!parent.is_array())
-          ASTERIA_THROW("tail subscript applied to non-array (parent `$1`)", parent);
+          ASTERIA_THROW("Tail subscript applied to non-array (parent `$1`)", parent);
         auto& arr = parent.open_array();
 
         return arr.emplace_back(V_null());
@@ -264,7 +264,7 @@ const
           return V_null();
 
         if(!parent.is_array())
-          ASTERIA_THROW("integer subscript applied to non-array (parent `$1`, index `$2`)", parent, altr.index);
+          ASTERIA_THROW("Integer subscript applied to non-array (parent `$1`, index `$2`)", parent, altr.index);
         auto& arr = parent.open_array();
 
         // Erase the element at the given index and return it.
@@ -286,7 +286,7 @@ const
           return V_null();
 
         if(!parent.is_object())
-          ASTERIA_THROW("string subscript applied to non-object (parent `$1`, key `$2`)", parent, altr.key);
+          ASTERIA_THROW("String subscript applied to non-object (parent `$1`, key `$2`)", parent, altr.key);
         auto& obj = parent.open_object();
 
         // Erase the value with the given key and return it.
@@ -305,7 +305,7 @@ const
           return V_null();
 
         if(!parent.is_array())
-          ASTERIA_THROW("head subscript applied to non-array (parent `$1`)", parent);
+          ASTERIA_THROW("Head subscript applied to non-array (parent `$1`)", parent);
         auto& arr = parent.open_array();
 
         // Erase the first element and return it.
@@ -323,7 +323,7 @@ const
           return V_null();
 
         if(!parent.is_array())
-          ASTERIA_THROW("tail subscript applied to non-array (parent `$1`)", parent);
+          ASTERIA_THROW("Tail subscript applied to non-array (parent `$1`)", parent);
         auto& arr = parent.open_array();
 
         // Erase the last element and return it.

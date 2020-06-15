@@ -50,7 +50,7 @@ reload_file(const char* path)
     // Resolve the path to an absolute one.
     uptr<char, void (&)(void*)> abspath(::realpath(path, nullptr), ::free);
     if(!abspath)
-      ASTERIA_THROW("could not open script file '$2'\n"
+      ASTERIA_THROW("Could not open script file '$2'\n"
                     "[`realpath()` failed: $1]",
                     noadl::format_errno(errno), path);
 
@@ -76,7 +76,7 @@ execute(Global_Context& global, cow_vector<Reference>&& args)
 const
   {
     if(!this->m_func)
-      ASTERIA_THROW("no script loaded");
+      ASTERIA_THROW("No script loaded");
 
     // Execute the script as a plain function.
     const StdIO_Sentry sentry;

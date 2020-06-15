@@ -158,7 +158,7 @@ do_reserve_one(Uparam uparam, const opt<Symbols>& syms_opt, size_t nbytes)
   {
     constexpr size_t nbytes_max = UINT8_MAX * sizeof(Header) - 1;
     if(nbytes > nbytes_max)
-      ASTERIA_THROW("invalid AVMC node size (`$1` > `$2`)", nbytes, nbytes_max);
+      ASTERIA_THROW("Invalid AVMC node size (`$1` > `$2`)", nbytes, nbytes_max);
 
     // Create a dummy header for calculation.
     Header temph;

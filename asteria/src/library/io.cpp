@@ -56,11 +56,11 @@ do_write_utf8_common(const IOF_Sentry& fp, const cow_string& text)
       // Decode a code point from `text`.
       char32_t cp;
       if(!noadl::utf8_decode(cp, text, off))
-        ASTERIA_THROW("invalid UTF-8 string (text `$1`, byte offset `$2`)", text, off);
+        ASTERIA_THROW("Invalid UTF-8 string (text `$1`, byte offset `$2`)", text, off);
 
       // Insert it into the output stream.
       if(::fputwc_unlocked(static_cast<wchar_t>(cp), fp) == WEOF)
-        ASTERIA_THROW("error writing standard output\n"
+        ASTERIA_THROW("Error writing standard output\n"
                       "[`fputwc_unlocked()` failed: $1]",
                       noadl::format_errno(errno));
 
@@ -80,10 +80,10 @@ std_io_getc()
 
     // Check stream status.
     if(::ferror_unlocked(fp))
-      ASTERIA_THROW("standard input failure (error bit set)");
+      ASTERIA_THROW("Standard input failure (error bit set)");
 
     if(::fwide(fp, +1) < 0)
-      ASTERIA_THROW("invalid text read from binary-oriented input");
+      ASTERIA_THROW("Invalid text read from binary-oriented input");
 
     // Read a UTF code point.
     wint_t wch = ::fgetwc_unlocked(fp);
@@ -92,7 +92,7 @@ std_io_getc()
       // Return `null` on EOF.
       int err = do_recover(fp);
       if(err != 0)
-        ASTERIA_THROW("error reading standard input\n"
+        ASTERIA_THROW("Error reading standard input\n"
                       "[`fgetwc_unlocked()` failed: $1]",
                       noadl::format_errno(err));
 
@@ -111,10 +111,10 @@ std_io_getln()
 
     // Check stream status.
     if(::ferror_unlocked(fp))
-      ASTERIA_THROW("standard input failure (error bit set)");
+      ASTERIA_THROW("Standard input failure (error bit set)");
 
     if(::fwide(fp, +1) < 0)
-      ASTERIA_THROW("invalid text read from binary-oriented input");
+      ASTERIA_THROW("Invalid text read from binary-oriented input");
 
     // Read a UTF-8 string.
     cow_string u8str;
@@ -129,7 +129,7 @@ std_io_getln()
         // Return `null` on EOF.
         int err = do_recover(fp);
         if(err != 0)
-          ASTERIA_THROW("error reading standard input\n"
+          ASTERIA_THROW("Error reading standard input\n"
                         "[`fgetwc_unlocked()` failed: $1]",
                         noadl::format_errno(err));
 
@@ -142,7 +142,7 @@ std_io_getln()
       // Append the non-LF character to the result string.
       char32_t cp = static_cast<uint32_t>(wch);
       if(!noadl::utf8_encode(u8str, cp))
-        ASTERIA_THROW("invalid UTF code point from standard input (value `$1`)", wch);
+        ASTERIA_THROW("Invalid UTF code point from standard input (value `$1`)", wch);
     }
     // Return the UTF-8 string.
     return u8str;
@@ -156,26 +156,26 @@ std_io_putc(V_integer value)
 
     // Check stream status.
     if(::ferror_unlocked(fp))
-      ASTERIA_THROW("standard output failure (error bit set)");
+      ASTERIA_THROW("Standard output failure (error bit set)");
 
     if(::fwide(fp, +1) < 0)
-      ASTERIA_THROW("invalid text write to binary-oriented output");
+      ASTERIA_THROW("Invalid text write to binary-oriented output");
 
     // Validate the code point.
     char32_t cp = static_cast<uint32_t>(value);
     if(cp != value)
-      ASTERIA_THROW("invalid UTF code point (value `$1`)", value);
+      ASTERIA_THROW("Invalid UTF code point (value `$1`)", value);
 
     // Check whether it is valid by try encoding it.
     // The result is discarded.
     char16_t sbuf[2];
     char16_t* sp = sbuf;
     if(!noadl::utf16_encode(sp, cp))
-      ASTERIA_THROW("invalid UTF code point (value `$1`)", value);
+      ASTERIA_THROW("Invalid UTF code point (value `$1`)", value);
 
     // Write a UTF code point.
     if(::fputwc_unlocked(static_cast<wchar_t>(cp), fp) == WEOF)
-      ASTERIA_THROW("error writing standard output\n"
+      ASTERIA_THROW("Error writing standard output\n"
                     "[`fputwc_unlocked()` failed: $1]",
                     noadl::format_errno(errno));
 
@@ -192,10 +192,10 @@ std_io_putc(V_string value)
 
     // Check stream status.
     if(::ferror_unlocked(fp))
-      ASTERIA_THROW("standard output failure (error bit set)");
+      ASTERIA_THROW("Standard output failure (error bit set)");
 
     if(::fwide(fp, +1) < 0)
-      ASTERIA_THROW("invalid text write to binary-oriented output");
+      ASTERIA_THROW("Invalid text write to binary-oriented output");
 
     // Write only the string.
     size_t ncps = do_write_utf8_common(fp, value);
@@ -212,17 +212,17 @@ std_io_putln(V_string value)
 
     // Check stream status.
     if(::ferror_unlocked(fp))
-      ASTERIA_THROW("standard output failure (error bit set)");
+      ASTERIA_THROW("Standard output failure (error bit set)");
 
     if(::fwide(fp, +1) < 0)
-      ASTERIA_THROW("invalid text write to binary-oriented output");
+      ASTERIA_THROW("Invalid text write to binary-oriented output");
 
     // Write the string itself.
     size_t ncps = do_write_utf8_common(fp, value);
 
     // Append a line feed and flush.
     if(::fputwc_unlocked(L'\n', fp) == WEOF)
-      ASTERIA_THROW("error writing standard output\n"
+      ASTERIA_THROW("Error writing standard output\n"
                     "[`fputwc_unlocked()` failed: $1]",
                     noadl::format_errno(errno));
 
@@ -239,10 +239,10 @@ std_io_putf(V_string templ, cow_vector<Value> values)
 
     // Check stream status.
     if(::ferror_unlocked(fp))
-      ASTERIA_THROW("standard output failure (error bit set)");
+      ASTERIA_THROW("Standard output failure (error bit set)");
 
     if(::fwide(fp, +1) < 0)
-      ASTERIA_THROW("invalid text write to binary-oriented output");
+      ASTERIA_THROW("Invalid text write to binary-oriented output");
 
     // Prepare inserters.
     cow_vector<::rocket::formatter> insts;
@@ -275,10 +275,10 @@ std_io_read(optV_integer limit)
 
     // Check stream status.
     if(::ferror_unlocked(fp))
-      ASTERIA_THROW("standard input failure (error bit set)");
+      ASTERIA_THROW("Standard input failure (error bit set)");
 
     if(::fwide(fp, -1) > 0)
-      ASTERIA_THROW("invalid binary read from text-oriented input");
+      ASTERIA_THROW("Invalid binary read from text-oriented input");
 
     // Read some bytes from the stream.
     cow_string data(rlimit, '\0');
@@ -288,7 +288,7 @@ std_io_read(optV_integer limit)
       // Return `null` on EOF.
       int err = do_recover(fp);
       if(err != 0)
-        ASTERIA_THROW("error reading standard input\n"
+        ASTERIA_THROW("Error reading standard input\n"
                       "[`fread_unlocked()` failed: $1]",
                       noadl::format_errno(err));
 
@@ -307,10 +307,10 @@ std_io_write(V_string data)
 
     // Check stream status.
     if(::ferror_unlocked(fp))
-      ASTERIA_THROW("standard output failure (error bit set)");
+      ASTERIA_THROW("Standard output failure (error bit set)");
 
     if(::fwide(fp, -1) > 0)
-      ASTERIA_THROW("invalid binary write to text-oriented output");
+      ASTERIA_THROW("Invalid binary write to text-oriented output");
 
     // Don't pass zero to `fwrite()`
     if(data.empty())
@@ -322,7 +322,7 @@ std_io_write(V_string data)
       // Throw an exception on error.
       int err = do_recover(fp);
       if(err != 0)
-        ASTERIA_THROW("error writing standard output\n"
+        ASTERIA_THROW("Error writing standard output\n"
                       "[`fwrite_unlocked()` failed: $1]",
                       noadl::format_errno(errno));
     }
@@ -336,7 +336,7 @@ std_io_flush()
   {
     // Flush standard output only.
     if(::fflush(stdout) == EOF)
-      ASTERIA_THROW("error flushing standard output\n"
+      ASTERIA_THROW("Error flushing standard output\n"
                     "[`fflush()` failed: $1]",
                     noadl::format_errno(errno));
   }

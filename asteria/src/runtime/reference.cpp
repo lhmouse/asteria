@@ -124,7 +124,7 @@ Reference::
 do_throw_unset_no_modifier()
 const
   {
-    ASTERIA_THROW("non-members can't be unset");
+    ASTERIA_THROW("Non-members can't be unset");
   }
 
 const Value&

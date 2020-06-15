@@ -18,7 +18,7 @@ const
   {
     switch(this->index()) {
       case index_void:
-        ASTERIA_THROW("attempt to take the result of a function call which returned no value");
+        ASTERIA_THROW("Attempt to take the result of a function call which returned no value");
 
       case index_constant:
         return this->m_stor.as<index_constant>().val;
@@ -32,16 +32,16 @@ const
           return null_value;
         }
         if(!var->is_initialized()) {
-          ASTERIA_THROW("attempt to read from an uninitialized variable");
+          ASTERIA_THROW("Attempt to read from an uninitialized variable");
         }
         return var->get_value();
       }
 
       case index_tail_call:
-        ASTERIA_THROW("tail call wrapper not dereferenceable");
+        ASTERIA_THROW("Tail call wrapper not dereferenceable");
 
       case index_jump_src:
-        ASTERIA_THROW("jump marker not dereferenceable");
+        ASTERIA_THROW("Jump marker not dereferenceable");
 
       default:
         ASTERIA_TERMINATE("invalid reference root type enumeration (index `$1`)", this->index());
@@ -55,33 +55,33 @@ const
   {
     switch(this->index()) {
       case index_void:
-        ASTERIA_THROW("attempt to modify the result of a function call which returned no value");
+        ASTERIA_THROW("Attempt to modify the result of a function call which returned no value");
 
       case index_constant:
-        ASTERIA_THROW("attempt to modify a constant `$1`", this->m_stor.as<index_constant>().val);
+        ASTERIA_THROW("Attempt to modify a constant `$1`", this->m_stor.as<index_constant>().val);
 
       case index_temporary:
-        ASTERIA_THROW("attempt to modify a temporary `$1`", this->m_stor.as<index_temporary>().val);
+        ASTERIA_THROW("Attempt to modify a temporary `$1`", this->m_stor.as<index_temporary>().val);
 
       case index_variable: {
         auto var = unerase_cast(this->m_stor.as<index_variable>().var);
         if(!var) {
-          ASTERIA_THROW("attempt to dereference a moved-away reference");
+          ASTERIA_THROW("Attempt to dereference a moved-away reference");
         }
         if(!var->is_initialized()) {
-          ASTERIA_THROW("attempt to modify an uninitialized variable");
+          ASTERIA_THROW("Attempt to modify an uninitialized variable");
         }
         if(var->is_immutable()) {
-          ASTERIA_THROW("attempt to modify an immutable variable `$1`", var->get_value());
+          ASTERIA_THROW("Attempt to modify an immutable variable `$1`", var->get_value());
         }
         return var->open_value();
       }
 
       case index_tail_call:
-        ASTERIA_THROW("tail call wrapper not dereferenceable");
+        ASTERIA_THROW("Tail call wrapper not dereferenceable");
 
       case index_jump_src:
-        ASTERIA_THROW("jump marker not dereferenceable");
+        ASTERIA_THROW("Jump marker not dereferenceable");
 
       default:
         ASTERIA_TERMINATE("invalid reference root type enumeration (index `$1`)", this->index());

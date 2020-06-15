@@ -236,7 +236,7 @@ final
     override
       {
         if(interrupted)
-          ASTERIA_THROW("interrupt received at '$1'", sloc);
+          ASTERIA_THROW("Interrupt received at '$1'", sloc);
       }
   };
 

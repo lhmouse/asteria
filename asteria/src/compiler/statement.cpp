@@ -20,10 +20,10 @@ do_user_declare(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
   {
     // Check for special names.
     if(name.rdstr().empty())
-      ASTERIA_THROW("attempt to declare a nameless $1", desc);
+      ASTERIA_THROW("Attempt to declare a nameless $1", desc);
 
     if(name.rdstr().starts_with("__"))
-      ASTERIA_THROW("reserved name not declarable as $2 (name `$1`)", name);
+      ASTERIA_THROW("Reserved name not declarable as $2 (name `$1`)", name);
 
     // Record this name.
     if(names_opt) {

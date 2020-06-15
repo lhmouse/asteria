@@ -17,7 +17,7 @@ Argument_Reader::
 do_record_parameter_required(Vtype vtype)
   {
     if(this->m_state.finished)
-      ASTERIA_THROW("argument reader finished and disposed");
+      ASTERIA_THROW("Argument reader finished and disposed");
 
     // Record a parameter and increment the number of parameters in total.
     this->m_state.history << ", " << describe_vtype(vtype);
@@ -29,7 +29,7 @@ Argument_Reader::
 do_record_parameter_optional(Vtype vtype)
   {
     if(this->m_state.finished)
-      ASTERIA_THROW("argument reader finished and disposed");
+      ASTERIA_THROW("Argument reader finished and disposed");
 
     // Record a parameter and increment the number of parameters in total.
     this->m_state.history << ", [" << describe_vtype(vtype) << ']';
@@ -41,7 +41,7 @@ Argument_Reader::
 do_record_parameter_generic()
   {
     if(this->m_state.finished)
-      ASTERIA_THROW("argument reader finished and disposed");
+      ASTERIA_THROW("Argument reader finished and disposed");
 
     // Record a parameter and increment the number of parameters in total.
     this->m_state.history << ", <generic>";
@@ -53,7 +53,7 @@ Argument_Reader::
 do_record_parameter_variadic()
   {
     if(this->m_state.finished)
-      ASTERIA_THROW("argument reader finished and disposed");
+      ASTERIA_THROW("Argument reader finished and disposed");
 
     // Terminate the parameter list.
     this->m_state.history << ", ...";
@@ -64,7 +64,7 @@ Argument_Reader::
 do_record_parameter_finish()
   {
     if(this->m_state.finished)
-      ASTERIA_THROW("argument reader finished and disposed");
+      ASTERIA_THROW("Argument reader finished and disposed");
 
     // Terminate this overload.
     this->m_state.history.push_back('\0');
@@ -655,7 +655,7 @@ const
     }
 
     // Throw the exception now.
-    ASTERIA_THROW("no matching function call for `$1($2)`$3", this->m_name, args_str, ovlds_str);
+    ASTERIA_THROW("No matching function call for `$1($2)`$3", this->m_name, args_str, ovlds_str);
   }
 
 }  // namespace asteria

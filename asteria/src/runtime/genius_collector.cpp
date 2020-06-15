@@ -30,7 +30,7 @@ const
         return &Genius_Collector::m_oldest;
 
       default:
-        ASTERIA_THROW("invalid GC generation (gc_gen `$1`)", gc_gen);
+        ASTERIA_THROW("Invalid GC generation (gc_gen `$1`)", gc_gen);
     }
   }
 

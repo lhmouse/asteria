@@ -23,7 +23,7 @@ do_prepare_function(const cow_vector<phsh_string>& params)
         continue;
 
       if(name.rdstr().starts_with("__"))
-        ASTERIA_THROW("reserved name not declarable as parameter (name `", name, "`)");
+        ASTERIA_THROW("Reserved name not declarable as parameter (name `", name, "`)");
 
       if(name == "...") {
         // Nothing is set for the variadic placeholder, but the parameter list terminates here.

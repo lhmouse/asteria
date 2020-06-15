@@ -125,7 +125,7 @@ do_bsearch(Global_Context& global, cow_vector<Reference>& args, IterT begin, Ite
       auto mpos = bpos + dist / 2;
       auto cmp = do_compare(global, args, kcomp, target, *mpos);
       if(cmp == compare_unordered)
-        ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)", target, *mpos);
+        ASTERIA_THROW("Unordered elements (operands were `$1` and `$2`)", target, *mpos);
 
       if(cmp == compare_equal)
         return { ::std::move(mpos), true };
@@ -153,7 +153,7 @@ do_bound(Global_Context& global, cow_vector<Reference>& args, IterT begin, IterT
       auto mpos = bpos + dist / 2;
       auto cmp = do_compare(global, args, kcomp, target, *mpos);
       if(cmp == compare_unordered)
-        ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)", target, *mpos);
+        ASTERIA_THROW("Unordered elements (operands were `$1` and `$2`)", target, *mpos);
 
       if(pred(cmp))
         epos = mpos;
@@ -202,7 +202,7 @@ do_merge_blocks(V_array& output, Global_Context& global, cow_vector<Reference>& 
       for(;;) {
         auto cmp = do_compare(global, args, kcomp, *(bpos[0]), *(bpos[1]));
         if(cmp == compare_unordered)
-          ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)", *(bpos[0]), *(bpos[1]));
+          ASTERIA_THROW("Unordered elements (operands were `$1` and `$2`)", *(bpos[0]), *(bpos[1]));
 
         // For Merge Sort to be stable, the two elements will only be swapped if the first one is greater
         // than the second one.

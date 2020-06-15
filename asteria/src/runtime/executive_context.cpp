@@ -52,7 +52,7 @@ do_bind_parameters(const rcptr<Variadic_Arguer>& zvarg, const cow_vector<phsh_st
         continue;
 
       if(name.rdstr().starts_with("__"))
-        ASTERIA_THROW("reserved name not declarable as parameter (name `$1`)", name);
+        ASTERIA_THROW("Reserved name not declarable as parameter (name `$1`)", name);
 
       if(name == "...") {
         // Nothing is set for the parameter placeholder, but the parameter list terminates here.
@@ -69,7 +69,7 @@ do_bind_parameters(const rcptr<Variadic_Arguer>& zvarg, const cow_vector<phsh_st
 
     // Disallow exceess arguments if the function is not variadic.
     if((elps == SIZE_MAX) && (args.size() > params.size())) {
-      ASTERIA_THROW("too many arguments (`$1` > `$2`)", args.size(), params.size());
+      ASTERIA_THROW("Too many arguments (`$1` > `$2`)", args.size(), params.size());
     }
     args.erase(0, elps);
 

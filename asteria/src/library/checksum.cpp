@@ -1348,7 +1348,7 @@ do_cast_hasher(V_opaque& oh)
   {
     auto qh = oh.open_opt<HasherT>();
     if(!qh)
-      ASTERIA_THROW("invalid dynamic cast to type `$1` from type `$2`",
+      ASTERIA_THROW("Invalid dynamic cast to type `$1` from type `$2`",
                     typeid(HasherT).name(), oh.type().name());
     return qh;
   }
@@ -1368,7 +1368,7 @@ do_hash_file(const V_string& path)
   {
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
     if(!fd)
-      ASTERIA_THROW("could not open file '$2'\n"
+      ASTERIA_THROW("Could not open file '$2'\n"
                     "[`open()` failed: $1]",
                     noadl::format_errno(errno), path);
 
@@ -1380,7 +1380,7 @@ do_hash_file(const V_string& path)
     for(;;) {
       ::ssize_t nread = ::read(fd, pbuf, nbuf);
       if(nread < 0)
-        ASTERIA_THROW("error reading file '$2'\n"
+        ASTERIA_THROW("Error reading file '$2'\n"
                       "[`read()` failed: $1]",
                       noadl::format_errno(errno), path);
 

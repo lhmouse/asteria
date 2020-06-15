@@ -478,7 +478,7 @@ struct AIR_Traits<AIR_Node::S_switch_statement>
           // This is a `default` clause if the condition is empty, and a `case` clause otherwise.
           if(sp.queues_labels[i].empty()) {
             if(bp != SIZE_MAX)
-              ASTERIA_THROW("multiple `default` clauses");
+              ASTERIA_THROW("Multiple `default` clauses");
             bp = i;
             continue;
           }
@@ -716,7 +716,7 @@ struct AIR_Traits<AIR_Node::S_for_each_statement>
           }
 
           default:
-            ASTERIA_THROW("range value not iterable (range `$1`)", range);
+            ASTERIA_THROW("Range value not iterable (range `$1`)", range);
         }
       }
   };
@@ -1029,7 +1029,7 @@ struct AIR_Traits<AIR_Node::S_push_global_reference>
         // Look for the name in the global context.
         auto qref = ctx.global().get_named_reference_opt(sp.name);
         if(!qref)
-          ASTERIA_THROW("undeclared identifier `$1`", sp.name);
+          ASTERIA_THROW("Undeclared identifier `$1`", sp.name);
 
         // Push a copy of it.
         ctx.stack().push(*qref);
@@ -1083,11 +1083,11 @@ struct AIR_Traits<AIR_Node::S_push_local_reference>
         // Look for the name in the context.
         auto qref = qctx->get_named_reference_opt(sp.name);
         if(!qref)
-          ASTERIA_THROW("undeclared identifier `$1`", sp.name);
+          ASTERIA_THROW("Undeclared identifier `$1`", sp.name);
 
         // Check if control flow has bypassed its initialization.
         if(qref->is_void())
-          ASTERIA_THROW("use of bypassed variable `$1`", sp.name);
+          ASTERIA_THROW("Use of bypassed variable `$1`", sp.name);
 
         // Push a copy of it.
         ctx.stack().push(*qref);
@@ -1363,7 +1363,7 @@ struct AIR_Traits<AIR_Node::S_function_call>
         // Copy the target, which shall be of type `function`.
         auto value = ctx.stack().get_top().read();
         if(!value.is_function())
-          ASTERIA_THROW("attempt to call a non-function (value `$1`)", value);
+          ASTERIA_THROW("Attempt to call a non-function (value `$1`)", value);
         auto& self = ctx.stack().open_top().zoom_out();
 
         return do_function_call_common(self, sloc, ctx, value.as_function(),
@@ -1516,7 +1516,7 @@ int64_t
 do_check_neg(int64_t rhs)
   {
     if(rhs == INT64_MIN)
-      ASTERIA_THROW("integer negation overflow (operand was `$1`)", rhs);
+      ASTERIA_THROW("Integer negation overflow (operand was `$1`)", rhs);
 
     return -rhs;
   }
@@ -1526,7 +1526,7 @@ int64_t
 do_check_add(int64_t lhs, int64_t rhs)
   {
     if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs))
-      ASTERIA_THROW("integer addition overflow (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Integer addition overflow (operands were `$1` and `$2`)", lhs, rhs);
 
     return lhs + rhs;
   }
@@ -1536,7 +1536,7 @@ int64_t
 do_check_sub(int64_t lhs, int64_t rhs)
   {
     if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs))
-      ASTERIA_THROW("integer subtraction overflow (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Integer subtraction overflow (operands were `$1` and `$2`)", lhs, rhs);
 
     return lhs - rhs;
   }
@@ -1552,7 +1552,7 @@ do_check_mul(int64_t lhs, int64_t rhs)
       return (lhs ^ rhs) ^ 1;
 
     if((lhs == INT64_MIN) || (rhs == INT64_MIN))
-      ASTERIA_THROW("integer multiplication overflow (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Integer multiplication overflow (operands were `$1` and `$2`)", lhs, rhs);
 
     if((lhs == -1) || (rhs == -1))
       return (lhs ^ rhs) + 1;
@@ -1562,7 +1562,7 @@ do_check_mul(int64_t lhs, int64_t rhs)
     auto alhs = (lhs ^ m) - m;  // may only be positive
     auto srhs = (rhs ^ m) - m;
     if((srhs >= 0) ? (alhs > INT64_MAX / srhs) : (alhs > INT64_MIN / srhs))
-      ASTERIA_THROW("integer multiplication overflow (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Integer multiplication overflow (operands were `$1` and `$2`)", lhs, rhs);
 
     return alhs * srhs;
   }
@@ -1572,10 +1572,10 @@ int64_t
 do_check_div(int64_t lhs, int64_t rhs)
   {
     if(rhs == 0)
-      ASTERIA_THROW("integer divided by zero (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Integer divided by zero (operands were `$1` and `$2`)", lhs, rhs);
 
     if((lhs == INT64_MIN) && (rhs == -1))
-      ASTERIA_THROW("integer division overflow (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Integer division overflow (operands were `$1` and `$2`)", lhs, rhs);
 
     return lhs / rhs;
   }
@@ -1585,10 +1585,10 @@ int64_t
 do_check_mod(int64_t lhs, int64_t rhs)
   {
     if(rhs == 0)
-      ASTERIA_THROW("integer divided by zero (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Integer divided by zero (operands were `$1` and `$2`)", lhs, rhs);
 
     if((lhs == INT64_MIN) && (rhs == -1))
-      ASTERIA_THROW("integer division overflow (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Integer division overflow (operands were `$1` and `$2`)", lhs, rhs);
 
     return lhs % rhs;
   }
@@ -1598,7 +1598,7 @@ int64_t
 do_check_sll(int64_t lhs, int64_t rhs)
   {
     if(rhs < 0)
-      ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)", lhs, rhs);
 
     if(rhs >= 64)
       return 0;
@@ -1611,7 +1611,7 @@ int64_t
 do_check_srl(int64_t lhs, int64_t rhs)
   {
     if(rhs < 0)
-      ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)", lhs, rhs);
 
     if(rhs >= 64)
       return 0;
@@ -1624,20 +1624,20 @@ int64_t
 do_check_sla(int64_t lhs, int64_t rhs)
   {
     if(rhs < 0)
-      ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)", lhs, rhs);
 
     if(lhs == 0)
       return 0;
 
     if(rhs >= 64)
-      ASTERIA_THROW("integer left shift overflow (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Integer left shift overflow (operands were `$1` and `$2`)", lhs, rhs);
 
     // Bits that will be shifted out must be all zeroes or all ones.
     auto bc = 63 - int(rhs);
     auto mask_out = uint64_t(lhs) >> bc << bc;
     auto mask_sbt = uint64_t(lhs >> 63) << bc;
     if(mask_out != mask_sbt)
-      ASTERIA_THROW("integer left shift overflow (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Integer left shift overflow (operands were `$1` and `$2`)", lhs, rhs);
 
     return int64_t(uint64_t(lhs) << rhs);
   }
@@ -1647,7 +1647,7 @@ int64_t
 do_check_sra(int64_t lhs, int64_t rhs)
   {
     if(rhs < 0)
-      ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)", lhs, rhs);
 
     if(rhs >= 64)
       return lhs >> 63;
@@ -1660,7 +1660,7 @@ int64_t
 do_check_trunci(double value)
   {
     if(!::std::islessequal(-0x1p63, value) || !::std::islessequal(value, 0x1p63 - 0x1p10))
-      ASTERIA_THROW("value not representable as an `integer` (operand was `$1`)", value);
+      ASTERIA_THROW("Value not representable as an `integer` (operand was `$1`)", value);
 
     return int64_t(value);
   }
@@ -1669,7 +1669,7 @@ cow_string
 do_string_dup(const cow_string& src, int64_t count)
   {
     if(count < 0)
-      ASTERIA_THROW("negative duplicate count (count was `$2`)", count);
+      ASTERIA_THROW("Negative duplicate count (count was `$2`)", count);
 
     cow_string res;
     size_t nchars = src.size();
@@ -1677,7 +1677,7 @@ do_string_dup(const cow_string& src, int64_t count)
       return res;
 
     if(nchars > res.max_size() / static_cast<uint64_t>(count))
-      ASTERIA_THROW("string length overflow (`$1` * `$2` > `$3`)", nchars, count, res.max_size());
+      ASTERIA_THROW("String length overflow (`$1` * `$2` > `$3`)", nchars, count, res.max_size());
 
     size_t times = static_cast<size_t>(count);
     if(nchars == 1) {
@@ -1708,7 +1708,7 @@ cow_string
 do_string_sll(const cow_string& lhs, int64_t rhs)
   {
     if(rhs < 0)
-      ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)", lhs, rhs);
 
     cow_string res;
     res.append(lhs.size(), ' ');
@@ -1725,7 +1725,7 @@ cow_string
 do_string_srl(const cow_string& lhs, int64_t rhs)
   {
     if(rhs < 0)
-      ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)", lhs, rhs);
 
     cow_string res;
     res.append(lhs.size(), ' ');
@@ -1742,11 +1742,11 @@ cow_string
 do_string_sla(const cow_string& lhs, int64_t rhs)
   {
     if(rhs < 0)
-      ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)", lhs, rhs);
 
     cow_string res;
     if(static_cast<uint64_t>(rhs) >= res.max_size() - lhs.size())
-      ASTERIA_THROW("string length overflow (`$1` + `$2` > `$3`)", lhs.size(), rhs, res.max_size());
+      ASTERIA_THROW("String length overflow (`$1` + `$2` > `$3`)", lhs.size(), rhs, res.max_size());
 
     // Append spaces in the right and return the result.
     size_t count = static_cast<size_t>(rhs);
@@ -1758,7 +1758,7 @@ cow_string
 do_string_sra(const cow_string& lhs, int64_t rhs)
   {
     if(rhs < 0)
-      ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)", lhs, rhs);
 
     cow_string res;
     if(static_cast<uint64_t>(rhs) >= lhs.size())
@@ -1875,7 +1875,7 @@ struct AIR_Traits_Xop<xop_inc_post> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("postfix increment not applicable (operand was `$1`)", lhs);
+            ASTERIA_THROW("Postfix increment not applicable (operand was `$1`)", lhs);
         }
         ctx.stack().open_top() = ::std::move(xref);
         return air_status_next;
@@ -1905,7 +1905,7 @@ struct AIR_Traits_Xop<xop_dec_post> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("postfix decrement not applicable (operand was `$1`)", lhs);
+            ASTERIA_THROW("Postfix decrement not applicable (operand was `$1`)", lhs);
         }
         ctx.stack().open_top() = ::std::move(xref);
         return air_status_next;
@@ -1941,7 +1941,7 @@ struct AIR_Traits_Xop<xop_subscr> : AIR_Traits<AIR_Node::S_apply_operator>
           }
 
           default:
-            ASTERIA_THROW("subscript value not valid (subscript was `$1`)", rhs);
+            ASTERIA_THROW("Subscript value not valid (subscript was `$1`)", rhs);
         }
         return air_status_next;
       }
@@ -1987,7 +1987,7 @@ struct AIR_Traits_Xop<xop_neg> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("prefix negation not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix negation not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2022,7 +2022,7 @@ struct AIR_Traits_Xop<xop_notb> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("prefix bitwise NOT not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix bitwise NOT not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2071,7 +2071,7 @@ struct AIR_Traits_Xop<xop_inc_pre> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("prefix increment not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix increment not applicable (operand was `$1`)", rhs);
         }
         return air_status_next;
       }
@@ -2099,7 +2099,7 @@ struct AIR_Traits_Xop<xop_dec_pre> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("prefix decrement not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix decrement not applicable (operand was `$1`)", rhs);
         }
         return air_status_next;
       }
@@ -2151,7 +2151,7 @@ struct AIR_Traits_Xop<xop_countof> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("prefix `countof` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `countof` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2201,7 +2201,7 @@ struct AIR_Traits_Xop<xop_sqrt> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("prefix `__sqrt` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__sqrt` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2231,7 +2231,7 @@ struct AIR_Traits_Xop<xop_isnan> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("prefix `__isnan` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__isnan` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2261,7 +2261,7 @@ struct AIR_Traits_Xop<xop_isinf> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("prefix `__isinf` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__isinf` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2291,7 +2291,7 @@ struct AIR_Traits_Xop<xop_abs> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("prefix `__abs` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__abs` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2321,7 +2321,7 @@ struct AIR_Traits_Xop<xop_sign> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("prefix `__sign` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__sign` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2350,7 +2350,7 @@ struct AIR_Traits_Xop<xop_round> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("prefix `__round` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__round` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2379,7 +2379,7 @@ struct AIR_Traits_Xop<xop_floor> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("prefix `__floor` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__floor` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2408,7 +2408,7 @@ struct AIR_Traits_Xop<xop_ceil> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("prefix `__ceil` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__ceil` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2437,7 +2437,7 @@ struct AIR_Traits_Xop<xop_trunc> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("prefix `__trunc` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__trunc` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2466,7 +2466,7 @@ struct AIR_Traits_Xop<xop_roundi> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("prefix `__roundi` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__roundi` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2495,7 +2495,7 @@ struct AIR_Traits_Xop<xop_floori> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("prefix `__floori` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__floori` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2524,7 +2524,7 @@ struct AIR_Traits_Xop<xop_ceili> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("prefix `__ceili` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__ceili` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2553,7 +2553,7 @@ struct AIR_Traits_Xop<xop_trunci> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("prefix `__trunci` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__trunci` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2622,7 +2622,7 @@ struct AIR_Traits_Xop<xop_cmp_lt> : AIR_Traits<AIR_Node::S_apply_operator>
         // Throw an exception if the operands compare unequal.
         auto comp = lhs.compare(rhs);
         if(comp == compare_unordered)
-          ASTERIA_THROW("values not comparable (operands were `$1` and `$2`)", lhs, rhs);
+          ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)", lhs, rhs);
         rhs = comp == compare_less;
 
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
@@ -2646,7 +2646,7 @@ struct AIR_Traits_Xop<xop_cmp_gt> : AIR_Traits<AIR_Node::S_apply_operator>
         // Throw an exception if the operands compare unequal.
         auto comp = lhs.compare(rhs);
         if(comp == compare_unordered)
-          ASTERIA_THROW("values not comparable (operands were `$1` and `$2`)", lhs, rhs);
+          ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)", lhs, rhs);
         rhs = comp == compare_greater;
 
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
@@ -2670,7 +2670,7 @@ struct AIR_Traits_Xop<xop_cmp_lte> : AIR_Traits<AIR_Node::S_apply_operator>
         // Throw an exception if the operands compare unequal.
         auto comp = lhs.compare(rhs);
         if(comp == compare_unordered)
-          ASTERIA_THROW("values not comparable (operands were `$1` and `$2`)", lhs, rhs);
+          ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)", lhs, rhs);
         rhs = comp != compare_greater;
 
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
@@ -2694,7 +2694,7 @@ struct AIR_Traits_Xop<xop_cmp_gte> : AIR_Traits<AIR_Node::S_apply_operator>
         // Throw an exception if the operands compare unequal.
         auto comp = lhs.compare(rhs);
         if(comp == compare_unordered)
-          ASTERIA_THROW("values not comparable (operands were `$1` and `$2`)", lhs, rhs);
+          ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)", lhs, rhs);
         rhs = comp != compare_less;
 
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
@@ -2779,7 +2779,7 @@ struct AIR_Traits_Xop<xop_add> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("infix addition not applicable (operands were `$1` and `$2`)", lhs, rhs);
+            ASTERIA_THROW("Infix addition not applicable (operands were `$1` and `$2`)", lhs, rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2817,7 +2817,7 @@ struct AIR_Traits_Xop<xop_sub> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("infix subtraction not applicable (operands were `$1` and `$2`)", lhs, rhs);
+            ASTERIA_THROW("Infix subtraction not applicable (operands were `$1` and `$2`)", lhs, rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2862,7 +2862,7 @@ struct AIR_Traits_Xop<xop_mul> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("infix multiplication not applicable (operands were `$1` and `$2`)", lhs, rhs);
+            ASTERIA_THROW("Infix multiplication not applicable (operands were `$1` and `$2`)", lhs, rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2895,7 +2895,7 @@ struct AIR_Traits_Xop<xop_div> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("infix division not applicable (operands were `$1` and `$2`)", lhs, rhs);
+            ASTERIA_THROW("Infix division not applicable (operands were `$1` and `$2`)", lhs, rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2928,7 +2928,7 @@ struct AIR_Traits_Xop<xop_mod> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("infix modulo not applicable (operands were `$1` and `$2`)", lhs, rhs);
+            ASTERIA_THROW("Infix modulo not applicable (operands were `$1` and `$2`)", lhs, rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2949,7 +2949,7 @@ struct AIR_Traits_Xop<xop_sll> : AIR_Traits<AIR_Node::S_apply_operator>
         const auto& lhs = ctx.stack().get_top().read();
 
         if(!rhs.is_integer())
-          ASTERIA_THROW("shift count not an integer (operands were `$1` and `$2`)", lhs, rhs);
+          ASTERIA_THROW("Shift count not an integer (operands were `$1` and `$2`)", lhs, rhs);
 
         switch(do_vmask_of(lhs)) {
           case vmask_integer:
@@ -2965,7 +2965,7 @@ struct AIR_Traits_Xop<xop_sll> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("infix logical left shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+            ASTERIA_THROW("Infix logical left shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -2986,7 +2986,7 @@ struct AIR_Traits_Xop<xop_srl> : AIR_Traits<AIR_Node::S_apply_operator>
         const auto& lhs = ctx.stack().get_top().read();
 
         if(!rhs.is_integer())
-          ASTERIA_THROW("shift count not an integer (operands were `$1` and `$2`)", lhs, rhs);
+          ASTERIA_THROW("Shift count not an integer (operands were `$1` and `$2`)", lhs, rhs);
 
         switch(do_vmask_of(lhs)) {
           case vmask_integer:
@@ -3002,7 +3002,7 @@ struct AIR_Traits_Xop<xop_srl> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("infix logical right shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+            ASTERIA_THROW("Infix logical right shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -3023,7 +3023,7 @@ struct AIR_Traits_Xop<xop_sla> : AIR_Traits<AIR_Node::S_apply_operator>
         const auto& lhs = ctx.stack().get_top().read();
 
         if(!rhs.is_integer())
-          ASTERIA_THROW("shift count not an integer (operands were `$1` and `$2`)", lhs, rhs);
+          ASTERIA_THROW("Shift count not an integer (operands were `$1` and `$2`)", lhs, rhs);
 
         switch(do_vmask_of(lhs)) {
           case vmask_integer:
@@ -3040,7 +3040,7 @@ struct AIR_Traits_Xop<xop_sla> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("infix arithmetic left shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+            ASTERIA_THROW("Infix arithmetic left shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -3061,7 +3061,7 @@ struct AIR_Traits_Xop<xop_sra> : AIR_Traits<AIR_Node::S_apply_operator>
         const auto& lhs = ctx.stack().get_top().read();
 
         if(!rhs.is_integer())
-          ASTERIA_THROW("shift count not an integer (operands were `$1` and `$2`)", lhs, rhs);
+          ASTERIA_THROW("Shift count not an integer (operands were `$1` and `$2`)", lhs, rhs);
 
         switch(do_vmask_of(lhs)) {
           case vmask_integer:
@@ -3077,7 +3077,7 @@ struct AIR_Traits_Xop<xop_sra> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("infix arithmetic right shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+            ASTERIA_THROW("Infix arithmetic right shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -3115,7 +3115,7 @@ struct AIR_Traits_Xop<xop_andb> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("infix bitwise AND not applicable (operands were `$1` and `$2`)", lhs, rhs);
+            ASTERIA_THROW("Infix bitwise AND not applicable (operands were `$1` and `$2`)", lhs, rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -3153,7 +3153,7 @@ struct AIR_Traits_Xop<xop_orb> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("infix bitwise OR not applicable (operands were `$1` and `$2`)", lhs, rhs);
+            ASTERIA_THROW("Infix bitwise OR not applicable (operands were `$1` and `$2`)", lhs, rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -3191,7 +3191,7 @@ struct AIR_Traits_Xop<xop_xorb> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("infix bitwise XOR not applicable (operands were `$1` and `$2`)", lhs, rhs);
+            ASTERIA_THROW("Infix bitwise XOR not applicable (operands were `$1` and `$2`)", lhs, rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -3239,7 +3239,7 @@ struct AIR_Traits_Xop<xop_fma> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           default:
-            ASTERIA_THROW("fused multiply-add not applicable (operands were `$1`, `$2` and `$3`)", lhs, mid, rhs);
+            ASTERIA_THROW("Fused multiply-add not applicable (operands were `$1`, `$2` and `$3`)", lhs, mid, rhs);
         }
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -3315,7 +3315,7 @@ struct AIR_Traits<AIR_Node::S_unpack_struct_array>
         // Make sure it is really an `array`.
         V_array arr;
         if(!val.is_null() && !val.is_array())
-          ASTERIA_THROW("invalid argument for structured array binding (initializer was `$1`)", val);
+          ASTERIA_THROW("Invalid argument for structured array binding (initializer was `$1`)", val);
 
         if(val.is_array())
           arr = ::std::move(val.open_array());
@@ -3380,7 +3380,7 @@ struct AIR_Traits<AIR_Node::S_unpack_struct_object>
         // Make sure it is really an `object`.
         V_object obj;
         if(!val.is_null() && !val.is_object())
-          ASTERIA_THROW("invalid argument for structured object binding (initializer was `$1`)", val);
+          ASTERIA_THROW("Invalid argument for structured object binding (initializer was `$1`)", val);
 
         if(val.is_object())
           obj = ::std::move(val.open_object());
@@ -3568,11 +3568,11 @@ struct AIR_Traits<AIR_Node::S_variadic_call>
 
             // Verify the argument count.
             if(!value.is_integer())
-              ASTERIA_THROW("invalid number of variadic arguments (value `$1`)", value);
+              ASTERIA_THROW("Invalid number of variadic arguments (value `$1`)", value);
 
             int64_t nvargs = value.as_integer();
             if((nvargs < 0) || (nvargs > INT_MAX))
-              ASTERIA_THROW("number of variadic arguments not acceptable (nvargs `$1`)", nvargs);
+              ASTERIA_THROW("Number of variadic arguments not acceptable (nvargs `$1`)", nvargs);
 
             // Generate arguments.
             args.assign(static_cast<size_t>(nvargs), gself);
@@ -3589,13 +3589,13 @@ struct AIR_Traits<AIR_Node::S_variadic_call>
           }
 
           default:
-            ASTERIA_THROW("invalid variadic argument generator (value `$1`)", value);
+            ASTERIA_THROW("Invalid variadic argument generator (value `$1`)", value);
         }
 
         // Copy the target, which shall be of type `function`.
         value = ctx.stack().get_top().read();
         if(!value.is_function())
-          ASTERIA_THROW("attempt to call a non-function (value `$1`)", value);
+          ASTERIA_THROW("Attempt to call a non-function (value `$1`)", value);
         auto& self = ctx.stack().open_top().zoom_out();
 
         return do_function_call_common(self, sloc, ctx, value.as_function(),
@@ -3699,11 +3699,11 @@ struct AIR_Traits<AIR_Node::S_import_call>
         // Copy the filename, which shall be of type `string`.
         auto value = ctx.stack().get_top().read();
         if(!value.is_string())
-          ASTERIA_THROW("invalid path specified for `import` (value `$1` not a string)", value);
+          ASTERIA_THROW("Invalid path specified for `import` (value `$1` not a string)", value);
 
         auto path = value.as_string();
         if(path.empty())
-          ASTERIA_THROW("empty path specified for `import`");
+          ASTERIA_THROW("Empty path specified for `import`");
 
         // Rewrite the path if it is not absolute.
         if((path[0] != '/') && (sp.sloc.c_file()[0] == '/')) {
@@ -3714,7 +3714,7 @@ struct AIR_Traits<AIR_Node::S_import_call>
 
         uptr<char, void (&)(void*)> abspath(::realpath(path.safe_c_str(), nullptr), ::free);
         if(!abspath)
-          ASTERIA_THROW("could not open script file '$2'\n"
+          ASTERIA_THROW("Could not open script file '$2'\n"
                         "[`realpath()` failed: $1]",
                         noadl::format_errno(errno), path);
 

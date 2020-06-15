@@ -188,7 +188,7 @@ V_string do_get_padding(const optV_string& padding)
       return ::rocket::sref(" ");
 
     if(padding->empty())
-      ASTERIA_THROW("empty padding string not valid");
+      ASTERIA_THROW("Empty padding string not valid");
 
     return *padding;
   }
@@ -340,27 +340,27 @@ V_string do_url_decode(const V_string& text)
       }
       if(c != '%') {
         if(do_is_url_invalid_char(c))
-          ASTERIA_THROW("invalid character in URL (character `$1`)", c);
+          ASTERIA_THROW("Invalid character in URL (character `$1`)", c);
 
         continue;
       }
 
       // Two hexadecimal characters shall follow.
       if(data.size() - nread < 2)
-        ASTERIA_THROW("no enough hexadecimal digits after `%`");
+        ASTERIA_THROW("No enough hexadecimal digits after `%`");
 
       // Parse the first digit.
       c = data[nread++];
       const char* pos = do_xstrchr(s_base16_table, c);
       if(!pos)
-        ASTERIA_THROW("invalid hexadecimal digit (character `$1`)", c);
+        ASTERIA_THROW("Invalid hexadecimal digit (character `$1`)", c);
       uint32_t reg = static_cast<uint32_t>(pos - s_base16_table) / 2 * 16;
 
       // Parse the second digit.
       c = data[nread++];
       pos = do_xstrchr(s_base16_table, c);
       if(!pos)
-        ASTERIA_THROW("invalid hexadecimal digit (character `$1`)", c);
+        ASTERIA_THROW("Invalid hexadecimal digit (character `$1`)", c);
       reg |= static_cast<uint32_t>(pos - s_base16_table) / 2;
 
       // Replace this sequence with the decoded byte.
@@ -472,7 +472,7 @@ do_unpack_impl(const V_string& text)
     // How many words will the result have?
     auto nwords = text.size() / sizeof(WordT);
     if(text.size() != nwords * sizeof(WordT))
-      ASTERIA_THROW("invalid source string length (`$1` not divisible by `$2`)",
+      ASTERIA_THROW("Invalid source string length (`$1` not divisible by `$2`)",
                     text.size(), sizeof(WordT));
     const auto pwords = reinterpret_cast<const WordT*>(text.data());
 
@@ -507,7 +507,7 @@ do_make_regex(const V_string& pattern)
     return ::std::regex(pattern.data(), pattern.size());
   }
   catch(::std::regex_error& stdex) {
-    ASTERIA_THROW("invalid regular expression (text `$1`): $2", pattern, stdex.what());
+    ASTERIA_THROW("Invalid regular expression (text `$1`): $2", pattern, stdex.what());
   }
 
 ::std::string
@@ -867,7 +867,7 @@ std_string_explode(V_string text, optV_string delim, optV_integer limit)
     uint64_t rlimit = UINT64_MAX;
     if(limit) {
       if(*limit <= 0)
-        ASTERIA_THROW("max number of segments must be positive (limit `$1`)", *limit);
+        ASTERIA_THROW("Max number of segments must be positive (limit `$1`)", *limit);
       rlimit = static_cast<uint64_t>(*limit);
     }
 
@@ -976,7 +976,7 @@ std_string_hex_decode(V_string text)
       if(pos) {
         // The character is a whitespace.
         if(reg != 1)
-          ASTERIA_THROW("unpaired hexadecimal digit");
+          ASTERIA_THROW("Unpaired hexadecimal digit");
 
         continue;
       }
@@ -985,7 +985,7 @@ std_string_hex_decode(V_string text)
       // Decode a digit.
       pos = do_xstrchr(s_base16_table, c);
       if(!pos)
-        ASTERIA_THROW("invalid hexadecimal digit (character `$1`)", c);
+        ASTERIA_THROW("Invalid hexadecimal digit (character `$1`)", c);
       reg |= static_cast<uint32_t>(pos - s_base16_table) / 2;
 
       // Decode the current group if it is complete.
@@ -996,7 +996,7 @@ std_string_hex_decode(V_string text)
       reg = 1;
     }
     if(reg != 1)
-      ASTERIA_THROW("unpaired hexadecimal digit");
+      ASTERIA_THROW("Unpaired hexadecimal digit");
     return data;
   }
 
@@ -1073,7 +1073,7 @@ std_string_base32_decode(V_string text)
       if(pos) {
         // The character is a whitespace.
         if(reg != 1)
-          ASTERIA_THROW("incomplete base32 group");
+          ASTERIA_THROW("Incomplete base32 group");
 
         continue;
       }
@@ -1082,7 +1082,7 @@ std_string_base32_decode(V_string text)
       if(c == s_base32_table[64]) {
         // The character is a padding character.
         if(reg < 0x100)
-          ASTERIA_THROW("unexpected base32 padding character");
+          ASTERIA_THROW("Unexpected base32 padding character");
 
         npad += 1;
       }
@@ -1090,10 +1090,10 @@ std_string_base32_decode(V_string text)
         // Decode a digit.
         pos = do_xstrchr(s_base32_table, c);
         if(!pos)
-          ASTERIA_THROW("invalid base32 digit (character `$1`)", c);
+          ASTERIA_THROW("Invalid base32 digit (character `$1`)", c);
 
         if(npad != 0)
-          ASTERIA_THROW("unexpected base32 digit following padding character");
+          ASTERIA_THROW("Unexpected base32 digit following padding character");
 
         reg |= static_cast<uint32_t>(pos - s_base32_table) / 2;
       }
@@ -1105,7 +1105,7 @@ std_string_base32_decode(V_string text)
       size_t m = (40 - npad * 5) / 8;
       size_t p = (m * 8 + 4) / 5;
       if(p + npad != 8)
-        ASTERIA_THROW("unexpected number of base32 padding characters (got `$1`)", npad);
+        ASTERIA_THROW("Unexpected number of base32 padding characters (got `$1`)", npad);
 
       for(size_t i = 0; i < m; ++i) {
         reg <<= 8;
@@ -1115,7 +1115,7 @@ std_string_base32_decode(V_string text)
       npad = 0;
     }
     if(reg != 1)
-      ASTERIA_THROW("incomplete base32 group");
+      ASTERIA_THROW("Incomplete base32 group");
     return data;
   }
 
@@ -1191,7 +1191,7 @@ std_string_base64_decode(V_string text)
       if(pos) {
         // The character is a whitespace.
         if(reg != 1)
-          ASTERIA_THROW("incomplete base64 group");
+          ASTERIA_THROW("Incomplete base64 group");
 
         continue;
       }
@@ -1200,7 +1200,7 @@ std_string_base64_decode(V_string text)
       if(c == s_base64_table[64]) {
         // The character is a padding character.
         if(reg < 0x100)
-          ASTERIA_THROW("unexpected base64 padding character");
+          ASTERIA_THROW("Unexpected base64 padding character");
 
         npad += 1;
       }
@@ -1208,10 +1208,10 @@ std_string_base64_decode(V_string text)
         // Decode a digit.
         pos = do_xstrchr(s_base64_table, c);
         if(!pos)
-          ASTERIA_THROW("invalid base64 digit (character `$1`)", c);
+          ASTERIA_THROW("Invalid base64 digit (character `$1`)", c);
 
         if(npad != 0)
-          ASTERIA_THROW("unexpected base64 digit following padding character");
+          ASTERIA_THROW("Unexpected base64 digit following padding character");
 
         reg |= static_cast<uint32_t>(pos - s_base64_table);
       }
@@ -1223,7 +1223,7 @@ std_string_base64_decode(V_string text)
       size_t m = (24 - npad * 6) / 8;
       size_t p = (m * 8 + 5) / 6;
       if(p + npad != 4)
-        ASTERIA_THROW("unexpected number of base64 padding characters (got `$1`)", npad);
+        ASTERIA_THROW("Unexpected number of base64 padding characters (got `$1`)", npad);
 
       for(size_t i = 0; i < m; ++i) {
         reg <<= 8;
@@ -1233,7 +1233,7 @@ std_string_base64_decode(V_string text)
       npad = 0;
     }
     if(reg != 1)
-      ASTERIA_THROW("incomplete base64 group");
+      ASTERIA_THROW("Incomplete base64 group");
     return data;
   }
 
@@ -1286,7 +1286,7 @@ std_string_utf8_encode(V_integer code_point, optV_boolean permissive)
     if(!noadl::utf8_encode(text, cp)) {
       // This comparison with `true` is by intention, because it may be unset.
       if(permissive != true)
-        ASTERIA_THROW("invalid UTF code point (value `$1`)", code_point);
+        ASTERIA_THROW("Invalid UTF code point (value `$1`)", code_point);
       noadl::utf8_encode(text, 0xFFFD);
     }
     return text;
@@ -1304,7 +1304,7 @@ std_string_utf8_encode(V_array code_points, optV_boolean permissive)
       if(!noadl::utf8_encode(text, cp)) {
         // This comparison with `true` is by intention, because it may be unset.
         if(permissive != true)
-          ASTERIA_THROW("invalid UTF code point (value `$1`)", value);
+          ASTERIA_THROW("Invalid UTF code point (value `$1`)", value);
         noadl::utf8_encode(text, 0xFFFD);
       }
     }
@@ -1324,7 +1324,7 @@ std_string_utf8_decode(V_string text, optV_boolean permissive)
       if(!noadl::utf8_decode(cp, text, offset)) {
         // This comparison with `true` is by intention, because it may be unset.
         if(permissive != true)
-          ASTERIA_THROW("invalid UTF-8 string");
+          ASTERIA_THROW("Invalid UTF-8 string");
         cp = text[offset++] & 0xFF;
       }
       code_points.emplace_back(V_integer(cp));

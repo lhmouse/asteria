@@ -79,7 +79,7 @@ class Line_Reader
             break;
           }
           if(this->m_str.size() >= INT_MAX) {
-            ASTERIA_THROW("too many characters in a single line");
+            ASTERIA_THROW("Too many characters in a single line");
           }
           // Append the character to the line buffer.
           this->m_str.push_back(static_cast<char>(ch));
@@ -87,7 +87,7 @@ class Line_Reader
 
         // Increment the line number if a line has been read successfully.
         if(this->m_line >= INT_MAX) {
-          ASTERIA_THROW("too many lines in source code");
+          ASTERIA_THROW("Too many lines in source code");
         }
         this->m_line++;
 
@@ -107,7 +107,7 @@ class Line_Reader
     const
       {
         if(add > this->m_str.size() - this->m_off)
-          ASTERIA_THROW("attempt to seek past end of line (`$1` + `$2` > `$3`)",
+          ASTERIA_THROW("Attempt to seek past end of line (`$1` + `$2` > `$3`)",
                         this->m_off, add, this->m_str.size());
         return this->m_str.data() + (this->m_off + add);
       }
@@ -125,7 +125,7 @@ class Line_Reader
     consume(size_t add)
       {
         if(add > this->m_str.size() - this->m_off)
-          ASTERIA_THROW("attempt to seek past end of line (`$1` + `$2` > `$3`)",
+          ASTERIA_THROW("Attempt to seek past end of line (`$1` + `$2` > `$3`)",
                         this->m_off, add, this->m_str.size());
         this->m_off += add;
       }
@@ -134,7 +134,7 @@ class Line_Reader
     rewind(size_t off = 0)
       {
         if(off > this->m_str.size())
-          ASTERIA_THROW("invalid offset within current line (`$1` > `$2`)",
+          ASTERIA_THROW("Invalid offset within current line (`$1` > `$2`)",
                         off, this->m_str.size());
         this->m_off = off;
       }
