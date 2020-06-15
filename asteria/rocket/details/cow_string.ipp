@@ -364,10 +364,10 @@ class string_iterator
     const noexcept
       {
         auto ref = this->m_ref;
-        ROCKET_ASSERT_MSG(ref, "iterator not initialized");
+        ROCKET_ASSERT_MSG(ref, "Iterator not initialized");
         auto dist = static_cast<size_t>(ptr - ref->data());
-        ROCKET_ASSERT_MSG(dist <= ref->size(), "iterator invalidated");
-        ROCKET_ASSERT_MSG(!deref || (dist < ref->size()), "past-the-end iterator not dereferenceable");
+        ROCKET_ASSERT_MSG(dist <= ref->size(), "Iterator invalidated");
+        ROCKET_ASSERT_MSG(!deref || (dist < ref->size()), "Past-the-end iterator not dereferenceable");
         return ptr;
       }
 
@@ -387,7 +387,7 @@ class string_iterator
     tell_owned_by(const parent_type* ref)
     const noexcept
       {
-        ROCKET_ASSERT_MSG(this->m_ref == ref, "iterator not belonging to the same container");
+        ROCKET_ASSERT_MSG(this->m_ref == ref, "Iterator not belonging to the same container");
         return this->tell();
       }
 

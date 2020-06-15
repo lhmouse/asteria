@@ -23,7 +23,7 @@ noexcept
   {
     int r = ::pthread_mutex_lock(&rmutex);
     ROCKET_ASSERT_MSG(r == 0,
-      "failed to lock recursive mutex (possible data corruption)");
+      "Failed to lock recursive mutex (possible data corruption)");
   }
 
 inline
@@ -33,7 +33,7 @@ noexcept
   {
     int r = ::pthread_mutex_unlock(&rmutex);
     ROCKET_ASSERT_MSG(r == 0,
-      "failed to unlock recursive mutex (possible data corruption)");
+      "Failed to unlock recursive mutex (possible data corruption)");
   }
 
 inline
@@ -43,7 +43,7 @@ noexcept
   {
     int r = ::pthread_mutex_destroy(&rmutex);
     ROCKET_ASSERT_MSG(r == 0,
-      "failed to destroy recursive mutex (possible in use)");
+      "Failed to destroy recursive mutex (possible in use)");
   }
 
 class stored_pointer

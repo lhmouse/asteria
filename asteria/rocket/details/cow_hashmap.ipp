@@ -794,11 +794,11 @@ class hashmap_iterator
     const noexcept
       {
         auto ref = this->m_ref;
-        ROCKET_ASSERT_MSG(ref, "iterator not initialized");
+        ROCKET_ASSERT_MSG(ref, "Iterator not initialized");
         auto dist = static_cast<size_t>(bkt - ref->buckets());
-        ROCKET_ASSERT_MSG(dist <= ref->bucket_count(), "iterator invalidated");
-        ROCKET_ASSERT_MSG((dist == ref->bucket_count()) || *bkt, "iterator invalidated");
-        ROCKET_ASSERT_MSG(!deref || (dist < ref->bucket_count()), "past-the-end iterator not dereferenceable");
+        ROCKET_ASSERT_MSG(dist <= ref->bucket_count(), "Iterator invalidated");
+        ROCKET_ASSERT_MSG((dist == ref->bucket_count()) || *bkt, "Iterator invalidated");
+        ROCKET_ASSERT_MSG(!deref || (dist < ref->bucket_count()), "Past-the-end iterator not dereferenceable");
         return bkt;
       }
 
@@ -810,7 +810,7 @@ class hashmap_iterator
           return nullptr;
 
         auto ref = this->m_ref;
-        ROCKET_ASSERT_MSG(ref, "iterator not initialized");
+        ROCKET_ASSERT_MSG(ref, "Iterator not initialized");
         // Find the next non-empty bucket.
         auto bkt = hint;
         while((bkt != ref->buckets() + ref->bucket_count()) && !*bkt)
@@ -835,7 +835,7 @@ class hashmap_iterator
     tell_owned_by(const parent_type* ref)
     const noexcept
       {
-        ROCKET_ASSERT_MSG(this->m_ref == ref, "iterator not belonging to the same container");
+        ROCKET_ASSERT_MSG(this->m_ref == ref, "Iterator not belonging to the same container");
         return this->tell();
       }
 

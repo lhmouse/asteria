@@ -23,7 +23,7 @@ noexcept
   {
     int r = ::pthread_mutex_lock(&mutex);
     ROCKET_ASSERT_MSG(r == 0,
-      "failed to lock mutex (possible deadlock or data corruption)");
+      "Failed to lock mutex (possible deadlock or data corruption)");
   }
 
 inline
@@ -33,7 +33,7 @@ noexcept
   {
     int r = ::pthread_mutex_unlock(&mutex);
     ROCKET_ASSERT_MSG(r == 0,
-      "failed to unlock mutex (possible data corruption)");
+      "Failed to unlock mutex (possible data corruption)");
   }
 
 inline
@@ -43,7 +43,7 @@ noexcept
   {
     int r = ::pthread_mutex_destroy(&mutex);
     ROCKET_ASSERT_MSG(r == 0,
-      "failed to destroy mutex (possible in use)");
+      "Failed to destroy mutex (possible in use)");
   }
 
 class stored_pointer
