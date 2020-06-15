@@ -87,4 +87,39 @@ class stored_handle
       { noadl::xswap(this->m_hv, other.m_hv);  }
   };
 
+template<typename handleT, typename closerT>
+class default_closer_wrapper
+  {
+  private:
+    typename conditional<
+        is_function<typename remove_reference<closerT>::type>::value,
+        closerT&,                      // take functions by reference
+        typename decay<closerT>::type  // take non-functions by value
+      >::type m_cl;
+
+  public:
+    constexpr  // non-explicit
+    default_closer_wrapper(closerT&& xcl)
+      : m_cl(::std::forward<closerT>(xcl))
+      { }
+
+  public:
+    constexpr
+    handleT
+    null()
+    const noexcept
+      { return { };  }
+
+    constexpr
+    handleT
+    is_null(handleT hv)
+    const noexcept
+      { return static_cast<bool>(hv) == false;  }
+
+    constexpr
+    void
+    close(handleT hv)
+      { this->m_cl(hv);  }
+  };
+
 }  // namespace details_unique_handle
