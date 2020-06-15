@@ -111,7 +111,7 @@ class default_closer_wrapper
       { return { };  }
 
     constexpr
-    handleT
+    bool
     is_null(handleT hv)
     const noexcept
       { return static_cast<bool>(hv) == false;  }
