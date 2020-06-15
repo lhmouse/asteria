@@ -80,11 +80,9 @@ class condition_variable
         ROCKET_ASSERT(r == 0);
 
         // Ensure we don't cause overflows.
-        int64_t mlim = ::std::numeric_limits<::time_t>::max();
-        mlim -= ts.tv_sec + 1;
-        mlim *= 1000;
-
-        if(msecs < mlim) {
+        constexpr int64_t secs_max = noadl::min(::std::numeric_limits<::time_t>::max(),
+                                                INT64_MAX / 1000);
+        if(msecs <= (secs_max - 1 - ts.tv_sec) * 1000) {
           // If overflow is not possible, add `msecs` to the current time.
           long secs = static_cast<long>(static_cast<unsigned long>(msecs) / 1'000);
           ts.tv_sec += static_cast<::time_t>(secs);
