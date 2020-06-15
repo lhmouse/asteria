@@ -99,6 +99,7 @@ using ::std::is_class;
 using ::std::is_union;
 using ::std::is_scalar;
 using ::std::is_arithmetic;
+using ::std::is_function;
 
 using ::std::allocator;
 using ::std::allocator_traits;
