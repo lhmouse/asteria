@@ -88,11 +88,15 @@ class condition_variable
           // If overflow is not possible, add `msecs` to the current time.
           long secs = static_cast<long>(static_cast<unsigned long>(msecs) / 1'000);
           ts.tv_sec += static_cast<::time_t>(secs);
-          ts.tv_nsec += (msecs - secs * 1'000) * 1'000'000;
 
-          long mask = (999'999'999 - ts.tv_nsec) >> 31;
-          ts.tv_sec -= mask;
-          ts.tv_nsec -= mask & 1'000'000'000;
+          long mrem = msecs - secs * 1'000;
+          if(mrem != 0) {
+            ts.tv_nsec += mrem * 1'000'000;
+
+            long mask = (999'999'999 - ts.tv_nsec) >> 31;
+            ts.tv_sec -= mask;
+            ts.tv_nsec -= mask & 1'000'000'000;
+          }
 
           // Now wait on the condition variable.
           details_condition_variable::do_cond_timedwait(this->m_cond, *owns, ts);
