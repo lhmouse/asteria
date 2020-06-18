@@ -10,6 +10,7 @@ namespace details_condition_variable {
 inline
 void
 do_cond_wait(::pthread_cond_t& cond, ::pthread_mutex_t& mutex)
+noexcept
   {
     int r = ::pthread_cond_wait(&cond, &mutex);
     ROCKET_ASSERT_MSG(r != EINVAL,
@@ -19,6 +20,7 @@ do_cond_wait(::pthread_cond_t& cond, ::pthread_mutex_t& mutex)
 inline
 void
 do_cond_timedwait(::pthread_cond_t& cond, ::pthread_mutex_t& mutex, const ::timespec& abstime)
+noexcept
   {
     int r = ::pthread_cond_timedwait(&cond, &mutex, &abstime);
     ROCKET_ASSERT_MSG(r != EINVAL,
