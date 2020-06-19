@@ -47,8 +47,8 @@ class condition_variable
         ROCKET_ASSERT(r == 0);
 
         // Ensure we don't cause overflows.
-        constexpr int64_t secs_max = noadl::min(::std::numeric_limits<::time_t>::max(),
-                                                INT64_MAX / 1000);
+        constexpr int64_t secs_max = noadl::min(INT64_MAX / 1000,
+                                         ::std::numeric_limits<::time_t>::max());
         if(msecs > (secs_max - 1 - ts.tv_sec) * 1000)
           return false;
 
@@ -60,7 +60,7 @@ class condition_variable
         if(mrem != 0) {
           ts.tv_nsec += mrem * 1'000'000;
 
-          long mask = (999'999'999 - ts.tv_nsec) >> 31;
+          long mask = static_cast<long>((999'999'999 - ts.tv_nsec) >> 31);
           ts.tv_sec -= mask;
           ts.tv_nsec -= mask & 1'000'000'000;
         }
@@ -69,7 +69,7 @@ class condition_variable
 
     template<typename mktmT, typename predT>
     bool
-    do_wait_check_loop(mutex::unique_lock& lock, mktmT&& mktm, predT&& pred)
+    do_wait_check_loop(mutex::unique_lock& lock, mktmT&& make_time, predT&& pred)
       {
         // Release the lock, as the mutex will be unlocked by `do_cond_wait()`
         auto owns = lock.m_sth.release();
@@ -77,7 +77,7 @@ class condition_variable
 
         // Calculate the time point to give up the wait.
         ::timespec ts;
-        if(mktm(ts))
+        if(make_time(ts))
           for(;;) {
             // Wait until `ts`.
             int r = details_condition_variable::do_cond_timedwait(
@@ -136,12 +136,15 @@ class condition_variable
     wait_for(mutex::unique_lock& lock, long msecs, predT&& pred)
     noexcept(noexcept(pred()))
       {
+        if(pred())
+          return true;
+
         if(msecs <= 0)
-          return pred();
+          return false;
 
         return this->do_wait_check_loop(lock,
             [&](::timespec& ts) { return this->do_make_abstime(ts, msecs);  },
-            [&] { return pred();  });
+            ::std::forward<predT>(pred));
       }
 
     void
@@ -158,9 +161,12 @@ class condition_variable
     wait(mutex::unique_lock& lock, predT&& pred)
     noexcept(noexcept(pred()))
       {
+        if(pred())
+          return true;
+
         return this->do_wait_check_loop(lock,
             [&](::timespec& /*ts*/) { return false;  },
-            [&] { return pred();  });
+            ::std::forward<predT>(pred));
       }
 
     void
