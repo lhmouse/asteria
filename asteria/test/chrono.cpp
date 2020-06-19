@@ -37,7 +37,7 @@ int main()
 
         s = "invalid";
         try { t = std.chrono.utc_parse(s);  assert false;  }
-          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
 
         t = 631152000000;  // 1990-01-01 00:00:00 GMT
         for(var i = 0;  i < 365 * 500;  ++i) {

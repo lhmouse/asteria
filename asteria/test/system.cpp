@@ -21,7 +21,7 @@ int main()
           assert status != 0;
         }
         catch(e)
-          assert std.string.find(e, "assertion failure") == null;
+          assert std.string.find(e, "Assertion failure") == null;
 
         assert std.system.execute('bash',
           [ '-c', 'kill -1 $$' ]) == 129;
