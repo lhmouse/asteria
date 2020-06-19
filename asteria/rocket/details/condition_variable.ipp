@@ -8,23 +8,25 @@
 namespace details_condition_variable {
 
 inline
-void
+int
 do_cond_wait(::pthread_cond_t& cond, ::pthread_mutex_t& mutex)
 noexcept
   {
     int r = ::pthread_cond_wait(&cond, &mutex);
     ROCKET_ASSERT_MSG(r != EINVAL,
-      "Failed to await condition variable (possible corrupted data)");
+        "Failed to await condition variable (possible corrupted data)");
+    return r;
   }
 
 inline
-void
+int
 do_cond_timedwait(::pthread_cond_t& cond, ::pthread_mutex_t& mutex, const ::timespec& abstime)
 noexcept
   {
     int r = ::pthread_cond_timedwait(&cond, &mutex, &abstime);
     ROCKET_ASSERT_MSG(r != EINVAL,
-      "Failed to await condition variable (possible corrupted data)");
+        "Failed to await condition variable (possible corrupted data)");
+    return r;
   }
 
 inline
@@ -34,7 +36,7 @@ noexcept
   {
     int r = ::pthread_cond_signal(&cond);
     ROCKET_ASSERT_MSG(r == 0,
-      "Failed to signal condition variable (possible corrupted data)");
+        "Failed to signal condition variable (possible corrupted data)");
   }
 
 inline
@@ -44,7 +46,7 @@ noexcept
   {
     int r = ::pthread_cond_broadcast(&cond);
     ROCKET_ASSERT_MSG(r == 0,
-      "Failed to signal condition variable (possible corrupted data)");
+        "Failed to signal condition variable (possible corrupted data)");
   }
 
 inline
@@ -54,7 +56,7 @@ noexcept
   {
     int r = ::pthread_cond_destroy(&cond);
     ROCKET_ASSERT_MSG(r == 0,
-      "Failed to destroy condition variable (possible in use)");
+        "Failed to destroy condition variable (possible in use)");
   }
 
 }  // namespace details_condition_variable
