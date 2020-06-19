@@ -39,7 +39,7 @@ class Runtime_Error
         this->do_insert_frame(frame_type_throw, sloc, this->m_value);  }
 
     Runtime_Error(F_assert, const Source_Location& sloc, const cow_string& msg)
-      : m_value("assertion failure: " + msg)
+      : m_value("Assertion failure: " + msg)
       { this->do_backtrace(),
         this->do_insert_frame(frame_type_assert, sloc, this->m_value);  }
 
