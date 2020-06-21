@@ -120,6 +120,15 @@ class atomic
       { return this->m_val.fetch_sub(1, morderT) - 1;  }
   };
 
+template<typename valueT>
+using atomic_relaxed = atomic<valueT, ::std::memory_order_relaxed>;
+
+template<typename valueT>
+using atomic_acq_rel = atomic<valueT, ::std::memory_order_acq_rel>;
+
+template<typename valueT>
+using atomic_seq_cst = atomic<valueT, ::std::memory_order_seq_cst>;
+
 }  // namespace rocket
 
 #endif
