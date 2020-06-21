@@ -53,7 +53,7 @@ class recursive_mutex::unique_lock
     explicit
     unique_lock(recursive_mutex& parent)
     noexcept
-      { this->assign(parent);  }
+      { this->lock(parent);  }
 
     unique_lock(unique_lock&& other)
     noexcept
@@ -92,7 +92,26 @@ class recursive_mutex::unique_lock
       }
 
     unique_lock&
-    assign(recursive_mutex& m)
+    try_lock(recursive_mutex& m)
+    noexcept
+      {
+        // Return immediately if the same mutex is already held.
+        // This is a bit faster than locking and relocking it.
+        auto ptr = ::std::addressof(m.m_rmutex);
+        if(ROCKET_UNEXPECT(ptr == this->m_sth.get()))
+          return *this;
+
+        // There shall be no gap between the unlock and lock operations.
+        // If the mutex cannot be locked, there is no effect.
+        if(details_recursive_mutex::do_rmutex_trylock(*ptr) != 0)
+          return *this;
+
+        this->m_sth.reset(ptr);
+        return *this;
+      }
+
+    unique_lock&
+    lock(recursive_mutex& m)
     noexcept
       {
         // Return immediately if the same mutex is already held.

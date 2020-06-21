@@ -8,12 +8,14 @@
 namespace details_mutex {
 
 inline
-bool
+int
 do_mutex_trylock(::pthread_mutex_t& mutex)
 noexcept
   {
     int r = ::pthread_mutex_trylock(&mutex);
-    return r == 0;
+    ROCKET_ASSERT_MSG(r != EINVAL,
+        "Failed to lock mutex (possible data corruption)");
+    return r;
   }
 
 inline

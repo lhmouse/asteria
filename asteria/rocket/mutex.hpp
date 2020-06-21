@@ -56,7 +56,7 @@ class mutex::unique_lock
     explicit
     unique_lock(mutex& parent)
     noexcept
-      { this->assign(parent);  }
+      { this->lock(parent);  }
 
     unique_lock(unique_lock&& other)
     noexcept
@@ -95,7 +95,26 @@ class mutex::unique_lock
       }
 
     unique_lock&
-    assign(mutex& m)
+    try_lock(mutex& m)
+    noexcept
+      {
+        // Return immediately if the same mutex is already held.
+        // Otherwise deadlocks would occur.
+        auto ptr = ::std::addressof(m.m_mutex);
+        if(ROCKET_UNEXPECT(ptr == this->m_sth.get()))
+          return *this;
+
+        // There shall be no gap between the unlock and lock operations.
+        // If the mutex cannot be locked, there is no effect.
+        if(details_mutex::do_mutex_trylock(*ptr) != 0)
+          return *this;
+
+        this->m_sth.reset(ptr);
+        return *this;
+      }
+
+    unique_lock&
+    lock(mutex& m)
     noexcept
       {
         // Return immediately if the same mutex is already held.

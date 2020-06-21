@@ -8,12 +8,14 @@
 namespace details_recursive_mutex {
 
 inline
-bool
+int
 do_rmutex_trylock(::pthread_mutex_t& rmutex)
 noexcept
   {
     int r = ::pthread_mutex_trylock(&rmutex);
-    return r == 0;
+    ROCKET_ASSERT_MSG(r != EINVAL,
+        "Failed to lock recursive mutex (possible data corruption)");
+    return r;
   }
 
 inline
