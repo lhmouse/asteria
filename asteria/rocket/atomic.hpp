@@ -35,7 +35,7 @@ class atomic
 
     atomic&
     operator=(value_type val)
-    volatile noexcept
+    noexcept
       { return this->store(val);  }
 
     atomic(const atomic&)
@@ -49,14 +49,14 @@ class atomic
     // load/store operations
     value_type
     load()
-    const volatile noexcept
+    const noexcept
       {
         return this->m_val.load(morderT);
       }
 
     atomic&
     store(value_type val)
-    volatile noexcept
+    noexcept
       {
         this->m_val.store(val, morderT);
         return *this;
@@ -64,59 +64,59 @@ class atomic
 
     operator
     value_type()
-    const volatile noexcept
+    const noexcept
       { return this->m_val.load(morderT);  }
 
     // exchange operations
     value_type
     exchange(value_type val)
-    volatile noexcept
+    noexcept
       { return this->m_val.exchange(val, morderT);  }
 
     bool
     compare_exchange(value_type& cmp, value_type xchg)
-    volatile noexcept
+    noexcept
       { return this->m_val.compare_exchange_weak(cmp, xchg, morderT);  }
 
     // arithmetic operations
     template<typename otherT>
     value_type
     fetch_add(otherT other)
-    volatile noexcept
+    noexcept
       { return this->m_val.fetch_add(other, morderT);  }
 
     template<typename otherT>
     value_type
     fetch_sub(otherT other)
-    volatile noexcept
+    noexcept
       { return this->m_val.fetch_sub(other, morderT);  }
 
     template<typename otherT>
     value_type
     fetch_and(otherT other)
-    volatile noexcept
+    noexcept
       { return this->m_val.fetch_and(other, morderT);  }
 
     template<typename otherT>
     value_type
     fetch_or(otherT other)
-    volatile noexcept
+    noexcept
       { return this->m_val.fetch_or(other, morderT);  }
 
     template<typename otherT>
     value_type
     fetch_xor(otherT other)
-    volatile noexcept
+    noexcept
       { return this->m_val.fetch_xor(other, morderT);  }
 
     value_type
     increment()
-    volatile noexcept
+    noexcept
       { return this->m_val.fetch_add(1, morderT) + 1;  }
 
     value_type
     decrement()
-    volatile noexcept
+    noexcept
       { return this->m_val.fetch_sub(1, morderT) - 1;  }
   };
 
