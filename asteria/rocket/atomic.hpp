@@ -5,7 +5,9 @@
 #define ROCKET_ATOMIC_HPP_
 
 #include "compiler.h"
+#include "assert.hpp"
 #include <atomic>  // std::atomic<>
+#include <utility>  // std::declval()
 
 namespace rocket {
 
@@ -68,8 +70,22 @@ class atomic
     store(value_type val)
     noexcept
       {
-        this->m_val.store(val, memorderT);
-        return *this;
+        switch(memorderT) {
+          case ::std::memory_order_relaxed:
+          case ::std::memory_order_acquire:
+          case ::std::memory_order_consume:
+            return this->m_val.store(val, ::std::memory_order_relaxed), *this;
+
+          case ::std::memory_order_release:
+          case ::std::memory_order_acq_rel:
+            return this->m_val.store(val, ::std::memory_order_release), *this;
+
+          case ::std::memory_order_seq_cst:
+            return this->m_val.store(val, memorderT), *this;
+
+          default:
+            ROCKET_ASSERT(false);
+        }
       }
 
     // exchange operations
@@ -85,44 +101,39 @@ class atomic
 
     // arithmetic operations
     template<typename otherT>
-    value_type
+    decltype(::std::declval<::std::atomic<value_type>&>().fetch_add(
+                                     ::std::declval<otherT>(), memorderT))
     fetch_add(otherT other)
     noexcept
       { return this->m_val.fetch_add(other, memorderT);  }
 
     template<typename otherT>
-    value_type
+    decltype(::std::declval<::std::atomic<value_type>&>().fetch_sub(
+                                     ::std::declval<otherT>(), memorderT))
     fetch_sub(otherT other)
     noexcept
       { return this->m_val.fetch_sub(other, memorderT);  }
 
     template<typename otherT>
-    value_type
+    decltype(::std::declval<::std::atomic<value_type>&>().fetch_and(
+                                     ::std::declval<otherT>(), memorderT))
     fetch_and(otherT other)
     noexcept
       { return this->m_val.fetch_and(other, memorderT);  }
 
     template<typename otherT>
-    value_type
+    decltype(::std::declval<::std::atomic<value_type>&>().fetch_or(
+                                     ::std::declval<otherT>(), memorderT))
     fetch_or(otherT other)
     noexcept
       { return this->m_val.fetch_or(other, memorderT);  }
 
     template<typename otherT>
-    value_type
+    decltype(::std::declval<::std::atomic<value_type>&>().fetch_xor(
+                                     ::std::declval<otherT>(), memorderT))
     fetch_xor(otherT other)
     noexcept
       { return this->m_val.fetch_xor(other, memorderT);  }
-
-    value_type
-    increment()
-    noexcept
-      { return this->m_val.fetch_add(1, memorderT) + 1;  }
-
-    value_type
-    decrement()
-    noexcept
-      { return this->m_val.fetch_sub(1, memorderT) - 1;  }
   };
 
 template<typename valueT>
