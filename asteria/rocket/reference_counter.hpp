@@ -17,8 +17,14 @@ class reference_counter;
 template<typename valueT>
 class reference_counter
   {
+    static_assert(is_integral<valueT>::value && !is_same<valueT, bool>::value,
+                  "invalid reference counter value type");
+
+  public:
+    using value_type  = typename ::std::atomic<valueT>::value_type;
+
   private:
-    ::std::atomic<valueT> m_nref;
+    ::std::atomic<value_type> m_nref;
 
   public:
     constexpr
@@ -28,7 +34,7 @@ class reference_counter
       { }
 
     explicit constexpr
-    reference_counter(valueT nref)
+    reference_counter(value_type nref)
     noexcept
       : m_nref(nref)
       { }
@@ -45,12 +51,6 @@ class reference_counter
       { return *this;  }
 
     ~reference_counter()
-      { this->do_terminate_if_shared();  }
-
-  private:
-    void
-    do_terminate_if_shared()
-    const
       {
         auto old = this->m_nref.load(::std::memory_order_relaxed);
         if(old > 1)
@@ -64,8 +64,7 @@ class reference_counter
     const noexcept
       { return ROCKET_EXPECT(this->m_nref.load(::std::memory_order_relaxed) == 1);  }
 
-    ROCKET_PURE_FUNCTION
-    valueT
+    value_type
     get()
     const noexcept
       { return this->m_nref.load(::std::memory_order_relaxed);  }
