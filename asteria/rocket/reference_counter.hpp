@@ -21,7 +21,7 @@ class reference_counter
                   "invalid reference counter value type");
 
   public:
-    using value_type  = typename ::std::atomic<valueT>::value_type;
+    using value_type  = valueT;
 
   private:
     ::std::atomic<value_type> m_nref;
