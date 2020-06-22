@@ -7,7 +7,6 @@
 #include "compiler.h"
 #include "assert.hpp"
 #include <atomic>  // std::atomic<>
-#include <utility>  // std::declval()
 
 namespace rocket {
 
@@ -101,36 +100,31 @@ class atomic
 
     // arithmetic operations
     template<typename otherT>
-    decltype(::std::declval<::std::atomic<value_type>&>().fetch_add(
-                                     ::std::declval<otherT>(), memorderT))
+    value_type
     fetch_add(otherT other)
     noexcept
       { return this->m_val.fetch_add(other, memorderT);  }
 
     template<typename otherT>
-    decltype(::std::declval<::std::atomic<value_type>&>().fetch_sub(
-                                     ::std::declval<otherT>(), memorderT))
+    value_type
     fetch_sub(otherT other)
     noexcept
       { return this->m_val.fetch_sub(other, memorderT);  }
 
     template<typename otherT>
-    decltype(::std::declval<::std::atomic<value_type>&>().fetch_and(
-                                     ::std::declval<otherT>(), memorderT))
+    value_type
     fetch_and(otherT other)
     noexcept
       { return this->m_val.fetch_and(other, memorderT);  }
 
     template<typename otherT>
-    decltype(::std::declval<::std::atomic<value_type>&>().fetch_or(
-                                     ::std::declval<otherT>(), memorderT))
+    value_type
     fetch_or(otherT other)
     noexcept
       { return this->m_val.fetch_or(other, memorderT);  }
 
     template<typename otherT>
-    decltype(::std::declval<::std::atomic<value_type>&>().fetch_xor(
-                                     ::std::declval<otherT>(), memorderT))
+    value_type
     fetch_xor(otherT other)
     noexcept
       { return this->m_val.fetch_xor(other, memorderT);  }
