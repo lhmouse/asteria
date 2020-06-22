@@ -9,7 +9,7 @@
 
 namespace rocket {
 
-template<typename valueT, ::std::memory_order morderT = ::std::memory_order_acq_rel>
+template<typename valueT, ::std::memory_order memorderT = ::std::memory_order_acq_rel>
 class atomic;
 
 /* Differences from `std::atomic`:
@@ -17,7 +17,7 @@ class atomic;
  * 2. Memory order is a template argument and cannot be specified elsewhere.
 **/
 
-template<typename valueT, ::std::memory_order morderT>
+template<typename valueT, ::std::memory_order memorderT>
 class atomic
   {
   public:
@@ -51,73 +51,83 @@ class atomic
     load()
     const noexcept
       {
-        return this->m_val.load(morderT);
+        switch(memorderT) {
+          case ::std::memory_order_relaxed:
+          case ::std::memory_order_release:
+            return this->m_val.load(::std::memory_order_relaxed);
+
+          case ::std::memory_order_acquire:
+          case ::std::memory_order_acq_rel:
+            return this->m_val.load(::std::memory_order_acquire);
+
+          case ::std::memory_order_consume:
+          case ::std::memory_order_seq_cst:
+            return this->m_val.load(memorderT);
+
+          default:
+            ROCKET_ASSERT(false);
+        }
       }
 
     atomic&
     store(value_type val)
     noexcept
       {
-        this->m_val.store(val, morderT);
+        this->m_val.store(val, memorderT);
         return *this;
       }
-
-    operator
-    value_type()
-    const noexcept
-      { return this->m_val.load(morderT);  }
 
     // exchange operations
     value_type
     exchange(value_type val)
     noexcept
-      { return this->m_val.exchange(val, morderT);  }
+      { return this->m_val.exchange(val, memorderT);  }
 
     bool
     compare_exchange(value_type& cmp, value_type xchg)
     noexcept
-      { return this->m_val.compare_exchange_weak(cmp, xchg, morderT);  }
+      { return this->m_val.compare_exchange_weak(cmp, xchg, memorderT);  }
 
     // arithmetic operations
     template<typename otherT>
     value_type
     fetch_add(otherT other)
     noexcept
-      { return this->m_val.fetch_add(other, morderT);  }
+      { return this->m_val.fetch_add(other, memorderT);  }
 
     template<typename otherT>
     value_type
     fetch_sub(otherT other)
     noexcept
-      { return this->m_val.fetch_sub(other, morderT);  }
+      { return this->m_val.fetch_sub(other, memorderT);  }
 
     template<typename otherT>
     value_type
     fetch_and(otherT other)
     noexcept
-      { return this->m_val.fetch_and(other, morderT);  }
+      { return this->m_val.fetch_and(other, memorderT);  }
 
     template<typename otherT>
     value_type
     fetch_or(otherT other)
     noexcept
-      { return this->m_val.fetch_or(other, morderT);  }
+      { return this->m_val.fetch_or(other, memorderT);  }
 
     template<typename otherT>
     value_type
     fetch_xor(otherT other)
     noexcept
-      { return this->m_val.fetch_xor(other, morderT);  }
+      { return this->m_val.fetch_xor(other, memorderT);  }
 
     value_type
     increment()
     noexcept
-      { return this->m_val.fetch_add(1, morderT) + 1;  }
+      { return this->m_val.fetch_add(1, memorderT) + 1;  }
 
     value_type
     decrement()
     noexcept
-      { return this->m_val.fetch_sub(1, morderT) - 1;  }
+      { return this->m_val.fetch_sub(1, memorderT) - 1;  }
   };
 
 template<typename valueT>
