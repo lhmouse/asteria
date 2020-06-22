@@ -23,4 +23,4 @@ sudo ./ci/checkinstall  \
   --maintainer="${_maintainer}"  \
   --exclude="${_tmpdir}"
 
-sudo ldconfig -v
+sudo ldconfig
