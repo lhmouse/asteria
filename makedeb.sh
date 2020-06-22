@@ -22,3 +22,5 @@ sudo ./ci/checkinstall  \
   --pkgrelease=1  \
   --maintainer="${_maintainer}"  \
   --exclude="${_tmpdir}"
+
+sudo ldconfig -v
