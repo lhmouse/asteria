@@ -6,6 +6,7 @@
 
 #include "compiler.h"
 #include "assert.hpp"
+#include "utilities.hpp"
 #include <atomic>  // std::atomic<>
 #include <exception>  // std::terminate()
 
