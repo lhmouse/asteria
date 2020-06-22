@@ -33,11 +33,6 @@ class atomic
       : m_val(val)
       { }
 
-    atomic&
-    operator=(value_type val)
-    noexcept
-      { return this->store(val);  }
-
     atomic(const atomic&)
       = delete;
 
