@@ -7,47 +7,6 @@
 
 namespace details_mutex {
 
-inline
-int
-do_mutex_trylock(::pthread_mutex_t& mutex)
-noexcept
-  {
-    int r = ::pthread_mutex_trylock(&mutex);
-    ROCKET_ASSERT_MSG(r != EINVAL,
-        "Failed to lock mutex (possible data corruption)");
-    return r;
-  }
-
-inline
-void
-do_mutex_lock(::pthread_mutex_t& mutex)
-noexcept
-  {
-    int r = ::pthread_mutex_lock(&mutex);
-    ROCKET_ASSERT_MSG(r == 0,
-        "Failed to lock mutex (possible deadlock or data corruption)");
-  }
-
-inline
-void
-do_mutex_unlock(::pthread_mutex_t& mutex)
-noexcept
-  {
-    int r = ::pthread_mutex_unlock(&mutex);
-    ROCKET_ASSERT_MSG(r == 0,
-        "Failed to unlock mutex (possible data corruption)");
-  }
-
-inline
-void
-do_mutex_destroy(::pthread_mutex_t& mutex)
-noexcept
-  {
-    int r = ::pthread_mutex_destroy(&mutex);
-    ROCKET_ASSERT_MSG(r == 0,
-        "Failed to destroy mutex (possible in use)");
-  }
-
 class stored_pointer
   {
   private:
@@ -86,7 +45,7 @@ class stored_pointer
       {
         auto ptr = ::std::exchange(this->m_ptr, ::std::move(ptr_new));
         if(ptr)
-          do_mutex_unlock(*ptr);
+          ::pthread_mutex_unlock(ptr);
       }
 
     void

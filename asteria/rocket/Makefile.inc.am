@@ -67,7 +67,6 @@ include_rocket_details_HEADERS =  \
   %reldir%/details/linear_buffer.ipp  \
   %reldir%/details/mutex.ipp  \
   %reldir%/details/recursive_mutex.ipp  \
-  %reldir%/details/condition_variable.ipp  \
   %reldir%/details/once_flag.ipp  \
   ${NOTHING}
 

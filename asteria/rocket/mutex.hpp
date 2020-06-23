@@ -21,7 +21,7 @@ class mutex
     class unique_lock;
 
   private:
-    ::pthread_mutex_t m_mutex = PTHREAD_ERRORCHECK_MUTEX_INITIALIZER_NP;
+    ::pthread_mutex_t m_mutex[1] = { PTHREAD_ERRORCHECK_MUTEX_INITIALIZER_NP };
 
   public:
     constexpr
@@ -37,7 +37,10 @@ class mutex
       = delete;
 
     ~mutex()
-      { details_mutex::do_mutex_destroy(this->m_mutex);  }
+      {
+        int r = ::pthread_mutex_destroy(this->m_mutex);
+        ROCKET_ASSERT(r == 0);
+      }
   };
 
 class mutex::unique_lock
@@ -79,7 +82,7 @@ class mutex::unique_lock
     bool
     is_locking(const mutex& m)
     const noexcept
-      { return this->m_sth.get() == ::std::addressof(m.m_mutex);  }
+      { return this->m_sth.get() == m.m_mutex;  }
 
     bool
     is_locking(const mutex&&)
@@ -100,13 +103,15 @@ class mutex::unique_lock
       {
         // Return immediately if the same mutex is already held.
         // Otherwise deadlocks would occur.
-        auto ptr = ::std::addressof(m.m_mutex);
+        auto ptr = m.m_mutex;
         if(ROCKET_UNEXPECT(ptr == this->m_sth.get()))
           return *this;
 
         // There shall be no gap between the unlock and lock operations.
         // If the mutex cannot be locked, there is no effect.
-        if(details_mutex::do_mutex_trylock(*ptr) != 0)
+        int r = ::pthread_mutex_trylock(ptr);
+        ROCKET_ASSERT(r != EINVAL);
+        if(r != 0)
           return *this;
 
         this->m_sth.reset(ptr);
@@ -119,12 +124,14 @@ class mutex::unique_lock
       {
         // Return immediately if the same mutex is already held.
         // Otherwise deadlocks would occur.
-        auto ptr = ::std::addressof(m.m_mutex);
+        auto ptr = m.m_mutex;
         if(ROCKET_UNEXPECT(ptr == this->m_sth.get()))
           return *this;
 
         // There shall be no gap between the unlock and lock operations.
-        details_mutex::do_mutex_lock(*ptr);
+        int r = ::pthread_mutex_lock(ptr);
+        ROCKET_ASSERT(r == 0);
+
         this->m_sth.reset(ptr);
         return *this;
       }

@@ -7,47 +7,6 @@
 
 namespace details_recursive_mutex {
 
-inline
-int
-do_rmutex_trylock(::pthread_mutex_t& rmutex)
-noexcept
-  {
-    int r = ::pthread_mutex_trylock(&rmutex);
-    ROCKET_ASSERT_MSG(r != EINVAL,
-        "Failed to lock recursive mutex (possible data corruption)");
-    return r;
-  }
-
-inline
-void
-do_rmutex_lock(::pthread_mutex_t& rmutex)
-noexcept
-  {
-    int r = ::pthread_mutex_lock(&rmutex);
-    ROCKET_ASSERT_MSG(r == 0,
-        "Failed to lock recursive mutex (possible data corruption)");
-  }
-
-inline
-void
-do_rmutex_unlock(::pthread_mutex_t& rmutex)
-noexcept
-  {
-    int r = ::pthread_mutex_unlock(&rmutex);
-    ROCKET_ASSERT_MSG(r == 0,
-        "Failed to unlock recursive mutex (possible data corruption)");
-  }
-
-inline
-void
-do_rmutex_destroy(::pthread_mutex_t& rmutex)
-noexcept
-  {
-    int r = ::pthread_mutex_destroy(&rmutex);
-    ROCKET_ASSERT_MSG(r == 0,
-        "Failed to destroy recursive mutex (possible in use)");
-  }
-
 class stored_pointer
   {
   private:
@@ -86,7 +45,7 @@ class stored_pointer
       {
         auto ptr = ::std::exchange(this->m_ptr, ::std::move(ptr_new));
         if(ptr)
-          do_rmutex_unlock(*ptr);
+          ::pthread_mutex_unlock(ptr);
       }
 
     void

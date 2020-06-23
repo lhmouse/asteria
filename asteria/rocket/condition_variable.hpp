@@ -13,12 +13,10 @@ namespace rocket {
 
 class condition_variable;
 
-#include "details/condition_variable.ipp"
-
 class condition_variable
   {
   private:
-    ::pthread_cond_t m_cond = PTHREAD_COND_INITIALIZER;
+    ::pthread_cond_t m_cond[1] = { PTHREAD_COND_INITIALIZER };
 
   public:
     constexpr
@@ -34,7 +32,10 @@ class condition_variable
       = delete;
 
     ~condition_variable()
-      { details_condition_variable::do_cond_destroy(this->m_cond);  }
+      {
+        int r = ::pthread_cond_destroy(this->m_cond);
+        ROCKET_ASSERT(r == 0);
+      }
 
   private:
     static
@@ -80,8 +81,8 @@ class condition_variable
         if(make_time(ts))
           for(;;) {
             // Wait until `ts`.
-            int r = details_condition_variable::do_cond_timedwait(
-                                                     this->m_cond, *owns, ts);
+            int r = ::pthread_cond_timedwait(this->m_cond, owns, &ts);
+            ROCKET_ASSERT(r != EINVAL);
 
             // Reset the lock, as the mutex shall have been locked again.
             ROCKET_ASSERT(lock.m_sth.get() == nullptr);
@@ -102,7 +103,8 @@ class condition_variable
         else
           for(;;) {
             // Wait forever.
-            details_condition_variable::do_cond_wait(this->m_cond, *owns);
+            int r = ::pthread_cond_wait(this->m_cond, owns);
+            ROCKET_ASSERT(r != EINVAL);
 
             // Reset the lock, as the mutex shall have been locked again.
             ROCKET_ASSERT(lock.m_sth.get() == nullptr);
@@ -172,12 +174,18 @@ class condition_variable
     void
     notify_one()
     noexcept
-      { details_condition_variable::do_cond_signal(this->m_cond);  }
+      {
+        int r = ::pthread_cond_signal(this->m_cond);
+        ROCKET_ASSERT(r == 0);
+      }
 
     void
     notify_all()
     noexcept
-      { details_condition_variable::do_cond_broadcast(this->m_cond);  }
+      {
+        int r = ::pthread_cond_broadcast(this->m_cond);
+        ROCKET_ASSERT(r == 0);
+      }
   };
 
 }  // namespace rocket
