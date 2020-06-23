@@ -41,97 +41,126 @@ class atomic
     operator=(const atomic&)
       = delete;
 
+  private:
+    static constexpr
+    ::std::memory_order
+    do_order_acquire()
+    noexcept
+      {
+        switch(memorderT) {
+          case ::std::memory_order_consume:
+            return ::std::memory_order_consume;
+
+          case ::std::memory_order_acquire:
+          case ::std::memory_order_release:
+          case ::std::memory_order_acq_rel:
+            return ::std::memory_order_acquire;
+
+          default:  // relaxed || seq_cst
+            return memorderT;
+        }
+      }
+
+    static constexpr
+    ::std::memory_order
+    do_order_release()
+    noexcept
+      {
+        switch(memorderT) {
+          case ::std::memory_order_consume:
+          case ::std::memory_order_acquire:
+          case ::std::memory_order_release:
+          case ::std::memory_order_acq_rel:
+            return ::std::memory_order_release;
+
+          default:  // relaxed || seq_cst
+            return memorderT;
+        }
+      }
+
+    static constexpr
+    ::std::memory_order
+    do_order_acq_rel()
+    noexcept
+      {
+        switch(memorderT) {
+          case ::std::memory_order_consume:
+          case ::std::memory_order_acquire:
+          case ::std::memory_order_release:
+          case ::std::memory_order_acq_rel:
+            return ::std::memory_order_acq_rel;
+
+          default:  // relaxed || seq_cst
+            return memorderT;
+        }
+      }
+
   public:
     // load/store operations
     value_type
     load()
     const noexcept
-      {
-        switch(memorderT) {
-          case ::std::memory_order_relaxed:
-          case ::std::memory_order_release:
-            return this->m_val.load(::std::memory_order_relaxed);
-
-          case ::std::memory_order_acquire:
-          case ::std::memory_order_acq_rel:
-            return this->m_val.load(::std::memory_order_acquire);
-
-          case ::std::memory_order_consume:
-          case ::std::memory_order_seq_cst:
-            return this->m_val.load(memorderT);
-
-          default:
-            ROCKET_ASSERT(false);
-        }
-      }
+      { return this->m_val.load(this->do_order_acquire());  }
 
     atomic&
     store(value_type val)
     noexcept
-      {
-        switch(memorderT) {
-          case ::std::memory_order_relaxed:
-          case ::std::memory_order_acquire:
-          case ::std::memory_order_consume:
-            return this->m_val.store(val, ::std::memory_order_relaxed), *this;
-
-          case ::std::memory_order_release:
-          case ::std::memory_order_acq_rel:
-            return this->m_val.store(val, ::std::memory_order_release), *this;
-
-          case ::std::memory_order_seq_cst:
-            return this->m_val.store(val, memorderT), *this;
-
-          default:
-            ROCKET_ASSERT(false);
-        }
-      }
+      { return this->m_val.store(val, this->do_order_release()), *this;  }
 
     // exchange operations
     value_type
     exchange(value_type val)
     noexcept
-      { return this->m_val.exchange(val, memorderT);  }
+      { return this->m_val.exchange(val, this->do_order_acq_rel());  }
 
     bool
     compare_exchange(value_type& cmp, value_type xchg)
     noexcept
-      { return this->m_val.compare_exchange_weak(cmp, xchg, memorderT);  }
+      { return this->m_val.compare_exchange_weak(cmp, xchg, this->do_order_acq_rel());  }
 
     // arithmetic operations
     template<typename otherT>
     value_type
     fetch_add(otherT other)
     noexcept
-      { return this->m_val.fetch_add(other, memorderT);  }
+      { return this->m_val.fetch_add(other, this->do_order_acq_rel());  }
 
     template<typename otherT>
     value_type
     fetch_sub(otherT other)
     noexcept
-      { return this->m_val.fetch_sub(other, memorderT);  }
+      { return this->m_val.fetch_sub(other, this->do_order_acq_rel());  }
 
     template<typename otherT>
     value_type
     fetch_and(otherT other)
     noexcept
-      { return this->m_val.fetch_and(other, memorderT);  }
+      { return this->m_val.fetch_and(other, this->do_order_acq_rel());  }
 
     template<typename otherT>
     value_type
     fetch_or(otherT other)
     noexcept
-      { return this->m_val.fetch_or(other, memorderT);  }
+      { return this->m_val.fetch_or(other, this->do_order_acq_rel());  }
 
     template<typename otherT>
     value_type
     fetch_xor(otherT other)
     noexcept
-      { return this->m_val.fetch_xor(other, memorderT);  }
+      { return this->m_val.fetch_xor(other, this->do_order_acq_rel());  }
   };
 
 template<typename valueT>
 using atomic_relaxed = atomic<valueT, ::std::memory_order_relaxed>;
+
+template<typename valueT>
+using atomic_consume = atomic<valueT, ::std::memory_order_consume>;
+
+template<typename valueT>
+using atomic_acquire = atomic<valueT, ::std::memory_order_acquire>;
+
+template<typename valueT>
+using atomic_release = atomic<valueT, ::std::memory_order_release>;
 
 template<typename valueT>
 using atomic_acq_rel = atomic<valueT, ::std::memory_order_acq_rel>;
