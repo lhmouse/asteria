@@ -877,6 +877,10 @@ do_accept_for_initializer_opt(Token_Stream& tstrm)
     if(qinit)
       return do_blockify_statement(::std::move(*qinit));
 
+    qinit = do_accept_expression_statement_opt(tstrm);
+    if(qinit)
+      return do_blockify_statement(::std::move(*qinit));
+
     return nullopt;
   }
 
