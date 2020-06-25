@@ -38,4 +38,7 @@
       /* unreachable */  \
     while(false)
 
+// Set kill timer.
+static const auto asteria_test_alarm = ::alarm(30);
+
 #endif
