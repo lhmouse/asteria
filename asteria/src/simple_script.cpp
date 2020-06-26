@@ -48,7 +48,7 @@ Simple_Script::
 reload_file(const char* path)
   {
     // Resolve the path to an absolute one.
-    uptr<char, void (&)(void*)> abspath(::realpath(path, nullptr), ::free);
+    auto abspath = ::rocket::make_unique_handle(::realpath(path, nullptr), ::free);
     if(!abspath)
       ASTERIA_THROW("Could not open script file '$2'\n"
                     "[`realpath()` failed: $1]",

@@ -159,7 +159,7 @@ std_filesystem_get_working_directory()
   {
     // Pass a null pointer to request dynamic allocation.
     // Note this behavior is an extension that exists almost everywhere.
-    uptr<char, void (&)(void*)> qcwd(::getcwd(nullptr, 0), ::free);
+    auto qcwd = ::rocket::make_unique_handle(::getcwd(nullptr, 0), ::free);
     if(!qcwd)
       ASTERIA_THROW("Could not get current working directory\n"
                     "[`getcwd()` failed: $1]",
@@ -171,7 +171,7 @@ V_string
 std_filesystem_get_real_path(V_string path)
   {
     // Pass a null pointer to request dynamic allocation.
-    uptr<char, void (&)(void*)> abspath(::realpath(path.safe_c_str(), nullptr), ::free);
+    auto abspath = ::rocket::make_unique_handle(::realpath(path.safe_c_str(), nullptr), ::free);
     if(!abspath)
       ASTERIA_THROW("Could not resolve path '$2'\n"
                     "[`realpath()` failed: $1]",
@@ -568,9 +568,9 @@ std_filesystem_file_copy_from(V_string path_new, V_string path_old)
                     noadl::format_errno(errno), path_old);
 
     // Allocate the I/O buffer.
+    uptr<uint8_t, void (&)(void*)> pbuf(::operator delete);
     size_t nbuf = static_cast<size_t>(stb_old.st_blksize | 0x10'00000);
-    uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)),
-                                        ::operator delete);
+    pbuf.reset(static_cast<uint8_t*>(::operator new(nbuf)));
 
     // Copy all contents.
     for(;;) {

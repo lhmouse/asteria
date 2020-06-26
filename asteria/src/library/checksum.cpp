@@ -1366,17 +1366,20 @@ template<typename HasherT>
 decltype(::std::declval<HasherT&>().finish())
 do_hash_file(const V_string& path)
   {
+    // Open the file for reading.
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
     if(!fd)
       ASTERIA_THROW("Could not open file '$2'\n"
                     "[`open()` failed: $1]",
                     noadl::format_errno(errno), path);
 
-    HasherT h;
+    // Allocate the I/O buffer.
+    uptr<uint8_t, void (&)(void*)> pbuf(::operator delete);
     static constexpr size_t nbuf = 16384;
-    uptr<uint8_t, void (&)(void*)> pbuf(static_cast<uint8_t*>(::operator new(nbuf)),
-                                        ::operator delete);
+    pbuf.reset(static_cast<uint8_t*>(::operator new(nbuf)));
 
+    // Read bytes from the file and hash them.
+    HasherT h;
     for(;;) {
       ::ssize_t nread = ::read(fd, pbuf, nbuf);
       if(nread < 0)

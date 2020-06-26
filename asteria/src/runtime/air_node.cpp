@@ -3712,12 +3712,11 @@ struct AIR_Traits<AIR_Node::S_import_call>
           path.append(value.as_string());
         }
 
-        uptr<char, void (&)(void*)> abspath(::realpath(path.safe_c_str(), nullptr), ::free);
+        auto abspath = ::rocket::make_unique_handle(::realpath(path.safe_c_str(), nullptr), ::free);
         if(!abspath)
           ASTERIA_THROW("Could not open script file '$2'\n"
                         "[`realpath()` failed: $1]",
                         noadl::format_errno(errno), path);
-
         path.assign(abspath);
 
         // Compile the script file into a function object.
