@@ -26,7 +26,7 @@ const
         const auto& arr = parent.as_array();
 
         // Return a pointer to the element at the given index.
-        auto w = noadl::wrap_index(altr.index, arr.size());
+        auto w = wrap_index(altr.index, arr.size());
         uint64_t nadd = w.nprepend | w.nappend;
         if(nadd != 0)
           return nullptr;
@@ -108,7 +108,7 @@ const
         auto& arr = parent.open_array();
 
         // Return a pointer to the element at the given index.
-        auto w = noadl::wrap_index(altr.index, arr.size());
+        auto w = wrap_index(altr.index, arr.size());
         uint64_t nadd = w.nprepend | w.nappend;
         if(nadd != 0)
           return nullptr;
@@ -190,7 +190,7 @@ const
         auto& arr = parent.open_array();
 
         // Return a pointer to the element at the given index if the index is valid.
-        auto w = noadl::wrap_index(altr.index, arr.size());
+        auto w = wrap_index(altr.index, arr.size());
         uint64_t nadd = w.nprepend | w.nappend;
         if(nadd != 0) {
           // Create elements as needed.
@@ -268,7 +268,7 @@ const
         auto& arr = parent.open_array();
 
         // Erase the element at the given index and return it.
-        auto w = noadl::wrap_index(altr.index, arr.size());
+        auto w = wrap_index(altr.index, arr.size());
         uint64_t nadd = w.nprepend | w.nappend;
         if(nadd != 0)
           return V_null();

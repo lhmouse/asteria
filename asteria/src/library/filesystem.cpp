@@ -57,7 +57,7 @@ do_remove_recursive(const char* path)
 
           ASTERIA_THROW("Could not remove directory '$2'\n"
                         "[`rmdir()` failed: $1]",
-                        noadl::format_errno(errno), elem.path);
+                        format_errno(errno), elem.path);
         }
 
         case rm_disp_unlink: {
@@ -73,7 +73,7 @@ do_remove_recursive(const char* path)
 
           ASTERIA_THROW("Could not remove file '$2'\n"
                         "[`unlink()` failed: $1]",
-                        noadl::format_errno(errno), elem.path);
+                        format_errno(errno), elem.path);
         }
 
         case rm_disp_expand: {
@@ -88,7 +88,7 @@ do_remove_recursive(const char* path)
           if(!dp)
             ASTERIA_THROW("Could not open directory '$2'\n"
                           "[`opendir()` failed: $1]",
-                          noadl::format_errno(errno), elem.path);
+                          format_errno(errno), elem.path);
 
           // Append all entries.
           while(auto next = ::readdir(dp)) {
@@ -116,7 +116,7 @@ do_remove_recursive(const char* path)
               if(::lstat(child.c_str(), &stb) != 0)
                 ASTERIA_THROW("Could not get information about '$2'\n"
                               "[`lstat()` failed: $1]",
-                              noadl::format_errno(errno), child);
+                              format_errno(errno), child);
 
               // Check whether the child path denotes a directory.
               is_dir = S_ISDIR(stb.st_mode);
@@ -146,7 +146,7 @@ do_write_loop(int fd, const void* data, size_t size, const V_string& path)
       if(nwrtn < 0)
         ASTERIA_THROW("Error writing file '$2'\n"
                       "[`write()` failed: $1]",
-                      noadl::format_errno(errno), path);
+                      format_errno(errno), path);
       bp += nwrtn;
     }
     return bp;
@@ -163,7 +163,7 @@ std_filesystem_get_working_directory()
     if(!qcwd)
       ASTERIA_THROW("Could not get current working directory\n"
                     "[`getcwd()` failed: $1]",
-                    noadl::format_errno(errno));
+                    format_errno(errno));
     return V_string(qcwd);
   }
 
@@ -175,7 +175,7 @@ std_filesystem_get_real_path(V_string path)
     if(!abspath)
       ASTERIA_THROW("Could not resolve path '$2'\n"
                     "[`realpath()` failed: $1]",
-                    noadl::format_errno(errno), path);
+                    format_errno(errno), path);
     return V_string(abspath);
   }
 
@@ -233,7 +233,7 @@ std_filesystem_move_from(V_string path_new, V_string path_old)
     if(::rename(path_old.safe_c_str(), path_new.safe_c_str()) != 0)
       ASTERIA_THROW("Could not move file '$2' to '$3'\n"
                     "[`rename()` failed: $1]",
-                    noadl::format_errno(errno), path_old, path_new);
+                    format_errno(errno), path_old, path_new);
   }
 
 V_integer
@@ -260,7 +260,7 @@ std_filesystem_remove_recursive(V_string path)
 
         ASTERIA_THROW("Could not remove file '$2'\n"
                       "[`unlink()` failed: $1]",
-                      noadl::format_errno(errno), path);
+                      format_errno(errno), path);
       }
 
       case EEXIST:
@@ -272,7 +272,7 @@ std_filesystem_remove_recursive(V_string path)
     // Throw an exception for general failures.
     ASTERIA_THROW("Could not remove directory '$2'\n"
                   "[`rmdir()` failed: $1]",
-                  noadl::format_errno(errno), path);
+                  format_errno(errno), path);
   }
 
 V_object
@@ -283,7 +283,7 @@ std_filesystem_directory_list(V_string path)
     if(!dp)
       ASTERIA_THROW("Could not open directory '$2'\n"
                     "[`opendir()` failed: $1]",
-                    noadl::format_errno(errno), path);
+                    format_errno(errno), path);
 
     // Append all entries.
     V_object entries;
@@ -314,7 +314,7 @@ std_filesystem_directory_list(V_string path)
         if(::lstat(child.c_str(), &stb) != 0)
           ASTERIA_THROW("Could not get information about '$2'\n"
                         "[`lstat()` failed: $1]",
-                        noadl::format_errno(errno), child);
+                        format_errno(errno), child);
 
         // Check whether the child path denotes a directory.
         is_dir = S_ISDIR(stb.st_mode);
@@ -349,7 +349,7 @@ std_filesystem_directory_create(V_string path)
       if(::stat(path.c_str(), &stb) != 0)
         ASTERIA_THROW("Could not get information about '$2'\n"
                       "[`stat()` failed: $1]",
-                      noadl::format_errno(errno), path);
+                      format_errno(errno), path);
 
       if(S_ISDIR(stb.st_mode))
         return 0;
@@ -357,13 +357,13 @@ std_filesystem_directory_create(V_string path)
       // Throw an exception about the previous error.
       ASTERIA_THROW("Could not create directory '$2'\n"
                     "[`mkdir()` failed: $1]",
-                    noadl::format_errno(EEXIST), path);
+                    format_errno(EEXIST), path);
     }
 
     // Throw an exception for general failures.
     ASTERIA_THROW("Could not create directory '$2'\n"
                   "[`mkdir()` failed: $1]",
-                  noadl::format_errno(errno), path);
+                  format_errno(errno), path);
   }
 
 V_integer
@@ -380,7 +380,7 @@ std_filesystem_directory_remove(V_string path)
     // Throw an exception for general failures.
     ASTERIA_THROW("Could remove directory '$2'\n"
                   "[`rmdir()` failed: $1]",
-                  noadl::format_errno(errno), path);
+                  format_errno(errno), path);
   }
 
 V_string
@@ -396,7 +396,7 @@ std_filesystem_file_read(V_string path, optV_integer offset, optV_integer limit)
     if(!fd)
       ASTERIA_THROW("Could not open file '$2'\n"
                     "[`open()` failed: $1]",
-                    noadl::format_errno(errno), path);
+                    format_errno(errno), path);
 
     // We return data that have been read as a byte string.
     V_string data;
@@ -409,14 +409,14 @@ std_filesystem_file_read(V_string path, optV_integer offset, optV_integer limit)
       if(nread < 0)
         ASTERIA_THROW("Error reading file '$2'\n"
                       "[`pread()` failed: $1]",
-                      noadl::format_errno(errno), path);
+                      format_errno(errno), path);
     }
     else {
       nread = ::read(fd, data.mut_data(), data.size());
       if(nread < 0)
         ASTERIA_THROW("Error reading file '$2'\n"
                       "[`read()` failed: $1]",
-                      noadl::format_errno(errno), path);
+                      format_errno(errno), path);
     }
     data.erase(static_cast<size_t>(nread));
     return data;
@@ -436,7 +436,7 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
     if(!fd)
       ASTERIA_THROW("Could not open file '$2'\n"
                     "[`open()` failed: $1]",
-                    noadl::format_errno(errno), path);
+                    format_errno(errno), path);
 
     // These are reused for each iteration.
     V_string data;
@@ -458,14 +458,14 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
         if(nread < 0)
           ASTERIA_THROW("Error reading file '$2'\n"
                         "[`pread()` failed: $1]",
-                        noadl::format_errno(errno), path);
+                        format_errno(errno), path);
       }
       else {
         nread = ::read(fd, data.mut_data(), data.size());
         if(nread < 0)
           ASTERIA_THROW("Error reading file '$2'\n"
                         "[`read()` failed: $1]",
-                        noadl::format_errno(errno), path);
+                        format_errno(errno), path);
       }
       if(nread == 0)
         break;
@@ -506,7 +506,7 @@ std_filesystem_file_write(V_string path, V_string data, optV_integer offset)
     if(!fd)
       ASTERIA_THROW("Could not open file '$2'\n"
                     "[`open()` failed: $1]",
-                    noadl::format_errno(errno), path);
+                    format_errno(errno), path);
 
     // Set the file pointer when an offset is specified, even when it is an explicit zero.
     if(offset) {
@@ -514,7 +514,7 @@ std_filesystem_file_write(V_string path, V_string data, optV_integer offset)
       if(::ftruncate(fd, roffset) != 0)
         ASTERIA_THROW("Could not truncate file '$2'\n"
                       "[`ftruncate()` failed: $1]",
-                      noadl::format_errno(errno), path);
+                      format_errno(errno), path);
     }
 
     // Write all data.
@@ -534,7 +534,7 @@ std_filesystem_file_append(V_string path, V_string data, optV_boolean exclusive)
     if(!fd)
       ASTERIA_THROW("Could not open file '$2'\n"
                     "[`open()` failed: $1]",
-                    noadl::format_errno(errno), path);
+                    format_errno(errno), path);
 
     // Append all data to the end.
     do_write_loop(fd, data.data(), data.size(), path);
@@ -548,7 +548,7 @@ std_filesystem_file_copy_from(V_string path_new, V_string path_old)
     if(!fd_old)
       ASTERIA_THROW("Could not open source file '$2'\n"
                     "[`open()` failed: $1]",
-                    noadl::format_errno(errno), path_old);
+                    format_errno(errno), path_old);
 
     // Create the new file, discarding its contents.
     // The file is initially write-only.
@@ -558,14 +558,14 @@ std_filesystem_file_copy_from(V_string path_new, V_string path_old)
     if(!fd_new)
       ASTERIA_THROW("Could not create destination file '$2'\n"
                     "[`open()` failed: $1]",
-                    noadl::format_errno(errno), path_new);
+                    format_errno(errno), path_new);
 
     // Get the file mode and preferred I/O block size.
     struct ::stat stb_old;
     if(::fstat(fd_old, &stb_old) != 0)
       ASTERIA_THROW("Could not get information about source file '$2'\n"
                     "[`fstat()` failed: $1]",
-                    noadl::format_errno(errno), path_old);
+                    format_errno(errno), path_old);
 
     // Allocate the I/O buffer.
     uptr<uint8_t, void (&)(void*)> pbuf(::operator delete);
@@ -578,7 +578,7 @@ std_filesystem_file_copy_from(V_string path_new, V_string path_old)
       if(nread < 0)
         ASTERIA_THROW("Error reading file '$2'\n"
                       "[`read()` failed: $1]",
-                      noadl::format_errno(errno), path_old);
+                      format_errno(errno), path_old);
 
       if(nread == 0)
         break;
@@ -591,7 +591,7 @@ std_filesystem_file_copy_from(V_string path_new, V_string path_old)
     if(::fchmod(fd_new, stb_old.st_mode) != 0)
       ASTERIA_THROW("Could not set permission of '$2'\n"
                     "[`fchmod()` failed: $1]",
-                    noadl::format_errno(errno), path_new);
+                    format_errno(errno), path_new);
   }
 
 V_integer
@@ -608,7 +608,7 @@ std_filesystem_file_remove(V_string path)
     // Throw an exception for general failures.
     ASTERIA_THROW("Could not remove file '$2'\n"
                   "[`unlink()` failed: $1]",
-                  noadl::format_errno(errno), path);
+                  format_errno(errno), path);
   }
 
 void

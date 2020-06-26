@@ -1371,7 +1371,7 @@ do_hash_file(const V_string& path)
     if(!fd)
       ASTERIA_THROW("Could not open file '$2'\n"
                     "[`open()` failed: $1]",
-                    noadl::format_errno(errno), path);
+                    format_errno(errno), path);
 
     // Allocate the I/O buffer.
     uptr<uint8_t, void (&)(void*)> pbuf(::operator delete);
@@ -1385,7 +1385,7 @@ do_hash_file(const V_string& path)
       if(nread < 0)
         ASTERIA_THROW("Error reading file '$2'\n"
                       "[`read()` failed: $1]",
-                      noadl::format_errno(errno), path);
+                      format_errno(errno), path);
 
       if(nread == 0)
         break;  // EOF

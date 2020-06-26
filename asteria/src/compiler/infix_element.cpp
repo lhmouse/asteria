@@ -51,7 +51,7 @@ const noexcept
         if(altr.assign)
           return precedence_assignment;
 
-        switch(noadl::weaken_enum(altr.xop)) {
+        switch(weaken_enum(altr.xop)) {
           case xop_mul:
           case xop_div:
           case xop_mod:

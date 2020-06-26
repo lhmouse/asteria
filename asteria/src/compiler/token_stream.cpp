@@ -225,7 +225,7 @@ do_collect_digits(cow_string& tstr, Line_Reader& reader, size_t& tlen, uint8_t m
         tlen++;
         continue;
       }
-      if(!noadl::is_cctype(c, mask))
+      if(!is_cctype(c, mask))
         break;
 
       // Collect a digit.
@@ -272,7 +272,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool i
     if((tlen != 0) && do_may_infix_operators_follow(tokens))
       return false;
 
-    if(!noadl::is_cctype(reader.peek(tlen), cctype_digit))
+    if(!is_cctype(reader.peek(tlen), cctype_digit))
       return false;
 
     // These are characterstics of the literal.
@@ -587,7 +587,7 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
             if(c == 0)
               throw Parser_Error(parser_status_escape_sequence_incomplete, reader.tell(), tlen);
 
-            if(!noadl::is_cctype(c, cctype_xdigit))
+            if(!is_cctype(c, cctype_xdigit))
               throw Parser_Error(parser_status_escape_sequence_invalid_hex, reader.tell(), tlen);
 
             tlen++;
@@ -601,7 +601,7 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
             break;
           }
           // Write a Unicode code point.
-          if(!noadl::utf8_encode(val, cp))
+          if(!utf8_encode(val, cp))
             throw Parser_Error(parser_status_escape_utf_code_point_invalid, reader.tell(), tlen);
 
           break;
@@ -679,7 +679,7 @@ do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Line_Reader& reader, 
   {
     // identifier ::=
     //   PCRE([A-Za-z_][A-Za-z_0-9]*)
-    if(!noadl::is_cctype(reader.peek(), cctype_namei))
+    if(!is_cctype(reader.peek(), cctype_namei))
       return false;
 
     // Get the length of this identifier.
@@ -688,7 +688,7 @@ do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Line_Reader& reader, 
       char next = reader.peek(tlen);
       if(next == 0)
         break;
-      if(!noadl::is_cctype(next, cctype_namei | cctype_digit))
+      if(!is_cctype(next, cctype_namei | cctype_digit))
         break;
       tlen++;
     }
@@ -750,7 +750,7 @@ reload(tinybuf& cbuf, const cow_string& file)
         // Decode a code point.
         char32_t cp;
         auto tptr = reader.data();
-        if(!noadl::utf8_decode(cp, tptr, reader.navail()))
+        if(!utf8_decode(cp, tptr, reader.navail()))
           throw Parser_Error(parser_status_utf8_sequence_invalid, reader.tell(), reader.navail());
 
         auto u8len = static_cast<size_t>(tptr - reader.data());
@@ -782,7 +782,7 @@ reload(tinybuf& cbuf, const cow_string& file)
           continue;
         }
         // Read a character.
-        if(noadl::is_cctype(reader.peek(), cctype_space)) {
+        if(is_cctype(reader.peek(), cctype_space)) {
           // Skip a space.
           reader.consume(1);
           continue;

@@ -1268,7 +1268,7 @@ std_string_utf8_validate(V_string text)
     while(offset < text.size()) {
       // Try decoding a code point.
       char32_t cp;
-      if(!noadl::utf8_decode(cp, text, offset))
+      if(!utf8_decode(cp, text, offset))
         // This sequence is invalid.
         return false;
     }
@@ -1283,11 +1283,11 @@ std_string_utf8_encode(V_integer code_point, optV_boolean permissive)
 
     // Try encoding the code point.
     auto cp = static_cast<char32_t>(::rocket::clamp(code_point, -1, INT32_MAX));
-    if(!noadl::utf8_encode(text, cp)) {
+    if(!utf8_encode(text, cp)) {
       // This comparison with `true` is by intention, because it may be unset.
       if(permissive != true)
         ASTERIA_THROW("Invalid UTF code point (value `$1`)", code_point);
-      noadl::utf8_encode(text, 0xFFFD);
+      utf8_encode(text, 0xFFFD);
     }
     return text;
   }
@@ -1301,11 +1301,11 @@ std_string_utf8_encode(V_array code_points, optV_boolean permissive)
       // Try encoding the code point.
       V_integer value = elem.as_integer();
       auto cp = static_cast<char32_t>(::rocket::clamp(value, -1, INT32_MAX));
-      if(!noadl::utf8_encode(text, cp)) {
+      if(!utf8_encode(text, cp)) {
         // This comparison with `true` is by intention, because it may be unset.
         if(permissive != true)
           ASTERIA_THROW("Invalid UTF code point (value `$1`)", value);
-        noadl::utf8_encode(text, 0xFFFD);
+        utf8_encode(text, 0xFFFD);
       }
     }
     return text;
@@ -1321,7 +1321,7 @@ std_string_utf8_decode(V_string text, optV_boolean permissive)
     while(offset < text.size()) {
       // Try decoding a code point.
       char32_t cp;
-      if(!noadl::utf8_decode(cp, text, offset)) {
+      if(!utf8_decode(cp, text, offset)) {
         // This comparison with `true` is by intention, because it may be unset.
         if(permissive != true)
           ASTERIA_THROW("Invalid UTF-8 string");

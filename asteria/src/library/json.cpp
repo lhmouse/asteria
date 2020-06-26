@@ -133,7 +133,7 @@ final
     tinyfmt&
     break_line(tinyfmt& fmt)
     const override
-      { return fmt << noadl::pwrap(this->m_add, this->m_cur);  }
+      { return fmt << pwrap(this->m_add, this->m_cur);  }
 
     void
     increment_level()
@@ -160,7 +160,7 @@ do_quote_string(tinyfmt& fmt, const cow_string& str)
     while(offset < str.size()) {
       // Convert UTF-8 to UTF-16.
       char32_t cp;
-      if(!noadl::utf8_decode(cp, str, offset))
+      if(!utf8_decode(cp, str, offset))
         // Invalid UTF-8 code units are replaced with the replacement character.
         cp = 0xFFFD;
 
@@ -204,7 +204,7 @@ do_quote_string(tinyfmt& fmt, const cow_string& str)
           // Encode the character in UTF-16.
           char16_t ustr[2];
           char16_t* epos = ustr;
-          noadl::utf16_encode(epos, cp);
+          utf16_encode(epos, cp);
 
           // Write code units.
           ::rocket::ascii_numput nump;
@@ -226,9 +226,9 @@ tinyfmt&
 do_format_object_key(tinyfmt& fmt, bool json5, const Indenter& indent, const cow_string& name)
   {
     // Write the key.
-    if(json5 && name.size() && noadl::is_cctype(name[0], cctype_namei) &&
+    if(json5 && name.size() && is_cctype(name[0], cctype_namei) &&
                 ::std::all_of(name.begin() + 1, name.end(),
-                              [](char c) { return noadl::is_cctype(c, cctype_namei | cctype_digit);  }))
+                              [](char c) { return is_cctype(c, cctype_namei | cctype_digit);  }))
       fmt << name;
     else
       do_quote_string(fmt, name);
@@ -281,7 +281,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
 
     for(;;) {
       // Format a value. `qvalue` must always point to a valid value here.
-      switch(noadl::weaken_enum(qvalue->vtype())) {
+      switch(weaken_enum(qvalue->vtype())) {
         case vtype_boolean:
           // Write `true` or `false`.
           fmt << qvalue->as_boolean();
@@ -501,11 +501,11 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
       if(!qtok)
         throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
 
-      switch(noadl::weaken_enum(qtok->index())) {
+      switch(weaken_enum(qtok->index())) {
         case Token::index_punctuator: {
           // Accept a `+`, `-`, `[` or `{`.
           auto punct = qtok->as_punctuator();
-          switch(noadl::weaken_enum(punct)) {
+          switch(weaken_enum(punct)) {
             case punctuator_add:
             case punctuator_sub: {
               cow_string name;
@@ -752,7 +752,7 @@ std_json_parse_file(V_string path)
     if(!fp)
       ASTERIA_THROW("Could not open file '$2'\n"
                     "[`fopen()` failed: $1]",
-                    noadl::format_errno(errno), path);
+                    format_errno(errno), path);
 
     // Parse characters from the file.
     ::setbuf(fp, nullptr);

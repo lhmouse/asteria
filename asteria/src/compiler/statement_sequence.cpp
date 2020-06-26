@@ -1547,7 +1547,7 @@ do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tst
       throw Parser_Error(parser_status_open_brace_or_equal_initializer_expected, tstrm.next_sloc(),
                          tstrm.next_length());
 
-    Expression_Unit::S_closure_function xunit = { ::std::move(sloc), noadl::format_string("<closure:$1:$2>",
+    Expression_Unit::S_closure_function xunit = { ::std::move(sloc), format_string("<closure:$1:$2>",
                                                   sloc.line(), sloc.offset()), ::std::move(*kparams),
                                                   ::std::move(qblock->stmts) };
     units.emplace_back(::std::move(xunit));

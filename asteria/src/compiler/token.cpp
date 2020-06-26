@@ -36,7 +36,7 @@ const
 
       case index_string_literal:
         // string-literal "hello world"
-        return fmt << "string-literal `" << noadl::quote(this->m_stor.as<index_string_literal>().val) << "`";
+        return fmt << "string-literal `" << quote(this->m_stor.as<index_string_literal>().val) << "`";
 
       default:
         ASTERIA_TERMINATE("invalid token type (index `$1`)", this->index());

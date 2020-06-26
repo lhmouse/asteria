@@ -604,7 +604,7 @@ std_array_shuffle(V_array data, optV_integer seed)
       return ::std::move(data);
 
     // Create a linear congruential generator.
-    uint64_t lcg = seed ? static_cast<uint64_t>(*seed) : noadl::generate_random_seed();
+    uint64_t lcg = seed ? static_cast<uint64_t>(*seed) : generate_random_seed();
 
     // Shuffle elements.
     for(size_t i = 0;  i < data.size();  ++i) {
