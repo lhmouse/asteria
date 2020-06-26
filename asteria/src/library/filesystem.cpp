@@ -9,7 +9,6 @@
 #include <sys/stat.h>  // ::stat(), ::fstat(), ::lstat(), ::mkdir(), ::fchmod()
 #include <dirent.h>  // ::opendir(), ::closedir()
 #include <fcntl.h>  // ::open()
-#include <unistd.h>  // ::rmdir(), ::close(), ::read(), ::write(), ::unlink()
 #include <stdio.h>  // ::rename()
 #include <errno.h>  // errno
 
@@ -568,9 +567,8 @@ std_filesystem_file_copy_from(V_string path_new, V_string path_old)
                     format_errno(errno), path_old);
 
     // Allocate the I/O buffer.
-    uptr<uint8_t, void (&)(void*)> pbuf(::operator delete);
-    size_t nbuf = static_cast<size_t>(stb_old.st_blksize | 0x10'00000);
-    pbuf.reset(static_cast<uint8_t*>(::operator new(nbuf)));
+    size_t nbuf = static_cast<size_t>(stb_old.st_blksize | 0x1000);
+    auto pbuf = ::rocket::make_unique_handle(new char[nbuf], [](char* p) { delete[] p;  });
 
     // Copy all contents.
     for(;;) {

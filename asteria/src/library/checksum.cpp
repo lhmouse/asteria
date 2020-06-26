@@ -6,6 +6,7 @@
 #include "../runtime/argument_reader.hpp"
 #include "../runtime/global_context.hpp"
 #include "../utilities.hpp"
+#include <sys/stat.h>
 
 namespace asteria {
 namespace {
@@ -1373,13 +1374,19 @@ do_hash_file(const V_string& path)
                     "[`open()` failed: $1]",
                     format_errno(errno), path);
 
+    // Get the file mode and preferred I/O block size.
+    struct ::stat stb;
+    if(::fstat(fd, &stb) != 0)
+      ASTERIA_THROW("Could not get information about source file '$2'\n"
+                    "[`fstat()` failed: $1]",
+                    format_errno(errno), path);
+
     // Allocate the I/O buffer.
-    uptr<uint8_t, void (&)(void*)> pbuf(::operator delete);
-    static constexpr size_t nbuf = 16384;
-    pbuf.reset(static_cast<uint8_t*>(::operator new(nbuf)));
+    size_t nbuf = static_cast<size_t>(stb.st_blksize | 0x1000);
+    auto pbuf = ::rocket::make_unique_handle(new char[nbuf], [](char* p) { delete[] p;  });
+    HasherT h;
 
     // Read bytes from the file and hash them.
-    HasherT h;
     for(;;) {
       ::ssize_t nread = ::read(fd, pbuf, nbuf);
       if(nread < 0)
