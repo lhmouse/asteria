@@ -21,10 +21,8 @@ Runtime_Error::
 do_backtrace()
   try {
     // Unpack nested exceptions, if any.
-    auto eptr = ::std::current_exception();
-    if(ROCKET_EXPECT(!eptr))
-      return;
-    ::std::rethrow_exception(eptr);
+    if(auto eptr = ::std::current_exception())
+      ::std::rethrow_exception(eptr);
   }
   catch(Runtime_Error& nested) {
     // Copy frames.
