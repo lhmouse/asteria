@@ -103,13 +103,10 @@ initialize(API_Version version)
     }
     catch(exception& stdex) {
       // Ignore this exception, but notify the user about this error.
-      cow_string str;
-      str << "WARNING: An exception was thrown while performing garbage collection.\n"
-          << "         Some resources might have leaked.\n"
-          << "\n"
-          << stdex.what() << "\n"
-          << "[exception class `" << typeid(stdex).name() << "`]";
-      write_log_to_stderr(__FILE__, __LINE__, ::std::move(str));
+      ::rocket::tinyfmt_str fmt;
+      fmt << "WARNING: An exception was thrown while performing garbage collection.\n"
+          << "         Some resources might have leaked.\n\n" << stdex;
+      write_log_to_stderr(__FILE__, __LINE__, fmt.extract_string());
     }
     if(!gcoll)
       gcoll = ::rocket::make_refcnt<Genius_Collector>();

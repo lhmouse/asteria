@@ -80,6 +80,14 @@ tinyfmt&
 operator<<(tinyfmt&, void*);
 
 template
+tinyfmt&
+operator<<(tinyfmt&, const type_info&);
+
+template
+tinyfmt&
+operator<<(tinyfmt&, const exception&);
+
+template
 wtinyfmt&
 operator<<(wtinyfmt&, wchar_t);
 
@@ -146,5 +154,13 @@ operator<<(wtinyfmt&, const void*);
 template
 wtinyfmt&
 operator<<(wtinyfmt&, void*);
+
+template
+wtinyfmt&
+operator<<(wtinyfmt&, const type_info&);
+
+template
+wtinyfmt&
+operator<<(wtinyfmt&, const exception&);
 
 }  // namespace rocket

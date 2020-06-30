@@ -175,6 +175,17 @@ basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT* value)
   { return fmt << ascii_numput(reinterpret_cast<const void*>(value));  }
 
+template<typename charT, typename traitsT>
+basic_tinyfmt<charT, traitsT>&
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, const type_info& value)
+  { return fmt << value.name();  }
+
+template<typename charT, typename traitsT, typename valueT,
+ROCKET_ENABLE_IF(is_base_of<exception, typename remove_cv<valueT>::type>::value)>
+basic_tinyfmt<charT, traitsT>&
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, const valueT& value)
+  { return fmt << value.what() << "\n[exception class `" << typeid(value) << "`]";  }
+
 // rvalue inserter
 template<typename charT, typename traitsT, typename xvalueT>
 basic_tinyfmt<charT, traitsT>&
@@ -250,6 +261,14 @@ tinyfmt&
 operator<<(tinyfmt&, void*);
 
 extern template
+tinyfmt&
+operator<<(tinyfmt&, const type_info&);
+
+extern template
+tinyfmt&
+operator<<(tinyfmt&, const exception&);
+
+extern template
 wtinyfmt&
 operator<<(wtinyfmt&, wchar_t);
 
@@ -316,6 +335,14 @@ operator<<(wtinyfmt&, const void*);
 extern template
 wtinyfmt&
 operator<<(wtinyfmt&, void*);
+
+extern template
+wtinyfmt&
+operator<<(wtinyfmt&, const type_info&);
+
+extern template
+wtinyfmt&
+operator<<(wtinyfmt&, const exception&);
 
 }  // namespace rocket
 
