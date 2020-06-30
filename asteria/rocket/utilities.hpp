@@ -117,6 +117,8 @@ using ::std::equal_to;
 using ::std::pair;
 using ::std::tuple;
 
+using ::std::exception_ptr;
+using ::std::exception;
 using ::std::logic_error;
 using ::std::domain_error;
 using ::std::invalid_argument;
