@@ -112,6 +112,8 @@ using ::rocket::begin;
 using ::rocket::end;
 using ::rocket::xswap;
 using ::rocket::swap;
+using ::rocket::size;
+
 using ::rocket::nullopt;
 
 // Aliases
