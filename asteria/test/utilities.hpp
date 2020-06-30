@@ -6,6 +6,7 @@
 
 #include "../src/fwd.hpp"
 #include "../src/utilities.hpp"
+#include <unistd.h>   // ::alarm()
 
 #define ASTERIA_TEST_CHECK(expr)  \
     do  \
