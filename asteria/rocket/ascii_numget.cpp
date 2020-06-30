@@ -67,7 +67,7 @@ do_get_base(const char*& rp, const char* eptr, uint8_t ibase)
         return ibase;
 
       default:
-        noadl::sprintf_and_throw<invalid_argument>("ascii_numget: invalid radix (`%d` not 2, 10 or 16)", ibase);
+        sprintf_and_throw<invalid_argument>("ascii_numget: invalid radix (`%d` not 2, 10 or 16)", ibase);
     }
   }
 
@@ -840,7 +840,7 @@ constexpr s_decmult_F[] =
     { 0x71EC7CF2B1D0CC72, +1021 },  // 1.0e+307
     { 0x4733CE17AF227FC7, +1025 },  // 1.0e+308
   };
-static_assert(noadl::countof(s_decmult_F) == 652);
+static_assert(size(s_decmult_F) == 652);
 
 double
 do_xldexp_I(uint64_t ireg, int bexp, bool single)
@@ -1411,7 +1411,7 @@ noexcept
               freg = 0;
               break;
             }
-            if(mpos >= noadl::countof(s_decmult_F)) {
+            if(mpos >= size(s_decmult_F)) {
               freg = HUGE_VAL;
               break;
             }

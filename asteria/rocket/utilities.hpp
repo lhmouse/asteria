@@ -455,10 +455,17 @@ is_none_of(targetT&& targ, initializer_list<elementT> init)
                   ::std::forward<targetT>(targ), init);
   }
 
+template<typename containerT>
+constexpr
+decltype(::std::declval<const containerT&>().size())
+size(const containerT& cont)
+noexcept(noexcept(cont.size()))
+  { return cont.size();  }
+
 template<typename elementT, size_t countT>
 constexpr
 size_t
-countof(const elementT (&)[countT])
+size(const elementT (&)[countT])
 noexcept
   { return countT;  }
 

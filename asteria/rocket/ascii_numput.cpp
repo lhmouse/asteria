@@ -140,7 +140,7 @@ do_xput_I_exp(char*& ep, const int& exp)
     do_xput_U_bkwd(tbp, do_cast_U(::std::abs(exp)), 10, 2);
 
     // Append the exponent.
-    noadl::ranged_for(tbp, end(temps), [&](const char* p) { *(ep++) = *p;  });
+    ranged_for(tbp, end(temps), [&](const char* p) { *(ep++) = *p;  });
     return ep;
   }
 
@@ -854,7 +854,7 @@ constexpr s_decmult_F[] =
     { 0x1.C7B1F3CAC7433p+1019,  0x63CAC186BA81C60E,  -962 },  // 1.0e+307
     { 0x1.1CCF385EBC89Fp+1023,  0x4FD5679EFB9B04D8,  -965 },  // 1.0e+308
   };
-static_assert(noadl::countof(s_decmult_F) == 633);
+static_assert(size(s_decmult_F) == 633);
 
 void
 do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
@@ -864,7 +864,7 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
     double freg = ::std::fabs(value);
     // Locate the last number in the table that is <= `freg`.
     uint32_t bpos = 1;
-    uint32_t epos = static_cast<uint32_t>(noadl::countof(s_decmult_F));
+    uint32_t epos = static_cast<uint32_t>(size(s_decmult_F));
     for(;;) {
       // Stop if the range is empty.
       if(bpos == epos) {
@@ -1192,7 +1192,7 @@ noexcept
         // ... in plain format; the number starts with "0."; zeroes are prepended as necessary.
         *(ep++) = '0';
         *(ep++) = '.';
-        noadl::ranged_for(exp, -1, [&](int) { *(ep++) = '0';  });
+        ranged_for(exp, -1, [&](int) { *(ep++) = '0';  });
         do_xput_M_bin(ep, mant, nullptr);
       }
       else {
@@ -1303,7 +1303,7 @@ noexcept
         // ... in plain format; the number starts with "0."; zeroes are prepended as necessary.
         *(ep++) = '0';
         *(ep++) = '.';
-        noadl::ranged_for(exp, -1, [&](int) { *(ep++) = '0';  });
+        ranged_for(exp, -1, [&](int) { *(ep++) = '0';  });
         do_xput_M_hex(ep, mant, nullptr);
       }
       else {
@@ -1411,7 +1411,7 @@ noexcept
         // ... in plain format; the number starts with "0."; zeroes are prepended as necessary.
         *(ep++) = '0';
         *(ep++) = '.';
-        noadl::ranged_for(exp, -1, [&](int) { *(ep++) = '0';  });
+        ranged_for(exp, -1, [&](int) { *(ep++) = '0';  });
         do_xput_M_dec(ep, mant, nullptr);
       }
       else {
