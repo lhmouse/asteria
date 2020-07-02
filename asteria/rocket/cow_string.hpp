@@ -1209,11 +1209,23 @@ class basic_cow_string
     const noexcept
       { return this->find(from, other.data(), other.size());  }
 
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    find(const basic_cow_string& other)
+    const noexcept
+      { return this->find(size_type(0), other);  }
+
     // N.B. This is a non-standard extension.
     size_type
     find(size_type from, const basic_cow_string& other, size_type pos, size_type n = npos)
     const
       { return this->find(from, other.data() + pos, other.do_clamp_substr(pos, n));  }
+
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    find(const basic_cow_string& other, size_type pos, size_type n = npos)
+    const
+      { return this->find(size_type(0), other, pos, n);  }
 
     // N.B. This is a non-standard extension.
     size_type
@@ -1222,11 +1234,23 @@ class basic_cow_string
       { return this->do_find_forwards_if(from, n,
                    [&](const value_type* ts) { return traits_type::compare(ts, s, n) == 0;  });  }
 
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    find(const value_type* s, size_type n)
+    const noexcept
+      { return this->find(size_type(0), s, n);  }
+
     // N.B. This is a non-standard extension.
     size_type
     find(size_type from, const value_type* s)
     const noexcept
       { return this->find(from, s, traits_type::length(s));  }
+
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    find(const value_type* s)
+    const noexcept
+      { return this->find(size_type(0), s);  }
 
     // N.B. This is a non-standard extension.
     size_type
@@ -1246,17 +1270,35 @@ class basic_cow_string
         return tpos;
       }
 
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    find(value_type ch)
+    const noexcept
+      { return this->find(size_type(0), ch);  }
+
     // N.B. This is a non-standard extension.
     size_type
     rfind(size_type to, const basic_cow_string& other)
     const noexcept
       { return this->rfind(to, other.data(), other.size());  }
 
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    rfind(const basic_cow_string& other)
+    const noexcept
+      { return this->rfind(size_type(-1), other);  }
+
     // N.B. This is a non-standard extension.
     size_type
     rfind(size_type to, const basic_cow_string& other, size_type pos, size_type n = npos)
     const
       { return this->rfind(to, other.data() + pos, other.do_clamp_substr(pos, n));  }
+
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    rfind(const basic_cow_string& other, size_type pos, size_type n = npos)
+    const
+      { return this->rfind(size_type(-1), other, pos, n);  }
 
     // N.B. This is a non-standard extension.
     size_type
@@ -1265,11 +1307,23 @@ class basic_cow_string
       { return this->do_find_backwards_if(to, n,
                    [&](const value_type* ts) { return traits_type::compare(ts, s, n) == 0;  });  }
 
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    rfind(const value_type* s, size_type n)
+    const noexcept
+      { return this->rfind(size_type(-1), s, n);  }
+
     // N.B. This is a non-standard extension.
     size_type
     rfind(size_type to, const value_type* s)
     const noexcept
       { return this->rfind(to, s, traits_type::length(s));  }
+
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    rfind(const value_type* s)
+    const noexcept
+      { return this->rfind(size_type(-1), s);  }
 
     // N.B. This is a non-standard extension.
     size_type
@@ -1278,17 +1332,35 @@ class basic_cow_string
       { return this->do_find_backwards_if(to, 1,
                    [&](const value_type* ts) { return traits_type::eq(*ts, ch);  });  }
 
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    rfind(value_type ch)
+    const noexcept
+      { return this->rfind(size_type(-1), ch);  }
+
     // N.B. This is a non-standard extension.
     size_type
     find_first_of(size_type from, const basic_cow_string& other)
     const noexcept
       { return this->find_first_of(from, other.data(), other.size());  }
 
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    find_first_of(const basic_cow_string& other)
+    const noexcept
+      { return this->find_first_of(size_type(0), other);  }
+
     // N.B. This is a non-standard extension.
     size_type
     find_first_of(size_type from, const basic_cow_string& other, size_type pos, size_type n = npos)
     const
       { return this->find_first_of(from, other.data() + pos, other.do_clamp_substr(pos, n));  }
+
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    find_first_of(const basic_cow_string& other, size_type pos, size_type n = npos)
+    const
+      { return this->find_first_of(size_type(0), other, pos, n);  }
 
     // N.B. This is a non-standard extension.
     size_type
@@ -1297,11 +1369,23 @@ class basic_cow_string
       { return this->do_find_forwards_if(from, 1,
                    [&](const value_type* ts) { return traits_type::find(s, n, *ts) != nullptr;  });  }
 
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    find_first_of(const value_type* s, size_type n)
+    const noexcept
+      { return this->find_first_of(size_type(0), s, n);  }
+
     // N.B. This is a non-standard extension.
     size_type
     find_first_of(size_type from, const value_type* s)
     const noexcept
       { return this->find_first_of(from, s, traits_type::length(s));  }
+
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    find_first_of(const value_type* s)
+    const noexcept
+      { return this->find_first_of(size_type(0), s);  }
 
     // N.B. This is a non-standard extension.
     size_type
@@ -1309,17 +1393,35 @@ class basic_cow_string
     const noexcept
       { return this->find(from, ch);  }
 
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    find_first_of(value_type ch)
+    const noexcept
+      { return this->find_first_of(size_type(0), ch);  }
+
     // N.B. This is a non-standard extension.
     size_type
     find_last_of(size_type to, const basic_cow_string& other)
     const noexcept
       { return this->find_last_of(to, other.data(), other.size());  }
 
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    find_last_of(const basic_cow_string& other)
+    const noexcept
+      { return this->find_last_of(size_type(-1), other);  }
+
     // N.B. This is a non-standard extension.
     size_type
     find_last_of(size_type to, const basic_cow_string& other, size_type pos, size_type n = npos)
     const
       { return this->find_last_of(to, other.data() + pos, other.do_clamp_substr(pos, n));  }
+
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    find_last_of(const basic_cow_string& other, size_type pos, size_type n = npos)
+    const
+      { return this->find_last_of(size_type(-1), other, pos, n);  }
 
     // N.B. This is a non-standard extension.
     size_type
@@ -1328,11 +1430,23 @@ class basic_cow_string
       { return this->do_find_backwards_if(to, 1,
                    [&](const value_type* ts) { return traits_type::find(s, n, *ts) != nullptr;  });  }
 
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    find_last_of(const value_type* s, size_type n)
+    const noexcept
+      { return this->find_last_of(size_type(-1), s, n);  }
+
     // N.B. This is a non-standard extension.
     size_type
     find_last_of(size_type to, const value_type* s)
     const noexcept
       { return this->find_last_of(to, s, traits_type::length(s));  }
+
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    find_last_of(const value_type* s)
+    const noexcept
+      { return this->find_last_of(size_type(-1), s);  }
 
     // N.B. This is a non-standard extension.
     size_type
@@ -1340,17 +1454,35 @@ class basic_cow_string
     const noexcept
       { return this->rfind(to, ch);  }
 
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    find_last_of(value_type ch)
+    const noexcept
+      { return this->find_last_of(size_type(-1), ch);  }
+
     // N.B. This is a non-standard extension.
     size_type
     find_first_not_of(size_type from, const basic_cow_string& other)
     const noexcept
       { return this->find_first_not_of(from, other.data(), other.size());  }
 
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    find_first_not_of(const basic_cow_string& other)
+    const noexcept
+      { return this->find_first_not_of(size_type(0), other);  }
+
     // N.B. This is a non-standard extension.
     size_type
     find_first_not_of(size_type from, const basic_cow_string& other, size_type pos, size_type n = npos)
     const
       { return this->find_first_not_of(from, other.data() + pos, other.do_clamp_substr(pos, n));  }
+
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    find_first_not_of(const basic_cow_string& other, size_type pos, size_type n = npos)
+    const
+      { return this->find_first_not_of(size_type(0), other, pos, n);  }
 
     // N.B. This is a non-standard extension.
     size_type
@@ -1359,11 +1491,23 @@ class basic_cow_string
       { return this->do_find_forwards_if(from, 1,
                    [&](const value_type* ts) { return traits_type::find(s, n, *ts) == nullptr;  });  }
 
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    find_first_not_of(const value_type* s, size_type n)
+    const noexcept
+      { return this->find_first_not_of(size_type(0), s, n);  }
+
     // N.B. This is a non-standard extension.
     size_type
     find_first_not_of(size_type from, const value_type* s)
     const noexcept
       { return this->find_first_not_of(from, s, traits_type::length(s));  }
+
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    find_first_not_of(const value_type* s)
+    const noexcept
+      { return this->find_first_not_of(size_type(0), s);  }
 
     // N.B. This is a non-standard extension.
     size_type
@@ -1372,17 +1516,35 @@ class basic_cow_string
       { return this->do_find_forwards_if(from, 1,
                    [&](const value_type* ts) { return !traits_type::eq(*ts, ch);  });  }
 
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    find_first_not_of(value_type ch)
+    const noexcept
+      { return this->find_first_not_of(size_type(0), ch);  }
+
     // N.B. This is a non-standard extension.
     size_type
     find_last_not_of(size_type to, const basic_cow_string& other)
     const noexcept
       { return this->find_last_not_of(to, other.data(), other.size());  }
 
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    find_last_not_of(const basic_cow_string& other)
+    const noexcept
+      { return this->find_last_not_of(size_type(-1), other);  }
+
     // N.B. This is a non-standard extension.
     size_type
     find_last_not_of(size_type to, const basic_cow_string& other, size_type pos, size_type n = npos)
     const
       { return this->find_last_not_of(to, other.data() + pos, other.do_clamp_substr(pos, n));  }
+
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    find_last_not_of(const basic_cow_string& other, size_type pos, size_type n = npos)
+    const
+      { return this->find_last_not_of(size_type(-1), other, pos, n);  }
 
     // N.B. This is a non-standard extension.
     size_type
@@ -1391,11 +1553,23 @@ class basic_cow_string
       { return this->do_find_backwards_if(to, 1,
                    [&](const value_type* ts) { return traits_type::find(s, n, *ts) == nullptr;  });  }
 
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    find_last_not_of(const value_type* s, size_type n)
+    const noexcept
+      { return this->find_last_not_of(size_type(-1), s, n);  }
+
     // N.B. This is a non-standard extension.
     size_type
     find_last_not_of(size_type to, const value_type* s)
     const noexcept
       { return this->find_last_not_of(to, s, traits_type::length(s));  }
+
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    find_last_not_of(const value_type* s)
+    const noexcept
+      { return this->find_last_not_of(size_type(-1), s);  }
 
     // N.B. This is a non-standard extension.
     size_type
@@ -1403,6 +1577,12 @@ class basic_cow_string
     const noexcept
       { return this->do_find_backwards_if(to, 1,
                    [&](const value_type* ts) { return !traits_type::eq(*ts, ch);  });  }
+
+    // N.B. The signature differs from `std::basic_string`.
+    size_type
+    find_last_not_of(value_type ch)
+    const noexcept
+      { return this->find_last_not_of(size_type(-1), ch);  }
 
     // N.B. This is a non-standard extension.
     template<typename predT>
@@ -1414,9 +1594,23 @@ class basic_cow_string
     // N.B. This is a non-standard extension.
     template<typename predT>
     size_type
+    find_first_if(predT&& pred)
+    const
+      { return this->find_first_if(size_type(0), ::std::forward<predT>(pred));  }
+
+    // N.B. This is a non-standard extension.
+    template<typename predT>
+    size_type
     find_last_if(size_type to, predT&& pred)
     const
       { return this->do_find_backwards_if(to, 1, [&](const char* p) { return pred(*p);  });  }
+
+    // N.B. This is a non-standard extension.
+    template<typename predT>
+    size_type
+    find_last_if(predT&& pred)
+    const
+      { return this->find_last_if(size_type(-1), ::std::forward<predT>(pred));  }
 
     // N.B. There is no default argument for `tpos`.
     basic_cow_string
