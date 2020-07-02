@@ -383,13 +383,12 @@ class basic_cow_string
     // These are generic implementations for `{{,r}find,find_{first,last}{,_not}_of}()` functions.
     template<typename predT>
     size_type
-    do_xfind_if(size_type first, size_type last, difference_type step, predT pred)
+    do_xfind_if(size_type first, size_type last, difference_type step, predT&& pred)
     const
       {
         auto cur = first;
         for(;;) {
-          auto ptr = this->data() + cur;
-          if(pred(ptr))
+          if(pred(this->data() + cur))
             return ROCKET_ASSERT(cur != npos), cur;
 
           if(cur == last)
@@ -401,7 +400,7 @@ class basic_cow_string
 
     template<typename predT>
     size_type
-    do_find_forwards_if(size_type from, size_type n, predT pred)
+    do_find_forwards_if(size_type from, size_type n, predT&& pred)
     const
       {
         auto len = this->size();
@@ -417,7 +416,7 @@ class basic_cow_string
 
     template<typename predT>
     size_type
-    do_find_backwards_if(size_type to, size_type n, predT pred)
+    do_find_backwards_if(size_type to, size_type n, predT&& pred)
     const
       {
         auto len = this->size();
@@ -732,9 +731,11 @@ class basic_cow_string
           return *this;
 
         auto len_old = this->size();
+
         // Check for overlapped strings before `do_reserve_more()`.
         auto srpos = static_cast<uintptr_t>(s - this->data());
         this->do_reserve_more(n);
+
         auto ptr = this->m_sth.mut_data_unchecked();
         if(srpos < len_old)
           traits_type::move(ptr + len_old, ptr + srpos, n);
@@ -758,6 +759,7 @@ class basic_cow_string
 
         auto len_old = this->size();
         this->do_reserve_more(n);
+
         auto ptr = this->m_sth.mut_data_unchecked();
         traits_type::assign(ptr + len_old, n, ch);
         this->do_set_length(len_old + n);
@@ -791,7 +793,6 @@ class basic_cow_string
         other.append(this->data(), this->size());
         noadl::ranged_do_while(::std::move(first), ::std::move(last),
                                [&](const inputT& it) { other.push_back(*it);  });
-
         this->assign(::std::move(other));
         return *this;
       }
@@ -802,6 +803,7 @@ class basic_cow_string
       {
         auto len_old = this->size();
         this->do_reserve_more(1);
+
         auto ptr = this->m_sth.mut_data_unchecked();
         traits_type::assign(ptr[len_old], ch);
         this->do_set_length(len_old + 1);
@@ -1201,30 +1203,34 @@ class basic_cow_string
     noexcept
       { return this->m_sth.as_allocator();  }
 
+    // N.B. This is a non-standard extension.
     size_type
-    find(const basic_cow_string& other, size_type from = 0)
+    find(size_type from, const basic_cow_string& other)
     const noexcept
-      { return this->find(other.data(), from, other.size());  }
+      { return this->find(from, other.data(), other.size());  }
 
     // N.B. This is a non-standard extension.
     size_type
-    find(const basic_cow_string& other, size_type from, size_type pos, size_type n = npos)
+    find(size_type from, const basic_cow_string& other, size_type pos, size_type n = npos)
     const
-      { return this->find(other.data() + pos, from, other.do_clamp_substr(pos, n));  }
+      { return this->find(from, other.data() + pos, other.do_clamp_substr(pos, n));  }
 
+    // N.B. This is a non-standard extension.
     size_type
-    find(const value_type* s, size_type from, size_type n)
+    find(size_type from, const value_type* s, size_type n)
     const noexcept
       { return this->do_find_forwards_if(from, n,
                    [&](const value_type* ts) { return traits_type::compare(ts, s, n) == 0;  });  }
 
+    // N.B. This is a non-standard extension.
     size_type
-    find(const value_type* s, size_type from = 0)
+    find(size_type from, const value_type* s)
     const noexcept
-      { return this->find(s, from, traits_type::length(s));  }
+      { return this->find(from, s, traits_type::length(s));  }
 
+    // N.B. This is a non-standard extension.
     size_type
-    find(value_type ch, size_type from = 0)
+    find(size_type from, value_type ch)
     const noexcept
       {
         // This can be optimized.
@@ -1240,140 +1246,160 @@ class basic_cow_string
         return tpos;
       }
 
+    // N.B. This is a non-standard extension.
     size_type
-    rfind(const basic_cow_string& other, size_type to = npos)
+    rfind(size_type to, const basic_cow_string& other)
     const noexcept
-      { return this->rfind(other.data(), to, other.size());  }
+      { return this->rfind(to, other.data(), other.size());  }
 
     // N.B. This is a non-standard extension.
     size_type
-    rfind(const basic_cow_string& other, size_type to, size_type pos, size_type n = npos)
+    rfind(size_type to, const basic_cow_string& other, size_type pos, size_type n = npos)
     const
-      { return this->rfind(other.data() + pos, to, other.do_clamp_substr(pos, n));  }
+      { return this->rfind(to, other.data() + pos, other.do_clamp_substr(pos, n));  }
 
+    // N.B. This is a non-standard extension.
     size_type
-    rfind(const value_type* s, size_type to, size_type n)
+    rfind(size_type to, const value_type* s, size_type n)
     const noexcept
       { return this->do_find_backwards_if(to, n,
                    [&](const value_type* ts) { return traits_type::compare(ts, s, n) == 0;  });  }
 
+    // N.B. This is a non-standard extension.
     size_type
-    rfind(const value_type* s, size_type to = npos)
+    rfind(size_type to, const value_type* s)
     const noexcept
-      { return this->rfind(s, to, traits_type::length(s));  }
+      { return this->rfind(to, s, traits_type::length(s));  }
 
+    // N.B. This is a non-standard extension.
     size_type
-    rfind(value_type ch, size_type to = npos)
+    rfind(size_type to, value_type ch)
     const noexcept
       { return this->do_find_backwards_if(to, 1,
                    [&](const value_type* ts) { return traits_type::eq(*ts, ch);  });  }
 
+    // N.B. This is a non-standard extension.
     size_type
-    find_first_of(const basic_cow_string& other, size_type from = 0)
+    find_first_of(size_type from, const basic_cow_string& other)
     const noexcept
-      { return this->find_first_of(other.data(), from, other.size());  }
+      { return this->find_first_of(from, other.data(), other.size());  }
 
     // N.B. This is a non-standard extension.
     size_type
-    find_first_of(const basic_cow_string& other, size_type from, size_type pos, size_type n = npos)
+    find_first_of(size_type from, const basic_cow_string& other, size_type pos, size_type n = npos)
     const
-      { return this->find_first_of(other.data() + pos, from, other.do_clamp_substr(pos, n));  }
+      { return this->find_first_of(from, other.data() + pos, other.do_clamp_substr(pos, n));  }
 
+    // N.B. This is a non-standard extension.
     size_type
-    find_first_of(const value_type* s, size_type from, size_type n)
+    find_first_of(size_type from, const value_type* s, size_type n)
     const noexcept
       { return this->do_find_forwards_if(from, 1,
                    [&](const value_type* ts) { return traits_type::find(s, n, *ts) != nullptr;  });  }
 
+    // N.B. This is a non-standard extension.
     size_type
-    find_first_of(const value_type* s, size_type from = 0)
+    find_first_of(size_type from, const value_type* s)
     const noexcept
-      { return this->find_first_of(s, from, traits_type::length(s));  }
-
-    size_type
-    find_first_of(value_type ch, size_type from = 0)
-    const noexcept
-      { return this->find(ch, from);  }
-
-    size_type
-    find_last_of(const basic_cow_string& other, size_type to = npos)
-    const noexcept
-      { return this->find_last_of(other.data(), to, other.size());  }
+      { return this->find_first_of(from, s, traits_type::length(s));  }
 
     // N.B. This is a non-standard extension.
     size_type
-    find_last_of(const basic_cow_string& other, size_type to, size_type pos, size_type n = npos)
-    const
-      { return this->find_last_of(other.data() + pos, to, other.do_clamp_substr(pos, n));  }
+    find_first_of(size_type from, value_type ch)
+    const noexcept
+      { return this->find(from, ch);  }
 
+    // N.B. This is a non-standard extension.
     size_type
-    find_last_of(const value_type* s, size_type to, size_type n)
+    find_last_of(size_type to, const basic_cow_string& other)
+    const noexcept
+      { return this->find_last_of(to, other.data(), other.size());  }
+
+    // N.B. This is a non-standard extension.
+    size_type
+    find_last_of(size_type to, const basic_cow_string& other, size_type pos, size_type n = npos)
+    const
+      { return this->find_last_of(to, other.data() + pos, other.do_clamp_substr(pos, n));  }
+
+    // N.B. This is a non-standard extension.
+    size_type
+    find_last_of(size_type to, const value_type* s, size_type n)
     const noexcept
       { return this->do_find_backwards_if(to, 1,
                    [&](const value_type* ts) { return traits_type::find(s, n, *ts) != nullptr;  });  }
 
+    // N.B. This is a non-standard extension.
     size_type
-    find_last_of(const value_type* s, size_type to = npos)
+    find_last_of(size_type to, const value_type* s)
     const noexcept
-      { return this->find_last_of(s, to, traits_type::length(s));  }
-
-    size_type
-    find_last_of(value_type ch, size_type to = npos)
-    const noexcept
-      { return this->rfind(ch, to);  }
-
-    size_type
-    find_first_not_of(const basic_cow_string& other, size_type from = 0)
-    const noexcept
-      { return this->find_first_not_of(other.data(), from, other.size());  }
+      { return this->find_last_of(to, s, traits_type::length(s));  }
 
     // N.B. This is a non-standard extension.
     size_type
-    find_first_not_of(const basic_cow_string& other, size_type from, size_type pos, size_type n = npos)
-    const
-      { return this->find_first_not_of(other.data() + pos, from, other.do_clamp_substr(pos, n));  }
+    find_last_of(size_type to, value_type ch)
+    const noexcept
+      { return this->rfind(to, ch);  }
 
+    // N.B. This is a non-standard extension.
     size_type
-    find_first_not_of(const value_type* s, size_type from, size_type n)
+    find_first_not_of(size_type from, const basic_cow_string& other)
+    const noexcept
+      { return this->find_first_not_of(from, other.data(), other.size());  }
+
+    // N.B. This is a non-standard extension.
+    size_type
+    find_first_not_of(size_type from, const basic_cow_string& other, size_type pos, size_type n = npos)
+    const
+      { return this->find_first_not_of(from, other.data() + pos, other.do_clamp_substr(pos, n));  }
+
+    // N.B. This is a non-standard extension.
+    size_type
+    find_first_not_of(size_type from, const value_type* s, size_type n)
     const noexcept
       { return this->do_find_forwards_if(from, 1,
                    [&](const value_type* ts) { return traits_type::find(s, n, *ts) == nullptr;  });  }
 
+    // N.B. This is a non-standard extension.
     size_type
-    find_first_not_of(const value_type* s, size_type from = 0)
+    find_first_not_of(size_type from, const value_type* s)
     const noexcept
-      { return this->find_first_not_of(s, from, traits_type::length(s));  }
+      { return this->find_first_not_of(from, s, traits_type::length(s));  }
 
+    // N.B. This is a non-standard extension.
     size_type
-    find_first_not_of(value_type ch, size_type from = 0)
+    find_first_not_of(size_type from, value_type ch)
     const noexcept
       { return this->do_find_forwards_if(from, 1,
                    [&](const value_type* ts) { return !traits_type::eq(*ts, ch);  });  }
 
+    // N.B. This is a non-standard extension.
     size_type
-    find_last_not_of(const basic_cow_string& other, size_type to = npos)
+    find_last_not_of(size_type to, const basic_cow_string& other)
     const noexcept
-      { return this->find_last_not_of(other.data(), to, other.size());  }
+      { return this->find_last_not_of(to, other.data(), other.size());  }
 
     // N.B. This is a non-standard extension.
     size_type
-    find_last_not_of(const basic_cow_string& other, size_type to, size_type pos, size_type n = npos)
+    find_last_not_of(size_type to, const basic_cow_string& other, size_type pos, size_type n = npos)
     const
-      { return this->find_last_not_of(other.data() + pos, to, other.do_clamp_substr(pos, n));  }
+      { return this->find_last_not_of(to, other.data() + pos, other.do_clamp_substr(pos, n));  }
 
+    // N.B. This is a non-standard extension.
     size_type
-    find_last_not_of(const value_type* s, size_type to, size_type n)
+    find_last_not_of(size_type to, const value_type* s, size_type n)
     const noexcept
       { return this->do_find_backwards_if(to, 1,
                    [&](const value_type* ts) { return traits_type::find(s, n, *ts) == nullptr;  });  }
 
+    // N.B. This is a non-standard extension.
     size_type
-    find_last_not_of(const value_type* s, size_type to = npos)
+    find_last_not_of(size_type to, const value_type* s)
     const noexcept
-      { return this->find_last_not_of(s, to, traits_type::length(s));  }
+      { return this->find_last_not_of(to, s, traits_type::length(s));  }
 
+    // N.B. This is a non-standard extension.
     size_type
-    find_last_not_of(value_type ch, size_type to = npos)
+    find_last_not_of(size_type to, value_type ch)
     const noexcept
       { return this->do_find_backwards_if(to, 1,
                    [&](const value_type* ts) { return !traits_type::eq(*ts, ch);  });  }
@@ -1381,14 +1407,14 @@ class basic_cow_string
     // N.B. This is a non-standard extension.
     template<typename predT>
     size_type
-    find_first_if(predT pred, size_type from = 0)
+    find_first_if(size_type from, predT&& pred)
     const
       { return this->do_find_forwards_if(from, 1, [&](const char* p) { return pred(*p);  });  }
 
     // N.B. This is a non-standard extension.
     template<typename predT>
     size_type
-    find_last_if(predT pred, size_type to = npos)
+    find_last_if(size_type to, predT&& pred)
     const
       { return this->do_find_backwards_if(to, 1, [&](const char* p) { return pred(*p);  });  }
 
