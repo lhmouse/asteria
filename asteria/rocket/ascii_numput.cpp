@@ -34,6 +34,7 @@ do_xput_U_bkwd(char*& bp, const uint64_t& value, uint8_t base, size_t precision)
       // Shift a digit out.
       uint8_t dval = uint8_t(ireg % base);
       ireg /= base;
+
       // Write this digit.
       *(--bp) = do_pdigit_X(dval);
     }
@@ -84,12 +85,13 @@ do_xput_M_bin(char*& ep, const uint64_t& mant, const char* rdxp)
     // Write digits in normal order.
     uint64_t ireg = mant;
     while(ireg != 0) {
-      // Shift a digit out.
       uint8_t dval = uint8_t(ireg >> 63);
       ireg <<= 1;
+
       // Insert a decimal point before `rdxp`.
       if(ep == rdxp)
         *(ep++) = '.';
+
       // Write this digit.
       *(ep++) = do_pdigit_D(dval);
     }
@@ -107,12 +109,13 @@ do_xput_M_hex(char*& ep, const uint64_t& mant, const char* rdxp)
     // Write digits in normal order.
     uint64_t ireg = mant;
     while(ireg != 0) {
-      // Shift a digit out.
       uint8_t dval = uint8_t(ireg >> 60);
       ireg <<= 4;
+
       // Insert a decimal point before `rdxp`.
       if(ep == rdxp)
         *(ep++) = '.';
+
       // Write this digit.
       *(ep++) = do_pdigit_X(dval);
     }
@@ -862,30 +865,34 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
     // Note if `value` is not finite then the behavior is undefined.
     // Get the first digit.
     double freg = ::std::fabs(value);
+
     // Locate the last number in the table that is <= `freg`.
     uint32_t bpos = 1;
     uint32_t epos = static_cast<uint32_t>(size(s_decmult_F));
+
     for(;;) {
       // Stop if the range is empty.
       if(bpos == epos) {
         bpos = epos - 1;
         break;
       }
+
       // Get the median.
       uint32_t mpos = (bpos + epos) / 2;
       const double& med = s_decmult_F[mpos].bound;
+
       // Stops immediately if `freg` equals `med`.
       if(::std::memcmp(&freg, &med, sizeof(double)) == 0) {
         bpos = mpos;
         break;
       }
+
       // Decend into either subrange.
       if(freg < med)
         epos = mpos;
       else
         bpos = mpos + 1;
     }
-    // Get the multiplier.
     const auto& mult = s_decmult_F[bpos];
 
     // Extract the mantissa.
@@ -905,11 +912,13 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
     // In the case of single precision we have to drop 8 digits before rounding.
     if(ROCKET_UNEXPECT(single))
       ireg /= 100'000'000;
+
     // Note that the last digit should be rounded to even.
     ylo = ireg % 10;
     ireg -= ylo;
     if((ylo != 5) ? (ylo > 5) : (ireg % 20))
       ireg += 10;
+
     // Re-fill zeroes in the case of single precision.
     if(ROCKET_UNEXPECT(single))
       ireg *= 100'000'000;
@@ -925,14 +934,15 @@ do_xput_M_dec(char*& ep, const uint64_t& mant, const char* rdxp)
     // Write digits in normal order.
     uint64_t ireg = mant;
     while(ireg != 0) {
-      // Shift a digit out.
       uint64_t quo = ireg / 100'000'000'000'000'000;
       ireg %= 100'000'000'000'000'000;
       uint8_t dval = (uint8_t)quo;
       ireg *= 10;
+
       // Insert a decimal point before `rdxp`.
       if(ep == rdxp)
         *(ep++) = '.';
+
       // Write this digit.
       *(ep++) = do_pdigit_X(dval);
     }
@@ -982,6 +992,7 @@ noexcept
 
     // Append a null terminator.
     *bp = 0;
+
     // Write digits backwards.
     do_xput_U_bkwd(bp, reinterpret_cast<uintptr_t>(value), 16, sizeof(value) * 2);
 
@@ -1006,6 +1017,7 @@ noexcept
 
     // Append a null terminator.
     *bp = 0;
+
     // Write digits backwards.
     do_xput_U_bkwd(bp, value, 2, precision);
 
@@ -1030,6 +1042,7 @@ noexcept
 
     // Append a null terminator.
     *bp = 0;
+
     // Write digits backwards.
     do_xput_U_bkwd(bp, value, 16, precision);
 
@@ -1054,6 +1067,7 @@ noexcept
 
     // Append a null terminator.
     *bp = 0;
+
     // Write digits backwards.
     do_xput_U_bkwd(bp, value, 10, precision);
 
@@ -1074,14 +1088,17 @@ noexcept
 
     // Append a null terminator.
     *bp = 0;
+
     // Extend the sign bit to a word, assuming arithmetic shift.
     uint64_t sign = do_cast_U(value >> 63);
+
     // Write digits backwards using its absolute value without causing overflows.
     do_xput_U_bkwd(bp, (do_cast_U(value) ^ sign) - sign, 2, precision);
 
     // Prepend the binary prefix.
     *(--bp) = 'b';
     *(--bp) = '0';
+
     // If the number is negative, prepend a minus sign.
     if(sign)
       *(--bp) = '-';
@@ -1103,14 +1120,17 @@ noexcept
 
     // Append a null terminator.
     *bp = 0;
+
     // Extend the sign bit to a word, assuming arithmetic shift.
     uint64_t sign = do_cast_U(value >> 63);
+
     // Write digits backwards using its absolute value without causing overflows.
     do_xput_U_bkwd(bp, (do_cast_U(value) ^ sign) - sign, 16, precision);
 
     // Prepend the hexadecimal prefix.
     *(--bp) = 'x';
     *(--bp) = '0';
+
     // If the number is negative, prepend a minus sign.
     if(sign)
       *(--bp) = '-';
@@ -1132,8 +1152,10 @@ noexcept
 
     // Append a null terminator.
     *bp = 0;
+
     // Extend the sign bit to a word, assuming arithmetic shift.
     uint64_t sign = do_cast_U(value >> 63);
+
     // Write digits backwards using its absolute value without causing overflows.
     do_xput_U_bkwd(bp, (do_cast_U(value) ^ sign) - sign, 10, precision);
 
@@ -1158,6 +1180,7 @@ noexcept
 
     // Extract the sign bit and extend it to a word.
     int sign = ::std::signbit(value) ? -1 : 0;
+
     // Treat non-finite values and zeroes specially.
     if(do_check_special(bp, ep, value)) {
       // Use the template string literal, which is immutable.
@@ -1172,6 +1195,7 @@ noexcept
       // Prepend a minus sign if the number is negative.
       if(sign)
         *(ep++) = '-';
+
       // Prepend the binary prefix.
       *(ep++) = '0';
       *(ep++) = 'b';
@@ -1199,6 +1223,7 @@ noexcept
         // ... in plain format; the decimal point is inserted in the middle.
         do_xput_M_bin(ep, mant, ep + 1 + do_cast_U(exp));
       }
+
       // Append a null terminator.
       *ep = 0;
     }
@@ -1220,6 +1245,7 @@ noexcept
 
     // Extract the sign bit and extend it to a word.
     int sign = ::std::signbit(value) ? -1 : 0;
+
     // Treat non-finite values and zeroes specially.
     if(do_check_special(bp, ep, value)) {
       // Use the template string literal, which is immutable.
@@ -1234,6 +1260,7 @@ noexcept
       // Prepend a minus sign if the number is negative.
       if(sign)
         *(ep++) = '-';
+
       // Prepend the binary prefix.
       *(ep++) = '0';
       *(ep++) = 'b';
@@ -1242,10 +1269,12 @@ noexcept
       uint64_t mant;
       int exp;
       do_xfrexp_F_bin(mant, exp, value);
+
       // Write the broken-down number in scientific notation.
       do_xput_M_bin(ep, mant, ep + 1);
       *(ep++) = 'p';
       do_xput_I_exp(ep, exp);
+
       // Append a null terminator.
       *ep = 0;
     }
@@ -1267,6 +1296,7 @@ noexcept
 
     // Extract the sign bit and extend it to a word.
     int sign = ::std::signbit(value) ? -1 : 0;
+
     // Treat non-finite values and zeroes specially.
     if(do_check_special(bp, ep, value)) {
       // Use the template string literal, which is immutable.
@@ -1281,6 +1311,7 @@ noexcept
       // Prepend a minus sign if the number is negative.
       if(sign)
         *(ep++) = '-';
+
       // Prepend the hexadecimal prefix.
       *(ep++) = '0';
       *(ep++) = 'x';
@@ -1289,9 +1320,11 @@ noexcept
       uint64_t mant;
       int exp;
       do_xfrexp_F_bin(mant, exp, value);
+
       // Normalize the integral part so it is the maximum value in the range [0,16).
       mant >>= ~exp & 3;
       exp >>= 2;
+
       // Write the broken-down number...
       if((exp < -4) || ((single ? 6 : 14) <= exp)) {
         // ... in scientific notation.
@@ -1306,10 +1339,10 @@ noexcept
         ranged_for(exp, -1, [&](int) { *(ep++) = '0';  });
         do_xput_M_hex(ep, mant, nullptr);
       }
-      else {
+      else
         // ... in plain format; the decimal point is inserted in the middle.
         do_xput_M_hex(ep, mant, ep + 1 + do_cast_U(exp));
-      }
+
       // Append a null terminator.
       *ep = 0;
     }
@@ -1345,6 +1378,7 @@ noexcept
       // Prepend a minus sign if the number is negative.
       if(sign)
         *(ep++) = '-';
+
       // Prepend the hexadecimal prefix.
       *(ep++) = '0';
       *(ep++) = 'x';
@@ -1353,13 +1387,16 @@ noexcept
       uint64_t mant;
       int exp;
       do_xfrexp_F_bin(mant, exp, value);
+
       // Normalize the integral part so it is the maximum value in the range [0,16).
       mant >>= ~exp & 3;
       exp >>= 2;
+
       // Write the broken-down number in scientific notation.
       do_xput_M_hex(ep, mant, ep + 1);
       *(ep++) = 'p';
       do_xput_I_exp(ep, exp * 4);
+
       // Append a null terminator.
       *ep = 0;
     }
@@ -1381,6 +1418,7 @@ noexcept
 
     // Extract the sign bit and extend it to a word.
     int sign = ::std::signbit(value) ? -1 : 0;
+
     // Treat non-finite values and zeroes specially.
     if(do_check_special(bp, ep, value)) {
       // Use the template string literal, which is immutable.
@@ -1400,6 +1438,7 @@ noexcept
       uint64_t mant;
       int exp;
       do_xfrexp_F_dec(mant, exp, value, single);
+
       // Write the broken-down number...
       if((exp < -4) || ((single ? 9 : 17) <= exp)) {
         // ... in scientific notation.
@@ -1414,10 +1453,10 @@ noexcept
         ranged_for(exp, -1, [&](int) { *(ep++) = '0';  });
         do_xput_M_dec(ep, mant, nullptr);
       }
-      else {
+      else
         // ... in plain format; the decimal point is inserted in the middle.
         do_xput_M_dec(ep, mant, ep + 1 + do_cast_U(exp));
-      }
+
       // Append a null terminator.
       *ep = 0;
     }
@@ -1439,6 +1478,7 @@ noexcept
 
     // Extract the sign bit and extend it to a word.
     int sign = ::std::signbit(value) ? -1 : 0;
+
     // Treat non-finite values and zeroes specially.
     if(do_check_special(bp, ep, value)) {
       // Use the template string literal, which is immutable.
@@ -1458,10 +1498,12 @@ noexcept
       uint64_t mant;
       int exp;
       do_xfrexp_F_dec(mant, exp, value, single);
+
       // Write the broken-down number in scientific notation.
       do_xput_M_dec(ep, mant, ep + 1);
       *(ep++) = 'e';
       do_xput_I_exp(ep, exp);
+
       // Append a null terminator.
       *ep = 0;
     }

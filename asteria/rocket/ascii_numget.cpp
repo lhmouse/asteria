@@ -861,6 +861,7 @@ parse_B(const char*& bptr, const char* eptr)
   {
     this->clear();
     const char* rp = bptr;
+
     // Check for "0", "1", "false" or "true".
     bool value;
     if(rp == eptr)
@@ -927,16 +928,17 @@ parse_P(const char*& bptr, const char* eptr)
   {
     this->clear();
     const char* rp = bptr;
+
     // Check for the "0x" prefix, which is required.
     uint8_t base = do_get_base(rp, eptr, 0);
-    if(base != 16) {
+    if(base != 16)
       return *this;
-    }
+
     // Get the mantissa.
     mantissa m = { };
-    if(do_collect_U(m, rp, eptr, base, UINT64_MAX) == 0) {
+    if(do_collect_U(m, rp, eptr, base, UINT64_MAX) == 0)
       return *this;
-    }
+
     if(m.novfl != 0) {
       // Set an infinity if not all significant figures could be collected.
       this->m_vcls = 2;  // infinity
@@ -959,13 +961,15 @@ parse_U(const char*& bptr, const char* eptr, uint8_t ibase)
   {
     this->clear();
     const char* rp = bptr;
+
     // Check for the base prefix, which is optional.
     uint8_t base = do_get_base(rp, eptr, ibase);
+
     // Get the mantissa.
     mantissa m = { };
-    if(do_collect_U(m, rp, eptr, base, UINT64_MAX) == 0) {
+    if(do_collect_U(m, rp, eptr, base, UINT64_MAX) == 0)
       return *this;
-    }
+
     if(m.novfl != 0) {
       // Set an infinity if not all significant figures could be collected.
       this->m_vcls = 2;  // infinity
@@ -975,6 +979,7 @@ parse_U(const char*& bptr, const char* eptr, uint8_t ibase)
       this->m_base = base;
       this->m_mant = m.value;
     }
+
     // Report success and advance the read pointer.
     this->m_succ = true;
     bptr = rp;
@@ -985,15 +990,18 @@ ascii_numget& ascii_numget::parse_I(const char*& bptr, const char* eptr, uint8_t
   {
     this->clear();
     const char* rp = bptr;
+
     // Check for the sign.
     bool sign = do_get_sign(rp, eptr);
+
     // Check for the base prefix, which is optional.
     uint8_t base = do_get_base(rp, eptr, ibase);
+
     // Get the mantissa.
     mantissa m = { };
-    if(do_collect_U(m, rp, eptr, base, UINT64_MAX) == 0) {
+    if(do_collect_U(m, rp, eptr, base, UINT64_MAX) == 0)
       return *this;
-    }
+
     if(m.novfl != 0) {
       // Set an infinity if not all significant figures could be collected.
       this->m_vcls = 2;  // infinity
@@ -1015,12 +1023,15 @@ ascii_numget& ascii_numget::parse_F(const char*& bptr, const char* eptr, uint8_t
   {
     this->clear();
     const char* rp = bptr;
+
     // Check for the sign.
     bool sign = do_get_sign(rp, eptr);
+
     // Check for "infinity".
     if((eptr - rp >= 8) && (::std::memcmp(rp, "infinity", 8) == 0)) {
       // Skip the string.
       rp += 8;
+
       // Set an infinity.
       this->m_vcls = 2;  // infinity
     }
@@ -1033,26 +1044,30 @@ ascii_numget& ascii_numget::parse_F(const char*& bptr, const char* eptr, uint8_t
     else {
       // Check for the base prefix, which is optional.
       uint8_t base = do_get_base(rp, eptr, ibase);
+
       // Get the mantissa.
       mantissa m = { };
-      if(do_collect_U(m, rp, eptr, base, UINT64_MAX) == 0) {
+      if(do_collect_U(m, rp, eptr, base, UINT64_MAX) == 0)
         return *this;
-      }
+
       // Check for the radix point, which is optional.
       // If the radix point exists, the fractional part shall follow.
       size_t nfrac = 0;
       if((eptr - rp >= 1) && (rp[0] == '.')) {
         // Skip the radix point.
         rp += 1;
+
         // Get the fractional part, which is required.
         nfrac = do_collect_U(m, rp, eptr, base, UINT64_MAX);
         if(nfrac == 0)
           return *this;
       }
+
       // Initialize the exponent.
       int64_t expo = static_cast<int64_t>(m.novfl) - static_cast<int64_t>(nfrac);
       bool erdx = true;
       bool has_expo = false;
+
       // Check for the exponent.
       switch(base) {
         case 16:
@@ -1080,24 +1095,27 @@ ascii_numget& ascii_numget::parse_F(const char*& bptr, const char* eptr, uint8_t
           break;
         }
       }
+
       if(has_expo) {
         // Get the sign of the exponent, which is optional.
         bool esign = do_get_sign(rp, eptr);
+
         // Get the exponent.
         mantissa em = { };
-        if(do_collect_U(em, rp, eptr, 10, 999'999'999'999'999) == 0) {
+        if(do_collect_U(em, rp, eptr, 10, 999'999'999'999'999) == 0)
           return *this;
-        }
+
         // This shall not overflow.
         if(esign)
           expo -= static_cast<int64_t>(em.value);
         else
           expo += static_cast<int64_t>(em.value);
       }
-      if(m.value == 0) {
-        // Zero out the exponent if the mantissa is zero.
+
+      // Zero out the exponent if the mantissa is zero.
+      if(m.value == 0)
         expo = 0;
-      }
+
       // Normalize the exponent.
       if(expo < -0x0FFF'FFFF) {  // 28 bits
         // Set an infinitesimal if the exponent is too small.
@@ -1130,7 +1148,7 @@ cast_U(uint64_t& value, uint64_t lower, uint64_t upper)
 noexcept
   {
     this->m_stat = 0;
-    // Try casting the value.
+
     switch(this->m_vcls) {
       case 0: {  // finite
         uint64_t ireg = this->m_mant;
@@ -1139,9 +1157,11 @@ noexcept
           value = 0;
           break;
         }
+
         if(this->m_sign) {
           // Negative values are always out of range.
           value = 0;
+
           // For unsigned integers this always overflows and is always inexact.
           this->m_ovfl = true;
           this->m_inxc = true;
@@ -1157,6 +1177,7 @@ noexcept
         if(this->m_expo > 0) {
           for(int32_t i = 0; i != this->m_expo; ++i) {
             uint64_t next = ireg * base;
+
             // TODO: Overflow checks can be performed using intrinsics.
             if(next / base != ireg) {
               ireg = UINT64_MAX;
@@ -1169,9 +1190,11 @@ noexcept
         else {
           for(int32_t i = 0; i != this->m_expo; --i) {
             uint64_t next = ireg / base;
+
             // Set the inexact flag if a non-zero digit was shifted out.
             if(ireg % base != 0)
               this->m_inxc = true;
+
             // TODO: Overflow checks can be performed using intrinsics.
             if(next == 0) {
               ireg = 0;
@@ -1248,7 +1271,7 @@ cast_I(int64_t& value, int64_t lower, int64_t upper)
 noexcept
   {
     this->m_stat = 0;
-    // Try casting the value.
+
     switch(this->m_vcls) {
       case 0: {  // finite
         uint64_t ireg = this->m_mant;
@@ -1267,6 +1290,7 @@ noexcept
         if(this->m_expo > 0) {
           for(int32_t i = 0; i != this->m_expo; ++i) {
             uint64_t next = ireg * base;
+
             // TODO: Overflow checks can be performed using intrinsics.
             if(next / base != ireg) {
               ireg = UINT64_MAX;
@@ -1279,10 +1303,12 @@ noexcept
         else {
           for(int32_t i = 0; i != this->m_expo; --i) {
             uint64_t next = ireg / base;
+
             // Set the inexact flag if a non-zero digit was shifted out.
             if(ireg % base != 0) {
               this->m_inxc = true;
             }
+
             // TODO: Overflow checks can be performed using intrinsics.
             if(next == 0) {
               ireg = 0;
@@ -1322,6 +1348,7 @@ noexcept
       case 1: {  // infinitesimal
         // Truncate the value to zero.
         value = 0;
+
         // For integers this always underflows and is always inexact.
         this->m_udfl = true;
         this->m_inxc = true;
@@ -1331,6 +1358,7 @@ noexcept
       case 2: {  // infinity
         // Return the maximum value.
         value = numeric_limits<int64_t>::max();
+
         // For integers this always overflows and is always inexact.
         this->m_ovfl = true;
         this->m_inxc = true;
@@ -1340,6 +1368,7 @@ noexcept
       default: {  // quiet NaN
         // Return zero.
         value = 0;
+
         // For integers this is always inexact.
         this->m_inxc = true;
         break;
@@ -1369,8 +1398,10 @@ cast_F(double& value, double lower, double upper, bool single)
 noexcept
   {
     this->m_stat = 0;
+
     // Store the sign bit into a `double`.
     double sign = -(this->m_sign);
+
     // Try casting the value.
     switch(this->m_vcls) {
       case 0: {  // finite
@@ -1416,6 +1447,7 @@ noexcept
               break;
             }
             const auto& mult = s_decmult_F[mpos];
+
             // Adjust `ireg` such that its MSB is non-zero.
             // TODO: Modern CPUs have intrinsics for LZCNT.
             int32_t lzcnt = 0;
@@ -1425,6 +1457,7 @@ noexcept
               ireg <<= i;
               lzcnt += i;
             }
+
             // Multiply two 64-bit values and get the high-order half.
             // TODO: Modern CPUs have intrinsics for this.
             uint64_t xhi = ireg >> 32;
@@ -1432,6 +1465,7 @@ noexcept
             uint64_t yhi = mult.mant >> 32;
             uint64_t ylo = mult.mant << 32 >> 32;
             ireg = xhi * yhi + (((xlo * yhi >> 30) + (xhi * ylo >> 30) + (xlo * ylo >> 62)) >> 2);
+
             // Convert the mantissa to a floating-point number.
             freg = do_xldexp_I(ireg | 1, mult.bexp - lzcnt, single);
             break;
@@ -1461,6 +1495,7 @@ noexcept
 
       case 1: {  // infinitesimal
         value = ::std::copysign(0.0, sign);
+
         // For floating-point numbers this always underflows.
         this->m_udfl = true;
         break;
