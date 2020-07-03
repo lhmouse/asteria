@@ -18,10 +18,11 @@ final
     bool m_immut = false;
     bool m_alive = false;
 
-    // These are reference counters for garbage collection and are uninitialized by default.
-    // As values are reference-counting, reference counts can be fractional. For example,
-    // if three variablesshare a single instance of a function, then each of them is supposed
-    // to have 1/3 of the object.
+    // These are reference counters for garbage collection and are
+    // uninitialized by default. As values are reference-counting,
+    // reference counts can be fractional. For example, if three
+    // variables share a single instance of a function, then each
+    // of them is supposed to have 1/3 reference of the object.
     long m_gcref_i;
     double m_gcref_f;
 
