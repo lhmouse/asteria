@@ -635,14 +635,12 @@ class basic_hasher
     append(const charT& c)
     noexcept
       {
-        auto ch = static_cast<typename ::std::common_type<unsigned,
-                      typename make_unsigned<charT>::type>::type>(c);
+        char32_t word = static_cast<char32_t>(c);
         char32_t reg = this->m_reg;
-        for(size_t k = 0;  k < sizeof(c);  ++k) {
-          reg ^= static_cast<unsigned char>(ch);
-          ch >>= 8;
-          reg *= xprime;
-        }
+
+        for(size_t k = 0;  k < sizeof(c);  ++k)
+          reg = (reg ^ ((word >> k * 8) & 0xFF)) * xprime;
+
         this->m_reg = reg;
         return *this;
       }
@@ -651,9 +649,8 @@ class basic_hasher
     basic_hasher&
     append(const charT* s, size_t n)
       {
-        const charT* sp = s;
-        while(sp != s + n)
-          this->append(*(sp++));
+        for(auto sp = s;  sp != s + n;  ++sp)
+          this->append(*sp);
         return *this;
       }
 
@@ -661,9 +658,8 @@ class basic_hasher
     basic_hasher&
     append(const charT* s)
       {
-        const charT* sp = s;
-        while(!traitsT::eq(*sp, charT()))
-          this->append(*(sp++));
+        for(auto sp = s;  !traitsT::eq(*sp, charT());  ++sp)
+          this->append(*sp);
         return *this;
       }
 
