@@ -624,8 +624,8 @@ template<typename charT, typename traitsT>
 class basic_hasher
   {
   private:
+    static constexpr char32_t xoffset = 0x811C9DC5;
     static constexpr char32_t xprime = 0x1000193;
-    static constexpr char32_t xoffset = 0x811c9dc5;
 
     char32_t m_reg = xoffset;
 
