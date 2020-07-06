@@ -71,7 +71,7 @@ utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset);
 
 // Type conversion
 template<typename enumT>
-constexpr
+ROCKET_CONST_FUNCTION constexpr
 typename ::std::underlying_type<enumT>::type
 weaken_enum(enumT value)
 noexcept
@@ -89,13 +89,13 @@ enum : uint8_t
 
 extern const uint8_t cctype_table[128];
 
-inline
+ROCKET_CONST_FUNCTION inline
 uint8_t
 get_cctype(char c)
 noexcept
   { return (uint8_t(c) < 128) ? cctype_table[uint8_t(c)] : 0;  }
 
-inline
+ROCKET_CONST_FUNCTION inline
 bool
 is_cctype(char c, uint8_t mask)
 noexcept
