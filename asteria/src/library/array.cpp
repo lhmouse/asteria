@@ -284,6 +284,7 @@ std_array_find(V_array data, V_integer from, optV_integer length, Value target)
     auto qit = do_find_opt(range.first, range.second, target);
     if(!qit)
       return nullopt;
+
     return *qit - data.begin();
   }
 
@@ -295,6 +296,7 @@ std_array_find_if(Global_Context& global, V_array data, V_integer from, optV_int
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
     if(!qit)
       return nullopt;
+
     return *qit - data.begin();
   }
 
@@ -306,6 +308,7 @@ std_array_find_if_not(Global_Context& global, V_array data, V_integer from, optV
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
     if(!qit)
       return nullopt;
+
     return *qit - data.begin();
   }
 
@@ -317,6 +320,7 @@ std_array_rfind(V_array data, V_integer from, optV_integer length, Value target)
                            ::std::make_reverse_iterator(range.first), target);
     if(!qit)
       return nullopt;
+
     return data.rend() - *qit - 1;
   }
 
@@ -329,6 +333,7 @@ std_array_rfind_if(Global_Context& global, V_array data, V_integer from, optV_in
                                       ::std::make_reverse_iterator(range.first), predictor, true);
     if(!qit)
       return nullopt;
+
     return data.rend() - *qit - 1;
   }
 
@@ -341,6 +346,7 @@ std_array_rfind_if_not(Global_Context& global, V_array data, V_integer from, opt
                                       ::std::make_reverse_iterator(range.first), predictor, false);
     if(!qit)
       return nullopt;
+
     return data.rend() - *qit - 1;
   }
 
@@ -353,6 +359,7 @@ std_array_count(V_array data, V_integer from, optV_integer length, Value target)
       auto qit = do_find_opt(range.first, range.second, target);
       if(!qit)
         break;
+
       ++count;
       range.first = ::std::move(++*qit);
     }
@@ -369,6 +376,7 @@ std_array_count_if(Global_Context& global, V_array data, V_integer from, optV_in
       auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
       if(!qit)
         break;
+
       ++count;
       range.first = ::std::move(++*qit);
     }
@@ -385,6 +393,7 @@ std_array_count_if_not(Global_Context& global, V_array data, V_integer from, opt
       auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
       if(!qit)
         break;
+
       ++count;
       range.first = ::std::move(++*qit);
     }
@@ -400,6 +409,7 @@ std_array_exclude(V_array data, V_integer from, optV_integer length, Value targe
       auto qit = do_find_opt(range.first, range.second, target);
       if(!qit)
         break;
+
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
@@ -416,6 +426,7 @@ std_array_exclude_if(Global_Context& global, V_array data, V_integer from, optV_
       auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
       if(!qit)
         break;
+
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
@@ -432,6 +443,7 @@ std_array_exclude_if_not(Global_Context& global, V_array data, V_integer from, o
       auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
       if(!qit)
         break;
+
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
@@ -462,6 +474,7 @@ std_array_binary_search(Global_Context& global, V_array data, Value target, optV
     auto pair = do_bsearch(global, args, data.begin(), data.end(), comparator, target);
     if(!pair.second)
       return nullopt;
+
     return pair.first - data.begin();
   }
 
