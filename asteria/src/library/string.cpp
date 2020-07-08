@@ -614,6 +614,7 @@ std_string_find(V_string text, V_integer from, optV_integer length, V_string pat
     auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
     if(!qit)
       return nullopt;
+
     return *qit - text.begin();
   }
 
@@ -625,6 +626,7 @@ std_string_rfind(V_string text, V_integer from, optV_integer length, V_string pa
                            pattern.rbegin(), pattern.rend());
     if(!qit)
       return nullopt;
+
     return text.rend() - *qit - pattern.ssize();
   }
 
@@ -648,6 +650,7 @@ std_string_find_any_of(V_string text, V_integer from, optV_integer length, V_str
     auto qit = do_find_of_opt(range.first, range.second, accept, true);
     if(!qit)
       return nullopt;
+
     return *qit - text.begin();
   }
 
@@ -658,6 +661,7 @@ std_string_find_not_of(V_string text, V_integer from, optV_integer length, V_str
     auto qit = do_find_of_opt(range.first, range.second, reject, false);
     if(!qit)
       return nullopt;
+
     return *qit - text.begin();
   }
 
@@ -669,6 +673,7 @@ std_string_rfind_any_of(V_string text, V_integer from, optV_integer length, V_st
                               ::std::make_reverse_iterator(range.first), accept, true);
     if(!qit)
       return nullopt;
+
     return text.rend() - *qit - 1;
   }
 
@@ -680,6 +685,7 @@ std_string_rfind_not_of(V_string text, V_integer from, optV_integer length, V_st
                               ::std::make_reverse_iterator(range.first), reject, false);
     if(!qit)
       return nullopt;
+
     return text.rend() - *qit - 1;
   }
 
@@ -699,19 +705,19 @@ std_string_trim(V_string text, optV_string reject)
       return text;
 
     // Get the index of the first byte to keep.
-    auto start = text.find_first_not_of(rchars);
-    if(start == V_string::npos)
+    size_t bpos = text.find_first_not_of(rchars);
+    if(bpos == V_string::npos)
       // There is no byte to keep. Return an empty string.
       return nullopt;
 
     // Get the index of the last byte to keep.
-    auto end = text.find_last_not_of(rchars);
-    if((start == 0) && (end == text.size() - 1))
+    size_t epos = text.find_last_not_of(rchars) + 1;
+    if((bpos == 0) && (epos == text.size()))
       // There is no byte to strip. Make use of reference counting.
       return text;
 
     // Return the remaining part of `text`.
-    return text.substr(start, end + 1 - start);
+    return text.substr(bpos, epos - bpos);
   }
 
 V_string
@@ -723,17 +729,17 @@ std_string_triml(V_string text, optV_string reject)
       return text;
 
     // Get the index of the first byte to keep.
-    auto start = text.find_first_not_of(rchars);
-    if(start == V_string::npos)
+    size_t bpos = text.find_first_not_of(rchars);
+    if(bpos == V_string::npos)
       // There is no byte to keep. Return an empty string.
       return nullopt;
 
-    if(start == 0)
+    if(bpos == 0)
       // There is no byte to strip. Make use of reference counting.
       return text;
 
     // Return the remaining part of `text`.
-    return text.substr(start);
+    return text.substr(bpos);
   }
 
 V_string
@@ -745,17 +751,17 @@ std_string_trimr(V_string text, optV_string reject)
       return text;
 
     // Get the index of the last byte to keep.
-    auto end = text.find_last_not_of(rchars);
-    if(end == V_string::npos)
+    size_t epos = text.find_last_not_of(rchars) + 1;
+    if(epos == 0)
       // There is no byte to keep. Return an empty string.
       return nullopt;
 
-    if(end == text.size() - 1)
+    if(epos == text.size())
       // There is no byte to strip. Make use of reference counting.
       return text;
 
     // Return the remaining part of `text`.
-    return text.substr(0, end + 1);
+    return text.substr(0, epos);
   }
 
 V_string
