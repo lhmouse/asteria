@@ -46,18 +46,25 @@ do_get_base(const char*& rp, const char* eptr, uint8_t ibase)
     switch(ibase) {
       case 0:
         // Look ahead for at most 2 characters.
-        if((eptr - rp >= 2) && (rp[0] == '0')) {
-          // Check for binary and hexadecimal prefixes.
-          if(do_match_char_ci(rp[1], 'b')) {
-            rp += 2;
-            return 2;
-          }
-          if(do_match_char_ci(rp[1], 'x')) {
-            rp += 2;
-            return 16;
-          }
+        // Assume the number is decimal by default.
+        if(eptr - rp < 2)
+          return 10;
+
+        if(rp[0] != '0')
+          return 10;
+
+        // Check for binary and hexadecimal prefixes.
+        if(do_match_char_ci(rp[1], 'b')) {
+          rp += 2;
+          return 2;
         }
-        // Assume the number is decimal.
+
+        if(do_match_char_ci(rp[1], 'x')) {
+          rp += 2;
+          return 16;
+        }
+
+        // Assume decimal.
         return 10;
 
       case 2:
@@ -1064,7 +1071,7 @@ ascii_numget& ascii_numget::parse_F(const char*& bptr, const char* eptr, uint8_t
       }
 
       // Initialize the exponent.
-      int64_t expo = static_cast<int64_t>(m.novfl) - static_cast<int64_t>(nfrac);
+      int64_t expo = static_cast<ptrdiff_t>(m.novfl - nfrac);
       bool erdx = true;
       bool has_expo = false;
 
