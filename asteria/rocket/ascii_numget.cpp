@@ -81,61 +81,61 @@ do_get_base(const char*& rp, const char* eptr, uint8_t ibase)
 struct mantissa
   {
     uint64_t value;  // significant figures
-    uint8_t xvadd;  // bitwise OR of all figures overflowed
-    size_t novfl;  // number of significant figures overflowed
+    size_t ntrunc;   // number of significant figures truncated
+    bool trailer;    // have any non-zero figures been truncated?
   };
 
 constexpr int8_t s_digits[] =
   {
-     -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-     -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-     -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-      0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  -1,  -1,  -1,  -1,  -1,  -1,  // 0-9
-     -1,  10,  11,  12,  13,  14,  15,  16,  17,  18,  19,  20,  21,  22,  23,  24,  // A-O
-     25,  26,  27,  28,  29,  30,  31,  32,  33,  34,  35,  -1,  -1,  -1,  -1,  -1,  // P-Z
-     -1,  10,  11,  12,  13,  14,  15,  16,  17,  18,  19,  20,  21,  22,  23,  24,  // a-o
-     25,  26,  27,  28,  29,  30,  31,  32,  33,  34,  35,  -1,  -1,  -1,  -1,  -1,  // p-z
-     -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-     -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-     -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-     -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-     -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-     -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-     -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-     -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
+     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+      0,  1,  2,  3,  4,  5,  6,  7,  8,  9, -1, -1, -1, -1, -1, -1,  // 0-9
+     -1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,  // A-O
+     25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, -1, -1, -1, -1, -1,  // P-Z
+     -1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,  // a-o
+     25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, -1, -1, -1, -1, -1,  // p-z
+     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
   };
 
 size_t
-do_collect_U(mantissa& m, const char*& rp, const char* eptr, uint8_t base, uint64_t limit)
+do_collect_U(mantissa& m, const char*& rp, const char* eptr,
+             uint8_t base, uint64_t limit)
   {
-    size_t nread = 0;
-    for(;;) {
+    size_t nrd = 0;
+    while(rp != eptr) {
       // Get a digit.
-      if(rp == eptr) {
+      char32_t uch = static_cast<uint8_t>(rp[0]);
+      uint8_t dval = static_cast<uint8_t>(s_digits[uch]);
+      if(dval >= base)
         break;
-      }
-      uint8_t dval = uint8_t(s_digits[uint8_t(rp[0])]);
-      if(dval >= base) {
-        break;
-      }
-      nread += 1;
+
+      nrd += 1;
       rp += 1;
+
       // Ignore leading zeroes.
-      if((dval == 0) && (m.value == 0)) {
+      if((m.value | dval) == 0)
+        continue;
+
+      // Truncate this digit if it would cause an overflow.
+      if(m.value > (limit - dval) / base) {
+        m.ntrunc += 1;
+        m.trailer |= dval;
         continue;
       }
-      if(m.value <= (limit - dval) / base) {
-        // Append this digit to `value`.
-        m.value *= base;
-        m.value += dval;
-      }
-      else {
-        // Record an overflowed digit.
-        m.xvadd |= dval;
-        m.novfl += 1;
-      }
+
+      // Append this digit to `value`.
+      m.value *= base;
+      m.value += dval;
     }
-    return nread;
+    return nrd;
   }
 
 #if 0
@@ -946,7 +946,7 @@ parse_P(const char*& bptr, const char* eptr)
     if(do_collect_U(m, rp, eptr, base, UINT64_MAX) == 0)
       return *this;
 
-    if(m.novfl != 0) {
+    if(m.ntrunc != 0) {
       // Set an infinity if not all significant figures could be collected.
       this->m_vcls = 2;  // infinity
     }
@@ -977,7 +977,7 @@ parse_U(const char*& bptr, const char* eptr, uint8_t ibase)
     if(do_collect_U(m, rp, eptr, base, UINT64_MAX) == 0)
       return *this;
 
-    if(m.novfl != 0) {
+    if(m.ntrunc != 0) {
       // Set an infinity if not all significant figures could be collected.
       this->m_vcls = 2;  // infinity
     }
@@ -1009,7 +1009,7 @@ ascii_numget& ascii_numget::parse_I(const char*& bptr, const char* eptr, uint8_t
     if(do_collect_U(m, rp, eptr, base, UINT64_MAX) == 0)
       return *this;
 
-    if(m.novfl != 0) {
+    if(m.ntrunc != 0) {
       // Set an infinity if not all significant figures could be collected.
       this->m_vcls = 2;  // infinity
     }
@@ -1071,7 +1071,7 @@ ascii_numget& ascii_numget::parse_F(const char*& bptr, const char* eptr, uint8_t
       }
 
       // Initialize the exponent.
-      int64_t expo = static_cast<ptrdiff_t>(m.novfl - nfrac);
+      int64_t expo = static_cast<ptrdiff_t>(m.ntrunc - nfrac);
       bool erdx = true;
       bool has_expo = false;
 
@@ -1135,7 +1135,7 @@ ascii_numget& ascii_numget::parse_F(const char*& bptr, const char* eptr, uint8_t
       else {
         // Set the value.
         this->m_erdx = erdx;
-        this->m_madd = m.xvadd != 0;
+        this->m_madd = m.trailer;
         this->m_base = base;
         this->m_expo = static_cast<int32_t>(expo);
         this->m_mant = m.value;
