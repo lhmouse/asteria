@@ -272,21 +272,23 @@ class basic_tinybuf
     size_type
     getn(char_type* s, size_type n)
       {
-        if(n == 0) {
+        if(n == 0)
           // There is nothing to do.
           return 0;
-        }
+
         auto k = static_cast<size_type>(this->m_gend - this->m_gcur);
         if(ROCKET_UNEXPECT(k == 0)) {
           // If the get area is empty, try populating it.
           if(traits_type::is_eof(this->do_call_underflow(true)))
             return 0;
+
           k = static_cast<size_type>(this->m_gend - this->m_gcur);
           ROCKET_ASSERT(k != 0);
         }
+
+        // Consume some characters from the get area.
         // Don't read past the end of the get area.
         k = noadl::min(k, n);
-        // Consume some characters from the get area.
         traits_type::copy(s, this->m_gcur, k);
         this->m_gcur += k;
         return k;
@@ -295,16 +297,16 @@ class basic_tinybuf
     basic_tinybuf&
     putn(const char_type* s, size_type n)
       {
-        if(n == 0) {
+        if(n == 0)
           // There is nothing to do.
           return *this;
-        }
+
         auto k = static_cast<size_type>(this->m_pend - this->m_pcur);
-        if(ROCKET_UNEXPECT(n >= k)) {
+        if(ROCKET_UNEXPECT(n >= k))
           // If there is no enough room in the put area, evict its contents, followed by
           // the string specified.
           return this->do_call_overflow(s, n);
-        }
+
         // Append the string to the put area.
         traits_type::copy(this->m_pcur, s, k);
         this->m_pcur += k;
@@ -315,10 +317,10 @@ class basic_tinybuf
     puts(const char_type* s)
       {
         static constexpr char_type s_null[] = { '(', 'n', 'u', 'l', 'l', ')', 0 };
-        if(!s) {
+        if(!s)
           // Don't result in a segfault at least.
           return this->putn(s_null, traits_type::length(s_null));
-        }
+
         return this->putn(s, traits_type::length(s));
       }
 
