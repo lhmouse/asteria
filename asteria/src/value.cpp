@@ -340,37 +340,33 @@ const
 
       case vtype_array: {
         const auto& altr = this->m_stor.as<vtype_array>();
-        // array(3) =
-        //  [
+        // array(3) [
         //   0 = integer 1;
         //   1 = integer 2;
         //   2 = integer 3;
-        //  ]
-        fmt << "array(" << altr.size() << ")";
-        fmt << pwrap(indent, hanging + 1) << '[';
+        // ]
+        fmt << "array(" << altr.size() << ") [";
         for(size_t i = 0;  i < altr.size();  ++i) {
           fmt << pwrap(indent, hanging + indent) << i << " = ";
           altr[i].dump(fmt, indent, hanging + indent) << ';';
         }
-        fmt << pwrap(indent, hanging + 1) << ']';
+        fmt << pwrap(indent, hanging) << ']';
         return fmt;
       }
 
       case vtype_object: {
         const auto& altr = this->m_stor.as<vtype_object>();
-        // object(3) =
-        //  {
+        // object(3) {
         //   "one" = integer 1;
         //   "two" = integer 2;
         //   "three" = integer 3;
-        //  }
-        fmt << "object(" << altr.size() << ")";
-        fmt << pwrap(indent, hanging + 1) << '{';
+        // }
+        fmt << "object(" << altr.size() << ") {";
         for(auto q = altr.begin();  q != altr.end();  ++q) {
           fmt << pwrap(indent, hanging + indent) << quote(q->first) << " = ";
           q->second.dump(fmt, indent, hanging + indent) << ';';
         }
-        fmt << pwrap(indent, hanging + 1) << '}';
+        fmt << pwrap(indent, hanging) << '}';
         return fmt;
       }
 
