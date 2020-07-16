@@ -85,6 +85,7 @@ enum : uint8_t
     cctype_digit   = 0x04,  // [0-9]
     cctype_xdigit  = 0x08,  // [0-9A-Fa-f]
     cctype_namei   = 0x10,  // [A-Za-z_]
+    cctype_blank   = 0x20,  // [ \t]
   };
 
 extern const uint8_t cctype_table[128];
