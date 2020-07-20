@@ -51,11 +51,48 @@ noexcept
            details_ascii_case::to_lower(y);  }
 
 constexpr
+bool
+ascii_ci_equal(const char* sx, size_t nx, const char* sy, size_t ny)
+noexcept
+  {
+    // If the lengths are unequal, the strings cannot be equal.
+    if(nx != ny)
+      return false;
+
+    // Perform character-wise comparison of two strings of `nx` characters.
+    for(size_t k = 0;  k != nx;  ++k)
+      if(!noadl::ascii_ci_equal(sx[k], sy[k]))
+        return false;
+
+    // All characters are equal.
+    return true;
+  }
+
+constexpr
 int
 ascii_ci_compare(char x, char y)
 noexcept
   { return static_cast<int>(details_ascii_case::to_lower(x)) -
            static_cast<int>(details_ascii_case::to_lower(y));  }
+
+constexpr
+int
+ascii_ci_compare(const char* sx, size_t nx, const char* sy, size_t ny)
+noexcept
+  {
+    // Compare the longest initial substring.
+    // If any characters compare unequal, return immediately.
+    size_t n = noadl::min(nx, ny);
+
+    for(size_t k = 0;  k != n;  ++k)
+      if(int r = noadl::ascii_ci_compare(sx[k], sy[k]))
+        return r;
+
+    // The substrings compare equal.
+    // Compare the lengths. Note this is not very correct when both lengths
+    // are greater than `PTRDIFF_T / 2`, which is however impractical.
+    return static_cast<int>(static_cast<ptrdiff_t>(nx - ny));
+  }
 
 // Hash
 constexpr
