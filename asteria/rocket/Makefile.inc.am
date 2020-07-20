@@ -31,6 +31,7 @@ include_rocket_HEADERS =  \
   %reldir%/tinybuf_file.hpp  \
   %reldir%/ascii_numput.hpp  \
   %reldir%/ascii_numget.hpp  \
+  %reldir%/ascii_case.hpp  \
   %reldir%/tinyfmt.hpp  \
   %reldir%/tinyfmt_str.hpp  \
   %reldir%/tinyfmt_file.hpp  \
@@ -65,6 +66,7 @@ include_rocket_details_HEADERS =  \
   %reldir%/details/static_vector.ipp  \
   %reldir%/details/array.ipp  \
   %reldir%/details/linear_buffer.ipp  \
+  %reldir%/details/ascii_case.ipp  \
   %reldir%/details/mutex.ipp  \
   %reldir%/details/recursive_mutex.ipp  \
   %reldir%/details/once_flag.ipp  \
