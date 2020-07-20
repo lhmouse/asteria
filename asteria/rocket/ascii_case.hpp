@@ -90,7 +90,7 @@ noexcept
 
     // The substrings compare equal.
     // Compare the lengths. Note this is not very correct when both lengths
-    // are greater than `PTRDIFF_T / 2`, which is however impractical.
+    // are greater than `PTRDIFF_MAX / 2`, which is however impractical.
     return static_cast<int>(static_cast<ptrdiff_t>(nx - ny));
   }
 
