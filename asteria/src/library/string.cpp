@@ -5,6 +5,7 @@
 #include "string.hpp"
 #include "../runtime/argument_reader.hpp"
 #include "../utilities.hpp"
+#include "rocket/ascii_case.hpp"
 #include <endian.h>
 #include <regex>
 
@@ -805,14 +806,15 @@ std_string_to_upper(V_string text)
     // Translate each character.
     for(size_t i = 0;  i < res.size();  ++i) {
       char c = res[i];
-      if((c < 'a') || ('z' < c))
+      char t = ::rocket::ascii_to_upper(c);
+      if(c == t)
         continue;
 
       // Fork the string as needed.
       if(ROCKET_UNEXPECT(!wptr))
         wptr = res.mut_data();
 
-      wptr[i] = static_cast<char>(c - 'a' + 'A');
+      wptr[i] = t;
     }
     return res;
   }
@@ -826,14 +828,15 @@ std_string_to_lower(V_string text)
     // Translate each character.
     for(size_t i = 0;  i < res.size();  ++i) {
       char c = res[i];
-      if((c < 'A') || ('Z' < c))
+      char t = ::rocket::ascii_to_lower(c);
+      if(c == t)
         continue;
 
       // Fork the string as needed.
       if(ROCKET_UNEXPECT(!wptr))
         wptr = res.mut_data();
 
-      wptr[i] = static_cast<char>(c - 'A' + 'a');
+      wptr[i] = t;
     }
     return res;
   }
