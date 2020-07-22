@@ -768,10 +768,10 @@ class hashmap_iterator
       : m_ref(ref), m_bkt(bkt)
       { }
 
-    hashmap_iterator(const parent_type* ref, needs_adjust_tag, bucket_type* hint)
+    hashmap_iterator(const parent_type* ref, needs_adjust_tag, bucket_type* bkt)
     noexcept
-      : m_ref(ref), m_bkt(this->do_adjust_forwards(hint))
-      { }
+      : m_ref(ref), m_bkt(bkt)
+      { this->do_advance_unchecked();  }
 
   public:
     constexpr
@@ -803,18 +803,23 @@ class hashmap_iterator
       }
 
     bucket_type*
-    do_adjust_forwards(bucket_type* hint)
-    const noexcept
+    do_advance_unchecked()
+    noexcept
       {
-        if(hint == nullptr)
+        // Don't advance singular iterators.
+        auto bkt = this->m_bkt;
+        if(!bkt)
           return nullptr;
 
         auto ref = this->m_ref;
         ROCKET_ASSERT_MSG(ref, "Iterator not initialized");
-        // Find the next non-empty bucket.
-        auto bkt = hint;
-        while((bkt != ref->buckets() + ref->bucket_count()) && !*bkt)
+        const auto end = ref->buckets() + ref->bucket_count();
+
+        // Find the first non-empty bucket.
+        while((bkt != end) && !*bkt)
           ++bkt;
+
+        this->m_bkt = this->do_assert_valid_bucket(bkt, false);
         return bkt;
       }
 
@@ -840,12 +845,11 @@ class hashmap_iterator
       }
 
     hashmap_iterator&
-    seek_next()
+    next()
     noexcept
       {
-        auto bkt = this->do_assert_valid_bucket(this->m_bkt, true);
-        bkt = this->do_adjust_forwards(bkt + 1);
-        this->m_bkt = this->do_assert_valid_bucket(bkt, false);
+        this->m_bkt = this->do_assert_valid_bucket(this->m_bkt, true) + 1;
+        this->do_advance_unchecked();
         return *this;
       }
 
@@ -873,7 +877,7 @@ inline
 hashmap_iterator<hashmapT, valueT>&
 operator++(hashmap_iterator<hashmapT, valueT>& rhs)
 noexcept
-  { return rhs.seek_next();  }
+  { return rhs.next();  }
 
 template<typename hashmapT, typename valueT>
 inline
@@ -882,7 +886,7 @@ operator++(hashmap_iterator<hashmapT, valueT>& lhs, int)
 noexcept
   {
     auto res = lhs;
-    lhs.seek_next();
+    lhs.next();
     return res;
   }
 
