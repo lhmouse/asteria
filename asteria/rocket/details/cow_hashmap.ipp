@@ -848,7 +848,7 @@ class hashmap_iterator
     next()
     noexcept
       {
-        this->m_bkt = this->do_assert_valid_bucket(this->m_bkt, true) + 1;
+        this->m_bkt = this->do_assert_valid_bucket(this->m_bkt + 1, false);
         this->do_advance_unchecked();
         return *this;
       }
