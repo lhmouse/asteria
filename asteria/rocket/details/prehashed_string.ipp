@@ -26,7 +26,9 @@ class string_storage
     template<typename... paramsT>
     explicit
     string_storage(const hasher& hf, paramsT&&... params)
-      : hasher_base(hf), m_str(::std::forward<paramsT>(params)...), m_hval(this->as_hasher()(this->m_str))
+      : hasher_base(hf),
+        m_str(::std::forward<paramsT>(params)...),
+        m_hval(this->as_hasher()(this->m_str))
       { }
 
     string_storage(const string_storage&)
@@ -82,8 +84,8 @@ class string_storage
     void
     assign(string_storage&& other)
       {
-        this->m_str = ::std::move(other.m_str);
-        this->m_hval = this->as_hasher()(this->m_str);
+        noadl::xswap(this->m_str, other.m_str);
+        ::std::swap(this->m_hval, other.m_hval);
       }
 
     void
