@@ -749,7 +749,7 @@ do_accept_do_while_statement_opt(Token_Stream& tstrm)
 
     qkwrd = do_accept_keyword_opt(tstrm, { keyword_while });
     if(!qkwrd)
-      return nullopt;
+      throw Parser_Error(parser_status_keyword_while_expected, tstrm.next_sloc(), tstrm.next_length());
 
     auto kneg = do_accept_negation_opt(tstrm);
     if(!kneg)
