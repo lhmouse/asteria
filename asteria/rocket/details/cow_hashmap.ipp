@@ -771,7 +771,7 @@ class hashmap_iterator
     hashmap_iterator(const parent_type* ref, needs_adjust_tag, bucket_type* bkt)
     noexcept
       : m_ref(ref), m_bkt(bkt)
-      { this->do_advance_unchecked();  }
+      { this->do_adjust_unchecked();  }
 
   public:
     constexpr
@@ -797,13 +797,13 @@ class hashmap_iterator
         ROCKET_ASSERT_MSG(ref, "Iterator not initialized");
         auto dist = static_cast<size_t>(bkt - ref->buckets());
         ROCKET_ASSERT_MSG(dist <= ref->bucket_count(), "Iterator invalidated");
-        ROCKET_ASSERT_MSG((dist == ref->bucket_count()) || *bkt, "Iterator invalidated");
-        ROCKET_ASSERT_MSG(!deref || (dist < ref->bucket_count()), "Past-the-end iterator not dereferenceable");
+        ROCKET_ASSERT_MSG(!deref || ((dist < ref->bucket_count()) && *bkt),
+                          "Past-the-end iterator not dereferenceable");
         return bkt;
       }
 
     bucket_type*
-    do_advance_unchecked()
+    do_adjust_unchecked()
     noexcept
       {
         // Don't advance singular iterators.
@@ -840,7 +840,7 @@ class hashmap_iterator
     tell_owned_by(const parent_type* ref)
     const noexcept
       {
-        ROCKET_ASSERT_MSG(this->m_ref == ref, "Iterator not belonging to the same container");
+        ROCKET_ASSERT_MSG(this->m_ref == ref, "Dangling iterator");
         return this->tell();
       }
 
@@ -849,7 +849,7 @@ class hashmap_iterator
     noexcept
       {
         this->m_bkt = this->do_assert_valid_bucket(this->m_bkt + 1, false);
-        this->do_advance_unchecked();
+        this->do_adjust_unchecked();
         return *this;
       }
 
