@@ -5,7 +5,7 @@
 #include "string.hpp"
 #include "../runtime/argument_reader.hpp"
 #include "../utilities.hpp"
-#include "rocket/ascii_case.hpp"
+#include "../../rocket/ascii_case.hpp"
 #include <endian.h>
 #include <regex>
 
