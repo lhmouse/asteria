@@ -114,11 +114,12 @@ vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl,
           // Collect digits.
           while(--ndigs >= 0) {
             ch = traitsT::to_int_type(*(pp++));
-            if((ch < '0') || ('9' < ch))
+            char32_t dval = static_cast<char32_t>(ch - '0');
+            if(dval > 9)
               noadl::sprintf_and_throw<invalid_argument>("format: invalid digit (character `%c`)", (int)ch);
 
             // Accumulate a digit.
-            index = index * 10 + static_cast<size_t>(ch - '0');
+            index = index * 10 + dval;
           }
           break;
         }
