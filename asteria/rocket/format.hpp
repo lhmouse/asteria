@@ -81,9 +81,9 @@ vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl,
       fmt.putn(bp, static_cast<size_t>(pp - bp));
 
       // Skip the dollar sign and parse the placeholder.
-      if(pp == ep) {
+      if(pp == ep)
         noadl::sprintf_and_throw<invalid_argument>("format: incomplete placeholder (dangling `$`)");
-      }
+
       typename traitsT::int_type ch = traitsT::to_int_type(*++pp);
       bp = ++pp;
 
@@ -100,23 +100,24 @@ vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl,
         case '{': {
           // Look for the terminator.
           bp = traitsT::find(bp, static_cast<size_t>(ep - bp), traitsT::to_char_type('}'));
-          if(!bp) {
+          if(!bp)
             noadl::sprintf_and_throw<invalid_argument>("format: incomplete placeholder (no matching `}`)");
-          }
+
           // Parse the argument index.
           ptrdiff_t ndigs = bp++ - pp;
-          if(ndigs < 1) {
+          if(ndigs < 1)
             noadl::sprintf_and_throw<invalid_argument>("format: missing argument index");
-          }
-          if(ndigs > 3) {
+
+          if(ndigs > 3)
             noadl::sprintf_and_throw<invalid_argument>("format: too many digits (`%td` > `3`)", ndigs);
-          }
+
           // Collect digits.
           while(--ndigs >= 0) {
             ch = traitsT::to_int_type(*(pp++));
-            if((ch < '0') || ('9' < ch)) {
+            if((ch < '0') || ('9' < ch))
               noadl::sprintf_and_throw<invalid_argument>("format: invalid digit (character `%c`)", (int)ch);
-            }
+
+            // Accumulate a digit.
             index = index * 10 + static_cast<size_t>(ch - '0');
           }
           break;
