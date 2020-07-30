@@ -802,4 +802,12 @@ static const Value& null_value = reinterpret_cast<const Value&>(null_value_stora
 
 }  // namespace asteria
 
+// These are explicit instantiations. Note that can't occur inside `namespace asteria`.
+extern template
+class ::rocket::cow_vector<::asteria::Value>;
+
+extern template
+class ::rocket::cow_hashmap<::rocket::prehashed_string, ::asteria::Value,
+                      ::rocket::prehashed_string::hash, ::std::equal_to<void>>;
+
 #endif
