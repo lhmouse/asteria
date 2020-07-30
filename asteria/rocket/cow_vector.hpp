@@ -419,6 +419,14 @@ class cow_vector
         return this->data()[pos];
       }
 
+    // N.B. This is a non-standard extension.
+    template<typename subscriptT,
+    ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
+    const_reference
+    at(subscriptT pos)
+    const
+      { return this->at(static_cast<size_type>(pos));  }
+
     const_reference
     operator[](size_type pos)
     const noexcept
@@ -428,12 +436,19 @@ class cow_vector
         return this->data()[pos];
       }
 
+    // N.B. This is a non-standard extension.
+    template<typename subscriptT,
+    ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
+    const_reference
+    operator[](subscriptT pos)
+    const noexcept
+      { return this->operator[](static_cast<size_type>(pos));  }
+
     const_reference
     front()
     const noexcept
       {
-        auto cnt = this->size();
-        ROCKET_ASSERT(cnt > 0);
+        ROCKET_ASSERT(!this->empty());
         return this->data()[0];
       }
 
@@ -441,9 +456,8 @@ class cow_vector
     back()
     const noexcept
       {
-        auto cnt = this->size();
-        ROCKET_ASSERT(cnt > 0);
-        return this->data()[cnt - 1];
+        ROCKET_ASSERT(!this->empty());
+        return this->data()[this->size() - 1];
       }
 
     // N.B. This is a non-standard extension.
@@ -454,9 +468,16 @@ class cow_vector
         auto cnt = this->size();
         if(pos >= cnt)
           return nullptr;
-
         return this->data() + pos;
       }
+
+    // N.B. This is a non-standard extension.
+    template<typename subscriptT,
+    ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
+    const value_type*
+    get_ptr(subscriptT pos)
+    const noexcept
+      { return this->get_ptr(static_cast<size_type>(pos));  }
 
     // There is no `at()` overload that returns a non-const reference.
     // This is the consequent overload which does that.
@@ -467,16 +488,21 @@ class cow_vector
         auto cnt = this->size();
         if(pos >= cnt)
           this->do_throw_subscript_out_of_range(pos);
-
         return this->mut_data()[pos];
       }
+
+    // N.B. This is a non-standard extension.
+    template<typename subscriptT,
+    ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
+    reference
+    mut(subscriptT pos)
+      { return this->mut(static_cast<size_type>(pos));  }
 
     // N.B. This is a non-standard extension.
     reference
     mut_front()
       {
-        auto cnt = this->size();
-        ROCKET_ASSERT(cnt > 0);
+        ROCKET_ASSERT(!this->empty());
         return this->mut_data()[0];
       }
 
@@ -484,9 +510,8 @@ class cow_vector
     reference
     mut_back()
       {
-        auto cnt = this->size();
-        ROCKET_ASSERT(cnt > 0);
-        return this->mut_data()[cnt - 1];
+        ROCKET_ASSERT(!this->empty());
+        return this->mut_data()[this->size() - 1];
       }
 
     // N.B. This is a non-standard extension.
@@ -497,9 +522,16 @@ class cow_vector
         auto cnt = this->size();
         if(pos >= cnt)
           return nullptr;
-
         return this->mut_data() + pos;
       }
+
+    // N.B. This is a non-standard extension.
+    template<typename subscriptT,
+    ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
+    value_type*
+    mut_ptr(subscriptT pos)
+    noexcept
+      { return this->mut_ptr(static_cast<size_type>(pos));  }
 
     // N.B. This is a non-standard extension.
     template<typename... paramsT>
@@ -557,15 +589,15 @@ class cow_vector
     reference
     push_back(const value_type& value)
       {
-        auto cnt_old = this->size();
         // Check for overlapped elements before `do_reserve_more()`.
+        auto cnt_old = this->size();
         auto srpos = static_cast<uintptr_t>(::std::addressof(value) - this->data());
         this->do_reserve_more(1);
         if(srpos < cnt_old) {
+          // Note the old reference has been invalidated.
           auto ptr = this->m_sth.emplace_back_unchecked(this->data()[srpos]);
           return *ptr;
         }
-
         auto ptr = this->m_sth.emplace_back_unchecked(value);
         return *ptr;
       }

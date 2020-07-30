@@ -613,22 +613,37 @@ class basic_cow_string
         return this->data()[pos];
       }
 
+    // N.B. This is a non-standard extension.
+    template<typename subscriptT,
+    ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
+    const_reference
+    at(subscriptT pos)
+    const
+      { return this->at(static_cast<size_type>(pos));  }
+
     const_reference
     operator[](size_type pos)
     const noexcept
       {
         auto len = this->size();
-        // Reading from the character at `size()` is permitted.
+        // Note reading from the character at `size()` is permitted.
         ROCKET_ASSERT(pos <= len);
         return this->c_str()[pos];
       }
+
+    // N.B. This is a non-standard extension.
+    template<typename subscriptT,
+    ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
+    const_reference
+    operator[](subscriptT pos)
+    const noexcept
+      { return this->operator[](static_cast<size_type>(pos));  }
 
     const_reference
     front()
     const noexcept
       {
-        auto len = this->size();
-        ROCKET_ASSERT(len > 0);
+        ROCKET_ASSERT(!this->empty());
         return this->data()[0];
       }
 
@@ -636,9 +651,8 @@ class basic_cow_string
     back()
     const noexcept
       {
-        auto len = this->size();
-        ROCKET_ASSERT(len > 0);
-        return this->data()[len - 1];
+        ROCKET_ASSERT(!this->empty());
+        return this->data()[this->size() - 1];
       }
 
     // There is no `at()` overload that returns a non-const reference.
@@ -654,11 +668,17 @@ class basic_cow_string
       }
 
     // N.B. This is a non-standard extension.
+    template<typename subscriptT,
+    ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
+    reference
+    mut(subscriptT pos)
+      { return this->mut(static_cast<size_type>(pos));  }
+
+    // N.B. This is a non-standard extension.
     reference
     mut_front()
       {
-        auto len = this->size();
-        ROCKET_ASSERT(len > 0);
+        ROCKET_ASSERT(!this->empty());
         return this->mut_data()[0];
       }
 
@@ -666,9 +686,8 @@ class basic_cow_string
     reference
     mut_back()
       {
-        auto len = this->size();
-        ROCKET_ASSERT(len > 0);
-        return this->mut_data()[len - 1];
+        ROCKET_ASSERT(!this->empty());
+        return this->mut_data()[this->size() - 1];
       }
 
     // 24.3.2.6, modifiers
