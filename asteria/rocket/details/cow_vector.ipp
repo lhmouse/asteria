@@ -50,11 +50,11 @@ struct basic_storage : storage_header
 
     ~basic_storage()
       {
-        auto nrem = this->nelem;
-        while(nrem != 0) {
-          --nrem;
-          allocator_traits<allocator_type>::destroy(this->alloc, this->data + nrem);
-        }
+        // Destroy all elements backwards.
+        while(this->nelem != 0)
+          this->nelem -= 1,
+          allocator_traits<allocator_type>::destroy(this->alloc, this->data + this->nelem);
+
 #ifdef ROCKET_DEBUG
         this->nelem = 0xCCAA;
 #endif
@@ -68,93 +68,84 @@ struct basic_storage : storage_header
       = delete;
   };
 
-template<typename ptrT, typename allocT, typename ignoreT>
-[[noreturn]] inline
-void
-dispatch_copy_storage(false_type, ignoreT&&, ptrT /*ptr*/, ptrT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/)
+struct storage_traits_helpers
   {
-    // Throw an exception unconditionally, even when there is nothing to copy.
-    noadl::sprintf_and_throw<domain_error>("cow_vector: `%s` not copy-constructible",
-                                           typeid(typename allocT::value_type).name());
-  }
+    template<typename ptrT, typename allocT, typename ignoreT>
+    [[noreturn]] static
+    void
+    dispatch_copy(false_type, ignoreT&&, ptrT /*ptr*/, ptrT /*ptr_old*/, size_t, size_t)
+      {
+        // Throw an exception unconditionally, even when there is nothing to copy.
+        noadl::sprintf_and_throw<domain_error>("cow_vector: `%s` not copy-constructible",
+                                               typeid(typename allocT::value_type).name());
+      }
+
+    template<typename ptrT, typename allocT>
+    static
+    void
+    dispatch_copy(true_type, true_type, ptrT ptr, ptrT ptr_old, size_t off, size_t cnt)
+      {
+        // Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
+        ::std::memcpy(ptr->data + ptr->nelem, ptr_old->data + off,
+                                              cnt * sizeof(typename allocT::value_type));
+        ptr->nelem += cnt;
+      }
+
+    template<typename ptrT, typename allocT>
+    static
+    void
+    dispatch_copy(true_type, false_type, ptrT ptr, ptrT ptr_old, size_t off, size_t cnt)
+      {
+        // Copy elements one by one.
+        for(size_t i = off; i != off + cnt; ++i)
+          allocator_traits<allocT>::construct(ptr->alloc, ptr->data + ptr->nelem,
+                                              ptr_old->data[i]),
+          ptr->nelem += 1;
+      }
+
+    template<typename ptrT, typename allocT>
+    static
+    void
+    dispatch_move(ptrT ptr, ptrT ptr_old, size_t off, size_t cnt)
+      {
+        // Move elements one by one.
+        for(size_t i = off; i != off + cnt; ++i)
+          allocator_traits<allocT>::construct(ptr->alloc, ptr->data + ptr->nelem,
+                                              ::std::move(ptr_old->data[i])),
+          ptr->nelem += 1;
+      }
+  };
 
 template<typename ptrT, typename allocT>
-inline void
-dispatch_copy_storage(true_type, true_type, ptrT ptr, ptrT ptr_old, size_t off, size_t cnt)
+struct storage_traits
   {
-    // Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
-    auto nelem = ptr->nelem;
-    auto cap = basic_storage<allocT>::max_nelem_for_nblk(ptr->nblk);
-    ROCKET_ASSERT(cnt <= cap - nelem);
-    ::std::memcpy(ptr->data + nelem, ptr_old->data + off, cnt * sizeof(typename allocT::value_type));
-    ptr->nelem = (nelem += cnt);
-  }
+    using memcpy_type = conjunction<is_trivially_copy_constructible<typename allocT::value_type>,
+                                    is_std_allocator<allocT>>;
 
-template<typename ptrT, typename allocT>
-inline
-void
-dispatch_copy_storage(true_type, false_type, ptrT ptr, ptrT ptr_old, size_t off, size_t cnt)
-  {
-    // Copy elements one by one.
-    auto nelem = ptr->nelem;
-    auto cap = basic_storage<allocT>::max_nelem_for_nblk(ptr->nblk);
-    ROCKET_ASSERT(cnt <= cap - nelem);
-    for(size_t i = off; i != off + cnt; ++i) {
-      allocator_traits<allocT>::construct(ptr->alloc, ptr->data + nelem, ptr_old->data[i]);
-      ptr->nelem = ++nelem;
-    }
-  }
+    static
+    void
+    copy(ptrT ptr, ptrT ptr_old, size_t off, size_t cnt)
+      {
+        auto cap = basic_storage<allocT>::max_nelem_for_nblk(ptr->nblk);
+        ROCKET_ASSERT(cnt <= cap - ptr->nelem);
 
-template<typename ptrT, typename allocT>
-inline
-void
-copy_storage(ptrT ptr, ptrT ptr_old, size_t off, size_t cnt)
-  {
-    dispatch_copy_storage<ptrT, allocT>(
-       is_copy_constructible<typename allocT::value_type>(),  // copyable
-       conjunction<is_trivially_copy_constructible<typename allocT::value_type>,
-                   is_std_allocator<allocT>>(),  // memcpy
-       ptr, ptr_old, off, cnt);
-  }
+        storage_traits_helpers::template dispatch_copy<ptrT, allocT>(
+            is_copy_constructible<typename allocT::value_type>(),  // copyable
+            memcpy_type(),  // memcpy
+            ptr, ptr_old, off, cnt);
+      }
 
-template<typename ptrT, typename allocT>
-inline
-void
-dispatch_move_storage(true_type, ptrT ptr, ptrT ptr_old, size_t off, size_t cnt)
-  {
-    // Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
-    auto nelem = ptr->nelem;
-    auto cap = basic_storage<allocT>::max_nelem_for_nblk(ptr->nblk);
-    ROCKET_ASSERT(cnt <= cap - nelem);
-    ::std::memcpy(ptr->data + nelem, ptr_old->data + off, cnt * sizeof(typename allocT::value_type));
-    ptr->nelem = (nelem += cnt);
-  }
+    static
+    void
+    move(ptrT ptr, ptrT ptr_old, size_t off, size_t cnt)
+      {
+        auto cap = basic_storage<allocT>::max_nelem_for_nblk(ptr->nblk);
+        ROCKET_ASSERT(cnt <= cap - ptr->nelem);
 
-template<typename ptrT, typename allocT>
-inline
-void
-dispatch_move_storage(false_type, ptrT ptr, ptrT ptr_old, size_t off, size_t cnt)
-  {
-    // Move elements one by one.
-    auto nelem = ptr->nelem;
-    auto cap = basic_storage<allocT>::max_nelem_for_nblk(ptr->nblk);
-    ROCKET_ASSERT(cnt <= cap - nelem);
-    for(size_t i = off; i != off + cnt; ++i) {
-      allocator_traits<allocT>::construct(ptr->alloc, ptr->data + nelem, ::std::move(ptr_old->data[i]));
-      ptr->nelem = ++nelem;
-    }
-  }
-
-template<typename ptrT, typename allocT>
-inline
-void
-move_storage(ptrT ptr, ptrT ptr_old, size_t off, size_t cnt)
-  {
-    dispatch_move_storage<ptrT, allocT>(
-       conjunction<is_trivially_move_constructible<typename allocT::value_type>,
-                   is_std_allocator<allocT>>(),  // memcpy
-       ptr, ptr_old, off, cnt);
-  }
+        storage_traits_helpers::template dispatch_move<ptrT, allocT>(
+            ptr, ptr_old, off, cnt);
+      }
+  };
 
 template<typename allocT>
 class storage_handle
@@ -371,14 +362,13 @@ class storage_handle
           try {
             // Moving is only viable if the old and new allocators compare equal and the old block
             // is owned exclusively.
-            if((ptr_old->alloc == ptr->alloc) && ptr_old->nref.unique()) {
-              move_storage<storage_pointer, allocator_type>(ptr, ptr_old,       0, cnt_one);
-              move_storage<storage_pointer, allocator_type>(ptr, ptr_old, off_two, cnt_two);
-            }
-            else {
-              copy_storage<storage_pointer, allocator_type>(ptr, ptr_old,       0, cnt_one);
-              copy_storage<storage_pointer, allocator_type>(ptr, ptr_old, off_two, cnt_two);
-            }
+            using traits = storage_traits<storage_pointer, allocator_type>;
+            if(traits::memcpy_type::value || (ptr_old->alloc != ptr->alloc) || !ptr_old->nref.unique())
+              traits::copy(ptr, ptr_old,       0, cnt_one),
+              traits::copy(ptr, ptr_old, off_two, cnt_two);
+            else
+              traits::move(ptr, ptr_old,       0, cnt_one),
+              traits::move(ptr, ptr_old, off_two, cnt_two);
           }
           catch(...) {
             // If an exception is thrown, deallocate the new block, then rethrow the exception.
@@ -450,13 +440,15 @@ class storage_handle
       {
         ROCKET_ASSERT(this->unique());
         ROCKET_ASSERT(this->size() < this->capacity());
+
         auto ptr = this->m_ptr;
         ROCKET_ASSERT(ptr);
-        auto nelem = ptr->nelem;
-        allocator_traits<allocator_type>::construct(ptr->alloc, ptr->data + nelem,
+
+        // Construct a new element and return a pointer to it.
+        allocator_traits<allocator_type>::construct(ptr->alloc, ptr->data + ptr->nelem,
                                                     ::std::forward<paramsT>(params)...);
-        ptr->nelem = ++nelem;
-        return ptr->data + nelem - 1;
+        ptr->nelem += 1;
+        return ptr->data + ptr->nelem - 1;
       }
 
     void
@@ -470,11 +462,11 @@ class storage_handle
 
         auto ptr = this->m_ptr;
         ROCKET_ASSERT(ptr);
-        auto nelem = ptr->nelem;
-        for(size_type i = n; i != 0; --i) {
-          ptr->nelem = --nelem;
-          allocator_traits<allocator_type>::destroy(ptr->alloc, ptr->data + nelem);
-        }
+
+        // Destroy `n` elements.
+        for(size_type k = 0;  k != n;  ++k)
+          ptr->nelem -= 1,
+          allocator_traits<allocator_type>::destroy(ptr->alloc, ptr->data + ptr->nelem);
       }
   };
 
