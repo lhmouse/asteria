@@ -110,8 +110,7 @@ class refcnt_ptr
     static_assert(!is_array<elementT>::value, "invalid element type");
 
     template<typename>
-    friend
-    class refcnt_ptr;
+    friend class refcnt_ptr;
 
   public:
     using element_type  = elementT;

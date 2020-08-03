@@ -318,8 +318,7 @@ template<typename stringT, typename charT>
 class string_iterator
   {
     template<typename, typename>
-    friend
-    class string_iterator;
+    friend class string_iterator;
 
     friend stringT;
 

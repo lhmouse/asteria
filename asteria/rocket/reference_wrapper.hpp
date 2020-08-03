@@ -15,8 +15,7 @@ class reference_wrapper
     static_assert(!is_void<valueT>::value, "cannot form references to void");
 
     template<typename>
-    friend
-    class reference_wrapper;
+    friend class reference_wrapper;
 
   public:
     // types

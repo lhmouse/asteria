@@ -755,8 +755,7 @@ template<typename hashmapT, typename valueT>
 class hashmap_iterator
   {
     template<typename, typename>
-    friend
-    class hashmap_iterator;
+    friend class hashmap_iterator;
 
     friend hashmapT;
 

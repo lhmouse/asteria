@@ -479,8 +479,7 @@ template<typename vectorT, typename valueT>
 class vector_iterator
   {
     template<typename, typename>
-    friend
-    class vector_iterator;
+    friend class vector_iterator;
 
     friend vectorT;
 

@@ -22,8 +22,7 @@ class optional
     static_assert(!is_same<valueT, nullopt_t>::value, "invalid element type");
 
     template<typename>
-    friend
-    class optional;
+    friend class optional;
 
   public:
     using value_type       = valueT;
