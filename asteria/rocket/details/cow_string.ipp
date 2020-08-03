@@ -248,6 +248,7 @@ class storage_handle
           ROCKET_ASSERT(len_one <= cap - len);
           traits_type::copy(ptr->data + len, src, len_one);
           len += len_one;
+
           ROCKET_ASSERT(len_two <= cap - len);
           traits_type::copy(ptr->data + len, src + off_two, len_two);
           len += len_two;

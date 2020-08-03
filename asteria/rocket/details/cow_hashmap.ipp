@@ -537,24 +537,28 @@ class storage_handle
 
         // Copy or move elements into the new block.
         auto ptr_old = this->m_ptr;
-        if(ROCKET_UNEXPECT(ptr_old)) {
-          try {
-            // Moving is only viable if the old and new allocators compare equal and the old block
-            // is owned exclusively.
-            using traits = storage_traits<storage_pointer, allocator_type, hasher>;
-            if((ptr_old->alloc != ptr->alloc) || !ptr_old->nref.unique())
-              traits::copy(ptr, this->as_hasher(), ptr_old,       0, cnt_one),
-              traits::copy(ptr, this->as_hasher(), ptr_old, off_two, cnt_two);
-            else
-              traits::move(ptr, this->as_hasher(), ptr_old,       0, cnt_one),
-              traits::move(ptr, this->as_hasher(), ptr_old, off_two, cnt_two);
-          }
-          catch(...) {
-            // If an exception is thrown, deallocate the new block, then rethrow the exception.
-            noadl::destroy_at(noadl::unfancy(ptr));
-            allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
-            throw;
-          }
+        if(!ptr_old) {
+          // Replace the current block.
+          this->do_reset(ptr);
+          return ptr->data;
+        }
+
+        try {
+          // Moving is only viable if the old and new allocators compare equal and the old block
+          // is owned exclusively.
+          using traits = storage_traits<storage_pointer, allocator_type, hasher>;
+          if((ptr_old->alloc != ptr->alloc) || !ptr_old->nref.unique())
+            traits::copy(ptr, this->as_hasher(), ptr_old,       0, cnt_one),
+            traits::copy(ptr, this->as_hasher(), ptr_old, off_two, cnt_two);
+          else
+            traits::move(ptr, this->as_hasher(), ptr_old,       0, cnt_one),
+            traits::move(ptr, this->as_hasher(), ptr_old, off_two, cnt_two);
+        }
+        catch(...) {
+          // If an exception is thrown, deallocate the new block, then rethrow the exception.
+          noadl::destroy_at(noadl::unfancy(ptr));
+          allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
+          throw;
         }
 
         // Replace the current block.
