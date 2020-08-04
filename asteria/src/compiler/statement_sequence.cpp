@@ -1060,19 +1060,14 @@ do_accept_argument_no_conversion_opt(cow_vector<Expression_Unit>& units, Token_S
     // reference-specifier-opt ::=
     //   "&" | ""
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_andb });
-    if(kpunct) {
-      bool succ = do_accept_expression(units, tstrm);
-      if(!succ)
-        throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
-
-      return true;  // by ref
-    }
-    // We can't use `do_accept_expression_and_convert_to_rvalue_opt()` here as it breaks PTC.
     bool succ = do_accept_expression(units, tstrm);
-    if(succ) {
-      return false;  // by value
-    }
-    return nullopt;
+    if(kpunct && !succ)
+      throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
+
+    if(!succ)
+      return nullopt;
+
+    return !!kpunct;  // by ref?
   }
 
 opt<bool>
