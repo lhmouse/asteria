@@ -1517,7 +1517,6 @@ do_check_neg(int64_t rhs)
   {
     if(rhs == INT64_MIN)
       ASTERIA_THROW("Integer negation overflow (operand was `$1`)", rhs);
-
     return -rhs;
   }
 
@@ -1527,7 +1526,6 @@ do_check_add(int64_t lhs, int64_t rhs)
   {
     if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs))
       ASTERIA_THROW("Integer addition overflow (operands were `$1` and `$2`)", lhs, rhs);
-
     return lhs + rhs;
   }
 
@@ -1537,7 +1535,6 @@ do_check_sub(int64_t lhs, int64_t rhs)
   {
     if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs))
       ASTERIA_THROW("Integer subtraction overflow (operands were `$1` and `$2`)", lhs, rhs);
-
     return lhs - rhs;
   }
 
@@ -1563,7 +1560,6 @@ do_check_mul(int64_t lhs, int64_t rhs)
     auto srhs = (rhs ^ m) - m;
     if((srhs >= 0) ? (alhs > INT64_MAX / srhs) : (alhs > INT64_MIN / srhs))
       ASTERIA_THROW("Integer multiplication overflow (operands were `$1` and `$2`)", lhs, rhs);
-
     return alhs * srhs;
   }
 
@@ -1576,7 +1572,6 @@ do_check_div(int64_t lhs, int64_t rhs)
 
     if((lhs == INT64_MIN) && (rhs == -1))
       ASTERIA_THROW("Integer division overflow (operands were `$1` and `$2`)", lhs, rhs);
-
     return lhs / rhs;
   }
 
@@ -1589,7 +1584,6 @@ do_check_mod(int64_t lhs, int64_t rhs)
 
     if((lhs == INT64_MIN) && (rhs == -1))
       ASTERIA_THROW("Integer division overflow (operands were `$1` and `$2`)", lhs, rhs);
-
     return lhs % rhs;
   }
 
@@ -1602,7 +1596,6 @@ do_check_sll(int64_t lhs, int64_t rhs)
 
     if(rhs >= 64)
       return 0;
-
     return int64_t(uint64_t(lhs) << rhs);
   }
 
@@ -1615,7 +1608,6 @@ do_check_srl(int64_t lhs, int64_t rhs)
 
     if(rhs >= 64)
       return 0;
-
     return int64_t(uint64_t(lhs) >> rhs);
   }
 
@@ -1638,7 +1630,6 @@ do_check_sla(int64_t lhs, int64_t rhs)
     auto mask_sbt = uint64_t(lhs >> 63) << bc;
     if(mask_out != mask_sbt)
       ASTERIA_THROW("Integer left shift overflow (operands were `$1` and `$2`)", lhs, rhs);
-
     return int64_t(uint64_t(lhs) << rhs);
   }
 
@@ -1661,7 +1652,6 @@ do_check_trunci(double value)
   {
     if(!::std::islessequal(-0x1p63, value) || !::std::islessequal(value, 0x1p63 - 0x1p10))
       ASTERIA_THROW("Value not representable as an `integer` (operand was `$1`)", value);
-
     return int64_t(value);
   }
 
@@ -3487,7 +3477,6 @@ struct AIR_Traits<AIR_Node::S_single_step_trap>
         // Call the hook function if any.
         if(auto qhooks = ctx.global().get_hooks_opt())
           qhooks->on_single_step_trap(sloc);
-
         return air_status_next;
       }
   };

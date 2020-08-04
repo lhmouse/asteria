@@ -142,7 +142,6 @@ const
     // Apply the last modifier.
     if(!(qref = last.apply_const_opt(*qref)))
       return null_value;
-
     return *qref;
   }
 
@@ -159,7 +158,6 @@ const
 
     // Apply the last modifier.
     rref = ::rocket::ref(last.apply_and_create(rref));
-
     return rref;
   }
 
@@ -177,7 +175,6 @@ const
 
     // Apply the last modifier.
     auto val = last.apply_and_erase(*qref);
-
     return val;
   }
 

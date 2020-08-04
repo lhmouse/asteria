@@ -342,7 +342,6 @@ class basic_cow_string
         auto tlen = this->size();
         if(tpos > tlen)
           this->do_throw_subscript_out_of_range(tpos);
-
         return noadl::min(tlen - tpos, tn);
       }
 

@@ -32,7 +32,6 @@ do_slice(const V_array& data, const V_integer& from, const optV_integer& length)
       // greater than `data.size()`.
       if(from >= slen)
         return ::std::make_pair(data.end(), data.end());
-
       return do_slice(data, data.begin() + static_cast<ptrdiff_t>(from), length);
     }
 
@@ -284,7 +283,6 @@ std_array_find(V_array data, V_integer from, optV_integer length, Value target)
     auto qit = do_find_opt(range.first, range.second, target);
     if(!qit)
       return nullopt;
-
     return *qit - data.begin();
   }
 
@@ -296,7 +294,6 @@ std_array_find_if(Global_Context& global, V_array data, V_integer from, optV_int
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
     if(!qit)
       return nullopt;
-
     return *qit - data.begin();
   }
 
@@ -308,7 +305,6 @@ std_array_find_if_not(Global_Context& global, V_array data, V_integer from, optV
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
     if(!qit)
       return nullopt;
-
     return *qit - data.begin();
   }
 
@@ -320,7 +316,6 @@ std_array_rfind(V_array data, V_integer from, optV_integer length, Value target)
                            ::std::make_reverse_iterator(range.first), target);
     if(!qit)
       return nullopt;
-
     return data.rend() - *qit - 1;
   }
 
@@ -333,7 +328,6 @@ std_array_rfind_if(Global_Context& global, V_array data, V_integer from, optV_in
                                       ::std::make_reverse_iterator(range.first), predictor, true);
     if(!qit)
       return nullopt;
-
     return data.rend() - *qit - 1;
   }
 
@@ -346,7 +340,6 @@ std_array_rfind_if_not(Global_Context& global, V_array data, V_integer from, opt
                                       ::std::make_reverse_iterator(range.first), predictor, false);
     if(!qit)
       return nullopt;
-
     return data.rend() - *qit - 1;
   }
 
@@ -474,7 +467,6 @@ std_array_binary_search(Global_Context& global, V_array data, Value target, optV
     auto pair = do_bsearch(global, args, data.begin(), data.end(), comparator, target);
     if(!pair.second)
       return nullopt;
-
     return pair.first - data.begin();
   }
 

@@ -34,7 +34,6 @@ do_slice(const V_string& text, const V_integer& from, const optV_integer& length
       // greater than `text.size()`.
       if(from >= slen)
         return ::std::make_pair(text.end(), text.end());
-
       return do_slice(text, text.begin() + static_cast<ptrdiff_t>(from), length);
     }
 
@@ -179,7 +178,6 @@ V_string do_get_reject(const optV_string& reject)
   {
     if(!reject)
       return ::rocket::sref(" \t");
-
     return *reject;
   }
 
@@ -190,7 +188,6 @@ V_string do_get_padding(const optV_string& padding)
 
     if(padding->empty())
       ASTERIA_THROW("Empty padding string not valid");
-
     return *padding;
   }
 
@@ -615,7 +612,6 @@ std_string_find(V_string text, V_integer from, optV_integer length, V_string pat
     auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
     if(!qit)
       return nullopt;
-
     return *qit - text.begin();
   }
 
@@ -627,7 +623,6 @@ std_string_rfind(V_string text, V_integer from, optV_integer length, V_string pa
                            pattern.rbegin(), pattern.rend());
     if(!qit)
       return nullopt;
-
     return text.rend() - *qit - pattern.ssize();
   }
 
@@ -651,7 +646,6 @@ std_string_find_any_of(V_string text, V_integer from, optV_integer length, V_str
     auto qit = do_find_of_opt(range.first, range.second, accept, true);
     if(!qit)
       return nullopt;
-
     return *qit - text.begin();
   }
 
@@ -662,7 +656,6 @@ std_string_find_not_of(V_string text, V_integer from, optV_integer length, V_str
     auto qit = do_find_of_opt(range.first, range.second, reject, false);
     if(!qit)
       return nullopt;
-
     return *qit - text.begin();
   }
 
@@ -674,7 +667,6 @@ std_string_rfind_any_of(V_string text, V_integer from, optV_integer length, V_st
                               ::std::make_reverse_iterator(range.first), accept, true);
     if(!qit)
       return nullopt;
-
     return text.rend() - *qit - 1;
   }
 
@@ -686,7 +678,6 @@ std_string_rfind_not_of(V_string text, V_integer from, optV_integer length, V_st
                               ::std::make_reverse_iterator(range.first), reject, false);
     if(!qit)
       return nullopt;
-
     return text.rend() - *qit - 1;
   }
 

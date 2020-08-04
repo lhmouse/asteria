@@ -95,7 +95,6 @@ std_io_getc()
         ASTERIA_THROW("Error reading standard input\n"
                       "[`fgetwc_unlocked()` failed: $1]",
                       format_errno(err));
-
       return nullopt;
     }
 
@@ -132,7 +131,6 @@ std_io_getln()
           ASTERIA_THROW("Error reading standard input\n"
                         "[`fgetwc_unlocked()` failed: $1]",
                         format_errno(err));
-
         return nullopt;
       }
       // If a LF is encountered, finish this line.
@@ -291,7 +289,6 @@ std_io_read(optV_integer limit)
         ASTERIA_THROW("Error reading standard input\n"
                       "[`fread_unlocked()` failed: $1]",
                       format_errno(err));
-
       return nullopt;
     }
 

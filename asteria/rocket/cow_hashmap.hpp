@@ -560,7 +560,6 @@ class cow_hashmap
         size_type tpos;
         if(!this->m_sth.index_of(tpos, key))
           return this->end();
-
         return const_iterator(this->m_sth, ptr + tpos);
       }
 
@@ -574,7 +573,6 @@ class cow_hashmap
         size_type tpos;
         if(!this->m_sth.index_of(tpos, key))
           return this->mut_end();
-
         return iterator(this->m_sth, ptr + tpos);
       }
 
@@ -597,7 +595,6 @@ class cow_hashmap
         size_type tpos;
         if(!this->m_sth.index_of(tpos, key))
           return ::std::forward<ydefaultT>(ydef);
-
         return ptr[tpos]->second;
       }
 
@@ -611,7 +608,6 @@ class cow_hashmap
         size_type tpos;
         if(!this->m_sth.index_of(tpos, key))
           return ::std::forward<ydefaultT>(ydef);
-
         return ::std::move(ptr[tpos]->second);
       }
 
@@ -625,7 +621,6 @@ class cow_hashmap
         size_type tpos;
         if(!this->m_sth.index_of(tpos, key))
           this->do_throw_key_not_found();
-
         return ptr[tpos]->second;
       }
 
@@ -639,7 +634,6 @@ class cow_hashmap
         size_type tpos;
         if(!this->m_sth.index_of(tpos, key))
           return nullptr;
-
         return ::std::addressof(ptr[tpos]->second);
       }
 
@@ -664,7 +658,6 @@ class cow_hashmap
         size_type tpos;
         if(!this->m_sth.index_of(tpos, key))
           return nullptr;
-
         return ::std::addressof(ptr[tpos]->second);
       }
 

@@ -39,7 +39,6 @@ const
   {
     if(auto ptr = this->m_sptr.get())
       return ptr->describe(fmt);
-
     return fmt << "<null opaque pointer>";
   }
 
@@ -50,7 +49,6 @@ const
   {
     if(auto ptr = this->m_sptr.get())
       return ptr->enumerate_variables(callback);
-
     return callback;
   }
 
@@ -83,7 +81,6 @@ const
   {
     if(auto ptr = this->m_sptr.get())
       ptr->enumerate_variables(callback);  // dynamic
-
     return callback;
   }
 

@@ -470,7 +470,6 @@ do_accept_object_key(Token_Stream& tstrm)
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
     if(!kpunct)
       throw Parser_Error(parser_status_colon_expected, tstrm.next_sloc(), tstrm.next_length());
-
     return name;
   }
 

@@ -26,7 +26,6 @@ const noexcept
         const auto& altr = this->m_stor.as<index_logical_and>();
         if(altr.assign)
           return precedence_assignment;
-
         return precedence_logical_and;
       }
 
@@ -34,7 +33,6 @@ const noexcept
         const auto& altr = this->m_stor.as<index_logical_or>();
         if(altr.assign)
           return precedence_assignment;
-
         return precedence_logical_or;
       }
 
@@ -42,7 +40,6 @@ const noexcept
         const auto& altr = this->m_stor.as<index_coalescence>();
         if(altr.assign)
           return precedence_assignment;
-
         return precedence_coalescence;
       }
 

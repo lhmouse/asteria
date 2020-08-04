@@ -262,7 +262,6 @@ class basic_tinybuf_file
         if(!succ)
           noadl::sprintf_and_throw<runtime_error>("tinybuf_file: write error (errno `%d`, fileno `%d`)",
                                                   errno, ::fileno(this->m_file));
-
         return *this;
       }
 

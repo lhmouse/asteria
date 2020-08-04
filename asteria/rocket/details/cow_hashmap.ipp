@@ -403,7 +403,6 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return false;
-
         return ptr->nref.unique();
       }
 
@@ -433,7 +432,6 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return 0;
-
         return storage::max_nbkt_for_nblk(ptr->nblk);
       }
 
@@ -488,7 +486,6 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return nullptr;
-
         return ptr->data;
       }
 
@@ -499,7 +496,6 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return true;
-
         return reinterpret_cast<const storage_header*>(ptr)->nelem == 0;
       }
 
@@ -510,7 +506,6 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return 0;
-
         return reinterpret_cast<const storage_header*>(ptr)->nelem;
       }
 

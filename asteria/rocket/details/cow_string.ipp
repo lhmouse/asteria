@@ -149,7 +149,6 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return false;
-
         return ptr->nref.unique();
       }
 
@@ -217,7 +216,6 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return nullptr;
-
         return ptr->data;
       }
 
