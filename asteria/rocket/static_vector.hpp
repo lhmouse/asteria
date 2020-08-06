@@ -489,14 +489,8 @@ class static_vector
     reference
     push_back(const value_type& value)
       {
-        auto cnt_old = this->size();
-        // Check for overlapped elements before `do_reserve_more()`.
-        auto srpos = static_cast<uintptr_t>(::std::addressof(value) - this->data());
+        // Note the storage can't be relocated and invalidated.
         this->do_reserve_more(1);
-        if(srpos < cnt_old) {
-          auto ptr = this->m_sth.emplace_back_unchecked(this->m_sth.mut_data()[srpos]);
-          return *ptr;
-        }
         auto ptr = this->m_sth.emplace_back_unchecked(value);
         return *ptr;
       }
