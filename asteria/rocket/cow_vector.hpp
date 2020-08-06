@@ -177,7 +177,7 @@ class cow_vector
     void
     do_reserve_more(size_type cap_add)
       {
-        auto cnt = this->size();
+        size_type cnt = this->size();
         auto cap = this->m_sth.check_size_add(cnt, cap_add);
         if(!this->unique() || ROCKET_UNEXPECT(this->capacity() < cap)) {
 #ifndef ROCKET_DEBUG
@@ -205,7 +205,7 @@ class cow_vector
     do_clamp_subvec(size_type tpos, size_type tn)
     const
       {
-        auto tcnt = this->size();
+        size_type tcnt = this->size();
         if(tpos > tcnt)
           this->do_throw_subscript_out_of_range(tpos);
         return noadl::min(tcnt - tpos, tn);
@@ -215,10 +215,10 @@ class cow_vector
     value_type*
     do_insert_no_bound_check(size_type tpos, paramsT&&... params)
       {
-        auto cnt_old = this->size();
+        size_type cnt_old = this->size();
         ROCKET_ASSERT(tpos <= cnt_old);
         details_cow_vector::tagged_append(this, ::std::forward<paramsT>(params)...);
-        auto cnt_add = this->size() - cnt_old;
+        size_type cnt_add = this->size() - cnt_old;
         this->do_reserve_more(0);
         auto ptr = this->m_sth.mut_data_unchecked();
         noadl::rotate(ptr, tpos, cnt_old, cnt_old + cnt_add);
@@ -228,7 +228,7 @@ class cow_vector
     value_type*
     do_erase_no_bound_check(size_type tpos, size_type tn)
       {
-        auto cnt_old = this->size();
+        size_type cnt_old = this->size();
         ROCKET_ASSERT(tpos <= cnt_old);
         ROCKET_ASSERT(tn <= cnt_old - tpos);
         if(!this->unique()) {
@@ -338,7 +338,7 @@ class cow_vector
     cow_vector&
     resize(size_type n, const paramsT&... params)
       {
-        auto cnt_old = this->size();
+        size_type cnt_old = this->size();
         if(cnt_old < n)
           this->append(n - cnt_old, params...);
         else if(cnt_old > n)
@@ -357,7 +357,7 @@ class cow_vector
     cow_vector&
     reserve(size_type res_arg)
       {
-        auto cnt = this->size();
+        size_type cnt = this->size();
         auto cap_new = this->m_sth.round_up_capacity(noadl::max(cnt, res_arg));
         // If the storage is shared with other vectors, force rellocation to prevent copy-on-write
         // upon modification.
@@ -373,7 +373,7 @@ class cow_vector
     cow_vector&
     shrink_to_fit()
       {
-        auto cnt = this->size();
+        size_type cnt = this->size();
         auto cap_min = this->m_sth.round_up_capacity(cnt);
         // Don't increase memory usage.
         if(!this->unique() || (this->capacity() <= cap_min))
@@ -413,7 +413,7 @@ class cow_vector
     at(size_type pos)
     const
       {
-        auto cnt = this->size();
+        size_type cnt = this->size();
         if(pos >= cnt)
           this->do_throw_subscript_out_of_range(pos);
         return this->data()[pos];
@@ -431,7 +431,7 @@ class cow_vector
     operator[](size_type pos)
     const noexcept
       {
-        auto cnt = this->size();
+        size_type cnt = this->size();
         ROCKET_ASSERT(pos < cnt);
         return this->data()[pos];
       }
@@ -465,7 +465,7 @@ class cow_vector
     get_ptr(size_type pos)
     const noexcept
       {
-        auto cnt = this->size();
+        size_type cnt = this->size();
         if(pos >= cnt)
           return nullptr;
         return this->data() + pos;
@@ -485,7 +485,7 @@ class cow_vector
     reference
     mut(size_type pos)
       {
-        auto cnt = this->size();
+        size_type cnt = this->size();
         if(pos >= cnt)
           this->do_throw_subscript_out_of_range(pos);
         return this->mut_data()[pos];
@@ -519,7 +519,7 @@ class cow_vector
     mut_ptr(size_type pos)
     noexcept
       {
-        auto cnt = this->size();
+        size_type cnt = this->size();
         if(pos >= cnt)
           return nullptr;
         return this->mut_data() + pos;
@@ -590,7 +590,7 @@ class cow_vector
     push_back(const value_type& value)
       {
         // Check for overlapped elements before `do_reserve_more()`.
-        auto cnt_old = this->size();
+        size_type cnt_old = this->size();
         auto srpos = static_cast<uintptr_t>(::std::addressof(value) - this->data());
         this->do_reserve_more(1);
         if(srpos < cnt_old) {
@@ -737,7 +737,7 @@ class cow_vector
     cow_vector&
     pop_back(size_type n = 1)
       {
-        auto cnt_old = this->size();
+        size_type cnt_old = this->size();
         ROCKET_ASSERT(n <= cnt_old);
         if(n == 0)
           return *this;

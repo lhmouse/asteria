@@ -179,7 +179,7 @@ class array
     at(size_type pos)
     const
       {
-        auto cnt = this->size();
+        size_type cnt = this->size();
         if(pos >= cnt)
           this->do_throw_subscript_out_of_range(pos);
         return this->data()[pos];
@@ -189,7 +189,7 @@ class array
     operator[](size_type pos)
     const noexcept
       {
-        auto cnt = this->size();
+        size_type cnt = this->size();
         ROCKET_ASSERT(pos < cnt);
         return this->data()[pos];
       }
@@ -198,7 +198,7 @@ class array
     front()
     const noexcept
       {
-        auto cnt = this->size();
+        size_type cnt = this->size();
         ROCKET_ASSERT(cnt > 0);
         return this->data()[0];
       }
@@ -207,7 +207,7 @@ class array
     back()
     const noexcept
       {
-        auto cnt = this->size();
+        size_type cnt = this->size();
         ROCKET_ASSERT(cnt > 0);
         return this->data()[cnt - 1];
       }
@@ -217,7 +217,7 @@ class array
     get_ptr(size_type pos)
     const noexcept
       {
-        auto cnt = this->size();
+        size_type cnt = this->size();
         if(pos >= cnt) {
           return nullptr;
         }
@@ -230,7 +230,7 @@ class array
     reference
     mut(size_type pos)
       {
-        auto cnt = this->size();
+        size_type cnt = this->size();
         if(pos >= cnt) {
           this->do_throw_subscript_out_of_range(pos);
         }
@@ -241,7 +241,7 @@ class array
     operator[](size_type pos)
     noexcept
       {
-        auto cnt = this->size();
+        size_type cnt = this->size();
         ROCKET_ASSERT(pos < cnt);
         return this->mut_data()[pos];
       }
@@ -250,7 +250,7 @@ class array
     reference
     mut_front()
       {
-        auto cnt = this->size();
+        size_type cnt = this->size();
         ROCKET_ASSERT(cnt > 0);
         return this->mut_data()[0];
       }
@@ -259,7 +259,7 @@ class array
     reference
     mut_back()
       {
-        auto cnt = this->size();
+        size_type cnt = this->size();
         ROCKET_ASSERT(cnt > 0);
         return this->mut_data()[cnt - 1];
       }
@@ -269,7 +269,7 @@ class array
     mut_ptr(size_type pos)
     noexcept
       {
-        auto cnt = this->size();
+        size_type cnt = this->size();
         if(pos >= cnt)
           return nullptr;
         return this->mut_data() + pos;

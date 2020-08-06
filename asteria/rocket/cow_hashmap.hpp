@@ -220,7 +220,7 @@ class cow_hashmap
     void
     do_reserve_more(size_type cap_add)
       {
-        auto cnt = this->size();
+        size_type cnt = this->size();
         auto cap = this->m_sth.check_size_add(cnt, cap_add);
         if(!this->unique() || ROCKET_UNEXPECT(this->capacity() < cap)) {
 #ifndef ROCKET_DEBUG
@@ -255,7 +255,7 @@ class cow_hashmap
     details_cow_hashmap::bucket<allocator_type>*
     do_erase_no_bound_check(size_type tpos, size_type tn)
       {
-        auto cnt_old = this->size();
+        size_type cnt_old = this->size();
         auto nbkt_old = this->bucket_count();
         ROCKET_ASSERT(tpos <= nbkt_old);
         ROCKET_ASSERT(tn <= nbkt_old - tpos);
@@ -338,7 +338,7 @@ class cow_hashmap
     cow_hashmap&
     reserve(size_type res_arg)
       {
-        auto cnt = this->size();
+        size_type cnt = this->size();
         auto cap_new = this->m_sth.round_up_capacity(noadl::max(cnt, res_arg));
 
         // If the storage is shared with other hashmaps, force rellocation to prevent copy-on-write
@@ -355,7 +355,7 @@ class cow_hashmap
     cow_hashmap&
     shrink_to_fit()
       {
-        auto cnt = this->size();
+        size_type cnt = this->size();
         auto cap_min = this->m_sth.round_up_capacity(cnt);
 
         // Don't increase memory usage.
