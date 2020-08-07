@@ -163,7 +163,6 @@ class storage_handle
     using storage_pointer   = typename allocator_traits<storage_allocator>::pointer;
 
   private:
-
     storage_pointer m_ptr;
 
   public:
@@ -194,25 +193,25 @@ class storage_handle
     do_reset(storage_pointer ptr_new)
     noexcept
       {
+        // Decrement the reference count with acquire-release semantics to prevent races
+        // on `ptr->alloc`.
         auto ptr = ::std::exchange(this->m_ptr, ptr_new);
         if(ROCKET_EXPECT(!ptr))
           return;
 
-        // This is needed for incomplete type support.
-        auto dtor = reinterpret_cast<const storage_header*>(noadl::unfancy(ptr))->dtor;
-        reinterpret_cast<void (*)(storage_pointer)>(dtor)(ptr);
+        auto hdr = reinterpret_cast<const storage_header*>(noadl::unfancy(ptr));
+        if(ROCKET_EXPECT(!hdr->nref.decrement()))
+          return;
+
+        // This indirect call is paramount for incomplete type support.
+        reinterpret_cast<void (*)(storage_pointer)>(hdr->dtor)(ptr);
       }
 
     ROCKET_NOINLINE static
     void
-    do_drop_reference(storage_pointer ptr)
+    do_deallocate(storage_pointer ptr)
     noexcept
       {
-        // Decrement the reference count with acquire-release semantics to prevent races on `ptr->alloc`.
-        if(ROCKET_EXPECT(!ptr->nref.decrement()))
-          return;
-
-        // If it has been decremented to zero, deallocate the block.
         storage_allocator st_alloc(ptr->alloc);
         auto nblk = ptr->nblk;
         noadl::destroy_at(noadl::unfancy(ptr));
@@ -349,7 +348,7 @@ class storage_handle
 #ifdef ROCKET_DEBUG
         ::std::memset(static_cast<void*>(noadl::unfancy(ptr)), '*', sizeof(storage) * nblk);
 #endif
-        auto dtor = reinterpret_cast<void (*)(...)>(storage_handle::do_drop_reference);
+        auto dtor = reinterpret_cast<void (*)(...)>(this->do_deallocate);
         noadl::construct_at(noadl::unfancy(ptr), dtor, this->as_allocator(), nblk);
 
         // Copy or move elements into the new block.

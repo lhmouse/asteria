@@ -104,23 +104,25 @@ class storage_handle
     do_reset(storage_pointer ptr_new)
     noexcept
       {
+        // Decrement the reference count with acquire-release semantics to prevent races
+        // on `ptr->alloc`.
         auto ptr = ::std::exchange(this->m_ptr, ptr_new);
         if(ROCKET_EXPECT(!ptr))
           return;
 
-        storage_handle::do_drop_reference(ptr);
-      }
-
-    static
-    void
-    do_drop_reference(storage_pointer ptr)
-    noexcept
-      {
-        // Decrement the reference count with acquire-release semantics to prevent races on `ptr->alloc`.
         if(ROCKET_EXPECT(!ptr->nref.decrement()))
           return;
 
-        // If it has been decremented to zero, deallocate the block.
+        // Unlike vectors, strings require value types to be complete.
+        // This is a direct call without type erasure.
+        this->do_deallocate(ptr);
+      }
+
+    ROCKET_NOINLINE static
+    void
+    do_deallocate(storage_pointer ptr)
+    noexcept
+      {
         storage_allocator st_alloc(ptr->alloc);
         auto nblk = ptr->nblk;
         noadl::destroy_at(noadl::unfancy(ptr));
