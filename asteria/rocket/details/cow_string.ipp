@@ -334,7 +334,7 @@ class string_iterator
     pointer m_ptr;
 
   private:
-    // These constructors are called by the container.
+    // This constructor is called by the container.
     constexpr
     string_iterator(const parent_type* ref, pointer ptr)
     noexcept
