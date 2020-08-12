@@ -589,9 +589,7 @@ class storage_handle
     void
     exchange_with(storage_handle& other)
     noexcept
-      {
-        noadl::xswap(this->m_ptr, other.m_ptr);
-      }
+      { noadl::xswap(this->m_ptr, other.m_ptr);  }
 
     constexpr operator
     const storage_handle*()
