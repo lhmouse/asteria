@@ -315,10 +315,15 @@ class storage_handle
     noexcept
       {
         auto ptr = this->m_ptr;
-        if(!ptr)
-          return nullptr;
+        if(!ptr) {
+          // If no storage has been allocated, return a pointer to the static null character.
+          // Note that it cannot be modified.
+          // This function has to return the same value with `data()`.
+          return const_cast<value_type*>(null_char::value);
+        }
 
-        ROCKET_ASSERT(this->unique());
+        // Return a pointer to allocated data.
+        ROCKET_ASSERT(ptr->nref.load() == 1);
         return ptr->data;
       }
   };
@@ -338,16 +343,14 @@ class string_iterator
     using reference          = charT&;
     using difference_type    = ptrdiff_t;
 
-    using parent_type   = stringT;
-
   private:
-    const parent_type* m_ref;
+    const stringT* m_ref;
     pointer m_ptr;
 
   private:
     // This constructor is called by the container.
     constexpr
-    string_iterator(const parent_type* ref, pointer ptr)
+    string_iterator(const stringT* ref, charT* ptr)
     noexcept
       : m_ref(ref), m_ptr(ptr)
       { }
@@ -383,7 +386,7 @@ class string_iterator
 
   public:
     constexpr
-    const parent_type*
+    const stringT*
     parent()
     const noexcept
       { return this->m_ref;  }
@@ -394,7 +397,7 @@ class string_iterator
       { return this->do_assert_valid_pointer(this->m_ptr, false);  }
 
     pointer
-    tell_owned_by(const parent_type* ref)
+    tell_owned_by(const stringT* ref)
     const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_ref == ref, "Dangling iterator");
