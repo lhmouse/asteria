@@ -140,7 +140,6 @@ struct pointer_storage : storage_header
             allocator_traits<allocator_type>::destroy(this->alloc, noadl::unfancy(eptr));
             allocator_traits<allocator_type>::deallocate(this->alloc, eptr, size_t(1));
           }
-
           // `allocator_type::pointer` need not be a trivial type.
           noadl::destroy_at(this->data + i);
         }
@@ -353,7 +352,7 @@ class storage_handle
 
     ROCKET_NOINLINE static
     void
-    do_deallocate(storage_pointer ptr)
+    do_destroy_storage(storage_pointer ptr)
     noexcept
       {
         storage_allocator st_alloc(ptr->alloc);
@@ -527,8 +526,8 @@ class storage_handle
 #ifdef ROCKET_DEBUG
         ::std::memset(static_cast<void*>(noadl::unfancy(ptr)), '*', sizeof(storage) * nblk);
 #endif
-        auto dtor = reinterpret_cast<void (*)(...)>(this->do_deallocate);
-        noadl::construct_at(noadl::unfancy(ptr), dtor, this->as_allocator(), nblk);
+        noadl::construct_at(noadl::unfancy(ptr), reinterpret_cast<void (*)(...)>(this->do_destroy_storage),
+                            this->as_allocator(), nblk);
 
         // Copy or move elements into the new block.
         auto ptr_old = this->m_ptr;
@@ -551,8 +550,7 @@ class storage_handle
         }
         catch(...) {
           // If an exception is thrown, deallocate the new block, then rethrow the exception.
-          noadl::destroy_at(noadl::unfancy(ptr));
-          allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
+          this->do_destroy_storage(ptr);
           throw;
         }
 

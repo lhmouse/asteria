@@ -115,12 +115,12 @@ class storage_handle
 
         // Unlike vectors, strings require value types to be complete.
         // This is a direct call without type erasure.
-        this->do_deallocate(ptr);
+        this->do_destroy_storage(ptr);
       }
 
     ROCKET_NOINLINE static
     void
-    do_deallocate(storage_pointer ptr)
+    do_destroy_storage(storage_pointer ptr)
     noexcept
       {
         storage_allocator st_alloc(ptr->alloc);
