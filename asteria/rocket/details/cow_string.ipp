@@ -57,6 +57,15 @@ struct basic_storage : storage_header
       = delete;
   };
 
+template<typename charT>
+struct null_char
+  {
+    static constexpr charT value[1] = { };
+  };
+
+template<typename charT>
+constexpr charT null_char<charT>::value[1];
+
 template<typename allocT, typename traitsT>
 class storage_handle
   : private allocator_wrapper_base_for<allocT>::type

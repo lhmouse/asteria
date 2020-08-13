@@ -142,17 +142,14 @@ class basic_cow_string
     using const_reverse_iterator  = ::std::reverse_iterator<const_iterator>;
     using reverse_iterator        = ::std::reverse_iterator<iterator>;
 
-    using shallow_type   = basic_shallow_string<charT, traitsT>;
+    using shallow_type = basic_shallow_string<charT, traitsT>;
+    struct hash;
 
     static constexpr size_type npos = size_type(-1);
-    static const value_type null_char[1];
-
-    // hash support
-    struct hash;
 
   private:
     details_cow_string::storage_handle<allocator_type, traits_type> m_sth;
-    const value_type* m_ptr = null_char;
+    const value_type* m_ptr = details_cow_string::null_char<value_type>::value;
     size_type m_len = 0;
 
   public:
@@ -274,7 +271,7 @@ class basic_cow_string
         ROCKET_ASSERT(len_two <= this->m_len - off_two);
         auto ptr = this->m_sth.reallocate(this->m_ptr, len_one, off_two, len_two, res_arg);
         ROCKET_ASSERT(!ptr || this->m_sth.unique());
-        this->m_ptr = ptr ? ptr : null_char;
+        this->m_ptr = ptr ? ptr : details_cow_string::null_char<value_type>::value;
         this->m_len = len_one + len_two;
         return ptr;
       }
@@ -299,7 +296,7 @@ class basic_cow_string
     noexcept
       {
         if(!this->unique()) {
-          this->m_ptr = null_char;
+          this->m_ptr = details_cow_string::null_char<value_type>::value;
           this->m_len = 0;
           this->m_sth.deallocate();
         }
@@ -899,7 +896,7 @@ class basic_cow_string
     noexcept
       {
         this->m_sth.share_with(::std::move(other.m_sth));
-        this->m_ptr = ::std::exchange(other.m_ptr, null_char);
+        this->m_ptr = ::std::exchange(other.m_ptr, details_cow_string::null_char<value_type>::value);
         this->m_len = ::std::exchange(other.m_len, size_type(0));
         return *this;
       }
@@ -1758,9 +1755,6 @@ class basic_cow_string
 template<typename charT, typename traitsT, typename allocT>
 const typename basic_cow_string<charT, traitsT, allocT>::size_type basic_cow_string<charT, traitsT, allocT>::npos;
 #endif
-
-template<typename charT, typename traitsT, typename allocT>
-const charT basic_cow_string<charT, traitsT, allocT>::null_char[1] = { };
 
 template<typename charT, typename traitsT, typename allocT>
 struct basic_cow_string<charT, traitsT, allocT>::hash
