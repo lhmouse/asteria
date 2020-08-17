@@ -44,8 +44,8 @@ constexpr  // c++14
 void
 for_each_nonconstexpr(containerT&& cont, callbackT&& callback)
   {
-    for(auto&& qelem : cont)
-      ::std::forward<callbackT>(callback)(qelem);
+    for(auto&& elem : cont)
+      ::std::forward<callbackT>(callback)(elem);
   }
 
 // `any_of()`
@@ -54,8 +54,8 @@ constexpr  // c++14
 bool
 any_of_nonconstexpr(containerT&& cont, callbackT&& callback)
   {
-    for(auto&& qelem : cont)
-      if(::std::forward<callbackT>(callback)(qelem))
+    for(auto&& elem : cont)
+      if(::std::forward<callbackT>(callback)(elem))
         return true;
     return false;
   }
@@ -66,8 +66,8 @@ constexpr  // c++14
 bool
 none_of_nonconstexpr(containerT&& cont, callbackT&& callback)
   {
-    for(auto&& qelem : cont)
-      if(::std::forward<callbackT>(callback)(qelem))
+    for(auto&& elem : cont)
+      if(::std::forward<callbackT>(callback)(elem))
         return false;
     return true;
   }
@@ -78,8 +78,8 @@ constexpr  // c++14
 bool
 all_of_nonconstexpr(containerT&& cont, callbackT&& callback)
   {
-    for(auto&& qelem : cont)
-      if(!bool(::std::forward<callbackT>(callback)(qelem)))
+    for(auto&& elem : cont)
+      if(!bool(::std::forward<callbackT>(callback)(elem)))
         return false;
     return true;
   }
@@ -90,8 +90,8 @@ constexpr  // c++14
 bool
 is_any_of_nonconstexpr(targetT&& targ, containerT&& cont)
   {
-    for(auto&& qelem : cont)
-      if(::std::forward<targetT>(targ) == qelem)
+    for(auto&& elem : cont)
+      if(::std::forward<targetT>(targ) == elem)
         return true;
     return false;
   }
@@ -102,8 +102,8 @@ constexpr  // c++14
 bool
 is_none_of_nonconstexpr(targetT&& targ, containerT&& cont)
   {
-    for(auto&& qelem : cont)
-      if(::std::forward<targetT>(targ) == qelem)
+    for(auto&& elem : cont)
+      if(::std::forward<targetT>(targ) == elem)
         return false;
     return true;
   }
