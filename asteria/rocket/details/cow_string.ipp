@@ -57,15 +57,6 @@ struct basic_storage : storage_header
       = delete;
   };
 
-template<typename charT>
-struct null_char
-  {
-    static constexpr charT value[1] = { };
-  };
-
-template<typename charT>
-constexpr charT null_char<charT>::value[1];
-
 template<typename allocT, typename traitsT>
 class storage_handle
   : private allocator_wrapper_base_for<allocT>::type
@@ -75,6 +66,8 @@ class storage_handle
     using traits_type      = traitsT;
     using value_type       = typename allocator_type::value_type;
     using size_type        = typename allocator_traits<allocator_type>::size_type;
+
+    static constexpr value_type null_char[1] = { };
 
   private:
     using allocator_base    = typename allocator_wrapper_base_for<allocator_type>::type;
@@ -226,20 +219,27 @@ class storage_handle
       {
         auto ptr = this->m_ptr;
         if(!ptr)
+          return null_char;
+        return ptr->data;
+      }
+
+    value_type*
+    mut_data_opt()
+    noexcept
+      {
+        auto ptr = this->m_ptr;
+        if(!ptr || (ptr->nref.get() != 1))
           return nullptr;
         return ptr->data;
       }
 
     ROCKET_NOINLINE
     value_type*
-    reallocate(const value_type* src, size_type len_one, size_type off_two, size_type len_two, size_type res_arg)
+    reallocate_more(const value_type* src, size_type len, size_type add)
       {
-        if(res_arg == 0) {
-          // Deallocate the block.
-          this->deallocate();
-          return nullptr;
-        }
-        auto cap = this->check_size_add(0, res_arg);
+        // Calculate the combined length of string (len + add).
+        // The first part is copied from `src`. The second part is left uninitialized.
+        auto cap = this->check_size_add(len, add);
 
         // Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
         auto nblk = storage::min_nblk_for_nchar(cap);
@@ -250,24 +250,20 @@ class storage_handle
 #endif
         noadl::construct_at(noadl::unfancy(ptr), this->as_allocator(), nblk);
 
-        // Copy characters into the new block.
-        size_type len = 0;
-        if(len_one | len_two) {
-          // The two blocks will not overlap.
-          ROCKET_ASSERT(len_one <= cap - len);
-          traits_type::copy(ptr->data + len, src, len_one);
-          len += len_one;
+        // Add a null character anyway.
+        // The user still has to keep track of it if the storage is not fully utilized.
+        traits_type::assign(ptr->data[cap], value_type());
 
-          ROCKET_ASSERT(len_two <= cap - len);
-          traits_type::copy(ptr->data + len, src + off_two, len_two);
-          len += len_two;
-        }
-        // Add a null character.
+        // Copy characters into the new block if any.
+        // This shall not throw exceptions.
+        if(len)
+          traits_type::copy(ptr->data, src, len);
+
         traits_type::assign(ptr->data[len], value_type());
 
-        // Replace the current block.
+        // Set up the new storage.
         this->do_reset(ptr);
-        return ptr->data;
+        return ptr->data + len;
       }
 
     void
@@ -286,16 +282,6 @@ class storage_handle
       }
 
     void
-    share_with(storage_handle&& other)
-    noexcept
-      {
-        auto ptr = other.m_ptr;
-        if(ptr)
-          other.m_ptr = storage_pointer();
-        this->do_reset(ptr);
-      }
-
-    void
     exchange_with(storage_handle& other)
     noexcept
       { noadl::xswap(this->m_ptr, other.m_ptr);  }
@@ -309,24 +295,10 @@ class storage_handle
     storage_handle*()
     noexcept
       { return this;  }
-
-    value_type*
-    mut_data_unchecked()
-    noexcept
-      {
-        auto ptr = this->m_ptr;
-        if(!ptr) {
-          // If no storage has been allocated, return a pointer to the static null character.
-          // Note that it cannot be modified.
-          // This function has to return the same value with `data()`.
-          return const_cast<value_type*>(null_char::value);
-        }
-
-        // Return a pointer to allocated data.
-        ROCKET_ASSERT(ptr->nref.load() == 1);
-        return ptr->data;
-      }
   };
+
+template<typename allocT, typename traitsT>
+constexpr typename allocT::value_type storage_handle<allocT, traitsT>::null_char[1];
 
 template<typename stringT, typename charT>
 class string_iterator
@@ -344,22 +316,23 @@ class string_iterator
     using difference_type    = ptrdiff_t;
 
   private:
-    const stringT* m_ref;
-    pointer m_ptr;
+    pointer m_begin;
+    pointer m_cur;
+    pointer m_end;
 
   private:
     // This constructor is called by the container.
     constexpr
-    string_iterator(const stringT* ref, charT* ptr)
+    string_iterator(charT* begin, size_t ncur, size_t nend)
     noexcept
-      : m_ref(ref), m_ptr(ptr)
+      : m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)
       { }
 
   public:
     constexpr
     string_iterator()
     noexcept
-      : string_iterator(nullptr, nullptr)
+      : m_begin(), m_cur(), m_end()
       { }
 
     template<typename ycharT,
@@ -367,212 +340,125 @@ class string_iterator
     constexpr
     string_iterator(const string_iterator<stringT, ycharT>& other)
     noexcept
-      : string_iterator(other.m_ref, other.m_ptr)
+      : m_begin(other.m_begin), m_cur(other.m_cur), m_end(other.m_end)
       { }
 
   private:
     pointer
-    do_assert_valid_pointer(pointer ptr, bool deref)
+    do_validate(pointer cur, bool deref)
     const noexcept
       {
-        auto ref = this->m_ref;
-        ROCKET_ASSERT_MSG(ref, "Iterator not initialized");
-        auto dist = static_cast<size_t>(ptr - ref->data());
-        ROCKET_ASSERT_MSG(dist <= ref->size(), "Iterator invalidated");
-        ROCKET_ASSERT_MSG(!deref || (dist < ref->size()),
-                          "Past-the-end iterator not dereferenceable");
-        return ptr;
+        ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
+        ROCKET_ASSERT_MSG((this->m_begin <= cur) && (cur <= this->m_end), "Iterator invalidated");
+        ROCKET_ASSERT_MSG(!deref || (cur < this->m_end), "Past-the-end iterator not dereferenceable");
+        return cur;
       }
 
   public:
-    constexpr
-    const stringT*
-    parent()
-    const noexcept
-      { return this->m_ref;  }
-
-    pointer
-    tell()
-    const noexcept
-      { return this->do_assert_valid_pointer(this->m_ptr, false);  }
-
-    pointer
-    tell_owned_by(const stringT* ref)
-    const noexcept
-      {
-        ROCKET_ASSERT_MSG(this->m_ref == ref, "Dangling iterator");
-        return this->tell();
-      }
-
-    string_iterator&
-    seek(pointer ptr)
-    noexcept
-      {
-        this->m_ptr = this->do_assert_valid_pointer(ptr, false);
-        return *this;
-      }
-
     reference
     operator*()
     const noexcept
-      {
-        auto ptr = this->do_assert_valid_pointer(this->m_ptr, true);
-        ROCKET_ASSERT(ptr);
-        return *ptr;
-      }
-
-    pointer
-    operator->()
-    const noexcept
-      {
-        auto ptr = this->do_assert_valid_pointer(this->m_ptr, true);
-        ROCKET_ASSERT(ptr);
-        return ptr;
-      }
+      { return *(this->do_validate(this->m_cur, true));  }
 
     reference
     operator[](difference_type off)
     const noexcept
+      { return *(this->do_validate(this->m_cur + off, true));  }
+
+    pointer
+    operator->()
+    const noexcept
+      { return this->do_validate(this->m_cur, true);  }
+
+    string_iterator&
+    operator+=(difference_type off)
+    noexcept
       {
-        auto ptr = this->do_assert_valid_pointer(this->m_ptr + off, true);
-        ROCKET_ASSERT(ptr);
-        return *ptr;
+        this->m_cur = this->do_validate(this->m_cur + off, false);
+        return *this;
       }
+
+    string_iterator&
+    operator++()
+    noexcept
+      { return *this += difference_type(1);  }
+
+    string_iterator
+    operator+(difference_type off)
+    const noexcept
+      {
+        auto res = *this;
+        res += off;
+        return res;
+      }
+
+    string_iterator&
+    operator-=(difference_type off)
+    noexcept
+      {
+        this->m_cur = this->do_validate(this->m_cur - off, false);
+        return *this;
+      }
+
+    string_iterator&
+    operator--()
+    noexcept
+      { return *this -= difference_type(1);  }
+
+    string_iterator
+    operator-(difference_type off)
+    const noexcept
+      {
+        auto res = *this;
+        res -= off;
+        return res;
+      }
+
+    friend
+    string_iterator
+    operator+(difference_type off, const string_iterator& other)
+    noexcept
+      { return other + off;  }
+
+    difference_type
+    operator-(const string_iterator& other)
+    const noexcept
+      {
+        ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
+        ROCKET_ASSERT_MSG(this->m_begin == other.m_begin, "Iterator not compatible");
+        return this->m_cur - other.m_cur;
+      }
+
+    bool
+    operator==(const string_iterator& other)
+    const noexcept
+      { return *this - other == 0;  }
+
+    bool
+    operator!=(const string_iterator& other)
+    const noexcept
+      { return *this - other != 0;  }
+
+    bool
+    operator<(const string_iterator& other)
+    const noexcept
+      { return *this - other < 0;  }
+
+    bool
+    operator>(const string_iterator& other)
+    const noexcept
+      { return *this - other > 0;  }
+
+    bool
+    operator<=(const string_iterator& other)
+    const noexcept
+      { return *this - other <= 0;  }
+
+    bool
+    operator>=(const string_iterator& other)
+    const noexcept
+      { return *this - other >= 0;  }
   };
-
-template<typename stringT, typename charT>
-inline
-string_iterator<stringT, charT>&
-operator++(string_iterator<stringT, charT>& rhs)
-noexcept
-  { return rhs.seek(rhs.tell() + 1);  }
-
-template<typename stringT, typename charT>
-inline
-string_iterator<stringT, charT>&
-operator--(string_iterator<stringT, charT>& rhs)
-noexcept
-  { return rhs.seek(rhs.tell() - 1);  }
-
-template<typename stringT, typename charT>
-inline
-string_iterator<stringT, charT>
-operator++(string_iterator<stringT, charT>& lhs, int)
-noexcept
-  {
-    auto res = lhs;
-    lhs.seek(lhs.tell() + 1);
-    return res;
-  }
-
-template<typename stringT, typename charT>
-inline
-string_iterator<stringT, charT>
-operator--(string_iterator<stringT, charT>& lhs, int)
-noexcept
-  {
-    auto res = lhs;
-    lhs.seek(lhs.tell() - 1);
-    return res;
-  }
-
-template<typename stringT, typename charT>
-inline
-string_iterator<stringT, charT>&
-operator+=(string_iterator<stringT, charT>& lhs, typename string_iterator<stringT, charT>::difference_type rhs)
-noexcept
-  { return lhs.seek(lhs.tell() + rhs);  }
-
-template<typename stringT, typename charT>
-inline
-string_iterator<stringT, charT>&
-operator-=(string_iterator<stringT, charT>& lhs, typename string_iterator<stringT, charT>::difference_type rhs)
-noexcept
-  { return lhs.seek(lhs.tell() - rhs);  }
-
-template<typename stringT, typename charT>
-inline
-string_iterator<stringT, charT>
-operator+(const string_iterator<stringT, charT>& lhs, typename string_iterator<stringT, charT>::difference_type rhs)
-noexcept
-  {
-    auto res = lhs;
-    res.seek(res.tell() + rhs);
-    return res;
-  }
-
-template<typename stringT, typename charT>
-inline
-string_iterator<stringT, charT>
-operator-(const string_iterator<stringT, charT>& lhs, typename string_iterator<stringT, charT>::difference_type rhs)
-noexcept
-  {
-    auto res = lhs;
-    res.seek(res.tell() - rhs);
-    return res;
-  }
-
-template<typename stringT, typename charT>
-inline
-string_iterator<stringT, charT>
-operator+(typename string_iterator<stringT, charT>::difference_type lhs, const string_iterator<stringT, charT>& rhs)
-noexcept
-  {
-    auto res = rhs;
-    res.seek(res.tell() + lhs);
-    return res;
-  }
-
-template<typename stringT, typename xcharT, typename ycharT>
-inline
-typename string_iterator<stringT, xcharT>::difference_type
-operator-(const string_iterator<stringT, xcharT>& lhs, const string_iterator<stringT, ycharT>& rhs)
-noexcept
-  {
-    return lhs.tell_owned_by(rhs.parent()) - rhs.tell();
-  }
-
-template<typename stringT, typename xcharT, typename ycharT>
-inline
-bool
-operator==(const string_iterator<stringT, xcharT>& lhs, const string_iterator<stringT, ycharT>& rhs)
-noexcept
-  { return lhs.tell() == rhs.tell();  }
-
-template<typename stringT, typename xcharT, typename ycharT>
-inline
-bool
-operator!=(const string_iterator<stringT, xcharT>& lhs, const string_iterator<stringT, ycharT>& rhs)
-noexcept
-  { return lhs.tell() != rhs.tell();  }
-
-template<typename stringT, typename xcharT, typename ycharT>
-inline
-bool
-operator<(const string_iterator<stringT, xcharT>& lhs, const string_iterator<stringT, ycharT>& rhs)
-noexcept
-  { return lhs.tell_owned_by(rhs.parent()) < rhs.tell();  }
-
-template<typename stringT, typename xcharT, typename ycharT>
-inline
-bool
-operator>(const string_iterator<stringT, xcharT>& lhs, const string_iterator<stringT, ycharT>& rhs)
-noexcept
-  { return lhs.tell_owned_by(rhs.parent()) > rhs.tell();  }
-
-template<typename stringT, typename xcharT, typename ycharT>
-inline
-bool
-operator<=(const string_iterator<stringT, xcharT>& lhs, const string_iterator<stringT, ycharT>& rhs)
-noexcept
-  { return lhs.tell_owned_by(rhs.parent()) <= rhs.tell();  }
-
-template<typename stringT, typename xcharT, typename ycharT>
-inline
-bool
-operator>=(const string_iterator<stringT, xcharT>& lhs, const string_iterator<stringT, ycharT>& rhs)
-noexcept
-  { return lhs.tell_owned_by(rhs.parent()) >= rhs.tell();  }
 
 // Implement relational operators.
 template<typename charT, typename traitsT>
@@ -589,11 +475,10 @@ struct comparator
       {
         if(n1 != n2)
           return 2;
-
-        if(s1 == s2)
+        else if(s1 == s2)
           return 0;
-
-        return traits_type::compare(s1, s2, n1);
+        else
+          return traits_type::compare(s1, s2, n1);
       }
 
     static
@@ -603,34 +488,12 @@ struct comparator
       {
         if(n1 < n2)
           return (traits_type::compare(s1, s2, n1) > 0) ? +1 : -1;
-
-        if(n1 > n2)
+        else if(n1 > n2)
           return (traits_type::compare(s1, s2, n1) < 0) ? -1 : +1;
-
-        return traits_type::compare(s1, s2, n1);
+        else
+          return traits_type::compare(s1, s2, n1);
       }
   };
-
-// Replacement helpers.
-struct append_tag
-  { }
-  constexpr append;
-
-template<typename stringT, typename... paramsT>
-inline
-void
-tagged_append(stringT* str, append_tag, paramsT&&... params)
-  { str->append(::std::forward<paramsT>(params)...);  }
-
-struct push_back_tag
-  { }
-  constexpr push_back;
-
-template<typename stringT, typename... paramsT>
-inline
-void
-tagged_append(stringT* str, push_back_tag, paramsT&&... params)
-  { str->push_back(::std::forward<paramsT>(params)...);  }
 
 // Implement the FNV-1a hash algorithm.
 template<typename charT, typename traitsT>

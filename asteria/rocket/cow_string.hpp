@@ -148,8 +148,9 @@ class basic_cow_string
     static constexpr size_type npos = size_type(-1);
 
   private:
-    details_cow_string::storage_handle<allocator_type, traits_type> m_sth;
-    const value_type* m_ptr = details_cow_string::null_char<value_type>::value;
+    using storage_handle = details_cow_string::storage_handle<allocator_type, traits_type>;
+    storage_handle m_sth;
+    const value_type* m_ptr = storage_handle::null_char;
     size_type m_len = 0;
 
   public:
@@ -195,30 +196,30 @@ class basic_cow_string
     basic_cow_string(const basic_cow_string& other, size_type pos, size_type n = npos,
                      const allocator_type& alloc = allocator_type())
       : basic_cow_string(alloc)
-      { this->assign(other, pos, n);  }
+      { this->append(other, pos, n);  }
 
     basic_cow_string(const value_type* s, size_type n, const allocator_type& alloc = allocator_type())
       : basic_cow_string(alloc)
-      { this->assign(s, n);  }
+      { this->append(s, n);  }
 
     explicit
     basic_cow_string(const value_type* s, const allocator_type& alloc = allocator_type())
       : basic_cow_string(alloc)
-      { this->assign(s);  }
+      { this->append(s);  }
 
     basic_cow_string(size_type n, value_type ch, const allocator_type& alloc = allocator_type())
       : basic_cow_string(alloc)
-      { this->assign(n, ch);  }
+      { this->append(n, ch);  }
 
     template<typename inputT,
     ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     basic_cow_string(inputT first, inputT last, const allocator_type& alloc = allocator_type())
       : basic_cow_string(alloc)
-      { this->assign(::std::move(first), ::std::move(last));  }
+      { this->append(::std::move(first), ::std::move(last));  }
 
     basic_cow_string(initializer_list<value_type> init, const allocator_type& alloc = allocator_type())
       : basic_cow_string(alloc)
-      { this->assign(init);  }
+      { this->append(init);  }
 
     basic_cow_string&
     operator=(nullopt_t)
@@ -262,64 +263,6 @@ class basic_cow_string
       }
 
   private:
-    // Reallocate the storage to `res_arg` characters, not including the null terminator.
-    value_type*
-    do_reallocate(size_type len_one, size_type off_two, size_type len_two, size_type res_arg)
-      {
-        ROCKET_ASSERT(len_one <= off_two);
-        ROCKET_ASSERT(off_two <= this->m_len);
-        ROCKET_ASSERT(len_two <= this->m_len - off_two);
-        auto ptr = this->m_sth.reallocate(this->m_ptr, len_one, off_two, len_two, res_arg);
-        ROCKET_ASSERT(!ptr || this->m_sth.unique());
-        this->m_ptr = ptr ? ptr : details_cow_string::null_char<value_type>::value;
-        this->m_len = len_one + len_two;
-        return ptr;
-      }
-
-    // Add a null terminator at `ptr[len]` then set `len` there.
-    void
-    do_set_length(size_type len)
-    noexcept
-      {
-        ROCKET_ASSERT(len <= this->m_sth.capacity());
-        auto ptr = this->m_sth.mut_data_unchecked();
-        if(ptr) {
-          ROCKET_ASSERT(ptr == this->m_ptr);
-          traits_type::assign(ptr[len], value_type());
-        }
-        this->m_len = len;
-      }
-
-    // Clear contents. Deallocate the storage if it is shared at all.
-    void
-    do_clear()
-    noexcept
-      {
-        if(!this->unique()) {
-          this->m_ptr = details_cow_string::null_char<value_type>::value;
-          this->m_len = 0;
-          this->m_sth.deallocate();
-        }
-        else
-          this->do_set_length(0);
-      }
-
-    // Reallocate more storage as needed, without shrinking.
-    void
-    do_reserve_more(size_type cap_add)
-      {
-        auto len = this->size();
-        auto cap = this->m_sth.check_size_add(len, cap_add);
-        if(!this->unique() || ROCKET_UNEXPECT(this->capacity() < cap)) {
-#ifndef ROCKET_DEBUG
-          // Reserve more space for non-debug builds.
-          cap |= len / 2 + 31;
-#endif
-          this->do_reallocate(0, 0, len, cap | 1);
-        }
-        ROCKET_ASSERT(this->capacity() >= cap);
-      }
-
     [[noreturn]] ROCKET_NOINLINE
     void
     do_throw_subscript_out_of_range(size_type pos)
@@ -336,78 +279,58 @@ class basic_cow_string
     do_clamp_substr(size_type tpos, size_type tn)
     const
       {
-        auto tlen = this->size();
-        if(tpos > tlen)
+        size_type len = this->size();
+        if(len < tpos)
           this->do_throw_subscript_out_of_range(tpos);
-        return noadl::min(tlen - tpos, tn);
+        return noadl::min(tn, len - tpos);
       }
 
-    template<typename... paramsT>
+    // This function is used to implement `replace()` after the replacement has been appended.
+    // `tpos` and `tlen` are arguments to `replace()`. `brep` is the old length prior to `append()`.
+    // A pointer to the replacement is returned.
     value_type*
-    do_replace_no_bound_check(size_type tpos, size_type tn, paramsT&&... params)
+    do_swizzle_unchecked(size_type tpos, size_type tlen, size_type brep)
       {
-        auto len_old = this->size();
-        ROCKET_ASSERT(tpos <= len_old);
-        details_cow_string::tagged_append(this, ::std::forward<paramsT>(params)...);
-        auto len_add = this->size() - len_old;
-        auto len_sfx = len_old - (tpos + tn);
-        this->do_reserve_more(len_sfx);
-        auto ptr = this->m_sth.mut_data_unchecked();
-        traits_type::copy(ptr + len_old + len_add, ptr + tpos + tn, len_sfx);
-        traits_type::move(ptr + tpos, ptr + len_old, len_add + len_sfx);
-        this->do_set_length(len_old + len_add - tn);
-        return ptr + tpos;
-      }
+        // Get a pointer to mutable storage. If the storage is shared, duplicate it.
+        auto ptr = this->mut_data();
 
-    value_type*
-    do_erase_no_bound_check(size_type tpos, size_type tn)
-      {
-        auto len_old = this->size();
-        ROCKET_ASSERT(tpos <= len_old);
-        ROCKET_ASSERT(tn <= len_old - tpos);
-        if(!this->unique()) {
-          auto ptr = this->do_reallocate(tpos, tpos + tn, len_old - (tpos + tn), len_old);
-          return ptr + tpos;
+        // Swap the intervals [tpos+tlen,brep) and [brep,size).
+        size_type tepos = tpos + tlen;
+        if((tepos < brep) && (brep < this->size()))
+          noadl::rotate(ptr, tepos, brep, this->size());
+
+        // Erase the interval [tpos,tpos+tlen).
+        if(tpos < tepos) {
+          traits_type::move(ptr + tpos, ptr + tepos, this->size() - tepos);
+          this->m_len -= tlen;
+          traits_type::assign(ptr[this->m_len], value_type());
         }
-
-        auto ptr = this->m_sth.mut_data_unchecked();
-        traits_type::move(ptr + tpos, ptr + tpos + tn, len_old - (tpos + tn));
-        this->do_set_length(len_old - tn);
         return ptr + tpos;
       }
 
     // These are generic implementations for `{{,r}find,find_{first,last}{,_not}_of}()` functions.
     template<typename predT>
     size_type
-    do_xfind_if(size_type first, size_type last, difference_type step, predT&& pred)
-    const
-      {
-        auto cur = first;
-        for(;;) {
-          if(pred(this->data() + cur))
-            return ROCKET_ASSERT(cur != npos), cur;
-
-          if(cur == last)
-            return npos;
-
-          cur += static_cast<size_type>(step);
-        }
-      }
-
-    template<typename predT>
-    size_type
     do_find_forwards_if(size_type from, size_type n, predT&& pred)
     const
       {
-        auto len = this->size();
-        if(len < n)
+        // If the string is too short, no match could exist.
+        if(this->size() < n)
           return npos;
 
-        auto rlen = len - n;
+        // If the search starts at a position where no enough characters may follow, fail.
+        size_type rlen = this->size() - n;
         if(from > rlen)
           return npos;
 
-        return this->do_xfind_if(from, rlen, +1, ::std::move(pred));
+        // Search the interval [from,rlen] in normal order.
+        size_type cur = from;
+        while(!pred(this->data() + cur))
+          if(cur++ == rlen)
+            return npos;  // not found;
+
+        ROCKET_ASSERT(cur != npos);
+        return cur;
       }
 
     template<typename predT>
@@ -415,15 +338,23 @@ class basic_cow_string
     do_find_backwards_if(size_type to, size_type n, predT&& pred)
     const
       {
-        auto len = this->size();
-        if(len < n)
+        // If the string is too short, no match could exist.
+        if(this->size() < n)
           return npos;
 
-        auto rlen = len - n;
-        if(to > rlen)
-          return this->do_xfind_if(rlen, 0, -1, ::std::move(pred));
+        // Unlike `do_find_forwards_if()`, there is always a range to search.
+        size_type rlen = this->size() - n;
+        if(rlen > to)
+          rlen = to;
 
-        return this->do_xfind_if(to, 0, -1, ::std::move(pred));
+        // Search the interval [0,rlen] in reverse order.
+        size_type cur = rlen;
+        while(!pred(this->data() + cur))
+          if(cur-- == 0)
+            return npos;  // not found;
+
+        ROCKET_ASSERT(cur != npos);
+        return cur;
       }
 
   public:
@@ -431,12 +362,18 @@ class basic_cow_string
     const_iterator
     begin()
     const noexcept
-      { return const_iterator(this, this->data());  }
+      {
+        auto bptr = this->data();
+        return const_iterator(bptr, 0, this->size());
+      }
 
     const_iterator
     end()
     const noexcept
-      { return const_iterator(this, this->data() + this->size());  }
+      {
+        auto bptr = this->data();
+        return const_iterator(bptr, this->size(), this->size());
+      }
 
     const_reverse_iterator
     rbegin()
@@ -472,13 +409,19 @@ class basic_cow_string
     // N.B. This is a non-standard extension.
     iterator
     mut_begin()
-      { return iterator(this, this->mut_data());  }
+      {
+        auto bptr = this->mut_data();
+        return iterator(bptr, 0, this->size());
+      }
 
     // N.B. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
     iterator
     mut_end()
-      { return iterator(this, this->mut_data() + this->size());  }
+      {
+        auto bptr = this->mut_data();
+        return iterator(bptr, this->size(), this->size());
+      }
 
     // N.B. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
@@ -528,13 +471,10 @@ class basic_cow_string
     basic_cow_string&
     resize(size_type n, value_type ch = value_type())
       {
-        auto len_old = this->size();
-        if(len_old < n)
-          this->append(n - len_old, ch);
-        else if(len_old > n)
-          this->pop_back(len_old - n);
-        ROCKET_ASSERT(this->size() == n);
-        return *this;
+        if(this->size() < n)
+          return this->append(n - this->size(), ch);
+        else
+          return this->pop_back(this->size() - n);
       }
 
     constexpr
@@ -547,15 +487,23 @@ class basic_cow_string
     basic_cow_string&
     reserve(size_type res_arg)
       {
-        auto len = this->size();
-        auto cap_new = this->m_sth.round_up_capacity(noadl::max(len, res_arg));
-        // If the storage is shared with other strings, force rellocation to prevent copy-on-write
-        // upon modification.
-        if(this->unique() && (this->capacity() >= cap_new))
+        // Note zero is a special request to reduce capacity.
+        if(res_arg == 0)
+          return this->shrink_to_fit();
+
+        // Calculate the minimum capacity to reserve. This must include all existent characters.
+        // Don't reallocate if the storage is unique and there is enough room.
+        size_type rcap = this->m_sth.round_up_capacity(noadl::max(this->size(), res_arg));
+        if(this->unique() && (this->capacity() >= rcap))
           return *this;
 
-        this->do_reallocate(0, 0, len, cap_new);
-        ROCKET_ASSERT(this->capacity() >= res_arg);
+        // Allocate new storage.
+        storage_handle sth(this->m_sth.as_allocator());
+        auto ptr = sth.reallocate_more(this->data(), this->size(), rcap - this->size());
+
+        // Set the new storage up. The length is left intact.
+        this->m_sth.exchange_with(sth);
+        this->m_ptr = ptr - this->m_len;
         return *this;
       }
 
@@ -563,14 +511,19 @@ class basic_cow_string
     basic_cow_string&
     shrink_to_fit()
       {
-        auto len = this->size();
-        auto cap_min = this->m_sth.round_up_capacity(len);
-        // Don't increase memory usage.
-        if(!this->unique() || (this->capacity() <= cap_min))
+        // Calculate the minimum capacity to reserve. This must include all existent characters.
+        // Don't reallocate if the storage is shared or tight.
+        size_type rcap = this->m_sth.round_up_capacity(this->size());
+        if(!this->unique() || (this->capacity() <= rcap))
           return *this;
 
-        this->do_reallocate(0, 0, len, len);
-        ROCKET_ASSERT(this->capacity() <= cap_min);
+        // Allocate new storage.
+        storage_handle sth(this->m_sth.as_allocator());
+        auto ptr = sth.reallocate_more(this->data(), this->size(), 0);
+
+        // Set the new storage up. The length is left intact.
+        this->m_sth.exchange_with(sth);
+        this->m_ptr = ptr - this->m_len;
         return *this;
       }
 
@@ -579,10 +532,8 @@ class basic_cow_string
     clear()
     noexcept
       {
-        if(this->empty())
-          return *this;
-
-        this->do_clear();
+        this->m_ptr = storage_handle::null_char;
+        this->m_len = 0;
         return *this;
       }
 
@@ -603,8 +554,7 @@ class basic_cow_string
     at(size_type pos)
     const
       {
-        auto len = this->size();
-        if(pos >= len)
+        if(pos >= this->size())
           this->do_throw_subscript_out_of_range(pos);
         return this->data()[pos];
       }
@@ -621,9 +571,8 @@ class basic_cow_string
     operator[](size_type pos)
     const noexcept
       {
-        auto len = this->size();
         // Note reading from the character at `size()` is permitted.
-        ROCKET_ASSERT(pos <= len);
+        ROCKET_ASSERT(pos <= this->size());
         return this->c_str()[pos];
       }
 
@@ -657,8 +606,7 @@ class basic_cow_string
     reference
     mut(size_type pos)
       {
-        auto len = this->size();
-        if(pos >= len)
+        if(pos >= this->size())
           this->do_throw_subscript_out_of_range(pos);
         return this->mut_data()[pos];
       }
@@ -745,25 +693,38 @@ class basic_cow_string
         if(n == 0)
           return *this;
 
-        auto len_old = this->size();
+        // If the storage is unique and there is enough space, append the string in place.
+        auto ptr = this->m_sth.mut_data_opt();
+        if(ROCKET_EXPECT(ptr)) {
+          ptr += this->size();
 
-        // Check for overlapped strings before `do_reserve_more()`.
-        auto srpos = static_cast<uintptr_t>(s - this->data());
-        this->do_reserve_more(n);
+          // Note the string may be unowned, where `cap` would be zero.
+          size_type cap = this->capacity();
+          if(ROCKET_EXPECT((cap >= this->size()) && (n <= cap - this->size()))) {
+            // Copy the string.
+            traits_type::copy(ptr, s, n);
+            traits_type::assign(ptr[n], value_type());
 
-        auto ptr = this->m_sth.mut_data_unchecked();
-        if(srpos < len_old)
-          traits_type::move(ptr + len_old, ptr + srpos, n);
-        else
-          traits_type::copy(ptr + len_old, s, n);
-        this->do_set_length(len_old + n);
+            // Increase the length.
+            this->m_ptr = ptr - this->m_len;
+            this->m_len += n;
+            return *this;
+          }
+        }
+
+        // Allocate new storage.
+        storage_handle sth(this->m_sth.as_allocator());
+        ptr = sth.reallocate_more(this->data(), this->size(), n);
+
+        // Copy the string.
+        traits_type::copy(ptr, s, n);
+        traits_type::assign(ptr[n], value_type());
+
+        // Set the new storage up and increase the length.
+        this->m_sth.exchange_with(sth);
+        this->m_ptr = ptr - this->m_len;
+        this->m_len += n;
         return *this;
-      }
-
-    basic_cow_string&
-    append(const value_type* s)
-      {
-        return this->append(s, traits_type::length(s));
       }
 
     basic_cow_string&
@@ -772,20 +733,47 @@ class basic_cow_string
         if(n == 0)
           return *this;
 
-        auto len_old = this->size();
-        this->do_reserve_more(n);
+        // If the storage is unique and there is enough space, append the string in place.
+        auto ptr = this->m_sth.mut_data_opt();
+        if(ROCKET_EXPECT(ptr)) {
+          ptr += this->size();
 
-        auto ptr = this->m_sth.mut_data_unchecked();
-        traits_type::assign(ptr + len_old, n, ch);
-        this->do_set_length(len_old + n);
+          // Note the string may be unowned, where `cap` would be zero.
+          size_type cap = this->capacity();
+          if(ROCKET_EXPECT((cap >= this->size()) && (n <= cap - this->size()))) {
+            // Fill characters.
+            traits_type::assign(ptr, n, ch);
+            traits_type::assign(ptr[n], value_type());
+
+            // Increase the length.
+            this->m_ptr = ptr - this->m_len;
+            this->m_len += n;
+            return *this;
+          }
+        }
+
+        // Allocate new storage.
+        storage_handle sth(this->m_sth.as_allocator());
+        ptr = sth.reallocate_more(this->data(), this->size(), n);
+
+        // Fill characters.
+        traits_type::assign(ptr, n, ch);
+        traits_type::assign(ptr[n], value_type());
+
+        // Set the new storage up and increase the length.
+        this->m_sth.exchange_with(sth);
+        this->m_ptr = ptr - this->m_len;
+        this->m_len += n;
         return *this;
       }
 
     basic_cow_string&
+    append(const value_type* s)
+      { return this->append(s, traits_type::length(s));  }
+
+    basic_cow_string&
     append(initializer_list<value_type> init)
-      {
-        return this->append(init.begin(), init.size());
-      }
+      { return this->append(init.begin(), init.size());  }
 
     // N.B. This is a non-standard extension.
     basic_cow_string&
@@ -803,33 +791,76 @@ class basic_cow_string
         if(first == last)
           return *this;
 
-        basic_cow_string other(this->m_sth.as_allocator());
-        other.reserve(this->size() + noadl::estimate_distance(first, last));
-        other.append(this->data(), this->size());
-        noadl::ranged_do_while(::std::move(first), ::std::move(last),
-                               [&](const inputT& it) { other.push_back(*it);  });
-        this->assign(::std::move(other));
+        // If the storage is unique and there is enough space, append the string in place.
+        size_type n = noadl::estimate_distance(first, last);
+        auto ptr = this->m_sth.mut_data_opt();
+        if(ROCKET_EXPECT(n && ptr)) {
+          ptr += this->size();
+
+          // Note the string may be unowned, where `cap` would be zero.
+          size_type cap = this->capacity();
+          if(ROCKET_EXPECT((cap >= this->size()) && (n <= cap - this->size()))) {
+            // Copy characters.
+            n = 0;
+            noadl::ranged_for(::std::move(first), ::std::move(last),
+                              [&](inputT& it) { traits_type::assign(ptr[n++], *it);  });
+            traits_type::assign(ptr[n], value_type());
+
+            // Increase the length.
+            this->m_ptr = ptr - this->m_len;
+            this->m_len += n;
+            return *this;
+          }
+        }
+
+        // Allocate new storage.
+        storage_handle sth(this->m_sth.as_allocator());
+        if(ROCKET_EXPECT(n)) {
+          // The length is known.
+          ptr = sth.reallocate_more(this->data(), this->size(), n);
+
+          // Copy characters.
+          n = 0;
+          noadl::ranged_for(::std::move(first), ::std::move(last),
+                            [&](inputT& it) { traits_type::assign(ptr[n++], *it);  });
+        }
+        else {
+          // The length is not known.
+          size_type ecap = 10;
+          ptr = sth.reallocate_more(this->data(), this->size(), ecap);
+
+          // Copy characters.
+          noadl::ranged_for(::std::move(first), ::std::move(last),
+            [&](inputT& it) {
+              // If the reserved region has been exhausted, allocate a new one.
+              if(ROCKET_UNEXPECT(n >= ecap)) {
+                ecap += ecap / 2;
+                ptr = sth.reallocate_more(this->data(), this->size() + n, ecap) - n;
+              }
+              traits_type::assign(ptr[n++], *it);
+            });
+        }
+        traits_type::assign(ptr[n], value_type());
+
+        // Set the new storage up and increase the length.
+        this->m_sth.exchange_with(sth);
+        this->m_ptr = ptr - this->m_len;
+        this->m_len += n;
         return *this;
       }
 
     // N.B. The return type is a non-standard extension.
     basic_cow_string&
     push_back(value_type ch)
-      {
-        auto len_old = this->size();
-        this->do_reserve_more(1);
-
-        auto ptr = this->m_sth.mut_data_unchecked();
-        traits_type::assign(ptr[len_old], ch);
-        this->do_set_length(len_old + 1);
-        return *this;
-      }
+      { return this->append(size_type(1), ch);  }
 
     // N.B. There is no default argument for `tpos`.
     basic_cow_string&
     erase(size_type tpos, size_type tn = npos)
       {
-        this->do_erase_no_bound_check(tpos, this->do_clamp_substr(tpos, tn));
+        size_type tlen = this->do_clamp_substr(tpos, tn);
+
+        this->do_swizzle_unchecked(tpos, tlen, this->size());
         return *this;
       }
 
@@ -837,37 +868,25 @@ class basic_cow_string
     iterator
     erase(const_iterator tfirst, const_iterator tlast)
       {
-        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
-        auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
-        auto ptr = this->do_erase_no_bound_check(tpos, tn);
-        return iterator(this, ptr);
+        size_type tpos = static_cast<size_type>(tfirst - this->begin());
+        size_type tlen = static_cast<size_type>(tlast - tfirst);
+
+        auto ptr = this->do_swizzle_unchecked(tpos, tlen, this->size());
+        return iterator(ptr - tpos, tpos, this->size());
       }
 
     // N.B. This function may throw `std::bad_alloc`.
     iterator
     erase(const_iterator tfirst)
-      {
-        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
-        auto ptr = this->do_erase_no_bound_check(tpos, 1);
-        return iterator(this, ptr);
-      }
+      { return this->erase(tfirst, tfirst + 1);  }
 
     // N.B. This function may throw `std::bad_alloc`.
     // N.B. The return type and parameter are non-standard extensions.
     basic_cow_string&
     pop_back(size_type n = 1)
       {
-        if(n == 0)
-          return *this;
-
-        auto len_old = this->size();
-        ROCKET_ASSERT(n <= len_old);
-        if(!this->unique()) {
-          this->do_reallocate(0, 0, len_old - n, len_old);
-          return *this;
-        }
-
-        this->do_set_length(len_old - n);
+        ROCKET_ASSERT_MSG(n <= this->size(), "No enough characters to pop");
+        this->do_swizzle_unchecked(this->size() - n, n, this->size());
         return *this;
       }
 
@@ -875,7 +894,6 @@ class basic_cow_string
     assign(shallow_type sh)
     noexcept
       {
-        this->m_sth.deallocate();
         this->m_ptr = sh.c_str();
         this->m_len = sh.length();
         return *this;
@@ -895,8 +913,8 @@ class basic_cow_string
     assign(basic_cow_string&& other)
     noexcept
       {
-        this->m_sth.share_with(::std::move(other.m_sth));
-        this->m_ptr = ::std::exchange(other.m_ptr, details_cow_string::null_char<value_type>::value);
+        this->m_sth.exchange_with(other.m_sth);
+        this->m_ptr = ::std::exchange(other.m_ptr, storage_handle::null_char);
         this->m_len = ::std::exchange(other.m_len, size_type(0));
         return *this;
       }
@@ -904,21 +922,30 @@ class basic_cow_string
     basic_cow_string&
     assign(const basic_cow_string& other, size_type pos, size_type n = npos)
       {
-        this->do_replace_no_bound_check(0, this->size(), details_cow_string::append, other, pos, n);
+        // Note `other` may be `*this`.
+        size_type klen = this->size();
+        this->append(other, pos, n);
+        this->do_swizzle_unchecked(0, klen, klen);
         return *this;
       }
 
     basic_cow_string&
     assign(const value_type* s, size_type n)
       {
-        this->do_replace_no_bound_check(0, this->size(), details_cow_string::append, s, n);
+        // Note `s` may overlap with `this->data()`.
+        size_type klen = this->size();
+        this->append(s, n);
+        this->do_swizzle_unchecked(0, klen, klen);
         return *this;
       }
 
     basic_cow_string&
     assign(const value_type* s)
       {
-        this->do_replace_no_bound_check(0, this->size(), details_cow_string::append, s);
+        // Note `s` may overlap with `this->data()`.
+        size_type klen = this->size();
+        this->append(s);
+        this->do_swizzle_unchecked(0, klen, klen);
         return *this;
       }
 
@@ -943,8 +970,10 @@ class basic_cow_string
     basic_cow_string&
     assign(inputT first, inputT last)
       {
-        this->do_replace_no_bound_check(0, this->size(), details_cow_string::append,
-                                        ::std::move(first), ::std::move(last));
+        // Note `first` may overlap with `this->data()`.
+        size_type klen = this->size();
+        this->append(::std::move(first), ::std::move(last));
+        this->do_swizzle_unchecked(0, klen, klen);
         return *this;
       }
 
@@ -952,7 +981,11 @@ class basic_cow_string
     insert(size_type tpos, const basic_cow_string& other, size_type pos = 0, size_type n = npos)
       {
         this->do_clamp_substr(tpos, 0);  // just check
-        this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, other, pos, n);
+
+        // Note `other` may be `*this`.
+        size_type klen = this->size();
+        this->append(other, pos, n);
+        this->do_swizzle_unchecked(tpos, 0, klen);
         return *this;
       }
 
@@ -960,7 +993,11 @@ class basic_cow_string
     insert(size_type tpos, const value_type* s, size_type n)
       {
         this->do_clamp_substr(tpos, 0);  // just check
-        this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, s, n);
+
+        // Note `s` may overlap with `this->data()`.
+        size_type klen = this->size();
+        this->append(s, n);
+        this->do_swizzle_unchecked(tpos, 0, klen);
         return *this;
       }
 
@@ -968,7 +1005,11 @@ class basic_cow_string
     insert(size_type tpos, const value_type* s)
       {
         this->do_clamp_substr(tpos, 0);  // just check
-        this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, s);
+
+        // Note `s` may overlap with `this->data()`.
+        size_type klen = this->size();
+        this->append(s);
+        this->do_swizzle_unchecked(tpos, 0, klen);
         return *this;
       }
 
@@ -976,7 +1017,11 @@ class basic_cow_string
     insert(size_type tpos, size_type n, value_type ch)
       {
         this->do_clamp_substr(tpos, 0);  // just check
-        this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, n, ch);
+
+        // XXX: This can be optimized *a lot*.
+        size_type klen = this->size();
+        this->append(n, ch);
+        this->do_swizzle_unchecked(tpos, 0, klen);
         return *this;
       }
 
@@ -985,7 +1030,11 @@ class basic_cow_string
     insert(size_type tpos, initializer_list<value_type> init)
       {
         this->do_clamp_substr(tpos, 0);  // just check
-        this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, init);
+
+        // XXX: This can be optimized *a lot*.
+        size_type klen = this->size();
+        this->append(init);
+        this->do_swizzle_unchecked(tpos, 0, klen);
         return *this;
       }
 
@@ -993,43 +1042,63 @@ class basic_cow_string
     iterator
     insert(const_iterator tins, const basic_cow_string& other, size_type pos = 0, size_type n = npos)
       {
-        auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-        auto ptr = this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, other, pos, n);
-        return iterator(this, ptr);
+        size_type tpos = static_cast<size_type>(tins - this->begin());
+
+        // Note `other` may be `*this`.
+        size_type klen = this->size();
+        this->append(other, pos, n);
+        auto ptr = this->do_swizzle_unchecked(tpos, 0, klen);
+        return iterator(ptr - tpos, tpos, this->size());
       }
 
     // N.B. This is a non-standard extension.
     iterator
     insert(const_iterator tins, const value_type* s, size_type n)
       {
-        auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-        auto ptr = this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, s, n);
-        return iterator(this, ptr);
+        size_type tpos = static_cast<size_type>(tins - this->begin());
+
+        // Note `s` may overlap with `this->data()`.
+        size_type klen = this->size();
+        this->append(s, n);
+        auto ptr = this->do_swizzle_unchecked(tpos, 0, klen);
+        return iterator(ptr - tpos, tpos, this->size());
       }
 
     // N.B. This is a non-standard extension.
     iterator
     insert(const_iterator tins, const value_type* s)
       {
-        auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-        auto ptr = this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, s);
-        return iterator(this, ptr);
+        size_type tpos = static_cast<size_type>(tins - this->begin());
+
+        // Note `s` may overlap with `this->data()`.
+        size_type klen = this->size();
+        this->append(s);
+        auto ptr = this->do_swizzle_unchecked(tpos, 0, klen);
+        return iterator(ptr - tpos, tpos, this->size());
       }
 
     iterator
     insert(const_iterator tins, size_type n, value_type ch)
       {
-        auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-        auto ptr = this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, n, ch);
-        return iterator(this, ptr);
+        size_type tpos = static_cast<size_type>(tins - this->begin());
+
+        // XXX: This can be optimized *a lot*.
+        size_type klen = this->size();
+        this->append(n, ch);
+        auto ptr = this->do_swizzle_unchecked(tpos, 0, klen);
+        return iterator(ptr - tpos, tpos, this->size());
       }
 
     iterator
     insert(const_iterator tins, initializer_list<value_type> init)
       {
-        auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-        auto ptr = this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, init);
-        return iterator(this, ptr);
+        size_type tpos = static_cast<size_type>(tins - this->begin());
+
+        // XXX: This can be optimized *a lot*.
+        size_type klen = this->size();
+        this->append(init);
+        auto ptr = this->do_swizzle_unchecked(tpos, 0, klen);
+        return iterator(ptr - tpos, tpos, this->size());
       }
 
     template<typename inputT,
@@ -1037,49 +1106,64 @@ class basic_cow_string
     iterator
     insert(const_iterator tins, inputT first, inputT last)
       {
-        auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-        auto ptr = this->do_replace_no_bound_check(tpos, 0, details_cow_string::append,
-                                                   ::std::move(first), ::std::move(last));
-        return iterator(this, ptr);
+        size_type tpos = static_cast<size_type>(tins - this->begin());
+
+        // Note `first` may overlap with `this->data()`.
+        size_type klen = this->size();
+        this->append(::std::move(first), ::std::move(last));
+        auto ptr = this->do_swizzle_unchecked(tpos, 0, klen);
+        return iterator(ptr - tpos, tpos, this->size());
       }
 
     iterator
     insert(const_iterator tins, value_type ch)
-      {
-        auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-        auto ptr = this->do_replace_no_bound_check(tpos, 0, details_cow_string::push_back, ch);
-        return iterator(this, ptr);
-      }
+      { return this->insert(tins, size_type(1), ch);  }
 
     basic_cow_string&
     replace(size_type tpos, size_type tn, const basic_cow_string& other, size_type pos = 0, size_type n = npos)
       {
-        this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, tn),
-                                        details_cow_string::append, other, pos, n);
+        size_type tlen = this->do_clamp_substr(tpos, tn);
+
+        // Note `other` may be `*this`.
+        size_type klen = this->size();
+        this->append(other, pos, n);
+        this->do_swizzle_unchecked(tpos, tlen, klen);
         return *this;
       }
 
     basic_cow_string&
     replace(size_type tpos, size_type tn, const value_type* s, size_type n)
       {
-        this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, tn),
-                                        details_cow_string::append, s, n);
+        size_type tlen = this->do_clamp_substr(tpos, tn);
+
+        // Note `s` may overlap with `this->data()`.
+        size_type klen = this->size();
+        this->append(s, n);
+        this->do_swizzle_unchecked(tpos, tlen, klen);
         return *this;
       }
 
     basic_cow_string&
     replace(size_type tpos, size_type tn, const value_type* s)
       {
-        this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, tn),
-                                        details_cow_string::append, s);
+        size_type tlen = this->do_clamp_substr(tpos, tn);
+
+        // Note `s` may overlap with `this->data()`.
+        size_type klen = this->size();
+        this->append(s);
+        this->do_swizzle_unchecked(tpos, tlen, klen);
         return *this;
       }
 
     basic_cow_string&
     replace(size_type tpos, size_type tn, size_type n, value_type ch)
       {
-        this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, tn),
-                                        details_cow_string::append, n, ch);
+        size_type tlen = this->do_clamp_substr(tpos, tn);
+
+        // XXX: This can be optimized *a lot*.
+        size_type klen = this->size();
+        this->append(n, ch);
+        this->do_swizzle_unchecked(tpos, tlen, klen);
         return *this;
       }
 
@@ -1088,45 +1172,65 @@ class basic_cow_string
     replace(const_iterator tfirst, const_iterator tlast, const basic_cow_string& other,
             size_type pos = 0, size_type n = npos)
       {
-        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
-        auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
-        this->do_replace_no_bound_check(tpos, tn, details_cow_string::append, other, pos, n);
+        size_type tpos = static_cast<size_type>(tfirst - this->begin());
+        size_type tlen = static_cast<size_type>(tlast - tfirst);
+
+        // Note `other` may be `*this`.
+        size_type klen = this->size();
+        this->append(other, pos, n);
+        this->do_swizzle_unchecked(tpos, tlen, klen);
         return *this;
       }
 
     basic_cow_string&
     replace(const_iterator tfirst, const_iterator tlast, const value_type* s, size_type n)
       {
-        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
-        auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
-        this->do_replace_no_bound_check(tpos, tn, details_cow_string::append, s, n);
+        size_type tpos = static_cast<size_type>(tfirst - this->begin());
+        size_type tlen = static_cast<size_type>(tlast - tfirst);
+
+        // Note `s` may overlap with `this->data()`.
+        size_type klen = this->size();
+        this->append(s, n);
+        this->do_swizzle_unchecked(tpos, tlen, klen);
         return *this;
       }
 
     basic_cow_string&
     replace(const_iterator tfirst, const_iterator tlast, const value_type* s)
       {
-        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
-        auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
-        this->do_replace_no_bound_check(tpos, tn, details_cow_string::append, s);
+        size_type tpos = static_cast<size_type>(tfirst - this->begin());
+        size_type tlen = static_cast<size_type>(tlast - tfirst);
+
+        // Note `s` may overlap with `this->data()`.
+        size_type klen = this->size();
+        this->append(s);
+        this->do_swizzle_unchecked(tpos, tlen, klen);
         return *this;
       }
 
     basic_cow_string&
     replace(const_iterator tfirst, const_iterator tlast, size_type n, value_type ch)
       {
-        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
-        auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
-        this->do_replace_no_bound_check(tpos, tn, details_cow_string::append, n, ch);
+        size_type tpos = static_cast<size_type>(tfirst - this->begin());
+        size_type tlen = static_cast<size_type>(tlast - tfirst);
+
+        // XXX: This can be optimized *a lot*.
+        size_type klen = this->size();
+        this->append(n, ch);
+        this->do_swizzle_unchecked(tpos, tlen, klen);
         return *this;
       }
 
     basic_cow_string&
     replace(const_iterator tfirst, const_iterator tlast, initializer_list<value_type> init)
       {
-        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
-        auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
-        this->do_replace_no_bound_check(tpos, tn, details_cow_string::append, init);
+        size_type tpos = static_cast<size_type>(tfirst - this->begin());
+        size_type tlen = static_cast<size_type>(tlast - tfirst);
+
+        // XXX: This can be optimized *a lot*.
+        size_type klen = this->size();
+        this->append(init);
+        this->do_swizzle_unchecked(tpos, tlen, klen);
         return *this;
       }
 
@@ -1135,30 +1239,29 @@ class basic_cow_string
     basic_cow_string&
     replace(const_iterator tfirst, const_iterator tlast, inputT first, inputT last)
       {
-        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
-        auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
-        this->do_replace_no_bound_check(tpos, tn, details_cow_string::append,
-                                        ::std::move(first), ::std::move(last));
+        size_type tpos = static_cast<size_type>(tfirst - this->begin());
+        size_type tlen = static_cast<size_type>(tlast - tfirst);
+
+        // Note `first` may overlap with `this->data()`.
+        size_type klen = this->size();
+        this->append(::std::move(first), ::std::move(last));
+        this->do_swizzle_unchecked(tpos, tlen, klen);
         return *this;
       }
 
     // N.B. This is a non-standard extension.
     basic_cow_string&
     replace(const_iterator tfirst, const_iterator tlast, value_type ch)
-      {
-        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
-        auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
-        this->do_replace_no_bound_check(tpos, tn, details_cow_string::push_back, ch);
-        return *this;
-      }
+      { return this->replace(tfirst, tlast, size_type(1), ch);  }
 
     size_type
     copy(value_type* s, size_type tn, size_type tpos = 0)
     const
       {
-        auto rlen = this->do_clamp_substr(tpos, tn);
-        traits_type::copy(s, this->data() + tpos, rlen);
-        return rlen;
+        size_type tlen = this->do_clamp_substr(tpos, tn);
+
+        traits_type::copy(s, this->data() + tpos, tlen);
+        return tlen;
       }
 
     basic_cow_string&
@@ -1188,7 +1291,7 @@ class basic_cow_string
     safe_c_str()
     const
       {
-        auto clen = traits_type::length(this->m_ptr);
+        size_type clen = traits_type::length(this->m_ptr);
         if(clen != this->m_len)
           noadl::sprintf_and_throw<domain_error>("cow_string: embedded null character detected (at `%llu`)",
                                                  static_cast<unsigned long long>(clen));
@@ -1200,10 +1303,14 @@ class basic_cow_string
     value_type*
     mut_data()
       {
-        if(ROCKET_UNEXPECT(!this->empty() && !this->unique()))
-          return this->do_reallocate(0, 0, this->size(), this->size() | 1);
-        else
-          return this->m_sth.mut_data_unchecked();
+        auto ptr = this->m_sth.mut_data_opt();
+        if(ROCKET_EXPECT(ptr))
+          return ptr;
+
+        // Reallocate the storage. The length is left intact.
+        ptr = this->m_sth.reallocate_more(this->data(), this->size(), 0) - this->size();
+        this->m_ptr = ptr;
+        return ptr;
       }
 
     // N.B. The return type differs from `std::basic_string`.
