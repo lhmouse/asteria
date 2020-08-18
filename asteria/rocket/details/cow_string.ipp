@@ -163,10 +163,7 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return 0;
-
-        auto nref = ptr->nref.get();
-        ROCKET_ASSERT(nref > 0);
-        return nref;
+        return ptr->nref.get();
       }
 
     size_type
@@ -176,10 +173,7 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return 0;
-
-        auto cap = storage::max_nchar_for_nblk(ptr->nblk);
-        ROCKET_ASSERT(cap > 0);
-        return cap;
+        return storage::max_nchar_for_nblk(ptr->nblk);
       }
 
     size_type

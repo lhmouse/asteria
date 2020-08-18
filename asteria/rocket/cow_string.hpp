@@ -149,6 +149,8 @@ class basic_cow_string
 
   private:
     using storage_handle = details_cow_string::storage_handle<allocator_type, traits_type>;
+
+  private:
     storage_handle m_sth;
     const value_type* m_ptr = storage_handle::null_char;
     size_type m_len = 0;
@@ -224,43 +226,28 @@ class basic_cow_string
     basic_cow_string&
     operator=(nullopt_t)
     noexcept
-      {
-        this->clear();
-        return *this;
-      }
+      { return this->clear();  }
 
     basic_cow_string&
     operator=(shallow_type sh)
     noexcept
-      {
-        this->assign(sh);
-        return *this;
-      }
+      { return this->assign(sh);  }
 
     basic_cow_string&
     operator=(const basic_cow_string& other)
     noexcept
-      {
-        noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        this->assign(other);
-        return *this;
-      }
+      { return noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator()),
+               this->assign(other);  }
 
     basic_cow_string&
     operator=(basic_cow_string&& other)
     noexcept
-      {
-        noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        this->assign(::std::move(other));
-        return *this;
-      }
+      { return noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator()),
+               this->assign(::std::move(other));  }
 
     basic_cow_string&
     operator=(initializer_list<value_type> init)
-      {
-        this->assign(init);
-        return *this;
-      }
+      { return this->assign(init);  }
 
   private:
     [[noreturn]] ROCKET_NOINLINE
@@ -287,7 +274,6 @@ class basic_cow_string
 
     // This function is used to implement `replace()` after the replacement has been appended.
     // `tpos` and `tlen` are arguments to `replace()`. `brep` is the old length prior to `append()`.
-    // A pointer to the replacement is returned.
     value_type*
     do_swizzle_unchecked(size_type tpos, size_type tlen, size_type brep)
       {
@@ -300,11 +286,12 @@ class basic_cow_string
           noadl::rotate(ptr, tepos, brep, this->size());
 
         // Erase the interval [tpos,tpos+tlen).
-        if(tpos < tepos) {
-          traits_type::move(ptr + tpos, ptr + tepos, this->size() - tepos);
-          this->m_len -= tlen;
+        if(tpos < tepos)
+          traits_type::move(ptr + tpos, ptr + tepos, this->size() - tepos),
+          this->m_len -= tlen,
           traits_type::assign(ptr[this->m_len], value_type());
-        }
+
+        // Return a pointer to the relocated replacement.
         return ptr + tpos;
       }
 
