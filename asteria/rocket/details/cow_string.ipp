@@ -228,7 +228,7 @@ class storage_handle
     noexcept
       {
         auto ptr = this->m_ptr;
-        if(!ptr || (ptr->nref.get() != 1))
+        if(!ptr || !ptr->nref.unique())
           return nullptr;
         return ptr->data;
       }
