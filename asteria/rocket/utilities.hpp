@@ -303,6 +303,7 @@ rotate(elementT* ptr, size_t begin, size_t seek, size_t end)
     auto isl = brk - bot;
     if(isl == 0)
       return;
+
     auto isr = end - brk;
     if(isr == 0)
       return;
