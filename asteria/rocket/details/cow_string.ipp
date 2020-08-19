@@ -343,7 +343,7 @@ class string_iterator
     const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
-        ROCKET_ASSERT_MSG((this->m_begin <= cur) && (cur <= this->m_end), "Iterator invalidated");
+        ROCKET_ASSERT_MSG((this->m_begin <= cur) && (cur <= this->m_end), "Iterator out of range");
         ROCKET_ASSERT_MSG(!deref || (cur < this->m_end), "Past-the-end iterator not dereferenceable");
         return cur;
       }
