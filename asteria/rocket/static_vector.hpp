@@ -30,8 +30,8 @@ class static_vector;
 template<typename valueT, size_t capacityT, typename allocT>
 class static_vector
   {
-   static_assert(!is_array<valueT>::value, "invalid element type");
-   static_assert(is_same<typename allocT::value_type, valueT>::value, "inappropriate allocator type");
+    static_assert(!is_array<valueT>::value, "invalid element type");
+    static_assert(is_same<typename allocT::value_type, valueT>::value, "inappropriate allocator type");
 
   public:
     // types
@@ -96,6 +96,7 @@ class static_vector
       : static_vector(alloc)
       { this->append(n, value);  }
 
+    // N.B. This is a non-standard extension.
     template<typename firstT, typename... restT,
     ROCKET_DISABLE_IF(is_same<typename decay<firstT>::type, allocator_type>::value)>
     static_vector(size_type n, const firstT& first, const restT&... rest)
