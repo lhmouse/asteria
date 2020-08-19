@@ -44,10 +44,18 @@ struct basic_storage : storage_header
     basic_storage(const allocator_type& xalloc, size_type xnblk)
     noexcept
       : alloc(xalloc), nblk(xnblk)
-      { }
+      {
+#ifdef ROCKET_DEBUG
+        ::std::memset(static_cast<void*>(this->data), '*', sizeof(basic_storage) * (nblk - 1));
+#endif
+      }
 
     ~basic_storage()
-      { }
+      {
+#ifdef ROCKET_DEBUG
+        ::std::memset(static_cast<void*>(this->data), '~', sizeof(basic_storage) * (nblk - 1));
+#endif
+      }
 
     basic_storage(const basic_storage&)
       = delete;
@@ -128,9 +136,6 @@ class storage_handle
         storage_allocator st_alloc(ptr->alloc);
         auto nblk = ptr->nblk;
         noadl::destroy_at(noadl::unfancy(ptr));
-#ifdef ROCKET_DEBUG
-        ::std::memset(static_cast<void*>(noadl::unfancy(ptr)), '~', sizeof(storage) * nblk);
-#endif
         allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
       }
 
@@ -239,9 +244,6 @@ class storage_handle
         auto nblk = storage::min_nblk_for_nchar(cap);
         storage_allocator st_alloc(this->as_allocator());
         auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
-#ifdef ROCKET_DEBUG
-        ::std::memset(static_cast<void*>(noadl::unfancy(ptr)), '*', sizeof(storage) * nblk);
-#endif
         noadl::construct_at(noadl::unfancy(ptr), this->as_allocator(), nblk);
 
         // Add a null character anyway.
