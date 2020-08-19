@@ -18,53 +18,6 @@ struct storage_header
       { }
   };
 
-template<typename allocT>
-struct basic_storage : storage_header
-  {
-    using allocator_type   = allocT;
-    using value_type       = typename allocator_type::value_type;
-    using size_type        = typename allocator_traits<allocator_type>::size_type;
-
-    static constexpr
-    size_type
-    min_nblk_for_nchar(size_type nchar)
-    noexcept
-      { return (sizeof(value_type) * (nchar + 1) + sizeof(basic_storage) - 1) / sizeof(basic_storage) + 1;  }
-
-    static constexpr
-    size_type
-    max_nchar_for_nblk(size_type nblk)
-    noexcept
-      { return sizeof(basic_storage) * (nblk - 1) / sizeof(value_type) - 1;  }
-
-    allocator_type alloc;
-    size_type nblk;
-    value_type data[0];
-
-    basic_storage(const allocator_type& xalloc, size_type xnblk)
-    noexcept
-      : alloc(xalloc), nblk(xnblk)
-      {
-#ifdef ROCKET_DEBUG
-        ::std::memset(static_cast<void*>(this->data), '*', sizeof(basic_storage) * (this->nblk - 1));
-#endif
-      }
-
-    ~basic_storage()
-      {
-#ifdef ROCKET_DEBUG
-        ::std::memset(static_cast<void*>(this->data), '~', sizeof(basic_storage) * (this->nblk - 1));
-#endif
-      }
-
-    basic_storage(const basic_storage&)
-      = delete;
-
-    basic_storage&
-    operator=(const basic_storage&)
-      = delete;
-  };
-
 template<typename allocT, typename traitsT>
 class storage_handle
   : private allocator_wrapper_base_for<allocT>::type
@@ -78,8 +31,49 @@ class storage_handle
     static constexpr value_type null_char[1] = { };
 
   private:
+    struct storage : storage_header
+      {
+        allocator_type alloc;
+        size_type nblk;
+        value_type data[0];
+
+        storage(const allocator_type& xalloc, size_type xnblk)
+        noexcept
+          : alloc(xalloc), nblk(xnblk)
+          {
+#ifdef ROCKET_DEBUG
+            ::std::memset(static_cast<void*>(this->data), '*', sizeof(storage) * (this->nblk - 1));
+#endif
+          }
+
+        ~storage()
+          {
+#ifdef ROCKET_DEBUG
+            ::std::memset(static_cast<void*>(this->data), '~', sizeof(storage) * (this->nblk - 1));
+#endif
+          }
+
+        storage(const storage&)
+          = delete;
+
+        storage&
+        operator=(const storage&)
+          = delete;
+      };
+
+    static constexpr
+    size_type
+    min_nblk_for_nchar(size_type nchar)
+    noexcept
+      { return (sizeof(value_type) * (nchar + 1) + sizeof(storage) - 1) / sizeof(storage) + 1;  }
+
+    static constexpr
+    size_type
+    max_nchar_for_nblk(size_type nblk)
+    noexcept
+      { return sizeof(storage) * (nblk - 1) / sizeof(value_type) - 1;  }
+
     using allocator_base    = typename allocator_wrapper_base_for<allocator_type>::type;
-    using storage           = basic_storage<allocator_type>;
     using storage_allocator = typename allocator_traits<allocator_type>::template rebind_alloc<storage>;
     using storage_pointer   = typename allocator_traits<storage_allocator>::pointer;
 
@@ -133,8 +127,8 @@ class storage_handle
     do_destroy_storage(storage_pointer ptr)
     noexcept
       {
-        storage_allocator st_alloc(ptr->alloc);
         auto nblk = ptr->nblk;
+        storage_allocator st_alloc(ptr->alloc);
         noadl::destroy_at(noadl::unfancy(ptr));
         allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
       }
@@ -178,7 +172,7 @@ class storage_handle
         auto ptr = this->m_ptr;
         if(!ptr)
           return 0;
-        return storage::max_nchar_for_nblk(ptr->nblk);
+        return this->max_nchar_for_nblk(ptr->nblk);
       }
 
     size_type
@@ -187,7 +181,7 @@ class storage_handle
       {
         storage_allocator st_alloc(this->as_allocator());
         auto max_nblk = allocator_traits<storage_allocator>::max_size(st_alloc);
-        return storage::max_nchar_for_nblk(max_nblk / 2);
+        return this->max_nchar_for_nblk(max_nblk / 2);
       }
 
     size_type
@@ -208,8 +202,8 @@ class storage_handle
     const
       {
         auto cap = this->check_size_add(0, res_arg);
-        auto nblk = storage::min_nblk_for_nchar(cap);
-        return storage::max_nchar_for_nblk(nblk);
+        auto nblk = this->min_nblk_for_nchar(cap);
+        return this->max_nchar_for_nblk(nblk);
       }
 
     const value_type*
@@ -241,7 +235,7 @@ class storage_handle
         auto cap = this->check_size_add(len, add);
 
         // Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
-        auto nblk = storage::min_nblk_for_nchar(cap);
+        auto nblk = this->min_nblk_for_nchar(cap);
         storage_allocator st_alloc(this->as_allocator());
         auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
         noadl::construct_at(noadl::unfancy(ptr), this->as_allocator(), nblk);
