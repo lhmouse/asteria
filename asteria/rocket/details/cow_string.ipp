@@ -145,6 +145,7 @@ class storage_handle
     noexcept
       { return static_cast<allocator_base&>(*this);  }
 
+    ROCKET_PURE_FUNCTION
     bool
     unique()
     const noexcept
@@ -165,6 +166,7 @@ class storage_handle
         return ptr->nref.get();
       }
 
+    ROCKET_PURE_FUNCTION
     size_type
     capacity()
     const noexcept
@@ -206,6 +208,7 @@ class storage_handle
         return this->max_nchar_for_nblk(nblk);
       }
 
+    ROCKET_PURE_FUNCTION
     const value_type*
     data()
     const noexcept
