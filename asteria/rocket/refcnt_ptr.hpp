@@ -254,7 +254,7 @@ class refcnt_ptr
       { return this->m_sth.release();  }
 
     refcnt_ptr&
-    reset(pointer ptr = pointer())
+    reset(pointer ptr = nullptr)
     noexcept
       {
         this->m_sth.reset(ptr);

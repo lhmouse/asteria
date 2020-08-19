@@ -60,7 +60,7 @@ class stored_pointer
 
     ~stored_pointer()
       {
-        this->reset(pointer());
+        this->reset(nullptr);
 #ifdef ROCKET_DEBUG
         if(is_trivially_destructible<pointer>::value)
           ::std::memset(static_cast<void*>(::std::addressof(this->m_ptr)), 0xF6, sizeof(m_ptr));
@@ -104,7 +104,7 @@ class stored_pointer
     pointer
     release()
     noexcept
-      { return ::std::exchange(this->m_ptr, pointer());  }
+      { return ::std::exchange(this->m_ptr, nullptr);  }
 
     pointer
     fork()

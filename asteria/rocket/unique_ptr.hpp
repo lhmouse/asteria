@@ -156,7 +156,7 @@ class unique_ptr
 
     // N.B. The return type differs from `std::unique_ptr`.
     unique_ptr&
-    reset(pointer ptr_new = pointer())
+    reset(pointer ptr_new = nullptr)
     noexcept
       {
         this->m_sth.reset(::std::move(ptr_new));

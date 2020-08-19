@@ -262,7 +262,7 @@ class storage_handle
     void
     deallocate()
     noexcept
-      { this->do_reset(storage_pointer());  }
+      { this->do_reset(nullptr);  }
 
     void
     share_with(const storage_handle& other)

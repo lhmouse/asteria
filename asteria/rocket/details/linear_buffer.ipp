@@ -135,7 +135,7 @@ class basic_storage
     noexcept
       {
         // If the pointer is null we assume the capacity is zero.
-        auto ptr = ::std::exchange(this->m_ptr, storage_pointer());
+        auto ptr = ::std::exchange(this->m_ptr, nullptr);
         if(!ptr)
           return;
 

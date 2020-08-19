@@ -59,7 +59,7 @@ class bucket
       { return this->m_ptr;  }
 
     pointer
-    reset(pointer ptr = pointer())
+    reset(pointer ptr = nullptr)
     noexcept
       { return ::std::exchange(this->m_ptr, ptr);  }
 
@@ -562,7 +562,7 @@ class storage_handle
     void
     deallocate()
     noexcept
-      { this->do_reset(storage_pointer());  }
+      { this->do_reset(nullptr);  }
 
     void
     share_with(const storage_handle& other)
@@ -580,7 +580,7 @@ class storage_handle
       {
         auto ptr = other.m_ptr;
         if(ptr)
-          other.m_ptr = storage_pointer();
+          other.m_ptr = nullptr;
         this->do_reset(ptr);
       }
 
