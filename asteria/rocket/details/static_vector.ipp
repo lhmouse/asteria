@@ -84,7 +84,7 @@ class storage_handle
     noexcept
       { return static_cast<allocator_base&>(*this);  }
 
-    static constexpr
+    ROCKET_CONST_FUNCTION static constexpr
     size_type
     capacity()
     noexcept
