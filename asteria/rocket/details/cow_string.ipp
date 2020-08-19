@@ -46,14 +46,14 @@ struct basic_storage : storage_header
       : alloc(xalloc), nblk(xnblk)
       {
 #ifdef ROCKET_DEBUG
-        ::std::memset(static_cast<void*>(this->data), '*', sizeof(basic_storage) * (nblk - 1));
+        ::std::memset(static_cast<void*>(this->data), '*', sizeof(basic_storage) * (this->nblk - 1));
 #endif
       }
 
     ~basic_storage()
       {
 #ifdef ROCKET_DEBUG
-        ::std::memset(static_cast<void*>(this->data), '~', sizeof(basic_storage) * (nblk - 1));
+        ::std::memset(static_cast<void*>(this->data), '~', sizeof(basic_storage) * (this->nblk - 1));
 #endif
       }
 
