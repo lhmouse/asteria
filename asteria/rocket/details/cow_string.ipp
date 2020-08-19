@@ -303,7 +303,7 @@ class string_iterator
     friend stringT;
 
   public:
-    using iterator_category  = random_access_iterator_tag;
+    using iterator_category  = ::std::random_access_iterator_tag;
     using value_type         = typename remove_cv<charT>::type;
     using pointer            = charT*;
     using reference          = charT&;

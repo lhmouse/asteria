@@ -104,18 +104,11 @@ using ::std::is_function;
 using ::std::allocator;
 using ::std::allocator_traits;
 using ::std::default_delete;
-
-using ::std::iterator_traits;
-using ::std::output_iterator_tag;
-using ::std::input_iterator_tag;
-using ::std::forward_iterator_tag;
-using ::std::bidirectional_iterator_tag;
-using ::std::random_access_iterator_tag;
-
 using ::std::hash;
 using ::std::equal_to;
 using ::std::pair;
 using ::std::tuple;
+using ::std::iterator_traits;
 
 using ::std::exception_ptr;
 using ::std::exception;

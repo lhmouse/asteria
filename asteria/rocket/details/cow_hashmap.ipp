@@ -751,7 +751,7 @@ class hashmap_iterator
     friend hashmapT;
 
   public:
-    using iterator_category  = forward_iterator_tag;
+    using iterator_category  = ::std::forward_iterator_tag;
     using value_type         = typename remove_cv<valueT>::type;
     using pointer            = valueT*;
     using reference          = valueT&;

@@ -247,7 +247,7 @@ class vector_iterator
     friend vectorT;
 
   public:
-    using iterator_category  = random_access_iterator_tag;
+    using iterator_category  = ::std::random_access_iterator_tag;
     using value_type         = typename remove_cv<valueT>::type;
     using pointer            = valueT*;
     using reference          = valueT&;

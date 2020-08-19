@@ -24,13 +24,13 @@ noexcept
 template<typename iteratorT>
 constexpr
 size_t
-estimate_distance_aux(input_iterator_tag, iteratorT /*first*/, iteratorT /*last*/)
+estimate_distance_aux(::std::input_iterator_tag, iteratorT /*first*/, iteratorT /*last*/)
   { return 0;  }
 
 template<typename iteratorT>
 constexpr  // c++14
 size_t
-estimate_distance_aux(forward_iterator_tag, iteratorT first, iteratorT last)
+estimate_distance_aux(::std::forward_iterator_tag, iteratorT first, iteratorT last)
   {
     size_t total = 0;
     for(auto qit = ::std::move(first); qit != last; ++qit)
