@@ -167,8 +167,7 @@ class array
       }
 
     // N.B. This is a non-standard extension.
-    static
-    constexpr
+    static constexpr
     size_type
     capacity()
     noexcept
@@ -179,8 +178,7 @@ class array
     at(size_type pos)
     const
       {
-        size_type cnt = this->size();
-        if(pos >= cnt)
+        if(pos >= this->size())
           this->do_throw_subscript_out_of_range(pos);
         return this->data()[pos];
       }
@@ -189,8 +187,7 @@ class array
     operator[](size_type pos)
     const noexcept
       {
-        size_type cnt = this->size();
-        ROCKET_ASSERT(pos < cnt);
+        ROCKET_ASSERT(pos < this->size());
         return this->data()[pos];
       }
 
@@ -198,8 +195,7 @@ class array
     front()
     const noexcept
       {
-        size_type cnt = this->size();
-        ROCKET_ASSERT(cnt > 0);
+        ROCKET_ASSERT(!this->empty());
         return this->data()[0];
       }
 
@@ -207,9 +203,8 @@ class array
     back()
     const noexcept
       {
-        size_type cnt = this->size();
-        ROCKET_ASSERT(cnt > 0);
-        return this->data()[cnt - 1];
+        ROCKET_ASSERT(!this->empty());
+        return this->data()[this->size() - 1];
       }
 
     // N.B. This is a non-standard extension.
@@ -217,10 +212,8 @@ class array
     get_ptr(size_type pos)
     const noexcept
       {
-        size_type cnt = this->size();
-        if(pos >= cnt) {
+        if(pos >= this->size())
           return nullptr;
-        }
         return this->data() + pos;
       }
 
@@ -230,10 +223,8 @@ class array
     reference
     mut(size_type pos)
       {
-        size_type cnt = this->size();
-        if(pos >= cnt) {
+        if(pos >= this->size())
           this->do_throw_subscript_out_of_range(pos);
-        }
         return this->mut_data()[pos];
       }
 
@@ -241,8 +232,7 @@ class array
     operator[](size_type pos)
     noexcept
       {
-        size_type cnt = this->size();
-        ROCKET_ASSERT(pos < cnt);
+        ROCKET_ASSERT(pos < this->size());
         return this->mut_data()[pos];
       }
 
@@ -250,8 +240,7 @@ class array
     reference
     mut_front()
       {
-        size_type cnt = this->size();
-        ROCKET_ASSERT(cnt > 0);
+        ROCKET_ASSERT(!this->empty());
         return this->mut_data()[0];
       }
 
@@ -259,9 +248,8 @@ class array
     reference
     mut_back()
       {
-        size_type cnt = this->size();
-        ROCKET_ASSERT(cnt > 0);
-        return this->mut_data()[cnt - 1];
+        ROCKET_ASSERT(!this->empty());
+        return this->mut_data()[this->size() - 1];
       }
 
     // N.B. This is a non-standard extension.
@@ -269,8 +257,7 @@ class array
     mut_ptr(size_type pos)
     noexcept
       {
-        size_type cnt = this->size();
-        if(pos >= cnt)
+        if(pos >= this->size())
           return nullptr;
         return this->mut_data() + pos;
       }
