@@ -41,17 +41,23 @@ class optional
 
     optional(const value_type& value)
     noexcept(is_nothrow_copy_constructible<value_type>::value)
-      { this->m_stor.emplace_back(value);  }
+      {
+        this->m_stor.emplace_back(value);
+      }
 
     optional(value_type&& value)
     noexcept(is_nothrow_move_constructible<value_type>::value)
-      { this->m_stor.emplace_back(::std::move(value));  }
+      {
+        this->m_stor.emplace_back(::std::move(value));
+      }
 
     template<typename yvalueT,
     ROCKET_ENABLE_IF(is_convertible<yvalueT&&, value_type>::value)>
     optional(yvalueT&& yvalue)
     noexcept(is_nothrow_constructible<value_type, yvalueT&&>::value)
-      { this->m_stor.emplace_back(::std::forward<yvalueT>(yvalue)); }
+      {
+        this->m_stor.emplace_back(::std::forward<yvalueT>(yvalue));
+      }
 
     template<typename yvalueT,
     ROCKET_ENABLE_IF(is_convertible<const typename optional<yvalueT>::value_type&, value_type>::value)>
@@ -68,7 +74,7 @@ class optional
     noexcept(is_nothrow_constructible<value_type, typename optional<yvalueT>::value_type&&>::value)
       {
         if(!other.m_stor.empty())
-          this->m_stor.emplace_back(::std::move(other.m_stor.front()));
+          this->m_stor.emplace_back(::std::move(other.m_stor.mut_front()));
       }
 
     // 19.6.3.3, assignment
@@ -144,9 +150,9 @@ class optional
         if(other.m_stor.empty())
           this->m_stor.clear();
         else if(!this->m_stor.empty())
-          this->m_stor.mut_front() = ::std::move(other.m_stor.front());
+          this->m_stor.mut_front() = ::std::move(other.m_stor.mut_front());
         else
-          this->m_stor.emplace_back(::std::move(other.m_stor.front()));
+          this->m_stor.emplace_back(::std::move(other.m_stor.mut_front()));
         return *this;
       }
 

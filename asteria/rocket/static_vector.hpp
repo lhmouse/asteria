@@ -49,7 +49,10 @@ class static_vector
     using reverse_iterator        = ::std::reverse_iterator<iterator>;
 
   private:
-    details_static_vector::storage_handle<allocator_type, capacityT> m_sth;
+    using storage_handle = details_static_vector::storage_handle<allocator_type, capacityT>;
+
+  private:
+    storage_handle m_sth;
 
   public:
     // 26.3.11.2, construct/copy/destroy
@@ -87,73 +90,52 @@ class static_vector
     explicit
     static_vector(size_type n, const allocator_type& alloc = allocator_type())
       : static_vector(alloc)
-      { this->assign(n);  }
+      { this->append(n);  }
 
     static_vector(size_type n, const value_type& value, const allocator_type& alloc = allocator_type())
       : static_vector(alloc)
-      { this->assign(n, value);  }
+      { this->append(n, value);  }
 
     template<typename firstT, typename... restT,
     ROCKET_DISABLE_IF(is_same<typename decay<firstT>::type, allocator_type>::value)>
     static_vector(size_type n, const firstT& first, const restT&... rest)
       : static_vector()
-      { this->assign(n, first, rest...);  }
+      { this->append(n, first, rest...);  }
 
     template<typename inputT,
     ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     static_vector(inputT first, inputT last, const allocator_type& alloc = allocator_type())
       : static_vector(alloc)
-      { this->assign(::std::move(first), ::std::move(last));  }
+      { this->append(::std::move(first), ::std::move(last));  }
 
     static_vector(initializer_list<value_type> init, const allocator_type& alloc = allocator_type())
       : static_vector(alloc)
-      { this->assign(init);  }
+      { this->append(init);  }
 
     static_vector&
     operator=(nullopt_t)
     noexcept
-      {
-        this->clear();
-        return *this;
-      }
+      { return this->clear();  }
 
     static_vector&
     operator=(const static_vector& other)
     noexcept(conjunction<is_nothrow_copy_assignable<value_type>,
                          is_nothrow_copy_constructible<value_type>>::value)
-      {
-        noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        this->assign(other);
-        return *this;
-      }
+      { return noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator()),
+               this->assign(other);  }
 
     static_vector&
     operator=(static_vector&& other)
     noexcept(conjunction<is_nothrow_move_assignable<value_type>,
                          is_nothrow_move_constructible<value_type>>::value)
-      {
-        noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        this->assign(::std::move(other));
-        return *this;
-      }
+      { return noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator()),
+               this->assign(::std::move(other));  }
 
     static_vector&
     operator=(initializer_list<value_type> init)
-      {
-        this->assign(init);
-        return *this;
-      }
+      { return this->assign(init);  }
 
   private:
-    // Reallocate more storage as needed, without shrinking.
-    void
-    do_reserve_more(size_type cap_add)
-      {
-        size_type cnt = this->size();
-        auto cap = this->m_sth.check_size_add(cnt, cap_add);
-        ROCKET_ASSERT(this->capacity() >= cap);
-      }
-
     [[noreturn]] ROCKET_NOINLINE
     void
     do_throw_subscript_out_of_range(size_type pos)
@@ -164,40 +146,51 @@ class static_vector
                                                static_cast<unsigned long long>(this->size()));
       }
 
-    // This function works the same way as `std::string::substr()`.
+    // This function works the same way as `substr()`.
     // Ensure `tpos` is in `[0, size()]` and return `min(tn, size() - tpos)`.
     size_type
     do_clamp_subvec(size_type tpos, size_type tn)
     const
       {
-        size_type tcnt = this->size();
-        if(tpos > tcnt)
+        size_type len = this->size();
+        if(len < tpos)
           this->do_throw_subscript_out_of_range(tpos);
-        return noadl::min(tcnt - tpos, tn);
+        return noadl::min(tn, len - tpos);
       }
 
-    template<typename... paramsT>
+    // This function is used to implement `insert()` after new elements has been appended.
+    // `tpos` is the position to insert. `brep` is the old length prior to `append()`.
     value_type*
-    do_insert_no_bound_check(size_type tpos, paramsT&&... params)
+    do_swizzle_unchecked(size_type tpos, size_type brep)
       {
-        size_type cnt_old = this->size();
-        ROCKET_ASSERT(tpos <= cnt_old);
-        details_static_vector::tagged_append(this, ::std::forward<paramsT>(params)...);
-        size_type cnt_add = this->size() - cnt_old;
-        auto ptr = this->m_sth.mut_data();
-        noadl::rotate(ptr, tpos, cnt_old, cnt_old + cnt_add);
+        // Get a pointer to mutable storage.
+        auto ptr = this->mut_data();
+
+        // Swap the intervals [tpos,brep) and [brep,size).
+        if((tpos < brep) && (brep < this->size()))
+          noadl::rotate(ptr, tpos, brep, this->size());
+
+        // Return a pointer to inserted elements.
         return ptr + tpos;
       }
 
+    // This function is used to implement `erase()`.
     value_type*
-    do_erase_no_bound_check(size_type tpos, size_type tn)
+    do_erase_unchecked(size_type tpos, size_type tlen)
       {
-        size_type cnt_old = this->size();
-        ROCKET_ASSERT(tpos <= cnt_old);
-        ROCKET_ASSERT(tn <= cnt_old - tpos);
-        auto ptr = this->m_sth.mut_data();
-        noadl::rotate(ptr, tpos, tpos + tn, cnt_old);
-        this->m_sth.pop_back_n_unchecked(tn);
+        // Get a pointer to mutable storage.
+        auto ptr = this->mut_data();
+
+        // Swap the intervals [tpos,tpos+tlen) and [tpos+tlen,size).
+        size_type tepos = tpos + tlen;
+        if((tpos < tepos) && (tepos < this->size()))
+          noadl::rotate(ptr, tpos, tepos, this->size());
+
+        // Destroy elements.
+        for(size_type k = 0;  k < tlen;  ++k)
+          this->m_sth.pop_back_unchecked();
+
+        // Return a pointer next to erased elements.
         return ptr + tpos;
       }
 
@@ -206,12 +199,18 @@ class static_vector
     const_iterator
     begin()
     const noexcept
-      { return const_iterator(this->m_sth, this->data());  }
+      {
+        auto bptr = this->data();
+        return const_iterator(bptr, 0, this->size());
+      }
 
     const_iterator
     end()
     const noexcept
-      { return const_iterator(this->m_sth, this->data() + this->size());  }
+      {
+        auto bptr = this->data();
+        return const_iterator(bptr, this->size(), this->size());
+      }
 
     const_reverse_iterator
     rbegin()
@@ -246,12 +245,18 @@ class static_vector
     // N.B. This is a non-standard extension.
     iterator
     mut_begin()
-      { return iterator(this->m_sth, this->mut_data());  }
+      {
+        auto bptr = this->mut_data();
+        return iterator(bptr, 0, this->size());
+      }
 
     // N.B. This is a non-standard extension.
     iterator
     mut_end()
-      { return iterator(this->m_sth, this->mut_data() + this->size());  }
+      {
+        auto bptr = this->mut_data();
+        return iterator(bptr, this->size(), this->size());
+      }
 
     // N.B. This is a non-standard extension.
     reverse_iterator
@@ -268,7 +273,7 @@ class static_vector
     bool
     empty()
     const noexcept
-      { return this->m_sth.empty();  }
+      { return this->m_sth.size() == 0;  }
 
     constexpr
     size_type
@@ -294,20 +299,17 @@ class static_vector
     static_vector&
     resize(size_type n, const paramsT&... params)
       {
-        size_type cnt_old = this->size();
-        if(cnt_old < n)
-          this->append(n - cnt_old, params...);
-        else if(cnt_old > n)
-          this->pop_back(cnt_old - n);
-        ROCKET_ASSERT(this->size() == n);
-        return *this;
+        if(this->size() < n)
+          return this->append(n - this->size(), params...);
+        else
+          return this->pop_back(this->size() - n);
       }
 
     static constexpr
     size_type
     capacity()
     noexcept
-      { return capacityT;  }
+      { return storage_handle::capacity();  }
 
     // N.B. The return type is a non-standard extension.
     static_vector&
@@ -328,10 +330,8 @@ class static_vector
     clear()
     noexcept
       {
-        if(this->empty())
-          return *this;
-
-        this->m_sth.pop_back_n_unchecked(this->m_sth.size());
+        for(size_type k = this->size();  k != 0;  --k)
+          this->m_sth.pop_back_unchecked();
         return *this;
       }
 
@@ -340,8 +340,7 @@ class static_vector
     at(size_type pos)
     const
       {
-        size_type cnt = this->size();
-        if(pos >= cnt)
+        if(pos >= this->size())
           this->do_throw_subscript_out_of_range(pos);
         return this->data()[pos];
       }
@@ -350,8 +349,7 @@ class static_vector
     operator[](size_type pos)
     const noexcept
       {
-        size_type cnt = this->size();
-        ROCKET_ASSERT(pos < cnt);
+        ROCKET_ASSERT(pos < this->size());
         return this->data()[pos];
       }
 
@@ -359,8 +357,7 @@ class static_vector
     front()
     const noexcept
       {
-        size_type cnt = this->size();
-        ROCKET_ASSERT(cnt > 0);
+        ROCKET_ASSERT(!this->empty());
         return this->data()[0];
       }
 
@@ -368,9 +365,8 @@ class static_vector
     back()
     const noexcept
       {
-        size_type cnt = this->size();
-        ROCKET_ASSERT(cnt > 0);
-        return this->data()[cnt - 1];
+        ROCKET_ASSERT(!this->empty());
+        return this->data()[this->size() - 1];
       }
 
     // N.B. This is a non-standard extension.
@@ -378,8 +374,7 @@ class static_vector
     get_ptr(size_type pos)
     const noexcept
       {
-        size_type cnt = this->size();
-        if(pos >= cnt)
+        if(pos >= this->size())
           return nullptr;
         return this->data() + pos;
       }
@@ -390,37 +385,27 @@ class static_vector
     reference
     mut(size_type pos)
       {
-        size_type cnt = this->size();
-        if(pos >= cnt)
+        if(pos >= this->size())
           this->do_throw_subscript_out_of_range(pos);
-        return this->mut_data()[pos];
-      }
-
-    reference
-    operator[](size_type pos)
-    noexcept
-      {
-        size_type cnt = this->size();
-        ROCKET_ASSERT(pos < cnt);
         return this->mut_data()[pos];
       }
 
     // N.B. This is a non-standard extension.
     reference
     mut_front()
+    noexcept
       {
-        size_type cnt = this->size();
-        ROCKET_ASSERT(cnt > 0);
+        ROCKET_ASSERT(!this->empty());
         return this->mut_data()[0];
       }
 
     // N.B. This is a non-standard extension.
     reference
     mut_back()
+    noexcept
       {
-        size_type cnt = this->size();
-        ROCKET_ASSERT(cnt > 0);
-        return this->mut_data()[cnt - 1];
+        ROCKET_ASSERT(!this->empty());
+        return this->mut_data()[this->size() - 1];
       }
 
     // N.B. This is a non-standard extension.
@@ -428,8 +413,7 @@ class static_vector
     mut_ptr(size_type pos)
     noexcept
       {
-        size_type cnt = this->size();
-        if(pos >= cnt)
+        if(pos >= this->size())
           return nullptr;
         return this->mut_data() + pos;
       }
@@ -442,17 +426,19 @@ class static_vector
         if(n == 0)
           return *this;
 
-        this->do_reserve_more(n);
-        noadl::ranged_do_while(size_type(0), n, [&](size_type) { this->m_sth.emplace_back_unchecked(params...);  });
+        // Check whether there is room for new elements.
+        this->m_sth.check_size_add(this->size(), n);
+
+        // The storage can't be reallocated, so we may append all elements in place.
+        for(size_type k = 0;  k < n;  ++k)
+          this->m_sth.emplace_back_unchecked(params...);
         return *this;
       }
 
     // N.B. This is a non-standard extension.
     static_vector&
     append(initializer_list<value_type> init)
-      {
-        return this->append(init.begin(), init.end());
-      }
+      { return this->append(init.begin(), init.end());  }
 
     // N.B. This is a non-standard extension.
     template<typename inputT,
@@ -463,15 +449,13 @@ class static_vector
         if(first == last)
           return *this;
 
-        auto dist = noadl::estimate_distance(first, last);
-        if(dist == 0) {
-          noadl::ranged_do_while(::std::move(first), ::std::move(last),
-                                 [&](const inputT& it) { this->emplace_back(*it);  });
-          return *this;
-        }
-        this->do_reserve_more(dist);
-        noadl::ranged_do_while(::std::move(first), ::std::move(last),
-                               [&](const inputT& it) { this->m_sth.emplace_back_unchecked(*it);  });
+        // Check whether there is room for new elements if `inputT` is a forward iterator type.
+        size_type n = noadl::estimate_distance(first, last);
+        this->m_sth.check_size_add(this->size(), n);
+
+        // The storage can't be reallocated, so we may append all elements in place.
+        noadl::ranged_for(::std::move(first), ::std::move(last),
+                          [&](inputT& it) { this->m_sth.emplace_back_unchecked(*it);  });
         return *this;
       }
 
@@ -480,7 +464,10 @@ class static_vector
     reference
     emplace_back(paramsT&&... params)
       {
-        this->do_reserve_more(1);
+        // Check whether there is room for new elements.
+        this->m_sth.check_size_add(this->size(), 1);
+
+        // The storage can't be reallocated, so we may append the element in place.
         auto ptr = this->m_sth.emplace_back_unchecked(::std::forward<paramsT>(params)...);
         return *ptr;
       }
@@ -488,28 +475,23 @@ class static_vector
     // N.B. The return type is a non-standard extension.
     reference
     push_back(const value_type& value)
-      {
-        // Note the storage can't be relocated and invalidated.
-        this->do_reserve_more(1);
-        auto ptr = this->m_sth.emplace_back_unchecked(value);
-        return *ptr;
-      }
+      { return this->emplace_back(value);  }
 
     // N.B. The return type is a non-standard extension.
     reference
     push_back(value_type&& value)
-      {
-        this->do_reserve_more(1);
-        auto ptr = this->m_sth.emplace_back_unchecked(::std::move(value));
-        return *ptr;
-      }
+      { return this->emplace_back(::std::move(value));  }
 
     // N.B. This is a non-standard extension.
     static_vector&
     insert(size_type tpos, const value_type& value)
       {
         this->do_clamp_subvec(tpos, 0);  // just check
-        this->do_insert_no_bound_check(tpos, details_static_vector::push_back, value);
+
+        // Note `value` may reference an element in `*this`.
+        size_type klen = this->size();
+        this->push_back(value);
+        this->do_swizzle_unchecked(tpos, klen);
         return *this;
       }
 
@@ -518,7 +500,11 @@ class static_vector
     insert(size_type tpos, value_type&& value)
       {
         this->do_clamp_subvec(tpos, 0);  // just check
-        this->do_insert_no_bound_check(tpos, details_static_vector::push_back, ::std::move(value));
+
+        // Note `value` may reference an element in `*this`.
+        size_type klen = this->size();
+        this->push_back(::std::move(value));
+        this->do_swizzle_unchecked(tpos, klen);
         return *this;
       }
 
@@ -528,7 +514,11 @@ class static_vector
     insert(size_type tpos, size_type n, const paramsT&... params)
       {
         this->do_clamp_subvec(tpos, 0);  // just check
-        this->do_insert_no_bound_check(tpos, details_static_vector::append, n, params...);
+
+        // Note `params...` may reference an element in `*this`.
+        size_type klen = this->size();
+        this->append(n, params...);
+        this->do_swizzle_unchecked(tpos, klen);
         return *this;
       }
 
@@ -537,7 +527,11 @@ class static_vector
     insert(size_type tpos, initializer_list<value_type> init)
       {
         this->do_clamp_subvec(tpos, 0);  // just check
-        this->do_insert_no_bound_check(tpos, details_static_vector::append, init);
+
+        // XXX: This can be optimized *a lot*.
+        size_type klen = this->size();
+        this->append(init);
+        this->do_swizzle_unchecked(tpos, klen);
         return *this;
       }
 
@@ -548,24 +542,36 @@ class static_vector
     insert(size_type tpos, inputT first, inputT last)
       {
         this->do_clamp_subvec(tpos, 0);  // just check
-        this->do_insert_no_bound_check(tpos, details_static_vector::append, ::std::move(first), ::std::move(last));
+
+        // Note `first` may overlap with `this->begin()`.
+        size_type klen = this->size();
+        this->append(::std::move(first), ::std::move(last));
+        this->do_swizzle_unchecked(tpos, klen);
         return *this;
       }
 
     iterator
     insert(const_iterator tins, const value_type& value)
       {
-        auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
-        auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::push_back, value);
-        return iterator(this->m_sth, ptr);
+        size_type tpos = static_cast<size_type>(tins - this->begin());
+
+        // Note `value` may reference an element in `*this`.
+        size_type klen = this->size();
+        this->push_back(value);
+        auto ptr = this->do_swizzle_unchecked(tpos, klen);
+        return iterator(ptr - tpos, tpos, this->size());
       }
 
     iterator
     insert(const_iterator tins, value_type&& value)
       {
-        auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
-        auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::push_back, ::std::move(value));
-        return iterator(this->m_sth, ptr);
+        size_type tpos = static_cast<size_type>(tins - this->begin());
+
+        // Note `value` may reference an element in `*this`.
+        size_type klen = this->size();
+        this->push_back(::std::move(value));
+        auto ptr = this->do_swizzle_unchecked(tpos, klen);
+        return iterator(ptr - tpos, tpos, this->size());
       }
 
     // N.B. The parameter pack is a non-standard extension.
@@ -573,17 +579,25 @@ class static_vector
     iterator
     insert(const_iterator tins, size_type n, const paramsT&... params)
       {
-        auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
-        auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::append, n, params...);
-        return iterator(this->m_sth, ptr);
+        size_type tpos = static_cast<size_type>(tins - this->begin());
+
+        // Note `params...` may reference an element in `*this`.
+        size_type klen = this->size();
+        this->append(n, params...);
+        auto ptr = this->do_swizzle_unchecked(tpos, klen);
+        return iterator(ptr - tpos, tpos, this->size());
       }
 
     iterator
     insert(const_iterator tins, initializer_list<value_type> init)
       {
-        auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
-        auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::append, init);
-        return iterator(this->m_sth, ptr);
+        size_type tpos = static_cast<size_type>(tins - this->begin());
+
+        // XXX: This can be optimized *a lot*.
+        size_type klen = this->size();
+        this->append(init);
+        auto ptr = this->do_swizzle_unchecked(tpos, klen);
+        return iterator(ptr - tpos, tpos, this->size());
       }
 
     template<typename inputT,
@@ -591,44 +605,45 @@ class static_vector
     iterator
     insert(const_iterator tins, inputT first, inputT last)
       {
-        auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
-        auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::append,
-                                                  ::std::move(first), ::std::move(last));
-        return iterator(this->m_sth, ptr);
+        size_type tpos = static_cast<size_type>(tins - this->begin());
+
+        // Note `first` may overlap with `this->begin()`.
+        size_type klen = this->size();
+        this->append(::std::move(first), ::std::move(last));
+        auto ptr = this->do_swizzle_unchecked(tpos, klen);
+        return iterator(ptr - tpos, tpos, this->size());
       }
 
     // N.B. This is a non-standard extension.
     static_vector&
     erase(size_type tpos, size_type tn = size_type(-1))
       {
-        this->do_erase_no_bound_check(tpos, this->do_clamp_subvec(tpos, tn));
+        size_type tlen = this->do_clamp_subvec(tpos, tn);
+
+        this->do_erase_unchecked(tpos, tlen);
         return *this;
       }
 
     iterator
     erase(const_iterator tfirst, const_iterator tlast)
       {
-        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->data());
-        auto tn = static_cast<size_type>(tlast.tell_owned_by(this->m_sth) - tfirst.tell());
-        auto ptr = this->do_erase_no_bound_check(tpos, tn);
-        return iterator(this->m_sth, ptr);
+        size_type tpos = static_cast<size_type>(tfirst - this->begin());
+        size_type tlen = static_cast<size_type>(tlast - tfirst);
+
+        auto ptr = this->do_erase_unchecked(tpos, tlen);
+        return iterator(ptr - tpos, tpos, this->size());
       }
 
     iterator
     erase(const_iterator tfirst)
-      {
-        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->data());
-        auto ptr = this->do_erase_no_bound_check(tpos, 1);
-        return iterator(this->m_sth, ptr);
-      }
+      { return this->erase(tfirst, tfirst + 1);  }
 
     // N.B. The return type and parameter are non-standard extensions.
     static_vector&
     pop_back(size_type n = 1)
       {
-        size_type cnt_old = this->size();
-        ROCKET_ASSERT(n <= cnt_old);
-        this->m_sth.pop_back_n_unchecked(n);
+        for(size_type k = 0;  k < n;  ++k)
+          this->m_sth.pop_back_unchecked();
         return *this;
       }
 
@@ -636,10 +651,9 @@ class static_vector
     static_vector
     subvec(size_type tpos, size_type tn = size_type(-1))
     const
-      {
-        return static_vector(this->data() + tpos, this->data() + tpos + this->do_clamp_subvec(tpos, tn),
-                             this->m_sth.as_allocator());
-      }
+      { return static_vector(this->data() + tpos,
+                             this->data() + tpos + this->do_clamp_subvec(tpos, tn),
+                             this->m_sth.as_allocator());  }
 
     // N.B. The return type is a non-standard extension.
     static_vector&
@@ -647,20 +661,7 @@ class static_vector
     noexcept(conjunction<is_nothrow_copy_assignable<value_type>,
                          is_nothrow_copy_constructible<value_type>>::value)
       {
-        // Copy-assign the initial sequence.
-        auto ncomm = noadl::min(this->size(), other.size());
-        for(size_type i = 0; i != ncomm; ++i) {
-          this->m_sth.mut_data()[i] = other.m_sth.data()[i];
-        }
-        if(ncomm < other.size()) {
-          // Copy-construct remaining elements from `other` if is longer.
-          for(size_type i = ncomm; i != other.size(); ++i)
-            this->m_sth.emplace_back_unchecked(other.m_sth.data()[i]);
-        }
-        else {
-          // Truncate `*this` if it is longer.
-          this->m_sth.pop_back_n_unchecked(this->size() - ncomm);
-        }
+        this->m_sth.copy_from(other.m_sth);
         return *this;
       }
 
@@ -670,20 +671,7 @@ class static_vector
     noexcept(conjunction<is_nothrow_move_assignable<value_type>,
                          is_nothrow_move_constructible<value_type>>::value)
       {
-        // Move-assign the initial sequence.
-        auto ncomm = noadl::min(this->size(), other.size());
-        for(size_type i = 0; i != ncomm; ++i) {
-          this->m_sth.mut_data()[i] = ::std::move(other.m_sth.mut_data()[i]);
-        }
-        if(ncomm < other.size()) {
-          // Move-construct remaining elements from `other` if is longer.
-          for(size_type i = ncomm; i != other.size(); ++i)
-            this->m_sth.emplace_back_unchecked(::std::move(other.m_sth.mut_data()[i]));
-        }
-        else {
-          // Truncate `*this` if it is longer.
-          this->m_sth.pop_back_n_unchecked(this->size() - ncomm);
-        }
+        this->m_sth.move_from(other.m_sth);
         return *this;
       }
 
@@ -724,25 +712,7 @@ class static_vector
                          is_nothrow_move_constructible<value_type>>::value)
       {
         noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        // Swap the initial sequence.
-        auto ncomm = noadl::min(this->size(), other.size());
-        for(size_type i = 0; i != ncomm; ++i) {
-          noadl::xswap(this->m_sth.mut_data()[i], other.m_sth.mut_data()[i]);
-        }
-        if(ncomm < other.size()) {
-          // Move-construct remaining elements from `other` if is longer.
-          for(size_type i = ncomm; i != other.size(); ++i)
-            this->m_sth.emplace_back_unchecked(::std::move(other.m_sth.mut_data()[i]));
-          // Truncate `other`.
-          other.m_sth.pop_back_n_unchecked(other.size() - ncomm);
-        }
-        else {
-          // Move-construct remaining elements from `*this` if it is longer.
-          for(size_type i = ncomm; i != this->size(); ++i)
-            other.m_sth.emplace_back_unchecked(::std::move(this->m_sth.mut_data()[i]));
-          // Truncate `*this`.
-          this->m_sth.pop_back_n_unchecked(this->size() - ncomm);
-        }
+        this->m_sth.exchange_with(other.m_sth);
         return *this;
       }
 

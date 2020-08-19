@@ -17,13 +17,14 @@ class storage_handle
     using size_type        = typename allocator_traits<allocator_type>::size_type;
 
   private:
-    using allocator_base    = typename allocator_wrapper_base_for<allocator_type>::type;
+    using allocator_base  = typename allocator_wrapper_base_for<allocator_type>::type;
+    using nelem_type      = typename lowest_unsigned<capacityT - 1>::type;
 
   private:
-    typename lowest_unsigned<capacityT - 1>::type m_nelem;
+    nelem_type m_nelem;
     union {
-      value_type m_ebase[capacityT];
-      volatile char m_do_not_use;  // suppresses warnings about potential use of uninitialized objects
+      volatile char m_do_not_use;  // suppress warnings about potential use of uninitialized objects
+      value_type m_data[capacityT];
     };
 
   public:
@@ -33,7 +34,7 @@ class storage_handle
       : allocator_base(alloc), m_nelem(0)
       {
 #ifdef ROCKET_DEBUG
-        ::std::memset(static_cast<void*>(this->m_ebase), '*', sizeof(m_ebase));
+        ::std::memset(static_cast<void*>(this->m_data), '*', sizeof(m_data));
 #endif
       }
 
@@ -43,22 +44,20 @@ class storage_handle
       : allocator_base(::std::move(alloc)), m_nelem(0)
       {
 #ifdef ROCKET_DEBUG
-        ::std::memset(static_cast<void*>(this->m_ebase), '*', sizeof(m_ebase));
+        ::std::memset(static_cast<void*>(this->m_data), '*', sizeof(m_data));
 #endif
       }
 
     ~storage_handle()
       {
-        auto ebase = this->m_ebase;
-        auto nrem = this->m_nelem;
-        ROCKET_ASSERT(nrem <= capacityT);
-        while(nrem != 0) {
-          --nrem;
-          allocator_traits<allocator_type>::destroy(this->as_allocator(), ebase + nrem);
-        }
+        // Destroy all elements backwards.
+        size_type off = this->m_nelem;
+        while(off-- != 0)
+          allocator_traits<allocator_type>::destroy(this->as_allocator(), this->m_data + off);
+
 #ifdef ROCKET_DEBUG
-        this->m_nelem = static_cast<decltype(m_nelem)>(0xBAD1BEEF);
-        ::std::memset(static_cast<void*>(this->m_ebase), '~', sizeof(m_ebase));
+        this->m_nelem = static_cast<nelem_type>(0xBAD1BEEF);
+        ::std::memset(static_cast<void*>(this->m_data), '~', sizeof(m_data));
 #endif
       }
 
@@ -70,7 +69,8 @@ class storage_handle
       = delete;
 
   public:
-    constexpr const allocator_type&
+    constexpr
+    const allocator_type&
     as_allocator()
     const noexcept
       { return static_cast<const allocator_base&>(*this);  }
@@ -90,7 +90,7 @@ class storage_handle
     size_type
     max_size()
     const noexcept
-      { return noadl::min(allocator_traits<allocator_type>::max_size(this->as_allocator()), this->capacity());  }
+      { return this->capacity();  }
 
     size_type
     check_size_add(size_type base, size_type add)
@@ -105,28 +105,127 @@ class storage_handle
         return base + add;
       }
 
-    constexpr
+    ROCKET_PURE_FUNCTION constexpr
     const value_type*
     data()
     const noexcept
-      { return this->m_ebase;  }
+      { return this->m_data;  }
 
     value_type*
     mut_data()
     noexcept
-      { return this->m_ebase;  }
+      { return this->m_data;  }
 
-    constexpr
-    bool
-    empty()
-    const noexcept
-      { return this->m_nelem == 0;  }
-
-    constexpr
+    ROCKET_PURE_FUNCTION constexpr
     size_type
     size()
     const noexcept
       { return this->m_nelem;  }
+
+    template<typename... paramsT>
+    value_type*
+    emplace_back_unchecked(paramsT&&... params)
+      {
+        size_type off = this->m_nelem;
+        ROCKET_ASSERT_MSG(off < this->capacity(), "No space for new element");
+
+        allocator_traits<allocator_type>::construct(this->as_allocator(), this->m_data + off,
+                                                    ::std::forward<paramsT>(params)...);
+        this->m_nelem = static_cast<nelem_type>(++off);
+        return this->m_data + off - 1;
+      }
+
+    void
+    pop_back_unchecked()
+    noexcept
+      {
+        size_type off = this->m_nelem;
+        ROCKET_ASSERT_MSG(off > 0, "No element to pop");
+
+        this->m_nelem = static_cast<nelem_type>(--off);
+        allocator_traits<allocator_type>::destroy(this->as_allocator(), this->m_data + off);
+      }
+
+    void
+    copy_from(const storage_handle& other)
+      {
+        if(this->m_nelem < other.m_nelem) {
+          // `*this` is shorter than `other`.
+          size_type m = this->m_nelem;
+
+          for(size_type k = 0;  k < m;  ++k)
+            this->m_data[k] = other.m_data[k];
+
+          for(size_type k = m;  k < other.m_nelem;  ++k)
+            this->emplace_back_unchecked(other.m_data[k]);
+        }
+        else {
+          // `other` is shorter than `*this`, or they have the same length.
+          size_type m = other.m_nelem;
+
+          for(size_type k = 0;  k < m;  ++k)
+            this->m_data[k] = other.m_data[k];
+
+          for(size_type k = this->m_nelem;  k > m;  --k)
+            this->pop_back_unchecked();
+        }
+      }
+
+    void
+    move_from(storage_handle& other)
+      {
+        if(this->m_nelem < other.m_nelem) {
+          // `*this` is shorter than `other`.
+          size_type m = this->m_nelem;
+
+          for(size_type k = 0;  k < m;  ++k)
+            this->m_data[k] = ::std::move(other.m_data[k]);
+
+          for(size_type k = m;  k < other.m_nelem;  ++k)
+            this->emplace_back_unchecked(::std::move(other.m_data[k]));
+        }
+        else {
+          // `other` is shorter than `*this`, or they have the same length.
+          size_type m = other.m_nelem;
+
+          for(size_type k = 0;  k < m;  ++k)
+            this->m_data[k] = ::std::move(other.m_data[k]);
+
+          for(size_type k = this->m_nelem;  k > m;  --k)
+            this->pop_back_unchecked();
+        }
+      }
+
+    void
+    exchange_with(storage_handle& other)
+      {
+        if(this->m_nelem < other.m_nelem) {
+          // `*this` is shorter than `other`.
+          size_type m = this->m_nelem;
+
+          for(size_type k = 0;  k < m;  ++k)
+            noadl::xswap(this->m_data[k], other.m_data[k]);
+
+          for(size_type k = m;  k < other.m_nelem;  ++k)
+            this->emplace_back_unchecked(::std::move(other.m_data[k]));
+
+          for(size_type k = other.m_nelem;  k > m;  --k)
+            other.pop_back_unchecked();
+        }
+        else {
+          // `other` is shorter than `*this`, or they have the same length.
+          size_type m = other.m_nelem;
+
+          for(size_type k = 0;  k < m;  ++k)
+            noadl::xswap(this->m_data[k], other.m_data[k]);
+
+          for(size_type k = m;  k < this->m_nelem;  ++k)
+            other.emplace_back_unchecked(::std::move(this->m_data[k]));
+
+          for(size_type k = this->m_nelem;  k > m;  --k)
+            this->pop_back_unchecked();
+        }
+      }
 
     constexpr operator
     const storage_handle*()
@@ -137,35 +236,6 @@ class storage_handle
     storage_handle*()
     noexcept
       { return this;  }
-
-    template<typename... paramsT>
-    value_type*
-    emplace_back_unchecked(paramsT&&... params)
-      {
-        ROCKET_ASSERT(this->size() < this->capacity());
-        auto ebase = this->m_ebase;
-        size_t nelem = this->m_nelem;
-        allocator_traits<allocator_type>::construct(this->as_allocator(), ebase + nelem,
-                                                    ::std::forward<paramsT>(params)...);
-        this->m_nelem = static_cast<decltype(m_nelem)>(++nelem);
-        return ebase + nelem - 1;
-      }
-
-    void
-    pop_back_n_unchecked(size_type n)
-    noexcept
-      {
-        ROCKET_ASSERT(n <= this->size());
-        if(n == 0)
-          return;
-
-        auto ebase = this->m_ebase;
-        size_t nelem = this->m_nelem;
-        for(size_type i = n; i != 0; --i) {
-          this->m_nelem = static_cast<decltype(m_nelem)>(--nelem);
-          allocator_traits<allocator_type>::destroy(this->as_allocator(), ebase + nelem);
-        }
-      }
   };
 
 template<typename vectorT, typename valueT>
@@ -183,25 +253,25 @@ class vector_iterator
     using reference          = valueT&;
     using difference_type    = ptrdiff_t;
 
-    using parent_type   = storage_handle<typename vectorT::allocator_type, vectorT::capacity()>;
-
   private:
-    const parent_type* m_ref;
-    pointer m_ptr;
+  private:
+    pointer m_begin;
+    pointer m_cur;
+    pointer m_end;
 
   private:
     // This constructor is called by the container.
     constexpr
-    vector_iterator(const parent_type* ref, pointer ptr)
+    vector_iterator(valueT* begin, size_t ncur, size_t nend)
     noexcept
-      : m_ref(ref), m_ptr(ptr)
+      : m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)
       { }
 
   public:
     constexpr
     vector_iterator()
     noexcept
-      : vector_iterator(nullptr, nullptr)
+      : m_begin(), m_cur(), m_end()
       { }
 
     template<typename yvalueT,
@@ -209,231 +279,124 @@ class vector_iterator
     constexpr
     vector_iterator(const vector_iterator<vectorT, yvalueT>& other)
     noexcept
-      : vector_iterator(other.m_ref, other.m_ptr)
+      : m_begin(other.m_begin), m_cur(other.m_cur), m_end(other.m_end)
       { }
 
   private:
     pointer
-    do_assert_valid_pointer(pointer ptr, bool deref)
+    do_validate(pointer cur, bool deref)
     const noexcept
       {
-        auto ref = this->m_ref;
-        ROCKET_ASSERT_MSG(ref, "Iterator not initialized");
-        auto dist = static_cast<size_t>(ptr - ref->data());
-        ROCKET_ASSERT_MSG(dist <= ref->size(), "Iterator invalidated");
-        ROCKET_ASSERT_MSG(!deref || (dist < ref->size()),
-                          "Past-the-end iterator not dereferenceable");
-        return ptr;
+        ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
+        ROCKET_ASSERT_MSG((this->m_begin <= cur) && (cur <= this->m_end), "Iterator out of range");
+        ROCKET_ASSERT_MSG(!deref || (cur < this->m_end), "Past-the-end iterator not dereferenceable");
+        return cur;
       }
 
   public:
-    const parent_type*
-    parent()
-    const noexcept
-      { return this->m_ref;  }
-
-    pointer
-    tell()
-    const noexcept
-      { return this->do_assert_valid_pointer(this->m_ptr, false);  }
-
-    pointer
-    tell_owned_by(const parent_type* ref)
-    const noexcept
-      {
-        ROCKET_ASSERT_MSG(this->m_ref == ref, "Dangling iterator");
-        return this->tell();
-      }
-
-    vector_iterator&
-    seek(pointer ptr)
-    noexcept
-      {
-        this->m_ptr = this->do_assert_valid_pointer(ptr, false);
-        return *this;
-      }
-
     reference
     operator*()
     const noexcept
-      {
-        auto ptr = this->do_assert_valid_pointer(this->m_ptr, true);
-        return *ptr;
-      }
-
-    pointer
-    operator->()
-    const noexcept
-      {
-        auto ptr = this->do_assert_valid_pointer(this->m_ptr, true);
-        return ptr;
-      }
+      { return *(this->do_validate(this->m_cur, true));  }
 
     reference
     operator[](difference_type off)
     const noexcept
+      { return *(this->do_validate(this->m_cur + off, true));  }
+
+    pointer
+    operator->()
+    const noexcept
+      { return this->do_validate(this->m_cur, true);  }
+
+    vector_iterator&
+    operator+=(difference_type off)
+    noexcept
       {
-        auto ptr = this->do_assert_valid_pointer(this->m_ptr + off, true);
-        return *ptr;
+        this->m_cur = this->do_validate(this->m_cur + off, false);
+        return *this;
       }
+
+    vector_iterator&
+    operator++()
+    noexcept
+      { return *this += difference_type(1);  }
+
+    vector_iterator
+    operator+(difference_type off)
+    const noexcept
+      {
+        auto res = *this;
+        res += off;
+        return res;
+      }
+
+    vector_iterator&
+    operator-=(difference_type off)
+    noexcept
+      {
+        this->m_cur = this->do_validate(this->m_cur - off, false);
+        return *this;
+      }
+
+    vector_iterator&
+    operator--()
+    noexcept
+      { return *this -= difference_type(1);  }
+
+    vector_iterator
+    operator-(difference_type off)
+    const noexcept
+      {
+        auto res = *this;
+        res -= off;
+        return res;
+      }
+
+    friend
+    vector_iterator
+    operator+(difference_type off, const vector_iterator& other)
+    noexcept
+      { return other + off;  }
+
+    difference_type
+    operator-(const vector_iterator& other)
+    const noexcept
+      {
+        ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
+        ROCKET_ASSERT_MSG(this->m_begin == other.m_begin, "Iterator not compatible");
+        return this->m_cur - other.m_cur;
+      }
+
+    bool
+    operator==(const vector_iterator& other)
+    const noexcept
+      { return *this - other == 0;  }
+
+    bool
+    operator!=(const vector_iterator& other)
+    const noexcept
+      { return *this - other != 0;  }
+
+    bool
+    operator<(const vector_iterator& other)
+    const noexcept
+      { return *this - other < 0;  }
+
+    bool
+    operator>(const vector_iterator& other)
+    const noexcept
+      { return *this - other > 0;  }
+
+    bool
+    operator<=(const vector_iterator& other)
+    const noexcept
+      { return *this - other <= 0;  }
+
+    bool
+    operator>=(const vector_iterator& other)
+    const noexcept
+      { return *this - other >= 0;  }
   };
-
-template<typename vectorT, typename valueT>
-inline
-vector_iterator<vectorT, valueT>&
-operator++(vector_iterator<vectorT, valueT>& rhs)
-noexcept
-  { return rhs.seek(rhs.tell() + 1);  }
-
-template<typename vectorT, typename valueT>
-inline
-vector_iterator<vectorT, valueT>&
-operator--(vector_iterator<vectorT, valueT>& rhs)
-noexcept
-  { return rhs.seek(rhs.tell() - 1);  }
-
-template<typename vectorT, typename valueT>
-inline
-vector_iterator<vectorT, valueT>
-operator++(vector_iterator<vectorT, valueT>& lhs, int)
-noexcept
-  {
-    auto res = lhs;
-    lhs.seek(lhs.tell() + 1);
-    return res;
-  }
-
-template<typename vectorT, typename valueT>
-inline
-vector_iterator<vectorT, valueT>
-operator--(vector_iterator<vectorT, valueT>& lhs, int)
-noexcept
-  {
-    auto res = lhs;
-    lhs.seek(lhs.tell() - 1);
-    return res;
-  }
-
-template<typename vectorT, typename valueT>
-inline
-vector_iterator<vectorT, valueT>&
-operator+=(vector_iterator<vectorT, valueT>& lhs, typename vector_iterator<vectorT, valueT>::difference_type rhs)
-noexcept
-  { return lhs.seek(lhs.tell() + rhs);  }
-
-template<typename vectorT, typename valueT>
-inline
-vector_iterator<vectorT, valueT>&
-operator-=(vector_iterator<vectorT, valueT>& lhs, typename vector_iterator<vectorT, valueT>::difference_type rhs)
-noexcept
-  { return lhs.seek(lhs.tell() - rhs);  }
-
-template<typename vectorT, typename valueT>
-inline
-vector_iterator<vectorT, valueT>
-operator+(const vector_iterator<vectorT, valueT>& lhs, typename vector_iterator<vectorT, valueT>::difference_type rhs)
-noexcept
-  {
-    auto res = lhs;
-    res.seek(res.tell() + rhs);
-    return res;
-  }
-
-template<typename vectorT, typename valueT>
-inline
-vector_iterator<vectorT, valueT>
-operator-(const vector_iterator<vectorT, valueT>& lhs, typename vector_iterator<vectorT, valueT>::difference_type rhs)
-noexcept
-  {
-    auto res = lhs;
-    res.seek(res.tell() - rhs);
-    return res;
-  }
-
-template<typename vectorT, typename valueT>
-inline
-vector_iterator<vectorT, valueT>
-operator+(typename vector_iterator<vectorT, valueT>::difference_type lhs, const vector_iterator<vectorT, valueT>& rhs)
-noexcept
-  {
-    auto res = rhs;
-    res.seek(res.tell() + lhs);
-    return res;
-  }
-
-template<typename vectorT, typename xvalueT, typename yvalueT>
-typename vector_iterator<vectorT, xvalueT>::difference_type
-operator-(const vector_iterator<vectorT, xvalueT>& lhs, const vector_iterator<vectorT, yvalueT>& rhs)
-noexcept
-  {
-    return lhs.tell_owned_by(rhs.parent()) - rhs.tell();
-  }
-
-template<typename vectorT, typename xvalueT, typename yvalueT>
-bool
-operator==(const vector_iterator<vectorT, xvalueT>& lhs, const vector_iterator<vectorT, yvalueT>& rhs)
-noexcept
-  { return lhs.tell() == rhs.tell();  }
-
-template<typename vectorT, typename xvalueT, typename yvalueT>
-bool
-operator!=(const vector_iterator<vectorT, xvalueT>& lhs, const vector_iterator<vectorT, yvalueT>& rhs)
-noexcept
-  { return lhs.tell() != rhs.tell();  }
-
-template<typename vectorT, typename xvalueT, typename yvalueT>
-bool
-operator<(const vector_iterator<vectorT, xvalueT>& lhs, const vector_iterator<vectorT, yvalueT>& rhs)
-noexcept
-  { return lhs.tell_owned_by(rhs.parent()) < rhs.tell();  }
-
-template<typename vectorT, typename xvalueT, typename yvalueT>
-bool
-operator>(const vector_iterator<vectorT, xvalueT>& lhs, const vector_iterator<vectorT, yvalueT>& rhs)
-noexcept
-  { return lhs.tell_owned_by(rhs.parent()) > rhs.tell();  }
-
-template<typename vectorT, typename xvalueT, typename yvalueT>
-bool
-operator<=(const vector_iterator<vectorT, xvalueT>& lhs, const vector_iterator<vectorT, yvalueT>& rhs)
-noexcept
-  { return lhs.tell_owned_by(rhs.parent()) <= rhs.tell();  }
-
-template<typename vectorT, typename xvalueT, typename yvalueT>
-bool
-operator>=(const vector_iterator<vectorT, xvalueT>& lhs, const vector_iterator<vectorT, yvalueT>& rhs)
-noexcept
-  { return lhs.tell_owned_by(rhs.parent()) >= rhs.tell();  }
-
-// Insertion helpers.
-struct append_tag
-  { }
-  constexpr append;
-
-template<typename vectorT, typename... paramsT>
-inline
-void
-tagged_append(vectorT* vec, append_tag, paramsT&&... params)
-  { vec->append(::std::forward<paramsT>(params)...);  }
-
-struct emplace_back_tag
-  { }
-  constexpr emplace_back;
-
-template<typename vectorT, typename... paramsT>
-inline
-void
-tagged_append(vectorT* vec, emplace_back_tag, paramsT&&... params)
-  { vec->emplace_back(::std::forward<paramsT>(params)...);  }
-
-struct push_back_tag
-  { }
-  constexpr push_back;
-
-template<typename vectorT, typename... paramsT>
-inline
-void
-tagged_append(vectorT* vec, push_back_tag, paramsT&&... params)
-  { vec->push_back(::std::forward<paramsT>(params)...);  }
 
 }  // namespace details_static_vector
