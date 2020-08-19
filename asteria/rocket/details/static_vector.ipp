@@ -31,8 +31,10 @@ class storage_handle
     explicit
     storage_handle(const allocator_type& alloc)
     noexcept
-      : allocator_base(alloc), m_nelem(0)
+      : allocator_base(alloc)
       {
+        this->m_nelem = 0;
+
 #ifdef ROCKET_DEBUG
         ::std::memset(static_cast<void*>(this->m_data), '*', sizeof(m_data));
 #endif
@@ -41,8 +43,10 @@ class storage_handle
     explicit
     storage_handle(allocator_type&& alloc)
     noexcept
-      : allocator_base(::std::move(alloc)), m_nelem(0)
+      : allocator_base(::std::move(alloc))
       {
+        this->m_nelem = 0;
+
 #ifdef ROCKET_DEBUG
         ::std::memset(static_cast<void*>(this->m_data), '*', sizeof(m_data));
 #endif
