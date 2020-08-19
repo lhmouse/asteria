@@ -78,19 +78,19 @@ class storage_handle
     using storage_pointer   = typename allocator_traits<storage_allocator>::pointer;
 
   private:
-    storage_pointer m_ptr;
+    storage_pointer m_qstor;
 
   public:
     explicit constexpr
     storage_handle(const allocator_type& alloc)
     noexcept
-      : allocator_base(alloc), m_ptr()
+      : allocator_base(alloc), m_qstor()
       { }
 
     explicit constexpr
     storage_handle(allocator_type&& alloc)
     noexcept
-      : allocator_base(::std::move(alloc)), m_ptr()
+      : allocator_base(::std::move(alloc)), m_qstor()
       { }
 
     ~storage_handle()
@@ -105,32 +105,32 @@ class storage_handle
 
   private:
     void
-    do_reset(storage_pointer ptr_new)
+    do_reset(storage_pointer qstor_new)
     noexcept
       {
         // Decrement the reference count with acquire-release semantics to prevent races
-        // on `ptr->alloc`.
-        auto ptr = ::std::exchange(this->m_ptr, ptr_new);
-        if(ROCKET_EXPECT(!ptr))
+        // on `qstor->alloc`.
+        auto qstor = ::std::exchange(this->m_qstor, qstor_new);
+        if(ROCKET_EXPECT(!qstor))
           return;
 
-        if(ROCKET_EXPECT(!ptr->nref.decrement()))
+        if(ROCKET_EXPECT(!qstor->nref.decrement()))
           return;
 
         // Unlike vectors, strings require value types to be complete.
         // This is a direct call without type erasure.
-        this->do_destroy_storage(ptr);
+        this->do_destroy_storage(qstor);
       }
 
     ROCKET_NOINLINE static
     void
-    do_destroy_storage(storage_pointer ptr)
+    do_destroy_storage(storage_pointer qstor)
     noexcept
       {
-        auto nblk = ptr->nblk;
-        storage_allocator st_alloc(ptr->alloc);
-        noadl::destroy_at(noadl::unfancy(ptr));
-        allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
+        auto nblk = qstor->nblk;
+        storage_allocator st_alloc(qstor->alloc);
+        noadl::destroy_at(noadl::unfancy(qstor));
+        allocator_traits<storage_allocator>::deallocate(st_alloc, qstor, nblk);
       }
 
   public:
@@ -150,20 +150,20 @@ class storage_handle
     unique()
     const noexcept
       {
-        auto ptr = this->m_ptr;
-        if(!ptr)
+        auto qstor = this->m_qstor;
+        if(!qstor)
           return false;
-        return ptr->nref.unique();
+        return qstor->nref.unique();
       }
 
     long
     use_count()
     const noexcept
       {
-        auto ptr = this->m_ptr;
-        if(!ptr)
+        auto qstor = this->m_qstor;
+        if(!qstor)
           return 0;
-        return ptr->nref.get();
+        return qstor->nref.get();
       }
 
     ROCKET_PURE_FUNCTION
@@ -171,10 +171,10 @@ class storage_handle
     capacity()
     const noexcept
       {
-        auto ptr = this->m_ptr;
-        if(!ptr)
+        auto qstor = this->m_qstor;
+        if(!qstor)
           return 0;
-        return this->max_nchar_for_nblk(ptr->nblk);
+        return this->max_nchar_for_nblk(qstor->nblk);
       }
 
     size_type
@@ -213,20 +213,20 @@ class storage_handle
     data()
     const noexcept
       {
-        auto ptr = this->m_ptr;
-        if(!ptr)
+        auto qstor = this->m_qstor;
+        if(!qstor)
           return null_char;
-        return ptr->data;
+        return qstor->data;
       }
 
     value_type*
     mut_data_opt()
     noexcept
       {
-        auto ptr = this->m_ptr;
-        if(!ptr || !ptr->nref.unique())
+        auto qstor = this->m_qstor;
+        if(!qstor || !qstor->nref.unique())
           return nullptr;
-        return ptr->data;
+        return qstor->data;
       }
 
     ROCKET_NOINLINE
@@ -240,23 +240,23 @@ class storage_handle
         // Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
         auto nblk = this->min_nblk_for_nchar(cap);
         storage_allocator st_alloc(this->as_allocator());
-        auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
-        noadl::construct_at(noadl::unfancy(ptr), this->as_allocator(), nblk);
+        auto qstor = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
+        noadl::construct_at(noadl::unfancy(qstor), this->as_allocator(), nblk);
 
         // Add a null character anyway.
         // The user still has to keep track of it if the storage is not fully utilized.
-        traits_type::assign(ptr->data[cap], value_type());
+        traits_type::assign(qstor->data[cap], value_type());
 
         // Copy characters into the new block if any.
         // This shall not throw exceptions.
         if(len)
-          traits_type::copy(ptr->data, src, len);
+          traits_type::copy(qstor->data, src, len);
 
-        traits_type::assign(ptr->data[len], value_type());
+        traits_type::assign(qstor->data[len], value_type());
 
         // Set up the new storage.
-        this->do_reset(ptr);
-        return ptr->data + len;
+        this->do_reset(qstor);
+        return qstor->data + len;
       }
 
     void
@@ -268,16 +268,16 @@ class storage_handle
     share_with(const storage_handle& other)
     noexcept
       {
-        auto ptr = other.m_ptr;
-        if(ptr)
-          ptr->nref.increment();
-        this->do_reset(ptr);
+        auto qstor = other.m_qstor;
+        if(qstor)
+          qstor->nref.increment();
+        this->do_reset(qstor);
       }
 
     void
     exchange_with(storage_handle& other)
     noexcept
-      { noadl::xswap(this->m_ptr, other.m_ptr);  }
+      { noadl::xswap(this->m_qstor, other.m_qstor);  }
 
     constexpr operator
     const storage_handle*()
