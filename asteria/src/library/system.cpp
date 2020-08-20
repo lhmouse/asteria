@@ -84,23 +84,20 @@ std_system_execute(V_string cmd, optV_array argv, optV_array envp)
     cow_vector<const char*> ptrs = { cmd.safe_c_str() };
     if(argv)
       ::rocket::for_each(*argv, [&](const Value& arg) { ptrs.emplace_back(arg.as_string().safe_c_str());  });
+
+    auto eoff = ptrs.ssize();  // beginning of environment variables
     ptrs.emplace_back(nullptr);
-    size_t eoff = 1;  // beginning of environment variables
 
     // Append environment variables.
-    if(envp) {
-      eoff = ptrs.size();
-      ::rocket::for_each(*envp, [&](const Value& env) { ptrs.emplace_back(env.as_string().safe_c_str());  });
+    if(envp)
+      eoff = ptrs.ssize(),
+      ::rocket::for_each(*envp, [&](const Value& env) { ptrs.emplace_back(env.as_string().safe_c_str());  }),
       ptrs.emplace_back(nullptr);
-    }
-
-    // Be `const`-friendly.
-    auto pargv = const_cast<char**>(ptrs.data());
-    auto penvp = const_cast<char**>(ptrs.data() + eoff);
 
     // Launch the program.
     ::pid_t pid;
-    if(::posix_spawnp(&pid, cmd.c_str(), nullptr, nullptr, pargv, penvp) != 0)
+    if(::posix_spawnp(&pid, cmd.c_str(), nullptr, nullptr, const_cast<char**>(ptrs.data()),
+                                                           const_cast<char**>(ptrs.data() + eoff)) != 0)
       ASTERIA_THROW("Could not spawn process '$2'\n"
                     "[`posix_spawnp()` failed: $1]",
                     format_errno(errno), cmd);
