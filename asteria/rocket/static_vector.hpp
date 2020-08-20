@@ -416,7 +416,6 @@ class static_vector
     // N.B. This is a non-standard extension.
     reference
     mut_front()
-    noexcept
       {
         ROCKET_ASSERT(!this->empty());
         return this->mut_data()[0];
@@ -425,7 +424,6 @@ class static_vector
     // N.B. This is a non-standard extension.
     reference
     mut_back()
-    noexcept
       {
         ROCKET_ASSERT(!this->empty());
         return this->mut_data()[this->size() - 1];
@@ -434,7 +432,6 @@ class static_vector
     // N.B. This is a non-standard extension.
     value_type*
     mut_ptr(size_type pos)
-    noexcept
       {
         if(pos >= this->size())
           return nullptr;
