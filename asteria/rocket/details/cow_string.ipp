@@ -413,45 +413,52 @@ class string_iterator
     noexcept
       { return other + off;  }
 
+    template<typename ycharT>
     difference_type
-    operator-(const string_iterator& other)
+    operator-(const string_iterator<stringT, ycharT>& other)
     const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
         ROCKET_ASSERT_MSG(this->m_begin == other.m_begin, "Iterator not compatible");
         return this->m_cur - other.m_cur;
       }
-
-    bool
-    operator==(const string_iterator& other)
-    const noexcept
-      { return *this - other == 0;  }
-
-    bool
-    operator!=(const string_iterator& other)
-    const noexcept
-      { return *this - other != 0;  }
-
-    bool
-    operator<(const string_iterator& other)
-    const noexcept
-      { return *this - other < 0;  }
-
-    bool
-    operator>(const string_iterator& other)
-    const noexcept
-      { return *this - other > 0;  }
-
-    bool
-    operator<=(const string_iterator& other)
-    const noexcept
-      { return *this - other <= 0;  }
-
-    bool
-    operator>=(const string_iterator& other)
-    const noexcept
-      { return *this - other >= 0;  }
   };
+
+template<typename stringT, typename xcharT, typename ycharT>
+bool
+operator==(const string_iterator<stringT, xcharT>& lhs, const string_iterator<stringT, ycharT>& rhs)
+noexcept
+  { return lhs - rhs == 0;  }
+
+template<typename stringT, typename xcharT, typename ycharT>
+bool
+operator!=(const string_iterator<stringT, xcharT>& lhs, const string_iterator<stringT, ycharT>& rhs)
+noexcept
+  { return lhs - rhs != 0;  }
+
+template<typename stringT, typename xcharT, typename ycharT>
+bool
+operator<(const string_iterator<stringT, xcharT>& lhs, const string_iterator<stringT, ycharT>& rhs)
+noexcept
+  { return lhs - rhs < 0;  }
+
+template<typename stringT, typename xcharT, typename ycharT>
+bool
+operator>(const string_iterator<stringT, xcharT>& lhs, const string_iterator<stringT, ycharT>& rhs)
+noexcept
+  { return lhs - rhs > 0;  }
+
+template<typename stringT, typename xcharT, typename ycharT>
+bool
+operator<=(const string_iterator<stringT, xcharT>& lhs, const string_iterator<stringT, ycharT>& rhs)
+noexcept
+  { return lhs - rhs <= 0;  }
+
+template<typename stringT, typename xcharT, typename ycharT>
+bool
+operator>=(const string_iterator<stringT, xcharT>& lhs, const string_iterator<stringT, ycharT>& rhs)
+noexcept
+  { return lhs - rhs >= 0;  }
 
 // Implement relational operators.
 template<typename charT, typename traitsT>
