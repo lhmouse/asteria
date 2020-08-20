@@ -127,7 +127,7 @@ class storage_handle
       { return this->m_nelem;  }
 
     template<typename... paramsT>
-    value_type*
+    value_type&
     emplace_back_unchecked(paramsT&&... params)
       {
         size_type off = this->m_nelem;
@@ -136,7 +136,8 @@ class storage_handle
         allocator_traits<allocator_type>::construct(this->as_allocator(), this->m_data + off,
                                                     ::std::forward<paramsT>(params)...);
         this->m_nelem = static_cast<nelem_type>(off + 1);
-        return this->m_data + off;
+
+        return this->m_data[off];
       }
 
     void

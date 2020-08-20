@@ -489,8 +489,7 @@ class static_vector
         this->m_sth.check_size_add(this->size(), 1);
 
         // The storage can't be reallocated, so we may append the element in place.
-        auto ptr = this->m_sth.emplace_back_unchecked(::std::forward<paramsT>(params)...);
-        return *ptr;
+        return this->m_sth.emplace_back_unchecked(::std::forward<paramsT>(params)...);
       }
 
     // N.B. The return type is a non-standard extension.
