@@ -2209,15 +2209,13 @@ do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
       if(!succ)
         throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
 
+      // Assignment operations have the lowest precedence and group from right to left.
+      auto preced_limit = qnext->tell_precedence();
+      if(preced_limit == precedence_assignment)
+        preced_limit = static_cast<Precedence>(precedence_assignment - 1);
+
       // Collapse elements that have no lower precedence.
-      auto preced_next = qnext->tell_precedence();
-      while(stack.size() >= 2) {
-        // Assignment operations have the lowest precedence and group from right to left.
-        auto preced_back = stack.back().tell_precedence();
-        if(preced_back >= precedence_assignment)
-          break;
-        if(preced_back > preced_next)
-          break;
+      while((stack.size() >= 2) && (stack.back().tell_precedence() <= preced_limit)) {
         qelem = ::std::move(stack.mut_back());
         stack.pop_back();
         qelem->extract(stack.mut_back().open_junction());
