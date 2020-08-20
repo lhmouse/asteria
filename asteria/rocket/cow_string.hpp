@@ -682,11 +682,11 @@ class basic_cow_string
 
         // If the storage is unique and there is enough space, append the string in place.
         auto ptr = this->m_sth.mut_data_opt();
+        auto cap = this->capacity();
         if(ROCKET_EXPECT(ptr)) {
           ptr += this->size();
 
           // Note the string may be unowned, where `cap` would be zero.
-          size_type cap = this->capacity();
           if(ROCKET_EXPECT((cap >= this->size()) && (n <= cap - this->size()))) {
             // Copy the string.
             traits_type::copy(ptr, s, n);
@@ -701,7 +701,7 @@ class basic_cow_string
 
         // Allocate new storage.
         storage_handle sth(this->m_sth.as_allocator());
-        ptr = sth.reallocate_more(this->data(), this->size(), n);
+        ptr = sth.reallocate_more(this->data(), this->size(), n | cap / 2);
 
         // Copy the string.
         traits_type::copy(ptr, s, n);
@@ -722,11 +722,11 @@ class basic_cow_string
 
         // If the storage is unique and there is enough space, append the string in place.
         auto ptr = this->m_sth.mut_data_opt();
+        auto cap = this->capacity();
         if(ROCKET_EXPECT(ptr)) {
           ptr += this->size();
 
           // Note the string may be unowned, where `cap` would be zero.
-          size_type cap = this->capacity();
           if(ROCKET_EXPECT((cap >= this->size()) && (n <= cap - this->size()))) {
             // Fill characters.
             traits_type::assign(ptr, n, ch);
@@ -741,7 +741,7 @@ class basic_cow_string
 
         // Allocate new storage.
         storage_handle sth(this->m_sth.as_allocator());
-        ptr = sth.reallocate_more(this->data(), this->size(), n);
+        ptr = sth.reallocate_more(this->data(), this->size(), n | cap / 2);
 
         // Fill characters.
         traits_type::assign(ptr, n, ch);
@@ -778,14 +778,15 @@ class basic_cow_string
         if(first == last)
           return *this;
 
-        // If the storage is unique and there is enough space, append the string in place.
         size_type n = noadl::estimate_distance(first, last);
+
+        // If the storage is unique and there is enough space, append the string in place.
         auto ptr = this->m_sth.mut_data_opt();
+        auto cap = this->capacity();
         if(ROCKET_EXPECT(n && ptr)) {
           ptr += this->size();
 
           // Note the string may be unowned, where `cap` would be zero.
-          size_type cap = this->capacity();
           if(ROCKET_EXPECT((cap >= this->size()) && (n <= cap - this->size()))) {
             // Copy characters.
             n = 0;
@@ -804,7 +805,7 @@ class basic_cow_string
         storage_handle sth(this->m_sth.as_allocator());
         if(ROCKET_EXPECT(n)) {
           // The length is known.
-          ptr = sth.reallocate_more(this->data(), this->size(), n);
+          ptr = sth.reallocate_more(this->data(), this->size(), n | cap / 2);
 
           // Copy characters.
           n = 0;
@@ -813,16 +814,15 @@ class basic_cow_string
         }
         else {
           // The length is not known.
-          size_type ecap = 10;
-          ptr = sth.reallocate_more(this->data(), this->size(), ecap);
+          ptr = sth.reallocate_more(this->data(), this->size(), 31 | cap / 2);
+          cap = sth.capacity();
 
           // Copy characters.
           noadl::ranged_for(::std::move(first), ::std::move(last),
             [&](inputT& it) {
-              // If the reserved region has been exhausted, allocate a new one.
-              if(ROCKET_UNEXPECT(n >= ecap)) {
-                ecap += ecap / 2;
-                ptr = sth.reallocate_more(this->data(), this->size() + n, ecap) - n;
+              if(ROCKET_UNEXPECT(n >= cap - this->size())) {
+                ptr = sth.reallocate_more(ptr - this->size(), this->size() + n, cap / 2) - n;
+                cap = sth.capacity();
               }
               traits_type::assign(ptr[n++], *it);
             });
