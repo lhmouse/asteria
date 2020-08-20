@@ -277,7 +277,7 @@ class storage_handle
     void
     exchange_with(storage_handle& other)
     noexcept
-      { noadl::xswap(this->m_qstor, other.m_qstor);  }
+      { ::std::swap(this->m_qstor, other.m_qstor);  }
 
     constexpr operator
     const storage_handle*()
