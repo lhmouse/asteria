@@ -112,6 +112,18 @@ class storage_handle
   private:
     struct storage : storage_header
       {
+        static constexpr
+        size_type
+        min_nblk_for_nelem(size_type nelem)
+        noexcept
+          { return (sizeof(value_type) * nelem + sizeof(storage) - 1) / sizeof(storage) + 1;  }
+
+        static constexpr
+        size_type
+        max_nelem_for_nblk(size_type nblk)
+        noexcept
+          { return sizeof(storage) * (nblk - 1) / sizeof(value_type);  }
+
         allocator_type alloc;
         size_type nblk;
         value_type data[0];
@@ -148,18 +160,6 @@ class storage_handle
         operator=(const storage&)
           = delete;
       };
-
-    static constexpr
-    size_type
-    min_nblk_for_nelem(size_type nelem)
-    noexcept
-      { return (sizeof(value_type) * nelem + sizeof(storage) - 1) / sizeof(storage) + 1;  }
-
-    static constexpr
-    size_type
-    max_nelem_for_nblk(size_type nblk)
-    noexcept
-      { return sizeof(storage) * (nblk - 1) / sizeof(value_type);  }
 
     using allocator_base    = typename allocator_wrapper_base_for<allocator_type>::type;
     using storage_allocator = typename allocator_traits<allocator_type>::template rebind_alloc<storage>;
@@ -262,7 +262,7 @@ class storage_handle
         auto qstor = this->m_qstor;
         if(!qstor)
           return 0;
-        return this->max_nelem_for_nblk(qstor->nblk);
+        return storage::max_nelem_for_nblk(qstor->nblk);
       }
 
     size_type
@@ -271,7 +271,7 @@ class storage_handle
       {
         storage_allocator st_alloc(this->as_allocator());
         auto max_nblk = allocator_traits<storage_allocator>::max_size(st_alloc);
-        return this->max_nelem_for_nblk(max_nblk / 2);
+        return storage::max_nelem_for_nblk(max_nblk / 2);
       }
 
     size_type
@@ -292,8 +292,8 @@ class storage_handle
     const
       {
         auto cap = this->check_size_add(0, res_arg);
-        auto nblk = this->min_nblk_for_nelem(cap);
-        return this->max_nelem_for_nblk(nblk);
+        auto nblk = storage::min_nblk_for_nelem(cap);
+        return storage::max_nelem_for_nblk(nblk);
       }
 
     ROCKET_PURE_FUNCTION
@@ -370,7 +370,7 @@ class storage_handle
         auto cap = this->check_size_add(len, add);
 
         // Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
-        auto nblk = this->min_nblk_for_nelem(cap);
+        auto nblk = storage::min_nblk_for_nelem(cap);
         storage_allocator st_alloc(this->as_allocator());
         auto qstor = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
         noadl::construct_at(noadl::unfancy(qstor), reinterpret_cast<void (*)(...)>(this->do_destroy_storage),
