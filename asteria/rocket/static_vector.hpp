@@ -475,8 +475,8 @@ class static_vector
         this->m_sth.check_size_add(this->size(), n);
 
         // The storage can't be reallocated, so we may append all elements in place.
-        noadl::ranged_for(::std::move(first), ::std::move(last),
-                          [&](inputT& it) { this->m_sth.emplace_back_unchecked(*it);  });
+        for(auto it = ::std::move(first);  it != last;  ++it)
+          this->m_sth.emplace_back_unchecked(*it);
         return *this;
       }
 
