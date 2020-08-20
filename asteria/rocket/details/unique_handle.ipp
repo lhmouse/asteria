@@ -84,7 +84,7 @@ class stored_handle
     void
     exchange_with(stored_handle& other)
     noexcept
-      { noadl::xswap(this->m_hv, other.m_hv);  }
+      { ::std::swap(this->m_hv, other.m_hv);  }
   };
 
 template<typename handleT, typename closerT>

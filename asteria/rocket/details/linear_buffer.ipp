@@ -99,17 +99,18 @@ class basic_storage
         else {
           // If the buffer is not large enough, allocate a new one.
           auto nmax = this->max_size();
-          if(nmax - nused < nadd) {
+          if(nmax - nused < nadd)
             noadl::sprintf_and_throw<length_error>("linear_buffer: max size exceeded (`%lld` + `%lld` > `%lld`)",
                                                    static_cast<long long>(nused), static_cast<long long>(nadd),
                                                    static_cast<long long>(nmax));
-          }
+
           auto cap_new = (nused + nadd) | 0x1000;
           auto ptr_new = allocator_traits<allocator_type>::allocate(this->as_allocator(), cap_new);
           auto pbuf_new = noadl::unfancy(ptr_new);
 #ifdef ROCKET_DEBUG
           traits_type::assign(pbuf_new, cap_new, value_type(0xA5A5A5A5));
 #endif
+
           // Copy the old string into the new buffer and deallocate the old one.
           if(ROCKET_UNEXPECT(nused)) {
             traits_type::copy(pbuf_new, pbuf + goff, nused);
@@ -121,10 +122,12 @@ class basic_storage
             allocator_traits<allocator_type>::deallocate(this->as_allocator(), this->m_ptr, this->m_cap);
           }
           pbuf = pbuf_new;
+
           // Set up the new buffer.
           this->m_ptr = ::std::move(ptr_new);
           this->m_cap = cap_new;
         }
+
         // In either case, the string has been moved to the beginning of the buffer.
         ROCKET_ASSERT(nused + nadd <= this->m_cap);
         return nused;
@@ -148,8 +151,8 @@ class basic_storage
     exchange_with(basic_storage& other)
     noexcept
       {
-        noadl::xswap(this->m_ptr, other.m_ptr);
-        noadl::xswap(this->m_cap, other.m_cap);
+        ::std::swap(this->m_ptr, other.m_ptr);
+        ::std::swap(this->m_cap, other.m_cap);
       }
   };
 

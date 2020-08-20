@@ -129,7 +129,7 @@ class stored_pointer
     void
     exchange_with(stored_pointer& other)
     noexcept
-      { noadl::xswap(this->m_ptr, other.m_ptr);  }
+      { ::std::swap(this->m_ptr, other.m_ptr);  }
   };
 
 template<typename targetT, typename sourceT, typename casterT>

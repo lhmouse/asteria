@@ -33,7 +33,9 @@ struct deleter_reference
     const noexcept
       { return *(this->m_qdel);  }
 
-    constexpr deleterT&get()
+    constexpr
+    deleterT&
+    get()
     const noexcept
       { return *(this->m_qdel);  }
   };
@@ -122,7 +124,7 @@ class stored_pointer
     void
     exchange_with(stored_pointer& other)
     noexcept
-      { noadl::xswap(this->m_ptr, other.m_ptr);  }
+      { ::std::swap(this->m_ptr, other.m_ptr);  }
   };
 
 // deleter of reference types
@@ -197,7 +199,7 @@ class stored_pointer<pointerT, deleterT&>
     void
     exchange_with(stored_pointer& other)
     noexcept
-      { noadl::xswap(this->m_ptr, other.m_ptr);  }
+      { ::std::swap(this->m_ptr, other.m_ptr);  }
   };
 
 template<typename targetT, typename sourceT, typename casterT>
