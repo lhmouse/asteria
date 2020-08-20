@@ -202,7 +202,7 @@ class storage_handle
         if(ROCKET_EXPECT(!qstor))
           return;
 
-        auto hdr = reinterpret_cast<const storage_header*>(noadl::unfancy(qstor));
+        auto hdr = reinterpret_cast<storage_header*>(noadl::unfancy(qstor));
         if(ROCKET_EXPECT(!hdr->nref.decrement()))
           return;
 
