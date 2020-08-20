@@ -183,6 +183,13 @@ class array
         return this->data()[pos];
       }
 
+    template<typename subscriptT,
+    ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
+    const_reference
+    at(subscriptT pos)
+    const
+      { return this->at(static_cast<size_type>(pos));  }
+
     const_reference
     operator[](size_type pos)
     const noexcept
@@ -190,6 +197,14 @@ class array
         ROCKET_ASSERT(pos < this->size());
         return this->data()[pos];
       }
+
+    // N.B. This is a non-standard extension.
+    template<typename subscriptT,
+    ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
+    const_reference
+    operator[](subscriptT pos)
+    const noexcept
+      { return this->operator[](static_cast<size_type>(pos));  }
 
     const_reference
     front()
@@ -228,13 +243,26 @@ class array
         return this->mut_data()[pos];
       }
 
+    // N.B. This is a non-standard extension.
+    template<typename subscriptT,
+    ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
+    reference
+    mut(subscriptT pos)
+      { return this->mut(static_cast<size_type>(pos));  }
+
     reference
     operator[](size_type pos)
-    noexcept
       {
         ROCKET_ASSERT(pos < this->size());
         return this->mut_data()[pos];
       }
+
+    // N.B. This is a non-standard extension.
+    template<typename subscriptT,
+    ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
+    reference
+    operator[](subscriptT pos)
+      { return this->operator[](static_cast<size_type>(pos));  }
 
     // N.B. This is a non-standard extension.
     reference
@@ -255,7 +283,6 @@ class array
     // N.B. This is a non-standard extension.
     value_type*
     mut_ptr(size_type pos)
-    noexcept
       {
         if(pos >= this->size())
           return nullptr;
