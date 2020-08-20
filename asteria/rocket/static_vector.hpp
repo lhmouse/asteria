@@ -469,8 +469,9 @@ class static_vector
         if(first == last)
           return *this;
 
-        // Check whether there is room for new elements if `inputT` is a forward iterator type.
         size_type n = noadl::estimate_distance(first, last);
+
+        // Check whether there is room for new elements if `inputT` is a forward iterator type.
         this->m_sth.check_size_add(this->size(), n);
 
         // The storage can't be reallocated, so we may append all elements in place.
