@@ -322,11 +322,6 @@ class vector_iterator
         return *this;
       }
 
-    vector_iterator&
-    operator++()
-    noexcept
-      { return *this += difference_type(1);  }
-
     vector_iterator
     operator+(difference_type off)
     const noexcept
@@ -343,11 +338,6 @@ class vector_iterator
         this->m_cur = this->do_validate(this->m_cur - off, false);
         return *this;
       }
-
-    vector_iterator&
-    operator--()
-    noexcept
-      { return *this -= difference_type(1);  }
 
     vector_iterator
     operator-(difference_type off)
@@ -374,6 +364,30 @@ class vector_iterator
         return this->m_cur - other.m_cur;
       }
   };
+
+template<typename vectorT, typename valueT>
+vector_iterator<vectorT, valueT>&
+operator++(vector_iterator<vectorT, valueT>& lhs)
+noexcept
+  { return lhs += 1;  }
+
+template<typename vectorT, typename valueT>
+vector_iterator<vectorT, valueT>
+operator++(vector_iterator<vectorT, valueT>& lhs, int)
+noexcept
+  { return ::std::exchange(lhs, lhs + 1);  }
+
+template<typename vectorT, typename valueT>
+vector_iterator<vectorT, valueT>&
+operator--(vector_iterator<vectorT, valueT>& lhs)
+noexcept
+  { return lhs -= 1;  }
+
+template<typename vectorT, typename valueT>
+vector_iterator<vectorT, valueT>
+operator--(vector_iterator<vectorT, valueT>& lhs, int)
+noexcept
+  { return ::std::exchange(lhs, lhs - 1);  }
 
 template<typename vectorT, typename xvalueT, typename yvalueT>
 bool
