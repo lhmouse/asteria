@@ -790,8 +790,8 @@ class basic_cow_string
           if(ROCKET_EXPECT((cap >= this->size()) && (n <= cap - this->size()))) {
             // Copy characters.
             n = 0;
-            noadl::ranged_for(::std::move(first), ::std::move(last),
-                              [&](inputT& it) { traits_type::assign(ptr[n++], *it);  });
+            for(auto it = ::std::move(first);  it != last;  ++it)
+              traits_type::assign(ptr[n++], *it);
             traits_type::assign(ptr[n], value_type());
 
             // Increase the length.
@@ -809,8 +809,8 @@ class basic_cow_string
 
           // Copy characters.
           n = 0;
-          noadl::ranged_for(::std::move(first), ::std::move(last),
-                            [&](inputT& it) { traits_type::assign(ptr[n++], *it);  });
+          for(auto it = ::std::move(first);  it != last;  ++it)
+            traits_type::assign(ptr[n++], *it);
         }
         else {
           // The length is not known.
@@ -818,14 +818,13 @@ class basic_cow_string
           cap = sth.capacity();
 
           // Copy characters.
-          noadl::ranged_for(::std::move(first), ::std::move(last),
-            [&](inputT& it) {
-              if(ROCKET_UNEXPECT(n >= cap - this->size())) {
-                ptr = sth.reallocate_more(ptr - this->size(), this->size() + n, cap / 2) - n;
-                cap = sth.capacity();
-              }
-              traits_type::assign(ptr[n++], *it);
-            });
+          for(auto it = ::std::move(first);  it != last;  ++it) {
+            if(ROCKET_UNEXPECT(n >= cap - this->size())) {
+              ptr = sth.reallocate_more(ptr - this->size(), this->size() + n, cap / 2) - n;
+              cap = sth.capacity();
+            }
+            traits_type::assign(ptr[n++], *it);
+          }
         }
         traits_type::assign(ptr[n], value_type());
 
