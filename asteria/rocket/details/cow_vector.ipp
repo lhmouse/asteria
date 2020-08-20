@@ -202,12 +202,12 @@ class storage_handle
         if(ROCKET_EXPECT(!qstor))
           return;
 
-        auto hdr = reinterpret_cast<storage_header*>(noadl::unfancy(qstor));
-        if(ROCKET_EXPECT(!hdr->nref.decrement()))
+        auto qhead = reinterpret_cast<storage_header*>(noadl::unfancy(qstor));
+        if(ROCKET_EXPECT(!qhead->nref.decrement()))
           return;
 
         // This indirect call is paramount for incomplete type support.
-        reinterpret_cast<void (*)(storage_pointer)>(hdr->dtor)(qstor);
+        reinterpret_cast<void (*)(storage_pointer)>(qhead->dtor)(qstor);
       }
 
     ROCKET_NOINLINE static
