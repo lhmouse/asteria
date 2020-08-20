@@ -371,11 +371,6 @@ class string_iterator
         return *this;
       }
 
-    string_iterator&
-    operator++()
-    noexcept
-      { return *this += difference_type(1);  }
-
     string_iterator
     operator+(difference_type off)
     const noexcept
@@ -392,11 +387,6 @@ class string_iterator
         this->m_cur = this->do_validate(this->m_cur - off, false);
         return *this;
       }
-
-    string_iterator&
-    operator--()
-    noexcept
-      { return *this -= difference_type(1);  }
 
     string_iterator
     operator-(difference_type off)
@@ -423,6 +413,30 @@ class string_iterator
         return this->m_cur - other.m_cur;
       }
   };
+
+template<typename stringT, typename charT>
+string_iterator<stringT, charT>&
+operator++(string_iterator<stringT, charT>& lhs)
+noexcept
+  { return lhs += 1;  }
+
+template<typename stringT, typename charT>
+string_iterator<stringT, charT>
+operator++(string_iterator<stringT, charT>& lhs, int)
+noexcept
+  { return ::std::exchange(lhs, lhs + 1);  }
+
+template<typename stringT, typename charT>
+string_iterator<stringT, charT>&
+operator--(string_iterator<stringT, charT>& lhs)
+noexcept
+  { return lhs -= 1;  }
+
+template<typename stringT, typename charT>
+string_iterator<stringT, charT>
+operator--(string_iterator<stringT, charT>& lhs, int)
+noexcept
+  { return ::std::exchange(lhs, lhs - 1);  }
 
 template<typename stringT, typename xcharT, typename ycharT>
 bool
