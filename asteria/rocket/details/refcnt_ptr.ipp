@@ -49,13 +49,12 @@ class stored_pointer
     using pointer       = element_type*;
 
   private:
-    pointer m_ptr;
+    pointer m_ptr = nullptr;
 
   public:
     constexpr
     stored_pointer()
     noexcept
-      : m_ptr()
       { }
 
     ~stored_pointer()

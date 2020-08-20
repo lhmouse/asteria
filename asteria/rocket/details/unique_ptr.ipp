@@ -53,7 +53,7 @@ class stored_pointer
     using deleter_base = typename allocator_wrapper_base_for<deleterT>::type;
 
   private:
-    pointer m_ptr;
+    pointer m_ptr = nullptr;
 
   public:
     constexpr
@@ -65,18 +65,19 @@ class stored_pointer
     explicit constexpr
     stored_pointer(const deleter_type& del)
     noexcept
-      : deleter_base(del), m_ptr()
+      : deleter_base(del)
       { }
 
     explicit constexpr
     stored_pointer(deleter_type&& del)
     noexcept
-      : deleter_base(::std::move(del)), m_ptr()
+      : deleter_base(::std::move(del))
       { }
 
     ~stored_pointer()
       {
         this->reset(nullptr);
+
 #ifdef ROCKET_DEBUG
         if(is_trivially_destructible<pointer>::value)
           ::std::memset(static_cast<void*>(::std::addressof(this->m_ptr)), 0xF6, sizeof(m_ptr));
@@ -140,18 +141,19 @@ class stored_pointer<pointerT, deleterT&>
     using deleter_base = deleter_reference<deleterT>;
 
   private:
-    pointer m_ptr;
+    pointer m_ptr = nullptr;
 
   public:
     explicit constexpr
     stored_pointer(deleterT& del)
     noexcept
-      : deleter_base(del), m_ptr()
+      : deleter_base(del)
       { }
 
     ~stored_pointer()
       {
         this->reset(nullptr);
+
 #ifdef ROCKET_DEBUG
         if(is_trivially_destructible<pointer>::value)
           ::std::memset(static_cast<void*>(::std::addressof(this->m_ptr)), 0xF6, sizeof(m_ptr));

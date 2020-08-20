@@ -166,19 +166,19 @@ class storage_handle
     using storage_pointer   = typename allocator_traits<storage_allocator>::pointer;
 
   private:
-    storage_pointer m_qstor;
+    storage_pointer m_qstor = nullptr;
 
   public:
     explicit constexpr
     storage_handle(const allocator_type& alloc)
     noexcept
-      : allocator_base(alloc), m_qstor()
+      : allocator_base(alloc)
       { }
 
     explicit constexpr
     storage_handle(allocator_type&& alloc)
     noexcept
-      : allocator_base(::std::move(alloc)), m_qstor()
+      : allocator_base(::std::move(alloc))
       { }
 
     ~storage_handle()
