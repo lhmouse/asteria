@@ -260,7 +260,6 @@ class vector_iterator
     using difference_type    = ptrdiff_t;
 
   private:
-  private:
     pointer m_begin;
     pointer m_cur;
     pointer m_end;
@@ -365,44 +364,51 @@ class vector_iterator
     noexcept
       { return other + off;  }
 
+    template<typename yvalueT>
     difference_type
-    operator-(const vector_iterator& other)
+    operator-(const vector_iterator<vectorT, yvalueT>& other)
     const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
         ROCKET_ASSERT_MSG(this->m_begin == other.m_begin, "Iterator not compatible");
         return this->m_cur - other.m_cur;
       }
-
-    bool
-    operator==(const vector_iterator& other)
-    const noexcept
-      { return *this - other == 0;  }
-
-    bool
-    operator!=(const vector_iterator& other)
-    const noexcept
-      { return *this - other != 0;  }
-
-    bool
-    operator<(const vector_iterator& other)
-    const noexcept
-      { return *this - other < 0;  }
-
-    bool
-    operator>(const vector_iterator& other)
-    const noexcept
-      { return *this - other > 0;  }
-
-    bool
-    operator<=(const vector_iterator& other)
-    const noexcept
-      { return *this - other <= 0;  }
-
-    bool
-    operator>=(const vector_iterator& other)
-    const noexcept
-      { return *this - other >= 0;  }
   };
+
+template<typename vectorT, typename xvalueT, typename yvalueT>
+bool
+operator==(const vector_iterator<vectorT, xvalueT>& lhs, const vector_iterator<vectorT, yvalueT>& rhs)
+noexcept
+  { return lhs - rhs == 0;  }
+
+template<typename vectorT, typename xvalueT, typename yvalueT>
+bool
+operator!=(const vector_iterator<vectorT, xvalueT>& lhs, const vector_iterator<vectorT, yvalueT>& rhs)
+noexcept
+  { return lhs - rhs != 0;  }
+
+template<typename vectorT, typename xvalueT, typename yvalueT>
+bool
+operator<(const vector_iterator<vectorT, xvalueT>& lhs, const vector_iterator<vectorT, yvalueT>& rhs)
+noexcept
+  { return lhs - rhs < 0;  }
+
+template<typename vectorT, typename xvalueT, typename yvalueT>
+bool
+operator>(const vector_iterator<vectorT, xvalueT>& lhs, const vector_iterator<vectorT, yvalueT>& rhs)
+noexcept
+  { return lhs - rhs > 0;  }
+
+template<typename vectorT, typename xvalueT, typename yvalueT>
+bool
+operator<=(const vector_iterator<vectorT, xvalueT>& lhs, const vector_iterator<vectorT, yvalueT>& rhs)
+noexcept
+  { return lhs - rhs <= 0;  }
+
+template<typename vectorT, typename xvalueT, typename yvalueT>
+bool
+operator>=(const vector_iterator<vectorT, xvalueT>& lhs, const vector_iterator<vectorT, yvalueT>& rhs)
+noexcept
+  { return lhs - rhs >= 0;  }
 
 }  // namespace details_static_vector
