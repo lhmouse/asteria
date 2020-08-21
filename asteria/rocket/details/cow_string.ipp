@@ -309,9 +309,9 @@ class string_iterator
     using difference_type    = ptrdiff_t;
 
   private:
-    pointer m_begin;
-    pointer m_cur;
-    pointer m_end;
+    charT* m_begin;
+    charT* m_cur;
+    charT* m_end;
 
   private:
     // This constructor is called by the container.

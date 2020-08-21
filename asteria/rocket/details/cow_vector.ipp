@@ -440,9 +440,9 @@ class vector_iterator
     using difference_type    = ptrdiff_t;
 
   private:
-    pointer m_begin;
-    pointer m_cur;
-    pointer m_end;
+    valueT* m_begin;
+    valueT* m_cur;
+    valueT* m_end;
 
   private:
     // This constructor is called by the container.
