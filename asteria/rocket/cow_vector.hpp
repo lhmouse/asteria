@@ -337,9 +337,16 @@ class cow_vector
         return *this;
       }
 
+    // N.B. The return type is a non-standard extension.
     cow_vector&
     shrink_to_fit()
       {
+        // If the vector is empty, deallocate any dynamic storage.
+        if(this->empty()) {
+          this->m_sth.deallocate();
+          return *this;
+        }
+
         // Calculate the minimum capacity to reserve. This must include all existent characters.
         // Don't reallocate if the storage is shared or tight.
         size_type rcap = this->m_sth.round_up_capacity(this->size());
