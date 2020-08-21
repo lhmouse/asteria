@@ -293,6 +293,96 @@ class storage_handle
 template<typename allocT, typename traitsT>
 constexpr typename allocT::value_type storage_handle<allocT, traitsT>::null_char[1];
 
+// Implement relational operators.
+template<typename charT, typename traitsT>
+struct comparator
+  {
+    using char_type    = charT;
+    using traits_type  = traitsT;
+    using size_type    = size_t;
+
+    static
+    int
+    inequality(const char_type* s1, size_type n1, const char_type* s2, size_type n2)
+    noexcept
+      {
+        if(n1 != n2)
+          return 2;
+        else if(s1 == s2)
+          return 0;
+        else
+          return traits_type::compare(s1, s2, n1);
+      }
+
+    static
+    int
+    relation(const char_type* s1, size_type n1, const char_type* s2, size_type n2)
+    noexcept
+      {
+        if(n1 < n2)
+          return (traits_type::compare(s1, s2, n1) > 0) ? +1 : -1;
+        else if(n1 > n2)
+          return (traits_type::compare(s1, s2, n1) < 0) ? -1 : +1;
+        else
+          return traits_type::compare(s1, s2, n1);
+      }
+  };
+
+// Implement the FNV-1a hash algorithm.
+template<typename charT, typename traitsT>
+class basic_hasher
+  {
+  private:
+    static constexpr char32_t xoffset = 0x811C9DC5;
+    static constexpr char32_t xprime = 0x1000193;
+
+    char32_t m_reg = xoffset;
+
+  public:
+    constexpr
+    basic_hasher&
+    append(const charT& c)
+    noexcept
+      {
+        char32_t word = static_cast<char32_t>(c);
+        char32_t reg = this->m_reg;
+
+        for(size_t k = 0;  k < sizeof(c);  ++k)
+          reg = (reg ^ ((word >> k * 8) & 0xFF)) * xprime;
+
+        this->m_reg = reg;
+        return *this;
+      }
+
+    constexpr
+    basic_hasher&
+    append(const charT* s, size_t n)
+      {
+        for(auto sp = s;  sp != s + n;  ++sp)
+          this->append(*sp);
+        return *this;
+      }
+
+    constexpr
+    basic_hasher&
+    append(const charT* s)
+      {
+        for(auto sp = s;  !traitsT::eq(*sp, charT());  ++sp)
+          this->append(*sp);
+        return *this;
+      }
+
+    constexpr
+    size_t
+    finish()
+    noexcept
+      {
+        char32_t reg = this->m_reg;
+        this->m_reg = xoffset;
+        return reg;
+      }
+  };
+
 template<typename stringT, typename charT>
 class string_iterator
   {
@@ -473,95 +563,5 @@ bool
 operator>=(const string_iterator<stringT, xcharT>& lhs, const string_iterator<stringT, ycharT>& rhs)
 noexcept
   { return lhs - rhs >= 0;  }
-
-// Implement relational operators.
-template<typename charT, typename traitsT>
-struct comparator
-  {
-    using char_type    = charT;
-    using traits_type  = traitsT;
-    using size_type    = size_t;
-
-    static
-    int
-    inequality(const char_type* s1, size_type n1, const char_type* s2, size_type n2)
-    noexcept
-      {
-        if(n1 != n2)
-          return 2;
-        else if(s1 == s2)
-          return 0;
-        else
-          return traits_type::compare(s1, s2, n1);
-      }
-
-    static
-    int
-    relation(const char_type* s1, size_type n1, const char_type* s2, size_type n2)
-    noexcept
-      {
-        if(n1 < n2)
-          return (traits_type::compare(s1, s2, n1) > 0) ? +1 : -1;
-        else if(n1 > n2)
-          return (traits_type::compare(s1, s2, n1) < 0) ? -1 : +1;
-        else
-          return traits_type::compare(s1, s2, n1);
-      }
-  };
-
-// Implement the FNV-1a hash algorithm.
-template<typename charT, typename traitsT>
-class basic_hasher
-  {
-  private:
-    static constexpr char32_t xoffset = 0x811C9DC5;
-    static constexpr char32_t xprime = 0x1000193;
-
-    char32_t m_reg = xoffset;
-
-  public:
-    constexpr
-    basic_hasher&
-    append(const charT& c)
-    noexcept
-      {
-        char32_t word = static_cast<char32_t>(c);
-        char32_t reg = this->m_reg;
-
-        for(size_t k = 0;  k < sizeof(c);  ++k)
-          reg = (reg ^ ((word >> k * 8) & 0xFF)) * xprime;
-
-        this->m_reg = reg;
-        return *this;
-      }
-
-    constexpr
-    basic_hasher&
-    append(const charT* s, size_t n)
-      {
-        for(auto sp = s;  sp != s + n;  ++sp)
-          this->append(*sp);
-        return *this;
-      }
-
-    constexpr
-    basic_hasher&
-    append(const charT* s)
-      {
-        for(auto sp = s;  !traitsT::eq(*sp, charT());  ++sp)
-          this->append(*sp);
-        return *this;
-      }
-
-    constexpr
-    size_t
-    finish()
-    noexcept
-      {
-        char32_t reg = this->m_reg;
-        this->m_reg = xoffset;
-        return reg;
-      }
-  };
 
 }  // namespace details_cow_string
