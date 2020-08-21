@@ -67,13 +67,16 @@ using ::std::is_move_assignable;
 using ::std::is_const;
 using ::std::add_const;
 using ::std::remove_const;
+using ::std::add_volatile;
+using ::std::remove_volatile;
+using ::std::add_cv;
+using ::std::remove_cv;
 using ::std::is_reference;
 using ::std::is_lvalue_reference;
 using ::std::is_rvalue_reference;
 using ::std::add_lvalue_reference;
 using ::std::add_rvalue_reference;
 using ::std::remove_reference;
-using ::std::remove_cv;
 using ::std::is_same;
 using ::std::is_trivial;
 using ::std::is_integral;
@@ -234,6 +237,26 @@ struct disjunction
 template<typename firstT, typename... restT>
 struct disjunction<firstT, restT...>
   : conditional<bool(firstT::value), firstT, disjunction<restT...>>::type
+  { };
+
+template<typename targetT, typename sourceT>
+struct copy_cv
+  : enable_if<true, targetT>
+  { };
+
+template<typename targetT, typename sourceT>
+struct copy_cv<targetT, const sourceT>
+  : add_const<targetT>
+  { };
+
+template<typename targetT, typename sourceT>
+struct copy_cv<targetT, volatile sourceT>
+  : add_volatile<targetT>
+  { };
+
+template<typename targetT, typename sourceT>
+struct copy_cv<targetT, const volatile sourceT>
+  : add_cv<targetT>
   { };
 
 template<typename iteratorT>
