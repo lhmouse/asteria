@@ -492,7 +492,7 @@ class vector_iterator
     pointer
     operator->()
     const noexcept
-      { return this->do_validate(this->m_cur, true);  }
+      { return ::std::addressof(**this);  }
 
     vector_iterator&
     operator+=(difference_type off)
