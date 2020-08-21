@@ -20,9 +20,9 @@ class basic_linear_buffer;
 template<typename charT, typename traitsT, typename allocT>
 class basic_linear_buffer
   {
-    static_assert(!is_array<charT>::value, "invalid character type");
-    static_assert(is_trivial<charT>::value, "characters must be trivial");
-    static_assert(is_same<typename allocT::value_type, charT>::value, "inappropriate allocator type");
+    static_assert(!is_array<charT>::value, "Invalid character type");
+    static_assert(is_trivial<charT>::value, "Characters must be trivial");
+    static_assert(is_same<typename allocT::value_type, charT>::value, "Inappropriate allocator type");
 
   public:
     using value_type      = charT;

@@ -117,9 +117,9 @@ class basic_tinybuf_str
 
         // Perform range checks.
         if(off < static_cast<off_type>(-ref))
-          noadl::sprintf_and_throw<out_of_range>("tinybuf_str: attempt to seek to a negative offset");
+          noadl::sprintf_and_throw<out_of_range>("tinybuf_str: Attempt to seek to a negative offset");
         if(off > static_cast<off_type>(this->m_stor.size() - ref))
-          noadl::sprintf_and_throw<out_of_range>("tinybuf_str: attempt to seek past the end");
+          noadl::sprintf_and_throw<out_of_range>("tinybuf_str: Attempt to seek past the end");
 
         // Convert the relative offset to an absolute one and set it.
         off_type abs = static_cast<off_type>(ref) + off;

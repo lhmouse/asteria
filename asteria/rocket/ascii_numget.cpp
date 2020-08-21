@@ -74,7 +74,7 @@ do_get_base(const char*& rp, const char* eptr, uint8_t ibase)
         return ibase;
 
       default:
-        sprintf_and_throw<invalid_argument>("ascii_numget: invalid radix (`%d` not 2, 10 or 16)", ibase);
+        sprintf_and_throw<invalid_argument>("ascii_numget: Invalid radix (`%d` not 2, 10 or 16)", ibase);
     }
   }
 

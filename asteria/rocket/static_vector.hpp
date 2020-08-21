@@ -30,8 +30,8 @@ class static_vector;
 template<typename valueT, size_t capacityT, typename allocT>
 class static_vector
   {
-    static_assert(!is_array<valueT>::value, "invalid element type");
-    static_assert(is_same<typename allocT::value_type, valueT>::value, "inappropriate allocator type");
+    static_assert(!is_array<valueT>::value, "Invalid element type");
+    static_assert(is_same<typename allocT::value_type, valueT>::value, "Inappropriate allocator type");
 
   public:
     // types
@@ -142,7 +142,7 @@ class static_vector
     do_throw_subscript_out_of_range(size_type pos)
     const
       {
-        noadl::sprintf_and_throw<out_of_range>("static_vector: subscript out of range (`%llu` > `%llu`)",
+        noadl::sprintf_and_throw<out_of_range>("static_vector: Subscript out of range (`%llu` > `%llu`)",
                                                static_cast<unsigned long long>(pos),
                                                static_cast<unsigned long long>(this->size()));
       }

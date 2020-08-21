@@ -122,9 +122,9 @@ operator<<(basic_tinyfmt<charT, traitsT>& fmt, basic_shallow_string<charT, trait
 template<typename charT, typename traitsT, typename allocT>
 class basic_cow_string
   {
-    static_assert(!is_array<charT>::value, "invalid character type");
-    static_assert(is_trivial<charT>::value, "characters must be trivial");
-    static_assert(is_same<typename allocT::value_type, charT>::value, "inappropriate allocator type");
+    static_assert(!is_array<charT>::value, "Invalid character type");
+    static_assert(is_trivial<charT>::value, "Characters must be trivial");
+    static_assert(is_same<typename allocT::value_type, charT>::value, "Inappropriate allocator type");
 
   public:
     // types
@@ -255,7 +255,7 @@ class basic_cow_string
     do_throw_subscript_out_of_range(size_type pos)
     const
       {
-        noadl::sprintf_and_throw<out_of_range>("cow_string: subscript out of range (`%llu` > `%llu`)",
+        noadl::sprintf_and_throw<out_of_range>("cow_string: Subscript out of range (`%llu` > `%llu`)",
                                                static_cast<unsigned long long>(pos),
                                                static_cast<unsigned long long>(this->size()));
       }
@@ -1286,7 +1286,7 @@ class basic_cow_string
       {
         size_type clen = traits_type::length(this->m_ptr);
         if(clen != this->m_len)
-          noadl::sprintf_and_throw<domain_error>("cow_string: embedded null character detected (at `%llu`)",
+          noadl::sprintf_and_throw<domain_error>("cow_string: Embedded null character detected (at `%llu`)",
                                                  static_cast<unsigned long long>(clen));
         return this->m_ptr;
       }

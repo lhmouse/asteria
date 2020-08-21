@@ -25,7 +25,7 @@ class array;
 template<typename valueT, size_t capacityT, size_t... nestedT>
 class array
   {
-    static_assert(!is_array<valueT>::value, "invalid element type");
+    static_assert(!is_array<valueT>::value, "Invalid element type");
 
   public:
     // types
@@ -51,7 +51,7 @@ class array
     do_throw_subscript_out_of_range(size_type pos)
     const
       {
-        noadl::sprintf_and_throw<out_of_range>("array: subscript out of range (`%llu` > `%llu`)",
+        noadl::sprintf_and_throw<out_of_range>("array: Subscript out of range (`%llu` > `%llu`)",
                                                static_cast<unsigned long long>(pos),
                                                static_cast<unsigned long long>(this->size()));
       }

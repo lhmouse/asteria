@@ -82,7 +82,7 @@ vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl,
 
       // Skip the dollar sign and parse the placeholder.
       if(pp == ep)
-        noadl::sprintf_and_throw<invalid_argument>("format: incomplete placeholder (dangling `$`)");
+        noadl::sprintf_and_throw<invalid_argument>("format: Incomplete placeholder (dangling `$`)");
 
       typename traitsT::int_type ch = traitsT::to_int_type(*++pp);
       bp = ++pp;
@@ -101,22 +101,22 @@ vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl,
           // Look for the terminator.
           bp = traitsT::find(bp, static_cast<size_t>(ep - bp), traitsT::to_char_type('}'));
           if(!bp)
-            noadl::sprintf_and_throw<invalid_argument>("format: incomplete placeholder (no matching `}`)");
+            noadl::sprintf_and_throw<invalid_argument>("format: Incomplete placeholder (no matching `}`)");
 
           // Parse the argument index.
           ptrdiff_t ndigs = bp++ - pp;
           if(ndigs < 1)
-            noadl::sprintf_and_throw<invalid_argument>("format: missing argument index");
+            noadl::sprintf_and_throw<invalid_argument>("format: Missing argument index");
 
           if(ndigs > 3)
-            noadl::sprintf_and_throw<invalid_argument>("format: too many digits (`%td` > `3`)", ndigs);
+            noadl::sprintf_and_throw<invalid_argument>("format: Too many digits (`%td` > `3`)", ndigs);
 
           // Collect digits.
           while(--ndigs >= 0) {
             ch = traitsT::to_int_type(*(pp++));
             char32_t dval = static_cast<char32_t>(ch - '0');
             if(dval > 9)
-              noadl::sprintf_and_throw<invalid_argument>("format: invalid digit (character `%c`)", (int)ch);
+              noadl::sprintf_and_throw<invalid_argument>("format: Invalid digit (character `%c`)", (int)ch);
 
             // Accumulate a digit.
             index = index * 10 + dval;
@@ -139,7 +139,7 @@ vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl,
           break;
 
         default:
-          noadl::sprintf_and_throw<invalid_argument>("format: invalid placeholder (sequence `$%c`)", (int)ch);
+          noadl::sprintf_and_throw<invalid_argument>("format: Invalid placeholder (sequence `$%c`)", (int)ch);
       }
 
       // Replace the placeholder.
@@ -148,7 +148,7 @@ vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl,
       else if(index <= ninsts)
         pinsts[index-1].submit(fmt);
       else
-        noadl::sprintf_and_throw<invalid_argument>("format: no enough arguments (`%zu` > `%zu`)", index, ninsts);
+        noadl::sprintf_and_throw<invalid_argument>("format: No enough arguments (`%zu` > `%zu`)", index, ninsts);
     }
     return fmt;
   }

@@ -100,7 +100,7 @@ class basic_storage
           // If the buffer is not large enough, allocate a new one.
           auto nmax = this->max_size();
           if(nmax - nused < nadd)
-            noadl::sprintf_and_throw<length_error>("linear_buffer: max size exceeded (`%lld` + `%lld` > `%lld`)",
+            noadl::sprintf_and_throw<length_error>("linear_buffer: Max size exceeded (`%lld` + `%lld` > `%lld`)",
                                                    static_cast<long long>(nused), static_cast<long long>(nadd),
                                                    static_cast<long long>(nmax));
 

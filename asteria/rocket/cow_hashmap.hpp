@@ -39,8 +39,8 @@ class cow_hashmap;
 template<typename keyT, typename mappedT, typename hashT, typename eqT, typename allocT>
 class cow_hashmap
   {
-    static_assert(!is_array<keyT>::value, "invalid key type");
-    static_assert(!is_array<mappedT>::value, "invalid mapped value type");
+    static_assert(!is_array<keyT>::value, "Invalid key type");
+    static_assert(!is_array<mappedT>::value, "Invalid mapped value type");
     static_assert(is_same<typename allocT::value_type, pair<const keyT, mappedT>>::value,
                   "inappropriate allocator type");
     static_assert(noexcept(::std::declval<const hashT&>()(::std::declval<const keyT&>())),
@@ -236,7 +236,7 @@ class cow_hashmap
     void
     do_throw_key_not_found()
     const
-      { noadl::sprintf_and_throw<out_of_range>("cow_hashmap: key not found");  }
+      { noadl::sprintf_and_throw<out_of_range>("cow_hashmap: Key not found");  }
 
     const details_cow_hashmap::bucket<allocator_type>*
     do_get_table()

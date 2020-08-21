@@ -102,7 +102,7 @@ class basic_tinybuf_file
           // Discard all characters preceding `*gcur`.
           auto nbump = static_cast<size_type>(gcur - this->m_gbuf.begin());
           if(traits_type::fgetn(this->m_file, this->m_gbuf.mut_begin(), nbump) != nbump)
-            noadl::sprintf_and_throw<runtime_error>("tinybuf_file: read error (errno `%d`, fileno `%d`)",
+            noadl::sprintf_and_throw<runtime_error>("tinybuf_file: Read error (errno `%d`, fileno `%d`)",
                                                     errno, ::fileno(this->m_file));
         }
 
@@ -170,10 +170,10 @@ class basic_tinybuf_file
 
         // Reposition the file.
         if(!this->m_file)
-          noadl::sprintf_and_throw<invalid_argument>("tinybuf_file: no file opened");
+          noadl::sprintf_and_throw<invalid_argument>("tinybuf_file: No file opened");
 
         if(::fseeko(this->m_file, off, whence) != 0)
-          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: seek error (errno `%d`, fileno `%d`)",
+          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: Seek error (errno `%d`, fileno `%d`)",
                                                   errno, ::fileno(this->m_file));
 
         // Return the new offset.
@@ -189,7 +189,7 @@ class basic_tinybuf_file
 
         // Load more characters into the input buffer.
         if(!this->m_file)
-          noadl::sprintf_and_throw<invalid_argument>("tinybuf_file: no file opened");
+          noadl::sprintf_and_throw<invalid_argument>("tinybuf_file: No file opened");
 
         // Get the file position of the beginning of the new get area.
         auto goff = this->m_goff;
@@ -226,7 +226,7 @@ class basic_tinybuf_file
         this->m_goff = goff;
         // Check for read errors.
         if((navail == 0) && ::ferror(this->m_file))
-          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: read error (errno `%d`, fileno `%d`)",
+          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: Read error (errno `%d`, fileno `%d`)",
                                                   errno, ::fileno(this->m_file));
 
         // Get the number of characters available in total.
@@ -253,14 +253,14 @@ class basic_tinybuf_file
         // Notice that we don't use put areas.
         // Write the string directly to the file.
         if(!this->m_file)
-          noadl::sprintf_and_throw<invalid_argument>("tinybuf_file: no file opened");
+          noadl::sprintf_and_throw<invalid_argument>("tinybuf_file: No file opened");
 
         // Optimize the one-character case a little.
         bool succ = ROCKET_EXPECT(nadd == 1)
                         ? (traits_type::is_eof(traits_type::fputc(this->m_file, sadd[0])) == false)
                         : (traits_type::fputn(this->m_file, sadd, nadd) == nadd);
         if(!succ)
-          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: write error (errno `%d`, fileno `%d`)",
+          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: Write error (errno `%d`, fileno `%d`)",
                                                   errno, ::fileno(this->m_file));
         return *this;
       }
@@ -327,7 +327,7 @@ class basic_tinybuf_file
           mstr[mlen++] = 'w';
         }
         else
-          noadl::sprintf_and_throw<invalid_argument>("tinybuf_file: no access specified (path `%s`, mode `%u`)",
+          noadl::sprintf_and_throw<invalid_argument>("tinybuf_file: No access specified (path `%s`, mode `%u`)",
                                                      path, mode);
 
         // Translate combination flags.
@@ -352,12 +352,12 @@ class basic_tinybuf_file
         // Open the file.
         unique_posix_fd fd(::open(path, flags, 0666), ::close);
         if(!fd)
-          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: open error (errno `%d`, path `%s`, mode `%u`)",
+          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: Open error (errno `%d`, path `%s`, mode `%u`)",
                                                   errno, path, mode);
         // Convert it to a `FILE*`.
         unique_posix_file file(::fdopen(fd, mstr), ::fclose);
         if(!file)
-          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: open error (errno `%d`, path `%s`, mode `%u`)",
+          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: Open error (errno `%d`, path `%s`, mode `%u`)",
                                                   errno, path, mode);
         // If `fdopen()` succeeds it will have taken the ownership of `fd`.
         fd.release();
