@@ -1300,6 +1300,10 @@ class basic_cow_string
         if(ROCKET_EXPECT(ptr))
           return ptr;
 
+        // If the string is empty, return a pointer to constant storage.
+        if(this->empty())
+          return const_cast<value_type*>(this->data());
+
         // Reallocate the storage. The length is left intact.
         ptr = this->m_sth.reallocate_more(this->data(), this->size(), 0) - this->size();
         this->m_ptr = ptr;
