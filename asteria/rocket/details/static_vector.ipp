@@ -288,8 +288,8 @@ class vector_iterator
       { }
 
   private:
-    pointer
-    do_validate(pointer cur, bool deref)
+    valueT*
+    do_validate(valueT* cur, bool deref)
     const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");

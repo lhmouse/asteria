@@ -337,8 +337,8 @@ class string_iterator
       { }
 
   private:
-    pointer
-    do_validate(pointer cur, bool deref)
+    charT*
+    do_validate(charT* cur, bool deref)
     const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
