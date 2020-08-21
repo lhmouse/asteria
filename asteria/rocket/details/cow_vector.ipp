@@ -502,6 +502,28 @@ class vector_iterator
         return *this;
       }
 
+    vector_iterator&
+    operator-=(difference_type off)
+    noexcept
+      {
+        this->m_cur = this->do_validate(this->m_cur - off, false);
+        return *this;
+      }
+
+    template<typename yvalueT>
+    constexpr
+    bool
+    operator==(const vector_iterator<vectorT, yvalueT>& other)
+    const noexcept
+      { return this->m_cur == other.m_cur;  }
+
+    template<typename yvalueT>
+    constexpr
+    bool
+    operator!=(const vector_iterator<vectorT, yvalueT>& other)
+    const noexcept
+      { return this->m_cur != other.m_cur;  }
+
     vector_iterator
     operator+(difference_type off)
     const noexcept
@@ -511,20 +533,40 @@ class vector_iterator
         return res;
       }
 
-    vector_iterator&
-    operator-=(difference_type off)
-    noexcept
-      {
-        this->m_cur = this->do_validate(this->m_cur - off, false);
-        return *this;
-      }
-
     vector_iterator
     operator-(difference_type off)
     const noexcept
       {
         auto res = *this;
         res -= off;
+        return res;
+      }
+
+    vector_iterator&
+    operator++()
+    noexcept
+      { return *this += 1;  }
+
+    vector_iterator&
+    operator--()
+    noexcept
+      { return *this -= 1;  }
+
+    vector_iterator
+    operator++(int)
+    noexcept
+      {
+        auto res = *this;
+        ++*this;
+        return res;
+      }
+
+    vector_iterator
+    operator--(int)
+    noexcept
+      {
+        auto res = *this;
+        --*this;
         return res;
       }
 
@@ -543,66 +585,30 @@ class vector_iterator
         ROCKET_ASSERT_MSG(this->m_begin == other.m_begin, "Iterator not compatible");
         return this->m_cur - other.m_cur;
       }
+
+    template<typename yvalueT>
+    bool
+    operator<(const vector_iterator<vectorT, yvalueT>& other)
+    const noexcept
+      { return *this - other < 0;  }
+
+    template<typename yvalueT>
+    bool
+    operator>(const vector_iterator<vectorT, yvalueT>& other)
+    const noexcept
+      { return *this - other > 0;  }
+
+    template<typename yvalueT>
+    bool
+    operator<=(const vector_iterator<vectorT, yvalueT>& other)
+    const noexcept
+      { return *this - other <= 0;  }
+
+    template<typename yvalueT>
+    bool
+    operator>=(const vector_iterator<vectorT, yvalueT>& other)
+    const noexcept
+      { return *this - other >= 0;  }
   };
-
-template<typename vectorT, typename valueT>
-vector_iterator<vectorT, valueT>&
-operator++(vector_iterator<vectorT, valueT>& lhs)
-noexcept
-  { return lhs += 1;  }
-
-template<typename vectorT, typename valueT>
-vector_iterator<vectorT, valueT>
-operator++(vector_iterator<vectorT, valueT>& lhs, int)
-noexcept
-  { return ::std::exchange(lhs, lhs + 1);  }
-
-template<typename vectorT, typename valueT>
-vector_iterator<vectorT, valueT>&
-operator--(vector_iterator<vectorT, valueT>& lhs)
-noexcept
-  { return lhs -= 1;  }
-
-template<typename vectorT, typename valueT>
-vector_iterator<vectorT, valueT>
-operator--(vector_iterator<vectorT, valueT>& lhs, int)
-noexcept
-  { return ::std::exchange(lhs, lhs - 1);  }
-
-template<typename vectorT, typename xvalueT, typename yvalueT>
-bool
-operator==(const vector_iterator<vectorT, xvalueT>& lhs, const vector_iterator<vectorT, yvalueT>& rhs)
-noexcept
-  { return lhs - rhs == 0;  }
-
-template<typename vectorT, typename xvalueT, typename yvalueT>
-bool
-operator!=(const vector_iterator<vectorT, xvalueT>& lhs, const vector_iterator<vectorT, yvalueT>& rhs)
-noexcept
-  { return lhs - rhs != 0;  }
-
-template<typename vectorT, typename xvalueT, typename yvalueT>
-bool
-operator<(const vector_iterator<vectorT, xvalueT>& lhs, const vector_iterator<vectorT, yvalueT>& rhs)
-noexcept
-  { return lhs - rhs < 0;  }
-
-template<typename vectorT, typename xvalueT, typename yvalueT>
-bool
-operator>(const vector_iterator<vectorT, xvalueT>& lhs, const vector_iterator<vectorT, yvalueT>& rhs)
-noexcept
-  { return lhs - rhs > 0;  }
-
-template<typename vectorT, typename xvalueT, typename yvalueT>
-bool
-operator<=(const vector_iterator<vectorT, xvalueT>& lhs, const vector_iterator<vectorT, yvalueT>& rhs)
-noexcept
-  { return lhs - rhs <= 0;  }
-
-template<typename vectorT, typename xvalueT, typename yvalueT>
-bool
-operator>=(const vector_iterator<vectorT, xvalueT>& lhs, const vector_iterator<vectorT, yvalueT>& rhs)
-noexcept
-  { return lhs - rhs >= 0;  }
 
 }  // namespace details_cow_vector
