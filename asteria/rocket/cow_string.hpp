@@ -498,6 +498,13 @@ class basic_cow_string
     basic_cow_string&
     shrink_to_fit()
       {
+        // If the string is empty, deallocate any dynamic storage. The length is left intact.
+        if(this->empty()) {
+          this->m_sth.deallocate();
+          this->m_ptr = storage_handle::null_char;
+          return *this;
+        }
+
         // Calculate the minimum capacity to reserve. This must include all existent characters.
         // Don't reallocate if the storage is shared or tight.
         size_type rcap = this->m_sth.round_up_capacity(this->size());
