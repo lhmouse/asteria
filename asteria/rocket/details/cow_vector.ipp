@@ -14,6 +14,11 @@ struct storage_header
     void (*dtor)(...);
     size_t nelem;
 
+    // This is the number of uninitialized elements in the beginning.
+    // This field is paramount for exception safety.
+    // It shall be zero for a fully initialized block.
+    size_t nskip;
+
     explicit
     storage_header()
     noexcept
@@ -33,7 +38,7 @@ struct storage_traits
     do_transfer(false_type,   // 1. movable?
                 bool,         // 2. trival?
                 bool,         // 3. copyable?
-                storage_type&, storage_type&)
+                storage_type&, storage_type&, size_t)
       {
         noadl::sprintf_and_throw<domain_error>("cow_vector: `%s` not move-constructible",
                                                typeid(value_type).name());
@@ -44,11 +49,11 @@ struct storage_traits
     do_transfer(true_type,    // 1. movable?
                 true_type,    // 2. trival?
                 bool,         // 3. copyable?
-                storage_type& st_new, storage_type& st_old)
+                storage_type& st_new, storage_type& st_old, size_t nskip)
       {
-        ::std::memcpy(st_new.data + st_new.nelem,
-                      st_old.data, st_old.nelem * sizeof(value_type));
-        st_new.nelem += st_old.nelem;
+        ::std::memcpy(st_new.data + nskip,
+                      st_old.data + nskip, sizeof(value_type) * (st_old.nelem - nskip));
+        st_new.nskip = st_old.nskip;
       }
 
     static
@@ -56,18 +61,18 @@ struct storage_traits
     do_transfer(true_type,    // 1. movable?
                 false_type,   // 2. trivial?
                 true_type,    // 3. copyable?
-                storage_type& st_new, storage_type& st_old)
+                storage_type& st_new, storage_type& st_old, size_t nskip)
       {
         if(st_old.nref.unique())
-          for(size_t k = 0;  k != st_old.nelem;  ++k)
+          for(size_t k = st_old.nelem - 1;  k != nskip - 1;  --k)
             allocator_traits<allocator_type>::construct(st_new.alloc,
-                      st_new.data + st_new.nelem, ::std::move(st_old.data[k])),
-            st_new.nelem += 1;
+                                     st_new.data + k, ::std::move(st_old.data[k])),
+            st_new.nskip = k;
         else
-          for(size_t k = 0;  k != st_old.nelem;  ++k)
+          for(size_t k = st_old.nelem - 1;  k != nskip - 1;  --k)
             allocator_traits<allocator_type>::construct(st_new.alloc,
-                      st_new.data + st_new.nelem, st_old.data[k]),
-            st_new.nelem += 1;
+                                     st_new.data + k, st_old.data[k]),
+            st_new.nskip = k;
       }
 
     static
@@ -75,13 +80,13 @@ struct storage_traits
     do_transfer(true_type,    // 1. movable?
                 false_type,   // 2. trivial?
                 false_type,   // 3. copyable?
-                storage_type& st_new, storage_type& st_old)
+                storage_type& st_new, storage_type& st_old, size_t nskip)
       {
         if(st_old.nref.unique())
-          for(size_t k = 0;  k != st_old.nelem;  ++k)
+          for(size_t k = st_old.nelem - 1;  k != nskip - 1;  --k)
             allocator_traits<allocator_type>::construct(st_new.alloc,
-                      st_new.data + st_new.nelem, ::std::move(st_old.data[k])),
-            st_new.nelem += 1;
+                                     st_new.data + k, ::std::move(st_old.data[k])),
+            st_new.nskip = k;
         else
           noadl::sprintf_and_throw<domain_error>("cow_vector: `%s` not copy-constructible",
                                                  typeid(value_type).name());
@@ -89,14 +94,19 @@ struct storage_traits
 
     static
     void
-    dispatch_transfer(storage_type& st_new, storage_type& st_old)
+    dispatch_transfer(storage_type& st_new, storage_type& st_old, size_t nskip)
       {
+        ROCKET_ASSERT(st_old.nskip <= st_old.nelem);
+        ROCKET_ASSERT(st_old.nelem == st_new.nskip);
+        ROCKET_ASSERT(st_new.nskip <= st_new.nelem);
+        ROCKET_ASSERT(st_old.nskip <= nskip);
+
         return do_transfer(
             ::std::is_move_constructible<value_type>(),                // 1. movable
             conjunction<is_std_allocator<allocator_type>,
                         ::std::is_trivially_copyable<value_type>>(),   // 2. trivial
             ::std::is_copy_constructible<value_type>(),                // 3. copyable
-            st_new, st_old);
+            st_new, st_old, nskip);
       }
   };
 
@@ -128,12 +138,13 @@ class storage_handle
         size_type nblk;
         value_type data[0];
 
-        storage(void xdtor(...), const allocator_type& xalloc, size_type xnblk)
+        storage(void xdtor(...), size_t xnskip, const allocator_type& xalloc, size_type xnblk)
         noexcept
           : alloc(xalloc), nblk(xnblk)
           {
             this->dtor = xdtor;
-            this->nelem = 0;
+            this->nelem = xnskip;
+            this->nskip = xnskip;
 
 #ifdef ROCKET_DEBUG
             ::std::memset(static_cast<void*>(this->data), '*', sizeof(storage) * (this->nblk - 1));
@@ -143,7 +154,7 @@ class storage_handle
         ~storage()
           {
             // Destroy all elements backwards.
-            for(size_t k = this->nelem - 1;  k != size_t(-1);  --k)
+            for(size_t k = this->nelem - 1;  k != this->nskip - 1;  --k)
               allocator_traits<allocator_type>::destroy(this->alloc, this->data + k);
 
 #ifdef ROCKET_DEBUG
@@ -361,7 +372,7 @@ class storage_handle
 
     ROCKET_NOINLINE
     value_type*
-    reallocate_more(const storage_handle& sth, size_type add)
+    reallocate_prepare(const storage_handle& sth, size_type skip, size_type add)
       {
         // Calculate the combined length of vector (sth.size() + add).
         // The first part is copied/moved from `sth`. The second part is left uninitialized.
@@ -373,24 +384,37 @@ class storage_handle
         storage_allocator st_alloc(this->as_allocator());
         auto qstor = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
         noadl::construct_at(noadl::unfancy(qstor),
-                            reinterpret_cast<void (*)(...)>(this->do_destroy_storage),
+                            reinterpret_cast<void (*)(...)>(this->do_destroy_storage), len,
                             this->as_allocator(), nblk);
 
-        if(len) {
-          try {
-            // Copy/move old elements from `sth`.
-            ROCKET_ASSERT(sth.m_qstor);
-            storage_traits<allocator_type, storage>::dispatch_transfer(*qstor, *(sth.m_qstor));
-          }
-          catch(...) {
-            this->do_destroy_storage(qstor);
-            throw;
-          }
+        try {
+          // Copy/move old elements from `sth`.
+          if(skip < len)
+            ROCKET_ASSERT(sth.m_qstor),
+            storage_traits<allocator_type, storage>::dispatch_transfer(*qstor, *(sth.m_qstor), skip);
+        }
+        catch(...) {
+          this->do_destroy_storage(qstor);
+          throw;
         }
 
         // Set up the new storage.
         this->do_reset(qstor);
         return qstor->data + len;
+      }
+
+    void
+    reallocate_finish(const storage_handle& sth)
+      {
+        auto qstor = this->m_qstor;
+        ROCKET_ASSERT(qstor);
+
+        // Copy/move old elements from `sth`.
+        if(qstor->nskip != 0)
+          ROCKET_ASSERT(sth.m_qstor),
+          storage_traits<allocator_type, storage>::dispatch_transfer(*qstor, *(sth.m_qstor), 0);
+
+        ROCKET_ASSERT(qstor->nskip == 0);
       }
 
     void
