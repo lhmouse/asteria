@@ -31,7 +31,7 @@ class storage_handle
     static constexpr value_type null_char[1] = { };
 
   private:
-    struct storage : storage_header
+    struct storage : storage_header, allocator_wrapper_base_for<allocT>::type
       {
         static constexpr
         size_type
@@ -45,13 +45,12 @@ class storage_handle
         noexcept
           { return sizeof(storage) * (nblk - 1) / sizeof(value_type) - 1;  }
 
-        allocator_type alloc;
         size_type nblk;
         value_type data[0];
 
         storage(const allocator_type& xalloc, size_type xnblk)
         noexcept
-          : alloc(xalloc), nblk(xnblk)
+          : allocator_wrapper_base_for<allocT>::type(xalloc), nblk(xnblk)
           {
 #ifdef ROCKET_DEBUG
             ::std::memset(static_cast<void*>(this->data), '*', sizeof(storage) * (this->nblk - 1));
@@ -108,8 +107,7 @@ class storage_handle
     do_reset(storage_pointer qstor_new)
     noexcept
       {
-        // Decrement the reference count with acquire-release semantics to prevent races
-        // on `qstor->alloc`.
+        // Decrement the reference count with acquire-release semantics to prevent races on `*qstor`.
         auto qstor = ::std::exchange(this->m_qstor, qstor_new);
         if(ROCKET_EXPECT(!qstor))
           return;
@@ -128,7 +126,7 @@ class storage_handle
     noexcept
       {
         auto nblk = qstor->nblk;
-        storage_allocator st_alloc(qstor->alloc);
+        storage_allocator st_alloc(*qstor);
         noadl::destroy_at(noadl::unfancy(qstor));
         allocator_traits<storage_allocator>::deallocate(st_alloc, qstor, nblk);
       }

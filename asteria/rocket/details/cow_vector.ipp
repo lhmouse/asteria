@@ -65,12 +65,12 @@ struct storage_traits
       {
         if(st_old.nref.unique())
           for(size_t k = st_old.nelem - 1;  k != nskip - 1;  --k)
-            allocator_traits<allocator_type>::construct(st_new.alloc,
+            allocator_traits<allocator_type>::construct(st_new,
                                      st_new.data + k, ::std::move(st_old.data[k])),
             st_new.nskip = k;
         else
           for(size_t k = st_old.nelem - 1;  k != nskip - 1;  --k)
-            allocator_traits<allocator_type>::construct(st_new.alloc,
+            allocator_traits<allocator_type>::construct(st_new,
                                      st_new.data + k, st_old.data[k]),
             st_new.nskip = k;
       }
@@ -84,7 +84,7 @@ struct storage_traits
       {
         if(st_old.nref.unique())
           for(size_t k = st_old.nelem - 1;  k != nskip - 1;  --k)
-            allocator_traits<allocator_type>::construct(st_new.alloc,
+            allocator_traits<allocator_type>::construct(st_new,
                                      st_new.data + k, ::std::move(st_old.data[k])),
             st_new.nskip = k;
         else
@@ -120,7 +120,7 @@ class storage_handle
     using size_type        = typename allocator_traits<allocator_type>::size_type;
 
   private:
-    struct storage : storage_header
+    struct storage : storage_header, allocator_wrapper_base_for<allocT>::type
       {
         static constexpr
         size_type
@@ -134,13 +134,12 @@ class storage_handle
         noexcept
           { return sizeof(storage) * (nblk - 1) / sizeof(value_type);  }
 
-        allocator_type alloc;
         size_type nblk;
         value_type data[0];
 
         storage(void xdtor(...), size_t xnskip, const allocator_type& xalloc, size_type xnblk)
         noexcept
-          : alloc(xalloc), nblk(xnblk)
+          : allocator_wrapper_base_for<allocT>::type(xalloc), nblk(xnblk)
           {
             this->dtor = xdtor;
             this->nelem = xnskip;
@@ -155,7 +154,7 @@ class storage_handle
           {
             // Destroy all elements backwards.
             for(size_t k = this->nelem - 1;  k != this->nskip - 1;  --k)
-              allocator_traits<allocator_type>::destroy(this->alloc, this->data + k);
+              allocator_traits<allocator_type>::destroy(*this, this->data + k);
 
 #ifdef ROCKET_DEBUG
             this->nelem = static_cast<size_type>(0xBAD1BEEF);
@@ -206,8 +205,7 @@ class storage_handle
     do_reset(storage_pointer qstor_new)
     noexcept
       {
-        // Decrement the reference count with acquire-release semantics to prevent races
-        // on `qstor->alloc`.
+        // Decrement the reference count with acquire-release semantics to prevent races on `qstor`.
         auto qstor = ::std::exchange(this->m_qstor, qstor_new);
         if(ROCKET_EXPECT(!qstor))
           return;
@@ -226,7 +224,7 @@ class storage_handle
     noexcept
       {
         auto nblk = qstor->nblk;
-        storage_allocator st_alloc(qstor->alloc);
+        storage_allocator st_alloc(*qstor);
         noadl::destroy_at(noadl::unfancy(qstor));
         allocator_traits<storage_allocator>::deallocate(st_alloc, qstor, nblk);
       }
@@ -348,7 +346,7 @@ class storage_handle
         size_type off = qstor->nelem;
         ROCKET_ASSERT_MSG(off < this->capacity(), "No space for new elements");
 
-        allocator_traits<allocator_type>::construct(qstor->alloc, qstor->data + off,
+        allocator_traits<allocator_type>::construct(*qstor, qstor->data + off,
                                                     ::std::forward<paramsT>(params)...);
         qstor->nelem = off + 1;
 
@@ -367,7 +365,7 @@ class storage_handle
 
         off -= 1;
         qstor->nelem = off;
-        allocator_traits<allocator_type>::destroy(qstor->alloc, qstor->data + off);
+        allocator_traits<allocator_type>::destroy(*qstor, qstor->data + off);
       }
 
     ROCKET_NOINLINE
