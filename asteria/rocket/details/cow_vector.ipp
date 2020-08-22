@@ -143,9 +143,8 @@ class storage_handle
         ~storage()
           {
             // Destroy all elements backwards.
-            size_type off = this->nelem;
-            while(off-- != 0)
-              allocator_traits<allocator_type>::destroy(this->alloc, this->data + off);
+            for(size_t k = this->nelem - 1;  k != size_t(-1);  --k)
+              allocator_traits<allocator_type>::destroy(this->alloc, this->data + k);
 
 #ifdef ROCKET_DEBUG
             this->nelem = static_cast<size_type>(0xBAD1BEEF);
@@ -373,7 +372,8 @@ class storage_handle
         auto nblk = storage::min_nblk_for_nelem(cap);
         storage_allocator st_alloc(this->as_allocator());
         auto qstor = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
-        noadl::construct_at(noadl::unfancy(qstor), reinterpret_cast<void (*)(...)>(this->do_destroy_storage),
+        noadl::construct_at(noadl::unfancy(qstor),
+                            reinterpret_cast<void (*)(...)>(this->do_destroy_storage),
                             this->as_allocator(), nblk);
 
         if(len) {
