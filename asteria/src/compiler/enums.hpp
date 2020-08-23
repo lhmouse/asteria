@@ -68,6 +68,7 @@ enum Punctuator : uint8_t
     punctuator_ellipsis    = 54,  // ...
     punctuator_head        = 55,  // [^]
     punctuator_tail        = 56,  // [$]
+    punctuator_arrow       = 57,  // ->
   };
 
 ROCKET_CONST_FUNCTION
@@ -127,6 +128,7 @@ enum Keyword : uint8_t
     keyword_global    = 46,  // __global
     keyword_vcall     = 47,  // __vcall
     keyword_import    = 48,  // import
+    keyword_ref       = 49,
   };
 
 ROCKET_CONST_FUNCTION

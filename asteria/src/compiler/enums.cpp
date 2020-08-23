@@ -182,6 +182,9 @@ noexcept
       case punctuator_tail:
         return "[$]";
 
+      case punctuator_arrow:
+        return "->";
+
       default:
         return "<unknown punctuator>";
     }
@@ -338,6 +341,9 @@ noexcept
 
       case keyword_import:
         return "import";
+
+      case keyword_ref:
+        return "ref";
 
       default:
         return "<unknown keyword>";

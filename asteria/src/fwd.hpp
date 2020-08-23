@@ -720,6 +720,7 @@ enum Parser_Status : uint32_t
     parser_status_closed_brace_or_json5_key_expected         = 3028,
     parser_status_argument_expected                          = 3029,
     parser_status_closed_parenthesis_or_argument_expected    = 3030,
+    parser_status_arrow_expected                             = 3031,
   };
 
 ROCKET_CONST_FUNCTION

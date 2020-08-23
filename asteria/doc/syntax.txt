@@ -64,7 +64,7 @@ block ::=
 
 nonblock-statement ::=
 	null-statement |
-	variable-definition | immutable-variable-definition | function-definition |
+	variable-definition | immutable-variable-definition | reference-definition | function-definition |
 	expression-statement |
 	if-statement | switch-statement | do-while-statement | while-statement | for-statement |
 	break-statement | continue-statement | throw-statement | return-statement | assert-statement |
@@ -99,6 +99,9 @@ equal-initializer ::=
 
 immutable-variable-definition ::=
 	"const" variable-declarator equal-initailizer ( "," identifier equal-initializer | "" ) ";"
+
+reference-definition ::=
+	"ref" identifier "->" expression ";"
 
 function-definition ::=
 	"func" identifier "(" parameter-list-opt ")" block

@@ -524,6 +524,32 @@ do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
     return ::std::move(xstmt);
   }
 
+opt<Statement>
+do_accept_reference_definition_opt(Token_Stream& tstrm)
+  {
+    // reference-definition ::=
+    //   "ref" identifier "->" expression ";"
+    auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_ref });
+    if(!qkwrd)
+      return nullopt;
+
+    auto sloc = tstrm.next_sloc();
+    auto qname = do_accept_identifier_opt(tstrm);
+    if(!qname)
+      throw Parser_Error(parser_status_identifier_expected, tstrm.next_sloc(), tstrm.next_length());
+
+    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_arrow });
+    if(!kpunct)
+      throw Parser_Error(parser_status_arrow_expected, tstrm.next_sloc(), tstrm.next_length());
+
+    auto qinit = do_accept_expression_opt(tstrm);
+    if(!qinit)
+      throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
+
+    Statement::S_reference xstmt = { ::std::move(sloc), ::std::move(*qname), ::std::move(*qinit) };
+    return ::std::move(xstmt);
+  }
+
 opt<cow_vector<phsh_string>>
 do_accept_parameter_list_opt(Token_Stream& tstrm)
   {
@@ -1232,7 +1258,7 @@ do_accept_nonblock_statement_opt(Token_Stream& tstrm)
   {
     // nonblock-statement ::=
     //   null-statement |
-    //   variable-definition | immutable-variable-definition | function-definition |
+    //   variable-definition | immutable-variable-definition | reference-definition | function-definition |
     //   expression-statement |
     //   if-statement | switch-statement | do-while-statement | while-statement | for-statement |
     //   break-statement | continue-statement | throw-statement | return-statement | assert-statement |
@@ -1244,6 +1270,9 @@ do_accept_nonblock_statement_opt(Token_Stream& tstrm)
       return qstmt;
 
     if(auto qstmt = do_accept_immutable_variable_definition_opt(tstrm))
+      return qstmt;
+
+    if(auto qstmt = do_accept_reference_definition_opt(tstrm))
       return qstmt;
 
     if(auto qstmt = do_accept_function_definition_opt(tstrm))
