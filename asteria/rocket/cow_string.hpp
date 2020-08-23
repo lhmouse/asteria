@@ -1486,7 +1486,7 @@ class basic_cow_string
     find_first_of(size_type from, const value_type* s, size_type n)
     const noexcept
       { return this->do_find_forwards_if(from, 1,
-                   [&](const value_type* ts) { return traits_type::find(s, n, *ts) != nullptr;  });  }
+                   [&](const value_type* ts) { return traits_type::find(s, n, *ts);  });  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
@@ -1547,7 +1547,7 @@ class basic_cow_string
     find_last_of(size_type to, const value_type* s, size_type n)
     const noexcept
       { return this->do_find_backwards_if(to, 1,
-                   [&](const value_type* ts) { return traits_type::find(s, n, *ts) != nullptr;  });  }
+                   [&](const value_type* ts) { return traits_type::find(s, n, *ts);  });  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
@@ -1608,7 +1608,7 @@ class basic_cow_string
     find_first_not_of(size_type from, const value_type* s, size_type n)
     const noexcept
       { return this->do_find_forwards_if(from, 1,
-                   [&](const value_type* ts) { return traits_type::find(s, n, *ts) == nullptr;  });  }
+                   [&](const value_type* ts) { return !traits_type::find(s, n, *ts);  });  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
@@ -1670,7 +1670,7 @@ class basic_cow_string
     find_last_not_of(size_type to, const value_type* s, size_type n)
     const noexcept
       { return this->do_find_backwards_if(to, 1,
-                   [&](const value_type* ts) { return traits_type::find(s, n, *ts) == nullptr;  });  }
+                   [&](const value_type* ts) { return !traits_type::find(s, n, *ts);  });  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
