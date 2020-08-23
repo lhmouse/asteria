@@ -553,6 +553,29 @@ const
         return code;
       }
 
+      case index_reference: {
+        const auto& altr = this->m_stor.as<index_reference>();
+
+        // Create a reference for further name lookups.
+        do_user_declare(names_opt, ctx, altr.name, "reference placeholder");
+
+        // Clear the stack before pushing variables.
+        do_generate_clear_stack(code);
+
+        // Declare a void reference.
+        AIR_Node::S_declare_reference xnode_decl = { altr.name };
+        code.emplace_back(::std::move(xnode_decl));
+
+        // Generate code for the initializer.
+        // Note: Do not destroy the stack.
+        do_generate_subexpression(code, opts, ptc_aware_none, ctx, altr.init);
+
+        // Initialize the reference.
+        AIR_Node::S_initialize_reference xnode_init = { altr.name };
+        code.emplace_back(::std::move(xnode_init));
+        return code;
+      }
+
       default:
         ASTERIA_TERMINATE("invalid statement type (index `$1`)", this->index());
     }

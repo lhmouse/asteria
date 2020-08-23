@@ -38,4 +38,5 @@ check_PROGRAMS +=  \
   %reldir%/github_85.test  \
   %reldir%/github_98.test  \
   %reldir%/github_101.test  \
+  %reldir%/ref.test  \
   ${NOTHING}

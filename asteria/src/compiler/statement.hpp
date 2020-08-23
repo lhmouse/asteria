@@ -132,6 +132,13 @@ class Statement
         S_expression expr;
       };
 
+    struct S_reference
+      {
+        Source_Location sloc;
+        phsh_string name;
+        S_expression init;
+      };
+
     enum Index : uint8_t
       {
         index_expression  =  0,
@@ -151,6 +158,7 @@ class Statement
         index_return      = 14,
         index_assert      = 15,
         index_defer       = 16,
+        index_reference   = 17,
       };
 
     using Storage = variant<
@@ -172,6 +180,7 @@ class Statement
       , S_return      // 14,
       , S_assert      // 15,
       , S_defer       // 16,
+      , S_reference   // 17,
       )>;
 
     static_assert(::std::is_nothrow_copy_assignable<Storage>::value);

@@ -240,6 +240,16 @@ class AIR_Node
         AIR_Status status;
       };
 
+    struct S_declare_reference
+      {
+        phsh_string name;
+      };
+
+    struct S_initialize_reference
+      {
+        phsh_string name;
+      };
+
     enum Index : uint8_t
       {
         index_clear_stack            =  0,
@@ -277,6 +287,8 @@ class AIR_Node
         index_defer_expression       = 32,
         index_import_call            = 33,
         index_break_or_continue      = 34,
+        index_declare_reference      = 35,
+        index_initialize_reference   = 36,
       };
 
     using Storage = variant<
@@ -316,6 +328,8 @@ class AIR_Node
       , S_defer_expression       // 32,
       , S_import_call            // 33,
       , S_break_or_continue      // 34,
+      , S_declare_reference      // 35,
+      , S_initialize_reference   // 36,
       )>;
 
     static_assert(::std::is_nothrow_copy_assignable<Storage>::value);

@@ -141,6 +141,11 @@ struct Sparam_sloc_name
     phsh_string name;
   };
 
+struct Sparam_name
+  {
+    phsh_string name;
+  };
+
 struct Sparam_import
   {
     Compiler_Options opts;
@@ -3774,6 +3779,57 @@ struct AIR_Traits<AIR_Node::S_break_or_continue>
       }
   };
 
+template<>
+struct AIR_Traits<AIR_Node::S_declare_reference>
+  {
+    // `Uparam` is unused.
+    // `Sparam` is the name;
+
+    static
+    Sparam_name
+    make_sparam(bool& /*reachable*/, const AIR_Node::S_declare_reference& altr)
+      {
+        Sparam_name sp;
+        sp.name = altr.name;
+        return sp;
+      }
+
+    static
+    AIR_Status
+    execute(Executive_Context& ctx, const Sparam_name& sp)
+      {
+        // Inject a void reference into the current context.
+        ctx.open_named_reference(sp.name) = Reference_root::S_void();
+        return air_status_next;
+      }
+  };
+
+template<>
+struct AIR_Traits<AIR_Node::S_initialize_reference>
+  {
+    // `Uparam` is unused.
+    // `Sparam` is the name;
+
+    static
+    Sparam_name
+    make_sparam(bool& /*reachable*/, const AIR_Node::S_initialize_reference& altr)
+      {
+        Sparam_name sp;
+        sp.name = altr.name;
+        return sp;
+      }
+
+    static
+    AIR_Status
+    execute(Executive_Context& ctx, const Sparam_name& sp)
+      {
+        // Pop a reference from the stack and move it into the context.
+        ctx.open_named_reference(sp.name) = ::std::move(ctx.stack().open_top());
+        ctx.stack().pop();
+        return air_status_next;
+      }
+  };
+
 // These are helper type traits.
 // Depending on the existence of Uparam, Sparam and Symbols, the code will look very different.
 
@@ -4255,6 +4311,8 @@ const
 
       case index_import_call:
       case index_break_or_continue:
+      case index_declare_reference:
+      case index_initialize_reference:
         // There is nothing to rebind.
         return nullopt;
 
@@ -4592,6 +4650,16 @@ const
         return do_solidify(queue, altr);
       }
 
+      case index_declare_reference: {
+        const auto& altr = this->m_stor.as<index_declare_reference>();
+        return do_solidify(queue, altr);
+      }
+
+      case index_initialize_reference: {
+        const auto& altr = this->m_stor.as<index_initialize_reference>();
+        return do_solidify(queue, altr);
+      }
+
       default:
         ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
     }
@@ -4730,6 +4798,8 @@ const
 
       case index_import_call:
       case index_break_or_continue:
+      case index_declare_reference:
+      case index_initialize_reference:
         return callback;
 
       default:

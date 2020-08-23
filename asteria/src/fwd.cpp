@@ -342,6 +342,9 @@ noexcept
       case parser_status_closed_parenthesis_or_argument_expected:
         return "`)` or argument expected";
 
+      case parser_status_arrow_expected:
+        return "`->` expected";
+
       default:
         return "<unknown parser error>";
     }

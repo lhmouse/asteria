@@ -15,7 +15,7 @@ int main()
     cbuf.set_string(::rocket::sref(
       R"__(#!some shebang
         hh+++
-        if <<<->>>>>"\u55b5b喵"/
+        if <<<&>>>>>"\u55b5b喵"/
         * - 0x01`7.8`4p+4  // comments
         .false/*more
         comments*/;/*yet more*/-42e13
@@ -50,7 +50,7 @@ int main()
 
     p = ts.peek_opt();
     ASTERIA_TEST_CHECK(p);
-    ASTERIA_TEST_CHECK(p->as_punctuator() == punctuator_sub);
+    ASTERIA_TEST_CHECK(p->as_punctuator() == punctuator_andb);
     ts.shift();
 
     p = ts.peek_opt();
