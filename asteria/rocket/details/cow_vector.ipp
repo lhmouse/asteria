@@ -126,13 +126,17 @@ class storage_handle
         size_type
         min_nblk_for_nelem(size_type nelem)
         noexcept
-          { return (nelem * sizeof(value_type) + sizeof(storage) - 1) / sizeof(storage) + 1;  }
+          { return static_cast<size_type>(
+                       (static_cast<size_t>(nelem) * sizeof(value_type) + sizeof(storage) - 1)
+                           / sizeof(storage) + 1);  }
 
         static constexpr
         size_type
         max_nelem_for_nblk(size_type nblk)
         noexcept
-          { return (nblk - 1) * sizeof(storage) / sizeof(value_type);  }
+          { return static_cast<size_type>(
+                       (static_cast<size_t>(nblk) - 1) * sizeof(storage)
+                           / sizeof(value_type));  }
 
         size_type nblk;
         value_type data[0];
