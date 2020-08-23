@@ -522,12 +522,13 @@ class cow_vector
         if(first == last)
           return *this;
 
-        size_type n = noadl::estimate_distance(first, last);
+        size_t dist = noadl::estimate_distance(first, last);
+        size_type n = static_cast<size_type>(dist);
 
         // Check whether the storage is unique and there is enough space.
         auto ptr = this->m_sth.mut_data_opt();
         auto cap = this->capacity();
-        if(ROCKET_EXPECT(n && ptr && (n <= cap - this->size()))) {
+        if(ROCKET_EXPECT(dist && ptr && (dist <= cap - this->size()))) {
           // Append new elements in place.
           for(auto it = ::std::move(first);  it != last;  ++it)
             this->m_sth.emplace_back_unchecked(*it);
@@ -536,7 +537,7 @@ class cow_vector
 
         // Allocate new storage.
         storage_handle sth(this->m_sth.as_allocator());
-        if(ROCKET_EXPECT(n)) {
+        if(ROCKET_EXPECT(n && (n == dist))) {
           // The length is known.
           ptr = sth.reallocate_prepare(this->m_sth, this->size(), n | cap / 2);
 

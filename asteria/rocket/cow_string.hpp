@@ -774,7 +774,7 @@ class basic_cow_string
     append(const value_type* first, const value_type* last)
       {
         ROCKET_ASSERT(first <= last);
-        return this->append(first, static_cast<size_type>(last - first));
+        return this->append(first, static_cast<size_t>(last - first));
       }
 
     template<typename inputT,
@@ -785,16 +785,17 @@ class basic_cow_string
         if(first == last)
           return *this;
 
-        size_type n = noadl::estimate_distance(first, last);
+        size_t dist = noadl::estimate_distance(first, last);
+        size_type n = static_cast<size_type>(dist);
 
         // If the storage is unique and there is enough space, append the string in place.
         auto ptr = this->m_sth.mut_data_opt();
         auto cap = this->capacity();
-        if(ROCKET_EXPECT(n && ptr)) {
+        if(ROCKET_EXPECT(dist && ptr)) {
           ptr += this->size();
 
           // Note the string may be unowned, where `cap` would be zero.
-          if(ROCKET_EXPECT((cap >= this->size()) && (n <= cap - this->size()))) {
+          if(ROCKET_EXPECT((cap >= this->size()) && (dist <= cap - this->size()))) {
             // Copy characters.
             n = 0;
             for(auto it = ::std::move(first);  it != last;  ++it)
@@ -810,7 +811,7 @@ class basic_cow_string
 
         // Allocate new storage.
         storage_handle sth(this->m_sth.as_allocator());
-        if(ROCKET_EXPECT(n)) {
+        if(ROCKET_EXPECT(n && (n == dist))) {
           // The length is known.
           ptr = sth.reallocate_more(this->data(), this->size(), n | cap / 2);
 

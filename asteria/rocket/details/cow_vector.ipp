@@ -122,17 +122,20 @@ class storage_handle
   private:
     struct storage : storage_header, allocator_wrapper_base_for<allocT>::type
       {
+        static constexpr size_type cb_value  = sizeof(value_type);
+        static constexpr size_type cb_block  = sizeof(storage);
+
         static constexpr
         size_type
         min_nblk_for_nelem(size_type nelem)
         noexcept
-          { return (sizeof(value_type) * nelem + sizeof(storage) - 1) / sizeof(storage) + 1;  }
+          { return (nelem * cb_value + cb_block - 1) / cb_block + 1;  }
 
         static constexpr
         size_type
         max_nelem_for_nblk(size_type nblk)
         noexcept
-          { return sizeof(storage) * (nblk - 1) / sizeof(value_type);  }
+          { return (nblk - 1) * cb_block / cb_value;  }
 
         size_type nblk;
         value_type data[0];
@@ -146,7 +149,7 @@ class storage_handle
             this->nskip = xnskip;
 
 #ifdef ROCKET_DEBUG
-            ::std::memset(static_cast<void*>(this->data), '*', sizeof(storage) * (this->nblk - 1));
+            ::std::memset(static_cast<void*>(this->data), '*', (this->nblk - 1) * cb_block);
 #endif
           }
 
@@ -158,7 +161,7 @@ class storage_handle
 
 #ifdef ROCKET_DEBUG
             this->nelem = static_cast<size_type>(0xBAD1BEEF);
-            ::std::memset(static_cast<void*>(this->data), '~', sizeof(storage) * (this->nblk - 1));
+            ::std::memset(static_cast<void*>(this->data), '~', (this->nblk - 1) * cb_block);
 #endif
           }
 
@@ -333,7 +336,8 @@ class storage_handle
         auto qstor = this->m_qstor;
         if(!qstor)
           return 0;
-        return reinterpret_cast<storage_header*>(noadl::unfancy(qstor))->nelem;
+        return static_cast<size_type>(
+                   reinterpret_cast<storage_header*>(noadl::unfancy(qstor))->nelem);
       }
 
     template<typename... paramsT>
@@ -343,12 +347,12 @@ class storage_handle
         auto qstor = this->m_qstor;
         ROCKET_ASSERT_MSG(qstor, "No storage allocated");
 
-        size_type off = qstor->nelem;
+        size_t off = qstor->nelem;
         ROCKET_ASSERT_MSG(off < this->capacity(), "No space for new elements");
 
         allocator_traits<allocator_type>::construct(*qstor, qstor->data + off,
                                                     ::std::forward<paramsT>(params)...);
-        qstor->nelem = off + 1;
+        qstor->nelem = static_cast<size_type>(off + 1);
 
         return qstor->data[off];
       }
@@ -360,11 +364,12 @@ class storage_handle
         auto qstor = this->m_qstor;
         ROCKET_ASSERT_MSG(qstor, "No storage allocated");
 
-        size_type off = qstor->nelem;
+        size_t off = qstor->nelem;
         ROCKET_ASSERT_MSG(off > 0, "No element to pop");
 
-        off -= 1;
-        qstor->nelem = off;
+        off--;
+
+        qstor->nelem = static_cast<size_type>(off);
         allocator_traits<allocator_type>::destroy(*qstor, qstor->data + off);
       }
 

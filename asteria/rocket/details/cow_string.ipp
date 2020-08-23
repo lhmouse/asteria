@@ -33,17 +33,20 @@ class storage_handle
   private:
     struct storage : storage_header, allocator_wrapper_base_for<allocT>::type
       {
+        static constexpr size_type cb_value  = sizeof(value_type);
+        static constexpr size_type cb_block  = sizeof(storage);
+
         static constexpr
         size_type
         min_nblk_for_nchar(size_type nchar)
         noexcept
-          { return (sizeof(value_type) * (nchar + 1) + sizeof(storage) - 1) / sizeof(storage) + 1;  }
+          { return ((nchar + 1) * cb_value + cb_block - 1) / cb_block + 1;  }
 
         static constexpr
         size_type
         max_nchar_for_nblk(size_type nblk)
         noexcept
-          { return sizeof(storage) * (nblk - 1) / sizeof(value_type) - 1;  }
+          { return (nblk - 1) * cb_block / cb_value - 1;  }
 
         size_type nblk;
         value_type data[0];
@@ -53,14 +56,14 @@ class storage_handle
           : allocator_wrapper_base_for<allocT>::type(xalloc), nblk(xnblk)
           {
 #ifdef ROCKET_DEBUG
-            ::std::memset(static_cast<void*>(this->data), '*', sizeof(storage) * (this->nblk - 1));
+            ::std::memset(static_cast<void*>(this->data), '*', (this->nblk - 1) * cb_block);
 #endif
           }
 
         ~storage()
           {
 #ifdef ROCKET_DEBUG
-            ::std::memset(static_cast<void*>(this->data), '~', sizeof(storage) * (this->nblk - 1));
+            ::std::memset(static_cast<void*>(this->data), '~', (this->nblk - 1) * cb_block);
 #endif
           }
 
