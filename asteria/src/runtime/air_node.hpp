@@ -329,10 +329,7 @@ class AIR_Node
       { }
 
     ASTERIA_VARIANT_ASSIGNMENT(AIR_Node, Storage, XNodeT, xnode)
-      {
-        this->m_stor = ::std::forward<XNodeT>(xnode);
-        return *this;
-      }
+      { return this->m_stor = ::std::forward<XNodeT>(xnode), *this;  }
 
   public:
     Index

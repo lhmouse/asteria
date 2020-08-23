@@ -85,10 +85,7 @@ class Infix_Element
       { }
 
     ASTERIA_VARIANT_ASSIGNMENT(Infix_Element, Storage, XElemT, xelem)
-      {
-        this->m_stor = ::std::forward<XElemT>(xelem);
-        return *this;
-      }
+      { return this->m_stor = ::std::forward<XElemT>(xelem), *this;  }
 
   public:
     Index

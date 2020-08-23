@@ -185,10 +185,7 @@ class Statement
       { }
 
     ASTERIA_VARIANT_ASSIGNMENT(Statement, Storage, XStmtT, xstmt)
-      {
-        this->m_stor = ::std::forward<XStmtT>(xstmt);
-        return *this;
-      }
+      { return this->m_stor = ::std::forward<XStmtT>(xstmt), *this;  }
 
   public:
     Index

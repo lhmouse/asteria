@@ -148,10 +148,7 @@ class Expression_Unit
       { }
 
     ASTERIA_VARIANT_ASSIGNMENT(Expression_Unit, Storage, XUnitT, xunit)
-      {
-        this->m_stor = ::std::forward<XUnitT>(xunit);
-        return *this;
-      }
+      { return this->m_stor = ::std::forward<XUnitT>(xunit), *this;  }
 
   public:
     Index

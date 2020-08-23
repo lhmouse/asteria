@@ -56,10 +56,7 @@ class Reference_modifier
       { }
 
     ASTERIA_VARIANT_ASSIGNMENT(Reference_modifier, Storage, XModT, xmod)
-      {
-        this->m_stor = ::std::forward<XModT>(xmod);
-        return *this;
-      }
+      { return this->m_stor = ::std::forward<XModT>(xmod), *this;  }
 
   public:
     Index
