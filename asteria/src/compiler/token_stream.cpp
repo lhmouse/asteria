@@ -67,20 +67,20 @@ class Line_Reader
           int ch = this->m_cbuf->getc();
           if(ch == EOF) {
             // When the EOF is encountered, ...
-            if(this->m_str.empty()) {
+            if(this->m_str.empty())
               // ... if the last line is empty, fail; ...
               return false;
-            }
+
             // ... otherwise, accept the last line which does not end in an LF anyway.
             break;
           }
-          if(ch == '\n') {
+          if(ch == '\n')
             // Accept a line without the LF.
             break;
-          }
-          if(this->m_str.size() >= INT_MAX) {
+
+          if(this->m_str.size() >= INT_MAX)
             ASTERIA_THROW("Too many characters in a single line");
-          }
+
           // Append the character to the line buffer.
           this->m_str.push_back(static_cast<char>(ch));
         }
@@ -98,9 +98,7 @@ class Line_Reader
     size_t
     navail()
     const noexcept
-      {
-        return this->m_str.size() - this->m_off;
-      }
+      { return this->m_str.size() - this->m_off;  }
 
     const char*
     data(size_t add = 0)
