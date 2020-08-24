@@ -13,6 +13,10 @@ namespace asteria {
 class Reference_root
   {
   public:
+    struct S_uninit
+      {
+      };
+
     struct S_void
       {
       };
@@ -44,22 +48,24 @@ class Reference_root
 
     enum Index : uint8_t
       {
-        index_void        = 0,
-        index_constant    = 1,
-        index_temporary   = 2,
-        index_variable    = 3,
-        index_tail_call   = 4,
-        index_jump_src    = 5,
+        index_uninit      = 0,
+        index_void        = 1,
+        index_constant    = 2,
+        index_temporary   = 3,
+        index_variable    = 4,
+        index_tail_call   = 5,
+        index_jump_src    = 6,
       };
 
     using Storage = variant<
       ROCKET_CDR(
-      , S_void       // 0,
-      , S_constant   // 1,
-      , S_temporary  // 2,
-      , S_variable   // 3,
-      , S_tail_call  // 4,
-      , S_jump_src   // 5,
+      , S_uninit      // 0,
+      , S_void        // 1,
+      , S_constant    // 2,
+      , S_temporary   // 3,
+      , S_variable    // 4,
+      , S_tail_call   // 5,
+      , S_jump_src    // 6,
       )>;
 
     static_assert(::std::is_nothrow_copy_assignable<Storage>::value);
@@ -80,6 +86,11 @@ class Reference_root
     index()
     const noexcept
       { return static_cast<Index>(this->m_stor.index());  }
+
+    bool
+    is_uninitialized()
+    const noexcept
+      { return this->index() == index_uninit;  }
 
     bool
     is_void()

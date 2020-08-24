@@ -17,8 +17,11 @@ dereference_const()
 const
   {
     switch(this->index()) {
+      case index_uninit:
+        ASTERIA_THROW("Attempt to use a bypassed variable or reference");
+
       case index_void:
-        ASTERIA_THROW("Attempt to take the result of a function call which returned no value");
+        ASTERIA_THROW("Attempt to use the result of a function call which returned no value");
 
       case index_constant:
         return this->m_stor.as<index_constant>().val;
@@ -54,8 +57,11 @@ dereference_mutable()
 const
   {
     switch(this->index()) {
+      case index_uninit:
+        ASTERIA_THROW("Attempt to use a bypassed variable or reference");
+
       case index_void:
-        ASTERIA_THROW("Attempt to modify the result of a function call which returned no value");
+        ASTERIA_THROW("Attempt to use the result of a function call which returned no value");
 
       case index_constant:
         ASTERIA_THROW("Attempt to modify a constant `$1`", this->m_stor.as<index_constant>().val);
@@ -94,6 +100,7 @@ enumerate_variables(Variable_Callback& callback)
 const
   {
     switch(this->index()) {
+      case index_uninit:
       case index_void:
         return callback;
 

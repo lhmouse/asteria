@@ -106,7 +106,7 @@ do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVMC_Queue&
 Reference&
 do_declare(Executive_Context& ctx, const phsh_string& name)
   {
-    return ctx.open_named_reference(name) = Reference_root::S_void();
+    return ctx.open_named_reference(name) = Reference_root::S_uninit();
   }
 
 AIR_Status
@@ -1091,8 +1091,8 @@ struct AIR_Traits<AIR_Node::S_push_local_reference>
           ASTERIA_THROW("Undeclared identifier `$1`", sp.name);
 
         // Check if control flow has bypassed its initialization.
-        if(qref->is_void())
-          ASTERIA_THROW("Use of bypassed variable `$1`", sp.name);
+        if(qref->is_uninitialized())
+          ASTERIA_THROW("Use of bypassed variable or reference `$1`", sp.name);
 
         // Push a copy of it.
         ctx.stack().push(*qref);
@@ -1305,7 +1305,7 @@ cow_vector<Reference>
 do_pop_positional_arguments(Executive_Context& ctx, size_t nargs)
   {
     cow_vector<Reference> args;
-    args.resize(nargs, Reference_root::S_void());
+    args.append(nargs);
     for(size_t i = args.size() - 1;  i != SIZE_MAX;  --i) {
       // Get an argument. Ensure it is dereferenceable.
       auto& arg = ctx.stack().open_top();
@@ -3541,7 +3541,7 @@ struct AIR_Traits<AIR_Node::S_variadic_call>
             ctx.stack().pop();
 
             // Convert all elements to temporaries.
-            args.assign(source.size(), Reference_root::S_void());
+            args.assign(source.size());
             for(size_t i = 0;  i < args.size();  ++i) {
               // Make a reference to temporary.
               Reference_root::S_temporary xref = { ::std::move(source.mut(i)) };
@@ -3798,8 +3798,8 @@ struct AIR_Traits<AIR_Node::S_declare_reference>
     AIR_Status
     execute(Executive_Context& ctx, const Sparam_name& sp)
       {
-        // Inject a void reference into the current context.
-        ctx.open_named_reference(sp.name) = Reference_root::S_void();
+        // Inject a placeholder reference into the current context.
+        ctx.open_named_reference(sp.name) = Reference_root::S_uninit();
         return air_status_next;
       }
   };

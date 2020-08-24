@@ -31,14 +31,14 @@ do_prepare_function(const cow_vector<phsh_string>& params)
         break;
       }
       // Its contents are out of interest.
-      this->open_named_reference(name) /*= Reference_root::S_void()*/;
+      this->open_named_reference(name) /*= Reference_root::S_uninit()*/;
     }
 
     // Set pre-defined references.
     // N.B. If you have ever changed these, remember to update 'executive_context.cpp' as well.
-    this->open_named_reference(::rocket::sref("__varg")) /*= Reference_root::S_void()*/;
-    this->open_named_reference(::rocket::sref("__this")) /*= Reference_root::S_void()*/;
-    this->open_named_reference(::rocket::sref("__func")) /*= Reference_root::S_void()*/;
+    this->open_named_reference(::rocket::sref("__varg")) /*= Reference_root::S_uninit()*/;
+    this->open_named_reference(::rocket::sref("__this")) /*= Reference_root::S_uninit()*/;
+    this->open_named_reference(::rocket::sref("__func")) /*= Reference_root::S_uninit()*/;
   }
 
 }  // namespace asteria

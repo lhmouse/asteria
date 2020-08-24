@@ -27,12 +27,23 @@ int main()
         }
 
         try {
+          sth = disp(1);
+          assert false;
+        }
+        catch(e) {
+          std.io.putf("Caught exception: $1\n", e);
+          assert std.string.find(e, "a function call which returned no value") != null;
+        }
+
+        assert sth == 10;
+
+        try {
           disp(2);
           assert false;
         }
         catch(e) {
           std.io.putf("Caught exception: $1\n", e);
-          assert std.string.find(e, "bypassed variable `sth`") != null;
+          assert std.string.find(e, "bypassed variable or reference `sth`") != null;
         }
 
 ///////////////////////////////////////////////////////////////////////////////

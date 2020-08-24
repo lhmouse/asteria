@@ -17,6 +17,11 @@ class Reference
     cow_vector<Reference_modifier> m_mods;
 
   public:
+    Reference()
+    noexcept
+      : m_root(Reference_root::S_uninit()), m_mods()
+      { }
+
     ASTERIA_VARIANT_CONSTRUCTOR(Reference, Reference_root, XRootT, xroot)
       : m_root(::std::forward<XRootT>(xroot)), m_mods()
       { }
@@ -48,6 +53,11 @@ class Reference
     do_finish_call(Global_Context& global);
 
   public:
+    bool
+    is_uninitialized()
+    const noexcept
+      { return this->m_root.is_uninitialized();  }
+
     bool
     is_void()
     const noexcept

@@ -183,7 +183,7 @@ noexcept
     ROCKET_ASSERT(!*qbkt);
     this->do_list_attach(qbkt);
     ::rocket::construct_at(qbkt->kstor, name);
-    ::rocket::construct_at(qbkt->vstor, Reference_root::S_void());
+    ::rocket::construct_at(qbkt->vstor);
     ROCKET_ASSERT(*qbkt);
     this->m_size++;
   }

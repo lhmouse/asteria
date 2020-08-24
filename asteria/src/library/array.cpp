@@ -80,7 +80,7 @@ do_find_if_opt(Global_Context& global, IterT begin, IterT end, const V_function&
     cow_vector<Reference> args;
     for(auto it = ::std::move(begin);  it != end;  ++it) {
       // Set up arguments for the user-defined predictor.
-      args.resize(1, Reference_root::S_void());
+      args.resize(1);
       args.mut(0) = do_make_temporary(*it);
       // Call the predictor function and check the return value.
       auto self = pred.invoke(global, ::std::move(args));
@@ -100,7 +100,7 @@ do_compare(Global_Context& global, cow_vector<Reference>& args,
       return lhs.compare(rhs);
 
     // Set up arguments for the user-defined comparator.
-    args.resize(2, Reference_root::S_void());
+    args.resize(2);
     args.mut(0) = do_make_temporary(lhs);
     args.mut(1) = do_make_temporary(rhs);
     // Call the predictor function and compare the result with `0`.
@@ -590,7 +590,7 @@ std_array_generate(Global_Context& global, V_function generator, V_integer lengt
     cow_vector<Reference> args;
     for(int64_t i = 0;  i < length;  ++i) {
       // Set up arguments for the user-defined generator.
-      args.resize(2, Reference_root::S_void());
+      args.resize(2);
       args.mut(0) = do_make_temporary(i);
       args.mut(1) = do_make_temporary(data.empty() ? null_value : data.back());
 
