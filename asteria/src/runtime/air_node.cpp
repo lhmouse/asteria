@@ -3820,11 +3820,24 @@ struct AIR_Traits<AIR_Node::S_initialize_reference>
       }
 
     static
+    AVMC_Queue::Symbols
+    make_symbols(const AIR_Node::S_initialize_reference& altr)
+      {
+        AVMC_Queue::Symbols syms;
+        syms.sloc = altr.sloc;
+        return syms;
+      }
+
+    static
     AIR_Status
     execute(Executive_Context& ctx, const Sparam_name& sp)
       {
-        // Pop a reference from the stack and move it into the context.
-        ctx.open_named_reference(sp.name) = ::std::move(ctx.stack().open_top());
+        // Pop a reference from the stack. Ensure it is dereferenceable.
+        auto& top = ctx.stack().open_top();
+        static_cast<void>(top.read());
+
+        // Move it into the context.
+        ctx.open_named_reference(sp.name) = ::std::move(top);
         ctx.stack().pop();
         return air_status_next;
       }

@@ -571,7 +571,7 @@ const
         do_generate_subexpression(code, opts, ptc_aware_none, ctx, altr.init);
 
         // Initialize the reference.
-        AIR_Node::S_initialize_reference xnode_init = { altr.name };
+        AIR_Node::S_initialize_reference xnode_init = { altr.sloc, altr.name };
         code.emplace_back(::std::move(xnode_init));
         return code;
       }

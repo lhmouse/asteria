@@ -247,6 +247,7 @@ class AIR_Node
 
     struct S_initialize_reference
       {
+        Source_Location sloc;
         phsh_string name;
       };
 
