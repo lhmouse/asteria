@@ -72,7 +72,7 @@ class basic_storage
     size_type
     max_size()
     const noexcept
-      { return allocator_traits<allocator_type>::max_size(this->as_allocator());  }
+      { return allocator_traits<allocator_type>::max_size(*this);  }
 
     size_type
     capacity()
@@ -105,7 +105,7 @@ class basic_storage
                                                    static_cast<long long>(nmax));
 
           auto cap_new = (nused + nadd) | 0x1000;
-          auto ptr_new = allocator_traits<allocator_type>::allocate(this->as_allocator(), cap_new);
+          auto ptr_new = allocator_traits<allocator_type>::allocate(*this, cap_new);
           auto pbuf_new = noadl::unfancy(ptr_new);
 #ifdef ROCKET_DEBUG
           traits_type::assign(pbuf_new, cap_new, value_type(0xA5A5A5A5));
@@ -119,7 +119,7 @@ class basic_storage
 #ifdef ROCKET_DEBUG
             traits_type::assign(pbuf, this->m_cap, value_type(0xE9E9E9E9));
 #endif
-            allocator_traits<allocator_type>::deallocate(this->as_allocator(), this->m_ptr, this->m_cap);
+            allocator_traits<allocator_type>::deallocate(*this, this->m_ptr, this->m_cap);
           }
           pbuf = pbuf_new;
 
@@ -143,7 +143,7 @@ class basic_storage
           return;
 
         // Deallocate the buffer and reset stream offsets.
-        allocator_traits<allocator_type>::deallocate(this->as_allocator(), ptr, this->m_cap);
+        allocator_traits<allocator_type>::deallocate(*this, ptr, this->m_cap);
         this->m_cap = 0;
       }
 

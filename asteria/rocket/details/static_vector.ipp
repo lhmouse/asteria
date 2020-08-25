@@ -132,7 +132,7 @@ class storage_handle
         size_type off = this->m_nelem;
         ROCKET_ASSERT_MSG(off < this->capacity(), "No space for new elements");
 
-        allocator_traits<allocator_type>::construct(this->as_allocator(), this->m_data + off,
+        allocator_traits<allocator_type>::construct(*this, this->m_data + off,
                                                     ::std::forward<paramsT>(params)...);
         this->m_nelem = static_cast<nelem_type>(off + 1);
 
@@ -149,7 +149,7 @@ class storage_handle
         off--;
 
         this->m_nelem = static_cast<nelem_type>(off);
-        allocator_traits<allocator_type>::destroy(this->as_allocator(), this->m_data + off);
+        allocator_traits<allocator_type>::destroy(*this, this->m_data + off);
       }
 
     void
