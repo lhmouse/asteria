@@ -36,7 +36,7 @@ struct storage_traits
     [[noreturn]] static
     void
     do_transfer(false_type,   // 1. movable?
-                bool,         // 2. trival?
+                bool,         // 2. trivial?
                 bool,         // 3. copyable?
                 storage_type&, storage_type&, size_t)
       {
@@ -47,7 +47,7 @@ struct storage_traits
     static
     void
     do_transfer(true_type,    // 1. movable?
-                true_type,    // 2. trival?
+                true_type,    // 2. trivial?
                 bool,         // 3. copyable?
                 storage_type& st_new, storage_type& st_old, size_t nskip)
       {
@@ -102,10 +102,10 @@ struct storage_traits
         ROCKET_ASSERT(st_old.nskip <= nskip);
 
         return do_transfer(
-            ::std::is_move_constructible<value_type>(),                // 1. movable
-            conjunction<is_std_allocator<allocator_type>,
-                        ::std::is_trivially_copyable<value_type>>(),   // 2. trivial
-            ::std::is_copy_constructible<value_type>(),                // 3. copyable
+            ::std::is_move_constructible<value_type>(),            // 1. movable
+            conjunction<::std::is_trivially_copyable<value_type>,
+                        is_std_allocator<allocator_type>>(),       // 2. trivial
+            ::std::is_copy_constructible<value_type>(),            // 3. copyable
             st_new, st_old, nskip);
       }
   };
