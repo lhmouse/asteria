@@ -182,7 +182,7 @@ argument ::=
 	reference-specifier-opt expression | expression
 
 reference-specifier-opt ::=
-	"->" | ""
+	"ref" | "->" | ""
 
 assert-statement ::=
 	"assert" negation-opt expression assert-message-opt ";"

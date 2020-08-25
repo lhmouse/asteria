@@ -1079,21 +1079,35 @@ do_accept_throw_statement_opt(Token_Stream& tstrm)
   }
 
 opt<bool>
+do_accept_reference_specifier_opt(Token_Stream& tstrm)
+  {
+    // reference-specifier-opt ::=
+    //   "ref" | "->" | ""
+    auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_ref });
+    if(qkwrd)
+      return true;
+
+    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_arrow });
+    if(kpunct)
+      return true;
+
+    return nullopt;
+  }
+
+opt<bool>
 do_accept_argument_no_conversion_opt(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // argument ::=
     //   reference-specifier expression | expression
-    // reference-specifier-opt ::=
-    //   "->" | ""
-    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_arrow });
+    auto qref = do_accept_reference_specifier_opt(tstrm);
     bool succ = do_accept_expression(units, tstrm);
-    if(kpunct && !succ)
-      throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
-
-    if(!succ)
+    if(!qref && !succ)
       return nullopt;
 
-    return !!kpunct;  // by ref?
+    if(!succ)
+      throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
+
+    return qref.value_or(false);
   }
 
 opt<bool>
