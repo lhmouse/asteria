@@ -55,9 +55,8 @@ class storage_handle
     ~storage_handle()
       {
         // Destroy all elements backwards.
-        size_type off = this->m_nelem;
-        while(off-- != 0)
-          allocator_traits<allocator_type>::destroy(this->as_allocator(), this->m_data + off);
+        for(size_t k = static_cast<size_t>(this->m_nelem) - 1;  k != size_t(-1);  --k)
+          allocator_traits<allocator_type>::destroy(*this, this->m_data + k);
 
 #ifdef ROCKET_DEBUG
         this->m_nelem = static_cast<nelem_type>(0xBAD1BEEF);
@@ -147,7 +146,8 @@ class storage_handle
         size_type off = this->m_nelem;
         ROCKET_ASSERT_MSG(off > 0, "No element to pop");
 
-        off -= 1;
+        off--;
+
         this->m_nelem = static_cast<nelem_type>(off);
         allocator_traits<allocator_type>::destroy(this->as_allocator(), this->m_data + off);
       }
@@ -232,16 +232,6 @@ class storage_handle
             this->pop_back_unchecked();
         }
       }
-
-    constexpr operator
-    const storage_handle*()
-    const noexcept
-      { return this;  }
-
-    operator
-    storage_handle*()
-    noexcept
-      { return this;  }
   };
 
 template<typename vectorT, typename valueT>
