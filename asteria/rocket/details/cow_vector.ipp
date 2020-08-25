@@ -102,10 +102,10 @@ struct storage_traits
         ROCKET_ASSERT(st_old.nskip <= nskip);
 
         return do_transfer(
-            ::std::is_move_constructible<value_type>(),            // 1. movable
-            conjunction<::std::is_trivially_copyable<value_type>,
-                        is_std_allocator<allocator_type>>(),       // 2. trivial
-            ::std::is_copy_constructible<value_type>(),            // 3. copyable
+            is_move_constructible<value_type>(),              // 1. movable
+            conjunction<is_trivially_copyable<value_type>,
+                        is_std_allocator<allocator_type>>(),  // 2. trivial
+            is_copy_constructible<value_type>(),              // 3. copyable
             st_new, st_old, nskip);
       }
   };

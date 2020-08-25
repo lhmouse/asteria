@@ -88,6 +88,7 @@ using ::std::is_trivially_move_constructible;
 using ::std::is_trivially_copy_assignable;
 using ::std::is_trivially_move_assignable;
 using ::std::is_trivially_destructible;
+using ::std::is_trivially_copyable;
 using ::std::underlying_type;
 using ::std::is_array;
 using ::std::is_base_of;
