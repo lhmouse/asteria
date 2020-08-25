@@ -198,8 +198,7 @@ clamp(xvT&& xv, loT&& lo, upT&& up)
 
 template<typename iteratorT>
 struct is_input_iterator
-  : integral_constant<bool, details_utilities::is_input_iterator_tag(
-                                typename iterator_traits<iteratorT>::iterator_category())>
+  : details_utilities::is_input_iterator_aux<iteratorT, void>
   { };
 
 template<typename firstT, typename lastT, typename funcT, typename... paramsT>

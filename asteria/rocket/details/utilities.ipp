@@ -8,17 +8,16 @@
 namespace details_utilities {
 
 // `is_input_iterator`
-constexpr
-bool
-is_input_iterator_tag(::std::output_iterator_tag)
-noexcept
-  { return false;  }
+template<typename iteratorT, typename = void>
+struct is_input_iterator_aux
+  : false_type
+  { };
 
-constexpr
-bool
-is_input_iterator_tag(::std::input_iterator_tag)
-noexcept
-  { return true;  }
+template<typename iteratorT>
+struct is_input_iterator_aux<iteratorT, ROCKET_VOID_T(decltype(static_cast<::std::input_iterator_tag>(
+                                              typename iterator_traits<iteratorT>::iterator_category())))>
+  : true_type
+  { };
 
 // `estimate_distance()`
 template<typename iteratorT>
