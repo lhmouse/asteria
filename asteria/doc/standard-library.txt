@@ -54,30 +54,6 @@
 	* Returns the number of variables that have been collected in
 	  total.
 
-`std.system.execute(cmd, [argv], [envp])`
-
-	* Launches the program denoted by `cmd`, awaits its termination,
-	  and returns its exit status. If `argv` is provided, it shall be
-	  an array of strings, which specify additional arguments to pass
-	  to the program along with `cmd`. If `envp` is specified, it
-	  shall also be an array of strings, which specify environment
-	  variables to pass to the program.
-
-	* Returns the exit status as an integer. If the process exits due
-	  to a signal, the exit status is `128+N` where `N` is the signal
-	  number.
-
-	* Throws an exception if the program could not be launched or its
-	  exit status could not be retrieved.
-
-`std.system.daemonize()`
-
-	* Detaches the current process from its controlling terminal and
-	  continues in the background. The calling process terminates on
-	  success so this function never returns.
-
-	* Throws an exception on failure.
-
 `std.system.env_get_variable(name)`
 
 	* Retrieves an environment variable with `name`.
@@ -139,6 +115,30 @@
 	* Gets the effective user ID of the current process.
 
 	* Returns the effective user ID as an integer.
+
+`std.system.proc_invoke(cmd, [argv], [envp])`
+
+	* Launches the program denoted by `cmd`, awaits its termination,
+	  and returns its exit status. If `argv` is provided, it shall be
+	  an array of strings, which specify additional arguments to pass
+	  to the program along with `cmd`. If `envp` is specified, it
+	  shall also be an array of strings, which specify environment
+	  variables to pass to the program.
+
+	* Returns the exit status as an integer. If the process exits due
+	  to a signal, the exit status is `128+N` where `N` is the signal
+	  number.
+
+	* Throws an exception if the program could not be launched or its
+	  exit status could not be retrieved.
+
+`std.system.proc_daemonize()`
+
+	* Detaches the current process from its controlling terminal and
+	  continues in the background. The calling process terminates on
+	  success so this function never returns.
+
+	* Throws an exception on failure.
 
 ### `std.debug`
 

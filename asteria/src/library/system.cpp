@@ -77,59 +77,6 @@ std_system_gc_collect(Global_Context& global, optV_integer generation_limit)
     return static_cast<int64_t>(nvars);
   }
 
-V_integer
-std_system_execute(V_string cmd, optV_array argv, optV_array envp)
-  {
-    // Append arguments.
-    cow_vector<const char*> ptrs = { cmd.safe_c_str() };
-    if(argv)
-      ::rocket::for_each(*argv, [&](const Value& arg) { ptrs.emplace_back(arg.as_string().safe_c_str());  });
-
-    auto eoff = ptrs.ssize();  // beginning of environment variables
-    ptrs.emplace_back(nullptr);
-
-    // Append environment variables.
-    if(envp)
-      eoff = ptrs.ssize(),
-      ::rocket::for_each(*envp, [&](const Value& env) { ptrs.emplace_back(env.as_string().safe_c_str());  }),
-      ptrs.emplace_back(nullptr);
-
-    // Launch the program.
-    ::pid_t pid;
-    if(::posix_spawnp(&pid, cmd.c_str(), nullptr, nullptr, const_cast<char**>(ptrs.data()),
-                                                           const_cast<char**>(ptrs.data() + eoff)) != 0)
-      ASTERIA_THROW("Could not spawn process '$2'\n"
-                    "[`posix_spawnp()` failed: $1]",
-                    format_errno(errno), cmd);
-
-    // Await its termination.
-    for(;;) {
-      // Note: `waitpid()` may return if the child has been stopped or continued.
-      int wstat;
-      if(::waitpid(pid, &wstat, 0) == -1)
-        ASTERIA_THROW("Error awaiting child process '$2'\n"
-                      "[`waitpid()` failed: $1]",
-                      format_errno(errno), pid);
-
-      // Check whether the process has terminated normally.
-      if(WIFEXITED(wstat))
-        return WEXITSTATUS(wstat);
-
-      // Check whether the process has been terminated by a signal.
-      if(WIFSIGNALED(wstat))
-        return 128 + WTERMSIG(wstat);
-    }
-  }
-
-void
-std_system_daemonize()
-  {
-    if(::daemon(1, 0) != 0)
-      ASTERIA_THROW("Could not daemonize process\n"
-                    "[`daemon()` failed: $1]",
-                    format_errno(errno));
-  }
-
 optV_string
 std_system_env_get_variable(V_string name)
   {
@@ -227,6 +174,59 @@ V_integer
 std_system_proc_get_euid()
   {
     return ::geteuid();
+  }
+
+V_integer
+std_system_proc_invoke(V_string cmd, optV_array argv, optV_array envp)
+  {
+    // Append arguments.
+    cow_vector<const char*> ptrs = { cmd.safe_c_str() };
+    if(argv)
+      ::rocket::for_each(*argv, [&](const Value& arg) { ptrs.emplace_back(arg.as_string().safe_c_str());  });
+
+    auto eoff = ptrs.ssize();  // beginning of environment variables
+    ptrs.emplace_back(nullptr);
+
+    // Append environment variables.
+    if(envp)
+      eoff = ptrs.ssize(),
+      ::rocket::for_each(*envp, [&](const Value& env) { ptrs.emplace_back(env.as_string().safe_c_str());  }),
+      ptrs.emplace_back(nullptr);
+
+    // Launch the program.
+    ::pid_t pid;
+    if(::posix_spawnp(&pid, cmd.c_str(), nullptr, nullptr, const_cast<char**>(ptrs.data()),
+                                                           const_cast<char**>(ptrs.data() + eoff)) != 0)
+      ASTERIA_THROW("Could not spawn process '$2'\n"
+                    "[`posix_spawnp()` failed: $1]",
+                    format_errno(errno), cmd);
+
+    // Await its termination.
+    for(;;) {
+      // Note: `waitpid()` may return if the child has been stopped or continued.
+      int wstat;
+      if(::waitpid(pid, &wstat, 0) == -1)
+        ASTERIA_THROW("Error awaiting child process '$2'\n"
+                      "[`waitpid()` failed: $1]",
+                      format_errno(errno), pid);
+
+      // Check whether the process has terminated normally.
+      if(WIFEXITED(wstat))
+        return WEXITSTATUS(wstat);
+
+      // Check whether the process has been terminated by a signal.
+      if(WIFSIGNALED(wstat))
+        return 128 + WTERMSIG(wstat);
+    }
+  }
+
+void
+std_system_proc_daemonize()
+  {
+    if(::daemon(1, 0) != 0)
+      ASTERIA_THROW("Could not daemonize process\n"
+                    "[`daemon()` failed: $1]",
+                    format_errno(errno));
   }
 
 void
@@ -348,72 +348,6 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     if(reader.I().o(generation_limit).F()) {
       Reference_root::S_temporary xref = { std_system_gc_collect(global, ::std::move(generation_limit)) };
       return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.system.execute()`
-    //===================================================================
-    result.insert_or_assign(::rocket::sref("execute"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.system.execute(cmd, [argv], [envp])`
-
-  * Launches the program denoted by `cmd`, awaits its termination,
-    and returns its exit status. If `argv` is provided, it shall be
-    an array of strings, which specify additional arguments to pass
-    to the program along with `cmd`. If `envp` is specified, it
-    shall also be an array of strings, which specify environment
-    variables to pass to the program.
-
-  * Returns the exit status as an integer. If the process exits due
-    to a signal, the exit status is `128+N` where `N` is the signal
-    number.
-
-  * Throws an exception if the program could not be launched or its
-    exit status could not be retrieved.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
-  {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.system.execute"));
-    // Parse arguments.
-    V_string cmd;
-    optV_array argv;
-    optV_array envp;
-    if(reader.I().v(cmd).o(argv).o(envp).F()) {
-      Reference_root::S_temporary xref = { std_system_execute(::std::move(cmd), ::std::move(argv),
-                                                              ::std::move(envp)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.system.daemonize()`
-    //===================================================================
-    result.insert_or_assign(::rocket::sref("daemonize"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.system.daemonize()`
-
-  * Detaches the current process from its controlling terminal and
-    continues in the background. The calling process terminates on
-    success so this function never returns.
-
-  * Throws an exception on failure.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
-  {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.system.daemonize"));
-    // Parse arguments.
-    if(reader.I().F()) {
-      std_system_daemonize();
-      return self = Reference_root::S_void();
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -601,6 +535,72 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     if(reader.I().F()) {
       Reference_root::S_temporary xref = { std_system_proc_get_euid() };
       return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
+      ));
+
+    //===================================================================
+    // `std.system.proc_invoke()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("proc_invoke"),
+      V_function(
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.system.proc_invoke(cmd, [argv], [envp])`
+
+  * Launches the program denoted by `cmd`, awaits its termination,
+    and returns its exit status. If `argv` is provided, it shall be
+    an array of strings, which specify additional arguments to pass
+    to the program along with `cmd`. If `envp` is specified, it
+    shall also be an array of strings, which specify environment
+    variables to pass to the program.
+
+  * Returns the exit status as an integer. If the process exits due
+    to a signal, the exit status is `128+N` where `N` is the signal
+    number.
+
+  * Throws an exception if the program could not be launched or its
+    exit status could not be retrieved.
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.system.proc_invoke"));
+    // Parse arguments.
+    V_string cmd;
+    optV_array argv;
+    optV_array envp;
+    if(reader.I().v(cmd).o(argv).o(envp).F()) {
+      Reference_root::S_temporary xref = { std_system_proc_invoke(::std::move(cmd), ::std::move(argv),
+                                                                  ::std::move(envp)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
+      ));
+
+    //===================================================================
+    // `std.system.proc_daemonize()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("proc_daemonize"),
+      V_function(
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.system.proc_daemonize()`
+
+  * Detaches the current process from its controlling terminal and
+    continues in the background. The calling process terminates on
+    success so this function never returns.
+
+  * Throws an exception on failure.
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.system.proc_daemonize"));
+    // Parse arguments.
+    if(reader.I().F()) {
+      std_system_proc_daemonize();
+      return self = Reference_root::S_void();
     }
     // Fail.
     reader.throw_no_matching_function_call();
