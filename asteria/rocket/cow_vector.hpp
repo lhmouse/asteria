@@ -478,7 +478,8 @@ class cow_vector
       }
 
     // N.B. This is a non-standard extension.
-    template<typename... paramsT>
+    template<typename... paramsT,
+    ROCKET_ENABLE_IF(is_constructible<value_type, const paramsT&...>::value)>
     cow_vector&
     append(size_type n, const paramsT&... params)
       {
@@ -631,7 +632,8 @@ class cow_vector
       }
 
     // N.B. This is a non-standard extension.
-    template<typename... paramsT>
+    template<typename... paramsT,
+    ROCKET_ENABLE_IF(is_constructible<value_type, const paramsT&...>::value)>
     cow_vector&
     insert(size_type tpos, size_type n, const paramsT&... params)
       {
@@ -697,7 +699,8 @@ class cow_vector
       }
 
     // N.B. The parameter pack is a non-standard extension.
-    template<typename... paramsT>
+    template<typename... paramsT,
+    ROCKET_ENABLE_IF(is_constructible<value_type, const paramsT&...>::value)>
     iterator
     insert(const_iterator tins, size_type n, const paramsT&... params)
       {
