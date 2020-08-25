@@ -4,7 +4,7 @@ syntax asteria "\.ast$"
 comment "//"
 
 # Declarations
-color green "\<(var|const|func|each)\>"
+color green "\<(var|const|ref|func|each)\>"
 
 # Statements
 color brightyellow "\<(if|else|switch|case|default|do|while|for|try|catch)\>"
