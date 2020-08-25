@@ -103,7 +103,7 @@ var foo;
 const inc = 42;
 // `inc` refers to an "immutable variable" holding an `integer` of `42`.
 
-var bar = func() { return& inc;  };      // return by reference
+var bar = func() { return ->inc;  };      // return by reference
 // `bar` refers to an "immutable variable" holding a function.
 // `bar()` refers to the same "variable" as `inc`.
 

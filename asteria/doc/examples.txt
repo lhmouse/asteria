@@ -51,7 +51,7 @@ func exchange(x, y) {
 }
 
 var sth = 42;
-var old = exchange(&sth, "other");
+var old = exchange(->sth, "other");
 std.io.putf("old = $1\n", old);
 std.io.putf("sth = $1\n", sth);
 ```
@@ -62,7 +62,7 @@ std.io.putf("sth = $1\n", sth);
 var sth = 42;
 
 func get() {
-  return& sth;
+  return ->sth;
 }
 
 std.io.putf("sth = $1\n", sth);

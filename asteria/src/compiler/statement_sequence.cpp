@@ -1084,8 +1084,8 @@ do_accept_argument_no_conversion_opt(cow_vector<Expression_Unit>& units, Token_S
     // argument ::=
     //   reference-specifier expression | expression
     // reference-specifier-opt ::=
-    //   "&" | ""
-    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_andb });
+    //   "->" | ""
+    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_arrow });
     bool succ = do_accept_expression(units, tstrm);
     if(kpunct && !succ)
       throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());

@@ -32,7 +32,7 @@ int main()
             if(x == null)
               return 3;     // num of args := 3
             if(x == 0)
-              return& num;  // arg 0 := the variable
+              return ->num;  // arg 0 := the variable
             if(x == 1)
               return 2;     // arg 1 := 2
             if(x == 2)

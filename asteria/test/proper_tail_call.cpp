@@ -24,7 +24,7 @@ int main()
 
         ptc = func(n) {
           if(n <= 0) {
-            return& n;
+            return ->n;
           }
           ptc(n-1);  // this may blow the system stack up if non-proper.
         };

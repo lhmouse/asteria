@@ -16,7 +16,7 @@ int main()
 
         func noop(x) { }
         var obj = { };
-        noop(&obj[1]);  // `obj[1]` is not a valid reference because `obj` is not an array.
+        noop(->obj[1]);  // `obj[1]` is not a valid reference because `obj` is not an array.
 
 ///////////////////////////////////////////////////////////////////////////////
       )__"), tinybuf::open_read);

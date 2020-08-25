@@ -28,7 +28,7 @@ int main()
         st[$] = [ v.frame, v.line >= ln - 3 ? 12345 : v.line ];
       // print the backtrace
       std.debug.dump(bt);
-      return& st;
+      return ->st;
     }
 
     func deferred(s) {
@@ -61,13 +61,13 @@ int main()
     try
       foo();
     catch(e)
-      transform_backtrace(&st1, __backtrace, __line);
+      transform_backtrace(->st1, __backtrace, __line);
     // ptc
     ptc = true;
     try
       foo();
     catch(e)
-      transform_backtrace(&st2, __backtrace, __line);
+      transform_backtrace(->st2, __backtrace, __line);
     // compare
     assert st1 == st2;
 
@@ -78,13 +78,13 @@ int main()
     try
       foo();
     catch(e)
-      transform_backtrace(&st1, __backtrace, __line);
+      transform_backtrace(->st1, __backtrace, __line);
     // ptc
     ptc = true;
     try
       foo();
     catch(e)
-      transform_backtrace(&st2, __backtrace, __line);
+      transform_backtrace(->st2, __backtrace, __line);
     // compare
     assert st1 == st2;
 
@@ -95,13 +95,13 @@ int main()
     try
       foo();
     catch(e)
-      transform_backtrace(&st1, __backtrace, __line);
+      transform_backtrace(->st1, __backtrace, __line);
     // ptc
     ptc = true;
     try
       foo();
     catch(e)
-      transform_backtrace(&st2, __backtrace, __line);
+      transform_backtrace(->st2, __backtrace, __line);
     // compare
     assert st1 == st2;
 
@@ -112,13 +112,13 @@ int main()
     try
       foo();
     catch(e)
-      transform_backtrace(&st1, __backtrace, __line);
+      transform_backtrace(->st1, __backtrace, __line);
     // ptc
     ptc = true;
     try
       foo();
     catch(e)
-      transform_backtrace(&st2, __backtrace, __line);
+      transform_backtrace(->st2, __backtrace, __line);
     // compare
     assert st1 == st2;
 

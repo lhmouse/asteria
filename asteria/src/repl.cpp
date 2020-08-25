@@ -481,7 +481,7 @@ do_REP_single()
       if(retry) {
         // Rewrite the potential expression to a `return` statement.
         try {
-          script.reload_string(code.insert(0, "return& ( ").append(" );"), cmdline.path);
+          script.reload_string(code.insert(0, "return ->( ").append(" );"), cmdline.path);
         }
         catch(Parser_Error&)
           // If we fail again, it is the previous exception that we are interested in.
