@@ -280,16 +280,6 @@ class storage_handle
     exchange_with(storage_handle& other)
     noexcept
       { ::std::swap(this->m_qstor, other.m_qstor);  }
-
-    constexpr operator
-    const storage_handle*()
-    const noexcept
-      { return this;  }
-
-    operator
-    storage_handle*()
-    noexcept
-      { return this;  }
   };
 
 template<typename allocT, typename traitsT>
