@@ -774,7 +774,8 @@ class basic_cow_string
       }
 
     template<typename inputT,
-    ROCKET_ENABLE_IF(is_input_iterator<inputT>::value && !is_convertible<inputT, const value_type*>::value)>
+    ROCKET_ENABLE_IF(is_input_iterator<inputT>::value),
+    ROCKET_DISABLE_IF(is_convertible<inputT, const value_type*>::value)>
     basic_cow_string&
     append(inputT first, inputT last)
       {
