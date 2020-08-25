@@ -116,6 +116,30 @@
 
 	* Returns a UUID as a string of 36 characters without braces.
 
+`std.system.proc_get_pid()`
+
+	* Gets the ID of the current process.
+
+	* Returns the process ID as an integer.
+
+`std.system.proc_get_ppid()`
+
+	* Gets the ID of the parent process.
+
+	* Returns the parent process ID as an integer.
+
+`std.system.proc_get_uid()`
+
+	* Gets the real user ID of the current process.
+
+	* Returns the real user ID as an integer.
+
+`std.system.proc_get_euid()`
+
+	* Gets the effective user ID of the current process.
+
+	* Returns the effective user ID as an integer.
+
 ### `std.debug`
 
 `std.debug.logf(templ, ...)`

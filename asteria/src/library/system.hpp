@@ -44,6 +44,22 @@ std_system_env_get_variables();
 V_string
 std_system_uuid(Global_Context& global, optV_boolean lowercase);
 
+// `std.system.proc_get_pid()`
+V_integer
+std_system_proc_get_pid();
+
+// `std.system.proc_get_ppid()`
+V_integer
+std_system_proc_get_ppid();
+
+// `std.system.proc_get_uid()`
+V_integer
+std_system_proc_get_uid();
+
+// `std.system.proc_get_euid()`
+V_integer
+std_system_proc_get_euid();
+
 // Create an object that is to be referenced as `std.system`.
 void
 create_bindings_system(V_object& result, API_Version version);

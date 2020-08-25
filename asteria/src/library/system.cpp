@@ -205,6 +205,30 @@ std_system_uuid(Global_Context& global, optV_boolean lowercase)
     return cow_string(sbuf, sizeof(sbuf));
   }
 
+V_integer
+std_system_proc_get_pid()
+  {
+    return ::getpid();
+  }
+
+V_integer
+std_system_proc_get_ppid()
+  {
+    return ::getppid();
+  }
+
+V_integer
+std_system_proc_get_uid()
+  {
+    return ::getuid();
+  }
+
+V_integer
+std_system_proc_get_euid()
+  {
+    return ::geteuid();
+  }
+
 void
 create_bindings_system(V_object& result, API_Version /*version*/)
   {
@@ -484,6 +508,98 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     optV_boolean lowercase;
     if(reader.I().o(lowercase).F()) {
       Reference_root::S_temporary xref = { std_system_uuid(global, lowercase) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
+      ));
+
+    //===================================================================
+    // `std.system.proc_get_pid()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("proc_get_pid"),
+      V_function(
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+  * Gets the ID of the current process.
+
+  * Returns the process ID as an integer.
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.system.proc_get_pid"));
+    // Parse arguments.
+    if(reader.I().F()) {
+      Reference_root::S_temporary xref = { std_system_proc_get_pid() };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
+      ));
+
+    //===================================================================
+    // `std.system.proc_get_ppid()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("proc_get_ppid"),
+      V_function(
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+  * Gets the ID of the parent process.
+
+  * Returns the parent process ID as an integer.
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.system.proc_get_ppid"));
+    // Parse arguments.
+    if(reader.I().F()) {
+      Reference_root::S_temporary xref = { std_system_proc_get_ppid() };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
+      ));
+
+    //===================================================================
+    // `std.system.proc_get_uid()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("proc_get_uid"),
+      V_function(
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+  * Gets the real user ID of the current process.
+
+  * Returns the real user ID as an integer.
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.system.proc_get_uid"));
+    // Parse arguments.
+    if(reader.I().F()) {
+      Reference_root::S_temporary xref = { std_system_proc_get_uid() };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
+      ));
+
+    //===================================================================
+    // `std.system.proc_get_euid()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("proc_get_euid"),
+      V_function(
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+  * Gets the effective user ID of the current process.
+
+  * Returns the effective user ID as an integer.
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.system.proc_get_euid"));
+    // Parse arguments.
+    if(reader.I().F()) {
+      Reference_root::S_temporary xref = { std_system_proc_get_euid() };
       return self = ::std::move(xref);
     }
     // Fail.
