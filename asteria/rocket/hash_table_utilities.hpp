@@ -16,17 +16,25 @@ noexcept
   {
     ROCKET_ASSERT(begin < end);
 
-    // Multiplication is faster than division.
-    auto seed = hval * 0x9E3779B9 / 2;
-    auto ratio = static_cast<double>(static_cast<long>(seed) & 0x7FFFFFFF) / 0x80000000;
-    auto off = static_cast<ptrdiff_t>(static_cast<double>(end - begin) * ratio);
-    ROCKET_ASSERT((0 <= off) && (off < end - begin));
-    return begin + off;
+    // This makes a floating-point value in the interval [1,2).
+    uint64_t word = static_cast<uint32_t>(hval * 0x9E3779B9);
+    word = 0x3FF00000'00000000 | (word << 30);
+
+    // We assume floating-point numbers have the same endianness as integers.
+    double dist;
+    ::std::memcpy(&dist, &word, sizeof(double));
+    ROCKET_ASSERT((1 <= dist) && (dist < 2));
+    dist = (dist - 1) * static_cast<double>(end - begin);
+
+    // Truncate the distance towards zero.
+    auto bkt = begin + static_cast<ptrdiff_t>(dist);
+    ROCKET_ASSERT(bkt <= end);
+    return bkt;
   }
 
 template<typename bucketT, typename predT>
 bucketT*
-linear_probe(bucketT* begin, bucketT* to, bucketT* from, bucketT* end, const predT& pred)
+linear_probe(bucketT* begin, bucketT* to, bucketT* from, bucketT* end, predT&& pred)
   {
     ROCKET_ASSERT(begin <= to);
     ROCKET_ASSERT(to <= from);
