@@ -320,20 +320,6 @@ class vector_iterator
         return *this;
       }
 
-    template<typename yvalueT>
-    constexpr
-    bool
-    operator==(const vector_iterator<vectorT, yvalueT>& other)
-    const noexcept
-      { return this->m_cur == other.m_cur;  }
-
-    template<typename yvalueT>
-    constexpr
-    bool
-    operator!=(const vector_iterator<vectorT, yvalueT>& other)
-    const noexcept
-      { return this->m_cur != other.m_cur;  }
-
     vector_iterator
     operator+(difference_type off)
     const noexcept
@@ -365,20 +351,12 @@ class vector_iterator
     vector_iterator
     operator++(int)
     noexcept
-      {
-        auto res = *this;
-        ++*this;
-        return res;
-      }
+      { return ::std::exchange(*this, *this + 1);  }
 
     vector_iterator
     operator--(int)
     noexcept
-      {
-        auto res = *this;
-        --*this;
-        return res;
-      }
+      { return ::std::exchange(*this, *this - 1);  }
 
     friend
     vector_iterator
@@ -395,6 +373,20 @@ class vector_iterator
         ROCKET_ASSERT_MSG(this->m_begin == other.m_begin, "Iterator not compatible");
         return this->m_cur - other.m_cur;
       }
+
+    template<typename yvalueT>
+    constexpr
+    bool
+    operator==(const vector_iterator<vectorT, yvalueT>& other)
+    const noexcept
+      { return this->m_cur == other.m_cur;  }
+
+    template<typename yvalueT>
+    constexpr
+    bool
+    operator!=(const vector_iterator<vectorT, yvalueT>& other)
+    const noexcept
+      { return this->m_cur != other.m_cur;  }
 
     template<typename yvalueT>
     bool

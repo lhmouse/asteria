@@ -461,20 +461,6 @@ class string_iterator
         return *this;
       }
 
-    template<typename ycharT>
-    constexpr
-    bool
-    operator==(const string_iterator<stringT, ycharT>& other)
-    const noexcept
-      { return this->m_cur == other.m_cur;  }
-
-    template<typename ycharT>
-    constexpr
-    bool
-    operator!=(const string_iterator<stringT, ycharT>& other)
-    const noexcept
-      { return this->m_cur != other.m_cur;  }
-
     string_iterator
     operator+(difference_type off)
     const noexcept
@@ -506,20 +492,12 @@ class string_iterator
     string_iterator
     operator++(int)
     noexcept
-      {
-        auto res = *this;
-        ++*this;
-        return res;
-      }
+      { return ::std::exchange(*this, *this + 1);  }
 
     string_iterator
     operator--(int)
     noexcept
-      {
-        auto res = *this;
-        --*this;
-        return res;
-      }
+      { return ::std::exchange(*this, *this - 1);  }
 
     friend
     string_iterator
@@ -536,6 +514,20 @@ class string_iterator
         ROCKET_ASSERT_MSG(this->m_begin == other.m_begin, "Iterator not compatible");
         return this->m_cur - other.m_cur;
       }
+
+    template<typename ycharT>
+    constexpr
+    bool
+    operator==(const string_iterator<stringT, ycharT>& other)
+    const noexcept
+      { return this->m_cur == other.m_cur;  }
+
+    template<typename ycharT>
+    constexpr
+    bool
+    operator!=(const string_iterator<stringT, ycharT>& other)
+    const noexcept
+      { return this->m_cur != other.m_cur;  }
 
     template<typename ycharT>
     bool
