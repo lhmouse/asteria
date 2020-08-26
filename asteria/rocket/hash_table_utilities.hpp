@@ -21,14 +21,17 @@ noexcept
     word = 0x3FF00000'00000000 | (word << 30);
 
     // We assume floating-point numbers have the same endianness as integers.
-    double dist;
-    ::std::memcpy(&dist, &word, sizeof(double));
-    ROCKET_ASSERT((1 <= dist) && (dist < 2));
-    dist = (dist - 1) * static_cast<double>(end - begin);
+    double ratio;
+    ::std::memcpy(&ratio, &word, sizeof(double));
+    ROCKET_ASSERT((1 <= ratio) && (ratio < 2));
+
+    // The compiler is free to transform this expression into a fused multiply-add.
+    double dist = static_cast<double>(end - begin);
+    dist = ratio * dist - dist;
 
     // Truncate the distance towards zero.
     auto bkt = begin + static_cast<ptrdiff_t>(dist);
-    ROCKET_ASSERT(bkt <= end);
+    ROCKET_ASSERT(bkt < end);
     return bkt;
   }
 
