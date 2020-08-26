@@ -338,7 +338,7 @@ class storage_handle
         if(!qstor)
           return 0;
         return static_cast<size_type>(
-                   reinterpret_cast<storage_header*>(noadl::unfancy(qstor))->nelem);
+                   reinterpret_cast<const storage_header*>(noadl::unfancy(qstor))->nelem);
       }
 
     template<typename... paramsT>
@@ -432,7 +432,7 @@ class storage_handle
       {
         auto qstor = other.m_qstor;
         if(qstor)
-          reinterpret_cast<storage_header*>(noadl::unfancy(qstor))->nref.increment();
+          reinterpret_cast<const storage_header*>(noadl::unfancy(qstor))->nref.increment();
         this->do_reset(qstor);
       }
 
