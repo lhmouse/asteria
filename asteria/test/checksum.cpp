@@ -34,7 +34,7 @@ int main()
           0xBA2B5D48, 0x3200FA7A, 0x9719EF96, 0x1747AC19, 0x8AAF8951, 0xFDA493AD, 0x7D0F4BC9, 0x1635A5C1,
           0x0E224171, 0xE4EF63A7, 0xCEDF7CD3, 0x4AD6CF79, 0x5A78619F, 0x8610F444, 0xA7BF1EA6, 0x6EA65160,
         ];
-        h = std.checksum.crc32_new();
+        h = std.checksum.CRC32();
         for(each k, v : crc32_results) {
           // split
           for(var i = 0; i < k; ++i) {
@@ -44,7 +44,7 @@ int main()
           // simple
           assert std.checksum.crc32(s * k) == v;
         }
-        h = std.checksum.crc32_new();
+        h = std.checksum.CRC32();
         h.update("hello");
         q = h;
         h.update("1");
@@ -75,7 +75,7 @@ int main()
           0x60B477C5, 0x58D97537, 0x0482E485, 0x87B24BF7, 0xFEB7F145, 0xDD6B95B7, 0x4DF6C205, 0xBB667877,
           0x36DD92C5, 0x0FDAEE37, 0x27708785, 0x4C451CF7, 0xE2C6DC45, 0xDB7FFEB7, 0x9EB5B505, 0x34F2B977,
         ];
-        h = std.checksum.fnv1a32_new();
+        h = std.checksum.FNV1a32();
         for(each k, v : fnv1a32_results) {
           // split
           for(var i = 0; i < k; ++i) {
@@ -85,7 +85,7 @@ int main()
           // simple
           assert std.checksum.fnv1a32(s * k) == v;
         }
-        h = std.checksum.fnv1a32_new();
+        h = std.checksum.FNV1a32();
         h.update("hello");
         q = h;
         h.update("1");
@@ -164,7 +164,7 @@ int main()
           "8341C2174A953D048FEF4A92A38041C3", "B168C6C4896F029B2C7C5990C94E7AC8",
           "99AF26FBD01C1F26AF0D2C80855D4273", "60F727F61ACF60E7314C16E0ED9805AE",
         ];
-        h = std.checksum.md5_new();
+        h = std.checksum.MD5();
         for(each k, v : md5_results) {
           // split
           for(var i = 0; i < k; ++i) {
@@ -174,7 +174,7 @@ int main()
           // simple
           assert std.checksum.md5(s * k) == v;
         }
-        h = std.checksum.md5_new();
+        h = std.checksum.MD5();
         h.update("hello");
         q = h;
         h.update("1");
@@ -253,7 +253,7 @@ int main()
           "C2D328C68C0863EA596B4C46361C8A1321A98D0E", "53DBD67B08BAABD0FAADFD505CB54B09A9D8A3CA",
           "338748A8A6C46B4A9B25CA09775F4137374F17AB", "3D22D695ED0EC9CF888A9D25644EE95A830FB94D",
         ];
-        h = std.checksum.sha1_new();
+        h = std.checksum.SHA1();
         for(each k, v : sha1_results) {
           // split
           for(var i = 0; i < k; ++i) {
@@ -263,7 +263,7 @@ int main()
           // simple
           assert std.checksum.sha1(s * k) == v;
         }
-        h = std.checksum.sha1_new();
+        h = std.checksum.SHA1();
         h.update("hello");
         q = h;
         h.update("1");
@@ -406,7 +406,7 @@ int main()
           "D1E3F06B406DEEC956B84C108140A1C8532304B5BB7498EB744B20C57EDFAB12",
           "5E1094168FB46C75DC57FFF81E032657C217D98B4058BDB773DFAB537AEB0954",
         ];
-        h = std.checksum.sha256_new();
+        h = std.checksum.SHA256();
         for(each k, v : sha256_results) {
           // split
           for(var i = 0; i < k; ++i) {
@@ -416,7 +416,7 @@ int main()
           // simple
           assert std.checksum.sha256(s * k) == v;
         }
-        h = std.checksum.sha256_new();
+        h = std.checksum.SHA256();
         h.update("hello");
         q = h;
         h.update("1");

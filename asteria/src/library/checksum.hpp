@@ -8,7 +8,7 @@
 
 namespace asteria {
 
-// members of `std.checksum.crc32_new()`
+// members of `std.checksum.CRC32()`
 V_opaque
 std_checksum_CRC32_private();
 
@@ -20,7 +20,7 @@ std_checksum_CRC32_finish(V_opaque& h);
 
 // `std.checksum.crc32_new`
 V_object
-std_checksum_crc32_new();
+std_checksum_CRC32();
 
 // `std.checksum.crc32`
 V_integer
@@ -30,7 +30,7 @@ std_checksum_crc32(V_string data);
 V_integer
 std_checksum_crc32_file(V_string path);
 
-// members of `std.checksum.fnv1a32_new()`
+// members of `std.checksum.FNV1a32()`
 V_opaque
 std_checksum_FNV1a32_private();
 
@@ -42,7 +42,7 @@ std_checksum_FNV1a32_finish(V_opaque& h);
 
 // `std.checksum.fnv1a32_new`
 V_object
-std_checksum_fnv1a32_new();
+std_checksum_FNV1a32();
 
 // `std.checksum.fnv1a32`
 V_integer
@@ -52,7 +52,7 @@ std_checksum_fnv1a32(V_string data);
 V_integer
 std_checksum_fnv1a32_file(V_string path);
 
-// members of `std.checksum.md5_new()`
+// members of `std.checksum.MD5()`
 V_opaque
 std_checksum_MD5_private();
 
@@ -64,7 +64,7 @@ std_checksum_MD5_finish(V_opaque& h);
 
 // `std.checksum.md5_new`
 V_object
-std_checksum_md5_new();
+std_checksum_MD5();
 
 // `std.checksum.md5`
 V_string
@@ -74,7 +74,7 @@ std_checksum_md5(V_string data);
 V_string
 std_checksum_md5_file(V_string path);
 
-// members of `std.checksum.sha1_new()`
+// members of `std.checksum.SHA1()`
 V_opaque
 std_checksum_SHA1_private();
 
@@ -86,7 +86,7 @@ std_checksum_SHA1_finish(V_opaque& h);
 
 // `std.checksum.sha1_new`
 V_object
-std_checksum_sha1_new();
+std_checksum_SHA1();
 
 // `std.checksum.sha1`
 V_string
@@ -96,7 +96,7 @@ std_checksum_sha1(V_string data);
 V_string
 std_checksum_sha1_file(V_string path);
 
-// members of `std.checksum.sha256_new()`
+// members of `std.checksum.SHA256()`
 V_opaque
 std_checksum_SHA256_private();
 
@@ -108,7 +108,7 @@ std_checksum_SHA256_finish(V_opaque& h);
 
 // `std.checksum.sha256_new`
 V_object
-std_checksum_sha256_new();
+std_checksum_SHA256();
 
 // `std.checksum.sha256`
 V_string
