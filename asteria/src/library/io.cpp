@@ -19,15 +19,10 @@ class IOF_Sentry
     IOF_Sentry(::FILE* fp)
     noexcept
       : m_fp(fp)
-      {
-        ::flockfile(this->m_fp);
-      }
+      { ::flockfile(this->m_fp);  }
 
     ASTERIA_NONCOPYABLE_DESTRUCTOR(IOF_Sentry)
-      {
-        ::fflush_unlocked(this->m_fp);
-        ::funlockfile(this->m_fp);
-      }
+      { ::funlockfile(this->m_fp);  }
 
   public:
     operator
