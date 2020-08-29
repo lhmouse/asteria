@@ -19,15 +19,19 @@ class Reference
   public:
     Reference()
     noexcept
-      : m_root(Reference_root::S_uninit()), m_mods()
+      : m_root(Reference_root::S_uninit())
       { }
 
     ASTERIA_VARIANT_CONSTRUCTOR(Reference, Reference_root, XRootT, xroot)
-      : m_root(::std::forward<XRootT>(xroot)), m_mods()
+      : m_root(::std::forward<XRootT>(xroot))
       { }
 
     ASTERIA_VARIANT_ASSIGNMENT(Reference, Reference_root, XRootT, xroot)
-      { return this->m_root = ::std::forward<XRootT>(xroot), this->m_mods.clear(), *this;  }
+      {
+        this->m_root = ::std::forward<XRootT>(xroot);
+        this->m_mods.clear();
+        return *this;
+      }
 
     ASTERIA_COPYABLE_DESTRUCTOR(Reference);
 

@@ -24,8 +24,8 @@ final
   public:
     Genius_Collector()
     noexcept
-      : m_oldest(&(this->m_pool),           nullptr,  10),
-        m_middle(&(this->m_pool), &(this->m_oldest),  60),
+      : m_oldest(&(this->m_pool), nullptr, 10),
+        m_middle(&(this->m_pool), &(this->m_oldest), 60),
         m_newest(&(this->m_pool), &(this->m_middle), 800)
       { }
 

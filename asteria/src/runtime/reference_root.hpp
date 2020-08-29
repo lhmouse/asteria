@@ -79,7 +79,10 @@ class Reference_root
       { }
 
     ASTERIA_VARIANT_ASSIGNMENT(Reference_root, Storage, XRootT, xroot)
-      { return this->m_stor = ::std::forward<XRootT>(xroot), *this;  }
+      {
+        this->m_stor = ::std::forward<XRootT>(xroot);
+        return *this;
+      }
 
   public:
     Index

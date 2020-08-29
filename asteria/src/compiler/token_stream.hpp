@@ -103,7 +103,10 @@ class Token_Stream
     Token_Stream&
     clear()
     noexcept
-      { return this->m_rtoks.clear(), *this;  }
+      {
+        this->m_rtoks.clear();
+        return *this;
+      }
 
     // This function parses characters from the input stream and fills tokens into `*this`.
     // The contents of `*this` are destroyed prior to any further operation.

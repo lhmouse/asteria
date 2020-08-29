@@ -60,7 +60,10 @@ class Simple_Script
     Simple_Script&
     clear()
     noexcept
-      { return this->m_func.reset(), *this;  }
+      {
+        this->m_func.reset();
+        return *this;
+      }
 
     operator
     const cow_function&()

@@ -60,7 +60,6 @@ class Abstract_Context
     const
       {
         auto qref = this->m_named_refs.get_opt(name);
-        // Initialize builtins only when needed.
         if(ROCKET_UNEXPECT(!qref))
           qref = const_cast<Abstract_Context*>(this)->do_lazy_lookup_opt(name);
         return qref;

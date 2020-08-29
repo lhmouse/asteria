@@ -56,7 +56,10 @@ class AIR_Optimizer
     AIR_Optimizer&
     clear()
     noexcept
-      { return this->m_code.clear(), *this;  }
+      {
+        this->m_code.clear();
+        return *this;
+      }
 
     // This function performs code generation.
     // `ctx_opt` is the parent context this closure.

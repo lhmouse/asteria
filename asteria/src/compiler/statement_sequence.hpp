@@ -56,7 +56,10 @@ class Statement_Sequence
     Statement_Sequence&
     clear()
     noexcept
-      { return this->m_stmts.clear(), *this;  }
+      {
+        this->m_stmts.clear();
+        return *this;
+      }
 
     // This function parses tokens from the input stream and fills statements into `*this`.
     // The contents of `*this` are destroyed prior to any further operation.
