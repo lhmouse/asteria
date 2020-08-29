@@ -221,7 +221,7 @@ final
     on_function_return(const Source_Location& sloc, const cow_function& target, const Reference&)
     override
       {
-        this->do_verbose_trace(sloc, "returned function call: $1", target);
+        this->do_verbose_trace(sloc, "returned from function call: $1", target);
       }
 
     void
