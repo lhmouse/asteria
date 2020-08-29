@@ -19,10 +19,15 @@ class IOF_Sentry
     IOF_Sentry(::FILE* fp)
     noexcept
       : m_fp(fp)
-      { ::flockfile(this->m_fp);  }
+      {
+        ::flockfile(this->m_fp);
+      }
 
     ASTERIA_NONCOPYABLE_DESTRUCTOR(IOF_Sentry)
-      { ::funlockfile(this->m_fp);  }
+      {
+        ::fflush_unlocked(this->m_fp);
+        ::funlockfile(this->m_fp);
+      }
 
   public:
     operator
@@ -34,8 +39,8 @@ class IOF_Sentry
 int
 do_recover(const IOF_Sentry& fp)
   {
-    int err = 0;
     // Note `errno` is meaningful only when an error has occurred. EOF is not an error.
+    int err = 0;
     if(ROCKET_UNEXPECT(::ferror_unlocked(fp))) {
       // If the preceding operation failed for these non-fatal errors, clear the error bit.
       // This makes such operations retryable.
