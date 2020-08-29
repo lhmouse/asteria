@@ -36,7 +36,7 @@ std_filesystem_directory_list(V_string path);
 V_integer
 std_filesystem_directory_create(V_string path);
 
-// `std.filesystem.directoryr_remove`
+// `std.filesystem.directory_remove`
 V_integer
 std_filesystem_directory_remove(V_string path);
 
