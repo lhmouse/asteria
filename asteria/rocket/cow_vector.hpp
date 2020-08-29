@@ -368,6 +368,13 @@ class cow_vector
     clear()
     noexcept
       {
+        // If storage is shared, detach it.
+        if(!this->m_sth.unique()) {
+          this->m_sth.deallocate();
+          return *this;
+        }
+
+        // Destroy all elements backwards.
         for(size_type k = this->size();  k != 0;  --k)
           this->m_sth.pop_back_unchecked();
         return *this;
