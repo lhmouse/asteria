@@ -12,14 +12,17 @@ report_assertion_failure(const char* expr, const char* file, long line, const ch
 noexcept
   {
     // Write a message to the standard error stream.
-    ::std::fprintf(stderr, "======================\n"
-                           "** ASSERTION FAILED **\n"
-                           "======================\n"
-                           "\tCondition: %s\n"
-                           "\tLocation:  %s:%ld\n"
-                           "\tMessage:   %s\n"
-                           "======================\n",
-                           expr, file, line, msg);
+    ::std::fprintf(stderr,
+      "========================================================================\n"
+      "** ASSERTION FAILURE **\n"
+      "========================================================================\n"
+      "Expression: %s\n"
+      "Location:   %s:%ld\n"
+      "Message:    %s\n"
+      "========================================================================\n",
+      expr, file, line, msg
+    );
+
     // Prefer `std::terminate()` to `std::abort()`.
     ::std::terminate();
   }
