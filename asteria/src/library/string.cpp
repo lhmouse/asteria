@@ -762,7 +762,6 @@ std_string_padl(V_string text, V_integer length, optV_string padding)
     V_string res = text;
     auto rpadding = do_get_padding(padding);
     if(length <= 0)
-      // There is nothing to do.
       return res;
 
     // Fill `rpadding` at the front.
@@ -778,7 +777,6 @@ std_string_padr(V_string text, V_integer length, optV_string padding)
     V_string res = text;
     auto rpadding = do_get_padding(padding);
     if(length <= 0)
-      // There is nothing to do.
       return res;
 
     // Fill `rpadding` at the back.
@@ -804,7 +802,6 @@ std_string_to_upper(V_string text)
       // Fork the string as needed.
       if(ROCKET_UNEXPECT(!wptr))
         wptr = res.mut_data();
-
       wptr[i] = t;
     }
     return res;
@@ -871,9 +868,9 @@ std_string_explode(V_string text, optV_string delim, optV_integer limit)
       rlimit = static_cast<uint64_t>(*limit);
     }
 
+    // Return an empty array if there is no segment.
     V_array segments;
     if(text.empty())
-      // Return an empty array.
       return segments;
 
     if(!delim || delim->empty()) {
@@ -911,9 +908,10 @@ V_string
 std_string_implode(V_array segments, optV_string delim)
   {
     V_string text;
+
+    // Return an empty string if there is no segment.
     auto nsegs = segments.size();
     if(nsegs == 0)
-      // Return an empty string.
       return text;
 
     // Append the first string.
@@ -977,7 +975,6 @@ std_string_hex_decode(V_string text)
         // The character is a whitespace.
         if(reg != 1)
           ASTERIA_THROW("Unpaired hexadecimal digit");
-
         continue;
       }
       reg <<= 4;
