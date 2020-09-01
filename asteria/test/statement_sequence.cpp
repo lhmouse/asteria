@@ -33,7 +33,7 @@ int main()
         }
       )__"), tinybuf::open_read);
     Token_Stream tstrm({ });
-    tstrm.reload(cbuf, ::rocket::sref("dummy file"));
+    tstrm.reload(cbuf, ::rocket::sref("dummy file"), 16);
     Statement_Sequence stmtq({ });
     stmtq.reload(tstrm);
     ASTERIA_TEST_CHECK(cow_vector<Statement>(stmtq).size() == 4);

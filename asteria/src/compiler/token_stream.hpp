@@ -112,7 +112,7 @@ class Token_Stream
     // The contents of `*this` are destroyed prior to any further operation.
     // This function throws a `Parser_Error` upon failure.
     Token_Stream&
-    reload(tinybuf& cbuf, const cow_string& file);
+    reload(tinybuf& cbuf, const cow_string& file, int line);
   };
 
 }  // namespace asteria

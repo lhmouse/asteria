@@ -25,7 +25,7 @@ int main()
           binary(1,2,3,4,5),   // [ 3, 4 ]
         ];
       )__"), tinybuf::open_read);
-    Simple_Script code(cbuf, ::rocket::sref(__FILE__));
+    Simple_Script code(cbuf, ::rocket::sref(__FILE__), 14);
     Global_Context global;
     auto res = code.execute(global);
     const auto& array = res.read().as_array();
@@ -45,6 +45,6 @@ int main()
       R"__(
         return __varg('meow', 42, true);
       )__"), tinybuf::open_read);
-    code.reload(cbuf, ::rocket::sref("erroneous_file"));
+    code.reload(cbuf, ::rocket::sref("erroneous_file"), 45);
     ASTERIA_TEST_CHECK_CATCH(code.execute(global));
   }

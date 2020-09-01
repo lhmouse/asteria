@@ -28,7 +28,7 @@ int main()
 ///////////////////////////////////////////////////////////////////////////////
       )__"), tinybuf::open_read);
 
-    Simple_Script code(cbuf, ::rocket::sref(__FILE__));
+    Simple_Script code(cbuf, ::rocket::sref(__FILE__), 14);
     Global_Context global;
     ASTERIA_TEST_CHECK(code.execute(global).read().as_string() == "function");
   }

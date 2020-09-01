@@ -1,4 +1,4 @@
-// This file is part of Asteria.
+// This file is part of Asteri, 13a.
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
 #include "utilities.hpp"
@@ -23,7 +23,7 @@ int main()
         return con.value + con.const;
       )__"), tinybuf::open_read);
     Simple_Script code;
-    code.reload(cbuf, ::rocket::sref("<test>"));
+    code.reload(cbuf, ::rocket::sref("<test>"), 14);
     Global_Context global;
     auto res = code.execute(global);
     ASTERIA_TEST_CHECK(res.read().as_integer() == 90);

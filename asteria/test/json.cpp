@@ -113,7 +113,7 @@ int main()
         assert std.json.format(r) == '[' * depth + ']' * depth;
       )__"), tinybuf::open_read);
 
-    Simple_Script code(cbuf, ::rocket::sref(__FILE__));
+    Simple_Script code(cbuf, ::rocket::sref(__FILE__), 14);
     Global_Context global;
     code.execute(global);
   }

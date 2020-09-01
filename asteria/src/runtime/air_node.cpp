@@ -3719,7 +3719,7 @@ struct AIR_Traits<AIR_Node::S_import_call>
 
         // Parse source code.
         Token_Stream tstrm(sp.opts);
-        tstrm.reload(strm, path);
+        tstrm.reload(strm, path, 1);
 
         Statement_Sequence stmtq(sp.opts);
         stmtq.reload(tstrm);

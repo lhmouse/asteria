@@ -25,7 +25,7 @@ int main()
 
     static const ::rocket::unique_ptr<char, void (&)(void*)> abspath(::realpath(__FILE__, nullptr), ::free);
     ROCKET_ASSERT(abspath);
-    Simple_Script code(cbuf, ::rocket::sref(abspath.get()));
+    Simple_Script code(cbuf, ::rocket::sref(abspath.get()), 14);
     Global_Context global;
     code.execute(global);
   }

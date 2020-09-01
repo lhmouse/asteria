@@ -28,13 +28,13 @@ class Simple_Script
       : m_opts(opts)
       { }
 
-    Simple_Script(tinybuf& cbuf, const cow_string& name)
+    Simple_Script(tinybuf& cbuf, const cow_string& name, int line = 1)
       : m_opts()
-      { this->reload(cbuf, name);  }
+      { this->reload(cbuf, name, line);  }
 
-    Simple_Script(const Compiler_Options& opts, tinybuf& cbuf, const cow_string& name)
+    Simple_Script(const Compiler_Options& opts, tinybuf& cbuf, const cow_string& name, int line = 1)
       : m_opts(opts)
-      { this->reload(cbuf, name);  }
+      { this->reload(cbuf, name, line);  }
 
   public:
     const Compiler_Options&
@@ -72,10 +72,10 @@ class Simple_Script
 
     // Load a script.
     Simple_Script&
-    reload(tinybuf& cbuf, const cow_string& name);
+    reload(tinybuf& cbuf, const cow_string& name, int line = 1);
 
     Simple_Script&
-    reload_string(const cow_string& code, const cow_string& name);
+    reload_string(const cow_string& code, const cow_string& name, int line = 1);
 
     Simple_Script&
     reload_file(const char* path);

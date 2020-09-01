@@ -12,7 +12,7 @@ namespace asteria {
 
 Simple_Script&
 Simple_Script::
-reload(tinybuf& cbuf, const cow_string& name)
+reload(tinybuf& cbuf, const cow_string& name, int line)
   {
     // Initialize the parameter list.
     // This is the same for all scripts so we only do this once.
@@ -21,7 +21,7 @@ reload(tinybuf& cbuf, const cow_string& name)
 
     // Parse source code.
     Token_Stream tstrm(this->m_opts);
-    tstrm.reload(cbuf, name);
+    tstrm.reload(cbuf, name, line);
 
     Statement_Sequence stmtq(this->m_opts);
     stmtq.reload(tstrm);
@@ -36,11 +36,11 @@ reload(tinybuf& cbuf, const cow_string& name)
 
 Simple_Script&
 Simple_Script::
-reload_string(const cow_string& code, const cow_string& name)
+reload_string(const cow_string& code, const cow_string& name, int line)
   {
     ::rocket::tinybuf_str cbuf;
     cbuf.set_string(code, tinybuf::open_read);
-    return this->reload(cbuf, name);
+    return this->reload(cbuf, name, line);
   }
 
 Simple_Script&
@@ -57,7 +57,7 @@ reload_file(const char* path)
     // Open the file denoted by this path.
     ::rocket::tinybuf_file cbuf;
     cbuf.open(abspath, tinybuf::open_read);
-    return this->reload(cbuf, cow_string(abspath));
+    return this->reload(cbuf, cow_string(abspath), 1);
   }
 
 Simple_Script&
@@ -67,7 +67,7 @@ reload_stdin()
     // Initialize a stream using `stdin`.
     ::rocket::tinybuf_file cbuf;
     cbuf.reset(stdin, nullptr);
-    return this->reload(cbuf, ::rocket::sref("<stdin>"));
+    return this->reload(cbuf, ::rocket::sref("<stdin>"), 1);
   }
 
 Reference

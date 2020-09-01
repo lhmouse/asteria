@@ -522,7 +522,7 @@ int main()
         assert std.numeric.parse_real("0x100000000000008000000") == 0x1.0p80;
       )__"), tinybuf::open_read);
 
-    Simple_Script code(cbuf, ::rocket::sref(__FILE__));
+    Simple_Script code(cbuf, ::rocket::sref(__FILE__), 14);
     Global_Context global;
     code.execute(global);
   }

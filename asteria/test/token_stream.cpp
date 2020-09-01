@@ -20,7 +20,7 @@ int main()
         .false/*more
         comments*/;/*yet more*/-42e13
       )__"), tinybuf::open_read);
-    ts.reload(cbuf, ::rocket::sref("dummy_file"));
+    ts.reload(cbuf, ::rocket::sref("dummy_file"), 16);
     ASTERIA_TEST_CHECK(cbuf.getc() == EOF);
 
     auto p = ts.peek_opt();

@@ -22,8 +22,8 @@ class Line_Reader
     cow_string m_str;
 
   public:
-    Line_Reader(refp<tinybuf> xcbuf, const cow_string& xfile)
-      : m_cbuf(xcbuf), m_file(xfile)
+    Line_Reader(refp<tinybuf> xcbuf, const cow_string& xfile, size_t xline)
+      : m_cbuf(xcbuf), m_file(xfile), m_line(xline - 1)
       { }
 
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Line_Reader)
@@ -74,24 +74,17 @@ class Line_Reader
             // ... otherwise, accept the last line which does not end in an LF anyway.
             break;
           }
-          if(ch == '\n')
+          else if(ch == '\n')
             // Accept a line without the LF.
             break;
-
-          if(this->m_str.size() >= INT_MAX)
-            ASTERIA_THROW("Too many characters in a single line");
 
           // Append the character to the line buffer.
           this->m_str.push_back(static_cast<char>(ch));
         }
 
-        // Increment the line number if a line has been read successfully.
-        if(this->m_line >= INT_MAX) {
-          ASTERIA_THROW("Too many lines in source code");
-        }
-        this->m_line++;
-
         // Accept the line.
+        // Increment the line number if a line has been read successfully.
+        this->m_line++;
         return true;
       }
 
@@ -104,7 +97,7 @@ class Line_Reader
     data(size_t add = 0)
     const
       {
-        if(add > this->m_str.size() - this->m_off)
+        if(add > this->navail())
           ASTERIA_THROW("Attempt to seek past end of line (`$1` + `$2` > `$3`)",
                         this->m_off, add, this->m_str.size());
         return this->m_str.data() + (this->m_off + add);
@@ -114,7 +107,7 @@ class Line_Reader
     peek(size_t add = 0)
     const noexcept
       {
-        if(add > this->m_str.size() - this->m_off)
+        if(add > this->navail())
           return 0;
         return this->m_str[this->m_off + add];
       }
@@ -122,7 +115,7 @@ class Line_Reader
     void
     consume(size_t add)
       {
-        if(add > this->m_str.size() - this->m_off)
+        if(add > this->navail())
           ASTERIA_THROW("Attempt to seek past end of line (`$1` + `$2` > `$3`)",
                         this->m_off, add, this->m_str.size());
         this->m_off += add;
@@ -726,7 +719,7 @@ Token_Stream::
 
 Token_Stream&
 Token_Stream::
-reload(tinybuf& cbuf, const cow_string& file)
+reload(tinybuf& cbuf, const cow_string& file, int line)
   {
     // Tokens are parsed and stored here in normal order.
     // We will have to reverse this sequence before storing it into `*this` if it is accepted.
@@ -738,11 +731,11 @@ reload(tinybuf& cbuf, const cow_string& file)
     // Save the position of an unterminated block comment.
     Tack bcomm;
     // Read source code line by line.
-    Line_Reader reader(::rocket::ref(cbuf), file);
+    Line_Reader reader(::rocket::ref(cbuf), file, static_cast<size_t>(line));
 
     while(reader.advance()) {
       // Discard the first line if it looks like a shebang.
-      if((reader.line() == 1) && (::std::strncmp(reader.data(), "#!", 2) == 0))
+      if((reader.line() == line) && (::std::strncmp(reader.data(), "#!", 2) == 0))
         continue;
 
       // Ensure this line is a valid UTF-8 string.
