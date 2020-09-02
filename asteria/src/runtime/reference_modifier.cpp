@@ -128,7 +128,7 @@ const
         auto& obj = parent.open_object();
 
         // Return a pointer to the value with the given key.
-        auto q = obj.find_mut(altr.key);
+        auto q = obj.mut_find(altr.key);
         if(q == obj.end())
           return nullptr;
 
@@ -290,7 +290,7 @@ const
         auto& obj = parent.open_object();
 
         // Erase the value with the given key and return it.
-        auto q = obj.find_mut(altr.key);
+        auto q = obj.mut_find(altr.key);
         if(q == obj.end())
           return V_null();
 

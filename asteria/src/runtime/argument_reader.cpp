@@ -83,7 +83,7 @@ const
     // Before calling this function, the parameter information must have been recorded.
     auto index = this->m_state.nparams - 1;
     // Return a pointer to the argument at `index`.
-    return this->m_args->get_ptr(index);
+    return this->m_args->ptr(index);
   }
 
 opt<size_t>

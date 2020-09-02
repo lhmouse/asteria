@@ -567,7 +567,7 @@ class cow_hashmap
     // N.B. This is a non-standard extension.
     template<typename ykeyT>
     iterator
-    find_mut(const ykeyT& key)
+    mut_find(const ykeyT& key)
       {
         auto ptr = this->do_mut_table();
         size_type tpos;
@@ -627,7 +627,7 @@ class cow_hashmap
     // N.B. This is a non-standard extension.
     template<typename ykeyT>
     const mapped_type*
-    get_ptr(const ykeyT& key)
+    ptr(const ykeyT& key)
     const
       {
         auto ptr = this->do_get_table();

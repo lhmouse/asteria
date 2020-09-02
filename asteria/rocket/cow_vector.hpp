@@ -428,7 +428,7 @@ class cow_vector
 
     // N.B. This is a non-standard extension.
     const value_type*
-    get_ptr(size_type pos)
+    ptr(size_type pos)
     const noexcept
       {
         if(pos >= this->size())

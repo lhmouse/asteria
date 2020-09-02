@@ -73,7 +73,7 @@ class Token_Stream
     const Token*
     peek_opt(size_t offset = 0)
     const noexcept
-      { return this->m_rtoks.get_ptr(this->m_rtoks.size() + ~offset);  }
+      { return this->m_rtoks.ptr(this->m_rtoks.size() + ~offset);  }
 
     Token_Stream&
     shift(size_t count = 1)
