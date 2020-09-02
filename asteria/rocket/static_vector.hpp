@@ -497,14 +497,20 @@ class static_vector
       }
 
     // N.B. The return type is a non-standard extension.
-    reference
+    static_vector&
     push_back(const value_type& value)
-      { return this->emplace_back(value);  }
+      {
+        this->emplace_back(value);
+        return *this;
+      }
 
     // N.B. The return type is a non-standard extension.
-    reference
+    static_vector&
     push_back(value_type&& value)
-      { return this->emplace_back(::std::move(value));  }
+      {
+        this->emplace_back(::std::move(value));
+        return *this;
+      }
 
     // N.B. This is a non-standard extension.
     static_vector&
