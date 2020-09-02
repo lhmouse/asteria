@@ -180,10 +180,10 @@ class static_vector
     do_erase_unchecked(size_type tpos, size_type tlen)
       {
         // Get a pointer to mutable storage.
+        size_type tepos = tpos + tlen;
         auto ptr = this->mut_data();
 
         // Swap the intervals [tpos,tpos+tlen) and [tpos+tlen,size).
-        size_type tepos = tpos + tlen;
         if((tpos < tepos) && (tepos < this->size()))
           noadl::rotate(ptr, tpos, tepos, this->size());
 
@@ -452,6 +452,8 @@ class static_vector
         // The storage can't be reallocated, so we may append all elements in place.
         for(size_type k = 0;  k < n;  ++k)
           this->m_sth.emplace_back_unchecked(params...);
+
+        // The return type aligns with `std::string::append()`.
         return *this;
       }
 
@@ -477,6 +479,8 @@ class static_vector
         // The storage can't be reallocated, so we may append all elements in place.
         for(auto it = ::std::move(first);  it != last;  ++it)
           this->m_sth.emplace_back_unchecked(*it);
+
+        // The return type aligns with `std::string::append()`.
         return *this;
       }
 
