@@ -500,6 +500,8 @@ class cow_vector
           // Append new elements in place.
           for(size_type k = 0;  k < n;  ++k)
             this->m_sth.emplace_back_unchecked(params...);
+
+          // The return type aligns with `std::string::append()`.
           return *this;
         }
 
@@ -541,6 +543,8 @@ class cow_vector
           // Append new elements in place.
           for(auto it = ::std::move(first);  it != last;  ++it)
             this->m_sth.emplace_back_unchecked(*it);
+
+          // The return type aligns with `std::string::append()`.
           return *this;
         }
 
@@ -561,10 +565,11 @@ class cow_vector
 
           // Append new elements to the new storage.
           for(auto it = ::std::move(first);  it != last;  ++it) {
-            if(ROCKET_UNEXPECT(sth.size() >= cap)) {
-              ptr = sth.reallocate_prepare(sth, this->size(), cap / 2);
+            // Reallocate the storage if necessary.
+            if(ROCKET_UNEXPECT(sth.size() >= cap))
+              ptr = sth.reallocate_prepare(sth, this->size(), cap / 2),
               cap = sth.capacity();
-            }
+
             sth.emplace_back_unchecked(*it);
           }
         }
