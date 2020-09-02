@@ -14,7 +14,7 @@ noexcept
     // Write a message to the standard error stream.
     ::std::fprintf(stderr,
       "========================================================================\n"
-      "** ASSERTION FAILURE **\n"
+      "*** ASSERTION FAILURE ***\n"
       "========================================================================\n"
       "Expression: %s\n"
       "Location:   %s:%ld\n"
