@@ -7,6 +7,14 @@
 #include "value.hpp"
 #include "utilities.hpp"
 
+// These are explicit instantiations. Note that can't occur inside `namespace asteria`.
+template
+class ::rocket::cow_vector<::asteria::Value>;
+
+template
+class ::rocket::cow_hashmap<::rocket::prehashed_string, ::asteria::Value,
+                      ::rocket::prehashed_string::hash, ::std::equal_to<void>>;
+
 namespace asteria {
 
 Rcbase::
@@ -355,11 +363,3 @@ noexcept
 alignas(Value) const unsigned char null_value_storage[sizeof(Value)] = { };
 
 }  // namespace asteria
-
-// These are explicit instantiations. Note that can't occur inside `namespace asteria`.
-template
-class ::rocket::cow_vector<::asteria::Value>;
-
-template
-class ::rocket::cow_hashmap<::rocket::prehashed_string, ::asteria::Value,
-                      ::rocket::prehashed_string::hash, ::std::equal_to<void>>;
