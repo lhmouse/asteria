@@ -779,8 +779,8 @@ class cow_vector
     cow_vector&
     pop_back(size_type n = 1)
       {
-        for(size_type k = 0;  k < n;  ++k)
-          this->m_sth.pop_back_unchecked();
+        ROCKET_ASSERT_MSG(n <= this->size(), "No enough elements to pop");
+        this->do_erase_unchecked(this->size() - n, n);
         return *this;
       }
 
@@ -789,8 +789,8 @@ class cow_vector
     subvec(size_type tpos, size_type tn = size_type(-1))
     const
       { return cow_vector(this->data() + tpos,
-                             this->data() + tpos + this->do_clamp_subvec(tpos, tn),
-                             this->m_sth.as_allocator());  }
+                          this->data() + tpos + this->do_clamp_subvec(tpos, tn),
+                          this->m_sth.as_allocator());  }
 
     // N.B. The return type is a non-standard extension.
     cow_vector&
