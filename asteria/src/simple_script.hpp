@@ -22,19 +22,27 @@ class Simple_Script
       : m_opts()
       { }
 
+    Simple_Script(const cow_string& name, tinybuf& cbuf)
+      : m_opts()
+      { this->reload(name, 1, cbuf);  }
+
+    Simple_Script(const cow_string& name, int line, tinybuf& cbuf)
+      : m_opts()
+      { this->reload(name, line, cbuf);  }
+
     explicit constexpr
     Simple_Script(const Compiler_Options& opts)
     noexcept
       : m_opts(opts)
       { }
 
-    Simple_Script(tinybuf& cbuf, const cow_string& name, int line = 1)
-      : m_opts()
-      { this->reload(cbuf, name, line);  }
-
-    Simple_Script(const Compiler_Options& opts, tinybuf& cbuf, const cow_string& name, int line = 1)
+    Simple_Script(const Compiler_Options& opts, const cow_string& name, tinybuf& cbuf)
       : m_opts(opts)
-      { this->reload(cbuf, name, line);  }
+      { this->reload(name, 1, cbuf);  }
+
+    Simple_Script(const Compiler_Options& opts, const cow_string& name, int line, tinybuf& cbuf)
+      : m_opts(opts)
+      { this->reload(name, line, cbuf);  }
 
   public:
     const Compiler_Options&
@@ -72,16 +80,22 @@ class Simple_Script
 
     // Load a script.
     Simple_Script&
-    reload(tinybuf& cbuf, const cow_string& name, int line = 1);
+    reload(const cow_string& name, int line, tinybuf& cbuf);
 
     Simple_Script&
-    reload_string(const cow_string& code, const cow_string& name, int line = 1);
+    reload_string(const cow_string& name, const cow_string& code);
 
     Simple_Script&
-    reload_file(const char* path);
+    reload_string(const cow_string& name, int line, const cow_string& code);
 
     Simple_Script&
     reload_stdin();
+
+    Simple_Script&
+    reload_stdin(int line);
+
+    Simple_Script&
+    reload_file(const char* path);
 
     // Execute the script that has been loaded.
     Reference

@@ -9,9 +9,11 @@ using namespace asteria;
 
 int main()
   {
-    ::rocket::tinybuf_str cbuf;
-    cbuf.set_string(::rocket::sref(
-      R"__(
+    Simple_Script code;
+    code.reload_string(
+      ::rocket::sref(__FILE__), __LINE__, ::rocket::sref(R"__(
+///////////////////////////////////////////////////////////////////////////////
+
         const chars = "0123456789abcdefghijklmnopqrstuvwxyz";
         // We presume these random strings will never match any real files.
         var dname = ".filesystem-test_dir_" + std.string.implode(std.array.shuffle(std.string.explode(chars)));
@@ -106,9 +108,9 @@ int main()
         try { std.filesystem.file_remove(fname);  assert false;  }
           catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
         assert std.filesystem.directory_remove(fname) == 1;
-      )__"), tinybuf::open_read);
 
-    Simple_Script code(cbuf, ::rocket::sref(__FILE__), 14);
+///////////////////////////////////////////////////////////////////////////////
+      )__"));
     Global_Context global;
     code.execute(global);
   }

@@ -47,14 +47,17 @@ int main()
       var = global.genius_collector()->create_variable();
       var->initialize(V_string("meow"), true);
 
-      ::rocket::tinybuf_str cbuf;
-      cbuf.set_string(::rocket::sref(
+      Simple_Script code;
+      code.reload_string(
+        ::rocket::sref(__FILE__), __LINE__, ::rocket::sref(""
 #ifdef __OPTIMIZE__
         "const nloop = 1000000;"
 #else
         "const nloop = 10000;"
 #endif
         R"__(
+///////////////////////////////////////////////////////////////////////////////
+
           var g;
           func leak() {
             var f;
@@ -64,8 +67,9 @@ int main()
           for(var i = 0;  i < nloop;  ++i) {
             leak();
           }
-        )__"), tinybuf::open_read);
-      Simple_Script code(cbuf, ::rocket::sref(__FILE__));
+
+///////////////////////////////////////////////////////////////////////////////
+        )__"));
       code.execute(global);
     }
     ASTERIA_TEST_CHECK(var->is_initialized() == false);

@@ -9,9 +9,14 @@ using namespace asteria;
 
 int main()
   {
-    ::rocket::tinybuf_str cbuf;
-    cbuf.set_string(::rocket::sref(
-      R"__(
+    const ::rocket::unique_ptr<char, void (&)(void*)> abspath(::realpath(__FILE__, nullptr), ::free);
+    ROCKET_ASSERT(abspath);
+
+    Simple_Script code;
+    code.reload_string(
+      cow_string(abspath), __LINE__, ::rocket::sref(R"__(
+///////////////////////////////////////////////////////////////////////////////
+
         std.debug.logf("__file = $1", __file);
         assert import("import_add.txt", 3, 5) == 8;
 
@@ -21,11 +26,8 @@ int main()
         try { import("import_recursive.txt");  assert false;  }
           catch(e) { assert std.string.find(e, "Recursive import") != null;  }
 
-      )__"), tinybuf::open_read);
-
-    static const ::rocket::unique_ptr<char, void (&)(void*)> abspath(::realpath(__FILE__, nullptr), ::free);
-    ROCKET_ASSERT(abspath);
-    Simple_Script code(cbuf, ::rocket::sref(abspath.get()), 14);
+///////////////////////////////////////////////////////////////////////////////
+      )__"));
     Global_Context global;
     code.execute(global);
   }

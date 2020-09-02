@@ -685,7 +685,7 @@ do_json_parse(tinybuf& cbuf)
     opts.integers_as_reals = true;
 
     Token_Stream tstrm(opts);
-    tstrm.reload(cbuf, ::rocket::sref("<JSON text>"), 1);
+    tstrm.reload(::rocket::sref("<JSON text>"), 1, cbuf);
     if(tstrm.empty())
       ASTERIA_THROW("Empty JSON string");
 

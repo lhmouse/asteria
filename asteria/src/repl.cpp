@@ -473,7 +473,7 @@ do_REP_single()
     // The snippet might be a statement list or an expression.
     // First, try parsing it as the former.
     try {
-      script.reload_string(code, cmdline.path, 1);
+      script.reload_string(cmdline.path, 1, code);
     }
     catch(Parser_Error& except) {
       // We only want to make another attempt in the case of absence of a semicolon at the end.
@@ -482,7 +482,10 @@ do_REP_single()
         // Rewrite the potential expression to a `return` statement.
         // The first line is skipped.
         try {
-          script.reload_string(code.insert(0, "return ->(\n").append("\n);"), cmdline.path, 0);
+          script.reload_string(cmdline.path, 0,
+                               code
+                                 .insert(0, "return ->(\n")
+                                 .append(   "\n);"));
         }
         catch(Parser_Error&)
           // If we fail again, it is the previous exception that we are interested in.

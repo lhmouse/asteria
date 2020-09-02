@@ -9,9 +9,11 @@ using namespace asteria;
 
 int main()
   {
-    ::rocket::tinybuf_str cbuf;
-    cbuf.set_string(::rocket::sref(
-      R"__(
+    Simple_Script code;
+    code.reload_string(
+      ::rocket::sref(__FILE__), __LINE__, ::rocket::sref(R"__(
+///////////////////////////////////////////////////////////////////////////////
+
         func binary(a, b, ...) {
           var narg = __varg();
           var arg = __varg(a);
@@ -24,10 +26,12 @@ int main()
           binary(1,2,3,4),     // [ 2, 4 ]
           binary(1,2,3,4,5),   // [ 3, 4 ]
         ];
-      )__"), tinybuf::open_read);
-    Simple_Script code(cbuf, ::rocket::sref(__FILE__), 14);
+
+///////////////////////////////////////////////////////////////////////////////
+      )__"));
     Global_Context global;
     auto res = code.execute(global);
+
     const auto& array = res.read().as_array();
     ASTERIA_TEST_CHECK(array.size() == 5);
     ASTERIA_TEST_CHECK(array.at(0).as_array().at(0).as_integer() == 0);
@@ -41,10 +45,13 @@ int main()
     ASTERIA_TEST_CHECK(array.at(4).as_array().at(0).as_integer() == 3);
     ASTERIA_TEST_CHECK(array.at(4).as_array().at(1).as_integer() == 4);
 
-    cbuf.set_string(::rocket::sref(
-      R"__(
+    code.reload_string(
+      ::rocket::sref(__FILE__), __LINE__, ::rocket::sref(R"__(
+///////////////////////////////////////////////////////////////////////////////
+
         return __varg('meow', 42, true);
-      )__"), tinybuf::open_read);
-    code.reload(cbuf, ::rocket::sref("erroneous_file"), 45);
+
+///////////////////////////////////////////////////////////////////////////////
+      )__"));
     ASTERIA_TEST_CHECK_CATCH(code.execute(global));
   }

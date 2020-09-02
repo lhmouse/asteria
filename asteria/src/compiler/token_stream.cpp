@@ -719,7 +719,7 @@ Token_Stream::
 
 Token_Stream&
 Token_Stream::
-reload(tinybuf& cbuf, const cow_string& file, int line)
+reload(const cow_string& file, int line, tinybuf& cbuf)
   {
     // Tokens are parsed and stored here in normal order.
     // We will have to reverse this sequence before storing it into `*this` if it is accepted.
@@ -774,6 +774,7 @@ reload(tinybuf& cbuf, const cow_string& file, int line)
           reader.consume(tlen);
           continue;
         }
+
         // Read a character.
         if(is_cctype(reader.peek(), cctype_space)) {
           // Skip a space.
@@ -792,6 +793,7 @@ reload(tinybuf& cbuf, const cow_string& file, int line)
             continue;
           }
         }
+
         bool token_got = do_accept_numeric_literal(tokens, reader, this->m_opts.integers_as_reals) ||
                          do_accept_punctuator(tokens, reader) ||
                          do_accept_string_literal(tokens, reader, '\"', true) ||

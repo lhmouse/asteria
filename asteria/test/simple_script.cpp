@@ -9,9 +9,11 @@ using namespace asteria;
 
 int main()
   {
-    ::rocket::tinybuf_str cbuf;
-    cbuf.set_string(::rocket::sref(
-      R"__(
+    Simple_Script code;
+    code.reload_string(
+      ::rocket::sref(__FILE__), __LINE__, ::rocket::sref(R"__(
+///////////////////////////////////////////////////////////////////////////////
+
         var one = 1;
         const two = 2;
         func fib(n) {
@@ -21,9 +23,9 @@ int main()
         con["value"] = fib(11);
         con["const"] = one;
         return con.value + con.const;
-      )__"), tinybuf::open_read);
-    Simple_Script code;
-    code.reload(cbuf, ::rocket::sref("<test>"), 14);
+
+///////////////////////////////////////////////////////////////////////////////
+      )__"));
     Global_Context global;
     auto res = code.execute(global);
     ASTERIA_TEST_CHECK(res.read().as_integer() == 90);

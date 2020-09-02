@@ -9,9 +9,11 @@ using namespace asteria;
 
 int main()
   {
-    ::rocket::tinybuf_str cbuf;
-    cbuf.set_string(::rocket::sref(
-      R"__(
+    Simple_Script code;
+    code.reload_string(
+      ::rocket::sref(__FILE__), __LINE__, ::rocket::sref(R"__(
+///////////////////////////////////////////////////////////////////////////////
+
         assert std.string.slice("hello", 0) == "hello";
         assert std.string.slice("hello", 1) == "ello";
         assert std.string.slice("hello", 2) == "llo";
@@ -354,9 +356,8 @@ int main()
         assert std.string.regex_replace("a11b2c333d4e555", '\d{34}\w', '#') == "a11b2c333d4e555";
         assert std.string.regex_replace("a11b2c333d4e555", '(\w\d+)*', '$&$&') == "a11b2c333d4e555a11b2c333d4e555";
 
-      )__"), tinybuf::open_read);
-
-    Simple_Script code(cbuf, ::rocket::sref(__FILE__), 14);
+///////////////////////////////////////////////////////////////////////////////
+      )__"));
     Global_Context global;
     code.execute(global);
   }

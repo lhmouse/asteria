@@ -12,7 +12,7 @@ namespace asteria {
 
 Simple_Script&
 Simple_Script::
-reload(tinybuf& cbuf, const cow_string& name, int line)
+reload(const cow_string& name, int line, tinybuf& cbuf)
   {
     // Initialize the parameter list.
     // This is the same for all scripts so we only do this once.
@@ -21,7 +21,7 @@ reload(tinybuf& cbuf, const cow_string& name, int line)
 
     // Parse source code.
     Token_Stream tstrm(this->m_opts);
-    tstrm.reload(cbuf, name, line);
+    tstrm.reload(name, line, cbuf);
 
     Statement_Sequence stmtq(this->m_opts);
     stmtq.reload(tstrm);
@@ -36,11 +36,35 @@ reload(tinybuf& cbuf, const cow_string& name, int line)
 
 Simple_Script&
 Simple_Script::
-reload_string(const cow_string& code, const cow_string& name, int line)
+reload_string(const cow_string& name, const cow_string& code)
+  {
+    return this->reload_string(name, 1, code);
+  }
+
+Simple_Script&
+Simple_Script::
+reload_string(const cow_string& name, int line, const cow_string& code)
   {
     ::rocket::tinybuf_str cbuf;
     cbuf.set_string(code, tinybuf::open_read);
-    return this->reload(cbuf, name, line);
+    return this->reload(name, line, cbuf);
+  }
+
+Simple_Script&
+Simple_Script::
+reload_stdin()
+  {
+    return this->reload_stdin(1);
+  }
+
+Simple_Script&
+Simple_Script::
+reload_stdin(int line)
+  {
+    // Initialize a stream using `stdin`.
+    ::rocket::tinybuf_file cbuf;
+    cbuf.reset(stdin, nullptr);
+    return this->reload(::rocket::sref("<stdin>"), line, cbuf);
   }
 
 Simple_Script&
@@ -57,17 +81,7 @@ reload_file(const char* path)
     // Open the file denoted by this path.
     ::rocket::tinybuf_file cbuf;
     cbuf.open(abspath, tinybuf::open_read);
-    return this->reload(cbuf, cow_string(abspath), 1);
-  }
-
-Simple_Script&
-Simple_Script::
-reload_stdin()
-  {
-    // Initialize a stream using `stdin`.
-    ::rocket::tinybuf_file cbuf;
-    cbuf.reset(stdin, nullptr);
-    return this->reload(cbuf, ::rocket::sref("<stdin>"), 1);
+    return this->reload(cow_string(abspath), 1, cbuf);
   }
 
 Reference

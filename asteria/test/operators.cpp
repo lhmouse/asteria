@@ -9,9 +9,11 @@ using namespace asteria;
 
 int main()
   {
-    ::rocket::tinybuf_str cbuf;
-    cbuf.set_string(::rocket::sref(
-      R"__(
+    Simple_Script code;
+    code.reload_string(
+      ::rocket::sref(__FILE__), __LINE__, ::rocket::sref(R"__(
+///////////////////////////////////////////////////////////////////////////////
+
         var b = false, i = 12, r = 8.5, s = "a";
         var a = [ 1, 2, 3 ];
         var o = { one: 1, two: 2, three: 3 };
@@ -413,8 +415,8 @@ int main()
         assert ("987654321" ^ "abcdefg") == "XZTRPRT21";
         assert ("987654" ^ "abcdefghi") == "XZTRPRghi";
 
-      )__"), tinybuf::open_read);
-    Simple_Script code(cbuf, ::rocket::sref(__FILE__), 14);
+///////////////////////////////////////////////////////////////////////////////
+      )__"));
     Global_Context global;
     code.execute(global);
   }

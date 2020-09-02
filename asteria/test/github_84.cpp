@@ -9,9 +9,9 @@ using namespace asteria;
 
 int main()
   {
-    ::rocket::tinybuf_str cbuf;
-    cbuf.set_string(::rocket::sref(
-      R"__(
+    Simple_Script code;
+    code.reload_string(
+      ::rocket::sref(__FILE__), __LINE__, ::rocket::sref(R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         assert std.numeric.parse_real(" 0x1p-100") == +0x1.0p-100;
@@ -34,9 +34,7 @@ int main()
         assert std.numeric.parse_real("-0x1p+10000", true) == -infinity;
 
 ///////////////////////////////////////////////////////////////////////////////
-      )__"), tinybuf::open_read);
-
-    Simple_Script code(cbuf, ::rocket::sref(__FILE__), 14);
+      )__"));
     Global_Context global;
     code.execute(global);
   }

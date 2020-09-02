@@ -9,9 +9,11 @@ using namespace asteria;
 
 int main()
   {
-    ::rocket::tinybuf_str cbuf;
-    cbuf.set_string(::rocket::sref(
-      R"__(
+    Simple_Script code;
+    code.reload_string(
+      ::rocket::sref(__FILE__), __LINE__, ::rocket::sref(R"__(
+///////////////////////////////////////////////////////////////////////////////
+
         func lt_1ups(x, y) {
           return ((y == 0) ? __abs(x) : __abs(1-x/y)) <= 0x1.0p-52;
         }
@@ -122,9 +124,9 @@ int main()
         assert std.math.hypot(+nan, -infinity) == infinity;
         assert std.math.hypot(nan, 1, infinity) == infinity;
         assert __isnan std.math.hypot(nan, 1, nan);
-      )__"), tinybuf::open_read);
 
-    Simple_Script code(cbuf, ::rocket::sref(__FILE__), 14);
+///////////////////////////////////////////////////////////////////////////////
+      )__"));
     Global_Context global;
     code.execute(global);
   }
