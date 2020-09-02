@@ -346,12 +346,10 @@ class storage_handle
       {
         auto qstor = this->m_qstor;
         ROCKET_ASSERT_MSG(qstor, "No storage allocated");
+        ROCKET_ASSERT_MSG(qstor->nelem < this->capacity(), "No space for new elements");
 
         size_t off = qstor->nelem;
-        ROCKET_ASSERT_MSG(off < this->capacity(), "No space for new elements");
-
-        allocator_traits<allocator_type>::construct(*qstor, qstor->data + off,
-                                                    ::std::forward<paramsT>(params)...);
+        allocator_traits<allocator_type>::construct(*qstor, qstor->data + off, ::std::forward<paramsT>(params)...);
         qstor->nelem = static_cast<size_type>(off + 1);
 
         return qstor->data[off];
@@ -363,12 +361,9 @@ class storage_handle
       {
         auto qstor = this->m_qstor;
         ROCKET_ASSERT_MSG(qstor, "No storage allocated");
+        ROCKET_ASSERT_MSG(qstor->nelem > 0, "No element to pop");
 
-        size_t off = qstor->nelem;
-        ROCKET_ASSERT_MSG(off > 0, "No element to pop");
-
-        off--;
-
+        size_t off = qstor->nelem - 1;
         qstor->nelem = static_cast<size_type>(off);
         allocator_traits<allocator_type>::destroy(*qstor, qstor->data + off);
       }
