@@ -346,6 +346,7 @@ class storage_handle
       {
         auto qstor = this->m_qstor;
         ROCKET_ASSERT_MSG(qstor, "No storage allocated");
+        ROCKET_ASSERT_MSG(qstor->nref.unique(), "Shared storage shall not be modified");
         ROCKET_ASSERT_MSG(qstor->nelem < this->capacity(), "No space for new elements");
 
         size_t off = qstor->nelem;
@@ -361,6 +362,7 @@ class storage_handle
       {
         auto qstor = this->m_qstor;
         ROCKET_ASSERT_MSG(qstor, "No storage allocated");
+        ROCKET_ASSERT_MSG(qstor->nref.unique(), "Shared storage shall not be modified");
         ROCKET_ASSERT_MSG(qstor->nelem > 0, "No element to pop");
 
         size_t off = qstor->nelem - 1;
