@@ -129,11 +129,10 @@ class storage_handle
     value_type&
     emplace_back_unchecked(paramsT&&... params)
       {
-        size_type off = this->m_nelem;
-        ROCKET_ASSERT_MSG(off < this->capacity(), "No space for new elements");
+        ROCKET_ASSERT_MSG(this->m_nelem < this->capacity(), "No space for new elements");
 
-        allocator_traits<allocator_type>::construct(*this, this->m_data + off,
-                                                    ::std::forward<paramsT>(params)...);
+        size_t off = this->m_nelem;
+        allocator_traits<allocator_type>::construct(*this, this->m_data + off, ::std::forward<paramsT>(params)...);
         this->m_nelem = static_cast<nelem_type>(off + 1);
 
         return this->m_data[off];
@@ -143,11 +142,9 @@ class storage_handle
     pop_back_unchecked()
     noexcept
       {
-        size_type off = this->m_nelem;
-        ROCKET_ASSERT_MSG(off > 0, "No element to pop");
+        ROCKET_ASSERT_MSG(this->m_nelem > 0, "No element to pop");
 
-        off--;
-
+        size_t off = this->m_nelem - size_t(1);
         this->m_nelem = static_cast<nelem_type>(off);
         allocator_traits<allocator_type>::destroy(*this, this->m_data + off);
       }
