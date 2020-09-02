@@ -183,36 +183,19 @@ class cow_vector
     value_type*
     do_erase_unchecked(size_type tpos, size_type tlen)
       {
-        // Try getting a pointer to mutable storage.
+        // Get a pointer to mutable storage.
+        auto ptr = this->mut_data();
+
+        // Swap the intervals [tpos,tpos+tlen) and [tpos+tlen,size).
         size_type tepos = tpos + tlen;
-        auto ptr = this->m_sth.mut_data_opt();
-        if(ROCKET_EXPECT(ptr)) {
-          // Swap the intervals [tpos,tpos+tlen) and [tpos+tlen,size).
-          if((tpos < tepos) && (tepos < this->size()))
-            noadl::rotate(ptr, tpos, tepos, this->size());
+        if((tpos < tepos) && (tepos < this->size()))
+          noadl::rotate(ptr, tpos, tepos, this->size());
 
-          // Destroy unwanted elements.
-          for(size_type k = 0;  k < tlen;  ++k)
-            this->m_sth.pop_back_unchecked();
+        // Destroy elements.
+        for(size_type k = 0;  k < tlen;  ++k)
+          this->m_sth.pop_back_unchecked();
 
-          // Return a pointer next to erased elements.
-          return ptr + tpos;
-        }
-
-        // Allocate new empty storage.
-        storage_handle sth(this->m_sth.as_allocator());
-        ptr = sth.reallocate_prepare(sth, 0, this->size() - tlen);
-
-        // Copy elements in the interval [0,tpos) to the new storage.
-        for(size_type k = 0;  k < tpos;  ++k)
-          sth.emplace_back_unchecked(this->m_sth.data()[k]);
-
-        // Copy elements in the interval [tpos+tlen,size) to the new storage.
-        for(size_type k = tepos;  k < this->size();  ++k)
-          sth.emplace_back_unchecked(this->m_sth.data()[k]);
-
-        // Set the new storage up.
-        this->m_sth.exchange_with(sth);
+        // Return a pointer next to erased elements.
         return ptr + tpos;
       }
 
