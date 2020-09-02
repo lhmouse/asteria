@@ -842,7 +842,38 @@ class basic_cow_string
     // N.B. The return type is a non-standard extension.
     basic_cow_string&
     push_back(value_type ch)
-      { return this->append(size_type(1), ch);  }
+      {
+        // If the storage is unique and there is enough space, append the string in place.
+        // Note the string may be unowned, where `cap` would be zero.
+        auto ptr = this->m_sth.mut_data_opt();
+        auto cap = this->capacity();
+        if(ROCKET_EXPECT(ptr && (cap > this->size()))) {
+          ptr += this->size();
+
+          // Fill a character in place.
+          traits_type::assign(ptr[0], ch);
+          traits_type::assign(ptr[1], value_type());
+
+          // Increase the length.
+          this->m_ptr = ptr - this->m_len;
+          this->m_len++;
+          return *this;
+        }
+
+        // Allocate new storage.
+        storage_handle sth(this->m_sth.as_allocator());
+        ptr = sth.reallocate_more(this->data(), this->size(), 31 | cap / 2);
+
+        // Fill a character.
+        traits_type::assign(ptr[0], ch);
+        traits_type::assign(ptr[1], value_type());
+
+        // Set the new storage up and increase the length.
+        this->m_sth.exchange_with(sth);
+        this->m_ptr = ptr - this->m_len;
+        this->m_len++;
+        return *this;
+      }
 
     // N.B. There is no default argument for `tpos`.
     basic_cow_string&
