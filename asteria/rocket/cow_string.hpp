@@ -822,10 +822,11 @@ class basic_cow_string
 
           // Append characters to the new storage.
           for(auto it = ::std::move(first);  it != last;  ++it) {
-            if(ROCKET_UNEXPECT(n >= cap - this->size())) {
-              ptr = sth.reallocate_more(ptr - this->size(), this->size() + n, cap / 2) - n;
+            // Reallocate the storage if necessary.
+            if(ROCKET_UNEXPECT(n >= cap - this->size()))
+              ptr = sth.reallocate_more(ptr - this->size(), this->size() + n, cap / 2) - n,
               cap = sth.capacity();
-            }
+
             traits_type::assign(ptr[n++], *it);
           }
         }
