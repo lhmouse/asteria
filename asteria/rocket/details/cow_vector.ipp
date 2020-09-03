@@ -387,8 +387,8 @@ class storage_handle
                             reinterpret_cast<void (*)(...)>(this->do_destroy_storage), len,
                             this->as_allocator(), nblk);
 
+        // Copy/move old elements from `sth`.
         try {
-          // Copy/move old elements from `sth`.
           if(skip < len)
             ROCKET_ASSERT(sth.m_qstor),
             storage_traits<allocator_type, storage>::dispatch_transfer(*qstor, *(sth.m_qstor), skip);
@@ -411,7 +411,6 @@ class storage_handle
 
         // Copy/move old elements from `sth`.
         if(qstor->nskip != 0)
-          ROCKET_ASSERT(sth.m_qstor),
           storage_traits<allocator_type, storage>::dispatch_transfer(*qstor, *(sth.m_qstor), 0);
 
         ROCKET_ASSERT(qstor->nskip == 0);
