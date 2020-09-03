@@ -55,9 +55,10 @@ noexcept
 
     // Reallocate buckets that follow `*qbkt`.
     ::rocket::linear_probe(
-      // Only probe non-erased buckets.
-      bptr, qxcld, qxcld + 1, eptr,
-      // Relocate every bucket found.
+      bptr,
+      qxcld,
+      qxcld + 1,
+      eptr,
       [&](Bucket& rb) {
         auto sbkt = &rb;
 
