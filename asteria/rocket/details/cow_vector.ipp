@@ -372,7 +372,7 @@ class storage_handle
 
     ROCKET_NOINLINE
     value_type*
-    reallocate_prepare(const storage_handle& sth, size_type skip, size_type add)
+    reallocate_prepare(storage_handle& sth, size_type skip, size_type add)
       {
         // Calculate the combined length of vector (sth.size() + add).
         // The first part is copied/moved from `sth`. The second part is left uninitialized.
@@ -404,7 +404,7 @@ class storage_handle
       }
 
     void
-    reallocate_finish(const storage_handle& sth)
+    reallocate_finish(storage_handle& sth)
       {
         auto qstor = this->m_qstor;
         ROCKET_ASSERT(qstor);
