@@ -51,8 +51,8 @@ struct storage_traits
                 bool,         // 3. copyable?
                 storage_type& st_new, storage_type& st_old, size_t nskip)
       {
-        ::std::memcpy(st_new.data + nskip,
-                      st_old.data + nskip, sizeof(value_type) * (st_old.nelem - nskip));
+        ::std::memcpy(st_new.data + nskip, st_old.data + nskip,
+                                           sizeof(value_type) * (st_old.nelem - nskip));
         st_new.nskip = st_old.nskip;
       }
 
@@ -157,8 +157,9 @@ class storage_handle
         ~storage()
           {
             // Destroy all elements backwards.
-            for(size_t k = this->nelem - 1;  k != this->nskip - 1;  --k)
-              allocator_traits<allocator_type>::destroy(*this, this->data + k);
+            size_t off = this->nelem;
+            while(off-- != this->nskip)
+              allocator_traits<allocator_type>::destroy(*this, this->data + off);
 
 #ifdef ROCKET_DEBUG
             this->nelem = static_cast<size_type>(0xBAD1BEEF);
@@ -172,6 +173,32 @@ class storage_handle
         storage&
         operator=(const storage&)
           = delete;
+
+        template<typename... paramsT>
+        value_type&
+        emplace_back_unchecked(paramsT&&... params)
+          {
+            ROCKET_ASSERT_MSG(this->nref.unique(), "Shared storage shall not be modified");
+            ROCKET_ASSERT_MSG(this->nelem < this->max_nelem_for_nblk(this->nblk), "No space for new elements");
+
+            size_t off = this->nelem;
+            allocator_traits<allocator_type>::construct(*this, this->data + off, ::std::forward<paramsT>(params)...);
+            this->nelem = static_cast<size_type>(off + 1);
+
+            return this->data[off];
+          }
+
+        void
+        pop_back_unchecked()
+        noexcept
+          {
+            ROCKET_ASSERT_MSG(this->nref.unique(), "Shared storage shall not be modified");
+            ROCKET_ASSERT_MSG(this->nelem > 0, "No element to pop");
+
+            size_t off = this->nelem - 1;
+            this->nelem = static_cast<size_type>(off);
+            allocator_traits<allocator_type>::destroy(*this, this->data + off);
+          }
       };
 
     using allocator_base    = typename allocator_wrapper_base_for<allocator_type>::type;
@@ -346,14 +373,7 @@ class storage_handle
       {
         auto qstor = this->m_qstor;
         ROCKET_ASSERT_MSG(qstor, "No storage allocated");
-        ROCKET_ASSERT_MSG(qstor->nref.unique(), "Shared storage shall not be modified");
-        ROCKET_ASSERT_MSG(qstor->nelem < this->capacity(), "No space for new elements");
-
-        size_t off = qstor->nelem;
-        allocator_traits<allocator_type>::construct(*qstor, qstor->data + off, ::std::forward<paramsT>(params)...);
-        qstor->nelem = static_cast<size_type>(off + 1);
-
-        return qstor->data[off];
+        return qstor->emplace_back_unchecked(::std::forward<paramsT>(params)...);
       }
 
     void
@@ -362,12 +382,7 @@ class storage_handle
       {
         auto qstor = this->m_qstor;
         ROCKET_ASSERT_MSG(qstor, "No storage allocated");
-        ROCKET_ASSERT_MSG(qstor->nref.unique(), "Shared storage shall not be modified");
-        ROCKET_ASSERT_MSG(qstor->nelem > 0, "No element to pop");
-
-        size_t off = qstor->nelem - 1;
-        qstor->nelem = static_cast<size_type>(off);
-        allocator_traits<allocator_type>::destroy(*qstor, qstor->data + off);
+        return qstor->pop_back_unchecked();
       }
 
     ROCKET_NOINLINE
