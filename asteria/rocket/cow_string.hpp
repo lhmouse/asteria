@@ -224,6 +224,22 @@ class basic_cow_string
       { this->append(init);  }
 
     basic_cow_string&
+    operator=(const basic_cow_string& other)
+    noexcept
+      {
+        noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+        return this->assign(other);
+      }
+
+    basic_cow_string&
+    operator=(basic_cow_string&& other)
+    noexcept
+      {
+        noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+        return this->assign(::std::move(other));
+      }
+
+    basic_cow_string&
     operator=(nullopt_t)
     noexcept
       { return this->clear();  }
@@ -232,18 +248,6 @@ class basic_cow_string
     operator=(shallow_type sh)
     noexcept
       { return this->assign(sh);  }
-
-    basic_cow_string&
-    operator=(const basic_cow_string& other)
-    noexcept
-      { return noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator()),
-               this->assign(other);  }
-
-    basic_cow_string&
-    operator=(basic_cow_string&& other)
-    noexcept
-      { return noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator()),
-               this->assign(::std::move(other));  }
 
     basic_cow_string&
     operator=(initializer_list<value_type> init)
