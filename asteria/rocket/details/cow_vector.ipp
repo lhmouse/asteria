@@ -243,7 +243,8 @@ class storage_handle
     do_reset(storage_pointer qstor_new)
     noexcept
       {
-        // Decrement the reference count with acquire-release semantics to prevent races on `qstor`.
+        // Decrement the reference count with acquire-release semantics to prevent
+        // races on `qstor`.
         auto qstor = ::std::exchange(this->m_qstor, qstor_new);
         if(ROCKET_EXPECT(!qstor))
           return;
