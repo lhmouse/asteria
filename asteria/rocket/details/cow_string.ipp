@@ -37,17 +37,13 @@ class storage_handle
         size_type
         min_nblk_for_nchar(size_type nchar)
         noexcept
-          { return static_cast<size_type>(
-                       ((static_cast<size_t>(nchar) + 1) * sizeof(value_type) + sizeof(storage) - 1)
-                           / sizeof(storage) + 1);  }
+          { return ((nchar + 1) * sizeof(value_type) + sizeof(storage) - 1) / sizeof(storage) + 1;  }
 
         static constexpr
         size_type
         max_nchar_for_nblk(size_type nblk)
         noexcept
-          { return static_cast<size_type>(
-                       (static_cast<size_t>(nblk) - 1) * sizeof(storage)
-                           / sizeof(value_type) - 1);  }
+          { return (nblk - 1) * sizeof(storage) / sizeof(value_type) - 1;  }
 
         size_type nblk;
         value_type data[0];
