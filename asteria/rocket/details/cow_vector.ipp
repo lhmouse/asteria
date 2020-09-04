@@ -7,11 +7,13 @@
 
 namespace details_cow_vector {
 
+using unknown_function  = void (...);
+
 struct storage_header
   {
     mutable reference_counter<long> nref;
 
-    void (*dtor)(...);
+    unknown_function* dtor;
     size_t nelem;
 
     // This is the number of uninitialized elements in the beginning.
@@ -24,6 +26,91 @@ struct storage_header
     noexcept
       : nref()
       { }
+  };
+
+template<typename allocT>
+struct basic_storage
+  : public storage_header,
+    public allocator_wrapper_base_for<allocT>::type
+  {
+    using allocator_type   = allocT;
+    using value_type       = typename allocator_type::value_type;
+    using size_type        = typename allocator_traits<allocator_type>::size_type;
+
+    static constexpr
+    size_type
+    min_nblk_for_nelem(size_t nelem)
+    noexcept
+      { return (nelem * sizeof(value_type) + sizeof(basic_storage) - 1) / sizeof(basic_storage) + 1;  }
+
+    static constexpr
+    size_t
+    max_nelem_for_nblk(size_type nblk)
+    noexcept
+      { return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type);  }
+
+    size_type nblk;
+    value_type data[0];
+
+    basic_storage(unknown_function* xdtor, size_t xnskip, const allocator_type& xalloc, size_type xnblk)
+    noexcept
+      : allocator_wrapper_base_for<allocT>::type(xalloc),
+        nblk(xnblk)
+      {
+        this->dtor = xdtor;
+        this->nelem = xnskip;
+        this->nskip = xnskip;
+
+#ifdef ROCKET_DEBUG
+        ::std::memset(static_cast<void*>(this->data), '*', (this->nblk - 1) * sizeof(basic_storage));
+#endif
+      }
+
+    ~basic_storage()
+      {
+        // Destroy all elements backwards.
+        size_t off = this->nelem;
+        while(off-- != this->nskip)
+          allocator_traits<allocator_type>::destroy(*this, this->data + off);
+
+#ifdef ROCKET_DEBUG
+        this->nelem = static_cast<size_type>(0xBAD1BEEF);
+        ::std::memset(static_cast<void*>(this->data), '~', (this->nblk - 1) * sizeof(basic_storage));
+#endif
+      }
+
+    basic_storage(const basic_storage&)
+      = delete;
+
+    basic_storage&
+    operator=(const basic_storage&)
+      = delete;
+
+    template<typename... paramsT>
+    value_type&
+    emplace_back_unchecked(paramsT&&... params)
+      {
+        ROCKET_ASSERT_MSG(this->nref.unique(), "Shared storage shall not be modified");
+        ROCKET_ASSERT_MSG(this->nelem < this->max_nelem_for_nblk(this->nblk), "No space for new elements");
+
+        size_t off = this->nelem;
+        allocator_traits<allocator_type>::construct(*this, this->data + off, ::std::forward<paramsT>(params)...);
+        this->nelem = static_cast<size_type>(off + 1);
+
+        return this->data[off];
+      }
+
+    void
+    pop_back_unchecked()
+    noexcept
+      {
+        ROCKET_ASSERT_MSG(this->nref.unique(), "Shared storage shall not be modified");
+        ROCKET_ASSERT_MSG(this->nelem > 0, "No element to pop");
+
+        size_t off = this->nelem - 1;
+        this->nelem = static_cast<size_type>(off);
+        allocator_traits<allocator_type>::destroy(*this, this->data + off);
+      }
   };
 
 template<typename allocT, typename storageT>
@@ -120,84 +207,8 @@ class storage_handle
     using size_type        = typename allocator_traits<allocator_type>::size_type;
 
   private:
-    struct storage : storage_header, allocator_wrapper_base_for<allocT>::type
-      {
-        static constexpr
-        size_type
-        min_nblk_for_nelem(size_type nelem)
-        noexcept
-          { return (nelem * sizeof(value_type) + sizeof(storage) - 1) / sizeof(storage) + 1;  }
-
-        static constexpr
-        size_type
-        max_nelem_for_nblk(size_type nblk)
-        noexcept
-          { return (nblk - 1) * sizeof(storage) / sizeof(value_type);  }
-
-        size_type nblk;
-        value_type data[0];
-
-        storage(void xdtor(...), size_t xnskip, const allocator_type& xalloc, size_type xnblk)
-        noexcept
-          : allocator_wrapper_base_for<allocT>::type(xalloc), nblk(xnblk)
-          {
-            this->dtor = xdtor;
-            this->nelem = xnskip;
-            this->nskip = xnskip;
-
-#ifdef ROCKET_DEBUG
-            ::std::memset(static_cast<void*>(this->data), '*', (this->nblk - 1) * sizeof(storage));
-#endif
-          }
-
-        ~storage()
-          {
-            // Destroy all elements backwards.
-            size_t off = this->nelem;
-            while(off-- != this->nskip)
-              allocator_traits<allocator_type>::destroy(*this, this->data + off);
-
-#ifdef ROCKET_DEBUG
-            this->nelem = static_cast<size_type>(0xBAD1BEEF);
-            ::std::memset(static_cast<void*>(this->data), '~', (this->nblk - 1) * sizeof(storage));
-#endif
-          }
-
-        storage(const storage&)
-          = delete;
-
-        storage&
-        operator=(const storage&)
-          = delete;
-
-        template<typename... paramsT>
-        value_type&
-        emplace_back_unchecked(paramsT&&... params)
-          {
-            ROCKET_ASSERT_MSG(this->nref.unique(), "Shared storage shall not be modified");
-            ROCKET_ASSERT_MSG(this->nelem < this->max_nelem_for_nblk(this->nblk), "No space for new elements");
-
-            size_t off = this->nelem;
-            allocator_traits<allocator_type>::construct(*this, this->data + off, ::std::forward<paramsT>(params)...);
-            this->nelem = static_cast<size_type>(off + 1);
-
-            return this->data[off];
-          }
-
-        void
-        pop_back_unchecked()
-        noexcept
-          {
-            ROCKET_ASSERT_MSG(this->nref.unique(), "Shared storage shall not be modified");
-            ROCKET_ASSERT_MSG(this->nelem > 0, "No element to pop");
-
-            size_t off = this->nelem - 1;
-            this->nelem = static_cast<size_type>(off);
-            allocator_traits<allocator_type>::destroy(*this, this->data + off);
-          }
-      };
-
     using allocator_base    = typename allocator_wrapper_base_for<allocator_type>::type;
+    using storage           = basic_storage<allocator_type>;
     using storage_allocator = typename allocator_traits<allocator_type>::template rebind_alloc<storage>;
     using storage_pointer   = typename allocator_traits<storage_allocator>::pointer;
 
@@ -395,7 +406,7 @@ class storage_handle
         storage_allocator st_alloc(this->as_allocator());
         auto qstor = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
         noadl::construct_at(noadl::unfancy(qstor),
-                            reinterpret_cast<void (*)(...)>(this->do_destroy_storage), len,
+                            reinterpret_cast<unknown_function*>(this->do_destroy_storage), len,
                             this->as_allocator(), nblk);
 
         // Copy/move old elements from `sth`.

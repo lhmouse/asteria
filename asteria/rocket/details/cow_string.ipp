@@ -18,6 +18,55 @@ struct storage_header
       { }
   };
 
+template<typename allocT>
+struct basic_storage
+  : public storage_header,
+    public allocator_wrapper_base_for<allocT>::type
+  {
+    using allocator_type   = allocT;
+    using value_type       = typename allocator_type::value_type;
+    using size_type        = typename allocator_traits<allocator_type>::size_type;
+
+    static constexpr
+    size_type
+    min_nblk_for_nchar(size_t nchar)
+    noexcept
+      { return ((nchar + 1) * sizeof(value_type) + sizeof(basic_storage) - 1) / sizeof(basic_storage) + 1;  }
+
+    static constexpr
+    size_t
+    max_nchar_for_nblk(size_type nblk)
+    noexcept
+      { return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type) - 1;  }
+
+    size_type nblk;
+    value_type data[0];
+
+    basic_storage(const allocator_type& xalloc, size_type xnblk)
+    noexcept
+      : allocator_wrapper_base_for<allocT>::type(xalloc),
+        nblk(xnblk)
+      {
+#ifdef ROCKET_DEBUG
+        ::std::memset(static_cast<void*>(this->data), '*', (this->nblk - 1) * sizeof(basic_storage));
+#endif
+      }
+
+    ~basic_storage()
+      {
+#ifdef ROCKET_DEBUG
+        ::std::memset(static_cast<void*>(this->data), '~', (this->nblk - 1) * sizeof(basic_storage));
+#endif
+      }
+
+    basic_storage(const basic_storage&)
+      = delete;
+
+    basic_storage&
+    operator=(const basic_storage&)
+      = delete;
+  };
+
 template<typename allocT, typename traitsT>
 class storage_handle
   : private allocator_wrapper_base_for<allocT>::type
@@ -31,48 +80,8 @@ class storage_handle
     static constexpr value_type null_char[1] = { };
 
   private:
-    struct storage : storage_header, allocator_wrapper_base_for<allocT>::type
-      {
-        static constexpr
-        size_type
-        min_nblk_for_nchar(size_type nchar)
-        noexcept
-          { return ((nchar + 1) * sizeof(value_type) + sizeof(storage) - 1) / sizeof(storage) + 1;  }
-
-        static constexpr
-        size_type
-        max_nchar_for_nblk(size_type nblk)
-        noexcept
-          { return (nblk - 1) * sizeof(storage) / sizeof(value_type) - 1;  }
-
-        size_type nblk;
-        value_type data[0];
-
-        storage(const allocator_type& xalloc, size_type xnblk)
-        noexcept
-          : allocator_wrapper_base_for<allocT>::type(xalloc), nblk(xnblk)
-          {
-#ifdef ROCKET_DEBUG
-            ::std::memset(static_cast<void*>(this->data), '*', (this->nblk - 1) * sizeof(storage));
-#endif
-          }
-
-        ~storage()
-          {
-#ifdef ROCKET_DEBUG
-            ::std::memset(static_cast<void*>(this->data), '~', (this->nblk - 1) * sizeof(storage));
-#endif
-          }
-
-        storage(const storage&)
-          = delete;
-
-        storage&
-        operator=(const storage&)
-          = delete;
-      };
-
     using allocator_base    = typename allocator_wrapper_base_for<allocator_type>::type;
+    using storage           = basic_storage<allocator_type>;
     using storage_allocator = typename allocator_traits<allocator_type>::template rebind_alloc<storage>;
     using storage_pointer   = typename allocator_traits<storage_allocator>::pointer;
 
