@@ -256,11 +256,11 @@ class basic_cow_string
   private:
     [[noreturn]] ROCKET_NOINLINE
     void
-    do_throw_subscript_out_of_range(size_type pos)
+    do_throw_subscript_out_of_range(size_type pos, const char* rel)
     const
       {
-        noadl::sprintf_and_throw<out_of_range>("cow_string: Subscript out of range (`%llu` > `%llu`)",
-                                               static_cast<unsigned long long>(pos),
+        noadl::sprintf_and_throw<out_of_range>("cow_string: Subscript out of range (`%llu` %s `%llu`)",
+                                               static_cast<unsigned long long>(pos), rel,
                                                static_cast<unsigned long long>(this->size()));
       }
 
@@ -271,8 +271,8 @@ class basic_cow_string
     const
       {
         size_type len = this->size();
-        if(len < tpos)
-          this->do_throw_subscript_out_of_range(tpos);
+        if(tpos > len)
+          this->do_throw_subscript_out_of_range(tpos, ">");
         return noadl::min(tn, len - tpos);
       }
 
@@ -553,7 +553,7 @@ class basic_cow_string
     const
       {
         if(pos >= this->size())
-          this->do_throw_subscript_out_of_range(pos);
+          this->do_throw_subscript_out_of_range(pos, ">=");
         return this->data()[pos];
       }
 
@@ -605,7 +605,7 @@ class basic_cow_string
     mut(size_type pos)
       {
         if(pos >= this->size())
-          this->do_throw_subscript_out_of_range(pos);
+          this->do_throw_subscript_out_of_range(pos, ">=");
         return this->mut_data()[pos];
       }
 

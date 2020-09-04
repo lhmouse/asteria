@@ -48,11 +48,11 @@ class array
   private:
     [[noreturn]] ROCKET_NOINLINE
     void
-    do_throw_subscript_out_of_range(size_type pos)
+    do_throw_subscript_out_of_range(size_type pos, const char* rel)
     const
       {
-        noadl::sprintf_and_throw<out_of_range>("array: Subscript out of range (`%llu` > `%llu`)",
-                                               static_cast<unsigned long long>(pos),
+        noadl::sprintf_and_throw<out_of_range>("array: Subscript out of range (`%llu` %s `%llu`)",
+                                               static_cast<unsigned long long>(pos), rel,
                                                static_cast<unsigned long long>(this->size()));
       }
 
@@ -179,7 +179,7 @@ class array
     const
       {
         if(pos >= this->size())
-          this->do_throw_subscript_out_of_range(pos);
+          this->do_throw_subscript_out_of_range(pos, ">=");
         return this->data()[pos];
       }
 
@@ -239,7 +239,7 @@ class array
     mut(size_type pos)
       {
         if(pos >= this->size())
-          this->do_throw_subscript_out_of_range(pos);
+          this->do_throw_subscript_out_of_range(pos, ">=");
         return this->mut_data()[pos];
       }
 
