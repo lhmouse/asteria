@@ -55,8 +55,9 @@ class storage_handle
     ~storage_handle()
       {
         // Destroy all elements backwards.
-        for(size_t k = static_cast<size_t>(this->m_nelem) - 1;  k != size_t(-1);  --k)
-          allocator_traits<allocator_type>::destroy(*this, this->m_data + k);
+        size_t off = this->m_nelem;
+        while(off-- != 0)
+          allocator_traits<allocator_type>::destroy(*this, this->m_data + off);
 
 #ifdef ROCKET_DEBUG
         this->m_nelem = static_cast<nelem_type>(0xBAD1BEEF);
