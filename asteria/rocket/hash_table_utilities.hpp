@@ -18,7 +18,7 @@ noexcept
 
     // This makes a floating-point value in the interval [1,2).
     uint64_t word = static_cast<uint32_t>(hval * 0x9E3779B9);
-    word = 0x3FF00000'00000000 | (word << 30);
+    word = 0x3FF00000'00000000 | word << 20;
 
     // We assume floating-point numbers have the same endianness as integers.
     double ratio;
