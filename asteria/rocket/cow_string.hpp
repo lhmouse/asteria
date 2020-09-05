@@ -353,18 +353,12 @@ class basic_cow_string
     const_iterator
     begin()
     const noexcept
-      {
-        auto bptr = this->data();
-        return const_iterator(bptr, 0, this->size());
-      }
+      { return const_iterator(this->data(), 0, this->size());  }
 
     const_iterator
     end()
     const noexcept
-      {
-        auto bptr = this->data();
-        return const_iterator(bptr, this->size(), this->size());
-      }
+      { return const_iterator(this->data(), this->size(), this->size());  }
 
     const_reverse_iterator
     rbegin()
@@ -400,19 +394,13 @@ class basic_cow_string
     // N.B. This is a non-standard extension.
     iterator
     mut_begin()
-      {
-        auto bptr = this->mut_data();
-        return iterator(bptr, 0, this->size());
-      }
+      { return iterator(this->mut_data(), 0, this->size());  }
 
     // N.B. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
     iterator
     mut_end()
-      {
-        auto bptr = this->mut_data();
-        return iterator(bptr, this->size(), this->size());
-      }
+      { return iterator(this->mut_data(), this->size(), this->size());  }
 
     // N.B. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
