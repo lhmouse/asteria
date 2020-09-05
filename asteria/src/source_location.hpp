@@ -18,7 +18,7 @@ class Source_Location
   public:
     Source_Location(nullopt_t = nullopt)
     noexcept
-      : m_file(::rocket::sref("<unknown>")), m_line(-1), m_offset(-1)
+      : m_file(::rocket::sref("[unknown]")), m_line(-1), m_offset(-1)
       { }
 
     Source_Location(const cow_string& xfile, int xline, int xoffset)

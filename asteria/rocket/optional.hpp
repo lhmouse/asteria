@@ -360,7 +360,7 @@ template<typename charT, typename traitsT, typename valueT>
 inline
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, const optional<valueT>& rhs)
-  { return rhs ? (fmt << *rhs) : (fmt << "<no value>");  }
+  { return rhs ? (fmt << *rhs) : (fmt << "[no value]");  }
 
 }  // namespace rocket
 

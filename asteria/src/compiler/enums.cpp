@@ -186,7 +186,7 @@ noexcept
         return "->";
 
       default:
-        return "<unknown punctuator>";
+        return "[unknown punctuator]";
     }
   }
 
@@ -346,7 +346,7 @@ noexcept
         return "ref";
 
       default:
-        return "<unknown keyword>";
+        return "[unknown keyword]";
     }
   }
 

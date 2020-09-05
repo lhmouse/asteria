@@ -85,7 +85,7 @@ class Token_Stream
     const noexcept
       {
         if(this->m_rtoks.empty())
-          return Source_Location(::rocket::sref("<end of stream>"), -1, 0);
+          return Source_Location(::rocket::sref("[end of stream]"), -1, 0);
         else
           return this->m_rtoks.back().sloc();
       }

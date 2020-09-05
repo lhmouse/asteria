@@ -2727,7 +2727,7 @@ struct AIR_Traits_Xop<xop_cmp_3way> : AIR_Traits<AIR_Node::S_apply_operator>
             break;
 
           case compare_unordered:
-            rhs = ::rocket::sref("<unordered>");
+            rhs = ::rocket::sref("[unordered]");
             break;
 
           default:
@@ -3727,7 +3727,7 @@ struct AIR_Traits<AIR_Node::S_import_call>
         // Instantiate the function.
         AIR_Optimizer optmz(sp.opts);
         optmz.reload(nullptr, cow_vector<phsh_string>(1, ::rocket::sref("...")), stmtq);
-        auto qtarget = optmz.create_function(Source_Location(path, 0, 0), ::rocket::sref("<file scope>"));
+        auto qtarget = optmz.create_function(Source_Location(path, 0, 0), ::rocket::sref("[file scope]"));
 
         // Update the first argument to `import` if it was passed by reference.
         // `this` is null for imported scripts.

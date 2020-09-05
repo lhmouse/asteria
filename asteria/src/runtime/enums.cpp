@@ -156,7 +156,7 @@ noexcept
         return "postfix `[$]`";
 
       default:
-        return "<unknown operator>";
+        return "[unknown operator]";
     }
   }
 

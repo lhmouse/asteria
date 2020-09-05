@@ -503,7 +503,7 @@ do_REP_single()
 
       fmt.clear_string();
       if(ref.is_void())
-        fmt << "<void>";
+        fmt << "[void]";
       else
         fmt << ref.read();
 

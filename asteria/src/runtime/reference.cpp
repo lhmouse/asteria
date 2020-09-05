@@ -83,7 +83,7 @@ do_unpack_tail_calls(Reference& self, Global_Context& global)
         frames.pop_back();
 
         // Push the function call.
-        except.push_frame_plain(tca->sloc(), ::rocket::sref("<proper tail call>"));
+        except.push_frame_plain(tca->sloc(), ::rocket::sref("[proper tail call]"));
 
         // Call the hook function if any.
         if(auto qhooks = global.get_hooks_opt())

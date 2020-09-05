@@ -21,8 +21,8 @@ int main()
         assert std.numeric.abs(-42.5) == 42.5;
         assert std.numeric.abs(+infinity) == infinity;
         assert std.numeric.abs(-infinity) == infinity;
-        assert std.numeric.abs(+nan) <=> 0 == "<unordered>";
-        assert std.numeric.abs(-nan) <=> 0 == "<unordered>";
+        assert std.numeric.abs(+nan) <=> 0 == "[unordered]";
+        assert std.numeric.abs(-nan) <=> 0 == "[unordered]";
         assert typeof std.numeric.abs(42.5) == "real";
 
         assert std.numeric.sign(+42) ==  0;

@@ -47,7 +47,7 @@ const
   {
     if(auto ptr = this->m_sptr.get())
       return ptr->describe(fmt);
-    return fmt << "<null opaque pointer>";
+    return fmt << "[null opaque pointer]";
   }
 
 Variable_Callback&
@@ -79,7 +79,7 @@ const
     if(auto ptr = this->m_sptr.get())
       return ptr->describe(fmt);  // dynamic
 
-    return fmt << "<null function pointer>";
+    return fmt << "[null function pointer]";
   }
 
 Variable_Callback&
@@ -160,7 +160,7 @@ noexcept
         return "object";
 
       default:
-        return "<unknown data type>";
+        return "[unknown data type]";
     }
   }
 
@@ -194,7 +194,7 @@ noexcept
         return "  try clause";
 
       default:
-        return "<unknown frame type>";
+        return "[unknown frame type]";
     }
   }
 
@@ -354,7 +354,7 @@ noexcept
         return "`->` expected";
 
       default:
-        return "<unknown parser error>";
+        return "[unknown parser error]";
     }
   }
 

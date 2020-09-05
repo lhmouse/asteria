@@ -869,7 +869,7 @@ class stringified_key
     ROCKET_DISABLE_IF(is_scalar<valueT>::value)>
     stringified_key(const valueT&)
     noexcept
-      { ::std::strcpy(this->m_temp, "<custom key type>");  }
+      { ::std::strcpy(this->m_temp, "[could not stringify key]");  }
 
   public:
     const char*
