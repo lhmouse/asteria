@@ -14,7 +14,7 @@ Variadic_Arguer::
 describe(tinyfmt& fmt)
 const
   {
-    return fmt << "[built-in>.__varg([index]) @ " << this->m_sloc;
+    return fmt << "[built-in].__varg([index]) @ " << this->m_sloc;
   }
 
 Variable_Callback&
@@ -30,7 +30,7 @@ Variadic_Arguer::
 invoke_ptc_aware(Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args)
 const
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("[built-in>.__varg"));
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("[built-in].__varg"));
     // Extract arguments.
     optV_integer qindex;
     if(reader.I().o(qindex).F()) {
