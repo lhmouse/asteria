@@ -145,6 +145,14 @@ class cow_vector
       { return this->assign(init);  }
 
   private:
+    cow_vector&
+    do_deallocate()
+    noexcept
+      {
+        this->m_sth.deallocate();
+        return *this;
+      }
+
     [[noreturn]] ROCKET_NOINLINE
     void
     do_throw_subscript_out_of_range(size_type pos, const char* rel)
@@ -335,10 +343,8 @@ class cow_vector
     shrink_to_fit()
       {
         // If the vector is empty, deallocate any dynamic storage.
-        if(this->empty()) {
-          this->m_sth.deallocate();
-          return *this;
-        }
+        if(this->empty())
+          return this->do_deallocate();
 
         // Calculate the minimum capacity to reserve. This must include all existent characters.
         // Don't reallocate if the storage is shared or tight.
@@ -361,14 +367,10 @@ class cow_vector
     noexcept
       {
         // If storage is shared, detach it.
-        if(!this->m_sth.unique()) {
-          this->m_sth.deallocate();
-          return *this;
-        }
+        if(!this->m_sth.unique())
+          return this->do_deallocate();
 
-        // Destroy all elements backwards.
-        for(size_type k = this->size();  k != 0;  --k)
-          this->m_sth.pop_back_unchecked();
+        this->do_erase_unchecked(0, this->size());
         return *this;
       }
 
