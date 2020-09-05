@@ -24,16 +24,17 @@ class cow_hashmap;
 /* Differences from `std::unordered_map`:
  * 1. `begin()` and `end()` always return `const_iterator`s. `at()`, `front()` and `back()` always
  *    return `const_reference`s.
- * 2. The copy constructor and copy assignment operator will not throw exceptions.
- * 3. Comparison operators are not provided.
- * 4. `emplace()` and `emplace_hint()` functions are not provided. `try_emplace()` is recommended
+ * 2. Iterators are bidirectional iterators, not just forward iterators.
+ * 3. The copy constructor and copy assignment operator will not throw exceptions.
+ * 4. Comparison operators are not provided.
+ * 5. `emplace()` and `emplace_hint()` functions are not provided. `try_emplace()` is recommended
  *    as an alternative.
- * 5. There are no buckets. Bucket lookups and local iterators are not provided. Multimap cannot
+ * 6. There are no buckets. Bucket lookups and local iterators are not provided. Multimap cannot
  *    be implemented.
- * 6. The key and mapped types may be incomplete. The mapped type need be neither copy-assignable
+ * 7. The key and mapped types may be incomplete. The mapped type need be neither copy-assignable
  *    nor move-assignable.
- * 7. `erase()` may move elements around and invalidate iterators.
- * 8. `operator[]()` is not provided.
+ * 8. `erase()` may move elements around and invalidate iterators.
+ * 9. `operator[]()` is not provided.
 **/
 
 template<typename keyT, typename mappedT, typename hashT, typename eqT, typename allocT>
@@ -60,11 +61,17 @@ class cow_hashmap
     using const_reference  = const value_type&;
     using reference        = value_type&;
 
-    using const_iterator  = details_cow_hashmap::hashmap_iterator<cow_hashmap, const value_type>;
-    using iterator        = details_cow_hashmap::hashmap_iterator<cow_hashmap, value_type>;
+    using const_iterator          = details_cow_hashmap::hashmap_iterator<cow_hashmap, const value_type>;
+    using iterator                = details_cow_hashmap::hashmap_iterator<cow_hashmap, value_type>;
+    using const_reverse_iterator  = ::std::reverse_iterator<const_iterator>;
+    using reverse_iterator        = ::std::reverse_iterator<iterator>;
 
   private:
-    details_cow_hashmap::storage_handle<allocator_type, hasher, key_equal> m_sth;
+    using storage_handle = details_cow_hashmap::storage_handle<allocator_type, hasher, key_equal>;
+    using bucket_type    = typename storage_handle::bucket_type;
+
+  private:
+    storage_handle m_sth;
 
   public:
     // 26.5.4.2, construct/copy/destroy
@@ -104,11 +111,11 @@ class cow_hashmap
 
     constexpr
     cow_hashmap(nullopt_t = nullopt_t())
-    noexcept(conjunction<is_nothrow_constructible<hasher>,
+    noexcept(conjunction<is_nothrow_constructible<allocator_type>,
+                         is_nothrow_constructible<hasher>,
                          is_nothrow_copy_constructible<hasher>,
                          is_nothrow_constructible<key_equal>,
-                         is_nothrow_copy_constructible<key_equal>,
-                         is_nothrow_constructible<allocator_type>>::value)
+                         is_nothrow_copy_constructible<key_equal>>::value)
       : cow_hashmap(allocator_type())
       { }
 
@@ -116,7 +123,7 @@ class cow_hashmap
     cow_hashmap(size_type res_arg, const hasher& hf = hasher(), const key_equal& eq = key_equal(),
                 const allocator_type& alloc = allocator_type())
       : cow_hashmap(alloc, hf, eq)
-      { this->m_sth.reallocate(0, 0, 0, res_arg);  }
+      { this->reserve(res_arg);  }
 
     template<typename inputT,
     ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
@@ -131,48 +138,39 @@ class cow_hashmap
       { this->assign(init);  }
 
     cow_hashmap(size_type res_arg, const hasher& hf, const allocator_type& alloc)
-      : cow_hashmap(alloc, hf, key_equal())
-      { this->m_sth.reallocate(0, 0, 0, res_arg);  }
+      : cow_hashmap(res_arg, hf, key_equal(), alloc)
+      { }
 
     template<typename inputT,
     ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     cow_hashmap(inputT first, inputT last, size_type res_arg, const hasher& hf, const allocator_type& alloc)
-      : cow_hashmap(res_arg, hf, alloc)
-      { this->assign(::std::move(first), ::std::move(last));  }
+      : cow_hashmap(::std::move(first), ::std::move(last), res_arg, hf, key_equal(), alloc)
+      { }
 
     cow_hashmap(initializer_list<value_type> init, size_type res_arg, const hasher& hf, const allocator_type& alloc)
-      : cow_hashmap(res_arg, hf, alloc)
-      { this->assign(init);  }
+      : cow_hashmap(init, res_arg, hf, key_equal(), alloc)
+      { }
 
     cow_hashmap(size_type res_arg, const allocator_type& alloc)
-      : cow_hashmap(alloc, hasher(), key_equal())
-      { this->m_sth.reallocate(0, 0, 0, res_arg);  }
+      : cow_hashmap(res_arg, hasher(), key_equal(), alloc)
+      { }
 
     template<typename inputT,
     ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     cow_hashmap(inputT first, inputT last, size_type res_arg, const allocator_type& alloc)
-      : cow_hashmap(res_arg, alloc)
-      { this->assign(::std::move(first), ::std::move(last));  }
+      : cow_hashmap(::std::move(first), ::std::move(last), res_arg, hasher(), key_equal(), alloc)
+      { }
 
     cow_hashmap(initializer_list<value_type> init, size_type res_arg, const allocator_type& alloc)
-      : cow_hashmap(res_arg, alloc)
-      { this->assign(init);  }
-
-    cow_hashmap&
-    operator=(nullopt_t)
-    noexcept
-      {
-        this->clear();
-        return *this;
-      }
+      : cow_hashmap(init, res_arg, hasher(), key_equal(), alloc)
+      { }
 
     cow_hashmap&
     operator=(const cow_hashmap& other)
     noexcept
       {
         noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        this->assign(other);
-        return *this;
+        return this->assign(other);
       }
 
     cow_hashmap&
@@ -180,92 +178,71 @@ class cow_hashmap
     noexcept
       {
         noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        this->assign(::std::move(other));
-        return *this;
+        return this->assign(::std::move(other));
       }
 
     cow_hashmap&
+    operator=(nullopt_t)
+    noexcept
+      { return this->clear();  }
+
+    cow_hashmap&
     operator=(initializer_list<value_type> init)
-      {
-        this->assign(init);
-        return *this;
-      }
+      { return this->assign(init);  }
 
   private:
-    // Reallocate the storage to `res_arg` elements.
-    // The storage is owned by the current hashmap exclusively after this function returns normally.
-    details_cow_hashmap::bucket<allocator_type>*
-    do_reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
-      {
-        ROCKET_ASSERT(cnt_one <= off_two);
-        ROCKET_ASSERT(off_two <= this->m_sth.bucket_count());
-        ROCKET_ASSERT(cnt_two <= this->m_sth.bucket_count() - off_two);
-        auto ptr = this->m_sth.reallocate(cnt_one, off_two, cnt_two, res_arg);
-        ROCKET_ASSERT(!ptr || this->m_sth.unique());
-        return ptr;
-      }
-
-    // Clear contents. Deallocate the storage if it is shared at all.
-    void
-    do_clear()
+    cow_hashmap&
+    do_deallocate()
     noexcept
       {
-        if(!this->unique())
-          this->m_sth.deallocate();
-        else
-          this->m_sth.erase_range_unchecked(0, this->m_sth.bucket_count());
-      }
-
-    // Reallocate more storage as needed, without shrinking.
-    void
-    do_reserve_more(size_type cap_add)
-      {
-        size_type cnt = this->size();
-        auto cap = this->m_sth.check_size_add(cnt, cap_add);
-        if(!this->unique() || ROCKET_UNEXPECT(this->capacity() < cap)) {
-#ifndef ROCKET_DEBUG
-          // Reserve more space for non-debug builds.
-          cap |= cnt / 2 + 7;
-#endif
-          this->do_reallocate(0, 0, this->bucket_count(), cap | 1);
-        }
-        ROCKET_ASSERT(this->capacity() >= cap);
+        this->m_sth.deallocate();
+        return *this;
       }
 
     [[noreturn]] ROCKET_NOINLINE
     void
-    do_throw_key_not_found()
+    do_throw_key_not_found(const details_cow_hashmap::stringified_key& skey)
     const
-      { noadl::sprintf_and_throw<out_of_range>("cow_hashmap: Key not found");  }
+      {
+        noadl::sprintf_and_throw<out_of_range>("cow_hashmap: Key not found (`%s`)",
+                                               skey.c_str());
+      }
 
-    const details_cow_hashmap::bucket<allocator_type>*
-    do_get_table()
+    const bucket_type*
+    do_buckets()
     const noexcept
       { return this->m_sth.buckets();  }
 
-    details_cow_hashmap::bucket<allocator_type>*
-    do_mut_table()
+    bucket_type*
+    do_mut_buckets()
       {
-        if(ROCKET_UNEXPECT(!this->empty() && !this->unique())) {
-          return this->do_reallocate(0, 0, this->bucket_count(), this->size() | 1);
-        }
-        return this->m_sth.mut_buckets_unchecked();
+        auto bkts = this->m_sth.mut_buckets_opt();
+        if(ROCKET_EXPECT(bkts))
+          return bkts;
+
+        // If the hashmap is empty, return a pointer to constant storage.
+        if(this->empty())
+          return const_cast<bucket_type*>(this->do_buckets());
+
+        // Reallocate the storage. The length is left intact.
+        // Note that this function shall preserve indices of buckets of cloned elements
+        // in the new table.
+        bkts = this->m_sth.reallocate_clone(this->m_sth);
+        return bkts;
       }
 
-    details_cow_hashmap::bucket<allocator_type>*
-    do_erase_no_bound_check(size_type tpos, size_type tn)
+    // This function is used to implement `erase()`.
+    bucket_type*
+    do_erase_unchecked(size_type tpos, size_type tlen)
       {
-        size_type cnt_old = this->size();
-        auto nbkt_old = this->bucket_count();
-        ROCKET_ASSERT(tpos <= nbkt_old);
-        ROCKET_ASSERT(tn <= nbkt_old - tpos);
-        if(!this->unique()) {
-          auto ptr = this->do_reallocate(tpos, tpos + tn, nbkt_old - (tpos + tn), cnt_old);
-          return ptr;
-        }
-        auto ptr = this->m_sth.mut_buckets_unchecked();
-        this->m_sth.erase_range_unchecked(tpos, tn);
-        return ptr + tn;
+        // Get a pointer to mutable storage.
+        auto bkts = this->do_mut_buckets();
+
+        // Purge unwanted elements.
+        this->m_sth.erase_range_unchecked(tpos, tlen);
+
+        // Return a pointer next to erased elements.
+        return bkts + tpos;
       }
 
   public:
@@ -273,12 +250,22 @@ class cow_hashmap
     const_iterator
     begin()
     const noexcept
-      { return const_iterator(this->m_sth, details_cow_hashmap::needs_adjust, this->do_get_table());  }
+      { return const_iterator(this->do_buckets(), 0, this->bucket_count());  }
 
     const_iterator
     end()
     const noexcept
-      { return const_iterator(this->m_sth, this->do_get_table() + this->bucket_count());  }
+      { return const_iterator(this->do_buckets(), this->bucket_count(), this->bucket_count());  }
+
+    const_reverse_iterator
+    rbegin()
+    const noexcept
+      { return const_reverse_iterator(this->end());  }
+
+    const_reverse_iterator
+    rend()
+    const noexcept
+      { return const_reverse_iterator(this->begin());  }
 
     const_iterator
     cbegin()
@@ -290,45 +277,62 @@ class cow_hashmap
     const noexcept
       { return this->end();  }
 
-    // N.B. This function may throw `std::bad_alloc`.
+    const_reverse_iterator
+    crbegin()
+    const noexcept
+      { return this->rbegin();  }
+
+    const_reverse_iterator
+    crend()
+    const noexcept
+      { return this->rend();  }
+
     // N.B. This is a non-standard extension.
+    // N.B. This function may throw `std::bad_alloc`.
     iterator
     mut_begin()
-      { return iterator(this->m_sth, details_cow_hashmap::needs_adjust, this->do_mut_table());  }
+      { return iterator(this->do_mut_buckets(), 0, this->bucket_count());  }
 
-    // N.B. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
+    // N.B. This function may throw `std::bad_alloc`.
     iterator
     mut_end()
-      { return iterator(this->m_sth, this->do_mut_table() + this->bucket_count());  }
+      { return iterator(this->do_mut_buckets(), this->bucket_count(), this->bucket_count());  }
+
+    // N.B. This is a non-standard extension.
+    // N.B. This function may throw `std::bad_alloc`.
+    reverse_iterator
+    mut_rbegin()
+      { return reverse_iterator(this->mut_end());  }
+
+    // N.B. This is a non-standard extension.
+    // N.B. This function may throw `std::bad_alloc`.
+    reverse_iterator
+    mut_rend()
+      { return reverse_iterator(this->mut_begin());  }
 
     // capacity
-    constexpr
     bool
     empty()
     const noexcept
-      { return this->m_sth.empty();  }
+      { return this->m_sth.size() == 0;  }
 
-    constexpr
     size_type
     size()
     const noexcept
-      { return this->m_sth.element_count();  }
+      { return this->m_sth.size();  }
 
     // N.B. This is a non-standard extension.
-    constexpr
     difference_type
     ssize()
     const noexcept
       { return static_cast<difference_type>(this->size());  }
 
-    constexpr
     size_type
     max_size()
     const noexcept
       { return this->m_sth.max_size();  }
 
-    constexpr
     size_type
     capacity()
     const noexcept
@@ -338,16 +342,22 @@ class cow_hashmap
     cow_hashmap&
     reserve(size_type res_arg)
       {
-        size_type cnt = this->size();
-        auto cap_new = this->m_sth.round_up_capacity(noadl::max(cnt, res_arg));
+        // Note zero is a special request to reduce capacity.
+        if(res_arg == 0)
+          return this->shrink_to_fit();
 
-        // If the storage is shared with other hashmaps, force rellocation to prevent copy-on-write
-        // upon modification.
-        if(this->unique() && (this->capacity() >= cap_new))
+        // Calculate the minimum capacity to reserve. This must include all existent elements.
+        // Don't reallocate if the storage is unique and there is enough room.
+        size_type rcap = this->m_sth.round_up_capacity(noadl::max(this->size(), res_arg));
+        if(this->unique() && (this->capacity() >= rcap))
           return *this;
 
-        this->do_reallocate(0, 0, this->bucket_count(), cap_new);
-        ROCKET_ASSERT(this->capacity() >= res_arg);
+        // Allocate new storage.
+        storage_handle sth(this->m_sth.as_allocator(), this->m_sth.as_hasher(), this->m_sth.as_key_equal());
+        sth.reallocate_reserve(this->m_sth, true, rcap - this->size());
+
+        // Set the new storage up. The size is left intact.
+        this->m_sth.exchange_with(sth);
         return *this;
       }
 
@@ -355,15 +365,22 @@ class cow_hashmap
     cow_hashmap&
     shrink_to_fit()
       {
-        size_type cnt = this->size();
-        auto cap_min = this->m_sth.round_up_capacity(cnt);
+        // If the hashmap is empty, deallocate any dynamic storage.
+        if(this->empty())
+          return this->do_deallocate();
 
-        // Don't increase memory usage.
-        if(!this->unique() || (this->capacity() <= cap_min))
+        // Calculate the minimum capacity to reserve. This must include all existent elements.
+        // Don't reallocate if the storage is shared or tight.
+        size_type rcap = this->m_sth.round_up_capacity(this->size());
+        if(!this->unique() || (this->capacity() <= rcap))
           return *this;
 
-        this->do_reallocate(0, 0, cnt, cnt);
-        ROCKET_ASSERT(this->capacity() <= cap_min);
+        // Allocate new storage.
+        storage_handle sth(this->m_sth.as_allocator(), this->m_sth.as_hasher(), this->m_sth.as_key_equal());
+        sth.reallocate_reserve(this->m_sth, true, 0);
+
+        // Set the new storage up. The size is left intact.
+        this->m_sth.exchange_with(sth);
         return *this;
       }
 
@@ -372,8 +389,11 @@ class cow_hashmap
     clear()
     noexcept
       {
-        if(!this->empty())
-          this->do_clear();
+        // If storage is shared, detach it.
+        if(!this->m_sth.unique())
+          return this->do_deallocate();
+
+        this->m_sth.erase_range_unchecked(0, this->size());
         return *this;
       }
 
@@ -391,44 +411,61 @@ class cow_hashmap
 
     // hash policy
     // N.B. This is a non-standard extension.
-    constexpr
     size_type
     bucket_count()
     const noexcept
       { return this->m_sth.bucket_count();  }
 
     // N.B. The return type differs from `std::unordered_map`.
-    constexpr
     double
     load_factor()
     const noexcept
-      { return static_cast<double>(static_cast<difference_type>(this->size())) /
-               static_cast<double>(static_cast<difference_type>(this->bucket_count()));  }
+      { return static_cast<double>(this->ssize()) /
+                   static_cast<double>(static_cast<difference_type>(this->bucket_count()));  }
 
-    // N.B. The `constexpr` specifier is a non-standard extension.
     // N.B. The return type differs from `std::unordered_map`.
-    constexpr
     double
     max_load_factor()
     const noexcept
-      { return this->m_sth.max_load_factor();  }
+      { return 1.0 / storage_handle::max_load_factor_reciprocal;  }
 
-    void
+    // N.B. The return type is a non-standard extension.
+    cow_hashmap&
     rehash(size_type n)
-      { this->do_reallocate(0, 0, this->bucket_count(), noadl::max(this->size(), n));  }
+      {
+        // Calculate the minimum bucket count to reserve. This must include all existent elements.
+        // Don't reallocate if the storage is unique and there is enough room.
+        size_type rcap = this->m_sth.round_up_capacity(noadl::max(
+                                          this->size(), n / storage_handle::max_load_factor_reciprocal));
+        if(this->capacity() == rcap)
+          return *this;
+
+        // Allocate new storage.
+        storage_handle sth(this->m_sth.as_allocator(), this->m_sth.as_hasher(), this->m_sth.as_key_equal());
+        sth.reallocate_reserve(this->m_sth, true, rcap - this->size());
+
+        // Set the new storage up. The size is left intact.
+        this->m_sth.exchange_with(sth);
+        return *this;
+      }
 
     // 26.5.4.4, modifiers
     // N.B. This is a non-standard extension.
-    template<typename ykeyT, typename yvalueT>
+    template<typename ykeyT, typename ymappedT>
     pair<iterator, bool>
-    insert(const pair<ykeyT, yvalueT>& value)
+    insert(const pair<ykeyT, ymappedT>& value)
       { return this->try_emplace(value.first, value.second);  }
 
     // N.B. This is a non-standard extension.
-    template<typename ykeyT, typename yvalueT>
+    template<typename ykeyT, typename ymappedT>
     pair<iterator, bool>
-    insert(pair<ykeyT, yvalueT>&& value)
+    insert(pair<ykeyT, ymappedT>&& value)
       { return this->try_emplace(::std::move(value.first), ::std::move(value.second));  }
+
+    // N.B. The return type is a non-standard extension.
+    cow_hashmap&
+    insert(initializer_list<value_type> init)
+      { return this->insert(init.begin(), init.end());  }
 
     // N.B. The return type is a non-standard extension.
     template<typename inputT,
@@ -439,226 +476,268 @@ class cow_hashmap
         if(first == last)
           return *this;
 
-        auto dist = noadl::estimate_distance(first, last);
-        if(dist == 0) {
-          noadl::ranged_do_while(::std::move(first), ::std::move(last),
-                                 [&](const inputT& it) { this->insert(*it);  });
+        size_t dist = noadl::estimate_distance(first, last);
+        size_type n = static_cast<size_type>(dist);
+
+        // Check whether the storage is unique and there is enough space.
+        auto bkts = this->m_sth.mut_buckets_opt();
+        auto cap = this->capacity();
+        size_type tpos;
+        if(ROCKET_EXPECT(dist && bkts && (dist <= cap - this->size()))) {
+          // Insert new elements in place.
+          for(auto it = ::std::move(first);  it != last;  ++it)
+            this->m_sth.keyed_try_emplace(tpos, it->first, it->first, it->second);
+
+          // The return type aligns with `std::string::append()`.
           return *this;
         }
 
-        this->do_reserve_more(dist);
-        noadl::ranged_do_while(::std::move(first), ::std::move(last),
-                               [&](const inputT& it) { this->m_sth.keyed_emplace_unchecked(it->first, *it);  });
+        // Allocate new storage.
+        storage_handle sth(this->m_sth.as_allocator(), this->m_sth.as_hasher(), this->m_sth.as_key_equal());
+        if(ROCKET_EXPECT(n && (n == dist))) {
+          // The length is known.
+          bkts = sth.reallocate_reserve(this->m_sth, false, n | cap / 2);
+
+          // Insert new elements into the new storage.
+          for(auto it = ::std::move(first);  it != last;  ++it)
+            if(!this->m_sth.find(tpos, it->first))
+              sth.keyed_try_emplace(tpos, it->first, it->first, it->second);
+        }
+        else {
+          // The length is not known.
+          bkts = sth.reallocate_reserve(this->m_sth, false, 5 | cap / 2);
+          cap = sth.capacity();
+
+          // Insert new elements into the new storage.
+          for(auto it = ::std::move(first);  it != last;  ++it) {
+            // Reallocate the storage if necessary.
+            if(ROCKET_UNEXPECT(sth.size() >= cap))
+              bkts = sth.reallocate_reserve(sth, this->size(), cap / 2),
+              cap = sth.capacity();
+
+            if(!this->m_sth.find(tpos, it->first))
+              sth.keyed_try_emplace(tpos, it->first, it->first, it->second);
+          }
+        }
+        sth.reallocate_finish(this->m_sth);
+
+        // Set the new storage up.
+        this->m_sth.exchange_with(sth);
         return *this;
       }
 
-    // N.B. The return type is a non-standard extension.
-    cow_hashmap&
-    insert(initializer_list<value_type> init)
-      {
-        return this->insert(init.begin(), init.end());
-      }
+    // N.B. This is a non-standard extension.
+    // N.B. The hint is ignored.
+    template<typename ykeyT, typename ymappedT>
+    iterator
+    insert(const_iterator /*hint*/, const pair<ykeyT, ymappedT>& value)
+      { return this->insert(value).first;  }
 
     // N.B. This is a non-standard extension.
     // N.B. The hint is ignored.
-    template<typename ykeyT, typename yvalueT>
+    template<typename ykeyT, typename ymappedT>
     iterator
-    insert(const_iterator /*hint*/, const pair<ykeyT, yvalueT>& value)
-      {
-        return this->insert(value).first;
-      }
-
-    // N.B. This is a non-standard extension.
-    // N.B. The hint is ignored.
-    template<typename ykeyT, typename yvalueT>
-    iterator
-    insert(const_iterator /*hint*/, pair<ykeyT, yvalueT>&& value)
-      {
-        return this->insert(::std::move(value)).first;
-      }
+    insert(const_iterator /*hint*/, pair<ykeyT, ymappedT>&& value)
+      { return this->insert(::std::move(value)).first;  }
 
     template<typename ykeyT, typename... paramsT>
     pair<iterator, bool>
-    try_emplace(ykeyT&& key, paramsT&&... params)
+    try_emplace(ykeyT&& ykey, paramsT&&... params)
       {
-        this->do_reserve_more(1);
-        auto result = this->m_sth.keyed_emplace_unchecked(key,
-                          ::std::piecewise_construct, ::std::forward_as_tuple(::std::forward<ykeyT>(key)),
-                                                      ::std::forward_as_tuple(::std::forward<paramsT>(params)...));
-        return ::std::make_pair(iterator(this->m_sth, result.first), result.second);
+        // Check whether the storage is unique and there is enough space.
+        auto bkts = this->m_sth.mut_buckets_opt();
+        auto cap = this->capacity();
+        size_type tpos;
+        if(ROCKET_EXPECT(bkts && (this->size() < cap))) {
+          // Insert the new element in place.
+          bool inserted = this->m_sth.keyed_try_emplace(tpos, ykey,
+                      ::std::piecewise_construct, ::std::forward_as_tuple(::std::forward<ykeyT>(ykey)),
+                                                  ::std::forward_as_tuple(::std::forward<paramsT>(params)...));
+
+          // The return type aligns with `std::unordered_map::try_emplace()`.
+          return { iterator(bkts, tpos, this->bucket_count()), inserted };
+        }
+
+        // Check for equivalent keys before reallocation.
+        // If one is found, `tpos` will point at that bucket, so we can return an iterator to it.
+        if(this->m_sth.find(tpos, ykey))
+          return { iterator(this->do_mut_buckets(), tpos, this->bucket_count()), false };
+
+        // Allocate new storage.
+        storage_handle sth(this->m_sth.as_allocator(), this->m_sth.as_hasher(), this->m_sth.as_key_equal());
+        bkts = sth.reallocate_reserve(this->m_sth, false, 1 | cap / 2);
+
+        // Insert the new element into the new storage.
+        sth.keyed_try_emplace(tpos, ykey,
+                      ::std::piecewise_construct, ::std::forward_as_tuple(::std::forward<ykeyT>(ykey)),
+                                                  ::std::forward_as_tuple(::std::forward<paramsT>(params)...));
+        sth.reallocate_finish(this->m_sth);
+
+        // Set the new storage up.
+        this->m_sth.exchange_with(sth);
+        return { iterator(bkts, tpos, this->bucket_count()), true };
       }
 
     // N.B. The hint is ignored.
     template<typename ykeyT, typename... paramsT>
     iterator
-    try_emplace(const_iterator /*hint*/, ykeyT&& key, paramsT&&... params)
-      {
-        return this->try_emplace(::std::forward<ykeyT>(key), ::std::forward<paramsT>(params)...).first;
-      }
+    try_emplace(const_iterator /*hint*/, ykeyT&& ykey, paramsT&&... params)
+      { return this->try_emplace(::std::forward<ykeyT>(ykey), ::std::forward<paramsT>(params)...).first;  }
 
-    template<typename ykeyT, typename yvalueT>
+    template<typename ykeyT, typename ymappedT>
     pair<iterator, bool>
-    insert_or_assign(ykeyT&& key, yvalueT&& yvalue)
+    insert_or_assign(ykeyT&& ykey, ymappedT&& ymapped)
       {
-        this->do_reserve_more(1);
-        auto result = this->m_sth.keyed_emplace_unchecked(key,
-                          ::std::forward<ykeyT>(key), ::std::forward<yvalueT>(yvalue));
-        if(!result.second)
-          result.first->get()->second = ::std::forward<yvalueT>(yvalue);
-        return ::std::make_pair(iterator(this->m_sth, result.first), result.second);
+        auto r = this->try_emplace(::std::forward<ykeyT>(ykey), ::std::forward<ymappedT>(ymapped));
+        if(!r.second)
+          r.first->second = ::std::forward<ymappedT>(ymapped);
+        return r;
       }
 
     // N.B. The hint is ignored.
-    template<typename ykeyT, typename yvalueT>
+    template<typename ykeyT, typename ymappedT>
     iterator
-    insert_or_assign(const_iterator /*hint*/, ykeyT&& key, yvalueT&& yvalue)
-      {
-        return this->insert_or_assign(::std::forward<ykeyT>(key), ::std::forward<yvalueT>(yvalue)).first;
-      }
-
-    // N.B. This function may throw `std::bad_alloc`.
-    iterator
-    erase(const_iterator tfirst, const_iterator tlast)
-      {
-        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->do_get_table());
-        auto tn = static_cast<size_type>(tlast.tell_owned_by(this->m_sth) - tfirst.tell());
-        auto ptr = this->do_erase_no_bound_check(tpos, tn);
-        return iterator(this->m_sth, details_cow_hashmap::needs_adjust, ptr);
-      }
-
-    // N.B. This function may throw `std::bad_alloc`.
-    iterator
-    erase(const_iterator tfirst)
-      {
-        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->do_get_table());
-        auto ptr = this->do_erase_no_bound_check(tpos, 1);
-        return iterator(this->m_sth, details_cow_hashmap::needs_adjust, ptr);
-      }
+    insert_or_assign(const_iterator /*hint*/, ykeyT&& ykey, ymappedT&& ymapped)
+      { return this->insert_or_assign(::std::forward<ykeyT>(ykey), ::std::forward<ymappedT>(ymapped)).first;  }
 
     // N.B. This function may throw `std::bad_alloc`.
     // N.B. The return type differs from `std::unordered_map`.
     template<typename ykeyT,
     ROCKET_DISABLE_IF(is_convertible<ykeyT, const_iterator>::value)>
     bool
-    erase(const ykeyT& key)
+    erase(const ykeyT& ykey)
       {
         size_type tpos;
-        if(!this->m_sth.index_of(tpos, key))
+        if(!this->m_sth.find(tpos, ykey))
           return false;
 
-        this->do_erase_no_bound_check(tpos, 1);
+        this->do_erase_unchecked(tpos, 1);
         return true;
+      }
+
+    // N.B. This function may throw `std::bad_alloc`.
+    iterator
+    erase(const_iterator tfirst, const_iterator tlast)
+      {
+        size_type tpos = static_cast<size_type>(tfirst.do_index(this->do_buckets()));
+        size_type tlen = static_cast<size_type>(tlast.do_index(tfirst.m_cur));
+
+        auto bkt = this->do_erase_unchecked(tpos, tlen);
+        return iterator(bkt - tpos, tpos, this->bucket_count());
+      }
+
+    // N.B. This function may throw `std::bad_alloc`.
+    iterator
+    erase(const_iterator tfirst)
+      {
+        size_type tpos = static_cast<size_type>(tfirst.do_index(this->do_buckets()));
+
+        auto bkt = this->do_erase_unchecked(tpos, 1);
+        return iterator(bkt - tpos, tpos, this->bucket_count());
       }
 
     // map operations
     template<typename ykeyT>
     const_iterator
-    find(const ykeyT& key)
+    find(const ykeyT& ykey)
     const
       {
-        auto ptr = this->do_get_table();
         size_type tpos;
-        if(!this->m_sth.index_of(tpos, key))
+        if(!this->m_sth.find(tpos, ykey))
           return this->end();
-        return const_iterator(this->m_sth, ptr + tpos);
+        return const_iterator(this->do_buckets(), tpos, this->bucket_count());
       }
 
     // N.B. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
     template<typename ykeyT>
     iterator
-    mut_find(const ykeyT& key)
+    mut_find(const ykeyT& ykey)
       {
-        auto ptr = this->do_mut_table();
         size_type tpos;
-        if(!this->m_sth.index_of(tpos, key))
+        if(!this->m_sth.find(tpos, ykey))
           return this->mut_end();
-        return iterator(this->m_sth, ptr + tpos);
+        return iterator(this->do_mut_buckets(), tpos, this->bucket_count());
       }
 
+    // N.B. The return type differs from `std::unordered_map`.
     template<typename ykeyT>
-    size_t
-    count(const ykeyT& key)
+    bool
+    count(const ykeyT& ykey)
     const
       {
         size_type tpos;
-        return this->m_sth.index_of(tpos, key);
+        return this->m_sth.find(tpos, ykey);
       }
 
     // N.B. This is a non-standard extension.
     template<typename ykeyT, typename ydefaultT>
     typename select_type<const mapped_type&, ydefaultT&&>::type
-    get_or(const ykeyT& key, ydefaultT&& ydef)
+    get_or(const ykeyT& ykey, ydefaultT&& ydef)
     const
       {
-        auto ptr = this->do_get_table();
         size_type tpos;
-        if(!this->m_sth.index_of(tpos, key))
+        if(!this->m_sth.find(tpos, ykey))
           return ::std::forward<ydefaultT>(ydef);
-        return ptr[tpos]->second;
+        return this->do_buckets()[tpos]->second;
       }
 
     // N.B. This is a non-standard extension.
     template<typename ykeyT, typename ydefaultT>
     typename select_type<mapped_type&&, ydefaultT&&>::type
-    move_or(const ykeyT& key, ydefaultT&& ydef)
+    move_or(const ykeyT& ykey, ydefaultT&& ydef)
     const
       {
-        auto ptr = this->do_mut_table();
         size_type tpos;
-        if(!this->m_sth.index_of(tpos, key))
+        if(!this->m_sth.find(tpos, ykey))
           return ::std::forward<ydefaultT>(ydef);
-        return ::std::move(ptr[tpos]->second);
+        return ::std::move(this->do_mut_buckets()[tpos]->second);
       }
 
     // 26.5.4.3, element access
     template<typename ykeyT>
     const mapped_type&
-    at(const ykeyT& key)
+    at(const ykeyT& ykey)
     const
       {
-        auto ptr = this->do_get_table();
         size_type tpos;
-        if(!this->m_sth.index_of(tpos, key))
-          this->do_throw_key_not_found();
-        return ptr[tpos]->second;
+        if(!this->m_sth.find(tpos, ykey))
+          this->do_throw_key_not_found(ykey);
+        return this->do_buckets()[tpos]->second;
       }
 
     // N.B. This is a non-standard extension.
     template<typename ykeyT>
     const mapped_type*
-    ptr(const ykeyT& key)
+    ptr(const ykeyT& ykey)
     const
       {
-        auto ptr = this->do_get_table();
         size_type tpos;
-        if(!this->m_sth.index_of(tpos, key))
+        if(!this->m_sth.find(tpos, ykey))
           return nullptr;
-        return ::std::addressof(ptr[tpos]->second);
+        return ::std::addressof(this->do_buckets()[tpos]->second);
       }
 
     // N.B. This is a non-standard extension.
     template<typename ykeyT>
     mapped_type&
-    mut(const ykeyT& key)
+    mut(const ykeyT& ykey)
       {
-        auto ptr = this->do_mut_table();
         size_type tpos;
-        if(!this->m_sth.index_of(tpos, key))
-          this->do_throw_key_not_found();
-        return ptr[tpos]->second;
+        if(!this->m_sth.find(tpos, ykey))
+          this->do_throw_key_not_found(ykey);
+        return this->do_mut_buckets()[tpos]->second;
       }
 
     // N.B. This is a non-standard extension.
     template<typename ykeyT>
     mapped_type*
-    mut_ptr(const ykeyT& key)
+    mut_ptr(const ykeyT& ykey)
       {
-        auto ptr = this->do_mut_table();
         size_type tpos;
-        if(!this->m_sth.index_of(tpos, key))
+        if(!this->m_sth.find(tpos, ykey))
           return nullptr;
-        return ::std::addressof(ptr[tpos]->second);
+        return ::std::addressof(this->do_mut_buckets()[tpos]->second);
       }
 
     // N.B. This function is a non-standard extension.
