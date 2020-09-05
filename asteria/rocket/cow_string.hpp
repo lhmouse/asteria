@@ -910,7 +910,9 @@ class basic_cow_string
     pop_back(size_type n = 1)
       {
         ROCKET_ASSERT_MSG(n <= this->size(), "No enough characters to pop");
-        this->do_swizzle_unchecked(this->size() - n, n, this->size());
+        auto ptr = this->mut_data();
+        this->m_len -= n;
+        traits_type::assign(ptr[this->m_len], value_type());
         return *this;
       }
 
