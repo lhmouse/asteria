@@ -902,7 +902,12 @@ class basic_cow_string
     // N.B. This function may throw `std::bad_alloc`.
     iterator
     erase(const_iterator tfirst)
-      { return this->erase(tfirst, tfirst + 1);  }
+      {
+        size_type tpos = static_cast<size_type>(tfirst - this->begin());
+
+        auto ptr = this->do_swizzle_unchecked(tpos, 1, this->size());
+        return iterator(ptr - tpos, tpos, this->size());
+      }
 
     // N.B. This function may throw `std::bad_alloc`.
     // N.B. The return type and parameter are non-standard extensions.
