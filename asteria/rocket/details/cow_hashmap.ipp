@@ -859,6 +859,16 @@ class stringified_key
       { ::std::sprintf(this->m_temp, "%lc (U+%.6lX)", static_cast<wchar_t>(val),
                                                       static_cast<unsigned long>(val));  }
 
+    stringified_key(const void* val)
+    noexcept
+      { ::std::sprintf(this->m_temp, "%p", val);  }
+
+    template<typename funcT,
+    ROCKET_ENABLE_IF(is_function<funcT>::value)>
+    stringified_key(funcT* val)
+    noexcept
+      { ::std::sprintf(this->m_temp, "%p", reinterpret_cast<void*>(val));  }
+
     template<typename valueT,
     ROCKET_ENABLE_IF(is_enum<valueT>::value)>
     stringified_key(valueT val)
