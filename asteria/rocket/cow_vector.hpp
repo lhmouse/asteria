@@ -304,7 +304,7 @@ class cow_vector
 
     size_type
     capacity()
-    noexcept
+    const noexcept
       { return this->m_sth.capacity();  }
 
     // N.B. The return type is a non-standard extension.
