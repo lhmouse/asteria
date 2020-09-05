@@ -323,7 +323,7 @@ class cow_vector
         if(res_arg == 0)
           return this->shrink_to_fit();
 
-        // Calculate the minimum capacity to reserve. This must include all existent characters.
+        // Calculate the minimum capacity to reserve. This must include all existent elements.
         // Don't reallocate if the storage is unique and there is enough room.
         size_type rcap = this->m_sth.round_up_capacity(noadl::max(this->size(), res_arg));
         if(this->unique() && (this->capacity() >= rcap))
@@ -346,7 +346,7 @@ class cow_vector
         if(this->empty())
           return this->do_deallocate();
 
-        // Calculate the minimum capacity to reserve. This must include all existent characters.
+        // Calculate the minimum capacity to reserve. This must include all existent elements.
         // Don't reallocate if the storage is shared or tight.
         size_type rcap = this->m_sth.round_up_capacity(this->size());
         if(!this->unique() || (this->capacity() <= rcap))
