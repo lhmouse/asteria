@@ -323,8 +323,7 @@ class static_vector
     clear()
     noexcept
       {
-        for(size_type k = this->size();  k != 0;  --k)
-          this->m_sth.pop_back_unchecked();
+        this->do_erase_unchecked(0, this->size());
         return *this;
       }
 
@@ -664,8 +663,8 @@ class static_vector
     static_vector&
     pop_back(size_type n = 1)
       {
-        for(size_type k = 0;  k < n;  ++k)
-          this->m_sth.pop_back_unchecked();
+        ROCKET_ASSERT_MSG(n <= this->size(), "No enough elements to pop");
+        this->do_erase_unchecked(this->size() - n, n);
         return *this;
       }
 
