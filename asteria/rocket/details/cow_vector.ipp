@@ -393,6 +393,14 @@ class storage_handle
         return qstor->pop_back_unchecked();
       }
 
+    void
+    pop_back_unchecked(size_t total)
+    noexcept
+      {
+        for(size_t k = 0;  k != total;  ++k)
+          this->pop_back_unchecked();
+      }
+
     ROCKET_NOINLINE
     value_type*
     reallocate_prepare(storage_handle& sth, size_type skip, size_type add)

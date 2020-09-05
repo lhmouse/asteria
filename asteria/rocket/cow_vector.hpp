@@ -203,9 +203,8 @@ class cow_vector
         if((tpos < tepos) && (tepos < this->size()))
           noadl::rotate(ptr, tpos, tepos, this->size());
 
-        // Destroy elements.
-        for(size_type k = 0;  k < tlen;  ++k)
-          this->m_sth.pop_back_unchecked();
+        // Purge unwanted elements.
+        this->m_sth.pop_back_unchecked(tlen);
 
         // Return a pointer next to erased elements.
         return ptr + tpos;
@@ -370,7 +369,7 @@ class cow_vector
         if(!this->m_sth.unique())
           return this->do_deallocate();
 
-        this->do_erase_unchecked(0, this->size());
+        this->m_sth.pop_back_unchecked(this->size());
         return *this;
       }
 
@@ -779,8 +778,8 @@ class cow_vector
     cow_vector&
     pop_back(size_type n = 1)
       {
-        ROCKET_ASSERT_MSG(n <= this->size(), "No enough elements to pop");
-        this->do_erase_unchecked(this->size() - n, n);
+        this->mut_data();
+        this->m_sth.pop_back_unchecked(n);
         return *this;
       }
 
