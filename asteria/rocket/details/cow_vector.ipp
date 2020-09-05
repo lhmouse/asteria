@@ -403,6 +403,38 @@ class storage_handle
 
     ROCKET_NOINLINE
     value_type*
+    reallocate_clone(storage_handle& sth)
+      {
+        // Get the number of existent elements.
+        // Note that `sth` shall not be empty prior to this call.
+        ROCKET_ASSERT(sth.m_qstor);
+        auto len = sth.size();
+
+        // Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
+        auto nblk = sth.m_qstor->nblk;
+        storage_allocator st_alloc(this->as_allocator());
+        auto qstor = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
+        noadl::construct_at(noadl::unfancy(qstor),
+                            reinterpret_cast<unknown_function*>(this->do_destroy_storage), len,
+                            this->as_allocator(), nblk);
+
+        // Copy/move old elements from `sth`.
+        try {
+          if(len != 0)
+            storage_traits<allocator_type, storage>::dispatch_transfer(*qstor, *(sth.m_qstor), 0);
+        }
+        catch(...) {
+          this->do_destroy_storage(qstor);
+          throw;
+        }
+
+        // Set up the new storage.
+        this->do_reset(qstor);
+        return qstor->data;
+      }
+
+    ROCKET_NOINLINE
+    value_type*
     reallocate_prepare(storage_handle& sth, size_type skip, size_type add)
       {
         // Calculate the combined length of vector (sth.size() + add).

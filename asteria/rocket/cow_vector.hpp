@@ -870,7 +870,7 @@ class cow_vector
           return const_cast<value_type*>(this->data());
 
         // Reallocate the storage. The length is left intact.
-        ptr = this->m_sth.reallocate_prepare(this->m_sth, 0, 0) - this->size();
+        ptr = this->m_sth.reallocate_clone(this->m_sth);
         return ptr;
       }
 
