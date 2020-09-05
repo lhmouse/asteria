@@ -254,6 +254,16 @@ class basic_cow_string
       { return this->assign(init);  }
 
   private:
+    basic_cow_string&
+    do_deallocate()
+    noexcept
+      {
+        this->m_sth.deallocate();
+        this->m_ptr = storage_handle::null_char;
+        this->m_len = 0;
+        return *this;
+      }
+
     [[noreturn]] ROCKET_NOINLINE
     void
     do_throw_subscript_out_of_range(size_type pos, const char* rel)
@@ -491,11 +501,8 @@ class basic_cow_string
     shrink_to_fit()
       {
         // If the string is empty, deallocate any dynamic storage. The length is left intact.
-        if(this->empty()) {
-          this->m_sth.deallocate();
-          this->m_ptr = storage_handle::null_char;
-          return *this;
-        }
+        if(this->empty())
+          return this->do_deallocate();
 
         // Calculate the minimum capacity to reserve. This must include all existent characters.
         // Don't reallocate if the storage is shared or tight.
@@ -518,6 +525,10 @@ class basic_cow_string
     clear()
     noexcept
       {
+        // If storage is shared, detach it.
+        if(!this->m_sth.unique())
+          return this->do_deallocate();
+
         this->m_ptr = storage_handle::null_char;
         this->m_len = 0;
         return *this;
