@@ -493,14 +493,18 @@ class vector_iterator
     constexpr
     vector_iterator(valueT* begin, size_t ncur, size_t nend)
     noexcept
-      : m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)
+      : m_begin(begin),
+        m_cur(begin + ncur),
+        m_end(begin + nend)
       { }
 
   public:
     constexpr
     vector_iterator()
     noexcept
-      : m_begin(), m_cur(), m_end()
+      : m_begin(),
+        m_cur(),
+        m_end()
       { }
 
     template<typename yvalueT,
@@ -508,8 +512,22 @@ class vector_iterator
     constexpr
     vector_iterator(const vector_iterator<vectorT, yvalueT>& other)
     noexcept
-      : m_begin(other.m_begin), m_cur(other.m_cur), m_end(other.m_end)
+      : m_begin(other.m_begin),
+        m_cur(other.m_cur),
+        m_end(other.m_end)
       { }
+
+    template<typename yvalueT,
+    ROCKET_ENABLE_IF(is_convertible<yvalueT*, valueT*>::value)>
+    vector_iterator&
+    operator=(const vector_iterator<vectorT, yvalueT>& other)
+    noexcept
+      {
+        this->m_begin = other.m_begin;
+        this->m_cur = other.m_cur;
+        this->m_end = other.m_end;
+        return *this;
+      }
 
   private:
     valueT*

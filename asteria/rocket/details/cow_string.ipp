@@ -406,14 +406,18 @@ class string_iterator
     constexpr
     string_iterator(charT* begin, size_t ncur, size_t nend)
     noexcept
-      : m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)
+      : m_begin(begin),
+        m_cur(begin + ncur),
+        m_end(begin + nend)
       { }
 
   public:
     constexpr
     string_iterator()
     noexcept
-      : m_begin(), m_cur(), m_end()
+      : m_begin(),
+        m_cur(),
+        m_end()
       { }
 
     template<typename ycharT,
@@ -421,8 +425,22 @@ class string_iterator
     constexpr
     string_iterator(const string_iterator<stringT, ycharT>& other)
     noexcept
-      : m_begin(other.m_begin), m_cur(other.m_cur), m_end(other.m_end)
+      : m_begin(other.m_begin),
+        m_cur(other.m_cur),
+        m_end(other.m_end)
       { }
+
+    template<typename ycharT,
+    ROCKET_ENABLE_IF(is_convertible<ycharT*, charT*>::value)>
+    string_iterator&
+    operator=(const string_iterator<stringT, ycharT>& other)
+    noexcept
+      {
+        this->m_begin = other.m_begin;
+        this->m_cur = other.m_cur;
+        this->m_end = other.m_end;
+        return *this;
+      }
 
   private:
     charT*
