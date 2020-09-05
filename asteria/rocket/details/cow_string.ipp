@@ -259,7 +259,6 @@ class storage_handle
         // This shall not throw exceptions.
         if(len)
           traits_type::copy(qstor->data, src, len);
-
         traits_type::assign(qstor->data[len], value_type());
 
         // Set up the new storage.
