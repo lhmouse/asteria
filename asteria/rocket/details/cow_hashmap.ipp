@@ -958,12 +958,21 @@ class hashmap_iterator
       }
 
     difference_type
-    do_index(const bucketT* begin)
+    do_this_pos(const bucketT* begin)
     const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
         ROCKET_ASSERT_MSG(this->m_begin == begin, "Iterator not compatible");
         return this->m_cur - begin;
+      }
+
+    difference_type
+    do_this_len(const hashmap_iterator& other)
+    const noexcept
+      {
+        ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
+        ROCKET_ASSERT_MSG(this->m_begin == other.m_begin, "Iterator not compatible");
+        return this->m_cur - other.m_cur;
       }
 
     hashmap_iterator

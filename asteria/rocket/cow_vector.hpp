@@ -761,19 +761,20 @@ class cow_vector
       }
 
     iterator
-    erase(const_iterator tfirst, const_iterator tlast)
+    erase(const_iterator first, const_iterator last)
       {
-        size_type tpos = static_cast<size_type>(tfirst - this->begin());
-        size_type tlen = static_cast<size_type>(tlast - tfirst);
+        ROCKET_ASSERT_MSG(first <= last, "Invalid range");
+        size_type tpos = static_cast<size_type>(first - this->begin());
+        size_type tlen = static_cast<size_type>(last - first);
 
         auto ptr = this->do_erase_unchecked(tpos, tlen);
         return iterator(ptr - tpos, tpos, this->size());
       }
 
     iterator
-    erase(const_iterator tfirst)
+    erase(const_iterator pos)
       {
-        size_type tpos = static_cast<size_type>(tfirst - this->begin());
+        size_type tpos = static_cast<size_type>(pos - this->begin());
 
         auto ptr = this->do_erase_unchecked(tpos, 1);
         return iterator(ptr - tpos, tpos, this->size());

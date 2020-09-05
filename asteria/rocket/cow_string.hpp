@@ -890,10 +890,11 @@ class basic_cow_string
 
     // N.B. This function may throw `std::bad_alloc`.
     iterator
-    erase(const_iterator tfirst, const_iterator tlast)
+    erase(const_iterator first, const_iterator last)
       {
-        size_type tpos = static_cast<size_type>(tfirst - this->begin());
-        size_type tlen = static_cast<size_type>(tlast - tfirst);
+        ROCKET_ASSERT_MSG(first <= last, "Invalid range");
+        size_type tpos = static_cast<size_type>(first - this->begin());
+        size_type tlen = static_cast<size_type>(last - first);
 
         auto ptr = this->do_swizzle_unchecked(tpos, tlen, this->size());
         return iterator(ptr - tpos, tpos, this->size());
@@ -901,9 +902,9 @@ class basic_cow_string
 
     // N.B. This function may throw `std::bad_alloc`.
     iterator
-    erase(const_iterator tfirst)
+    erase(const_iterator pos)
       {
-        size_type tpos = static_cast<size_type>(tfirst - this->begin());
+        size_type tpos = static_cast<size_type>(pos - this->begin());
 
         auto ptr = this->do_swizzle_unchecked(tpos, 1, this->size());
         return iterator(ptr - tpos, tpos, this->size());
@@ -1200,11 +1201,12 @@ class basic_cow_string
 
     // N.B. The last two parameters are non-standard extensions.
     basic_cow_string&
-    replace(const_iterator tfirst, const_iterator tlast, const basic_cow_string& other,
+    replace(const_iterator first, const_iterator last, const basic_cow_string& other,
             size_type pos = 0, size_type n = npos)
       {
-        size_type tpos = static_cast<size_type>(tfirst - this->begin());
-        size_type tlen = static_cast<size_type>(tlast - tfirst);
+        ROCKET_ASSERT_MSG(first <= last, "Invalid range");
+        size_type tpos = static_cast<size_type>(first - this->begin());
+        size_type tlen = static_cast<size_type>(last - first);
 
         // Note `other` may be `*this`.
         size_type klen = this->size();
@@ -1214,10 +1216,11 @@ class basic_cow_string
       }
 
     basic_cow_string&
-    replace(const_iterator tfirst, const_iterator tlast, const value_type* s, size_type n)
+    replace(const_iterator first, const_iterator last, const value_type* s, size_type n)
       {
-        size_type tpos = static_cast<size_type>(tfirst - this->begin());
-        size_type tlen = static_cast<size_type>(tlast - tfirst);
+        ROCKET_ASSERT_MSG(first <= last, "Invalid range");
+        size_type tpos = static_cast<size_type>(first - this->begin());
+        size_type tlen = static_cast<size_type>(last - first);
 
         // Note `s` may overlap with `this->data()`.
         size_type klen = this->size();
@@ -1227,10 +1230,11 @@ class basic_cow_string
       }
 
     basic_cow_string&
-    replace(const_iterator tfirst, const_iterator tlast, const value_type* s)
+    replace(const_iterator first, const_iterator last, const value_type* s)
       {
-        size_type tpos = static_cast<size_type>(tfirst - this->begin());
-        size_type tlen = static_cast<size_type>(tlast - tfirst);
+        ROCKET_ASSERT_MSG(first <= last, "Invalid range");
+        size_type tpos = static_cast<size_type>(first - this->begin());
+        size_type tlen = static_cast<size_type>(last - first);
 
         // Note `s` may overlap with `this->data()`.
         size_type klen = this->size();
@@ -1240,10 +1244,11 @@ class basic_cow_string
       }
 
     basic_cow_string&
-    replace(const_iterator tfirst, const_iterator tlast, size_type n, value_type ch)
+    replace(const_iterator first, const_iterator last, size_type n, value_type ch)
       {
-        size_type tpos = static_cast<size_type>(tfirst - this->begin());
-        size_type tlen = static_cast<size_type>(tlast - tfirst);
+        ROCKET_ASSERT_MSG(first <= last, "Invalid range");
+        size_type tpos = static_cast<size_type>(first - this->begin());
+        size_type tlen = static_cast<size_type>(last - first);
 
         // XXX: This can be optimized *a lot*.
         size_type klen = this->size();
@@ -1253,10 +1258,11 @@ class basic_cow_string
       }
 
     basic_cow_string&
-    replace(const_iterator tfirst, const_iterator tlast, initializer_list<value_type> init)
+    replace(const_iterator first, const_iterator last, initializer_list<value_type> init)
       {
-        size_type tpos = static_cast<size_type>(tfirst - this->begin());
-        size_type tlen = static_cast<size_type>(tlast - tfirst);
+        ROCKET_ASSERT_MSG(first <= last, "Invalid range");
+        size_type tpos = static_cast<size_type>(first - this->begin());
+        size_type tlen = static_cast<size_type>(last - first);
 
         // XXX: This can be optimized *a lot*.
         size_type klen = this->size();
@@ -1268,22 +1274,33 @@ class basic_cow_string
     template<typename inputT,
     ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     basic_cow_string&
-    replace(const_iterator tfirst, const_iterator tlast, inputT first, inputT last)
+    replace(const_iterator first, const_iterator last, inputT ofirst, inputT olast)
       {
-        size_type tpos = static_cast<size_type>(tfirst - this->begin());
-        size_type tlen = static_cast<size_type>(tlast - tfirst);
+        ROCKET_ASSERT_MSG(first <= last, "Invalid range");
+        size_type tpos = static_cast<size_type>(first - this->begin());
+        size_type tlen = static_cast<size_type>(last - first);
 
         // Note `first` may overlap with `this->data()`.
         size_type klen = this->size();
-        this->append(::std::move(first), ::std::move(last));
+        this->append(::std::move(ofirst), ::std::move(olast));
         this->do_swizzle_unchecked(tpos, tlen, klen);
         return *this;
       }
 
     // N.B. This is a non-standard extension.
     basic_cow_string&
-    replace(const_iterator tfirst, const_iterator tlast, value_type ch)
-      { return this->replace(tfirst, tlast, size_type(1), ch);  }
+    replace(const_iterator first, const_iterator last, value_type ch)
+      {
+        ROCKET_ASSERT_MSG(first <= last, "Invalid range");
+        size_type tpos = static_cast<size_type>(first - this->begin());
+        size_type tlen = static_cast<size_type>(last - first);
+
+        // XXX: This can be optimized *a lot*.
+        size_type klen = this->size();
+        this->push_back(ch);
+        this->do_swizzle_unchecked(tpos, tlen, klen);
+        return *this;
+      }
 
     size_type
     copy(value_type* s, size_type tn, size_type tpos = 0)
