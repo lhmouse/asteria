@@ -170,12 +170,10 @@ class static_vector
       {
         // Get a pointer to mutable storage.
         auto ptr = this->mut_data();
+        size_type len = this->size();
 
-        // Swap the intervals [tpos,kpos) and [kpos,size).
-        if((tpos < kpos) && (kpos < this->size()))
-          noadl::rotate(ptr, tpos, kpos, this->size());
-
-        // Return a pointer to inserted elements.
+        // Swap the intervals [tpos,kpos) and [kpos,len).
+        noadl::rotate(ptr, tpos, kpos, len);
         return ptr + tpos;
       }
 
@@ -184,17 +182,15 @@ class static_vector
     do_erase_unchecked(size_type tpos, size_type tlen)
       {
         // Get a pointer to mutable storage.
-        size_type tepos = tpos + tlen;
         auto ptr = this->mut_data();
+        size_type len = this->size();
+        size_type epos = tpos + tlen;
 
-        // Swap the intervals [tpos,tpos+tlen) and [tpos+tlen,size).
-        if((tpos < tepos) && (tepos < this->size()))
-          noadl::rotate(ptr, tpos, tepos, this->size());
+        // Swap the intervals [tpos,epos) and [epos,len).
+        noadl::rotate(ptr, tpos, epos, len);
 
         // Purge unwanted elements.
-        this->m_sth.pop_back_unchecked(tlen);
-
-        // Return a pointer next to erased elements.
+        this->m_sth.pop_back_unchecked(epos - tpos);
         return ptr + tpos;
       }
 
