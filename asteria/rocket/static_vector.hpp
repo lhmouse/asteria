@@ -173,7 +173,7 @@ class static_vector
         size_type klen = kpos - tpos;
         size_type slen = this->size() - tpos;
 
-        // Swap the intervals [tpos,kpos) and [kpos,size).
+        // Swap the intervals [`tpos`,`kpos`) and [`kpos`,`size`).
         noadl::rotate(ptr, 0, klen, slen);
         return ptr;
       }
@@ -186,7 +186,7 @@ class static_vector
         auto ptr = this->mut_data() + tpos;
         size_type slen = this->size() - tpos;
 
-        // Swap the intervals [tpos,tpos+tlen) and [tpos+tlen,size).
+        // Swap the intervals [`tpos`,`tpos+tlen`) and [`tpos+tlen`,`size`).
         noadl::rotate(ptr, 0, tlen, slen);
 
         // Purge unwanted elements.
