@@ -292,21 +292,21 @@ class basic_cow_string
     do_swizzle_unchecked(size_type tpos, size_type tlen, size_type kpos)
       {
         // Get a pointer to mutable storage.
-        auto ptr = this->mut_data();
-        size_type len = this->size();
-        size_type epos = tpos + tlen;
+        auto ptr = this->mut_data() + tpos;
+        size_type klen = kpos - tpos;
+        size_type slen = this->size() - tpos;
 
-        // Swap the intervals [epos,kpos) and [kpos,len).
-        noadl::rotate(ptr, epos, kpos, len);
+        // Swap the intervals [tpos+tlen,kpos) and [kpos,size).
+        noadl::rotate(ptr, tlen, klen, slen);
 
-        // Erase the interval [tpos,epos).
+        // Erase the interval [tpos,tpos+tlen).
         if(tlen == 0)
-          return ptr + tpos;
+          return ptr;
 
-        // The null terminator has to be copied as well.
-        traits_type::move(ptr + tpos, ptr + epos, len + 1 - epos);
+        // Note the null terminator has to be copied as well.
+        traits_type::move(ptr, ptr + tlen, slen + 1 - tlen);
         this->m_len -= tlen;
-        return ptr + tpos;
+        return ptr;
       }
 
     // These are generic implementations for `{{,r}find,find_{first,last}{,_not}_of}()` functions.
