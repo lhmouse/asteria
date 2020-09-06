@@ -164,16 +164,16 @@ class static_vector
       }
 
     // This function is used to implement `insert()` after new elements has been appended.
-    // `tpos` is the position to insert. `brep` is the old length prior to `append()`.
+    // `tpos` is the position to insert. `kpos` is the old length prior to `append()`.
     value_type*
-    do_swizzle_unchecked(size_type tpos, size_type brep)
+    do_swizzle_unchecked(size_type tpos, size_type kpos)
       {
         // Get a pointer to mutable storage.
         auto ptr = this->mut_data();
 
-        // Swap the intervals [tpos,brep) and [brep,size).
-        if((tpos < brep) && (brep < this->size()))
-          noadl::rotate(ptr, tpos, brep, this->size());
+        // Swap the intervals [tpos,kpos) and [kpos,size).
+        if((tpos < kpos) && (kpos < this->size()))
+          noadl::rotate(ptr, tpos, kpos, this->size());
 
         // Return a pointer to inserted elements.
         return ptr + tpos;
@@ -509,9 +509,9 @@ class static_vector
         this->do_clamp_subvec(tpos, 0);  // just check
 
         // Note `value` may reference an element in `*this`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->push_back(value);
-        this->do_swizzle_unchecked(tpos, klen);
+        this->do_swizzle_unchecked(tpos, kpos);
         return *this;
       }
 
@@ -522,9 +522,9 @@ class static_vector
         this->do_clamp_subvec(tpos, 0);  // just check
 
         // Note `value` may reference an element in `*this`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->push_back(::std::move(value));
-        this->do_swizzle_unchecked(tpos, klen);
+        this->do_swizzle_unchecked(tpos, kpos);
         return *this;
       }
 
@@ -536,9 +536,9 @@ class static_vector
         this->do_clamp_subvec(tpos, 0);  // just check
 
         // Note `params...` may reference an element in `*this`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(n, params...);
-        this->do_swizzle_unchecked(tpos, klen);
+        this->do_swizzle_unchecked(tpos, kpos);
         return *this;
       }
 
@@ -549,9 +549,9 @@ class static_vector
         this->do_clamp_subvec(tpos, 0);  // just check
 
         // XXX: This can be optimized *a lot*.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(init);
-        this->do_swizzle_unchecked(tpos, klen);
+        this->do_swizzle_unchecked(tpos, kpos);
         return *this;
       }
 
@@ -564,9 +564,9 @@ class static_vector
         this->do_clamp_subvec(tpos, 0);  // just check
 
         // Note `first` may overlap with `this->begin()`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(::std::move(first), ::std::move(last));
-        this->do_swizzle_unchecked(tpos, klen);
+        this->do_swizzle_unchecked(tpos, kpos);
         return *this;
       }
 
@@ -576,9 +576,9 @@ class static_vector
         size_type tpos = static_cast<size_type>(tins - this->begin());
 
         // Note `value` may reference an element in `*this`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->push_back(value);
-        auto ptr = this->do_swizzle_unchecked(tpos, klen);
+        auto ptr = this->do_swizzle_unchecked(tpos, kpos);
         return iterator(ptr - tpos, tpos, this->size());
       }
 
@@ -588,9 +588,9 @@ class static_vector
         size_type tpos = static_cast<size_type>(tins - this->begin());
 
         // Note `value` may reference an element in `*this`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->push_back(::std::move(value));
-        auto ptr = this->do_swizzle_unchecked(tpos, klen);
+        auto ptr = this->do_swizzle_unchecked(tpos, kpos);
         return iterator(ptr - tpos, tpos, this->size());
       }
 
@@ -602,9 +602,9 @@ class static_vector
         size_type tpos = static_cast<size_type>(tins - this->begin());
 
         // Note `params...` may reference an element in `*this`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(n, params...);
-        auto ptr = this->do_swizzle_unchecked(tpos, klen);
+        auto ptr = this->do_swizzle_unchecked(tpos, kpos);
         return iterator(ptr - tpos, tpos, this->size());
       }
 
@@ -614,9 +614,9 @@ class static_vector
         size_type tpos = static_cast<size_type>(tins - this->begin());
 
         // XXX: This can be optimized *a lot*.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(init);
-        auto ptr = this->do_swizzle_unchecked(tpos, klen);
+        auto ptr = this->do_swizzle_unchecked(tpos, kpos);
         return iterator(ptr - tpos, tpos, this->size());
       }
 
@@ -628,9 +628,9 @@ class static_vector
         size_type tpos = static_cast<size_type>(tins - this->begin());
 
         // Note `first` may overlap with `this->begin()`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(::std::move(first), ::std::move(last));
-        auto ptr = this->do_swizzle_unchecked(tpos, klen);
+        auto ptr = this->do_swizzle_unchecked(tpos, kpos);
         return iterator(ptr - tpos, tpos, this->size());
       }
 

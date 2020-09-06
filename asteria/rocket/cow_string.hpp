@@ -287,17 +287,17 @@ class basic_cow_string
       }
 
     // This function is used to implement `replace()` after the replacement has been appended.
-    // `tpos` and `tlen` are arguments to `replace()`. `brep` is the old length prior to `append()`.
+    // `tpos` and `tlen` are arguments to `replace()`. `kpos` is the old length prior to `append()`.
     value_type*
-    do_swizzle_unchecked(size_type tpos, size_type tlen, size_type brep)
+    do_swizzle_unchecked(size_type tpos, size_type tlen, size_type kpos)
       {
         // Get a pointer to mutable storage. If the storage is shared, duplicate it.
         auto ptr = this->mut_data();
 
-        // Swap the intervals [tpos+tlen,brep) and [brep,size).
+        // Swap the intervals [tpos+tlen,kpos) and [kpos,size).
         size_type tepos = tpos + tlen;
-        if((tepos < brep) && (brep < this->size()))
-          noadl::rotate(ptr, tepos, brep, this->size());
+        if((tepos < kpos) && (kpos < this->size()))
+          noadl::rotate(ptr, tepos, kpos, this->size());
 
         // Erase the interval [tpos,tpos+tlen).
         if(tpos < tepos)
@@ -955,9 +955,9 @@ class basic_cow_string
     assign(const basic_cow_string& other, size_type pos, size_type n = npos)
       {
         // Note `other` may be `*this`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(other, pos, n);
-        this->do_swizzle_unchecked(0, klen, klen);
+        this->do_swizzle_unchecked(0, kpos, kpos);
         return *this;
       }
 
@@ -965,9 +965,9 @@ class basic_cow_string
     assign(const value_type* s, size_type n)
       {
         // Note `s` may overlap with `this->data()`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(s, n);
-        this->do_swizzle_unchecked(0, klen, klen);
+        this->do_swizzle_unchecked(0, kpos, kpos);
         return *this;
       }
 
@@ -975,9 +975,9 @@ class basic_cow_string
     assign(const value_type* s)
       {
         // Note `s` may overlap with `this->data()`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(s);
-        this->do_swizzle_unchecked(0, klen, klen);
+        this->do_swizzle_unchecked(0, kpos, kpos);
         return *this;
       }
 
@@ -1003,9 +1003,9 @@ class basic_cow_string
     assign(inputT first, inputT last)
       {
         // Note `first` may overlap with `this->data()`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(::std::move(first), ::std::move(last));
-        this->do_swizzle_unchecked(0, klen, klen);
+        this->do_swizzle_unchecked(0, kpos, kpos);
         return *this;
       }
 
@@ -1015,9 +1015,9 @@ class basic_cow_string
         this->do_clamp_substr(tpos, 0);  // just check
 
         // Note `other` may be `*this`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(other, pos, n);
-        this->do_swizzle_unchecked(tpos, 0, klen);
+        this->do_swizzle_unchecked(tpos, 0, kpos);
         return *this;
       }
 
@@ -1027,9 +1027,9 @@ class basic_cow_string
         this->do_clamp_substr(tpos, 0);  // just check
 
         // Note `s` may overlap with `this->data()`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(s, n);
-        this->do_swizzle_unchecked(tpos, 0, klen);
+        this->do_swizzle_unchecked(tpos, 0, kpos);
         return *this;
       }
 
@@ -1039,9 +1039,9 @@ class basic_cow_string
         this->do_clamp_substr(tpos, 0);  // just check
 
         // Note `s` may overlap with `this->data()`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(s);
-        this->do_swizzle_unchecked(tpos, 0, klen);
+        this->do_swizzle_unchecked(tpos, 0, kpos);
         return *this;
       }
 
@@ -1051,9 +1051,9 @@ class basic_cow_string
         this->do_clamp_substr(tpos, 0);  // just check
 
         // XXX: This can be optimized *a lot*.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(n, ch);
-        this->do_swizzle_unchecked(tpos, 0, klen);
+        this->do_swizzle_unchecked(tpos, 0, kpos);
         return *this;
       }
 
@@ -1064,9 +1064,9 @@ class basic_cow_string
         this->do_clamp_substr(tpos, 0);  // just check
 
         // XXX: This can be optimized *a lot*.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(init);
-        this->do_swizzle_unchecked(tpos, 0, klen);
+        this->do_swizzle_unchecked(tpos, 0, kpos);
         return *this;
       }
 
@@ -1077,9 +1077,9 @@ class basic_cow_string
         size_type tpos = static_cast<size_type>(tins - this->begin());
 
         // Note `other` may be `*this`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(other, pos, n);
-        auto ptr = this->do_swizzle_unchecked(tpos, 0, klen);
+        auto ptr = this->do_swizzle_unchecked(tpos, 0, kpos);
         return iterator(ptr - tpos, tpos, this->size());
       }
 
@@ -1090,9 +1090,9 @@ class basic_cow_string
         size_type tpos = static_cast<size_type>(tins - this->begin());
 
         // Note `s` may overlap with `this->data()`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(s, n);
-        auto ptr = this->do_swizzle_unchecked(tpos, 0, klen);
+        auto ptr = this->do_swizzle_unchecked(tpos, 0, kpos);
         return iterator(ptr - tpos, tpos, this->size());
       }
 
@@ -1103,9 +1103,9 @@ class basic_cow_string
         size_type tpos = static_cast<size_type>(tins - this->begin());
 
         // Note `s` may overlap with `this->data()`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(s);
-        auto ptr = this->do_swizzle_unchecked(tpos, 0, klen);
+        auto ptr = this->do_swizzle_unchecked(tpos, 0, kpos);
         return iterator(ptr - tpos, tpos, this->size());
       }
 
@@ -1115,9 +1115,9 @@ class basic_cow_string
         size_type tpos = static_cast<size_type>(tins - this->begin());
 
         // XXX: This can be optimized *a lot*.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(n, ch);
-        auto ptr = this->do_swizzle_unchecked(tpos, 0, klen);
+        auto ptr = this->do_swizzle_unchecked(tpos, 0, kpos);
         return iterator(ptr - tpos, tpos, this->size());
       }
 
@@ -1127,9 +1127,9 @@ class basic_cow_string
         size_type tpos = static_cast<size_type>(tins - this->begin());
 
         // XXX: This can be optimized *a lot*.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(init);
-        auto ptr = this->do_swizzle_unchecked(tpos, 0, klen);
+        auto ptr = this->do_swizzle_unchecked(tpos, 0, kpos);
         return iterator(ptr - tpos, tpos, this->size());
       }
 
@@ -1141,9 +1141,9 @@ class basic_cow_string
         size_type tpos = static_cast<size_type>(tins - this->begin());
 
         // Note `first` may overlap with `this->data()`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(::std::move(first), ::std::move(last));
-        auto ptr = this->do_swizzle_unchecked(tpos, 0, klen);
+        auto ptr = this->do_swizzle_unchecked(tpos, 0, kpos);
         return iterator(ptr - tpos, tpos, this->size());
       }
 
@@ -1157,9 +1157,9 @@ class basic_cow_string
         size_type tlen = this->do_clamp_substr(tpos, tn);
 
         // Note `other` may be `*this`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(other, pos, n);
-        this->do_swizzle_unchecked(tpos, tlen, klen);
+        this->do_swizzle_unchecked(tpos, tlen, kpos);
         return *this;
       }
 
@@ -1169,9 +1169,9 @@ class basic_cow_string
         size_type tlen = this->do_clamp_substr(tpos, tn);
 
         // Note `s` may overlap with `this->data()`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(s, n);
-        this->do_swizzle_unchecked(tpos, tlen, klen);
+        this->do_swizzle_unchecked(tpos, tlen, kpos);
         return *this;
       }
 
@@ -1181,9 +1181,9 @@ class basic_cow_string
         size_type tlen = this->do_clamp_substr(tpos, tn);
 
         // Note `s` may overlap with `this->data()`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(s);
-        this->do_swizzle_unchecked(tpos, tlen, klen);
+        this->do_swizzle_unchecked(tpos, tlen, kpos);
         return *this;
       }
 
@@ -1193,9 +1193,9 @@ class basic_cow_string
         size_type tlen = this->do_clamp_substr(tpos, tn);
 
         // XXX: This can be optimized *a lot*.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(n, ch);
-        this->do_swizzle_unchecked(tpos, tlen, klen);
+        this->do_swizzle_unchecked(tpos, tlen, kpos);
         return *this;
       }
 
@@ -1209,9 +1209,9 @@ class basic_cow_string
         size_type tlen = static_cast<size_type>(last - first);
 
         // Note `other` may be `*this`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(other, pos, n);
-        this->do_swizzle_unchecked(tpos, tlen, klen);
+        this->do_swizzle_unchecked(tpos, tlen, kpos);
         return *this;
       }
 
@@ -1223,9 +1223,9 @@ class basic_cow_string
         size_type tlen = static_cast<size_type>(last - first);
 
         // Note `s` may overlap with `this->data()`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(s, n);
-        this->do_swizzle_unchecked(tpos, tlen, klen);
+        this->do_swizzle_unchecked(tpos, tlen, kpos);
         return *this;
       }
 
@@ -1237,9 +1237,9 @@ class basic_cow_string
         size_type tlen = static_cast<size_type>(last - first);
 
         // Note `s` may overlap with `this->data()`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(s);
-        this->do_swizzle_unchecked(tpos, tlen, klen);
+        this->do_swizzle_unchecked(tpos, tlen, kpos);
         return *this;
       }
 
@@ -1251,9 +1251,9 @@ class basic_cow_string
         size_type tlen = static_cast<size_type>(last - first);
 
         // XXX: This can be optimized *a lot*.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(n, ch);
-        this->do_swizzle_unchecked(tpos, tlen, klen);
+        this->do_swizzle_unchecked(tpos, tlen, kpos);
         return *this;
       }
 
@@ -1265,9 +1265,9 @@ class basic_cow_string
         size_type tlen = static_cast<size_type>(last - first);
 
         // XXX: This can be optimized *a lot*.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(init);
-        this->do_swizzle_unchecked(tpos, tlen, klen);
+        this->do_swizzle_unchecked(tpos, tlen, kpos);
         return *this;
       }
 
@@ -1281,9 +1281,9 @@ class basic_cow_string
         size_type tlen = static_cast<size_type>(last - first);
 
         // Note `first` may overlap with `this->data()`.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->append(::std::move(ofirst), ::std::move(olast));
-        this->do_swizzle_unchecked(tpos, tlen, klen);
+        this->do_swizzle_unchecked(tpos, tlen, kpos);
         return *this;
       }
 
@@ -1296,9 +1296,9 @@ class basic_cow_string
         size_type tlen = static_cast<size_type>(last - first);
 
         // XXX: This can be optimized *a lot*.
-        size_type klen = this->size();
+        size_type kpos = this->size();
         this->push_back(ch);
-        this->do_swizzle_unchecked(tpos, tlen, klen);
+        this->do_swizzle_unchecked(tpos, tlen, kpos);
         return *this;
       }
 
