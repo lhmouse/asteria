@@ -296,16 +296,35 @@ class basic_cow_string
         size_type klen = kpos - tpos;
         size_type slen = this->size() - tpos;
 
-        // Swap the intervals [tpos+tlen,kpos) and [kpos,size).
+        // Swap the intervals [`tpos+tlen`,`kpos`) and [`kpos`,`size`).
         noadl::rotate(ptr, tlen, klen, slen);
 
-        // Erase the interval [tpos,tpos+tlen).
+        // Erase the interval [`tpos`,`tpos+tlen`).
         if(tlen == 0)
           return ptr;
 
         // Note the null terminator has to be copied as well.
         traits_type::move(ptr, ptr + tlen, slen + 1 - tlen);
         this->m_len -= tlen;
+        return ptr;
+      }
+
+    // This function is used to implement `replace()` if the replacement cannot alias `*this`.
+    // `tpos` and `tlen` are arguments to `replace()`. `n` is the length to reserve.
+    value_type*
+    do_reserve_divide_unchecked(size_type tpos, size_type tlen, size_type n)
+      {
+        // Get a pointer to mutable storage.
+        auto ptr = this->mut_data() + tpos;
+        size_type slen = this->size() - tpos;
+
+        // Push the interval [`tpos+tlen`,`size`) by `n-tlen` characters.
+        if(tlen == n)
+          return ptr;
+
+        // Note the null terminator has to be copied as well.
+        traits_type::move(ptr + n, ptr + tlen, slen + 1 - tlen);
+        this->m_len -= tlen - n;
         return ptr;
       }
 
@@ -885,7 +904,7 @@ class basic_cow_string
       {
         size_type tlen = this->do_clamp_substr(tpos, tn);
 
-        this->do_swizzle_unchecked(tpos, tlen, this->size());
+        this->do_reserve_divide_unchecked(tpos, tlen, 0);
         return *this;
       }
 
@@ -897,7 +916,7 @@ class basic_cow_string
         size_type tpos = static_cast<size_type>(first - this->begin());
         size_type tlen = static_cast<size_type>(last - first);
 
-        auto ptr = this->do_swizzle_unchecked(tpos, tlen, this->size());
+        auto ptr = this->do_reserve_divide_unchecked(tpos, tlen, 0);
         return iterator(ptr - tpos, tpos, this->size());
       }
 
@@ -907,7 +926,7 @@ class basic_cow_string
       {
         size_type tpos = static_cast<size_type>(pos - this->begin());
 
-        auto ptr = this->do_swizzle_unchecked(tpos, 1, this->size());
+        auto ptr = this->do_reserve_divide_unchecked(tpos, 1, 0);
         return iterator(ptr - tpos, tpos, this->size());
       }
 
@@ -1051,10 +1070,9 @@ class basic_cow_string
       {
         this->do_clamp_substr(tpos, 0);  // just check
 
-        // XXX: This can be optimized *a lot*.
-        size_type kpos = this->size();
-        this->append(n, ch);
-        this->do_swizzle_unchecked(tpos, 0, kpos);
+        // Note no aliasing is possible.
+        auto ptr = this->do_reserve_divide_unchecked(tpos, 0, n);
+        traits_type::assign(ptr, n, ch);
         return *this;
       }
 
@@ -1064,10 +1082,9 @@ class basic_cow_string
       {
         this->do_clamp_substr(tpos, 0);  // just check
 
-        // XXX: This can be optimized *a lot*.
-        size_type kpos = this->size();
-        this->append(init);
-        this->do_swizzle_unchecked(tpos, 0, kpos);
+        // Note no aliasing is possible.
+        auto ptr = this->do_reserve_divide_unchecked(tpos, 0, init.size());
+        traits_type::copy(ptr, init.begin(), init.size());
         return *this;
       }
 
@@ -1115,10 +1132,9 @@ class basic_cow_string
       {
         size_type tpos = static_cast<size_type>(tins - this->begin());
 
-        // XXX: This can be optimized *a lot*.
-        size_type kpos = this->size();
-        this->append(n, ch);
-        auto ptr = this->do_swizzle_unchecked(tpos, 0, kpos);
+        // Note no aliasing is possible.
+        auto ptr = this->do_reserve_divide_unchecked(tpos, 0, n);
+        traits_type::assign(ptr, n, ch);
         return iterator(ptr - tpos, tpos, this->size());
       }
 
@@ -1127,10 +1143,9 @@ class basic_cow_string
       {
         size_type tpos = static_cast<size_type>(tins - this->begin());
 
-        // XXX: This can be optimized *a lot*.
-        size_type kpos = this->size();
-        this->append(init);
-        auto ptr = this->do_swizzle_unchecked(tpos, 0, kpos);
+        // Note no aliasing is possible.
+        auto ptr = this->do_reserve_divide_unchecked(tpos, 0, init.size());
+        traits_type::copy(ptr, init.begin(), init.size());
         return iterator(ptr - tpos, tpos, this->size());
       }
 
@@ -1193,10 +1208,9 @@ class basic_cow_string
       {
         size_type tlen = this->do_clamp_substr(tpos, tn);
 
-        // XXX: This can be optimized *a lot*.
-        size_type kpos = this->size();
-        this->append(n, ch);
-        this->do_swizzle_unchecked(tpos, tlen, kpos);
+        // Note no aliasing is possible.
+        auto ptr = this->do_reserve_divide_unchecked(tpos, tlen, n);
+        traits_type::assign(ptr, n, ch);
         return *this;
       }
 
@@ -1251,10 +1265,9 @@ class basic_cow_string
         size_type tpos = static_cast<size_type>(first - this->begin());
         size_type tlen = static_cast<size_type>(last - first);
 
-        // XXX: This can be optimized *a lot*.
-        size_type kpos = this->size();
-        this->append(n, ch);
-        this->do_swizzle_unchecked(tpos, tlen, kpos);
+        // Note no aliasing is possible.
+        auto ptr = this->do_reserve_divide_unchecked(tpos, tlen, n);
+        traits_type::assign(ptr, n, ch);
         return *this;
       }
 
@@ -1265,10 +1278,9 @@ class basic_cow_string
         size_type tpos = static_cast<size_type>(first - this->begin());
         size_type tlen = static_cast<size_type>(last - first);
 
-        // XXX: This can be optimized *a lot*.
-        size_type kpos = this->size();
-        this->append(init);
-        this->do_swizzle_unchecked(tpos, tlen, kpos);
+        // Note no aliasing is possible.
+        auto ptr = this->do_reserve_divide_unchecked(tpos, tlen, init.size());
+        traits_type::copy(ptr, init.begin(), init.size());
         return *this;
       }
 
@@ -1296,10 +1308,9 @@ class basic_cow_string
         size_type tpos = static_cast<size_type>(first - this->begin());
         size_type tlen = static_cast<size_type>(last - first);
 
-        // XXX: This can be optimized *a lot*.
-        size_type kpos = this->size();
-        this->push_back(ch);
-        this->do_swizzle_unchecked(tpos, tlen, kpos);
+        // Note no aliasing is possible.
+        auto ptr = this->do_reserve_divide_unchecked(tpos, tlen, 1);
+        traits_type::assign(*ptr, ch);
         return *this;
       }
 
