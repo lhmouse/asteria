@@ -169,12 +169,13 @@ class static_vector
     do_swizzle_unchecked(size_type tpos, size_type kpos)
       {
         // Get a pointer to mutable storage.
-        auto ptr = this->mut_data();
-        size_type len = this->size();
+        auto ptr = this->mut_data() + tpos;
+        size_type klen = kpos - tpos;
+        size_type slen = this->size() - tpos;
 
-        // Swap the intervals [tpos,kpos) and [kpos,len).
-        noadl::rotate(ptr, tpos, kpos, len);
-        return ptr + tpos;
+        // Swap the intervals [tpos,kpos) and [kpos,size).
+        noadl::rotate(ptr, 0, klen, slen);
+        return ptr;
       }
 
     // This function is used to implement `erase()`.
@@ -182,16 +183,15 @@ class static_vector
     do_erase_unchecked(size_type tpos, size_type tlen)
       {
         // Get a pointer to mutable storage.
-        auto ptr = this->mut_data();
-        size_type len = this->size();
-        size_type epos = tpos + tlen;
+        auto ptr = this->mut_data() + tpos;
+        size_type slen = this->size() - tpos;
 
-        // Swap the intervals [tpos,epos) and [epos,len).
-        noadl::rotate(ptr, tpos, epos, len);
+        // Swap the intervals [tpos,tpos+tlen) and [tpos+tlen,size).
+        noadl::rotate(ptr, 0, tlen, slen);
 
         // Purge unwanted elements.
-        this->m_sth.pop_back_unchecked(epos - tpos);
-        return ptr + tpos;
+        this->m_sth.pop_back_unchecked(tlen);
+        return ptr;
       }
 
   public:
