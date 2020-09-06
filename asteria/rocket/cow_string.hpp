@@ -291,21 +291,21 @@ class basic_cow_string
     value_type*
     do_swizzle_unchecked(size_type tpos, size_type tlen, size_type kpos)
       {
-        // Get a pointer to mutable storage. If the storage is shared, duplicate it.
+        // Get a pointer to mutable storage.
         auto ptr = this->mut_data();
+        size_type len = this->size();
+        size_type epos = tpos + tlen;
 
-        // Swap the intervals [tpos+tlen,kpos) and [kpos,size).
-        size_type tepos = tpos + tlen;
-        if((tepos < kpos) && (kpos < this->size()))
-          noadl::rotate(ptr, tepos, kpos, this->size());
+        // Swap the intervals [epos,kpos) and [kpos,len).
+        noadl::rotate(ptr, epos, kpos, len);
 
-        // Erase the interval [tpos,tpos+tlen).
-        if(tpos < tepos)
-          traits_type::move(ptr + tpos, ptr + tepos, this->size() - tepos),
-          this->m_len -= tlen,
-          traits_type::assign(ptr[this->m_len], value_type());
+        // Erase the interval [tpos,epos).
+        if(tlen == 0)
+          return ptr + tpos;
 
-        // Return a pointer to the relocated replacement.
+        // The null terminator has to be copied as well.
+        traits_type::move(ptr + tpos, ptr + epos, len + 1 - epos);
+        this->m_len -= tlen;
         return ptr + tpos;
       }
 
@@ -328,8 +328,9 @@ class basic_cow_string
         size_type cur = from;
         while(!pred(this->data() + cur))
           if(cur++ == rlen)
-            return npos;  // not found;
+            return npos;  // not found
 
+        // A character has been found so don't return `npos`.
         ROCKET_ASSERT(cur != npos);
         return cur;
       }
