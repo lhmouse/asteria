@@ -881,7 +881,6 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
     // Locate the last number in the table that is <= `freg`.
     uint32_t bpos = 1;
     uint32_t epos = static_cast<uint32_t>(size(s_decmult_F));
-
     for(;;) {
       // Stop if the range is empty.
       if(bpos == epos) {
@@ -1412,6 +1411,7 @@ noexcept
 
     // Extract the sign bit and extend it to a word.
     int sign = ::std::signbit(value) ? -1 : 0;
+
     // Treat non-finite values and zeroes specially.
     if(do_check_special(bp, ep, value)) {
       // Use the template string literal, which is immutable.
