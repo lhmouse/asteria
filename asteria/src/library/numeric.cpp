@@ -425,57 +425,25 @@ std_numeric_muls(V_real x, V_real y)
 V_integer
 std_numeric_lzcnt(V_integer x)
   {
-    // TODO: Modern CPUs have intrinsics for this.
-    uint64_t ireg = static_cast<uint64_t>(x);
-    if(ireg == 0)
+    if(ROCKET_UNEXPECT(x == 0))
       return 64;
-
-    // Scan bits from left to right.
-    uint32_t count = 0;
-    for(unsigned i = 32;  i != 0;  i /= 2) {
-      if(ireg >> (64 - i))
-        continue;
-      ireg <<= i;
-      count += i;
-    }
-    return count;
+    else
+      return ROCKET_LZCNT64_NZ(static_cast<uint64_t>(x));
   }
 
 V_integer
 std_numeric_tzcnt(V_integer x)
   {
-    // TODO: Modern CPUs have intrinsics for this.
-    uint64_t ireg = static_cast<uint64_t>(x);
-    if(ireg == 0)
+    if(ROCKET_UNEXPECT(x == 0))
       return 64;
-
-    // Scan bits from right to left.
-    uint32_t count = 0;
-    for(unsigned i = 32;  i != 0;  i /= 2) {
-      if(ireg << (64 - i))
-        continue;
-      ireg >>= i;
-      count += i;
-    }
-    return count;
+    else
+      return ROCKET_TZCNT64_NZ(static_cast<uint64_t>(x));
   }
 
 V_integer
 std_numeric_popcnt(V_integer x)
   {
-    // TODO: Modern CPUs have intrinsics for this.
-    uint64_t ireg = static_cast<uint64_t>(x);
-    if(ireg == 0)
-      return 0;
-
-    // Scan bits from right to left.
-    uint32_t count = 0;
-    for(unsigned i = 0;  i < 64;  ++i) {
-      uint32_t n = ireg & 1;
-      ireg >>= 1;
-      count += n;
-    }
-    return count;
+    return ROCKET_POPCNT64(static_cast<uint64_t>(x));
   }
 
 V_integer
