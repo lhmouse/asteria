@@ -1500,14 +1500,8 @@ noexcept
             const auto& mult = s_decmult_F[mpos];
 
             // Adjust `ireg` such that its MSB is non-zero.
-            // TODO: Modern CPUs have intrinsics for LZCNT.
-            int32_t lzcnt = 0;
-            for(int i = 32; i != 0; i /= 2) {
-              if(ireg >> (64 - i))
-                continue;
-              ireg <<= i;
-              lzcnt += i;
-            }
+            int sh = ROCKET_LZCNT64_NZ(ireg);
+            ireg <<= sh;
 
             // Multiply two 64-bit values and get the high-order half.
             // TODO: Modern CPUs have intrinsics for this.
@@ -1520,7 +1514,7 @@ noexcept
             ireg |= 1;
 
             // Convert the mantissa to a floating-point number.
-            freg = do_xldexp_I(ireg, mult.exp2 - lzcnt, single);
+            freg = do_xldexp_I(ireg, mult.exp2 - sh, single);
             break;
           }
 
