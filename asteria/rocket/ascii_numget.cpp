@@ -1314,9 +1314,8 @@ noexcept
             uint64_t next = ireg / base;
 
             // Set the inexact flag if a non-zero digit was shifted out.
-            if(ireg % base != 0) {
+            if(ireg % base != 0)
               this->m_inxc = true;
-            }
 
             // TODO: Overflow checks can be performed using intrinsics.
             if(next == 0) {
