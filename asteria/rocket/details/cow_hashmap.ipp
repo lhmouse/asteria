@@ -822,42 +822,11 @@ class stringified_key
     noexcept
       { ::std::sprintf(this->m_temp, "%llu", val);  }
 
-    stringified_key(float val)
+    template<typename valueT,
+    ROCKET_ENABLE_IF(is_enum<valueT>::value)>
+    stringified_key(valueT val)
     noexcept
-      { ::std::snprintf(this->m_temp, sizeof(this->m_temp), "%g", static_cast<double>(val));  }
-
-    stringified_key(double val)
-    noexcept
-      { ::std::snprintf(this->m_temp, sizeof(this->m_temp), "%g", val);  }
-
-    stringified_key(long double val)
-    noexcept
-      { ::std::snprintf(this->m_temp, sizeof(this->m_temp), "%Lg", val);  }
-
-    stringified_key(char val)
-    noexcept
-      { ::std::sprintf(this->m_temp, "%c", val);  }
-
-    stringified_key(wchar_t val)
-    noexcept
-      { ::std::sprintf(this->m_temp, "%lc", val);  }
-
-    stringified_key(const char* val)
-    noexcept
-      { ::std::snprintf(this->m_temp, sizeof(this->m_temp), "%s", val);  }
-
-    stringified_key(const wchar_t* val)
-    noexcept
-      { ::std::snprintf(this->m_temp, sizeof(this->m_temp), "%ls", val);  }
-
-    stringified_key(char16_t val)
-    noexcept
-      { ::std::sprintf(this->m_temp, "%lc (U+%.4X)", static_cast<wchar_t>(val),
-                                                     static_cast<unsigned>(val));  }
-    stringified_key(char32_t val)
-    noexcept
-      { ::std::sprintf(this->m_temp, "%lc (U+%.6lX)", static_cast<wchar_t>(val),
-                                                      static_cast<unsigned long>(val));  }
+      { ::std::sprintf(this->m_temp, "%lld", static_cast<long long>(val));  }
 
     stringified_key(const void* val)
     noexcept
@@ -870,16 +839,10 @@ class stringified_key
       { ::std::sprintf(this->m_temp, "%p", reinterpret_cast<void*>(val));  }
 
     template<typename valueT,
-    ROCKET_ENABLE_IF(is_enum<valueT>::value)>
-    stringified_key(valueT val)
-    noexcept
-      { ::std::sprintf(this->m_temp, "%lld", static_cast<long long>(val));  }
-
-    template<typename valueT,
     ROCKET_DISABLE_IF(is_scalar<valueT>::value)>
     stringified_key(const valueT&)
     noexcept
-      { ::std::strcpy(this->m_temp, "[could not stringify key]");  }
+      { ::std::strcpy(this->m_temp, "[not printable]");  }
 
   public:
     const char*

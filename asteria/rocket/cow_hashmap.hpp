@@ -204,7 +204,7 @@ class cow_hashmap
     do_throw_key_not_found(const details_cow_hashmap::stringified_key& skey)
     const
       {
-        noadl::sprintf_and_throw<out_of_range>("cow_hashmap: Key not found (looking for `%s`)",
+        noadl::sprintf_and_throw<out_of_range>("cow_hashmap: Key not found (key `%s`)",
                                                skey.c_str());
       }
 
