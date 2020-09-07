@@ -850,14 +850,53 @@ constexpr s_decmult_F[] =
 static_assert(size(s_decmult_F) == 652);
 
 double
+do_xldexp_I_partial(double&& fval, int bexp, int emax)
+  {
+    // Extract the biased exponent and mantissa without the hidden bit.
+    // This function requires `fval` to be normalized, finite and positive.
+    uint64_t ma;
+    ::std::memcpy(&ma, &fval, sizeof(double));
+    int be = (int)(ma >> 52) & 0x7FF;
+    ma &= 0xFFFFF'FFFFFFFF;
+
+    // Adjust the exponent.
+    // This shall not cause overflows.
+    be += bexp;
+
+    if(be >= emax) {
+      // The value overflowed to infinity.
+      ma = 0;
+      be = emax;
+    }
+    else if(be <= -52) {
+      // The value was truncated to zero.
+      ma = 0;
+      be = 0;
+    }
+    else if(be <= 0) {
+      // The value was denormalized.
+      ma = UINT64_C(1) << (51 + be) | ma >> (1 - be);
+      be = 0;
+    }
+
+    // Compose the new value.
+    ma |= (uint64_t)(unsigned)be << 52;
+    ::std::memcpy(&fval, &ma, sizeof(double));
+    return fval;
+  }
+
+double
 do_xldexp_I(uint64_t ireg, int bexp, bool single)
   {
+    // On x86, conversion from `uint64_t` to `double` is very inefficient.
+    // We make use of only 63 bits, so this can be optimized by casting the word
+    // to `int64_t`, followed by conversion to the desired floating-point type.
     ROCKET_ASSERT(ireg <= INT64_MAX);
-    // Round it correctly.
-    if(ROCKET_UNEXPECT(single))
-      return (double)::std::ldexp((float)(int64_t)ireg, bexp);
+
+    if(single)
+      return do_xldexp_I_partial((double)(float)(int64_t)ireg, bexp, 0xFF);
     else
-      return ::std::ldexp((double)(int64_t)ireg, bexp);
+      return do_xldexp_I_partial((double)(int64_t)ireg, bexp, 0x7FF);
   }
 
 }  // namespace
@@ -1472,10 +1511,12 @@ noexcept
             uint64_t xlo = ireg << 32 >> 32;
             uint64_t yhi = mult.mant >> 32;
             uint64_t ylo = mult.mant << 32 >> 32;
-            ireg = xhi * yhi + (((xlo * yhi >> 30) + (xhi * ylo >> 30) + (xlo * ylo >> 62)) >> 2);
+            ireg = xhi * yhi;
+            ireg += ((xlo * yhi >> 30) + (xhi * ylo >> 30) + (xlo * ylo >> 62)) >> 2;
+            ireg |= 1;
 
             // Convert the mantissa to a floating-point number.
-            freg = do_xldexp_I(ireg | 1, mult.bexp - lzcnt, single);
+            freg = do_xldexp_I(ireg, mult.bexp - lzcnt, single);
             break;
           }
 
