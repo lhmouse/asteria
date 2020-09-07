@@ -32,7 +32,7 @@ do_xput_U_bkwd(char*& bp, const uint64_t& value, uint8_t base, size_t precision)
     uint64_t ireg = value;
     while(ireg != 0) {
       // Shift a digit out.
-      uint8_t dval = uint8_t(ireg % base);
+      uint8_t dval = static_cast<uint8_t>(ireg % base);
       ireg /= base;
 
       // Write this digit.
@@ -85,7 +85,7 @@ do_xput_M_bin(char*& ep, const uint64_t& mant, const char* rdxp)
     // Write digits in normal order.
     uint64_t ireg = mant;
     while(ireg != 0) {
-      uint8_t dval = uint8_t(ireg >> 63);
+      uint8_t dval = static_cast<uint8_t>(ireg >> 63);
       ireg <<= 1;
 
       // Insert a decimal point before `rdxp`.
@@ -109,7 +109,7 @@ do_xput_M_hex(char*& ep, const uint64_t& mant, const char* rdxp)
     // Write digits in normal order.
     uint64_t ireg = mant;
     while(ireg != 0) {
-      uint8_t dval = uint8_t(ireg >> 60);
+      uint8_t dval = static_cast<uint8_t>(ireg >> 60);
       ireg <<= 4;
 
       // Insert a decimal point before `rdxp`.
