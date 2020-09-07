@@ -94,13 +94,9 @@ do_xfrexp_F_bin(uint64_t& mant, int& exp, const double& value)
       bexp += 1;
 
       // Adjust `ireg` such that its MSB is non-zero.
-      // TODO: Modern CPUs have intrinsics for LZCNT.
-      for(int i = 32; i != 0; i /= 2) {
-        if(ireg >> (53 - i))
-          continue;
-        ireg <<= i;
-        bexp -= i;
-      }
+      int sh = ROCKET_LZCNT64_NZ(ireg) - 11;
+      ireg <<= sh;
+      bexp -= sh;
 
       // Check the hidden bit.
       ROCKET_ASSERT((ireg >> 52) == 1);
@@ -954,13 +950,9 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
       bexp += 1;
 
       // Adjust `ireg` such that its MSB is non-zero.
-      // TODO: Modern CPUs have intrinsics for LZCNT.
-      for(int i = 32; i != 0; i /= 2) {
-        if(ireg >> (53 - i))
-          continue;
-        ireg <<= i;
-        bexp -= i;
-      }
+      int sh = ROCKET_LZCNT64_NZ(ireg) - 11;
+      ireg <<= sh;
+      bexp -= sh;
 
       // Remove the hidden bit.
       ROCKET_ASSERT((ireg >> 52) == 1);
