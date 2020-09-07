@@ -79,10 +79,39 @@ void
 do_xfrexp_F_bin(uint64_t& mant, int& exp, const double& value)
   {
     // Note if `value` is not finite then the behavior is undefined.
-    int exp2;
-    double frac = ::std::frexp(::std::fabs(value), &exp2);
-    exp = exp2 - 1;
-    mant = (uint64_t)(int64_t)(frac * 0x1p53) << 11;
+    // Get the first digit.
+    double freg = ::std::fabs(value);
+
+    // Extract the biased exponent and mantissa without the hidden bit.
+    // This function requires `freg` to be normalized, finite and positive.
+    uint64_t ireg;
+    ::std::memcpy(&ireg, &freg, sizeof(double));
+    int bexp = (int)(ireg >> 52) & 0x7FF;
+    ireg &= 0xFFFFF'FFFFFFFF;
+
+    if(bexp == 0) {
+      // The value is denormal.
+      bexp += 1;
+
+      // Adjust `ireg` such that its MSB is non-zero.
+      // TODO: Modern CPUs have intrinsics for LZCNT.
+      for(int i = 32; i != 0; i /= 2) {
+        if(ireg >> (53 - i))
+          continue;
+        ireg <<= i;
+        bexp -= i;
+      }
+
+      // Check the hidden bit.
+      ROCKET_ASSERT((ireg >> 52) == 1);
+    }
+
+    // Recover the hidden bit.
+    ireg |= 0x100000'00000000;
+
+    // Bias the exponent back and normalize the mantissa.
+    exp = bexp - 0x3FF;
+    mant = ireg << 11;
   }
 
 void
