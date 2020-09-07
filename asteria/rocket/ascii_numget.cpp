@@ -1082,6 +1082,7 @@ ascii_numget& ascii_numget::parse_F(const char*& bptr, const char* eptr, uint8_t
           // Fallthrough
         case 2: {
           erdx = false;
+
           // A binary exponent is expected.
           if((eptr - rp >= 1) && do_match_char_ci(rp[0], 'p')) {
             // Skip the exponent initiator.
@@ -1093,6 +1094,7 @@ ascii_numget& ascii_numget::parse_F(const char*& bptr, const char* eptr, uint8_t
 
         case 10: {
           erdx = true;
+
           // A decimal exponent is expected.
           if((eptr - rp >= 1) && do_match_char_ci(rp[0], 'e')) {
             // Skip the exponent initiator.
