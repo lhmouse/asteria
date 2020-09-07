@@ -901,9 +901,43 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
     }
     const auto& mult = s_decmult_F[bpos];
 
-    // Extract the mantissa.
-    freg = ::std::ldexp(freg, mult.exp2);
-    uint64_t ireg = (uint64_t)(int64_t)freg | 1;
+    // Extract the biased exponent and mantissa without the hidden bit.
+    // This function requires `freg` to be normalized, finite and positive.
+    uint64_t ireg;
+    ::std::memcpy(&ireg, &freg, sizeof(double));
+    int bexp = (int)(ireg >> 52) & 0x7FF;
+    ireg &= 0xFFFFF'FFFFFFFF;
+
+    if(bexp == 0) {
+      // The value is denormal.
+      bexp += 1;
+
+      // Adjust `ireg` such that its MSB is non-zero.
+      // TODO: Modern CPUs have intrinsics for LZCNT.
+      for(int i = 32; i != 0; i /= 2) {
+        if(ireg >> (53 - i))
+          continue;
+        ireg <<= i;
+        bexp -= i;
+      }
+
+      // Remove the hidden bit.
+      ROCKET_ASSERT((ireg >> 52) == 1);
+      ireg &= 0xFFFFF'FFFFFFFF;
+    }
+
+    // Adjust the exponent.
+    // This shall not cause overflows.
+    bexp += mult.exp2;
+
+    // Compose the new value.
+    ireg |= (uint64_t)(unsigned)bexp << 52;
+    ::std::memcpy(&freg, &ireg, sizeof(double));
+
+    // On x86, conversion from `double` to `int64_t` is very inefficient.
+    // We make use of only 63 bits, so this can be optimized by casting the
+    // floating-point number to `int64_t`, followed by conversion to `uint64_t`.
+    ireg = (uint64_t)(int64_t)freg;
 
     // Multiply two 64-bit values and get the high-order half.
     // This produces 18 significant figures.
@@ -912,7 +946,9 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
     uint64_t xlo = ireg << 32 >> 32;
     uint64_t yhi = mult.mant >> 32;
     uint64_t ylo = mult.mant << 32 >> 32;
-    ireg = xhi * yhi + (((xlo * yhi >> 30) + (xhi * ylo >> 30) + (xlo * ylo >> 62)) >> 2);
+    ireg = xhi * yhi;
+    ireg += (((xlo * yhi >> 30) + (xhi * ylo >> 30) + (xlo * ylo >> 62)) >> 2);
+    ireg |= 1;
 
     // Round the mantissa. We now have 18 digits.
     // In the case of single precision we have to drop 8 digits before rounding.
