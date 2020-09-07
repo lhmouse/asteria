@@ -79,9 +79,9 @@ void
 do_xfrexp_F_bin(uint64_t& mant, int& exp, const double& value)
   {
     // Note if `value` is not finite then the behavior is undefined.
-    int bexp;
-    double frac = ::std::frexp(::std::fabs(value), &bexp);
-    exp = bexp - 1;
+    int exp2;
+    double frac = ::std::frexp(::std::fabs(value), &exp2);
+    exp = exp2 - 1;
     mant = (uint64_t)(int64_t)(frac * 0x1p53) << 11;
   }
 
@@ -169,7 +169,7 @@ void
 do_print_one(int e)
   {
     __float128 value, frac;
-    int bexp;
+    int exp2;
     long long mant;
 
     // Calculate the boundary.
@@ -180,29 +180,29 @@ do_print_one(int e)
     }
     else {
       // Break it down into the fraction and exponent.
-      frac = frexpq(value, &bexp);
+      frac = frexpq(value, &exp2);
       // Truncate the fraction to 53 bits. Do not round it.
       frac = ldexpq(frac, 53);
       mant = (long long)frac;
-      bexp = bexp - 1;
+      exp2 = exp2 - 1;
       // Print the higher part in fixed-point format.
       printf("\t{ 0x1.%.13llXp%+.4d, ",
-             mant & 0xFFFFFFFFFFFFF, bexp);
+             mant & 0xFFFFFFFFFFFFF, exp2);
     }
 
     // Calculate the reciprocal of the boundary.
     // We only need 17 decimal digits.
     value = 1.0e17 / value;
     // Break it down into the fraction and exponent.
-    frac = frexpq(value, &bexp);
+    frac = frexpq(value, &exp2);
     // The fraction is in 63-bit mantissa format.
     frac = ldexpq(frac, 63);
     mant = (long long)frac;
-    bexp = bexp + 1;
+    exp2 = exp2 + 1;
     // Print the mantissa in fixed-point format.
     printf(" 0x%.16llX, ", mant);
     // Print the exponent in binary.
-    printf("%+5d },", bexp);
+    printf("%+5d },", exp2);
 
     // Print some comments.
     printf("  // 1.0e%+.3d\n", e);
@@ -225,7 +225,7 @@ struct decmult_F
   {
     double bound;
     uint64_t mant;
-    int bexp;
+    int exp2;
   }
 constexpr s_decmult_F[] =
   {
@@ -902,7 +902,7 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
     const auto& mult = s_decmult_F[bpos];
 
     // Extract the mantissa.
-    freg = ::std::ldexp(freg, mult.bexp);
+    freg = ::std::ldexp(freg, mult.exp2);
     uint64_t ireg = (uint64_t)(int64_t)freg | 1;
 
     // Multiply two 64-bit values and get the high-order half.

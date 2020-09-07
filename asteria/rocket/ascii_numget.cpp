@@ -154,21 +154,21 @@ void
 do_print_one(int e)
   {
     __float128 value, frac;
-    int bexp;
+    int exp2;
     long long mant;
 
     // Calculate the multiplier.
     value = powq(10, e);
     // Break it down into the fraction and exponent.
-    frac = frexpq(value, &bexp);
+    frac = frexpq(value, &exp2);
     // Truncate the fraction to 63 bits. Do not round it.
     frac = ldexpq(frac, 63);
     mant = (long long)frac;
-    bexp = bexp + 1;
+    exp2 = exp2 + 1;
     // Print the mantissa in fixed-point format.
     printf("\t{ 0x%.16llX, ", mant);
     // Print the exponent in binary.
-    printf("%+5d },", bexp);
+    printf("%+5d },", exp2);
 
     // Print some comments.
     printf("  // 1.0e%+.3d\n", e);
@@ -190,7 +190,7 @@ main(void)
 struct decmult_F
   {
     uint64_t mant;
-    int bexp;
+    int exp2;
   }
 constexpr s_decmult_F[] =
   {
@@ -850,43 +850,43 @@ constexpr s_decmult_F[] =
 static_assert(size(s_decmult_F) == 652);
 
 double
-do_xldexp_I_partial(double&& fval, int bexp, int emax)
+do_xldexp_I_partial(double&& freg, int exp2, int bemax)
   {
     // Extract the biased exponent and mantissa without the hidden bit.
-    // This function requires `fval` to be normalized, finite and positive.
-    uint64_t ma;
-    ::std::memcpy(&ma, &fval, sizeof(double));
-    int be = (int)(ma >> 52) & 0x7FF;
-    ma &= 0xFFFFF'FFFFFFFF;
+    // This function requires `freg` to be normalized, finite and positive.
+    uint64_t ireg;
+    ::std::memcpy(&ireg, &freg, sizeof(double));
+    int bexp = (int)(ireg >> 52) & 0x7FF;
+    ireg &= 0xFFFFF'FFFFFFFF;
 
     // Adjust the exponent.
     // This shall not cause overflows.
-    be += bexp;
+    bexp += exp2;
 
-    if(be >= emax) {
+    if(bexp >= bemax) {
       // The value overflowed to infinity.
-      ma = 0;
-      be = emax;
+      ireg = 0;
+      bexp = bemax;
     }
-    else if(be <= -52) {
+    else if(bexp <= -52) {
       // The value was truncated to zero.
-      ma = 0;
-      be = 0;
+      ireg = 0;
+      bexp = 0;
     }
-    else if(be <= 0) {
+    else if(bexp <= 0) {
       // The value was denormalized.
-      ma = UINT64_C(1) << (51 + be) | ma >> (1 - be);
-      be = 0;
+      ireg = UINT64_C(1) << (51 + bexp) | ireg >> (1 - bexp);
+      bexp = 0;
     }
 
     // Compose the new value.
-    ma |= (uint64_t)(unsigned)be << 52;
-    ::std::memcpy(&fval, &ma, sizeof(double));
-    return fval;
+    ireg |= (uint64_t)(unsigned)bexp << 52;
+    ::std::memcpy(&freg, &ireg, sizeof(double));
+    return freg;
   }
 
 double
-do_xldexp_I(uint64_t ireg, int bexp, bool single)
+do_xldexp_I(uint64_t ireg, int exp2, bool single)
   {
     // On x86, conversion from `uint64_t` to `double` is very inefficient.
     // We make use of only 63 bits, so this can be optimized by casting the word
@@ -894,9 +894,9 @@ do_xldexp_I(uint64_t ireg, int bexp, bool single)
     ROCKET_ASSERT(ireg <= INT64_MAX);
 
     if(single)
-      return do_xldexp_I_partial((double)(float)(int64_t)ireg, bexp, 0xFF);
+      return do_xldexp_I_partial((double)(float)(int64_t)ireg, exp2, 0xFF);
     else
-      return do_xldexp_I_partial((double)(int64_t)ireg, bexp, 0x7FF);
+      return do_xldexp_I_partial((double)(int64_t)ireg, exp2, 0x7FF);
   }
 
 }  // namespace
@@ -1516,7 +1516,7 @@ noexcept
             ireg |= 1;
 
             // Convert the mantissa to a floating-point number.
-            freg = do_xldexp_I(ireg, mult.bexp - lzcnt, single);
+            freg = do_xldexp_I(ireg, mult.exp2 - lzcnt, single);
             break;
           }
 
