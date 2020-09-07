@@ -181,10 +181,12 @@ do_print_one(int e)
     else {
       // Break it down into the fraction and exponent.
       frac = frexpq(value, &exp2);
+
       // Truncate the fraction to 53 bits. Do not round it.
       frac = ldexpq(frac, 53);
       mant = (long long)frac;
       exp2 = exp2 - 1;
+
       // Print the higher part in fixed-point format.
       printf("\t{ 0x1.%.13llXp%+.4d, ",
              mant & 0xFFFFFFFFFFFFF, exp2);
@@ -193,14 +195,18 @@ do_print_one(int e)
     // Calculate the reciprocal of the boundary.
     // We only need 17 decimal digits.
     value = 1.0e17 / value;
+
     // Break it down into the fraction and exponent.
     frac = frexpq(value, &exp2);
+
     // The fraction is in 63-bit mantissa format.
     frac = ldexpq(frac, 63);
     mant = (long long)frac;
     exp2 = exp2 + 1;
+
     // Print the mantissa in fixed-point format.
     printf(" 0x%.16llX, ", mant);
+
     // Print the exponent in binary.
     printf("%+5d },", exp2);
 

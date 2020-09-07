@@ -159,14 +159,18 @@ do_print_one(int e)
 
     // Calculate the multiplier.
     value = powq(10, e);
+
     // Break it down into the fraction and exponent.
     frac = frexpq(value, &exp2);
+
     // Truncate the fraction to 63 bits. Do not round it.
     frac = ldexpq(frac, 63);
     mant = (long long)frac;
     exp2 = exp2 + 1;
+
     // Print the mantissa in fixed-point format.
     printf("\t{ 0x%.16llX, ", mant);
+
     // Print the exponent in binary.
     printf("%+5d },", exp2);
 
