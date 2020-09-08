@@ -91,12 +91,10 @@ do_xfrexp_F_bin(uint64_t& mant, int& exp, const double& value)
 
     if(bexp == 0) {
       // The value is denormal.
-      bexp += 1;
-
       // Adjust `ireg` such that its MSB is non-zero.
       int sh = ROCKET_LZCNT64_NZ(ireg) - 11;
       ireg <<= sh;
-      bexp -= sh;
+      bexp -= sh - 1;
 
       // Check the hidden bit.
       ROCKET_ASSERT((ireg >> 52) == 1);
@@ -947,12 +945,10 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
 
     if(bexp == 0) {
       // The value is denormal.
-      bexp += 1;
-
       // Adjust `ireg` such that its MSB is non-zero.
       int sh = ROCKET_LZCNT64_NZ(ireg) - 11;
       ireg <<= sh;
-      bexp -= sh;
+      bexp -= sh - 1;
 
       // Remove the hidden bit.
       ROCKET_ASSERT((ireg >> 52) == 1);
