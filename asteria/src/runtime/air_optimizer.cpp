@@ -62,18 +62,14 @@ cow_function
 AIR_Optimizer::
 create_function(const Source_Location& sloc, const cow_string& name)
   {
+    cow_string func = name;
+
     // Append the parameter list to `name`.
     // We only do this if `name` really looks like a function name.
-    cow_string func = name;
-    if(is_cctype(func[0], cctype_namei)) {
+    if(is_cctype(name.front(), cctype_namei) && (name.back() != ')')) {
       func << '(';
-
-      for(const auto& param : this->m_params)
-        func << param << ", ";
-
-      if(!this->m_params.empty())
-        func.erase(func.size() - 2);
-
+      for(size_t k = 0;  k != this->m_params.size();  ++k)
+        k && &(func << ", "), func << this->m_params[k];
       func << ')';
     }
 
