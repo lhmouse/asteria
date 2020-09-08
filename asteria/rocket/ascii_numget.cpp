@@ -853,54 +853,62 @@ constexpr s_decmult_F[] =
   };
 static_assert(size(s_decmult_F) == 652);
 
+template<typename floatT, typename storageT, int E, int M>
 double
-do_xldexp_I_partial(double&& freg, int exp2, int bemax)
+do_xldexp_I_generic(uint64_t bits, int exp2)
   {
+    static_assert(is_floating_point<floatT>::value);
+    static_assert(is_unsigned<storageT>::value);
+    static_assert(sizeof(floatT) == sizeof(storageT));
+
+    // This is the maximum value of the biased exponent field.
+    constexpr int bexp_max = (1 << E) - 1;
+    constexpr storageT mantissa_one = 1;
+
+    // On x86, conversion from `uint64_t` to `double` is very inefficient.
+    // We make use of only 63 bits, so this can be optimized by casting the word
+    // to `int64_t`, followed by conversion to the desired floating-point type.
+    ROCKET_ASSERT(bits <= INT64_MAX);
+    floatT freg = static_cast<floatT>(static_cast<int64_t>(bits));
+
     // Extract the biased exponent and mantissa without the hidden bit.
     // This function requires `freg` to be normalized, finite and positive.
-    uint64_t ireg;
-    ::std::memcpy(&ireg, &freg, sizeof(double));
-    int bexp = (int)(ireg >> 52) & 0x7FF;
-    ireg &= 0xFFFFF'FFFFFFFF;
+    storageT ireg;
+    ::std::memcpy(&ireg, &freg, sizeof(floatT));
+    int bexp = static_cast<int>(ireg >> M) & bexp_max;
+    ireg &= (mantissa_one << M) - 1;
 
     // Adjust the exponent.
     // This shall not cause overflows.
     bexp += exp2;
 
-    if(bexp >= bemax) {
-      // The value has overflowed to infinity.
+    // Check for overflows and underflows.
+    if(bexp >= bexp_max) {
       ireg = 0;
-      bexp = bemax;
+      bexp = bexp_max;  // infinity
     }
-    else if(bexp <= -52) {
-      // The value has been truncated to zero.
+    else if(bexp <= -M) {
       ireg = 0;
-      bexp = 0;
+      bexp = 0;  // zero
     }
     else if(bexp <= 0) {
-      // The value has been denormalized.
-      ireg = UINT64_C(1) << (51 + bexp) | ireg >> (1 - bexp);
-      bexp = 0;
+      ireg = mantissa_one << (M - 1 + bexp) | ireg >> (1 - bexp);
+      bexp = 0;  // denormal
     }
 
     // Compose the new value.
-    ireg |= (uint64_t)(unsigned)bexp << 52;
-    ::std::memcpy(&freg, &ireg, sizeof(double));
-    return freg;
+    ireg |= static_cast<storageT>(static_cast<unsigned>(bexp)) << M;
+    ::std::memcpy(&freg, &ireg, sizeof(floatT));
+    return static_cast<double>(freg);
   }
 
 double
 do_xldexp_I(uint64_t ireg, int exp2, bool single)
   {
-    // On x86, conversion from `uint64_t` to `double` is very inefficient.
-    // We make use of only 63 bits, so this can be optimized by casting the word
-    // to `int64_t`, followed by conversion to the desired floating-point type.
-    ROCKET_ASSERT(ireg <= INT64_MAX);
-
     if(single)
-      return do_xldexp_I_partial((double)(float)(int64_t)ireg, exp2, 0xFF);
+      return do_xldexp_I_generic<float, uint32_t, 8, 23>(ireg, exp2);
     else
-      return do_xldexp_I_partial((double)(int64_t)ireg, exp2, 0x7FF);
+      return do_xldexp_I_generic<double, uint64_t, 11, 52>(ireg, exp2);
   }
 
 }  // namespace
@@ -1502,6 +1510,7 @@ noexcept
             // Adjust `ireg` such that its MSB is non-zero.
             int sh = ROCKET_LZCNT64_NZ(ireg);
             ireg <<= sh;
+            int exp2 = mult.exp2 - sh;
 
             // Multiply two 64-bit values and get the high-order half.
             // TODO: Modern CPUs have intrinsics for this.
@@ -1516,7 +1525,7 @@ noexcept
             ireg += 0xFF;
 
             // Convert the mantissa to a floating-point number.
-            freg = do_xldexp_I(ireg, mult.exp2 - sh, single);
+            freg = do_xldexp_I(ireg, exp2, single);
             break;
           }
 
