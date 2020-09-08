@@ -41,6 +41,15 @@ class Argument_Reader
 
   private:
     inline
+    Argument_Reader&
+    do_fail()
+    noexcept
+      {
+        this->m_state.succeeded = false;
+        return *this;
+      }
+
+    inline
     void
     do_record_parameter_optional(Vtype vtype);
 

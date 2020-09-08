@@ -19,8 +19,11 @@ do_record_parameter_required(Vtype vtype)
     if(this->m_state.finished)
       ASTERIA_THROW("Argument reader finished and disposed");
 
-    // Record a parameter and increment the number of parameters in total.
-    this->m_state.history << ", " << describe_vtype(vtype);
+    if(this->m_state.nparams)
+      this->m_state.history << ", ";
+
+    // Record a parameter.
+    this->m_state.history << describe_vtype(vtype);
     this->m_state.nparams++;
   }
 
@@ -31,8 +34,11 @@ do_record_parameter_optional(Vtype vtype)
     if(this->m_state.finished)
       ASTERIA_THROW("Argument reader finished and disposed");
 
-    // Record a parameter and increment the number of parameters in total.
-    this->m_state.history << ", [" << describe_vtype(vtype) << ']';
+    if(this->m_state.nparams)
+      this->m_state.history << ", ";
+
+    // Record a parameter.
+    this->m_state.history << '[' << describe_vtype(vtype) << ']';
     this->m_state.nparams++;
   }
 
@@ -43,8 +49,11 @@ do_record_parameter_generic()
     if(this->m_state.finished)
       ASTERIA_THROW("Argument reader finished and disposed");
 
-    // Record a parameter and increment the number of parameters in total.
-    this->m_state.history << ", <generic>";
+    if(this->m_state.nparams)
+      this->m_state.history << ", ";
+
+    // Record a parameter.
+    this->m_state.history << "[generic]";
     this->m_state.nparams++;
   }
 
@@ -55,8 +64,11 @@ do_record_parameter_variadic()
     if(this->m_state.finished)
       ASTERIA_THROW("Argument reader finished and disposed");
 
-    // Terminate the parameter list.
-    this->m_state.history << ", ...";
+    if(this->m_state.nparams)
+      this->m_state.history << ", ";
+
+    // Record the end of parameters.
+    this->m_state.history << "...";
   }
 
 void
@@ -68,7 +80,6 @@ do_record_parameter_finish()
 
     // Terminate this overload.
     this->m_state.history.push_back('\0');
-    // Append it to the overload list as a single operation.
     this->m_ovlds.append(this->m_state.history);
   }
 
@@ -81,8 +92,7 @@ const
       return nullptr;
 
     // Before calling this function, the parameter information must have been recorded.
-    auto index = this->m_state.nparams - 1;
-    // Return a pointer to the argument at `index`.
+    size_t index = this->m_state.nparams - 1;
     return this->m_args->ptr(index);
   }
 
@@ -95,8 +105,7 @@ const
       return nullopt;
 
     // Before calling this function, the current overload must have been finished.
-    auto index = this->m_state.nparams;
-    // Return the beginning of variadic arguments.
+    size_t index = this->m_state.nparams;
     return ::rocket::min(index, this->m_args->size());
   }
 
@@ -173,7 +182,7 @@ F()
     // There shall be no more arguments than parameters.
     auto nargs = this->m_args->size();
     if(nargs > *qvoff) {
-      this->m_state.succeeded = false;
+      this->do_fail();
       return false;
     }
     return true;
@@ -183,21 +192,19 @@ Argument_Reader&
 Argument_Reader::
 v(V_boolean& xval)
   {
+    xval = false;
     this->do_record_parameter_required(vtype_boolean);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
-    if(!karg) {
-      this->m_state.succeeded = false;
-      return *this;
-    }
-    const auto& val = karg->read();
+    if(!karg)
+      return this->do_fail();
 
     // If the value doesn't have the desired type, fail.
-    if(!val.is_boolean()) {
-      this->m_state.succeeded = false;
-      return *this;
-    }
+    const auto& val = karg->read();
+    if(!val.is_boolean())
+      return this->do_fail();
+
     xval = val.as_boolean();
     return *this;
   }
@@ -206,21 +213,19 @@ Argument_Reader&
 Argument_Reader::
 v(V_integer& xval)
   {
+    xval = 0;
     this->do_record_parameter_required(vtype_integer);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
-    if(!karg) {
-      this->m_state.succeeded = false;
-      return *this;
-    }
-    const auto& val = karg->read();
+    if(!karg)
+      return this->do_fail();
 
     // If the value doesn't have the desired type, fail.
-    if(!val.is_integer()) {
-      this->m_state.succeeded = false;
-      return *this;
-    }
+    const auto& val = karg->read();
+    if(!val.is_integer())
+      return this->do_fail();
+
     xval = val.as_integer();
     return *this;
   }
@@ -229,21 +234,19 @@ Argument_Reader&
 Argument_Reader::
 v(V_real& xval)
   {
+    xval = 0;
     this->do_record_parameter_required(vtype_real);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
-    if(!karg) {
-      this->m_state.succeeded = false;
-      return *this;
-    }
-    const auto& val = karg->read();
+    if(!karg)
+      return this->do_fail();
 
     // If the value doesn't have the desired type, fail.
-    if(!val.is_convertible_to_real()) {
-      this->m_state.succeeded = false;
-      return *this;
-    }
+    const auto& val = karg->read();
+    if(!val.is_convertible_to_real())
+      return this->do_fail();
+
     xval = val.convert_to_real();
     return *this;
   }
@@ -252,21 +255,19 @@ Argument_Reader&
 Argument_Reader::
 v(V_string& xval)
   {
+    xval.clear();
     this->do_record_parameter_required(vtype_string);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
-    if(!karg) {
-      this->m_state.succeeded = false;
-      return *this;
-    }
-    const auto& val = karg->read();
+    if(!karg)
+      return this->do_fail();
 
     // If the value doesn't have the desired type, fail.
-    if(!val.is_string()) {
-      this->m_state.succeeded = false;
-      return *this;
-    }
+    const auto& val = karg->read();
+    if(!val.is_string())
+      return this->do_fail();
+
     xval = val.as_string();
     return *this;
   }
@@ -275,21 +276,19 @@ Argument_Reader&
 Argument_Reader::
 v(V_opaque& xval)
   {
+    xval.reset();
     this->do_record_parameter_required(vtype_opaque);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
-    if(!karg) {
-      this->m_state.succeeded = false;
-      return *this;
-    }
-    const auto& val = karg->read();
+    if(!karg)
+      return this->do_fail();
 
     // If the value doesn't have the desired type, fail.
-    if(!val.is_opaque()) {
-      this->m_state.succeeded = false;
-      return *this;
-    }
+    const auto& val = karg->read();
+    if(!val.is_opaque())
+      return this->do_fail();
+
     xval = val.as_opaque();
     return *this;
   }
@@ -298,21 +297,19 @@ Argument_Reader&
 Argument_Reader::
 v(V_function& xval)
   {
+    xval.reset();
     this->do_record_parameter_required(vtype_function);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
-    if(!karg) {
-      this->m_state.succeeded = false;
-      return *this;
-    }
-    const auto& val = karg->read();
+    if(!karg)
+      return this->do_fail();
 
     // If the value doesn't have the desired type, fail.
-    if(!val.is_function()) {
-      this->m_state.succeeded = false;
-      return *this;
-    }
+    const auto& val = karg->read();
+    if(!val.is_function())
+      return this->do_fail();
+
     xval = val.as_function();
     return *this;
   }
@@ -321,21 +318,19 @@ Argument_Reader&
 Argument_Reader::
 v(V_array& xval)
   {
+    xval.clear();
     this->do_record_parameter_required(vtype_array);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
-    if(!karg) {
-      this->m_state.succeeded = false;
-      return *this;
-    }
-    const auto& val = karg->read();
+    if(!karg)
+      return this->do_fail();
 
     // If the value doesn't have the desired type, fail.
-    if(!val.is_array()) {
-      this->m_state.succeeded = false;
-      return *this;
-    }
+    const auto& val = karg->read();
+    if(!val.is_array())
+      return this->do_fail();
+
     xval = val.as_array();
     return *this;
   }
@@ -344,21 +339,19 @@ Argument_Reader&
 Argument_Reader::
 v(V_object& xval)
   {
+    xval.clear();
     this->do_record_parameter_required(vtype_object);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
-    if(!karg) {
-      this->m_state.succeeded = false;
-      return *this;
-    }
-    const auto& val = karg->read();
+    if(!karg)
+      return this->do_fail();
 
     // If the value doesn't have the desired type, fail.
-    if(!val.is_object()) {
-      this->m_state.succeeded = false;
-      return *this;
-    }
+    const auto& val = karg->read();
+    if(!val.is_object())
+      return this->do_fail();
+
     xval = val.as_object();
     return *this;
   }
@@ -367,14 +360,14 @@ Argument_Reader&
 Argument_Reader::
 o(Reference& ref)
   {
+    ref = Reference_root::S_uninit();
     this->do_record_parameter_generic();
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
-    if(!karg) {
-      ref = Reference_root::S_constant();
+    if(!karg)
       return *this;
-    }
+
     ref = *karg;
     return *this;
   }
@@ -383,14 +376,14 @@ Argument_Reader&
 Argument_Reader::
 o(Value& val)
   {
+    val = nullptr;
     this->do_record_parameter_generic();
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
-    if(!karg) {
-      val = V_null();
+    if(!karg)
       return *this;
-    }
+
     val = karg->read();
     return *this;
   }
@@ -399,25 +392,22 @@ Argument_Reader&
 Argument_Reader::
 o(optV_boolean& xopt)
   {
+    xopt.reset();
     this->do_record_parameter_optional(vtype_boolean);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
-    if(!karg) {
-      xopt.reset();
+    if(!karg)
       return *this;
-    }
+
     const auto& val = karg->read();
-    if(val.is_null()) {
-      xopt.reset();
+    if(val.is_null())
       return *this;
-    }
 
     // If the value doesn't have the desired type, fail.
-    if(!val.is_boolean()) {
-      this->m_state.succeeded = false;
-      return *this;
-    }
+    if(!val.is_boolean())
+      return this->do_fail();
+
     xopt = val.as_boolean();
     return *this;
   }
@@ -426,25 +416,22 @@ Argument_Reader&
 Argument_Reader::
 o(optV_integer& xopt)
   {
+    xopt.reset();
     this->do_record_parameter_optional(vtype_integer);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
-    if(!karg) {
-      xopt.reset();
+    if(!karg)
       return *this;
-    }
+
     const auto& val = karg->read();
-    if(val.is_null()) {
-      xopt.reset();
+    if(val.is_null())
       return *this;
-    }
 
     // If the value doesn't have the desired type, fail.
-    if(!val.is_integer()) {
-      this->m_state.succeeded = false;
-      return *this;
-    }
+    if(!val.is_integer())
+      return this->do_fail();
+
     xopt = val.as_integer();
     return *this;
   }
@@ -453,25 +440,22 @@ Argument_Reader&
 Argument_Reader::
 o(optV_real& xopt)
   {
+    xopt.reset();
     this->do_record_parameter_optional(vtype_real);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
-    if(!karg) {
-      xopt.reset();
+    if(!karg)
       return *this;
-    }
+
     const auto& val = karg->read();
-    if(val.is_null()) {
-      xopt.reset();
+    if(val.is_null())
       return *this;
-    }
 
     // If the value doesn't have the desired type, fail.
-    if(!val.is_convertible_to_real()) {
-      this->m_state.succeeded = false;
-      return *this;
-    }
+    if(!val.is_convertible_to_real())
+      return this->do_fail();
+
     xopt = val.convert_to_real();
     return *this;
   }
@@ -480,25 +464,22 @@ Argument_Reader&
 Argument_Reader::
 o(optV_string& xopt)
   {
+    xopt.reset();
     this->do_record_parameter_optional(vtype_string);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
-    if(!karg) {
-      xopt.reset();
+    if(!karg)
       return *this;
-    }
+
     const auto& val = karg->read();
-    if(val.is_null()) {
-      xopt.reset();
+    if(val.is_null())
       return *this;
-    }
 
     // If the value doesn't have the desired type, fail.
-    if(!val.is_string()) {
-      this->m_state.succeeded = false;
-      return *this;
-    }
+    if(!val.is_string())
+      return this->do_fail();
+
     xopt = val.as_string();
     return *this;
   }
@@ -507,25 +488,22 @@ Argument_Reader&
 Argument_Reader::
 o(optV_opaque& xopt)
   {
+    xopt.reset();
     this->do_record_parameter_optional(vtype_opaque);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
-    if(!karg) {
-      xopt.reset();
+    if(!karg)
       return *this;
-    }
+
     const auto& val = karg->read();
-    if(val.is_null()) {
-      xopt.reset();
+    if(val.is_null())
       return *this;
-    }
 
     // If the value doesn't have the desired type, fail.
-    if(!val.is_opaque()) {
-      this->m_state.succeeded = false;
-      return *this;
-    }
+    if(!val.is_opaque())
+      return this->do_fail();
+
     xopt = val.as_opaque();
     return *this;
   }
@@ -534,25 +512,22 @@ Argument_Reader&
 Argument_Reader::
 o(optV_function& xopt)
   {
+    xopt.reset();
     this->do_record_parameter_optional(vtype_function);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
-    if(!karg) {
-      xopt.reset();
+    if(!karg)
       return *this;
-    }
+
     const auto& val = karg->read();
-    if(val.is_null()) {
-      xopt.reset();
+    if(val.is_null())
       return *this;
-    }
 
     // If the value doesn't have the desired type, fail.
-    if(!val.is_function()) {
-      this->m_state.succeeded = false;
-      return *this;
-    }
+    if(!val.is_function())
+      return this->do_fail();
+
     xopt = val.as_function();
     return *this;
   }
@@ -561,25 +536,22 @@ Argument_Reader&
 Argument_Reader::
 o(optV_array& xopt)
   {
+    xopt.reset();
     this->do_record_parameter_optional(vtype_array);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
-    if(!karg) {
-      xopt.reset();
+    if(!karg)
       return *this;
-    }
+
     const auto& val = karg->read();
-    if(val.is_null()) {
-      xopt.reset();
+    if(val.is_null())
       return *this;
-    }
 
     // If the value doesn't have the desired type, fail.
-    if(!val.is_array()) {
-      this->m_state.succeeded = false;
-      return *this;
-    }
+    if(!val.is_array())
+      return this->do_fail();
+
     xopt = val.as_array();
     return *this;
   }
@@ -588,25 +560,22 @@ Argument_Reader&
 Argument_Reader::
 o(optV_object& xopt)
   {
+    xopt.reset();
     this->do_record_parameter_optional(vtype_object);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
-    if(!karg) {
-      xopt.reset();
+    if(!karg)
       return *this;
-    }
+
     const auto& val = karg->read();
-    if(val.is_null()) {
-      xopt.reset();
+    if(val.is_null())
       return *this;
-    }
 
     // If the value doesn't have the desired type, fail.
-    if(!val.is_object()) {
-      this->m_state.succeeded = false;
-      return *this;
-    }
+    if(!val.is_object())
+      return this->do_fail();
+
     xopt = val.as_object();
     return *this;
   }
@@ -617,45 +586,29 @@ throw_no_matching_function_call()
 const
   {
     // Create a message containing all arguments.
-    cow_string args_str;
     const auto& args = this->m_args.get();
-    if(!args.empty()) {
-      size_t k = 0;
-      for(;;) {
-        args_str << args[k].read().what_vtype();
-        // Seek to the next argument.
-        if(++k == args.size())
-          break;
-        args_str << ", ";
-      }
+    cow_string args_str;
+
+    for(size_t k = 0;  k != args.size();  ++k) {
+      k && &(args_str << ", ");
+      args_str << args[k].read().what_vtype();
     }
 
     // Append the list of overloads.
-    cow_string ovlds_str;
     const auto& ovlds = this->m_ovlds;
-    if(!ovlds.empty()) {
-      ovlds_str << "\n[list of overloads:\n  ";
-      size_t k = 0;
-      for(;;) {
-        ovlds_str << '`' << this->m_name << '(';
-        // Get the current parameter list.
-        const char* sparams = ovlds.data() + k;
-        size_t nchars = ::std::strlen(sparams);
-        // If the parameter list is not empty, it always start with a ", " so skip it.
-        if(nchars != 0)
-          ovlds_str.append(sparams + 2, nchars - 2);
-        k += nchars;
-        ovlds_str << ')' << '`';
-        // Seek to the next overload.
-        if(++k == ovlds.size())
-          break;
-        ovlds_str << "\n  ";
-      }
-      ovlds_str << "\n  -- end of list of overloads]";
+    cow_string ovlds_str;
+
+    for(size_t k = 0;  k != ovlds.size();  ++k) {
+      auto sh = ::rocket::sref(ovlds.c_str() + k);
+      ovlds_str << "\n  `" << this->m_name << '(' << sh << ')';
+      k += sh.length();
     }
 
     // Throw the exception now.
-    ASTERIA_THROW("No matching function call for `$1($2)`$3", this->m_name, args_str, ovlds_str);
+    ASTERIA_THROW("No matching function call for `$1($2)`\n"
+                  "[list of overloads:$3\n"
+                  "  -- end of list of overloads]",
+                  this->m_name, args_str, ovlds_str);
   }
 
 }  // namespace asteria
