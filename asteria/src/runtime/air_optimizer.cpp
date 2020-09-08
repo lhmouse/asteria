@@ -65,12 +65,15 @@ create_function(const Source_Location& sloc, const cow_string& name)
     // Append the parameter list to `name`.
     // We only do this if `name` really looks like a function name.
     cow_string func = name;
-    if((func.size() != 0) && (func.front() != '<') && (func.back() != '>')) {
+    if(is_cctype(func[0], cctype_namei)) {
       func << '(';
+
       for(const auto& param : this->m_params)
         func << param << ", ";
+
       if(!this->m_params.empty())
         func.erase(func.size() - 2);
+
       func << ')';
     }
 
