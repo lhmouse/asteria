@@ -26,9 +26,10 @@ reload(const Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
     // Generate code for all statements.
     Analytic_Context ctx_func(ctx_opt, this->m_params);
     for(size_t i = 0;  i < stmts.size();  ++i) {
+      auto qnext = stmts.ptr(i + 1);
+      bool rvoid = !qnext || qnext->is_empty_return();
       stmts[i].generate_code(this->m_code, nullptr, ctx_func, this->m_opts,
-                     ((i + 1 == stmts.size()) || stmts.at(i + 1).is_empty_return())
-                          ? ptc_aware_void : ptc_aware_none);
+                             rvoid ? ptc_aware_void : ptc_aware_none);
     }
 
     // TODO: Insert optimization passes
