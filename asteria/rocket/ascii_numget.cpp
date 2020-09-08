@@ -868,17 +868,17 @@ do_xldexp_I_partial(double&& freg, int exp2, int bemax)
     bexp += exp2;
 
     if(bexp >= bemax) {
-      // The value overflowed to infinity.
+      // The value has overflowed to infinity.
       ireg = 0;
       bexp = bemax;
     }
     else if(bexp <= -52) {
-      // The value was truncated to zero.
+      // The value has been truncated to zero.
       ireg = 0;
       bexp = 0;
     }
     else if(bexp <= 0) {
-      // The value was denormalized.
+      // The value has been denormalized.
       ireg = UINT64_C(1) << (51 + bexp) | ireg >> (1 - bexp);
       bexp = 0;
     }
