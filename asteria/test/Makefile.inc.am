@@ -40,4 +40,5 @@ check_PROGRAMS +=  \
   %reldir%/github_101.test  \
   %reldir%/ref.test  \
   %reldir%/github_105.test  \
+  %reldir%/ascii_numget.test  \
   ${NOTHING}

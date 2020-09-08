@@ -1511,7 +1511,9 @@ noexcept
             uint64_t ylo = mult.mant << 32 >> 32;
             ireg = xhi * yhi;
             ireg += ((xlo * yhi >> 30) + (xhi * ylo >> 30) + (xlo * ylo >> 62)) >> 2;
-            ireg |= 1;
+
+            // Compensate for denormal numbers a little.
+            ireg += 0xFF;
 
             // Convert the mantissa to a floating-point number.
             freg = do_xldexp_I(ireg, mult.exp2 - sh, single);
