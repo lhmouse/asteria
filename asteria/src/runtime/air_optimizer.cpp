@@ -68,8 +68,11 @@ create_function(const Source_Location& sloc, const cow_string& name)
     // We only do this if `name` really looks like a function name.
     if(is_cctype(name.front(), cctype_namei) && (name.back() != ')')) {
       func << '(';
-      for(size_t k = 0;  k != this->m_params.size();  ++k)
-        k && &(func << ", "), func << this->m_params[k];
+      if(this->m_params.size()) {
+        func << this->m_params[0];
+        for(size_t k = 1;  k != this->m_params.size();  ++k)
+          func << ", " << this->m_params[k];
+      }
       func << ')';
     }
 

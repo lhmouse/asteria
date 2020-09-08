@@ -585,30 +585,27 @@ Argument_Reader::
 throw_no_matching_function_call()
 const
   {
-    // Create a message containing all arguments.
-    const auto& args = this->m_args.get();
-    cow_string args_str;
-
-    for(size_t k = 0;  k != args.size();  ++k) {
-      k && &(args_str << ", ");
-      args_str << args[k].read().what_vtype();
+    // Compose an argument list.
+    cow_string arguments;
+    if(this->m_args->size()) {
+      arguments << this->m_args.get()[0].read().what_vtype();
+      for(size_t k = 1;  k != this->m_args->size();  ++k)
+        arguments << ", " << this->m_args.get()[k].read().what_vtype();
     }
 
     // Append the list of overloads.
-    const auto& ovlds = this->m_ovlds;
-    cow_string ovlds_str;
-
-    for(size_t k = 0;  k != ovlds.size();  ++k) {
-      auto sh = ::rocket::sref(ovlds.c_str() + k);
-      ovlds_str << "\n  `" << this->m_name << '(' << sh << ')';
+    cow_string overloads;
+    for(size_t k = 0;  k != this->m_ovlds.size();  ++k) {
+      auto sh = ::rocket::sref(this->m_ovlds.c_str() + k);
+      overloads << "  `" << this->m_name << '(' << sh << ")\n";
       k += sh.length();
     }
 
     // Throw the exception now.
     ASTERIA_THROW("No matching function call for `$1($2)`\n"
-                  "[list of overloads:$3\n"
-                  "  -- end of list of overloads]",
-                  this->m_name, args_str, ovlds_str);
+                  "[list of overloads:\n"
+                  "$3  -- end of list of overloads]",
+                  this->m_name, arguments, overloads);
   }
 
 }  // namespace asteria

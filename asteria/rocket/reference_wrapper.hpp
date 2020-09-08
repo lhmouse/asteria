@@ -60,7 +60,7 @@ class reference_wrapper
 
     constexpr
     operator
-    reference ()
+    reference()
     const noexcept
       { return this->get();  }
 
