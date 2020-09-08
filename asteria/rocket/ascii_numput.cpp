@@ -90,8 +90,7 @@ do_xfrexp_F_bin(uint64_t& mant, int& exp, const double& value)
     ireg &= 0xFFFFF'FFFFFFFF;
 
     if(bexp == 0) {
-      // The value is denormal.
-      // Adjust `ireg` such that its MSB is non-zero.
+      // Normalize the denormal value.
       int sh = ROCKET_LZCNT64_NZ(ireg) - 11;
       ireg <<= sh;
       bexp -= sh - 1;
@@ -977,7 +976,6 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
     uint64_t ylo = mult.mant << 32 >> 32;
     ireg = xhi * yhi;
     ireg += (((xlo * yhi >> 30) + (xhi * ylo >> 30) + (xlo * ylo >> 62)) >> 2);
-    ireg |= 1;
 
     // Round the mantissa. We now have 18 digits.
     // In the case of single precision we have to drop 8 digits before rounding.
