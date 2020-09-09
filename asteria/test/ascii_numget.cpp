@@ -51,11 +51,11 @@ static const struct {
 int main()
   {
     for(const auto& r : cases) {
-      ::fprintf(stderr, "checking: %s\n", r.input);
+      ::printf("---------------> checking: %s\n", r.input);
 
       double exp;
       ::std::memcpy(&exp, &r.expected, sizeof(double));
-      ::fprintf(stderr, "  exp: %.17g\n", exp);
+      ::printf("--------------->   exp: %.17g\n", exp);
 
       const char* p = r.input;
       const char* e = p + ::std::strlen(p);
@@ -70,7 +70,7 @@ int main()
       ::std::memcpy(&bits, &val, sizeof(double));
       int err = static_cast<int>(bits - r.expected);
 
-      ::fprintf(stderr, "  got: %.17g (%+d ULP)\n\n", val, err);
+      ::printf("--------------->   got: %.17g (%+d ULP)\n\n", val, err);
       // TODO: ASTERIA_TEST_CHECK(err == 0);
     }
   }
