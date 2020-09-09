@@ -1044,7 +1044,9 @@ parse_U(const char*& bptr, const char* eptr, uint8_t ibase)
     return *this;
   }
 
-ascii_numget& ascii_numget::parse_I(const char*& bptr, const char* eptr, uint8_t ibase)
+ascii_numget&
+ascii_numget::
+parse_I(const char*& bptr, const char* eptr, uint8_t ibase)
   {
     this->clear();
     const char* rp = bptr;
@@ -1077,7 +1079,9 @@ ascii_numget& ascii_numget::parse_I(const char*& bptr, const char* eptr, uint8_t
     return *this;
   }
 
-ascii_numget& ascii_numget::parse_F(const char*& bptr, const char* eptr, uint8_t ibase)
+ascii_numget&
+ascii_numget::
+parse_F(const char*& bptr, const char* eptr, uint8_t ibase)
   {
     this->clear();
     const char* rp = bptr;
