@@ -46,6 +46,10 @@ static const struct {
     {"5.92e+48", 0x4a1033d7eca0adefULL},
     {"7.35e+66", 0x4dd172b70eababa9ULL},
     {"8.32116e+55", 0x4b8b2628393e02cdULL},
+
+    // https://www.exploringbinary.com/php-hangs-on-numeric-value-2-2250738585072011e-308/
+    {"2.2250738585072011e-308", 0x000fffffffffffffULL},
+    {"2.2250738585072012e-308", 0x0010000000000000ULL},
 };
 
 int main()
@@ -71,6 +75,7 @@ int main()
       int err = static_cast<int>(bits - r.expected);
 
       ::printf("--------------->   got: %.17g (%+d ULP)\n\n", val, err);
+      ASTERIA_TEST_CHECK(::std::abs(err) <= 1);
       // TODO: ASTERIA_TEST_CHECK(err == 0);
     }
   }
