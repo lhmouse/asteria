@@ -455,21 +455,25 @@ do_accept_object_key(Token_Stream& tstrm)
                          tstrm.next_length());
 
     cow_string name;
-    if(qtok->is_identifier()) {
-      name = qtok->as_identifier();
-    }
-    else if(qtok->is_string_literal()) {
-      name = qtok->as_string_literal();
-    }
-    else {
-      throw Parser_Error(parser_status_closed_brace_or_json5_key_expected, tstrm.next_sloc(),
-                         tstrm.next_length());
+    switch(weaken_enum(qtok->index())) {
+      case Token::index_identifier:
+        name = qtok->as_identifier();
+        break;
+
+      case Token::index_string_literal:
+        name = qtok->as_string_literal();
+        break;
+
+      default:
+        throw Parser_Error(parser_status_closed_brace_or_json5_key_expected, tstrm.next_sloc(),
+                           tstrm.next_length());
     }
     tstrm.shift();
 
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
     if(!kpunct)
       throw Parser_Error(parser_status_colon_expected, tstrm.next_sloc(), tstrm.next_length());
+
     return name;
   }
 
