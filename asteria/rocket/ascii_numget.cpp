@@ -106,8 +106,7 @@ constexpr int8_t s_digits[] =
   };
 
 size_t
-do_collect_U(mantissa& m, const char*& rp, const char* eptr,
-             uint8_t base, uint64_t limit)
+do_collect_U_generic(mantissa& m, const char*& rp, const char* eptr, uint8_t base, uint64_t limit)
   {
     size_t nrd = 0;
     while(rp != eptr) {
@@ -136,6 +135,24 @@ do_collect_U(mantissa& m, const char*& rp, const char* eptr,
       m.value += dval;
     }
     return nrd;
+  }
+
+size_t
+do_collect_U(mantissa& m, const char*& rp, const char* eptr, uint8_t base, uint64_t limit)
+  {
+    switch(base) {
+      case 2:
+        return do_collect_U_generic(m, rp, eptr, 2, limit);
+
+      case 10:
+        return do_collect_U_generic(m, rp, eptr, 10, limit);
+
+      case 16:
+        return do_collect_U_generic(m, rp, eptr, 16, limit);
+
+      default:
+        return do_collect_U_generic(m, rp, eptr, base, limit);
+    }
   }
 
 #if 0
