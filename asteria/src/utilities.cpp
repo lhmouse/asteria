@@ -120,7 +120,7 @@ noexcept
       else
         fmt << static_cast<char>(ch);
     }
-    fmt << '\n';
+    fmt << "\n\n";
 
     // Write the string now. If the operation fails, we don't retry.
     return ::write(STDERR_FILENO, fmt.c_str(), fmt.length());
