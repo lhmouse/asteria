@@ -11,32 +11,56 @@
 #define ASTERIA_TEST_CHECK(expr)  \
     do  \
       try {  \
-        if(expr) {  \
-          /* successful */  \
+        if(static_cast<bool>(expr) == false) {  \
+          /* failed */  \
+          ::asteria::write_log_to_stderr(__FILE__, __LINE__,  \
+              ::asteria::format_string(  \
+                 "ASTERIA_TEST_CHECK FAIL: $1",  \
+                 #expr  \
+              ));  \
+          ::abort();  \
           break;  \
         }  \
-        /* failed */  \
-        ASTERIA_TERMINATE("ASTERIA_TEST_CHECK: $1\n  failed", #expr);  \
+        \
+        /* successful */  \
+        ::asteria::write_log_to_stderr(__FILE__, __LINE__,  \
+            ::asteria::format_string(  \
+               "ASTERIA_TEST_CHECK PASS: $1",  \
+               #expr  \
+            ));  \
       }  \
       catch(exception& stdex) {  \
         /* failed */  \
-        ASTERIA_TERMINATE("ASTERIA_TEST_CHECK: $1\n  caught an exception: $2", #expr, stdex.what());  \
+        ::asteria::write_log_to_stderr(__FILE__, __LINE__,  \
+            ::asteria::format_string(  \
+               "ASTERIA_TEST_CHECK EXCEPTION: $1\n$2",  \
+               #expr, stdex  \
+            ));  \
+        ::abort();  \
       }  \
-      /* unreachable */  \
     while(false)
 
 #define ASTERIA_TEST_CHECK_CATCH(expr)  \
     do  \
       try {  \
         static_cast<void>(expr);  \
+        \
         /* failed */  \
-        ASTERIA_TERMINATE("ASTERIA_TEST_CHECK_CATCH: $1\n  didn't catch an exception", #expr);  \
+        ::asteria::write_log_to_stderr(__FILE__, __LINE__,  \
+            ::asteria::format_string(  \
+               "ASTERIA_TEST_CHECK_CATCH XPASS: $1",  \
+               #expr  \
+            ));  \
+        ::abort();  \
       }  \
-      catch(exception& /*stdex*/) {  \
+      catch(exception& stdex) {  \
         /* successful */  \
-        break;  \
+        ::asteria::write_log_to_stderr(__FILE__, __LINE__,  \
+            ::asteria::format_string(  \
+               "ASTERIA_TEST_CHECK XFAIL: $1",  \
+               #expr  \
+            ));  \
       }  \
-      /* unreachable */  \
     while(false)
 
 // Set kill timer.
