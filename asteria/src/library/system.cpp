@@ -516,18 +516,12 @@ std_system_proc_daemonize()
 V_object
 std_system_conf_load_file(V_string path)
   {
-    // Resolve the path to an absolute one.
-    uptr<char, void (&)(void*)> abspath(::realpath(path.safe_c_str(), nullptr), ::free);
-    if(!abspath)
-      ASTERIA_THROW("Could not open configuration file '$2'\n"
-                     "[`realpath()` failed: $1]",
-                     format_errno(errno), path);
-
-    ::rocket::unique_posix_file fp(::fopen(abspath, "r"), ::fclose);
+    // Open the file denoted by `path` in text mode.
+    ::rocket::unique_posix_file fp(::fopen(path.safe_c_str(), "r"), ::fclose);
     if(!fp)
       ASTERIA_THROW("Could not open configuration file '$2'\n"
                      "[`fopen()` failed: $1]",
-                     format_errno(errno), abspath);
+                     format_errno(errno), path);
 
     // Parse characters from the file.
     ::setbuf(fp, nullptr);
@@ -539,7 +533,7 @@ std_system_conf_load_file(V_string path)
     opts.keywords_as_identifiers = true;
 
     Token_Stream tstrm(opts);
-    tstrm.reload(cow_string(abspath), 1, cbuf);
+    tstrm.reload(path, 1, cbuf);
 
     // Parse a sequence of key-value pairs.
     V_object root;
