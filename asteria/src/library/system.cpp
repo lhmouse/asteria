@@ -7,6 +7,9 @@
 #include "../runtime/global_context.hpp"
 #include "../runtime/genius_collector.hpp"
 #include "../runtime/random_engine.hpp"
+#include "../compiler/token_stream.hpp"
+#include "../compiler/parser_error.hpp"
+#include "../compiler/enums.hpp"
 #include "../utilities.hpp"
 #include <spawn.h>  // ::posix_spawnp()
 #include <sys/wait.h>  // ::waitpid()
@@ -19,6 +22,287 @@ namespace {
 constexpr int64_t xgcgen_newest = static_cast<int64_t>(gc_generation_newest);
 constexpr int64_t xgcgen_oldest = static_cast<int64_t>(gc_generation_oldest);
 constexpr char s_hex_digits[] = "00112233445566778899AaBbCcDdEeFf";
+
+inline
+bool
+do_check_punctuator(const Token* qtok, initializer_list<Punctuator> accept)
+  {
+    return qtok && qtok->is_punctuator() && ::rocket::is_any_of(qtok->as_punctuator(), accept);
+  }
+
+struct Key_with_sloc
+  {
+    Source_Location sloc;
+    size_t length;
+    phsh_string name;
+  };
+
+opt<Key_with_sloc>
+do_accept_object_key_opt(Token_Stream& tstrm)
+  {
+    auto qtok = tstrm.peek_opt();
+    if(!qtok)
+      return nullopt;
+
+    // A key may be either an identifier or a string literal.
+    Key_with_sloc key;
+    switch(::asteria::weaken_enum(qtok->index())) {
+      case ::asteria::Token::index_identifier:
+        key.name = qtok->as_identifier();
+        break;
+
+      case ::asteria::Token::index_string_literal:
+        key.name = qtok->as_string_literal();
+        break;
+
+      default:
+        return nullopt;
+    }
+    key.sloc = qtok->sloc();
+    key.length = qtok->length();
+    tstrm.shift();
+
+    // Accept the value initiator.
+    qtok = tstrm.peek_opt();
+    if(!do_check_punctuator(qtok, { punctuator_assign, punctuator_colon }))
+      throw Parser_Error(parser_status_equals_sign_or_colon_expected,
+                                    tstrm.next_sloc(), tstrm.next_length());
+
+    tstrm.shift();
+    return ::std::move(key);
+  }
+
+Value&
+do_insert_unique(V_object& obj, Key_with_sloc&& key, Value&& value)
+  {
+    auto pair = obj.try_emplace(::std::move(key.name), ::std::move(value));
+    if(!pair.second)
+      throw Parser_Error(parser_status_duplicate_key_in_object, key.sloc, key.length);
+    return pair.first->second;
+  }
+
+struct S_xparse_array
+  {
+    V_array arr;
+  };
+
+struct S_xparse_object
+  {
+    V_object obj;
+    Key_with_sloc key;
+  };
+
+using Xparse = ::rocket::variant<S_xparse_array, S_xparse_object>;
+
+Value
+do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
+  {
+    Value value;
+
+    // Implement a non-recursive descent parser.
+    cow_vector<Xparse> stack;
+
+    for(;;) {
+      // Accept a value. No other things such as closed brackets are allowed.
+      auto qtok = tstrm.peek_opt();
+      if(!qtok)
+        throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
+
+      switch(weaken_enum(qtok->index())) {
+        case Token::index_punctuator: {
+          // Accept a `+`, `-`, `[` or `{`.
+          auto punct = qtok->as_punctuator();
+          switch(weaken_enum(punct)) {
+            case punctuator_add:
+            case punctuator_sub: {
+              cow_string name;
+              qtok = tstrm.peek_opt(1);
+              if(qtok && qtok->is_identifier())
+                name = qtok->as_identifier();
+
+              // Only `infinity` and `nan` may follow.
+              // Note that the tokenizer will have merged sign symbols into adjacent number literals.
+              if(::rocket::is_none_of(name, { "infinity", "nan" }))
+                throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(),
+                                   tstrm.next_length());
+
+              // Accept a special numeric value.
+              double sign = (punct == punctuator_add) - 1;
+              double real = (name[0] == 'i') ? ::std::numeric_limits<double>::infinity()
+                                             : ::std::numeric_limits<double>::quiet_NaN();
+
+              value = ::std::copysign(real, sign);
+              tstrm.shift(2);
+              break;
+            }
+
+            case punctuator_bracket_op: {
+              tstrm.shift();
+
+              // Open an array.
+              qtok = tstrm.peek_opt();
+              if(!qtok) {
+                throw Parser_Error(parser_status_closed_bracket_or_comma_expected, tstrm.next_sloc(),
+                                   tstrm.next_length());
+              }
+              else if(!do_check_punctuator(qtok, { punctuator_bracket_cl })) {
+                // Descend into the new array.
+                S_xparse_array ctxa = { V_array() };
+                stack.emplace_back(::std::move(ctxa));
+                continue;
+              }
+              tstrm.shift();
+
+              // Accept an empty array.
+              value = V_array();
+              break;
+            }
+
+            case punctuator_brace_op: {
+              tstrm.shift();
+
+              // Open an object.
+              qtok = tstrm.peek_opt();
+              if(!qtok) {
+                throw Parser_Error(parser_status_closed_brace_or_comma_expected, tstrm.next_sloc(),
+                                   tstrm.next_length());
+              }
+              else if(!do_check_punctuator(qtok, { punctuator_brace_cl })) {
+                // Get the first key.
+                auto qkey = do_accept_object_key_opt(tstrm);
+                if(!qkey)
+                  throw Parser_Error(parser_status_closed_brace_or_json5_key_expected, tstrm.next_sloc(),
+                                     tstrm.next_length());
+
+                // Descend into the new object.
+                S_xparse_object ctxo = { V_object(), ::std::move(*qkey) };
+                stack.emplace_back(::std::move(ctxo));
+                continue;
+              }
+              tstrm.shift();
+
+              // Accept an empty object.
+              value = V_object();
+              break;
+            }
+
+            default:
+              throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
+          }
+          break;
+        }
+
+        case Token::index_identifier: {
+          // Accept a literal.
+          const auto& name = qtok->as_identifier();
+          if(::rocket::is_none_of(name, { "null", "true", "false", "infinity", "nan" }))
+            throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
+
+          switch(name[3]) {
+            case 'l':
+              value = nullptr;
+              break;
+
+            case 'e':
+              value = true;
+              break;
+
+            case 's':
+              value = false;
+              break;
+
+            case 'i':
+              value = ::std::numeric_limits<double>::infinity();
+              break;
+
+            case 0:
+              value = ::std::numeric_limits<double>::quiet_NaN();
+              break;
+
+            default:
+              ROCKET_ASSERT(false);
+          }
+          tstrm.shift();
+          break;
+        }
+
+        case Token::index_integer_literal:
+          // Accept an integer.
+          value = qtok->as_integer_literal();
+          tstrm.shift();
+          break;
+
+        case Token::index_real_literal:
+          // Accept a real.
+          value = qtok->as_real_literal();
+          tstrm.shift();
+          break;
+
+        case Token::index_string_literal:
+          // Accept a UTF-8 string.
+          value = qtok->as_string_literal();
+          tstrm.shift();
+          break;
+
+        default:
+          throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
+      }
+
+      // A complete value has been accepted. Insert it into its parent array or object.
+      for(;;) {
+        if(stack.empty())
+          // Accept the root value.
+          return value;
+
+        if(stack.back().index() == 0) {
+          auto& ctxa = stack.mut_back().as<0>();
+          ctxa.arr.emplace_back(::std::move(value));
+
+          // Check for termination.
+          qtok = tstrm.peek_opt();
+          if(!qtok) {
+            throw Parser_Error(parser_status_closed_bracket_or_comma_expected, tstrm.next_sloc(),
+                               tstrm.next_length());
+          }
+          else if(!do_check_punctuator(qtok, { punctuator_bracket_cl })) {
+            // Look for the next element.
+            break;
+          }
+          tstrm.shift();
+
+          // Close this array.
+          value = ::std::move(ctxa.arr);
+        }
+        else {
+          auto& ctxo = stack.mut_back().as<1>();
+          do_insert_unique(ctxo.obj, ::std::move(ctxo.key), ::std::move(value));
+
+          // Check for termination.
+          qtok = tstrm.peek_opt();
+          if(!qtok) {
+            throw Parser_Error(parser_status_closed_brace_or_comma_expected, tstrm.next_sloc(),
+                               tstrm.next_length());
+          }
+          else if(!do_check_punctuator(qtok, { punctuator_brace_cl })) {
+            // Get the next key.
+            auto qkey = do_accept_object_key_opt(tstrm);
+            if(!qkey)
+              throw Parser_Error(parser_status_closed_brace_or_json5_key_expected, tstrm.next_sloc(),
+                                 tstrm.next_length());
+
+            // Look for the next value.
+            ctxo.key = ::std::move(*qkey);
+            break;
+          }
+          tstrm.shift();
+
+          // Close this object.
+          value = ::std::move(ctxo.obj);
+        }
+        stack.pop_back();
+      }
+    }
+  }
 
 }  // namespace
 
@@ -227,6 +511,45 @@ std_system_proc_daemonize()
       ASTERIA_THROW("Could not daemonize process\n"
                     "[`daemon()` failed: $1]",
                     format_errno(errno));
+  }
+
+V_object
+std_system_conf_load_file(V_string path)
+  {
+    // Resolve the path to an absolute one.
+    uptr<char, void (&)(void*)> abspath(::realpath(path.safe_c_str(), nullptr), ::free);
+    if(!abspath)
+      ASTERIA_THROW("Could not open configuration file '$2'\n"
+                     "[`realpath()` failed: $1]",
+                     format_errno(errno), path);
+
+    ::rocket::unique_posix_file fp(::fopen(abspath, "r"), ::fclose);
+    if(!fp)
+      ASTERIA_THROW("Could not open configuration file '$2'\n"
+                     "[`fopen()` failed: $1]",
+                     format_errno(errno), abspath);
+
+    // Parse characters from the file.
+    ::setbuf(fp, nullptr);
+    ::rocket::tinybuf_file cbuf(::std::move(fp));
+
+    // Initialize tokenizer options.
+    // Unlike JSON5, we support _real_ integers and single-quote string literals.
+    Compiler_Options opts;
+    opts.keywords_as_identifiers = true;
+
+    Token_Stream tstrm(opts);
+    tstrm.reload(cow_string(abspath), 1, cbuf);
+
+    // Parse a sequence of key-value pairs.
+    V_object root;
+    while(auto qkey = do_accept_object_key_opt(tstrm))
+      do_insert_unique(root, ::std::move(*qkey), do_conf_parse_value_nonrecursive(tstrm));
+
+    // Ensure all data have been consumed.
+    if(!tstrm.empty())
+      throw Parser_Error(parser_status_identifier_expected, tstrm.next_sloc(), tstrm.next_length());
+    return root;
   }
 
 void
@@ -601,6 +924,40 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     if(reader.I().F()) {
       std_system_proc_daemonize();
       return self = Reference_root::S_void();
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
+      ));
+
+    //===================================================================
+    // `std.system.conf_load_file()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("conf_load_file"),
+      V_function(
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.system.conf_load_file(path)`
+
+  * Loads the configuration file denoted by `path`. Its syntax is
+    similar to JSON5, except that commas, semicolons and top-level
+    braces are omitted for simplicity, and single-quoted strings do
+    not support escapes. A sample configuration file can be found
+    at 'doc/sample.conf'.
+
+  * Returns an object of all values from the file, if it was parsed
+    successfully.
+
+  * Throws an exception if the file could not be opened, or there
+    was an error in it.
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.system.conf_load_file"));
+    // Parse arguments.
+    V_string path;
+    if(reader.I().v(path).F()) {
+      Reference_root::S_temporary xref = { std_system_conf_load_file(::std::move(path)) };
+      return self = ::std::move(xref);
     }
     // Fail.
     reader.throw_no_matching_function_call();

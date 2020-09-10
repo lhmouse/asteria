@@ -140,6 +140,20 @@
 
 	* Throws an exception on failure.
 
+`std.system.conf_load_file(path)`
+
+	* Loads the configuration file denoted by `path`. Its syntax is
+	  similar to JSON5, except that commas, semicolons and top-level
+	  braces are omitted for simplicity, and single-quoted strings do
+	  not support escapes. A sample configuration file can be found
+	  at 'doc/sample.conf'.
+
+	* Returns an object of all values from the file, if it was parsed
+	  successfully.
+
+	* Throws an exception if the file could not be opened, or there
+	  was an error in it.
+
 ### `std.debug`
 
 `std.debug.logf(templ, ...)`

@@ -60,6 +60,10 @@ std_system_proc_invoke(V_string path, optV_array argv, optV_array envp);
 void
 std_system_proc_daemonize();
 
+// `std.system.conf_load_file`
+V_object
+std_system_conf_load_file(V_string path);
+
 // Create an object that is to be referenced as `std.system`.
 void
 create_bindings_system(V_object& result, API_Version version);
