@@ -65,8 +65,7 @@ do_accept_object_key_opt(Token_Stream& tstrm)
     // Accept the value initiator.
     qtok = tstrm.peek_opt();
     if(!do_check_punctuator(qtok, { punctuator_assign, punctuator_colon }))
-      throw Parser_Error(parser_status_equals_sign_or_colon_expected,
-                                    tstrm.next_sloc(), tstrm.next_length());
+      throw Parser_Error(parser_status_equals_sign_or_colon_expected, tstrm.next_sloc(), tstrm.next_length());
 
     tstrm.shift();
     return ::std::move(key);
