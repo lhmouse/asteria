@@ -978,19 +978,18 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
     ireg += (((xlo * yhi >> 30) + (xhi * ylo >> 30) + (xlo * ylo >> 62)) >> 2);
 
     // Round the mantissa. We now have 18 digits.
-    // In the case of single precision we have to drop 8 digits before rounding.
-    if(ROCKET_UNEXPECT(single))
-      ireg /= 100'000'000;
-
-    // Note that the last digit should be rounded to even.
-    ylo = ireg % 10;
-    ireg -= ylo;
-    if((ylo != 5) ? (ylo > 5) : (ireg % 20))
-      ireg += 10;
-
-    // Re-fill zeroes in the case of single precision.
-    if(ROCKET_UNEXPECT(single))
-      ireg *= 100'000'000;
+    if(single) {
+      uint64_t dval = ireg % 1000000000;
+      ireg /= 1000000000;
+      ireg += dval >= 500000000;
+      ireg *= 1000000000;
+    }
+    else {
+      uint64_t dval = ireg % 10;
+      ireg /= 10;
+      ireg += dval >= 5;
+      ireg *= 10;
+    }
 
     // Return the mantissa and exponent.
     mant = ireg;
