@@ -110,6 +110,7 @@ const noexcept
       case vtype_array: {
         const auto& lhs = this->m_stor.as<vtype_array>();
         const auto& rhs = other.m_stor.as<vtype_array>();
+
         // Perform lexicographical comparison on the longest initial sequences of the same length.
         size_t rlen = ::rocket::min(lhs.size(), rhs.size());
         for(size_t i = 0;  i < rlen;  ++i) {
@@ -327,14 +328,14 @@ const
       case vtype_opaque: {
         const auto& altr = this->m_stor.as<vtype_opaque>();
         // #opaque(0x123456) [[`my opaque`]]
-        fmt << "#opaque(" << altr.ptr() << ") [[`" << altr << "`]]";
+        fmt << "#opaque(" << altr.get_opt() << ") [[`" << altr << "`]]";
         return fmt;
       }
 
       case vtype_function: {
         const auto& altr = this->m_stor.as<vtype_function>();
-        // *function(0x123456) [[`my function`]]
-        fmt << "*function(" << altr.ptr() << ") [[`" << altr << "`]]";
+        // *function [[`my function`]]
+        fmt << "*function [[`" << altr << "`]]";
         return fmt;
       }
 

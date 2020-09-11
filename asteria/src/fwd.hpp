@@ -421,11 +421,6 @@ class cow_opaque
     const
       { return typeid(*(this->m_sptr.get()));  }  // may throw `std::bad_typeid`
 
-    const void*
-    ptr()
-    const noexcept
-      { return this->m_sptr.get();  }
-
     tinyfmt&
     describe(tinyfmt& fmt)
     const;
@@ -434,12 +429,12 @@ class cow_opaque
     enumerate_variables(Variable_Callback& callback)
     const;
 
-    template<typename OpaqueT>
+    template<typename OpaqueT = Abstract_Opaque>
     rcptr<const OpaqueT>
-    cast_opt()
+    get_opt()
     const;
 
-    template<typename OpaqueT>
+    template<typename OpaqueT = Abstract_Opaque>
     rcptr<OpaqueT>
     open_opt();
   };
@@ -453,7 +448,7 @@ template<typename OpaqueT>
 inline
 rcptr<const OpaqueT>
 cow_opaque::
-cast_opt()
+get_opt()
 const
   {
     auto ptr = this->m_sptr.get();
@@ -562,11 +557,6 @@ class cow_function
     const
       { return this->m_fptr ? typeid(simple_function)
                             : typeid(*(this->m_sptr.get()));  }  // may throw `std::bad_typeid`
-
-    const void*
-    ptr()
-    const noexcept
-      { return this->m_fptr ? (void*)(intptr_t)this->m_fptr : this->m_sptr.get();  }
 
     tinyfmt&
     describe(tinyfmt& fmt)
