@@ -140,7 +140,7 @@ Global_Context global;
 Simple_Script script;
 
 // These are process exit status codes.
-enum Exit_Code : uint8_t
+enum Exit_Status : uint8_t
   {
     exit_success            = 0,
     exit_system_error       = 1,
@@ -151,7 +151,7 @@ enum Exit_Code : uint8_t
 
 [[noreturn]]
 int
-do_exit(Exit_Code code, const char* fmt = nullptr, ...)
+do_exit(Exit_Status stat, const char* fmt = nullptr, ...)
 noexcept
   {
     // Output the string to standard error.
@@ -165,12 +165,12 @@ noexcept
     if(ROCKET_EXPECT(!cmdline.verbose)) {
       // Perform fast exit by default.
       ::fflush(nullptr);
-      ::quick_exit(static_cast<int>(code));
+      ::quick_exit(static_cast<int>(stat));
     }
     else
       // Perform normal exit if verbose mode is on.
       // This helps catching memory leaks upon exit.
-      ::exit(static_cast<int>(code));
+      ::exit(static_cast<int>(stat));
   }
 
 class REPL_Hooks
@@ -206,38 +206,28 @@ final
     void
     on_variable_declare(const Source_Location& sloc, const phsh_string& name)
     override
-      {
-        this->do_verbose_trace(sloc, "declaring variable `$1`", name);
-      }
+      { this->do_verbose_trace(sloc, "declaring variable `$1`", name);  }
 
     void
     on_function_call(const Source_Location& sloc, const cow_function& target)
     override
-      {
-        this->do_verbose_trace(sloc, "initiating function call: $1", target);
-      }
+      { this->do_verbose_trace(sloc, "initiating function call: $1", target);  }
 
     void
     on_function_return(const Source_Location& sloc, const cow_function& target, const Reference&)
     override
-      {
-        this->do_verbose_trace(sloc, "returned from function call: $1", target);
-      }
+      { this->do_verbose_trace(sloc, "returned from function call: $1", target);  }
 
     void
     on_function_except(const Source_Location& sloc, const cow_function& target, const Runtime_Error&)
     override
-      {
-        this->do_verbose_trace(sloc, "caught an exception from function call: $1", target);
-      }
+      { this->do_verbose_trace(sloc, "caught an exception from function call: $1", target);  }
 
     void
     on_single_step_trap(const Source_Location& sloc)
     override
-      {
-        if(interrupted)
-          ASTERIA_THROW("Interrupt received at '$1'", sloc);
-      }
+      { if(interrupted)
+          ASTERIA_THROW("Interrupt received at '$1'", sloc);  }
   };
 
 void
@@ -482,10 +472,9 @@ do_REP_single()
         // Rewrite the potential expression to a `return` statement.
         // The first line is skipped.
         try {
-          script.reload_string(cmdline.path, 0,
-                               code
-                                 .insert(0, "return ->(\n")
-                                 .append(   "\n);"));
+          code.insert(0, "return ->(\n");
+          code.append("\n);");
+          script.reload_string(cmdline.path, 0, code);
         }
         catch(Parser_Error&)
           // If we fail again, it is the previous exception that we are interested in.
@@ -500,14 +489,13 @@ do_REP_single()
     // Execute the script as a function, which returns a `Reference`.
     ASTERIA_RUNTIME_TRY {
       const auto ref = script.execute(global, ::std::move(cmdline.args));
-
-      fmt.clear_string();
-      if(ref.is_void())
-        fmt << "[void]";
-      else
-        fmt << ref.read();
-
-      return ::fprintf(stderr, "* result #%lu: %s\n", index, fmt.c_str());
+      auto str = "[void]";
+      if(!ref.is_void()) {
+        const auto& val = ref.read();
+        val.dump(fmt.clear_string());
+        str = fmt.c_str();
+      }
+      return ::fprintf(stderr, "* result #%lu: %s\n", index, str);
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except)
       // If an exception was thrown, print something informative.
@@ -573,15 +561,13 @@ do_single_noreturn()
     // Execute the script.
     ASTERIA_RUNTIME_TRY {
       const auto ref = script.execute(global, ::std::move(cmdline.args));
-
-      if(ref.is_void())
-        do_exit(exit_success);
-
-      const auto& val = ref.read();
-      if(!val.is_integer())
-        do_exit(exit_system_error);
-
-      do_exit(static_cast<Exit_Code>(val.as_integer()));
+      auto stat = exit_success;
+      if(!ref.is_void()) {
+        const auto& val = ref.read();
+        stat = val.is_integer() ? static_cast<Exit_Status>(val.as_integer())
+                                : exit_system_error;
+      }
+      do_exit(stat);
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except)
       // If an exception was thrown, print something informative.
@@ -609,7 +595,6 @@ main(int argc, char** argv)
     else
       do_single_noreturn();
   }
-  catch(exception& stdex) {
+  catch(exception& stdex)
     // Print a message followed by the backtrace if it is available. There isn't much we can do.
-    do_exit(exit_system_error, "! unhandled exception: %s\n", stdex.what());
-  }
+    { do_exit(exit_system_error, "! unhandled exception: %s\n", stdex.what());  }
