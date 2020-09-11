@@ -46,12 +46,12 @@ do_accept_object_key_opt(Token_Stream& tstrm)
 
     // A key may be either an identifier or a string literal.
     Key_with_sloc key;
-    switch(::asteria::weaken_enum(qtok->index())) {
-      case ::asteria::Token::index_identifier:
+    switch(weaken_enum(qtok->index())) {
+      case Token::index_identifier:
         key.name = qtok->as_identifier();
         break;
 
-      case ::asteria::Token::index_string_literal:
+      case Token::index_string_literal:
         key.name = qtok->as_string_literal();
         break;
 
