@@ -669,7 +669,7 @@ noexcept
 inline
 tinyfmt&
 operator<<(tinyfmt& fmt, const Value& value)
-  { return value.dump(fmt);  }
+  { return value.print(fmt);  }
 
 }  // namespace asteria
 
