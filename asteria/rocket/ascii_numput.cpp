@@ -1029,9 +1029,6 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
       tz_mult *= 10;
     }
 
-::printf("ireg = %18ld\n", ireg);
-::printf("  lo = %18ld (%2d)\n", bound_lo, tzcnt_lo);
-::printf("  hi = %18ld (%2d)\n", bound_hi, tzcnt_hi);
     if(tzcnt_lo != tzcnt_hi) {
       // Pick the bound with more trailing zeroes if their counts don't equal.
       next = (tzcnt_lo > tzcnt_hi) ? bound_lo : bound_hi;
@@ -1048,8 +1045,6 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
     }
     else
       ireg = next;
-
-::printf("ireg = %18ld\n", ireg);
 
     // Return the mantissa and exponent.
     mant = ireg;
@@ -1543,7 +1538,7 @@ noexcept
   {
     this->clear();
     char* bp;
-    char* ep;single = 1;
+    char* ep;
 
     // Extract the sign bit and extend it to a word.
     int sign = ::std::signbit(value) ? -1 : 0;
