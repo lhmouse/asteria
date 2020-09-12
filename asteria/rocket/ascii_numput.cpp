@@ -1002,9 +1002,9 @@ do_xput_M_dec(char*& ep, const uint64_t& mant, const char* rdxp)
     // Write digits in normal order.
     uint64_t ireg = mant;
     while(ireg != 0) {
-      uint64_t quo = ireg / 100'000'000'000'000'000;
-      ireg %= 100'000'000'000'000'000;
-      uint8_t dval = (uint8_t)quo;
+      uint64_t quo = ireg / 100000'000000'000000;
+      ireg %= 100000'000000'000000;
+      uint8_t dval = static_cast<uint8_t>(quo);
       ireg *= 10;
 
       // Insert a decimal point before `rdxp`.
@@ -1015,8 +1015,8 @@ do_xput_M_dec(char*& ep, const uint64_t& mant, const char* rdxp)
       *(ep++) = do_pdigit_X(dval);
     }
 
-    // If `rdxp` is set, fill zeroes until it is reached,
-    // if no decimal point has been added so far.
+    // If `rdxp` is set and no decimal point has been added so far,
+    // fill zeroes until it is reached.
     if(rdxp)
       while(ep < rdxp)
         *(ep++) = '0';
