@@ -978,18 +978,73 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
     ireg += (((xlo * yhi >> 30) + (xhi * ylo >> 30) + (xlo * ylo >> 62)) >> 2);
 
     // Round the mantissa. We now have 18 digits.
+    uint64_t max_error;
+    uint64_t tzeroes;
     if(single) {
-      uint64_t dval = ireg % 1000000000;
-      ireg /= 1000000000;
-      ireg += dval >= 500000000;
-      ireg *= 1000000000;
+      max_error = (ireg >> 24) - 1;
+      tzeroes = 1000000000;
     }
     else {
-      uint64_t dval = ireg % 10;
-      ireg /= 10;
-      ireg += dval >= 5;
-      ireg *= 10;
+      max_error = (ireg >> 53) - 1;
+      tzeroes = 10;
     }
+
+    uint64_t next = ireg / tzeroes;
+    int tzcnt_lo = -1;
+    uint64_t bound_lo = ireg;
+    int tzcnt_hi = -1;
+    uint64_t bound_hi = ireg;
+    for(;;) {
+      uint64_t bound_next = next * tzeroes;
+      if(tzcnt_lo < 0) {
+        // Try removing a trailing zero from the lower bound.
+        ROCKET_ASSERT(ireg >= bound_next);
+        if(ireg - bound_next <= max_error) {
+          // Record a digit if the result is close enough.
+          tzcnt_lo -= 1;
+          bound_lo = bound_next;
+        }
+        else
+          tzcnt_lo ^= -1;
+      }
+
+      bound_next += tzeroes;
+      if(tzcnt_hi < 0) {
+        // Try removing a trailing zero from the upper bound.
+        ROCKET_ASSERT(bound_next >= ireg);
+        if(bound_next - ireg <= max_error) {
+          // Record a digit if the result is close enough.
+          tzcnt_hi -= 1;
+          bound_hi = bound_next;
+        }
+        else
+          tzcnt_hi ^= -1;
+      }
+
+      // If neither bound can be ajusted any further, stop.
+      if((tzcnt_lo | tzcnt_hi) >= 0)
+        break;
+
+      next /= 10;
+      tzeroes *= 10;
+    }
+
+    if(tzcnt_lo != tzcnt_hi) {
+      // Pick the bound with more trailing zeroes if their counts don't equal.
+      next = (tzcnt_lo > tzcnt_hi) ? bound_lo : bound_hi;
+    }
+    else {
+      // Pick the nestest bound otherwise, rounding upwards on a par.
+      next = (ireg - bound_lo < bound_hi - ireg) ? bound_lo : bound_hi;
+    }
+
+    // Check for carries.
+    if((next > ireg) && (next >= 1000'00000'00000'00000)) {
+      ireg = next / 10;
+      bpos -= 1;
+    }
+    else
+      ireg = next;
 
     // Return the mantissa and exponent.
     mant = ireg;
