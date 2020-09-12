@@ -1041,7 +1041,7 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
     // Check for carries.
     if((next > ireg) && (next >= 1000'00000'00000'00000)) {
       ireg = next / 10;
-      bpos -= 1;
+      bpos += 1;
     }
     else
       ireg = next;
