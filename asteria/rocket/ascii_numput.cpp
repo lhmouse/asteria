@@ -979,23 +979,23 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
 
     // Round the mantissa. We now have 18 digits.
     uint64_t max_error;
-    uint64_t tzeroes;
+    uint64_t tz_mult;
     if(single) {
       max_error = (ireg >> 24) - 1;
-      tzeroes = 1000000000;
+      tz_mult = 1000000000;
     }
     else {
       max_error = (ireg >> 53) - 1;
-      tzeroes = 10;
+      tz_mult = 10;
     }
 
-    uint64_t next = ireg / tzeroes;
+    uint64_t next = ireg / tz_mult;
     int tzcnt_lo = -1;
     uint64_t bound_lo = ireg;
     int tzcnt_hi = -1;
     uint64_t bound_hi = ireg;
     for(;;) {
-      uint64_t bound_next = next * tzeroes;
+      uint64_t bound_next = next * tz_mult;
       if(tzcnt_lo < 0) {
         // Try removing a trailing zero from the lower bound.
         ROCKET_ASSERT(ireg >= bound_next);
@@ -1008,7 +1008,7 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
           tzcnt_lo ^= -1;
       }
 
-      bound_next += tzeroes;
+      bound_next += tz_mult;
       if(tzcnt_hi < 0) {
         // Try removing a trailing zero from the upper bound.
         ROCKET_ASSERT(bound_next >= ireg);
@@ -1026,9 +1026,12 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
         break;
 
       next /= 10;
-      tzeroes *= 10;
+      tz_mult *= 10;
     }
 
+::printf("ireg = %18ld\n", ireg);
+::printf("  lo = %18ld (%2d)\n", bound_lo, tzcnt_lo);
+::printf("  hi = %18ld (%2d)\n", bound_hi, tzcnt_hi);
     if(tzcnt_lo != tzcnt_hi) {
       // Pick the bound with more trailing zeroes if their counts don't equal.
       next = (tzcnt_lo > tzcnt_hi) ? bound_lo : bound_hi;
@@ -1045,6 +1048,8 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
     }
     else
       ireg = next;
+
+::printf("ireg = %18ld\n", ireg);
 
     // Return the mantissa and exponent.
     mant = ireg;
@@ -1538,7 +1543,7 @@ noexcept
   {
     this->clear();
     char* bp;
-    char* ep;
+    char* ep;single = 1;
 
     // Extract the sign bit and extend it to a word.
     int sign = ::std::signbit(value) ? -1 : 0;
