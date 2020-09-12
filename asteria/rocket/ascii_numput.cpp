@@ -1002,8 +1002,8 @@ do_xput_M_dec(char*& ep, const uint64_t& mant, const char* rdxp)
     // Write digits in normal order.
     uint64_t ireg = mant;
     while(ireg != 0) {
-      uint64_t quo = ireg / 100000'000000'000000;
-      ireg %= 100000'000000'000000;
+      uint64_t quo = ireg / 100'00000'00000'00000;
+      ireg %= 100'00000'00000'00000;
       uint8_t dval = static_cast<uint8_t>(quo);
       ireg *= 10;
 
