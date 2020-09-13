@@ -14,7 +14,7 @@ Variadic_Arguer::
 describe(tinyfmt& fmt)
 const
   {
-    return fmt << "[built-in].__varg([index]) @ " << this->m_sloc;
+    return fmt << "`__varg([index])` @ '" << this->m_sloc << "'";
   }
 
 Variable_Callback&
