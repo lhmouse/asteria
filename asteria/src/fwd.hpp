@@ -793,7 +793,7 @@ static const Value& null_value = reinterpret_cast<const Value&>(null_value_stora
 
 }  // namespace asteria
 
-// These are explicit instantiations. Note that can't occur inside `namespace asteria`.
+// These are explicit instantiations. Note that they can't occur inside `namespace asteria`.
 extern template
 class ::rocket::cow_vector<::asteria::Value>;
 

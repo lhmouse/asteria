@@ -7,7 +7,7 @@
 #include "value.hpp"
 #include "utilities.hpp"
 
-// These are explicit instantiations. Note that can't occur inside `namespace asteria`.
+// These are explicit instantiations. Note that they can't occur inside `namespace asteria`.
 template
 class ::rocket::cow_vector<::asteria::Value>;
 
