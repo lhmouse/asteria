@@ -597,7 +597,7 @@ const
     cow_string overloads;
     for(size_t k = 0;  k != this->m_ovlds.size();  ++k) {
       auto sh = ::rocket::sref(this->m_ovlds.c_str() + k);
-      overloads << "  `" << this->m_name << '(' << sh << ")\n";
+      overloads << "  " << this->m_name << '(' << sh << ")\n";
       k += sh.length();
     }
 
