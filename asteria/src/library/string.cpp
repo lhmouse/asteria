@@ -161,7 +161,8 @@ do_find_and_replace(V_string& res, IterT tbegin, IterT tend, IterT pbegin, IterT
   }
 
 template<typename IterT>
-opt<IterT> do_find_of_opt(IterT begin, IterT end, const V_string& set, bool match)
+opt<IterT>
+do_find_of_opt(IterT begin, IterT end, const V_string& set, bool match)
   {
     // Make a lookup table.
     array<bool, 256> table = { };
@@ -174,14 +175,16 @@ opt<IterT> do_find_of_opt(IterT begin, IterT end, const V_string& set, bool matc
     return nullopt;
   }
 
-V_string do_get_reject(const optV_string& reject)
+V_string
+do_get_reject(const optV_string& reject)
   {
     if(!reject)
       return ::rocket::sref(" \t");
     return *reject;
   }
 
-V_string do_get_padding(const optV_string& padding)
+V_string
+do_get_padding(const optV_string& padding)
   {
     if(!padding)
       return ::rocket::sref(" ");
@@ -321,7 +324,8 @@ do_url_encode(const V_string& data, bool lcase)
   }
 
 template<bool queryT>
-V_string do_url_decode(const V_string& text)
+V_string
+do_url_decode(const V_string& text)
   {
     V_string data = text;
     // Only modify the string as needed, without causing copies on write.
