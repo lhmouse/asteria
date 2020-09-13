@@ -566,7 +566,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.system.gc_count_variables"));
+    Argument_Reader reader(::rocket::sref("std.system.gc_count_variables"), ::rocket::cref(args));
     // Parse arguments.
     V_integer generation;
     if(reader.I().v(generation).F()) {
@@ -594,7 +594,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.system.gc_get_threshold"));
+    Argument_Reader reader(::rocket::sref("std.system.gc_get_threshold"), ::rocket::cref(args));
     // Parse arguments.
     V_integer generation;
     if(reader.I().v(generation).F()) {
@@ -627,7 +627,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.system.gc_set_threshold"));
+    Argument_Reader reader(::rocket::sref("std.system.gc_set_threshold"), ::rocket::cref(args));
     // Parse arguments.
     V_integer generation;
     V_integer threshold;
@@ -658,7 +658,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.system.gc_collect"));
+    Argument_Reader reader(::rocket::sref("std.system.gc_collect"), ::rocket::cref(args));
     // Parse arguments.
     optV_integer generation_limit;
     if(reader.I().o(generation_limit).F()) {
@@ -687,7 +687,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.system.env_get_variable"));
+    Argument_Reader reader(::rocket::sref("std.system.env_get_variable"), ::rocket::cref(args));
     // Parse arguments.
     V_string name;
     if(reader.I().v(name).F()) {
@@ -714,7 +714,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.system.env_get_variables"));
+    Argument_Reader reader(::rocket::sref("std.system.env_get_variables"), ::rocket::cref(args));
     // Parse arguments.
     if(reader.I().F()) {
       Reference_root::S_temporary xref = { std_system_env_get_variables() };
@@ -753,7 +753,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.system.uuid"));
+    Argument_Reader reader(::rocket::sref("std.system.uuid"), ::rocket::cref(args));
     // Parse arguments.
     optV_boolean lowercase;
     if(reader.I().o(lowercase).F()) {
@@ -777,7 +777,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.system.proc_get_pid"));
+    Argument_Reader reader(::rocket::sref("std.system.proc_get_pid"), ::rocket::cref(args));
     // Parse arguments.
     if(reader.I().F()) {
       Reference_root::S_temporary xref = { std_system_proc_get_pid() };
@@ -800,7 +800,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.system.proc_get_ppid"));
+    Argument_Reader reader(::rocket::sref("std.system.proc_get_ppid"), ::rocket::cref(args));
     // Parse arguments.
     if(reader.I().F()) {
       Reference_root::S_temporary xref = { std_system_proc_get_ppid() };
@@ -823,7 +823,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.system.proc_get_uid"));
+    Argument_Reader reader(::rocket::sref("std.system.proc_get_uid"), ::rocket::cref(args));
     // Parse arguments.
     if(reader.I().F()) {
       Reference_root::S_temporary xref = { std_system_proc_get_uid() };
@@ -846,7 +846,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.system.proc_get_euid"));
+    Argument_Reader reader(::rocket::sref("std.system.proc_get_euid"), ::rocket::cref(args));
     // Parse arguments.
     if(reader.I().F()) {
       Reference_root::S_temporary xref = { std_system_proc_get_euid() };
@@ -881,7 +881,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.system.proc_invoke"));
+    Argument_Reader reader(::rocket::sref("std.system.proc_invoke"), ::rocket::cref(args));
     // Parse arguments.
     V_string cmd;
     optV_array argv;
@@ -912,7 +912,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.system.proc_daemonize"));
+    Argument_Reader reader(::rocket::sref("std.system.proc_daemonize"), ::rocket::cref(args));
     // Parse arguments.
     if(reader.I().F()) {
       std_system_proc_daemonize();
@@ -945,7 +945,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.system.conf_load_file"));
+    Argument_Reader reader(::rocket::sref("std.system.conf_load_file"), ::rocket::cref(args));
     // Parse arguments.
     V_string path;
     if(reader.I().v(path).F()) {

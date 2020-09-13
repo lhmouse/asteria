@@ -74,7 +74,7 @@ create_bindings_debug(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.debug.logf"));
+    Argument_Reader reader(::rocket::sref("std.debug.logf"), ::rocket::cref(args));
     // Parse variadic arguments.
     V_string templ;
     cow_vector<Value> values;
@@ -106,7 +106,7 @@ create_bindings_debug(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.debug.dump"));
+    Argument_Reader reader(::rocket::sref("std.debug.dump"), ::rocket::cref(args));
     // Parse arguments.
     Value value;
     optV_integer indent;

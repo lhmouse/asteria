@@ -689,7 +689,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.slice"));
+    Argument_Reader reader(::rocket::sref("std.array.slice"), ::rocket::cref(args));
     // Parse arguments.
     V_array data;
     V_integer from;
@@ -732,7 +732,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.replace"));
+    Argument_Reader reader(::rocket::sref("std.array.replace"), ::rocket::cref(args));
     Argument_Reader::State state;
     // Parse arguments.
     V_array data;
@@ -790,7 +790,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.find"));
+    Argument_Reader reader(::rocket::sref("std.array.find"), ::rocket::cref(args));
     Argument_Reader::State state;
     // Parse arguments.
     V_array data;
@@ -853,7 +853,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.find_if"));
+    Argument_Reader reader(::rocket::sref("std.array.find_if"), ::rocket::cref(args));
     Argument_Reader::State state;
     // Parse arguments.
     V_array data;
@@ -916,7 +916,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.find_if_not"));
+    Argument_Reader reader(::rocket::sref("std.array.find_if_not"), ::rocket::cref(args));
     Argument_Reader::State state;
     // Parse arguments.
     V_array data;
@@ -979,7 +979,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.rfind"));
+    Argument_Reader reader(::rocket::sref("std.array.rfind"), ::rocket::cref(args));
     Argument_Reader::State state;
     // Parse arguments.
     V_array data;
@@ -1042,7 +1042,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.rfind_if"));
+    Argument_Reader reader(::rocket::sref("std.array.rfind_if"), ::rocket::cref(args));
     Argument_Reader::State state;
     // Parse arguments.
     V_array data;
@@ -1105,7 +1105,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.rfind_if_not"));
+    Argument_Reader reader(::rocket::sref("std.array.rfind_if_not"), ::rocket::cref(args));
     Argument_Reader::State state;
     // Parse arguments.
     V_array data;
@@ -1166,7 +1166,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.count"));
+    Argument_Reader reader(::rocket::sref("std.array.count"), ::rocket::cref(args));
     Argument_Reader::State state;
     // Parse arguments.
     V_array data;
@@ -1231,7 +1231,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.count_if"));
+    Argument_Reader reader(::rocket::sref("std.array.count_if"), ::rocket::cref(args));
     Argument_Reader::State state;
     // Parse arguments.
     V_array data;
@@ -1296,7 +1296,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.count_if_not"));
+    Argument_Reader reader(::rocket::sref("std.array.count_if_not"), ::rocket::cref(args));
     Argument_Reader::State state;
     // Parse arguments.
     V_array data;
@@ -1357,7 +1357,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.exclude"));
+    Argument_Reader reader(::rocket::sref("std.array.exclude"), ::rocket::cref(args));
     Argument_Reader::State state;
     // Parse arguments.
     V_array data;
@@ -1420,7 +1420,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.exclude_if"));
+    Argument_Reader reader(::rocket::sref("std.array.exclude_if"), ::rocket::cref(args));
     Argument_Reader::State state;
     // Parse arguments.
     V_array data;
@@ -1483,7 +1483,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.exclude_if_not"));
+    Argument_Reader reader(::rocket::sref("std.array.exclude_if_not"), ::rocket::cref(args));
     Argument_Reader::State state;
     // Parse arguments.
     V_array data;
@@ -1535,7 +1535,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.is_sorted"));
+    Argument_Reader reader(::rocket::sref("std.array.is_sorted"), ::rocket::cref(args));
     // Parse arguments.
     V_array data;
     optV_function comparator;
@@ -1572,7 +1572,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.binary_search"));
+    Argument_Reader reader(::rocket::sref("std.array.binary_search"), ::rocket::cref(args));
     // Parse arguments.
     V_array data;
     Value target;
@@ -1612,7 +1612,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.lower_bound"));
+    Argument_Reader reader(::rocket::sref("std.array.lower_bound"), ::rocket::cref(args));
     // Parse arguments.
     V_array data;
     Value target;
@@ -1652,7 +1652,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.upper_bound"));
+    Argument_Reader reader(::rocket::sref("std.array.upper_bound"), ::rocket::cref(args));
     // Parse arguments.
     V_array data;
     Value target;
@@ -1691,7 +1691,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.lower_bound"));
+    Argument_Reader reader(::rocket::sref("std.array.lower_bound"), ::rocket::cref(args));
     // Parse arguments.
     V_array data;
     Value target;
@@ -1730,7 +1730,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.sort"));
+    Argument_Reader reader(::rocket::sref("std.array.sort"), ::rocket::cref(args));
     // Parse arguments.
     V_array data;
     optV_function comparator;
@@ -1766,7 +1766,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.sortu"));
+    Argument_Reader reader(::rocket::sref("std.array.sortu"), ::rocket::cref(args));
     // Parse arguments.
     V_array data;
     optV_function comparator;
@@ -1797,7 +1797,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.max_of"));
+    Argument_Reader reader(::rocket::sref("std.array.max_of"), ::rocket::cref(args));
     // Parse arguments.
     V_array data;
     optV_function comparator;
@@ -1828,7 +1828,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.min_of"));
+    Argument_Reader reader(::rocket::sref("std.array.min_of"), ::rocket::cref(args));
     // Parse arguments.
     V_array data;
     optV_function comparator;
@@ -1856,7 +1856,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.reverse"));
+    Argument_Reader reader(::rocket::sref("std.array.reverse"), ::rocket::cref(args));
     // Parse arguments.
     V_array data;
     optV_function comparator;
@@ -1888,7 +1888,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.generate"));
+    Argument_Reader reader(::rocket::sref("std.array.generate"), ::rocket::cref(args));
     // Parse arguments.
     V_function generator;
     V_integer length;
@@ -1920,7 +1920,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.shuffle"));
+    Argument_Reader reader(::rocket::sref("std.array.shuffle"), ::rocket::cref(args));
     // Parse arguments.
     V_array data;
     optV_integer seed;
@@ -1950,7 +1950,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.rotate"));
+    Argument_Reader reader(::rocket::sref("std.array.rotate"), ::rocket::cref(args));
     // Parse arguments.
     V_array data;
     V_integer shift;
@@ -1978,7 +1978,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.copy_keys"));
+    Argument_Reader reader(::rocket::sref("std.array.copy_keys"), ::rocket::cref(args));
     // Parse arguments.
     V_object source;
     if(reader.I().v(source).F()) {
@@ -2005,7 +2005,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.array.copy_values"));
+    Argument_Reader reader(::rocket::sref("std.array.copy_values"), ::rocket::cref(args));
     // Parse arguments.
     V_object source;
     if(reader.I().v(source).F()) {

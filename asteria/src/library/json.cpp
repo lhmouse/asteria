@@ -790,7 +790,7 @@ create_bindings_json(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.json.format"));
+    Argument_Reader reader(::rocket::sref("std.json.format"), ::rocket::cref(args));
     Argument_Reader::State state;
     // Parse arguments.
     Value value;
@@ -829,7 +829,7 @@ create_bindings_json(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.json.format5"));
+    Argument_Reader reader(::rocket::sref("std.json.format5"), ::rocket::cref(args));
     Argument_Reader::State state;
     // Parse arguments.
     Value value;
@@ -879,7 +879,7 @@ create_bindings_json(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.json.parse"));
+    Argument_Reader reader(::rocket::sref("std.json.parse"), ::rocket::cref(args));
     // Parse arguments.
     V_string text;
     if(reader.I().v(text).F()) {
@@ -909,7 +909,7 @@ create_bindings_json(V_object& result, API_Version /*version*/)
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::cref(args), ::rocket::sref("std.json.parse_file"));
+    Argument_Reader reader(::rocket::sref("std.json.parse_file"), ::rocket::cref(args));
     // Parse arguments.
     V_string path;
     if(reader.I().v(path).F()) {

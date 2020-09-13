@@ -22,8 +22,8 @@ class Argument_Reader
       };
 
   private:
-    refp<const cow_vector<Reference>> m_args;
     cow_string m_name;
+    refp<const cow_vector<Reference>> m_args;
 
     // `m_ovlds` contains all overloads that have been tested so far.
     cow_string m_ovlds;
@@ -32,9 +32,9 @@ class Argument_Reader
     State m_state = { };
 
   public:
-    Argument_Reader(refp<const cow_vector<Reference>> args, const cow_string& name)
+    Argument_Reader(const cow_string& name, refp<const cow_vector<Reference>> args)
     noexcept
-      : m_args(args), m_name(name)
+      : m_name(name), m_args(args)
       { }
 
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Argument_Reader);
@@ -80,20 +80,20 @@ class Argument_Reader
     const;
 
   public:
+    const cow_string&
+    name()
+    const noexcept
+      { return this->m_name;  }
+
     size_t
     count_arguments()
     const noexcept
       { return this->m_args->size();  }
 
     const Reference&
-    get_argument(size_t index)
+    argument(size_t index)
     const
       { return this->m_args->at(index);  }
-
-    const cow_string&
-    get_name()
-    const noexcept
-      { return this->m_name;  }
 
     // `S` stands for `save` or `store`.
     const Argument_Reader&
