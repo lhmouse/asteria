@@ -978,14 +978,14 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
     ireg += (((xlo * yhi >> 30) + (xhi * ylo >> 30) + (xlo * ylo >> 62)) >> 2);
 
     // Round the mantissa. We now have 18 digits.
-    uint64_t max_error;
+    uint64_t half_ulp;
     uint64_t tz_mult;
     if(single) {
-      max_error = (ireg >> 24) - 1;
+      half_ulp = ireg >> 24;
       tz_mult = 1000000000;
     }
     else {
-      max_error = (ireg >> 53) - 1;
+      half_ulp = ireg >> 53;
       tz_mult = 10;
     }
 
@@ -998,8 +998,10 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
       uint64_t bound_next = next * tz_mult;
       if(tzcnt_lo < 0) {
         // Try removing a trailing zero from the lower bound.
+        // Note `ireg` is a bit smaller because it was truncated towards zero.
+        // The maximum tolerable round-off error in this case is `(ULP / 2 - 2)`.
         ROCKET_ASSERT(ireg >= bound_next);
-        if(ireg - bound_next <= max_error) {
+        if(ireg - bound_next <= half_ulp - 2) {
           // Record a digit if the result is close enough.
           tzcnt_lo -= 1;
           bound_lo = bound_next;
@@ -1011,8 +1013,9 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
       bound_next += tz_mult;
       if(tzcnt_hi < 0) {
         // Try removing a trailing zero from the upper bound.
+        // The maximum tolerable round-off error in this case is `(ULP / 2 - 1)`.
         ROCKET_ASSERT(bound_next >= ireg);
-        if(bound_next - ireg <= max_error) {
+        if(bound_next - ireg <= half_ulp - 1) {
           // Record a digit if the result is close enough.
           tzcnt_hi -= 1;
           bound_hi = bound_next;
