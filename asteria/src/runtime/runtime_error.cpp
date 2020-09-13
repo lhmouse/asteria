@@ -55,7 +55,8 @@ do_compose_message()
     fmt << "\n[backtrace frames:";
     for(size_t i = 0;  i < this->m_frames.size();  ++i) {
       const auto& frm = this->m_frames[i];
-      format(fmt, "\n  #$1 $2 at '$3': $4", i, frm.what_type(), frm.sloc(), frm.value());
+      format(fmt, "\n  #$1 $2 at '$3': ", i, frm.what_type(), frm.sloc());
+      frm.value().dump(fmt);
     }
     fmt << "\n  -- end of backtrace frames]";
 
