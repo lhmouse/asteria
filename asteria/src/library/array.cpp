@@ -348,11 +348,7 @@ std_array_count(V_array data, V_integer from, optV_integer length, Value target)
   {
     int64_t count = 0;
     auto range = do_slice(data, from, length);
-    for(;;) {
-      auto qit = do_find_opt(range.first, range.second, target);
-      if(!qit)
-        break;
-
+    while(auto qit = do_find_opt(range.first, range.second, target)) {
       ++count;
       range.first = ::std::move(++*qit);
     }
@@ -365,11 +361,7 @@ std_array_count_if(Global_Context& global, V_array data, V_integer from, optV_in
   {
     int64_t count = 0;
     auto range = do_slice(data, from, length);
-    for(;;) {
-      auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
-      if(!qit)
-        break;
-
+    while(auto qit = do_find_if_opt(global, range.first, range.second, predictor, true)) {
       ++count;
       range.first = ::std::move(++*qit);
     }
@@ -382,11 +374,7 @@ std_array_count_if_not(Global_Context& global, V_array data, V_integer from, opt
   {
     int64_t count = 0;
     auto range = do_slice(data, from, length);
-    for(;;) {
-      auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
-      if(!qit)
-        break;
-
+    while(auto qit = do_find_if_opt(global, range.first, range.second, predictor, false)) {
       ++count;
       range.first = ::std::move(++*qit);
     }
@@ -398,11 +386,7 @@ std_array_exclude(V_array data, V_integer from, optV_integer length, Value targe
   {
     auto range = do_slice(data, from, length);
     ptrdiff_t dist = data.end() - range.second;
-    for(;;) {
-      auto qit = do_find_opt(range.first, range.second, target);
-      if(!qit)
-        break;
-
+    while(auto qit = do_find_opt(range.first, range.second, target)) {
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
@@ -415,11 +399,7 @@ std_array_exclude_if(Global_Context& global, V_array data, V_integer from, optV_
   {
     auto range = do_slice(data, from, length);
     ptrdiff_t dist = data.end() - range.second;
-    for(;;) {
-      auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
-      if(!qit)
-        break;
-
+    while(auto qit = do_find_if_opt(global, range.first, range.second, predictor, true)) {
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
@@ -432,11 +412,7 @@ std_array_exclude_if_not(Global_Context& global, V_array data, V_integer from, o
   {
     auto range = do_slice(data, from, length);
     ptrdiff_t dist = data.end() - range.second;
-    for(;;) {
-      auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
-      if(!qit)
-        break;
-
+    while(auto qit = do_find_if_opt(global, range.first, range.second, predictor, false)) {
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
@@ -611,21 +587,21 @@ std_array_shuffle(V_array data, optV_integer seed)
     // Create a linear congruential generator.
     uint64_t lcg = seed ? static_cast<uint64_t>(*seed) : generate_random_seed();
 
+    const auto bptr = data.mut_data();
+    const auto eptr = bptr + data.ssize();
+
     // Shuffle elements.
-    for(size_t i = 0;  i < data.size();  ++i) {
+    for(auto ps = bptr;  ps != eptr;  ++ps) {
       // These arguments are the same as glibc's `drand48()` function.
       //   https://en.wikipedia.org/wiki/Linear_congruential_generator#Parameters_in_common_use
       lcg *= 0x5DEECE66D;     // a
       lcg += 0xB;             // c
       lcg &= 0xFFFFFFFFFFFF;  // m
 
-      // N.B. Conversion from an unsigned type to a floating-point type would result in performance penalty.
-      // ratio <= [0.0, 1.0)
-      double ratio = static_cast<double>(static_cast<int64_t>(lcg)) * 0x1p-48;
-      // k <= [0, data.size())
-      size_t k = static_cast<size_t>(static_cast<int64_t>(ratio * static_cast<double>(data.ssize())));
-      if(k != i)
-        swap(data.mut(k), data.mut(i));
+      // Pick a random target.
+      auto pd = ::rocket::get_probing_origin(bptr, eptr, static_cast<size_t>(lcg >> 16));
+      if(ps != pd)
+        swap(*ps, *pd);
     }
     return ::std::move(data);
   }
