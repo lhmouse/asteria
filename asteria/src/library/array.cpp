@@ -32,6 +32,8 @@ do_slice(const V_array& data, const V_integer& from, const optV_integer& length)
       // greater than `data.size()`.
       if(from >= slen)
         return ::std::make_pair(data.end(), data.end());
+
+      // Return a subrange from `begin() + from`.
       return do_slice(data, data.begin() + static_cast<ptrdiff_t>(from), length);
     }
 

@@ -34,6 +34,8 @@ do_slice(const V_string& text, const V_integer& from, const optV_integer& length
       // greater than `text.size()`.
       if(from >= slen)
         return ::std::make_pair(text.end(), text.end());
+
+      // Return a subrange from `begin() + from`.
       return do_slice(text, text.begin() + static_cast<ptrdiff_t>(from), length);
     }
 
