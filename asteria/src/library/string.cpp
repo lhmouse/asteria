@@ -95,9 +95,11 @@ class BMH_Searcher
         for(;;) {
           if(tend - tcur < this->m_plen)
             return nullopt;
+
           auto tnext = tcur + this->m_plen;
           if(::std::equal(tcur, tnext, pbegin))
             return tcur;
+
           // Adjust the read iterator using the Bad Character Rule.
           tcur += this->m_bcrs[uint8_t(tnext[-1])];
         }
