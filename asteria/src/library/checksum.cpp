@@ -349,14 +349,12 @@ do_load_le(const uint8_t* ptr)
     return le32toh(word);
   }
 
-template<size_t N>
+constexpr
 uint32_t
-do_rotl_impl(uint32_t value)
+do_rotl(uint32_t value, int n)
   {
-    return (value << N) | (value >> (32 - N));
+    return (value << n) | (value >> (32 - n));
   }
-
-#define do_rotl(x, y)  (do_rotl_impl<y>(x))
 
 class MD5_Hasher
 final
