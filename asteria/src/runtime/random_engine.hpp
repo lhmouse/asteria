@@ -13,37 +13,20 @@ final
   : public Rcfwd<Random_Engine>
   {
   public:
-    using result_type  = uint32_t;
-
-    static
-    constexpr
-    result_type
-    min()
-    noexcept
-      { return 0; }
-
-    static
-    constexpr
-    result_type
-    max()
-    noexcept
-      { return UINT32_MAX;  }
-
-  private:
-    // This implements the ISAAC PRNG that is both very fast and
-    // cryptographically secure.
+    // This implements the ISAAC PRNG that is cryptographically secure.
     // The reference implementation assumes that `long` has 32 bits.
     //   https://www.burtleburtle.net/bob/rand/isaac.html
+    using result_type  = uint32_t;
 
-    // output pool
-    uint32_t m_ngot;
-    uint32_t m_pool[256];
-
-    // internal states
-    uint32_t m_aa;
-    uint32_t m_bb;
-    uint32_t m_cc;
-    uint32_t m_mm[256];
+  private:
+    // This matches `struct randctx` from 'rand.h'.
+    //   https://www.burtleburtle.net/bob/c/rand.h
+    uint32_t m_randcnt;
+    uint32_t m_randrsl[256];
+    uint32_t m_randmem[256];
+    uint32_t m_randa;
+    uint32_t m_randb;
+    uint32_t m_randc;
 
   public:
     Random_Engine()
@@ -53,26 +36,41 @@ final
     ASTERIA_COPYABLE_DESTRUCTOR(Random_Engine);
 
   private:
-    inline
     void
-    do_clear()
-    noexcept;
-
-    inline
-    void
-    do_update()
+    do_isaac()
     noexcept;
 
   public:
-    // Initialize this PRNG with some external entropy source.
+    // Initializes this PRNG with some external entropy source.
     void
     init()
     noexcept;
 
-    // Get a random 32-bit number.
+    // Gets a random 32-bit number.
     uint32_t
     bump()
-    noexcept;
+    noexcept
+      {
+        // This matches `main()` from 'rand.c'.
+        //   https://www.burtleburtle.net/bob/c/rand.c
+        uint32_t off = this->m_randcnt++ % 256;
+        if(ROCKET_UNEXPECT(off == 0))
+          this->do_isaac();
+        return this->m_randrsl[off];
+      }
+
+    // This class is a UniformRandomBitGenerator.
+    static constexpr
+    result_type
+    min()
+    noexcept
+      { return 0; }
+
+    static constexpr
+    result_type
+    max()
+    noexcept
+      { return UINT32_MAX;  }
 
     result_type
     operator()()
