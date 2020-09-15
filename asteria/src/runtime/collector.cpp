@@ -118,6 +118,7 @@ collect_single_opt()
 
     // The algorithm here is described at
     //   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
+
     // We initialize `gcref` to zero then increment it, rather than initialize `gcref` to
     // the reference count then decrement it. This saves a phase below for us.
     Collector* next = nullptr;
@@ -130,6 +131,7 @@ collect_single_opt()
     //   Add variables that are either tracked or reachable from tracked ones
     //   into the staging area.
     ///////////////////////////////////////////////////////////////////////////
+
     do_traverse(this->m_tracked,
       [&](const rcptr<Variable>& root) {
         // Add a variable that is reachable directly.
@@ -169,6 +171,7 @@ collect_single_opt()
     // Phase 2
     //   Drop references directly or indirectly from `m_staging`.
     ///////////////////////////////////////////////////////////////////////////
+
     do_traverse(this->m_staging,
       [&](const rcptr<Variable>& root) {
         // Drop a direct reference.
@@ -196,6 +199,7 @@ collect_single_opt()
     // Phase 3
     //   Mark variables reachable indirectly from those reachable directly.
     ///////////////////////////////////////////////////////////////////////////
+
     do_traverse(this->m_staging,
       [&](const rcptr<Variable>& root) {
         // Skip variables that are possibly unreachable.
@@ -224,6 +228,7 @@ collect_single_opt()
     //   Wipe out variables whose `gcref` counters have excceeded their
     //   reference counts.
     ///////////////////////////////////////////////////////////////////////////
+
     do_traverse(this->m_staging,
       [&](const rcptr<Variable>& root) {
         // All reachable variables will have negative gcref counters.
@@ -254,6 +259,7 @@ collect_single_opt()
     ///////////////////////////////////////////////////////////////////////////
     // Finish
     ///////////////////////////////////////////////////////////////////////////
+
     this->m_staging.clear();
     this->m_counter = 0;
     return next;
