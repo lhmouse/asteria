@@ -6,34 +6,35 @@
 #include "../runtime/argument_reader.hpp"
 #include "../runtime/global_context.hpp"
 #include "../utilities.hpp"
+#include <endian.h>
 #include <sys/stat.h>
 
 namespace asteria {
 namespace {
 
-template<uint32_t valueT, uint32_t divisorT, int roundT>
+template<uint32_t valueT, uint32_t divT, int N>
 struct CRC32_Generator
-  : CRC32_Generator<(valueT >> 1) ^ (-(valueT & 1) & divisorT), divisorT, roundT + 1>
+  : CRC32_Generator<(valueT >> 1) ^ (-(valueT & 1) & divT), divT, N + 1>
   { };
 
-template<uint32_t valueT, uint32_t divisorT>
-struct CRC32_Generator<valueT, divisorT, 8>
+template<uint32_t valueT, uint32_t divT>
+struct CRC32_Generator<valueT, divT, 8>
   : ::std::integral_constant<uint32_t, valueT>
   { };
 
-template<uint32_t divisorT, size_t... S>
+template<uint32_t divT, size_t... S>
 constexpr
 array<uint32_t, 256>
 do_CRC32_table_impl(const index_sequence<S...>&)
 noexcept
-  { return { CRC32_Generator<uint8_t(S), divisorT, 0>::value... };  }
+  { return { CRC32_Generator<uint8_t(S), divT, 0>::value... };  }
 
-template<uint32_t divisorT>
+template<uint32_t divT>
 constexpr
 array<uint32_t, 256>
 do_CRC32_table()
 noexcept
-  { return do_CRC32_table_impl<divisorT>(::std::make_index_sequence<256>());  }
+  { return do_CRC32_table_impl<divT>(::std::make_index_sequence<256>());  }
 
 constexpr auto s_iso3309_CRC32_table = do_CRC32_table<0xEDB88320>();
 
@@ -162,7 +163,7 @@ class FNV1a32_Hasher
 final
   : public Abstract_Opaque
   {
-  private:
+  public:
     enum : uint32_t
       {
         prime   = 16777619,
@@ -212,6 +213,7 @@ final
       {
         // Get the checksum.
         uint32_t ck = this->m_reg;
+
         // Reset internal states.
         this->m_reg = offset;
         return ck;
@@ -285,116 +287,71 @@ do_construct_fnv1a32(V_object& result)
       ));
   }
 
-template<uint32_t valueT>
-struct Hex_Digit
-  : ::std::integral_constant<char, char('0' + valueT + ((9 - valueT) >> 29))>
-  { };
-
-template<uint32_t valueT>
-constexpr
-array<char, 2>
-do_generate_hex_digits_for_byte()
-noexcept
-  { return { Hex_Digit<valueT / 16>::value, Hex_Digit<valueT % 16>::value };  }
-
-template<size_t... S>
-constexpr
-array<char, 256, 2>
-do_generate_hex_digits_impl(const index_sequence<S...>&)
-noexcept
-  { return { do_generate_hex_digits_for_byte<uint8_t(S)>()... };  }
-
-constexpr auto s_hex_digits = do_generate_hex_digits_impl(::std::make_index_sequence<256>());
-
-template<bool bigendT, typename WordT>
-V_string&
-do_pdigits_impl(V_string& str, const WordT& ref)
+template<size_t N>
+cow_string
+do_print_words_be(const array<uint32_t, N>& words)
   {
-    static_assert(::std::is_unsigned<WordT>::value);
-    array<uint8_t, sizeof(WordT)> stor_le;
-    uint64_t word = static_cast<uint64_t>(ref);
-    // Write the word in little-endian order.
-    for(size_t i = 0;  i < stor_le.size();  ++i) {
-      stor_le[i] = word & 0xFF;
-      word >>= 8;
+    cow_string str;
+    str.reserve(N * 2);
+
+    for(uint32_t word : words) {
+      for(uint32_t k = 0;  k != 8;  ++k) {
+        uint32_t ch = word >> 28;
+        word <<= 4;
+        str += static_cast<char>('0' + ch + ((9 - ch) >> 29));
+      }
     }
-    // Append hexadecimal digits.
-    if(bigendT)
-      ::std::for_each(stor_le.rbegin(), stor_le.rend(),
-                      [&](uint8_t b) { str.append(s_hex_digits[b].data(), 2);  });
-    else
-      ::std::for_each(stor_le.begin(), stor_le.end(),
-                      [&](uint8_t b) { str.append(s_hex_digits[b].data(), 2);  });
     return str;
   }
 
-template<typename WordT>
-V_string&
-do_pdigits_be(V_string& str, const WordT& ref)
-  { return do_pdigits_impl<1, WordT>(str, ref);  }
-
-template<typename WordT>
-V_string&
-do_pdigits_le(V_string& str, const WordT& ref)
-  { return do_pdigits_impl<0, WordT>(str, ref);  }
-
-template<bool bigendT, typename WordT>
-WordT&
-do_load_impl(WordT& ref, const uint8_t* ptr)
+template<size_t N>
+cow_string
+do_print_words_le(const array<uint32_t, N>& words)
   {
-    static_assert(::std::is_unsigned<WordT>::value);
-    array<uint8_t, sizeof(WordT)> stor_be;
-    uint64_t word = 0;
+    cow_string str;
+    str.reserve(N * 2);
 
-    // Re-arrange bytes.
-    if(bigendT)
-      ::std::copy_n(ptr, stor_be.size(), stor_be.mut_begin());
-    else
-      ::std::copy_n(ptr, stor_be.size(), stor_be.mut_rbegin());
-
-    // Assemble the word.
-    for(uint8_t byte : stor_be) {
-      word <<= 8;
-      word |= byte;
+    for(uint32_t word : words) {
+      for(uint32_t k = 0;  k != 8;  ++k) {
+        uint32_t ch = word & 0x0F;
+        word >>= 4;
+        str += static_cast<char>('0' + ch + ((9 - ch) >> 29));
+      }
     }
-    return ref = static_cast<WordT>(word);
+    return str;
   }
 
-template<typename WordT>
-WordT&
-do_load_be(WordT& ref, const uint8_t* ptr)
-  { return do_load_impl<1, WordT>(ref, ptr);  }
-
-template<typename WordT>
-WordT&
-do_load_le(WordT& ref, const uint8_t* ptr)
-  { return do_load_impl<0, WordT>(ref, ptr);  }
-
-template<typename WordT>
-constexpr
-WordT
-do_rotl(const WordT& ref, size_t bits)
-  {
-    constexpr auto width = sizeof(WordT) * 8;
-    auto sum = (ref << (+bits) % width) | (ref >> (-bits) % width);
-    return static_cast<WordT>(sum);
-  }
-
-template<typename WordT, size_t sizeT>
-inline
+template<size_t N>
 void
-do_padd(array<WordT, sizeT>& lhs, const array<WordT, sizeT>& rhs)
+do_accumulate_words(array<uint32_t, N>& lhs, const array<uint32_t, N>& rhs)
   {
-    ::rocket::ranged_for(size_t(0), sizeT, [&](size_t i) { lhs[i] += rhs[i];  });
+    for(size_t k = 0;  k != N;  ++k)
+      lhs[k] += rhs[k];
   }
+
+uint32_t
+do_load_be(const uint8_t* ptr)
+  {
+    uint32_t word;
+    ::std::memcpy(&word, ptr, 4);
+    return be32toh(word);
+  }
+
+template<size_t N>
+uint32_t
+do_rotl_impl(uint32_t value)
+  {
+    return (value << N) | (value >> (32 - N));
+  }
+
+#define do_rotl(x, y)  (do_rotl_impl<y>(x))
 
 class MD5_Hasher
 final
   : public Abstract_Opaque
   {
   private:
-    static
-    constexpr
+    static constexpr
     array<uint32_t, 4>
     init()
     noexcept
@@ -556,11 +513,13 @@ final
           this->m_size += static_cast<uint64_t>(n);
           bp += n;
           bc += n;
+
           // ... and if is still not full, there aren't going to be any more data.
           if(bc != ec) {
             ROCKET_ASSERT(bp == ep);
             return;
           }
+
           // Consume the last chunk.
           ROCKET_ASSERT(this->m_size % 64 == 0);
           this->do_consume_chunk(this->m_chunk.data());
@@ -589,7 +548,6 @@ final
     finish()
     noexcept
       {
-        // Finalize the hasher.
         auto bc = this->m_chunk.mut_begin() + this->m_size % 64;
         auto ec = this->m_chunk.mut_end();
         ptrdiff_t n;
@@ -598,14 +556,12 @@ final
         *(bc++) = 0x80;
         n = ec - bc;
         if(n < 8) {
-          // Wrap.
           ::std::fill_n(bc, n, 0);
           this->do_consume_chunk(this->m_chunk.data());
           bc = this->m_chunk.mut_begin();
         }
         n = ec - bc - 8;
         if(n > 0) {
-          // Fill zeroes.
           ::std::fill_n(bc, n, 0);
           bc += n;
         }
@@ -613,16 +569,14 @@ final
 
         // Write the number of bits in little-endian order.
         auto bits = this->m_size * 8;
-        for(ptrdiff_t i = 0;  i < 8;  ++i) {
-          bc[i] = bits & 0xFF;
+        for(long k = 0;  k < 8;  ++k) {
+          bc[k] = bits & 0xFF;
           bits >>= 8;
         }
         this->do_consume_chunk(this->m_chunk.data());
 
         // Get the checksum.
-        V_string ck;
-        ck.reserve(this->m_regs.size() * 8);
-        ::rocket::for_each(this->m_regs, [&](uint32_t w) { do_pdigits_le(ck, w);  });
+        cow_string ck = do_print_words_le(this->m_regs);
 
         // Reset internal states.
         this->m_regs = init();
@@ -703,8 +657,7 @@ final
   : public Abstract_Opaque
   {
   private:
-    static
-    constexpr
+    static constexpr
     array<uint32_t, 5>
     init()
     noexcept
@@ -891,11 +844,13 @@ final
           this->m_size += static_cast<uint64_t>(n);
           bp += n;
           bc += n;
+
           // ... and if is still not full, there aren't going to be any more data.
           if(bc != ec) {
             ROCKET_ASSERT(bp == ep);
             return;
           }
+
           // Consume the last chunk.
           ROCKET_ASSERT(this->m_size % 64 == 0);
           this->do_consume_chunk(this->m_chunk.data());
@@ -924,7 +879,6 @@ final
     finish()
     noexcept
       {
-        // Finalize the hasher.
         auto bc = this->m_chunk.mut_begin() + this->m_size % 64;
         auto ec = this->m_chunk.mut_end();
         ptrdiff_t n;
@@ -933,14 +887,12 @@ final
         *(bc++) = 0x80;
         n = ec - bc;
         if(n < 8) {
-          // Wrap.
           ::std::fill_n(bc, n, 0);
           this->do_consume_chunk(this->m_chunk.data());
           bc = this->m_chunk.mut_begin();
         }
         n = ec - bc - 8;
         if(n > 0) {
-          // Fill zeroes.
           ::std::fill_n(bc, n, 0);
           bc += n;
         }
@@ -948,16 +900,14 @@ final
 
         // Write the number of bits in big-endian order.
         auto bits = this->m_size * 8;
-        for(ptrdiff_t i = 7;  i != -1;  --i) {
-          bc[i] = bits & 0xFF;
+        for(long k = 7;  k != -1;  --k) {
+          bc[k] = bits & 0xFF;
           bits >>= 8;
         }
         this->do_consume_chunk(this->m_chunk.data());
 
         // Get the checksum.
-        V_string ck;
-        ck.reserve(this->m_regs.size() * 8);
-        ::rocket::for_each(this->m_regs, [&](uint32_t w) { do_pdigits_be(ck, w);  });
+        cow_string ck = do_print_words_be(this->m_regs);
 
         // Reset internal states.
         this->m_regs = init();
@@ -1038,8 +988,7 @@ final
   : public Abstract_Opaque
   {
   private:
-    static
-    constexpr
+    static constexpr
     array<uint32_t, 8>
     init()
     noexcept
@@ -1201,11 +1150,13 @@ final
           this->m_size += static_cast<uint64_t>(n);
           bp += n;
           bc += n;
+
           // ... and if is still not full, there aren't going to be any more data.
           if(bc != ec) {
             ROCKET_ASSERT(bp == ep);
             return;
           }
+
           // Consume the last chunk.
           ROCKET_ASSERT(this->m_size % 64 == 0);
           this->do_consume_chunk(this->m_chunk.data());
@@ -1234,7 +1185,6 @@ final
     finish()
     noexcept
       {
-        // Finalize the hasher.
         auto bc = this->m_chunk.mut_begin() + this->m_size % 64;
         auto ec = this->m_chunk.mut_end();
         ptrdiff_t n;
@@ -1243,14 +1193,12 @@ final
         *(bc++) = 0x80;
         n = ec - bc;
         if(n < 8) {
-          // Wrap.
           ::std::fill_n(bc, n, 0);
           this->do_consume_chunk(this->m_chunk.data());
           bc = this->m_chunk.mut_begin();
         }
         n = ec - bc - 8;
         if(n > 0) {
-          // Fill zeroes.
           ::std::fill_n(bc, n, 0);
           bc += n;
         }
@@ -1258,16 +1206,14 @@ final
 
         // Write the number of bits in big-endian order.
         auto bits = this->m_size * 8;
-        for(ptrdiff_t i = 7;  i != -1;  --i) {
-          bc[i] = bits & 0xFF;
+        for(long k = 7;  k != -1;  --k) {
+          bc[k] = bits & 0xFF;
           bits >>= 8;
         }
         this->do_consume_chunk(this->m_chunk.data());
 
         // Get the checksum.
-        V_string ck;
-        ck.reserve(this->m_regs.size() * 8);
-        ::rocket::for_each(this->m_regs, [&](uint32_t w) { do_pdigits_be(ck, w);  });
+        cow_string ck = do_print_words_be(this->m_regs);
 
         // Reset internal states.
         this->m_regs = init();
