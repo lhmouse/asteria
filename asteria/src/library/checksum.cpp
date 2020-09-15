@@ -294,11 +294,12 @@ do_print_words_be(const array<uint32_t, N>& words)
     cow_string str;
     str.reserve(N * 2);
 
+    uint32_t ch;
     for(uint32_t word : words) {
       for(uint32_t k = 0;  k != 8;  ++k) {
-        uint32_t ch = word >> 28;
-        word <<= 4;
+        ch = word >> 28;
         str += static_cast<char>('0' + ch + ((9 - ch) >> 29));
+        word <<= 4;
       }
     }
     return str;
@@ -311,11 +312,14 @@ do_print_words_le(const array<uint32_t, N>& words)
     cow_string str;
     str.reserve(N * 2);
 
+    uint32_t ch;
     for(uint32_t word : words) {
-      for(uint32_t k = 0;  k != 8;  ++k) {
-        uint32_t ch = word & 0x0F;
-        word >>= 4;
+      for(uint32_t k = 0;  k != 4;  ++k) {
+        ch = (word >> 4) & 0x0F;
         str += static_cast<char>('0' + ch + ((9 - ch) >> 29));
+        ch = word & 0x0F;
+        str += static_cast<char>('0' + ch + ((9 - ch) >> 29));
+        word >>= 8;
       }
     }
     return str;
@@ -335,6 +339,14 @@ do_load_be(const uint8_t* ptr)
     uint32_t word;
     ::std::memcpy(&word, ptr, 4);
     return be32toh(word);
+  }
+
+uint32_t
+do_load_le(const uint8_t* ptr)
+  {
+    uint32_t word;
+    ::std::memcpy(&word, ptr, 4);
+    return le32toh(word);
   }
 
 template<size_t N>
@@ -367,112 +379,107 @@ final
     do_consume_chunk(const uint8_t* p)
     noexcept
       {
-        uint32_t w;
-        uint32_t f, g;
-
         // https://en.wikipedia.org/wiki/MD5
-        auto xhash = [&](uint32_t i, auto&& specx, uint32_t& a, uint32_t& b,
-                         uint32_t& c, uint32_t& d, uint32_t k, uint8_t rb)
-          {
-            specx(i, b, c, d);
-            do_load_le(w, p + g * 4);
-            w = a + f + k + w;
-            a = b + do_rotl(w, rb);
-          };
-
-        auto spec0 = [&](uint32_t i, uint32_t& b, uint32_t& c, uint32_t& d)
-          { f = d ^ (b & (c ^ d));
-            g = i;  };
-
-        auto spec1 = [&](uint32_t i, uint32_t& b, uint32_t& c, uint32_t& d)
-          { f = c ^ (d & (b ^ c));
-            g = (5 * i + 1) % 16;  };
-
-        auto spec2 = [&](uint32_t i, uint32_t& b, uint32_t& c, uint32_t& d)
-          { f = b ^ c ^ d;
-            g = (3 * i + 5) % 16;  };
-
-        auto spec3 = [&](uint32_t i, uint32_t& b, uint32_t& c, uint32_t& d)
-          { f = c ^ (b | ~d);
-            g = (7 * i) % 16;  };
-
-        // Unroll loops by hand.
         auto r = this->m_regs;
+        uint32_t w, f, g;
 
-        // 0 * 16
-        xhash( 0, spec0, r[0], r[1], r[2], r[3], 0xD76AA478,  7);
-        xhash( 1, spec0, r[3], r[0], r[1], r[2], 0xE8C7B756, 12);
-        xhash( 2, spec0, r[2], r[3], r[0], r[1], 0x242070DB, 17);
-        xhash( 3, spec0, r[1], r[2], r[3], r[0], 0xC1BDCEEE, 22);
-        xhash( 4, spec0, r[0], r[1], r[2], r[3], 0xF57C0FAF,  7);
-        xhash( 5, spec0, r[3], r[0], r[1], r[2], 0x4787C62A, 12);
-        xhash( 6, spec0, r[2], r[3], r[0], r[1], 0xA8304613, 17);
-        xhash( 7, spec0, r[1], r[2], r[3], r[0], 0xFD469501, 22);
-        xhash( 8, spec0, r[0], r[1], r[2], r[3], 0x698098D8,  7);
-        xhash( 9, spec0, r[3], r[0], r[1], r[2], 0x8B44F7AF, 12);
-        xhash(10, spec0, r[2], r[3], r[0], r[1], 0xFFFF5BB1, 17);
-        xhash(11, spec0, r[1], r[2], r[3], r[0], 0x895CD7BE, 22);
-        xhash(12, spec0, r[0], r[1], r[2], r[3], 0x6B901122,  7);
-        xhash(13, spec0, r[3], r[0], r[1], r[2], 0xFD987193, 12);
-        xhash(14, spec0, r[2], r[3], r[0], r[1], 0xA679438E, 17);
-        xhash(15, spec0, r[1], r[2], r[3], r[0], 0x49B40821, 22);
+#define XHASH(i, sp, a, b, c, d, k, rb)  \
+        sp(i, b, c, d);  \
+        w = do_load_le(p + g * 4);  \
+        w += a + f + k;  \
+        a = b + do_rotl(w, rb);
 
-        // 1 * 16
-        xhash(16, spec1, r[0], r[1], r[2], r[3], 0xF61E2562,  5);
-        xhash(17, spec1, r[3], r[0], r[1], r[2], 0xC040B340,  9);
-        xhash(18, spec1, r[2], r[3], r[0], r[1], 0x265E5A51, 14);
-        xhash(19, spec1, r[1], r[2], r[3], r[0], 0xE9B6C7AA, 20);
-        xhash(20, spec1, r[0], r[1], r[2], r[3], 0xD62F105D,  5);
-        xhash(21, spec1, r[3], r[0], r[1], r[2], 0x02441453,  9);
-        xhash(22, spec1, r[2], r[3], r[0], r[1], 0xD8A1E681, 14);
-        xhash(23, spec1, r[1], r[2], r[3], r[0], 0xE7D3FBC8, 20);
-        xhash(24, spec1, r[0], r[1], r[2], r[3], 0x21E1CDE6,  5);
-        xhash(25, spec1, r[3], r[0], r[1], r[2], 0xC33707D6,  9);
-        xhash(26, spec1, r[2], r[3], r[0], r[1], 0xF4D50D87, 14);
-        xhash(27, spec1, r[1], r[2], r[3], r[0], 0x455A14ED, 20);
-        xhash(28, spec1, r[0], r[1], r[2], r[3], 0xA9E3E905,  5);
-        xhash(29, spec1, r[3], r[0], r[1], r[2], 0xFCEFA3F8,  9);
-        xhash(30, spec1, r[2], r[3], r[0], r[1], 0x676F02D9, 14);
-        xhash(31, spec1, r[1], r[2], r[3], r[0], 0x8D2A4C8A, 20);
+#define SP_0(i, b, c, d)  \
+        f = d ^ (b & (c ^ d));  \
+        g = i;
 
-        // 2 * 16
-        xhash(32, spec2, r[0], r[1], r[2], r[3], 0xFFFA3942,  4);
-        xhash(33, spec2, r[3], r[0], r[1], r[2], 0x8771F681, 11);
-        xhash(34, spec2, r[2], r[3], r[0], r[1], 0x6D9D6122, 16);
-        xhash(35, spec2, r[1], r[2], r[3], r[0], 0xFDE5380C, 23);
-        xhash(36, spec2, r[0], r[1], r[2], r[3], 0xA4BEEA44,  4);
-        xhash(37, spec2, r[3], r[0], r[1], r[2], 0x4BDECFA9, 11);
-        xhash(38, spec2, r[2], r[3], r[0], r[1], 0xF6BB4B60, 16);
-        xhash(39, spec2, r[1], r[2], r[3], r[0], 0xBEBFBC70, 23);
-        xhash(40, spec2, r[0], r[1], r[2], r[3], 0x289B7EC6,  4);
-        xhash(41, spec2, r[3], r[0], r[1], r[2], 0xEAA127FA, 11);
-        xhash(42, spec2, r[2], r[3], r[0], r[1], 0xD4EF3085, 16);
-        xhash(43, spec2, r[1], r[2], r[3], r[0], 0x04881D05, 23);
-        xhash(44, spec2, r[0], r[1], r[2], r[3], 0xD9D4D039,  4);
-        xhash(45, spec2, r[3], r[0], r[1], r[2], 0xE6DB99E5, 11);
-        xhash(46, spec2, r[2], r[3], r[0], r[1], 0x1FA27CF8, 16);
-        xhash(47, spec2, r[1], r[2], r[3], r[0], 0xC4AC5665, 23);
+#define SP_1(i, b, c, d)  \
+        f = c ^ (d & (b ^ c));  \
+        g = (5 * i + 1) % 16;
 
-        // 3 * 16
-        xhash(48, spec3, r[0], r[1], r[2], r[3], 0xF4292244,  6);
-        xhash(49, spec3, r[3], r[0], r[1], r[2], 0x432AFF97, 10);
-        xhash(50, spec3, r[2], r[3], r[0], r[1], 0xAB9423A7, 15);
-        xhash(51, spec3, r[1], r[2], r[3], r[0], 0xFC93A039, 21);
-        xhash(52, spec3, r[0], r[1], r[2], r[3], 0x655B59C3,  6);
-        xhash(53, spec3, r[3], r[0], r[1], r[2], 0x8F0CCC92, 10);
-        xhash(54, spec3, r[2], r[3], r[0], r[1], 0xFFEFF47D, 15);
-        xhash(55, spec3, r[1], r[2], r[3], r[0], 0x85845DD1, 21);
-        xhash(56, spec3, r[0], r[1], r[2], r[3], 0x6FA87E4F,  6);
-        xhash(57, spec3, r[3], r[0], r[1], r[2], 0xFE2CE6E0, 10);
-        xhash(58, spec3, r[2], r[3], r[0], r[1], 0xA3014314, 15);
-        xhash(59, spec3, r[1], r[2], r[3], r[0], 0x4E0811A1, 21);
-        xhash(60, spec3, r[0], r[1], r[2], r[3], 0xF7537E82,  6);
-        xhash(61, spec3, r[3], r[0], r[1], r[2], 0xBD3AF235, 10);
-        xhash(62, spec3, r[2], r[3], r[0], r[1], 0x2AD7D2BB, 15);
-        xhash(63, spec3, r[1], r[2], r[3], r[0], 0xEB86D391, 21);
+#define SP_2(i, b, c, d)  \
+        f = b ^ c ^ d;  \
+        g = (3 * i + 5) % 16;
 
-        // Accumulate the result.
-        do_padd(this->m_regs, r);
+#define SP_3(i, b, c, d)  \
+        f = c ^ (b | ~d);  \
+        g = (7 * i) % 16;
+
+        XHASH( 0, SP_0, r[0], r[1], r[2], r[3], 0xD76AA478,  7);
+        XHASH( 1, SP_0, r[3], r[0], r[1], r[2], 0xE8C7B756, 12);
+        XHASH( 2, SP_0, r[2], r[3], r[0], r[1], 0x242070DB, 17);
+        XHASH( 3, SP_0, r[1], r[2], r[3], r[0], 0xC1BDCEEE, 22);
+        XHASH( 4, SP_0, r[0], r[1], r[2], r[3], 0xF57C0FAF,  7);
+        XHASH( 5, SP_0, r[3], r[0], r[1], r[2], 0x4787C62A, 12);
+        XHASH( 6, SP_0, r[2], r[3], r[0], r[1], 0xA8304613, 17);
+        XHASH( 7, SP_0, r[1], r[2], r[3], r[0], 0xFD469501, 22);
+        XHASH( 8, SP_0, r[0], r[1], r[2], r[3], 0x698098D8,  7);
+        XHASH( 9, SP_0, r[3], r[0], r[1], r[2], 0x8B44F7AF, 12);
+        XHASH(10, SP_0, r[2], r[3], r[0], r[1], 0xFFFF5BB1, 17);
+        XHASH(11, SP_0, r[1], r[2], r[3], r[0], 0x895CD7BE, 22);
+        XHASH(12, SP_0, r[0], r[1], r[2], r[3], 0x6B901122,  7);
+        XHASH(13, SP_0, r[3], r[0], r[1], r[2], 0xFD987193, 12);
+        XHASH(14, SP_0, r[2], r[3], r[0], r[1], 0xA679438E, 17);
+        XHASH(15, SP_0, r[1], r[2], r[3], r[0], 0x49B40821, 22);
+
+        XHASH(16, SP_1, r[0], r[1], r[2], r[3], 0xF61E2562,  5);
+        XHASH(17, SP_1, r[3], r[0], r[1], r[2], 0xC040B340,  9);
+        XHASH(18, SP_1, r[2], r[3], r[0], r[1], 0x265E5A51, 14);
+        XHASH(19, SP_1, r[1], r[2], r[3], r[0], 0xE9B6C7AA, 20);
+        XHASH(20, SP_1, r[0], r[1], r[2], r[3], 0xD62F105D,  5);
+        XHASH(21, SP_1, r[3], r[0], r[1], r[2], 0x02441453,  9);
+        XHASH(22, SP_1, r[2], r[3], r[0], r[1], 0xD8A1E681, 14);
+        XHASH(23, SP_1, r[1], r[2], r[3], r[0], 0xE7D3FBC8, 20);
+        XHASH(24, SP_1, r[0], r[1], r[2], r[3], 0x21E1CDE6,  5);
+        XHASH(25, SP_1, r[3], r[0], r[1], r[2], 0xC33707D6,  9);
+        XHASH(26, SP_1, r[2], r[3], r[0], r[1], 0xF4D50D87, 14);
+        XHASH(27, SP_1, r[1], r[2], r[3], r[0], 0x455A14ED, 20);
+        XHASH(28, SP_1, r[0], r[1], r[2], r[3], 0xA9E3E905,  5);
+        XHASH(29, SP_1, r[3], r[0], r[1], r[2], 0xFCEFA3F8,  9);
+        XHASH(30, SP_1, r[2], r[3], r[0], r[1], 0x676F02D9, 14);
+        XHASH(31, SP_1, r[1], r[2], r[3], r[0], 0x8D2A4C8A, 20);
+
+        XHASH(32, SP_2, r[0], r[1], r[2], r[3], 0xFFFA3942,  4);
+        XHASH(33, SP_2, r[3], r[0], r[1], r[2], 0x8771F681, 11);
+        XHASH(34, SP_2, r[2], r[3], r[0], r[1], 0x6D9D6122, 16);
+        XHASH(35, SP_2, r[1], r[2], r[3], r[0], 0xFDE5380C, 23);
+        XHASH(36, SP_2, r[0], r[1], r[2], r[3], 0xA4BEEA44,  4);
+        XHASH(37, SP_2, r[3], r[0], r[1], r[2], 0x4BDECFA9, 11);
+        XHASH(38, SP_2, r[2], r[3], r[0], r[1], 0xF6BB4B60, 16);
+        XHASH(39, SP_2, r[1], r[2], r[3], r[0], 0xBEBFBC70, 23);
+        XHASH(40, SP_2, r[0], r[1], r[2], r[3], 0x289B7EC6,  4);
+        XHASH(41, SP_2, r[3], r[0], r[1], r[2], 0xEAA127FA, 11);
+        XHASH(42, SP_2, r[2], r[3], r[0], r[1], 0xD4EF3085, 16);
+        XHASH(43, SP_2, r[1], r[2], r[3], r[0], 0x04881D05, 23);
+        XHASH(44, SP_2, r[0], r[1], r[2], r[3], 0xD9D4D039,  4);
+        XHASH(45, SP_2, r[3], r[0], r[1], r[2], 0xE6DB99E5, 11);
+        XHASH(46, SP_2, r[2], r[3], r[0], r[1], 0x1FA27CF8, 16);
+        XHASH(47, SP_2, r[1], r[2], r[3], r[0], 0xC4AC5665, 23);
+
+        XHASH(48, SP_3, r[0], r[1], r[2], r[3], 0xF4292244,  6);
+        XHASH(49, SP_3, r[3], r[0], r[1], r[2], 0x432AFF97, 10);
+        XHASH(50, SP_3, r[2], r[3], r[0], r[1], 0xAB9423A7, 15);
+        XHASH(51, SP_3, r[1], r[2], r[3], r[0], 0xFC93A039, 21);
+        XHASH(52, SP_3, r[0], r[1], r[2], r[3], 0x655B59C3,  6);
+        XHASH(53, SP_3, r[3], r[0], r[1], r[2], 0x8F0CCC92, 10);
+        XHASH(54, SP_3, r[2], r[3], r[0], r[1], 0xFFEFF47D, 15);
+        XHASH(55, SP_3, r[1], r[2], r[3], r[0], 0x85845DD1, 21);
+        XHASH(56, SP_3, r[0], r[1], r[2], r[3], 0x6FA87E4F,  6);
+        XHASH(57, SP_3, r[3], r[0], r[1], r[2], 0xFE2CE6E0, 10);
+        XHASH(58, SP_3, r[2], r[3], r[0], r[1], 0xA3014314, 15);
+        XHASH(59, SP_3, r[1], r[2], r[3], r[0], 0x4E0811A1, 21);
+        XHASH(60, SP_3, r[0], r[1], r[2], r[3], 0xF7537E82,  6);
+        XHASH(61, SP_3, r[3], r[0], r[1], r[2], 0xBD3AF235, 10);
+        XHASH(62, SP_3, r[2], r[3], r[0], r[1], 0x2AD7D2BB, 15);
+        XHASH(63, SP_3, r[1], r[2], r[3], r[0], 0xEB86D391, 21);
+
+#undef XHASH
+#undef SP_0
+#undef SP_1
+#undef SP_2
+#undef SP_3
+
+        do_accumulate_words(this->m_regs, r);
       }
 
   public:
@@ -673,137 +680,137 @@ final
     do_consume_chunk(const uint8_t* p)
     noexcept
       {
-        array<uint32_t, 80> w;
-        uint32_t f, k;
-
         // https://en.wikipedia.org/wiki/SHA-1
-        auto xhash = [&](uint32_t i, auto&& specx, uint32_t& a, uint32_t& b,
-                         uint32_t& c, uint32_t& d, uint32_t& e)
-          {
-            specx(b, c, d);
-            e += do_rotl(a, 5) + f + k + w[i];
-            b = do_rotl(b, 30);
-          };
-
-        auto spec0 = [&](uint32_t& b, uint32_t& c, uint32_t& d)
-          { f = d ^ (b & (c ^ d));
-            k = 0x5A827999;  };
-
-        auto spec1 = [&](uint32_t& b, uint32_t& c, uint32_t& d)
-          { f = b ^ c ^ d;
-            k = 0x6ED9EBA1;  };
-
-        auto spec2 = [&](uint32_t& b, uint32_t& c, uint32_t& d)
-          { f = (b & (c | d)) | (c & d);
-            k = 0x8F1BBCDC;  };
-
-        auto spec3 = [&](uint32_t& b, uint32_t& c, uint32_t& d)
-          { f = b ^ c ^ d;
-            k = 0xCA62C1D6;  };
-
-        // Unroll loops by hand.
         auto r = this->m_regs;
+        uint32_t f, k;
+        array<uint32_t, 80> w;
 
-        // Initialize `w`.
-        for(size_t i =  0;  i < 16;  ++i)
-          do_load_be(w[i], p + i * 4);
+#define XHASH(i, sp, a, b, c, d, e)  \
+        sp(b, c, d);  \
+        e += do_rotl(a, 5) + f + k + w[i];  \
+        b = do_rotl(b, 30);
 
-        for(size_t i = 16;  i < 32;  ++i)
-          w[i] = do_rotl(w[i-3] ^ w[i- 8] ^ w[i-14] ^ w[i-16], 1);
+#define SP_0(b, c, d)  \
+        f = d ^ (b & (c ^ d));  \
+        k = 0x5A827999;
 
-        for(size_t i = 32;  i < 80;  ++i)
-          w[i] = do_rotl(w[i-6] ^ w[i-16] ^ w[i-28] ^ w[i-32], 2);
+#define SP_1(b, c, d)  \
+        f = b ^ c ^ d;  \
+        k = 0x6ED9EBA1;
+
+#define SP_2(b, c, d)  \
+        f = (b & (c | d)) | (c & d);  \
+        k = 0x8F1BBCDC;
+
+#define SP_3(b, c, d)  \
+        f = b ^ c ^ d;  \
+        k = 0xCA62C1D6;
+
+        // Fill `w`.
+        for(k = 0;  k < 16;  ++k)
+          w[k] = do_load_be(p + k * 4);
+
+        for(k = 16;  k < 32;  ++k)
+          w[k] = do_rotl(w[k - 3] ^ w[k - 8] ^ w[k - 14] ^ w[k - 16], 1);
+
+        for(k = 32;  k < 80;  ++k)
+          w[k] = do_rotl(w[k - 6] ^ w[k - 16] ^ w[k - 28] ^ w[k - 32], 2);
 
         // 0 * 20
-        xhash( 0, spec0, r[0], r[1], r[2], r[3], r[4]);
-        xhash( 1, spec0, r[4], r[0], r[1], r[2], r[3]);
-        xhash( 2, spec0, r[3], r[4], r[0], r[1], r[2]);
-        xhash( 3, spec0, r[2], r[3], r[4], r[0], r[1]);
-        xhash( 4, spec0, r[1], r[2], r[3], r[4], r[0]);
-        xhash( 5, spec0, r[0], r[1], r[2], r[3], r[4]);
-        xhash( 6, spec0, r[4], r[0], r[1], r[2], r[3]);
-        xhash( 7, spec0, r[3], r[4], r[0], r[1], r[2]);
-        xhash( 8, spec0, r[2], r[3], r[4], r[0], r[1]);
-        xhash( 9, spec0, r[1], r[2], r[3], r[4], r[0]);
-        xhash(10, spec0, r[0], r[1], r[2], r[3], r[4]);
-        xhash(11, spec0, r[4], r[0], r[1], r[2], r[3]);
-        xhash(12, spec0, r[3], r[4], r[0], r[1], r[2]);
-        xhash(13, spec0, r[2], r[3], r[4], r[0], r[1]);
-        xhash(14, spec0, r[1], r[2], r[3], r[4], r[0]);
-        xhash(15, spec0, r[0], r[1], r[2], r[3], r[4]);
-        xhash(16, spec0, r[4], r[0], r[1], r[2], r[3]);
-        xhash(17, spec0, r[3], r[4], r[0], r[1], r[2]);
-        xhash(18, spec0, r[2], r[3], r[4], r[0], r[1]);
-        xhash(19, spec0, r[1], r[2], r[3], r[4], r[0]);
+        XHASH( 0, SP_0, r[0], r[1], r[2], r[3], r[4]);
+        XHASH( 1, SP_0, r[4], r[0], r[1], r[2], r[3]);
+        XHASH( 2, SP_0, r[3], r[4], r[0], r[1], r[2]);
+        XHASH( 3, SP_0, r[2], r[3], r[4], r[0], r[1]);
+        XHASH( 4, SP_0, r[1], r[2], r[3], r[4], r[0]);
+        XHASH( 5, SP_0, r[0], r[1], r[2], r[3], r[4]);
+        XHASH( 6, SP_0, r[4], r[0], r[1], r[2], r[3]);
+        XHASH( 7, SP_0, r[3], r[4], r[0], r[1], r[2]);
+        XHASH( 8, SP_0, r[2], r[3], r[4], r[0], r[1]);
+        XHASH( 9, SP_0, r[1], r[2], r[3], r[4], r[0]);
+        XHASH(10, SP_0, r[0], r[1], r[2], r[3], r[4]);
+        XHASH(11, SP_0, r[4], r[0], r[1], r[2], r[3]);
+        XHASH(12, SP_0, r[3], r[4], r[0], r[1], r[2]);
+        XHASH(13, SP_0, r[2], r[3], r[4], r[0], r[1]);
+        XHASH(14, SP_0, r[1], r[2], r[3], r[4], r[0]);
+        XHASH(15, SP_0, r[0], r[1], r[2], r[3], r[4]);
+        XHASH(16, SP_0, r[4], r[0], r[1], r[2], r[3]);
+        XHASH(17, SP_0, r[3], r[4], r[0], r[1], r[2]);
+        XHASH(18, SP_0, r[2], r[3], r[4], r[0], r[1]);
+        XHASH(19, SP_0, r[1], r[2], r[3], r[4], r[0]);
 
-        // 1
-        xhash(20, spec1, r[0], r[1], r[2], r[3], r[4]);
-        xhash(21, spec1, r[4], r[0], r[1], r[2], r[3]);
-        xhash(22, spec1, r[3], r[4], r[0], r[1], r[2]);
-        xhash(23, spec1, r[2], r[3], r[4], r[0], r[1]);
-        xhash(24, spec1, r[1], r[2], r[3], r[4], r[0]);
-        xhash(25, spec1, r[0], r[1], r[2], r[3], r[4]);
-        xhash(26, spec1, r[4], r[0], r[1], r[2], r[3]);
-        xhash(27, spec1, r[3], r[4], r[0], r[1], r[2]);
-        xhash(28, spec1, r[2], r[3], r[4], r[0], r[1]);
-        xhash(29, spec1, r[1], r[2], r[3], r[4], r[0]);
-        xhash(30, spec1, r[0], r[1], r[2], r[3], r[4]);
-        xhash(31, spec1, r[4], r[0], r[1], r[2], r[3]);
-        xhash(32, spec1, r[3], r[4], r[0], r[1], r[2]);
-        xhash(33, spec1, r[2], r[3], r[4], r[0], r[1]);
-        xhash(34, spec1, r[1], r[2], r[3], r[4], r[0]);
-        xhash(35, spec1, r[0], r[1], r[2], r[3], r[4]);
-        xhash(36, spec1, r[4], r[0], r[1], r[2], r[3]);
-        xhash(37, spec1, r[3], r[4], r[0], r[1], r[2]);
-        xhash(38, spec1, r[2], r[3], r[4], r[0], r[1]);
-        xhash(39, spec1, r[1], r[2], r[3], r[4], r[0]);
+        // 1 * 20
+        XHASH(20, SP_1, r[0], r[1], r[2], r[3], r[4]);
+        XHASH(21, SP_1, r[4], r[0], r[1], r[2], r[3]);
+        XHASH(22, SP_1, r[3], r[4], r[0], r[1], r[2]);
+        XHASH(23, SP_1, r[2], r[3], r[4], r[0], r[1]);
+        XHASH(24, SP_1, r[1], r[2], r[3], r[4], r[0]);
+        XHASH(25, SP_1, r[0], r[1], r[2], r[3], r[4]);
+        XHASH(26, SP_1, r[4], r[0], r[1], r[2], r[3]);
+        XHASH(27, SP_1, r[3], r[4], r[0], r[1], r[2]);
+        XHASH(28, SP_1, r[2], r[3], r[4], r[0], r[1]);
+        XHASH(29, SP_1, r[1], r[2], r[3], r[4], r[0]);
+        XHASH(30, SP_1, r[0], r[1], r[2], r[3], r[4]);
+        XHASH(31, SP_1, r[4], r[0], r[1], r[2], r[3]);
+        XHASH(32, SP_1, r[3], r[4], r[0], r[1], r[2]);
+        XHASH(33, SP_1, r[2], r[3], r[4], r[0], r[1]);
+        XHASH(34, SP_1, r[1], r[2], r[3], r[4], r[0]);
+        XHASH(35, SP_1, r[0], r[1], r[2], r[3], r[4]);
+        XHASH(36, SP_1, r[4], r[0], r[1], r[2], r[3]);
+        XHASH(37, SP_1, r[3], r[4], r[0], r[1], r[2]);
+        XHASH(38, SP_1, r[2], r[3], r[4], r[0], r[1]);
+        XHASH(39, SP_1, r[1], r[2], r[3], r[4], r[0]);
 
-        // 2
-        xhash(40, spec2, r[0], r[1], r[2], r[3], r[4]);
-        xhash(41, spec2, r[4], r[0], r[1], r[2], r[3]);
-        xhash(42, spec2, r[3], r[4], r[0], r[1], r[2]);
-        xhash(43, spec2, r[2], r[3], r[4], r[0], r[1]);
-        xhash(44, spec2, r[1], r[2], r[3], r[4], r[0]);
-        xhash(45, spec2, r[0], r[1], r[2], r[3], r[4]);
-        xhash(46, spec2, r[4], r[0], r[1], r[2], r[3]);
-        xhash(47, spec2, r[3], r[4], r[0], r[1], r[2]);
-        xhash(48, spec2, r[2], r[3], r[4], r[0], r[1]);
-        xhash(49, spec2, r[1], r[2], r[3], r[4], r[0]);
-        xhash(50, spec2, r[0], r[1], r[2], r[3], r[4]);
-        xhash(51, spec2, r[4], r[0], r[1], r[2], r[3]);
-        xhash(52, spec2, r[3], r[4], r[0], r[1], r[2]);
-        xhash(53, spec2, r[2], r[3], r[4], r[0], r[1]);
-        xhash(54, spec2, r[1], r[2], r[3], r[4], r[0]);
-        xhash(55, spec2, r[0], r[1], r[2], r[3], r[4]);
-        xhash(56, spec2, r[4], r[0], r[1], r[2], r[3]);
-        xhash(57, spec2, r[3], r[4], r[0], r[1], r[2]);
-        xhash(58, spec2, r[2], r[3], r[4], r[0], r[1]);
-        xhash(59, spec2, r[1], r[2], r[3], r[4], r[0]);
+        // 2 * 20
+        XHASH(40, SP_2, r[0], r[1], r[2], r[3], r[4]);
+        XHASH(41, SP_2, r[4], r[0], r[1], r[2], r[3]);
+        XHASH(42, SP_2, r[3], r[4], r[0], r[1], r[2]);
+        XHASH(43, SP_2, r[2], r[3], r[4], r[0], r[1]);
+        XHASH(44, SP_2, r[1], r[2], r[3], r[4], r[0]);
+        XHASH(45, SP_2, r[0], r[1], r[2], r[3], r[4]);
+        XHASH(46, SP_2, r[4], r[0], r[1], r[2], r[3]);
+        XHASH(47, SP_2, r[3], r[4], r[0], r[1], r[2]);
+        XHASH(48, SP_2, r[2], r[3], r[4], r[0], r[1]);
+        XHASH(49, SP_2, r[1], r[2], r[3], r[4], r[0]);
+        XHASH(50, SP_2, r[0], r[1], r[2], r[3], r[4]);
+        XHASH(51, SP_2, r[4], r[0], r[1], r[2], r[3]);
+        XHASH(52, SP_2, r[3], r[4], r[0], r[1], r[2]);
+        XHASH(53, SP_2, r[2], r[3], r[4], r[0], r[1]);
+        XHASH(54, SP_2, r[1], r[2], r[3], r[4], r[0]);
+        XHASH(55, SP_2, r[0], r[1], r[2], r[3], r[4]);
+        XHASH(56, SP_2, r[4], r[0], r[1], r[2], r[3]);
+        XHASH(57, SP_2, r[3], r[4], r[0], r[1], r[2]);
+        XHASH(58, SP_2, r[2], r[3], r[4], r[0], r[1]);
+        XHASH(59, SP_2, r[1], r[2], r[3], r[4], r[0]);
 
-        // 3
-        xhash(60, spec3, r[0], r[1], r[2], r[3], r[4]);
-        xhash(61, spec3, r[4], r[0], r[1], r[2], r[3]);
-        xhash(62, spec3, r[3], r[4], r[0], r[1], r[2]);
-        xhash(63, spec3, r[2], r[3], r[4], r[0], r[1]);
-        xhash(64, spec3, r[1], r[2], r[3], r[4], r[0]);
-        xhash(65, spec3, r[0], r[1], r[2], r[3], r[4]);
-        xhash(66, spec3, r[4], r[0], r[1], r[2], r[3]);
-        xhash(67, spec3, r[3], r[4], r[0], r[1], r[2]);
-        xhash(68, spec3, r[2], r[3], r[4], r[0], r[1]);
-        xhash(69, spec3, r[1], r[2], r[3], r[4], r[0]);
-        xhash(70, spec3, r[0], r[1], r[2], r[3], r[4]);
-        xhash(71, spec3, r[4], r[0], r[1], r[2], r[3]);
-        xhash(72, spec3, r[3], r[4], r[0], r[1], r[2]);
-        xhash(73, spec3, r[2], r[3], r[4], r[0], r[1]);
-        xhash(74, spec3, r[1], r[2], r[3], r[4], r[0]);
-        xhash(75, spec3, r[0], r[1], r[2], r[3], r[4]);
-        xhash(76, spec3, r[4], r[0], r[1], r[2], r[3]);
-        xhash(77, spec3, r[3], r[4], r[0], r[1], r[2]);
-        xhash(78, spec3, r[2], r[3], r[4], r[0], r[1]);
-        xhash(79, spec3, r[1], r[2], r[3], r[4], r[0]);
+        // 3 * 20
+        XHASH(60, SP_3, r[0], r[1], r[2], r[3], r[4]);
+        XHASH(61, SP_3, r[4], r[0], r[1], r[2], r[3]);
+        XHASH(62, SP_3, r[3], r[4], r[0], r[1], r[2]);
+        XHASH(63, SP_3, r[2], r[3], r[4], r[0], r[1]);
+        XHASH(64, SP_3, r[1], r[2], r[3], r[4], r[0]);
+        XHASH(65, SP_3, r[0], r[1], r[2], r[3], r[4]);
+        XHASH(66, SP_3, r[4], r[0], r[1], r[2], r[3]);
+        XHASH(67, SP_3, r[3], r[4], r[0], r[1], r[2]);
+        XHASH(68, SP_3, r[2], r[3], r[4], r[0], r[1]);
+        XHASH(69, SP_3, r[1], r[2], r[3], r[4], r[0]);
+        XHASH(70, SP_3, r[0], r[1], r[2], r[3], r[4]);
+        XHASH(71, SP_3, r[4], r[0], r[1], r[2], r[3]);
+        XHASH(72, SP_3, r[3], r[4], r[0], r[1], r[2]);
+        XHASH(73, SP_3, r[2], r[3], r[4], r[0], r[1]);
+        XHASH(74, SP_3, r[1], r[2], r[3], r[4], r[0]);
+        XHASH(75, SP_3, r[0], r[1], r[2], r[3], r[4]);
+        XHASH(76, SP_3, r[4], r[0], r[1], r[2], r[3]);
+        XHASH(77, SP_3, r[3], r[4], r[0], r[1], r[2]);
+        XHASH(78, SP_3, r[2], r[3], r[4], r[0], r[1]);
+        XHASH(79, SP_3, r[1], r[2], r[3], r[4], r[0]);
 
-        // Accumulate the result.
-        do_padd(this->m_regs, r);
+#undef XHASH
+#undef SP_0
+#undef SP_1
+#undef SP_2
+#undef SP_3
+
+        do_accumulate_words(this->m_regs, r);
       }
 
   public:
@@ -1005,111 +1012,108 @@ final
     do_consume_chunk(const uint8_t* p)
     noexcept
       {
-        array<uint32_t, 64> w;
-        uint32_t s0, maj, t2, s1, ch, t1;
-
         // https://en.wikipedia.org/wiki/SHA-2
-        auto xhash = [&](uint32_t i, uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
-                         uint32_t& e, uint32_t& f, uint32_t& g, uint32_t& h, uint32_t k)
-          {
-            s0 = do_rotl(a, 10) ^ do_rotl(a, 19) ^ do_rotl(a, 30);
-            maj = (a & b) | (c & (a ^ b));
-            t2 = s0 + maj;
-            s1 = do_rotl(e,  7) ^ do_rotl(e, 21) ^ do_rotl(e, 26);
-            ch = g ^ (e & (f ^ g));
-            t1 = h + s1 + ch + k + w[i];
-            d += t1;
-            h = t1 + t2;
-          };
-        // Unroll loops by hand.
         auto r = this->m_regs;
+        uint32_t s0, maj, t2, s1, ch, t1;
+        array<uint32_t, 64> w;
 
-        // Initialize `w`.
-        for(size_t i =  0;  i < 16;  ++i)
-          do_load_be(w[i], p + i * 4);
+#define XHASH(i, a, b, c, d, e, f, g, h, k)  \
+        s0 = do_rotl(a, 10) ^ do_rotl(a, 19) ^ do_rotl(a, 30);  \
+        maj = (a & b) | (c & (a ^ b));  \
+        t2 = s0 + maj;  \
+        s1 = do_rotl(e,  7) ^ do_rotl(e, 21) ^ do_rotl(e, 26);  \
+        ch = g ^ (e & (f ^ g));  \
+        t1 = h + s1 + ch + k + w[i];  \
+        d += t1;  \
+        h = t1 + t2;
 
-        for(size_t i = 16;  i < 64;  ++i) {
-          t1 = w[i-15];
-          s0 = do_rotl(t1, 14) ^ do_rotl(t1, 25) ^ (t1 >>  3);
-          t2 = w[i- 2];
+        // Fill `w`.
+        for(ch =  0;  ch < 16;  ++ch)
+          w[ch] = do_load_be(p + ch * 4);
+
+        for(ch = 16;  ch < 64;  ++ch) {
+          t1 = w[ch - 15];
+          s0 = do_rotl(t1, 14) ^ do_rotl(t1, 25) ^ (t1 >> 3);
+          t2 = w[ch - 2];
           s1 = do_rotl(t2, 13) ^ do_rotl(t2, 15) ^ (t2 >> 10);
-          w[i] = w[i-16] + w[i-7] + s0 + s1;
+          w[ch] = w[ch - 16] + w[ch - 7] + s0 + s1;
         }
 
         // 0 * 16
-        xhash( 0, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x428A2F98);
-        xhash( 1, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0x71374491);
-        xhash( 2, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0xB5C0FBCF);
-        xhash( 3, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0xE9B5DBA5);
-        xhash( 4, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x3956C25B);
-        xhash( 5, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0x59F111F1);
-        xhash( 6, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x923F82A4);
-        xhash( 7, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0xAB1C5ED5);
-        xhash( 8, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0xD807AA98);
-        xhash( 9, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0x12835B01);
-        xhash(10, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0x243185BE);
-        xhash(11, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0x550C7DC3);
-        xhash(12, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x72BE5D74);
-        xhash(13, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0x80DEB1FE);
-        xhash(14, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x9BDC06A7);
-        xhash(15, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0xC19BF174);
+        XHASH( 0, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x428A2F98);
+        XHASH( 1, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0x71374491);
+        XHASH( 2, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0xB5C0FBCF);
+        XHASH( 3, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0xE9B5DBA5);
+        XHASH( 4, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x3956C25B);
+        XHASH( 5, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0x59F111F1);
+        XHASH( 6, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x923F82A4);
+        XHASH( 7, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0xAB1C5ED5);
+        XHASH( 8, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0xD807AA98);
+        XHASH( 9, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0x12835B01);
+        XHASH(10, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0x243185BE);
+        XHASH(11, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0x550C7DC3);
+        XHASH(12, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x72BE5D74);
+        XHASH(13, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0x80DEB1FE);
+        XHASH(14, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x9BDC06A7);
+        XHASH(15, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0xC19BF174);
 
         // 1 * 16
-        xhash(16, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0xE49B69C1);
-        xhash(17, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0xEFBE4786);
-        xhash(18, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0x0FC19DC6);
-        xhash(19, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0x240CA1CC);
-        xhash(20, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x2DE92C6F);
-        xhash(21, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0x4A7484AA);
-        xhash(22, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x5CB0A9DC);
-        xhash(23, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0x76F988DA);
-        xhash(24, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x983E5152);
-        xhash(25, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0xA831C66D);
-        xhash(26, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0xB00327C8);
-        xhash(27, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0xBF597FC7);
-        xhash(28, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0xC6E00BF3);
-        xhash(29, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0xD5A79147);
-        xhash(30, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x06CA6351);
-        xhash(31, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0x14292967);
+        XHASH(16, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0xE49B69C1);
+        XHASH(17, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0xEFBE4786);
+        XHASH(18, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0x0FC19DC6);
+        XHASH(19, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0x240CA1CC);
+        XHASH(20, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x2DE92C6F);
+        XHASH(21, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0x4A7484AA);
+        XHASH(22, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x5CB0A9DC);
+        XHASH(23, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0x76F988DA);
+        XHASH(24, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x983E5152);
+        XHASH(25, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0xA831C66D);
+        XHASH(26, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0xB00327C8);
+        XHASH(27, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0xBF597FC7);
+        XHASH(28, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0xC6E00BF3);
+        XHASH(29, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0xD5A79147);
+        XHASH(30, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x06CA6351);
+        XHASH(31, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0x14292967);
 
         // 2 * 16
-        xhash(32, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x27B70A85);
-        xhash(33, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0x2E1B2138);
-        xhash(34, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0x4D2C6DFC);
-        xhash(35, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0x53380D13);
-        xhash(36, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x650A7354);
-        xhash(37, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0x766A0ABB);
-        xhash(38, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x81C2C92E);
-        xhash(39, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0x92722C85);
-        xhash(40, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0xA2BFE8A1);
-        xhash(41, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0xA81A664B);
-        xhash(42, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0xC24B8B70);
-        xhash(43, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0xC76C51A3);
-        xhash(44, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0xD192E819);
-        xhash(45, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0xD6990624);
-        xhash(46, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0xF40E3585);
-        xhash(47, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0x106AA070);
+        XHASH(32, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x27B70A85);
+        XHASH(33, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0x2E1B2138);
+        XHASH(34, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0x4D2C6DFC);
+        XHASH(35, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0x53380D13);
+        XHASH(36, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x650A7354);
+        XHASH(37, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0x766A0ABB);
+        XHASH(38, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x81C2C92E);
+        XHASH(39, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0x92722C85);
+        XHASH(40, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0xA2BFE8A1);
+        XHASH(41, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0xA81A664B);
+        XHASH(42, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0xC24B8B70);
+        XHASH(43, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0xC76C51A3);
+        XHASH(44, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0xD192E819);
+        XHASH(45, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0xD6990624);
+        XHASH(46, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0xF40E3585);
+        XHASH(47, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0x106AA070);
 
         // 3 * 16
-        xhash(48, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x19A4C116);
-        xhash(49, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0x1E376C08);
-        xhash(50, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0x2748774C);
-        xhash(51, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0x34B0BCB5);
-        xhash(52, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x391C0CB3);
-        xhash(53, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0x4ED8AA4A);
-        xhash(54, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x5B9CCA4F);
-        xhash(55, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0x682E6FF3);
-        xhash(56, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x748F82EE);
-        xhash(57, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0x78A5636F);
-        xhash(58, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0x84C87814);
-        xhash(59, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0x8CC70208);
-        xhash(60, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x90BEFFFA);
-        xhash(61, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0xA4506CEB);
-        xhash(62, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0xBEF9A3F7);
-        xhash(63, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0xC67178F2);
+        XHASH(48, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x19A4C116);
+        XHASH(49, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0x1E376C08);
+        XHASH(50, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0x2748774C);
+        XHASH(51, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0x34B0BCB5);
+        XHASH(52, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x391C0CB3);
+        XHASH(53, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0x4ED8AA4A);
+        XHASH(54, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x5B9CCA4F);
+        XHASH(55, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0x682E6FF3);
+        XHASH(56, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x748F82EE);
+        XHASH(57, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0x78A5636F);
+        XHASH(58, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0x84C87814);
+        XHASH(59, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0x8CC70208);
+        XHASH(60, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x90BEFFFA);
+        XHASH(61, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0xA4506CEB);
+        XHASH(62, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0xBEF9A3F7);
+        XHASH(63, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0xC67178F2);
 
-        // Accumulate the result.
-        do_padd(this->m_regs, r);
+#undef XHASH
+
+        do_accumulate_words(this->m_regs, r);
       }
 
   public:
