@@ -258,12 +258,12 @@ const
           return fmt << quote(this->m_stor.as<vtype_string>());
 
       case vtype_opaque:
-        // #opaque [[`my opaque`]]
-        return fmt << "#opaque [[`" << this->m_stor.as<vtype_opaque>() << "`]]";
+        // #opaque [[my opaque]]
+        return fmt << "#opaque [[" << this->m_stor.as<vtype_opaque>() << "]]";
 
       case vtype_function:
-        // *function [[`my function`]]
-        return fmt << "*function [[`" << this->m_stor.as<vtype_function>() << "`]]";
+        // *function [[my function]]
+        return fmt << "*function [[" << this->m_stor.as<vtype_function>() << "]]";
 
       case vtype_array: {
         const auto& altr = this->m_stor.as<vtype_array>();
@@ -327,15 +327,15 @@ const
 
       case vtype_opaque: {
         const auto& altr = this->m_stor.as<vtype_opaque>();
-        // #opaque(0x123456) [[`my opaque`]]
-        fmt << "#opaque(" << altr.get_opt() << ") [[`" << altr << "`]]";
+        // #opaque(0x123456) [[my opaque]]
+        fmt << "#opaque(" << altr.get_opt() << ") [[" << altr << "]]";
         return fmt;
       }
 
       case vtype_function: {
         const auto& altr = this->m_stor.as<vtype_function>();
-        // *function [[`my function`]]
-        fmt << "*function [[`" << altr << "`]]";
+        // *function [[my function]]
+        fmt << "*function [[" << altr << "]]";
         return fmt;
       }
 
