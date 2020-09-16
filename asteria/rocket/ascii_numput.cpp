@@ -1120,7 +1120,7 @@ noexcept
     *bp = 0;
 
     // Write digits backwards.
-    do_xput_U_bkwd(bp, reinterpret_cast<uintptr_t>(value), 16, sizeof(value) * 2);
+    do_xput_U_bkwd(bp, reinterpret_cast<uintptr_t>(value), 16, 1);
 
     // Prepend the hexadecimal prefix.
     *(--bp) = 'x';
