@@ -490,6 +490,18 @@ open_opt()
     return tsptr;
   }
 
+// Clones an opaque object.
+template<typename OpaqueT>
+inline
+OpaqueT*
+clone_opaque(rcptr<Abstract_Opaque>& output, const OpaqueT& src)
+  {
+    auto sptr = ::rocket::make_refcnt<OpaqueT>(src);
+    auto ptr = sptr.get();
+    output = ::std::move(sptr);
+    return ptr;
+  }
+
 // Function type support
 using simple_function = Reference& (Reference& self,  // `this` (input) and return (output) reference
                                     cow_vector<Reference>&& args,  // positional arguments

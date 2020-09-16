@@ -49,7 +49,7 @@ final
     tinyfmt&
     describe(tinyfmt& fmt)
     const override
-      { return fmt << "CRC-32 hasher";  }
+      { return fmt << "`CRC32_Hasher`";  }
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
@@ -59,11 +59,7 @@ final
     CRC32_Hasher*
     clone_opt(rcptr<Abstract_Opaque>& output)
     const override
-      {
-        auto qnew = ::rocket::make_unique<CRC32_Hasher>(*this);
-        output.reset(qnew.get());
-        return qnew.release();
-      }
+      { return noadl::clone_opaque(output, *this);  }
 
     void
     update(const void* data, size_t size)
@@ -177,7 +173,7 @@ final
     tinyfmt&
     describe(tinyfmt& fmt)
     const override
-      { return fmt << "FNV-1a hasher (32-bit)";  }
+      { return fmt << "`FNV1a32_Hasher`";  }
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
@@ -187,11 +183,7 @@ final
     FNV1a32_Hasher*
     clone_opt(rcptr<Abstract_Opaque>& output)
     const override
-      {
-        auto qnew = ::rocket::make_unique<FNV1a32_Hasher>(*this);
-        output.reset(qnew.get());
-        return qnew.release();
-      }
+      { return noadl::clone_opaque(output, *this);  }
 
     void
     update(const void* data, size_t size)
@@ -488,7 +480,7 @@ final
     tinyfmt&
     describe(tinyfmt& fmt)
     const override
-      { return fmt << "MD5 hasher";  }
+      { return fmt << "`MD5_Hasher`";  }
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
@@ -498,11 +490,7 @@ final
     MD5_Hasher*
     clone_opt(rcptr<Abstract_Opaque>& output)
     const override
-      {
-        auto qnew = ::rocket::make_unique<MD5_Hasher>(*this);
-        output.reset(qnew.get());
-        return qnew.release();
-      }
+      { return noadl::clone_opaque(output, *this);  }
 
     void
     update(const void* data, size_t size)
@@ -819,7 +807,7 @@ final
     tinyfmt&
     describe(tinyfmt& fmt)
     const override
-      { return fmt << "SHA-1 hasher";  }
+      { return fmt << "`SHA1_Hasher`";  }
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
@@ -829,11 +817,7 @@ final
     SHA1_Hasher*
     clone_opt(rcptr<Abstract_Opaque>& output)
     const override
-      {
-        auto qnew = ::rocket::make_unique<SHA1_Hasher>(*this);
-        output.reset(qnew.get());
-        return qnew.release();
-      }
+      { return noadl::clone_opaque(output, *this);  }
 
     void
     update(const void* data, size_t size)
@@ -1122,7 +1106,7 @@ final
     tinyfmt&
     describe(tinyfmt& fmt)
     const override
-      { return fmt << "SHA-256 hasher";  }
+      { return fmt << "`SHA256_Hasher`";  }
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
@@ -1132,11 +1116,7 @@ final
     SHA256_Hasher*
     clone_opt(rcptr<Abstract_Opaque>& output)
     const override
-      {
-        auto qnew = ::rocket::make_unique<SHA256_Hasher>(*this);
-        output.reset(qnew.get());
-        return qnew.release();
-      }
+      { return noadl::clone_opaque(output, *this);  }
 
     void
     update(const void* data, size_t size)
