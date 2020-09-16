@@ -12,14 +12,14 @@
 namespace asteria {
 namespace {
 
-template<uint32_t valueT, uint32_t divT, int N>
+template<uint32_t valT, uint32_t divT, int N>
 struct CRC32_Generator
-  : CRC32_Generator<(valueT >> 1) ^ (-(valueT & 1) & divT), divT, N + 1>
+  : CRC32_Generator<(valT >> 1) ^ (-(valT & 1) & divT), divT, N + 1>
   { };
 
-template<uint32_t valueT, uint32_t divT>
-struct CRC32_Generator<valueT, divT, 8>
-  : ::std::integral_constant<uint32_t, valueT>
+template<uint32_t valT, uint32_t divT>
+struct CRC32_Generator<valT, divT, 8>
+  : ::std::integral_constant<uint32_t, valT>
   { };
 
 template<uint32_t divT, size_t... S>
@@ -328,6 +328,7 @@ do_print_words_le(const array<uint32_t, N>& words)
 template<size_t N>
 void
 do_accumulate_words(array<uint32_t, N>& lhs, const array<uint32_t, N>& rhs)
+noexcept
   {
     for(size_t k = 0;  k != N;  ++k)
       lhs[k] += rhs[k];
@@ -335,6 +336,7 @@ do_accumulate_words(array<uint32_t, N>& lhs, const array<uint32_t, N>& rhs)
 
 uint32_t
 do_load_be(const uint8_t* ptr)
+noexcept
   {
     uint32_t word;
     ::std::memcpy(&word, ptr, 4);
@@ -343,6 +345,7 @@ do_load_be(const uint8_t* ptr)
 
 uint32_t
 do_load_le(const uint8_t* ptr)
+noexcept
   {
     uint32_t word;
     ::std::memcpy(&word, ptr, 4);
@@ -351,9 +354,10 @@ do_load_le(const uint8_t* ptr)
 
 constexpr
 uint32_t
-do_rotl(uint32_t value, int n)
+do_rotl(uint32_t value, size_t n)
+noexcept
   {
-    return (value << n) | (value >> (32 - n));
+    return value << n % 32 | value >> (32 - n) % 32;
   }
 
 class MD5_Hasher
