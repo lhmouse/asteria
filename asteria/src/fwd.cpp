@@ -74,7 +74,7 @@ describe(tinyfmt& fmt)
 const
   {
     if(auto fptr = this->m_fptr)
-      return format(fmt, "$1\n[native function at $2]", this->m_desc, (void*)(intptr_t)fptr);  // static
+      return format(fmt, "native function `$1`: $2", (void*)fptr, this->m_desc);  // static
 
     if(auto ptr = this->m_sptr.get())
       return ptr->describe(fmt);  // dynamic
