@@ -201,6 +201,21 @@ struct is_input_iterator
   : details_utilities::is_input_iterator_aux<iteratorT, void>
   { };
 
+template<typename targetT, typename... candiatesT>
+struct is_any_type_of
+  : false_type
+  { };
+
+template<typename targetT, typename... restT>
+struct is_any_type_of<targetT, targetT, restT...>
+  : true_type
+  { };
+
+template<typename targetT, typename firstT, typename... restT>
+struct is_any_type_of<targetT, firstT, restT...>
+  : is_any_type_of<targetT, restT...>
+  { };
+
 template<typename firstT, typename lastT, typename funcT, typename... paramsT>
 void
 ranged_for(firstT first, lastT last, funcT&& func, const paramsT&... params)
