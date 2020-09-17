@@ -76,7 +76,7 @@ class Value
 
     Value(cow_string xval)
     noexcept
-      : m_stor(::std::move(xval))
+      : m_stor(V_string(::std::move(xval)))
       { }
 
     Value(cow_string::shallow_type xval)
