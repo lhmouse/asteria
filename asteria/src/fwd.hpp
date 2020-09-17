@@ -291,7 +291,8 @@ struct StdIO_Sentry
   };
 
 // Opaque (user-defined) type support
-struct Abstract_Opaque : Rcfwd<Abstract_Opaque>
+struct Abstract_Opaque
+  : public Rcfwd<Abstract_Opaque>
   {
     Abstract_Opaque()
     noexcept
@@ -331,7 +332,8 @@ tinyfmt&
 operator<<(tinyfmt& fmt, const Abstract_Opaque& opaq)
   { return opaq.describe(fmt);  }
 
-struct Abstract_Function : Rcfwd<Abstract_Function>
+struct Abstract_Function
+  : public Rcfwd<Abstract_Function>
   {
     Abstract_Function()
     noexcept
@@ -427,7 +429,12 @@ class cow_opaque
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const;
+    const
+      {
+        if(auto sptr = this->m_sptr.get())
+          sptr->enumerate_variables(callback);
+        return callback;
+      }
 
     template<typename OpaqueT = Abstract_Opaque>
     rcptr<const OpaqueT>
@@ -576,7 +583,12 @@ class cow_function
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const;
+    const
+      {
+        if(auto sptr = this->m_sptr.get())
+          sptr->enumerate_variables(callback);
+        return callback;
+      }
 
     Reference&
     invoke_ptc_aware(Reference& self, Global_Context& global, cow_vector<Reference>&& args = { })
