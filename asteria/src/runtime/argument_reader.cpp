@@ -14,7 +14,7 @@ Argument_Reader::
 
 void
 Argument_Reader::
-do_record_parameter_required(Vtype vtype)
+do_record_parameter_required(Type type)
   {
     if(this->m_state.finished)
       ASTERIA_THROW("Argument reader finished and disposed");
@@ -23,13 +23,13 @@ do_record_parameter_required(Vtype vtype)
       this->m_state.history << ", ";
 
     // Record a parameter.
-    this->m_state.history << describe_vtype(vtype);
+    this->m_state.history << describe_type(type);
     this->m_state.nparams++;
   }
 
 void
 Argument_Reader::
-do_record_parameter_optional(Vtype vtype)
+do_record_parameter_optional(Type type)
   {
     if(this->m_state.finished)
       ASTERIA_THROW("Argument reader finished and disposed");
@@ -38,7 +38,7 @@ do_record_parameter_optional(Vtype vtype)
       this->m_state.history << ", ";
 
     // Record a parameter.
-    this->m_state.history << '[' << describe_vtype(vtype) << ']';
+    this->m_state.history << '[' << describe_type(type) << ']';
     this->m_state.nparams++;
   }
 
@@ -193,7 +193,7 @@ Argument_Reader::
 v(V_boolean& xval)
   {
     xval = false;
-    this->do_record_parameter_required(vtype_boolean);
+    this->do_record_parameter_required(type_boolean);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
@@ -214,7 +214,7 @@ Argument_Reader::
 v(V_integer& xval)
   {
     xval = 0;
-    this->do_record_parameter_required(vtype_integer);
+    this->do_record_parameter_required(type_integer);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
@@ -235,7 +235,7 @@ Argument_Reader::
 v(V_real& xval)
   {
     xval = 0;
-    this->do_record_parameter_required(vtype_real);
+    this->do_record_parameter_required(type_real);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
@@ -256,7 +256,7 @@ Argument_Reader::
 v(V_string& xval)
   {
     xval.clear();
-    this->do_record_parameter_required(vtype_string);
+    this->do_record_parameter_required(type_string);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
@@ -277,7 +277,7 @@ Argument_Reader::
 v(V_opaque& xval)
   {
     xval.reset();
-    this->do_record_parameter_required(vtype_opaque);
+    this->do_record_parameter_required(type_opaque);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
@@ -298,7 +298,7 @@ Argument_Reader::
 v(V_function& xval)
   {
     xval.reset();
-    this->do_record_parameter_required(vtype_function);
+    this->do_record_parameter_required(type_function);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
@@ -319,7 +319,7 @@ Argument_Reader::
 v(V_array& xval)
   {
     xval.clear();
-    this->do_record_parameter_required(vtype_array);
+    this->do_record_parameter_required(type_array);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
@@ -340,7 +340,7 @@ Argument_Reader::
 v(V_object& xval)
   {
     xval.clear();
-    this->do_record_parameter_required(vtype_object);
+    this->do_record_parameter_required(type_object);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
@@ -393,7 +393,7 @@ Argument_Reader::
 o(optV_boolean& xopt)
   {
     xopt.reset();
-    this->do_record_parameter_optional(vtype_boolean);
+    this->do_record_parameter_optional(type_boolean);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
@@ -417,7 +417,7 @@ Argument_Reader::
 o(optV_integer& xopt)
   {
     xopt.reset();
-    this->do_record_parameter_optional(vtype_integer);
+    this->do_record_parameter_optional(type_integer);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
@@ -441,7 +441,7 @@ Argument_Reader::
 o(optV_real& xopt)
   {
     xopt.reset();
-    this->do_record_parameter_optional(vtype_real);
+    this->do_record_parameter_optional(type_real);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
@@ -465,7 +465,7 @@ Argument_Reader::
 o(optV_string& xopt)
   {
     xopt.reset();
-    this->do_record_parameter_optional(vtype_string);
+    this->do_record_parameter_optional(type_string);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
@@ -489,7 +489,7 @@ Argument_Reader::
 o(optV_opaque& xopt)
   {
     xopt.reset();
-    this->do_record_parameter_optional(vtype_opaque);
+    this->do_record_parameter_optional(type_opaque);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
@@ -513,7 +513,7 @@ Argument_Reader::
 o(optV_function& xopt)
   {
     xopt.reset();
-    this->do_record_parameter_optional(vtype_function);
+    this->do_record_parameter_optional(type_function);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
@@ -537,7 +537,7 @@ Argument_Reader::
 o(optV_array& xopt)
   {
     xopt.reset();
-    this->do_record_parameter_optional(vtype_array);
+    this->do_record_parameter_optional(type_array);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
@@ -561,7 +561,7 @@ Argument_Reader::
 o(optV_object& xopt)
   {
     xopt.reset();
-    this->do_record_parameter_optional(vtype_object);
+    this->do_record_parameter_optional(type_object);
 
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
@@ -588,9 +588,9 @@ const
     // Compose an argument list.
     cow_string arguments;
     if(this->m_args->size()) {
-      arguments << this->m_args.get()[0].read().what_vtype();
+      arguments << this->m_args.get()[0].read().what_type();
       for(size_t k = 1;  k != this->m_args->size();  ++k)
-        arguments << ", " << this->m_args.get()[k].read().what_vtype();
+        arguments << ", " << this->m_args.get()[k].read().what_type();
     }
 
     // Append the list of overloads.

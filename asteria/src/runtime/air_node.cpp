@@ -669,12 +669,12 @@ struct AIR_Traits<AIR_Node::S_for_each_statement>
         mapped = ::std::move(ctx_for.stack().open_top());
 
         const auto range = mapped.read();
-        switch(weaken_enum(range.vtype())) {
-          case vtype_null:
+        switch(weaken_enum(range.type())) {
+          case type_null:
             // Do nothing.
             return air_status_next;
 
-          case vtype_array: {
+          case type_array: {
             const auto& arr = range.as_array();
             for(int64_t i = 0;  i < arr.ssize();  ++i) {
               // Set the key which is the subscript of the mapped element in the array.
@@ -697,7 +697,7 @@ struct AIR_Traits<AIR_Node::S_for_each_statement>
             return air_status_next;
           }
 
-          case vtype_object: {
+          case type_object: {
             const auto& obj = range.as_object();
             for(auto it = obj.begin();  it != obj.end();  ++it) {
               // Set the key which is the key of this element in the object.
@@ -1498,22 +1498,22 @@ struct AIR_Traits<AIR_Node::S_push_unnamed_object>
 
 enum Vmask : uint32_t
   {
-    vmask_null        = 1 << vtype_null,
-    vmask_boolean     = 1 << vtype_boolean,
-    vmask_integer     = 1 << vtype_integer,
-    vmask_real        = 1 << vtype_real,
-    vmask_string      = 1 << vtype_string,
-    vmask_opaque      = 1 << vtype_opaque,
-    vmask_function    = 1 << vtype_function,
-    vmask_array       = 1 << vtype_array,
-    vmask_object      = 1 << vtype_object,
+    vmask_null        = 1 << type_null,
+    vmask_boolean     = 1 << type_boolean,
+    vmask_integer     = 1 << type_integer,
+    vmask_real        = 1 << type_real,
+    vmask_string      = 1 << type_string,
+    vmask_opaque      = 1 << type_opaque,
+    vmask_function    = 1 << type_function,
+    vmask_array       = 1 << type_array,
+    vmask_object      = 1 << type_object,
   };
 
 inline
 uint32_t do_vmask_of(const Value& val)
 noexcept
   {
-    return UINT32_C(1) << val.vtype();
+    return UINT32_C(1) << val.type();
   }
 
 ROCKET_CONST_FUNCTION
@@ -2166,7 +2166,7 @@ struct AIR_Traits_Xop<xop_typeof> : AIR_Traits<AIR_Node::S_apply_operator>
 
         // Return the type name of the operand, which is static.
         // N.B. This is one of the few operators that work on all types.
-        rhs = ::rocket::sref(rhs.what_vtype());
+        rhs = ::rocket::sref(rhs.what_type());
 
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
         return air_status_next;
@@ -3531,12 +3531,12 @@ struct AIR_Traits<AIR_Node::S_variadic_call>
         // Pop the argument generator.
         cow_vector<Reference> args;
         auto value = ctx.stack().get_top().read();
-        switch(weaken_enum(value.vtype())) {
-          case vtype_null:
+        switch(weaken_enum(value.type())) {
+          case type_null:
             // Leave `args` empty.
             break;
 
-          case vtype_array: {
+          case type_array: {
             auto source = ::std::move(value.open_array());
             ctx.stack().pop();
 
@@ -3550,7 +3550,7 @@ struct AIR_Traits<AIR_Node::S_variadic_call>
             break;
           }
 
-          case vtype_function: {
+          case type_function: {
             const auto generator = ::std::move(value.open_function());
             auto gself = ctx.stack().open_top().zoom_out();
 

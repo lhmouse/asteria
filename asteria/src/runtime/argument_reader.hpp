@@ -51,11 +51,11 @@ class Argument_Reader
 
     inline
     void
-    do_record_parameter_optional(Vtype vtype);
+    do_record_parameter_optional(Type type);
 
     inline
     void
-    do_record_parameter_required(Vtype vtype);
+    do_record_parameter_required(Type type);
 
     inline
     void

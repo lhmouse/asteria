@@ -248,9 +248,9 @@ do_find_uncensored(V_object::const_iterator& curp, const V_object& object)
     for(;;)
       if(curp == object.end())
         return false;
-      else if(::rocket::is_any_of(curp->second.vtype(),
-                     { vtype_null, vtype_boolean, vtype_integer, vtype_real, vtype_string,
-                       vtype_array, vtype_object }))
+      else if(::rocket::is_any_of(curp->second.type(),
+                     { type_null, type_boolean, type_integer, type_real, type_string,
+                       type_array, type_object }))
         return true;
       else
         ++curp;
@@ -281,18 +281,18 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
 
     for(;;) {
       // Format a value. `qvalue` must always point to a valid value here.
-      switch(weaken_enum(qvalue->vtype())) {
-        case vtype_boolean:
+      switch(weaken_enum(qvalue->type())) {
+        case type_boolean:
           // Write `true` or `false`.
           fmt << qvalue->as_boolean();
           break;
 
-        case vtype_integer:
+        case type_integer:
           // Write the integer in decimal.
           fmt << static_cast<double>(qvalue->as_integer());
           break;
 
-        case vtype_real: {
+        case type_real: {
           double real = qvalue->as_real();
           if(::std::isfinite(real)) {
             // Write the real in decimal.
@@ -313,12 +313,12 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
           break;
         }
 
-        case vtype_string:
+        case type_string:
           // Write the quoted string.
           do_quote_string(fmt, qvalue->as_string());
           break;
 
-        case vtype_array: {
+        case type_array: {
           const auto& array = qvalue->as_array();
           fmt << '[';
 
@@ -339,7 +339,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
           break;
         }
 
-        case vtype_object: {
+        case type_object: {
           const auto& object = qvalue->as_object();
           fmt << '{';
 

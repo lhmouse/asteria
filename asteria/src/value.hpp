@@ -323,9 +323,9 @@ class Value
     operator=(initializer_list<Value> list)
       {
         if(this->is_array())
-          this->m_stor.as<vtype_array>().assign(list.begin(), list.end());
+          this->m_stor.as<type_array>().assign(list.begin(), list.end());
         else
-          this->m_stor.emplace<vtype_array>(list);
+          this->m_stor.emplace<type_array>(list);
         return *this;
       }
 
@@ -334,9 +334,9 @@ class Value
     operator=(initializer_list<pair<KeyT, Value>> list)
       {
         if(this->is_object())
-          this->m_stor.as<vtype_object>().assign(list.begin(), list.end());
+          this->m_stor.as<type_object>().assign(list.begin(), list.end());
         else
-          this->m_stor.emplace<vtype_object>(list);
+          this->m_stor.emplace<type_object>(list);
         return *this;
       }
 
@@ -464,132 +464,132 @@ class Value
       }
 
   public:
-    Vtype
-    vtype()
+    Type
+    type()
     const noexcept
-      { return static_cast<Vtype>(this->m_stor.index());  }
+      { return static_cast<Type>(this->m_stor.index());  }
 
     const char*
-    what_vtype()
+    what_type()
     const noexcept
-      { return describe_vtype(this->vtype());  }
+      { return describe_type(this->type());  }
 
     bool
     is_null()
     const noexcept
-      { return this->vtype() == vtype_null;  }
+      { return this->type() == type_null;  }
 
     bool
     is_boolean()
     const noexcept
-      { return this->vtype() == vtype_boolean;  }
+      { return this->type() == type_boolean;  }
 
     V_boolean
     as_boolean()
     const
-      { return this->m_stor.as<vtype_boolean>();  }
+      { return this->m_stor.as<type_boolean>();  }
 
     V_boolean&
     open_boolean()
-      { return this->m_stor.as<vtype_boolean>();  }
+      { return this->m_stor.as<type_boolean>();  }
 
     bool
     is_integer()
     const noexcept
-      { return this->vtype() == vtype_integer;  }
+      { return this->type() == type_integer;  }
 
     V_integer
     as_integer()
     const
-      { return this->m_stor.as<vtype_integer>();  }
+      { return this->m_stor.as<type_integer>();  }
 
     V_integer&
     open_integer()
-      { return this->m_stor.as<vtype_integer>();  }
+      { return this->m_stor.as<type_integer>();  }
 
     bool
     is_real()
     const noexcept
-      { return this->vtype() == vtype_real;  }
+      { return this->type() == type_real;  }
 
     V_real
     as_real()
     const
-      { return this->m_stor.as<vtype_real>();  }
+      { return this->m_stor.as<type_real>();  }
 
     V_real&
     open_real()
-      { return this->m_stor.as<vtype_real>();  }
+      { return this->m_stor.as<type_real>();  }
 
     bool
     is_string()
     const noexcept
-      { return this->vtype() == vtype_string;  }
+      { return this->type() == type_string;  }
 
     const V_string&
     as_string()
     const
-      { return this->m_stor.as<vtype_string>();  }
+      { return this->m_stor.as<type_string>();  }
 
     V_string&
     open_string()
-      { return this->m_stor.as<vtype_string>();  }
+      { return this->m_stor.as<type_string>();  }
 
     bool
     is_function()
     const noexcept
-      { return this->vtype() == vtype_function;  }
+      { return this->type() == type_function;  }
 
     const V_function&
     as_function()
     const
-      { return this->m_stor.as<vtype_function>();  }
+      { return this->m_stor.as<type_function>();  }
 
     V_function&
     open_function()
-      { return this->m_stor.as<vtype_function>();  }
+      { return this->m_stor.as<type_function>();  }
 
     bool
     is_opaque()
     const noexcept
-      { return this->vtype() == vtype_opaque;  }
+      { return this->type() == type_opaque;  }
 
     const V_opaque&
     as_opaque()
     const
-      { return this->m_stor.as<vtype_opaque>();  }
+      { return this->m_stor.as<type_opaque>();  }
 
     V_opaque&
     open_opaque()
-      { return this->m_stor.as<vtype_opaque>();  }
+      { return this->m_stor.as<type_opaque>();  }
 
     bool
     is_array()
     const noexcept
-      { return this->vtype() == vtype_array;  }
+      { return this->type() == type_array;  }
 
     const V_array&
     as_array()
     const
-      { return this->m_stor.as<vtype_array>();  }
+      { return this->m_stor.as<type_array>();  }
 
     V_array&
     open_array()
-      { return this->m_stor.as<vtype_array>();  }
+      { return this->m_stor.as<type_array>();  }
 
     bool
     is_object()
     const noexcept
-      { return this->vtype() == vtype_object;  }
+      { return this->type() == type_object;  }
 
     const V_object&
     as_object()
     const
-      { return this->m_stor.as<vtype_object>();  }
+      { return this->m_stor.as<type_object>();  }
 
     V_object&
     open_object()
-      { return this->m_stor.as<vtype_object>();  }
+      { return this->m_stor.as<type_object>();  }
 
     bool
     is_convertible_to_real()
@@ -606,7 +606,7 @@ class Value
     V_real&
     mutate_into_real()
       { return this->is_integer()
-                 ? this->m_stor.emplace<vtype_real>(V_real(this->as_integer()))
+                 ? this->m_stor.emplace<type_real>(V_real(this->as_integer()))
                  : this->open_real();  }
 
     Value&

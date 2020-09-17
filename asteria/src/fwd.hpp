@@ -629,22 +629,22 @@ using optV_array     = opt<V_array>;
 using optV_object    = opt<V_object>;
 
 // Indices of fundamental types
-enum Vtype : uint8_t
+enum Type : uint8_t
   {
-    vtype_null      = 0,
-    vtype_boolean   = 1,
-    vtype_integer   = 2,
-    vtype_real      = 3,
-    vtype_string    = 4,
-    vtype_opaque    = 5,
-    vtype_function  = 6,
-    vtype_array     = 7,
-    vtype_object    = 8,
+    type_null      = 0,
+    type_boolean   = 1,
+    type_integer   = 2,
+    type_real      = 3,
+    type_string    = 4,
+    type_opaque    = 5,
+    type_function  = 6,
+    type_array     = 7,
+    type_object    = 8,
   };
 
 ROCKET_CONST_FUNCTION
 const char*
-describe_vtype(Vtype vtype)
+describe_type(Type type)
 noexcept;
 
 // Value comparison results

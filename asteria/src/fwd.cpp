@@ -109,35 +109,35 @@ const
   }
 
 const char*
-describe_vtype(Vtype vtype)
+describe_type(Type type)
 noexcept
   {
-    switch(vtype) {
-      case vtype_null:
+    switch(type) {
+      case type_null:
         return "null";
 
-      case vtype_boolean:
+      case type_boolean:
         return "boolean";
 
-      case vtype_integer:
+      case type_integer:
         return "integer";
 
-      case vtype_real:
+      case type_real:
         return "real";
 
-      case vtype_string:
+      case type_string:
         return "string";
 
-      case vtype_opaque:
+      case type_opaque:
         return "opaque";
 
-      case vtype_function:
+      case type_function:
         return "function";
 
-      case vtype_array:
+      case type_array:
         return "array";
 
-      case vtype_object:
+      case type_object:
         return "object";
 
       default:
