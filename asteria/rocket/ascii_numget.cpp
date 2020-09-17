@@ -1544,6 +1544,7 @@ noexcept
 
             // Adjust `ireg` such that its MSB is non-zero.
             int sh = ROCKET_LZCNT64_NZ(ireg);
+            ireg |= this->m_madd;
             ireg <<= sh;
             int exp2 = mult.exp2 - sh;
 
