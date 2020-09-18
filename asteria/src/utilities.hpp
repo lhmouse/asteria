@@ -7,6 +7,7 @@
 #include "fwd.hpp"
 #include "../rocket/tinyfmt_str.hpp"
 #include "../rocket/format.hpp"
+#include "details/utilities.ipp"
 
 namespace asteria {
 
@@ -88,13 +89,11 @@ enum : uint8_t
     cctype_blank   = 0x20,  // [ \t]
   };
 
-extern const uint8_t cctype_table[128];
-
 ROCKET_CONST_FUNCTION inline
 uint8_t
 get_cctype(char c)
 noexcept
-  { return (uint8_t(c) < 128) ? cctype_table[uint8_t(c)] : 0;  }
+  { return (uint8_t(c) < 128) ? details_utilities::cctype_table[uint8_t(c)] : 0;  }
 
 ROCKET_CONST_FUNCTION inline
 bool
@@ -103,63 +102,37 @@ noexcept
   { return noadl::get_cctype(c) & mask;  }
 
 // C-style quoting
-struct Quote_Wrapper
-  {
-    const char* str;
-    size_t len;
-  };
-
 constexpr
-Quote_Wrapper
+details_utilities::Quote_Wrapper
 quote(const char* str, size_t len)
 noexcept
   { return { str, len };  }
 
 inline
-Quote_Wrapper
+details_utilities::Quote_Wrapper
 quote(const char* str)
 noexcept
   { return noadl::quote(str, ::std::strlen(str));  }
 
 inline
-Quote_Wrapper
+details_utilities::Quote_Wrapper
 quote(const cow_string& str)
 noexcept
   { return noadl::quote(str.data(), str.size());  }
 
-tinyfmt&
-operator<<(tinyfmt& fmt, const Quote_Wrapper& q);
-
 // Justifying
-struct Paragraph_Wrapper
-  {
-    size_t indent;
-    size_t hanging;
-  };
-
 constexpr
-Paragraph_Wrapper
+details_utilities::Paragraph_Wrapper
 pwrap(size_t indent, size_t hanging)
 noexcept
   { return { indent, hanging };  }
 
-tinyfmt&
-operator<<(tinyfmt& fmt, const Paragraph_Wrapper& q);
-
 // Error numbers
-struct Formatted_errno
-  {
-    int err;
-  };
-
 constexpr
-Formatted_errno
+details_utilities::Formatted_errno
 format_errno(int err)
 noexcept
   { return { err };  }
-
-tinyfmt&
-operator<<(tinyfmt& fmt, const Formatted_errno& e);
 
 // Negative array index wrapper
 struct Wrapped_Index

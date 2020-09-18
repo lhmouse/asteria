@@ -8,6 +8,8 @@
 
 namespace asteria {
 
+using details_variable_hashset::Bucket;
+
 void
 Variable_HashSet::
 do_destroy_buckets()
@@ -28,7 +30,7 @@ noexcept
 #endif
   }
 
-Variable_HashSet::Bucket*
+Bucket*
 Variable_HashSet::
 do_xprobe(const rcptr<Variable>& var)
 const noexcept
@@ -125,6 +127,7 @@ Variable_HashSet::
 do_rehash(size_t nbkt)
   {
     ROCKET_ASSERT(nbkt / 2 > this->m_size);
+
     // Allocate a new table.
     if(nbkt > PTRDIFF_MAX / sizeof(Bucket))
       throw ::std::bad_array_new_length();

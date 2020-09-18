@@ -9,6 +9,13 @@ include_asteria_HEADERS =  \
   %reldir%/simple_script.hpp  \
   ${NOTHING}
 
+include_asteria_detailsdir = ${includedir}/asteria/details
+include_asteria_details_HEADERS =  \
+  %reldir%/details/utilities.ipp  \
+  %reldir%/details/variable_hashset.ipp  \
+  %reldir%/details/reference_dictionary.ipp  \
+  ${NOTHING}
+
 include_asteria_lldsdir = ${includedir}/asteria/llds
 include_asteria_llds_HEADERS =  \
   %reldir%/llds/variable_hashset.hpp  \

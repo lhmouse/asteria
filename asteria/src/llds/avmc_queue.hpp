@@ -38,7 +38,6 @@ class AVMC_Queue
           uint8_t v8s[6];
         };
       };
-
     static_assert(sizeof(Uparam) == sizeof(uint64_t));
 
     // Symbols are optional. If no symbol is given, no backtrace frame is appended.
@@ -47,7 +46,6 @@ class AVMC_Queue
       {
         Source_Location sloc;
       };
-
     static_assert(::std::is_nothrow_move_constructible<Symbols>::value);
 
     // These are prototypes for callbacks.
@@ -58,6 +56,8 @@ class AVMC_Queue
     using Enumerator   = Variable_Callback& (Variable_Callback& callback, Uparam uparam, const void* sparam);
 
   private:
+    struct Header;
+
     struct Vtable
       {
         Move_Ctor* mvctor_opt;  // if null then bitwise copy is performed
@@ -65,8 +65,6 @@ class AVMC_Queue
         Executor* executor;  // not nullable [!]
         Enumerator* venum_opt;  // if null then no variables shall exist
       };
-
-    struct Header;
 
   private:
     Header* m_bptr = nullptr;  // beginning of raw storage

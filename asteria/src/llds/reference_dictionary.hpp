@@ -6,34 +6,16 @@
 
 #include "../fwd.hpp"
 #include "../runtime/reference.hpp"
+#include "../details/reference_dictionary.ipp"
 
 namespace asteria {
 
 class Reference_Dictionary
   {
   private:
-    struct Bucket
-      {
-        Bucket* next;  // the next bucket in the [non-circular] list
-        Bucket* prev;  // the previous bucket in the [circular] list
-        union { phsh_string kstor[1];  };  // initialized iff `prev` is non-null
-        union { Reference vstor[1];  };  // initialized iff `prev` is non-null
-
-        Bucket()
-        { }
-
-        ~Bucket()
-        { }
-
-        explicit operator
-        bool()
-        const noexcept
-          { return this->prev != nullptr;  }
-      };
-
-    Bucket* m_bptr = nullptr;  // beginning of bucket storage
-    Bucket* m_eptr = nullptr;  // end of bucket storage
-    Bucket* m_head = nullptr;  // the first initialized bucket
+    details_reference_dictionary::Bucket* m_bptr = nullptr;  // beginning of bucket storage
+    details_reference_dictionary::Bucket* m_eptr = nullptr;  // end of bucket storage
+    details_reference_dictionary::Bucket* m_head = nullptr;  // the first initialized bucket
     size_t m_size = 0;         // number of initialized buckets
 
   public:
@@ -71,25 +53,25 @@ class Reference_Dictionary
 
     // This function returns a pointer to either an empty bucket or a bucket containing
     // a key which is equal to `name`, but in no case can a null pointer be returned.
-    Bucket*
+    details_reference_dictionary::Bucket*
     do_xprobe(const phsh_string& name)
     const noexcept;
 
     // This function is used for relocation after an element is erased.
     inline
     void
-    do_xrelocate_but(Bucket* qxcld)
+    do_xrelocate_but(details_reference_dictionary::Bucket* qxcld)
     noexcept;
 
     // Valid buckets are linked altogether for efficient iteration.
     inline
     void
-    do_list_attach(Bucket* qbkt)
+    do_list_attach(details_reference_dictionary::Bucket* qbkt)
     noexcept;
 
     inline
     void
-    do_list_detach(Bucket* qbkt)
+    do_list_detach(details_reference_dictionary::Bucket* qbkt)
     noexcept;
 
     // This function is primarily used to reallocate a larger table.
@@ -99,13 +81,13 @@ class Reference_Dictionary
     // This functions stores `var` in the bucket `*qbkt`.
     // `*qbkt` must be empty.
     void
-    do_attach(Bucket* qbkt, const phsh_string& name)
+    do_attach(details_reference_dictionary::Bucket* qbkt, const phsh_string& name)
     noexcept;
 
     // This functions clears the bucket `*qbkt`
     // `*qbkt` must not be empty.
     void
-    do_detach(Bucket* qbkt)
+    do_detach(details_reference_dictionary::Bucket* qbkt)
     noexcept;
 
   public:
