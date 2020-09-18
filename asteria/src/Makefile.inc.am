@@ -12,6 +12,7 @@ include_asteria_HEADERS =  \
 include_asteria_detailsdir = ${includedir}/asteria/details
 include_asteria_details_HEADERS =  \
   %reldir%/details/utilities.ipp  \
+  %reldir%/details/value.ipp  \
   %reldir%/details/variable_hashset.ipp  \
   %reldir%/details/reference_dictionary.ipp  \
   %reldir%/details/avmc_queue.ipp  \

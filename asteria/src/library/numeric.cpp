@@ -1362,8 +1362,13 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     V_real x;
     if(reader.I().v(x).F()) {
       auto pair = std_numeric_frexp(::std::move(x));
+
       // The binding function returns a `pair`, but we would like to return an array so convert it.
-      Reference_root::S_temporary xref = { { pair.first, pair.second } };
+      V_array arr(2);
+      arr.mut(0) = pair.first;
+      arr.mut(1) = pair.second;
+
+      Reference_root::S_temporary xref = { ::std::move(arr) };
       return self = ::std::move(xref);
     }
     // Fail.

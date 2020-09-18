@@ -5,6 +5,7 @@
 #define ASTERIA_VALUE_HPP_
 
 #include "fwd.hpp"
+#include "details/value.ipp"
 
 namespace asteria {
 
@@ -29,435 +30,98 @@ class Value
   public:
     Value(nullptr_t = nullptr)
     noexcept
+      : m_stor()
       { }
 
-    Value(bool xval)
-    noexcept
-      : m_stor(V_boolean(xval))
+    template<typename XValT,
+    ROCKET_ENABLE_IF(details_value::Valuable<XValT>::nullable::value)>
+    Value(XValT&& xval)
+    noexcept(::std::is_nothrow_assignable<Storage&,
+                              typename details_value::Valuable<XValT>::via_type&&>::value)
+      : m_stor()
+      { details_value::Valuable<XValT>::assign(this->m_stor, ::std::forward<XValT>(xval));  }
+
+    template<typename XValT,
+    ROCKET_DISABLE_IF(details_value::Valuable<XValT>::nullable::value)>
+    Value(XValT&& xval)
+    noexcept(::std::is_nothrow_constructible<Storage&,
+                              typename details_value::Valuable<XValT>::via_type&&>::value)
+      : m_stor(typename details_value::Valuable<XValT>::via_type(::std::forward<XValT>(xval)))
       { }
 
-    Value(signed char xval)
-    noexcept
-      : m_stor(V_integer(xval))
+    template<typename XValT,
+    ROCKET_ENABLE_IF_HAS_TYPE(typename details_value::Valuable<XValT>::via_type)>
+    Value(const opt<XValT>& xopt)
+    noexcept(::std::is_nothrow_assignable<Storage&,
+                              const typename details_value::Valuable<XValT>::via_type&>::value)
+      {
+        if(xopt)
+          details_value::Valuable<XValT>::assign(this->m_stor, *xopt);
+      }
+
+    template<typename XValT,
+    ROCKET_ENABLE_IF_HAS_TYPE(typename details_value::Valuable<XValT>::via_type)>
+    Value(opt<XValT>&& xopt)
+    noexcept(::std::is_nothrow_assignable<Storage&,
+                              typename details_value::Valuable<XValT>::via_type&&>::value)
+      {
+        if(xopt)
+          details_value::Valuable<XValT>::assign(this->m_stor, ::std::move(*xopt));
+      }
+
+    template<typename XValT>
+    Value(initializer_list<XValT> init)
+      : m_stor(V_array(init.begin(), init.end()))
       { }
 
-    Value(signed short xval)
-    noexcept
-      : m_stor(V_integer(xval))
-      { }
-
-    Value(signed xval)
-    noexcept
-      : m_stor(V_integer(xval))
-      { }
-
-    Value(signed long xval)
-    noexcept
-      : m_stor(V_integer(xval))
-      { }
-
-    Value(signed long long xval)
-    noexcept
-      : m_stor(V_integer(xval))
-      { }
-
-    Value(float xval)
-    noexcept
-      : m_stor(V_real(xval))
-      { }
-
-    Value(double xval)
-    noexcept
-      : m_stor(V_real(xval))
-      { }
-
-    Value(cow_string xval)
-    noexcept
-      : m_stor(V_string(::std::move(xval)))
-      { }
-
-    Value(cow_string::shallow_type xval)
-    noexcept
-      : m_stor(V_string(xval))
-      { }
-
-    Value(cow_opaque xval)
-    noexcept
-      { this->do_xassign<V_opaque&&>(xval, ::std::addressof(xval));  }
-
-    template<typename OpaqueT,
-    ROCKET_ENABLE_IF(::std::is_convertible<OpaqueT*, Abstract_Opaque*>::value)>
-    Value(rcptr<OpaqueT> xval)
-    noexcept
-      { this->do_xassign<V_opaque>(xval, ::std::addressof(xval));  }
-
-    Value(cow_function xval)
-    noexcept
-      { this->do_xassign<V_function&&>(xval, ::std::addressof(xval));  }
-
-    template<typename FunctionT,
-    ROCKET_ENABLE_IF(::std::is_convertible<FunctionT*, Abstract_Function*>::value)>
-    Value(rcptr<FunctionT> xval)
-    noexcept
-      { this->do_xassign<V_function>(xval, ::std::addressof(xval));  }
-
-    Value(cow_vector<Value> xval)
-    noexcept
-      : m_stor(::std::move(xval))
-      { }
-
-    Value(cow_dictionary<Value> xval)
-    noexcept
-      : m_stor(::std::move(xval))
-      { }
-
-    Value(initializer_list<Value> list)
-      : m_stor(V_array(list.begin(), list.end()))
-      { }
-
-    template<typename KeyT>
-    Value(initializer_list<pair<KeyT, Value>> list)
-      : m_stor(V_object(list.begin(), list.end()))
-      { }
-
-    Value(const opt<bool>& xval)
-    noexcept
-      { this->do_xassign<V_boolean>(xval, xval); }
-
-    Value(const opt<signed char>& xval)
-    noexcept
-      { this->do_xassign<V_integer>(xval, xval);  }
-
-    Value(const opt<signed short>& xval)
-    noexcept
-      { this->do_xassign<V_integer>(xval, xval);  }
-
-    Value(const opt<signed>& xval)
-    noexcept
-      { this->do_xassign<V_integer>(xval, xval);  }
-
-    Value(const opt<signed long>& xval)
-    noexcept
-      { this->do_xassign<V_integer>(xval, xval);  }
-
-    Value(const opt<signed long long>& xval)
-    noexcept
-      { this->do_xassign<V_integer>(xval, xval);  }
-
-    Value(const opt<float>& xval)
-    noexcept
-      { this->do_xassign<V_real>(xval, xval);  }
-
-    Value(const opt<double>& xval)
-    noexcept
-      { this->do_xassign<V_real>(xval, xval);  }
-
-    Value(const opt<cow_string>& xval)
-    noexcept
-      { this->do_xassign<const V_string&>(xval, xval);  }
-
-    Value(opt<cow_string>&& xval)
-    noexcept
-      { this->do_xassign<V_string&&>(xval, xval);  }
-
-    Value(const opt<cow_vector<Value>>& xval)
-    noexcept
-      { this->do_xassign<const V_array&>(xval, xval);  }
-
-    Value(opt<cow_vector<Value>>&& xval)
-    noexcept
-      { this->do_xassign<V_array&&>(xval, xval);  }
-
-    Value(const opt<cow_dictionary<Value>>& xval)
-    noexcept
-      { this->do_xassign<const V_object&>(xval, xval);  }
-
-    Value(opt<cow_dictionary<Value>>&& xval)
-    noexcept
-      { this->do_xassign<V_object&&>(xval, xval);  }
-
+    template<typename XValT,
+    ROCKET_ENABLE_IF_HAS_TYPE(typename details_value::Valuable<XValT>::via_type)>
     Value&
-    operator=(nullptr_t)
-    noexcept
+    operator=(XValT&& xval)
+    noexcept(::std::is_nothrow_assignable<Storage&,
+                              typename details_value::Valuable<XValT>::via_type&&>::value)
       {
-        this->m_stor = V_null();
+        details_value::Valuable<XValT>::assign(this->m_stor, ::std::forward<XValT>(xval));
         return *this;
       }
 
+    template<typename XValT,
+    ROCKET_ENABLE_IF_HAS_TYPE(typename details_value::Valuable<XValT>::via_type)>
     Value&
-    operator=(bool xval)
-    noexcept
+    operator=(const opt<XValT>& xopt)
+    noexcept(::std::is_nothrow_assignable<Storage&,
+                              const typename details_value::Valuable<XValT>::via_type&>::value)
       {
-        this->m_stor = V_boolean(xval);
-        return *this;
-      }
-
-    Value&
-    operator=(signed char xval)
-    noexcept
-      {
-        this->m_stor = V_integer(xval);
-        return *this;
-      }
-
-    Value&
-    operator=(signed short xval)
-    noexcept
-      {
-        this->m_stor = V_integer(xval);
-        return *this;
-      }
-
-    Value&
-    operator=(signed xval)
-    noexcept
-      {
-        this->m_stor = V_integer(xval);
-        return *this;
-      }
-
-    Value&
-    operator=(signed long xval)
-    noexcept
-      {
-        this->m_stor = V_integer(xval);
-        return *this;
-      }
-
-    Value&
-    operator=(signed long long xval)
-    noexcept
-      {
-        this->m_stor = V_integer(xval);
-        return *this;
-      }
-
-    Value&
-    operator=(float xval)
-    noexcept
-      {
-        this->m_stor = V_real(xval);
-        return *this;
-      }
-
-    Value&
-    operator=(double xval)
-    noexcept
-      {
-        this->m_stor = V_real(xval);
-        return *this;
-      }
-
-    Value&
-    operator=(cow_string xval)
-    noexcept
-      {
-        this->m_stor = V_string(::std::move(xval));
-        return *this;
-      }
-
-    Value&
-    operator=(cow_string::shallow_type xval)
-    noexcept
-      {
-        this->m_stor = V_string(xval);
-        return *this;
-      }
-
-    Value&
-    operator=(cow_opaque xval)
-    noexcept
-      {
-        this->do_xassign<V_opaque&&>(xval, ::std::addressof(xval));
-        return *this;
-      }
-
-    template<typename OpaqueT,
-    ROCKET_ENABLE_IF(::std::is_convertible<OpaqueT*, Abstract_Opaque*>::value)>
-    Value&
-    operator=(rcptr<OpaqueT> xval)
-    noexcept
-      {
-        this->do_xassign<V_opaque>(xval, ::std::addressof(xval));
-        return *this;
-      }
-
-    Value&
-    operator=(cow_function xval)
-    noexcept
-      {
-        this->do_xassign<V_function&&>(xval, ::std::addressof(xval));
-        return *this;
-      }
-
-    template<typename FunctionT,
-    ROCKET_ENABLE_IF(::std::is_convertible<FunctionT*, Abstract_Function*>::value)>
-    Value&
-    operator=(rcptr<FunctionT> xval)
-    noexcept
-      {
-        this->do_xassign<V_function>(xval, ::std::addressof(xval));
-        return *this;
-      }
-
-    Value&
-    operator=(cow_vector<Value> xval)
-    noexcept
-      {
-        this->m_stor = ::std::move(xval);
-        return *this;
-      }
-
-    Value&
-    operator=(cow_dictionary<Value> xval)
-    noexcept
-      {
-        this->m_stor = ::std::move(xval);
-        return *this;
-      }
-
-    Value&
-    operator=(initializer_list<Value> list)
-      {
-        if(this->is_array())
-          this->m_stor.as<type_array>().assign(list.begin(), list.end());
-        else
-          this->m_stor.emplace<type_array>(list);
-        return *this;
-      }
-
-    template<typename KeyT>
-    Value&
-    operator=(initializer_list<pair<KeyT, Value>> list)
-      {
-        if(this->is_object())
-          this->m_stor.as<type_object>().assign(list.begin(), list.end());
-        else
-          this->m_stor.emplace<type_object>(list);
-        return *this;
-      }
-
-    Value&
-    operator=(const opt<bool>& xval)
-    noexcept
-      {
-        this->do_xassign<V_boolean>(xval, xval);
-        return *this;
-      }
-
-    Value&
-    operator=(const opt<signed char>& xval)
-    noexcept
-      {
-        this->do_xassign<V_integer>(xval, xval);
-        return *this;
-      }
-
-    Value&
-    operator=(const opt<signed short>& xval)
-    noexcept
-      {
-        this->do_xassign<V_integer>(xval, xval);
-        return *this;
-      }
-
-    Value&
-    operator=(const opt<signed>& xval)
-    noexcept
-      {
-        this->do_xassign<V_integer>(xval, xval);
-        return *this;
-      }
-
-    Value&
-    operator=(const opt<signed long>& xval)
-    noexcept
-      {
-        this->do_xassign<V_integer>(xval, xval);
-        return *this;
-      }
-
-    Value&
-    operator=(const opt<signed long long>& xval)
-    noexcept
-      {
-        this->do_xassign<V_integer>(xval, xval);
-        return *this;
-      }
-
-    Value&
-    operator=(const opt<float>& xval)
-    noexcept
-      {
-        this->do_xassign<V_real>(xval, xval);
-        return *this;
-      }
-
-    Value&
-    operator=(const opt<double>& xval)
-    noexcept
-      {
-        this->do_xassign<V_real>(xval, xval);
-        return *this;
-      }
-
-    Value&
-    operator=(const opt<cow_string>& xval)
-    noexcept
-      {
-        this->do_xassign<const V_string&>(xval, xval);
-        return *this;
-      }
-
-    Value&
-    operator=(opt<cow_string>&& xval)
-    noexcept
-      {
-        this->do_xassign<V_string&&>(xval, xval);
-        return *this;
-      }
-
-    Value&
-    operator=(const opt<cow_vector<Value>>& xval)
-    noexcept
-      {
-        this->do_xassign<const V_array&>(xval, xval);
-        return *this;
-      }
-
-    Value&
-    operator=(opt<cow_vector<Value>>&& xval)
-    noexcept
-      {
-        this->do_xassign<V_array&&>(xval, xval);
-        return *this;
-      }
-
-    Value&
-    operator=(const opt<cow_dictionary<Value>>& xval)
-    noexcept
-      {
-        this->do_xassign<const V_object&>(xval, xval);
-        return *this;
-      }
-
-    Value&
-    operator=(opt<cow_dictionary<Value>>&& xval)
-    noexcept
-      {
-        this->do_xassign<V_object&&>(xval, xval);
-        return *this;
-      }
-
-  private:
-    template<typename CastT, typename ChkT, typename PtrT>
-    void
-    do_xassign(ChkT&& chk, PtrT&& ptr)
-      {
-        if(chk)
-          this->m_stor = static_cast<CastT>(*ptr);
+        if(xopt)
+          details_value::Valuable<XValT>::assign(this->m_stor, *xopt);
         else
           this->m_stor = V_null();
+        return *this;
+      }
+
+    template<typename XValT,
+    ROCKET_ENABLE_IF_HAS_TYPE(typename details_value::Valuable<XValT>::via_type)>
+    Value&
+    operator=(opt<XValT>&& xopt)
+    noexcept(::std::is_nothrow_assignable<Storage&,
+                              typename details_value::Valuable<XValT>::via_type&&>::value)
+      {
+        if(xopt)
+          details_value::Valuable<XValT>::assign(this->m_stor, ::std::move(*xopt));
+        else
+          this->m_stor = V_null();
+        return *this;
+      }
+
+    template<typename XValT>
+    Value&
+    operator=(initializer_list<XValT> init)
+      {
+        if(this->m_stor.index() == type_array)
+          this->m_stor.as<type_array>().assign(init.begin(), init.end());
+        else
+          this->m_stor = V_array(init.begin(), init.end());
+        return *this;
       }
 
   public:
