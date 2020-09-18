@@ -130,7 +130,7 @@ using cow_vector = ::rocket::cow_vector<E>;
 
 template<typename E>
 using cow_dictionary = ::rocket::cow_hashmap<::rocket::prehashed_string, E,
-                                             ::rocket::prehashed_string::hash, ::std::equal_to<void>>;
+                                   ::rocket::prehashed_string::hash, ::std::equal_to<void>>;
 
 template<typename E, size_t k>
 using sso_vector = ::rocket::static_vector<E, k>;
