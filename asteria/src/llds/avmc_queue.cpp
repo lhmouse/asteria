@@ -10,76 +10,13 @@
 
 namespace asteria {
 
-struct AVMC_Queue::Header
-  {
-    union {
-      struct {
-        uint8_t nphdrs;  // size of `sparam`, in number of `Header`s [!]
-        uint8_t has_vtbl : 1;  // vtable exists?
-        uint8_t has_syms : 1;  // symbols exist?
-      };
-      Uparam up_stor;
-    };
-    union {
-      const Vtable* vtable;  // active if `has_vtbl`
-      Executor* exec;  // active otherwise
-    };
-    max_align_t alignment[0];
-
-    Move_Ctor*
-    mvctor_opt()
-    const noexcept
-      { return this->has_vtbl ? this->vtable->mvctor_opt : nullptr;  }
-
-    Destructor*
-    dtor_opt()
-    const noexcept
-      { return this->has_vtbl ? this->vtable->dtor_opt : nullptr;  }
-
-    Executor*
-    executor()
-    const noexcept
-      { return this->has_vtbl ? this->vtable->executor : this->exec;  }
-
-    Enumerator*
-    venum_opt()
-    const noexcept
-      { return this->has_vtbl ? this->vtable->venum_opt : nullptr;  }
-
-    constexpr
-    const Uparam&
-    uparam()
-    const noexcept
-      { return this->up_stor;  }
-
-    constexpr
-    void*
-    skip(uint32_t offset)
-    const noexcept
-      { return const_cast<Header*>(this) + 1 + offset;  }
-
-    Symbols*
-    syms_opt()
-    const noexcept
-      { return this->has_syms ? static_cast<Symbols*>(this->skip(0)) : nullptr;  }
-
-    constexpr
-    uint32_t
-    symbol_size_in_headers()
-    const noexcept
-      { return this->has_syms * uint32_t((sizeof(Symbols) - 1) / sizeof(Header) + 1);  }
-
-    void*
-    sparam()
-    const noexcept
-      { return this->skip(this->symbol_size_in_headers());  }
-
-    constexpr
-    uint32_t
-    total_size_in_headers()
-    const noexcept
-      { return 1 + this->symbol_size_in_headers() + this->nphdrs;  }
-  };
+using details_avmc_queue::Uparam;
+using details_avmc_queue::Symbols;
+using details_avmc_queue::Constructor;
+using details_avmc_queue::Executor;
+using details_avmc_queue::Enumerator;
+using details_avmc_queue::Vtable;
+using details_avmc_queue::Header;
 
 void
 AVMC_Queue::
@@ -110,6 +47,9 @@ void
 AVMC_Queue::
 do_reallocate(uint32_t nadd)
   {
+    ROCKET_ASSERT(nadd <= UINT16_MAX);
+
+    // Allocate a new table.
     constexpr size_t nhdrs_max = UINT32_MAX / sizeof(Header);
     if(nhdrs_max - this->m_used < nadd)
       throw ::std::bad_array_new_length();
@@ -132,7 +72,7 @@ do_reallocate(uint32_t nadd)
       offset += qnode->total_size_in_headers();
 
       // Move-construct new user-defined data.
-      if(auto qmvct = qnode->mvctor_opt())
+      if(auto qmvct = qnode->mvct_opt())
         qmvct(qnode->uparam(), qnode->sparam(), qxold->sparam());
 
       // Move-construct new symbols.
@@ -152,7 +92,7 @@ do_reallocate(uint32_t nadd)
       ::operator delete(bold);
   }
 
-AVMC_Queue::Header*
+Header*
 AVMC_Queue::
 do_reserve_one(Uparam uparam, const opt<Symbols>& syms_opt, size_t nbytes)
   {
@@ -185,7 +125,7 @@ do_reserve_one(Uparam uparam, const opt<Symbols>& syms_opt, size_t nbytes)
     return qnode;
   }
 
-void
+AVMC_Queue&
 AVMC_Queue::
 do_append_trivial(Executor* exec, Uparam uparam, opt<Symbols>&& syms_opt, size_t nbytes,
                   const void* src_opt)
@@ -208,12 +148,13 @@ do_append_trivial(Executor* exec, Uparam uparam, opt<Symbols>&& syms_opt, size_t
 
     // Accept this node.
     this->m_used += qnode->total_size_in_headers();
+    return *this;
   }
 
-void
+AVMC_Queue&
 AVMC_Queue::
-do_append_nontrivial(const Vtable* vtbl, Uparam uparam, opt<Symbols>&& syms_opt, size_t nbytes,
-                     Constructor* ctor_opt, intptr_t ctor_arg)
+do_append_nontrivial(const Vtable* vtbl, Uparam uparam, opt<Symbols>&& syms_opt,
+                     size_t nbytes, Constructor* ctor_opt, intptr_t ctor_arg)
   {
     auto qnode = this->do_reserve_one(uparam, syms_opt, nbytes);
     qnode->has_vtbl = true;
@@ -233,6 +174,7 @@ do_append_nontrivial(const Vtable* vtbl, Uparam uparam, opt<Symbols>&& syms_opt,
 
     // Accept this node.
     this->m_used += qnode->total_size_in_headers();
+    return *this;
   }
 
 AIR_Status

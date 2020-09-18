@@ -14,6 +14,7 @@ include_asteria_details_HEADERS =  \
   %reldir%/details/utilities.ipp  \
   %reldir%/details/variable_hashset.ipp  \
   %reldir%/details/reference_dictionary.ipp  \
+  %reldir%/details/avmc_queue.ipp  \
   ${NOTHING}
 
 include_asteria_lldsdir = ${includedir}/asteria/llds
