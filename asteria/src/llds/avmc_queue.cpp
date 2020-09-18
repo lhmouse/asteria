@@ -127,8 +127,8 @@ do_reserve_one(Uparam uparam, const opt<Symbols>& syms_opt, size_t nbytes)
 
 AVMC_Queue&
 AVMC_Queue::
-do_append_trivial(Executor* exec, Uparam uparam, opt<Symbols>&& syms_opt, size_t nbytes,
-                  const void* src_opt)
+do_append_trivial(Executor* exec, Uparam uparam, opt<Symbols>&& syms_opt,
+                  size_t nbytes, const void* src_opt)
   {
     auto qnode = this->do_reserve_one(uparam, syms_opt, nbytes);
     qnode->has_vtbl = false;
