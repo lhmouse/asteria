@@ -278,9 +278,11 @@ struct AIR_Traits<AIR_Node::S_clear_stack>
   };
 
 bool
-do_solidify_code(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
+do_solidify_full(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
   {
-    return ::rocket::all_of(code, [&](const AIR_Node& node) { return node.solidify(queue);  });
+    bool r = ::rocket::all_of(code, [&](const AIR_Node& node) { return node.solidify(queue);  });
+    queue.shrink_to_fit();
+    return r;
   }
 
 template<>
@@ -294,7 +296,7 @@ struct AIR_Traits<AIR_Node::S_execute_block>
     make_sparam(bool& reachable, const AIR_Node::S_execute_block& altr)
       {
         AVMC_Queue queue;
-        reachable &= do_solidify_code(queue, altr.code_body);
+        reachable &= do_solidify_full(queue, altr.code_body);
         return queue;
       }
 
@@ -417,8 +419,8 @@ struct AIR_Traits<AIR_Node::S_if_statement>
     make_sparam(bool& reachable, const AIR_Node::S_if_statement& altr)
       {
         Sparam_queues_2 sp;
-        bool rtrue = do_solidify_code(sp.queues[0], altr.code_true);
-        bool rfalse = do_solidify_code(sp.queues[1], altr.code_false);
+        bool rtrue = do_solidify_full(sp.queues[0], altr.code_true);
+        bool rfalse = do_solidify_full(sp.queues[1], altr.code_false);
         reachable &= rtrue | rfalse;
         return sp;
       }
@@ -449,7 +451,7 @@ struct AIR_Traits<AIR_Node::S_switch_statement>
       {
         ROCKET_ASSERT(queues.empty());
         queues.reserve(seqs.size());
-        ::rocket::for_each(seqs, [&](const auto& code) { do_solidify_code(queues.emplace_back(), code);  });
+        ::rocket::for_each(seqs, [&](const auto& code) { do_solidify_full(queues.emplace_back(), code);  });
       }
 
     static
@@ -547,8 +549,8 @@ struct AIR_Traits<AIR_Node::S_do_while_statement>
     make_sparam(bool& /*reachable*/, const AIR_Node::S_do_while_statement& altr)
       {
         Sparam_queues_2 sp;
-        do_solidify_code(sp.queues[0], altr.code_body);
-        do_solidify_code(sp.queues[1], altr.code_cond);
+        do_solidify_full(sp.queues[0], altr.code_body);
+        do_solidify_full(sp.queues[1], altr.code_cond);
         return sp;
       }
 
@@ -596,8 +598,8 @@ struct AIR_Traits<AIR_Node::S_while_statement>
     make_sparam(bool& /*reachable*/, const AIR_Node::S_while_statement& altr)
       {
         Sparam_queues_2 sp;
-        do_solidify_code(sp.queues[0], altr.code_cond);
-        do_solidify_code(sp.queues[1], altr.code_body);
+        do_solidify_full(sp.queues[0], altr.code_cond);
+        do_solidify_full(sp.queues[1], altr.code_body);
         return sp;
       }
 
@@ -638,8 +640,8 @@ struct AIR_Traits<AIR_Node::S_for_each_statement>
         Sparam_for_each sp;
         sp.name_key = altr.name_key;
         sp.name_mapped = altr.name_mapped;
-        do_solidify_code(sp.queue_init, altr.code_init);
-        do_solidify_code(sp.queue_body, altr.code_body);
+        do_solidify_full(sp.queue_init, altr.code_init);
+        do_solidify_full(sp.queue_body, altr.code_body);
         return sp;
       }
 
@@ -737,10 +739,10 @@ struct AIR_Traits<AIR_Node::S_for_statement>
     make_sparam(bool& /*reachable*/, const AIR_Node::S_for_statement& altr)
       {
         Sparam_queues_4 sp;
-        do_solidify_code(sp.queues[0], altr.code_init);
-        do_solidify_code(sp.queues[1], altr.code_cond);
-        do_solidify_code(sp.queues[2], altr.code_step);
-        do_solidify_code(sp.queues[3], altr.code_body);
+        do_solidify_full(sp.queues[0], altr.code_init);
+        do_solidify_full(sp.queues[1], altr.code_cond);
+        do_solidify_full(sp.queues[2], altr.code_step);
+        do_solidify_full(sp.queues[3], altr.code_body);
         return sp;
       }
 
@@ -792,10 +794,10 @@ struct AIR_Traits<AIR_Node::S_try_statement>
       {
         Sparam_try_catch sp;
         sp.sloc_try = altr.sloc_try;
-        bool rtry = do_solidify_code(sp.queue_try, altr.code_try);
+        bool rtry = do_solidify_full(sp.queue_try, altr.code_try);
         sp.sloc_catch = altr.sloc_catch;
         sp.name_except = altr.name_except;
-        bool rcatch = do_solidify_code(sp.queue_catch, altr.code_catch);
+        bool rcatch = do_solidify_full(sp.queue_catch, altr.code_catch);
         reachable &= rtry | rcatch;
         return sp;
       }
@@ -1178,8 +1180,8 @@ struct AIR_Traits<AIR_Node::S_branch_expression>
     make_sparam(bool& reachable, const AIR_Node::S_branch_expression& altr)
       {
         Sparam_queues_2 sp;
-        bool rtrue = do_solidify_code(sp.queues[0], altr.code_true);
-        bool rfalse = do_solidify_code(sp.queues[1], altr.code_false);
+        bool rtrue = do_solidify_full(sp.queues[0], altr.code_true);
+        bool rfalse = do_solidify_full(sp.queues[1], altr.code_false);
         reachable &= rtrue | rfalse;
         return sp;
       }
@@ -1227,7 +1229,7 @@ struct AIR_Traits<AIR_Node::S_coalescence>
     make_sparam(bool& /*reachable*/, const AIR_Node::S_coalescence& altr)
       {
         AVMC_Queue queue;
-        do_solidify_code(queue, altr.code_null);
+        do_solidify_full(queue, altr.code_null);
         return queue;
       }
 
@@ -3633,7 +3635,7 @@ struct AIR_Traits<AIR_Node::S_defer_expression>
 
         // Solidify it.
         AVMC_Queue queue;
-        do_solidify_code(queue, bound_body);
+        do_solidify_full(queue, bound_body);
 
         // Push this expression.
         ctx.defer_expression(sp.sloc, ::std::move(queue));
@@ -3929,7 +3931,7 @@ struct enumerator_of<SparamT, ROCKET_VOID_T(decltype(&SparamT::enumerate_variabl
     static
     Variable_Callback&
     thunk(Variable_Callback& callback, AVMC_Queue::Uparam /*up*/, const void* sp)
-      { return ((const SparamT*)sp)->enumerate_variables(callback);  }
+      { return static_cast<const SparamT*>(sp)->enumerate_variables(callback);  }
   };
 
 // Finally...
@@ -3946,7 +3948,6 @@ struct AVMC_Appender
                               TraitsT::make_symbols(altr),
                               TraitsT::make_uparam(reachable, altr),
                               TraitsT::make_sparam(reachable, altr));
-        queue.shrink_to_fit();
         return reachable;
       }
   };
@@ -3963,7 +3964,6 @@ struct AVMC_Appender<TraitsT, XaNodeT, UparamT, SparamT, void>
                               enumerator_of<SparamT>::thunk>(
                               TraitsT::make_uparam(reachable, altr),
                               TraitsT::make_sparam(reachable, altr));
-        queue.shrink_to_fit();
         return reachable;
       }
   };
@@ -4068,13 +4068,11 @@ inline
 bool
 do_solidify_explicit(AVMC_Queue& queue, const XaNodeT& altr)
   {
-    bool r = AVMC_Appender<TraitsT, XaNodeT,
-                           typename Uparam_of<TraitsT, XaNodeT>::type,
-                           typename Sparam_of<TraitsT, XaNodeT>::type,
-                           typename Symbols_of<TraitsT, XaNodeT>::type>
+    return AVMC_Appender<TraitsT, XaNodeT,
+                         typename Uparam_of<TraitsT, XaNodeT>::type,
+                         typename Sparam_of<TraitsT, XaNodeT>::type,
+                         typename Symbols_of<TraitsT, XaNodeT>::type>
                ::do_append(queue, altr);
-    queue.shrink_to_fit();
-    return r;
   }
 
 template<typename XaNodeT>
