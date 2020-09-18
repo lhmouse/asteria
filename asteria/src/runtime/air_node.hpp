@@ -292,50 +292,48 @@ class AIR_Node
         index_initialize_reference   = 36,
       };
 
+  private:
     using Storage = variant<
       ROCKET_CDR(
-      , S_clear_stack            //  0,
-      , S_execute_block          //  1,
-      , S_declare_variable       //  2,
-      , S_initialize_variable    //  3,
-      , S_if_statement           //  4,
-      , S_switch_statement       //  5,
-      , S_do_while_statement     //  6,
-      , S_while_statement        //  7,
-      , S_for_each_statement     //  8,
-      , S_for_statement          //  9,
-      , S_try_statement          // 10,
-      , S_throw_statement        // 11,
-      , S_assert_statement       // 12,
-      , S_return_statement       // 13,
-      , S_glvalue_to_prvalue     // 14,
-      , S_push_immediate         // 15,
-      , S_push_global_reference  // 16,
-      , S_push_local_reference   // 17,
-      , S_push_bound_reference   // 18,
-      , S_define_function        // 19,
-      , S_branch_expression      // 20,
-      , S_coalescence            // 21,
-      , S_function_call          // 22,
-      , S_member_access          // 23,
-      , S_push_unnamed_array     // 24,
-      , S_push_unnamed_object    // 25,
-      , S_apply_operator         // 26,
-      , S_unpack_struct_array    // 27,
-      , S_unpack_struct_object   // 28,
-      , S_define_null_variable   // 29,
-      , S_single_step_trap       // 30,
-      , S_variadic_call          // 31,
-      , S_defer_expression       // 32,
-      , S_import_call            // 33,
-      , S_break_or_continue      // 34,
-      , S_declare_reference      // 35,
-      , S_initialize_reference   // 36,
+        ,S_clear_stack            //  0,
+        ,S_execute_block          //  1,
+        ,S_declare_variable       //  2,
+        ,S_initialize_variable    //  3,
+        ,S_if_statement           //  4,
+        ,S_switch_statement       //  5,
+        ,S_do_while_statement     //  6,
+        ,S_while_statement        //  7,
+        ,S_for_each_statement     //  8,
+        ,S_for_statement          //  9,
+        ,S_try_statement          // 10,
+        ,S_throw_statement        // 11,
+        ,S_assert_statement       // 12,
+        ,S_return_statement       // 13,
+        ,S_glvalue_to_prvalue     // 14,
+        ,S_push_immediate         // 15,
+        ,S_push_global_reference  // 16,
+        ,S_push_local_reference   // 17,
+        ,S_push_bound_reference   // 18,
+        ,S_define_function        // 19,
+        ,S_branch_expression      // 20,
+        ,S_coalescence            // 21,
+        ,S_function_call          // 22,
+        ,S_member_access          // 23,
+        ,S_push_unnamed_array     // 24,
+        ,S_push_unnamed_object    // 25,
+        ,S_apply_operator         // 26,
+        ,S_unpack_struct_array    // 27,
+        ,S_unpack_struct_object   // 28,
+        ,S_define_null_variable   // 29,
+        ,S_single_step_trap       // 30,
+        ,S_variadic_call          // 31,
+        ,S_defer_expression       // 32,
+        ,S_import_call            // 33,
+        ,S_break_or_continue      // 34,
+        ,S_declare_reference      // 35,
+        ,S_initialize_reference   // 36,
       )>;
 
-    static_assert(::std::is_nothrow_copy_assignable<Storage>::value);
-
-  private:
     Storage m_stor;
 
   public:
@@ -344,10 +342,8 @@ class AIR_Node
       { }
 
     ASTERIA_VARIANT_ASSIGNMENT(AIR_Node, Storage, XNodeT, xnode)
-      {
-        this->m_stor = ::std::forward<XNodeT>(xnode);
-        return *this;
-      }
+      { this->m_stor = ::std::forward<XNodeT>(xnode);
+        return *this;  }
 
   public:
     Index

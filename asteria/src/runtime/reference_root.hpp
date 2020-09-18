@@ -57,20 +57,18 @@ class Reference_root
         index_jump_src    = 6,
       };
 
+  private:
     using Storage = variant<
       ROCKET_CDR(
-      , S_uninit      // 0,
-      , S_void        // 1,
-      , S_constant    // 2,
-      , S_temporary   // 3,
-      , S_variable    // 4,
-      , S_tail_call   // 5,
-      , S_jump_src    // 6,
+        ,S_uninit      // 0,
+        ,S_void        // 1,
+        ,S_constant    // 2,
+        ,S_temporary   // 3,
+        ,S_variable    // 4,
+        ,S_tail_call   // 5,
+        ,S_jump_src    // 6,
       )>;
 
-    static_assert(::std::is_nothrow_copy_assignable<Storage>::value);
-
-  private:
     Storage m_stor;
 
   public:
@@ -79,10 +77,8 @@ class Reference_root
       { }
 
     ASTERIA_VARIANT_ASSIGNMENT(Reference_root, Storage, XRootT, xroot)
-      {
-        this->m_stor = ::std::forward<XRootT>(xroot);
-        return *this;
-      }
+      { this->m_stor = ::std::forward<XRootT>(xroot);
+        return *this;  }
 
   public:
     Index

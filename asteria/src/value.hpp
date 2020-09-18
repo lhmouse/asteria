@@ -10,23 +10,20 @@ namespace asteria {
 
 class Value
   {
-  public:
+  private:
     using Storage = variant<
       ROCKET_CDR(
-      , V_null      // 0,
-      , V_boolean   // 1,
-      , V_integer   // 2,
-      , V_real      // 3,
-      , V_string    // 4,
-      , V_opaque    // 5,
-      , V_function  // 6,
-      , V_array     // 7,
-      , V_object    // 8,
+        ,V_null      // 0,
+        ,V_boolean   // 1,
+        ,V_integer   // 2,
+        ,V_real      // 3,
+        ,V_string    // 4,
+        ,V_opaque    // 5,
+        ,V_function  // 6,
+        ,V_array     // 7,
+        ,V_object    // 8,
       )>;
 
-    static_assert(::std::is_nothrow_copy_assignable<Storage>::value);
-
-  private:
     Storage m_stor;
 
   public:

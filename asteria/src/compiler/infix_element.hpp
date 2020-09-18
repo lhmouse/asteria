@@ -64,19 +64,17 @@ class Infix_Element
         index_general      = 5,
       };
 
+  private:
     using Storage = variant<
       ROCKET_CDR(
-      , S_head         // 0,
-      , S_ternary      // 1,
-      , S_logical_and  // 2,
-      , S_logical_or   // 3,
-      , S_coalescence  // 4,
-      , S_general      // 5,
+        ,S_head         // 0,
+        ,S_ternary      // 1,
+        ,S_logical_and  // 2,
+        ,S_logical_or   // 3,
+        ,S_coalescence  // 4,
+        ,S_general      // 5,
       )>;
 
-    static_assert(::std::is_nothrow_copy_assignable<Storage>::value);
-
-  private:
     Storage m_stor;
 
   public:
@@ -85,10 +83,8 @@ class Infix_Element
       { }
 
     ASTERIA_VARIANT_ASSIGNMENT(Infix_Element, Storage, XElemT, xelem)
-      {
-        this->m_stor = ::std::forward<XElemT>(xelem);
-        return *this;
-      }
+      { this->m_stor = ::std::forward<XElemT>(xelem);
+        return *this;  }
 
   public:
     Index

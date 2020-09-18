@@ -28,19 +28,19 @@ class Runtime_Error
   public:
     Runtime_Error(F_native, const exception& stdex)
       : m_value(cow_string(stdex.what()))
-      { this->do_backtrace(),
+      { this->do_backtrace();
         this->do_insert_frame(frame_type_native, nullopt, this->m_value);  }
 
     template<typename XValT,
     ROCKET_ENABLE_IF(::std::is_constructible<Value, XValT&&>::value)>
     Runtime_Error(F_throw, XValT&& xval, const Source_Location& sloc)
       : m_value(::std::forward<XValT>(xval))
-      { this->do_backtrace(),
+      { this->do_backtrace();
         this->do_insert_frame(frame_type_throw, sloc, this->m_value);  }
 
     Runtime_Error(F_assert, const Source_Location& sloc, const cow_string& msg)
       : m_value("Assertion failure: " + msg)
-      { this->do_backtrace(),
+      { this->do_backtrace();
         this->do_insert_frame(frame_type_assert, sloc, this->m_value);  }
 
     ASTERIA_COPYABLE_DESTRUCTOR(Runtime_Error);

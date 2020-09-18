@@ -119,27 +119,25 @@ class Expression_Unit
         index_import_call       = 13,
       };
 
+  private:
     using Storage = variant<
       ROCKET_CDR(
-      , S_literal           //  0,
-      , S_named_reference   //  1,
-      , S_closure_function  //  2,
-      , S_branch            //  3,
-      , S_function_call     //  4,
-      , S_member_access     //  5,
-      , S_operator_rpn      //  6,
-      , S_unnamed_array     //  7,
-      , S_unnamed_object    //  8,
-      , S_coalescence       //  9,
-      , S_global_reference  // 10,
-      , S_variadic_call     // 11,
-      , S_argument_finish   // 12,
-      , S_import_call       // 13,
+        ,S_literal           //  0,
+        ,S_named_reference   //  1,
+        ,S_closure_function  //  2,
+        ,S_branch            //  3,
+        ,S_function_call     //  4,
+        ,S_member_access     //  5,
+        ,S_operator_rpn      //  6,
+        ,S_unnamed_array     //  7,
+        ,S_unnamed_object    //  8,
+        ,S_coalescence       //  9,
+        ,S_global_reference  // 10,
+        ,S_variadic_call     // 11,
+        ,S_argument_finish   // 12,
+        ,S_import_call       // 13,
       )>;
 
-    static_assert(::std::is_nothrow_copy_assignable<Storage>::value);
-
-  private:
     Storage m_stor;
 
   public:
@@ -148,10 +146,8 @@ class Expression_Unit
       { }
 
     ASTERIA_VARIANT_ASSIGNMENT(Expression_Unit, Storage, XUnitT, xunit)
-      {
-        this->m_stor = ::std::forward<XUnitT>(xunit);
-        return *this;
-      }
+      { this->m_stor = ::std::forward<XUnitT>(xunit);
+        return *this;  }
 
   public:
     Index

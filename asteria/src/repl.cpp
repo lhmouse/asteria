@@ -476,9 +476,10 @@ do_REP_single()
           code.append("\n);");
           script.reload_string(cmdline.path, 0, code);
         }
-        catch(Parser_Error&)
+        catch(Parser_Error&) {
           // If we fail again, it is the previous exception that we are interested in.
-          { retry = false;  }
+          retry = false;
+        }
       }
 
       // Bail out upon irrecoverable errors.
@@ -497,9 +498,10 @@ do_REP_single()
       }
       return ::fprintf(stderr, "* result #%lu: %s\n", index, str);
     }
-    ASTERIA_RUNTIME_CATCH(Runtime_Error& except)
+    ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
       // If an exception was thrown, print something informative.
-      { return ::fprintf(stderr, "! error: %s\n", except.what());  }
+      return ::fprintf(stderr, "! error: %s\n", except.what());
+    }
   }
 
 [[noreturn]]
@@ -554,9 +556,10 @@ do_single_noreturn()
       else
         script.reload_file(cmdline.path.c_str());
     }
-    catch(Parser_Error& except)
+    catch(Parser_Error& except) {
       // Report the error and exit.
-      { do_exit(exit_parser_error, "! error: %s\n", except.what());  }
+      do_exit(exit_parser_error, "! error: %s\n", except.what());
+    }
 
     // Execute the script.
     ASTERIA_RUNTIME_TRY {
@@ -569,9 +572,10 @@ do_single_noreturn()
       }
       do_exit(stat);
     }
-    ASTERIA_RUNTIME_CATCH(Runtime_Error& except)
+    ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
       // If an exception was thrown, print something informative.
-      { do_exit(exit_runtime_error, "! error: %s\n", except.what());  }
+      do_exit(exit_runtime_error, "! error: %s\n", except.what());
+    }
   }
 
 }  // namespace
@@ -595,6 +599,7 @@ main(int argc, char** argv)
     else
       do_single_noreturn();
   }
-  catch(exception& stdex)
+  catch(exception& stdex) {
     // Print a message followed by the backtrace if it is available. There isn't much we can do.
-    { do_exit(exit_system_error, "! unhandled exception: %s\n", stdex.what());  }
+    do_exit(exit_system_error, "! unhandled exception: %s\n", stdex.what());
+  }
