@@ -91,7 +91,7 @@ struct S_xparse_object
     Key_with_sloc key;
   };
 
-using Xparse = ::rocket::variant<S_xparse_array, S_xparse_object>;
+using Xparse = variant<S_xparse_array, S_xparse_object>;
 
 Value
 do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
