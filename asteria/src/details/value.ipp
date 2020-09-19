@@ -47,7 +47,8 @@ struct Valuable_decayed<bool>
 
 template<typename IntegerT>
 struct Valuable_decayed<IntegerT, typename ::std::enable_if<
-            ::rocket::is_any_type_of<IntegerT, signed char, short, int, long, long long>::value
+            ::rocket::is_any_type_of<IntegerT,
+                            signed char, short, int, long, long long>::value
         >::type>
   {
     using via_type  = V_integer;
@@ -64,7 +65,8 @@ struct Valuable_decayed<IntegerT, typename ::std::enable_if<
 
 template<typename FloatT>
 struct Valuable_decayed<FloatT, typename ::std::enable_if<
-          ::rocket::is_any_type_of<FloatT, float, double>::value
+            ::rocket::is_any_type_of<FloatT,
+                            float, double>::value
         >::type>
   {
     using via_type  = V_real;
@@ -81,7 +83,8 @@ struct Valuable_decayed<FloatT, typename ::std::enable_if<
 
 template<typename StringT>
 struct Valuable_decayed<StringT, typename ::std::enable_if<
-            ::rocket::is_any_type_of<StringT, cow_string::shallow_type, cow_string>::value
+            ::rocket::is_any_type_of<StringT,
+                            cow_string::shallow_type, cow_string>::value
         >::type>
   {
     using via_type  = V_string;
