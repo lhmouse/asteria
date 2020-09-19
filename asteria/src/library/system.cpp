@@ -9,7 +9,7 @@
 #include "../runtime/random_engine.hpp"
 #include "../compiler/token_stream.hpp"
 #include "../compiler/parser_error.hpp"
-#include "../compiler/enums.hpp"
+#include "../compiler/fwd.hpp"
 #include "../utilities.hpp"
 #include <spawn.h>  // ::posix_spawnp()
 #include <sys/wait.h>  // ::waitpid()

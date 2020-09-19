@@ -3,7 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "token_stream.hpp"
-#include "enums.hpp"
+#include "fwd.hpp"
 #include "token.hpp"
 #include "parser_error.hpp"
 #include "../utilities.hpp"

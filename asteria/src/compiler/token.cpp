@@ -3,7 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "token.hpp"
-#include "enums.hpp"
+#include "fwd.hpp"
 #include "../utilities.hpp"
 
 namespace asteria {

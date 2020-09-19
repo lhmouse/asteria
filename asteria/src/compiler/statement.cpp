@@ -4,11 +4,11 @@
 #include "../precompiled.hpp"
 #include "statement.hpp"
 #include "expression_unit.hpp"
-#include "enums.hpp"
+#include "fwd.hpp"
 #include "../runtime/air_node.hpp"
 #include "../runtime/analytic_context.hpp"
 #include "../runtime/air_optimizer.hpp"
-#include "../runtime/enums.hpp"
+#include "../runtime/fwd.hpp"
 #include "../utilities.hpp"
 
 namespace asteria {

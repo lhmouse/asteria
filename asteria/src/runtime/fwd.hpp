@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_RUNTIME_ENUMS_HPP_
-#define ASTERIA_RUNTIME_ENUMS_HPP_
+#ifndef ASTERIA_RUNTIME_FWD_HPP_
+#define ASTERIA_RUNTIME_FWD_HPP_
 
 #include "../fwd.hpp"
 

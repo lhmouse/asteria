@@ -8,7 +8,7 @@
 #include "abstract_context.hpp"
 #include "variadic_arguer.hpp"
 #include "evaluation_stack.hpp"
-#include "enums.hpp"
+#include "fwd.hpp"
 #include "../llds/avmc_queue.hpp"
 
 namespace asteria {

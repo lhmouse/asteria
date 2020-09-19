@@ -9,8 +9,8 @@
 #include "expression_unit.hpp"
 #include "statement.hpp"
 #include "infix_element.hpp"
-#include "enums.hpp"
-#include "../runtime/enums.hpp"
+#include "fwd.hpp"
+#include "../runtime/fwd.hpp"
 #include "../utilities.hpp"
 
 namespace asteria {

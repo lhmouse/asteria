@@ -27,7 +27,7 @@ include_asteria_llds_HEADERS =  \
 
 include_asteria_runtimedir = ${includedir}/asteria/runtime
 include_asteria_runtime_HEADERS =  \
-  %reldir%/runtime/enums.hpp  \
+  %reldir%/runtime/fwd.hpp  \
   %reldir%/runtime/abstract_hooks.hpp  \
   %reldir%/runtime/reference_root.hpp  \
   %reldir%/runtime/reference_modifier.hpp  \
@@ -55,7 +55,7 @@ include_asteria_runtime_HEADERS =  \
 
 include_asteria_compilerdir = ${includedir}/asteria/compiler
 include_asteria_compiler_HEADERS =  \
-  %reldir%/compiler/enums.hpp  \
+  %reldir%/compiler/fwd.hpp  \
   %reldir%/compiler/parser_error.hpp  \
   %reldir%/compiler/token.hpp  \
   %reldir%/compiler/token_stream.hpp  \
@@ -92,7 +92,7 @@ lib_libasteria_la_SOURCES =  \
   %reldir%/llds/variable_hashset.cpp  \
   %reldir%/llds/reference_dictionary.cpp  \
   %reldir%/llds/avmc_queue.cpp  \
-  %reldir%/runtime/enums.cpp  \
+  %reldir%/runtime/fwd.cpp  \
   %reldir%/runtime/abstract_hooks.cpp  \
   %reldir%/runtime/reference_root.cpp  \
   %reldir%/runtime/reference_modifier.cpp  \
@@ -116,7 +116,7 @@ lib_libasteria_la_SOURCES =  \
   %reldir%/runtime/air_node.cpp  \
   %reldir%/runtime/air_optimizer.cpp  \
   %reldir%/runtime/argument_reader.cpp  \
-  %reldir%/compiler/enums.cpp  \
+  %reldir%/compiler/fwd.cpp  \
   %reldir%/compiler/parser_error.cpp  \
   %reldir%/compiler/token.cpp  \
   %reldir%/compiler/token_stream.cpp  \

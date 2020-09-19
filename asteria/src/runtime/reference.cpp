@@ -10,7 +10,7 @@
 #include "runtime_error.hpp"
 #include "variable.hpp"
 #include "ptc_arguments.hpp"
-#include "enums.hpp"
+#include "fwd.hpp"
 #include "../utilities.hpp"
 
 namespace asteria {
