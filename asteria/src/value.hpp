@@ -37,7 +37,7 @@ class Value
     ROCKET_ENABLE_IF(details_value::Valuable<XValT>::nullable::value)>
     Value(XValT&& xval)
     noexcept(::std::is_nothrow_assignable<Storage&,
-                              typename details_value::Valuable<XValT>::via_type&&>::value)
+                          typename details_value::Valuable<XValT>::via_type&&>::value)
       : m_stor()
       { details_value::Valuable<XValT>::assign(this->m_stor, ::std::forward<XValT>(xval));  }
 
@@ -45,7 +45,7 @@ class Value
     ROCKET_DISABLE_IF(details_value::Valuable<XValT>::nullable::value)>
     Value(XValT&& xval)
     noexcept(::std::is_nothrow_constructible<Storage&,
-                              typename details_value::Valuable<XValT>::via_type&&>::value)
+                          typename details_value::Valuable<XValT>::via_type&&>::value)
       : m_stor(typename details_value::Valuable<XValT>::via_type(::std::forward<XValT>(xval)))
       { }
 
@@ -53,7 +53,7 @@ class Value
     ROCKET_ENABLE_IF_HAS_TYPE(typename details_value::Valuable<XValT>::via_type)>
     Value(const opt<XValT>& xopt)
     noexcept(::std::is_nothrow_assignable<Storage&,
-                              const typename details_value::Valuable<XValT>::via_type&>::value)
+                          const typename details_value::Valuable<XValT>::via_type&>::value)
       {
         if(xopt)
           details_value::Valuable<XValT>::assign(this->m_stor, *xopt);
@@ -63,7 +63,7 @@ class Value
     ROCKET_ENABLE_IF_HAS_TYPE(typename details_value::Valuable<XValT>::via_type)>
     Value(opt<XValT>&& xopt)
     noexcept(::std::is_nothrow_assignable<Storage&,
-                              typename details_value::Valuable<XValT>::via_type&&>::value)
+                          typename details_value::Valuable<XValT>::via_type&&>::value)
       {
         if(xopt)
           details_value::Valuable<XValT>::assign(this->m_stor, ::std::move(*xopt));
@@ -79,7 +79,7 @@ class Value
     Value&
     operator=(XValT&& xval)
     noexcept(::std::is_nothrow_assignable<Storage&,
-                              typename details_value::Valuable<XValT>::via_type&&>::value)
+                          typename details_value::Valuable<XValT>::via_type&&>::value)
       {
         details_value::Valuable<XValT>::assign(this->m_stor, ::std::forward<XValT>(xval));
         return *this;
@@ -90,7 +90,7 @@ class Value
     Value&
     operator=(const opt<XValT>& xopt)
     noexcept(::std::is_nothrow_assignable<Storage&,
-                              const typename details_value::Valuable<XValT>::via_type&>::value)
+                          const typename details_value::Valuable<XValT>::via_type&>::value)
       {
         if(xopt)
           details_value::Valuable<XValT>::assign(this->m_stor, *xopt);
@@ -104,7 +104,7 @@ class Value
     Value&
     operator=(opt<XValT>&& xopt)
     noexcept(::std::is_nothrow_assignable<Storage&,
-                              typename details_value::Valuable<XValT>::via_type&&>::value)
+                          typename details_value::Valuable<XValT>::via_type&&>::value)
       {
         if(xopt)
           details_value::Valuable<XValT>::assign(this->m_stor, ::std::move(*xopt));
