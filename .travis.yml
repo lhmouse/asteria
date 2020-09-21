@@ -8,6 +8,7 @@ addons:
   apt:
     packages:
       - parallel
+      - libpcre2-dev
 
 compiler:
   - gcc
