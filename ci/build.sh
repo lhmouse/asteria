@@ -2,7 +2,7 @@
 
 # setup
 export CXX=${CXX:-"g++"}
-export CXXFLAGS='-O2 -g0 -std=gnu++14 -fno-gnu-keywords'
+export CXXFLAGS='-O2 -g0'
 
 # build
 ${CXX} --version
