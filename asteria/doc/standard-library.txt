@@ -907,132 +907,125 @@
 	  sequences, or when a placeholder sequence has no corresponding
 	  argument.
 
-`std.string.regex_find(text, pattern)`
+`std.string.pcre_find(text, pattern)`
 
-	* Searches `text` for the first occurrence of the regular
-	  expression `pattern`.
+	* Searches `text` for the first match of the Perl-compatible
+	  regular expressions (PCRE) `pattern`.
 
-	* Returns an array of two integers, the first of which
-	  specifies the subscript of the matching sequence and the second
-	  of which specifies its length. If `pattern` is not found, this
-	  function returns `null`.
+	* Returns an array of two integers. The first integer specifies
+	  the subscript of the matching sequence and the second integer
+	  specifies its length. If `pattern` is not found, this function
+	  returns `null`.
 
-	* Throws an exception if `pattern` is not a valid regular
-	  expression.
+	* Throws an exception if `pattern` is not a valid PCRE.
 
-`std.string.regex_find(text, from, pattern)`
+`std.string.pcre_find(text, from, pattern)`
 
-	* Searches `text` for the first occurrence of the regular
-	  expression `pattern`. The search operation is performed on the
-	  same subrange that would be returned by `slice(text, from)`.
+	* Searches `text` for the first match of the Perl-compatible
+	  regular expressions (PCRE) `pattern`. The search operation is
+	  performed on the same subrange that would be returned by
+	  `slice(text, from)`.
 
-	* Returns an array of two integers, the first of which
-	  specifies the subscript of the matching sequence and the second
-	  of which specifies its length. If `pattern` is not found, this
-	  function returns `null`.
+	* Returns an array of two integers. The first integer specifies
+	  the subscript of the matching sequence and the second integer
+	  specifies its length. If `pattern` is not found, this function
+	  returns `null`.
 
-	* Throws an exception if `pattern` is not a valid regular
-	  expression.
+	* Throws an exception if `pattern` is not a valid PCRE.
 
-`std.string.regex_find(text, from, [length], pattern)`
+`std.string.pcre_find(text, from, [length], pattern)`
 
-	* Searches `text` for the first occurrence of the regular
-	  expression `pattern`. The search operation is performed on the
-	  same subrange that would be returned by
+	* Searches `text` for the first match of the Perl-compatible
+	  regular expressions (PCRE) `pattern`. The search operation is
+	  performed on the same subrange that would be returned by
 	  `slice(text, from, length)`.
 
-	* Returns an array of two integers, the first of which
-	  specifies the subscript of the matching sequence and the second
-	  of which specifies its length. If `pattern` is not found, this
-	  function returns `null`.
+	* Returns an array of two integers. The first integer specifies
+	  the subscript of the matching sequence and the second integer
+	  specifies its length. If `pattern` is not found, this function
+	  returns `null`.
 
-	* Throws an exception if `pattern` is not a valid regular
-	  expression.
+	* Throws an exception if `pattern` is not a valid PCRE.
 
-`std.string.regex_match(text, pattern)`
+`std.string.pcre_match(text, pattern)`
 
-	* Checks whether the regular expression `patterm` matches the
-	  entire sequence `text`.
+	* Searches `text` for the first match of the Perl-compatible
+	  regular expressions (PCRE) `pattern`.
 
-	* Returns an array of optional strings. The first element
-	  contains a copy of `text`. All the other elements hold
+	* Returns an array of strings. The first element is a copy of the
+	  substring that matches `pattern`. The remaining elements are
 	  substrings that match positional capturing groups. If a group
-	  matches nothing, the corresponding element is `null`. The total
-	  number of elements equals the number of capturing groups plus
-	  one. If `text` does not match `pattern`, `null` is returned.
+	  fails to match, its corresponding element is `null`. If `text`
+	  does not match `pattern`, `null` is returned.
 
-	* Throws an exception if `pattern` is not a valid regular
-	  expression.
+	* Throws an exception if `pattern` is not a valid PCRE.
 
-`std.string.regex_match(text, from, pattern)`
+`std.string.pcre_match(text, from, pattern)`
 
-	* Checks whether the regular expression `patterm` matches the
-	  subrange that would be returned by `slice(text, from)`.
+	* Searches `text` for the first match of the Perl-compatible
+	  regular expressions (PCRE) `pattern`. The search operation is
+	  performed on the same subrange that would be returned by
+	  `slice(text, from)`.
 
-	* Returns an array of optional strings. The first element
-	  contains a copy of `text`. All the other elements hold
+	* Returns an array of strings. The first element is a copy of the
+	  substring that matches `pattern`. The remaining elements are
 	  substrings that match positional capturing groups. If a group
-	  matches nothing, the corresponding element is `null`. The total
-	  number of elements equals the number of capturing groups plus
-	  one. If `text` does not match `pattern`, `null` is returned.
+	  fails to match, its corresponding element is `null`. If `text`
+	  does not match `pattern`, `null` is returned.
 
-	* Throws an exception if `pattern` is not a valid regular
-	  expression.
+	* Throws an exception if `pattern` is not a valid PCRE.
 
-`std.string.regex_match(text, from, [length], pattern)`
+`std.string.pcre_match(text, from, [length], pattern)`
 
-	* Checks whether the regular expression `patterm` matches the
-	  subrange that would be returned by `slice(text, from, length)`.
+	* Searches `text` for the first match of the Perl-compatible
+	  regular expressions (PCRE) `pattern`. The search operation is
+	  performed on the same subrange that would be returned by
+	  `slice(text, from, length)`.
 
-	* Returns an array of optional strings. The first element
-	  contains a copy of `text`. All the other elements hold
+	* Returns an array of strings. The first element is a copy of the
+	  substring that matches `pattern`. The remaining elements are
 	  substrings that match positional capturing groups. If a group
-	  matches nothing, the corresponding element is `null`. The total
-	  number of elements equals the number of capturing groups plus
-	  one. If `text` does not match `pattern`, `null` is returned.
+	  fails to match, its corresponding element is `null`. If `text`
+	  does not match `pattern`, `null` is returned.
 
-	* Throws an exception if `pattern` is not a valid regular
-	  expression.
+	* Throws an exception if `pattern` is not a valid PCRE.
 
-`std.string.regex_replace(text, pattern, replacement)`
+`std.string.pcre_replace(text, pattern, replacement)`
 
-	* Searches `text` and replaces all matches of the regular
-	  expression `pattern` with `replacement`. This function returns
-	  a new string without modifying `text`.
+	* Searches `text` and replaces all matches of the Perl-compatible
+	  regular expressions (PCRE) `pattern` with `replacement`. This
+	  function returns a new string without modifying `text`.
 
 	* Returns the string with `pattern` replaced. If `text` does not
 	  contain `pattern`, it is returned intact.
 
-	* Throws an exception if `pattern` is not a valid regular
-	  expression.
+	* Throws an exception if `pattern` is not a valid PCRE.
 
-`std.string.regex_replace(text, from, pattern, replacement)`
+`std.string.pcre_replace(text, from, pattern, replacement)`
 
-	* Searches `text` and replaces all matches of the regular
-	  expression `pattern` with `replacement`. The search operation
-	  is performed on the same subrange that would be returned by
-	  `slice(text, from)`. This function returns a new string
-	  without modifying `text`.
-
-	* Returns the string with `pattern` replaced. If `text` does not
-	  contain `pattern`, it is returned intact.
-
-	* Throws an exception if either `pattern` or `replacement` is not
-	  a valid regular expression.
-
-`std.string.regex_replace(text, from, [length], pattern, replacement)`
-
-	* Searches `text` and replaces all matches of the regular
-	  expression `pattern` with `replacement`. The search operation
-	  is performed on the same subrange that would be returned by
-	  `slice(text, from, length)`. This function returns a new
+	* Searches `text` and replaces all matches of the Perl-compatible
+	  regular expressions (PCRE) `pattern` with `replacement`. The
+	  search operation is performed on the same subrange that would
+	  be returned by `slice(text, from)`. This function returns a new
 	  string without modifying `text`.
 
 	* Returns the string with `pattern` replaced. If `text` does not
 	  contain `pattern`, it is returned intact.
 
-	* Throws an exception if `pattern` is not a valid regular
-	  expression.
+	* Throws an exception if `pattern` is not a valid PCRE.
+
+`std.string.pcre_replace(text, from, [length], pattern, replacement)`
+
+	* Searches `text` and replaces all matches of the Perl-compatible
+	  regular expressions (PCRE) `pattern` with `replacement`. The
+	  search operation is performed on the same subrange that would
+	  be returned by `slice(text, from, length)`. This function
+	  returns a new string without modifying `text`.
+
+	* Returns the string with `pattern` replaced. If `text` does not
+	  contain `pattern`, it is returned intact.
+
+	* Throws an exception if `pattern` is not a valid PCRE.
 
 ### `std.array`
 

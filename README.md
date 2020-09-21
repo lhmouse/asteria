@@ -15,7 +15,7 @@
 |**GCC 8**   |:1st_place_medal:Primary   |                 |
 |**GCC 7**   |:2nd_place_medal:Secondary |Faulty strict overflow warnings.    |
 |**GCC 6**   |:1st_place_medal:Primary   |                 |
-|**GCC 5**   |:2nd_place_medal:Secondary |                 |
+|**GCC 5**   |:1st_place_medal:Primary   |                 |
 |**Clang 8** |:2nd_place_medal:Secondary |Unknown warning options. A number of meaningless warnings.  |
 |**Clang 7** |:2nd_place_medal:Secondary |Unknown warning options. A number of meaningless warnings.  |
 |**MSVC 19** |:no_entry:Abandoned        |Little build system support. Internal compiler errors.   |

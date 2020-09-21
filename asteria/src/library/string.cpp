@@ -6,8 +6,9 @@
 #include "../runtime/argument_reader.hpp"
 #include "../utilities.hpp"
 #include "../../rocket/ascii_case.hpp"
+#define PCRE2_CODE_UNIT_WIDTH 8
+#include <pcre2.h>
 #include <endian.h>
-#include <regex>
 
 namespace asteria {
 namespace {
@@ -504,62 +505,68 @@ do_unpack_le(const V_string& text)
     return values;
   }
 
-::std::regex
-do_make_regex(const V_string& pattern)
-  try {
-    return ::std::regex(pattern.data(), pattern.size());
-  }
-  catch(::std::regex_error& stdex) {
-    ASTERIA_THROW("Invalid regular expression (text `$1`): $2", pattern, stdex.what());
-  }
-
-::std::string
-do_make_regex_replacement(const V_string& replacement)
+class PCRE2_Error
   {
-    return ::std::string(replacement.data(), replacement.size());
-  }
+  private:
+    array<char, 256> m_buf;
 
-template<typename IterT>
-::std::sub_match<IterT>
-do_regex_search(IterT tbegin, IterT tend, const ::std::regex& pattern)
-  {
-    ::std::sub_match<IterT> match;
-    ::std::match_results<IterT> matches;
-    if(::std::regex_search(tbegin, tend, matches, pattern))
-      match = matches[0];
-    return match;
-  }
+  public:
+    explicit
+    PCRE2_Error(int err)
+    noexcept
+      { ::pcre2_get_error_message(err, reinterpret_cast<uint8_t*>(this->m_buf.mut_data()),
+                                  this->m_buf.size());  }
 
-template<typename IterT>
-::std::match_results<IterT>
-do_regex_match(IterT tbegin, IterT tend, const ::std::regex& pattern)
-  {
-    ::std::match_results<IterT> matches;
-    ::std::regex_match(tbegin, tend, matches, pattern);
-    return matches;
-  }
+  public:
+    const char*
+    c_str()
+    const noexcept
+      { return this->m_buf.data();  }
+  };
 
-template<typename IterT>
-V_array
-do_regex_copy_matches(const ::std::match_results<IterT>& matches)
-  {
-    V_array rval(matches.size());
-    for(size_t i = 0;  i < matches.size();  ++i) {
-      const auto& m = matches[i];
-      if(m.matched)
-        rval.mut(i) = V_string(m.first, m.second);
-    }
-    return rval;
-  }
+inline
+tinyfmt&
+operator<<(tinyfmt& fmt, const PCRE2_Error& err)
+  { return fmt << err.c_str();  }
 
-template<typename IterT>
-V_string&
-do_regex_replace(V_string& res, IterT tbegin, IterT tend,
-                 const ::std::regex& pattern, const ::std::string& replacement)
+class PCRE2_pcre
   {
-    ::std::regex_replace(::std::back_inserter(res), tbegin, tend, pattern, replacement);
-    return res;
-  }
+  private:
+    uptr<::pcre2_code, void (&)(::pcre2_code*)> m_code;
+    uptr<::pcre2_match_data, void (&)(::pcre2_match_data*)> m_match;
+
+  public:
+    explicit
+    PCRE2_pcre(const V_string& pattern, uint32_t opts = 0)
+      : m_code(::pcre2_code_free),
+        m_match(::pcre2_match_data_free)
+      {
+        int err;
+        size_t off;
+        if(!this->m_code.reset(::pcre2_compile(reinterpret_cast<const uint8_t*>(pattern.data()),
+                               pattern.size(), opts | PCRE2_NEVER_UTF | PCRE2_NEVER_UCP,
+                               &err, &off, nullptr)))
+          ASTERIA_THROW("Invalid regular expression: $1\n"
+                        "[`pcre2_compile()` failed at offset `$3`: $2]",
+                        pattern, PCRE2_Error(err), off);
+
+        if(!this->m_match.reset(::pcre2_match_data_create_from_pattern(this->m_code, nullptr)))
+          ASTERIA_THROW("Could not allocate `match_data` structure: $1\n"
+                        "[`pcre2_match_data_create_from_pattern()` failed]",
+                        pattern);
+      }
+
+  public:
+    ::pcre2_code*
+    code()
+    noexcept
+      { return this->m_code;  }
+
+    ::pcre2_match_data*
+    match()
+    noexcept
+      { return this->m_match;  }
+  };
 
 }  // namespace
 
@@ -1480,36 +1487,133 @@ std_string_format(V_string templ, cow_vector<Value> values)
   }
 
 opt<pair<V_integer, V_integer>>
-std_string_regex_find(V_string text, V_integer from, optV_integer length, V_string pattern)
+std_string_pcre_find(V_string text, V_integer from, optV_integer length, V_string pattern)
   {
     auto range = do_slice(text, from, length);
-    auto match = do_regex_search(range.first, range.second, do_make_regex(pattern));
-    if(!match.matched)
-      return nullopt;
-    return ::std::make_pair(match.first - text.begin(), match.second - match.first);
+
+    // Get the real start and length.
+    auto sub_off = static_cast<size_t>(range.first - text.begin());
+    auto sub_ptr = reinterpret_cast<const uint8_t*>(text.data()) + sub_off;
+    auto sub_len = static_cast<size_t>(range.second - range.first);
+
+    // Construct a regular expression that captures nothing.
+    PCRE2_pcre pcre(pattern, PCRE2_NO_AUTO_CAPTURE);
+    int err = ::pcre2_match(pcre.code(), sub_ptr, sub_len, 0, 0, pcre.match(), nullptr);
+    if(err < 0) {
+      if(err == PCRE2_ERROR_NOMATCH)
+        return nullopt;
+
+      ASTERIA_THROW("Regular expression match failure: $1\n"
+                    "[`pcre2_match()` failed: $2]",
+                    pattern, PCRE2_Error(err));
+    }
+
+    // Get the output vector. We only need the first two elements here.
+    auto ovec = ::pcre2_get_ovector_pointer(pcre.match());
+
+    // This is copied from PCRE2 manual:
+    //   If a pattern uses the \K escape sequence within a positive assertion, the reported
+    //   start of a successful match can be greater than the end of the match. For example,
+    //   if the pattern (?=ab\K) is matched against "ab", the start and end offset values
+    //   for the match are 2 and 0.
+    return ::std::make_pair(static_cast<int64_t>(sub_off + ovec[0]),
+                            static_cast<int64_t>(::std::max(ovec[0], ovec[1]) - ovec[0]));
   }
 
 optV_array
-std_string_regex_match(V_string text, V_integer from, optV_integer length, V_string pattern)
+std_string_pcre_match(V_string text, V_integer from, optV_integer length, V_string pattern)
   {
     auto range = do_slice(text, from, length);
-    auto matches = do_regex_match(range.first, range.second, do_make_regex(pattern));
-    if(matches.empty())
-      return nullopt;
-    return do_regex_copy_matches(matches);
+
+    // Get the real start and length.
+    auto sub_off = static_cast<size_t>(range.first - text.begin());
+    auto sub_ptr = reinterpret_cast<const uint8_t*>(text.data()) + sub_off;
+    auto sub_len = static_cast<size_t>(range.second - range.first);
+
+    // Construct a regular expression.
+    PCRE2_pcre pcre(pattern);
+    int err = ::pcre2_match(pcre.code(), sub_ptr, sub_len, 0, 0, pcre.match(), nullptr);
+    if(err < 0) {
+      if(err == PCRE2_ERROR_NOMATCH)
+        return nullopt;
+
+      ASTERIA_THROW("Regular expression match failure: $1\n"
+                    "[`pcre2_match()` failed: $2]",
+                    pattern, PCRE2_Error(err));
+    }
+
+    // Get the output vector and number of groups plus the match itself.
+    auto ovec = ::pcre2_get_ovector_pointer(pcre.match());
+    size_t npairs = ::pcre2_get_ovector_count(pcre.match());
+
+    // Compose the match result array.
+    // The first element should be the matched substring. All remaining elements are
+    // positional capturing groups. If a group matched nothing, its corresponding element
+    // is `null`.
+    V_array matches(npairs);
+    for(size_t k = 0;  k != npairs;  ++k) {
+      auto opair = ovec + k * 2;
+      if(opair[0] == PCRE2_UNSET)
+        continue;
+
+      // This is copied from PCRE2 manual:
+      //   If a pattern uses the \K escape sequence within a positive assertion, the reported
+      //   start of a successful match can be greater than the end of the match. For example,
+      //   if the pattern (?=ab\K) is matched against "ab", the start and end offset values
+      //   for the match are 2 and 0.
+      matches.mut(k) = cow_string(reinterpret_cast<const char*>(sub_ptr + opair[0]),
+                                  ::std::max(opair[0], opair[1]) - opair[0]);
+    }
+    return ::std::move(matches);
   }
 
 V_string
-std_string_regex_replace(V_string text, V_integer from, optV_integer length, V_string pattern,
-                         V_string replacement)
+std_string_pcre_replace(V_string text, V_integer from, optV_integer length, V_string pattern,
+                        V_string replacement)
   {
-    V_string res;
     auto range = do_slice(text, from, length);
-    res.append(text.begin(), range.first);
-    do_regex_replace(res, range.first, range.second, do_make_regex(pattern),
-                          do_make_regex_replacement(replacement));
-    res.append(range.second, text.end());
-    return res;
+
+    // Get the real start and length.
+    auto sub_off = static_cast<size_t>(range.first - text.begin());
+    auto sub_ptr = reinterpret_cast<const uint8_t*>(text.data()) + sub_off;
+    auto sub_len = static_cast<size_t>(range.second - range.first);
+
+    // Reserve resonable storage for the replaced string.
+    size_t output_len = text.size() * 3 / 2 + 50;
+    V_string output_str;
+
+    // Construct a regular expression.
+    PCRE2_pcre pcre(pattern);
+    int err;
+    do {
+      output_str.assign(output_len, '*');
+
+      // Try substitution using reserved storage.
+      err = ::pcre2_substitute(pcre.code(), sub_ptr, sub_len, 0,
+                               PCRE2_SUBSTITUTE_EXTENDED | PCRE2_SUBSTITUTE_GLOBAL
+                                   | PCRE2_SUBSTITUTE_OVERFLOW_LENGTH,
+                               pcre.match(), nullptr,
+                               reinterpret_cast<const uint8_t*>(replacement.data()), replacement.size(),
+                               reinterpret_cast<uint8_t*>(output_str.mut_data()), &output_len);
+    }
+    while(err == PCRE2_ERROR_NOMEMORY);
+
+    if(err < 0) {
+      if(err == PCRE2_ERROR_NOMATCH)
+        return ::std::move(text);
+
+      ASTERIA_THROW("Regular expression substitution failure: $1\n"
+                    "[`pcre2_substitute()` failed: $2]",
+                    pattern, PCRE2_Error(err));
+    }
+
+    // Discard excess characters.
+    output_str.resize(output_len);
+
+    // Concatenate it with unreplaced parts.
+    output_str.insert(output_str.begin(), text.begin(), range.first);
+    output_str.append(range.second, text.end());
+    return output_str;
   }
 
 void
@@ -3375,62 +3479,60 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       ));
 
     //===================================================================
-    // `std.string.regex_find()`
+    // `std.string.pcre_find()`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("regex_find"),
+    result.insert_or_assign(::rocket::sref("pcre_find"),
       V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.regex_find(text, pattern)`
+`std.string.pcre_find(text, pattern)`
 
-  * Searches `text` for the first occurrence of the regular
-    expression `pattern`.
+  * Searches `text` for the first match of the Perl-compatible
+    regular expressions (PCRE) `pattern`.
 
-  * Returns an array of two integers, the first of which
-    specifies the subscript of the matching sequence and the second
-    of which specifies its length. If `pattern` is not found, this
-    function returns `null`.
+  * Returns an array of two integers. The first integer specifies
+    the subscript of the matching sequence and the second integer
+    specifies its length. If `pattern` is not found, this function
+    returns `null`.
 
-  * Throws an exception if `pattern` is not a valid regular
-    expression.
+  * Throws an exception if `pattern` is not a valid PCRE.
 
-`std.string.regex_find(text, from, pattern)`
+`std.string.pcre_find(text, from, pattern)`
 
-  * Searches `text` for the first occurrence of the regular
-    expression `pattern`. The search operation is performed on the
-    same subrange that would be returned by `slice(text, from)`.
+  * Searches `text` for the first match of the Perl-compatible
+    regular expressions (PCRE) `pattern`. The search operation is
+    performed on the same subrange that would be returned by
+    `slice(text, from)`.
 
-  * Returns an array of two integers, the first of which
-    specifies the subscript of the matching sequence and the second
-    of which specifies its length. If `pattern` is not found, this
-    function returns `null`.
+  * Returns an array of two integers. The first integer specifies
+    the subscript of the matching sequence and the second integer
+    specifies its length. If `pattern` is not found, this function
+    returns `null`.
 
-  * Throws an exception if `pattern` is not a valid regular
-    expression.
+  * Throws an exception if `pattern` is not a valid PCRE.
 
-`std.string.regex_find(text, from, [length], pattern)`
+`std.string.pcre_find(text, from, [length], pattern)`
 
-  * Searches `text` for the first occurrence of the regular
-    expression `pattern`. The search operation is performed on the
-    same subrange that would be returned by
+  * Searches `text` for the first match of the Perl-compatible
+    regular expressions (PCRE) `pattern`. The search operation is
+    performed on the same subrange that would be returned by
     `slice(text, from, length)`.
 
-  * Returns an array of two integers, the first of which
-    specifies the subscript of the matching sequence and the second
-    of which specifies its length. If `pattern` is not found, this
-    function returns `null`.
+  * Returns an array of two integers. The first integer specifies
+    the subscript of the matching sequence and the second integer
+    specifies its length. If `pattern` is not found, this function
+    returns `null`.
 
-  * Throws an exception if `pattern` is not a valid regular
-    expression.
+  * Throws an exception if `pattern` is not a valid PCRE.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::sref("std.string.regex_find"), ::rocket::cref(args));
+    Argument_Reader reader(::rocket::sref("std.string.pcre_find"), ::rocket::cref(args));
     Argument_Reader::State state;
     // Parse arguments.
     V_string text;
     V_string pattern;
     if(reader.I().v(text).S(state).v(pattern).F()) {
-      auto kpair = std_string_regex_find(::std::move(text), 0, nullopt, ::std::move(pattern));
+      auto kpair = std_string_pcre_find(::std::move(text), 0, nullopt, ::std::move(pattern));
       if(!kpair)
         return self = Reference_root::S_temporary();
       // The binding function returns a `pair`, but we would like to return an array so convert it.
@@ -3439,7 +3541,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).v(pattern).F()) {
-      auto kpair = std_string_regex_find(::std::move(text), from, nullopt, ::std::move(pattern));
+      auto kpair = std_string_pcre_find(::std::move(text), from, nullopt, ::std::move(pattern));
       if(!kpair)
         return self = Reference_root::S_temporary();
       // The binding function returns a `pair`, but we would like to return an array so convert it.
@@ -3448,7 +3550,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     }
     optV_integer length;
     if(reader.L(state).o(length).v(pattern).F()) {
-      auto kpair = std_string_regex_find(::std::move(text), from, length, ::std::move(pattern));
+      auto kpair = std_string_pcre_find(::std::move(text), from, length, ::std::move(pattern));
       if(!kpair)
         return self = Reference_root::S_temporary();
       // The binding function returns a `pair`, but we would like to return an array so convert it.
@@ -3461,77 +3563,75 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       ));
 
     //===================================================================
-    // `std.string.regex_match()`
+    // `std.string.pcre_match()`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("regex_match"),
+    result.insert_or_assign(::rocket::sref("pcre_match"),
       V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.regex_match(text, pattern)`
+`std.string.pcre_match(text, pattern)`
 
-  * Checks whether the regular expression `patterm` matches the
-    entire sequence `text`.
+  * Searches `text` for the first match of the Perl-compatible
+    regular expressions (PCRE) `pattern`.
 
-  * Returns an array of optional strings. The first element
-    contains a copy of `text`. All the other elements hold
+  * Returns an array of strings. The first element is a copy of the
+    substring that matches `pattern`. The remaining elements are
     substrings that match positional capturing groups. If a group
-    matches nothing, the corresponding element is `null`. The total
-    number of elements equals the number of capturing groups plus
-    one. If `text` does not match `pattern`, `null` is returned.
+    fails to match, its corresponding element is `null`. If `text`
+    does not match `pattern`, `null` is returned.
 
-  * Throws an exception if `pattern` is not a valid regular
-    expression.
+  * Throws an exception if `pattern` is not a valid PCRE.
 
-`std.string.regex_match(text, from, pattern)`
+`std.string.pcre_match(text, from, pattern)`
 
-  * Checks whether the regular expression `patterm` matches the
-    subrange that would be returned by `slice(text, from)`.
+  * Searches `text` for the first match of the Perl-compatible
+    regular expressions (PCRE) `pattern`. The search operation is
+    performed on the same subrange that would be returned by
+    `slice(text, from)`.
 
-  * Returns an array of optional strings. The first element
-    contains a copy of `text`. All the other elements hold
+  * Returns an array of strings. The first element is a copy of the
+    substring that matches `pattern`. The remaining elements are
     substrings that match positional capturing groups. If a group
-    matches nothing, the corresponding element is `null`. The total
-    number of elements equals the number of capturing groups plus
-    one. If `text` does not match `pattern`, `null` is returned.
+    fails to match, its corresponding element is `null`. If `text`
+    does not match `pattern`, `null` is returned.
 
-  * Throws an exception if `pattern` is not a valid regular
-    expression.
+  * Throws an exception if `pattern` is not a valid PCRE.
 
-`std.string.regex_match(text, from, [length], pattern)`
+`std.string.pcre_match(text, from, [length], pattern)`
 
-  * Checks whether the regular expression `patterm` matches the
-    subrange that would be returned by `slice(text, from, length)`.
+  * Searches `text` for the first match of the Perl-compatible
+    regular expressions (PCRE) `pattern`. The search operation is
+    performed on the same subrange that would be returned by
+    `slice(text, from, length)`.
 
-  * Returns an array of optional strings. The first element
-    contains a copy of `text`. All the other elements hold
+  * Returns an array of strings. The first element is a copy of the
+    substring that matches `pattern`. The remaining elements are
     substrings that match positional capturing groups. If a group
-    matches nothing, the corresponding element is `null`. The total
-    number of elements equals the number of capturing groups plus
-    one. If `text` does not match `pattern`, `null` is returned.
+    fails to match, its corresponding element is `null`. If `text`
+    does not match `pattern`, `null` is returned.
 
-  * Throws an exception if `pattern` is not a valid regular
-    expression.
+  * Throws an exception if `pattern` is not a valid PCRE.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::sref("std.string.regex_match"), ::rocket::cref(args));
+    Argument_Reader reader(::rocket::sref("std.string.pcre_match"), ::rocket::cref(args));
     Argument_Reader::State state;
     // Parse arguments.
     V_string text;
     V_string pattern;
     if(reader.I().v(text).S(state).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_regex_match(::std::move(text), 0, nullopt,
+      Reference_root::S_temporary xref = { std_string_pcre_match(::std::move(text), 0, nullopt,
                                                                   ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_regex_match(::std::move(text), from, nullopt,
+      Reference_root::S_temporary xref = { std_string_pcre_match(::std::move(text), from, nullopt,
                                                                   ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
     optV_integer length;
     if(reader.L(state).o(length).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_regex_match(::std::move(text), from, length,
+      Reference_root::S_temporary xref = { std_string_pcre_match(::std::move(text), from, length,
                                                                   ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
@@ -3541,73 +3641,70 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       ));
 
     //===================================================================
-    // `std.string.regex_replace()`
+    // `std.string.pcre_replace()`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("regex_replace"),
+    result.insert_or_assign(::rocket::sref("pcre_replace"),
       V_function(
 """""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.regex_replace(text, pattern, replacement)`
+`std.string.pcre_replace(text, pattern, replacement)`
 
-  * Searches `text` and replaces all matches of the regular
-    expression `pattern` with `replacement`. This function returns
-    a new string without modifying `text`.
-
-  * Returns the string with `pattern` replaced. If `text` does not
-    contain `pattern`, it is returned intact.
-
-  * Throws an exception if `pattern` is not a valid regular
-    expression.
-
-`std.string.regex_replace(text, from, pattern, replacement)`
-
-  * Searches `text` and replaces all matches of the regular
-    expression `pattern` with `replacement`. The search operation
-    is performed on the same subrange that would be returned by
-    `slice(text, from)`. This function returns a new string
-    without modifying `text`.
+  * Searches `text` and replaces all matches of the Perl-compatible
+    regular expressions (PCRE) `pattern` with `replacement`. This
+    function returns a new string without modifying `text`.
 
   * Returns the string with `pattern` replaced. If `text` does not
     contain `pattern`, it is returned intact.
 
-  * Throws an exception if either `pattern` or `replacement` is not
-    a valid regular expression.
+  * Throws an exception if `pattern` is not a valid PCRE.
 
-`std.string.regex_replace(text, from, [length], pattern, replacement)`
+`std.string.pcre_replace(text, from, pattern, replacement)`
 
-  * Searches `text` and replaces all matches of the regular
-    expression `pattern` with `replacement`. The search operation
-    is performed on the same subrange that would be returned by
-    `slice(text, from, length)`. This function returns a new
+  * Searches `text` and replaces all matches of the Perl-compatible
+    regular expressions (PCRE) `pattern` with `replacement`. The
+    search operation is performed on the same subrange that would
+    be returned by `slice(text, from)`. This function returns a new
     string without modifying `text`.
 
   * Returns the string with `pattern` replaced. If `text` does not
     contain `pattern`, it is returned intact.
 
-  * Throws an exception if `pattern` is not a valid regular
-    expression.
+  * Throws an exception if `pattern` is not a valid PCRE.
+
+`std.string.pcre_replace(text, from, [length], pattern, replacement)`
+
+  * Searches `text` and replaces all matches of the Perl-compatible
+    regular expressions (PCRE) `pattern` with `replacement`. The
+    search operation is performed on the same subrange that would
+    be returned by `slice(text, from, length)`. This function
+    returns a new string without modifying `text`.
+
+  * Returns the string with `pattern` replaced. If `text` does not
+    contain `pattern`, it is returned intact.
+
+  * Throws an exception if `pattern` is not a valid PCRE.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
 *[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
   {
-    Argument_Reader reader(::rocket::sref("std.string.regex_replace"), ::rocket::cref(args));
+    Argument_Reader reader(::rocket::sref("std.string.pcre_replace"), ::rocket::cref(args));
     Argument_Reader::State state;
     // Parse arguments.
     V_string text;
     V_string pattern;
     V_string replacement;
     if(reader.I().v(text).S(state).v(pattern).v(replacement).F()) {
-      Reference_root::S_temporary xref = { std_string_regex_replace(::std::move(text), 0, nullopt,
+      Reference_root::S_temporary xref = { std_string_pcre_replace(::std::move(text), 0, nullopt,
                                                           ::std::move(pattern), ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).v(pattern).v(replacement).F()) {
-      Reference_root::S_temporary xref = { std_string_regex_replace(::std::move(text), from, nullopt,
+      Reference_root::S_temporary xref = { std_string_pcre_replace(::std::move(text), from, nullopt,
                                                            ::std::move(pattern), ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
     optV_integer length;
     if(reader.L(state).o(length).v(pattern).v(replacement).F()) {
-      Reference_root::S_temporary xref = { std_string_regex_replace(::std::move(text), from, length,
+      Reference_root::S_temporary xref = { std_string_pcre_replace(::std::move(text), from, length,
                                                            ::std::move(pattern), ::std::move(replacement)) };
       return self = ::std::move(xref);
     }

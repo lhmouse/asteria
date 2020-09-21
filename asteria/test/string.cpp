@@ -342,19 +342,19 @@ int main()
         assert std.string.format("funny $0 string") == "funny funny $0 string string";
         assert std.string.format("$2345", 'x', 'y') == "y345";
 
-        assert std.string.regex_find("a11b2c333d4e555", '\d+\w') == [1,3];
-        assert std.string.regex_find("a11b2c333d4e555", '\d{3}\w') == [6,4];
-        assert std.string.regex_find("a11b2c333d4e555", '\d{34}\w') == null;
-        assert std.string.regex_find("a11b2c333d4e555", '(\w\d+)*') == [0,15];
+        assert std.string.pcre_find("a11b2c333d4e555", '\d+\w') == [1,3];
+        assert std.string.pcre_find("a11b2c333d4e555", '\d{3}\w') == [6,4];
+        assert std.string.pcre_find("a11b2c333d4e555", '\d{34}\w') == null;
+        assert std.string.pcre_find("a11b2c333d4e555", '(\w\d+)*') == [0,15];
 
-        assert std.string.regex_match("a11b2c333d4e555", '\d+\w') == null;
-        assert std.string.regex_match("a11b2c333d4e555", '(\w\d+)*') != null;
-        assert std.string.regex_match("a11b2c333d4e555", '(\w\d*)(\w\d+)(\w\d*\w\d+)(\w\d+)') == [ "a11b2c333d4e555", "a11", "b2", "c333d4", "e555" ];
+        assert std.string.pcre_match("a11b2c333d4e555", '\d+\w') == [ "11b" ];
+        assert std.string.pcre_match("a11b2c333d4e555", '(?:\w\d+)*') == [ "a11b2c333d4e555" ];
+        assert std.string.pcre_match("a11b2c333d4e555", '(\w\d*)(\w\d+)(\w\d*\w\d+)(\w\d+)') == [ "a11b2c333d4e555", "a11", "b2", "c333d4", "e555" ];
+        assert std.string.pcre_match("a11b2c333d4e555", '(\d+\w)(22)?(\d+\w)') == [ "11b2c", "11b", null, "2c" ];
 
-        assert std.string.regex_replace("a11b2c333d4e555", '\d+\w', '*') == "a*****";
-        assert std.string.regex_replace("a11b2c333d4e555", '(\d{3})(\w)', '$2$1') == "a11b2cd3334e555";
-        assert std.string.regex_replace("a11b2c333d4e555", '\d{34}\w', '#') == "a11b2c333d4e555";
-        assert std.string.regex_replace("a11b2c333d4e555", '(\w\d+)*', '$&$&') == "a11b2c333d4e555a11b2c333d4e555";
+        assert std.string.pcre_replace("a11b2c333d4e555", '\d+\w', '*') == "a*****";
+        assert std.string.pcre_replace("a11b2c333d4e555", '(\d{3})(\w)', '$2$1') == "a11b2cd3334e555";
+        assert std.string.pcre_replace("a11b2c333d4e555", '\d{34}\w', '#') == "a11b2c333d4e555";
 
 ///////////////////////////////////////////////////////////////////////////////
       )__"));

@@ -247,16 +247,16 @@ std_string_format(V_string templ, cow_vector<Value> values);
 
 // `std.stringval`.
 opt<pair<V_integer, V_integer>>
-std_string_regex_find(V_string text, V_integer from, optV_integer length, V_string pattern);
+std_string_pcre_find(V_string text, V_integer from, optV_integer length, V_string pattern);
 
-// `std.string.regex_match`
+// `std.string.pcre_match`
 optV_array
-std_string_regex_match(V_string text, V_integer from, optV_integer length, V_string pattern);
+std_string_pcre_match(V_string text, V_integer from, optV_integer length, V_string pattern);
 
-// `std.string.regex_replace`
+// `std.string.pcre_replace`
 V_string
-std_string_regex_replace(V_string text, V_integer from, optV_integer length, V_string pattern,
-                         V_string replacement);
+std_string_pcre_replace(V_string text, V_integer from, optV_integer length, V_string pattern,
+                        V_string replacement);
 
 // Create an object that is to be referenced as `std.string`.
 void
