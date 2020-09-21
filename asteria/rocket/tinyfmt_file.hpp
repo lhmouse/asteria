@@ -131,7 +131,7 @@ class basic_tinyfmt_file
 template<typename charT, typename traitsT, typename allocT>
 basic_tinyfmt_file<charT, traitsT, allocT>::
 ~basic_tinyfmt_file()
-  = default;
+  { }
 
 template<typename charT, typename traitsT, typename allocT>
 inline

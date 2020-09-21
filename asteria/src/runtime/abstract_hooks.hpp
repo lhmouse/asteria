@@ -14,7 +14,7 @@ class Abstract_Hooks
   public:
     Abstract_Hooks()
     noexcept
-      = default;
+      { }
 
     ASTERIA_COPYABLE_DESTRUCTOR(Abstract_Hooks);
 

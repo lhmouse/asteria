@@ -29,7 +29,7 @@ final
   public:
     Variable()
     noexcept
-      = default;
+      { }
 
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Variable);
 

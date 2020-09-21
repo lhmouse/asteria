@@ -20,7 +20,7 @@ class Abstract_Context
     constexpr
     Abstract_Context()
     noexcept
-      = default;
+      { }
 
     virtual
     ~Abstract_Context();

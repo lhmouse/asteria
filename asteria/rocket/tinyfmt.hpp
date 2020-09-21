@@ -103,7 +103,7 @@ class basic_tinyfmt
 template<typename charT, typename traitsT>
 basic_tinyfmt<charT, traitsT>::
 ~basic_tinyfmt()
-  = default;
+  { }
 
 extern template
 class basic_tinyfmt<char>;

@@ -23,7 +23,7 @@ final
   public:
     Loader_Lock()
     noexcept
-      = default;
+      { }
 
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Loader_Lock);
 
@@ -46,7 +46,7 @@ class Loader_Lock::Unique_Stream
     constexpr
     Unique_Stream()
     noexcept
-      = default;
+      { }
 
     Unique_Stream(const rcptr<Loader_Lock>& lock, const char* path)
       { this->reset(lock, path);  }

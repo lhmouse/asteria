@@ -392,7 +392,7 @@ class basic_tinybuf_file
 template<typename charT, typename traitsT, typename allocT>
 basic_tinybuf_file<charT, traitsT, allocT>::
 ~basic_tinybuf_file()
-  = default;
+  { }
 
 template<typename charT, typename traitsT, typename allocT>
 inline
