@@ -9,7 +9,7 @@ namespace asteria {
 static_assert(::std::is_nothrow_copy_constructible<Parser_Error>::value &&
               ::std::is_nothrow_move_constructible<Parser_Error>::value &&
               ::std::is_nothrow_copy_assignable<Parser_Error>::value &&
-              ::std::is_nothrow_move_assignable<Parser_Error>::value);
+              ::std::is_nothrow_move_assignable<Parser_Error>::value, "");
 
 Parser_Error::
 ~Parser_Error()

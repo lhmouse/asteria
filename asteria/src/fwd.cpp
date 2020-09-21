@@ -7,14 +7,6 @@
 #include "value.hpp"
 #include "utilities.hpp"
 
-// These are explicit instantiations. Note that they can't occur inside `namespace asteria`.
-template
-class ::rocket::cow_vector<::asteria::Value>;
-
-template
-class ::rocket::cow_hashmap<::rocket::prehashed_string, ::asteria::Value,
-                      ::rocket::prehashed_string::hash, ::std::equal_to<void>>;
-
 namespace asteria {
 
 Rcbase::

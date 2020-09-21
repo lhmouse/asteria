@@ -596,7 +596,7 @@ class storage_handle
         auto qbkt = noadl::linear_probe(bptr, orig, orig, eptr,
                         [&](const bucket_type& r) { return this->as_key_equal()(r->first, ykey);  });
 
-        static_assert(max_load_factor_reciprocal > 1);
+        static_assert(max_load_factor_reciprocal > 1, "");
         ROCKET_ASSERT(qbkt);
         tpos = static_cast<size_type>(qbkt - bptr);
 
