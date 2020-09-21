@@ -1579,7 +1579,7 @@ std_string_pcre_replace(V_string text, V_integer from, optV_integer length, V_st
     auto sub_len = static_cast<size_t>(range.second - range.first);
 
     // Reserve resonable storage for the replaced string.
-    size_t output_len = text.size() * 3 / 2 + 50;
+    size_t output_len = replacement.size() + text.size() + 15;
     V_string output_str;
 
     // Construct a regular expression.
