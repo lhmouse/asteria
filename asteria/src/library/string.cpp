@@ -376,135 +376,132 @@ do_url_decode(const V_string& text)
     return data;
   }
 
-template<bool bigendT>
-struct Bswap;
+ROCKET_CONST_FUNCTION inline
+int64_t
+bswap_be(int64_t value)
+noexcept
+  { return static_cast<int64_t>(be64toh(static_cast<uint64_t>(value)));  }
 
-template<>
-struct Bswap<true>  // big endian
+ROCKET_CONST_FUNCTION inline
+int32_t
+bswap_be(int32_t value)
+noexcept
+  { return static_cast<int32_t>(be32toh(static_cast<uint32_t>(value)));  }
+
+ROCKET_CONST_FUNCTION inline
+int16_t
+bswap_be(int16_t value)
+noexcept
+  { return static_cast<int16_t>(be16toh(static_cast<uint16_t>(value)));  }
+
+ROCKET_CONST_FUNCTION inline
+int8_t
+bswap_be(int8_t value)
+noexcept
+  { return value;  }
+
+ROCKET_CONST_FUNCTION inline
+int64_t
+bswap_le(int64_t value)
+noexcept
+  { return static_cast<int64_t>(le64toh(static_cast<uint64_t>(value)));  }
+
+ROCKET_CONST_FUNCTION inline
+int32_t
+bswap_le(int32_t value)
+noexcept
+  { return static_cast<int32_t>(le32toh(static_cast<uint32_t>(value)));  }
+
+ROCKET_CONST_FUNCTION inline
+int16_t
+bswap_le(int16_t value)
+noexcept
+  { return static_cast<int16_t>(le16toh(static_cast<uint16_t>(value)));  }
+
+ROCKET_CONST_FUNCTION inline
+int8_t
+bswap_le(int8_t value)
+noexcept
+  { return value;  }
+
+template<typename WordT>
+V_string
+do_pack_be(const V_integer& value)
   {
-    static inline
-    int64_t
-    conv(int64_t word)
-    noexcept
-      { return int64_t(be64toh(uint64_t(word)));  }
-
-    static inline
-    int32_t
-    conv(int32_t word)
-    noexcept
-      { return int32_t(be32toh(uint32_t(word)));  }
-
-    static inline
-    int16_t
-    conv(int16_t word)
-    noexcept
-      { return int16_t(be16toh(uint16_t(word)));  }
-
-    static inline
-    int8_t
-    conv(int8_t word)
-    noexcept
-      { return word;  }
-
-    static inline
-    int
-    conv(...)
-    noexcept
-      = delete;
-  };
-
-template<>
-struct Bswap<false>  // little endian
-  {
-    static inline
-    int64_t
-    conv(int64_t word)
-    noexcept
-      { return int64_t(le64toh(uint64_t(word)));  }
-
-    static inline
-    int32_t
-    conv(int32_t word)
-    noexcept
-      { return int32_t(le32toh(uint32_t(word)));  }
-
-    static inline
-    int16_t
-    conv(int16_t word)
-    noexcept
-      { return int16_t(le16toh(uint16_t(word)));  }
-
-    static inline
-    int8_t
-    conv(int8_t word)
-    noexcept
-      { return word;  }
-
-    static inline
-    int
-    conv(...)
-    noexcept
-      = delete;
-  };
-
-template<bool bigendT, typename WordT>
-V_string&
-do_pack_one_impl(V_string& text, const V_integer& value)
-  {
-    // Convert the value into the specified byte order.
-    auto word = Bswap<bigendT>::conv(static_cast<WordT>(value));
-    text.append(reinterpret_cast<const char*>(&word), sizeof(word));
+    WordT word = bswap_be(static_cast<WordT>(value));
+    V_string text(reinterpret_cast<char*>(&word), sizeof(WordT));
     return text;
   }
 
 template<typename WordT>
-V_string&
-do_pack_one_be(V_string& text, const V_integer& value)
+V_string
+do_pack_be(const V_array& values)
   {
-    return do_pack_one_impl<1, WordT>(text, value);
+    V_string text;
+    text.reserve(values.size() * sizeof(WordT));
+    for(const auto& value : values) {
+      WordT word = bswap_be(static_cast<WordT>(value.as_integer()));
+      text.append(reinterpret_cast<char*>(&word), sizeof(WordT));
+    }
+    return text;
   }
 
 template<typename WordT>
-V_string&
-do_pack_one_le(V_string& text, const V_integer& value)
+V_string
+do_pack_le(const V_integer& value)
   {
-    return do_pack_one_impl<0, WordT>(text, value);
+    WordT word = bswap_le(static_cast<WordT>(value));
+    V_string text(reinterpret_cast<char*>(&word), sizeof(WordT));
+    return text;
   }
 
-template<bool bigendT, typename WordT>
-V_array
-do_unpack_impl(const V_string& text)
+template<typename WordT>
+V_string
+do_pack_le(const V_array& values)
   {
-    // How many words will the result have?
-    auto nwords = text.size() / sizeof(WordT);
-    if(text.size() != nwords * sizeof(WordT))
-      ASTERIA_THROW("Invalid source string length (`$1` not divisible by `$2`)",
-                    text.size(), sizeof(WordT));
-    const auto pwords = reinterpret_cast<const WordT*>(text.data());
-
-    V_array values;
-    values.reserve(nwords);
-
-    // Unpack integers.
-    for(size_t i = 0;  i < nwords;  ++i) {
-      auto word = Bswap<bigendT>::conv(pwords[i]);
-      values.emplace_back(V_integer(word));
+    V_string text;
+    text.reserve(values.size() * sizeof(WordT));
+    for(const auto& value : values) {
+      WordT word = bswap_le(static_cast<WordT>(value.as_integer()));
+      text.append(reinterpret_cast<char*>(&word), sizeof(WordT));
     }
-    return values;
+    return text;
   }
 
 template<typename WordT>
 V_array
 do_unpack_be(const V_string& text)
   {
-    return do_unpack_impl<1, WordT>(text);
+    size_t nwords = text.size() / sizeof(WordT);
+    if(nwords * sizeof(WordT) != text.size())
+      ASTERIA_THROW("String length `$1` not divisible by `$2`", text.size(), sizeof(WordT));
+
+    V_array values;
+    values.reserve(nwords);
+    for(size_t k = 0;  k != nwords;  ++k) {
+      WordT word;
+      ::std::memcpy(&word, text.data() + k * sizeof(WordT), sizeof(WordT));
+      values.emplace_back(V_integer(bswap_be(word)));
+    }
+    return values;
   }
 
 template<typename WordT>
 V_array
 do_unpack_le(const V_string& text)
   {
-    return do_unpack_impl<0, WordT>(text);
+    size_t nwords = text.size() / sizeof(WordT);
+    if(nwords * sizeof(WordT) != text.size())
+      ASTERIA_THROW("String length `$1` not divisible by `$2`", text.size(), sizeof(WordT));
+
+    V_array values	;
+    values.reserve(nwords);
+    for(size_t k = 0;  k != nwords;  ++k) {
+      WordT word;
+      ::std::memcpy(&word, text.data() + k * sizeof(WordT), sizeof(WordT));
+      values.emplace_back(V_integer(bswap_le(word)));
+    }
+    return values;
   }
 
 ::std::regex
@@ -1340,45 +1337,31 @@ std_string_utf8_decode(V_string text, optV_boolean permissive)
 V_string
 std_string_pack_8(V_integer value)
   {
-    V_string text;
-    text.reserve(1);
-    do_pack_one_le<int8_t>(text, value);
-    return text;
+    return do_pack_be<int8_t>(value);
   }
 
 V_string
 std_string_pack_8(V_array values)
   {
-    V_string text;
-    text.reserve(values.size());
-    for(const auto& elem : values)
-      do_pack_one_le<int8_t>(text, elem.as_integer());
-    return text;
+    return do_pack_be<int8_t>(values);
   }
 
 V_array
 std_string_unpack_8(V_string text)
   {
-    return do_unpack_le<int8_t>(text);
+    return do_unpack_be<int8_t>(text);
   }
 
 V_string
 std_string_pack_16be(V_integer value)
   {
-    V_string text;
-    text.reserve(2);
-    do_pack_one_be<int16_t>(text, value);
-    return text;
+    return do_pack_be<int16_t>(value);
   }
 
 V_string
 std_string_pack_16be(V_array values)
   {
-    V_string text;
-    text.reserve(values.size() * 2);
-    for(const auto& elem : values)
-      do_pack_one_be<int16_t>(text, elem.as_integer());
-    return text;
+    return do_pack_be<int16_t>(values);
   }
 
 V_array
@@ -1390,20 +1373,13 @@ std_string_unpack_16be(V_string text)
 V_string
 std_string_pack_16le(V_integer value)
   {
-    V_string text;
-    text.reserve(2);
-    do_pack_one_le<int16_t>(text, value);
-    return text;
+    return do_pack_le<int16_t>(value);
   }
 
 V_string
 std_string_pack_16le(V_array values)
   {
-    V_string text;
-    text.reserve(values.size() * 2);
-    for(const auto& elem : values)
-      do_pack_one_le<int16_t>(text, elem.as_integer());
-    return text;
+    return do_pack_le<int16_t>(values);
   }
 
 V_array
@@ -1415,20 +1391,13 @@ std_string_unpack_16le(V_string text)
 V_string
 std_string_pack_32be(V_integer value)
   {
-    V_string text;
-    text.reserve(4);
-    do_pack_one_be<int32_t>(text, value);
-    return text;
+    return do_pack_be<int32_t>(value);
   }
 
 V_string
 std_string_pack_32be(V_array values)
   {
-    V_string text;
-    text.reserve(values.size() * 4);
-    for(const auto& elem : values)
-      do_pack_one_be<int32_t>(text, elem.as_integer());
-    return text;
+    return do_pack_be<int32_t>(values);
   }
 
 V_array
@@ -1440,20 +1409,13 @@ std_string_unpack_32be(V_string text)
 V_string
 std_string_pack_32le(V_integer value)
   {
-    V_string text;
-    text.reserve(4);
-    do_pack_one_le<int32_t>(text, value);
-    return text;
+    return do_pack_le<int32_t>(value);
   }
 
 V_string
 std_string_pack_32le(V_array values)
   {
-    V_string text;
-    text.reserve(values.size() * 4);
-    for(const auto& elem : values)
-      do_pack_one_le<int32_t>(text, elem.as_integer());
-    return text;
+    return do_pack_le<int32_t>(values);
   }
 
 V_array
@@ -1465,20 +1427,13 @@ std_string_unpack_32le(V_string text)
 V_string
 std_string_pack_64be(V_integer value)
   {
-    V_string text;
-    text.reserve(8);
-    do_pack_one_be<int64_t>(text, value);
-    return text;
+    return do_pack_be<int64_t>(value);
   }
 
 V_string
 std_string_pack_64be(V_array values)
   {
-    V_string text;
-    text.reserve(values.size() * 8);
-    for(const auto& elem : values)
-      do_pack_one_be<int64_t>(text, elem.as_integer());
-    return text;
+    return do_pack_be<int64_t>(values);
   }
 
 V_array
@@ -1490,20 +1445,13 @@ std_string_unpack_64be(V_string text)
 V_string
 std_string_pack_64le(V_integer value)
   {
-    V_string text;
-    text.reserve(8);
-    do_pack_one_le<int64_t>(text, value);
-    return text;
+    return do_pack_le<int64_t>(value);
   }
 
 V_string
 std_string_pack_64le(V_array values)
   {
-    V_string text;
-    text.reserve(values.size() * 8);
-    for(const auto& elem : values)
-      do_pack_one_le<int64_t>(text, elem.as_integer());
-    return text;
+    return do_pack_le<int64_t>(values);
   }
 
 V_array
