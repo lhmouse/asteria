@@ -10,6 +10,11 @@ AM_INIT_AUTOMAKE([foreign subdir-objects])
 AM_SILENT_RULES([yes])
 LT_INIT([disable-static])
 
+## Check for required libraries
+AC_CHECK_LIB([rt], [clock_gettime], [], [AC_MSG_ERROR(clock and time library not found)])
+AC_CHECK_LIB([pcre2-8], [pcre2_compile_8], [], [AC_MSG_ERROR(PCRE2 library not found)])
+
+## Set up optional features
 AC_ARG_ENABLE([debug-checks], AS_HELP_STRING([--enable-debug-checks], [enable assertions]))
 AM_CONDITIONAL([enable_debug_checks], [test "${enable_debug_checks}" == "yes"])
 AM_COND_IF([enable_debug_checks], [

@@ -453,7 +453,7 @@ do_pack_one_impl(V_string& text, const V_integer& value)
   {
     // Convert the value into the specified byte order.
     auto word = Bswap<bigendT>::conv(static_cast<WordT>(value));
-    text.append((char (&)[])word, sizeof(word));
+    text.append(reinterpret_cast<const char*>(&word), sizeof(word));
     return text;
   }
 
