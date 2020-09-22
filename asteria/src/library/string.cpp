@@ -1608,7 +1608,8 @@ std_string_pcre_replace(V_string text, V_integer from, optV_integer length, V_st
     }
 
     // Discard excess characters.
-    output_str.resize(output_len);
+    ROCKET_ASSERT(output_len <= output_str.size());
+    output_str.erase(output_len);
 
     // Concatenate it with unreplaced parts.
     output_str.insert(output_str.begin(), text.begin(), range.first);
