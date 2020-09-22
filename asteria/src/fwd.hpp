@@ -609,7 +609,7 @@ operator<<(tinyfmt& fmt, const cow_function& func)
   { return func.describe(fmt);  }
 
 // Fundamental types
-using V_null      = nullptr_t;
+using V_null      = nullopt_t;
 using V_boolean   = bool;
 using V_integer   = int64_t;
 using V_real      = double;

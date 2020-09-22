@@ -17,7 +17,7 @@ template<typename ValT, typename = void>
 struct Valuable_impl;
 
 template<>
-struct Valuable_impl<nullptr_t>
+struct Valuable_impl<nullopt_t>
   {
     using via_type  = V_null;
     using nullable  = ::std::false_type;
@@ -25,7 +25,7 @@ struct Valuable_impl<nullptr_t>
     template<typename StorT>
     static
     void
-    assign(StorT& stor, nullptr_t)
+    assign(StorT& stor, nullopt_t)
       {
         stor = V_null();
       }
