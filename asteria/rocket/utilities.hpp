@@ -516,9 +516,10 @@ struct lowest_unsigned
   { };
 
 // This tag value is used to construct an empty container. Assigning `nullopt` to a container clears it.
-struct nullopt_t
+enum class nullopt_t
+  : uintptr_t
   { }
-  constexpr nullopt;
+  constexpr nullopt = { };
 
 // Fancy pointer conversion
 template<typename pointerT>
