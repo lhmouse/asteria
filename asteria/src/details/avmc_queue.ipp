@@ -100,8 +100,8 @@ const Vtable*
 get_vtable()
 noexcept
   {
+    static_assert(!::std::is_array<SparamT>::value, "");
     static_assert(::std::is_object<SparamT>::value, "");
-    static_assert(::std::is_same<SparamT, typename ::std::decay<SparamT>::type>::value, "");
     static_assert(::std::is_nothrow_move_constructible<SparamT>::value, "");
 
     static constexpr Vtable s_vtbl[1] = {{ Default_mvct_opt<SparamT>::value,
