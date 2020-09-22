@@ -17,7 +17,7 @@ constexpr double s_const_lb10 = 3.3219280948873623478703194294893901758648313930
 }  // namespace
 
 V_real
-std_math_exp(V_real y, optV_real base)
+std_math_exp(V_real y, Opt_real base)
   {
     if(!base)
       return ::exp(y);
@@ -44,7 +44,7 @@ std_math_pow(V_real x, V_real y)
   }
 
 V_real
-std_math_log(V_real x, optV_real base)
+std_math_log(V_real x, Opt_real base)
   {
     if(!base)
       return ::log(x);
@@ -243,7 +243,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.math.exp"), ::rocket::cref(args));
     // Parse arguments.
     V_real y;
-    optV_real base;
+    Opt_real base;
     if(reader.I().v(y).o(base).F()) {
       Reference_root::S_temporary xref = { std_math_exp(::std::move(y), ::std::move(base)) };
       return self = ::std::move(xref);
@@ -327,7 +327,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.math.log"), ::rocket::cref(args));
     // Parse arguments.
     V_real y;
-    optV_real base;
+    Opt_real base;
     if(reader.I().v(y).o(base).F()) {
       Reference_root::S_temporary xref = { std_math_log(::std::move(y), ::std::move(base)) };
       return self = ::std::move(xref);

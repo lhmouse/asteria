@@ -178,7 +178,7 @@ std_filesystem_get_real_path(V_string path)
     return V_string(abspath);
   }
 
-optV_object
+Opt_object
 std_filesystem_get_information(V_string path)
   {
     struct ::stat stb;
@@ -383,7 +383,7 @@ std_filesystem_directory_remove(V_string path)
   }
 
 V_string
-std_filesystem_file_read(V_string path, optV_integer offset, optV_integer limit)
+std_filesystem_file_read(V_string path, Opt_integer offset, Opt_integer limit)
   {
     if(offset && (*offset < 0))
       ASTERIA_THROW("Negative file offset (offset `$1`)", *offset);
@@ -423,7 +423,7 @@ std_filesystem_file_read(V_string path, optV_integer offset, optV_integer limit)
 
 V_integer
 std_filesystem_file_stream(Global_Context& global, V_string path, V_function callback,
-                           optV_integer offset, optV_integer limit)
+                           Opt_integer offset, Opt_integer limit)
   {
     if(offset && (*offset < 0))
       ASTERIA_THROW("Negative file offset (offset `$1`)", *offset);
@@ -488,7 +488,7 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
   }
 
 void
-std_filesystem_file_write(V_string path, V_string data, optV_integer offset)
+std_filesystem_file_write(V_string path, V_string data, Opt_integer offset)
   {
     if(offset && (*offset < 0))
       ASTERIA_THROW("Negative file offset (offset `$1`)", *offset);
@@ -521,7 +521,7 @@ std_filesystem_file_write(V_string path, V_string data, optV_integer offset)
   }
 
 void
-std_filesystem_file_append(V_string path, V_string data, optV_boolean exclusive)
+std_filesystem_file_append(V_string path, V_string data, Opt_boolean exclusive)
   {
     // Calculate the `flags` argument.
     int flags = O_WRONLY | O_CREAT | O_APPEND;
@@ -899,8 +899,8 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.filesystem.file_read"), ::rocket::cref(args));
     // Parse arguments.
     V_string path;
-    optV_integer offset;
-    optV_integer limit;
+    Opt_integer offset;
+    Opt_integer limit;
     if(reader.I().v(path).o(offset).o(limit).F()) {
       Reference_root::S_temporary xref = { std_filesystem_file_read(::std::move(path), ::std::move(offset),
                                                                     ::std::move(limit)) };
@@ -944,8 +944,8 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string path;
     V_function callback;
-    optV_integer offset;
-    optV_integer limit;
+    Opt_integer offset;
+    Opt_integer limit;
     if(reader.I().v(path).v(callback).o(offset).o(limit).F()) {
       Reference_root::S_temporary xref = { std_filesystem_file_stream(global, path, callback, offset, limit) };
       return self = ::std::move(xref);
@@ -979,7 +979,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string path;
     V_string data;
-    optV_integer offset;
+    Opt_integer offset;
     if(reader.I().v(path).v(data).o(offset).F()) {
       std_filesystem_file_write(path, data, offset);
       return self = Reference_root::S_void();
@@ -1012,7 +1012,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string path;
     V_string data;
-    optV_boolean exclusive;
+    Opt_boolean exclusive;
     if(reader.I().v(path).v(data).o(exclusive).F()) {
       std_filesystem_file_append(path, data, exclusive);
       return self = Reference_root::S_void();

@@ -132,7 +132,7 @@ std_chrono_utc_from_local(V_integer time_local)
   }
 
 V_string
-std_chrono_utc_format(V_integer time_point, optV_boolean with_ms)
+std_chrono_utc_format(V_integer time_point, Opt_boolean with_ms)
   {
     // No millisecond part is added by default.
     bool pms = with_ms.value_or(false);
@@ -594,7 +594,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.chrono.utc_format"), ::rocket::cref(args));
     // Parse arguments.
     V_integer time_point;
-    optV_boolean with_ms;
+    Opt_boolean with_ms;
     if(reader.I().v(time_point).o(with_ms).F()) {
       Reference_root::S_temporary xref = { std_chrono_utc_format(::std::move(time_point), with_ms) };
       return self = ::std::move(xref);

@@ -32,7 +32,7 @@ const
   {
     Argument_Reader reader(::rocket::sref("__varg"), ::rocket::cref(args));
     // Extract arguments.
-    optV_integer qindex;
+    Opt_integer qindex;
     if(reader.I().o(qindex).F()) {
       auto nvargs = this->m_vargs.size();
       if(!qindex) {

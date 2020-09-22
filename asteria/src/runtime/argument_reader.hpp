@@ -179,28 +179,28 @@ class Argument_Reader
     o(Value& val);
 
     Argument_Reader&
-    o(optV_boolean& xopt);
+    o(Opt_boolean& xopt);
 
     Argument_Reader&
-    o(optV_integer& xopt);
+    o(Opt_integer& xopt);
 
     Argument_Reader&
-    o(optV_real& xopt);  // performs integer-to-real conversions as necessary
+    o(Opt_real& xopt);  // performs integer-to-real conversions as necessary
 
     Argument_Reader&
-    o(optV_string& xopt);
+    o(Opt_string& xopt);
 
     Argument_Reader&
-    o(optV_opaque& xopt);
+    o(Opt_opaque& xopt);
 
     Argument_Reader&
-    o(optV_function& xopt);
+    o(Opt_function& xopt);
 
     Argument_Reader&
-    o(optV_array& xopt);
+    o(Opt_array& xopt);
 
     Argument_Reader&
-    o(optV_object& xopt);
+    o(Opt_object& xopt);
 
     // Throw an exception saying there are no viable overloads.
     [[noreturn]]

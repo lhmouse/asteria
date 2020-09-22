@@ -307,7 +307,7 @@ std_numeric_itrunc(V_real value)
   }
 
 V_real
-std_numeric_random(Global_Context& global, optV_real limit)
+std_numeric_random(Global_Context& global, Opt_real limit)
   {
     auto prng = global.random_engine();
 
@@ -493,7 +493,7 @@ std_numeric_rotr(V_integer m, V_integer x, V_integer n)
   }
 
 V_string
-std_numeric_format(V_integer value, optV_integer base, optV_integer ebase)
+std_numeric_format(V_integer value, Opt_integer base, Opt_integer ebase)
   {
     V_string text;
     ::rocket::ascii_numput nump;
@@ -560,7 +560,7 @@ std_numeric_format(V_integer value, optV_integer base, optV_integer ebase)
   }
 
 V_string
-std_numeric_format(V_real value, optV_integer base, optV_integer ebase)
+std_numeric_format(V_real value, Opt_integer base, Opt_integer ebase)
   {
     V_string text;
     ::rocket::ascii_numput nump;
@@ -642,7 +642,7 @@ std_numeric_parse_integer(V_string text)
   }
 
 V_real
-std_numeric_parse_real(V_string text, optV_boolean saturating)
+std_numeric_parse_real(V_string text, Opt_boolean saturating)
   {
     auto tpos = text.find_first_not_of(s_spaces);
     if(tpos == V_string::npos)
@@ -1241,7 +1241,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
   {
     Argument_Reader reader(::rocket::sref("std.numeric.random"), ::rocket::cref(args));
     // Parse arguments.
-    optV_real limit;
+    Opt_real limit;
     if(reader.I().o(limit).F()) {
       Reference_root::S_temporary xref = { std_numeric_random(global, ::std::move(limit)) };
       return self = ::std::move(xref);
@@ -1792,8 +1792,8 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.numeric.format"), ::rocket::cref(args));
     // Parse arguments.
     V_integer ivalue;
-    optV_integer base;
-    optV_integer ebase;
+    Opt_integer base;
+    Opt_integer ebase;
     if(reader.I().v(ivalue).o(base).o(ebase).F()) {
       Reference_root::S_temporary xref = { std_numeric_format(::std::move(ivalue), ::std::move(base),
                                                               ::std::move(ebase)) };
@@ -1891,7 +1891,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.numeric.parse_real"), ::rocket::cref(args));
     // Parse arguments.
     V_string text;
-    optV_boolean saturating;
+    Opt_boolean saturating;
     if(reader.I().v(text).o(saturating).F()) {
       Reference_root::S_temporary xref = { std_numeric_parse_real(::std::move(text), saturating) };
       return self = ::std::move(xref);

@@ -72,7 +72,7 @@ do_write_utf8_common(const IOF_Sentry& fp, const cow_string& text)
 
 }  // namespace
 
-optV_integer
+Opt_integer
 std_io_getc()
   {
     // Lock standard input for reading.
@@ -102,7 +102,7 @@ std_io_getc()
     return static_cast<uint32_t>(wch);
   }
 
-optV_string
+Opt_string
 std_io_getln()
   {
     // Lock standard input for reading.
@@ -146,7 +146,7 @@ std_io_getln()
     return u8str;
   }
 
-optV_integer
+Opt_integer
 std_io_putc(V_integer value)
   {
     // Lock standard output for writing.
@@ -182,7 +182,7 @@ std_io_putc(V_integer value)
     return 1;
   }
 
-optV_integer
+Opt_integer
 std_io_putc(V_string value)
   {
     // Lock standard output for writing.
@@ -202,7 +202,7 @@ std_io_putc(V_string value)
     return static_cast<int64_t>(ncps);
   }
 
-optV_integer
+Opt_integer
 std_io_putln(V_string value)
   {
     // Lock standard output for writing.
@@ -229,7 +229,7 @@ std_io_putln(V_string value)
     return static_cast<int64_t>(ncps + 1);
   }
 
-optV_integer
+Opt_integer
 std_io_putf(V_string templ, cow_vector<Value> values)
   {
     // Lock standard output for writing.
@@ -263,8 +263,8 @@ std_io_putf(V_string templ, cow_vector<Value> values)
     return static_cast<int64_t>(ncps);
   }
 
-optV_string
-std_io_read(optV_integer limit)
+Opt_string
+std_io_read(Opt_integer limit)
   {
     size_t rlimit = (size_t)::rocket::clamp(limit.value_or(INT32_MAX), 0, 0x10'00000);
 
@@ -296,7 +296,7 @@ std_io_read(optV_integer limit)
     return ::std::move(data.erase(ntotal));
   }
 
-optV_integer
+Opt_integer
 std_io_write(V_string data)
   {
     // Lock standard output for writing.
@@ -525,7 +525,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
   {
     Argument_Reader reader(::rocket::sref("std.io.read"), ::rocket::cref(args));
     // Parse arguments.
-    optV_integer limit;
+    Opt_integer limit;
     if(reader.I().o(limit).F()) {
       Reference_root::S_temporary xref = { std_io_read(::std::move(limit)) };
       return self = ::std::move(xref);

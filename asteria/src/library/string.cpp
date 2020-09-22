@@ -14,7 +14,7 @@ namespace asteria {
 namespace {
 
 pair<V_string::const_iterator, V_string::const_iterator>
-do_slice(const V_string& text, V_string::const_iterator tbegin, const optV_integer& length)
+do_slice(const V_string& text, V_string::const_iterator tbegin, const Opt_integer& length)
   {
     if(!length || (*length >= text.end() - tbegin))
       return ::std::make_pair(tbegin, text.end());
@@ -27,7 +27,7 @@ do_slice(const V_string& text, V_string::const_iterator tbegin, const optV_integ
   }
 
 pair<V_string::const_iterator, V_string::const_iterator>
-do_slice(const V_string& text, const V_integer& from, const optV_integer& length)
+do_slice(const V_string& text, const V_integer& from, const Opt_integer& length)
   {
     auto slen = static_cast<int64_t>(text.size());
     if(from >= 0) {
@@ -181,7 +181,7 @@ do_find_of_opt(IterT begin, IterT end, const V_string& set, bool match)
   }
 
 V_string
-do_get_reject(const optV_string& reject)
+do_get_reject(const Opt_string& reject)
   {
     if(!reject)
       return ::rocket::sref(" \t");
@@ -189,7 +189,7 @@ do_get_reject(const optV_string& reject)
   }
 
 V_string
-do_get_padding(const optV_string& padding)
+do_get_padding(const Opt_string& padding)
   {
     if(!padding)
       return ::rocket::sref(" ");
@@ -571,7 +571,7 @@ class PCRE2_pcre
 }  // namespace
 
 V_string
-std_string_slice(V_string text, V_integer from, optV_integer length)
+std_string_slice(V_string text, V_integer from, Opt_integer length)
   {
     auto range = do_slice(text, from, length);
     if((range.first == text.begin()) && (range.second == text.end()))
@@ -581,7 +581,7 @@ std_string_slice(V_string text, V_integer from, optV_integer length)
   }
 
 V_string
-std_string_replace_slice(V_string text, V_integer from, optV_integer length, V_string replacement)
+std_string_replace_slice(V_string text, V_integer from, Opt_integer length, V_string replacement)
   {
     V_string res = text;
     auto range = do_slice(res, from, length);
@@ -591,7 +591,7 @@ std_string_replace_slice(V_string text, V_integer from, optV_integer length, V_s
   }
 
 V_integer
-std_string_compare(V_string text1, V_string text2, optV_integer length)
+std_string_compare(V_string text1, V_string text2, Opt_integer length)
   {
     if(!length || (*length >= PTRDIFF_MAX))
       // Compare the entire strings.
@@ -617,8 +617,8 @@ std_string_ends_with(V_string text, V_string suffix)
     return text.ends_with(suffix);
   }
 
-optV_integer
-std_string_find(V_string text, V_integer from, optV_integer length, V_string pattern)
+Opt_integer
+std_string_find(V_string text, V_integer from, Opt_integer length, V_string pattern)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
@@ -627,8 +627,8 @@ std_string_find(V_string text, V_integer from, optV_integer length, V_string pat
     return *qit - text.begin();
   }
 
-optV_integer
-std_string_rfind(V_string text, V_integer from, optV_integer length, V_string pattern)
+Opt_integer
+std_string_rfind(V_string text, V_integer from, Opt_integer length, V_string pattern)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
@@ -639,7 +639,7 @@ std_string_rfind(V_string text, V_integer from, optV_integer length, V_string pa
   }
 
 V_string
-std_string_find_and_replace(V_string text, V_integer from, optV_integer length, V_string pattern,
+std_string_find_and_replace(V_string text, V_integer from, Opt_integer length, V_string pattern,
                             V_string replacement)
   {
     V_string res;
@@ -651,8 +651,8 @@ std_string_find_and_replace(V_string text, V_integer from, optV_integer length, 
     return res;
   }
 
-optV_integer
-std_string_find_any_of(V_string text, V_integer from, optV_integer length, V_string accept)
+Opt_integer
+std_string_find_any_of(V_string text, V_integer from, Opt_integer length, V_string accept)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(range.first, range.second, accept, true);
@@ -661,8 +661,8 @@ std_string_find_any_of(V_string text, V_integer from, optV_integer length, V_str
     return *qit - text.begin();
   }
 
-optV_integer
-std_string_find_not_of(V_string text, V_integer from, optV_integer length, V_string reject)
+Opt_integer
+std_string_find_not_of(V_string text, V_integer from, Opt_integer length, V_string reject)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(range.first, range.second, reject, false);
@@ -671,8 +671,8 @@ std_string_find_not_of(V_string text, V_integer from, optV_integer length, V_str
     return *qit - text.begin();
   }
 
-optV_integer
-std_string_rfind_any_of(V_string text, V_integer from, optV_integer length, V_string accept)
+Opt_integer
+std_string_rfind_any_of(V_string text, V_integer from, Opt_integer length, V_string accept)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(::std::make_reverse_iterator(range.second),
@@ -682,8 +682,8 @@ std_string_rfind_any_of(V_string text, V_integer from, optV_integer length, V_st
     return text.rend() - *qit - 1;
   }
 
-optV_integer
-std_string_rfind_not_of(V_string text, V_integer from, optV_integer length, V_string reject)
+Opt_integer
+std_string_rfind_not_of(V_string text, V_integer from, Opt_integer length, V_string reject)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(::std::make_reverse_iterator(range.second),
@@ -701,7 +701,7 @@ std_string_reverse(V_string text)
   }
 
 V_string
-std_string_trim(V_string text, optV_string reject)
+std_string_trim(V_string text, Opt_string reject)
   {
     auto rchars = do_get_reject(reject);
     if(rchars.length() == 0)
@@ -725,7 +725,7 @@ std_string_trim(V_string text, optV_string reject)
   }
 
 V_string
-std_string_triml(V_string text, optV_string reject)
+std_string_triml(V_string text, Opt_string reject)
   {
     auto rchars = do_get_reject(reject);
     if(rchars.length() == 0)
@@ -747,7 +747,7 @@ std_string_triml(V_string text, optV_string reject)
   }
 
 V_string
-std_string_trimr(V_string text, optV_string reject)
+std_string_trimr(V_string text, Opt_string reject)
   {
     auto rchars = do_get_reject(reject);
     if(rchars.length() == 0)
@@ -769,7 +769,7 @@ std_string_trimr(V_string text, optV_string reject)
   }
 
 V_string
-std_string_padl(V_string text, V_integer length, optV_string padding)
+std_string_padl(V_string text, V_integer length, Opt_string padding)
   {
     V_string res = text;
     auto rpadding = do_get_padding(padding);
@@ -784,7 +784,7 @@ std_string_padl(V_string text, V_integer length, optV_string padding)
   }
 
 V_string
-std_string_padr(V_string text, V_integer length, optV_string padding)
+std_string_padr(V_string text, V_integer length, Opt_string padding)
   {
     V_string res = text;
     auto rpadding = do_get_padding(padding);
@@ -842,7 +842,7 @@ std_string_to_lower(V_string text)
   }
 
 V_string
-std_string_translate(V_string text, V_string inputs, optV_string outputs)
+std_string_translate(V_string text, V_string inputs, Opt_string outputs)
   {
     // Use reference counting as our advantage.
     V_string res = text;
@@ -871,7 +871,7 @@ std_string_translate(V_string text, V_string inputs, optV_string outputs)
   }
 
 V_array
-std_string_explode(V_string text, optV_string delim, optV_integer limit)
+std_string_explode(V_string text, Opt_string delim, Opt_integer limit)
   {
     uint64_t rlimit = UINT64_MAX;
     if(limit) {
@@ -917,7 +917,7 @@ std_string_explode(V_string text, optV_string delim, optV_integer limit)
   }
 
 V_string
-std_string_implode(V_array segments, optV_string delim)
+std_string_implode(V_array segments, Opt_string delim)
   {
     V_string text;
 
@@ -938,7 +938,7 @@ std_string_implode(V_array segments, optV_string delim)
   }
 
 V_string
-std_string_hex_encode(V_string data, optV_boolean lowercase, optV_string delim)
+std_string_hex_encode(V_string data, Opt_boolean lowercase, Opt_string delim)
   {
     V_string text;
     auto rdelim = delim ? ::rocket::sref(*delim) : ::rocket::sref("");
@@ -1010,7 +1010,7 @@ std_string_hex_decode(V_string text)
   }
 
 V_string
-std_string_base32_encode(V_string data, optV_boolean lowercase)
+std_string_base32_encode(V_string data, Opt_boolean lowercase)
   {
     V_string text;
     bool rlowerc = lowercase.value_or(false);
@@ -1247,7 +1247,7 @@ std_string_base64_decode(V_string text)
   }
 
 V_string
-std_string_url_encode(V_string data, optV_boolean lowercase)
+std_string_url_encode(V_string data, Opt_boolean lowercase)
   {
     return do_url_encode<0>(data, lowercase.value_or(false));
   }
@@ -1259,7 +1259,7 @@ std_string_url_decode(V_string text)
   }
 
 V_string
-std_string_url_encode_query(V_string data, optV_boolean lowercase)
+std_string_url_encode_query(V_string data, Opt_boolean lowercase)
   {
     return do_url_encode<1>(data, lowercase.value_or(false));
   }
@@ -1285,7 +1285,7 @@ std_string_utf8_validate(V_string text)
   }
 
 V_string
-std_string_utf8_encode(V_integer code_point, optV_boolean permissive)
+std_string_utf8_encode(V_integer code_point, Opt_boolean permissive)
   {
     V_string text;
     text.reserve(4);
@@ -1302,7 +1302,7 @@ std_string_utf8_encode(V_integer code_point, optV_boolean permissive)
   }
 
 V_string
-std_string_utf8_encode(V_array code_points, optV_boolean permissive)
+std_string_utf8_encode(V_array code_points, Opt_boolean permissive)
   {
     V_string text;
     text.reserve(code_points.size() * 3);
@@ -1321,7 +1321,7 @@ std_string_utf8_encode(V_array code_points, optV_boolean permissive)
   }
 
 V_array
-std_string_utf8_decode(V_string text, optV_boolean permissive)
+std_string_utf8_decode(V_string text, Opt_boolean permissive)
   {
     V_array code_points;
     code_points.reserve(text.size());
@@ -1487,7 +1487,7 @@ std_string_format(V_string templ, cow_vector<Value> values)
   }
 
 opt<pair<V_integer, V_integer>>
-std_string_pcre_find(V_string text, V_integer from, optV_integer length, V_string pattern)
+std_string_pcre_find(V_string text, V_integer from, Opt_integer length, V_string pattern)
   {
     auto range = do_slice(text, from, length);
 
@@ -1520,8 +1520,8 @@ std_string_pcre_find(V_string text, V_integer from, optV_integer length, V_strin
                             static_cast<int64_t>(::std::max(ovec[0], ovec[1]) - ovec[0]));
   }
 
-optV_array
-std_string_pcre_match(V_string text, V_integer from, optV_integer length, V_string pattern)
+Opt_array
+std_string_pcre_match(V_string text, V_integer from, Opt_integer length, V_string pattern)
   {
     auto range = do_slice(text, from, length);
 
@@ -1568,7 +1568,7 @@ std_string_pcre_match(V_string text, V_integer from, optV_integer length, V_stri
   }
 
 V_string
-std_string_pcre_replace(V_string text, V_integer from, optV_integer length, V_string pattern,
+std_string_pcre_replace(V_string text, V_integer from, Opt_integer length, V_string pattern,
                         V_string replacement)
   {
     auto range = do_slice(text, from, length);
@@ -1644,7 +1644,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string text;
     V_integer from;
-    optV_integer length;
+    Opt_integer length;
     if(reader.I().v(text).v(from).o(length).F()) {
       Reference_root::S_temporary xref = { std_string_slice(::std::move(text), from, length) };
       return self = ::std::move(xref);
@@ -1694,7 +1694,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
                                                                     ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
-    optV_integer length;
+    Opt_integer length;
     if(reader.L(state).o(length).v(replacement).F()) {
       Reference_root::S_temporary xref = { std_string_replace_slice(::std::move(text), from, length,
                                                                     ::std::move(replacement)) };
@@ -1729,7 +1729,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string text1;
     V_string text2;
-    optV_integer length;
+    Opt_integer length;
     if(reader.I().v(text1).v(text2).o(length).F()) {
       Reference_root::S_temporary xref = { std_string_compare(::std::move(text1), ::std::move(text2), length) };
       return self = ::std::move(xref);
@@ -1849,7 +1849,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
                                                            ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
-    optV_integer length;
+    Opt_integer length;
     if(reader.L(state).o(length).v(pattern).F()) {
       Reference_root::S_temporary xref = { std_string_find(::std::move(text), from, length,
                                                            ::std::move(pattern)) };
@@ -1910,7 +1910,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
                                                             ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
-    optV_integer length;
+    Opt_integer length;
     if(reader.L(state).o(length).v(pattern).F()) {
       Reference_root::S_temporary xref = { std_string_rfind(::std::move(text), from, length,
                                                             ::std::move(pattern)) };
@@ -1975,7 +1975,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
                                                            ::std::move(pattern), ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
-    optV_integer length;
+    Opt_integer length;
     if(reader.L(state).o(length).v(pattern).v(replacement).F()) {
       Reference_root::S_temporary xref = { std_string_find_and_replace(::std::move(text), from, length,
                                                            ::std::move(pattern), ::std::move(replacement)) };
@@ -2035,7 +2035,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
                                                                   ::std::move(accept)) };
       return self = ::std::move(xref);
     }
-    optV_integer length;
+    Opt_integer length;
     if(reader.L(state).o(length).v(accept).F()) {
       Reference_root::S_temporary xref = { std_string_find_any_of(::std::move(text), from, length,
                                                                   ::std::move(accept)) };
@@ -2095,7 +2095,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
                                                                    ::std::move(accept)) };
       return self = ::std::move(xref);
     }
-    optV_integer length;
+    Opt_integer length;
     if(reader.L(state).o(length).v(accept).F()) {
       Reference_root::S_temporary xref = { std_string_rfind_any_of(::std::move(text), from, length,
                                                                    ::std::move(accept)) };
@@ -2155,7 +2155,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
                                                                   ::std::move(accept)) };
       return self = ::std::move(xref);
     }
-    optV_integer length;
+    Opt_integer length;
     if(reader.L(state).o(length).v(accept).F()) {
       Reference_root::S_temporary xref = { std_string_find_not_of(::std::move(text), from, length,
                                                                   ::std::move(accept)) };
@@ -2215,7 +2215,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
                                                                    ::std::move(accept)) };
       return self = ::std::move(xref);
     }
-    optV_integer length;
+    Opt_integer length;
     if(reader.L(state).o(length).v(accept).F()) {
       Reference_root::S_temporary xref = { std_string_rfind_not_of(::std::move(text), from, length,
                                                                    ::std::move(accept)) };
@@ -2273,7 +2273,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.string.trim"), ::rocket::cref(args));
     // Parse arguments.
     V_string text;
-    optV_string reject;
+    Opt_string reject;
     if(reader.I().v(text).o(reject).F()) {
       Reference_root::S_temporary xref = { std_string_trim(::std::move(text), ::std::move(reject)) };
       return self = ::std::move(xref);
@@ -2303,7 +2303,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.string.triml"), ::rocket::cref(args));
     // Parse arguments.
     V_string text;
-    optV_string reject;
+    Opt_string reject;
     if(reader.I().v(text).o(reject).F()) {
       Reference_root::S_temporary xref = { std_string_triml(::std::move(text), ::std::move(reject)) };
       return self = ::std::move(xref);
@@ -2333,7 +2333,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.string.trimr"), ::rocket::cref(args));
     // Parse arguments.
     V_string text;
-    optV_string reject;
+    Opt_string reject;
     if(reader.I().v(text).o(reject).F()) {
       Reference_root::S_temporary xref = { std_string_trimr(::std::move(text), ::std::move(reject)) };
       return self = ::std::move(xref);
@@ -2366,7 +2366,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string text;
     V_integer length;
-    optV_string padding;
+    Opt_string padding;
     if(reader.I().v(text).v(length).o(padding).F()) {
       Reference_root::S_temporary xref = { std_string_padl(::std::move(text), length, ::std::move(padding)) };
       return self = ::std::move(xref);
@@ -2399,7 +2399,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string text;
     V_integer length;
-    optV_string padding;
+    Opt_string padding;
     if(reader.I().v(text).v(length).o(padding).F()) {
       Reference_root::S_temporary xref = { std_string_padr(::std::move(text), length, ::std::move(padding)) };
       return self = ::std::move(xref);
@@ -2491,7 +2491,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string text;
     V_string inputs;
-    optV_string outputs;
+    Opt_string outputs;
     if(reader.I().v(text).v(inputs).o(outputs).F()) {
       Reference_root::S_temporary xref = { std_string_translate(::std::move(text), ::std::move(inputs),
                                                                 ::std::move(outputs)) };
@@ -2526,8 +2526,8 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.string.explode"), ::rocket::cref(args));
     // Parse arguments.
     V_string text;
-    optV_string delim;
-    optV_integer limit;
+    Opt_string delim;
+    Opt_integer limit;
     if(reader.I().v(text).o(delim).o(limit).F()) {
       Reference_root::S_temporary xref = { std_string_explode(::std::move(text), ::std::move(delim), limit) };
       return self = ::std::move(xref);
@@ -2557,7 +2557,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.string.implode"), ::rocket::cref(args));
     // Parse arguments.
     V_array segments;
-    optV_string delim;
+    Opt_string delim;
     if(reader.I().v(segments).o(delim).F()) {
       Reference_root::S_temporary xref = { std_string_implode(::std::move(segments), ::std::move(delim)) };
       return self = ::std::move(xref);
@@ -2589,8 +2589,8 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.string.hex_encode"), ::rocket::cref(args));
     // Parse arguments.
     V_string data;
-    optV_boolean lowercase;
-    optV_string delim;
+    Opt_boolean lowercase;
+    Opt_string delim;
     if(reader.I().v(data).o(lowercase).o(delim).F()) {
       Reference_root::S_temporary xref = { std_string_hex_encode(::std::move(data), lowercase,
                                                                  ::std::move(delim)) };
@@ -2656,7 +2656,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.string.base32_encode"), ::rocket::cref(args));
     // Parse arguments.
     V_string data;
-    optV_boolean lowercase;
+    Opt_boolean lowercase;
     if(reader.I().v(data).o(lowercase).F()) {
       Reference_root::S_temporary xref = { std_string_base32_encode(::std::move(data), lowercase) };
       return self = ::std::move(xref);
@@ -2782,7 +2782,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.string.url_encode"), ::rocket::cref(args));
     // Parse arguments.
     V_string data;
-    optV_boolean lowercase;
+    Opt_boolean lowercase;
     if(reader.I().v(data).o(lowercase).F()) {
       Reference_root::S_temporary xref = { std_string_url_encode(::std::move(data), lowercase) };
       return self = ::std::move(xref);
@@ -2846,7 +2846,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.string.url_encode"), ::rocket::cref(args));
     // Parse arguments.
     V_string data;
-    optV_boolean lowercase;
+    Opt_boolean lowercase;
     if(reader.I().v(data).o(lowercase).F()) {
       Reference_root::S_temporary xref = { std_string_url_encode_query(::std::move(data), lowercase) };
       return self = ::std::move(xref);
@@ -2936,7 +2936,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.string.utf8_encode"), ::rocket::cref(args));
     // Parse arguments.
     V_integer code_point;
-    optV_boolean permissive;
+    Opt_boolean permissive;
     if(reader.I().v(code_point).o(permissive).F()) {
       Reference_root::S_temporary xref = { std_string_utf8_encode(::std::move(code_point), permissive) };
       return self = ::std::move(xref);
@@ -2975,7 +2975,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.string.utf8_decode"), ::rocket::cref(args));
     // Parse arguments.
     V_string text;
-    optV_boolean permissive;
+    Opt_boolean permissive;
     if(reader.I().v(text).o(permissive).F()) {
       Reference_root::S_temporary xref = { std_string_utf8_decode(::std::move(text), permissive) };
       return self = ::std::move(xref);
@@ -3543,7 +3543,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
                                                                 ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
-    optV_integer length;
+    Opt_integer length;
     if(reader.L(state).o(length).v(pattern).F()) {
       Reference_root::S_temporary xref = { std_string_pcre_find(::std::move(text), from, length,
                                                                 ::std::move(pattern)) };
@@ -3621,7 +3621,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
                                                                   ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
-    optV_integer length;
+    Opt_integer length;
     if(reader.L(state).o(length).v(pattern).F()) {
       Reference_root::S_temporary xref = { std_string_pcre_match(::std::move(text), from, length,
                                                                   ::std::move(pattern)) };
@@ -3694,7 +3694,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
                                                            ::std::move(pattern), ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
-    optV_integer length;
+    Opt_integer length;
     if(reader.L(state).o(length).v(pattern).v(replacement).F()) {
       Reference_root::S_temporary xref = { std_string_pcre_replace(::std::move(text), from, length,
                                                            ::std::move(pattern), ::std::move(replacement)) };

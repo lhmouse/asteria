@@ -305,7 +305,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
 
 }  // namespace
 
-optV_integer
+Opt_integer
 std_system_gc_count_variables(Global_Context& global, V_integer generation)
   {
     auto gc_gen = static_cast<GC_Generation>(::rocket::clamp(generation, xgcgen_newest, xgcgen_oldest));
@@ -318,7 +318,7 @@ std_system_gc_count_variables(Global_Context& global, V_integer generation)
     return static_cast<int64_t>(count);
   }
 
-optV_integer
+Opt_integer
 std_system_gc_get_threshold(Global_Context& global, V_integer generation)
   {
     auto gc_gen = static_cast<GC_Generation>(::rocket::clamp(generation, xgcgen_newest, xgcgen_oldest));
@@ -331,7 +331,7 @@ std_system_gc_get_threshold(Global_Context& global, V_integer generation)
     return static_cast<int64_t>(thres);
   }
 
-optV_integer
+Opt_integer
 std_system_gc_set_threshold(Global_Context& global, V_integer generation, V_integer threshold)
   {
     auto gc_gen = static_cast<GC_Generation>(::rocket::clamp(generation, xgcgen_newest, xgcgen_oldest));
@@ -346,7 +346,7 @@ std_system_gc_set_threshold(Global_Context& global, V_integer generation, V_inte
   }
 
 V_integer
-std_system_gc_collect(Global_Context& global, optV_integer generation_limit)
+std_system_gc_collect(Global_Context& global, Opt_integer generation_limit)
   {
     auto gc_limit = gc_generation_oldest;
 
@@ -360,7 +360,7 @@ std_system_gc_collect(Global_Context& global, optV_integer generation_limit)
     return static_cast<int64_t>(nvars);
   }
 
-optV_string
+Opt_string
 std_system_env_get_variable(V_string name)
   {
     const char* val = ::getenv(name.safe_c_str());
@@ -386,7 +386,7 @@ std_system_env_get_variables()
   }
 
 V_string
-std_system_uuid(Global_Context& global, optV_boolean lowercase)
+std_system_uuid(Global_Context& global, Opt_boolean lowercase)
   {
     // Canonical form: `xxxxxxxx-xxxx-Myyy-Nzzz-wwwwwwwwwwww`
     //  * x: number of 1/10,000 seconds since UNIX Epoch
@@ -460,7 +460,7 @@ std_system_proc_get_euid()
   }
 
 V_integer
-std_system_proc_invoke(V_string cmd, optV_array argv, optV_array envp)
+std_system_proc_invoke(V_string cmd, Opt_array argv, Opt_array envp)
   {
     // Append arguments.
     cow_vector<const char*> ptrs = { cmd.safe_c_str() };
@@ -660,7 +660,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
   {
     Argument_Reader reader(::rocket::sref("std.system.gc_collect"), ::rocket::cref(args));
     // Parse arguments.
-    optV_integer generation_limit;
+    Opt_integer generation_limit;
     if(reader.I().o(generation_limit).F()) {
       Reference_root::S_temporary xref = { std_system_gc_collect(global, ::std::move(generation_limit)) };
       return self = ::std::move(xref);
@@ -755,7 +755,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
   {
     Argument_Reader reader(::rocket::sref("std.system.uuid"), ::rocket::cref(args));
     // Parse arguments.
-    optV_boolean lowercase;
+    Opt_boolean lowercase;
     if(reader.I().o(lowercase).F()) {
       Reference_root::S_temporary xref = { std_system_uuid(global, lowercase) };
       return self = ::std::move(xref);
@@ -884,8 +884,8 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.system.proc_invoke"), ::rocket::cref(args));
     // Parse arguments.
     V_string cmd;
-    optV_array argv;
-    optV_array envp;
+    Opt_array argv;
+    Opt_array envp;
     if(reader.I().v(cmd).o(argv).o(envp).F()) {
       Reference_root::S_temporary xref = { std_system_proc_invoke(::std::move(cmd), ::std::move(argv),
                                                                   ::std::move(envp)) };

@@ -707,7 +707,7 @@ do_json_parse(tinybuf& cbuf)
 }  // namespace
 
 V_string
-std_json_format(Value value, optV_string indent)
+std_json_format(Value value, Opt_string indent)
   {
     // No line break is inserted if `indent` is null or empty.
     return (!indent || indent->empty()) ? do_format_nonrecursive(value, false, Indenter_none())
@@ -723,7 +723,7 @@ std_json_format(Value value, V_integer indent)
   }
 
 V_string
-std_json_format5(Value value, optV_string indent)
+std_json_format5(Value value, Opt_string indent)
   {
     // No line break is inserted if `indent` is null or empty.
     return (!indent || indent->empty()) ? do_format_nonrecursive(value, true, Indenter_none())
@@ -794,7 +794,7 @@ create_bindings_json(V_object& result, API_Version /*version*/)
     Argument_Reader::State state;
     // Parse arguments.
     Value value;
-    optV_string sindent;
+    Opt_string sindent;
     if(reader.I().o(value).S(state).o(sindent).F()) {
       Reference_root::S_temporary xref = { std_json_format(::std::move(value), ::std::move(sindent)) };
       return self = ::std::move(xref);
@@ -833,7 +833,7 @@ create_bindings_json(V_object& result, API_Version /*version*/)
     Argument_Reader::State state;
     // Parse arguments.
     Value value;
-    optV_string sindent;
+    Opt_string sindent;
     if(reader.I().o(value).S(state).o(sindent).F()) {
       Reference_root::S_temporary xref = { std_json_format5(::std::move(value), ::std::move(sindent)) };
       return self = ::std::move(xref);

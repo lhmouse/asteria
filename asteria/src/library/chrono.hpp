@@ -34,7 +34,7 @@ std_chrono_utc_from_local(V_integer time_local);
 
 // `std.chrono.utc_format`
 V_string
-std_chrono_utc_format(V_integer time_point, optV_boolean with_ms);
+std_chrono_utc_format(V_integer time_point, Opt_boolean with_ms);
 
 // `std.chrono.utc_parse`
 V_integer
