@@ -48,7 +48,7 @@ struct Valuable_decayed<bool>
 template<typename IntegerT>
 struct Valuable_decayed<IntegerT, typename ::std::enable_if<
             ::rocket::is_any_type_of<IntegerT,
-                            signed char, short, int, long, long long>::value
+                        signed char, short, int, long, long long>::value
         >::type>
   {
     using via_type  = V_integer;
@@ -66,7 +66,7 @@ struct Valuable_decayed<IntegerT, typename ::std::enable_if<
 template<typename FloatT>
 struct Valuable_decayed<FloatT, typename ::std::enable_if<
             ::rocket::is_any_type_of<FloatT,
-                            float, double>::value
+                                 float, double>::value
         >::type>
   {
     using via_type  = V_real;
@@ -84,7 +84,7 @@ struct Valuable_decayed<FloatT, typename ::std::enable_if<
 template<typename StringT>
 struct Valuable_decayed<StringT, typename ::std::enable_if<
             ::rocket::is_any_type_of<StringT,
-                            cow_string::shallow_type, cow_string>::value
+                        cow_string::shallow_type, cow_string>::value
         >::type>
   {
     using via_type  = V_string;
@@ -119,7 +119,8 @@ struct Valuable_decayed<cow_opaque>
 
 template<typename OpaqueT>
 struct Valuable_decayed<rcptr<OpaqueT>, typename ::std::enable_if<
-            ::std::is_convertible<OpaqueT*, Abstract_Opaque*>::value
+            ::std::is_convertible<OpaqueT*,
+                                  Abstract_Opaque*>::value
         >::type>
   {
     using via_type  = V_opaque;
@@ -157,7 +158,8 @@ struct Valuable_decayed<cow_function>
 
 template<typename FunctionT>
 struct Valuable_decayed<rcptr<FunctionT>, typename ::std::enable_if<
-            ::std::is_convertible<FunctionT*, const Abstract_Function*>::value
+            ::std::is_convertible<FunctionT*,
+                                  const Abstract_Function*>::value
         >::type>
   {
     using via_type  = V_function;
@@ -202,6 +204,28 @@ struct Valuable_decayed<cow_dictionary<Value>>
     assign(StorT& stor, XValT&& xval)
       {
         stor = V_object(::std::forward<XValT>(xval));
+      }
+  };
+
+template<typename XValT>
+struct Valuable_decayed<opt<XValT>, typename ::std::conditional<
+               true, void, typename Valuable_decayed<XValT>::via_type
+        >::type>
+  {
+    using via_type  = typename Valuable_decayed<XValT>::via_type;
+    using nullable  = ::std::true_type;
+
+    template<typename StorT, typename XOptT>
+    static
+    void
+    assign(StorT& stor, XOptT&& xopt)
+      {
+        if(xopt)
+          stor = static_cast<typename ::std::conditional<
+                       ::std::is_lvalue_reference<XOptT&&>::value,
+                                       const XValT&, XValT&&>::type>(*xopt);
+        else
+          stor = V_null();
       }
   };
 

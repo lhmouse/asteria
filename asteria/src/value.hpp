@@ -49,26 +49,6 @@ class Value
       : m_stor(typename details_value::Valuable<XValT>::via_type(::std::forward<XValT>(xval)))
       { }
 
-    template<typename XValT,
-    ROCKET_ENABLE_IF_HAS_TYPE(typename details_value::Valuable<XValT>::via_type)>
-    Value(const opt<XValT>& xopt)
-    noexcept(::std::is_nothrow_assignable<Storage&,
-                          const typename details_value::Valuable<XValT>::via_type&>::value)
-      {
-        if(xopt)
-          details_value::Valuable<XValT>::assign(this->m_stor, *xopt);
-      }
-
-    template<typename XValT,
-    ROCKET_ENABLE_IF_HAS_TYPE(typename details_value::Valuable<XValT>::via_type)>
-    Value(opt<XValT>&& xopt)
-    noexcept(::std::is_nothrow_assignable<Storage&,
-                          typename details_value::Valuable<XValT>::via_type&&>::value)
-      {
-        if(xopt)
-          details_value::Valuable<XValT>::assign(this->m_stor, ::std::move(*xopt));
-      }
-
     template<typename XValT>
     Value(initializer_list<XValT> init)
       : m_stor(V_array(init.begin(), init.end()))
@@ -82,34 +62,6 @@ class Value
                           typename details_value::Valuable<XValT>::via_type&&>::value)
       {
         details_value::Valuable<XValT>::assign(this->m_stor, ::std::forward<XValT>(xval));
-        return *this;
-      }
-
-    template<typename XValT,
-    ROCKET_ENABLE_IF_HAS_TYPE(typename details_value::Valuable<XValT>::via_type)>
-    Value&
-    operator=(const opt<XValT>& xopt)
-    noexcept(::std::is_nothrow_assignable<Storage&,
-                          const typename details_value::Valuable<XValT>::via_type&>::value)
-      {
-        if(xopt)
-          details_value::Valuable<XValT>::assign(this->m_stor, *xopt);
-        else
-          this->m_stor = V_null();
-        return *this;
-      }
-
-    template<typename XValT,
-    ROCKET_ENABLE_IF_HAS_TYPE(typename details_value::Valuable<XValT>::via_type)>
-    Value&
-    operator=(opt<XValT>&& xopt)
-    noexcept(::std::is_nothrow_assignable<Storage&,
-                          typename details_value::Valuable<XValT>::via_type&&>::value)
-      {
-        if(xopt)
-          details_value::Valuable<XValT>::assign(this->m_stor, ::std::move(*xopt));
-        else
-          this->m_stor = V_null();
         return *this;
       }
 
