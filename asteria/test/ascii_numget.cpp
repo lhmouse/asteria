@@ -2,6 +2,7 @@
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
 #include "utilities.hpp"
+#include "rocket/ascii_numget.hpp"
 
 using namespace asteria;
 
