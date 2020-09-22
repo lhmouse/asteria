@@ -204,6 +204,14 @@ final
 
   public:
     void
+    on_single_step_trap(const Source_Location& sloc)
+    override
+      {
+        if(interrupted)
+          ASTERIA_THROW("Interrupt received\n[callback inside '$1']", sloc);
+      }
+
+    void
     on_variable_declare(const Source_Location& sloc, const phsh_string& name)
     override
       { this->do_verbose_trace(sloc, "declaring variable `$1`", name);  }
@@ -222,12 +230,6 @@ final
     on_function_except(const Source_Location& sloc, const cow_function& target, const Runtime_Error&)
     override
       { this->do_verbose_trace(sloc, "caught an exception from function call: $1", target);  }
-
-    void
-    on_single_step_trap(const Source_Location& sloc)
-    override
-      { if(interrupted)
-          ASTERIA_THROW("Interrupt received at '$1'", sloc);  }
   };
 
 void
