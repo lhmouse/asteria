@@ -11,16 +11,15 @@ namespace details_value {
 // This controls implicit conversions to `Value` from other types.
 // The main templte is undefined and is SFINAE-friendly.
 // A member type alias `via_type` shall be provided, which shall designate one of
-// the `V_*` candidates. If `nullable` is `false_type`, `ValT` shall be convertible
-// to `via_type`.
+// the `V_*` candidates.
 template<typename ValT, typename = void>
 struct Valuable_impl;
 
 template<>
 struct Valuable_impl<nullopt_t>
   {
-    using via_type  = V_null;
-    using nullable  = ::std::false_type;
+    using direct_init  = ::std::true_type;
+    using via_type     = V_null;
 
     template<typename StorT>
     static
@@ -34,8 +33,8 @@ struct Valuable_impl<nullopt_t>
 template<>
 struct Valuable_impl<bool>
   {
-    using via_type  = V_boolean;
-    using nullable  = ::std::false_type;
+    using direct_init  = ::std::true_type;
+    using via_type     = V_boolean;
 
     template<typename StorT, typename XValT>
     static
@@ -52,8 +51,8 @@ struct Valuable_impl<IntegerT, typename ::std::enable_if<
                         signed char, short, int, long, long long>::value
         >::type>
   {
-    using via_type  = V_integer;
-    using nullable  = ::std::false_type;
+    using direct_init  = ::std::true_type;
+    using via_type     = V_integer;
 
     template<typename StorT, typename XValT>
     static
@@ -70,8 +69,8 @@ struct Valuable_impl<FloatT, typename ::std::enable_if<
                                  float, double>::value
         >::type>
   {
-    using via_type  = V_real;
-    using nullable  = ::std::false_type;
+    using direct_init  = ::std::true_type;
+    using via_type     = V_real;
 
     template<typename StorT, typename XValT>
     static
@@ -88,8 +87,8 @@ struct Valuable_impl<StringT, typename ::std::enable_if<
                         cow_string::shallow_type, cow_string>::value
         >::type>
   {
-    using via_type  = V_string;
-    using nullable  = ::std::false_type;
+    using direct_init  = ::std::true_type;
+    using via_type     = V_string;
 
     template<typename StorT, typename XValT>
     static
@@ -103,8 +102,8 @@ struct Valuable_impl<StringT, typename ::std::enable_if<
 template<>
 struct Valuable_impl<cow_opaque>
   {
-    using via_type  = V_opaque;
-    using nullable  = ::std::true_type;
+    using direct_init  = ::std::false_type;
+    using via_type     = V_opaque;
 
     template<typename StorT, typename XValT>
     static
@@ -124,8 +123,8 @@ struct Valuable_impl<rcptr<OpaqueT>, typename ::std::enable_if<
                                   Abstract_Opaque*>::value
         >::type>
   {
-    using via_type  = V_opaque;
-    using nullable  = ::std::true_type;
+    using direct_init  = ::std::false_type;
+    using via_type     = V_opaque;
 
     template<typename StorT, typename XValT>
     static
@@ -142,8 +141,8 @@ struct Valuable_impl<rcptr<OpaqueT>, typename ::std::enable_if<
 template<>
 struct Valuable_impl<cow_function>
   {
-    using via_type  = V_function;
-    using nullable  = ::std::true_type;
+    using direct_init  = ::std::false_type;
+    using via_type     = V_function;
 
     template<typename StorT, typename XValT>
     static
@@ -163,8 +162,8 @@ struct Valuable_impl<rcptr<FunctionT>, typename ::std::enable_if<
                                   const Abstract_Function*>::value
         >::type>
   {
-    using via_type  = V_function;
-    using nullable  = ::std::true_type;
+    using direct_init  = ::std::false_type;
+    using via_type     = V_function;
 
     template<typename StorT, typename XValT>
     static
@@ -181,8 +180,8 @@ struct Valuable_impl<rcptr<FunctionT>, typename ::std::enable_if<
 template<>
 struct Valuable_impl<cow_vector<Value>>
   {
-    using via_type  = V_array;
-    using nullable  = ::std::false_type;
+    using direct_init  = ::std::true_type;
+    using via_type     = V_array;
 
     template<typename StorT, typename XValT>
     static
@@ -196,8 +195,8 @@ struct Valuable_impl<cow_vector<Value>>
 template<>
 struct Valuable_impl<cow_dictionary<Value>>
   {
-    using via_type  = V_object;
-    using nullable  = ::std::false_type;
+    using direct_init  = ::std::true_type;
+    using via_type     = V_object;
 
     template<typename StorT, typename XValT>
     static
@@ -211,8 +210,8 @@ struct Valuable_impl<cow_dictionary<Value>>
 template<typename XValT, size_t N>
 struct Valuable_impl<XValT [N]>
   {
-    using via_type  = V_array;
-    using nullable  = ::std::true_type;  // XXX: not really nullable
+    using direct_init  = ::std::false_type;
+    using via_type     = V_array;
 
     template<typename StorT, typename XArrT>
     static
@@ -234,8 +233,8 @@ struct Valuable_impl<TupleT, typename ::std::conditional<
                bool(::std::tuple_size<TupleT>::value), void, void
         >::type>
   {
-    using via_type  = V_array;
-    using nullable  = ::std::true_type;  // XXX: not really nullable
+    using direct_init  = ::std::false_type;
+    using via_type     = V_array;
 
     template<size_t... N, typename XTupT>
     static
@@ -266,8 +265,8 @@ struct Valuable_impl<opt<XValT>, typename ::std::conditional<
                true, void, typename Valuable_impl<XValT>::via_type
         >::type>
   {
-    using via_type  = typename Valuable_impl<XValT>::via_type;
-    using nullable  = ::std::true_type;
+    using direct_init  = ::std::false_type;
+    using via_type     = typename Valuable_impl<XValT>::via_type;
 
     template<typename StorT, typename XOptT>
     static
