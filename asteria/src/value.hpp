@@ -28,7 +28,7 @@ class Value
     Storage m_stor;
 
   public:
-    Value(nullptr_t = nullptr)
+    Value(nullopt_t = nullopt)
     noexcept
       : m_stor()
       { }

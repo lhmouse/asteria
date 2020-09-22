@@ -199,7 +199,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
 
           switch(name[3]) {
             case 'l':
-              value = nullptr;
+              value = nullopt;
               break;
 
             case 'e':

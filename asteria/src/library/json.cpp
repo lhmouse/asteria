@@ -580,7 +580,7 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
 
           switch(name[0]) {
             case 'n':
-              value = nullptr;
+              value = nullopt;
               break;
 
             case 't':

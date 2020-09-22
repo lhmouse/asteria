@@ -43,8 +43,8 @@ int main()
     ASTERIA_TEST_CHECK(value.as_object().at(phsh_string(::rocket::sref("one"))).as_boolean() == true);
     ASTERIA_TEST_CHECK(value.as_object().at(phsh_string(::rocket::sref("two"))).as_string() == "world");
 
-    value = nullptr;
-    Value cmp(nullptr);
+    value = nullopt;
+    Value cmp(nullopt);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_equal);
     swap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_equal);

@@ -376,7 +376,7 @@ Argument_Reader&
 Argument_Reader::
 o(Value& val)
   {
-    val = nullptr;
+    val = V_null();
     this->do_record_parameter_generic();
 
     // Get the next argument.
