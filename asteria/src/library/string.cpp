@@ -3533,29 +3533,20 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string text;
     V_string pattern;
     if(reader.I().v(text).S(state).v(pattern).F()) {
-      auto kpair = std_string_pcre_find(::std::move(text), 0, nullopt, ::std::move(pattern));
-      if(!kpair)
-        return self = Reference_root::S_temporary();
-      // The binding function returns a `pair`, but we would like to return an array so convert it.
-      Reference_root::S_temporary xref = { { kpair->first, kpair->second } };
+      Reference_root::S_temporary xref = { std_string_pcre_find(::std::move(text), 0, nullopt,
+                                                                ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).v(pattern).F()) {
-      auto kpair = std_string_pcre_find(::std::move(text), from, nullopt, ::std::move(pattern));
-      if(!kpair)
-        return self = Reference_root::S_temporary();
-      // The binding function returns a `pair`, but we would like to return an array so convert it.
-      Reference_root::S_temporary xref = { { kpair->first, kpair->second } };
+      Reference_root::S_temporary xref = { std_string_pcre_find(::std::move(text), from, nullopt,
+                                                                ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
     optV_integer length;
     if(reader.L(state).o(length).v(pattern).F()) {
-      auto kpair = std_string_pcre_find(::std::move(text), from, length, ::std::move(pattern));
-      if(!kpair)
-        return self = Reference_root::S_temporary();
-      // The binding function returns a `pair`, but we would like to return an array so convert it.
-      Reference_root::S_temporary xref = { { kpair->first, kpair->second } };
+      Reference_root::S_temporary xref = { std_string_pcre_find(::std::move(text), from, length,
+                                                                ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
     // Fail.

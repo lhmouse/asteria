@@ -435,9 +435,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
-      auto pair = std_math_sincos(::std::move(x));
-      // The binding function returns a `pair`, but we would like to return an array so convert it.
-      Reference_root::S_temporary xref = { { pair.first, pair.second } };
+      Reference_root::S_temporary xref = { std_math_sincos(::std::move(x)) };
       return self = ::std::move(xref);
     }
     // Fail.

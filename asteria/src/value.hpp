@@ -49,11 +49,6 @@ class Value
       : m_stor(typename details_value::Valuable<XValT>::via_type(::std::forward<XValT>(xval)))
       { }
 
-    template<typename XValT>
-    Value(initializer_list<XValT> init)
-      : m_stor(V_array(init.begin(), init.end()))
-      { }
-
     template<typename XValT,
     ROCKET_ENABLE_IF_HAS_TYPE(typename details_value::Valuable<XValT>::via_type)>
     Value&
@@ -62,17 +57,6 @@ class Value
                           typename details_value::Valuable<XValT>::via_type&&>::value)
       {
         details_value::Valuable<XValT>::assign(this->m_stor, ::std::forward<XValT>(xval));
-        return *this;
-      }
-
-    template<typename XValT>
-    Value&
-    operator=(initializer_list<XValT> init)
-      {
-        if(this->m_stor.index() == type_array)
-          this->m_stor.as<type_array>().assign(init.begin(), init.end());
-        else
-          this->m_stor = V_array(init.begin(), init.end());
         return *this;
       }
 

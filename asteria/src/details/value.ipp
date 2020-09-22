@@ -10,8 +10,9 @@ namespace details_value {
 
 // This controls implicit conversions to `Value` from other types.
 // The main templte is undefined and is SFINAE-friendly.
-// A member type alias `via_type` shall be provided, which shall designate one of the `V_*` candidates.
-// If `nullable` is `false_type`, `ValT` shall be convertible to `via_type`.
+// A member type alias `via_type` shall be provided, which shall designate one of
+// the `V_*` candidates. If `nullable` is `false_type`, `ValT` shall be convertible
+// to `via_type`.
 template<typename ValT, typename = void>
 struct Valuable_impl;
 
@@ -207,6 +208,59 @@ struct Valuable_impl<cow_dictionary<Value>>
       }
   };
 
+template<typename XValT, size_t N>
+struct Valuable_impl<XValT [N]>
+  {
+    using via_type  = V_array;
+    using nullable  = ::std::true_type;  // XXX: not really nullable
+
+    template<typename StorT, typename XArrT>
+    static
+    void
+    assign(StorT& stor, XArrT&& xarr)
+      {
+        V_array arr;
+        arr.reserve(N);
+        for(size_t k = 0;  k != N;  ++k)
+          arr.emplace_back(static_cast<typename ::std::conditional<
+                       ::std::is_lvalue_reference<XArrT&&>::value,
+                                       const XValT&, XValT&&>::type>(xarr[k]));
+        stor = ::std::move(arr);
+      }
+  };
+
+template<typename TupleT>
+struct Valuable_impl<TupleT, typename ::std::conditional<
+               bool(::std::tuple_size<TupleT>::value), void, void
+        >::type>
+  {
+    using via_type  = V_array;
+    using nullable  = ::std::true_type;  // XXX: not really nullable
+
+    template<size_t... N, typename XTupT>
+    static
+    void
+    unpack_tuple_aux(V_array& arr, ::std::index_sequence<N...>, XTupT&& xtup)
+      {
+        int dummy[] = { (static_cast<void>(arr.emplace_back(
+                               ::std::get<N>(::std::forward<XTupT>(xtup)))), 1)...  };
+        (void)dummy;
+      }
+
+    template<typename StorT, typename XTupT>
+    static
+    void
+    assign(StorT& stor, XTupT&& xtup)
+      {
+        V_array arr;
+        constexpr size_t N = ::std::tuple_size<TupleT>::value;
+        arr.reserve(N);
+        unpack_tuple_aux(arr, ::std::make_index_sequence<N>(),
+                                               ::std::forward<XTupT>(xtup));
+        stor = ::std::move(arr);
+      }
+  };
+
 template<typename XValT>
 struct Valuable_impl<opt<XValT>, typename ::std::conditional<
                true, void, typename Valuable_impl<XValT>::via_type
@@ -221,9 +275,10 @@ struct Valuable_impl<opt<XValT>, typename ::std::conditional<
     assign(StorT& stor, XOptT&& xopt)
       {
         if(xopt)
-          stor = static_cast<typename ::std::conditional<
-                       ::std::is_lvalue_reference<XOptT&&>::value,
-                                       const XValT&, XValT&&>::type>(*xopt);
+          Valuable_impl<XValT>::assign(stor,
+                  static_cast<typename ::std::conditional<
+                                 ::std::is_lvalue_reference<XOptT&&>::value,
+                                                const XValT&, XValT&&>::type>(*xopt));
         else
           stor = V_null();
       }
