@@ -910,6 +910,14 @@ do_accept_for_initializer_opt(Token_Stream& tstrm)
     return nullopt;
   }
 
+Statement::S_expression&
+do_set_empty_expression(opt<Statement::S_expression>& qexpr, const Token_Stream& tstrm)
+  {
+    auto& expr = qexpr.emplace();
+    expr.sloc = tstrm.next_sloc();
+    return expr;
+  }
+
 opt<Statement>
 do_accept_for_complement_triplet_opt(Token_Stream& tstrm)
   {
@@ -921,7 +929,7 @@ do_accept_for_complement_triplet_opt(Token_Stream& tstrm)
 
     auto qcond = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
     if(!qcond)
-      qcond.emplace();
+      do_set_empty_expression(qcond, tstrm);
 
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
@@ -929,7 +937,7 @@ do_accept_for_complement_triplet_opt(Token_Stream& tstrm)
 
     auto kstep = do_accept_expression_opt(tstrm);
     if(!kstep)
-      kstep.emplace();
+      do_set_empty_expression(kstep, tstrm);
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
