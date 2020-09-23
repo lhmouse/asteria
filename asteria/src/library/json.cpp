@@ -7,7 +7,7 @@
 #include "../runtime/global_context.hpp"
 #include "../compiler/token_stream.hpp"
 #include "../compiler/parser_error.hpp"
-#include "../compiler/fwd.hpp"
+#include "../compiler/enums.hpp"
 #include "../utilities.hpp"
 
 namespace asteria {

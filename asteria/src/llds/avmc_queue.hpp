@@ -5,7 +5,7 @@
 #define ASTERIA_LLDS_AVMC_QUEUE_HPP_
 
 #include "../fwd.hpp"
-#include "../runtime/fwd.hpp"
+#include "../runtime/enums.hpp"
 #include "../source_location.hpp"
 #include "../details/avmc_queue.ipp"
 
