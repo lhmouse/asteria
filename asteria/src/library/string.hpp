@@ -253,6 +253,10 @@ std_string_pcre_find(V_string text, V_integer from, Opt_integer length, V_string
 Opt_array
 std_string_pcre_match(V_string text, V_integer from, Opt_integer length, V_string pattern);
 
+// `std.string.pcre_named_match`
+Opt_object
+std_string_pcre_named_match(V_string text, V_integer from, Opt_integer length, V_string pattern);
+
 // `std.string.pcre_replace`
 V_string
 std_string_pcre_replace(V_string text, V_integer from, Opt_integer length, V_string pattern,

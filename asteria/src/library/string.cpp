@@ -1561,6 +1561,68 @@ std_string_pcre_match(V_string text, V_integer from, Opt_integer length, V_strin
     return ::std::move(matches);
   }
 
+Opt_object
+std_string_pcre_named_match(V_string text, V_integer from, Opt_integer length, V_string pattern)
+  {
+    auto range = do_slice(text, from, length);
+
+    // Get the real start and length.
+    auto sub_off = static_cast<size_t>(range.first - text.begin());
+    auto sub_ptr = reinterpret_cast<const uint8_t*>(text.data()) + sub_off;
+    auto sub_len = static_cast<size_t>(range.second - range.first);
+
+    // Try matching using default options.
+    PCRE2_pcre pcre(pattern);
+    int err = ::pcre2_match(pcre.code(), sub_ptr, sub_len, 0, 0, pcre.match(), nullptr);
+    if(err < 0) {
+      if(err == PCRE2_ERROR_NOMATCH)
+        return nullopt;
+
+      ASTERIA_THROW("Regular expression match failure: $1\n"
+                    "[`pcre2_match()` failed: $2]",
+                    pattern, PCRE2_Error(err));
+    }
+    auto ovec = ::pcre2_get_ovector_pointer(pcre.match());
+
+    // Get named group information.
+    uint32_t ngroups;
+    ::pcre2_pattern_info(pcre.code(), PCRE2_INFO_NAMECOUNT, &ngroups);
+
+    const uint8_t* gptr;
+    ::pcre2_pattern_info(pcre.code(), PCRE2_INFO_NAMETABLE, &gptr);
+
+    uint32_t gsize;
+    ::pcre2_pattern_info(pcre.code(), PCRE2_INFO_NAMEENTRYSIZE, &gsize);
+
+    // Compose the match result object.
+    V_object matches;
+    for(size_t k = 0;  k != ngroups;  ++k) {
+      // Get the index of this group.
+      uint16_t index_be;
+      ::std::memcpy(&index_be, gptr, 2);
+      size_t index = be16toh(index_be);
+
+      // Get the name of this group and initialize its value.
+      auto& value = matches.try_emplace(
+                          cow_string(reinterpret_cast<const char*>(gptr + 2))
+                      ).first->second;
+
+      // This is copied from PCRE2 manual:
+      //   If a pattern uses the \K escape sequence within a positive assertion, the reported
+      //   start of a successful match can be greater than the end of the match. For example,
+      //   if the pattern (?=ab\K) is matched against "ab", the start and end offset values
+      //   for the match are 2 and 0.
+      auto opair = ovec + index * 2;
+      if(opair[0] != PCRE2_UNSET)
+        value = cow_string(reinterpret_cast<const char*>(sub_ptr + opair[0]),
+                           ::std::max(opair[0], opair[1]) - opair[0]);
+
+      // Go to the next group.
+      gptr += gsize;
+    }
+    return ::std::move(matches);
+  }
+
 V_string
 std_string_pcre_replace(V_string text, V_integer from, Opt_integer length, V_string pattern,
                         V_string replacement)
@@ -3618,6 +3680,84 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     if(reader.L(state).o(length).v(pattern).F()) {
       Reference_root::S_temporary xref = { std_string_pcre_match(::std::move(text), from, length,
                                                                   ::std::move(pattern)) };
+      return self = ::std::move(xref);
+    }
+    // Fail.
+    reader.throw_no_matching_function_call();
+  }
+      ));
+
+    //===================================================================
+    // `std.string.pcre_named_match()`
+    //===================================================================
+    result.insert_or_assign(::rocket::sref("pcre_named_match"),
+      V_function(
+"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+`std.string.pcre_named_match(text, pattern)`
+
+  * Searches `text` for the first match of the Perl-compatible
+    regular expressions (PCRE) `pattern`.
+
+  * Returns an object of all named groups. Each key is the name of
+    a group and its value is the matched substring. If there are no
+    named groups in `pattern`, an empty object is returned. If a
+    group fails to match, its corresponding value is an explicit
+    `null`. If `text` does not match `pattern`, `null` is returned.
+
+  * Throws an exception if `pattern` is not a valid PCRE.
+
+`std.string.pcre_named_match(text, from, pattern)`
+
+  * Searches `text` for the first match of the Perl-compatible
+    regular expressions (PCRE) `pattern`. The search operation is
+    performed on the same subrange that would be returned by
+    `slice(text, from)`.
+
+  * Returns an object of all named groups. Each key is the name of
+    a group and its value is the matched substring. If there are no
+    named groups in `pattern`, an empty object is returned. If a
+    group fails to match, its corresponding value is an explicit
+    `null`. If `text` does not match `pattern`, `null` is returned.
+
+  * Throws an exception if `pattern` is not a valid PCRE.
+
+`std.string.pcre_named_match(text, from, [length], pattern)`
+
+  * Searches `text` for the first match of the Perl-compatible
+    regular expressions (PCRE) `pattern`. The search operation is
+    performed on the same subrange that would be returned by
+    `slice(text, from, length)`.
+
+  * Returns an object of all named groups. Each key is the name of
+    a group and its value is the matched substring. If there are no
+    named groups in `pattern`, an empty object is returned. If a
+    group fails to match, its corresponding value is an explicit
+    `null`. If `text` does not match `pattern`, `null` is returned.
+
+  * Throws an exception if `pattern` is not a valid PCRE.
+)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
+*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+  {
+    Argument_Reader reader(::rocket::sref("std.string.pcre_named_match"), ::rocket::cref(args));
+    Argument_Reader::State state;
+    // Parse arguments.
+    V_string text;
+    V_string pattern;
+    if(reader.I().v(text).S(state).v(pattern).F()) {
+      Reference_root::S_temporary xref = { std_string_pcre_named_match(::std::move(text), 0, nullopt,
+                                                                       ::std::move(pattern)) };
+      return self = ::std::move(xref);
+    }
+    V_integer from;
+    if(reader.L(state).v(from).S(state).v(pattern).F()) {
+      Reference_root::S_temporary xref = { std_string_pcre_named_match(::std::move(text), from, nullopt,
+                                                                       ::std::move(pattern)) };
+      return self = ::std::move(xref);
+    }
+    Opt_integer length;
+    if(reader.L(state).o(length).v(pattern).F()) {
+      Reference_root::S_temporary xref = { std_string_pcre_named_match(::std::move(text), from, length,
+                                                                       ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
     // Fail.

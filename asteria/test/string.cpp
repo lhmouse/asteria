@@ -353,6 +353,25 @@ int main()
         assert std.string.pcre_match("a11b2c333d4e555", '(\w\d*)(\w\d+)(\w\d*\w\d+)(\w\d+)') == [ "a11b2c333d4e555", "a11", "b2", "c333d4", "e555" ];
         assert std.string.pcre_match("a11b2c333d4e555", '(\d+\w)(22)?(\d+\w)') == [ "11b2c", "11b", null, "2c" ];
 
+        var m = std.string.pcre_named_match("a11b2c333d4e555", '(?:\w\d+)*');
+        assert typeof m == "object";
+        assert countof m == 0;
+
+        assert std.string.pcre_named_match("a11b2c333d4e555", '\d{34}\w') == null;
+
+        m = std.string.pcre_named_match("a11b2c333d4e555", '(\w\d*)(?<xx>\w\d+)(\w\d*\w\d+)(?<yy>\w\d+)');
+        assert typeof m == "object";
+        assert countof m == 2;
+        assert m.xx == "b2";
+        assert m.yy == "e555";
+
+        m = std.string.pcre_named_match("a11b2c333d4e555", '(?<xx>\d+\w)(?<yy>22)?(?<zz>\d+\w)');
+        assert typeof m == "object";
+        assert countof m == 3;
+        assert m.xx == "11b";
+        assert m.yy == null;
+        assert m.zz == "2c";
+
         assert std.string.pcre_replace("a11b2c333d4e555", '\d+\w', '*') == "a*****";
         assert std.string.pcre_replace("a11b2c333d4e555", '(\d{3})(\w)', '$2$1') == "a11b2cd3334e555";
         assert std.string.pcre_replace("a11b2c333d4e555", '\d{34}\w', '#') == "a11b2c333d4e555";

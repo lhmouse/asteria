@@ -990,6 +990,49 @@
 
 	* Throws an exception if `pattern` is not a valid PCRE.
 
+`std.string.pcre_named_match(text, pattern)`
+
+	* Searches `text` for the first match of the Perl-compatible
+	  regular expressions (PCRE) `pattern`.
+
+	* Returns an object of all named groups. Each key is the name of
+	  a group and its value is the matched substring. If there are no
+	  named groups in `pattern`, an empty object is returned. If a
+	  group fails to match, its corresponding value is an explicit
+	  `null`. If `text` does not match `pattern`, `null` is returned.
+
+	* Throws an exception if `pattern` is not a valid PCRE.
+
+`std.string.pcre_named_match(text, from, pattern)`
+
+	* Searches `text` for the first match of the Perl-compatible
+	  regular expressions (PCRE) `pattern`. The search operation is
+	  performed on the same subrange that would be returned by
+	  `slice(text, from)`.
+
+	* Returns an object of all named groups. Each key is the name of
+	  a group and its value is the matched substring. If there are no
+	  named groups in `pattern`, an empty object is returned. If a
+	  group fails to match, its corresponding value is an explicit
+	  `null`. If `text` does not match `pattern`, `null` is returned.
+
+	* Throws an exception if `pattern` is not a valid PCRE.
+
+`std.string.pcre_named_match(text, from, [length], pattern)`
+
+	* Searches `text` for the first match of the Perl-compatible
+	  regular expressions (PCRE) `pattern`. The search operation is
+	  performed on the same subrange that would be returned by
+	  `slice(text, from, length)`.
+
+	* Returns an object of all named groups. Each key is the name of
+	  a group and its value is the matched substring. If there are no
+	  named groups in `pattern`, an empty object is returned. If a
+	  group fails to match, its corresponding value is an explicit
+	  `null`. If `text` does not match `pattern`, `null` is returned.
+
+	* Throws an exception if `pattern` is not a valid PCRE.
+
 `std.string.pcre_replace(text, pattern, replacement)`
 
 	* Searches `text` and replaces all matches of the Perl-compatible
