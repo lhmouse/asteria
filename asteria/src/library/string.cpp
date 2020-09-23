@@ -568,6 +568,12 @@ class PCRE2_pcre
       { return this->m_match;  }
   };
 
+struct PCRE2_Name
+  {
+    uint16_t index_be;
+    char name[];
+  };
+
 }  // namespace
 
 V_string
@@ -631,7 +637,8 @@ Opt_integer
 std_string_rfind(V_string text, V_integer from, Opt_integer length, V_string pattern)
   {
     auto range = do_slice(text, from, length);
-    auto qit = do_find_opt(::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first),
+    auto qit = do_find_opt(::std::make_reverse_iterator(range.second),
+                           ::std::make_reverse_iterator(range.first),
                            pattern.rbegin(), pattern.rend());
     if(!qit)
       return nullopt;
@@ -1585,11 +1592,11 @@ std_string_pcre_named_match(V_string text, V_integer from, Opt_integer length, V
     auto ovec = ::pcre2_get_ovector_pointer(pcre.match());
 
     // Get named group information.
-    uint32_t ngroups;
-    ::pcre2_pattern_info(pcre.code(), PCRE2_INFO_NAMECOUNT, &ngroups);
-
     const uint8_t* gptr;
     ::pcre2_pattern_info(pcre.code(), PCRE2_INFO_NAMETABLE, &gptr);
+
+    uint32_t ngroups;
+    ::pcre2_pattern_info(pcre.code(), PCRE2_INFO_NAMECOUNT, &ngroups);
 
     uint32_t gsize;
     ::pcre2_pattern_info(pcre.code(), PCRE2_INFO_NAMEENTRYSIZE, &gsize);
@@ -1597,28 +1604,20 @@ std_string_pcre_named_match(V_string text, V_integer from, Opt_integer length, V
     // Compose the match result object.
     V_object matches;
     for(size_t k = 0;  k != ngroups;  ++k) {
-      // Get the index of this group.
-      uint16_t index_be;
-      ::std::memcpy(&index_be, gptr, 2);
-      size_t index = be16toh(index_be);
-
-      // Get the name of this group and initialize its value.
-      auto& value = matches.try_emplace(
-                          cow_string(reinterpret_cast<const char*>(gptr + 2))
-                      ).first->second;
+      // Get the index and name of this group.
+      auto gcur = reinterpret_cast<const PCRE2_Name*>(gptr + k * gsize);
+      size_t gindex = be16toh(gcur->index_be);
+      auto gmatch = matches.try_emplace(cow_string(gcur->name)).first;
 
       // This is copied from PCRE2 manual:
       //   If a pattern uses the \K escape sequence within a positive assertion, the reported
       //   start of a successful match can be greater than the end of the match. For example,
       //   if the pattern (?=ab\K) is matched against "ab", the start and end offset values
       //   for the match are 2 and 0.
-      auto opair = ovec + index * 2;
+      auto opair = ovec + gindex * 2;
       if(opair[0] != PCRE2_UNSET)
-        value = cow_string(reinterpret_cast<const char*>(sub_ptr + opair[0]),
-                           ::std::max(opair[0], opair[1]) - opair[0]);
-
-      // Go to the next group.
-      gptr += gsize;
+        gmatch->second = cow_string(reinterpret_cast<const char*>(sub_ptr + opair[0]),
+                                    ::std::max(opair[0], opair[1]) - opair[0]);
     }
     return ::std::move(matches);
   }
