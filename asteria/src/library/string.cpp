@@ -1496,8 +1496,8 @@ std_string_pcre_find(V_string text, V_integer from, Opt_integer length, V_string
     auto sub_ptr = reinterpret_cast<const uint8_t*>(text.data()) + sub_off;
     auto sub_len = static_cast<size_t>(range.second - range.first);
 
-    // Construct a regular expression that captures nothing.
-    PCRE2_pcre pcre(pattern, PCRE2_NO_AUTO_CAPTURE);
+    // Try matching using default options.
+    PCRE2_pcre pcre(pattern);
     int err = ::pcre2_match(pcre.code(), sub_ptr, sub_len, 0, 0, pcre.match(), nullptr);
     if(err < 0) {
       if(err == PCRE2_ERROR_NOMATCH)
@@ -1507,8 +1507,6 @@ std_string_pcre_find(V_string text, V_integer from, Opt_integer length, V_string
                     "[`pcre2_match()` failed: $2]",
                     pattern, PCRE2_Error(err));
     }
-
-    // Get the output vector. We only need the first two elements here.
     auto ovec = ::pcre2_get_ovector_pointer(pcre.match());
 
     // This is copied from PCRE2 manual:
@@ -1530,7 +1528,7 @@ std_string_pcre_match(V_string text, V_integer from, Opt_integer length, V_strin
     auto sub_ptr = reinterpret_cast<const uint8_t*>(text.data()) + sub_off;
     auto sub_len = static_cast<size_t>(range.second - range.first);
 
-    // Construct a regular expression.
+    // Try matching using default options.
     PCRE2_pcre pcre(pattern);
     int err = ::pcre2_match(pcre.code(), sub_ptr, sub_len, 0, 0, pcre.match(), nullptr);
     if(err < 0) {
@@ -1541,8 +1539,6 @@ std_string_pcre_match(V_string text, V_integer from, Opt_integer length, V_strin
                     "[`pcre2_match()` failed: $2]",
                     pattern, PCRE2_Error(err));
     }
-
-    // Get the output vector and number of groups plus the match itself.
     auto ovec = ::pcre2_get_ovector_pointer(pcre.match());
     size_t npairs = ::pcre2_get_ovector_count(pcre.match());
 
@@ -1552,17 +1548,15 @@ std_string_pcre_match(V_string text, V_integer from, Opt_integer length, V_strin
     // is `null`.
     V_array matches(npairs);
     for(size_t k = 0;  k != npairs;  ++k) {
-      auto opair = ovec + k * 2;
-      if(opair[0] == PCRE2_UNSET)
-        continue;
-
       // This is copied from PCRE2 manual:
       //   If a pattern uses the \K escape sequence within a positive assertion, the reported
       //   start of a successful match can be greater than the end of the match. For example,
       //   if the pattern (?=ab\K) is matched against "ab", the start and end offset values
       //   for the match are 2 and 0.
-      matches.mut(k) = cow_string(reinterpret_cast<const char*>(sub_ptr + opair[0]),
-                                  ::std::max(opair[0], opair[1]) - opair[0]);
+      auto opair = ovec + k * 2;
+      if(opair[0] != PCRE2_UNSET)
+        matches.mut(k) = cow_string(reinterpret_cast<const char*>(sub_ptr + opair[0]),
+                                    ::std::max(opair[0], opair[1]) - opair[0]);
     }
     return ::std::move(matches);
   }
@@ -1582,13 +1576,12 @@ std_string_pcre_replace(V_string text, V_integer from, Opt_integer length, V_str
     size_t output_len = replacement.size() + text.size() + 15;
     V_string output_str;
 
-    // Construct a regular expression.
+    // Try matching using default options.
     PCRE2_pcre pcre(pattern);
     int err;
     do {
       output_str.assign(output_len, '*');
 
-      // Try substitution using reserved storage.
       err = ::pcre2_substitute(pcre.code(), sub_ptr, sub_len, 0,
                                PCRE2_SUBSTITUTE_EXTENDED | PCRE2_SUBSTITUTE_GLOBAL
                                    | PCRE2_SUBSTITUTE_OVERFLOW_LENGTH,

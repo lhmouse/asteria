@@ -245,7 +245,7 @@ std_string_unpack_64le(V_string text);
 V_string
 std_string_format(V_string templ, cow_vector<Value> values);
 
-// `std.stringval`.
+// `std.string.pcre_find`.
 opt<pair<V_integer, V_integer>>
 std_string_pcre_find(V_string text, V_integer from, Opt_integer length, V_string pattern);
 

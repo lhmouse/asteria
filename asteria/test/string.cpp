@@ -348,6 +348,7 @@ int main()
         assert std.string.pcre_find("a11b2c333d4e555", '(\w\d+)*') == [0,15];
 
         assert std.string.pcre_match("a11b2c333d4e555", '\d+\w') == [ "11b" ];
+        assert std.string.pcre_match("a11b2c333d4e555", '\d{34}\w') == null;
         assert std.string.pcre_match("a11b2c333d4e555", '(?:\w\d+)*') == [ "a11b2c333d4e555" ];
         assert std.string.pcre_match("a11b2c333d4e555", '(\w\d*)(\w\d+)(\w\d*\w\d+)(\w\d+)') == [ "a11b2c333d4e555", "a11", "b2", "c333d4", "e555" ];
         assert std.string.pcre_match("a11b2c333d4e555", '(\d+\w)(22)?(\d+\w)') == [ "11b2c", "11b", null, "2c" ];
