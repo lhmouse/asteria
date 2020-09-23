@@ -30,6 +30,7 @@ do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code, const Abstract_Context&
       auto qnode = code[i].rebind_opt(ctx);
       if(!qnode)
         continue;
+
       dirty |= true;
       code.mut(i) = ::std::move(*qnode);
     }
@@ -44,6 +45,7 @@ do_rebind_nodes(bool& dirty, cow_vector<cow_vector<AIR_Node>>& seqs, const Abstr
         auto qnode = seqs[k][i].rebind_opt(ctx);
         if(!qnode)
           continue;
+
         dirty |= true;
         seqs.mut(k).mut(i) = ::std::move(*qnode);
       }
@@ -486,6 +488,7 @@ struct AIR_Traits<AIR_Node::S_switch_statement>
           if(sp.queues_labels[i].empty()) {
             if(bp != SIZE_MAX)
               ASTERIA_THROW("Multiple `default` clauses");
+
             bp = i;
             continue;
           }
@@ -514,6 +517,7 @@ struct AIR_Traits<AIR_Node::S_switch_statement>
               status = sp.queues_bodies[bp].execute(ctx_body);
               if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch }))
                 break;
+
               if(status != air_status_next)
                 return status;
             }
@@ -564,6 +568,7 @@ struct AIR_Traits<AIR_Node::S_do_while_statement>
           auto status = do_execute_block(sp.queues[0], ctx);
           if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while }))
             break;
+
           if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
                                             air_status_continue_while }))
             return status;
@@ -619,6 +624,7 @@ struct AIR_Traits<AIR_Node::S_while_statement>
           status = do_execute_block(sp.queues[1], ctx);
           if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while }))
             break;
+
           if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
                                             air_status_continue_while }))
             return status;
@@ -689,6 +695,7 @@ struct AIR_Traits<AIR_Node::S_for_each_statement>
               status = do_execute_block(sp.queue_body, ctx_for);
               if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
                 break;
+
               if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
                                                 air_status_continue_for }))
                 return status;
@@ -712,6 +719,7 @@ struct AIR_Traits<AIR_Node::S_for_each_statement>
               status = do_execute_block(sp.queue_body, ctx_for);
               if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
                 break;
+
               if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
                                                 air_status_continue_for }))
                 return status;
@@ -770,6 +778,7 @@ struct AIR_Traits<AIR_Node::S_for_statement>
           status = do_execute_block(sp.queues[3], ctx_for);
           if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
             break;
+
           if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
                                             air_status_continue_for }))
             return status;
