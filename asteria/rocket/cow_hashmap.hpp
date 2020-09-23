@@ -168,18 +168,14 @@ class cow_hashmap
     cow_hashmap&
     operator=(const cow_hashmap& other)
     noexcept
-      {
-        noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        return this->assign(other);
-      }
+      { noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+        return this->assign(other);  }
 
     cow_hashmap&
     operator=(cow_hashmap&& other)
     noexcept
-      {
-        noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        return this->assign(::std::move(other));
-      }
+      { noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+        return this->assign(::std::move(other));  }
 
     cow_hashmap&
     operator=(nullopt_t)
