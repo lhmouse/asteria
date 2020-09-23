@@ -5,6 +5,7 @@
 #include "executive_context.hpp"
 #include "runtime_error.hpp"
 #include "ptc_arguments.hpp"
+#include "enums.hpp"
 #include "../llds/avmc_queue.hpp"
 #include "../utilities.hpp"
 
@@ -19,6 +20,21 @@ do_set_lazy_reference(Executive_Context& ctx, const phsh_string& name, XRefT&& x
     auto& ref = ctx.open_named_reference(name);
     ref = ::std::forward<XRefT>(xref);
     return ::std::addressof(ref);
+  }
+
+template<typename ElemT>
+inline
+cow_vector<ElemT>&
+do_concatenate(cow_vector<ElemT>& lhs, cow_vector<ElemT>&& rhs)
+  {
+    if(lhs.size()) {
+      lhs.append(::std::make_move_iterator(rhs.mut_begin()), ::std::make_move_iterator(rhs.mut_end()));
+      rhs.clear();
+    }
+    else {
+      lhs.swap(rhs);
+    }
+    return lhs;
   }
 
 }  // namespace
@@ -79,86 +95,6 @@ do_bind_parameters(const rcptr<Variadic_Arguer>& zvarg, const cow_vector<phsh_st
       this->m_lazy_args = ::std::move(args);
   }
 
-void
-Executive_Context::
-do_defer_expression(const Source_Location& sloc, AVMC_Queue&& queue)
-  {
-    this->m_defer.emplace_back(sloc, ::std::move(queue));
-  }
-
-void
-Executive_Context::
-do_on_scope_exit_void()
-  {
-    // Execute all deferred expressions backwards.
-    while(this->m_defer.size()) {
-      // Pop an expression.
-      auto pair = ::std::move(this->m_defer.mut_back());
-      this->m_defer.pop_back();
-
-      // Execute it. If an exception is thrown, append a frame and rethrow it.
-      ASTERIA_RUNTIME_TRY {
-        auto status = pair.second.execute(*this);
-        ROCKET_ASSERT(status == air_status_next);
-      }
-      ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
-        except.push_frame_defer(pair.first);
-        this->do_on_scope_exit_exception(except);
-        throw;
-      }
-    }
-  }
-
-void
-Executive_Context::
-do_on_scope_exit_return()
-  {
-    if(auto tca = this->m_stack->get_top().get_tail_call_opt()) {
-      // If a PTC wrapper was returned, prepend all deferred expressions to it.
-      auto& defer = tca->open_defer_stack();
-      if(defer.size()) {
-        defer.insert(defer.begin(), ::std::make_move_iterator(this->m_defer.mut_begin()),
-                                    ::std::make_move_iterator(this->m_defer.mut_end()));
-        this->m_defer.clear();
-      }
-      else
-        defer.swap(this->m_defer);
-    }
-    else {
-      // Stash the return reference.
-      auto self = ::std::move(this->m_stack->open_top());
-
-      // Evaluate all deferred expressions.
-      this->do_on_scope_exit_void();
-
-      // Restore the return reference.
-      this->m_stack->clear();
-      this->m_stack->push(::std::move(self));
-    }
-  }
-
-void
-Executive_Context::
-do_on_scope_exit_exception(Runtime_Error& except)
-  {
-    // Execute all deferred expressions backwards.
-    while(this->m_defer.size()) {
-      // Pop an expression.
-      auto pair = ::std::move(this->m_defer.mut_back());
-      this->m_defer.pop_back();
-
-      // Execute it. If an exception is thrown, replace `except` with it.
-      ASTERIA_RUNTIME_TRY {
-        auto status = pair.second.execute(*this);
-        ROCKET_ASSERT(status == air_status_next);
-      }
-      ASTERIA_RUNTIME_CATCH(Runtime_Error& nested) {
-        except = nested;
-        except.push_frame_defer(pair.first);
-      }
-    }
-  }
-
 Reference*
 Executive_Context::
 do_lazy_lookup_opt(const phsh_string& name)
@@ -173,7 +109,8 @@ do_lazy_lookup_opt(const phsh_string& name)
 
     if(name == "__this") {
       // Note: This can only happen inside a function context and the `this` argument is null.
-      return do_set_lazy_reference(*this, name, Reference_root::S_constant());
+      Reference_root::S_constant xref = { };
+      return do_set_lazy_reference(*this, name, ::std::move(xref));
     }
 
     if(name == "__varg") {
@@ -189,6 +126,86 @@ do_lazy_lookup_opt(const phsh_string& name)
     }
 
     return nullptr;
+  }
+
+Executive_Context&
+Executive_Context::
+defer_expression(const Source_Location& sloc, AVMC_Queue&& queue)
+  {
+    this->m_defer.emplace_back(sloc, ::std::move(queue));
+    return *this;
+  }
+
+AIR_Status
+Executive_Context::
+on_scope_exit(AIR_Status status)
+  {
+    if(ROCKET_EXPECT(this->m_defer.empty()))
+      return status;
+
+    // Stash the returned reference, if any.
+    Reference self = Reference_root::S_uninit();
+    if(status == air_status_return_ref)
+      self = ::std::move(this->m_stack->get_top());
+
+    if(auto tca = self.get_tail_call_opt()) {
+      // If a PTC wrapper was returned, prepend all deferred expressions to it.
+      // These callbacks will be unpacked later, so we just return.
+      do_concatenate(tca->open_defer_stack(), ::std::move(this->m_defer));
+      this->m_stack->open_top() = ::std::move(self);
+      return status;
+    }
+
+    // Execute all deferred expressions backwards.
+    while(this->m_defer.size()) {
+      auto pair = ::std::move(this->m_defer.mut_back());
+      this->m_defer.pop_back();
+
+      // Execute it.
+      // If an exception is thrown, append a frame and rethrow it.
+      ASTERIA_RUNTIME_TRY {
+        auto status_def = pair.second.execute(*this);
+        ROCKET_ASSERT(status_def == air_status_next);
+      }
+      ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+        except.push_frame_defer(pair.first);
+        this->on_scope_exit(except);
+        throw;
+      }
+    }
+
+    if(self.is_uninitialized())
+      return status;
+
+    // Restore the returned reference.
+    this->m_stack->open_top() = ::std::move(self);
+    return status;
+  }
+
+Runtime_Error&
+Executive_Context::
+on_scope_exit(Runtime_Error& except)
+  {
+    if(ROCKET_EXPECT(this->m_defer.empty()))
+      return except;
+
+    // Execute all deferred expressions backwards.
+    while(this->m_defer.size()) {
+      auto pair = ::std::move(this->m_defer.mut_back());
+      this->m_defer.pop_back();
+
+      // Execute it.
+      // If an exception is thrown, replace `except` with it.
+      ASTERIA_RUNTIME_TRY {
+        auto status_def = pair.second.execute(*this);
+        ROCKET_ASSERT(status_def == air_status_next);
+      }
+      ASTERIA_RUNTIME_CATCH(Runtime_Error& nested) {
+        except = nested;
+        except.push_frame_defer(pair.first);
+      }
+    }
+    return except;
   }
 
 }  // namespace asteria

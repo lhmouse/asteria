@@ -8,6 +8,7 @@
 #include "global_context.hpp"
 #include "runtime_error.hpp"
 #include "ptc_arguments.hpp"
+#include "enums.hpp"
 #include "../utilities.hpp"
 
 namespace asteria {

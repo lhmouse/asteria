@@ -8,7 +8,6 @@
 #include "abstract_context.hpp"
 #include "variadic_arguer.hpp"
 #include "evaluation_stack.hpp"
-#include "enums.hpp"
 #include "../llds/avmc_queue.hpp"
 
 namespace asteria {
@@ -59,18 +58,6 @@ class Executive_Context
     do_bind_parameters(const rcptr<Variadic_Arguer>& zvarg, const cow_vector<phsh_string>& params,
                        Reference&& self, cow_vector<Reference>&& args);
 
-    void
-    do_defer_expression(const Source_Location& sloc, AVMC_Queue&& queue);
-
-    void
-    do_on_scope_exit_void();
-
-    void
-    do_on_scope_exit_return();
-
-    void
-    do_on_scope_exit_exception(Runtime_Error& except);
-
   protected:
     bool
     do_is_analytic()
@@ -110,37 +97,16 @@ class Executive_Context
     // Defer an expression which will be evaluated at scope exit.
     // The result of such expressions are discarded.
     Executive_Context&
-    defer_expression(const Source_Location& sloc, AVMC_Queue&& queue)
-      {
-        this->do_defer_expression(sloc, ::std::move(queue));
-        return *this;
-      }
+    defer_expression(const Source_Location& sloc, AVMC_Queue&& queue);
 
     // These functions must be called before exiting a scope.
     // Note that these functions may throw arbitrary exceptions, which
     // is why RAII is inapplicable.
     AIR_Status
-    on_scope_exit(AIR_Status status)
-      {
-        if(ROCKET_EXPECT(this->m_defer.empty()))
-          return status;
-
-        if(status != air_status_return_ref)
-          this->do_on_scope_exit_void();
-        else
-          this->do_on_scope_exit_return();
-        return status;
-      }
+    on_scope_exit(AIR_Status status);
 
     Runtime_Error&
-    on_scope_exit(Runtime_Error& except)
-      {
-        if(ROCKET_EXPECT(this->m_defer.empty()))
-          return except;
-
-        this->do_on_scope_exit_exception(except);
-        return except;
-      }
+    on_scope_exit(Runtime_Error& except);
   };
 
 }  // namespace asteria

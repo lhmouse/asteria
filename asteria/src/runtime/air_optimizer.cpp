@@ -5,6 +5,7 @@
 #include "air_optimizer.hpp"
 #include "analytic_context.hpp"
 #include "instantiated_function.hpp"
+#include "enums.hpp"
 #include "../compiler/statement.hpp"
 #include "../utilities.hpp"
 

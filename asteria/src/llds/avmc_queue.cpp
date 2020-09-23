@@ -6,6 +6,7 @@
 #include "../runtime/air_node.hpp"
 #include "../runtime/variable_callback.hpp"
 #include "../runtime/runtime_error.hpp"
+#include "../runtime/enums.hpp"
 #include "../utilities.hpp"
 
 namespace asteria {
