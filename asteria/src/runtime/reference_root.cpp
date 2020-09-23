@@ -122,7 +122,7 @@ const
       }
 
       case index_tail_call: {
-        auto ptc = unerase_cast(this->m_stor.as<index_tail_call>().tca);
+        auto ptc = unerase_cast(this->m_stor.as<index_tail_call>().ptca);
         if(!ptc) {
           return callback;
         }

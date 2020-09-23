@@ -38,7 +38,7 @@ class Reference_root
 
     struct S_tail_call
       {
-        rcfwdp<PTC_Arguments> tca;
+        rcfwdp<PTC_Arguments> ptca;
       };
 
     struct S_jump_src
@@ -134,7 +134,7 @@ class Reference_root
     const rcfwdp<PTC_Arguments>&
     as_tail_call()
     const
-      { return this->m_stor.as<index_tail_call>().tca;  }
+      { return this->m_stor.as<index_tail_call>().ptca;  }
 
     bool
     is_jump_src()

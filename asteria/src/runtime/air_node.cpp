@@ -879,7 +879,7 @@ struct AIR_Traits<AIR_Node::S_throw_statement>
       {
         // Read the value to throw.
         // Note that the operand must not have been empty for this code.
-        throw Runtime_Error(Runtime_Error::F_throw(), ctx.stack().get_top().read(), sloc);
+        throw Runtime_Error(Runtime_Error::M_throw(), ctx.stack().get_top().read(), sloc);
       }
   };
 
@@ -918,7 +918,7 @@ struct AIR_Traits<AIR_Node::S_assert_statement>
           return air_status_next;
 
         // Throw a `Runtime_Error`.
-        throw Runtime_Error(Runtime_Error::F_assert(), sp.sloc, sp.text);
+        throw Runtime_Error(Runtime_Error::M_assert(), sp.sloc, sp.text);
       }
   };
 
@@ -1292,10 +1292,10 @@ do_function_call_common(Reference& self, const Source_Location& sloc, Executive_
 
     // Pack arguments for this proper tail call.
     args.emplace_back(::std::move(self));
-    auto tca = ::rocket::make_refcnt<PTC_Arguments>(sloc, ptc, target, ::std::move(args));
+    auto ptca = ::rocket::make_refcnt<PTC_Arguments>(sloc, ptc, target, ::std::move(args));
 
     // Set the result, which will be unpacked outside this scope.
-    Reference_root::S_tail_call xref = { ::std::move(tca) };
+    Reference_root::S_tail_call xref = { ::std::move(ptca) };
     self = ::std::move(xref);
 
     // Force `air_status_return_ref` if control flow reaches the end of a function.

@@ -79,8 +79,8 @@ const
 
         // In case of PTCs, set up source location.
         // This cannot be set at the call site where such information isn't available.
-        if(auto tca = self.get_tail_call_opt())
-          tca->set_enclosing_function(this->m_zvarg->sloc(), this->m_zvarg->func());
+        if(auto ptca = self.get_tail_call_opt())
+          ptca->set_enclosing_function(this->m_zvarg->sloc(), this->m_zvarg->func());
         break;
 
       case air_status_break_unspec:

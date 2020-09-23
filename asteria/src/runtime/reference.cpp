@@ -21,7 +21,7 @@ do_unpack_tail_calls(Reference& self, Global_Context& global)
   {
     // The function call shall yield an rvalue unless all wrapped calls return by reference.
     PTC_Aware ptc_conj = ptc_aware_by_ref;
-    rcptr<PTC_Arguments> tca;
+    rcptr<PTC_Arguments> ptca;
 
     // We must rebuild the backtrace using this queue if an exception is thrown.
     cow_vector<rcptr<PTC_Arguments>> frames;
@@ -30,73 +30,73 @@ do_unpack_tail_calls(Reference& self, Global_Context& global)
     ASTERIA_RUNTIME_TRY {
       // Unpack all frames recursively.
       // Note that `self` is overwritten before the wrapped function is called.
-      while(!!(tca = self.get_tail_call_opt())) {
+      while(!!(ptca = self.get_tail_call_opt())) {
         // Generate a single-step trap before unpacking arguments.
         if(auto qhooks = global.get_hooks_opt())
-          qhooks->on_single_step_trap(tca->sloc());
+          qhooks->on_single_step_trap(ptca->sloc());
 
         // Get the `this` reference and all the other arguments.
-        auto args = ::std::move(tca->open_arguments_and_self());
+        auto args = ::std::move(ptca->open_arguments_and_self());
         self = ::std::move(args.mut_back());
         args.pop_back();
 
         // Call the hook function if any.
         if(auto qhooks = global.get_hooks_opt())
-          qhooks->on_function_call(tca->sloc(), tca->get_target());
+          qhooks->on_function_call(ptca->sloc(), ptca->get_target());
 
         // Figure out how to forward the result.
-        if(tca->ptc_aware() == ptc_aware_void) {
+        if(ptca->ptc_aware() == ptc_aware_void) {
           ptc_conj = ptc_aware_void;
         }
-        else if((tca->ptc_aware() == ptc_aware_by_val) && (ptc_conj == ptc_aware_by_ref)) {
+        else if((ptca->ptc_aware() == ptc_aware_by_val) && (ptc_conj == ptc_aware_by_ref)) {
           ptc_conj = ptc_aware_by_val;
         }
         // Record this frame.
-        frames.emplace_back(tca);
+        frames.emplace_back(ptca);
 
         // Perform a non-tail call.
-        tca->get_target().invoke_ptc_aware(self, global, ::std::move(args));
+        ptca->get_target().invoke_ptc_aware(self, global, ::std::move(args));
       }
 
       // Check for deferred expressions.
       while(frames.size()) {
         // Pop frames in reverse order.
-        tca = ::std::move(frames.mut_back());
+        ptca = ::std::move(frames.mut_back());
         frames.pop_back();
 
         // Evaluate deferred expressions if any.
-        if(tca->get_defer_stack().size())
+        if(ptca->get_defer_stack().size())
           Executive_Context(::rocket::ref(global), ::rocket::ref(stack),
-                            ::std::move(tca->open_defer_stack()))
+                            ::std::move(ptca->open_defer_stack()))
             .on_scope_exit(air_status_next);
 
         // Call the hook function if any.
         if(auto qhooks = global.get_hooks_opt())
-          qhooks->on_function_return(tca->sloc(), tca->get_target(), self);
+          qhooks->on_function_return(ptca->sloc(), ptca->get_target(), self);
       }
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
       // Check for deferred expressions.
       while(frames.size()) {
         // Pop frames in reverse order.
-        tca = ::std::move(frames.mut_back());
+        ptca = ::std::move(frames.mut_back());
         frames.pop_back();
 
         // Push the function call.
-        except.push_frame_plain(tca->sloc(), ::rocket::sref("[proper tail call]"));
+        except.push_frame_plain(ptca->sloc(), ::rocket::sref("[proper tail call]"));
 
         // Call the hook function if any.
         if(auto qhooks = global.get_hooks_opt())
-          qhooks->on_function_except(tca->sloc(), tca->get_target(), except);
+          qhooks->on_function_except(ptca->sloc(), ptca->get_target(), except);
 
         // Evaluate deferred expressions if any.
-        if(tca->get_defer_stack().size())
+        if(ptca->get_defer_stack().size())
           Executive_Context(::rocket::ref(global), ::rocket::ref(stack),
-                            ::std::move(tca->open_defer_stack()))
+                            ::std::move(ptca->open_defer_stack()))
             .on_scope_exit(except);
 
         // Push the caller.
-        except.push_frame_func(tca->enclosing_sloc(), tca->enclosing_func());
+        except.push_frame_func(ptca->enclosing_sloc(), ptca->enclosing_func());
       }
       throw;
     }
