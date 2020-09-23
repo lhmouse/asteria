@@ -838,7 +838,7 @@ opt<Statement>
 do_accept_for_complement_range_opt(Token_Stream& tstrm)
   {
     // for-complement-range ::=
-    //   "each" identifier "," identifier ":" expression ")" statement
+    //   "each" identifier "," identifier "->" expression ")" statement
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_each });
     if(!qkwrd)
       return nullopt;
@@ -855,7 +855,7 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm)
     if(!qmname)
       throw Parser_Error(parser_status_identifier_expected, tstrm.next_sloc(), tstrm.next_length());
 
-    kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
+    kpunct = do_accept_punctuator_opt(tstrm, { punctuator_arrow });
     if(!kpunct)
       throw Parser_Error(parser_status_colon_expected, tstrm.next_sloc(), tstrm.next_length());
 

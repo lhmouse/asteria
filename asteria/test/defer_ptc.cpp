@@ -24,7 +24,7 @@ int main()
     func transform_backtrace(st, bt, ln) {
       st = [ ];
       // ignore top level calls
-      for(each k, v : bt)
+      for(each k, v -> bt)
         st[$] = [ v.frame, v.line >= ln - 3 ? 12345 : v.line ];
       // print the backtrace
       std.debug.dump(bt);
