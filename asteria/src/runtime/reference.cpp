@@ -96,7 +96,11 @@ do_unpack_tail_calls(Reference& self, Global_Context& global)
             .on_scope_exit(except);
 
         // Push the caller.
-        except.push_frame_func(ptca->enclosing_sloc(), ptca->enclosing_func());
+        // Note that if we arrive here, there must have been an exception thrown when
+        // unpacking the last frame (i.e. the last call did not return), so the last
+        // frame does not have its enclosing function set.
+        if(ptca->enclosing_sloc().offset() >= 0)
+          except.push_frame_func(ptca->enclosing_sloc(), ptca->enclosing_func());
       }
       throw;
     }
