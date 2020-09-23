@@ -32,8 +32,8 @@ final
     cow_string m_enclosing_func;
 
   public:
-    PTC_Arguments(const Source_Location& sloc, PTC_Aware ptc,
-                  const cow_function& target, cow_vector<Reference>&& args_self)
+    PTC_Arguments(const Source_Location& sloc, PTC_Aware ptc, const cow_function& target,
+                  cow_vector<Reference>&& args_self)
       : m_sloc(sloc), m_ptc(ptc),
         m_target(target), m_args_self(::std::move(args_self))
       { }
