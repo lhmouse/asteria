@@ -152,30 +152,29 @@ on_scope_exit(AIR_Status status)
       // If a PTC wrapper was returned, prepend all deferred expressions to it.
       // These callbacks will be unpacked later, so we just return.
       do_concatenate(tca->open_defer_stack(), ::std::move(this->m_defer));
-      this->m_stack->open_top() = ::std::move(self);
-      return status;
+      ROCKET_ASSERT(!self.is_uninitialized());
     }
+    else {
+      // Execute all deferred expressions backwards.
+      while(this->m_defer.size()) {
+        auto pair = ::std::move(this->m_defer.mut_back());
+        this->m_defer.pop_back();
 
-    // Execute all deferred expressions backwards.
-    while(this->m_defer.size()) {
-      auto pair = ::std::move(this->m_defer.mut_back());
-      this->m_defer.pop_back();
-
-      // Execute it.
-      // If an exception is thrown, append a frame and rethrow it.
-      ASTERIA_RUNTIME_TRY {
-        auto status_def = pair.second.execute(*this);
-        ROCKET_ASSERT(status_def == air_status_next);
+        // Execute it.
+        // If an exception is thrown, append a frame and rethrow it.
+        ASTERIA_RUNTIME_TRY {
+          auto status_def = pair.second.execute(*this);
+          ROCKET_ASSERT(status_def == air_status_next);
+        }
+        ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+          except.push_frame_defer(pair.first);
+          this->on_scope_exit(except);
+          throw;
+        }
       }
-      ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
-        except.push_frame_defer(pair.first);
-        this->on_scope_exit(except);
-        throw;
-      }
+      if(self.is_uninitialized())
+        return status;
     }
-
-    if(self.is_uninitialized())
-      return status;
 
     // Restore the returned reference.
     this->m_stack->open_top() = ::std::move(self);
