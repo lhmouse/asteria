@@ -103,8 +103,7 @@ extract(cow_vector<Expression_Unit>& units)
         auto& altr = this->m_stor.as<index_head>();
 
         // Move-append all units into `units`.
-        units.append(::std::make_move_iterator(altr.units.mut_begin()),
-                     ::std::make_move_iterator(altr.units.mut_end()));
+        units.append(altr.units.move_begin(), altr.units.move_end());
         return *this;
       }
 
@@ -151,8 +150,7 @@ extract(cow_vector<Expression_Unit>& units)
         // N.B. `units` is the LHS operand.
         // Append the RHS operand to the LHS operand, followed by the operator, forming the Reverse Polish
         // Notation (RPN).
-        units.append(::std::make_move_iterator(altr.rhs.mut_begin()),
-                     ::std::make_move_iterator(altr.rhs.mut_end()));
+        units.append(altr.rhs.move_begin(), altr.rhs.move_end());
 
         // Append the operator itself.
         Expression_Unit::S_operator_rpn xunit = { altr.sloc, altr.xop, altr.assign };

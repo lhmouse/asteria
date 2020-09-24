@@ -28,7 +28,7 @@ cow_vector<ElemT>&
 do_concatenate(cow_vector<ElemT>& lhs, cow_vector<ElemT>&& rhs)
   {
     if(lhs.size()) {
-      lhs.append(::std::make_move_iterator(rhs.mut_begin()), ::std::make_move_iterator(rhs.mut_end()));
+      lhs.append(rhs.move_begin(), rhs.move_end());
       rhs.clear();
     }
     else {

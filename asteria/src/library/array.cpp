@@ -264,17 +264,18 @@ std_array_replace_slice(V_array data, V_integer from, Opt_integer length, V_arra
     auto offset = ::std::distance(res.begin(), range.first);
     auto dist = ::std::distance(range.first, range.second);
 
-    if(dist >= replacement.ssize())
+    if(dist >= replacement.ssize()) {
       // Overwrite the subrange in place.
       res.erase(::std::move(replacement.mut_begin(), replacement.mut_end(),
                             res.mut_begin() + offset),
                 res.mut_begin() + offset + dist);
-    else
+    }
+    else {
       // Extend the range.
       res.insert(::std::move(replacement.mut_begin(), replacement.mut_begin() + dist,
                              res.mut_begin() + offset),
-                 ::std::make_move_iterator(replacement.mut_begin() + dist),
-                 ::std::make_move_iterator(replacement.mut_end()));
+                 replacement.move_begin() + dist, replacement.move_end());
+    }
     return res;
   }
 
@@ -557,7 +558,7 @@ V_array
 std_array_reverse(V_array data)
   {
     // This is an easy matter, isn't it?
-    return V_array(::std::make_move_iterator(data.rbegin()), ::std::make_move_iterator(data.rend()));
+    return V_array(data.move_rbegin(), data.move_rend());
   }
 
 V_array
