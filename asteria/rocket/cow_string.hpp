@@ -440,6 +440,30 @@ class basic_cow_string
     mut_rend()
       { return reverse_iterator(this->mut_begin());  }
 
+    // N.B. This is a non-standard extension.
+    // N.B. This function may throw `std::bad_alloc`.
+    ::std::move_iterator<iterator>
+    move_begin()
+      { return ::std::move_iterator<iterator>(this->mut_begin());  }
+
+    // N.B. This is a non-standard extension.
+    // N.B. This function may throw `std::bad_alloc`.
+    ::std::move_iterator<iterator>
+    move_end()
+      { return ::std::move_iterator<iterator>(this->mut_end());  }
+
+    // N.B. This is a non-standard extension.
+    // N.B. This function may throw `std::bad_alloc`.
+    ::std::move_iterator<reverse_iterator>
+    move_rbegin()
+      { return ::std::move_iterator<reverse_iterator>(this->mut_rbegin());  }
+
+    // N.B. This is a non-standard extension.
+    // N.B. This function may throw `std::bad_alloc`.
+    ::std::move_iterator<reverse_iterator>
+    move_rend()
+      { return ::std::move_iterator<reverse_iterator>(this->mut_rend());  }
+
     // 24.3.2.4, capacity
     constexpr
     bool
