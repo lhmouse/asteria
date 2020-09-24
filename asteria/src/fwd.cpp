@@ -152,7 +152,7 @@ noexcept
         return "  catch clause";
 
       case frame_type_plain:
-        return "  frame";
+        return "  block";
 
       case frame_type_func:
         return "  function";
