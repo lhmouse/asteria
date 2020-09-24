@@ -26,14 +26,13 @@ do_backtrace()
   }
   catch(Runtime_Error& nested) {
     // Copy frames.
-    if(this->m_frames.empty())
-      this->m_frames = nested.m_frames;
-    else
+    if(this->m_frames.size())
       this->m_frames.append(nested.m_frames.begin(), nested.m_frames.end());
+    else
+      this->m_frames = nested.m_frames;
   }
-  catch(::std::exception& /*nested*/) {
-    // Do nothing.
-  }
+  catch(exception&)
+    { }
 
 void
 Runtime_Error::
