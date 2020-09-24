@@ -50,12 +50,21 @@ do_compose_message()
     else
       fmt << this->m_value;
 
+    // Get the width of the frame number colomn.
+    ::rocket::ascii_numput nump;
+    nump.put(this->m_frames.size());
+
+    sso_vector<char, 16> sbuf(nump.size(), ' ');
+    sbuf.emplace_back();
+
     // Append stack frames.
     fmt << "\n[backtrace frames:";
-    for(size_t i = 0;  i < this->m_frames.size();  ++i) {
-      const auto& frm = this->m_frames[i];
-      format(fmt, "\n  #$1 $2 at '$3': ", i, frm.what_type(), frm.sloc());
-      frm.value().dump(fmt);
+    for(size_t k = 0;  k < this->m_frames.size();  ++k) {
+      const auto& frm = this->m_frames[k];
+      nump.put(k);
+      ::std::reverse_copy(nump.begin(), nump.end(), sbuf.mut_rbegin() + 1);
+      format(fmt, "\n  $1: $2 at '$3': ", sbuf.data(), frm.what_type(), frm.sloc());
+      frm.value().dump(fmt, 0, 0);
     }
     fmt << "\n  -- end of backtrace frames]";
 
