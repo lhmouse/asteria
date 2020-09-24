@@ -31,8 +31,7 @@ class Runtime_Error
       { this->do_backtrace();
         this->do_insert_frame(frame_type_native, nullopt, this->m_value);  }
 
-    template<typename XValT,
-    ROCKET_ENABLE_IF(::std::is_constructible<Value, XValT&&>::value)>
+    template<typename XValT>
     Runtime_Error(M_throw, XValT&& xval, const Source_Location& sloc)
       : m_value(::std::forward<XValT>(xval))
       { this->do_backtrace();
