@@ -53,7 +53,7 @@ class Token
       };
 
   private:
-    using Storage = variant<
+    using Storage = ::rocket::variant<
       ROCKET_CDR(
         ,S_keyword          // 0,
         ,S_punctuator       // 1,

@@ -162,7 +162,7 @@ class Statement
       };
 
   private:
-    using Storage = variant<
+    using Storage = ::rocket::variant<
       ROCKET_CDR(
         ,S_expression  //  0,
         ,S_block       //  1,

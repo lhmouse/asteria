@@ -135,12 +135,6 @@ using cow_dictionary = ::rocket::cow_hashmap<::rocket::prehashed_string, E,
 template<typename E, size_t k>
 using sso_vector = ::rocket::static_vector<E, k>;
 
-template<typename... P>
-using variant = ::rocket::variant<P...>;
-
-template<typename T>
-using opt = ::rocket::optional<T>;
-
 template<typename F, typename S>
 using pair = ::std::pair<F, S>;
 
@@ -150,8 +144,11 @@ using cow_bivector = ::rocket::cow_vector<::std::pair<F, S>>;
 template<typename E, size_t... k>
 using array = ::rocket::array<E, k...>;
 
+template<typename T>
+using opt = ::rocket::optional<T>;
+
 template<typename E>
-using refp = ::rocket::reference_wrapper<E>;
+using ref = ::rocket::reference_wrapper<E>;
 
 // Core
 class Value;

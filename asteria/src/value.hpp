@@ -12,7 +12,7 @@ namespace asteria {
 class Value
   {
   private:
-    using Storage = variant<
+    using Storage = ::rocket::variant<
       ROCKET_CDR(
         ,V_null      // 0,
         ,V_boolean   // 1,

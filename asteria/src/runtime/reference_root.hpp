@@ -58,7 +58,7 @@ class Reference_root
       };
 
   private:
-    using Storage = variant<
+    using Storage = ::rocket::variant<
       ROCKET_CDR(
         ,S_uninit      // 0,
         ,S_void        // 1,

@@ -65,7 +65,7 @@ class Infix_Element
       };
 
   private:
-    using Storage = variant<
+    using Storage = ::rocket::variant<
       ROCKET_CDR(
         ,S_head         // 0,
         ,S_ternary      // 1,

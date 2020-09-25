@@ -23,7 +23,7 @@ class Argument_Reader
 
   private:
     cow_string m_name;
-    refp<const cow_vector<Reference>> m_args;
+    ref<const cow_vector<Reference>> m_args;
 
     // `m_ovlds` contains all overloads that have been tested so far.
     cow_string m_ovlds;
@@ -32,7 +32,7 @@ class Argument_Reader
     State m_state = { };
 
   public:
-    Argument_Reader(const cow_string& name, refp<const cow_vector<Reference>> args)
+    Argument_Reader(const cow_string& name, ref<const cow_vector<Reference>> args)
     noexcept
       : m_name(name), m_args(args)
       { }

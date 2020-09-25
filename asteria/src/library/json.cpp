@@ -258,17 +258,17 @@ do_find_uncensored(V_object::const_iterator& curp, const V_object& object)
 
 struct S_xformat_array
   {
-    refp<const V_array> refa;
+    ref<const V_array> refa;
     V_array::const_iterator curp;
   };
 
 struct S_xformat_object
   {
-    refp<const V_object> refo;
+    ref<const V_object> refo;
     V_object::const_iterator curp;
   };
 
-using Xformat = variant<S_xformat_array, S_xformat_object>;
+using Xformat = ::rocket::variant<S_xformat_array, S_xformat_object>;
 
 V_string
 do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
@@ -488,7 +488,7 @@ struct S_xparse_object
     phsh_string key;
   };
 
-using Xparse = variant<S_xparse_array, S_xparse_object>;
+using Xparse = ::rocket::variant<S_xparse_array, S_xparse_object>;
 
 Value
 do_json_parse_nonrecursive(Token_Stream& tstrm)

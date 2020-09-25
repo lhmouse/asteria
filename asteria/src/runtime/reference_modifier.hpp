@@ -38,7 +38,7 @@ class Reference_modifier
       };
 
   private:
-    using Storage = variant<
+    using Storage = ::rocket::variant<
       ROCKET_CDR(
         ,S_array_index  // 0,
         ,S_object_key   // 1,

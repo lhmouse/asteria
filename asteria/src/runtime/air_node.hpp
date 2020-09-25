@@ -293,7 +293,7 @@ class AIR_Node
       };
 
   private:
-    using Storage = variant<
+    using Storage = ::rocket::variant<
       ROCKET_CDR(
         ,S_clear_stack            //  0,
         ,S_execute_block          //  1,

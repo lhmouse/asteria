@@ -14,7 +14,7 @@ namespace {
 class Line_Reader
   {
   private:
-    refp<tinybuf> m_cbuf;
+    ref<tinybuf> m_cbuf;
     cow_string m_file;
 
     size_t m_line = 0;
@@ -22,7 +22,7 @@ class Line_Reader
     cow_string m_str;
 
   public:
-    Line_Reader(refp<tinybuf> xcbuf, const cow_string& xfile, size_t xline)
+    Line_Reader(ref<tinybuf> xcbuf, const cow_string& xfile, size_t xline)
       : m_cbuf(xcbuf), m_file(xfile), m_line(xline - 1)
       { }
 

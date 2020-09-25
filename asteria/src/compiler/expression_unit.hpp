@@ -120,7 +120,7 @@ class Expression_Unit
       };
 
   private:
-    using Storage = variant<
+    using Storage = ::rocket::variant<
       ROCKET_CDR(
         ,S_literal           //  0,
         ,S_named_reference   //  1,
