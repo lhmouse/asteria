@@ -35,7 +35,7 @@ class Executive_Context
     ROCKET_ENABLE_IF(::std::is_base_of<Executive_Context, ContextT>::value)>
     Executive_Context(ref<ContextT> parent)  // for non-functions
       : m_parent_opt(parent.ptr()),
-        m_global(parent->m_global), m_stack(parent->m_stack)
+        m_global(parent.get().m_global), m_stack(parent.get().m_stack)
       { }
 
     Executive_Context(ref<Global_Context> xglobal, ref<Evaluation_Stack> xstack,

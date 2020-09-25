@@ -64,7 +64,7 @@ class Line_Reader
 
         // Buffer a line.
         for(;;) {
-          int ch = this->m_cbuf->getc();
+          int ch = this->m_cbuf.get().getc();
           if(ch == EOF) {
             // When the EOF is encountered, ...
             if(this->m_str.empty())

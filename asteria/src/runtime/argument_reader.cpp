@@ -93,7 +93,7 @@ const
 
     // Before calling this function, the parameter information must have been recorded.
     size_t index = this->m_state.nparams - 1;
-    return this->m_args->ptr(index);
+    return this->m_args.get().ptr(index);
   }
 
 opt<size_t>
@@ -106,7 +106,7 @@ const
 
     // Before calling this function, the current overload must have been finished.
     size_t index = this->m_state.nparams;
-    return ::rocket::min(index, this->m_args->size());
+    return ::rocket::min(index, this->m_args.get().size());
   }
 
 Argument_Reader&
@@ -136,10 +136,11 @@ F(cow_vector<Reference>& vargs)
 
     // Copy variadic arguments, if any.
     vargs.clear();
-    auto nargs = this->m_args->size();
+    auto nargs = this->m_args.get().size();
     if(nargs > *qvoff) {
       vargs.reserve(nargs - *qvoff);
-      ::std::for_each(this->m_args->begin() + static_cast<ptrdiff_t>(*qvoff), this->m_args->end(),
+      ::std::for_each(this->m_args.get().begin() + static_cast<ptrdiff_t>(*qvoff),
+                      this->m_args.get().end(),
                       [&](const Reference& arg) {vargs.emplace_back(arg);  });
     }
     return true;
@@ -159,10 +160,11 @@ F(cow_vector<Value>& vargs)
 
     // Copy variadic arguments, if any.
     vargs.clear();
-    auto nargs = this->m_args->size();
+    auto nargs = this->m_args.get().size();
     if(nargs > *qvoff) {
       vargs.reserve(nargs - *qvoff);
-      ::std::for_each(this->m_args->begin() + static_cast<ptrdiff_t>(*qvoff), this->m_args->end(),
+      ::std::for_each(this->m_args.get().begin() + static_cast<ptrdiff_t>(*qvoff),
+                      this->m_args.get().end(),
                       [&](const Reference& arg) {vargs.emplace_back(arg.read());  });
     }
     return true;
@@ -180,7 +182,7 @@ F()
       return false;
 
     // There shall be no more arguments than parameters.
-    auto nargs = this->m_args->size();
+    auto nargs = this->m_args.get().size();
     if(nargs > *qvoff) {
       this->do_fail();
       return false;
@@ -587,9 +589,9 @@ const
   {
     // Compose an argument list.
     cow_string arguments;
-    if(this->m_args->size()) {
+    if(this->m_args.get().size()) {
       arguments << this->m_args.get()[0].read().what_type();
-      for(size_t k = 1;  k != this->m_args->size();  ++k)
+      for(size_t k = 1;  k != this->m_args.get().size();  ++k)
         arguments << ", " << this->m_args.get()[k].read().what_type();
     }
 

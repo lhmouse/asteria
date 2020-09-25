@@ -146,7 +146,7 @@ on_scope_exit(AIR_Status status)
     // Stash the returned reference, if any.
     Reference self = Reference_root::S_uninit();
     if(status == air_status_return_ref)
-      self = ::std::move(this->m_stack->get_top());
+      self = ::std::move(this->m_stack.get().get_top());
 
     if(auto ptca = self.get_tail_call_opt()) {
       // If a PTC wrapper was returned, prepend all deferred expressions to it.
@@ -177,7 +177,7 @@ on_scope_exit(AIR_Status status)
     }
 
     // Restore the returned reference.
-    this->m_stack->open_top() = ::std::move(self);
+    this->m_stack.get().open_top() = ::std::move(self);
     return status;
   }
 

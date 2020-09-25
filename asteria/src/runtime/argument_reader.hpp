@@ -88,12 +88,12 @@ class Argument_Reader
     size_t
     count_arguments()
     const noexcept
-      { return this->m_args->size();  }
+      { return this->m_args.get().size();  }
 
     const Reference&
     argument(size_t index)
     const
-      { return this->m_args->at(index);  }
+      { return this->m_args.get().at(index);  }
 
     // `S` stands for `save` or `store`.
     const Argument_Reader&

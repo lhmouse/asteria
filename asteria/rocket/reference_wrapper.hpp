@@ -63,12 +63,6 @@ class reference_wrapper
     reference()
     const noexcept
       { return this->get();  }
-
-    constexpr
-    pointer
-    operator->()
-    const noexcept
-      { return this->ptr();  }
   };
 
 template<typename valueT>

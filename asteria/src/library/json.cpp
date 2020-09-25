@@ -276,24 +276,24 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
     ::rocket::tinyfmt_str fmt;
 
     // Transform recursion to iteration using a handwritten stack.
-    auto qvalue = ::rocket::ref(value);
+    auto qval = &value;
     cow_vector<Xformat> stack;
 
     for(;;) {
-      // Format a value. `qvalue` must always point to a valid value here.
-      switch(weaken_enum(qvalue->type())) {
+      // Format a value. `qval` must always point to a valid value here.
+      switch(weaken_enum(qval->type())) {
         case type_boolean:
           // Write `true` or `false`.
-          fmt << qvalue->as_boolean();
+          fmt << qval->as_boolean();
           break;
 
         case type_integer:
           // Write the integer in decimal.
-          fmt << static_cast<double>(qvalue->as_integer());
+          fmt << static_cast<double>(qval->as_integer());
           break;
 
         case type_real: {
-          double real = qvalue->as_real();
+          double real = qval->as_real();
           if(::std::isfinite(real)) {
             // Write the real in decimal.
             fmt << real;
@@ -315,11 +315,11 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
 
         case type_string:
           // Write the quoted string.
-          do_quote_string(fmt, qvalue->as_string());
+          do_quote_string(fmt, qval->as_string());
           break;
 
         case type_array: {
-          const auto& array = qvalue->as_array();
+          const auto& array = qval->as_array();
           fmt << '[';
 
           // Open an array.
@@ -329,7 +329,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
             indent.break_line(fmt);
 
             // Descend into the array.
-            qvalue = ::rocket::ref(ctxa.curp[0]);
+            qval = &(ctxa.curp[0]);
             stack.emplace_back(::std::move(ctxa));
             continue;
           }
@@ -340,7 +340,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
         }
 
         case type_object: {
-          const auto& object = qvalue->as_object();
+          const auto& object = qval->as_object();
           fmt << '{';
 
           // Open an object.
@@ -353,7 +353,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
             do_format_object_key(fmt, json5, indent, ctxo.curp->first);
 
             // Descend into the object.
-            qvalue = ::rocket::ref(ctxo.curp->second);
+            qval = &(ctxo.curp->second);
             stack.emplace_back(::std::move(ctxo));
             continue;
           }
@@ -378,12 +378,12 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
         // Advance to the next element.
         if(stack.back().index() == 0) {
           auto& ctxa = stack.mut_back().as<0>();
-          if(++(ctxa.curp) != ctxa.refa->end()) {
+          if(++(ctxa.curp) != ctxa.refa.get().end()) {
             fmt << ',';
             indent.break_line(fmt);
 
             // Format the next element.
-            qvalue = ::rocket::ref(ctxa.curp[0]);
+            qval = &(ctxa.curp[0]);
             break;
           }
 
@@ -405,7 +405,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
             do_format_object_key(fmt, json5, indent, ctxo.curp->first);
 
             // Format the next value.
-            qvalue = ::rocket::ref(ctxo.curp->second);
+            qval = &(ctxo.curp->second);
             break;
           }
 
