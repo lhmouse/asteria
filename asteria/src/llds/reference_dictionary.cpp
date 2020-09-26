@@ -4,7 +4,7 @@
 #include "../precompiled.hpp"
 #include "reference_dictionary.hpp"
 #include "../runtime/variable_callback.hpp"
-#include "../utilities.hpp"
+#include "../util.hpp"
 
 namespace asteria {
 

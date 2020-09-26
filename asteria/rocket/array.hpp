@@ -4,10 +4,10 @@
 #ifndef ROCKET_ARRAY_HPP_
 #define ROCKET_ARRAY_HPP_
 
+#include "fwd.hpp"
 #include "compiler.h"
 #include "assert.hpp"
 #include "throw.hpp"
-#include "utilities.hpp"
 
 namespace rocket {
 

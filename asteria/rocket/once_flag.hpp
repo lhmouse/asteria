@@ -4,8 +4,8 @@
 #ifndef ROCKET_ONCE_FLAG_HPP_
 #define ROCKET_ONCE_FLAG_HPP_
 
+#include "fwd.hpp"
 #include "assert.hpp"
-#include "utilities.hpp"
 
 namespace rocket {
 

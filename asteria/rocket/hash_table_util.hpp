@@ -1,11 +1,11 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_HASH_TABLE_UTILITIES_HPP_
-#define ROCKET_HASH_TABLE_UTILITIES_HPP_
+#ifndef ROCKET_HASH_TABLE_UTIL_HPP_
+#define ROCKET_HASH_TABLE_UTIL_HPP_
 
+#include "fwd.hpp"
 #include "assert.hpp"
-#include "utilities.hpp"
 
 namespace rocket {
 

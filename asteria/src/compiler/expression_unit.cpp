@@ -8,7 +8,7 @@
 #include "../runtime/analytic_context.hpp"
 #include "../runtime/air_optimizer.hpp"
 #include "../runtime/enums.hpp"
-#include "../utilities.hpp"
+#include "../util.hpp"
 
 namespace asteria {
 namespace {

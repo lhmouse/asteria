@@ -1,12 +1,12 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_UTILITIES_HPP_
-#  error Please include <asteria/utilities.hpp> instead.
+#ifndef ASTERIA_UTIL_HPP_
+#  error Please include <asteria/util.hpp> instead.
 #endif
 
 namespace asteria {
-namespace details_utilities {
+namespace details_util {
 
 extern const uint8_t cctype_table[128];
 
@@ -36,5 +36,5 @@ struct Formatted_errno
 tinyfmt&
 operator<<(tinyfmt& fmt, const Formatted_errno& e);
 
-}  // namespace details_utilities
+}  // namespace details_util
 }  // namespace asteria

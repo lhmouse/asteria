@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
-#include "utilities.hpp"
-#include "../src/utilities.hpp"
+#include "util.hpp"
+#include "../src/util.hpp"
 
 using namespace asteria;
 

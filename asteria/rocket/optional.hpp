@@ -15,6 +15,11 @@ class optional;
 template<typename charT, typename traitsT>
 class basic_tinyfmt;
 
+enum class nullopt_t
+  : uintptr_t
+  { }
+  constexpr nullopt = { };
+
 template<typename valueT>
 class optional
   {

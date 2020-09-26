@@ -4,7 +4,7 @@
 #ifndef ROCKET_FILL_ITERATOR_HPP_
 #define ROCKET_FILL_ITERATOR_HPP_
 
-#include "utilities.hpp"
+#include "fwd.hpp"
 
 namespace rocket {
 

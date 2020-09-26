@@ -6,7 +6,7 @@
 #include "enums.hpp"
 #include "token.hpp"
 #include "parser_error.hpp"
-#include "../utilities.hpp"
+#include "../util.hpp"
 
 namespace asteria {
 namespace {
@@ -166,7 +166,7 @@ class Tack
     clear()
     noexcept
       {
-        this->m_sloc = nullopt;
+        this->m_sloc = { };
         this->m_length = 0;
         return *this;
       }

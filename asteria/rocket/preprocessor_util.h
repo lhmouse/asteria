@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_PREPROCESSOR_UTILITIES_H_
-#define ROCKET_PREPROCESSOR_UTILITIES_H_
+#ifndef ROCKET_PREPROCESSOR_UTIL_H_
+#define ROCKET_PREPROCESSOR_UTIL_H_
 
 #define ROCKET_CAR(x, ...)          x
 #define ROCKET_CDR(x, ...)          __VA_ARGS__

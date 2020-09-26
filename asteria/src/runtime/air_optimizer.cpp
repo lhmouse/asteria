@@ -7,7 +7,7 @@
 #include "instantiated_function.hpp"
 #include "enums.hpp"
 #include "../compiler/statement.hpp"
-#include "../utilities.hpp"
+#include "../util.hpp"
 
 namespace asteria {
 

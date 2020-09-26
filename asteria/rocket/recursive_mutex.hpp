@@ -4,8 +4,8 @@
 #ifndef ROCKET_RECURSIVE_MUTEX_HPP_
 #define ROCKET_RECURSIVE_MUTEX_HPP_
 
+#include "fwd.hpp"
 #include "assert.hpp"
-#include "utilities.hpp"
 #include <pthread.h>
 
 namespace rocket {

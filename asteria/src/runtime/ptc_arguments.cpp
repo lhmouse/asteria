@@ -5,7 +5,7 @@
 #include "ptc_arguments.hpp"
 #include "reference.hpp"
 #include "variable_callback.hpp"
-#include "../utilities.hpp"
+#include "../util.hpp"
 
 namespace asteria {
 

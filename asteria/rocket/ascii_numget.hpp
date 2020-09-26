@@ -4,7 +4,7 @@
 #ifndef ROCKET_ASCII_NUMGET_HPP_
 #define ROCKET_ASCII_NUMGET_HPP_
 
-#include "utilities.hpp"
+#include "fwd.hpp"
 #include <climits>
 #include <cmath>
 

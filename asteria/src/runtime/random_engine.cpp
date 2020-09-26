@@ -3,7 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "random_engine.hpp"
-#include "../utilities.hpp"
+#include "../util.hpp"
 #include <fcntl.h>  // ::open()
 #include <unistd.h>  // ::close(), ::read()
 

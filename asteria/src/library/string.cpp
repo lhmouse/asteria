@@ -4,7 +4,7 @@
 #include "../precompiled.hpp"
 #include "string.hpp"
 #include "../runtime/argument_reader.hpp"
-#include "../utilities.hpp"
+#include "../util.hpp"
 #include "../../rocket/ascii_case.hpp"
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include <pcre2.h>
@@ -719,7 +719,7 @@ std_string_trim(V_string text, Opt_string reject)
     size_t bpos = text.find_first_not_of(rchars);
     if(bpos == V_string::npos)
       // There is no byte to keep. Return an empty string.
-      return nullopt;
+      return { };
 
     // Get the index of the last byte to keep.
     size_t epos = text.find_last_not_of(rchars) + 1;
@@ -743,7 +743,7 @@ std_string_triml(V_string text, Opt_string reject)
     size_t bpos = text.find_first_not_of(rchars);
     if(bpos == V_string::npos)
       // There is no byte to keep. Return an empty string.
-      return nullopt;
+      return { };
 
     if(bpos == 0)
       // There is no byte to strip. Make use of reference counting.
@@ -765,7 +765,7 @@ std_string_trimr(V_string text, Opt_string reject)
     size_t epos = text.find_last_not_of(rchars) + 1;
     if(epos == 0)
       // There is no byte to keep. Return an empty string.
-      return nullopt;
+      return { };
 
     if(epos == text.size())
       // There is no byte to strip. Make use of reference counting.

@@ -6,7 +6,7 @@
 #include "expression_unit.hpp"
 #include "enums.hpp"
 #include "../runtime/enums.hpp"
-#include "../utilities.hpp"
+#include "../util.hpp"
 
 namespace asteria {
 
@@ -121,7 +121,7 @@ extract(cow_vector<Expression_Unit>& units)
         auto& altr = this->m_stor.as<index_logical_and>();
 
         // Construct a branch unit from the TRUE branch and an empty FALSE branch, then append it to `units`.
-        Expression_Unit::S_branch xunit = { altr.sloc, ::std::move(altr.branch_true), nullopt, altr.assign };
+        Expression_Unit::S_branch xunit = { altr.sloc, ::std::move(altr.branch_true), { }, altr.assign };
         units.emplace_back(::std::move(xunit));
         return *this;
       }
@@ -130,7 +130,7 @@ extract(cow_vector<Expression_Unit>& units)
         auto& altr = this->m_stor.as<index_logical_or>();
 
         // Construct a branch unit from an empty TRUE branch and the FALSE branch, then append it to `units`.
-        Expression_Unit::S_branch xunit = { altr.sloc, nullopt, ::std::move(altr.branch_false), altr.assign };
+        Expression_Unit::S_branch xunit = { altr.sloc, { }, ::std::move(altr.branch_false), altr.assign };
         units.emplace_back(::std::move(xunit));
         return *this;
       }

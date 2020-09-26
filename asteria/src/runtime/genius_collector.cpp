@@ -5,7 +5,7 @@
 #include "genius_collector.hpp"
 #include "variable.hpp"
 #include "reference.hpp"
-#include "../utilities.hpp"
+#include "../util.hpp"
 
 namespace asteria {
 

@@ -2,7 +2,7 @@ include_asteriadir = ${includedir}/asteria
 include_asteria_HEADERS =  \
   %reldir%/precompiled.hpp  \
   %reldir%/fwd.hpp  \
-  %reldir%/utilities.hpp  \
+  %reldir%/util.hpp  \
   %reldir%/recursion_sentry.hpp  \
   %reldir%/value.hpp  \
   %reldir%/source_location.hpp  \
@@ -11,7 +11,7 @@ include_asteria_HEADERS =  \
 
 include_asteria_detailsdir = ${includedir}/asteria/details
 include_asteria_details_HEADERS =  \
-  %reldir%/details/utilities.ipp  \
+  %reldir%/details/util.ipp  \
   %reldir%/details/value.ipp  \
   %reldir%/details/variable_hashset.ipp  \
   %reldir%/details/reference_dictionary.ipp  \
@@ -84,7 +84,7 @@ include_asteria_library_HEADERS =  \
 lib_LTLIBRARIES += lib/libasteria.la
 lib_libasteria_la_SOURCES =  \
   %reldir%/fwd.cpp  \
-  %reldir%/utilities.cpp  \
+  %reldir%/util.cpp  \
   %reldir%/recursion_sentry.cpp  \
   %reldir%/value.cpp  \
   %reldir%/source_location.cpp  \

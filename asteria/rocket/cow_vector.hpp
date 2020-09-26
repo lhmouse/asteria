@@ -4,11 +4,11 @@
 #ifndef ROCKET_COW_VECTOR_HPP_
 #define ROCKET_COW_VECTOR_HPP_
 
+#include "fwd.hpp"
 #include "compiler.h"
 #include "assert.hpp"
 #include "throw.hpp"
-#include "utilities.hpp"
-#include "allocator_utilities.hpp"
+#include "allocator_util.hpp"
 #include "reference_counter.hpp"
 
 namespace rocket {
@@ -87,7 +87,7 @@ class cow_vector
       { this->assign(::std::move(other));  }
 
     constexpr
-    cow_vector(nullopt_t = nullopt_t())
+    cow_vector()
     noexcept(is_nothrow_constructible<allocator_type>::value)
       : cow_vector(allocator_type())
       { }
@@ -130,11 +130,6 @@ class cow_vector
     noexcept
       { noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         return this->assign(::std::move(other));  }
-
-    cow_vector&
-    operator=(nullopt_t)
-    noexcept
-      { return this->clear();  }
 
     cow_vector&
     operator=(initializer_list<value_type> init)

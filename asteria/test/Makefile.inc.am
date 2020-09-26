@@ -1,9 +1,9 @@
 check_HEADERS +=  \
-  %reldir%/utilities.hpp  \
+  %reldir%/util.hpp  \
   ${NOTHING}
 
 check_PROGRAMS +=  \
-  %reldir%/utilities.test  \
+  %reldir%/util.test  \
   %reldir%/value.test  \
   %reldir%/variable.test  \
   %reldir%/reference.test  \

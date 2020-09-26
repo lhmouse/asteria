@@ -16,7 +16,7 @@ class Source_Location
     int m_offset;
 
   public:
-    Source_Location(nullopt_t = nullopt)
+    Source_Location()
     noexcept
       : m_file(::rocket::sref("[unknown]")), m_line(-1), m_offset(-1)
       { }

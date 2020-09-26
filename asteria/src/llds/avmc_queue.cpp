@@ -7,7 +7,7 @@
 #include "../runtime/variable_callback.hpp"
 #include "../runtime/runtime_error.hpp"
 #include "../runtime/enums.hpp"
-#include "../utilities.hpp"
+#include "../util.hpp"
 
 namespace asteria {
 

@@ -1,12 +1,12 @@
 include_rocketdir = ${includedir}/rocket
 include_rocket_HEADERS =  \
   %reldir%/compiler.h  \
-  %reldir%/preprocessor_utilities.h  \
+  %reldir%/preprocessor_util.h  \
   %reldir%/assert.hpp  \
-  %reldir%/utilities.hpp  \
+  %reldir%/fwd.hpp  \
   %reldir%/throw.hpp  \
-  %reldir%/allocator_utilities.hpp  \
-  %reldir%/hash_table_utilities.hpp  \
+  %reldir%/allocator_util.hpp  \
+  %reldir%/hash_table_util.hpp  \
   %reldir%/variant.hpp  \
   %reldir%/fill_iterator.hpp  \
   %reldir%/unique_handle.hpp  \
@@ -52,8 +52,8 @@ include_rocket_platform_HEADERS =  \
 
 include_rocket_detailsdir = ${includedir}/rocket/details
 include_rocket_details_HEADERS =  \
-  %reldir%/details/utilities.ipp  \
-  %reldir%/details/allocator_utilities.ipp  \
+  %reldir%/details/util.ipp  \
+  %reldir%/details/allocator_util.ipp  \
   %reldir%/details/variant.ipp  \
   %reldir%/details/unique_handle.ipp  \
   %reldir%/details/char_traits.ipp  \

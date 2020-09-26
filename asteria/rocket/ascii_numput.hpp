@@ -4,7 +4,7 @@
 #ifndef ROCKET_ASCII_NUMPUT_HPP_
 #define ROCKET_ASCII_NUMPUT_HPP_
 
-#include "utilities.hpp"
+#include "fwd.hpp"
 
 namespace rocket {
 

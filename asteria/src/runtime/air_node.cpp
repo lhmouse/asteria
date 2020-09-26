@@ -18,7 +18,7 @@
 #include "../compiler/token_stream.hpp"
 #include "../compiler/statement_sequence.hpp"
 #include "../llds/avmc_queue.hpp"
-#include "../utilities.hpp"
+#include "../util.hpp"
 
 namespace asteria {
 namespace {

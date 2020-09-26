@@ -4,7 +4,7 @@
 #include "../precompiled.hpp"
 #include "io.hpp"
 #include "../runtime/argument_reader.hpp"
-#include "../utilities.hpp"
+#include "../util.hpp"
 
 namespace asteria {
 namespace {

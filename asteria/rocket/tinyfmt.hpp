@@ -4,7 +4,7 @@
 #ifndef ROCKET_TINYFMT_HPP_
 #define ROCKET_TINYFMT_HPP_
 
-#include "utilities.hpp"
+#include "fwd.hpp"
 #include "throw.hpp"
 #include "tinybuf.hpp"
 #include "ascii_numput.hpp"

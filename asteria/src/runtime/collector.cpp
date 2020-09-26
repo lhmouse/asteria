@@ -5,7 +5,7 @@
 #include "collector.hpp"
 #include "variable.hpp"
 #include "variable_callback.hpp"
-#include "../utilities.hpp"
+#include "../util.hpp"
 
 namespace asteria {
 namespace {

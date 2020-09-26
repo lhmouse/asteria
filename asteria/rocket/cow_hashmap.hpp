@@ -4,12 +4,12 @@
 #ifndef ROCKET_COW_HASHMAP_HPP_
 #define ROCKET_COW_HASHMAP_HPP_
 
+#include "fwd.hpp"
 #include "compiler.h"
 #include "assert.hpp"
 #include "throw.hpp"
-#include "utilities.hpp"
-#include "allocator_utilities.hpp"
-#include "hash_table_utilities.hpp"
+#include "allocator_util.hpp"
+#include "hash_table_util.hpp"
 #include "reference_counter.hpp"
 #include <tuple>  // std::forward_as_tuple()
 
@@ -110,7 +110,7 @@ class cow_hashmap
       { this->assign(::std::move(other));  }
 
     constexpr
-    cow_hashmap(nullopt_t = nullopt_t())
+    cow_hashmap()
     noexcept(conjunction<is_nothrow_constructible<allocator_type>,
                          is_nothrow_constructible<hasher>,
                          is_nothrow_copy_constructible<hasher>,
@@ -176,11 +176,6 @@ class cow_hashmap
     noexcept
       { noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         return this->assign(::std::move(other));  }
-
-    cow_hashmap&
-    operator=(nullopt_t)
-    noexcept
-      { return this->clear();  }
 
     cow_hashmap&
     operator=(initializer_list<value_type> init)

@@ -4,7 +4,7 @@
 #ifndef ROCKET_THROW_HPP_
 #define ROCKET_THROW_HPP_
 
-#include "utilities.hpp"
+#include "fwd.hpp"
 
 namespace rocket {
 

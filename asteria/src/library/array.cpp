@@ -5,7 +5,7 @@
 #include "array.hpp"
 #include "../runtime/argument_reader.hpp"
 #include "../runtime/global_context.hpp"
-#include "../utilities.hpp"
+#include "../util.hpp"
 
 namespace asteria {
 namespace {

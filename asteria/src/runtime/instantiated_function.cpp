@@ -9,7 +9,7 @@
 #include "runtime_error.hpp"
 #include "ptc_arguments.hpp"
 #include "enums.hpp"
-#include "../utilities.hpp"
+#include "../util.hpp"
 
 namespace asteria {
 

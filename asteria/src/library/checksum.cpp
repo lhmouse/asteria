@@ -5,7 +5,7 @@
 #include "checksum.hpp"
 #include "../runtime/argument_reader.hpp"
 #include "../runtime/global_context.hpp"
-#include "../utilities.hpp"
+#include "../util.hpp"
 #include <endian.h>
 #include <sys/stat.h>
 

@@ -4,10 +4,10 @@
 #ifndef ROCKET_LINEAR_BUFFER_HPP_
 #define ROCKET_LINEAR_BUFFER_HPP_
 
+#include "fwd.hpp"
 #include "compiler.h"
 #include "assert.hpp"
-#include "allocator_utilities.hpp"
-#include "utilities.hpp"
+#include "allocator_util.hpp"
 #include "char_traits.hpp"
 
 namespace rocket {

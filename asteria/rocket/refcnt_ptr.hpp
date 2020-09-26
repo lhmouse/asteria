@@ -4,11 +4,11 @@
 #ifndef ROCKET_REFCNT_PTR_HPP_
 #define ROCKET_REFCNT_PTR_HPP_
 
+#include "fwd.hpp"
 #include "compiler.h"
 #include "assert.hpp"
 #include "throw.hpp"
-#include "utilities.hpp"
-#include "allocator_utilities.hpp"
+#include "allocator_util.hpp"
 #include "reference_counter.hpp"
 
 namespace rocket {

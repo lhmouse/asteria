@@ -4,12 +4,12 @@
 #ifndef ROCKET_COW_STRING_HPP_
 #define ROCKET_COW_STRING_HPP_
 
+#include "fwd.hpp"
 #include "compiler.h"
 #include "assert.hpp"
 #include "throw.hpp"
-#include "utilities.hpp"
 #include "char_traits.hpp"
-#include "allocator_utilities.hpp"
+#include "allocator_util.hpp"
 #include "reference_counter.hpp"
 
 namespace rocket {
@@ -190,7 +190,7 @@ class basic_cow_string
       { this->assign(::std::move(other));  }
 
     constexpr
-    basic_cow_string(nullopt_t = nullopt_t())
+    basic_cow_string()
     noexcept(is_nothrow_constructible<allocator_type>::value)
       : basic_cow_string(allocator_type())
       { }
@@ -234,11 +234,6 @@ class basic_cow_string
     noexcept
       { noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         return this->assign(::std::move(other));  }
-
-    basic_cow_string&
-    operator=(nullopt_t)
-    noexcept
-      { return this->clear();  }
 
     basic_cow_string&
     operator=(shallow_type sh)

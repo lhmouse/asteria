@@ -4,7 +4,7 @@
 #ifndef ROCKET_CHAR_TRAITS_HPP_
 #define ROCKET_CHAR_TRAITS_HPP_
 
-#include "utilities.hpp"
+#include "fwd.hpp"
 #include "throw.hpp"
 #include <string.h>  // ::memcpy() etc
 #include <wchar.h>  // ::fgetwc() etc, WEOF

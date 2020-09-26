@@ -4,7 +4,7 @@
 #include "../precompiled.hpp"
 #include "chrono.hpp"
 #include "../runtime/argument_reader.hpp"
-#include "../utilities.hpp"
+#include "../util.hpp"
 #include <time.h>  // ::clock_gettime(), ::timespec
 
 namespace asteria {

@@ -4,11 +4,11 @@
 #ifndef ROCKET_STATIC_VECTOR_HPP_
 #define ROCKET_STATIC_VECTOR_HPP_
 
+#include "fwd.hpp"
 #include "compiler.h"
 #include "assert.hpp"
 #include "throw.hpp"
-#include "utilities.hpp"
-#include "allocator_utilities.hpp"
+#include "allocator_util.hpp"
 
 namespace rocket {
 
@@ -82,7 +82,7 @@ class static_vector
       : m_sth(alloc)
       { this->assign(::std::move(other));  }
 
-    static_vector(nullopt_t = nullopt_t())
+    static_vector()
     noexcept(is_nothrow_constructible<allocator_type>::value)
       : static_vector(allocator_type())
       { }
@@ -126,11 +126,6 @@ class static_vector
                          is_nothrow_move_constructible<value_type>>::value)
       { noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         return this->assign(::std::move(other));  }
-
-    static_vector&
-    operator=(nullopt_t)
-    noexcept
-      { return this->clear();  }
 
     static_vector&
     operator=(initializer_list<value_type> init)

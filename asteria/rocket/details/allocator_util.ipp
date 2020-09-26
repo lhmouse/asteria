@@ -1,11 +1,11 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_ALLOCATOR_UTILITIES_HPP_
-#  error Please include <rocket/allocator_utilities.hpp> instead.
+#ifndef ROCKET_ALLOCATOR_UTIL_HPP_
+#  error Please include <rocket/allocator_util.hpp> instead.
 #endif
 
-namespace details_allocator_utilities {
+namespace details_allocator_util {
 
 template<typename allocT>
 class final_wrapper
@@ -88,4 +88,4 @@ propagate(propagate_swap_tag, allocT& lhs, allocT& rhs)
 noexcept
   { noadl::xswap(lhs, rhs);  }
 
-}  // namespace details_allocator_utilities
+}  // namespace details_allocator_util

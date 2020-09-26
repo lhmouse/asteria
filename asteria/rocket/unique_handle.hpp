@@ -4,10 +4,10 @@
 #ifndef ROCKET_UNIQUE_HANDLE_HPP_
 #define ROCKET_UNIQUE_HANDLE_HPP_
 
+#include "fwd.hpp"
 #include "compiler.h"
 #include "assert.hpp"
-#include "allocator_utilities.hpp"
-#include "utilities.hpp"
+#include "allocator_util.hpp"
 
 namespace rocket {
 

@@ -3,7 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "loader_lock.hpp"
-#include "../utilities.hpp"
+#include "../util.hpp"
 #include <sys/stat.h>
 #include <unistd.h>  // ::fstat()
 

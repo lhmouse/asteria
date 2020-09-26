@@ -11,7 +11,7 @@
 #include "infix_element.hpp"
 #include "enums.hpp"
 #include "../runtime/enums.hpp"
-#include "../utilities.hpp"
+#include "../util.hpp"
 
 namespace asteria {
 namespace {
@@ -438,7 +438,7 @@ do_accept_null_statement_opt(Token_Stream& tstrm)
     if(!kpunct)
       return nullopt;
 
-    Statement::S_expression xstmt = { ::std::move(sloc), nullopt };
+    Statement::S_expression xstmt = { ::std::move(sloc), { } };
     return ::std::move(xstmt);
   }
 
@@ -2076,7 +2076,7 @@ do_accept_infix_operator_ternary_opt(Token_Stream& tstrm)
     if(!kpunct)
       throw Parser_Error(parser_status_colon_expected, tstrm.next_sloc(), tstrm.next_length());
 
-    Infix_Element::S_ternary xelem = { sloc, *kpunct == punctuator_quest_eq, ::std::move(btrue), nullopt };
+    Infix_Element::S_ternary xelem = { sloc, *kpunct == punctuator_quest_eq, ::std::move(btrue), { } };
     return ::std::move(xelem);
   }
 
@@ -2094,7 +2094,7 @@ do_accept_infix_operator_logical_and_opt(Token_Stream& tstrm)
       // `and` is the same with `&&`.
       kpunct.emplace(punctuator_andl);
     }
-    Infix_Element::S_logical_and xelem = { sloc, *kpunct == punctuator_andl_eq, nullopt };
+    Infix_Element::S_logical_and xelem = { sloc, *kpunct == punctuator_andl_eq, { } };
     return ::std::move(xelem);
   }
 
@@ -2112,7 +2112,7 @@ do_accept_infix_operator_logical_or_opt(Token_Stream& tstrm)
       // `or` is the same with `||`.
       kpunct.emplace(punctuator_orl);
     }
-    Infix_Element::S_logical_or xelem = { sloc, *kpunct == punctuator_orl_eq, nullopt };
+    Infix_Element::S_logical_or xelem = { sloc, *kpunct == punctuator_orl_eq, { } };
     return ::std::move(xelem);
   }
 
@@ -2126,7 +2126,7 @@ do_accept_infix_operator_coalescence_opt(Token_Stream& tstrm)
     if(!kpunct)
       return nullopt;
 
-    Infix_Element::S_coalescence xelem = { sloc, *kpunct == punctuator_coales_eq, nullopt };
+    Infix_Element::S_coalescence xelem = { sloc, *kpunct == punctuator_coales_eq, { } };
     return ::std::move(xelem);
   }
 
@@ -2199,7 +2199,7 @@ do_accept_infix_operator_general_opt(Token_Stream& tstrm)
 
       // Return the infix operator and discard this token.
       tstrm.shift();
-      Infix_Element::S_general xelem = { sloc, qcnf->xop, qcnf->assign, nullopt };
+      Infix_Element::S_general xelem = { sloc, qcnf->xop, qcnf->assign, { } };
       return ::std::move(xelem);
     }
     return nullopt;

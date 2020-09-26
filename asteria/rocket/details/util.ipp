@@ -1,11 +1,11 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_UTILITIES_HPP_
-#  error Please include <rocket/utilities.hpp> instead.
+#ifndef ROCKET_UTIL_HPP_
+#  error Please include <rocket/util.hpp> instead.
 #endif
 
-namespace details_utilities {
+namespace details_util {
 
 // `is_input_iterator`
 template<typename iteratorT, typename = void>
@@ -158,4 +158,4 @@ targetT
 static_or_dynamic_cast_aux(false_type, sourceT&& src)
   { return dynamic_cast<targetT>(::std::forward<sourceT>(src));  }
 
-}  // namespace details_utilities
+}  // namespace details_util

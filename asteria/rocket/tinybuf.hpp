@@ -4,9 +4,9 @@
 #ifndef ROCKET_TINYBUF_HPP_
 #define ROCKET_TINYBUF_HPP_
 
+#include "fwd.hpp"
 #include "assert.hpp"
 #include "throw.hpp"
-#include "utilities.hpp"
 #include "char_traits.hpp"
 
 namespace rocket {

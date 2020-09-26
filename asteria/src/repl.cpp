@@ -9,7 +9,7 @@
 #include "runtime/abstract_hooks.hpp"
 #include "compiler/parser_error.hpp"
 #include "simple_script.hpp"
-#include "utilities.hpp"
+#include "util.hpp"
 #include <locale.h>
 #include <unistd.h>
 #include <signal.h>

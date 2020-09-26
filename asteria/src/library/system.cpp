@@ -10,7 +10,7 @@
 #include "../compiler/token_stream.hpp"
 #include "../compiler/parser_error.hpp"
 #include "../compiler/enums.hpp"
-#include "../utilities.hpp"
+#include "../util.hpp"
 #include <spawn.h>  // ::posix_spawnp()
 #include <sys/wait.h>  // ::waitpid()
 #include <unistd.h>  // ::daemon()
