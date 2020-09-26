@@ -1,12 +1,11 @@
 include_rocketdir = ${includedir}/rocket
 include_rocket_HEADERS =  \
   %reldir%/compiler.h  \
-  %reldir%/preprocessor_util.h  \
   %reldir%/assert.hpp  \
   %reldir%/fwd.hpp  \
   %reldir%/throw.hpp  \
-  %reldir%/allocator_util.hpp  \
-  %reldir%/hash_table_util.hpp  \
+  %reldir%/xallocator.hpp  \
+  %reldir%/xhashtable.hpp  \
   %reldir%/variant.hpp  \
   %reldir%/fill_iterator.hpp  \
   %reldir%/unique_handle.hpp  \
@@ -43,17 +42,13 @@ include_rocket_HEADERS =  \
   %reldir%/once_flag.hpp  \
   ${NOTHING}
 
-include_rocket_platformdir = ${includedir}/rocket/platform
-include_rocket_platform_HEADERS =  \
-  %reldir%/platform/compiler_clang.h  \
-  %reldir%/platform/compiler_gcc.h  \
-  %reldir%/platform/compiler_msvc.h  \
-  ${NOTHING}
-
 include_rocket_detailsdir = ${includedir}/rocket/details
 include_rocket_details_HEADERS =  \
+  %reldir%/details/compiler_clang.i  \
+  %reldir%/details/compiler_gcc.i  \
+  %reldir%/details/compiler_msvc.i  \
   %reldir%/details/util.ipp  \
-  %reldir%/details/allocator_util.ipp  \
+  %reldir%/details/xallocator.ipp  \
   %reldir%/details/variant.ipp  \
   %reldir%/details/unique_handle.ipp  \
   %reldir%/details/char_traits.ipp  \

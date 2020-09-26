@@ -5,7 +5,6 @@
 #define ROCKET_REFERENCE_COUNTER_HPP_
 
 #include "fwd.hpp"
-#include "compiler.h"
 #include "assert.hpp"
 #include <atomic>  // std::atomic<>
 #include <exception>  // std::terminate()

@@ -1,12 +1,11 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_DETAILS_PLATFORM_COMPILER_IMPLEMENTATION_
+#ifndef ROCKET_COMPILER_H_
 #  error Please #include <rocket/compiler.h> instead.
 #endif
-#undef ROCKET_DETAILS_PLATFORM_COMPILER_IMPLEMENTATION_
 
-#define ROCKET_ATTRIBUTE_PRINTF(...)        __attribute__((__format__(__gnu_printf__, __VA_ARGS__)))
+#define ROCKET_ATTRIBUTE_PRINTF(...)        __attribute__((__format__(__printf__, __VA_ARGS__)))
 #define ROCKET_SELECTANY                    __attribute__((__weak__))
 #define ROCKET_SECTION(...)                 __attribute__((__section__(__VA_ARGS__)))
 #define ROCKET_NOINLINE                     __attribute__((__noinline__))
@@ -30,7 +29,7 @@
 #define ROCKET_POPCNT32(...)                __builtin_popcount(__VA_ARGS__)
 #define ROCKET_POPCNT64(...)                __builtin_popcountll(__VA_ARGS__)
 
-// Check for libstdc++.
-#if defined(_GLIBCXX_DEBUG)
+// Check for either libc++ or libstdc++.
+#if defined(_LIBCPP_DEBUG) || defined(_GLIBCXX_DEBUG)
 #  define ROCKET_DEBUG                      1
 #endif

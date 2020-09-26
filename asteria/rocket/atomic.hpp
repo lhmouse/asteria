@@ -4,7 +4,6 @@
 #ifndef ROCKET_ATOMIC_HPP_
 #define ROCKET_ATOMIC_HPP_
 
-#include "compiler.h"
 #include "assert.hpp"
 #include <atomic>  // std::atomic<>
 

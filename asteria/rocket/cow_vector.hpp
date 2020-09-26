@@ -5,11 +5,10 @@
 #define ROCKET_COW_VECTOR_HPP_
 
 #include "fwd.hpp"
-#include "compiler.h"
 #include "assert.hpp"
 #include "throw.hpp"
-#include "allocator_util.hpp"
 #include "reference_counter.hpp"
+#include "xallocator.hpp"
 
 namespace rocket {
 

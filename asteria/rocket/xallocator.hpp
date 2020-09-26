@@ -1,20 +1,19 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_ALLOCATOR_UTIL_HPP_
-#define ROCKET_ALLOCATOR_UTIL_HPP_
+#ifndef ROCKET_XALLOCATOR_HPP_
+#define ROCKET_XALLOCATOR_HPP_
 
 #include "fwd.hpp"
-#include <type_traits>  // std::conditional<>, std::false_type, std::true_type
 
 namespace rocket {
 
-#include "details/allocator_util.ipp"
+#include "details/xallocator.ipp"
 
 template<typename allocT>
 struct allocator_wrapper_base_for
   : conditional<is_final<allocT>::value,
-                details_allocator_util::final_wrapper<allocT>,
+                details_xallocator::final_wrapper<allocT>,
                 allocT>
   { };
 
@@ -23,10 +22,10 @@ void
 propagate_allocator_on_copy(allocT& lhs, const allocT& rhs)
 noexcept
   {
-    details_allocator_util::propagate<allocT>(
+    details_xallocator::propagate<allocT>(
         typename conditional<allocator_traits<allocT>::propagate_on_container_copy_assignment::value,
-                             details_allocator_util::propagate_copy_tag,
-                             details_allocator_util::propagate_none_tag>::type(),
+                             details_xallocator::propagate_copy_tag,
+                             details_xallocator::propagate_none_tag>::type(),
         lhs, rhs);
   }
 
@@ -35,10 +34,10 @@ void
 propagate_allocator_on_move(allocT& lhs, allocT& rhs)
 noexcept
   {
-    details_allocator_util::propagate<allocT>(
+    details_xallocator::propagate<allocT>(
         typename conditional<allocator_traits<allocT>::propagate_on_container_move_assignment::value,
-                             details_allocator_util::propagate_move_tag,
-                             details_allocator_util::propagate_none_tag>::type(),
+                             details_xallocator::propagate_move_tag,
+                             details_xallocator::propagate_none_tag>::type(),
         lhs, rhs);
   }
 
@@ -47,10 +46,10 @@ void
 propagate_allocator_on_swap(allocT& lhs, allocT& rhs)
 noexcept
   {
-    details_allocator_util::propagate<allocT>(
+    details_xallocator::propagate<allocT>(
         typename conditional<allocator_traits<allocT>::propagate_on_container_swap::value,
-                             details_allocator_util::propagate_swap_tag,
-                             details_allocator_util::propagate_none_tag>::type(),
+                             details_xallocator::propagate_swap_tag,
+                             details_xallocator::propagate_none_tag>::type(),
         lhs, rhs);
   }
 

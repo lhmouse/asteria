@@ -4,7 +4,6 @@
 #ifndef ROCKET_OPTIONAL_HPP_
 #define ROCKET_OPTIONAL_HPP_
 
-#include "compiler.h"
 #include "static_vector.hpp"
 
 namespace rocket {

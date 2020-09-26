@@ -8,7 +8,6 @@
 #  include <config.h>
 #endif
 
-#include "../rocket/preprocessor_util.h"
 #include "../rocket/cow_string.hpp"
 #include "../rocket/tinyfmt_str.hpp"
 #include "../rocket/cow_vector.hpp"

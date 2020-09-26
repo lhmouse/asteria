@@ -4,14 +4,13 @@
 #ifndef ROCKET_COMPILER_H_
 #define ROCKET_COMPILER_H_
 
-#define ROCKET_DETAILS_PLATFORM_COMPILER_IMPLEMENTATION_  1
 // Clang may pretend to be GCC or MSVC so has to be checked very first.
 #if defined(__clang__)
-#  include "platform/compiler_clang.h"
+#  include "details/compiler_clang.i"
 #elif defined(__GNUC__)
-#  include "platform/compiler_gcc.h"
+#  include "details/compiler_gcc.i"
 #elif defined(_MSC_VER)
-#  include "platform/compiler_msvc.h"
+#  include "details/compiler_msvc.i"
 #endif
 
 // Ensure all requested macros are defined.

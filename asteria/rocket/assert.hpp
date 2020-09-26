@@ -4,7 +4,6 @@
 #ifndef ROCKET_ASSERT_HPP_
 #define ROCKET_ASSERT_HPP_
 
-#include "compiler.h"
 
 namespace rocket {
 

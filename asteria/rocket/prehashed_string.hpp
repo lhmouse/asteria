@@ -4,7 +4,6 @@
 #ifndef ROCKET_PREHASHED_STRING_HPP_
 #define ROCKET_PREHASHED_STRING_HPP_
 
-#include "compiler.h"
 #include "cow_string.hpp"
 
 namespace rocket {

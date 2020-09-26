@@ -1,10 +1,9 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_DETAILS_PLATFORM_COMPILER_IMPLEMENTATION_
+#ifndef ROCKET_COMPILER_H_
 #  error Please #include <rocket/compiler.h> instead.
 #endif
-#undef ROCKET_DETAILS_PLATFORM_COMPILER_IMPLEMENTATION_
 
 #define ROCKET_ATTRIBUTE_PRINTF(...)        // not implemented
 #define ROCKET_SELECTANY                    __declspec(selectany)

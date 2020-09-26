@@ -5,12 +5,11 @@
 #define ROCKET_COW_HASHMAP_HPP_
 
 #include "fwd.hpp"
-#include "compiler.h"
 #include "assert.hpp"
 #include "throw.hpp"
-#include "allocator_util.hpp"
-#include "hash_table_util.hpp"
 #include "reference_counter.hpp"
+#include "xallocator.hpp"
+#include "xhashtable.hpp"
 #include <tuple>  // std::forward_as_tuple()
 
 namespace rocket {

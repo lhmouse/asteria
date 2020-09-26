@@ -5,7 +5,6 @@
 #define ROCKET_ARRAY_HPP_
 
 #include "fwd.hpp"
-#include "compiler.h"
 #include "assert.hpp"
 #include "throw.hpp"
 
