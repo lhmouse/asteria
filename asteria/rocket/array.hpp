@@ -82,30 +82,6 @@ class array
     const noexcept
       { return const_reverse_iterator(this->begin());  }
 
-    constexpr
-    const_iterator
-    cbegin()
-    const noexcept
-      { return this->begin();  }
-
-    constexpr
-    const_iterator
-    cend()
-    const noexcept
-      { return this->end();  }
-
-    constexpr
-    const_reverse_iterator
-    crbegin()
-    const noexcept
-      { return this->rbegin();  }
-
-    constexpr
-    const_reverse_iterator
-    crend()
-    const noexcept
-      { return this->rend();  }
-
     // N.B. This is a non-standard extension.
     constexpr
     iterator

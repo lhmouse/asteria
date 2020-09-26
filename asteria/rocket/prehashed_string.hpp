@@ -176,26 +176,6 @@ class basic_prehashed_string
     const noexcept
       { return this->m_sth.str().rend();  }
 
-    const_iterator
-    cbegin()
-    const noexcept
-      { return this->begin();  }
-
-    const_iterator
-    cend()
-    const noexcept
-      { return this->end();  }
-
-    const_reverse_iterator
-    crbegin()
-    const noexcept
-      { return this->rbegin();  }
-
-    const_reverse_iterator
-    crend()
-    const noexcept
-      { return this->rend();  }
-
     // 24.3.2.4, capacity
     bool
     empty()

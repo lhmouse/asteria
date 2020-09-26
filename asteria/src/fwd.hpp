@@ -106,8 +106,6 @@ using ::rocket::cow_u32string;
 using ::rocket::tinybuf;
 using ::rocket::tinyfmt;
 
-using ::rocket::cbegin;
-using ::rocket::cend;
 using ::rocket::begin;
 using ::rocket::end;
 using ::rocket::xswap;

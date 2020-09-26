@@ -126,8 +126,6 @@ using ::std::range_error;
 using ::std::overflow_error;
 using ::std::underflow_error;
 
-using ::std::cbegin;
-using ::std::cend;
 using ::std::begin;
 using ::std::end;
 using ::std::swap;

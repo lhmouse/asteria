@@ -396,26 +396,6 @@ class basic_cow_string
     const noexcept
       { return const_reverse_iterator(this->begin());  }
 
-    const_iterator
-    cbegin()
-    const noexcept
-      { return this->begin();  }
-
-    const_iterator
-    cend()
-    const noexcept
-      { return this->end();  }
-
-    const_reverse_iterator
-    crbegin()
-    const noexcept
-      { return this->rbegin();  }
-
-    const_reverse_iterator
-    crend()
-    const noexcept
-      { return this->rend();  }
-
     // N.B. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
     iterator
