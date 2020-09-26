@@ -17,7 +17,7 @@ write_log_to_stderr(const char* file, long line, cow_string&& msg)
 noexcept;
 
 template<typename... ParamsT>
-ROCKET_NOINLINE
+ROCKET_NOINLINE ROCKET_FLATTEN_FUNCTION
 cow_string
 format_string(const char* templ, const ParamsT&... params)
   {
@@ -142,6 +142,7 @@ struct Wrapped_Index
     size_t rindex;  // the wrapped index (valid if both `nprepend` and `nappend` are zeroes)
   };
 
+ROCKET_CONST_FUNCTION
 Wrapped_Index
 wrap_index(int64_t index, size_t size)
 noexcept;
