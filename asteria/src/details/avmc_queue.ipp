@@ -56,59 +56,6 @@ struct Vtable
     Enumerator* venum_opt;  // if null then no variables shall exist
   };
 
-template<typename SparamT, typename = void>
-struct Default_mvct_opt
-  {
-    static
-    void
-    value(Uparam, void* sparam, void* sp_old)
-    noexcept
-      { ::rocket::construct_at(static_cast<SparamT*>(sparam),
-                               ::std::move(*(static_cast<SparamT*>(sp_old))));  }
-  };
-
-template<typename SparamT>
-struct Default_mvct_opt<SparamT, typename ::std::enable_if<
-                   ::std::is_trivially_move_constructible<SparamT>::value
-                   >::type>
-  {
-    static constexpr Move_Constructor* value = nullptr;
-  };
-
-template<typename SparamT, typename = void>
-struct Default_dtor_opt
-  {
-    static
-    void
-    value(Uparam, void* sparam)
-    noexcept
-      { ::rocket::destroy_at(static_cast<SparamT*>(sparam));  }
-  };
-
-template<typename SparamT>
-struct Default_dtor_opt<SparamT, typename ::std::enable_if<
-                   ::std::is_trivially_destructible<SparamT>::value
-                   >::type>
-  {
-    static constexpr Destructor* value = nullptr;
-  };
-
-// This function returns a vtable struct that is allocated statically.
-template<Executor execT, Enumerator* qvenumT, typename SparamT>
-ROCKET_CONST_FUNCTION inline
-const Vtable*
-get_vtable()
-noexcept
-  {
-    static_assert(!::std::is_array<SparamT>::value, "");
-    static_assert(::std::is_object<SparamT>::value, "");
-    static_assert(::std::is_nothrow_move_constructible<SparamT>::value, "");
-
-    static constexpr Vtable s_vtbl[1] = {{ Default_mvct_opt<SparamT>::value,
-                                           Default_dtor_opt<SparamT>::value,
-                                           execT, qvenumT }};
-    return s_vtbl;
-  }
 
 struct Header
   {
@@ -180,6 +127,60 @@ struct Header
     const noexcept
       { return 1 + this->symbol_size_in_headers() + this->nphdrs;  }
   };
+
+template<typename SparamT, typename = void>
+struct Default_mvct_opt
+  {
+    static
+    void
+    value(Uparam, void* sparam, void* sp_old)
+    noexcept
+      { ::rocket::construct_at(static_cast<SparamT*>(sparam),
+                               ::std::move(*(static_cast<SparamT*>(sp_old))));  }
+  };
+
+template<typename SparamT>
+struct Default_mvct_opt<SparamT, typename ::std::enable_if<
+                   ::std::is_trivially_move_constructible<SparamT>::value
+                   >::type>
+  {
+    static constexpr Move_Constructor* value = nullptr;
+  };
+
+template<typename SparamT, typename = void>
+struct Default_dtor_opt
+  {
+    static
+    void
+    value(Uparam, void* sparam)
+    noexcept
+      { ::rocket::destroy_at(static_cast<SparamT*>(sparam));  }
+  };
+
+template<typename SparamT>
+struct Default_dtor_opt<SparamT, typename ::std::enable_if<
+                   ::std::is_trivially_destructible<SparamT>::value
+                   >::type>
+  {
+    static constexpr Destructor* value = nullptr;
+  };
+
+// This function returns a vtable struct that is allocated statically.
+template<Executor execT, Enumerator* qvenumT, typename SparamT>
+ROCKET_CONST_FUNCTION inline
+const Vtable*
+get_vtable()
+noexcept
+  {
+    static_assert(!::std::is_array<SparamT>::value, "");
+    static_assert(::std::is_object<SparamT>::value, "");
+    static_assert(::std::is_nothrow_move_constructible<SparamT>::value, "");
+
+    static constexpr Vtable s_vtbl[1] = {{ Default_mvct_opt<SparamT>::value,
+                                           Default_dtor_opt<SparamT>::value,
+                                           execT, qvenumT }};
+    return s_vtbl;
+  }
 
 }  // namespace details_avmc_queue
 }  // namespace asteria
