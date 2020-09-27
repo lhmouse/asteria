@@ -15,7 +15,6 @@ using details_avmc_queue::Uparam;
 using details_avmc_queue::Symbols;
 using details_avmc_queue::Constructor;
 using details_avmc_queue::Executor;
-using details_avmc_queue::Enumerator;
 using details_avmc_queue::Vtable;
 using details_avmc_queue::Header;
 
@@ -117,12 +116,12 @@ do_reserve_one(Uparam uparam, const opt<Symbols>& syms_opt, size_t nbytes)
 
 AVMC_Queue&
 AVMC_Queue::
-do_append_trivial(Executor* exec, Uparam uparam, opt<Symbols>&& syms_opt,
+do_append_trivial(Executor* executor, Uparam uparam, opt<Symbols>&& syms_opt,
                   size_t nbytes, const void* src_opt)
   {
     auto qnode = this->do_reserve_one(uparam, syms_opt, nbytes);
     qnode->has_vtbl = false;
-    qnode->exec = exec;
+    qnode->executor = executor;
 
     // Copy symbols.
     uptr<Symbols> usyms;
@@ -153,7 +152,7 @@ do_append_nontrivial(const Vtable* vtbl, Uparam uparam, opt<Symbols>&& syms_opt,
   {
     auto qnode = this->do_reserve_one(uparam, syms_opt, nbytes);
     qnode->has_vtbl = true;
-    qnode->vtable = vtbl;
+    qnode->vtbl = vtbl;
 
     // Copy symbols.
     uptr<Symbols> usyms;
@@ -190,7 +189,7 @@ const
 
       // Call the executor function for this node.
       ASTERIA_RUNTIME_TRY {
-        auto status = qnode->executor()(ctx, qnode->uparam(), qnode->sparam());
+        auto status = qnode->executorx()(ctx, qnode->uparam(), qnode->sparam());
         if(ROCKET_UNEXPECT(status != air_status_next))
           return status;
       }

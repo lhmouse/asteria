@@ -60,7 +60,7 @@ struct Sparam_syms
   {
     const Symbols* syms_opt;
     void* reserved;
-    max_align_t aligned[0];
+    max_align_t stor[0];
   };
 
 // This is the header of each variable-length object that is stored in an AVMC queue.
@@ -78,20 +78,20 @@ struct Header
     };
 
     union {
-      const Vtable* vtable;      // active if `has_vtbl`
-      Executor* exec;            // active otherwise
+      const Vtable* vtbl;        // active if `has_vtbl`
+      Executor* executor;        // active otherwise
     };
 
     union {
       Sparam_syms sp_syms[0];    // active if `has_syms`
-      max_align_t sp_stor[0];   // active otherwise
+      max_align_t sp_stor[0];    // active otherwise
     };
 
     // The Executor function and Uparam struct always exist.
     Executor*
-    executor()
+    executorx()
     const noexcept
-      { return this->has_vtbl ? this->vtable->executor : this->exec;  }
+      { return this->has_vtbl ? this->vtbl->executor : this->executor;  }
 
     Uparam
     uparam()
@@ -102,17 +102,17 @@ struct Header
     Relocator*
     reloc_opt()
     const noexcept
-      { return this->has_vtbl ? this->vtable->reloc_opt : nullptr;  }
+      { return this->has_vtbl ? this->vtbl->reloc_opt : nullptr;  }
 
     Destructor*
     dtor_opt()
     const noexcept
-      { return this->has_vtbl ? this->vtable->dtor_opt : nullptr;  }
+      { return this->has_vtbl ? this->vtbl->dtor_opt : nullptr;  }
 
     Enumerator*
     venum_opt()
     const noexcept
-      { return this->has_vtbl ? this->vtable->venum_opt : nullptr;  }
+      { return this->has_vtbl ? this->vtbl->venum_opt : nullptr;  }
 
     // These functions access subsequential user-defined data.
     const Symbols*
@@ -123,12 +123,12 @@ struct Header
     const void*
     sparam()
     const noexcept
-      { return this->has_syms ? this->sp_syms->aligned : this->sp_stor;  }
+      { return this->has_syms ? this->sp_syms->stor : this->sp_stor;  }
 
     void*
     sparam()
     noexcept
-      { return this->has_syms ? this->sp_syms->aligned : this->sp_stor;  }
+      { return this->has_syms ? this->sp_syms->stor : this->sp_stor;  }
 
     uint32_t
     total_size_in_headers()

@@ -68,7 +68,7 @@ class AVMC_Queue
     // If `src_opt` is specified, it should point to the buffer containing data to copy.
     // Otherwise, `sp` is filled with zeroes.
     AVMC_Queue&
-    do_append_trivial(Executor* exec, Uparam up, opt<Symbols>&& syms_opt,
+    do_append_trivial(Executor* executor, Uparam up, opt<Symbols>&& syms_opt,
                       size_t nbytes, const void* src_opt);
 
     // Append a new node to the end. `nbytes` is the size of `sp` to initialize.
@@ -140,28 +140,28 @@ class AVMC_Queue
     // If `sp_opt` is a null pointer, `nbytes` zero bytes are allocated.
     // Call `append()` if the parameter is non-trivial.
     AVMC_Queue&
-    append_trivial(Executor& exec, Uparam up = { })
-      { return this->do_append_trivial(exec, up, nullopt, 0, nullptr);  }
+    append_trivial(Executor& executor, Uparam up = { })
+      { return this->do_append_trivial(executor, up, nullopt, 0, nullptr);  }
 
     AVMC_Queue&
-    append_trivial(Executor& exec, Symbols syms, Uparam up = { })
-      { return this->do_append_trivial(exec, up, ::std::move(syms), 0, nullptr);  }
+    append_trivial(Executor& executor, Symbols syms, Uparam up = { })
+      { return this->do_append_trivial(executor, up, ::std::move(syms), 0, nullptr);  }
 
     AVMC_Queue&
-    append_trivial(Executor& exec, const void* sp_opt, size_t nbytes)
-      { return this->do_append_trivial(exec, Uparam(), nullopt, nbytes, sp_opt);  }
+    append_trivial(Executor& executor, const void* sp_opt, size_t nbytes)
+      { return this->do_append_trivial(executor, Uparam(), nullopt, nbytes, sp_opt);  }
 
     AVMC_Queue&
-    append_trivial(Executor& exec, Symbols syms, const void* sp_opt, size_t nbytes)
-      { return this->do_append_trivial(exec, Uparam(), ::std::move(syms), nbytes, sp_opt);  }
+    append_trivial(Executor& executor, Symbols syms, const void* sp_opt, size_t nbytes)
+      { return this->do_append_trivial(executor, Uparam(), ::std::move(syms), nbytes, sp_opt);  }
 
     AVMC_Queue&
-    append_trivial(Executor& exec, Uparam up, const void* sp_opt, size_t nbytes)
-      { return this->do_append_trivial(exec, up, nullopt, nbytes, sp_opt);  }
+    append_trivial(Executor& executor, Uparam up, const void* sp_opt, size_t nbytes)
+      { return this->do_append_trivial(executor, up, nullopt, nbytes, sp_opt);  }
 
     AVMC_Queue&
-    append_trivial(Executor& exec, Symbols syms, Uparam up, const void* sp_opt, size_t nbytes)
-      { return this->do_append_trivial(exec, up, ::std::move(syms), nbytes, sp_opt);  }
+    append_trivial(Executor& executor, Symbols syms, Uparam up, const void* sp_opt, size_t nbytes)
+      { return this->do_append_trivial(executor, up, ::std::move(syms), nbytes, sp_opt);  }
 
     // Append a node with type-generic semantics.
     // Both trivial and non-trivial parameter types are supported.
