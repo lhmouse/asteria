@@ -56,7 +56,9 @@ struct Vtable
     Enumerator* venum_opt;  // if null then no variables shall exist
   };
 
-
+// This is the header of each variable-length object that is stored in an AVMC queue.
+// User-defined data may immediate follow this struct, so the size of this struct has to be
+// a multiple of `alignof(max_align_t)`.
 struct Header
   {
     union {
@@ -73,6 +75,19 @@ struct Header
     };
     max_align_t alignment[0];
 
+    // The Executor function and Uparam struct always exist.
+    Executor*
+    executor()
+    const noexcept
+      { return this->has_vtbl ? this->vtable->executor : this->exec;  }
+
+    constexpr
+    const Uparam&
+    uparam()
+    const noexcept
+      { return this->up_stor;  }
+
+    // These functions obtain function pointers from the Vtable, if any.
     Move_Constructor*
     mvct_opt()
     const noexcept
@@ -83,22 +98,12 @@ struct Header
     const noexcept
       { return this->has_vtbl ? this->vtable->dtor_opt : nullptr;  }
 
-    Executor*
-    executor()
-    const noexcept
-      { return this->has_vtbl ? this->vtable->executor : this->exec;  }
-
     Enumerator*
     venum_opt()
     const noexcept
       { return this->has_vtbl ? this->vtable->venum_opt : nullptr;  }
 
-    constexpr
-    const Uparam&
-    uparam()
-    const noexcept
-      { return this->up_stor;  }
-
+    // These functions access subsequential user-defined data.
     constexpr
     void*
     skip(uint32_t offset)
