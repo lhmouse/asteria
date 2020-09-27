@@ -42,38 +42,50 @@ struct Symbols
   };
 
 // These are prototypes for callbacks.
-using Constructor       = void (Uparam uparam, void* sparam, intptr_t ctor_arg);
-using Move_Constructor  = void (Uparam uparam, void* sparam, void* sp_old);
-using Destructor        = void (Uparam uparam, void* sparam);
-using Executor          = AIR_Status (Executive_Context& ctx, Uparam uparam, const void* sparam);
-using Enumerator        = Variable_Callback& (Variable_Callback& callback, Uparam uparam, const void* sparam);
+using Constructor  = void (Uparam uparam, void* sparam, intptr_t ctor_arg);
+using Relocator    = void (Uparam uparam, void* sparam, void* sp_old);
+using Destructor   = void (Uparam uparam, void* sparam);
+using Executor     = AIR_Status (Executive_Context& ctx, Uparam uparam, const void* sparam);
+using Enumerator   = Variable_Callback& (Variable_Callback& callback, Uparam uparam, const void* sparam);
 
 struct Vtable
   {
-    Move_Constructor* mvct_opt;  // if null then bitwise copy is performed
+    Relocator* reloc_opt;  // if null then bitwise copy is performed
     Destructor* dtor_opt;  // if null then no cleanup is performed
     Executor* executor;  // not nullable [!]
     Enumerator* venum_opt;  // if null then no variables shall exist
   };
 
+struct Sparam_syms
+  {
+    const Symbols* syms_opt;
+    void* reserved;
+    max_align_t aligned[0];
+  };
+
 // This is the header of each variable-length object that is stored in an AVMC queue.
-// User-defined data may immediate follow this struct, so the size of this struct has to be
-// a multiple of `alignof(max_align_t)`.
+// User-defined data may immediate follow this struct, so the size of this struct has
+// to be a multiple of `alignof(max_align_t)`.
 struct Header
   {
     union {
       struct {
-        uint8_t nphdrs;  // size of `sparam`, in number of `Header`s [!]
-        uint8_t has_vtbl : 1;  // vtable exists?
-        uint8_t has_syms : 1;  // symbols exist?
+        uint8_t nphdrs;         // size of `sparam`, in number of `Header`s [!]
+        uint8_t has_vtbl : 1;   // vtable exists?
+        uint8_t has_syms : 1;   // symbols exist?
       };
       Uparam up_stor;
     };
+
     union {
-      const Vtable* vtable;  // active if `has_vtbl`
-      Executor* exec;  // active otherwise
+      const Vtable* vtable;      // active if `has_vtbl`
+      Executor* exec;            // active otherwise
     };
-    max_align_t alignment[0];
+
+    union {
+      Sparam_syms sp_syms[0];    // active if `has_syms`
+      max_align_t sp_stor[0];   // active otherwise
+    };
 
     // The Executor function and Uparam struct always exist.
     Executor*
@@ -81,17 +93,16 @@ struct Header
     const noexcept
       { return this->has_vtbl ? this->vtable->executor : this->exec;  }
 
-    constexpr
-    const Uparam&
+    Uparam
     uparam()
     const noexcept
       { return this->up_stor;  }
 
     // These functions obtain function pointers from the Vtable, if any.
-    Move_Constructor*
-    mvct_opt()
+    Relocator*
+    reloc_opt()
     const noexcept
-      { return this->has_vtbl ? this->vtable->mvct_opt : nullptr;  }
+      { return this->has_vtbl ? this->vtable->reloc_opt : nullptr;  }
 
     Destructor*
     dtor_opt()
@@ -104,52 +115,50 @@ struct Header
       { return this->has_vtbl ? this->vtable->venum_opt : nullptr;  }
 
     // These functions access subsequential user-defined data.
-    constexpr
-    void*
-    skip(uint32_t offset)
-    const noexcept
-      { return const_cast<Header*>(this) + 1 + offset;  }
-
-    Symbols*
+    const Symbols*
     syms_opt()
     const noexcept
-      { return this->has_syms ? static_cast<Symbols*>(this->skip(0)) : nullptr;  }
+      { return this->has_syms ? this->sp_syms->syms_opt : nullptr;  }
 
-    constexpr
-    uint32_t
-    symbol_size_in_headers()
+    const void*
+    sparam()
     const noexcept
-      { return this->has_syms * uint32_t((sizeof(Symbols) - 1) / sizeof(Header) + 1);  }
+      { return this->has_syms ? this->sp_syms->aligned : this->sp_stor;  }
 
     void*
     sparam()
-    const noexcept
-      { return this->skip(this->symbol_size_in_headers());  }
+    noexcept
+      { return this->has_syms ? this->sp_syms->aligned : this->sp_stor;  }
 
-    constexpr
     uint32_t
     total_size_in_headers()
     const noexcept
-      { return 1 + this->symbol_size_in_headers() + this->nphdrs;  }
+      { return UINT32_C(1) + this->has_syms + this->nphdrs;  }
   };
 
+static_assert(sizeof(Header) == sizeof(Sparam_syms), "");
+static_assert(sizeof(Header) % alignof(max_align_t) == 0, "");
+static_assert(alignof(Header) == alignof(max_align_t), "");
+
 template<typename SparamT, typename = void>
-struct Default_mvct_opt
+struct Default_reloc_opt
   {
     static
     void
     value(Uparam, void* sparam, void* sp_old)
     noexcept
-      { ::rocket::construct_at(static_cast<SparamT*>(sparam),
-                               ::std::move(*(static_cast<SparamT*>(sp_old))));  }
+      {
+        ::rocket::construct_at((SparamT*)sparam, ::std::move(*(SparamT*)sp_old));
+        ::rocket::destroy_at((SparamT*)sp_old);
+      }
   };
 
 template<typename SparamT>
-struct Default_mvct_opt<SparamT, typename ::std::enable_if<
-                   ::std::is_trivially_move_constructible<SparamT>::value
+struct Default_reloc_opt<SparamT, typename ::std::enable_if<
+                   ::std::is_trivially_copyable<SparamT>::value
                    >::type>
   {
-    static constexpr Move_Constructor* value = nullptr;
+    static constexpr Relocator* value = nullptr;
   };
 
 template<typename SparamT, typename = void>
@@ -159,7 +168,9 @@ struct Default_dtor_opt
     void
     value(Uparam, void* sparam)
     noexcept
-      { ::rocket::destroy_at(static_cast<SparamT*>(sparam));  }
+      {
+        ::rocket::destroy_at((SparamT*)sparam);
+      }
   };
 
 template<typename SparamT>
@@ -181,7 +192,7 @@ noexcept
     static_assert(::std::is_object<SparamT>::value, "");
     static_assert(::std::is_nothrow_move_constructible<SparamT>::value, "");
 
-    static constexpr Vtable s_vtbl[1] = {{ Default_mvct_opt<SparamT>::value,
+    static constexpr Vtable s_vtbl[1] = {{ Default_reloc_opt<SparamT>::value,
                                            Default_dtor_opt<SparamT>::value,
                                            execT, qvenumT }};
     return s_vtbl;
