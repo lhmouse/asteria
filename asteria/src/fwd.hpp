@@ -34,10 +34,6 @@
 #include <cstdio>
 #include <cwchar>
 
-namespace asteria {
-namespace noadl = asteria;
-
-// Macros
 #define ASTERIA_VARIANT_CONSTRUCTOR(C, V, T, t)  \
     template<typename T,  \
     ROCKET_ENABLE_IF(::std::is_constructible<V, T&&>::value)>  \
@@ -73,6 +69,9 @@ namespace noadl = asteria;
 
 #define ASTERIA_INCOMPLET(T)     template<typename T##_IKYvW2aJ = T,  \
                                           typename T = T##_IKYvW2aJ>
+
+namespace asteria {
+namespace noadl = asteria;
 
 // `using`-directives
 using ::std::initializer_list;
