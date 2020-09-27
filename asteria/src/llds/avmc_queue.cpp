@@ -29,13 +29,8 @@ noexcept
       auto qnode = next;
       next += qnode->total_size_in_headers();
 
-      // Destroy user-defined data.
-      if(auto dtor = qnode->dtor_opt())
-        dtor(qnode->uparam(), qnode->sparam());
-
-      // Destroy symbols.
-      if(auto syms = qnode->syms_opt())
-        delete syms;
+      // Destroy symbols and user-defined data.
+      qnode->destroy();
     }
 
 #ifdef ROCKET_DEBUG
@@ -68,12 +63,11 @@ do_reallocate(uint32_t nadd)
     uint32_t offset = 0;
     while(ROCKET_EXPECT(offset != this->m_used)) {
       auto qnode = bptr + offset;
-      auto qxold = bold + offset;
+      auto qfrom = bold + offset;
       offset += qnode->total_size_in_headers();
 
       // Relocate user-defined data.
-      if(auto reloc = qnode->reloc_opt())
-        reloc(qnode->uparam(), qnode->sparam(), qxold->sparam());
+      qnode->relocate(::std::move(*qfrom));
     }
 
     // Deallocate the old block.
@@ -138,7 +132,7 @@ do_append_trivial(Executor* executor, Uparam uparam, opt<Symbols>&& syms_opt,
     // Set up symbols.
     // This operation will not throw exceptions.
     if(usyms)
-      qnode->sp_syms->syms_opt = usyms.release();
+      qnode->adopt_symbols(::std::move(usyms));
 
     // Accept this node.
     this->m_used += qnode->total_size_in_headers();
@@ -169,7 +163,7 @@ do_append_nontrivial(const Vtable* vtbl, Uparam uparam, opt<Symbols>&& syms_opt,
     // Set up symbols.
     // This operation will not throw exceptions.
     if(usyms)
-      qnode->sp_syms->syms_opt = usyms.release();
+      qnode->adopt_symbols(::std::move(usyms));
 
     // Accept this node.
     this->m_used += qnode->total_size_in_headers();
@@ -189,13 +183,12 @@ const
 
       // Call the executor function for this node.
       ASTERIA_RUNTIME_TRY {
-        auto status = qnode->executorx()(ctx, qnode->uparam(), qnode->sparam());
+        auto status = qnode->execute(ctx);
         if(ROCKET_UNEXPECT(status != air_status_next))
           return status;
       }
       ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
-        if(auto syms = qnode->syms_opt())
-          except.push_frame_plain(syms->sloc, ::rocket::sref(""));
+        qnode->push_symbols(except);
         throw;
       }
     }
@@ -214,8 +207,7 @@ const
       next += qnode->total_size_in_headers();
 
       // Enumerate variables in this node.
-      if(auto venum = qnode->venum_opt())
-        venum(callback, qnode->uparam(), qnode->sparam());
+      qnode->enumerate_variables(callback);
     }
     return callback;
   }

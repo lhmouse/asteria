@@ -87,38 +87,16 @@ struct Header
       max_align_t sp_stor[0];    // active otherwise
     };
 
-    // The Executor function and Uparam struct always exist.
-    Executor*
-    executorx()
-    const noexcept
-      { return this->has_vtbl ? this->vtbl->executor : this->executor;  }
-
-    Uparam
+    // Begin fancy optimization for space!
+    const Uparam&
     uparam()
     const noexcept
       { return this->up_stor;  }
 
-    // These functions obtain function pointers from the Vtable, if any.
-    Relocator*
-    reloc_opt()
-    const noexcept
-      { return this->has_vtbl ? this->vtbl->reloc_opt : nullptr;  }
-
-    Destructor*
-    dtor_opt()
-    const noexcept
-      { return this->has_vtbl ? this->vtbl->dtor_opt : nullptr;  }
-
-    Enumerator*
-    venum_opt()
-    const noexcept
-      { return this->has_vtbl ? this->vtbl->venum_opt : nullptr;  }
-
-    // These functions access subsequential user-defined data.
-    const Symbols*
-    syms_opt()
-    const noexcept
-      { return this->has_syms ? this->sp_syms->syms_opt : nullptr;  }
+    Uparam&
+    uparam()
+    noexcept
+      { return this->up_stor;  }
 
     const void*
     sparam()
@@ -134,6 +112,63 @@ struct Header
     total_size_in_headers()
     const noexcept
       { return UINT32_C(1) + this->has_syms + this->nphdrs;  }
+
+    // Provide general accesstors.
+    void
+    relocate(Header&& other)
+    noexcept
+      {
+        // Move user-defined data. The symbols are trivially relocatable.
+        if(this->has_vtbl && this->vtbl->reloc_opt)
+          this->vtbl->reloc_opt(this->uparam(), this->sparam(), other.sparam());
+      }
+
+    void
+    destroy()
+    noexcept
+      {
+        // Destroy user-defined data and symbols.
+        if(this->has_vtbl && this->vtbl->dtor_opt)
+          this->vtbl->dtor_opt(this->uparam(), this->sparam());
+
+        if(this->has_syms)
+          delete this->sp_syms->syms_opt;
+      }
+
+    AIR_Status
+    execute(Executive_Context& ctx)
+    const
+      {
+        if(this->has_vtbl)
+          return this->vtbl->executor(ctx, this->uparam(), this->sparam());
+        else
+          return this->executor(ctx, this->uparam(), this->sparam());
+      }
+
+    void
+    enumerate_variables(Variable_Callback& callback)
+    const
+      {
+        if(this->has_vtbl && this->vtbl->venum_opt)
+          this->vtbl->venum_opt(callback, this->uparam(), this->sparam());
+      }
+
+    void
+    adopt_symbols(uptr<Symbols>&& syms_opt)
+    noexcept
+      {
+        ROCKET_ASSERT(this->has_syms);
+        this->sp_syms->syms_opt = syms_opt.release();
+      }
+
+    ASTERIA_INCOMPLET(Runtime_Error)
+    void
+    push_symbols(Runtime_Error& except)
+    const
+      {
+        if(this->has_syms && this->sp_syms->syms_opt)
+          except.push_frame_plain(this->sp_syms->syms_opt->sloc, ::rocket::sref(""));
+      }
   };
 
 static_assert(sizeof(Header) == sizeof(Sparam_syms), "");
