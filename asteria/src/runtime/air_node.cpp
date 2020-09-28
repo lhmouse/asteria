@@ -117,6 +117,7 @@ do_execute_block(const AVMC_Queue& queue, const Executive_Context& ctx)
     // Execute the body on a new context.
     Executive_Context ctx_next(::rocket::ref(ctx));
     AIR_Status status;
+
     ASTERIA_RUNTIME_TRY {
       status = queue.execute(ctx_next);
     }
@@ -505,12 +506,12 @@ struct AIR_Traits<AIR_Node::S_switch_statement>
         if(bp != SIZE_MAX) {
           // Note that all clauses share the same context.
           Executive_Context ctx_body(::rocket::ref(ctx));
+          AIR_Status status;
 
           // Inject all bypassed variables into the scope.
           for(const auto& name : sp.names_added[bp])
             do_declare(ctx_body, name);
 
-          AIR_Status status;
           ASTERIA_RUNTIME_TRY {
             do {
               // Execute the body.
@@ -834,6 +835,7 @@ struct AIR_Traits<AIR_Node::S_try_statement>
         // User-provided bindings may obtain the current exception using `::std::current_exception`.
         Executive_Context ctx_catch(::rocket::ref(ctx));
         AIR_Status status;
+
         ASTERIA_RUNTIME_TRY {
           // Set the exception reference.
           Reference_root::S_temporary xref = { except.value() };

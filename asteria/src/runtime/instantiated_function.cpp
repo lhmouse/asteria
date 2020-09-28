@@ -53,9 +53,9 @@ const
                                this->m_zvarg, this->m_params,
                                ::std::move(self), ::std::move(args));
     stack.reserve(::std::move(args));
+    AIR_Status status;
 
     // Execute the function body.
-    AIR_Status status;
     ASTERIA_RUNTIME_TRY {
       status = this->m_queue.execute(ctx_func);
     }
