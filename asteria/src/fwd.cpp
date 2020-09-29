@@ -94,7 +94,7 @@ cow_function::
 invoke(Global_Context& global, cow_vector<Reference>&& args)
 const
   {
-    Reference self = Reference_root::S_constant();
+    Reference self = Reference::S_void();
     this->invoke_ptc_aware(self, global, ::std::move(args));
     self.finish_call(global);
     return self;
