@@ -52,9 +52,9 @@ do_compose_message()
 
     // Get the width of the frame number colomn.
     ::rocket::ascii_numput nump;
-    nump.put(this->m_frames.size());
+    nump.put(this->m_frames.size() - 1);
 
-    sso_vector<char, 16> sbuf(nump.size(), ' ');
+    sso_vector<char, 24> sbuf(nump.size(), ' ');
     sbuf.emplace_back();
 
     // Append stack frames.
