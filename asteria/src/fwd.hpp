@@ -162,8 +162,6 @@ enum AIR_Status : uint8_t;
 enum PTC_Aware : uint8_t;
 class Abstract_Hooks;
 class Runtime_Error;
-class Reference_root;
-class Reference_modifier;
 class Reference;
 class Evaluation_Stack;
 class Variable;

@@ -68,11 +68,11 @@ do_find_opt(IterT begin, IterT end, const Value& target)
     return nullopt;
   }
 
-Reference_root::S_temporary
-do_make_temporary(const Value& value)
+void
+do_make_temporary(cow_vector<Reference>& args, const Value& value)
   {
-    Reference_root::S_temporary xref = { value };
-    return xref;
+    Reference::S_temporary xref = { value };
+    args.emplace_back(::std::move(xref));
   }
 
 template<typename IterT>
@@ -82,8 +82,9 @@ do_find_if_opt(Global_Context& global, IterT begin, IterT end, const V_function&
     cow_vector<Reference> args;
     for(auto it = ::std::move(begin);  it != end;  ++it) {
       // Set up arguments for the user-defined predictor.
-      args.resize(1);
-      args.mut(0) = do_make_temporary(*it);
+      args.clear();
+      do_make_temporary(args, *it);
+
       // Call the predictor function and check the return value.
       auto self = pred.invoke(global, ::std::move(args));
       if(self.read().test() == match)
@@ -102,9 +103,10 @@ do_compare(Global_Context& global, cow_vector<Reference>& args,
       return lhs.compare(rhs);
 
     // Set up arguments for the user-defined comparator.
-    args.resize(2);
-    args.mut(0) = do_make_temporary(lhs);
-    args.mut(1) = do_make_temporary(rhs);
+    args.clear();
+    do_make_temporary(args, lhs);
+    do_make_temporary(args, rhs);
+
     // Call the predictor function and compare the result with `0`.
     auto self = kcomp.invoke(global, ::std::move(args));
     return self.read().compare(V_integer(0));
@@ -569,9 +571,9 @@ std_array_generate(Global_Context& global, V_function generator, V_integer lengt
     cow_vector<Reference> args;
     for(int64_t i = 0;  i < length;  ++i) {
       // Set up arguments for the user-defined generator.
-      args.resize(2);
-      args.mut(0) = do_make_temporary(i);
-      args.mut(1) = do_make_temporary(data.empty() ? null_value : data.back());
+      args.clear();
+      do_make_temporary(args, i);
+      do_make_temporary(args, data.empty() ? null_value : data.back());
 
       // Call the generator function and push the return value.
       auto self = generator.invoke(global, ::std::move(args));
@@ -674,7 +676,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     V_integer from;
     Opt_integer length;
     if(reader.I().v(data).v(from).o(length).F()) {
-      Reference_root::S_temporary xref = { std_array_slice(::std::move(data), from, length) };
+      Reference::S_temporary xref = { std_array_slice(::std::move(data), from, length) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -718,13 +720,13 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     V_integer from;
     V_array replacement;
     if(reader.I().v(data).v(from).S(state).v(replacement).F()) {
-      Reference_root::S_temporary xref = { std_array_replace_slice(::std::move(data), from, nullopt,
+      Reference::S_temporary xref = { std_array_replace_slice(::std::move(data), from, nullopt,
                                                                    ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
     Opt_integer length;
     if(reader.L(state).o(length).v(replacement).F()) {
-      Reference_root::S_temporary xref = { std_array_replace_slice(::std::move(data), from, length,
+      Reference::S_temporary xref = { std_array_replace_slice(::std::move(data), from, length,
                                                                    ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
@@ -775,19 +777,19 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     V_array data;
     Value target;
     if(reader.I().v(data).S(state).o(target).F()) {
-      Reference_root::S_temporary xref = { std_array_find(::std::move(data), 0, nullopt,
+      Reference::S_temporary xref = { std_array_find(::std::move(data), 0, nullopt,
                                                           ::std::move(target)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).o(target).F()) {
-      Reference_root::S_temporary xref = { std_array_find(::std::move(data), from, nullopt,
+      Reference::S_temporary xref = { std_array_find(::std::move(data), from, nullopt,
                                                           ::std::move(target)) };
       return self = ::std::move(xref);
     }
     Opt_integer length;
     if(reader.L(state).o(length).o(target).F()) {
-      Reference_root::S_temporary xref = { std_array_find(::std::move(data), from, length,
+      Reference::S_temporary xref = { std_array_find(::std::move(data), from, length,
                                                           ::std::move(target)) };
       return self = ::std::move(xref);
     }
@@ -838,19 +840,19 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     V_array data;
     V_function predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_find_if(global, ::std::move(data), 0, nullopt,
+      Reference::S_temporary xref = { std_array_find_if(global, ::std::move(data), 0, nullopt,
                                                              ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_find_if(global, ::std::move(data), from, nullopt,
+      Reference::S_temporary xref = { std_array_find_if(global, ::std::move(data), from, nullopt,
                                                              ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     Opt_integer length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_find_if(global, ::std::move(data), from, length,
+      Reference::S_temporary xref = { std_array_find_if(global, ::std::move(data), from, length,
                                                              ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
@@ -901,19 +903,19 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     V_array data;
     V_function predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_find_if_not(global, ::std::move(data), 0, nullopt,
+      Reference::S_temporary xref = { std_array_find_if_not(global, ::std::move(data), 0, nullopt,
                                                                  ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_find_if_not(global, ::std::move(data), from, nullopt,
+      Reference::S_temporary xref = { std_array_find_if_not(global, ::std::move(data), from, nullopt,
                                                                  ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     Opt_integer length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_find_if_not(global, ::std::move(data), from, length,
+      Reference::S_temporary xref = { std_array_find_if_not(global, ::std::move(data), from, length,
                                                                  ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
@@ -964,19 +966,19 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     V_array data;
     Value target;
     if(reader.I().v(data).S(state).o(target).F()) {
-      Reference_root::S_temporary xref = { std_array_rfind(::std::move(data), 0, nullopt,
+      Reference::S_temporary xref = { std_array_rfind(::std::move(data), 0, nullopt,
                                                            ::std::move(target)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).o(target).F()) {
-      Reference_root::S_temporary xref = { std_array_rfind(::std::move(data), from, nullopt,
+      Reference::S_temporary xref = { std_array_rfind(::std::move(data), from, nullopt,
                                                            ::std::move(target)) };
       return self = ::std::move(xref);
     }
     Opt_integer length;
     if(reader.L(state).o(length).o(target).F()) {
-      Reference_root::S_temporary xref = { std_array_rfind(::std::move(data), from, length,
+      Reference::S_temporary xref = { std_array_rfind(::std::move(data), from, length,
                                                            ::std::move(target)) };
       return self = ::std::move(xref);
     }
@@ -1027,19 +1029,19 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     V_array data;
     V_function predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_rfind_if(global, ::std::move(data), 0, nullopt,
+      Reference::S_temporary xref = { std_array_rfind_if(global, ::std::move(data), 0, nullopt,
                                                               ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_rfind_if(global, ::std::move(data), from, nullopt,
+      Reference::S_temporary xref = { std_array_rfind_if(global, ::std::move(data), from, nullopt,
                                                               ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     Opt_integer length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_rfind_if(global, ::std::move(data), from, length,
+      Reference::S_temporary xref = { std_array_rfind_if(global, ::std::move(data), from, length,
                                                               ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
@@ -1090,19 +1092,19 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     V_array data;
     V_function predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_rfind_if_not(global, ::std::move(data), 0, nullopt,
+      Reference::S_temporary xref = { std_array_rfind_if_not(global, ::std::move(data), 0, nullopt,
                                                                   ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_rfind_if_not(global, ::std::move(data), from, nullopt,
+      Reference::S_temporary xref = { std_array_rfind_if_not(global, ::std::move(data), from, nullopt,
                                                                   ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     Opt_integer length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_rfind_if_not(global, ::std::move(data), from, length,
+      Reference::S_temporary xref = { std_array_rfind_if_not(global, ::std::move(data), from, length,
                                                                   ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
@@ -1151,19 +1153,19 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     V_array data;
     Value target;
     if(reader.I().v(data).S(state).o(target).F()) {
-      Reference_root::S_temporary xref = { std_array_count(::std::move(data), 0, nullopt,
+      Reference::S_temporary xref = { std_array_count(::std::move(data), 0, nullopt,
                                                            ::std::move(target)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).o(target).F()) {
-      Reference_root::S_temporary xref = { std_array_count(::std::move(data), from, nullopt,
+      Reference::S_temporary xref = { std_array_count(::std::move(data), from, nullopt,
                                                            ::std::move(target)) };
       return self = ::std::move(xref);
     }
     Opt_integer length;
     if(reader.L(state).o(length).o(target).F()) {
-      Reference_root::S_temporary xref = { std_array_count(::std::move(data), from, length,
+      Reference::S_temporary xref = { std_array_count(::std::move(data), from, length,
                                                            ::std::move(target)) };
       return self = ::std::move(xref);
     }
@@ -1216,19 +1218,19 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     V_array data;
     V_function predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_count_if(global, ::std::move(data), 0, nullopt,
+      Reference::S_temporary xref = { std_array_count_if(global, ::std::move(data), 0, nullopt,
                                                               ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_count_if(global, ::std::move(data), from, nullopt,
+      Reference::S_temporary xref = { std_array_count_if(global, ::std::move(data), from, nullopt,
                                                               ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     Opt_integer length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_count_if(global, ::std::move(data), from, length,
+      Reference::S_temporary xref = { std_array_count_if(global, ::std::move(data), from, length,
                                                               ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
@@ -1281,19 +1283,19 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     V_array data;
     V_function predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_count_if_not(global, ::std::move(data), 0, nullopt,
+      Reference::S_temporary xref = { std_array_count_if_not(global, ::std::move(data), 0, nullopt,
                                                                   ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_count_if_not(global, ::std::move(data), from, nullopt,
+      Reference::S_temporary xref = { std_array_count_if_not(global, ::std::move(data), from, nullopt,
                                                                   ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     Opt_integer length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_count_if_not(global, ::std::move(data), from, length,
+      Reference::S_temporary xref = { std_array_count_if_not(global, ::std::move(data), from, length,
                                                                   ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
@@ -1342,19 +1344,19 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     V_array data;
     Value target;
     if(reader.I().v(data).S(state).o(target).F()) {
-      Reference_root::S_temporary xref = { std_array_exclude(::std::move(data), 0, nullopt,
+      Reference::S_temporary xref = { std_array_exclude(::std::move(data), 0, nullopt,
                                                              ::std::move(target)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).o(target).F()) {
-      Reference_root::S_temporary xref = { std_array_exclude(::std::move(data), from, nullopt,
+      Reference::S_temporary xref = { std_array_exclude(::std::move(data), from, nullopt,
                                                              ::std::move(target)) };
       return self = ::std::move(xref);
     }
     Opt_integer length;
     if(reader.L(state).o(length).o(target).F()) {
-      Reference_root::S_temporary xref = { std_array_exclude(::std::move(data), from, length,
+      Reference::S_temporary xref = { std_array_exclude(::std::move(data), from, length,
                                                              ::std::move(target)) };
       return self = ::std::move(xref);
     }
@@ -1405,19 +1407,19 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     V_array data;
     V_function predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_exclude_if(global, ::std::move(data), 0, nullopt,
+      Reference::S_temporary xref = { std_array_exclude_if(global, ::std::move(data), 0, nullopt,
                                                                 ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_exclude_if(global, ::std::move(data), from, nullopt,
+      Reference::S_temporary xref = { std_array_exclude_if(global, ::std::move(data), from, nullopt,
                                                                 ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     Opt_integer length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_exclude_if(global, ::std::move(data), from, length,
+      Reference::S_temporary xref = { std_array_exclude_if(global, ::std::move(data), from, length,
                                                                 ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
@@ -1468,19 +1470,19 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     V_array data;
     V_function predictor;
     if(reader.I().v(data).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_exclude_if_not(global, ::std::move(data), 0, nullopt,
+      Reference::S_temporary xref = { std_array_exclude_if_not(global, ::std::move(data), 0, nullopt,
                                                                     ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_exclude_if_not(global, ::std::move(data), from, nullopt,
+      Reference::S_temporary xref = { std_array_exclude_if_not(global, ::std::move(data), from, nullopt,
                                                                     ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
     Opt_integer length;
     if(reader.L(state).o(length).v(predictor).F()) {
-      Reference_root::S_temporary xref = { std_array_exclude_if_not(global, ::std::move(data), from, length,
+      Reference::S_temporary xref = { std_array_exclude_if_not(global, ::std::move(data), from, length,
                                                                     ::std::move(predictor)) };
       return self = ::std::move(xref);
     }
@@ -1519,7 +1521,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     V_array data;
     Opt_function comparator;
     if(reader.I().v(data).o(comparator).F()) {
-      Reference_root::S_temporary xref = { std_array_is_sorted(global, ::std::move(data),
+      Reference::S_temporary xref = { std_array_is_sorted(global, ::std::move(data),
                                                                ::std::move(comparator)) };
       return self = ::std::move(xref);
     }
@@ -1557,7 +1559,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     Value target;
     Opt_function comparator;
     if(reader.I().v(data).o(target).o(comparator).F()) {
-      Reference_root::S_temporary xref = { std_array_binary_search(global, ::std::move(data), ::std::move(target),
+      Reference::S_temporary xref = { std_array_binary_search(global, ::std::move(data), ::std::move(target),
                                                                    ::std::move(comparator)) };
       return self = ::std::move(xref);
     }
@@ -1597,7 +1599,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     Value target;
     Opt_function comparator;
     if(reader.I().v(data).o(target).o(comparator).F()) {
-      Reference_root::S_temporary xref = { std_array_lower_bound(global, ::std::move(data), ::std::move(target),
+      Reference::S_temporary xref = { std_array_lower_bound(global, ::std::move(data), ::std::move(target),
                                                                  ::std::move(comparator)) };
       return self = ::std::move(xref);
     }
@@ -1637,7 +1639,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     Value target;
     Opt_function comparator;
     if(reader.I().v(data).o(target).o(comparator).F()) {
-      Reference_root::S_temporary xref = { std_array_upper_bound(global, ::std::move(data), ::std::move(target),
+      Reference::S_temporary xref = { std_array_upper_bound(global, ::std::move(data), ::std::move(target),
                                                                  ::std::move(comparator)) };
       return self = ::std::move(xref);
     }
@@ -1676,7 +1678,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     Value target;
     Opt_function comparator;
     if(reader.I().v(data).o(target).o(comparator).F()) {
-      Reference_root::S_temporary xref = { std_array_equal_range(global, ::std::move(data), ::std::move(target),
+      Reference::S_temporary xref = { std_array_equal_range(global, ::std::move(data), ::std::move(target),
                                                                  ::std::move(comparator)) };
       return self = ::std::move(xref);
     }
@@ -1712,7 +1714,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     V_array data;
     Opt_function comparator;
     if(reader.I().v(data).o(comparator).F()) {
-      Reference_root::S_temporary xref = { std_array_sort(global, ::std::move(data), ::std::move(comparator)) };
+      Reference::S_temporary xref = { std_array_sort(global, ::std::move(data), ::std::move(comparator)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1748,7 +1750,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     V_array data;
     Opt_function comparator;
     if(reader.I().v(data).o(comparator).F()) {
-      Reference_root::S_temporary xref = { std_array_sortu(global, ::std::move(data), ::std::move(comparator)) };
+      Reference::S_temporary xref = { std_array_sortu(global, ::std::move(data), ::std::move(comparator)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1779,7 +1781,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     V_array data;
     Opt_function comparator;
     if(reader.I().v(data).o(comparator).F()) {
-      Reference_root::S_temporary xref = { std_array_max_of(global, ::std::move(data), ::std::move(comparator)) };
+      Reference::S_temporary xref = { std_array_max_of(global, ::std::move(data), ::std::move(comparator)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1810,7 +1812,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     V_array data;
     Opt_function comparator;
     if(reader.I().v(data).o(comparator).F()) {
-      Reference_root::S_temporary xref = { std_array_min_of(global, ::std::move(data), ::std::move(comparator)) };
+      Reference::S_temporary xref = { std_array_min_of(global, ::std::move(data), ::std::move(comparator)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1838,7 +1840,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     V_array data;
     Opt_function comparator;
     if(reader.I().v(data).o(comparator).F()) {
-      Reference_root::S_temporary xref = { std_array_reverse(::std::move(data)) };
+      Reference::S_temporary xref = { std_array_reverse(::std::move(data)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1870,7 +1872,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     V_function generator;
     V_integer length;
     if(reader.I().v(generator).v(length).F()) {
-      Reference_root::S_temporary xref = { std_array_generate(global, ::std::move(generator), length) };
+      Reference::S_temporary xref = { std_array_generate(global, ::std::move(generator), length) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1902,7 +1904,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     V_array data;
     Opt_integer seed;
     if(reader.I().v(data).o(seed).F()) {
-      Reference_root::S_temporary xref = { std_array_shuffle(::std::move(data), ::std::move(seed)) };
+      Reference::S_temporary xref = { std_array_shuffle(::std::move(data), ::std::move(seed)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1932,7 +1934,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     V_array data;
     V_integer shift;
     if(reader.I().v(data).v(shift).F()) {
-      Reference_root::S_temporary xref = { std_array_rotate(::std::move(data), ::std::move(shift)) };
+      Reference::S_temporary xref = { std_array_rotate(::std::move(data), ::std::move(shift)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1959,7 +1961,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_object source;
     if(reader.I().v(source).F()) {
-      Reference_root::S_temporary xref = { std_array_copy_keys(::std::move(source)) };
+      Reference::S_temporary xref = { std_array_copy_keys(::std::move(source)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1986,7 +1988,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_object source;
     if(reader.I().v(source).F()) {
-      Reference_root::S_temporary xref = { std_array_copy_values(::std::move(source)) };
+      Reference::S_temporary xref = { std_array_copy_values(::std::move(source)) };
       return self = ::std::move(xref);
     }
     // Fail.

@@ -424,7 +424,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.chrono.utc_now"), ::rocket::cref(args));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_chrono_utc_now() };
+      Reference::S_temporary xref = { std_chrono_utc_now() };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -450,7 +450,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.chrono.local_now"), ::rocket::cref(args));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_chrono_local_now() };
+      Reference::S_temporary xref = { std_chrono_local_now() };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -479,7 +479,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.chrono.hires_now"), ::rocket::cref(args));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_chrono_hires_now() };
+      Reference::S_temporary xref = { std_chrono_hires_now() };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -508,7 +508,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.chrono.steady_now"), ::rocket::cref(args));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_chrono_steady_now() };
+      Reference::S_temporary xref = { std_chrono_steady_now() };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -536,7 +536,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer time_utc;
     if(reader.I().v(time_utc).F()) {
-      Reference_root::S_temporary xref = { std_chrono_local_from_utc(::std::move(time_utc)) };
+      Reference::S_temporary xref = { std_chrono_local_from_utc(::std::move(time_utc)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -565,7 +565,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer time_local;
     if(reader.I().v(time_local).F()) {
-      Reference_root::S_temporary xref = { std_chrono_utc_from_local(::std::move(time_local)) };
+      Reference::S_temporary xref = { std_chrono_utc_from_local(::std::move(time_local)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -596,7 +596,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     V_integer time_point;
     Opt_boolean with_ms;
     if(reader.I().v(time_point).o(with_ms).F()) {
-      Reference_root::S_temporary xref = { std_chrono_utc_format(::std::move(time_point), with_ms) };
+      Reference::S_temporary xref = { std_chrono_utc_format(::std::move(time_point), with_ms) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -627,7 +627,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string time_str;
     if(reader.I().v(time_str).F()) {
-      Reference_root::S_temporary xref = { std_chrono_utc_parse(::std::move(time_str)) };
+      Reference::S_temporary xref = { std_chrono_utc_parse(::std::move(time_str)) };
       return self = ::std::move(xref);
     }
     // Fail.

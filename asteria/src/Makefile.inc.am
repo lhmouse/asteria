@@ -29,8 +29,6 @@ include_asteria_runtimedir = ${includedir}/asteria/runtime
 include_asteria_runtime_HEADERS =  \
   %reldir%/runtime/enums.hpp  \
   %reldir%/runtime/abstract_hooks.hpp  \
-  %reldir%/runtime/reference_root.hpp  \
-  %reldir%/runtime/reference_modifier.hpp  \
   %reldir%/runtime/reference.hpp  \
   %reldir%/runtime/variable.hpp  \
   %reldir%/runtime/variable_callback.hpp  \
@@ -94,8 +92,6 @@ lib_libasteria_la_SOURCES =  \
   %reldir%/llds/avmc_queue.cpp  \
   %reldir%/runtime/enums.cpp  \
   %reldir%/runtime/abstract_hooks.cpp  \
-  %reldir%/runtime/reference_root.cpp  \
-  %reldir%/runtime/reference_modifier.cpp  \
   %reldir%/runtime/reference.cpp  \
   %reldir%/runtime/variable.cpp  \
   %reldir%/runtime/variable_callback.cpp  \

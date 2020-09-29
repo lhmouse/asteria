@@ -64,7 +64,7 @@ do_forward_if_opt(bool dirty, XNodeT&& xnode)
   }
 
 Executive_Context&
-do_set_temporary(Executive_Context& ctx, bool assign, Reference_root::S_temporary&& xref)
+do_set_temporary(Executive_Context& ctx, bool assign, Reference::S_temporary&& xref)
   {
     ROCKET_ASSERT(!ctx.stack().empty());
 
@@ -108,7 +108,7 @@ do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVMC_Queue&
 Reference&
 do_declare(Executive_Context& ctx, const phsh_string& name)
   {
-    return ctx.open_named_reference(name) = Reference_root::S_uninit();
+    return ctx.open_named_reference(name) = Reference::S_uninit();
   }
 
 AIR_Status
@@ -345,7 +345,7 @@ struct AIR_Traits<AIR_Node::S_declare_variable>
         auto var = gcoll->create_variable();
 
         // Inject the variable into the current context.
-        Reference_root::S_variable xref = { ::std::move(var) };
+        Reference::S_variable xref = { ::std::move(var) };
         ctx.open_named_reference(sp.name) = xref;  // it'll be used later so don't move!
 
         // Call the hook function if any.
@@ -666,7 +666,7 @@ struct AIR_Traits<AIR_Node::S_for_each_statement>
         // Allocate an uninitialized variable for the key.
         const auto vkey = gcoll->create_variable();
         // Inject the variable into the current context.
-        Reference_root::S_variable xref = { vkey };
+        Reference::S_variable xref = { vkey };
         ctx_for.open_named_reference(sp.name_key) = xref;
 
         // Create the mapped reference.
@@ -689,7 +689,7 @@ struct AIR_Traits<AIR_Node::S_for_each_statement>
               // Set the key which is the subscript of the mapped element in the array.
               vkey->initialize(i, true);
               // Set the mapped reference.
-              Reference_modifier::S_array_index xmod = { i };
+              Reference::M_array_index xmod = { i };
               mapped.zoom_in(::std::move(xmod));
 
               // Execute the loop body.
@@ -713,7 +713,7 @@ struct AIR_Traits<AIR_Node::S_for_each_statement>
               // Set the key which is the key of this element in the object.
               vkey->initialize(it->first.rdstr(), true);
               // Set the mapped reference.
-              Reference_modifier::S_object_key xmod = { it->first.rdstr() };
+              Reference::M_object_key xmod = { it->first.rdstr() };
               mapped.zoom_in(::std::move(xmod));
 
               // Execute the loop body.
@@ -838,7 +838,7 @@ struct AIR_Traits<AIR_Node::S_try_statement>
 
         ASTERIA_RUNTIME_TRY {
           // Set the exception reference.
-          Reference_root::S_temporary xref = { except.value() };
+          Reference::S_temporary xref = { except.value() };
           ctx_catch.open_named_reference(sp.name_except) = ::std::move(xref);
 
           // Set backtrace frames.
@@ -987,7 +987,7 @@ struct AIR_Traits<AIR_Node::S_glvalue_to_prvalue>
           return air_status_next;
 
         // Convert the result to an rvalue.
-        Reference_root::S_temporary xref = { self.read() };
+        Reference::S_temporary xref = { self.read() };
         self = ::std::move(xref);
         return air_status_next;
       }
@@ -1011,7 +1011,7 @@ struct AIR_Traits<AIR_Node::S_push_immediate>
     execute(Executive_Context& ctx, const Value& value)
       {
         // Push a constant.
-        Reference_root::S_constant xref = { value };
+        Reference::S_constant xref = { value };
         ctx.stack().push(::std::move(xref));
         return air_status_next;
       }
@@ -1106,7 +1106,7 @@ struct AIR_Traits<AIR_Node::S_push_local_reference>
           ASTERIA_THROW("Undeclared identifier `$1`", sp.name);
 
         // Check if control flow has bypassed its initialization.
-        if(qref->is_uninitialized())
+        if(qref->is_uninit())
           ASTERIA_THROW("Use of bypassed variable or reference `$1`", sp.name);
 
         // Push a copy of it.
@@ -1167,7 +1167,7 @@ struct AIR_Traits<AIR_Node::S_define_function>
         auto qtarget = optmz.create_function(sp.sloc, sp.func);
 
         // Push the function as a temporary.
-        Reference_root::S_temporary xref = { ::std::move(qtarget) };
+        Reference::S_temporary xref = { ::std::move(qtarget) };
         ctx.stack().push(::std::move(xref));
         return air_status_next;
       }
@@ -1308,7 +1308,7 @@ do_function_call_common(Reference& self, const Source_Location& sloc, Executive_
     auto ptca = ::rocket::make_refcnt<PTC_Arguments>(sloc, ptc, target, ::std::move(args));
 
     // Set the result, which will be unpacked outside this scope.
-    Reference_root::S_tail_call xref = { ::std::move(ptca) };
+    Reference::S_ptc_args xref = { ::std::move(ptca) };
     self = ::std::move(xref);
 
     // Force `air_status_return_ref` if control flow reaches the end of a function.
@@ -1320,7 +1320,7 @@ cow_vector<Reference>
 do_pop_positional_arguments(Executive_Context& ctx, size_t nargs)
   {
     cow_vector<Reference> args;
-    args.append(nargs);
+    args.append(nargs, Reference::S_uninit());
     for(size_t i = args.size() - 1;  i != SIZE_MAX;  --i) {
       // Get an argument. Ensure it is dereferenceable.
       auto& arg = ctx.stack().open_top();
@@ -1418,7 +1418,7 @@ struct AIR_Traits<AIR_Node::S_member_access>
     execute(Executive_Context& ctx, const phsh_string& name)
       {
         // Append a modifier to the reference at the top.
-        Reference_modifier::S_object_key xmod = { name };
+        Reference::M_object_key xmod = { name };
         ctx.stack().open_top().zoom_in(::std::move(xmod));
         return air_status_next;
       }
@@ -1462,7 +1462,7 @@ struct AIR_Traits<AIR_Node::S_push_unnamed_array>
         }
 
         // Push the array as a temporary.
-        Reference_root::S_temporary xref = { ::std::move(array) };
+        Reference::S_temporary xref = { ::std::move(array) };
         ctx.stack().push(::std::move(xref));
         return air_status_next;
       }
@@ -1505,7 +1505,7 @@ struct AIR_Traits<AIR_Node::S_push_unnamed_object>
         }
 
         // Push the object as a temporary.
-        Reference_root::S_temporary xref = { ::std::move(object) };
+        Reference::S_temporary xref = { ::std::move(object) };
         ctx.stack().push(::std::move(xref));
         return air_status_next;
       }
@@ -1871,7 +1871,7 @@ struct AIR_Traits_Xop<xop_inc_post> : AIR_Traits<AIR_Node::S_apply_operator>
       {
         // This operator is unary.
         auto& lhs = ctx.stack().get_top().open();
-        Reference_root::S_temporary xref = { lhs };
+        Reference::S_temporary xref = { lhs };
 
         switch(do_vmask_of(lhs)) {
           case vmask_integer:
@@ -1901,7 +1901,7 @@ struct AIR_Traits_Xop<xop_dec_post> : AIR_Traits<AIR_Node::S_apply_operator>
       {
         // This operator is unary.
         auto& lhs = ctx.stack().get_top().open();
-        Reference_root::S_temporary xref = { lhs };
+        Reference::S_temporary xref = { lhs };
 
         switch(do_vmask_of(lhs)) {
           case vmask_integer:
@@ -1930,7 +1930,7 @@ struct AIR_Traits_Xop<xop_subscr> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
       {
         // This operator is binary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
         ctx.stack().pop();
         auto& lref = ctx.stack().open_top();
@@ -1938,14 +1938,14 @@ struct AIR_Traits_Xop<xop_subscr> : AIR_Traits<AIR_Node::S_apply_operator>
         switch(do_vmask_of(rhs)) {
           case vmask_integer: {
             // Append an array subscript. `assign` is ignored.
-            Reference_modifier::S_array_index xmod = { rhs.as_integer() };
+            Reference::M_array_index xmod = { rhs.as_integer() };
             lref.zoom_in(::std::move(xmod));
             break;
           }
 
           case vmask_string: {
             // Append an object subscript. `assign` is ignored.
-            Reference_modifier::S_object_key xmod = { ::std::move(rhs.open_string()) };
+            Reference::M_object_key xmod = { ::std::move(rhs.open_string()) };
             lref.zoom_in(::std::move(xmod));
             break;
           }
@@ -1965,7 +1965,7 @@ struct AIR_Traits_Xop<xop_pos> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
 
         // Copy the operand to create a temporary value.
         // N.B. This is one of the few operators that work on all types.
@@ -1982,7 +1982,7 @@ struct AIR_Traits_Xop<xop_neg> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2012,7 +2012,7 @@ struct AIR_Traits_Xop<xop_notb> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2047,7 +2047,7 @@ struct AIR_Traits_Xop<xop_notl> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
         // Perform logical NOT operation on the operand to create a temporary value.
@@ -2123,7 +2123,7 @@ struct AIR_Traits_Xop<xop_unset> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().unset() };
+        Reference::S_temporary xref = { ctx.stack().get_top().unset() };
 
         // Unset the reference and return the old value.
         do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
@@ -2139,7 +2139,7 @@ struct AIR_Traits_Xop<xop_countof> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
         // Return the number of elements in the operand.
@@ -2176,7 +2176,7 @@ struct AIR_Traits_Xop<xop_typeof> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
         // Return the type name of the operand, which is static.
@@ -2196,7 +2196,7 @@ struct AIR_Traits_Xop<xop_sqrt> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2226,7 +2226,7 @@ struct AIR_Traits_Xop<xop_isnan> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2256,7 +2256,7 @@ struct AIR_Traits_Xop<xop_isinf> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2286,7 +2286,7 @@ struct AIR_Traits_Xop<xop_abs> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2316,7 +2316,7 @@ struct AIR_Traits_Xop<xop_sign> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2346,7 +2346,7 @@ struct AIR_Traits_Xop<xop_round> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2375,7 +2375,7 @@ struct AIR_Traits_Xop<xop_floor> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2404,7 +2404,7 @@ struct AIR_Traits_Xop<xop_ceil> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2433,7 +2433,7 @@ struct AIR_Traits_Xop<xop_trunc> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2462,7 +2462,7 @@ struct AIR_Traits_Xop<xop_iround> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2491,7 +2491,7 @@ struct AIR_Traits_Xop<xop_ifloor> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2520,7 +2520,7 @@ struct AIR_Traits_Xop<xop_iceil> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2549,7 +2549,7 @@ struct AIR_Traits_Xop<xop_itrunc> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2578,7 +2578,7 @@ struct AIR_Traits_Xop<xop_cmp_eq> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
@@ -2601,7 +2601,7 @@ struct AIR_Traits_Xop<xop_cmp_ne> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
@@ -2624,7 +2624,7 @@ struct AIR_Traits_Xop<xop_cmp_lt> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
@@ -2648,7 +2648,7 @@ struct AIR_Traits_Xop<xop_cmp_gt> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
@@ -2672,7 +2672,7 @@ struct AIR_Traits_Xop<xop_cmp_lte> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
@@ -2696,7 +2696,7 @@ struct AIR_Traits_Xop<xop_cmp_gte> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
@@ -2720,7 +2720,7 @@ struct AIR_Traits_Xop<xop_cmp_3way> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
@@ -2761,7 +2761,7 @@ struct AIR_Traits_Xop<xop_add> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
@@ -2804,7 +2804,7 @@ struct AIR_Traits_Xop<xop_sub> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
@@ -2842,7 +2842,7 @@ struct AIR_Traits_Xop<xop_mul> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
@@ -2887,7 +2887,7 @@ struct AIR_Traits_Xop<xop_div> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
@@ -2920,7 +2920,7 @@ struct AIR_Traits_Xop<xop_mod> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
@@ -2953,7 +2953,7 @@ struct AIR_Traits_Xop<xop_sll> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
@@ -2990,7 +2990,7 @@ struct AIR_Traits_Xop<xop_srl> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
@@ -3027,7 +3027,7 @@ struct AIR_Traits_Xop<xop_sla> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
@@ -3065,7 +3065,7 @@ struct AIR_Traits_Xop<xop_sra> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
@@ -3102,7 +3102,7 @@ struct AIR_Traits_Xop<xop_andb> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
@@ -3140,7 +3140,7 @@ struct AIR_Traits_Xop<xop_orb> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
@@ -3178,7 +3178,7 @@ struct AIR_Traits_Xop<xop_xorb> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
         ctx.stack().pop();
         const auto& lhs = ctx.stack().get_top().read();
@@ -3233,7 +3233,7 @@ struct AIR_Traits_Xop<xop_fma> : AIR_Traits<AIR_Node::S_apply_operator>
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is ternary.
-        Reference_root::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().read() };
         auto& rhs = xref.val;
         ctx.stack().pop();
         auto mid = ctx.stack().get_top().read();
@@ -3266,7 +3266,7 @@ struct AIR_Traits_Xop<xop_head> : AIR_Traits<AIR_Node::S_apply_operator>
         // This operator is unary.
         auto& lref = ctx.stack().open_top();
 
-        Reference_modifier::S_array_head xmod = { };
+        Reference::M_array_head xmod = { };
         lref.zoom_in(::std::move(xmod));
         return air_status_next;
       }
@@ -3282,7 +3282,7 @@ struct AIR_Traits_Xop<xop_tail> : AIR_Traits<AIR_Node::S_apply_operator>
         // This operator is unary.
         auto& lref = ctx.stack().open_top();
 
-        Reference_modifier::S_array_tail xmod = { };
+        Reference::M_array_tail xmod = { };
         lref.zoom_in(::std::move(xmod));
         return air_status_next;
       }
@@ -3455,7 +3455,7 @@ struct AIR_Traits<AIR_Node::S_define_null_variable>
         auto var = gcoll->create_variable();
 
         // Inject the variable into the current context.
-        Reference_root::S_variable xref = { var };
+        Reference::S_variable xref = { var };
         ctx.open_named_reference(sp.name) = ::std::move(xref);
 
         // Call the hook function if any.
@@ -3556,11 +3556,11 @@ struct AIR_Traits<AIR_Node::S_variadic_call>
             ctx.stack().pop();
 
             // Convert all elements to temporaries.
-            args.assign(source.size());
-            for(size_t i = 0;  i < args.size();  ++i) {
+            args.reserve(source.size());
+            for(size_t i = 0;  i < source.size();  ++i) {
               // Make a reference to temporary.
-              Reference_root::S_temporary xref = { ::std::move(source.mut(i)) };
-              args.mut(i) = ::std::move(xref);
+              Reference::S_temporary xref = { ::std::move(source.mut(i)) };
+              args.emplace_back(::std::move(xref));
             }
             break;
           }
@@ -3587,7 +3587,7 @@ struct AIR_Traits<AIR_Node::S_variadic_call>
             args.assign(static_cast<size_t>(nvargs), gself);
             for(size_t i = 0;  i < args.size();  ++i) {
               // Initialize the argument list for the generator.
-              Reference_root::S_constant xref = { int64_t(i) };
+              Reference::S_constant xref = { int64_t(i) };
               gargs.clear().emplace_back(::std::move(xref));
 
               // Generate an argument. Ensure it is dereferenceable.
@@ -3749,7 +3749,7 @@ struct AIR_Traits<AIR_Node::S_import_call>
         auto& self = ctx.stack().open_top();
         if(self.is_lvalue())
           self.open() = path;
-        self = Reference_root::S_constant();
+        self = Reference::S_constant();
 
         return do_function_call_common(self, sp.sloc, ctx, qtarget, ptc_aware_none, ::std::move(args));
       }
@@ -3782,7 +3782,7 @@ struct AIR_Traits<AIR_Node::S_break_or_continue>
     AIR_Status
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Source_Location& sloc)
       {
-        Reference_root::S_jump_src xref = { sloc };
+        Reference::S_jump_src xref = { sloc };
         ctx.stack().push(::std::move(xref));
 
         auto status = static_cast<AIR_Status>(up.v8s[0]);
@@ -3814,7 +3814,7 @@ struct AIR_Traits<AIR_Node::S_declare_reference>
     execute(Executive_Context& ctx, const Sparam_name& sp)
       {
         // Inject a placeholder reference into the current context.
-        ctx.open_named_reference(sp.name) = Reference_root::S_uninit();
+        ctx.open_named_reference(sp.name) = Reference::S_uninit();
         return air_status_next;
       }
   };

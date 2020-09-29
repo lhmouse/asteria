@@ -149,7 +149,7 @@ initialize(API_Version version)
     vstd->initialize(::std::move(ostd), true);
 
     // Set the `std` reference now.
-    Reference_root::S_variable xref = { vstd };
+    Reference::S_variable xref = { vstd };
     this->open_named_reference(::rocket::sref("std")) = ::std::move(xref);
     this->m_vstd = vstd;
   }

@@ -362,7 +362,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.io.getc"), ::rocket::cref(args));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_io_getc() };
+      Reference::S_temporary xref = { std_io_getc() };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -394,7 +394,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.io.getln"), ::rocket::cref(args));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_io_getln() };
+      Reference::S_temporary xref = { std_io_getln() };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -425,12 +425,12 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
-      Reference_root::S_temporary xref = { std_io_putc(::std::move(ivalue)) };
+      Reference::S_temporary xref = { std_io_putc(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
     V_string svalue;
     if(reader.I().v(svalue).F()) {
-      Reference_root::S_temporary xref = { std_io_putc(::std::move(svalue)) };
+      Reference::S_temporary xref = { std_io_putc(::std::move(svalue)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -463,7 +463,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string text;
     if(reader.I().v(text).F()) {
-      Reference_root::S_temporary xref = { std_io_putln(::std::move(text)) };
+      Reference::S_temporary xref = { std_io_putln(::std::move(text)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -495,7 +495,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     V_string templ;
     cow_vector<Value> values;
     if(reader.I().v(templ).F(values)) {
-      Reference_root::S_temporary xref = { std_io_putf(::std::move(templ), ::std::move(values)) };
+      Reference::S_temporary xref = { std_io_putf(::std::move(templ), ::std::move(values)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -527,7 +527,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Opt_integer limit;
     if(reader.I().o(limit).F()) {
-      Reference_root::S_temporary xref = { std_io_read(::std::move(limit)) };
+      Reference::S_temporary xref = { std_io_read(::std::move(limit)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -557,7 +557,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string data;
     if(reader.I().v(data).F()) {
-      Reference_root::S_temporary xref = { std_io_write(::std::move(data)) };
+      Reference::S_temporary xref = { std_io_write(::std::move(data)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -585,7 +585,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     // Parse arguments.
     if(reader.I().F()) {
       std_io_flush();
-      return self = Reference_root::S_void();
+      return self = Reference::S_void();
     }
     // Fail.
     reader.throw_no_matching_function_call();

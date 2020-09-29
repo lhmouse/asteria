@@ -796,12 +796,12 @@ create_bindings_json(V_object& result, API_Version /*version*/)
     Value value;
     Opt_string sindent;
     if(reader.I().o(value).S(state).o(sindent).F()) {
-      Reference_root::S_temporary xref = { std_json_format(::std::move(value), ::std::move(sindent)) };
+      Reference::S_temporary xref = { std_json_format(::std::move(value), ::std::move(sindent)) };
       return self = ::std::move(xref);
     }
     V_integer nindent;
     if(reader.L(state).v(nindent).F()) {
-      Reference_root::S_temporary xref = { std_json_format(::std::move(value), ::std::move(nindent)) };
+      Reference::S_temporary xref = { std_json_format(::std::move(value), ::std::move(nindent)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -835,12 +835,12 @@ create_bindings_json(V_object& result, API_Version /*version*/)
     Value value;
     Opt_string sindent;
     if(reader.I().o(value).S(state).o(sindent).F()) {
-      Reference_root::S_temporary xref = { std_json_format5(::std::move(value), ::std::move(sindent)) };
+      Reference::S_temporary xref = { std_json_format5(::std::move(value), ::std::move(sindent)) };
       return self = ::std::move(xref);
     }
     V_integer nindent;
     if(reader.L(state).v(nindent).F()) {
-      Reference_root::S_temporary xref = { std_json_format5(::std::move(value), ::std::move(nindent)) };
+      Reference::S_temporary xref = { std_json_format5(::std::move(value), ::std::move(nindent)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -883,7 +883,7 @@ create_bindings_json(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string text;
     if(reader.I().v(text).F()) {
-      Reference_root::S_temporary xref = { std_json_parse(::std::move(text)) };
+      Reference::S_temporary xref = { std_json_parse(::std::move(text)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -913,7 +913,7 @@ create_bindings_json(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string path;
     if(reader.I().v(path).F()) {
-      Reference_root::S_temporary xref = { std_json_parse_file(::std::move(path)) };
+      Reference::S_temporary xref = { std_json_parse_file(::std::move(path)) };
       return self = ::std::move(xref);
     }
     // Fail.

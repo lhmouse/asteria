@@ -570,7 +570,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer generation;
     if(reader.I().v(generation).F()) {
-      Reference_root::S_temporary xref = { std_system_gc_count_variables(global, ::std::move(generation)) };
+      Reference::S_temporary xref = { std_system_gc_count_variables(global, ::std::move(generation)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -598,7 +598,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer generation;
     if(reader.I().v(generation).F()) {
-      Reference_root::S_temporary xref = { std_system_gc_get_threshold(global, ::std::move(generation)) };
+      Reference::S_temporary xref = { std_system_gc_get_threshold(global, ::std::move(generation)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -632,7 +632,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     V_integer generation;
     V_integer threshold;
     if(reader.I().v(generation).v(threshold).F()) {
-      Reference_root::S_temporary xref = { std_system_gc_set_threshold(global, ::std::move(generation),
+      Reference::S_temporary xref = { std_system_gc_set_threshold(global, ::std::move(generation),
                                                                        ::std::move(threshold)) };
       return self = ::std::move(xref);
     }
@@ -662,7 +662,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Opt_integer generation_limit;
     if(reader.I().o(generation_limit).F()) {
-      Reference_root::S_temporary xref = { std_system_gc_collect(global, ::std::move(generation_limit)) };
+      Reference::S_temporary xref = { std_system_gc_collect(global, ::std::move(generation_limit)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -691,7 +691,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string name;
     if(reader.I().v(name).F()) {
-      Reference_root::S_temporary xref = { std_system_env_get_variable(::std::move(name)) };
+      Reference::S_temporary xref = { std_system_env_get_variable(::std::move(name)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -717,7 +717,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.system.env_get_variables"), ::rocket::cref(args));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_system_env_get_variables() };
+      Reference::S_temporary xref = { std_system_env_get_variables() };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -757,7 +757,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Opt_boolean lowercase;
     if(reader.I().o(lowercase).F()) {
-      Reference_root::S_temporary xref = { std_system_uuid(global, lowercase) };
+      Reference::S_temporary xref = { std_system_uuid(global, lowercase) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -780,7 +780,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.system.proc_get_pid"), ::rocket::cref(args));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_system_proc_get_pid() };
+      Reference::S_temporary xref = { std_system_proc_get_pid() };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -803,7 +803,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.system.proc_get_ppid"), ::rocket::cref(args));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_system_proc_get_ppid() };
+      Reference::S_temporary xref = { std_system_proc_get_ppid() };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -826,7 +826,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.system.proc_get_uid"), ::rocket::cref(args));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_system_proc_get_uid() };
+      Reference::S_temporary xref = { std_system_proc_get_uid() };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -849,7 +849,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.system.proc_get_euid"), ::rocket::cref(args));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_system_proc_get_euid() };
+      Reference::S_temporary xref = { std_system_proc_get_euid() };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -887,7 +887,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     Opt_array argv;
     Opt_array envp;
     if(reader.I().v(cmd).o(argv).o(envp).F()) {
-      Reference_root::S_temporary xref = { std_system_proc_invoke(::std::move(cmd), ::std::move(argv),
+      Reference::S_temporary xref = { std_system_proc_invoke(::std::move(cmd), ::std::move(argv),
                                                                   ::std::move(envp)) };
       return self = ::std::move(xref);
     }
@@ -916,7 +916,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     // Parse arguments.
     if(reader.I().F()) {
       std_system_proc_daemonize();
-      return self = Reference_root::S_void();
+      return self = Reference::S_void();
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -949,7 +949,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string path;
     if(reader.I().v(path).F()) {
-      Reference_root::S_temporary xref = { std_system_conf_load_file(::std::move(path)) };
+      Reference::S_temporary xref = { std_system_conf_load_file(::std::move(path)) };
       return self = ::std::move(xref);
     }
     // Fail.

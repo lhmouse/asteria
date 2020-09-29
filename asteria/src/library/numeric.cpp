@@ -749,12 +749,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_abs(::std::move(ivalue)) };
+      Reference::S_temporary xref = { std_numeric_abs(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
     V_real rvalue;
     if(reader.I().v(rvalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_abs(::std::move(rvalue)) };
+      Reference::S_temporary xref = { std_numeric_abs(::std::move(rvalue)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -782,12 +782,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_sign(::std::move(ivalue)) };
+      Reference::S_temporary xref = { std_numeric_sign(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
     V_real rvalue;
     if(reader.I().v(rvalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_sign(::std::move(rvalue)) };
+      Reference::S_temporary xref = { std_numeric_sign(::std::move(rvalue)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -817,12 +817,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_is_finite(::std::move(ivalue)) };
+      Reference::S_temporary xref = { std_numeric_is_finite(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
     V_real rvalue;
     if(reader.I().v(rvalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_is_finite(::std::move(rvalue)) };
+      Reference::S_temporary xref = { std_numeric_is_finite(::std::move(rvalue)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -852,12 +852,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_is_infinity(::std::move(ivalue)) };
+      Reference::S_temporary xref = { std_numeric_is_infinity(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
     V_real rvalue;
     if(reader.I().v(rvalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_is_infinity(::std::move(rvalue)) };
+      Reference::S_temporary xref = { std_numeric_is_infinity(::std::move(rvalue)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -886,12 +886,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_is_nan(::std::move(ivalue)) };
+      Reference::S_temporary xref = { std_numeric_is_nan(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
     V_real rvalue;
     if(reader.I().v(rvalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_is_nan(::std::move(rvalue)) };
+      Reference::S_temporary xref = { std_numeric_is_nan(::std::move(rvalue)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -925,7 +925,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     V_integer ilower;
     V_integer iupper;
     if(reader.I().v(ivalue).v(ilower).v(iupper).F()) {
-      Reference_root::S_temporary xref = { std_numeric_clamp(::std::move(ivalue), ::std::move(ilower),
+      Reference::S_temporary xref = { std_numeric_clamp(::std::move(ivalue), ::std::move(ilower),
                                                              ::std::move(iupper)) };
       return self = ::std::move(xref);
     }
@@ -933,7 +933,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     V_real flower;
     V_real fupper;
     if(reader.I().v(rvalue).v(flower).v(fupper).F()) {
-      Reference_root::S_temporary xref = { std_numeric_clamp(::std::move(rvalue), ::std::move(flower),
+      Reference::S_temporary xref = { std_numeric_clamp(::std::move(rvalue), ::std::move(flower),
                                                              ::std::move(fupper)) };
       return self = ::std::move(xref);
     }
@@ -962,12 +962,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_round(::std::move(ivalue)) };
+      Reference::S_temporary xref = { std_numeric_round(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
     V_real rvalue;
     if(reader.I().v(rvalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_round(::std::move(rvalue)) };
+      Reference::S_temporary xref = { std_numeric_round(::std::move(rvalue)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -999,12 +999,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_iround(::std::move(ivalue)) };
+      Reference::S_temporary xref = { std_numeric_iround(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
     V_real rvalue;
     if(reader.I().v(rvalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_iround(::std::move(rvalue)) };
+      Reference::S_temporary xref = { std_numeric_iround(::std::move(rvalue)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1032,12 +1032,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_floor(::std::move(ivalue)) };
+      Reference::S_temporary xref = { std_numeric_floor(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
     V_real rvalue;
     if(reader.I().v(rvalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_floor(::std::move(rvalue)) };
+      Reference::S_temporary xref = { std_numeric_floor(::std::move(rvalue)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1069,12 +1069,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_ifloor(::std::move(ivalue)) };
+      Reference::S_temporary xref = { std_numeric_ifloor(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
     V_real rvalue;
     if(reader.I().v(rvalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_ifloor(::std::move(rvalue)) };
+      Reference::S_temporary xref = { std_numeric_ifloor(::std::move(rvalue)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1102,12 +1102,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_ceil(::std::move(ivalue)) };
+      Reference::S_temporary xref = { std_numeric_ceil(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
     V_real rvalue;
     if(reader.I().v(rvalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_ceil(::std::move(rvalue)) };
+      Reference::S_temporary xref = { std_numeric_ceil(::std::move(rvalue)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1139,12 +1139,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_iceil(::std::move(ivalue)) };
+      Reference::S_temporary xref = { std_numeric_iceil(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
     V_real rvalue;
     if(reader.I().v(rvalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_iceil(::std::move(rvalue)) };
+      Reference::S_temporary xref = { std_numeric_iceil(::std::move(rvalue)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1172,12 +1172,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_trunc(::std::move(ivalue)) };
+      Reference::S_temporary xref = { std_numeric_trunc(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
     V_real rvalue;
     if(reader.I().v(rvalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_trunc(::std::move(rvalue)) };
+      Reference::S_temporary xref = { std_numeric_trunc(::std::move(rvalue)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1208,12 +1208,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer ivalue;
     if(reader.I().v(ivalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_itrunc(::std::move(ivalue)) };
+      Reference::S_temporary xref = { std_numeric_itrunc(::std::move(ivalue)) };
       return self = ::std::move(xref);
     }
     V_real rvalue;
     if(reader.I().v(rvalue).F()) {
-      Reference_root::S_temporary xref = { std_numeric_itrunc(::std::move(rvalue)) };
+      Reference::S_temporary xref = { std_numeric_itrunc(::std::move(rvalue)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1243,7 +1243,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     Opt_real limit;
     if(reader.I().o(limit).F()) {
-      Reference_root::S_temporary xref = { std_numeric_random(global, ::std::move(limit)) };
+      Reference::S_temporary xref = { std_numeric_random(global, ::std::move(limit)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1270,7 +1270,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
-      Reference_root::S_temporary xref = { std_numeric_sqrt(::std::move(x)) };
+      Reference::S_temporary xref = { std_numeric_sqrt(::std::move(x)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1300,7 +1300,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     V_real y;
     V_real z;
     if(reader.I().v(x).v(y).v(z).F()) {
-      Reference_root::S_temporary xref = { std_numeric_fma(::std::move(x), ::std::move(y), ::std::move(z)) };
+      Reference::S_temporary xref = { std_numeric_fma(::std::move(x), ::std::move(y), ::std::move(z)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1329,7 +1329,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     V_real x;
     V_real y;
     if(reader.I().v(x).v(y).F()) {
-      Reference_root::S_temporary xref = { std_numeric_remainder(::std::move(x), ::std::move(y)) };
+      Reference::S_temporary xref = { std_numeric_remainder(::std::move(x), ::std::move(y)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1361,7 +1361,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
-      Reference_root::S_temporary xref = { std_numeric_frexp(::std::move(x)) };
+      Reference::S_temporary xref = { std_numeric_frexp(::std::move(x)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1390,7 +1390,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     V_real frac;
     V_integer exp;
     if(reader.I().v(frac).v(exp).F()) {
-      Reference_root::S_temporary xref = { std_numeric_ldexp(::std::move(frac), ::std::move(exp)) };
+      Reference::S_temporary xref = { std_numeric_ldexp(::std::move(frac), ::std::move(exp)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1420,7 +1420,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     V_integer x;
     V_integer y;
     if(reader.I().v(x).v(y).F()) {
-      Reference_root::S_temporary xref = { std_numeric_addm(::std::move(x), ::std::move(y)) };
+      Reference::S_temporary xref = { std_numeric_addm(::std::move(x), ::std::move(y)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1451,7 +1451,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     V_integer x;
     V_integer y;
     if(reader.I().v(x).v(y).F()) {
-      Reference_root::S_temporary xref = { std_numeric_subm(::std::move(x), ::std::move(y)) };
+      Reference::S_temporary xref = { std_numeric_subm(::std::move(x), ::std::move(y)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1482,7 +1482,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     V_integer x;
     V_integer y;
     if(reader.I().v(x).v(y).F()) {
-      Reference_root::S_temporary xref = { std_numeric_mulm(::std::move(x), ::std::move(y)) };
+      Reference::S_temporary xref = { std_numeric_mulm(::std::move(x), ::std::move(y)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1514,13 +1514,13 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     V_integer ix;
     V_integer iy;
     if(reader.I().v(ix).v(iy).F()) {
-      Reference_root::S_temporary xref = { std_numeric_adds(::std::move(ix), ::std::move(iy)) };
+      Reference::S_temporary xref = { std_numeric_adds(::std::move(ix), ::std::move(iy)) };
       return self = ::std::move(xref);
     }
     V_real fx;
     V_real fy;
     if(reader.I().v(fx).v(fy).F()) {
-      Reference_root::S_temporary xref = { std_numeric_adds(::std::move(fx), ::std::move(fy)) };
+      Reference::S_temporary xref = { std_numeric_adds(::std::move(fx), ::std::move(fy)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1552,13 +1552,13 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     V_integer ix;
     V_integer iy;
     if(reader.I().v(ix).v(iy).F()) {
-      Reference_root::S_temporary xref = { std_numeric_subs(::std::move(ix), ::std::move(iy)) };
+      Reference::S_temporary xref = { std_numeric_subs(::std::move(ix), ::std::move(iy)) };
       return self = ::std::move(xref);
     }
     V_real fx;
     V_real fy;
     if(reader.I().v(fx).v(fy).F()) {
-      Reference_root::S_temporary xref = { std_numeric_subs(::std::move(fx), ::std::move(fy)) };
+      Reference::S_temporary xref = { std_numeric_subs(::std::move(fx), ::std::move(fy)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1590,13 +1590,13 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     V_integer ix;
     V_integer iy;
     if(reader.I().v(ix).v(iy).F()) {
-      Reference_root::S_temporary xref = { std_numeric_muls(::std::move(ix), ::std::move(iy)) };
+      Reference::S_temporary xref = { std_numeric_muls(::std::move(ix), ::std::move(iy)) };
       return self = ::std::move(xref);
     }
     V_real fx;
     V_real fy;
     if(reader.I().v(fx).v(fy).F()) {
-      Reference_root::S_temporary xref = { std_numeric_muls(::std::move(fx), ::std::move(fy)) };
+      Reference::S_temporary xref = { std_numeric_muls(::std::move(fx), ::std::move(fy)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1624,7 +1624,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer x;
     if(reader.I().v(x).F()) {
-      Reference_root::S_temporary xref = { std_numeric_lzcnt(::std::move(x)) };
+      Reference::S_temporary xref = { std_numeric_lzcnt(::std::move(x)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1652,7 +1652,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer x;
     if(reader.I().v(x).F()) {
-      Reference_root::S_temporary xref = { std_numeric_tzcnt(::std::move(x)) };
+      Reference::S_temporary xref = { std_numeric_tzcnt(::std::move(x)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1679,7 +1679,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer x;
     if(reader.I().v(x).F()) {
-      Reference_root::S_temporary xref = { std_numeric_popcnt(::std::move(x)) };
+      Reference::S_temporary xref = { std_numeric_popcnt(::std::move(x)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1716,7 +1716,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     V_integer x;
     V_integer n;
     if(reader.I().v(m).v(x).v(n).F()) {
-      Reference_root::S_temporary xref = { std_numeric_rotl(::std::move(m), ::std::move(x), ::std::move(n)) };
+      Reference::S_temporary xref = { std_numeric_rotl(::std::move(m), ::std::move(x), ::std::move(n)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1753,7 +1753,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     V_integer x;
     V_integer n;
     if(reader.I().v(m).v(x).v(n).F()) {
-      Reference_root::S_temporary xref = { std_numeric_rotr(::std::move(m), ::std::move(x), ::std::move(n)) };
+      Reference::S_temporary xref = { std_numeric_rotr(::std::move(m), ::std::move(x), ::std::move(n)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1795,13 +1795,13 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     Opt_integer base;
     Opt_integer ebase;
     if(reader.I().v(ivalue).o(base).o(ebase).F()) {
-      Reference_root::S_temporary xref = { std_numeric_format(::std::move(ivalue), ::std::move(base),
+      Reference::S_temporary xref = { std_numeric_format(::std::move(ivalue), ::std::move(base),
                                                               ::std::move(ebase)) };
       return self = ::std::move(xref);
     }
     V_real fvalue;
     if(reader.I().v(fvalue).o(base).o(ebase).F()) {
-      Reference_root::S_temporary xref = { std_numeric_format(::std::move(fvalue), ::std::move(base),
+      Reference::S_temporary xref = { std_numeric_format(::std::move(fvalue), ::std::move(base),
                                                               ::std::move(ebase)) };
       return self = ::std::move(xref);
     }
@@ -1844,7 +1844,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string text;
     if(reader.I().v(text).F()) {
-      Reference_root::S_temporary xref = { std_numeric_parse_integer(::std::move(text)) };
+      Reference::S_temporary xref = { std_numeric_parse_integer(::std::move(text)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1893,7 +1893,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     V_string text;
     Opt_boolean saturating;
     if(reader.I().v(text).o(saturating).F()) {
-      Reference_root::S_temporary xref = { std_numeric_parse_real(::std::move(text), saturating) };
+      Reference::S_temporary xref = { std_numeric_parse_real(::std::move(text), saturating) };
       return self = ::std::move(xref);
     }
     // Fail.

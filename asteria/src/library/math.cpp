@@ -245,7 +245,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     V_real y;
     Opt_real base;
     if(reader.I().v(y).o(base).F()) {
-      Reference_root::S_temporary xref = { std_math_exp(::std::move(y), ::std::move(base)) };
+      Reference::S_temporary xref = { std_math_exp(::std::move(y), ::std::move(base)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -272,7 +272,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_real y;
     if(reader.I().v(y).F()) {
-      Reference_root::S_temporary xref = { std_math_expm1(::std::move(y)) };
+      Reference::S_temporary xref = { std_math_expm1(::std::move(y)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -301,7 +301,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     V_real x;
     V_real y;
     if(reader.I().v(x).v(y).F()) {
-      Reference_root::S_temporary xref = { std_math_pow(::std::move(x), ::std::move(y)) };
+      Reference::S_temporary xref = { std_math_pow(::std::move(x), ::std::move(y)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -329,7 +329,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     V_real y;
     Opt_real base;
     if(reader.I().v(y).o(base).F()) {
-      Reference_root::S_temporary xref = { std_math_log(::std::move(y), ::std::move(base)) };
+      Reference::S_temporary xref = { std_math_log(::std::move(y), ::std::move(base)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -356,7 +356,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_real y;
     if(reader.I().v(y).F()) {
-      Reference_root::S_temporary xref = { std_math_log1p(::std::move(y)) };
+      Reference::S_temporary xref = { std_math_log1p(::std::move(y)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -382,7 +382,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
-      Reference_root::S_temporary xref = { std_math_sin(::std::move(x)) };
+      Reference::S_temporary xref = { std_math_sin(::std::move(x)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -408,7 +408,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
-      Reference_root::S_temporary xref = { std_math_cos(::std::move(x)) };
+      Reference::S_temporary xref = { std_math_cos(::std::move(x)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -435,7 +435,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
-      Reference_root::S_temporary xref = { std_math_sincos(::std::move(x)) };
+      Reference::S_temporary xref = { std_math_sincos(::std::move(x)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -461,7 +461,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
-      Reference_root::S_temporary xref = { std_math_tan(::std::move(x)) };
+      Reference::S_temporary xref = { std_math_tan(::std::move(x)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -487,7 +487,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
-      Reference_root::S_temporary xref = { std_math_asin(::std::move(x)) };
+      Reference::S_temporary xref = { std_math_asin(::std::move(x)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -513,7 +513,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
-      Reference_root::S_temporary xref = { std_math_acos(::std::move(x)) };
+      Reference::S_temporary xref = { std_math_acos(::std::move(x)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -539,7 +539,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
-      Reference_root::S_temporary xref = { std_math_atan(::std::move(x)) };
+      Reference::S_temporary xref = { std_math_atan(::std::move(x)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -566,7 +566,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     V_real y;
     V_real x;
     if(reader.I().v(y).v(x).F()) {
-      Reference_root::S_temporary xref = { std_math_atan2(::std::move(y), ::std::move(x)) };
+      Reference::S_temporary xref = { std_math_atan2(::std::move(y), ::std::move(x)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -596,7 +596,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse variadic arguments.
     cow_vector<Value> values;
     if(reader.I().F(values)) {
-      Reference_root::S_temporary xref = { std_math_hypot(::std::move(values)) };
+      Reference::S_temporary xref = { std_math_hypot(::std::move(values)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -622,7 +622,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
-      Reference_root::S_temporary xref = { std_math_sinh(::std::move(x)) };
+      Reference::S_temporary xref = { std_math_sinh(::std::move(x)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -648,7 +648,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
-      Reference_root::S_temporary xref = { std_math_cosh(::std::move(x)) };
+      Reference::S_temporary xref = { std_math_cosh(::std::move(x)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -674,7 +674,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
-      Reference_root::S_temporary xref = { std_math_tanh(::std::move(x)) };
+      Reference::S_temporary xref = { std_math_tanh(::std::move(x)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -700,7 +700,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
-      Reference_root::S_temporary xref = { std_math_asinh(::std::move(x)) };
+      Reference::S_temporary xref = { std_math_asinh(::std::move(x)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -726,7 +726,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
-      Reference_root::S_temporary xref = { std_math_acosh(::std::move(x)) };
+      Reference::S_temporary xref = { std_math_acosh(::std::move(x)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -752,7 +752,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
-      Reference_root::S_temporary xref = { std_math_atanh(::std::move(x)) };
+      Reference::S_temporary xref = { std_math_atanh(::std::move(x)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -778,7 +778,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
-      Reference_root::S_temporary xref = { std_math_erf(::std::move(x)) };
+      Reference::S_temporary xref = { std_math_erf(::std::move(x)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -804,7 +804,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
-      Reference_root::S_temporary xref = { std_math_cerf(::std::move(x)) };
+      Reference::S_temporary xref = { std_math_cerf(::std::move(x)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -830,7 +830,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
-      Reference_root::S_temporary xref = { std_math_gamma(::std::move(x)) };
+      Reference::S_temporary xref = { std_math_gamma(::std::move(x)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -857,7 +857,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_real x;
     if(reader.I().v(x).F()) {
-      Reference_root::S_temporary xref = { std_math_lgamma(::std::move(x)) };
+      Reference::S_temporary xref = { std_math_lgamma(::std::move(x)) };
       return self = ::std::move(xref);
     }
     // Fail.

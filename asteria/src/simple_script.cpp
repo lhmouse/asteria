@@ -106,7 +106,7 @@ const
     cow_vector<Reference> args;
     args.reserve(vals.size());
     for(size_t i = 0;  i < vals.size();  ++i) {
-      Reference_root::S_temporary xref = { ::std::move(vals.mut(i)) };
+      Reference::S_temporary xref = { ::std::move(vals.mut(i)) };
       args.emplace_back(::std::move(xref));
     }
     return this->execute(global, ::std::move(args));

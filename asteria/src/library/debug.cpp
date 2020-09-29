@@ -79,7 +79,7 @@ create_bindings_debug(V_object& result, API_Version /*version*/)
     V_string templ;
     cow_vector<Value> values;
     if(reader.I().v(templ).F(values)) {
-      Reference_root::S_temporary xref = { std_debug_logf(templ, values) };
+      Reference::S_temporary xref = { std_debug_logf(templ, values) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -111,7 +111,7 @@ create_bindings_debug(V_object& result, API_Version /*version*/)
     Value value;
     Opt_integer indent;
     if(reader.I().o(value).o(indent).F()) {
-      Reference_root::S_temporary xref = { std_debug_dump(value, indent) };
+      Reference::S_temporary xref = { std_debug_dump(value, indent) };
       return self = ::std::move(xref);
     }
     // Fail.

@@ -70,7 +70,7 @@ const
       case air_status_next:
       case air_status_return_void:
         // Return void if the control flow reached the end of the function.
-        self = Reference_root::S_void();
+        self = Reference::S_void();
         break;
 
       case air_status_return_ref:
@@ -79,7 +79,7 @@ const
 
         // In case of PTCs, set up source location.
         // This cannot be set at the call site where such information isn't available.
-        if(auto ptca = self.get_tail_call_opt())
+        if(auto ptca = self.get_ptc_args_opt())
           ptca->set_enclosing_function(this->m_zvarg->sloc(), this->m_zvarg->func());
         break;
 

@@ -5,138 +5,160 @@
 #define ASTERIA_RUNTIME_REFERENCE_HPP_
 
 #include "../fwd.hpp"
-#include "reference_root.hpp"
-#include "reference_modifier.hpp"
+#include "../value.hpp"
+#include "../source_location.hpp"
 
 namespace asteria {
 
 class Reference
   {
+  public:
+    struct S_uninit
+      {
+      };
+
+    struct S_void
+      {
+      };
+
+    struct S_constant
+      {
+        Value val;
+      };
+
+    struct S_temporary
+      {
+        Value val;
+      };
+
+    struct S_variable
+      {
+        rcfwdp<Variable> var;
+      };
+
+    struct S_ptc_args
+      {
+        rcfwdp<PTC_Arguments> ptca;
+      };
+
+    struct S_jump_src
+      {
+        Source_Location sloc;
+      };
+
+    enum Index : uint8_t
+      {
+        index_uninit     = 0,
+        index_void       = 1,
+        index_constant   = 2,
+        index_temporary  = 3,
+        index_variable   = 4,
+        index_ptc_args   = 5,
+        index_jump_src   = 6,
+      };
+
+    struct M_array_index
+      {
+        int64_t index;
+      };
+
+    struct M_object_key
+      {
+        phsh_string key;
+      };
+
+    struct M_array_head
+      {
+      };
+
+    struct M_array_tail
+      {
+      };
+
   private:
-    Reference_root m_root;
-    cow_vector<Reference_modifier> m_mods;
+    using Root = ::rocket::variant<
+      ROCKET_CDR(
+        ,S_uninit     // 0,
+        ,S_void       // 1,
+        ,S_constant   // 2,
+        ,S_temporary  // 3,
+        ,S_variable   // 4,
+        ,S_ptc_args   // 5,
+        ,S_jump_src   // 6,
+      )>;
+
+    enum MIndex : uint8_t
+      {
+        mindex_array_index  = 0,
+        mindex_object_key   = 1,
+        mindex_array_head   = 2,
+        mindex_array_tail   = 3,
+      };
+
+    using Modifier = ::rocket::variant<
+      ROCKET_CDR(
+        ,M_array_index  // 0,
+        ,M_object_key   // 1,
+        ,M_array_head   // 2,
+        ,M_array_tail   // 3,
+      )>;
+
+    Root m_root;
+    cow_vector<Modifier> m_mods;
 
   public:
-    Reference()
-    noexcept
-      : m_root(Reference_root::S_uninit()),
-        m_mods()
-      { }
-
-    ASTERIA_VARIANT_CONSTRUCTOR(Reference, Reference_root, XRootT, xroot)
+    ASTERIA_VARIANT_CONSTRUCTOR(Reference, Root, XRootT, xroot)
       : m_root(::std::forward<XRootT>(xroot)),
         m_mods()
       { }
 
-    ASTERIA_VARIANT_ASSIGNMENT(Reference, Reference_root, XRootT, xroot)
+    ASTERIA_VARIANT_ASSIGNMENT(Reference, Root, XRootT, xroot)
       { this->m_root = ::std::forward<XRootT>(xroot);
         this->m_mods.clear();
         return *this;  }
 
     ASTERIA_COPYABLE_DESTRUCTOR(Reference);
 
-  private:
-    [[noreturn]]
-    void
-    do_throw_unset_no_modifier()
-    const;
-
-    const Value&
-    do_read(size_t nmod, const Reference_modifier& last)
-    const;
-
-    Value&
-    do_open(size_t nmod, const Reference_modifier& last)
-    const;
-
-    Value
-    do_unset(size_t nmod, const Reference_modifier& last)
-    const;
-
-    Reference&
-    do_finish_call(Global_Context& global);
-
   public:
-    bool
-    is_uninitialized()
+    Index
+    index()
     const noexcept
-      { return this->m_root.is_uninitialized();  }
+      { return static_cast<Index>(this->m_root.index());  }
+
+    bool
+    is_uninit()
+    const noexcept
+      { return this->index() == index_uninit;  }
 
     bool
     is_void()
     const noexcept
-      { return this->m_root.is_void();  }
+      { return this->index() == index_void;  }
 
     bool
     is_constant()
     const noexcept
-      { return this->m_root.is_constant();  }
-
-    bool
-    is_constant_null()
-    const noexcept
-      { return this->m_root.is_constant() && this->m_root.as_constant().is_null();  }
+      { return this->index() == index_constant;  }
 
     bool
     is_temporary()
     const noexcept
-      { return this->m_root.is_temporary();  }
+      { return this->index() == index_temporary;  }
 
     bool
     is_variable()
     const noexcept
-      { return this->m_root.is_variable();  }
+      { return this->index() == index_variable;  }
 
     bool
-    is_tail_call()
+    is_ptc_args()
     const noexcept
-      { return this->m_root.is_tail_call();  }
+      { return this->index() == index_ptc_args;  }
 
     bool
     is_jump_src()
     const noexcept
-      { return this->m_root.is_jump_src();  }
-
-    bool
-    is_lvalue()
-    const noexcept
-      { return this->is_variable();  }
-
-    bool
-    is_rvalue()
-    const noexcept
-      { return this->is_constant() || this->is_temporary();  }
-
-    bool
-    is_glvalue()
-    const noexcept
-      { return this->is_lvalue() || (this->is_rvalue() && !this->m_mods.empty());  }
-
-    bool
-    is_prvalue()
-    const noexcept
-      { return this->is_rvalue() && this->m_mods.empty();  }
-
-    // Append a modifier.
-    template<typename XModT>
-    Reference&
-    zoom_in(XModT&& xmod)
-      {
-        this->m_mods.emplace_back(::std::forward<XModT>(xmod));
-        return *this;
-      }
-
-    // Drop the last modifier.
-    // If there is no modifier, set `this` to `null`.
-    Reference&
-    zoom_out()
-      {
-        if(ROCKET_EXPECT(this->m_mods.empty()))
-          this->m_root = Reference_root::S_constant();
-        else
-          this->m_mods.pop_back();
-        return *this;
-      }
+      { return this->index() == index_jump_src;  }
 
     Reference&
     swap(Reference& other)
@@ -147,90 +169,101 @@ class Reference
         return *this;
       }
 
-    const Value&
-    read()
-    const
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback)
+    const;
+
+    // An lvalue is something writable.
+    // An rvalue is something read-only.
+    // Everything else is neither an lvalue or an rvalue.
+    bool
+    is_lvalue()
+    const noexcept
+      { return this->is_variable();  }
+
+    bool
+    is_rvalue()
+    const noexcept
+      { return this->is_constant() || this->is_temporary();  }
+
+    // A glvalue is an lvalue or a subobject of an rvalue.
+    // A prvalue is an rvalue that is not a subobject.
+    // These are used to determine whether a value can be further normalized.
+    bool
+    is_glvalue()
+    const noexcept
+      { return this->is_lvalue() || (this->is_rvalue() && this->m_mods.size());  }
+
+    bool
+    is_prvalue()
+    const noexcept
+      { return this->is_rvalue() && this->m_mods.empty();  }
+
+    // A modifier is created by a dot or bracket operator.
+    // For instance, the expression `obj.x[42]` results in a reference having two
+    // modifiers.
+    // Modifiers can be removed to yield references to ancestor objects. Removing
+    // the last modifier shall yield the constant `null`.
+    template<typename XModT>
+    Reference&
+    zoom_in(XModT&& xmod)
+      {
+        this->m_mods.emplace_back(::std::forward<XModT>(xmod));
+        return *this;
+      }
+
+    Reference&
+    zoom_out()
       {
         if(ROCKET_EXPECT(this->m_mods.empty()))
-          return this->m_root.dereference_const();
+          this->m_root = S_constant();
         else
-          return this->do_read(this->m_mods.size() - 1, this->m_mods.back());
+          this->m_mods.pop_back();
+        return *this;
       }
+
+    // These are general read/write functions.
+    // Note that not all references denote values. Some of them are placeholders.
+    const Value&
+    read()
+    const;
 
     Value&
     open()
-    const
-      {
-        if(ROCKET_EXPECT(this->m_mods.empty()))
-          return this->m_root.dereference_mutable();
-        else
-          return this->do_open(this->m_mods.size() - 1, this->m_mods.back());
-      }
+    const;
 
     Value
     unset()
-    const
-      {
-        if(ROCKET_EXPECT(this->m_mods.empty()))
-          this->do_throw_unset_no_modifier();
-        else
-          return this->do_unset(this->m_mods.size() - 1, this->m_mods.back());
-      }
+    const;
 
-    const Value&
-    read(const Reference_modifier& last)
-    const
-      { return this->do_read(this->m_mods.size(), last);  }
-
-    Value&
-    open(const Reference_modifier& last)
-    const
-      { return this->do_open(this->m_mods.size(), last);  }
-
-    Value
-    unset(const Reference_modifier& last)
-    const
-      { return this->do_unset(this->m_mods.size(), last);  }
-
+    // These are placeholder accessors.
     ASTERIA_INCOMPLET(Variable)
     rcptr<Variable>
     get_variable_opt()
     const noexcept
       {
-        if(ROCKET_UNEXPECT(!this->is_variable()))
-          return nullptr;
-        else
-          return unerase_cast<Variable>(this->m_root.as_variable());
+        return ROCKET_EXPECT(this->is_variable())
+                   ? unerase_cast<Variable>(this->m_root.as<index_variable>().var)
+                   : nullptr;
       }
 
     ASTERIA_INCOMPLET(PTC_Arguments)
     rcptr<PTC_Arguments>
-    get_tail_call_opt()
+    get_ptc_args_opt()
     const noexcept
       {
-        if(ROCKET_UNEXPECT(!this->is_tail_call()))
-          return nullptr;
-        else
-          return unerase_cast<PTC_Arguments>(this->m_root.as_tail_call());
+        return ROCKET_EXPECT(this->is_ptc_args())
+                   ? unerase_cast<PTC_Arguments>(this->m_root.as<index_ptc_args>().ptca)
+                   : nullptr;
       }
+
+    Reference&
+    finish_call(Global_Context& global);
 
     const Source_Location&
     as_jump_src()
     const
-      { return this->m_root.as_jump_src();  }
-
-    Reference&
-    finish_call(Global_Context& global)
-      {
-        if(ROCKET_EXPECT(!this->is_tail_call()))
-          return *this;
-        else
-          return this->do_finish_call(global);
-      }
-
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback)
-    const;
+      { return this->m_root.as<index_jump_src>().sloc;  }
   };
 
 inline

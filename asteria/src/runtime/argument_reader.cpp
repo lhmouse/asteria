@@ -362,7 +362,7 @@ Argument_Reader&
 Argument_Reader::
 o(Reference& ref)
   {
-    ref = Reference_root::S_uninit();
+    ref = Reference::S_uninit();
     this->do_record_parameter_generic();
 
     // Get the next argument.

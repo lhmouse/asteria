@@ -473,7 +473,7 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
 
       // Prepare arguments for the user-defined function.
       args.reserve(2);
-      Reference_root::S_temporary xref = { roffset };
+      Reference::S_temporary xref = { roffset };
       args.emplace_back(::std::move(xref));
       xref.val = ::std::move(data);
       args.emplace_back(::std::move(xref));
@@ -630,7 +630,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.filesystem.get_working_directory"), ::rocket::cref(args));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_filesystem_get_working_directory() };
+      Reference::S_temporary xref = { std_filesystem_get_working_directory() };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -660,7 +660,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string path;
     if(reader.I().v(path).F()) {
-      Reference_root::S_temporary xref = { std_filesystem_get_real_path(::std::move(path)) };
+      Reference::S_temporary xref = { std_filesystem_get_real_path(::std::move(path)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -703,7 +703,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string path;
     if(reader.I().v(path).F()) {
-      Reference_root::S_temporary xref = { std_filesystem_get_information(::std::move(path)) };
+      Reference::S_temporary xref = { std_filesystem_get_information(::std::move(path)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -730,7 +730,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string path;
     if(reader.I().v(path).F()) {
-      Reference_root::S_temporary xref = { std_filesystem_remove_recursive(::std::move(path)) };
+      Reference::S_temporary xref = { std_filesystem_remove_recursive(::std::move(path)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -764,7 +764,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     V_string path_old;
     if(reader.I().v(path_new).v(path_old).F()) {
       std_filesystem_move_from(path_new, path_old);
-      return self = Reference_root::S_void();
+      return self = Reference::S_void();
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -803,7 +803,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string path;
     if(reader.I().v(path).F()) {
-      Reference_root::S_temporary xref = { std_filesystem_directory_list(::std::move(path)) };
+      Reference::S_temporary xref = { std_filesystem_directory_list(::std::move(path)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -836,7 +836,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string path;
     if(reader.I().v(path).F()) {
-      Reference_root::S_temporary xref = { std_filesystem_directory_create(::std::move(path)) };
+      Reference::S_temporary xref = { std_filesystem_directory_create(::std::move(path)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -867,7 +867,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string path;
     if(reader.I().v(path).F()) {
-      Reference_root::S_temporary xref = { std_filesystem_directory_remove(::std::move(path)) };
+      Reference::S_temporary xref = { std_filesystem_directory_remove(::std::move(path)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -902,7 +902,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     Opt_integer offset;
     Opt_integer limit;
     if(reader.I().v(path).o(offset).o(limit).F()) {
-      Reference_root::S_temporary xref = { std_filesystem_file_read(::std::move(path), ::std::move(offset),
+      Reference::S_temporary xref = { std_filesystem_file_read(::std::move(path), ::std::move(offset),
                                                                     ::std::move(limit)) };
       return self = ::std::move(xref);
     }
@@ -947,7 +947,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     Opt_integer offset;
     Opt_integer limit;
     if(reader.I().v(path).v(callback).o(offset).o(limit).F()) {
-      Reference_root::S_temporary xref = { std_filesystem_file_stream(global, path, callback, offset, limit) };
+      Reference::S_temporary xref = { std_filesystem_file_stream(global, path, callback, offset, limit) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -982,7 +982,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     Opt_integer offset;
     if(reader.I().v(path).v(data).o(offset).F()) {
       std_filesystem_file_write(path, data, offset);
-      return self = Reference_root::S_void();
+      return self = Reference::S_void();
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1015,7 +1015,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     Opt_boolean exclusive;
     if(reader.I().v(path).v(data).o(exclusive).F()) {
       std_filesystem_file_append(path, data, exclusive);
-      return self = Reference_root::S_void();
+      return self = Reference::S_void();
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1045,7 +1045,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     V_string path_old;
     if(reader.I().v(path_new).v(path_old).F()) {
       std_filesystem_file_copy_from(path_new, path_old);
-      return self = Reference_root::S_void();
+      return self = Reference::S_void();
     }
     // Fail.
     reader.throw_no_matching_function_call();
@@ -1075,7 +1075,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string path;
     if(reader.I().v(path).F()) {
-      Reference_root::S_temporary xref = { std_filesystem_file_remove(path) };
+      Reference::S_temporary xref = { std_filesystem_file_remove(path) };
       return self = ::std::move(xref);
     }
     // Fail.

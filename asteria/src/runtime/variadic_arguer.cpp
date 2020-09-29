@@ -37,7 +37,7 @@ const
       auto nvargs = this->m_vargs.size();
       if(!qindex) {
         // Return the number of variadic arguments if `index` is `null` or absent.
-        Reference_root::S_constant xref = { static_cast<int64_t>(nvargs) };
+        Reference::S_constant xref = { static_cast<int64_t>(nvargs) };
         return self = ::std::move(xref);
       }
       // Return the argument at `index`.
@@ -45,7 +45,7 @@ const
       auto nadd = w.nprepend | w.nappend;
       if(nadd != 0) {
         // Return a `null`.
-        return self = Reference_root::S_constant();
+        return self = Reference::S_constant();
       }
       return self = this->m_vargs.at(w.rindex);
     }

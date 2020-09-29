@@ -112,13 +112,13 @@ do_construct_crc32(V_object& result)
   {
     Argument_Reader reader(::rocket::sref("std.checksum.CRC32().update"), ::rocket::cref(args));
     // Get the hasher.
-    Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
+    Reference::M_object_key xmod = { ::rocket::sref("$h") };
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     V_string data;
     if(reader.I().v(data).F()) {
       std_checksum_CRC32_update(self.open().open_opaque(), ::std::move(data));
-      return self = Reference_root::S_void();
+      return self = Reference::S_void();
     }
     reader.throw_no_matching_function_call();
   }
@@ -143,11 +143,11 @@ do_construct_crc32(V_object& result)
   {
     Argument_Reader reader(::rocket::sref("std.checksum.CRC32().finish"), ::rocket::cref(args));
     // Get the hasher.
-    Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
+    Reference::M_object_key xmod = { ::rocket::sref("$h") };
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_checksum_CRC32_finish(self.open().open_opaque()) };
+      Reference::S_temporary xref = { std_checksum_CRC32_finish(self.open().open_opaque()) };
       return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
@@ -236,13 +236,13 @@ do_construct_fnv1a32(V_object& result)
   {
     Argument_Reader reader(::rocket::sref("std.checksum.FNV1a32().update"), ::rocket::cref(args));
     // Get the hasher.
-    Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
+    Reference::M_object_key xmod = { ::rocket::sref("$h") };
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     V_string data;
     if(reader.I().v(data).F()) {
       std_checksum_FNV1a32_update(self.open().open_opaque(), ::std::move(data));
-      return self = Reference_root::S_void();
+      return self = Reference::S_void();
     }
     reader.throw_no_matching_function_call();
   }
@@ -267,11 +267,11 @@ do_construct_fnv1a32(V_object& result)
   {
     Argument_Reader reader(::rocket::sref("std.checksum.FNV1a32().finish"), ::rocket::cref(args));
     // Get the hasher.
-    Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
+    Reference::M_object_key xmod = { ::rocket::sref("$h") };
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_checksum_FNV1a32_finish(self.open().open_opaque()) };
+      Reference::S_temporary xref = { std_checksum_FNV1a32_finish(self.open().open_opaque()) };
       return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
@@ -606,13 +606,13 @@ do_construct_md5(V_object& result)
   {
     Argument_Reader reader(::rocket::sref("std.checksum.MD5().update"), ::rocket::cref(args));
     // Get the hasher.
-    Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
+    Reference::M_object_key xmod = { ::rocket::sref("$h") };
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     V_string data;
     if(reader.I().v(data).F()) {
       std_checksum_MD5_update(self.open().open_opaque(), ::std::move(data));
-      return self = Reference_root::S_void();
+      return self = Reference::S_void();
     }
     reader.throw_no_matching_function_call();
   }
@@ -637,11 +637,11 @@ do_construct_md5(V_object& result)
   {
     Argument_Reader reader(::rocket::sref("std.checksum.MD5().finish"), ::rocket::cref(args));
     // Get the hasher.
-    Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
+    Reference::M_object_key xmod = { ::rocket::sref("$h") };
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_checksum_MD5_finish(self.open().open_opaque()) };
+      Reference::S_temporary xref = { std_checksum_MD5_finish(self.open().open_opaque()) };
       return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
@@ -933,13 +933,13 @@ do_construct_sha1(V_object& result)
   {
     Argument_Reader reader(::rocket::sref("std.checksum.SHA1().update"), ::rocket::cref(args));
     // Get the hasher.
-    Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
+    Reference::M_object_key xmod = { ::rocket::sref("$h") };
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     V_string data;
     if(reader.I().v(data).F()) {
       std_checksum_SHA1_update(self.open().open_opaque(), ::std::move(data));
-      return self = Reference_root::S_void();
+      return self = Reference::S_void();
     }
     reader.throw_no_matching_function_call();
   }
@@ -964,11 +964,11 @@ do_construct_sha1(V_object& result)
   {
     Argument_Reader reader(::rocket::sref("std.checksum.SHA1().finish"), ::rocket::cref(args));
     // Get the hasher.
-    Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
+    Reference::M_object_key xmod = { ::rocket::sref("$h") };
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_checksum_SHA1_finish(self.open().open_opaque()) };
+      Reference::S_temporary xref = { std_checksum_SHA1_finish(self.open().open_opaque()) };
       return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
@@ -1232,13 +1232,13 @@ do_construct_sha256(V_object& result)
   {
     Argument_Reader reader(::rocket::sref("std.checksum.SHA256().update"), ::rocket::cref(args));
     // Get the hasher.
-    Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
+    Reference::M_object_key xmod = { ::rocket::sref("$h") };
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     V_string data;
     if(reader.I().v(data).F()) {
       std_checksum_SHA256_update(self.open().open_opaque(), ::std::move(data));
-      return self = Reference_root::S_void();
+      return self = Reference::S_void();
     }
     reader.throw_no_matching_function_call();
   }
@@ -1263,11 +1263,11 @@ do_construct_sha256(V_object& result)
   {
     Argument_Reader reader(::rocket::sref("std.checksum.SHA256().finish"), ::rocket::cref(args));
     // Get the hasher.
-    Reference_modifier::S_object_key xmod = { ::rocket::sref("$h") };
+    Reference::M_object_key xmod = { ::rocket::sref("$h") };
     self.zoom_in(::std::move(xmod));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_checksum_SHA256_finish(self.open().open_opaque()) };
+      Reference::S_temporary xref = { std_checksum_SHA256_finish(self.open().open_opaque()) };
       return self = ::std::move(xref);
     }
     reader.throw_no_matching_function_call();
@@ -1558,7 +1558,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.checksum.CRC32"), ::rocket::cref(args));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_checksum_CRC32() };
+      Reference::S_temporary xref = { std_checksum_CRC32() };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1597,7 +1597,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string data;
     if(reader.I().v(data).F()) {
-      Reference_root::S_temporary xref = { std_checksum_crc32(::std::move(data)) };
+      Reference::S_temporary xref = { std_checksum_crc32(::std::move(data)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1638,7 +1638,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string path;
     if(reader.I().v(path).F()) {
-      Reference_root::S_temporary xref = { std_checksum_crc32_file(::std::move(path)) };
+      Reference::S_temporary xref = { std_checksum_crc32_file(::std::move(path)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1676,7 +1676,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.checksum.FNV1a32"), ::rocket::cref(args));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_checksum_FNV1a32() };
+      Reference::S_temporary xref = { std_checksum_FNV1a32() };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1715,7 +1715,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string data;
     if(reader.I().v(data).F()) {
-      Reference_root::S_temporary xref = { std_checksum_fnv1a32(::std::move(data)) };
+      Reference::S_temporary xref = { std_checksum_fnv1a32(::std::move(data)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1760,7 +1760,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string path;
     if(reader.I().v(path).F()) {
-      Reference_root::S_temporary xref = { std_checksum_fnv1a32_file(::std::move(path)) };
+      Reference::S_temporary xref = { std_checksum_fnv1a32_file(::std::move(path)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1795,7 +1795,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.checksum.MD5"), ::rocket::cref(args));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_checksum_MD5() };
+      Reference::S_temporary xref = { std_checksum_MD5() };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1834,7 +1834,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string data;
     if(reader.I().v(data).F()) {
-      Reference_root::S_temporary xref = { std_checksum_md5(::std::move(data)) };
+      Reference::S_temporary xref = { std_checksum_md5(::std::move(data)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1875,7 +1875,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string path;
     if(reader.I().v(path).F()) {
-      Reference_root::S_temporary xref = { std_checksum_md5_file(::std::move(path)) };
+      Reference::S_temporary xref = { std_checksum_md5_file(::std::move(path)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1910,7 +1910,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.checksum.SHA1"), ::rocket::cref(args));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_checksum_SHA1() };
+      Reference::S_temporary xref = { std_checksum_SHA1() };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1949,7 +1949,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string data;
     if(reader.I().v(data).F()) {
-      Reference_root::S_temporary xref = { std_checksum_sha1(::std::move(data)) };
+      Reference::S_temporary xref = { std_checksum_sha1(::std::move(data)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1990,7 +1990,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string path;
     if(reader.I().v(path).F()) {
-      Reference_root::S_temporary xref = { std_checksum_sha1_file(::std::move(path)) };
+      Reference::S_temporary xref = { std_checksum_sha1_file(::std::move(path)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2025,7 +2025,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     Argument_Reader reader(::rocket::sref("std.checksum.SHA256"), ::rocket::cref(args));
     // Parse arguments.
     if(reader.I().F()) {
-      Reference_root::S_temporary xref = { std_checksum_SHA256() };
+      Reference::S_temporary xref = { std_checksum_SHA256() };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2064,7 +2064,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string data;
     if(reader.I().v(data).F()) {
-      Reference_root::S_temporary xref = { std_checksum_sha256(::std::move(data)) };
+      Reference::S_temporary xref = { std_checksum_sha256(::std::move(data)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2105,7 +2105,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string path;
     if(reader.I().v(path).F()) {
-      Reference_root::S_temporary xref = { std_checksum_sha256_file(::std::move(path)) };
+      Reference::S_temporary xref = { std_checksum_sha256_file(::std::move(path)) };
       return self = ::std::move(xref);
     }
     // Fail.

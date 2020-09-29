@@ -1700,7 +1700,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_integer from;
     Opt_integer length;
     if(reader.I().v(text).v(from).o(length).F()) {
-      Reference_root::S_temporary xref = { std_string_slice(::std::move(text), from, length) };
+      Reference::S_temporary xref = { std_string_slice(::std::move(text), from, length) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1744,13 +1744,13 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_integer from;
     V_string replacement;
     if(reader.I().v(text).v(from).S(state).v(replacement).F()) {
-      Reference_root::S_temporary xref = { std_string_replace_slice(::std::move(text), from, nullopt,
+      Reference::S_temporary xref = { std_string_replace_slice(::std::move(text), from, nullopt,
                                                                     ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
     Opt_integer length;
     if(reader.L(state).o(length).v(replacement).F()) {
-      Reference_root::S_temporary xref = { std_string_replace_slice(::std::move(text), from, length,
+      Reference::S_temporary xref = { std_string_replace_slice(::std::move(text), from, length,
                                                                     ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
@@ -1785,7 +1785,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string text2;
     Opt_integer length;
     if(reader.I().v(text1).v(text2).o(length).F()) {
-      Reference_root::S_temporary xref = { std_string_compare(::std::move(text1), ::std::move(text2), length) };
+      Reference::S_temporary xref = { std_string_compare(::std::move(text1), ::std::move(text2), length) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1814,7 +1814,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string text;
     V_string prefix;
     if(reader.I().v(text).v(prefix).F()) {
-      Reference_root::S_temporary xref = { std_string_starts_with(::std::move(text), ::std::move(prefix)) };
+      Reference::S_temporary xref = { std_string_starts_with(::std::move(text), ::std::move(prefix)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1843,7 +1843,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string text;
     V_string suffix;
     if(reader.I().v(text).v(suffix).F()) {
-      Reference_root::S_temporary xref = { std_string_ends_with(::std::move(text), ::std::move(suffix)) };
+      Reference::S_temporary xref = { std_string_ends_with(::std::move(text), ::std::move(suffix)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -1893,19 +1893,19 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string text;
     V_string pattern;
     if(reader.I().v(text).S(state).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_find(::std::move(text), 0, nullopt,
+      Reference::S_temporary xref = { std_string_find(::std::move(text), 0, nullopt,
                                                            ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_find(::std::move(text), from, nullopt,
+      Reference::S_temporary xref = { std_string_find(::std::move(text), from, nullopt,
                                                            ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
     Opt_integer length;
     if(reader.L(state).o(length).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_find(::std::move(text), from, length,
+      Reference::S_temporary xref = { std_string_find(::std::move(text), from, length,
                                                            ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
@@ -1954,19 +1954,19 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string text;
     V_string pattern;
     if(reader.I().v(text).S(state).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_rfind(::std::move(text), 0, nullopt,
+      Reference::S_temporary xref = { std_string_rfind(::std::move(text), 0, nullopt,
                                                             ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_rfind(::std::move(text), from, nullopt,
+      Reference::S_temporary xref = { std_string_rfind(::std::move(text), from, nullopt,
                                                             ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
     Opt_integer length;
     if(reader.L(state).o(length).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_rfind(::std::move(text), from, length,
+      Reference::S_temporary xref = { std_string_rfind(::std::move(text), from, length,
                                                             ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
@@ -2019,19 +2019,19 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string pattern;
     V_string replacement;
     if(reader.I().v(text).S(state).v(pattern).v(replacement).F()) {
-      Reference_root::S_temporary xref = { std_string_find_and_replace(::std::move(text), 0, nullopt,
+      Reference::S_temporary xref = { std_string_find_and_replace(::std::move(text), 0, nullopt,
                                                            ::std::move(pattern), ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).v(pattern).v(replacement).F()) {
-      Reference_root::S_temporary xref = { std_string_find_and_replace(::std::move(text), from, nullopt,
+      Reference::S_temporary xref = { std_string_find_and_replace(::std::move(text), from, nullopt,
                                                            ::std::move(pattern), ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
     Opt_integer length;
     if(reader.L(state).o(length).v(pattern).v(replacement).F()) {
-      Reference_root::S_temporary xref = { std_string_find_and_replace(::std::move(text), from, length,
+      Reference::S_temporary xref = { std_string_find_and_replace(::std::move(text), from, length,
                                                            ::std::move(pattern), ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
@@ -2079,19 +2079,19 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string text;
     V_string accept;
     if(reader.I().v(text).S(state).v(accept).F()) {
-      Reference_root::S_temporary xref = { std_string_find_any_of(::std::move(text), 0, nullopt,
+      Reference::S_temporary xref = { std_string_find_any_of(::std::move(text), 0, nullopt,
                                                                   ::std::move(accept)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).v(accept).F()) {
-      Reference_root::S_temporary xref = { std_string_find_any_of(::std::move(text), from, nullopt,
+      Reference::S_temporary xref = { std_string_find_any_of(::std::move(text), from, nullopt,
                                                                   ::std::move(accept)) };
       return self = ::std::move(xref);
     }
     Opt_integer length;
     if(reader.L(state).o(length).v(accept).F()) {
-      Reference_root::S_temporary xref = { std_string_find_any_of(::std::move(text), from, length,
+      Reference::S_temporary xref = { std_string_find_any_of(::std::move(text), from, length,
                                                                   ::std::move(accept)) };
       return self = ::std::move(xref);
     }
@@ -2139,19 +2139,19 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string text;
     V_string accept;
     if(reader.I().v(text).S(state).v(accept).F()) {
-      Reference_root::S_temporary xref = { std_string_rfind_any_of(::std::move(text), 0, nullopt,
+      Reference::S_temporary xref = { std_string_rfind_any_of(::std::move(text), 0, nullopt,
                                                                    ::std::move(accept)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).v(accept).F()) {
-      Reference_root::S_temporary xref = { std_string_rfind_any_of(::std::move(text), from, nullopt,
+      Reference::S_temporary xref = { std_string_rfind_any_of(::std::move(text), from, nullopt,
                                                                    ::std::move(accept)) };
       return self = ::std::move(xref);
     }
     Opt_integer length;
     if(reader.L(state).o(length).v(accept).F()) {
-      Reference_root::S_temporary xref = { std_string_rfind_any_of(::std::move(text), from, length,
+      Reference::S_temporary xref = { std_string_rfind_any_of(::std::move(text), from, length,
                                                                    ::std::move(accept)) };
       return self = ::std::move(xref);
     }
@@ -2199,19 +2199,19 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string text;
     V_string accept;
     if(reader.I().v(text).S(state).v(accept).F()) {
-      Reference_root::S_temporary xref = { std_string_find_not_of(::std::move(text), 0, nullopt,
+      Reference::S_temporary xref = { std_string_find_not_of(::std::move(text), 0, nullopt,
                                                                   ::std::move(accept)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).v(accept).F()) {
-      Reference_root::S_temporary xref = { std_string_find_not_of(::std::move(text), from, nullopt,
+      Reference::S_temporary xref = { std_string_find_not_of(::std::move(text), from, nullopt,
                                                                   ::std::move(accept)) };
       return self = ::std::move(xref);
     }
     Opt_integer length;
     if(reader.L(state).o(length).v(accept).F()) {
-      Reference_root::S_temporary xref = { std_string_find_not_of(::std::move(text), from, length,
+      Reference::S_temporary xref = { std_string_find_not_of(::std::move(text), from, length,
                                                                   ::std::move(accept)) };
       return self = ::std::move(xref);
     }
@@ -2259,19 +2259,19 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string text;
     V_string accept;
     if(reader.I().v(text).S(state).v(accept).F()) {
-      Reference_root::S_temporary xref = { std_string_rfind_not_of(::std::move(text), 0, nullopt,
+      Reference::S_temporary xref = { std_string_rfind_not_of(::std::move(text), 0, nullopt,
                                                                    ::std::move(accept)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).v(accept).F()) {
-      Reference_root::S_temporary xref = { std_string_rfind_not_of(::std::move(text), from, nullopt,
+      Reference::S_temporary xref = { std_string_rfind_not_of(::std::move(text), from, nullopt,
                                                                    ::std::move(accept)) };
       return self = ::std::move(xref);
     }
     Opt_integer length;
     if(reader.L(state).o(length).v(accept).F()) {
-      Reference_root::S_temporary xref = { std_string_rfind_not_of(::std::move(text), from, length,
+      Reference::S_temporary xref = { std_string_rfind_not_of(::std::move(text), from, length,
                                                                    ::std::move(accept)) };
       return self = ::std::move(xref);
     }
@@ -2299,7 +2299,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string text;
     if(reader.I().v(text).F()) {
-      Reference_root::S_temporary xref = { std_string_reverse(::std::move(text)) };
+      Reference::S_temporary xref = { std_string_reverse(::std::move(text)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2329,7 +2329,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string text;
     Opt_string reject;
     if(reader.I().v(text).o(reject).F()) {
-      Reference_root::S_temporary xref = { std_string_trim(::std::move(text), ::std::move(reject)) };
+      Reference::S_temporary xref = { std_string_trim(::std::move(text), ::std::move(reject)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2359,7 +2359,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string text;
     Opt_string reject;
     if(reader.I().v(text).o(reject).F()) {
-      Reference_root::S_temporary xref = { std_string_triml(::std::move(text), ::std::move(reject)) };
+      Reference::S_temporary xref = { std_string_triml(::std::move(text), ::std::move(reject)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2389,7 +2389,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string text;
     Opt_string reject;
     if(reader.I().v(text).o(reject).F()) {
-      Reference_root::S_temporary xref = { std_string_trimr(::std::move(text), ::std::move(reject)) };
+      Reference::S_temporary xref = { std_string_trimr(::std::move(text), ::std::move(reject)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2422,7 +2422,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_integer length;
     Opt_string padding;
     if(reader.I().v(text).v(length).o(padding).F()) {
-      Reference_root::S_temporary xref = { std_string_padl(::std::move(text), length, ::std::move(padding)) };
+      Reference::S_temporary xref = { std_string_padl(::std::move(text), length, ::std::move(padding)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2455,7 +2455,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_integer length;
     Opt_string padding;
     if(reader.I().v(text).v(length).o(padding).F()) {
-      Reference_root::S_temporary xref = { std_string_padr(::std::move(text), length, ::std::move(padding)) };
+      Reference::S_temporary xref = { std_string_padr(::std::move(text), length, ::std::move(padding)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2483,7 +2483,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string text;
     if(reader.I().v(text).F()) {
-      Reference_root::S_temporary xref = { std_string_to_upper(::std::move(text)) };
+      Reference::S_temporary xref = { std_string_to_upper(::std::move(text)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2511,7 +2511,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string text;
     if(reader.I().v(text).F()) {
-      Reference_root::S_temporary xref = { std_string_to_lower(::std::move(text)) };
+      Reference::S_temporary xref = { std_string_to_lower(::std::move(text)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2547,7 +2547,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string inputs;
     Opt_string outputs;
     if(reader.I().v(text).v(inputs).o(outputs).F()) {
-      Reference_root::S_temporary xref = { std_string_translate(::std::move(text), ::std::move(inputs),
+      Reference::S_temporary xref = { std_string_translate(::std::move(text), ::std::move(inputs),
                                                                 ::std::move(outputs)) };
       return self = ::std::move(xref);
     }
@@ -2583,7 +2583,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     Opt_string delim;
     Opt_integer limit;
     if(reader.I().v(text).o(delim).o(limit).F()) {
-      Reference_root::S_temporary xref = { std_string_explode(::std::move(text), ::std::move(delim), limit) };
+      Reference::S_temporary xref = { std_string_explode(::std::move(text), ::std::move(delim), limit) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2613,7 +2613,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_array segments;
     Opt_string delim;
     if(reader.I().v(segments).o(delim).F()) {
-      Reference_root::S_temporary xref = { std_string_implode(::std::move(segments), ::std::move(delim)) };
+      Reference::S_temporary xref = { std_string_implode(::std::move(segments), ::std::move(delim)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2646,7 +2646,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     Opt_boolean lowercase;
     Opt_string delim;
     if(reader.I().v(data).o(lowercase).o(delim).F()) {
-      Reference_root::S_temporary xref = { std_string_hex_encode(::std::move(data), lowercase,
+      Reference::S_temporary xref = { std_string_hex_encode(::std::move(data), lowercase,
                                                                  ::std::move(delim)) };
       return self = ::std::move(xref);
     }
@@ -2680,7 +2680,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string text;
     if(reader.I().v(text).F()) {
-      Reference_root::S_temporary xref = { std_string_hex_decode(::std::move(text)) };
+      Reference::S_temporary xref = { std_string_hex_decode(::std::move(text)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2712,7 +2712,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string data;
     Opt_boolean lowercase;
     if(reader.I().v(data).o(lowercase).F()) {
-      Reference_root::S_temporary xref = { std_string_base32_encode(::std::move(data), lowercase) };
+      Reference::S_temporary xref = { std_string_base32_encode(::std::move(data), lowercase) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2745,7 +2745,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string text;
     if(reader.I().v(text).F()) {
-      Reference_root::S_temporary xref = { std_string_base32_decode(::std::move(text)) };
+      Reference::S_temporary xref = { std_string_base32_decode(::std::move(text)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2773,7 +2773,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string data;
     if(reader.I().v(data).F()) {
-      Reference_root::S_temporary xref = { std_string_base64_encode(::std::move(data)) };
+      Reference::S_temporary xref = { std_string_base64_encode(::std::move(data)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2806,7 +2806,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string text;
     if(reader.I().v(text).F()) {
-      Reference_root::S_temporary xref = { std_string_base64_decode(::std::move(text)) };
+      Reference::S_temporary xref = { std_string_base64_decode(::std::move(text)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2838,7 +2838,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string data;
     Opt_boolean lowercase;
     if(reader.I().v(data).o(lowercase).F()) {
-      Reference_root::S_temporary xref = { std_string_url_encode(::std::move(data), lowercase) };
+      Reference::S_temporary xref = { std_string_url_encode(::std::move(data), lowercase) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2871,7 +2871,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string text;
     if(reader.I().v(text).F()) {
-      Reference_root::S_temporary xref = { std_string_url_decode(::std::move(text)) };
+      Reference::S_temporary xref = { std_string_url_decode(::std::move(text)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2902,7 +2902,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string data;
     Opt_boolean lowercase;
     if(reader.I().v(data).o(lowercase).F()) {
-      Reference_root::S_temporary xref = { std_string_url_encode_query(::std::move(data), lowercase) };
+      Reference::S_temporary xref = { std_string_url_encode_query(::std::move(data), lowercase) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2932,7 +2932,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string text;
     if(reader.I().v(text).F()) {
-      Reference_root::S_temporary xref = { std_string_url_decode_query(::std::move(text)) };
+      Reference::S_temporary xref = { std_string_url_decode_query(::std::move(text)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2958,7 +2958,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string text;
     if(reader.I().v(text).F()) {
-      Reference_root::S_temporary xref = { std_string_utf8_validate(::std::move(text)) };
+      Reference::S_temporary xref = { std_string_utf8_validate(::std::move(text)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -2992,12 +2992,12 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_integer code_point;
     Opt_boolean permissive;
     if(reader.I().v(code_point).o(permissive).F()) {
-      Reference_root::S_temporary xref = { std_string_utf8_encode(::std::move(code_point), permissive) };
+      Reference::S_temporary xref = { std_string_utf8_encode(::std::move(code_point), permissive) };
       return self = ::std::move(xref);
     }
     V_array code_points;
     if(reader.I().v(code_points).o(permissive).F()) {
-      Reference_root::S_temporary xref = { std_string_utf8_encode(::std::move(code_points), permissive) };
+      Reference::S_temporary xref = { std_string_utf8_encode(::std::move(code_points), permissive) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -3031,7 +3031,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string text;
     Opt_boolean permissive;
     if(reader.I().v(text).o(permissive).F()) {
-      Reference_root::S_temporary xref = { std_string_utf8_decode(::std::move(text), permissive) };
+      Reference::S_temporary xref = { std_string_utf8_decode(::std::move(text), permissive) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -3059,12 +3059,12 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer value;
     if(reader.I().v(value).F()) {
-      Reference_root::S_temporary xref = { std_string_pack_8(::std::move(value)) };
+      Reference::S_temporary xref = { std_string_pack_8(::std::move(value)) };
       return self = ::std::move(xref);
     }
     V_array values;
     if(reader.I().v(values).F()) {
-      Reference_root::S_temporary xref = { std_string_pack_8(::std::move(values)) };
+      Reference::S_temporary xref = { std_string_pack_8(::std::move(values)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -3092,7 +3092,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string text;
     if(reader.I().v(text).F()) {
-      Reference_root::S_temporary xref = { std_string_unpack_8(::std::move(text)) };
+      Reference::S_temporary xref = { std_string_unpack_8(::std::move(text)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -3121,12 +3121,12 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer value;
     if(reader.I().v(value).F()) {
-      Reference_root::S_temporary xref = { std_string_pack_16be(::std::move(value)) };
+      Reference::S_temporary xref = { std_string_pack_16be(::std::move(value)) };
       return self = ::std::move(xref);
     }
     V_array values;
     if(reader.I().v(values).F()) {
-      Reference_root::S_temporary xref = { std_string_pack_16be(::std::move(values)) };
+      Reference::S_temporary xref = { std_string_pack_16be(::std::move(values)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -3158,7 +3158,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string text;
     if(reader.I().v(text).F()) {
-      Reference_root::S_temporary xref = { std_string_unpack_16be(::std::move(text)) };
+      Reference::S_temporary xref = { std_string_unpack_16be(::std::move(text)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -3187,12 +3187,12 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer value;
     if(reader.I().v(value).F()) {
-      Reference_root::S_temporary xref = { std_string_pack_16le(::std::move(value)) };
+      Reference::S_temporary xref = { std_string_pack_16le(::std::move(value)) };
       return self = ::std::move(xref);
     }
     V_array values;
     if(reader.I().v(values).F()) {
-      Reference_root::S_temporary xref = { std_string_pack_16le(::std::move(values)) };
+      Reference::S_temporary xref = { std_string_pack_16le(::std::move(values)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -3224,7 +3224,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string text;
     if(reader.I().v(text).F()) {
-      Reference_root::S_temporary xref = { std_string_unpack_16le(::std::move(text)) };
+      Reference::S_temporary xref = { std_string_unpack_16le(::std::move(text)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -3253,12 +3253,12 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer value;
     if(reader.I().v(value).F()) {
-      Reference_root::S_temporary xref = { std_string_pack_32be(::std::move(value)) };
+      Reference::S_temporary xref = { std_string_pack_32be(::std::move(value)) };
       return self = ::std::move(xref);
     }
     V_array values;
     if(reader.I().v(values).F()) {
-      Reference_root::S_temporary xref = { std_string_pack_32be(::std::move(values)) };
+      Reference::S_temporary xref = { std_string_pack_32be(::std::move(values)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -3290,7 +3290,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string text;
     if(reader.I().v(text).F()) {
-      Reference_root::S_temporary xref = { std_string_unpack_32be(::std::move(text)) };
+      Reference::S_temporary xref = { std_string_unpack_32be(::std::move(text)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -3319,12 +3319,12 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer value;
     if(reader.I().v(value).F()) {
-      Reference_root::S_temporary xref = { std_string_pack_32le(::std::move(value)) };
+      Reference::S_temporary xref = { std_string_pack_32le(::std::move(value)) };
       return self = ::std::move(xref);
     }
     V_array values;
     if(reader.I().v(values).F()) {
-      Reference_root::S_temporary xref = { std_string_pack_32le(::std::move(values)) };
+      Reference::S_temporary xref = { std_string_pack_32le(::std::move(values)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -3356,7 +3356,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string text;
     if(reader.I().v(text).F()) {
-      Reference_root::S_temporary xref = { std_string_unpack_32le(::std::move(text)) };
+      Reference::S_temporary xref = { std_string_unpack_32le(::std::move(text)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -3384,12 +3384,12 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer value;
     if(reader.I().v(value).F()) {
-      Reference_root::S_temporary xref = { std_string_pack_64be(::std::move(value)) };
+      Reference::S_temporary xref = { std_string_pack_64be(::std::move(value)) };
       return self = ::std::move(xref);
     }
     V_array values;
     if(reader.I().v(values).F()) {
-      Reference_root::S_temporary xref = { std_string_pack_64be(::std::move(values)) };
+      Reference::S_temporary xref = { std_string_pack_64be(::std::move(values)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -3420,7 +3420,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string text;
     if(reader.I().v(text).F()) {
-      Reference_root::S_temporary xref = { std_string_unpack_64be(::std::move(text)) };
+      Reference::S_temporary xref = { std_string_unpack_64be(::std::move(text)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -3448,12 +3448,12 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_integer value;
     if(reader.I().v(value).F()) {
-      Reference_root::S_temporary xref = { std_string_pack_64le(::std::move(value)) };
+      Reference::S_temporary xref = { std_string_pack_64le(::std::move(value)) };
       return self = ::std::move(xref);
     }
     V_array values;
     if(reader.I().v(values).F()) {
-      Reference_root::S_temporary xref = { std_string_pack_64le(::std::move(values)) };
+      Reference::S_temporary xref = { std_string_pack_64le(::std::move(values)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -3485,7 +3485,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     // Parse arguments.
     V_string text;
     if(reader.I().v(text).F()) {
-      Reference_root::S_temporary xref = { std_string_unpack_64le(::std::move(text)) };
+      Reference::S_temporary xref = { std_string_unpack_64le(::std::move(text)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -3525,7 +3525,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string templ;
     cow_vector<Value> values;
     if(reader.I().v(templ).F(values)) {
-      Reference_root::S_temporary xref = { std_string_format(::std::move(templ), ::std::move(values)) };
+      Reference::S_temporary xref = { std_string_format(::std::move(templ), ::std::move(values)) };
       return self = ::std::move(xref);
     }
     // Fail.
@@ -3587,19 +3587,19 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string text;
     V_string pattern;
     if(reader.I().v(text).S(state).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_pcre_find(::std::move(text), 0, nullopt,
+      Reference::S_temporary xref = { std_string_pcre_find(::std::move(text), 0, nullopt,
                                                                 ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_pcre_find(::std::move(text), from, nullopt,
+      Reference::S_temporary xref = { std_string_pcre_find(::std::move(text), from, nullopt,
                                                                 ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
     Opt_integer length;
     if(reader.L(state).o(length).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_pcre_find(::std::move(text), from, length,
+      Reference::S_temporary xref = { std_string_pcre_find(::std::move(text), from, length,
                                                                 ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
@@ -3665,19 +3665,19 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string text;
     V_string pattern;
     if(reader.I().v(text).S(state).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_pcre_match(::std::move(text), 0, nullopt,
+      Reference::S_temporary xref = { std_string_pcre_match(::std::move(text), 0, nullopt,
                                                                   ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_pcre_match(::std::move(text), from, nullopt,
+      Reference::S_temporary xref = { std_string_pcre_match(::std::move(text), from, nullopt,
                                                                   ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
     Opt_integer length;
     if(reader.L(state).o(length).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_pcre_match(::std::move(text), from, length,
+      Reference::S_temporary xref = { std_string_pcre_match(::std::move(text), from, length,
                                                                   ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
@@ -3743,19 +3743,19 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string text;
     V_string pattern;
     if(reader.I().v(text).S(state).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_pcre_named_match(::std::move(text), 0, nullopt,
+      Reference::S_temporary xref = { std_string_pcre_named_match(::std::move(text), 0, nullopt,
                                                                        ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_pcre_named_match(::std::move(text), from, nullopt,
+      Reference::S_temporary xref = { std_string_pcre_named_match(::std::move(text), from, nullopt,
                                                                        ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
     Opt_integer length;
     if(reader.L(state).o(length).v(pattern).F()) {
-      Reference_root::S_temporary xref = { std_string_pcre_named_match(::std::move(text), from, length,
+      Reference::S_temporary xref = { std_string_pcre_named_match(::std::move(text), from, length,
                                                                        ::std::move(pattern)) };
       return self = ::std::move(xref);
     }
@@ -3816,19 +3816,19 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     V_string pattern;
     V_string replacement;
     if(reader.I().v(text).S(state).v(pattern).v(replacement).F()) {
-      Reference_root::S_temporary xref = { std_string_pcre_replace(::std::move(text), 0, nullopt,
+      Reference::S_temporary xref = { std_string_pcre_replace(::std::move(text), 0, nullopt,
                                                           ::std::move(pattern), ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
     V_integer from;
     if(reader.L(state).v(from).S(state).v(pattern).v(replacement).F()) {
-      Reference_root::S_temporary xref = { std_string_pcre_replace(::std::move(text), from, nullopt,
+      Reference::S_temporary xref = { std_string_pcre_replace(::std::move(text), from, nullopt,
                                                            ::std::move(pattern), ::std::move(replacement)) };
       return self = ::std::move(xref);
     }
     Opt_integer length;
     if(reader.L(state).o(length).v(pattern).v(replacement).F()) {
-      Reference_root::S_temporary xref = { std_string_pcre_replace(::std::move(text), from, length,
+      Reference::S_temporary xref = { std_string_pcre_replace(::std::move(text), from, length,
                                                            ::std::move(pattern), ::std::move(replacement)) };
       return self = ::std::move(xref);
     }

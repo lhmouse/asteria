@@ -53,9 +53,9 @@ do_bind_parameters(const rcptr<Variadic_Arguer>& zvarg, const cow_vector<phsh_st
     this->m_zvarg = zvarg;
 
     // Set the `this` reference.
-    // If the self reference is null, it is likely that `this` isn't ever referenced in this function,
-    // so perform lazy initialization.
-    if(!self.is_void() && !self.is_constant_null())
+    // If the self reference is void, it is likely that `this` isn't ever referenced in this function,
+    // so perform lazy initialization to avoid this overhead.
+    if(!self.is_void() && !(self.is_constant() && self.read().is_null()))
       this->open_named_reference(::rocket::sref("__this")) = ::std::move(self);
 
     // This is the subscript of the special parameter placeholder `...`.
@@ -78,7 +78,7 @@ do_bind_parameters(const rcptr<Variadic_Arguer>& zvarg, const cow_vector<phsh_st
       }
       // Set the parameter.
       if(ROCKET_UNEXPECT(i >= args.size()))
-        this->open_named_reference(name) = Reference_root::S_constant();
+        this->open_named_reference(name) = Reference::S_constant();
       else
         this->open_named_reference(name) = ::std::move(args.mut(i));
     }
@@ -103,13 +103,13 @@ do_lazy_lookup_opt(const phsh_string& name)
     // N.B. If you have ever changed these, remember to update 'analytic_context.cpp' as well.
     if(name == "__func") {
       // Note: This can only happen inside a function context.
-      Reference_root::S_constant xref = { this->m_zvarg->func() };
+      Reference::S_constant xref = { this->m_zvarg->func() };
       return do_set_lazy_reference(*this, name, ::std::move(xref));
     }
 
     if(name == "__this") {
       // Note: This can only happen inside a function context and the `this` argument is null.
-      Reference_root::S_constant xref = { };
+      Reference::S_constant xref = { };
       return do_set_lazy_reference(*this, name, ::std::move(xref));
     }
 
@@ -121,7 +121,7 @@ do_lazy_lookup_opt(const phsh_string& name)
       else
         varg = this->m_zvarg;
 
-      Reference_root::S_constant xref = { ::std::move(varg) };
+      Reference::S_constant xref = { ::std::move(varg) };
       return do_set_lazy_reference(*this, name, ::std::move(xref));
     }
 
@@ -144,15 +144,15 @@ on_scope_exit(AIR_Status status)
       return status;
 
     // Stash the returned reference, if any.
-    Reference self = Reference_root::S_uninit();
+    Reference self = Reference::S_uninit();
     if(status == air_status_return_ref)
       self = ::std::move(this->m_stack.get().get_top());
 
-    if(auto ptca = self.get_tail_call_opt()) {
+    if(auto ptca = self.get_ptc_args_opt()) {
       // If a PTC wrapper was returned, prepend all deferred expressions to it.
       // These callbacks will be unpacked later, so we just return.
       do_concatenate(ptca->open_defer_stack(), ::std::move(this->m_defer));
-      ROCKET_ASSERT(!self.is_uninitialized());
+      ROCKET_ASSERT(!self.is_uninit());
     }
     else {
       // Execute all deferred expressions backwards.
@@ -172,7 +172,7 @@ on_scope_exit(AIR_Status status)
           throw;
         }
       }
-      if(self.is_uninitialized())
+      if(self.is_uninit())
         return status;
     }
 
