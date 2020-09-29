@@ -2,7 +2,7 @@ ACLOCAL_AMFLAGS = -I m4
 NOTHING =
 
 ## Compiler options
-AM_CPPFLAGS = -pipe -pthread -Wall -Wextra -fPIC -DPIC -DDLL_EXPORT \
+AM_CPPFLAGS = -pipe -pthread -Wall -Wextra -fPIC -DPIC -DDLL_EXPORT  \
   -D_FILE_OFFSET_BITS=64 -D_POSIX_C_SOURCE=200809 -D_GNU_SOURCE -D_WIN32_WINNT=0x0600  \
   -f{inline-limit=2400,strict-{aliasing,overflow},merge-all-constants}  \
   -fno-{math-errno,trapping-math,devirtualize-speculatively}  \
