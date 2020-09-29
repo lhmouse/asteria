@@ -501,9 +501,10 @@ clone_opaque(rcptr<Abstract_Opaque>& output, const OpaqueT& src)
   }
 
 // Function type support
-using simple_function = Reference& (Reference& self,  // `this` (input) and return (output) reference
-                                    cow_vector<Reference>&& args,  // positional arguments
-                                    Global_Context& global);
+using simple_function =
+          Reference& (Reference& self,  // `this` (input) and return (output) reference
+                      cow_vector<Reference>&& args,  // positional arguments
+                      Global_Context& global);
 
 class cow_function
   {
