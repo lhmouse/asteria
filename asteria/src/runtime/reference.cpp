@@ -220,13 +220,11 @@ const
           // Elements of null values are also null values.
           if(qval->is_null())
             return null_value;
-
-          if(!qval->is_array())
+          else if(!qval->is_array())
             ASTERIA_THROW("Integer subscript inapplicable (value `$1`, index `$2`)", *qval, altr.index);
 
-          const auto& arr = qval->as_array();
-
           // Get the element at the given index.
+          const auto& arr = qval->as_array();
           auto w = wrap_index(altr.index, arr.size());
           if(w.nprepend | w.nappend)
             return null_value;
@@ -241,13 +239,11 @@ const
           // Members of null values are also null values.
           if(qval->is_null())
             return null_value;
-
-          if(!qval->is_object())
+          else if(!qval->is_object())
             ASTERIA_THROW("String subscript inapplicable (value `$1`, key `$2`)", *qval, altr.key);
 
-          const auto& obj = qval->as_object();
-
           // Get the value with the given key.
+          const auto& obj = qval->as_object();
           auto it = obj.find(altr.key);
           if(it == obj.end())
             return null_value;
@@ -260,13 +256,11 @@ const
           // Elements of null values are also null values.
           if(qval->is_null())
             return null_value;
-
-          if(!qval->is_array())
+          else if(!qval->is_array())
             ASTERIA_THROW("Head operator inapplicable (value `$1`)", *qval);
 
-          const auto& arr = qval->as_array();
-
           // Get the first element.
+          const auto& arr = qval->as_array();
           if(arr.empty())
             return null_value;
 
@@ -278,13 +272,11 @@ const
           // Elements of null values are also null values.
           if(qval->is_null())
             return null_value;
-
-          if(!qval->is_array())
+          else if(!qval->is_array())
             ASTERIA_THROW("Tail operator inapplicable (value `$1`)", *qval);
 
-          const auto& arr = qval->as_array();
-
           // Get the last element.
+          const auto& arr = qval->as_array();
           if(arr.empty())
             return null_value;
 
@@ -358,18 +350,15 @@ const
           // Create values as needed.
           if(qval->is_null())
             *qval = V_array();
-
-          if(!qval->is_array())
+          else if(!qval->is_array())
             ASTERIA_THROW("Integer subscript inapplicable (value `$1`, index `$2`)", *qval, altr.index);
 
-          auto& arr = qval->open_array();
-
           // Get the element at the given index.
+          auto& arr = qval->open_array();
           auto w = wrap_index(altr.index, arr.size());
           if(w.nprepend)
             arr.insert(arr.begin(), w.nprepend);
-
-          if(w.nappend)
+          else if(w.nappend)
             arr.append(w.nappend);
 
           qval = arr.mut_data() + w.rindex;
@@ -382,13 +371,11 @@ const
           // Create values as needed.
           if(qval->is_null())
             *qval = V_object();
-
-          if(!qval->is_object())
+          else if(!qval->is_object())
             ASTERIA_THROW("String subscript inapplicable (value `$1`, key `$2`)", *qval, altr.key);
 
-          auto& obj = qval->open_object();
-
           // Get the value with the given key.
+          auto& obj = qval->open_object();
           qval = &(obj.try_emplace(altr.key).first->second);
           break;
         }
@@ -397,13 +384,11 @@ const
           // Create values as needed.
           if(qval->is_null())
             *qval = V_array();
-
-          if(!qval->is_array())
+          else if(!qval->is_array())
             ASTERIA_THROW("Head operator inapplicable (value `$1`)", *qval);
 
-          auto& arr = qval->open_array();
-
           // Prepend a new element.
+          auto& arr = qval->open_array();
           qval = &*(arr.insert(arr.begin(), 1));
           break;
         }
@@ -412,13 +397,11 @@ const
           // Create values as needed.
           if(qval->is_null())
             *qval = V_array();
-
-          if(!qval->is_array())
+          else if(!qval->is_array())
             ASTERIA_THROW("Tail operator inapplicable (value `$1`)", *qval);
 
-          auto& arr = qval->open_array();
-
           // Append a new element.
+          auto& arr = qval->open_array();
           qval = &(arr.emplace_back());
           break;
         }
@@ -489,13 +472,11 @@ const
           // Elements of null values are also null values.
           if(qval->is_null())
             return nullopt;
-
-          if(!qval->is_array())
+          else if(!qval->is_array())
             ASTERIA_THROW("Integer subscript inapplicable (value `$1`, index `$2`)", *qval, altr.index);
 
-          auto& arr = qval->open_array();
-
           // Get the element at the given index.
+          auto& arr = qval->open_array();
           auto w = wrap_index(altr.index, arr.size());
           if(w.nprepend | w.nappend)
             return nullopt;
@@ -510,13 +491,11 @@ const
           // Members of null values are also null values.
           if(qval->is_null())
             return nullopt;
-
-          if(!qval->is_object())
+          else if(!qval->is_object())
             ASTERIA_THROW("String subscript inapplicable (value `$1`, key `$2`)", *qval, altr.key);
 
-          auto& obj = qval->open_object();
-
           // Get the value with the given key.
+          auto& obj = qval->open_object();
           auto it = obj.mut_find(altr.key);
           if(it == obj.end())
             return nullopt;
@@ -529,13 +508,11 @@ const
           // Elements of null values are also null values.
           if(qval->is_null())
             return nullopt;
-
-          if(!qval->is_array())
+          else if(!qval->is_array())
             ASTERIA_THROW("Head operator inapplicable (value `$1`)", *qval);
 
-          auto& arr = qval->open_array();
-
           // Get the first element.
+          auto& arr = qval->open_array();
           if(arr.empty())
             return nullopt;
 
@@ -547,13 +524,11 @@ const
           // Elements of null values are also null values.
           if(qval->is_null())
             return nullopt;
-
-          if(!qval->is_array())
+          else if(!qval->is_array())
             ASTERIA_THROW("Tail operator inapplicable (value `$1`)", *qval);
 
-          auto& arr = qval->open_array();
-
           // Get the last element.
+          auto& arr = qval->open_array();
           if(arr.empty())
             return nullopt;
 
@@ -575,13 +550,11 @@ const
         // Elements of null values are also null values.
         if(qval->is_null())
           return nullopt;
-
-        if(!qval->is_array())
+        else if(!qval->is_array())
           ASTERIA_THROW("Integer subscript inapplicable (value `$1`, index `$2`)", *qval, altr.index);
 
-        auto& arr = qval->open_array();
-
         // Get the element at the given index.
+        auto& arr = qval->open_array();
         auto w = wrap_index(altr.index, arr.size());
         if(w.nprepend | w.nappend)
           return nullopt;
@@ -597,13 +570,11 @@ const
         // Members of null values are also null values.
         if(qval->is_null())
           return nullopt;
-
-        if(!qval->is_object())
+        else if(!qval->is_object())
           ASTERIA_THROW("String subscript inapplicable (value `$1`, key `$2`)", *qval, altr.key);
 
-        auto& obj = qval->open_object();
-
         // Get the value with the given key.
+        auto& obj = qval->open_object();
         auto it = obj.mut_find(altr.key);
         if(it == obj.end())
           return nullopt;
@@ -617,13 +588,11 @@ const
         // Elements of null values are also null values.
         if(qval->is_null())
           return nullopt;
-
-        if(!qval->is_array())
+        else if(!qval->is_array())
           ASTERIA_THROW("Head operator inapplicable (value `$1`)", *qval);
 
-        auto& arr = qval->open_array();
-
         // Get the first element.
+        auto& arr = qval->open_array();
         if(arr.empty())
           return nullopt;
 
@@ -636,13 +605,11 @@ const
         // Elements of null values are also null values.
         if(qval->is_null())
           return nullopt;
-
-        if(!qval->is_array())
+        else if(!qval->is_array())
           ASTERIA_THROW("Tail operator inapplicable (value `$1`)", *qval);
 
-        auto& arr = qval->open_array();
-
         // Get the last element.
+        auto& arr = qval->open_array();
         if(arr.empty())
           return nullopt;
 
