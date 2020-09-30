@@ -18,21 +18,21 @@ Runtime_Error::
 
 void
 Runtime_Error::
-do_backtrace()
-  try {
+do_backtrace(Backtrace_Frame&& new_frm)
+  {
     // Unpack nested exceptions, if any.
-    if(auto eptr = ::std::current_exception())
-      ::std::rethrow_exception(eptr);
+    try {
+      if(auto eptr = ::std::current_exception())
+        ::std::rethrow_exception(eptr);
+    }
+    catch(Runtime_Error& nested)
+      { this->m_frames.append(nested.m_frames.begin(), nested.m_frames.end());  }
+    catch(exception&)
+      { }
+
+    // Push a new frame.
+    this->do_insert_frame(::std::move(new_frm));
   }
-  catch(Runtime_Error& nested) {
-    // Copy frames.
-    if(this->m_frames.size())
-      this->m_frames.append(nested.m_frames.begin(), nested.m_frames.end());
-    else
-      this->m_frames = nested.m_frames;
-  }
-  catch(exception&)
-    { }
 
 void
 Runtime_Error::

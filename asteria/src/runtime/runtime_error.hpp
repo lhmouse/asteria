@@ -28,25 +28,22 @@ class Runtime_Error
   public:
     Runtime_Error(M_native, const exception& stdex)
       : m_value(cow_string(stdex.what()))
-      { this->do_backtrace();
-        this->do_insert_frame({ frame_type_native, this->m_value });  }
+      { this->do_backtrace({ frame_type_native, this->m_value });  }
 
     template<typename XValT>
     Runtime_Error(M_throw, XValT&& xval, const Source_Location& sloc)
       : m_value(::std::forward<XValT>(xval))
-      { this->do_backtrace();
-        this->do_insert_frame({ frame_type_throw, sloc, this->m_value });  }
+      { this->do_backtrace({ frame_type_throw, sloc, this->m_value });  }
 
     Runtime_Error(M_assert, const Source_Location& sloc, const cow_string& msg)
       : m_value("Assertion failure: " + msg)
-      { this->do_backtrace();
-        this->do_insert_frame({ frame_type_assert, sloc, this->m_value });  }
+      { this->do_backtrace({ frame_type_assert, sloc, this->m_value });  }
 
     ASTERIA_COPYABLE_DESTRUCTOR(Runtime_Error);
 
   private:
     void
-    do_backtrace();
+    do_backtrace(Backtrace_Frame&& new_frm);
 
     void
     do_insert_frame(Backtrace_Frame&& new_frm);
