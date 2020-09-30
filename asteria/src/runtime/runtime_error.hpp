@@ -29,18 +29,18 @@ class Runtime_Error
     Runtime_Error(M_native, const exception& stdex)
       : m_value(cow_string(stdex.what()))
       { this->do_backtrace();
-        this->do_insert_frame(frame_type_native, this->m_value);  }
+        this->do_insert_frame({ frame_type_native, this->m_value });  }
 
     template<typename XValT>
     Runtime_Error(M_throw, XValT&& xval, const Source_Location& sloc)
       : m_value(::std::forward<XValT>(xval))
       { this->do_backtrace();
-        this->do_insert_frame(frame_type_throw, sloc, this->m_value);  }
+        this->do_insert_frame({ frame_type_throw, sloc, this->m_value });  }
 
     Runtime_Error(M_assert, const Source_Location& sloc, const cow_string& msg)
       : m_value("Assertion failure: " + msg)
       { this->do_backtrace();
-        this->do_insert_frame(frame_type_assert, sloc, this->m_value);  }
+        this->do_insert_frame({ frame_type_assert, sloc, this->m_value });  }
 
     ASTERIA_COPYABLE_DESTRUCTOR(Runtime_Error);
 
@@ -49,20 +49,7 @@ class Runtime_Error
     do_backtrace();
 
     void
-    do_compose_message();
-
-    template<typename... ParamsT>
-    void
-    do_insert_frame(ParamsT&&... params)
-      {
-        // Insert the frame. Note exception safety.
-        size_t ipos = this->m_ipos;
-        this->m_frames.insert(ipos, Backtrace_Frame(::std::forward<ParamsT>(params)...));
-        this->m_ipos = ipos + 1;
-
-        // Rebuild the message using new frames.
-        this->do_compose_message();
-      }
+    do_insert_frame(Backtrace_Frame&& new_frm);
 
   public:
     const char*
@@ -94,7 +81,7 @@ class Runtime_Error
         this->m_ipos = 0;
 
         // Append the first frame to the current backtrace.
-        this->do_insert_frame(frame_type_throw, sloc, this->m_value);
+        this->do_insert_frame({ frame_type_throw, sloc, this->m_value });
         return *this;
       }
 
@@ -103,7 +90,7 @@ class Runtime_Error
     push_frame_catch(const Source_Location& sloc, XValT&& xval)
       {
         // Append a new frame to the current backtrace.
-        this->do_insert_frame(frame_type_catch, sloc, ::std::forward<XValT>(xval));
+        this->do_insert_frame({ frame_type_catch, sloc, ::std::forward<XValT>(xval) });
         return *this;
       }
 
@@ -111,7 +98,7 @@ class Runtime_Error
     push_frame_plain(const Source_Location& sloc, const cow_string& remarks)
       {
         // Append a new frame to the current backtrace.
-        this->do_insert_frame(frame_type_plain, sloc, remarks);
+        this->do_insert_frame({ frame_type_plain, sloc, remarks });
         return *this;
       }
 
@@ -119,7 +106,7 @@ class Runtime_Error
     push_frame_func(const Source_Location& sloc, const cow_string& func)
       {
         // Append a new frame to the current backtrace.
-        this->do_insert_frame(frame_type_func, sloc, func);
+        this->do_insert_frame({ frame_type_func, sloc, func });
         return *this;
       }
 
@@ -127,7 +114,7 @@ class Runtime_Error
     push_frame_defer(const Source_Location& sloc)
       {
         // Append a new frame to the current backtrace.
-        this->do_insert_frame(frame_type_defer, sloc, this->m_value);
+        this->do_insert_frame({ frame_type_defer, sloc, this->m_value });
         return *this;
       }
 
@@ -135,7 +122,7 @@ class Runtime_Error
     push_frame_try(const Source_Location& sloc)
       {
         // Append a new frame to the current backtrace.
-        this->do_insert_frame(frame_type_try, sloc, this->m_value);
+        this->do_insert_frame({ frame_type_try, sloc, this->m_value });
         return *this;
       }
   };

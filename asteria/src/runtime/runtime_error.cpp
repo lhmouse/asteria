@@ -36,9 +36,15 @@ do_backtrace()
 
 void
 Runtime_Error::
-do_compose_message()
+do_insert_frame(Backtrace_Frame&& new_frm)
   {
-    // Reuse the storage if any.
+    // Insert the frame. Note exception safety.
+    size_t ipos = this->m_ipos;
+    this->m_frames.insert(ipos, ::std::move(new_frm));
+    this->m_ipos = ipos + 1;
+
+    // Rebuild the message using new frames.
+    // The storage may be reused.
     ::rocket::tinyfmt_str fmt;
     fmt.set_string(::std::move(this->m_what));
     fmt.clear_string();
