@@ -535,6 +535,7 @@ class string_iterator
       {
         ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
         ROCKET_ASSERT_MSG(this->m_begin == other.m_begin, "Iterator not compatible");
+        ROCKET_ASSERT_MSG(this->m_end == other.m_end, "Iterator not compatible");
         return this->m_cur - other.m_cur;
       }
 
