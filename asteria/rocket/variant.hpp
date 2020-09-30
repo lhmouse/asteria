@@ -37,7 +37,11 @@ class variant
     static constexpr size_t alternative_size = sizeof...(alternativesT);
 
   private:
-    typename aligned_union<1, alternativesT...>::type m_stor[1];
+    // The first member of this union is used for trivial initialization.
+    union {
+      typename alternative_at<0>::type m_first;
+      typename aligned_union<1, alternativesT...>::type m_stor[1];
+    };
     typename lowest_unsigned<alternative_size - 1>::type m_index;
 
   private:
@@ -57,16 +61,11 @@ class variant
 
   public:
     // 23.7.3.1, constructors
+    constexpr
     variant()
     noexcept(is_nothrow_constructible<typename alternative_at<0>::type>::value)
-      {
-#ifdef ROCKET_DEBUG
-        ::std::memset(this->m_stor, '*', sizeof(m_stor));
-#endif
-        // Value-initialize the first alternative in place.
-        noadl::construct_at(this->do_cast_storage<0>());
-        this->m_index = 0;
-      }
+      : m_first(), m_index(0)
+      { }
 
     template<typename paramT,
     ROCKET_ENABLE_IF_HAS_VALUE(index_of<typename decay<paramT>::type>::value)>
