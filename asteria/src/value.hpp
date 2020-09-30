@@ -28,6 +28,7 @@ class Value
     Storage m_stor;
 
   public:
+    constexpr
     Value(nullopt_t = nullopt)
     noexcept
       : m_stor()
