@@ -21,7 +21,7 @@ class Runtime_Error
   private:
     Value m_value;
     cow_vector<Backtrace_Frame> m_frames;
-    size_t m_ipos = 0;  // where to insert new frames
+    ptrdiff_t m_ins_at = 0;  // where to insert new frames
 
     cow_string m_what;  // a comprehensive string that is human-readable.
 
@@ -75,7 +75,7 @@ class Runtime_Error
       {
         // Start a new backtrace.
         this->m_value = ::std::forward<XValT>(xval);
-        this->m_ipos = 0;
+        this->m_ins_at = 0;
 
         // Append the first frame to the current backtrace.
         this->do_insert_frame({ frame_type_throw, sloc, this->m_value });
@@ -88,6 +88,10 @@ class Runtime_Error
       {
         // Append a new frame to the current backtrace.
         this->do_insert_frame({ frame_type_catch, sloc, ::std::forward<XValT>(xval) });
+
+        // This means an exception was thrown again from a `catch` block.
+        // Subsequent frames shoud be appended to its parent.
+        this->m_ins_at = this->m_frames.ssize();
         return *this;
       }
 
@@ -112,6 +116,10 @@ class Runtime_Error
       {
         // Append a new frame to the current backtrace.
         this->do_insert_frame({ frame_type_defer, sloc, this->m_value });
+
+        // This means an exception was thrown again during execution of deferred
+        // expression. Subsequent frames shoud be appended to its parent.
+        this->m_ins_at = this->m_frames.ssize();
         return *this;
       }
 
