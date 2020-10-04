@@ -145,7 +145,7 @@ using ::std::swap;
 #define ROCKET_ENABLE_IF_HAS_TYPE(...)       ROCKET_VOID_T(__VA_ARGS__)* = nullptr
 #define ROCKET_ENABLE_IF_HAS_VALUE(...)      ROCKET_ENABLE_IF(sizeof(__VA_ARGS__) | 1)
 
-#include "details/util.ipp"
+#include "details/fwd.ipp"
 
 template<typename typeT>
 struct remove_cvref
@@ -204,7 +204,7 @@ clamp(xvT&& xv, loT&& lo, upT&& up)
 
 template<typename iteratorT>
 struct is_input_iterator
-  : details_util::is_input_iterator_aux<iteratorT, void>
+  : details_fwd::is_input_iterator_aux<iteratorT, void>
   { };
 
 template<typename targetT, typename... candiatesT>
@@ -285,7 +285,7 @@ constexpr
 size_t
 estimate_distance(iteratorT first, iteratorT last)
   {
-    return details_util::estimate_distance_aux(
+    return details_fwd::estimate_distance_aux(
                         typename iterator_traits<iteratorT>::iterator_category(),
                         ::std::move(first), ::std::move(last));
   }
@@ -392,7 +392,7 @@ constexpr
 void
 for_each(containerT&& cont, callbackT&& callback)
   {
-    return details_util::for_each_nonconstexpr(
+    return details_fwd::for_each_nonconstexpr(
                   ::std::forward<containerT>(cont), ::std::forward<callbackT>(callback));
   }
 
@@ -401,7 +401,7 @@ constexpr
 void
 for_each(initializer_list<elementT> init, callbackT&& callback)
   {
-    return details_util::for_each_nonconstexpr(
+    return details_fwd::for_each_nonconstexpr(
                   init, ::std::forward<callbackT>(callback));
   }
 
@@ -410,7 +410,7 @@ constexpr
 bool
 any_of(containerT&& cont, callbackT&& callback)
   {
-    return details_util::any_of_nonconstexpr(
+    return details_fwd::any_of_nonconstexpr(
                   ::std::forward<containerT>(cont), ::std::forward<callbackT>(callback));
   }
 
@@ -419,7 +419,7 @@ constexpr
 bool
 any_of(initializer_list<elementT> init, callbackT&& callback)
   {
-    return details_util::any_of_nonconstexpr(
+    return details_fwd::any_of_nonconstexpr(
                   init, ::std::forward<callbackT>(callback));
   }
 
@@ -428,7 +428,7 @@ constexpr
 bool
 none_of(containerT&& cont, callbackT&& callback)
   {
-    return details_util::none_of_nonconstexpr(
+    return details_fwd::none_of_nonconstexpr(
                   ::std::forward<containerT>(cont), ::std::forward<callbackT>(callback));
   }
 
@@ -437,7 +437,7 @@ constexpr
 bool
 none_of(initializer_list<elementT> init, callbackT&& callback)
   {
-    return details_util::none_of_nonconstexpr(
+    return details_fwd::none_of_nonconstexpr(
                   init, ::std::forward<callbackT>(callback));
   }
 
@@ -446,7 +446,7 @@ constexpr
 bool
 all_of(containerT&& cont, callbackT&& callback)
   {
-    return details_util::all_of_nonconstexpr(
+    return details_fwd::all_of_nonconstexpr(
                   ::std::forward<containerT>(cont), ::std::forward<callbackT>(callback));
   }
 
@@ -455,7 +455,7 @@ constexpr
 bool
 all_of(initializer_list<elementT> init, callbackT&& callback)
   {
-    return details_util::all_of_nonconstexpr(
+    return details_fwd::all_of_nonconstexpr(
                   init, ::std::forward<callbackT>(callback));
   }
 
@@ -464,7 +464,7 @@ constexpr
 bool
 is_any_of(targetT&& targ, containerT&& cont)
   {
-    return details_util::is_any_of_nonconstexpr(
+    return details_fwd::is_any_of_nonconstexpr(
                   ::std::forward<targetT>(targ), ::std::forward<containerT>(cont));
   }
 
@@ -473,7 +473,7 @@ constexpr
 bool
 is_any_of(targetT&& targ, initializer_list<elementT> init)
   {
-    return details_util::is_any_of_nonconstexpr(
+    return details_fwd::is_any_of_nonconstexpr(
                   ::std::forward<targetT>(targ), init);
   }
 
@@ -482,7 +482,7 @@ constexpr
 bool
 is_none_of(targetT&& targ, containerT&& cont)
   {
-    return details_util::is_none_of_nonconstexpr(
+    return details_fwd::is_none_of_nonconstexpr(
                   ::std::forward<targetT>(targ), ::std::forward<containerT>(cont));
   }
 
@@ -491,7 +491,7 @@ constexpr
 bool
 is_none_of(targetT&& targ, initializer_list<elementT> init)
   {
-    return details_util::is_none_of_nonconstexpr(
+    return details_fwd::is_none_of_nonconstexpr(
                   ::std::forward<targetT>(targ), init);
   }
 
@@ -511,13 +511,13 @@ noexcept
 
 template<intmax_t valueT>
 struct lowest_signed
-  : details_util::integer_selector<intmax_t, valueT,
+  : details_fwd::integer_selector<intmax_t, valueT,
               signed char, signed short, signed, signed long, signed long long>
   { };
 
 template<uintmax_t valueT>
 struct lowest_unsigned
-  : details_util::integer_selector<uintmax_t, valueT,
+  : details_fwd::integer_selector<uintmax_t, valueT,
               unsigned char, unsigned short, unsigned, unsigned long, unsigned long long>
   { };
 
@@ -532,8 +532,8 @@ template<typename targetT, typename sourceT>
 constexpr
 targetT
 static_or_dynamic_cast(sourceT&& src)
-  { return details_util::static_or_dynamic_cast_aux<targetT, sourceT>(
-                        details_util::use_static_cast_aux<targetT, sourceT>(),
+  { return details_fwd::static_or_dynamic_cast_aux<targetT, sourceT>(
+                        details_fwd::use_static_cast_aux<targetT, sourceT>(),
                         ::std::forward<sourceT>(src));  }
 
 }  // namespace rocket

@@ -47,7 +47,7 @@ include_rocket_details_HEADERS =  \
   %reldir%/details/compiler_clang.i  \
   %reldir%/details/compiler_gcc.i  \
   %reldir%/details/compiler_msvc.i  \
-  %reldir%/details/util.ipp  \
+  %reldir%/details/fwd.ipp  \
   %reldir%/details/xallocator.ipp  \
   %reldir%/details/variant.ipp  \
   %reldir%/details/unique_handle.ipp  \
