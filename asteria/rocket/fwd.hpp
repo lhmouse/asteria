@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_UTIL_HPP_
-#define ROCKET_UTIL_HPP_
+#ifndef ROCKET_FWD_HPP_
+#define ROCKET_FWD_HPP_
 
 // This must be the first header as it defines some macros that interact with the standard library.
 #include "compiler.h"
