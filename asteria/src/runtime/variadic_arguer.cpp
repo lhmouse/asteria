@@ -31,26 +31,30 @@ invoke_ptc_aware(Reference& self, Global_Context& /*global*/, cow_vector<Referen
 const
   {
     Argument_Reader reader(::rocket::sref("__varg"), ::rocket::cref(args));
-    // Extract arguments.
+
+    // If an argument is specified, it shall be the index of a variadic argument as
+    // an integer, or an explicit `null`.
     Opt_integer qindex;
-    if(reader.I().o(qindex).F()) {
-      auto nvargs = this->m_vargs.size();
-      if(!qindex) {
-        // Return the number of variadic arguments if `index` is `null` or absent.
-        Reference::S_constant xref = { static_cast<int64_t>(nvargs) };
-        return self = ::std::move(xref);
-      }
-      // Return the argument at `index`.
-      auto w = wrap_index(*qindex, nvargs);
-      auto nadd = w.nprepend | w.nappend;
-      if(nadd != 0) {
-        // Return a `null`.
-        return self = Reference::S_constant();
-      }
-      return self = this->m_vargs.at(w.rindex);
+
+    reader.start_overload();     // (
+    reader.optional(qindex);     //   [index]
+    if(!reader.end_overload())   // )
+      reader.throw_no_matching_function_call();
+
+    // If no argument is given, return the number of variadic arguments.
+    if(!qindex) {
+      Reference::S_constant xref = { this->m_vargs.ssize() };
+      return self = ::std::move(xref);
     }
-    // Fail.
-    reader.throw_no_matching_function_call();
+
+    // Wrap the index as necessary.
+    // If the index is out of range, return a constant `null`.
+    auto w = wrap_index(*qindex, this->m_vargs.size());
+    if(w.nprepend | w.nappend)
+      return self = Reference::S_constant();
+
+    // Copy the reference at `*qindex`.
+    return self = this->m_vargs.at(w.rindex);
   }
 
 }  // namespace asteria

@@ -14,572 +14,524 @@ Argument_Reader::
 
 void
 Argument_Reader::
-do_record_parameter_required(Type type)
+do_prepare_parameter(const char* param)
   {
-    if(this->m_state.finished)
-      ASTERIA_THROW("Argument reader finished and disposed");
+    // Ensure `end_overload()` has not been called for this overload.
+    if(this->m_state.ended)
+      ASTERIA_THROW("Current overload marked ended");
 
-    if(this->m_state.nparams)
-      this->m_state.history << ", ";
-
-    // Record a parameter.
-    this->m_state.history << describe_type(type);
-    this->m_state.nparams++;
+    // Append the parameter.
+    // If it is not the first one, insert a comma before it.
+    if(this->m_state.nparams++)
+      this->m_state.params << ", ";
+    this->m_state.params << param;
   }
 
 void
 Argument_Reader::
-do_record_parameter_optional(Type type)
+do_terminate_parameter_list()
   {
-    if(this->m_state.finished)
-      ASTERIA_THROW("Argument reader finished and disposed");
+    // Ensure `end_overload()` has not been called for this overload.
+    if(this->m_state.ended)
+      ASTERIA_THROW("Current overload marked ended");
 
-    if(this->m_state.nparams)
-      this->m_state.history << ", ";
-
-    // Record a parameter.
-    this->m_state.history << '[' << describe_type(type) << ']';
-    this->m_state.nparams++;
+    // Mark this overload ended.
+    this->m_state.ended = true;
+    this->m_overloads.append(this->m_state.params.data(),
+               this->m_state.params.size() + 1);  // null terminator included
   }
 
-void
+Argument_Reader&
 Argument_Reader::
-do_record_parameter_generic()
+do_mark_match_failure()
+noexcept
   {
-    if(this->m_state.finished)
-      ASTERIA_THROW("Argument reader finished and disposed");
-
-    if(this->m_state.nparams)
-      this->m_state.history << ", ";
-
-    // Record a parameter.
-    this->m_state.history << "[generic]";
-    this->m_state.nparams++;
-  }
-
-void
-Argument_Reader::
-do_record_parameter_variadic()
-  {
-    if(this->m_state.finished)
-      ASTERIA_THROW("Argument reader finished and disposed");
-
-    if(this->m_state.nparams)
-      this->m_state.history << ", ";
-
-    // Record the end of parameters.
-    this->m_state.history << "...";
-  }
-
-void
-Argument_Reader::
-do_record_parameter_finish()
-  {
-    if(this->m_state.finished)
-      ASTERIA_THROW("Argument reader finished and disposed");
-
-    // Terminate this overload.
-    this->m_state.history.push_back('\0');
-    this->m_ovlds.append(this->m_state.history);
+    // Set the current overload as unmatched.
+    this->m_state.matched = false;
+    return *this;
   }
 
 const Reference*
 Argument_Reader::
-do_peek_argument_opt()
+do_peek_argument()
 const
   {
-    if(!this->m_state.succeeded)
+    // Try getting an argument for the next parameter.
+    // Prior to this function, `do_prepare_parameter()` shall have been called.
+    if(!this->m_state.matched)
       return nullptr;
 
-    // Before calling this function, the parameter information must have been recorded.
     size_t index = this->m_state.nparams - 1;
-    return this->m_args.get().ptr(index);
+    if(index >= this->m_args->size())
+      return nullptr;
+
+    return this->m_args->data() + index;
   }
 
-opt<size_t>
-Argument_Reader::
-do_check_finish_opt()
-const
+Argument_Reader&
+Argument_Reader::load_state(size_t index)
   {
-    if(!this->m_state.succeeded)
-      return nullopt;
-
-    // Before calling this function, the current overload must have been finished.
-    size_t index = this->m_state.nparams;
-    return ::rocket::min(index, this->m_args.get().size());
+    this->m_state = this->m_saved_states.at(index);
+    return *this;
   }
 
 Argument_Reader&
 Argument_Reader::
-I()
+save_state(size_t index)
+  {
+    if(index >= this->m_saved_states.size())
+      this->m_saved_states.append(index - this->m_saved_states.size() + 1);
+
+    this->m_saved_states.mut(index) = this->m_state;
+    return *this;
+  }
+
+Argument_Reader&
+Argument_Reader::
+start_overload()
 noexcept
   {
-    // Clear internal states.
-    this->m_state.history.clear();
+    this->m_state.params.clear();
     this->m_state.nparams = 0;
-    this->m_state.finished = false;
-    this->m_state.succeeded = true;
+    this->m_state.ended = false;
+    this->m_state.matched = true;
     return *this;
-  }
-
-bool
-Argument_Reader::
-F(cow_vector<Reference>& vargs)
-  {
-    this->do_record_parameter_variadic();
-    this->do_record_parameter_finish();
-
-    // Get the number of named parameters.
-    auto qvoff = this->do_check_finish_opt();
-    if(!qvoff)
-      return false;
-
-    // Copy variadic arguments, if any.
-    vargs.clear();
-    auto nargs = this->m_args.get().size();
-    if(nargs > *qvoff) {
-      vargs.reserve(nargs - *qvoff);
-      ::std::for_each(this->m_args.get().begin() + static_cast<ptrdiff_t>(*qvoff),
-                      this->m_args.get().end(),
-                      [&](const Reference& arg) {vargs.emplace_back(arg);  });
-    }
-    return true;
-  }
-
-bool
-Argument_Reader::
-F(cow_vector<Value>& vargs)
-  {
-    this->do_record_parameter_variadic();
-    this->do_record_parameter_finish();
-
-    // Get the number of named parameters.
-    auto qvoff = this->do_check_finish_opt();
-    if(!qvoff)
-      return false;
-
-    // Copy variadic arguments, if any.
-    vargs.clear();
-    auto nargs = this->m_args.get().size();
-    if(nargs > *qvoff) {
-      vargs.reserve(nargs - *qvoff);
-      ::std::for_each(this->m_args.get().begin() + static_cast<ptrdiff_t>(*qvoff),
-                      this->m_args.get().end(),
-                      [&](const Reference& arg) {vargs.emplace_back(arg.read());  });
-    }
-    return true;
-  }
-
-bool
-Argument_Reader::
-F()
-  {
-    this->do_record_parameter_finish();
-
-    // Get the number of named parameters.
-    auto qvoff = this->do_check_finish_opt();
-    if(!qvoff)
-      return false;
-
-    // There shall be no more arguments than parameters.
-    auto nargs = this->m_args.get().size();
-    if(nargs > *qvoff) {
-      this->do_fail();
-      return false;
-    }
-    return true;
   }
 
 Argument_Reader&
 Argument_Reader::
-v(V_boolean& xval)
+optional(Reference& out)
   {
-    xval = false;
-    this->do_record_parameter_required(type_boolean);
+    out = Reference::S_uninit();
+    this->do_prepare_parameter("[reference]");
 
-    // Get the next argument.
-    auto karg = this->do_peek_argument_opt();
-    if(!karg)
-      return this->do_fail();
+    auto qref = this->do_peek_argument();
+    if(!qref)
+      return *this;
 
-    // If the value doesn't have the desired type, fail.
-    const auto& val = karg->read();
+    // Copy the argument reference as is.
+    out = *qref;
+    return *this;
+  }
+
+Argument_Reader&
+Argument_Reader::
+optional(Value& out)
+  {
+    out = nullopt;
+    this->do_prepare_parameter("[value]");
+
+    auto qref = this->do_peek_argument();
+    if(!qref)
+      return *this;
+
+    // Dereference the argument and copy the value as is.
+    out = qref->read();
+    return *this;
+  }
+
+Argument_Reader&
+Argument_Reader::
+optional(Opt_boolean& out)
+  {
+    out = nullopt;
+    this->do_prepare_parameter("[boolean]");
+
+    auto qref = this->do_peek_argument();
+    if(!qref)
+      return *this;
+
+    // Dereference the argument and check its type.
+    const auto& val = qref->read();
+    if(val.is_null())
+      return *this;
+
     if(!val.is_boolean())
-      return this->do_fail();
+      return this->do_mark_match_failure();
 
-    xval = val.as_boolean();
+    out = val.as_boolean();
     return *this;
   }
 
 Argument_Reader&
 Argument_Reader::
-v(V_integer& xval)
+optional(Opt_integer& out)
   {
-    xval = 0;
-    this->do_record_parameter_required(type_integer);
+    out = nullopt;
+    this->do_prepare_parameter("[integer]");
 
-    // Get the next argument.
-    auto karg = this->do_peek_argument_opt();
-    if(!karg)
-      return this->do_fail();
+    auto qref = this->do_peek_argument();
+    if(!qref)
+      return *this;
 
-    // If the value doesn't have the desired type, fail.
-    const auto& val = karg->read();
+    // Dereference the argument and check its type.
+    const auto& val = qref->read();
     if(!val.is_integer())
-      return this->do_fail();
+      return this->do_mark_match_failure();
 
-    xval = val.as_integer();
-    return *this;
-  }
-
-Argument_Reader&
-Argument_Reader::
-v(V_real& xval)
-  {
-    xval = 0;
-    this->do_record_parameter_required(type_real);
-
-    // Get the next argument.
-    auto karg = this->do_peek_argument_opt();
-    if(!karg)
-      return this->do_fail();
-
-    // If the value doesn't have the desired type, fail.
-    const auto& val = karg->read();
-    if(!val.is_convertible_to_real())
-      return this->do_fail();
-
-    xval = val.convert_to_real();
-    return *this;
-  }
-
-Argument_Reader&
-Argument_Reader::
-v(V_string& xval)
-  {
-    xval.clear();
-    this->do_record_parameter_required(type_string);
-
-    // Get the next argument.
-    auto karg = this->do_peek_argument_opt();
-    if(!karg)
-      return this->do_fail();
-
-    // If the value doesn't have the desired type, fail.
-    const auto& val = karg->read();
-    if(!val.is_string())
-      return this->do_fail();
-
-    xval = val.as_string();
-    return *this;
-  }
-
-Argument_Reader&
-Argument_Reader::
-v(V_opaque& xval)
-  {
-    xval.reset();
-    this->do_record_parameter_required(type_opaque);
-
-    // Get the next argument.
-    auto karg = this->do_peek_argument_opt();
-    if(!karg)
-      return this->do_fail();
-
-    // If the value doesn't have the desired type, fail.
-    const auto& val = karg->read();
-    if(!val.is_opaque())
-      return this->do_fail();
-
-    xval = val.as_opaque();
-    return *this;
-  }
-
-Argument_Reader&
-Argument_Reader::
-v(V_function& xval)
-  {
-    xval.reset();
-    this->do_record_parameter_required(type_function);
-
-    // Get the next argument.
-    auto karg = this->do_peek_argument_opt();
-    if(!karg)
-      return this->do_fail();
-
-    // If the value doesn't have the desired type, fail.
-    const auto& val = karg->read();
-    if(!val.is_function())
-      return this->do_fail();
-
-    xval = val.as_function();
-    return *this;
-  }
-
-Argument_Reader&
-Argument_Reader::
-v(V_array& xval)
-  {
-    xval.clear();
-    this->do_record_parameter_required(type_array);
-
-    // Get the next argument.
-    auto karg = this->do_peek_argument_opt();
-    if(!karg)
-      return this->do_fail();
-
-    // If the value doesn't have the desired type, fail.
-    const auto& val = karg->read();
-    if(!val.is_array())
-      return this->do_fail();
-
-    xval = val.as_array();
-    return *this;
-  }
-
-Argument_Reader&
-Argument_Reader::
-v(V_object& xval)
-  {
-    xval.clear();
-    this->do_record_parameter_required(type_object);
-
-    // Get the next argument.
-    auto karg = this->do_peek_argument_opt();
-    if(!karg)
-      return this->do_fail();
-
-    // If the value doesn't have the desired type, fail.
-    const auto& val = karg->read();
-    if(!val.is_object())
-      return this->do_fail();
-
-    xval = val.as_object();
-    return *this;
-  }
-
-Argument_Reader&
-Argument_Reader::
-o(Reference& ref)
-  {
-    ref = Reference::S_uninit();
-    this->do_record_parameter_generic();
-
-    // Get the next argument.
-    auto karg = this->do_peek_argument_opt();
-    if(!karg)
-      return *this;
-
-    ref = *karg;
-    return *this;
-  }
-
-Argument_Reader&
-Argument_Reader::
-o(Value& val)
-  {
-    val = V_null();
-    this->do_record_parameter_generic();
-
-    // Get the next argument.
-    auto karg = this->do_peek_argument_opt();
-    if(!karg)
-      return *this;
-
-    val = karg->read();
-    return *this;
-  }
-
-Argument_Reader&
-Argument_Reader::
-o(Opt_boolean& xopt)
-  {
-    xopt.reset();
-    this->do_record_parameter_optional(type_boolean);
-
-    // Get the next argument.
-    auto karg = this->do_peek_argument_opt();
-    if(!karg)
-      return *this;
-
-    const auto& val = karg->read();
     if(val.is_null())
       return *this;
 
-    // If the value doesn't have the desired type, fail.
+    out = val.as_integer();
+    return *this;
+  }
+
+Argument_Reader&
+Argument_Reader::
+optional(Opt_real& out)
+  {
+    out = nullopt;
+    this->do_prepare_parameter("[real]");
+
+    auto qref = this->do_peek_argument();
+    if(!qref)
+      return *this;
+
+    // Dereference the argument and check its type.
+    const auto& val = qref->read();
+    if(!val.is_convertible_to_real())
+      return this->do_mark_match_failure();
+
+    if(val.is_null())
+      return *this;
+
+    out = val.convert_to_real();
+    return *this;
+  }
+
+Argument_Reader&
+Argument_Reader::
+optional(Opt_string& out)
+  {
+    out = nullopt;
+    this->do_prepare_parameter("[string]");
+
+    auto qref = this->do_peek_argument();
+    if(!qref)
+      return *this;
+
+    // Dereference the argument and check its type.
+    const auto& val = qref->read();
+    if(!val.is_string())
+      return this->do_mark_match_failure();
+
+    if(val.is_null())
+      return *this;
+
+    out = val.as_string();
+    return *this;
+  }
+
+Argument_Reader&
+Argument_Reader::
+optional(Opt_opaque& out)
+  {
+    out = nullptr;
+    this->do_prepare_parameter("[opaque]");
+
+    auto qref = this->do_peek_argument();
+    if(!qref)
+      return *this;
+
+    // Dereference the argument and check its type.
+    const auto& val = qref->read();
+    if(!val.is_opaque())
+      return this->do_mark_match_failure();
+
+    if(val.is_null())
+      return *this;
+
+    out = val.as_opaque();
+    return *this;
+  }
+
+Argument_Reader&
+Argument_Reader::
+optional(Opt_function& out)
+  {
+    out = nullptr;
+    this->do_prepare_parameter("[function]");
+
+    auto qref = this->do_peek_argument();
+    if(!qref)
+      return *this;
+
+    // Dereference the argument and check its type.
+    const auto& val = qref->read();
+    if(!val.is_function())
+      return this->do_mark_match_failure();
+
+    if(val.is_null())
+      return *this;
+
+    out = val.as_function();
+    return *this;
+  }
+
+Argument_Reader&
+Argument_Reader::
+optional(Opt_array& out)
+  {
+    out = nullopt;
+    this->do_prepare_parameter("[array]");
+
+    auto qref = this->do_peek_argument();
+    if(!qref)
+      return *this;
+
+    // Dereference the argument and check its type.
+    const auto& val = qref->read();
+    if(!val.is_array())
+      return this->do_mark_match_failure();
+
+    if(val.is_null())
+      return *this;
+
+    out = val.as_array();
+    return *this;
+  }
+
+Argument_Reader&
+Argument_Reader::
+optional(Opt_object& out)
+  {
+    out = nullopt;
+    this->do_prepare_parameter("[object]");
+
+    auto qref = this->do_peek_argument();
+    if(!qref)
+      return *this;
+
+    // Dereference the argument and check its type.
+    const auto& val = qref->read();
+    if(!val.is_object())
+      return this->do_mark_match_failure();
+
+    if(val.is_null())
+      return *this;
+
+    out = val.as_object();
+    return *this;
+  }
+
+Argument_Reader&
+Argument_Reader::
+required(V_boolean& out)
+  {
+    out = false;
+    this->do_prepare_parameter("boolean");
+
+    auto qref = this->do_peek_argument();
+    if(!qref)
+      return this->do_mark_match_failure();
+
+    // Dereference the argument and check its type.
+    const auto& val = qref->read();
     if(!val.is_boolean())
-      return this->do_fail();
+      return this->do_mark_match_failure();
 
-    xopt = val.as_boolean();
+    out = val.as_boolean();
     return *this;
   }
 
 Argument_Reader&
 Argument_Reader::
-o(Opt_integer& xopt)
+required(V_integer& out)
   {
-    xopt.reset();
-    this->do_record_parameter_optional(type_integer);
+    out = 0;
+    this->do_prepare_parameter("integer");
 
-    // Get the next argument.
-    auto karg = this->do_peek_argument_opt();
-    if(!karg)
-      return *this;
+    auto qref = this->do_peek_argument();
+    if(!qref)
+      return this->do_mark_match_failure();
 
-    const auto& val = karg->read();
-    if(val.is_null())
-      return *this;
-
-    // If the value doesn't have the desired type, fail.
+    // Dereference the argument and check its type.
+    const auto& val = qref->read();
     if(!val.is_integer())
-      return this->do_fail();
+      return this->do_mark_match_failure();
 
-    xopt = val.as_integer();
+    out = val.as_integer();
     return *this;
   }
 
 Argument_Reader&
 Argument_Reader::
-o(Opt_real& xopt)
+required(V_real& out)
   {
-    xopt.reset();
-    this->do_record_parameter_optional(type_real);
+    out = 0.0;
+    this->do_prepare_parameter("real");
 
-    // Get the next argument.
-    auto karg = this->do_peek_argument_opt();
-    if(!karg)
-      return *this;
+    auto qref = this->do_peek_argument();
+    if(!qref)
+      return this->do_mark_match_failure();
 
-    const auto& val = karg->read();
-    if(val.is_null())
-      return *this;
-
-    // If the value doesn't have the desired type, fail.
+    // Dereference the argument and check its type.
+    const auto& val = qref->read();
     if(!val.is_convertible_to_real())
-      return this->do_fail();
+      return this->do_mark_match_failure();
 
-    xopt = val.convert_to_real();
+    out = val.convert_to_real();
     return *this;
   }
 
 Argument_Reader&
 Argument_Reader::
-o(Opt_string& xopt)
+required(V_string& out)
   {
-    xopt.reset();
-    this->do_record_parameter_optional(type_string);
+    out.clear();
+    this->do_prepare_parameter("string");
 
-    // Get the next argument.
-    auto karg = this->do_peek_argument_opt();
-    if(!karg)
-      return *this;
+    auto qref = this->do_peek_argument();
+    if(!qref)
+      return this->do_mark_match_failure();
 
-    const auto& val = karg->read();
-    if(val.is_null())
-      return *this;
-
-    // If the value doesn't have the desired type, fail.
+    // Dereference the argument and check its type.
+    const auto& val = qref->read();
     if(!val.is_string())
-      return this->do_fail();
+      return this->do_mark_match_failure();
 
-    xopt = val.as_string();
+    out = val.as_string();
     return *this;
   }
 
 Argument_Reader&
 Argument_Reader::
-o(Opt_opaque& xopt)
+required(V_opaque& out)
   {
-    xopt.reset();
-    this->do_record_parameter_optional(type_opaque);
+    out = nullptr;
+    this->do_prepare_parameter("opaque");
 
-    // Get the next argument.
-    auto karg = this->do_peek_argument_opt();
-    if(!karg)
-      return *this;
+    auto qref = this->do_peek_argument();
+    if(!qref)
+      return this->do_mark_match_failure();
 
-    const auto& val = karg->read();
-    if(val.is_null())
-      return *this;
-
-    // If the value doesn't have the desired type, fail.
+    // Dereference the argument and check its type.
+    const auto& val = qref->read();
     if(!val.is_opaque())
-      return this->do_fail();
+      return this->do_mark_match_failure();
 
-    xopt = val.as_opaque();
+    out = val.as_opaque();
     return *this;
   }
 
 Argument_Reader&
 Argument_Reader::
-o(Opt_function& xopt)
+required(V_function& out)
   {
-    xopt.reset();
-    this->do_record_parameter_optional(type_function);
+    out = nullptr;
+    this->do_prepare_parameter("function");
 
-    // Get the next argument.
-    auto karg = this->do_peek_argument_opt();
-    if(!karg)
-      return *this;
+    auto qref = this->do_peek_argument();
+    if(!qref)
+      return this->do_mark_match_failure();
 
-    const auto& val = karg->read();
-    if(val.is_null())
-      return *this;
-
-    // If the value doesn't have the desired type, fail.
+    // Dereference the argument and check its type.
+    const auto& val = qref->read();
     if(!val.is_function())
-      return this->do_fail();
+      return this->do_mark_match_failure();
 
-    xopt = val.as_function();
+    out = val.as_function();
     return *this;
   }
 
 Argument_Reader&
 Argument_Reader::
-o(Opt_array& xopt)
+required(V_array& out)
   {
-    xopt.reset();
-    this->do_record_parameter_optional(type_array);
+    out.clear();
+    this->do_prepare_parameter("array");
 
-    // Get the next argument.
-    auto karg = this->do_peek_argument_opt();
-    if(!karg)
-      return *this;
+    auto qref = this->do_peek_argument();
+    if(!qref)
+      return this->do_mark_match_failure();
 
-    const auto& val = karg->read();
-    if(val.is_null())
-      return *this;
-
-    // If the value doesn't have the desired type, fail.
+    // Dereference the argument and check its type.
+    const auto& val = qref->read();
     if(!val.is_array())
-      return this->do_fail();
+      return this->do_mark_match_failure();
 
-    xopt = val.as_array();
+    out = val.as_array();
     return *this;
   }
 
 Argument_Reader&
 Argument_Reader::
-o(Opt_object& xopt)
+required(V_object& out)
   {
-    xopt.reset();
-    this->do_record_parameter_optional(type_object);
+    out.clear();
+    this->do_prepare_parameter("object");
 
-    // Get the next argument.
-    auto karg = this->do_peek_argument_opt();
-    if(!karg)
-      return *this;
+    auto qref = this->do_peek_argument();
+    if(!qref)
+      return this->do_mark_match_failure();
 
-    const auto& val = karg->read();
-    if(val.is_null())
-      return *this;
-
-    // If the value doesn't have the desired type, fail.
+    // Dereference the argument and check its type.
+    const auto& val = qref->read();
     if(!val.is_object())
-      return this->do_fail();
+      return this->do_mark_match_failure();
 
-    xopt = val.as_object();
+    out = val.as_object();
     return *this;
+  }
+
+bool
+Argument_Reader::
+end_overload()
+  {
+    this->do_terminate_parameter_list();
+
+    // Ensure no more arguments follow. Note there may be fewer.
+    if(!this->m_state.matched)
+      return false;
+
+    size_t index = this->m_state.nparams;
+    if(index < this->m_args->size()) {
+      this->do_mark_match_failure();
+      return false;
+    }
+    return true;
+  }
+
+bool
+Argument_Reader::
+end_overload(cow_vector<Reference>& vargs)
+  {
+    vargs.clear();
+    this->do_prepare_parameter("...");
+    this->do_terminate_parameter_list();
+
+    // Check for variadic arguments. Note the `...` is not a parameter.
+    if(!this->m_state.matched)
+      return false;
+
+    size_t index = this->m_state.nparams - 1;
+    if(index < this->m_args->size()) {
+      vargs.append(this->m_args->begin() + static_cast<ptrdiff_t>(index),
+                   this->m_args->end());
+    }
+    return true;
+  }
+
+bool
+Argument_Reader::
+end_overload(cow_vector<Value>& vargs)
+  {
+    vargs.clear();
+    this->do_prepare_parameter("...");
+    this->do_terminate_parameter_list();
+
+    // Check for variadic arguments. Note the `...` is not a parameter.
+    if(!this->m_state.matched)
+      return false;
+
+    size_t index = this->m_state.nparams - 1;
+    if(index < this->m_args->size()) {
+      vargs.reserve(this->m_args->size() - index);
+      ::std::transform(this->m_args->begin() + static_cast<ptrdiff_t>(index),
+                       this->m_args->end(), ::std::back_inserter(vargs),
+                       ::std::mem_fn(&Reference::read));
+    }
+    return true;
   }
 
 void
@@ -587,27 +539,27 @@ Argument_Reader::
 throw_no_matching_function_call()
 const
   {
-    // Compose an argument list.
+    // Compose the list of types of arguments.
     cow_string arguments;
-    if(this->m_args.get().size()) {
-      arguments << this->m_args.get()[0].read().what_type();
-      for(size_t k = 1;  k != this->m_args.get().size();  ++k)
-        arguments << ", " << this->m_args.get()[k].read().what_type();
+    if(this->m_args->size()) {
+      arguments << this->m_args->front().read().what_type();
+      for(size_t k = 1;  k < this->m_args->size();  ++k)
+        arguments << ", " << this->m_args->at(k).read().what_type();
     }
 
-    // Append the list of overloads.
-    cow_string overloads;
-    for(size_t k = 0;  k != this->m_ovlds.size();  ++k) {
-      auto sh = ::rocket::sref(this->m_ovlds.c_str() + k);
-      overloads << "  " << this->m_name << '(' << sh << ")\n";
-      k += sh.length();
+    // Compose the list of overloads.
+    ::rocket::tinyfmt_str overloads;
+    for(size_t k = 0;  k < this->m_overloads.size();  ++k) {
+      auto params = ::rocket::sref(this->m_overloads.c_str() + k);
+      format(overloads, "  $1($2)\n", this->m_name, params);
+      k += params.length();
     }
 
     // Throw the exception now.
     ASTERIA_THROW("No matching function call for `$1($2)`\n"
                   "[list of overloads:\n"
                   "$3  -- end of list of overloads]",
-                  this->m_name, arguments, overloads);
+                  this->m_name, arguments, overloads.get_string());
   }
 
 }  // namespace asteria
