@@ -353,8 +353,8 @@ do_accept_expression_opt(Token_Stream& tstrm)
   {
     // expression-opt ::=
     //   expression | ""
-    auto sloc = tstrm.next_sloc();
     cow_vector<Expression_Unit> units;
+    auto sloc = tstrm.next_sloc();
     bool succ = do_accept_expression(units, tstrm);
     if(!succ)
       return nullopt;
@@ -368,8 +368,8 @@ do_accept_expression_and_convert_to_rvalue_opt(Token_Stream& tstrm)
   {
     // expression-opt ::=
     //   expression | ""
-    auto sloc = tstrm.next_sloc();
     cow_vector<Expression_Unit> units;
+    auto sloc = tstrm.next_sloc();
     bool succ = do_accept_expression_and_convert_to_rvalue(units, tstrm);
     if(!succ)
       return nullopt;
@@ -1134,8 +1134,8 @@ do_accept_function_argument_opt(cow_vector<Expression_Unit>& units, Token_Stream
 opt<pair<bool, Statement::S_expression>>
 do_accept_return_argument_opt(Token_Stream& tstrm)
   {
-    auto sloc = tstrm.next_sloc();
     cow_vector<Expression_Unit> units;
+    auto sloc = tstrm.next_sloc();
     auto qref = do_accept_argument_no_conversion_opt(units, tstrm);
     if(!qref)
       return nullopt;
@@ -1444,8 +1444,8 @@ do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tstr
     auto qtok = tstrm.peek_opt();
     if(!qtok)
       return false;
-    auto sloc = qtok->sloc();
 
+    auto sloc = qtok->sloc();
     if(qtok->is_keyword()) {
       auto qcnf = ::std::find(begin(s_keyword_table), end(s_keyword_table), qtok->as_keyword());
       if(qcnf == end(s_keyword_table))
@@ -1911,8 +1911,8 @@ do_accept_postfix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tst
     auto qtok = tstrm.peek_opt();
     if(!qtok)
       return false;
-    auto sloc = qtok->sloc();
 
+    auto sloc = qtok->sloc();
     if(qtok->is_punctuator()) {
       auto qcnf = ::std::find(begin(s_postfix_xop_table), end(s_postfix_xop_table), qtok->as_punctuator());
       if(qcnf == end(s_postfix_xop_table))
@@ -2201,8 +2201,8 @@ do_accept_infix_operator_general_opt(Token_Stream& tstrm)
     auto qtok = tstrm.peek_opt();
     if(!qtok)
       return nullopt;
-    auto sloc = qtok->sloc();
 
+    auto sloc = qtok->sloc();
     if(qtok->is_punctuator()) {
       auto qcnf = ::std::find(begin(s_infix_xop_table), end(s_infix_xop_table), qtok->as_punctuator());
       if(qcnf == end(s_infix_xop_table))
