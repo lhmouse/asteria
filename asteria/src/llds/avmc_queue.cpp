@@ -10,7 +10,6 @@
 #include "../util.hpp"
 
 namespace asteria {
-namespace {
 
 using details_avmc_queue::Uparam;
 using details_avmc_queue::Symbols;
@@ -18,8 +17,6 @@ using details_avmc_queue::Constructor;
 using details_avmc_queue::Executor;
 using details_avmc_queue::Vtable;
 using details_avmc_queue::Header;
-
-}  // namespace
 
 void
 AVMC_Queue::
