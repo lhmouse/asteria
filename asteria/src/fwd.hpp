@@ -379,6 +379,10 @@ class cow_opaque
       : m_sptr(::std::move(sptr))
       { }
 
+    cow_opaque&
+    operator=(nullptr_t)
+      { return this->reset();  }
+
   private:
     [[noreturn]]
     void
@@ -531,6 +535,10 @@ class cow_function
     noexcept
       : m_sptr(::std::move(sptr))
       { }
+
+    cow_function&
+    operator=(nullptr_t)
+      { return this->reset();  }
 
   private:
     [[noreturn]]
