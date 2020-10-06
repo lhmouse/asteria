@@ -2245,6 +2245,7 @@ do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // Check for stack overflows.
     const auto sentry = tstrm.copy_recursion_sentry();
+
     // expression ::=
     //   infix-head infix-carriage-list-opt
     // infix-carriage-list-opt ::=
