@@ -2305,9 +2305,8 @@ Statement_Sequence&
 Statement_Sequence::
 reload(Token_Stream& tstrm)
   {
-    // Parse the document recursively.
-    cow_vector<Statement> stmts;
     // Destroy the contents of `*this` and reuse their storage, if any.
+    cow_vector<Statement> stmts;
     stmts.swap(this->m_stmts);
     stmts.clear();
 
