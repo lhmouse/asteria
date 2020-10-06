@@ -1620,9 +1620,9 @@ do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
       if(!succ)
         break;
 
-      if(nelems >= INT32_MAX)
-        throw Parser_Error(parser_status_too_many_elements, tstrm.next_sloc(), tstrm.next_length());
       nelems += 1;
+      if(nelems >= 0x100000)
+        throw Parser_Error(parser_status_too_many_elements, tstrm.next_sloc(), tstrm.next_length());
 
       // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
@@ -1630,6 +1630,7 @@ do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
       if(!kpunct)
         break;
     }
+
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
     if(!kpunct)
       throw Parser_Error(comma_allowed ? parser_status_closed_bracket_or_comma_expected
@@ -1683,6 +1684,7 @@ do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm
       if(!kpunct)
         break;
     }
+
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
     if(!kpunct)
       throw Parser_Error(comma_allowed ? parser_status_closed_brace_or_comma_expected
@@ -1807,23 +1809,31 @@ do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream&
       throw Parser_Error(parser_status_open_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
 
     uint32_t nargs = 0;
+    bool comma_allowed = false;
     for(;;) {
       auto qref = do_accept_function_argument_opt(units, tstrm);
       if(!qref)
-        throw Parser_Error(parser_status_argument_expected, tstrm.next_sloc(), tstrm.next_length());
+        break;
 
-      if(nargs >= INT32_MAX)
-        throw Parser_Error(parser_status_too_many_elements, tstrm.next_sloc(), tstrm.next_length());
       nargs += 1;
+      if(nargs >= 0x100000)
+        throw Parser_Error(parser_status_too_many_elements, tstrm.next_sloc(), tstrm.next_length());
 
-      // Look for the next argument.
+      // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
+      comma_allowed = !kpunct;
       if(!kpunct)
         break;
     }
+
+    if(nargs < 1)
+      throw Parser_Error(parser_status_argument_expected, tstrm.next_sloc(), tstrm.next_length());
+
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
-      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm.next_sloc(), tstrm.next_length());
+      throw Parser_Error(comma_allowed ? parser_status_closed_parenthesis_or_comma_expected
+                                       : parser_status_closed_parenthesis_or_argument_expected,
+                         tstrm.next_sloc(), tstrm.next_length());
 
     Expression_Unit::S_import_call xunit = { ::std::move(sloc), nargs };
     units.emplace_back(::std::move(xunit));
@@ -1938,9 +1948,9 @@ do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_Stream
       if(!qref)
         break;
 
-      if(nargs >= INT32_MAX)
-        throw Parser_Error(parser_status_too_many_elements, tstrm.next_sloc(), tstrm.next_length());
       nargs += 1;
+      if(nargs >= 0x100000)
+        throw Parser_Error(parser_status_too_many_elements, tstrm.next_sloc(), tstrm.next_length());
 
       // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
@@ -1948,6 +1958,7 @@ do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_Stream
       if(!kpunct)
         break;
     }
+
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Parser_Error(comma_allowed ? parser_status_closed_parenthesis_or_comma_expected
