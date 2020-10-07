@@ -143,7 +143,7 @@ const
       case index_variable: {
         auto var = unerase_cast(this->m_root.as<index_variable>().var);
         if(var && callback.process(var))
-          var->enumerate_variables(callback);
+          var->enumerate_variables_descent(callback);
         return callback;
       }
 

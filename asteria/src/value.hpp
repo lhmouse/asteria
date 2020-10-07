@@ -188,6 +188,13 @@ class Value
       { return this->m_stor.as<type_object>();  }
 
     bool
+    is_scalar()
+    const noexcept
+      { return (1 << this->type()) &
+                   (1 << type_null | 1 << type_boolean | 1 << type_integer |
+                    1 << type_real | 1 << type_string);  }
+
+    bool
     is_convertible_to_real()
     const noexcept
       { return this->is_integer() || this->is_real();  }

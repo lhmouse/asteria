@@ -36,11 +36,12 @@ class Sentry
 template<typename FuncT>
 struct Variable_Walker : Variable_Callback
   {
-    FuncT func;  // If `FunctionT` is a reference type then this is a reference.
+    FuncT& func;
 
     explicit
-    Variable_Walker(FuncT&& xfunc)
-      : func(::std::forward<FuncT>(xfunc))
+    Variable_Walker(FuncT& xfunc)
+    noexcept
+      : func(xfunc)
       { }
 
     bool
@@ -50,13 +51,22 @@ struct Variable_Walker : Variable_Callback
   };
 
 template<typename ContT, typename FuncT>
-FuncT&&
+void
 do_traverse(const ContT& cont, FuncT&& func)
   {
-    // The callback has to be an lvalue.
-    Variable_Walker<FuncT&&> walker(::std::forward<FuncT>(func));
+    Variable_Walker<FuncT&> walker(func);
     cont.enumerate_variables(walker);
-    return ::std::forward<FuncT>(walker.func);
+  }
+
+template<typename FuncT>
+void
+do_traverse(const Variable& var, FuncT&& func)
+  {
+    if(ROCKET_EXPECT(var.get_value().is_scalar()))
+      return;
+
+    Variable_Walker<FuncT&> walker(func);
+    var.enumerate_variables_descent(walker);
   }
 
 struct Variable_Wiper : Variable_Callback

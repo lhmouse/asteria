@@ -105,9 +105,9 @@ final
         if(split > 1) {
           // Update the fractional part.
           this->m_gcref_f += 1 / static_cast<double>(split);
-          if(static_cast<long>(this->m_gcref_f) == 0) {
+          if(static_cast<long>(this->m_gcref_f) == 0)
             return *this;
-          }
+
           // Accumulate the carry bit.
           this->m_gcref_f -= 1;
         }
@@ -116,7 +116,7 @@ final
       }
 
     Variable_Callback&
-    enumerate_variables(Variable_Callback& callback)
+    enumerate_variables_descent(Variable_Callback& callback)
     const;
   };
 
