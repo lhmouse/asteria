@@ -34,27 +34,32 @@ class Sentry
   };
 
 template<typename FuncT>
-struct Variable_Walker : Variable_Callback
+class Variable_Walker
+final
+  : public Variable_Callback
   {
-    FuncT& func;
+  private:
+    ::std::reference_wrapper<FuncT> m_func;
 
+  public:
     explicit
-    Variable_Walker(FuncT& xfunc)
+    Variable_Walker(FuncT& func)
     noexcept
-      : func(xfunc)
+      : m_func(func)
       { }
 
+  protected:
     bool
-    process(const rcptr<Variable>& var)
+    do_process_one(const rcptr<Variable>& var)
     override
-      { return this->func(var);  }
+      { return this->m_func(var);  }
   };
 
 template<typename ContT, typename FuncT>
 void
 do_traverse(const ContT& cont, FuncT&& func)
   {
-    Variable_Walker<FuncT&> walker(func);
+    Variable_Walker<FuncT> walker(func);
     cont.enumerate_variables(walker);
   }
 
@@ -65,14 +70,17 @@ do_traverse(const Variable& var, FuncT&& func)
     if(ROCKET_EXPECT(var.get_value().is_scalar()))
       return;
 
-    Variable_Walker<FuncT&> walker(func);
+    Variable_Walker<FuncT> walker(func);
     var.enumerate_variables_descent(walker);
   }
 
-struct Variable_Wiper : Variable_Callback
+class Variable_Wiper
+final
+  : public Variable_Callback
   {
+  protected:
     bool
-    process(const rcptr<Variable>& var)
+    do_process_one(const rcptr<Variable>& var)
     override
       {
         // Don't modify variables in place which might have side effects.
