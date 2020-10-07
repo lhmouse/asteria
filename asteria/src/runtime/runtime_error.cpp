@@ -64,15 +64,16 @@ do_insert_frame(Backtrace_Frame&& new_frm)
     sbuf.emplace_back();
 
     // Append stack frames.
-    fmt << "\n[backtrace frames:";
+    fmt << "\n[backtrace frames:\n";
     for(size_t k = 0;  k < this->m_frames.size();  ++k) {
       const auto& frm = this->m_frames[k];
       nump.put(k);
       ::std::reverse_copy(nump.begin(), nump.end(), sbuf.mut_rbegin() + 1);
-      format(fmt, "\n  $1: $2 at '$3': ", sbuf.data(), frm.what_type(), frm.sloc());
+      format(fmt, "  $1: $2 at '$3': ", sbuf.data(), frm.what_type(), frm.sloc());
       frm.value().dump(fmt, 0, 0);
+      fmt << '\n';
     }
-    fmt << "\n  -- end of backtrace frames]";
+    fmt << "  -- end of backtrace frames]";
 
     // Set the string.
     this->m_what = fmt.extract_string();
