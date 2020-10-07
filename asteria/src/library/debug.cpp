@@ -57,67 +57,32 @@ std_debug_dump(Value value, Opt_integer indent)
 void
 create_bindings_debug(V_object& result, API_Version /*version*/)
   {
-    //===================================================================
-    // `std.debug.logf()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("logf"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.debug.logf(templ, ...)`
+      ASTERIA_BINDING_BEGIN("std.debug.logf", self, global, reader) {
+        V_string templ;
+        cow_vector<Value> values;
 
-  * Compose a string in the same way as `std.string.format()`, but
-    instead of returning it, write it to standard error. A line
-    break is appended to terminate the line.
+        reader.start_overload();
+        reader.required(templ);          // template
+        if(reader.end_overload(values))  // ...
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_debug_logf, templ, values);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the number of bytes written if the operation succeeds,
-    or `null` otherwise.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.debug.logf"), ::rocket::cref(args));
-    // Parse variadic arguments.
-    V_string templ;
-    cow_vector<Value> values;
-    if(reader.I().v(templ).F(values)) {
-      Reference::S_temporary xref = { std_debug_logf(templ, values) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.debug.dump()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("dump"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.debug.dump(value, [indent])`
+      ASTERIA_BINDING_BEGIN("std.debug.dump", self, global, reader) {
+        Value value;
+        Opt_integer indent;
 
-  * Prints the value to standard error with detailed information.
-    `indent` specifies the number of spaces to use as a single
-    level of indent. Its value is clamped between `0` and `10`
-    inclusively. If it is set to `0`, no line break is inserted and
-    output lines are not indented. It has a default value of `2`.
-
-  * Returns the number of bytes written if the operation succeeds,
-    or `null` otherwise.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.debug.dump"), ::rocket::cref(args));
-    // Parse arguments.
-    Value value;
-    Opt_integer indent;
-    if(reader.I().o(value).o(indent).F()) {
-      Reference::S_temporary xref = { std_debug_dump(value, indent) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.optional(value);     // [value]
+        reader.optional(indent);    // [indent]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_debug_dump, value, indent);
+      }
+      ASTERIA_BINDING_END);
   }
 
 }  // namespace asteria

@@ -14,7 +14,8 @@ std_array_slice(V_array data, V_integer from, Opt_integer length);
 
 // `std.array.replace_slice`
 V_array
-std_array_replace_slice(V_array data, V_integer from, Opt_integer length, V_array replacement);
+std_array_replace_slice(V_array data, V_integer from, Opt_integer length,
+                        V_array replacement, Opt_integer rfrom, Opt_integer rlength);
 
 // `std.array.find`
 Opt_integer

@@ -249,34 +249,44 @@ do_merge_blocks(V_array& output, Global_Context& global, cow_vector<Reference>& 
 V_array
 std_array_slice(V_array data, V_integer from, Opt_integer length)
   {
-    auto range = do_slice(data, from, length);
-    if((range.first == data.begin()) && (range.second == data.end()))
-      // Use reference counting as our advantage.
-      return data;
-    return V_array(range.first, range.second);
+    // Use reference counting as our advantage.
+    V_array res = data;
+    auto range = do_slice(res, from, length);
+    if(range.second - range.first != res.ssize())
+      res.assign(range.first, range.second);
+    return res;
   }
 
 V_array
-std_array_replace_slice(V_array data, V_integer from, Opt_integer length, V_array replacement)
+std_array_replace_slice(V_array data, V_integer from, Opt_integer length,
+                        V_array replacement, Opt_integer rfrom, Opt_integer rlength)
   {
     V_array res = data;
     auto range = do_slice(res, from, length);
+    auto rep_range = do_slice(replacement, rfrom.value_or(0), rlength);
 
     // Convert iterators to subscripts.
     auto offset = ::std::distance(res.begin(), range.first);
     auto dist = ::std::distance(range.first, range.second);
+    auto rep_offset = ::std::distance(replacement.begin(), rep_range.first);
+    auto rep_dist = ::std::distance(rep_range.first, rep_range.second);
 
     if(dist >= replacement.ssize()) {
       // Overwrite the subrange in place.
-      res.erase(::std::move(replacement.mut_begin(), replacement.mut_end(),
-                            res.mut_begin() + offset),
-                res.mut_begin() + offset + dist);
+      auto insp = ::std::move(replacement.mut_begin() + rep_offset,
+                              replacement.mut_begin() + rep_offset + rep_dist,
+                              res.mut_begin() + offset);
+
+      res.erase(insp, res.begin() + offset + dist);
     }
     else {
       // Extend the range.
-      res.insert(::std::move(replacement.mut_begin(), replacement.mut_begin() + dist,
-                             res.mut_begin() + offset),
-                 replacement.move_begin() + dist, replacement.move_end());
+      auto insp = ::std::move(replacement.mut_begin() + rep_offset,
+                              replacement.mut_begin() + rep_offset + dist,
+                              res.mut_begin() + offset);
+
+      res.insert(insp, replacement.move_begin() + rep_offset + dist,
+                       replacement.move_begin() + rep_offset + rep_dist);
     }
     return res;
   }
@@ -650,1351 +660,648 @@ std_array_copy_values(V_object source)
 void
 create_bindings_array(V_object& result, API_Version /*version*/)
   {
-    //===================================================================
-    // `std.array.slice()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("slice"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.slice(data, from, [length])`
+      ASTERIA_BINDING_BEGIN("std.array.slice", self, global, reader) {
+        V_array data;
+        V_integer from;
+        Opt_integer len;
 
-  * Copies a subrange of `data` to create a new array. Elements are
-    copied from `from` if it is non-negative, or from
-    `countof(data) + from` otherwise. If `length` is set to an
-    integer, no more than this number of elements will be copied.
-    If it is absent, all elements from `from` to the end of `data`
-    will be copied. If `from` is outside `data`, an empty array
-    is returned.
+        reader.start_overload();
+        reader.required(data);    // data
+        reader.required(from);    // from
+        reader.optional(len);     // [length]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_slice, data, from, len);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the specified subarray of `data`.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.slice"), ::rocket::cref(args));
-    // Parse arguments.
-    V_array data;
-    V_integer from;
-    Opt_integer length;
-    if(reader.I().v(data).v(from).o(length).F()) {
-      Reference::S_temporary xref = { std_array_slice(::std::move(data), from, length) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.replace_slice()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("replace_slice"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.replace_slice(data, from, replacement)`
+      ASTERIA_BINDING_BEGIN("std.array.replace_slice", self, global, reader) {
+        V_array text;
+        V_integer from;
+        Opt_integer len;
+        V_array rep;
+        Opt_integer rfrom;
+        Opt_integer rlen;
 
-  * Replaces all elements from `from` to the end of `data` with
-    `replacement` and returns the new array. If `from` is negative,
-    it specifies an offset from the end of `data`. This function
-    returns a new array without modifying `data`.
+        reader.start_overload();
+        reader.required(text);      // text
+        reader.required(from);      // from
+        reader.save_state(0);
+        reader.required(rep);       // replacement
+        reader.optional(rfrom);     // rep_from
+        reader.optional(rlen);      // rep_length
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_replace_slice, text, from, nullopt, rep, rfrom, rlen);
 
-  * Returns a new array with the subrange replaced.
+        reader.load_state(0);       // text, from
+        reader.optional(len);       // [length]
+        reader.required(rep);       // replacement
+        reader.optional(rfrom);     // rep_from
+        reader.optional(rlen);      // rep_length
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_replace_slice, text, from, len, rep, rfrom, rlen);
+      }
+      ASTERIA_BINDING_END);
 
-`std.array.replace_slice(data, from, [length], replacement)`
-
-  * Replaces a subrange of `data` with `replacement` to create a
-    new array. `from` specifies the start of the subrange to
-    replace. If `from` is negative, it specifies an offset from the
-    end of `data`. `length` specifies the maximum number of
-    elements to replace. If it is set to `null`, this function is
-    equivalent to `replace_slice(data, from, replacement)`. This
-    function returns a new array without modifying `data`.
-
-  * Returns a new array with the subrange replaced.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.replace"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    V_array data;
-    V_integer from;
-    V_array replacement;
-    if(reader.I().v(data).v(from).S(state).v(replacement).F()) {
-      Reference::S_temporary xref = { std_array_replace_slice(::std::move(data), from, nullopt,
-                                                                   ::std::move(replacement)) };
-      return self = ::std::move(xref);
-    }
-    Opt_integer length;
-    if(reader.L(state).o(length).v(replacement).F()) {
-      Reference::S_temporary xref = { std_array_replace_slice(::std::move(data), from, length,
-                                                                   ::std::move(replacement)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.find()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("find"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.find(data, target)`
+      ASTERIA_BINDING_BEGIN("std.array.find", self, global, reader) {
+        V_array data;
+        V_integer from;
+        Opt_integer len;
+        Value targ;
 
-  * Searches `data` for the first occurrence of `target`.
+        reader.start_overload();
+        reader.required(data);     // data
+        reader.save_state(0);
+        reader.optional(targ);     // [target]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_find, data, 0, nullopt, targ);
 
-  * Returns the subscript of the first match of `target` in `data`
-    if one is found, which is always non-negative, or `null`
-    otherwise.
+        reader.load_state(0);      // data
+        reader.required(from);     // from
+        reader.save_state(0);
+        reader.optional(targ);     // [target]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_find, data, from, nullopt, targ);
 
-`std.array.find(data, from, target)`
+        reader.load_state(0);      // data, from
+        reader.optional(len);      // [length]
+        reader.optional(targ);     // [target]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_find, data, from, len, targ);
+      }
+      ASTERIA_BINDING_END);
 
-  * Searches `data` for the first occurrence of `target`. The
-    search operation is performed on the same subrange that would
-    be returned by `slice(data, from)`.
-
-  * Returns the subscript of the first match of `target` in `data`
-    if one is found, which is always non-negative, or `null`
-    otherwise.
-
-`std.array.find(data, from, [length], target)`
-
-  * Searches `data` for the first occurrence of `target`. The
-    search operation is performed on the same subrange that would
-    be returned by `slice(data, from, length)`.
-
-  * Returns the subscript of the first match of `target` in `data`
-    if one is found, which is always non-negative, or `null`
-    otherwise.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.find"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    V_array data;
-    Value target;
-    if(reader.I().v(data).S(state).o(target).F()) {
-      Reference::S_temporary xref = { std_array_find(::std::move(data), 0, nullopt,
-                                                          ::std::move(target)) };
-      return self = ::std::move(xref);
-    }
-    V_integer from;
-    if(reader.L(state).v(from).S(state).o(target).F()) {
-      Reference::S_temporary xref = { std_array_find(::std::move(data), from, nullopt,
-                                                          ::std::move(target)) };
-      return self = ::std::move(xref);
-    }
-    Opt_integer length;
-    if(reader.L(state).o(length).o(target).F()) {
-      Reference::S_temporary xref = { std_array_find(::std::move(data), from, length,
-                                                          ::std::move(target)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.find_if()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("find_if"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.find_if(data, predictor)`
+      ASTERIA_BINDING_BEGIN("std.array.find_if", self, global, reader) {
+        V_array data;
+        V_integer from;
+        Opt_integer len;
+        V_function pred;
 
-  * Finds the first element, namely `x`, in `data`, for which
-    `predictor(x)` yields logically true.
+        reader.start_overload();
+        reader.required(data);     // data
+        reader.save_state(0);
+        reader.required(pred);     // predictor
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_find_if, global, data, 0, nullopt, pred);
 
-  * Returns the subscript of such an element as an integer, if one
-    is found, or `null` otherwise.
+        reader.load_state(0);      // data
+        reader.required(from);     // from
+        reader.save_state(0);
+        reader.required(pred);     // predictor
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_find_if, global, data, from, nullopt, pred);
 
-`std.array.find_if(data, from, predictor)`
+        reader.load_state(0);      // data, from
+        reader.optional(len);      // [length]
+        reader.required(pred);     // predictor
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_find_if, global, data, from, len, pred);
+      }
+      ASTERIA_BINDING_END);
 
-  * Finds the first element, namely `x`, in `data`, for which
-    `predictor(x)` yields logically true. The search operation is
-    performed on the same subrange that would be returned by
-    `slice(data, from)`.
-
-  * Returns the subscript of such an element as an integer, if one
-    is found, or `null` otherwise.
-
-`std.array.find_if(data, from, [length], predictor)`
-
-  * Finds the first element, namely `x`, in `data`, for which
-    `predictor(x)` yields logically true. The search operation is
-    performed on the same subrange that would be returned by
-    `slice(data, from, length)`.
-
-  * Returns the subscript of such an element as an integer, if one
-    is found, or `null` otherwise.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.find_if"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    V_array data;
-    V_function predictor;
-    if(reader.I().v(data).S(state).v(predictor).F()) {
-      Reference::S_temporary xref = { std_array_find_if(global, ::std::move(data), 0, nullopt,
-                                                             ::std::move(predictor)) };
-      return self = ::std::move(xref);
-    }
-    V_integer from;
-    if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      Reference::S_temporary xref = { std_array_find_if(global, ::std::move(data), from, nullopt,
-                                                             ::std::move(predictor)) };
-      return self = ::std::move(xref);
-    }
-    Opt_integer length;
-    if(reader.L(state).o(length).v(predictor).F()) {
-      Reference::S_temporary xref = { std_array_find_if(global, ::std::move(data), from, length,
-                                                             ::std::move(predictor)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.find_if_not()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("find_if_not"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.find_if_not(data, predictor)`
+      ASTERIA_BINDING_BEGIN("std.array.find_if_not", self, global, reader) {
+        V_array data;
+        V_integer from;
+        Opt_integer len;
+        V_function pred;
 
-  * Finds the first element, namely `x`, in `data`, for which
-    `predictor(x)` yields logically false.
+        reader.start_overload();
+        reader.required(data);     // data
+        reader.save_state(0);
+        reader.required(pred);     // predictor
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_find_if_not, global, data, 0, nullopt, pred);
 
-  * Returns the subscript of such an element as an integer, if one
-    is found, or `null` otherwise.
+        reader.load_state(0);      // data
+        reader.required(from);     // from
+        reader.save_state(0);
+        reader.required(pred);     // predictor
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_find_if_not, global, data, from, nullopt, pred);
 
-`std.array.find_if_not(data, from, predictor)`
+        reader.load_state(0);      // data, from
+        reader.optional(len);      // [length]
+        reader.required(pred);     // predictor
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_find_if_not, global, data, from, len, pred);
+      }
+      ASTERIA_BINDING_END);
 
-  * Finds the first element, namely `x`, in `data`, for which
-    `predictor(x)` yields logically false. The search operation is
-    performed on the same subrange that would be returned by
-    `slice(data, from)`.
-
-  * Returns the subscript of such an element as an integer, if one
-    is found, or `null` otherwise.
-
-`std.array.find_if_not(data, from, [length], predictor)`
-
-  * Finds the first element, namely `x`, in `data`, for which
-    `predictor(x)` yields logically false. The search operation is
-    performed on the same subrange that would be returned by
-    `slice(data, from, length)`.
-
-  * Returns the subscript of such an element as an integer, if one
-    is found, or `null` otherwise.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.find_if_not"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    V_array data;
-    V_function predictor;
-    if(reader.I().v(data).S(state).v(predictor).F()) {
-      Reference::S_temporary xref = { std_array_find_if_not(global, ::std::move(data), 0, nullopt,
-                                                                 ::std::move(predictor)) };
-      return self = ::std::move(xref);
-    }
-    V_integer from;
-    if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      Reference::S_temporary xref = { std_array_find_if_not(global, ::std::move(data), from, nullopt,
-                                                                 ::std::move(predictor)) };
-      return self = ::std::move(xref);
-    }
-    Opt_integer length;
-    if(reader.L(state).o(length).v(predictor).F()) {
-      Reference::S_temporary xref = { std_array_find_if_not(global, ::std::move(data), from, length,
-                                                                 ::std::move(predictor)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.rfind()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("rfind"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.rfind(data, target)`
+      ASTERIA_BINDING_BEGIN("std.array.rfind", self, global, reader) {
+        V_array data;
+        V_integer from;
+        Opt_integer len;
+        Value targ;
 
-  * Searches `data` for the last occurrence of `target`.
+        reader.start_overload();
+        reader.required(data);     // data
+        reader.save_state(0);
+        reader.optional(targ);     // [target]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_rfind, data, 0, nullopt, targ);
 
-  * Returns the subscript of the last match of `target` in `data`
-    if one is found, which is always non-negative, or `null`
-    otherwise.
+        reader.load_state(0);      // data
+        reader.required(from);     // from
+        reader.save_state(0);
+        reader.optional(targ);     // [target]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_rfind, data, from, nullopt, targ);
 
-`std.array.rfind(data, from, target)`
+        reader.load_state(0);      // data, from
+        reader.optional(len);      // [length]
+        reader.optional(targ);     // [target]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_rfind, data, from, len, targ);
+      }
+      ASTERIA_BINDING_END);
 
-  * Searches `data` for the last occurrence of `target`. The search
-    operation is performed on the same subrange that would be
-    returned by `slice(data, from)`.
-
-  * Returns the subscript of the last match of `target` in `data`
-    if one is found, which is always non-negative, or `null`
-    otherwise.
-
-`std.array.rfind(data, from, [length], target)`
-
-  * Searches `data` for the last occurrence of `target`. The search
-    operation is performed on the same subrange that would be
-    returned by `slice(data, from, length)`.
-
-  * Returns the subscript of the last match of `target` in `data`
-    if one is found, which is always non-negative, or `null`
-    otherwise.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.rfind"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    V_array data;
-    Value target;
-    if(reader.I().v(data).S(state).o(target).F()) {
-      Reference::S_temporary xref = { std_array_rfind(::std::move(data), 0, nullopt,
-                                                           ::std::move(target)) };
-      return self = ::std::move(xref);
-    }
-    V_integer from;
-    if(reader.L(state).v(from).S(state).o(target).F()) {
-      Reference::S_temporary xref = { std_array_rfind(::std::move(data), from, nullopt,
-                                                           ::std::move(target)) };
-      return self = ::std::move(xref);
-    }
-    Opt_integer length;
-    if(reader.L(state).o(length).o(target).F()) {
-      Reference::S_temporary xref = { std_array_rfind(::std::move(data), from, length,
-                                                           ::std::move(target)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.rfind_if()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("rfind_if"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.rfind_if(data, predictor)`
+      ASTERIA_BINDING_BEGIN("std.array.rfind_if", self, global, reader) {
+        V_array data;
+        V_integer from;
+        Opt_integer len;
+        V_function pred;
 
-  * Finds the last element, namely `x`, in `data`, for which
-    `predictor(x)` yields logically true.
+        reader.start_overload();
+        reader.required(data);     // data
+        reader.save_state(0);
+        reader.required(pred);     // predictor
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_rfind_if, global, data, 0, nullopt, pred);
 
-  * Returns the subscript of such an element as an integer, if one
-    is found, or `null` otherwise.
+        reader.load_state(0);      // data
+        reader.required(from);     // from
+        reader.save_state(0);
+        reader.required(pred);     // predictor
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_rfind_if, global, data, from, nullopt, pred);
 
-`std.array.rfind_if(data, from, predictor)`
+        reader.load_state(0);      // data, from
+        reader.optional(len);      // [length]
+        reader.required(pred);     // predictor
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_rfind_if, global, data, from, len, pred);
+      }
+      ASTERIA_BINDING_END);
 
-  * Finds the last element, namely `x`, in `data`, for which
-    `predictor(x)` yields logically true. The search operation is
-    performed on the same subrange that would be returned by
-    `slice(data, from)`.
-
-  * Returns the subscript of such an element as an integer, if one
-    is found, or `null` otherwise.
-
-`std.array.rfind_if(data, from, [length], predictor)`
-
-  * Finds the last element, namely `x`, in `data`, for which
-    `predictor(x)` yields logically true. The search operation is
-    performed on the same subrange that would be returned by
-    `slice(data, from, length)`.
-
-  * Returns the subscript of such an element as an integer, if one
-    is found, or `null` otherwise.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.rfind_if"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    V_array data;
-    V_function predictor;
-    if(reader.I().v(data).S(state).v(predictor).F()) {
-      Reference::S_temporary xref = { std_array_rfind_if(global, ::std::move(data), 0, nullopt,
-                                                              ::std::move(predictor)) };
-      return self = ::std::move(xref);
-    }
-    V_integer from;
-    if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      Reference::S_temporary xref = { std_array_rfind_if(global, ::std::move(data), from, nullopt,
-                                                              ::std::move(predictor)) };
-      return self = ::std::move(xref);
-    }
-    Opt_integer length;
-    if(reader.L(state).o(length).v(predictor).F()) {
-      Reference::S_temporary xref = { std_array_rfind_if(global, ::std::move(data), from, length,
-                                                              ::std::move(predictor)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.rfind_if_not()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("rfind_if_not"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.rfind_if_not(data, predictor)`
+      ASTERIA_BINDING_BEGIN("std.array.rfind_if_not", self, global, reader) {
+        V_array data;
+        V_integer from;
+        Opt_integer len;
+        V_function pred;
 
-  * Finds the last element, namely `x`, in `data`, for which
-    `predictor(x)` yields logically false.
+        reader.start_overload();
+        reader.required(data);     // data
+        reader.save_state(0);
+        reader.required(pred);     // predictor
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_rfind_if_not, global, data, 0, nullopt, pred);
 
-  * Returns the subscript of such an element as an integer, if one
-    is found, or `null` otherwise.
+        reader.load_state(0);      // data
+        reader.required(from);     // from
+        reader.save_state(0);
+        reader.required(pred);     // predictor
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_rfind_if_not, global, data, from, nullopt, pred);
 
-`std.array.rfind_if_not(data, from, predictor)`
+        reader.load_state(0);      // data, from
+        reader.optional(len);      // [length]
+        reader.required(pred);     // predictor
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_rfind_if_not, global, data, from, len, pred);
+      }
+      ASTERIA_BINDING_END);
 
-  * Finds the last element, namely `x`, in `data`, for which
-    `predictor(x)` yields logically false. The search operation is
-    performed on the same subrange that would be returned by
-    `slice(data, from)`.
-
-  * Returns the subscript of such an element as an integer, if one
-    is found, or `null` otherwise.
-
-`std.array.rfind_if_not(data, from, [length], predictor)`
-
-  * Finds the last element, namely `x`, in `data`, for which
-    `predictor(x)` yields logically false. The search operation is
-    performed on the same subrange that would be returned by
-    `slice(data, from, length)`.
-
-  * Returns the subscript of such an element as an integer, if one
-    is found, or `null` otherwise.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.rfind_if_not"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    V_array data;
-    V_function predictor;
-    if(reader.I().v(data).S(state).v(predictor).F()) {
-      Reference::S_temporary xref = { std_array_rfind_if_not(global, ::std::move(data), 0, nullopt,
-                                                                  ::std::move(predictor)) };
-      return self = ::std::move(xref);
-    }
-    V_integer from;
-    if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      Reference::S_temporary xref = { std_array_rfind_if_not(global, ::std::move(data), from, nullopt,
-                                                                  ::std::move(predictor)) };
-      return self = ::std::move(xref);
-    }
-    Opt_integer length;
-    if(reader.L(state).o(length).v(predictor).F()) {
-      Reference::S_temporary xref = { std_array_rfind_if_not(global, ::std::move(data), from, length,
-                                                                  ::std::move(predictor)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.count()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("count"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.count(data, target)`
+      ASTERIA_BINDING_BEGIN("std.array.count", self, global, reader) {
+        V_array data;
+        V_integer from;
+        Opt_integer len;
+        Value targ;
 
-  * Searches `data` for `target` and figures the total number of
-    occurrences.
+        reader.start_overload();
+        reader.required(data);     // data
+        reader.save_state(0);
+        reader.optional(targ);     // [target]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_count, data, 0, nullopt, targ);
 
-  * Returns the number of occurrences as an integer, which is
-    always non-negative.
+        reader.load_state(0);      // data
+        reader.required(from);     // from
+        reader.save_state(0);
+        reader.optional(targ);     // [target]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_count, data, from, nullopt, targ);
 
-`std.array.count(data, from, target)`
+        reader.load_state(0);      // data, from
+        reader.optional(len);      // [length]
+        reader.optional(targ);     // [target]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_count, data, from, len, targ);
+      }
+      ASTERIA_BINDING_END);
 
-  * Searches `data` for `target` and figures the total number of
-    occurrences. The search operation is performed on the same
-    subrange that would be returned by `slice(data, from)`.
-
-  * Returns the number of occurrences as an integer, which is
-    always non-negative.
-
-`std.array.count(data, from, [length], target)`
-
-  * Searches `data` for `target` and figures the total number of
-    occurrences. The search operation is performed on the same
-    subrange that would be returned by `slice(data, from, length)`.
-
-  * Returns the number of occurrences as an integer, which is
-    always non-negative.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.count"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    V_array data;
-    Value target;
-    if(reader.I().v(data).S(state).o(target).F()) {
-      Reference::S_temporary xref = { std_array_count(::std::move(data), 0, nullopt,
-                                                           ::std::move(target)) };
-      return self = ::std::move(xref);
-    }
-    V_integer from;
-    if(reader.L(state).v(from).S(state).o(target).F()) {
-      Reference::S_temporary xref = { std_array_count(::std::move(data), from, nullopt,
-                                                           ::std::move(target)) };
-      return self = ::std::move(xref);
-    }
-    Opt_integer length;
-    if(reader.L(state).o(length).o(target).F()) {
-      Reference::S_temporary xref = { std_array_count(::std::move(data), from, length,
-                                                           ::std::move(target)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.count_if()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("count_if"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.count_if(data, target, predictor)`
+      ASTERIA_BINDING_BEGIN("std.array.count_if", self, global, reader) {
+        V_array data;
+        V_integer from;
+        Opt_integer len;
+        V_function pred;
 
-  * Searches `data` for every element, namely `x`, such that
-    `predictor(x)` yields logically true, and figures the total
-    number of such occurrences.
+        reader.start_overload();
+        reader.required(data);     // data
+        reader.save_state(0);
+        reader.required(pred);     // predictor
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_count_if, global, data, 0, nullopt, pred);
 
-  * Returns the number of occurrences as an integer, which is
-    always non-negative.
+        reader.load_state(0);      // data
+        reader.required(from);     // from
+        reader.save_state(0);
+        reader.required(pred);     // predictor
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_count_if, global, data, from, nullopt, pred);
 
-`std.array.count_if(data, from, target, predictor)`
+        reader.load_state(0);      // data, from
+        reader.optional(len);      // [length]
+        reader.required(pred);     // predictor
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_count_if, global, data, from, len, pred);
+      }
+      ASTERIA_BINDING_END);
 
-  * Searches `data` for every element, namely `x`, such that
-    `predictor(x)` yields logically true, and figures the total
-    number of elements. The search operation is performed on the
-    same subrange that would be returned by `slice(data, from)`.
-
-  * Returns the number of occurrences as an integer, which is
-    always non-negative.
-
-`std.array.count_if(data, from, [length], target, predictor)`
-
-  * Searches `data` for every element, namely `x`, such that
-    `predictor(x)` yields logically true, and figures the total
-    number of elements. The search operation is performed on the
-    same subrange that would be returned by `slice(data, from,
-    length)`.
-
-  * Returns the number of occurrences as an integer, which is
-    always non-negative.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.count_if"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    V_array data;
-    V_function predictor;
-    if(reader.I().v(data).S(state).v(predictor).F()) {
-      Reference::S_temporary xref = { std_array_count_if(global, ::std::move(data), 0, nullopt,
-                                                              ::std::move(predictor)) };
-      return self = ::std::move(xref);
-    }
-    V_integer from;
-    if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      Reference::S_temporary xref = { std_array_count_if(global, ::std::move(data), from, nullopt,
-                                                              ::std::move(predictor)) };
-      return self = ::std::move(xref);
-    }
-    Opt_integer length;
-    if(reader.L(state).o(length).v(predictor).F()) {
-      Reference::S_temporary xref = { std_array_count_if(global, ::std::move(data), from, length,
-                                                              ::std::move(predictor)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.count_if_not()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("count_if_not"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.count_if_not(data, target, predictor)`
+      ASTERIA_BINDING_BEGIN("std.array.count_if_not", self, global, reader) {
+        V_array data;
+        V_integer from;
+        Opt_integer len;
+        V_function pred;
 
-  * Searches on every element, namely `x`, in `data`, such that
-    `predictor(x)` yields logically false, and figures the total
-    number of such occurrences.
+        reader.start_overload();
+        reader.required(data);     // data
+        reader.save_state(0);
+        reader.required(pred);     // predictor
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_count_if_not, global, data, 0, nullopt, pred);
 
-  * Returns the number of occurrences as an integer, which is
-    always non-negative.
+        reader.load_state(0);      // data
+        reader.required(from);     // from
+        reader.save_state(0);
+        reader.required(pred);     // predictor
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_count_if_not, global, data, from, nullopt, pred);
 
-`std.array.count_if_not(data, from, target, predictor)`
+        reader.load_state(0);      // data, from
+        reader.optional(len);      // [length]
+        reader.required(pred);     // predictor
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_count_if_not, global, data, from, len, pred);
+      }
+      ASTERIA_BINDING_END);
 
-  * Searches on every element, namely `x`, in `data`, such that
-    `predictor(x)` yields logically false, and figures the total
-    number of elements. The search operation is performed on the
-    same subrange that would be returned by `slice(data, from)`.
-
-  * Returns the number of occurrences as an integer, which is
-    always non-negative.
-
-`std.array.count_if_not(data, from, [length], target, predictor)`
-
-  * Searches on every element, namely `x`, in `data`, such that
-    `predictor(x)` yields logically false, and figures the total
-    number of elements. The search operation is performed on the
-    same subrange that would be returned by `slice(data, from,
-    length)`.
-
-  * Returns the number of occurrences as an integer, which is
-    always non-negative.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.count_if_not"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    V_array data;
-    V_function predictor;
-    if(reader.I().v(data).S(state).v(predictor).F()) {
-      Reference::S_temporary xref = { std_array_count_if_not(global, ::std::move(data), 0, nullopt,
-                                                                  ::std::move(predictor)) };
-      return self = ::std::move(xref);
-    }
-    V_integer from;
-    if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      Reference::S_temporary xref = { std_array_count_if_not(global, ::std::move(data), from, nullopt,
-                                                                  ::std::move(predictor)) };
-      return self = ::std::move(xref);
-    }
-    Opt_integer length;
-    if(reader.L(state).o(length).v(predictor).F()) {
-      Reference::S_temporary xref = { std_array_count_if_not(global, ::std::move(data), from, length,
-                                                                  ::std::move(predictor)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.exclude()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("exclude"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.exclude(data, target)`
+      ASTERIA_BINDING_BEGIN("std.array.exclude", self, global, reader) {
+        V_array data;
+        V_integer from;
+        Opt_integer len;
+        Value targ;
 
-  * Removes every element from `data` which compares equal to
-    `target` to create a new array. This function returns a new
-    array without modifying `data`.
+        reader.start_overload();
+        reader.required(data);     // data
+        reader.save_state(0);
+        reader.optional(targ);     // [target]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_exclude, data, 0, nullopt, targ);
 
-  * Returns a new array with all occurrences removed.
+        reader.load_state(0);      // data
+        reader.required(from);     // from
+        reader.save_state(0);
+        reader.optional(targ);     // [target]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_exclude, data, from, nullopt, targ);
 
-`std.array.exclude(data, from, target)`
+        reader.load_state(0);      // data, from
+        reader.optional(len);      // [length]
+        reader.optional(targ);     // [target]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_exclude, data, from, len, targ);
+      }
+      ASTERIA_BINDING_END);
 
-  * Removes every element from `data` which both compares equal
-    to `target` and is within the same subrange that would be
-    returned by `slice(data, from)` to create a new array. This
-    function returns a new array without modifying `data`.
-
-  * Returns a new array with all occurrences removed.
-
-`std.array.exclude(data, from, [length], target)`
-
-  * Removes every element from `data` which both compares equal
-    to `target` and is within the same subrange that would be
-    returned by `slice(data, from, length)` to create a new array.
-    This function returns a new array without modifying `data`.
-
-  * Returns a new array with all occurrences removed.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.exclude"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    V_array data;
-    Value target;
-    if(reader.I().v(data).S(state).o(target).F()) {
-      Reference::S_temporary xref = { std_array_exclude(::std::move(data), 0, nullopt,
-                                                             ::std::move(target)) };
-      return self = ::std::move(xref);
-    }
-    V_integer from;
-    if(reader.L(state).v(from).S(state).o(target).F()) {
-      Reference::S_temporary xref = { std_array_exclude(::std::move(data), from, nullopt,
-                                                             ::std::move(target)) };
-      return self = ::std::move(xref);
-    }
-    Opt_integer length;
-    if(reader.L(state).o(length).o(target).F()) {
-      Reference::S_temporary xref = { std_array_exclude(::std::move(data), from, length,
-                                                             ::std::move(target)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.exclude_if()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("exclude_if"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.exclude_if(data, target, predictor)`
+      ASTERIA_BINDING_BEGIN("std.array.exclude_if", self, global, reader) {
+        V_array data;
+        V_integer from;
+        Opt_integer len;
+        V_function pred;
 
-  * Removes every element from `data`, namely `x`, such that
-    `predictor(x)` yields logically false, to create a new array.
-    This function returns a new array without modifying `data`.
+        reader.start_overload();
+        reader.required(data);     // data
+        reader.save_state(0);
+        reader.required(pred);     // predictor
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_exclude_if, global, data, 0, nullopt, pred);
 
-  * Returns a new array with all occurrences removed.
+        reader.load_state(0);      // data
+        reader.required(from);     // from
+        reader.save_state(0);
+        reader.required(pred);     // predictor
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_exclude_if, global, data, from, nullopt, pred);
 
-`std.array.exclude_if(data, from, target, predictor)`
+        reader.load_state(0);      // data, from
+        reader.optional(len);      // [length]
+        reader.required(pred);     // predictor
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_exclude_if, global, data, from, len, pred);
+      }
+      ASTERIA_BINDING_END);
 
-  * Removes every element from `data`, namely `x`, such that
-    both `predictor(x)` yields logically false and `x` is within
-    the subrange that would be returned by `slice(data, from)`,
-    to create a new array. This function returns a new array
-    without modifying `data`.
-
-  * Returns a new array with all occurrences removed.
-
-`std.array.exclude_if(data, from, [length], target, predictor)`
-
-  * Removes every element from `data`, namely `x`, such that
-    both `predictor(x)` yields logically false and `x` is within
-    the subrange that would be returned by `slice(data, from,
-    length)`, to create a new array. This function returns a new
-    array without modifying `data`.
-
-  * Returns a new array with all occurrences removed.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.exclude_if"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    V_array data;
-    V_function predictor;
-    if(reader.I().v(data).S(state).v(predictor).F()) {
-      Reference::S_temporary xref = { std_array_exclude_if(global, ::std::move(data), 0, nullopt,
-                                                                ::std::move(predictor)) };
-      return self = ::std::move(xref);
-    }
-    V_integer from;
-    if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      Reference::S_temporary xref = { std_array_exclude_if(global, ::std::move(data), from, nullopt,
-                                                                ::std::move(predictor)) };
-      return self = ::std::move(xref);
-    }
-    Opt_integer length;
-    if(reader.L(state).o(length).v(predictor).F()) {
-      Reference::S_temporary xref = { std_array_exclude_if(global, ::std::move(data), from, length,
-                                                                ::std::move(predictor)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.exclude_if_not()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("exclude_if_not"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.exclude_if_not(data, target, predictor)`
+      ASTERIA_BINDING_BEGIN("std.array.exclude_if_not", self, global, reader) {
+        V_array data;
+        V_integer from;
+        Opt_integer len;
+        V_function pred;
 
-  * Removes every element from `data`, namely `x`, such that
-    `predictor(x)` yields logically true, to create a new array.
-    This function returns a new array without modifying `data`.
+        reader.start_overload();
+        reader.required(data);     // data
+        reader.save_state(0);
+        reader.required(pred);     // predictor
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_exclude_if_not, global, data, 0, nullopt, pred);
 
-  * Returns a new array with all occurrences removed.
+        reader.load_state(0);      // data
+        reader.required(from);     // from
+        reader.save_state(0);
+        reader.required(pred);     // predictor
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_exclude_if_not, global, data, from, nullopt, pred);
 
-`std.array.exclude_if_not(data, from, target, predictor)`
+        reader.load_state(0);      // data, from
+        reader.optional(len);      // [length]
+        reader.required(pred);     // predictor
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_exclude_if_not, global, data, from, len, pred);
+      }
+      ASTERIA_BINDING_END);
 
-  * Removes every element from `data`, namely `x`, such that
-    both `predictor(x)` yields logically true and `x` is within
-    the subrange that would be returned by `slice(data, from)`,
-    to create a new array. This function returns a new array
-    without modifying `data`.
-
-  * Returns a new array with all occurrences removed.
-
-`std.array.exclude_if_not(data, from, [length], target, predictor)`
-
-  * Removes every element from `data`, namely `x`, such that
-    both `predictor(x)` yields logically true and `x` is within
-    the subrange that would be returned by `slice(data, from,
-    length)`, to create a new array. This function returns a new
-    array without modifying `data`.
-
-  * Returns a new array with all occurrences removed.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.exclude_if_not"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    V_array data;
-    V_function predictor;
-    if(reader.I().v(data).S(state).v(predictor).F()) {
-      Reference::S_temporary xref = { std_array_exclude_if_not(global, ::std::move(data), 0, nullopt,
-                                                                    ::std::move(predictor)) };
-      return self = ::std::move(xref);
-    }
-    V_integer from;
-    if(reader.L(state).v(from).S(state).v(predictor).F()) {
-      Reference::S_temporary xref = { std_array_exclude_if_not(global, ::std::move(data), from, nullopt,
-                                                                    ::std::move(predictor)) };
-      return self = ::std::move(xref);
-    }
-    Opt_integer length;
-    if(reader.L(state).o(length).v(predictor).F()) {
-      Reference::S_temporary xref = { std_array_exclude_if_not(global, ::std::move(data), from, length,
-                                                                    ::std::move(predictor)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.is_sorted()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("is_sorted"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.is_sorted(data, [comparator])`
+      ASTERIA_BINDING_BEGIN("std.array.is_sorted", self, global, reader) {
+        V_array data;
+        Opt_function comp;
 
-  * Checks whether `data` is sorted. That is, there is no pair of
-    adjacent elements in `data` such that the first one is greater
-    than or unordered with the second one. Elements are compared
-    using `comparator`, which shall be a binary function that
-    returns a negative integer or real if the first argument is
-    less than the second one, a positive integer or real if the
-    first argument is greater than the second one, or `0` if the
-    arguments are equal; other values indicate that the arguments
-    are unordered. If no `comparator` is provided, the built-in
-    3-way comparison operator is used. An array that contains no
-    elements is considered to have been sorted.
+        reader.start_overload();
+        reader.required(data);     // data
+        reader.optional(comp);     // [comparator]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_is_sorted, global, data, comp);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns `true` if `data` is sorted or empty, or `false`
-    otherwise.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.is_sorted"), ::rocket::cref(args));
-    // Parse arguments.
-    V_array data;
-    Opt_function comparator;
-    if(reader.I().v(data).o(comparator).F()) {
-      Reference::S_temporary xref = { std_array_is_sorted(global, ::std::move(data),
-                                                               ::std::move(comparator)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.binary_search()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("binary_search"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.binary_search(data, target, [comparator])`
+      ASTERIA_BINDING_BEGIN("std.array.binary_search", self, global, reader) {
+        V_array data;
+        Value targ;
+        Opt_function comp;
 
-  * Finds the first element in `data` that is equal to `target`.
-    The principle of user-defined `comparator`s is the same as the
-    `is_sorted()` function. As a consequence, the function call
-    `is_sorted(data, comparator)` shall yield `true` prior to this
-    call, otherwise the effect is undefined.
+        reader.start_overload();
+        reader.required(data);     // data
+        reader.optional(targ);     // [target]
+        reader.optional(comp);     // [comparator]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_binary_search, global, data, targ, comp);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the subscript of such an element as an integer, if one
-    is found, or `null` otherwise.
-
-  * Throws an exception if `data` has not been sorted properly. Be
-    advised that in this case there is no guarantee whether an
-    exception will be thrown or not.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.binary_search"), ::rocket::cref(args));
-    // Parse arguments.
-    V_array data;
-    Value target;
-    Opt_function comparator;
-    if(reader.I().v(data).o(target).o(comparator).F()) {
-      Reference::S_temporary xref = { std_array_binary_search(global, ::std::move(data), ::std::move(target),
-                                                                   ::std::move(comparator)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.lower_bound()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("lower_bound"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.lower_bound(data, target, [comparator])`
+      ASTERIA_BINDING_BEGIN("std.array.lower_bound", self, global, reader) {
+        V_array data;
+        Value targ;
+        Opt_function comp;
 
-  * Finds the first element in `data` that is greater than or equal
-    to `target` and precedes all elements that are less than
-    `target` if any. The principle of user-defined `comparator`s is
-    the same as the `is_sorted()` function. As a consequence, the
-    function call `is_sorted(data, comparator)` shall yield `true`
-    prior to this call, otherwise the effect is undefined.
+        reader.start_overload();
+        reader.required(data);     // data
+        reader.optional(targ);     // [target]
+        reader.optional(comp);     // [comparator]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_lower_bound, global, data, targ, comp);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the subscript of such an element as an integer. This
-    function returns `countof(data)` if all elements are less than
-    `target`.
-
-  * Throws an exception if `data` has not been sorted properly. Be
-    advised that in this case there is no guarantee whether an
-    exception will be thrown or not.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.lower_bound"), ::rocket::cref(args));
-    // Parse arguments.
-    V_array data;
-    Value target;
-    Opt_function comparator;
-    if(reader.I().v(data).o(target).o(comparator).F()) {
-      Reference::S_temporary xref = { std_array_lower_bound(global, ::std::move(data), ::std::move(target),
-                                                                 ::std::move(comparator)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.upper_bound()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("upper_bound"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.upper_bound(data, target, [comparator])`
+      ASTERIA_BINDING_BEGIN("std.array.upper_bound", self, global, reader) {
+        V_array data;
+        Value targ;
+        Opt_function comp;
 
-  * Finds the first element in `data` that is greater than `target`
-    and precedes all elements that are less than or equal to
-    `target` if any. The principle of user-defined `comparator`s is
-    the same as the `is_sorted()` function. As a consequence, the
-    function call `is_sorted(data, comparator)` shall yield `true`
-    prior to this call, otherwise the effect is undefined.
+        reader.start_overload();
+        reader.required(data);     // data
+        reader.optional(targ);     // [target]
+        reader.optional(comp);     // [comparator]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_upper_bound, global, data, targ, comp);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the subscript of such an element as an integer. This
-    function returns `countof(data)` if all elements are less than
-    or equal to `target`.
-
-  * Throws an exception if `data` has not been sorted properly. Be
-    advised that in this case there is no guarantee whether an
-    exception will be thrown or not.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.upper_bound"), ::rocket::cref(args));
-    // Parse arguments.
-    V_array data;
-    Value target;
-    Opt_function comparator;
-    if(reader.I().v(data).o(target).o(comparator).F()) {
-      Reference::S_temporary xref = { std_array_upper_bound(global, ::std::move(data), ::std::move(target),
-                                                                 ::std::move(comparator)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.equal_range()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("equal_range"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.equal_range(data, target, [comparator])`
+      ASTERIA_BINDING_BEGIN("std.array.equal_range", self, global, reader) {
+        V_array data;
+        Value targ;
+        Opt_function comp;
 
-  * Gets the range of elements equivalent to `target` in `data` as
-    a single function call. This function is equivalent to calling
-    `lower_bound(data, target, comparator)` and
-    `upper_bound(data, target, comparator)` respectively then
-    storing the start and length in an array.
+        reader.start_overload();
+        reader.required(data);     // data
+        reader.optional(targ);     // [target]
+        reader.optional(comp);     // [comparator]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_equal_range, global, data, targ, comp);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns an array of two integers, the first of which specifies
-    the lower bound and the second of which specifies the number
-    of elements in the range.
-
-  * Throws an exception if `data` has not been sorted properly. Be
-    advised that in this case there is no guarantee whether an
-    exception will be thrown or not.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.lower_bound"), ::rocket::cref(args));
-    // Parse arguments.
-    V_array data;
-    Value target;
-    Opt_function comparator;
-    if(reader.I().v(data).o(target).o(comparator).F()) {
-      Reference::S_temporary xref = { std_array_equal_range(global, ::std::move(data), ::std::move(target),
-                                                                 ::std::move(comparator)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.sort()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("sort"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.sort(data, [comparator])`
+      ASTERIA_BINDING_BEGIN("std.array.sort", self, global, reader) {
+        V_array data;
+        Opt_function comp;
 
-  * Sorts elements in `data` in ascending order. The principle of
-    user-defined `comparator`s is the same as the `is_sorted()`
-    function. The algorithm shall finish in `O(n log n)` time where
-    `n` is the number of elements in `data`, and shall be stable.
-    This function returns a new array without modifying `data`.
+        reader.start_overload();
+        reader.required(data);     // data
+        reader.optional(comp);     // [comparator]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_sort, global, data, comp);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the sorted array.
-
-  * Throws an exception if any elements are unordered. Be advised
-    that in this case there is no guarantee whether an exception
-    will be thrown or not.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.sort"), ::rocket::cref(args));
-    // Parse arguments.
-    V_array data;
-    Opt_function comparator;
-    if(reader.I().v(data).o(comparator).F()) {
-      Reference::S_temporary xref = { std_array_sort(global, ::std::move(data), ::std::move(comparator)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.sortu()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("sortu"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.sortu(data, [comparator])`
+      ASTERIA_BINDING_BEGIN("std.array.sortu", self, global, reader) {
+        V_array data;
+        Opt_function comp;
 
-  * Sorts elements in `data` in ascending order, then removes all
-    elements that have preceding equivalents. The principle of
-    user-defined `comparator`s is the same as the `is_sorted()`
-    function. The algorithm shall finish in `O(n log n)` time where
-    `n` is the number of elements in `data`. This function returns
-    a new array without modifying `data`.
+        reader.start_overload();
+        reader.required(data);     // data
+        reader.optional(comp);     // [comparator]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_sortu, global, data, comp);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the sorted array with no duplicate elements.
-
-  * Throws an exception if any elements are unordered. Be advised
-    that in this case there is no guarantee whether an exception
-    will be thrown or not.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.sortu"), ::rocket::cref(args));
-    // Parse arguments.
-    V_array data;
-    Opt_function comparator;
-    if(reader.I().v(data).o(comparator).F()) {
-      Reference::S_temporary xref = { std_array_sortu(global, ::std::move(data), ::std::move(comparator)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.max_of()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("max_of"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.max_of(data, [comparator])`
+      ASTERIA_BINDING_BEGIN("std.array.max_of", self, global, reader) {
+        V_array data;
+        Opt_function comp;
 
-  * Finds the maximum element in `data`. The principle of
-    user-defined `comparator`s is the same as the `is_sorted()`
-    function. Elements that are unordered with the first element
-    are ignored silently.
+        reader.start_overload();
+        reader.required(data);     // data
+        reader.optional(comp);     // [comparator]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_max_of, global, data, comp);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns a copy of the maximum element, or `null` if `data` is
-    empty.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.max_of"), ::rocket::cref(args));
-    // Parse arguments.
-    V_array data;
-    Opt_function comparator;
-    if(reader.I().v(data).o(comparator).F()) {
-      Reference::S_temporary xref = { std_array_max_of(global, ::std::move(data), ::std::move(comparator)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.min_of()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("min_of"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.min_of(data, [comparator])`
+      ASTERIA_BINDING_BEGIN("std.array.min_of", self, global, reader) {
+        V_array data;
+        Opt_function comp;
 
-  * Finds the minimum element in `data`. The principle of
-    user-defined `comparator`s is the same as the `is_sorted()`
-    function. Elements that are unordered with the first element
-    are ignored silently.
+        reader.start_overload();
+        reader.required(data);     // data
+        reader.optional(comp);     // [comparator]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_min_of, global, data, comp);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns a copy of the minimum element, or `null` if `data` is
-    empty.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.min_of"), ::rocket::cref(args));
-    // Parse arguments.
-    V_array data;
-    Opt_function comparator;
-    if(reader.I().v(data).o(comparator).F()) {
-      Reference::S_temporary xref = { std_array_min_of(global, ::std::move(data), ::std::move(comparator)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.reverse()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("reverse"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.reverse(data)`
+      ASTERIA_BINDING_BEGIN("std.array.reverse", self, global, reader) {
+        V_array data;
 
-  * Reverses an array. This function returns a new array without
-    modifying `data`.
+        reader.start_overload();
+        reader.required(data);     // data
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_reverse, data);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the reversed array.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.reverse"), ::rocket::cref(args));
-    // Parse arguments.
-    V_array data;
-    Opt_function comparator;
-    if(reader.I().v(data).o(comparator).F()) {
-      Reference::S_temporary xref = { std_array_reverse(::std::move(data)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.generate()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("generate"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.generate(generator, length)`
+      ASTERIA_BINDING_BEGIN("std.array.generate", self, global, reader) {
+        V_function gen;
+        V_integer len;
 
-  * Calls `generator` repeatedly up to `length` times and returns
-    an array consisting of all values returned. `generator` shall
-    be a binary function. The first argument will be the number of
-    elements having been generated; the second argument is the
-    previous element generated, or `null` in the case of the first
-    element.
+        reader.start_overload();
+        reader.required(gen);      // generator
+        reader.required(len);      // length
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_generate, global, gen, len);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns an array containing all values generated.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.generate"), ::rocket::cref(args));
-    // Parse arguments.
-    V_function generator;
-    V_integer length;
-    if(reader.I().v(generator).v(length).F()) {
-      Reference::S_temporary xref = { std_array_generate(global, ::std::move(generator), length) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.shuffle()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("shuffle"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.shuffle(data, [seed])`
+      ASTERIA_BINDING_BEGIN("std.array.shuffle", self, global, reader) {
+        V_array data;
+        Opt_integer seed;
 
-  * Shuffles elements in `data` randomly. If `seed` is set to an
-    integer, the internal pseudo random number generator will be
-    initialized with it and will produce the same series of numbers
-    for a specific `seed` value. If it is absent, an unspecified
-    seed is generated when this function is called. This function
-    returns a new array without modifying `data`.
+        reader.start_overload();
+        reader.required(data);     // data
+        reader.optional(seed);     // [seed]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_shuffle, data, seed);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the shuffled array.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.shuffle"), ::rocket::cref(args));
-    // Parse arguments.
-    V_array data;
-    Opt_integer seed;
-    if(reader.I().v(data).o(seed).F()) {
-      Reference::S_temporary xref = { std_array_shuffle(::std::move(data), ::std::move(seed)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.rotate()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("rotate"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.rotate(data, shift)`
+      ASTERIA_BINDING_BEGIN("std.array.rotate", self, global, reader) {
+        V_array data;
+        V_integer shift;
 
-  * Rotates elements in `data` by `shift`. That is, unless `data`
-    is empty, the element at subscript `x` is moved to subscript
-    `(x + shift) % countof(data)`. No element is added or removed.
+        reader.start_overload();
+        reader.required(data);     // data
+        reader.required(shift);    // shift
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_rotate, data, shift);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the rotated array. If `data` is empty, an empty array
-    is returned.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.rotate"), ::rocket::cref(args));
-    // Parse arguments.
-    V_array data;
-    V_integer shift;
-    if(reader.I().v(data).v(shift).F()) {
-      Reference::S_temporary xref = { std_array_rotate(::std::move(data), ::std::move(shift)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.copy_keys()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("copy_keys"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.copy_keys(source)`
+      ASTERIA_BINDING_BEGIN("std.array.copy_keys", self, global, reader) {
+        V_object obj;
 
-  * Copies all keys from `source`, which shall be an object, to
-    create an array.
+        reader.start_overload();
+        reader.required(obj);    // source
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_copy_keys, obj);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns an array of all keys in `source`.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.copy_keys"), ::rocket::cref(args));
-    // Parse arguments.
-    V_object source;
-    if(reader.I().v(source).F()) {
-      Reference::S_temporary xref = { std_array_copy_keys(::std::move(source)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.array.copy_values()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("copy_values"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.array.copy_values(source)`
+      ASTERIA_BINDING_BEGIN("std.array.copy_values", self, global, reader) {
+        V_object obj;
 
-  * Copies all values from `source`, which shall be an object, to
-    create an array.
-
-  * Returns an array of all values in `source`.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.array.copy_values"), ::rocket::cref(args));
-    // Parse arguments.
-    V_object source;
-    if(reader.I().v(source).F()) {
-      Reference::S_temporary xref = { std_array_copy_values(::std::move(source)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(obj);    // source
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_copy_values, obj);
+      }
+      ASTERIA_BINDING_END);
   }
 
 }  // namespace asteria

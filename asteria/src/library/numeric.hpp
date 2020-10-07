@@ -43,6 +43,14 @@ std_numeric_is_nan(V_integer value);
 V_boolean
 std_numeric_is_nan(V_real value);
 
+// `std.numeric.max`
+Value
+std_numeric_max(cow_vector<Value> values);
+
+// `std.numeric.min`
+Value
+std_numeric_min(cow_vector<Value> values);
+
 // `std.numeric.clamp`
 V_integer
 std_numeric_clamp(V_integer value, V_integer lower, V_integer upper);

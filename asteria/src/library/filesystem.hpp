@@ -30,15 +30,15 @@ std_filesystem_remove_recursive(V_string path);
 
 // `std.filesystem.directory_list`
 V_object
-std_filesystem_directory_list(V_string path);
+std_filesystem_dir_list(V_string path);
 
 // `std.filesystem.directory_create`
 V_integer
-std_filesystem_directory_create(V_string path);
+std_filesystem_dir_create(V_string path);
 
 // `std.filesystem.directory_remove`
 V_integer
-std_filesystem_directory_remove(V_string path);
+std_filesystem_dir_remove(V_string path);
 
 // `std.filesystem.file_read`
 V_string
@@ -51,7 +51,8 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
 
 // `std.filesystem.file_write`
 void
-std_filesystem_file_write(V_string path, V_string data, Opt_integer offset);
+std_filesystem_file_write(V_string path, Opt_integer offset, V_string data);
+
 
 // `std.filesystem.file_append`
 void

@@ -19,5 +19,57 @@ struct State
     bool matched = false;
   };
 
+// This ensures `Global_Context` is always passed as a non-const lvalue.
+template<typename XValT>
+constexpr
+typename ::std::remove_reference<XValT>::type&&
+move(XValT&& xval)
+noexcept
+  { return static_cast<typename ::std::remove_reference<XValT>::type&&>(xval);  }
+
+constexpr
+Global_Context&
+move(Global_Context& global)
+noexcept
+  { return global;  }
+
+// The void return type needs special treatment.
+template<typename RetT, typename SeqT, typename FuncT, typename TupleT>
+struct Applier;
+
+template<typename RetT, size_t... N, typename FuncT, typename... ArgsT>
+struct Applier<RetT, ::std::index_sequence<N...>, FuncT, ::std::tuple<ArgsT...>>
+  {
+    static
+    Reference&
+    do_apply(Reference& self, FuncT& func, ::std::tuple<ArgsT...>& args)
+      {
+        Reference::S_temporary xref = { func(::std::get<N>(args)...)  };
+        return self = ::std::move(xref);
+      }
+  };
+
+template<size_t... N, typename FuncT, typename... ArgsT>
+struct Applier<void, ::std::index_sequence<N...>, FuncT, ::std::tuple<ArgsT...>>
+  {
+    static
+    Reference&
+    do_apply(Reference& self, FuncT& func, ::std::tuple<ArgsT...>& args)
+      {
+        func(::std::get<N>(args)...);
+        return self = Reference::S_void();
+      }
+  };
+
+template<typename FuncT, typename... ArgsT>
+inline
+Reference&
+apply_and_set_result(Reference& self, FuncT&& func, ::std::tuple<ArgsT...>&& args)
+  {
+    return Applier<decltype(func(::std::declval<ArgsT>()...)),
+                   ::std::index_sequence_for<ArgsT...>,
+                   FuncT, ::std::tuple<ArgsT...>>::do_apply(self, func, args);
+  }
+
 }  // namespace details_argument_reader
 }  // namespace asteria

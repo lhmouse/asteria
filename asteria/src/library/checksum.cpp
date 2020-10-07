@@ -12,6 +12,20 @@
 namespace asteria {
 namespace {
 
+ref<V_opaque>
+do_open_private(Reference&& self, const phsh_string& name)
+  {
+    Reference::M_object_key xmod = { name };
+    self.zoom_in(::std::move(xmod));
+    return ::rocket::ref(self.open().open_opaque());
+  }
+
+void
+do_set_private(V_object& result, const phsh_string& name, V_opaque&& h)
+  {
+    result.insert_or_assign(name, ::std::move(h));
+  }
+
 template<uint32_t valT, uint32_t divT, int N>
 struct CRC32_Generator
   : CRC32_Generator<(valT >> 1) ^ (-(valT & 1) & divT), divT, N + 1>
@@ -49,7 +63,7 @@ final
     tinyfmt&
     describe(tinyfmt& fmt)
     const override
-      { return fmt << "`CRC32_Hasher`";  }
+      { return fmt << "instance of `std.checksum.CRC32` at `" << this << "`";  }
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
@@ -89,70 +103,34 @@ final
   };
 
 void
-do_construct_crc32(V_object& result)
+do_construct_CRC32(V_object& result)
   {
-    //===================================================================
-    // * private data
-    //===================================================================
-    result.insert_or_assign(::rocket::sref("$h"),
-      std_checksum_CRC32_private());
+    static constexpr auto uuid = ::rocket::sref("#{2C78B9D8-A8F4-4CE9-36E7-12B9EE14AD3D}");
+    do_set_private(result, uuid, std_checksum_CRC32_private());
 
-    //===================================================================
-    // `.update(data)`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("update"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.checksum.CRC32().update(data)`
+      ASTERIA_BINDING_BEGIN("std.checksum.CRC32::update", self, global, reader) {
+        const auto href = do_open_private(::std::move(self), uuid);
+        V_string data;
 
-  * Puts `data` into the hasher denoted by `this`, which shall be
-    a byte string.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.checksum.CRC32().update"), ::rocket::cref(args));
-    // Get the hasher.
-    Reference::M_object_key xmod = { ::rocket::sref("$h") };
-    self.zoom_in(::std::move(xmod));
-    // Parse arguments.
-    V_string data;
-    if(reader.I().v(data).F()) {
-      std_checksum_CRC32_update(self.open().open_opaque(), ::std::move(data));
-      return self = Reference::S_void();
-    }
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(data);    // data
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_CRC32_update, href, data);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `.finish()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("finish"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.checksum.CRC32().finish()`
+      ASTERIA_BINDING_BEGIN("std.checksum.CRC32::finish", self, global, reader) {
+        const auto href = do_open_private(::std::move(self), uuid);
 
-  * Extracts the checksum from the hasher denoted by `this`, then
-    resets it, making it suitable for further data as if it had
-    just been created.
-
-  * Returns the checksum as an integer, whose high-order 32 bits
-    are always zeroes.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.checksum.CRC32().finish"), ::rocket::cref(args));
-    // Get the hasher.
-    Reference::M_object_key xmod = { ::rocket::sref("$h") };
-    self.zoom_in(::std::move(xmod));
-    // Parse arguments.
-    if(reader.I().F()) {
-      Reference::S_temporary xref = { std_checksum_CRC32_finish(self.open().open_opaque()) };
-      return self = ::std::move(xref);
-    }
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_CRC32_finish, href);
+      }
+      ASTERIA_BINDING_END);
   }
 
 class FNV1a32_Hasher
@@ -173,7 +151,7 @@ final
     tinyfmt&
     describe(tinyfmt& fmt)
     const override
-      { return fmt << "`FNV1a32_Hasher`";  }
+      { return fmt << "instance of `std.checksum.FNV1a32` at `" << this << "`";  }
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
@@ -213,70 +191,34 @@ final
   };
 
 void
-do_construct_fnv1a32(V_object& result)
+do_construct_FNV1a32(V_object& result)
   {
-    //===================================================================
-    // * private data
-    //===================================================================
-    result.insert_or_assign(::rocket::sref("$h"),
-      std_checksum_FNV1a32_private());
+    static constexpr auto uuid = ::rocket::sref("#{2C79571C-5D7B-4674-056A-6C0D075A82FC}");
+    do_set_private(result, uuid, std_checksum_FNV1a32_private());
 
-    //===================================================================
-    // `.update(data)`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("update"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.checksum.FNV1a32().update(data)`
+      ASTERIA_BINDING_BEGIN("std.checksum.FNV1a32::update", self, global, reader) {
+        const auto href = do_open_private(::std::move(self), uuid);
+        V_string data;
 
-  * Puts `data` into the hasher denoted by `this`, which shall be
-    a byte string.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.checksum.FNV1a32().update"), ::rocket::cref(args));
-    // Get the hasher.
-    Reference::M_object_key xmod = { ::rocket::sref("$h") };
-    self.zoom_in(::std::move(xmod));
-    // Parse arguments.
-    V_string data;
-    if(reader.I().v(data).F()) {
-      std_checksum_FNV1a32_update(self.open().open_opaque(), ::std::move(data));
-      return self = Reference::S_void();
-    }
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(data);    // data
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_FNV1a32_update, href, data);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `.finish()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("finish"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.checksum.FNV1a32().finish()`
+      ASTERIA_BINDING_BEGIN("std.checksum.FNV1a32::finish", self, global, reader) {
+        const auto href = do_open_private(::std::move(self), uuid);
 
-  * Extracts the checksum from the hasher denoted by `this`, then
-    resets it, making it suitable for further data as if it had
-    just been created.
-
-  * Returns the checksum as an integer, whose high-order 32 bits
-    are always zeroes.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.checksum.FNV1a32().finish"), ::rocket::cref(args));
-    // Get the hasher.
-    Reference::M_object_key xmod = { ::rocket::sref("$h") };
-    self.zoom_in(::std::move(xmod));
-    // Parse arguments.
-    if(reader.I().F()) {
-      Reference::S_temporary xref = { std_checksum_FNV1a32_finish(self.open().open_opaque()) };
-      return self = ::std::move(xref);
-    }
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_FNV1a32_finish, href);
+      }
+      ASTERIA_BINDING_END);
   }
 
 template<size_t N>
@@ -480,7 +422,7 @@ final
     tinyfmt&
     describe(tinyfmt& fmt)
     const override
-      { return fmt << "`MD5_Hasher`";  }
+      { return fmt << "instance of `std.checksum.MD5` at `" << this << "`";  }
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
@@ -583,70 +525,34 @@ final
   };
 
 void
-do_construct_md5(V_object& result)
+do_construct_MD5(V_object& result)
   {
-    //===================================================================
-    // * private data
-    //===================================================================
-    result.insert_or_assign(::rocket::sref("$h"),
-      std_checksum_MD5_private());
+    static constexpr auto uuid = ::rocket::sref("#{2C795808-7290-4675-056A-D3825905F8E1}");
+    do_set_private(result, uuid, std_checksum_MD5_private());
 
-    //===================================================================
-    // `.update(data)`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("update"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.checksum.MD5().update(data)`
+      ASTERIA_BINDING_BEGIN("std.checksum.MD5::update", self, global, reader) {
+        const auto href = do_open_private(::std::move(self), uuid);
+        V_string data;
 
-  * Puts `data` into the hasher denoted by `this`, which shall be
-    a byte string.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.checksum.MD5().update"), ::rocket::cref(args));
-    // Get the hasher.
-    Reference::M_object_key xmod = { ::rocket::sref("$h") };
-    self.zoom_in(::std::move(xmod));
-    // Parse arguments.
-    V_string data;
-    if(reader.I().v(data).F()) {
-      std_checksum_MD5_update(self.open().open_opaque(), ::std::move(data));
-      return self = Reference::S_void();
-    }
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(data);    // data
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_MD5_update, href, data);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `.finish()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("finish"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.checksum.MD5().finish()`
+      ASTERIA_BINDING_BEGIN("std.checksum.MD5::finish", self, global, reader) {
+        const auto href = do_open_private(::std::move(self), uuid);
 
-  * Extracts the checksum from the hasher denoted by `this`, then
-    resets it, making it suitable for further data as if it had
-    just been created.
-
-  * Returns the checksum as a string of 32 hexadecimal digits in
-    uppercase.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.checksum.MD5().finish"), ::rocket::cref(args));
-    // Get the hasher.
-    Reference::M_object_key xmod = { ::rocket::sref("$h") };
-    self.zoom_in(::std::move(xmod));
-    // Parse arguments.
-    if(reader.I().F()) {
-      Reference::S_temporary xref = { std_checksum_MD5_finish(self.open().open_opaque()) };
-      return self = ::std::move(xref);
-    }
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_MD5_finish, href);
+      }
+      ASTERIA_BINDING_END);
   }
 
 class SHA1_Hasher
@@ -807,7 +713,7 @@ final
     tinyfmt&
     describe(tinyfmt& fmt)
     const override
-      { return fmt << "`SHA1_Hasher`";  }
+      { return fmt << "instance of `std.checksum.SHA1` at `" << this << "`";  }
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
@@ -910,70 +816,34 @@ final
   };
 
 void
-do_construct_sha1(V_object& result)
+do_construct_SHA1(V_object& result)
   {
-    //===================================================================
-    // * private data
-    //===================================================================
-    result.insert_or_assign(::rocket::sref("$h"),
-      std_checksum_SHA1_private());
+    static constexpr auto uuid = ::rocket::sref("#{2C795747-7003-4674-056A-91122125D892}");
+    do_set_private(result, uuid, std_checksum_SHA1_private());
 
-    //===================================================================
-    // `.update(data)`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("update"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.checksum.SHA1().update(data)`
+      ASTERIA_BINDING_BEGIN("std.checksum.SHA1::update", self, global, reader) {
+        const auto href = do_open_private(::std::move(self), uuid);
+        V_string data;
 
-  * Puts `data` into the hasher denoted by `this`, which shall be
-    a byte string.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.checksum.SHA1().update"), ::rocket::cref(args));
-    // Get the hasher.
-    Reference::M_object_key xmod = { ::rocket::sref("$h") };
-    self.zoom_in(::std::move(xmod));
-    // Parse arguments.
-    V_string data;
-    if(reader.I().v(data).F()) {
-      std_checksum_SHA1_update(self.open().open_opaque(), ::std::move(data));
-      return self = Reference::S_void();
-    }
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(data);    // data
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_SHA1_update, href, data);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `.finish()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("finish"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.checksum.SHA1().finish()`
+      ASTERIA_BINDING_BEGIN("std.checksum.SHA1::finish", self, global, reader) {
+        const auto href = do_open_private(::std::move(self), uuid);
 
-  * Extracts the checksum from the hasher denoted by `this`, then
-    resets it, making it suitable for further data as if it had
-    just been created.
-
-  * Returns the checksum as  a string of 40 hexadecimal digits in
-    uppercase.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.checksum.SHA1().finish"), ::rocket::cref(args));
-    // Get the hasher.
-    Reference::M_object_key xmod = { ::rocket::sref("$h") };
-    self.zoom_in(::std::move(xmod));
-    // Parse arguments.
-    if(reader.I().F()) {
-      Reference::S_temporary xref = { std_checksum_SHA1_finish(self.open().open_opaque()) };
-      return self = ::std::move(xref);
-    }
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_SHA1_finish, href);
+      }
+      ASTERIA_BINDING_END);
   }
 
 class SHA256_Hasher
@@ -1106,7 +976,7 @@ final
     tinyfmt&
     describe(tinyfmt& fmt)
     const override
-      { return fmt << "`SHA256_Hasher`";  }
+      { return fmt << "instance of `std.checksum.SHA256` at `" << this << "`";  }
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
@@ -1209,85 +1079,50 @@ final
   };
 
 void
-do_construct_sha256(V_object& result)
+do_construct_SHA256(V_object& result)
   {
-    //===================================================================
-    // * private data
-    //===================================================================
-    result.insert_or_assign(::rocket::sref("$h"),
-      std_checksum_SHA256_private());
+    static constexpr auto uuid = ::rocket::sref("#{2C795749-6F4F-4674-056A-B0E8CF4BBD7D}");
+    do_set_private(result, uuid, std_checksum_SHA256_private());
 
-    //===================================================================
-    // `.update(data)`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("update"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.checksum.SHA256().update(data)`
+      ASTERIA_BINDING_BEGIN("std.checksum.SHA256::update", self, global, reader) {
+        const auto href = do_open_private(::std::move(self), uuid);
+        V_string data;
 
-  * Puts `data` into the hasher denoted by `this`, which shall be
-    a byte string.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.checksum.SHA256().update"), ::rocket::cref(args));
-    // Get the hasher.
-    Reference::M_object_key xmod = { ::rocket::sref("$h") };
-    self.zoom_in(::std::move(xmod));
-    // Parse arguments.
-    V_string data;
-    if(reader.I().v(data).F()) {
-      std_checksum_SHA256_update(self.open().open_opaque(), ::std::move(data));
-      return self = Reference::S_void();
-    }
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(data);    // data
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_SHA256_update, href, data);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `.finish()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("finish"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.checksum.SHA256().finish()`
+      ASTERIA_BINDING_BEGIN("std.checksum.SHA256::finish", self, global, reader) {
+        const auto href = do_open_private(::std::move(self), uuid);
 
-  * Extracts the checksum from the hasher denoted by `this`, then
-    resets it, making it suitable for further data as if it had
-    just been created.
-
-  * Returns the checksum as  a string of 64 hexadecimal digits in
-    uppercase.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.checksum.SHA256().finish"), ::rocket::cref(args));
-    // Get the hasher.
-    Reference::M_object_key xmod = { ::rocket::sref("$h") };
-    self.zoom_in(::std::move(xmod));
-    // Parse arguments.
-    if(reader.I().F()) {
-      Reference::S_temporary xref = { std_checksum_SHA256_finish(self.open().open_opaque()) };
-      return self = ::std::move(xref);
-    }
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_SHA256_finish, href);
+      }
+      ASTERIA_BINDING_END);
   }
 
 template<typename HasherT>
+inline
 rcptr<HasherT>
-do_cast_hasher(V_opaque& oh)
+do_cast_hasher(V_opaque& h)
   {
-    auto qh = oh.open_opt<HasherT>();
-    if(!qh)
-      ASTERIA_THROW("Invalid dynamic cast to type `$1` from type `$2`",
-                    typeid(HasherT).name(), oh.type().name());
-    return qh;
+    auto hptr = h.open_opt<HasherT>();
+    if(!hptr)
+      ASTERIA_THROW("Invalid hasher type (invalid dynamic_cast to `$1` from `$2`)",
+                    typeid(HasherT).name(), h.type().name());
+    return hptr;
   }
 
 template<typename HasherT>
-decltype(::std::declval<HasherT&>().finish())
+decltype(auto)
 do_hash_bytes(const V_string& data)
   {
     HasherT h;
@@ -1296,7 +1131,7 @@ do_hash_bytes(const V_string& data)
   }
 
 template<typename HasherT>
-decltype(::std::declval<HasherT&>().finish())
+decltype(auto)
 do_hash_file(const V_string& path)
   {
     // Open the file for reading.
@@ -1319,18 +1154,16 @@ do_hash_file(const V_string& path)
     HasherT h;
 
     // Read bytes from the file and hash them.
-    for(;;) {
-      ::ssize_t nread = ::read(fd, pbuf, nbuf);
-      if(nread < 0)
-        ASTERIA_THROW("Error reading file '$2'\n"
-                      "[`read()` failed: $1]",
-                      format_errno(errno), path);
-
-      if(nread == 0)
-        break;  // EOF
-
+    ::ssize_t nread;
+    while((nread = ::read(fd, pbuf, nbuf)) > 0)
       h.update(pbuf, static_cast<size_t>(nread));
-    }
+
+    if(nread < 0)
+      ASTERIA_THROW("Error reading file '$2'\n"
+                    "[`read()` failed: $1]",
+                    format_errno(errno), path);
+
+    // Finalize the hasher.
     return h.finish();
   }
 
@@ -1358,7 +1191,7 @@ V_object
 std_checksum_CRC32()
   {
     V_object result;
-    do_construct_crc32(result);
+    do_construct_CRC32(result);
     return result;
   }
 
@@ -1396,7 +1229,7 @@ V_object
 std_checksum_FNV1a32()
   {
     V_object result;
-    do_construct_fnv1a32(result);
+    do_construct_FNV1a32(result);
     return result;
   }
 
@@ -1434,7 +1267,7 @@ V_object
 std_checksum_MD5()
   {
     V_object result;
-    do_construct_md5(result);
+    do_construct_MD5(result);
     return result;
   }
 
@@ -1472,7 +1305,7 @@ V_object
 std_checksum_SHA1()
   {
     V_object result;
-    do_construct_sha1(result);
+    do_construct_SHA1(result);
     return result;
   }
 
@@ -1510,7 +1343,7 @@ V_object
 std_checksum_SHA256()
   {
     V_object result;
-    do_construct_sha256(result);
+    do_construct_SHA256(result);
     return result;
   }
 
@@ -1529,589 +1362,170 @@ std_checksum_sha256_file(V_string path)
 void
 create_bindings_checksum(V_object& result, API_Version /*version*/)
   {
-    //===================================================================
-    // `std.checksum.CRC32()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("CRC32"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.checksum.CRC32()`
+      ASTERIA_BINDING_BEGIN("std.checksum.CRC32", self, global, reader) {
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_CRC32);
+      }
+      ASTERIA_BINDING_END);
 
-  * Creates a CRC-32 hasher according to ISO/IEC 3309. The divisor
-    is `0x04C11DB7` (or `0xEDB88320` in reverse form).
-
-  * Returns the hasher as an object consisting of the following
-    members:
-
-    * `update(data)`
-    * `finish()`
-
-    The function `update()` is used to put data into the hasher,
-    which shall be a byte string. After all data have been put, the
-    function `finish()` extracts the checksum as an integer (whose
-    high-order 32 bits are always zeroes), then resets the hasher,
-    making it suitable for further data as if it had just been
-    created.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.checksum.CRC32"), ::rocket::cref(args));
-    // Parse arguments.
-    if(reader.I().F()) {
-      Reference::S_temporary xref = { std_checksum_CRC32() };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.checksum.crc32()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("crc32"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.checksum.crc32(data)`
+      ASTERIA_BINDING_BEGIN("std.checksum.crc32", self, global, reader) {
+        V_string data;
 
-  * Calculates the CRC-32 checksum of `data` which must be of type
-    string, as if this function was defined as
+        reader.start_overload();
+        reader.required(data);    // data
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_crc32, data);
+      }
+      ASTERIA_BINDING_END);
 
-    ```
-    std.checksum.crc32 = func(data) {
-      var h = this.CRC32();
-      h.update(data);
-      return h.finish();
-    };
-    ```
-
-    This function is expected to be both more efficient and easier
-    to use.
-
-  * Returns the CRC-32 checksum as an integer. The high-order 32
-    bits are always zeroes.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.checksum.crc32"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string data;
-    if(reader.I().v(data).F()) {
-      Reference::S_temporary xref = { std_checksum_crc32(::std::move(data)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.checksum.crc32_file()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("crc32_file"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.checksum.crc32_file(path)`
+      ASTERIA_BINDING_BEGIN("std.checksum.crc32_file", self, global, reader) {
+        V_string path;
 
-  * Calculates the CRC-32 checksum of the file denoted by `path`,
-    as if this function was defined as
+        reader.start_overload();
+        reader.required(path);    // path
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_crc32_file, path);
+      }
+      ASTERIA_BINDING_END);
 
-    ```
-    std.checksum.crc32_file = func(path) {
-      var h = this.CRC32();
-      this.file_stream(path, func(off, data) = h.update(data));
-      return h.finish();
-    };
-    ```
-
-    This function is expected to be both more efficient and easier
-    to use.
-
-  * Returns the CRC-32 checksum as an integer. The high-order 32
-    bits are always zeroes.
-
-  * Throws an exception if a read error occurs.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.checksum.crc32_file"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string path;
-    if(reader.I().v(path).F()) {
-      Reference::S_temporary xref = { std_checksum_crc32_file(::std::move(path)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.checksum.FNV1a32()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("FNV1a32"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.checksum.FNV1a32()`
+      ASTERIA_BINDING_BEGIN("std.checksum.FNV1a32", self, global, reader) {
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_FNV1a32);
+      }
+      ASTERIA_BINDING_END);
 
-  * Creates a 32-bit Fowler-Noll-Vo (a.k.a. FNV) hasher of the
-    32-bit FNV-1a variant. The FNV prime is `16777619` and the FNV
-    offset basis is `2166136261`.
-
-  * Returns the hasher as an object consisting of the following
-    members:
-
-    * `update(data)`
-    * `finish()`
-
-    The function `update()` is used to put data into the hasher,
-    which shall be a byte string. After all data have been put, the
-    function `finish()` extracts the checksum as an integer (whose
-    high-order 32 bits are always zeroes), then resets the hasher,
-    making it suitable for further data as if it had just been
-    created.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.checksum.FNV1a32"), ::rocket::cref(args));
-    // Parse arguments.
-    if(reader.I().F()) {
-      Reference::S_temporary xref = { std_checksum_FNV1a32() };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.checksum.fnv1a32()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("fnv1a32"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.checksum.fnv1a32(data)`
+      ASTERIA_BINDING_BEGIN("std.checksum.fnv1a32", self, global, reader) {
+        V_string data;
 
-  * Calculates the 32-bit FNV-1a checksum of `data` which must be
-    a byte string, as if this function was defined as
+        reader.start_overload();
+        reader.required(data);    // data
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_fnv1a32, data);
+      }
+      ASTERIA_BINDING_END);
 
-    ```
-    std.checksum.fnv1a32 = func(data) {
-      var h = this.FNV1a32();
-      h.update(data);
-      return h.finish();
-    };
-    ```
-
-    This function is expected to be both more efficient and easier
-    to use.
-
-  * Returns the 32-bit FNV-1a checksum as an integer. The
-    high-order 32 bits are always zeroes.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.checksum.fnv1a32"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string data;
-    if(reader.I().v(data).F()) {
-      Reference::S_temporary xref = { std_checksum_fnv1a32(::std::move(data)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.checksum.fnv1a32_file()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("fnv1a32_file"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.checksum.fnv1a32_file(path)`
+      ASTERIA_BINDING_BEGIN("std.checksum.fnv1a32_file", self, global, reader) {
+        V_string path;
 
-  * Calculates the 32-bit FNV-1a checksum of the file denoted by
-    `path`, as if this function was defined as
+        reader.start_overload();
+        reader.required(path);    // path
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_fnv1a32_file, path);
+      }
+      ASTERIA_BINDING_END);
 
-    ```
-    std.checksum.fnv1a32_file = func(path) {
-      var h = this.FNV1a32();
-      var r = this.file_stream(path,
-                func(off, data) = h.update(data));
-      if(r == null)
-        return r;
-      return h.finish();
-    };
-    ```
-
-    This function is expected to be both more efficient and easier
-    to use.
-
-  * Returns the 32-bit FNV-1a checksum as an integer. The
-    high-order 32 bits are always zeroes. If the file does not
-    exist, `null` is returned.
-
-  * Throws an exception if a read error occurs.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.checksum.fnv1a32_file"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string path;
-    if(reader.I().v(path).F()) {
-      Reference::S_temporary xref = { std_checksum_fnv1a32_file(::std::move(path)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.checksum.MD5()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("MD5"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.checksum.MD5()`
+      ASTERIA_BINDING_BEGIN("std.checksum.MD5", self, global, reader) {
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_MD5);
+      }
+      ASTERIA_BINDING_END);
 
-  * Creates an MD5 hasher.
-
-  * Returns the hasher as an object consisting of the following
-    members:
-
-    * `update(data)`
-    * `finish()`
-
-    The function `update()` is used to put data into the hasher,
-    which shall be a byte string. After all data have been put, the
-    function `finish()` extracts the checksum as a string of 32
-    hexadecimal digits in uppercase, then resets the hasher, making
-    it suitable for further data as if it had just been created.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.checksum.MD5"), ::rocket::cref(args));
-    // Parse arguments.
-    if(reader.I().F()) {
-      Reference::S_temporary xref = { std_checksum_MD5() };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.checksum.md5()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("md5"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.checksum.md5(data)`
+      ASTERIA_BINDING_BEGIN("std.checksum.md5", self, global, reader) {
+        V_string data;
 
-  * Calculates the MD5 checksum of `data` which must be of type
-    string, as if this function was defined as
+        reader.start_overload();
+        reader.required(data);    // data
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_md5, data);
+      }
+      ASTERIA_BINDING_END);
 
-    ```
-    std.checksum.md5 = func(data) {
-      var h = this.MD5();
-      h.update(data);
-      return h.finish();
-    };
-    ```
-
-    This function is expected to be both more efficient and easier
-    to use.
-
-  * Returns the MD5 checksum as a string of 32 hexadecimal digits
-    in uppercase.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.checksum.md5"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string data;
-    if(reader.I().v(data).F()) {
-      Reference::S_temporary xref = { std_checksum_md5(::std::move(data)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.checksum.md5_file()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("md5_file"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.checksum.md5_file(path)`
+      ASTERIA_BINDING_BEGIN("std.checksum.md5_file", self, global, reader) {
+        V_string path;
 
-  * Calculates the MD5 checksum of the file denoted by `path`, as
-    if this function was defined as
+        reader.start_overload();
+        reader.required(path);    // path
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_md5_file, path);
+      }
+      ASTERIA_BINDING_END);
 
-    ```
-    std.checksum.md5_file = func(path) {
-      var h = this.MD5();
-      this.file_stream(path, func(off, data) = h.update(data));
-      return h.finish();
-    };
-    ```
-
-    This function is expected to be both more efficient and easier
-    to use.
-
-  * Returns the MD5 checksum as a string of 32 hexadecimal digits
-    in uppercase.
-
-  * Throws an exception if a read error occurs.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.checksum.md5_file"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string path;
-    if(reader.I().v(path).F()) {
-      Reference::S_temporary xref = { std_checksum_md5_file(::std::move(path)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.checksum.SHA1()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("SHA1"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.checksum.SHA1()`
+      ASTERIA_BINDING_BEGIN("std.checksum.SHA1", self, global, reader) {
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_SHA1);
+      }
+      ASTERIA_BINDING_END);
 
-  * Creates an SHA-1 hasher.
-
-  * Returns the hasher as an object consisting of the following
-    members:
-
-    * `update(data)`
-    * `finish()`
-
-    The function `update()` is used to put data into the hasher,
-    which shall be a byte string. After all data have been put, the
-    function `finish()` extracts the checksum as a string of 40
-    hexadecimal digits in uppercase, then resets the hasher, making
-    it suitable for further data as if it had just been created.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.checksum.SHA1"), ::rocket::cref(args));
-    // Parse arguments.
-    if(reader.I().F()) {
-      Reference::S_temporary xref = { std_checksum_SHA1() };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.checksum.sha1()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("sha1"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.checksum.sha1(data)`
+      ASTERIA_BINDING_BEGIN("std.checksum.sha1", self, global, reader) {
+        V_string data;
 
-  * Calculates the SHA-1 checksum of `data` which must be of type
-    string, as if this function was defined as
+        reader.start_overload();
+        reader.required(data);    // data
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_sha1, data);
+      }
+      ASTERIA_BINDING_END);
 
-    ```
-    std.checksum.sha1 = func(data) {
-      var h = this.SHA1();
-      h.update(data);
-      return h.finish();
-    };
-    ```
-
-    This function is expected to be both more efficient and easier
-    to use.
-
-  * Returns the SHA-1 checksum as a string of 40 hexadecimal
-    digits in uppercase.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.checksum.sha1"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string data;
-    if(reader.I().v(data).F()) {
-      Reference::S_temporary xref = { std_checksum_sha1(::std::move(data)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.checksum.sha1_file()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("sha1_file"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.checksum.sha1_file(path)`
+      ASTERIA_BINDING_BEGIN("std.checksum.sha1_file", self, global, reader) {
+        V_string path;
 
-  * Calculates the SHA-1 checksum of the file denoted by `path`, as
-    if this function was defined as
+        reader.start_overload();
+        reader.required(path);    // path
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_sha1_file, path);
+      }
+      ASTERIA_BINDING_END);
 
-    ```
-    std.checksum.sha1_file = func(path) {
-      var h = this.SHA1();
-      this.file_stream(path, func(off, data) = h.update(data));
-      return h.finish();
-    };
-    ```
-
-    This function is expected to be both more efficient and easier
-    to use.
-
-  * Returns the SHA-1 checksum as a string of 40 hexadecimal digits
-    in uppercase.
-
-  * Throws an exception if a read error occurs.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.checksum.sha1_file"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string path;
-    if(reader.I().v(path).F()) {
-      Reference::S_temporary xref = { std_checksum_sha1_file(::std::move(path)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.checksum.SHA256()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("SHA256"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.checksum.SHA256()`
+      ASTERIA_BINDING_BEGIN("std.checksum.SHA256", self, global, reader) {
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_SHA256);
+      }
+      ASTERIA_BINDING_END);
 
-  * Creates an SHA-256 hasher.
-
-  * Returns the hasher as an object consisting of the following
-    members:
-
-    * `update(data)`
-    * `finish()`
-
-    The function `update()` is used to put data into the hasher,
-    which shall be a byte string. After all data have been put, the
-    function `finish()` extracts the checksum as a string of 64
-    hexadecimal digits in uppercase, then resets the hasher, making
-    it suitable for further data as if it had just been created.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.checksum.SHA256"), ::rocket::cref(args));
-    // Parse arguments.
-    if(reader.I().F()) {
-      Reference::S_temporary xref = { std_checksum_SHA256() };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.checksum.sha256()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("sha256"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.checksum.sha256(data)`
+      ASTERIA_BINDING_BEGIN("std.checksum.sha256", self, global, reader) {
+        V_string data;
 
-  * Calculates the SHA-256 checksum of `data` which must be of type
-    string, as if this function was defined as
+        reader.start_overload();
+        reader.required(data);    // data
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_sha256, data);
+      }
+      ASTERIA_BINDING_END);
 
-    ```
-    std.checksum.sha256 = func(data) {
-      var h = this.SHA256();
-      h.update(data);
-      return h.finish();
-    };
-    ```
-
-    This function is expected to be both more efficient and easier
-    to use.
-
-  * Returns the SHA-256 checksum as a string of 64 hexadecimal
-    digits in uppercase.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.checksum.sha256"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string data;
-    if(reader.I().v(data).F()) {
-      Reference::S_temporary xref = { std_checksum_sha256(::std::move(data)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.checksum.sha256_file()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("sha256_file"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.checksum.sha256_file(path)`
+      ASTERIA_BINDING_BEGIN("std.checksum.sha256_file", self, global, reader) {
+        V_string path;
 
-  * Calculates the SHA-256 checksum of the file denoted by `path`,
-    as if this function was defined as
-
-    ```
-    std.checksum.sha256_file = func(path) {
-      var h = this.SHA256();
-      this.file_stream(path, func(off, data) = h.update(data));
-      return h.finish();
-    };
-    ```
-
-    This function is expected to be both more efficient and easier
-    to use.
-
-  * Returns the SHA-256 checksum as a string of 64 hexadecimal
-    digits in uppercase.
-
-  * Throws an exception if a read error occurs.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.checksum.sha256_file"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string path;
-    if(reader.I().v(path).F()) {
-      Reference::S_temporary xref = { std_checksum_sha256_file(::std::move(path)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(path);    // path
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_sha256_file, path);
+      }
+      ASTERIA_BINDING_END);
   }
 
 }  // namespace asteria

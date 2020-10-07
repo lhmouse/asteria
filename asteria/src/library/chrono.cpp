@@ -468,234 +468,91 @@ std_chrono_utc_parse(V_string time_str)
 void
 create_bindings_chrono(V_object& result, API_Version /*version*/)
   {
-    //===================================================================
-    // `std.chrono.utc_now()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("utc_now"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.chrono.utc_now()`
+      ASTERIA_BINDING_BEGIN("std.chrono.utc_now", self, global, reader) {
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_chrono_utc_now);
+      }
+      ASTERIA_BINDING_END);
 
-  * Retrieves the wall clock time in UTC.
-
-  * Returns the number of milliseconds since the Unix epoch,
-    represented as an integer.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.chrono.utc_now"), ::rocket::cref(args));
-    // Parse arguments.
-    if(reader.I().F()) {
-      Reference::S_temporary xref = { std_chrono_utc_now() };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.chrono.local_now()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("local_now"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.chrono.local_now()`
+      ASTERIA_BINDING_BEGIN("std.chrono.local_now", self, global, reader) {
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_chrono_local_now);
+      }
+      ASTERIA_BINDING_END);
 
-  * Retrieves the wall clock time in the local time zone.
-
-  * Returns the number of milliseconds since `1970-01-01 00:00:00`
-    in the local time zone, represented as an integer.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.chrono.local_now"), ::rocket::cref(args));
-    // Parse arguments.
-    if(reader.I().F()) {
-      Reference::S_temporary xref = { std_chrono_local_now() };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.chrono.hires_now()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("hires_now"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.chrono.hires_now()`
+      ASTERIA_BINDING_BEGIN("std.chrono.hires_now", self, global, reader) {
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_chrono_hires_now);
+      }
+      ASTERIA_BINDING_END);
 
-  * Retrieves a time point from a high resolution clock. The clock
-    goes monotonically and cannot be adjusted, being suitable for
-    time measurement. This function provides accuracy and might be
-    quite heavyweight.
-
-  * Returns the number of milliseconds since an unspecified time
-    point, represented as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.chrono.hires_now"), ::rocket::cref(args));
-    // Parse arguments.
-    if(reader.I().F()) {
-      Reference::S_temporary xref = { std_chrono_hires_now() };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.chrono.steady_now()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("steady_now"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.chrono.steady_now()`
+      ASTERIA_BINDING_BEGIN("std.chrono.steady_now", self, global, reader) {
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_chrono_steady_now);
+      }
+      ASTERIA_BINDING_END);
 
-  * Retrieves a time point from a steady clock. The clock goes
-    monotonically and cannot be adjusted, being suitable for time
-    measurement. This function is supposed to be fast and might
-    have poor accuracy.
-
-  * Returns the number of milliseconds since an unspecified time
-    point, represented as an integer.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.chrono.steady_now"), ::rocket::cref(args));
-    // Parse arguments.
-    if(reader.I().F()) {
-      Reference::S_temporary xref = { std_chrono_steady_now() };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.chrono.local_from_utc()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("local_from_utc"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.chrono.local_from_utc(time_utc)`
+      ASTERIA_BINDING_BEGIN("std.chrono.local_from_utc", self, global, reader) {
+        V_integer utc;
 
-  * Converts a UTC time point to a local one. `time_utc` shall be
-    the number of milliseconds since the Unix epoch.
+        reader.start_overload();
+        reader.required(utc);     // time_utc
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_chrono_local_from_utc, utc);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the number of milliseconds since `1970-01-01 00:00:00`
-    in the local time zone, represented as an integer.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.chrono.local_from_utc"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer time_utc;
-    if(reader.I().v(time_utc).F()) {
-      Reference::S_temporary xref = { std_chrono_local_from_utc(::std::move(time_utc)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.chrono.utc_from_local()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("utc_from_local"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.chrono.utc_from_local(time_local)`
+      ASTERIA_BINDING_BEGIN("std.chrono.utc_from_local", self, global, reader) {
+        V_integer local;
 
-  * Converts a local time point to a UTC one. `time_local` shall
-    be the number of milliseconds since `1970-01-01 00:00:00` in
-    the local time zone.
+        reader.start_overload();
+        reader.required(local);     // time_local
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_chrono_utc_from_local, local);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the number of milliseconds since the Unix epoch,
-    represented as an integer.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.chrono.utc_from_local"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer time_local;
-    if(reader.I().v(time_local).F()) {
-      Reference::S_temporary xref = { std_chrono_utc_from_local(::std::move(time_local)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.chrono.utc_format()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("utc_format"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.chrono.utc_format(time_point, [with_ms])`
+      ASTERIA_BINDING_BEGIN("std.chrono.utc_format", self, global, reader) {
+        V_integer utc;
+        Opt_boolean with_ms;
 
-  * Converts `time_point`, which represents the number of
-    milliseconds since `1970-01-01 00:00:00`, to an ASCII string in
-    the aforementioned format, according to the ISO 8601 standard.
-    If `with_ms` is set to `true`, the string will have a 3-digit
-    fractional part. By default, no fractional part is added.
+        reader.start_overload();
+        reader.required(utc);      // time_point
+        reader.optional(with_ms);  // with_ms
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_chrono_utc_format, utc, with_ms);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns a string representing the time point.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.chrono.utc_format"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer time_point;
-    Opt_boolean with_ms;
-    if(reader.I().v(time_point).o(with_ms).F()) {
-      Reference::S_temporary xref = { std_chrono_utc_format(::std::move(time_point), with_ms) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.chrono.utc_parse()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("utc_parse"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.chrono.utc_parse(time_str)`
+      ASTERIA_BINDING_BEGIN("std.chrono.utc_parse", self, global, reader) {
+        V_string str;
 
-  * Parses `time_str`, which is an ASCII string representing a time
-    point in the format `1970-01-01 00:00:00.000`, according to the
-    ISO 8601 standard. The subsecond part is optional and may have
-    fewer or more digits. There may be leading or trailing spaces.
-
-  * Returns the number of milliseconds since `1970-01-01 00:00:00`.
-
-  * Throws an exception if the string is invalid.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.chrono.utc_parse"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string time_str;
-    if(reader.I().v(time_str).F()) {
-      Reference::S_temporary xref = { std_chrono_utc_parse(::std::move(time_str)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(str);      // time_str
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_chrono_utc_parse, str);
+      }
+      ASTERIA_BINDING_END);
   }
 
 }  // namespace asteria

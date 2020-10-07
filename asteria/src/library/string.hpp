@@ -14,7 +14,8 @@ std_string_slice(V_string text, V_integer from, Opt_integer length);
 
 // `std.string.replace_slice`
 V_string
-std_string_replace_slice(V_string text, V_integer from, Opt_integer length, V_string replacement);
+std_string_replace_slice(V_string text, V_integer from, Opt_integer length,
+                         V_string replacement, Opt_integer rfrom, Opt_integer rlength);
 
 // `std.string.compare`
 V_integer

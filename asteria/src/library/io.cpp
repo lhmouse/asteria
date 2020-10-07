@@ -341,256 +341,100 @@ std_io_flush()
 void
 create_bindings_io(V_object& result, API_Version /*version*/)
   {
-    //===================================================================
-    // `std.io.getc()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("getc"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.io.getc()`
+      ASTERIA_BINDING_BEGIN("std.io.getc", self, global, reader) {
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_io_getc);
+      }
+      ASTERIA_BINDING_END);
 
-  * Reads a UTF code point from standard input.
-
-  * Returns the code point that has been read as an integer. If the
-    end of input is encountered, `null` is returned.
-
-  * Throws an exception if standard input is binary-oriented, or if
-    a read error occurs.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.io.getc"), ::rocket::cref(args));
-    // Parse arguments.
-    if(reader.I().F()) {
-      Reference::S_temporary xref = { std_io_getc() };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.io.getln()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("getln"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.io.getln()`
+      ASTERIA_BINDING_BEGIN("std.io.getln", self, global, reader) {
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_io_getln);
+      }
+      ASTERIA_BINDING_END);
 
-  * Reads a UTF-8 string from standard input, which is terminated
-    by either a LF character or the end of input. The terminating
-    LF, if any, is not included in the returned string.
-
-  * Returns the line that has been read as a string. If the end of
-    input is encountered, `null` is returned.
-
-  * Throws an exception if standard input is binary-oriented, or if
-    a read error occurs, or if source data cannot be converted to a
-    valid UTF code point sequence.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.io.getln"), ::rocket::cref(args));
-    // Parse arguments.
-    if(reader.I().F()) {
-      Reference::S_temporary xref = { std_io_getln() };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.io.putc()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("putc"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.io.putc(value)`
+      ASTERIA_BINDING_BEGIN("std.io.putc", self, global, reader) {
+        V_integer ch;
+        V_string str;
 
-  * Writes a UTF-8 string to standard output. `value` may be either
-    an integer representing a UTF code point or a UTF-8 string.
+        reader.start_overload();
+        reader.required(ch);       // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_io_putc, ch);
 
-  * Returns the number of UTF code points that have been written.
+        reader.start_overload();
+        reader.required(str);      // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_io_putc, str);
+      }
+      ASTERIA_BINDING_END);
 
-  * Throws an exception if standard output is binary-oriented, or
-    if source data cannot be converted to a valid UTF code point
-    sequence, or if a write error occurs.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.io.putc"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer ivalue;
-    if(reader.I().v(ivalue).F()) {
-      Reference::S_temporary xref = { std_io_putc(::std::move(ivalue)) };
-      return self = ::std::move(xref);
-    }
-    V_string svalue;
-    if(reader.I().v(svalue).F()) {
-      Reference::S_temporary xref = { std_io_putc(::std::move(svalue)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.io.putln()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("putln"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.io.putln(text)`
+      ASTERIA_BINDING_BEGIN("std.io.putln", self, global, reader) {
+        V_string text;
 
-  * Writes a UTF-8 string to standard output, followed by a LF,
-    which may flush the stream automatically. `text` shall be a
-    UTF-8 string.
+        reader.start_overload();
+        reader.required(text);      // text
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_io_putln, text);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the number of UTF code points that have been written,
-    including the terminating LF.
-
-  * Throws an exception if standard output is binary-oriented, or
-    if source data cannot be converted to a valid UTF code point
-    sequence, or if a write error occurs.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.io.putln"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    if(reader.I().v(text).F()) {
-      Reference::S_temporary xref = { std_io_putln(::std::move(text)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.io.putf()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("putf"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.io.putf(templ, ...)`
+      ASTERIA_BINDING_BEGIN("std.io.putf", self, global, reader) {
+        V_string templ;
+        cow_vector<Value> values;
 
- * Compose a string in the same way as `std.string.format()`, but
-   instead of returning it, write it to standard output.
+        reader.start_overload();
+        reader.required(templ);          // template
+        if(reader.end_overload(values))  // ...
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_io_putf, templ, values);
+      }
+      ASTERIA_BINDING_END);
 
- * Returns the number of UTF code points that have been written.
-
- * Throws an exception if standard output is binary-oriented, or
-   if source data cannot be converted to a valid UTF code point
-   sequence, or if a write error occurs.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.io.putf"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string templ;
-    cow_vector<Value> values;
-    if(reader.I().v(templ).F(values)) {
-      Reference::S_temporary xref = { std_io_putf(::std::move(templ), ::std::move(values)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.io.read()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("read"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.io.read([limit])`
+      ASTERIA_BINDING_BEGIN("std.io.read", self, global, reader) {
+        Opt_integer limit;
 
-  * Reads a series of bytes from standard input. If `limit` is set,
-    no more than this number of bytes will be read.
+        reader.start_overload();
+        reader.optional(limit);     // [limit]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_io_read, limit);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the bytes that have been read as a string. If the end
-    of input is encountered, `null` is returned.
-
-  * Throws an exception if standard input is text-oriented, or if
-    a read error occurs, or if source data cannot be converted to a
-    valid UTF code point sequence.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.io.read"), ::rocket::cref(args));
-    // Parse arguments.
-    Opt_integer limit;
-    if(reader.I().o(limit).F()) {
-      Reference::S_temporary xref = { std_io_read(::std::move(limit)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.io.write()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("write"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.io.write(data)`
+      ASTERIA_BINDING_BEGIN("std.io.write", self, global, reader) {
+        V_string data;
 
-  * Writes a series of bytes to standard output. `data` shall be a
-    byte string.
+        reader.start_overload();
+        reader.required(data);      // data
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_io_write, data);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the number of bytes that have been written.
-
-  * Throws an exception if standard output is text-oriented, or if
-    a write error occurs.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.io.write"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string data;
-    if(reader.I().v(data).F()) {
-      Reference::S_temporary xref = { std_io_write(::std::move(data)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.io.flush()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("flush"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.io.flush()`
-
-  * Forces buffered data on standard output to be delivered to its
-    underlying device. This function may be called regardless of
-    the orientation of standard output.
-
-  * Throws an exception if a write error occurs.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.io.flush"), ::rocket::cref(args));
-    // Parse arguments.
-    if(reader.I().F()) {
-      std_io_flush();
-      return self = Reference::S_void();
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+      ASTERIA_BINDING_BEGIN("std.io.flush", self, global, reader) {
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_io_flush);
+      }
+      ASTERIA_BINDING_END);
   }
 
 }  // namespace asteria

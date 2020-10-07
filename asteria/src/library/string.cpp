@@ -579,20 +579,24 @@ struct PCRE2_Name
 V_string
 std_string_slice(V_string text, V_integer from, Opt_integer length)
   {
-    auto range = do_slice(text, from, length);
-    if((range.first == text.begin()) && (range.second == text.end()))
-      // Use reference counting as our advantage.
-      return text;
-    return V_string(range.first, range.second);
+    // Use reference counting as our advantage.
+    V_string res = text;
+    auto range = do_slice(res, from, length);
+    if(range.second - range.first != res.ssize())
+      res.assign(range.first, range.second);
+    return res;
   }
 
 V_string
-std_string_replace_slice(V_string text, V_integer from, Opt_integer length, V_string replacement)
+std_string_replace_slice(V_string text, V_integer from, Opt_integer length,
+                         V_string replacement, Opt_integer rfrom, Opt_integer rlength)
   {
     V_string res = text;
     auto range = do_slice(res, from, length);
+    auto rep_range = do_slice(replacement, rfrom.value_or(0), rlength);
+
     // Replace the subrange.
-    res.replace(range.first, range.second, replacement);
+    res.replace(range.first, range.second, rep_range.first, rep_range.second);
     return res;
   }
 
@@ -1674,2168 +1678,1020 @@ std_string_pcre_replace(V_string text, V_integer from, Opt_integer length, V_str
 void
 create_bindings_string(V_object& result, API_Version /*version*/)
   {
-    //===================================================================
-    // `std.string.slice()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("slice"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.slice(text, from, [length])`
+      ASTERIA_BINDING_BEGIN("std.string.slice", self, global, reader) {
+        V_string text;
+        V_integer from;
+        Opt_integer len;
 
-  * Copies a subrange of `text` to create a new byte string. Bytes
-    are copied from `from` if it is non-negative, or from
-    `countof(text) + from` otherwise. If `length` is set to an
-    integer, no more than this number of bytes will be copied. If
-    it is absent, all bytes from `from` to the end of `text` will
-    be copied. If `from` is outside `text`, an empty string is
-    returned.
+        reader.start_overload();
+        reader.required(text);      // text
+        reader.required(from);      // from
+        reader.optional(len);       // [length]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_slice, text, from, len);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the specified substring of `text`.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.slice"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    V_integer from;
-    Opt_integer length;
-    if(reader.I().v(text).v(from).o(length).F()) {
-      Reference::S_temporary xref = { std_string_slice(::std::move(text), from, length) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.replace_slice()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("replace_slice"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.replace_slice(text, from, replacement)`
+      ASTERIA_BINDING_BEGIN("std.string.replace_slice", self, global, reader) {
+        V_string text;
+        V_integer from;
+        Opt_integer len;
+        V_string rep;
+        Opt_integer rfrom;
+        Opt_integer rlen;
 
-  * Replaces all bytes from `from` to the end of `text` with
-    `replacement` and returns the new byte string. If `from` is
-    negative, it specifies an offset from the end of `text`. This
-    function returns a new string without modifying `text`.
+        reader.start_overload();
+        reader.required(text);      // text
+        reader.required(from);      // from
+        reader.save_state(0);
+        reader.required(rep);       // replacement
+        reader.optional(rfrom);     // rep_from
+        reader.optional(rlen);      // rep_length
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_replace_slice, text, from, nullopt, rep, rfrom, rlen);
 
-  * Returns a string with the subrange replaced.
+        reader.load_state(0);       // text, from
+        reader.optional(len);       // [length]
+        reader.required(rep);       // replacement
+        reader.optional(rfrom);     // rep_from
+        reader.optional(rlen);      // rep_length
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_replace_slice, text, from, len, rep, rfrom, rlen);
+      }
+      ASTERIA_BINDING_END);
 
-`std.string.replace_slice(text, from, [length], replacement)`
-
-  * Replaces a subrange of `text` with `replacement` to create a
-    new byte string. `from` specifies the start of the subrange to
-    replace. If `from` is negative, it specifies an offset from the
-    end of `text`. `length` specifies the maximum number of bytes
-    to replace. If it is set to `null`, this function is equivalent
-    to `replace_slice(text, from, replacement)`. This function
-    returns a new string without modifying `text`.
-
-  * Returns a string with the subrange replaced.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.replace"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    V_string text;
-    V_integer from;
-    V_string replacement;
-    if(reader.I().v(text).v(from).S(state).v(replacement).F()) {
-      Reference::S_temporary xref = { std_string_replace_slice(::std::move(text), from, nullopt,
-                                                                    ::std::move(replacement)) };
-      return self = ::std::move(xref);
-    }
-    Opt_integer length;
-    if(reader.L(state).o(length).v(replacement).F()) {
-      Reference::S_temporary xref = { std_string_replace_slice(::std::move(text), from, length,
-                                                                    ::std::move(replacement)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.compare()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("compare"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.compare(text1, text2, [length])`
+      ASTERIA_BINDING_BEGIN("std.string.compare", self, global, reader) {
+        V_string text1;
+        V_string text2;
+        Opt_integer len;
 
-  * Performs lexicographical comparison on two byte strings. If
-    `length` is set to an integer, no more than this number of
-    bytes are compared. This function behaves like the `strncmp()`
-    function in C, except that null characters do not terminate
-    strings.
+        reader.start_overload();
+        reader.required(text1);     // text1
+        reader.required(text2);     // text2
+        reader.optional(len);       // [length]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_compare, text1, text2, len);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns a positive integer if `text1` compares greater than
-    `text2`, a negative integer if `text1` compares less than
-    `text2`, or zero if `text1` compares equal to `text2`.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.compare"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text1;
-    V_string text2;
-    Opt_integer length;
-    if(reader.I().v(text1).v(text2).o(length).F()) {
-      Reference::S_temporary xref = { std_string_compare(::std::move(text1), ::std::move(text2), length) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.starts_with()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("starts_with"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.starts_with(text, prefix)`
+      ASTERIA_BINDING_BEGIN("std.string.starts_with", self, global, reader) {
+        V_string text;
+        V_string prfx;
 
-  * Checks whether `prefix` is a prefix of `text`. The empty
-    string is considered to be a prefix of any string.
+        reader.start_overload();
+        reader.required(text);     // text
+        reader.required(prfx);     // prefix
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_starts_with, text, prfx);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns `true` if `prefix` is a prefix of `text`, or `false`
-    otherwise.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.starts_with"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    V_string prefix;
-    if(reader.I().v(text).v(prefix).F()) {
-      Reference::S_temporary xref = { std_string_starts_with(::std::move(text), ::std::move(prefix)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.ends_with()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("ends_with"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.ends_with(text, suffix)`
+      ASTERIA_BINDING_BEGIN("std.string.ends_with", self, global, reader) {
+        V_string text;
+        V_string sufx;
 
-  * Checks whether `suffix` is a suffix of `text`. The empty
-    string is considered to be a suffix of any string.
+        reader.start_overload();
+        reader.required(text);     // text
+        reader.required(sufx);     // suffix
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_ends_with, text, sufx);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns `true` if `suffix` is a suffix of `text`, or `false`
-    otherwise.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.ends_with"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    V_string suffix;
-    if(reader.I().v(text).v(suffix).F()) {
-      Reference::S_temporary xref = { std_string_ends_with(::std::move(text), ::std::move(suffix)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.find()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("find"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.find(text, pattern)`
+      ASTERIA_BINDING_BEGIN("std.string.find", self, global, reader) {
+        V_string text;
+        V_integer from;
+        Opt_integer len;
+        V_string patt;
 
-  * Searches `text` for the first occurrence of `pattern`.
+        reader.start_overload();
+        reader.required(text);     // text
+        reader.save_state(0);
+        reader.required(patt);     // pattern
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_find, text, 0, nullopt, patt);
 
-  * Returns the subscript of the first byte of the first match of
-    `pattern` in `text` if one is found, which is always
-    non-negative, or `null` otherwise.
+        reader.load_state(0);      // text
+        reader.required(from);     // from
+        reader.save_state(0);
+        reader.required(patt);     // pattern
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_find, text, from, nullopt, patt);
 
-`std.string.find(text, from, pattern)`
+        reader.load_state(0);      // text, from
+        reader.optional(len);      // [length]
+        reader.required(patt);     // pattern
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_find, text, from, len, patt);
+      }
+      ASTERIA_BINDING_END);
 
-  * Searches `text` for the first occurrence of `pattern`. The
-    search operation is performed on the same subrange that would
-    be returned by `slice(text, from)`.
-
-  * Returns the subscript of the first byte of the first match of
-    `pattern` in `text` if one is found, which is always
-    non-negative, or `null` otherwise.
-
-`std.string.find(text, from, [length], pattern)`
-
-  * Searches `text` for the first occurrence of `pattern`. The
-    search operation is performed on the same subrange that would
-    be returned by `slice(text, from, length)`.
-
-  * Returns the subscript of the first byte of the first match of
-    `pattern` in `text` if one is found, which is always
-    non-negative, or `null` otherwise.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.find"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    V_string text;
-    V_string pattern;
-    if(reader.I().v(text).S(state).v(pattern).F()) {
-      Reference::S_temporary xref = { std_string_find(::std::move(text), 0, nullopt,
-                                                           ::std::move(pattern)) };
-      return self = ::std::move(xref);
-    }
-    V_integer from;
-    if(reader.L(state).v(from).S(state).v(pattern).F()) {
-      Reference::S_temporary xref = { std_string_find(::std::move(text), from, nullopt,
-                                                           ::std::move(pattern)) };
-      return self = ::std::move(xref);
-    }
-    Opt_integer length;
-    if(reader.L(state).o(length).v(pattern).F()) {
-      Reference::S_temporary xref = { std_string_find(::std::move(text), from, length,
-                                                           ::std::move(pattern)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.rfind()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("rfind"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.rfind(text, pattern)`
+      ASTERIA_BINDING_BEGIN("std.string.rfind", self, global, reader) {
+        V_string text;
+        V_integer from;
+        Opt_integer len;
+        V_string patt;
 
-  * Searches `text` for the last occurrence of `pattern`.
+        reader.start_overload();
+        reader.required(text);     // text
+        reader.save_state(0);
+        reader.required(patt);     // pattern
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_rfind, text, 0, nullopt, patt);
 
-  * Returns the subscript of the first byte of the last match of
-    `pattern` in `text` if one is found, which is always
-    non-negative, or `null` otherwise.
+        reader.load_state(0);      // text
+        reader.required(from);     // from
+        reader.save_state(0);
+        reader.required(patt);     // pattern
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_rfind, text, from, nullopt, patt);
 
-`std.string.rfind(text, from, pattern)`
+        reader.load_state(0);      // text, from
+        reader.optional(len);      // [length]
+        reader.required(patt);     // pattern
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_rfind, text, from, len, patt);
+      }
+      ASTERIA_BINDING_END);
 
-  * Searches `text` for the last occurrence of `pattern`. The
-    search operation is performed on the same subrange that would
-    be returned by `slice(text, from)`.
-
-  * Returns the subscript of the first byte of the last match of
-    `pattern` in `text` if one is found, which is always
-    non-negative, or `null` otherwise.
-
-`std.string.rfind(text, from, [length], pattern)`
-
-  * Searches `text` for the last occurrence of `pattern`.
-
-  * Returns the subscript of the first byte of the last match of
-    `pattern` in `text` if one is found, which is always
-    non-negative, or `null` otherwise.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.rfind"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    V_string text;
-    V_string pattern;
-    if(reader.I().v(text).S(state).v(pattern).F()) {
-      Reference::S_temporary xref = { std_string_rfind(::std::move(text), 0, nullopt,
-                                                            ::std::move(pattern)) };
-      return self = ::std::move(xref);
-    }
-    V_integer from;
-    if(reader.L(state).v(from).S(state).v(pattern).F()) {
-      Reference::S_temporary xref = { std_string_rfind(::std::move(text), from, nullopt,
-                                                            ::std::move(pattern)) };
-      return self = ::std::move(xref);
-    }
-    Opt_integer length;
-    if(reader.L(state).o(length).v(pattern).F()) {
-      Reference::S_temporary xref = { std_string_rfind(::std::move(text), from, length,
-                                                            ::std::move(pattern)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.find_and_replace()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("find_and_replace"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.find_and_replace(text, pattern, replacement)`
+      ASTERIA_BINDING_BEGIN("std.string.find_and_replace", self, global, reader) {
+        V_string text;
+        V_integer from;
+        Opt_integer len;
+        V_string patt;
+        V_string rep;
 
-  * Searches `text` and replaces all occurrences of `pattern` with
-    `replacement`. This function returns a new string without
-    modifying `text`.
+        reader.start_overload();
+        reader.required(text);     // text
+        reader.save_state(0);
+        reader.required(patt);     // pattern
+        reader.required(rep);     // replacement
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_find_and_replace, text, 0, nullopt, patt, rep);
 
-  * Returns the string with `pattern` replaced. If `text` does not
-    contain `pattern`, it is returned intact.
+        reader.load_state(0);      // text
+        reader.required(from);     // from
+        reader.save_state(0);
+        reader.required(patt);     // pattern
+        reader.required(rep);     // replacement
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_find_and_replace, text, from, nullopt, patt, rep);
 
-`std.string.find_and_replace(text, from, pattern, replacement)`
+        reader.load_state(0);      // text, from
+        reader.optional(len);      // [length]
+        reader.required(patt);     // pattern
+        reader.required(rep);     // replacement
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_find_and_replace, text, from, len, patt, rep);
+      }
+      ASTERIA_BINDING_END);
 
-  * Searches `text` and replaces all occurrences of `pattern` with
-    `replacement`. The search operation is performed on the same
-    subrange that would be returned by `slice(text, from)`. This
-    function returns a new string without modifying `text`.
-
-  * Returns the string with `pattern` replaced. If `text` does not
-    contain `pattern`, it is returned intact.
-
-`std.string.find_and_replace(text, from, [length], pattern, replacement)`
-
-  * Searches `text` and replaces all occurrences of `pattern` with
-    `replacement`. The search operation is performed on the same
-    subrange that would be returned by `slice(text, from, length)`.
-    This function returns a new string without modifying `text`.
-
-  * Returns the string with `pattern` replaced. If `text` does not
-    contain `pattern`, it is returned intact.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.find_and_replace"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    V_string text;
-    V_string pattern;
-    V_string replacement;
-    if(reader.I().v(text).S(state).v(pattern).v(replacement).F()) {
-      Reference::S_temporary xref = { std_string_find_and_replace(::std::move(text), 0, nullopt,
-                                                           ::std::move(pattern), ::std::move(replacement)) };
-      return self = ::std::move(xref);
-    }
-    V_integer from;
-    if(reader.L(state).v(from).S(state).v(pattern).v(replacement).F()) {
-      Reference::S_temporary xref = { std_string_find_and_replace(::std::move(text), from, nullopt,
-                                                           ::std::move(pattern), ::std::move(replacement)) };
-      return self = ::std::move(xref);
-    }
-    Opt_integer length;
-    if(reader.L(state).o(length).v(pattern).v(replacement).F()) {
-      Reference::S_temporary xref = { std_string_find_and_replace(::std::move(text), from, length,
-                                                           ::std::move(pattern), ::std::move(replacement)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.find_any_of()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("find_any_of"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.find_any_of(text, accept)`
+      ASTERIA_BINDING_BEGIN("std.string.find_any_of", self, global, reader) {
+        V_string text;
+        V_integer from;
+        Opt_integer len;
+        V_string acc;
 
-  * Searches `text` for bytes that exist in `accept`.
+        reader.start_overload();
+        reader.required(text);     // text
+        reader.save_state(0);
+        reader.required(acc);      // accept
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_find_any_of, text, 0, nullopt, acc);
 
-  * Returns the subscript of the first byte found, which is always
-    non-negative; or `null` if no such byte exists.
+        reader.load_state(0);      // text
+        reader.required(from);     // from
+        reader.save_state(0);
+        reader.required(acc);      // accept
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_find_any_of, text, from, nullopt, acc);
 
-`std.string.find_any_of(text, from, accept)`
+        reader.load_state(0);      // text, from
+        reader.optional(len);      // [length]
+        reader.required(acc);      // accept
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_find_any_of, text, from, len, acc);
+      }
+      ASTERIA_BINDING_END);
 
-  * Searches `text` for bytes that exist in `accept`. The search
-    operation is performed on the same subrange that would be
-    returned by `slice(text, from)`.
-
-  * Returns the subscript of the first byte found, which is always
-    non-negative; or `null` if no such byte exists.
-
-`std.string.find_any_of(text, from, [length], accept)`
-
-  * Searches `text` for bytes that exist in `accept`. The search
-    operation is performed on the same subrange that would be
-    returned by `slice(text, from, length)`.
-
-  * Returns the subscript of the first byte found, which is always
-    non-negative; or `null` if no such byte exists.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.find_any_of"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    V_string text;
-    V_string accept;
-    if(reader.I().v(text).S(state).v(accept).F()) {
-      Reference::S_temporary xref = { std_string_find_any_of(::std::move(text), 0, nullopt,
-                                                                  ::std::move(accept)) };
-      return self = ::std::move(xref);
-    }
-    V_integer from;
-    if(reader.L(state).v(from).S(state).v(accept).F()) {
-      Reference::S_temporary xref = { std_string_find_any_of(::std::move(text), from, nullopt,
-                                                                  ::std::move(accept)) };
-      return self = ::std::move(xref);
-    }
-    Opt_integer length;
-    if(reader.L(state).o(length).v(accept).F()) {
-      Reference::S_temporary xref = { std_string_find_any_of(::std::move(text), from, length,
-                                                                  ::std::move(accept)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.rfind_any_of()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("rfind_any_of"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.rfind_any_of(text, accept)`
+      ASTERIA_BINDING_BEGIN("std.string.rfind_any_of", self, global, reader) {
+        V_string text;
+        V_integer from;
+        Opt_integer len;
+        V_string acc;
 
-  * Searches `text` for bytes that exist in `accept`.
+        reader.start_overload();
+        reader.required(text);     // text
+        reader.save_state(0);
+        reader.required(acc);      // accept
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_rfind_any_of, text, 0, nullopt, acc);
 
-  * Returns the subscript of the last byte found, which is always
-    non-negative; or `null` if no such byte exists.
+        reader.load_state(0);      // text
+        reader.required(from);     // from
+        reader.save_state(0);
+        reader.required(acc);      // accept
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_rfind_any_of, text, from, nullopt, acc);
 
-`std.string.rfind_any_of(text, from, accept)`
+        reader.load_state(0);      // text, from
+        reader.optional(len);      // [length]
+        reader.required(acc);      // accept
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_rfind_any_of, text, from, len, acc);
+      }
+      ASTERIA_BINDING_END);
 
-  * Searches `text` for bytes that exist in `accept`. The search
-    operation is performed on the same subrange that would be
-    returned by `slice(text, from)`.
-
-  * Returns the subscript of the last byte found, which is always
-    non-negative; or `null` if no such byte exists.
-
-`std.string.rfind_any_of(text, from, [length], accept)`
-
-  * Searches `text` for bytes that exist in `accept`. The search
-    operation is performed on the same subrange that would be
-    returned by `slice(text, from, length)`.
-
-  * Returns the subscript of the last byte found, which is always
-    non-negative; or `null` if no such byte exists.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.rfind_any_of"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    V_string text;
-    V_string accept;
-    if(reader.I().v(text).S(state).v(accept).F()) {
-      Reference::S_temporary xref = { std_string_rfind_any_of(::std::move(text), 0, nullopt,
-                                                                   ::std::move(accept)) };
-      return self = ::std::move(xref);
-    }
-    V_integer from;
-    if(reader.L(state).v(from).S(state).v(accept).F()) {
-      Reference::S_temporary xref = { std_string_rfind_any_of(::std::move(text), from, nullopt,
-                                                                   ::std::move(accept)) };
-      return self = ::std::move(xref);
-    }
-    Opt_integer length;
-    if(reader.L(state).o(length).v(accept).F()) {
-      Reference::S_temporary xref = { std_string_rfind_any_of(::std::move(text), from, length,
-                                                                   ::std::move(accept)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.find_not_of()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("find_not_of"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.find_not_of(text, reject)`
+      ASTERIA_BINDING_BEGIN("std.string.find_not_of", self, global, reader) {
+        V_string text;
+        V_integer from;
+        Opt_integer len;
+        V_string rej;
 
-  * Searches `text` for bytes that does not exist in `reject`.
+        reader.start_overload();
+        reader.required(text);     // text
+        reader.save_state(0);
+        reader.required(rej);      // reject
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_find_not_of, text, 0, nullopt, rej);
 
-  * Returns the subscript of the first byte found, which is always
-    non-negative; or `null` if no such byte exists.
+        reader.load_state(0);      // text
+        reader.required(from);     // from
+        reader.save_state(0);
+        reader.required(rej);      // reject
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_find_not_of, text, from, nullopt, rej);
 
-`std.string.find_not_of(text, from, reject)`
+        reader.load_state(0);      // text, from
+        reader.optional(len);      // [length]
+        reader.required(rej);      // reject
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_find_not_of, text, from, len, rej);
+      }
+      ASTERIA_BINDING_END);
 
-  * Searches `text` for bytes that does not exist in `reject`. The
-    search operation is performed on the same subrange that would
-    be returned by `slice(text, from)`.
-
-  * Returns the subscript of the first byte found, which is always
-    non-negative; or `null` if no such byte exists.
-
-`std.string.find_not_of(text, from, [length], reject)`
-
-  * Searches `text` for bytes that does not exist in `reject`. The
-    search operation is performed on the same subrange that would
-    be returned by `slice(text, from, length)`.
-
-  * Returns the subscript of the first byte found, which is always
-    non-negative; or `null` if no such byte exists.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.find_not_of"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    V_string text;
-    V_string accept;
-    if(reader.I().v(text).S(state).v(accept).F()) {
-      Reference::S_temporary xref = { std_string_find_not_of(::std::move(text), 0, nullopt,
-                                                                  ::std::move(accept)) };
-      return self = ::std::move(xref);
-    }
-    V_integer from;
-    if(reader.L(state).v(from).S(state).v(accept).F()) {
-      Reference::S_temporary xref = { std_string_find_not_of(::std::move(text), from, nullopt,
-                                                                  ::std::move(accept)) };
-      return self = ::std::move(xref);
-    }
-    Opt_integer length;
-    if(reader.L(state).o(length).v(accept).F()) {
-      Reference::S_temporary xref = { std_string_find_not_of(::std::move(text), from, length,
-                                                                  ::std::move(accept)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.rfind_not_of()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("rfind_not_of"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.rfind_not_of(text, reject)`
+      ASTERIA_BINDING_BEGIN("std.string.rfind_not_of", self, global, reader) {
+        V_string text;
+        V_integer from;
+        Opt_integer len;
+        V_string rej;
 
-  * Searches `text` for bytes that does not exist in `reject`.
+        reader.start_overload();
+        reader.required(text);     // text
+        reader.save_state(0);
+        reader.required(rej);      // reject
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_rfind_not_of, text, 0, nullopt, rej);
 
-  * Returns the subscript of the last byte found, which is always
-    non-negative; or `null` if no such byte exists.
+        reader.load_state(0);      // text
+        reader.required(from);     // from
+        reader.save_state(0);
+        reader.required(rej);      // reject
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_rfind_not_of, text, from, nullopt, rej);
 
-`std.string.rfind_not_of(text, from, reject)`
+        reader.load_state(0);      // text, from
+        reader.optional(len);      // [length]
+        reader.required(rej);      // reject
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_rfind_not_of, text, from, len, rej);
+      }
+      ASTERIA_BINDING_END);
 
-  * Searches `text` for bytes that does not exist in `reject`. The
-    search operation is performed on the same subrange that would
-    be returned by `slice(text, from)`.
-
-  * Returns the subscript of the last byte found, which is always
-    non-negative; or `null` if no such byte exists.
-
-`std.string.rfind_not_of(text, from, [length], reject)`
-
-  * Searches `text` for bytes that does not exist in `reject`. The
-    search operation is performed on the same subrange that would
-    be returned by `slice(text, from, length)`.
-
-  * Returns the subscript of the last byte found, which is always
-    non-negative; or `null` if no such byte exists.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.rfind_not_of"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    V_string text;
-    V_string accept;
-    if(reader.I().v(text).S(state).v(accept).F()) {
-      Reference::S_temporary xref = { std_string_rfind_not_of(::std::move(text), 0, nullopt,
-                                                                   ::std::move(accept)) };
-      return self = ::std::move(xref);
-    }
-    V_integer from;
-    if(reader.L(state).v(from).S(state).v(accept).F()) {
-      Reference::S_temporary xref = { std_string_rfind_not_of(::std::move(text), from, nullopt,
-                                                                   ::std::move(accept)) };
-      return self = ::std::move(xref);
-    }
-    Opt_integer length;
-    if(reader.L(state).o(length).v(accept).F()) {
-      Reference::S_temporary xref = { std_string_rfind_not_of(::std::move(text), from, length,
-                                                                   ::std::move(accept)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.reverse()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("reverse"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.reverse(text)`
+      ASTERIA_BINDING_BEGIN("std.string.reverse", self, global, reader) {
+        V_string text;
 
-  * Reverses a byte string. This function returns a new string
-    without modifying `text`.
+        reader.start_overload();
+        reader.required(text);    // text
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_reverse, text);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the reversed string.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.reverse"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    if(reader.I().v(text).F()) {
-      Reference::S_temporary xref = { std_string_reverse(::std::move(text)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.trim()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("trim"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.trim(text, [reject])`
+      ASTERIA_BINDING_BEGIN("std.string.trim", self, global, reader) {
+        V_string text;
+        Opt_string rej;
 
-  * Removes the longest prefix and suffix consisting solely bytes
-    from `reject`. If `reject` is empty, no byte is removed. If
-    `reject` is not specified, spaces and tabs are removed. This
-    function returns a new string without modifying `text`.
+        reader.start_overload();
+        reader.required(text);    // text
+        reader.optional(rej);    // [reject]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_trim, text, rej);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the trimmed string.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.trim"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    Opt_string reject;
-    if(reader.I().v(text).o(reject).F()) {
-      Reference::S_temporary xref = { std_string_trim(::std::move(text), ::std::move(reject)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.triml()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("triml"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.triml(text, [reject])`
+      ASTERIA_BINDING_BEGIN("std.string.triml", self, global, reader) {
+        V_string text;
+        Opt_string rej;
 
-  * Removes the longest prefix consisting solely bytes from
-    `reject`. If `reject` is empty, no byte is removed. If `reject`
-    is not specified, spaces and tabs are removed. This function
-    returns a new string without modifying `text`.
+        reader.start_overload();
+        reader.required(text);    // text
+        reader.optional(rej);     // [reject]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_triml, text, rej);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the trimmed string.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.triml"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    Opt_string reject;
-    if(reader.I().v(text).o(reject).F()) {
-      Reference::S_temporary xref = { std_string_triml(::std::move(text), ::std::move(reject)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.trimr()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("trimr"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.trimr(text, [reject])`
+      ASTERIA_BINDING_BEGIN("std.string.trimr", self, global, reader) {
+        V_string text;
+        Opt_string rej;
 
-  * Removes the longest suffix consisting solely bytes from
-    `reject`. If `reject` is empty, no byte is removed. If `reject`
-    is not specified, spaces and tabs are removed. This function
-    returns a new string without modifying `text`.
+        reader.start_overload();
+        reader.required(text);    // text
+        reader.optional(rej);     // [reject]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_trimr, text, rej);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the trimmed string.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.trimr"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    Opt_string reject;
-    if(reader.I().v(text).o(reject).F()) {
-      Reference::S_temporary xref = { std_string_trimr(::std::move(text), ::std::move(reject)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.padl()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("padl"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.padl(text, length, [padding])`
+      ASTERIA_BINDING_BEGIN("std.string.padl", self, global, reader) {
+        V_string text;
+        V_integer len;
+        Opt_string pad;
 
-  * Prepends `text` with `padding` repeatedly, until its length
-    would exceed `length`. The default value of `padding` is a
-    string consisting of a space. This function returns a new
-    string without modifying `text`.
+        reader.start_overload();
+        reader.required(text);    // text
+        reader.required(len);     // length
+        reader.optional(pad);     // [padding]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_padl, text, len, pad);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the padded string.
-
-  * Throws an exception if `padding` is empty.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.padl"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    V_integer length;
-    Opt_string padding;
-    if(reader.I().v(text).v(length).o(padding).F()) {
-      Reference::S_temporary xref = { std_string_padl(::std::move(text), length, ::std::move(padding)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.padr()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("padr"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.padr(text, length, [padding])`
+      ASTERIA_BINDING_BEGIN("std.string.padr", self, global, reader) {
+        V_string text;
+        V_integer len;
+        Opt_string pad;
 
-  * Appends `text` with `padding` repeatedly, until its length
-    would exceed `length`. The default value of `padding` is a
-    string consisting of a space. This function returns a new
-    string without modifying `text`.
+        reader.start_overload();
+        reader.required(text);    // text
+        reader.required(len);     // length
+        reader.optional(pad);     // [padding]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_padr, text, len, pad);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the padded string.
-
-  * Throws an exception if `padding` is empty.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.padr"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    V_integer length;
-    Opt_string padding;
-    if(reader.I().v(text).v(length).o(padding).F()) {
-      Reference::S_temporary xref = { std_string_padr(::std::move(text), length, ::std::move(padding)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.to_upper()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("to_upper"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.to_upper(text)`
+      ASTERIA_BINDING_BEGIN("std.string.to_upper", self, global, reader) {
+        V_string text;
 
-  * Converts all lowercase English letters in `text` to their
-    uppercase counterparts. This function returns a new string
-    without modifying `text`.
+        reader.start_overload();
+        reader.required(text);    // text
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_to_upper, text);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns a new string after the conversion.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.to_upper"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    if(reader.I().v(text).F()) {
-      Reference::S_temporary xref = { std_string_to_upper(::std::move(text)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.to_lower()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("to_lower"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.to_lower(text)`
+      ASTERIA_BINDING_BEGIN("std.string.to_lower", self, global, reader) {
+        V_string text;
 
-  * Converts all uppercase English letters in `text` to their
-    lowercase counterparts. This function returns a new string
-    without modifying `text`.
+        reader.start_overload();
+        reader.required(text);    // text
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_to_lower, text);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns a new string after the conversion.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.to_lower"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    if(reader.I().v(text).F()) {
-      Reference::S_temporary xref = { std_string_to_lower(::std::move(text)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.translate()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("translate"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.translate(text, inputs, [outputs])`
+      ASTERIA_BINDING_BEGIN("std.string.translate", self, global, reader) {
+        V_string text;
+        V_string in;
+        Opt_string out;
 
-  * Performs bytewise translation on the given string. For every
-    byte in `text` that is also found in `inputs`, if there is a
-    corresponding replacement byte in `outputs` with the same
-    subscript, it is replaced with the latter; if no replacement
-    exists, because `outputs` is shorter than `inputs` or is null,
-    it is deleted. If `outputs` is longer than `inputs`, excess
-    bytes are ignored. Bytes that do not exist in `inputs` are left
-    intact. This function returns a new string without modifying
-    `text`.
+        reader.start_overload();
+        reader.required(text);    // text
+        reader.required(in);      // input
+        reader.optional(out);     // [output]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_translate, text, in, out);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the translated string.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.translate"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    V_string inputs;
-    Opt_string outputs;
-    if(reader.I().v(text).v(inputs).o(outputs).F()) {
-      Reference::S_temporary xref = { std_string_translate(::std::move(text), ::std::move(inputs),
-                                                                ::std::move(outputs)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.explode()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("explode"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.explode(text, [delim], [limit])`
+      ASTERIA_BINDING_BEGIN("std.string.explode", self, global, reader) {
+        V_string text;
+        Opt_string delim;
+        Opt_integer limit;
 
-  * Breaks `text` down into segments, separated by `delim`. If
-    `delim` is `null` or an empty string, every byte becomes a
-    segment. If `limit` is set to a positive integer, there will be
-    no more segments than this number; the vert last segment will
-    contain all the remaining bytes of the `text`.
+        reader.start_overload();
+        reader.required(text);    // text
+        reader.optional(delim);   // [delim]
+        reader.optional(limit);   // [limit]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_explode, text, delim, limit);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns an array containing the broken-down segments. If `text`
-    is empty, an empty array is returned.
-
-  * Throws an exception if `limit` is negative or zero.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.explode"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    Opt_string delim;
-    Opt_integer limit;
-    if(reader.I().v(text).o(delim).o(limit).F()) {
-      Reference::S_temporary xref = { std_string_explode(::std::move(text), ::std::move(delim), limit) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.implode()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("implode"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.implode(segments, [delim])`
+      ASTERIA_BINDING_BEGIN("std.string.implode", self, global, reader) {
+        V_array segs;
+        Opt_string delim;
 
-  * Concatenates elements of an array, `segments`, to create a new
-    string. All segments shall be strings. If `delim` is
-    specified, it is inserted between adjacent segments.
+        reader.start_overload();
+        reader.required(segs);    // segments
+        reader.optional(delim);   // [delim]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_implode, segs, delim);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns a string containing all segments. If `segments` is
-    empty, an empty string is returned.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.implode"), ::rocket::cref(args));
-    // Parse arguments.
-    V_array segments;
-    Opt_string delim;
-    if(reader.I().v(segments).o(delim).F()) {
-      Reference::S_temporary xref = { std_string_implode(::std::move(segments), ::std::move(delim)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.hex_encode()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("hex_encode"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.hex_encode(data, [lowercase], [delim])`
+      ASTERIA_BINDING_BEGIN("std.string.hex_encode", self, global, reader) {
+        V_string data;
+        Opt_boolean lowc;
+        Opt_string delim;
 
-  * Encodes all bytes in `data` as 2-digit hexadecimal numbers and
-    concatenates them. If `lowercase` is set to `true`, hexadecimal
-    digits above `9` are encoded as `abcdef`; otherwise they are
-    encoded as `ABCDEF`. If `delim` is specified, it is inserted
-    between adjacent bytes.
+        reader.start_overload();
+        reader.required(data);    // data
+        reader.optional(lowc);    // [lowercase]
+        reader.optional(delim);   // [delim]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_hex_encode, data, lowc, delim);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the encoded string. If `data` is empty, an empty
-    string is returned.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.hex_encode"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string data;
-    Opt_boolean lowercase;
-    Opt_string delim;
-    if(reader.I().v(data).o(lowercase).o(delim).F()) {
-      Reference::S_temporary xref = { std_string_hex_encode(::std::move(data), lowercase,
-                                                                 ::std::move(delim)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.hex_decode()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("hex_decode"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.hex_decode(text)`
+      ASTERIA_BINDING_BEGIN("std.string.hex_decode", self, global, reader) {
+        V_string text;
 
-  * Decodes all hexadecimal digits from `text` and converts them to
-    bytes. Whitespaces can be used to delimit bytes; they shall not
-    occur between digits in the same byte. Consequently, the total
-    number of non-whitespace characters must be a multiple of two.
-    Invalid characters cause decode errors.
+        reader.start_overload();
+        reader.required(text);    // text
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_hex_decode, text);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns a string containing decoded bytes. If `text` is empty
-    or consists of only whitespaces, an empty string is returned.
-
-  * Throws an exception if the string is invalid.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.hex_decode"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    if(reader.I().v(text).F()) {
-      Reference::S_temporary xref = { std_string_hex_decode(::std::move(text)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.base32_encode()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("base32_encode"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.base32_encode(data, [lowercase])`
+      ASTERIA_BINDING_BEGIN("std.string.base32_encode", self, global, reader) {
+        V_string data;
+        Opt_boolean lowc;
 
-  * Encodes all bytes in `data` according to the base32 encoding
-    specified by IETF RFC 4648. If `lowercase` is set to `true`,
-    lowercase letters are used to represent values through `0` to
-    `25`; otherwise, uppercase letters are used. The length of
-    encoded data is always a multiple of 8; padding characters are
-    mandatory.
+        reader.start_overload();
+        reader.required(data);    // data
+        reader.optional(lowc);    // [lowercase]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_base32_encode, data, lowc);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the encoded string.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.base32_encode"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string data;
-    Opt_boolean lowercase;
-    if(reader.I().v(data).o(lowercase).F()) {
-      Reference::S_temporary xref = { std_string_base32_encode(::std::move(data), lowercase) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.base32_decode()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("base32_decode"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.base32_decode(text)`
+      ASTERIA_BINDING_BEGIN("std.string.base32_decode", self, global, reader) {
+        V_string text;
 
-  * Decodes data encoded in base32, as specified by IETF RFC 4648.
-    Whitespaces can be used to delimit encoding units; they shall
-    not occur between characters in the same unit. Consequently,
-    the number of non-whitespace characters must be a multiple of
-    eight. Invalid characters cause decode errors.
+        reader.start_overload();
+        reader.required(text);    // text
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_base32_decode, text);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns a string containing decoded bytes. If `text` is empty
-    or consists of only whitespaces, an empty string is returned.
-
-  * Throws an exception if the string is invalid.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.base32_decode"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    if(reader.I().v(text).F()) {
-      Reference::S_temporary xref = { std_string_base32_decode(::std::move(text)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.base64_encode()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("base64_encode"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.base64_encode(data)`
+      ASTERIA_BINDING_BEGIN("std.string.base64_encode", self, global, reader) {
+        V_string data;
 
-  * Encodes all bytes in `data` according to the base64 encoding
-    specified by IETF RFC 4648. The length of encoded data is
-    always a multiple of 4; padding characters are mandatory.
+        reader.start_overload();
+        reader.required(data);    // data
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_base64_encode, data);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the encoded string.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.base64_encode"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string data;
-    if(reader.I().v(data).F()) {
-      Reference::S_temporary xref = { std_string_base64_encode(::std::move(data)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.base64_decode()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("base64_decode"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.base64_decode(text)`
+      ASTERIA_BINDING_BEGIN("std.string.base64_decode", self, global, reader) {
+        V_string text;
 
-  * Decodes data encoded in base64, as specified by IETF RFC 4648.
-    Whitespaces can be used to delimit encoding units; they shall
-    not occur between characters in the same unit. Consequently,
-    the number of non-whitespace characters must be a multiple of
-    four. Invalid characters cause decode errors.
+        reader.start_overload();
+        reader.required(text);    // text
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_base64_decode, text);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns a string containing decoded bytes. If `text` is empty
-    or consists of only whitespaces, an empty string is returned.
-
-  * Throws an exception if the string is invalid.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.base64_decode"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    if(reader.I().v(text).F()) {
-      Reference::S_temporary xref = { std_string_base64_decode(::std::move(text)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.url_encode()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("url_encode"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.url_encode(data, [lowercase])`
+      ASTERIA_BINDING_BEGIN("std.string.url_encode", self, global, reader) {
+        V_string data;
+        Opt_boolean lowc;
 
-  * Encodes bytes in `data` according to IETF RFC 3986. Every byte
-    that is not a letter, digit, `-`, `.`, `_` or `~` is encoded as
-    a `%` followed by two hexadecimal digits. If `lowercase` is set
-    to `true`, lowercase letters are used to represent values
-    through `10` to `15`; otherwise, uppercase letters are used.
+        reader.start_overload();
+        reader.required(data);    // data
+        reader.optional(lowc);    // [lowercase]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_url_encode, data, lowc);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the encoded string. If `data` is empty, an empty
-    string is returned.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.url_encode"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string data;
-    Opt_boolean lowercase;
-    if(reader.I().v(data).o(lowercase).F()) {
-      Reference::S_temporary xref = { std_string_url_encode(::std::move(data), lowercase) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.url_decode()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("url_decode"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.url_decode(text)`
+      ASTERIA_BINDING_BEGIN("std.string.url_decode", self, global, reader) {
+        V_string text;
 
-  * Decodes percent-encode sequences from `text` and converts them
-    to bytes according to IETF RFC 3986. For convenience reasons,
-    both reserved and unreserved characters are copied verbatim.
-    Characters that are neither reserved nor unreserved (such as
-    ASCII control characters or non-ASCII characters) cause decode
-    errors.
+        reader.start_overload();
+        reader.required(text);    // text
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_url_decode, text);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns a string containing decoded bytes.
-
-  * Throws an exception if the string contains invalid characters.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.url_decode"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    if(reader.I().v(text).F()) {
-      Reference::S_temporary xref = { std_string_url_decode(::std::move(text)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.url_encode_query()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("url_encode_query"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.url_encode_query(data, [lowercase])`
+      ASTERIA_BINDING_BEGIN("std.string.url_encode_query", self, global, reader) {
+        V_string data;
+        Opt_boolean lowc;
 
-  * Encodes bytes in `data` according to IETF RFC 3986. This
-    function behaves like `url_encode()`, except that characters
-    that are allowed unencoded in query strings are not encoded,
-    and spaces are encoded as `+` instead of the long form `%20`.
+        reader.start_overload();
+        reader.required(data);    // data
+        reader.optional(lowc);    // [lowercase]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_url_encode_query, data, lowc);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the encoded string. If `data` is empty, an empty
-    string is returned.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.url_encode"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string data;
-    Opt_boolean lowercase;
-    if(reader.I().v(data).o(lowercase).F()) {
-      Reference::S_temporary xref = { std_string_url_encode_query(::std::move(data), lowercase) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.url_decode_query()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("url_decode_query"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.url_decode_query(text)`
+      ASTERIA_BINDING_BEGIN("std.string.url_decode_query", self, global, reader) {
+        V_string text;
 
-  * Decodes percent-encode sequences from `text` and converts them
-    to bytes according to IETF RFC 3986. This function behaves like
-    `url_decode()`, except that `+` is decoded as a space.
+        reader.start_overload();
+        reader.required(text);    // text
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_url_decode_query, text);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns a string containing decoded bytes.
-
-  * Throws an exception if the string contains invalid characters.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.url_decode"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    if(reader.I().v(text).F()) {
-      Reference::S_temporary xref = { std_string_url_decode_query(::std::move(text)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.utf8_validate()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("utf8_validate"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.utf8_validate(text)`
+      ASTERIA_BINDING_BEGIN("std.string.utf8_validate", self, global, reader) {
+        V_string text;
 
-  * Checks whether `text` is a valid UTF-8 string.
+        reader.start_overload();
+        reader.required(text);    // text
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_utf8_validate, text);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns `true` if `text` is valid, or `false` otherwise.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.utf8_validate"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    if(reader.I().v(text).F()) {
-      Reference::S_temporary xref = { std_string_utf8_validate(::std::move(text)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.utf8_encode()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("utf8_encode"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.utf8_encode(code_points, [permissive])`
+      ASTERIA_BINDING_BEGIN("std.string.utf8_encode", self, global, reader) {
+        V_integer cp;
+        V_array cps;
+        Opt_boolean perm;
 
-  * Encodes code points from `code_points` into an UTF-8 string.
-    `code_points` can be either an integer or an array of
-    integers. When an invalid code point is encountered, if
-    `permissive` is set to `true`, it is replaced with the
-    replacement character `"\uFFFD"` and consequently encoded as
-    `"\xEF\xBF\xBD"`; otherwise this function fails.
+        reader.start_overload();
+        reader.required(cp);      // code_point
+        reader.optional(perm);    // [permissive]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_utf8_encode, cp, perm);
 
-  * Returns the encoded string.
+        reader.start_overload();
+        reader.required(cps);     // code_points
+        reader.optional(perm);    // [permissive]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_utf8_encode, cps, perm);
+      }
+      ASTERIA_BINDING_END);
 
-  * Throws an exception on failure.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.utf8_encode"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer code_point;
-    Opt_boolean permissive;
-    if(reader.I().v(code_point).o(permissive).F()) {
-      Reference::S_temporary xref = { std_string_utf8_encode(::std::move(code_point), permissive) };
-      return self = ::std::move(xref);
-    }
-    V_array code_points;
-    if(reader.I().v(code_points).o(permissive).F()) {
-      Reference::S_temporary xref = { std_string_utf8_encode(::std::move(code_points), permissive) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.utf8_decode()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("utf8_decode"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.utf8_decode(text, [permissive])`
+      ASTERIA_BINDING_BEGIN("std.string.utf8_decode", self, global, reader) {
+        V_string text;
+        Opt_boolean perm;
 
-  * Decodes `text`, which is expected to be a string containing
-    UTF-8 code units, into an array of code points, represented as
-    integers. When an invalid code sequence is encountered, if
-    `permissive` is set to `true`, all code units of it are
-    re-interpreted as isolated bytes according to ISO/IEC 8859-1;
-    otherwise this function fails.
+        reader.start_overload();
+        reader.required(text);    // text
+        reader.optional(perm);    // [permissive]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_utf8_decode, text, perm);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns an array containing decoded code points.
-
-  * Throws an exception on failure.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.utf8_decode"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    Opt_boolean permissive;
-    if(reader.I().v(text).o(permissive).F()) {
-      Reference::S_temporary xref = { std_string_utf8_decode(::std::move(text), permissive) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.pack_8()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("pack_8"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.pack_8(values)`
+      ASTERIA_BINDING_BEGIN("std.string.pack_8", self, global, reader) {
+        V_integer val;
+        V_array vals;
 
-  * Packs a series of 8-bit integers into a string. `values` can be
-    either an integer or an array of integers, all of which are
-    truncated to 8 bits then copied into a string.
+        reader.start_overload();
+        reader.required(val);    // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pack_8, val);
 
-  * Returns the packed string.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.pack_8"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer value;
-    if(reader.I().v(value).F()) {
-      Reference::S_temporary xref = { std_string_pack_8(::std::move(value)) };
-      return self = ::std::move(xref);
-    }
-    V_array values;
-    if(reader.I().v(values).F()) {
-      Reference::S_temporary xref = { std_string_pack_8(::std::move(values)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(vals);    // values
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pack_8, vals);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `std.string.unpack_8()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("unpack_8"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.unpack_8(text)`
+      ASTERIA_BINDING_BEGIN("std.string.unpack_8", self, global, reader) {
+        V_string text;
 
-  * Unpacks 8-bit integers from a string. The contents of `text`
-    are re-interpreted as contiguous signed 8-bit integers, all of
-    which are sign-extended to 64 bits then copied into an array.
+        reader.start_overload();
+        reader.required(text);    // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_unpack_8, text);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns an array containing unpacked integers.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.unpack_8"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    if(reader.I().v(text).F()) {
-      Reference::S_temporary xref = { std_string_unpack_8(::std::move(text)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.pack_16be()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("pack_16be"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.pack_16be(values)`
+      ASTERIA_BINDING_BEGIN("std.string.pack_16be", self, global, reader) {
+        V_integer val;
+        V_array vals;
 
-  * Packs a series of 16-bit integers into a string. `values` can
-    be either an integer or an array of `integers`, all of which
-    are truncated to 16 bits then copied into a string in the
-    big-endian byte order.
+        reader.start_overload();
+        reader.required(val);    // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pack_16be, val);
 
-  * Returns the packed string.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.pack_16be"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer value;
-    if(reader.I().v(value).F()) {
-      Reference::S_temporary xref = { std_string_pack_16be(::std::move(value)) };
-      return self = ::std::move(xref);
-    }
-    V_array values;
-    if(reader.I().v(values).F()) {
-      Reference::S_temporary xref = { std_string_pack_16be(::std::move(values)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(vals);    // values
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pack_16be, vals);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `std.string.unpack_16be()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("unpack_16be"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.unpack_16be(text)`
+      ASTERIA_BINDING_BEGIN("std.string.unpack_16be", self, global, reader) {
+        V_string text;
 
-  * Unpacks 16-bit integers from a string. The contents of `text`
-    are re-interpreted as contiguous signed 16-bit integers in the
-    big-endian byte order, all of which are sign-extended to 64
-    bits then copied into an array.
+        reader.start_overload();
+        reader.required(text);    // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_unpack_16be, text);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns an array containing unpacked integers.
-
-  * Throws an exception if the length of `text` is not a multiple
-    of 2.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.unpack_16be"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    if(reader.I().v(text).F()) {
-      Reference::S_temporary xref = { std_string_unpack_16be(::std::move(text)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.pack_16le()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("pack_16le"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.pack_16le(values)`
+      ASTERIA_BINDING_BEGIN("std.string.pack_16le", self, global, reader) {
+        V_integer val;
+        V_array vals;
 
-  * Packs a series of 16-bit integers into a string. `values` can
-    be either an integer or an array of `integers`, all of which
-    are truncated to 16 bits then copied into a string in the
-    little-endian byte order.
+        reader.start_overload();
+        reader.required(val);    // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pack_16le, val);
 
-  * Returns the packed string.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.pack_16le"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer value;
-    if(reader.I().v(value).F()) {
-      Reference::S_temporary xref = { std_string_pack_16le(::std::move(value)) };
-      return self = ::std::move(xref);
-    }
-    V_array values;
-    if(reader.I().v(values).F()) {
-      Reference::S_temporary xref = { std_string_pack_16le(::std::move(values)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(vals);    // values
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pack_16le, vals);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `std.string.unpack_16le()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("unpack_16le"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.unpack_16le(text)`
+      ASTERIA_BINDING_BEGIN("std.string.unpack_16le", self, global, reader) {
+        V_string text;
 
-  * Unpacks 16-bit integers from a string. The contents of `text`
-    are re-interpreted as contiguous signed 16-bit integers in the
-    little-endian byte order, all of which are sign-extended to 64
-    bits then copied into an array.
+        reader.start_overload();
+        reader.required(text);    // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_unpack_16le, text);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns an array containing unpacked integers.
-
-  * Throws an exception if the length of `text` is not a multiple
-    of 2.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.unpack_16le"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    if(reader.I().v(text).F()) {
-      Reference::S_temporary xref = { std_string_unpack_16le(::std::move(text)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.pack_32be()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("pack_32be"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.pack_32be(values)`
+      ASTERIA_BINDING_BEGIN("std.string.pack_32be", self, global, reader) {
+        V_integer val;
+        V_array vals;
 
-  * Packs a series of 32-bit integers into a string. `values` can
-    be either an integer or an array of `integers`, all of which
-    are truncated to 32 bits then copied into a string in the
-    big-endian byte order.
+        reader.start_overload();
+        reader.required(val);    // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pack_32be, val);
 
-  * Returns the packed string.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.pack_32be"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer value;
-    if(reader.I().v(value).F()) {
-      Reference::S_temporary xref = { std_string_pack_32be(::std::move(value)) };
-      return self = ::std::move(xref);
-    }
-    V_array values;
-    if(reader.I().v(values).F()) {
-      Reference::S_temporary xref = { std_string_pack_32be(::std::move(values)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(vals);    // values
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pack_32be, vals);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `std.string.unpack_32be()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("unpack_32be"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.unpack_32be(text)`
+      ASTERIA_BINDING_BEGIN("std.string.unpack_32be", self, global, reader) {
+        V_string text;
 
-  * Unpacks 32-bit integers from a string. The contents of `text`
-    are re-interpreted as contiguous signed 32-bit integers in the
-    big-endian byte order, all of which are sign-extended to 64
-    bits then copied into an array.
+        reader.start_overload();
+        reader.required(text);    // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_unpack_32be, text);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns an array containing unpacked integers.
-
-  * Throws an exception if the length of `text` is not a multiple
-    of 4.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.unpack_32be"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    if(reader.I().v(text).F()) {
-      Reference::S_temporary xref = { std_string_unpack_32be(::std::move(text)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.pack_32le()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("pack_32le"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.pack_32le(values)`
+      ASTERIA_BINDING_BEGIN("std.string.pack_32le", self, global, reader) {
+        V_integer val;
+        V_array vals;
 
-  * Packs a series of 32-bit integers into a string. `values` can
-    be either an integer or an array of `integers`, all of which
-    are truncated to 32 bits then copied into a string in the
-    little-endian byte order.
+        reader.start_overload();
+        reader.required(val);    // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pack_32le, val);
 
-  * Returns the packed string.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.pack_32le"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer value;
-    if(reader.I().v(value).F()) {
-      Reference::S_temporary xref = { std_string_pack_32le(::std::move(value)) };
-      return self = ::std::move(xref);
-    }
-    V_array values;
-    if(reader.I().v(values).F()) {
-      Reference::S_temporary xref = { std_string_pack_32le(::std::move(values)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(vals);    // values
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pack_32le, vals);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `std.string.unpack_32le()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("unpack_32le"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.unpack_32le(text)`
+      ASTERIA_BINDING_BEGIN("std.string.unpack_32le", self, global, reader) {
+        V_string text;
 
-  * Unpacks 32-bit integers from a string. The contents of `text`
-    are re-interpreted as contiguous signed 32-bit integers in the
-    little-endian byte order, all of which are sign-extended to 64
-    bits then copied into an array.
+        reader.start_overload();
+        reader.required(text);    // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_unpack_32le, text);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns an array containing unpacked integers.
-
-  * Throws an exception if the length of `text` is not a multiple
-    of 4.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.unpack_32le"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    if(reader.I().v(text).F()) {
-      Reference::S_temporary xref = { std_string_unpack_32le(::std::move(text)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.pack_64be()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("pack_64be"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.pack_64be(values)`
+      ASTERIA_BINDING_BEGIN("std.string.pack_64be", self, global, reader) {
+        V_integer val;
+        V_array vals;
 
-  * Packs a series of 64-bit integers into a string. `values` can
-    be either an integer or an array of `integers`, all of which
-    are copied into a string in the big-endian byte order.
+        reader.start_overload();
+        reader.required(val);    // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pack_64be, val);
 
-  * Returns the packed string.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.pack_64be"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer value;
-    if(reader.I().v(value).F()) {
-      Reference::S_temporary xref = { std_string_pack_64be(::std::move(value)) };
-      return self = ::std::move(xref);
-    }
-    V_array values;
-    if(reader.I().v(values).F()) {
-      Reference::S_temporary xref = { std_string_pack_64be(::std::move(values)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(vals);    // values
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pack_64be, vals);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `std.string.unpack_64be()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("unpack_64be"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.unpack_64be(text)`
+      ASTERIA_BINDING_BEGIN("std.string.unpack_64be", self, global, reader) {
+        V_string text;
 
-  * Unpacks 64-bit integers from a string. The contents of `text`
-    are re-interpreted as contiguous signed 64-bit integers in the
-    big-endian byte order, all of which are copied into an array.
+        reader.start_overload();
+        reader.required(text);    // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_unpack_64be, text);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns an array containing unpacked integers.
-
-  * Throws an exception if the length of `text` is not a multiple
-    of 8.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.unpack_64be"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    if(reader.I().v(text).F()) {
-      Reference::S_temporary xref = { std_string_unpack_64be(::std::move(text)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.pack_64le()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("pack_64le"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.pack_64le(values)`
+      ASTERIA_BINDING_BEGIN("std.string.pack_64le", self, global, reader) {
+        V_integer val;
+        V_array vals;
 
-  * Packs a series of 64-bit integers into a string. `values` can
-    be either an integer or an array of `integers`, all of which
-    are copied into a string in the little-endian byte order.
+        reader.start_overload();
+        reader.required(val);    // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pack_64le, val);
 
-  * Returns the packed string.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.pack_64le"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer value;
-    if(reader.I().v(value).F()) {
-      Reference::S_temporary xref = { std_string_pack_64le(::std::move(value)) };
-      return self = ::std::move(xref);
-    }
-    V_array values;
-    if(reader.I().v(values).F()) {
-      Reference::S_temporary xref = { std_string_pack_64le(::std::move(values)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(vals);    // values
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pack_64le, vals);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `std.string.unpack_64le()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("unpack_64le"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.unpack_64le(text)`
+      ASTERIA_BINDING_BEGIN("std.string.unpack_64le", self, global, reader) {
+        V_string text;
 
-  * Unpacks 64-bit integers from a string. The contents of `text`
-    are re-interpreted as contiguous signed 64-bit integers in the
-    little-endian byte order, all of which are copied into an
-    array.
+        reader.start_overload();
+        reader.required(text);    // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_unpack_64le, text);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns an array containing unpacked integers.
-
-  * Throws an exception if the length of `text` is not a multiple
-    of 8.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.unpack_64le"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    if(reader.I().v(text).F()) {
-      Reference::S_temporary xref = { std_string_unpack_64le(::std::move(text)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.format()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("format"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.format(templ, ...)`
+      ASTERIA_BINDING_BEGIN("std.string.format", self, global, reader) {
+        V_string templ;
+        cow_vector<Value> args;
 
-  * Compose a string according to the template string `templ`, as
-    follows:
+        reader.start_overload();
+        reader.required(templ);         // template
+        if(reader.end_overload(args))   // ...
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_format, templ, args);
+      }
+      ASTERIA_BINDING_END);
 
-    * A sequence of `$$` is replaced with a literal `$`.
-    * A sequence of `${NNN}`, where `NNN` is at most three decimal
-      numerals, is replaced with the NNN-th argument. If `NNN` is
-      zero, it is replaced with `templ` itself.
-    * A sequence of `$N`, where `N` is a single decimal numeral,
-      behaves the same as `${N}`.
-    * All other characters are copied verbatim.
-
-  * Returns the composed string.
-
-  * Throws an exception if `templ` contains invalid placeholder
-    sequences, or when a placeholder sequence has no corresponding
-    argument.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.format"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string templ;
-    cow_vector<Value> values;
-    if(reader.I().v(templ).F(values)) {
-      Reference::S_temporary xref = { std_string_format(::std::move(templ), ::std::move(values)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.pcre_find()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("pcre_find"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.pcre_find(text, pattern)`
+      ASTERIA_BINDING_BEGIN("std.string.pcre_find", self, global, reader) {
+        V_string text;
+        V_integer from;
+        Opt_integer len;
+        V_string patt;
 
-  * Searches `text` for the first match of the Perl-compatible
-    regular expressions (PCRE) `pattern`.
+        reader.start_overload();
+        reader.required(text);     // text
+        reader.save_state(0);
+        reader.required(patt);     // pattern
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pcre_find, text, 0, nullopt, patt);
 
-  * Returns an array of two integers. The first integer specifies
-    the subscript of the matching sequence and the second integer
-    specifies its length. If `pattern` is not found, this function
-    returns `null`.
+        reader.load_state(0);      // text
+        reader.required(from);     // from
+        reader.save_state(0);
+        reader.required(patt);     // pattern
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pcre_find, text, from, nullopt, patt);
 
-  * Throws an exception if `pattern` is not a valid PCRE.
+        reader.load_state(0);      // text, from
+        reader.optional(len);      // [length]
+        reader.required(patt);     // pattern
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pcre_find, text, from, len, patt);
+      }
+      ASTERIA_BINDING_END);
 
-`std.string.pcre_find(text, from, pattern)`
-
-  * Searches `text` for the first match of the Perl-compatible
-    regular expressions (PCRE) `pattern`. The search operation is
-    performed on the same subrange that would be returned by
-    `slice(text, from)`.
-
-  * Returns an array of two integers. The first integer specifies
-    the subscript of the matching sequence and the second integer
-    specifies its length. If `pattern` is not found, this function
-    returns `null`.
-
-  * Throws an exception if `pattern` is not a valid PCRE.
-
-`std.string.pcre_find(text, from, [length], pattern)`
-
-  * Searches `text` for the first match of the Perl-compatible
-    regular expressions (PCRE) `pattern`. The search operation is
-    performed on the same subrange that would be returned by
-    `slice(text, from, length)`.
-
-  * Returns an array of two integers. The first integer specifies
-    the subscript of the matching sequence and the second integer
-    specifies its length. If `pattern` is not found, this function
-    returns `null`.
-
-  * Throws an exception if `pattern` is not a valid PCRE.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.pcre_find"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    V_string text;
-    V_string pattern;
-    if(reader.I().v(text).S(state).v(pattern).F()) {
-      Reference::S_temporary xref = { std_string_pcre_find(::std::move(text), 0, nullopt,
-                                                                ::std::move(pattern)) };
-      return self = ::std::move(xref);
-    }
-    V_integer from;
-    if(reader.L(state).v(from).S(state).v(pattern).F()) {
-      Reference::S_temporary xref = { std_string_pcre_find(::std::move(text), from, nullopt,
-                                                                ::std::move(pattern)) };
-      return self = ::std::move(xref);
-    }
-    Opt_integer length;
-    if(reader.L(state).o(length).v(pattern).F()) {
-      Reference::S_temporary xref = { std_string_pcre_find(::std::move(text), from, length,
-                                                                ::std::move(pattern)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.pcre_match()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("pcre_match"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.pcre_match(text, pattern)`
+      ASTERIA_BINDING_BEGIN("std.string.pcre_match", self, global, reader) {
+        V_string text;
+        V_integer from;
+        Opt_integer len;
+        V_string patt;
 
-  * Searches `text` for the first match of the Perl-compatible
-    regular expressions (PCRE) `pattern`.
+        reader.start_overload();
+        reader.required(text);     // text
+        reader.save_state(0);
+        reader.required(patt);     // pattern
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pcre_match, text, 0, nullopt, patt);
 
-  * Returns an array of strings. The first element is a copy of the
-    substring that matches `pattern`. The remaining elements are
-    substrings that match positional capturing groups. If a group
-    fails to match, its corresponding element is `null`. If `text`
-    does not match `pattern`, `null` is returned.
+        reader.load_state(0);      // text
+        reader.required(from);     // from
+        reader.save_state(0);
+        reader.required(patt);     // pattern
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pcre_match, text, from, nullopt, patt);
 
-  * Throws an exception if `pattern` is not a valid PCRE.
+        reader.load_state(0);      // text, from
+        reader.optional(len);      // [length]
+        reader.required(patt);     // pattern
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pcre_match, text, from, len, patt);
+      }
+      ASTERIA_BINDING_END);
 
-`std.string.pcre_match(text, from, pattern)`
-
-  * Searches `text` for the first match of the Perl-compatible
-    regular expressions (PCRE) `pattern`. The search operation is
-    performed on the same subrange that would be returned by
-    `slice(text, from)`.
-
-  * Returns an array of strings. The first element is a copy of the
-    substring that matches `pattern`. The remaining elements are
-    substrings that match positional capturing groups. If a group
-    fails to match, its corresponding element is `null`. If `text`
-    does not match `pattern`, `null` is returned.
-
-  * Throws an exception if `pattern` is not a valid PCRE.
-
-`std.string.pcre_match(text, from, [length], pattern)`
-
-  * Searches `text` for the first match of the Perl-compatible
-    regular expressions (PCRE) `pattern`. The search operation is
-    performed on the same subrange that would be returned by
-    `slice(text, from, length)`.
-
-  * Returns an array of strings. The first element is a copy of the
-    substring that matches `pattern`. The remaining elements are
-    substrings that match positional capturing groups. If a group
-    fails to match, its corresponding element is `null`. If `text`
-    does not match `pattern`, `null` is returned.
-
-  * Throws an exception if `pattern` is not a valid PCRE.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.pcre_match"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    V_string text;
-    V_string pattern;
-    if(reader.I().v(text).S(state).v(pattern).F()) {
-      Reference::S_temporary xref = { std_string_pcre_match(::std::move(text), 0, nullopt,
-                                                                  ::std::move(pattern)) };
-      return self = ::std::move(xref);
-    }
-    V_integer from;
-    if(reader.L(state).v(from).S(state).v(pattern).F()) {
-      Reference::S_temporary xref = { std_string_pcre_match(::std::move(text), from, nullopt,
-                                                                  ::std::move(pattern)) };
-      return self = ::std::move(xref);
-    }
-    Opt_integer length;
-    if(reader.L(state).o(length).v(pattern).F()) {
-      Reference::S_temporary xref = { std_string_pcre_match(::std::move(text), from, length,
-                                                                  ::std::move(pattern)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.pcre_named_match()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("pcre_named_match"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.pcre_named_match(text, pattern)`
+      ASTERIA_BINDING_BEGIN("std.string.pcre_named_match", self, global, reader) {
+        V_string text;
+        V_integer from;
+        Opt_integer len;
+        V_string patt;
 
-  * Searches `text` for the first match of the Perl-compatible
-    regular expressions (PCRE) `pattern`.
+        reader.start_overload();
+        reader.required(text);     // text
+        reader.save_state(0);
+        reader.required(patt);     // pattern
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pcre_named_match, text, 0, nullopt, patt);
 
-  * Returns an object of all named groups. Each key is the name of
-    a group and its value is the matched substring. If there are no
-    named groups in `pattern`, an empty object is returned. If a
-    group fails to match, its corresponding value is an explicit
-    `null`. If `text` does not match `pattern`, `null` is returned.
+        reader.load_state(0);      // text
+        reader.required(from);     // from
+        reader.save_state(0);
+        reader.required(patt);     // pattern
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pcre_named_match, text, from, nullopt, patt);
 
-  * Throws an exception if `pattern` is not a valid PCRE.
+        reader.load_state(0);      // text, from
+        reader.optional(len);      // [length]
+        reader.required(patt);     // pattern
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pcre_named_match, text, from, len, patt);
+      }
+      ASTERIA_BINDING_END);
 
-`std.string.pcre_named_match(text, from, pattern)`
-
-  * Searches `text` for the first match of the Perl-compatible
-    regular expressions (PCRE) `pattern`. The search operation is
-    performed on the same subrange that would be returned by
-    `slice(text, from)`.
-
-  * Returns an object of all named groups. Each key is the name of
-    a group and its value is the matched substring. If there are no
-    named groups in `pattern`, an empty object is returned. If a
-    group fails to match, its corresponding value is an explicit
-    `null`. If `text` does not match `pattern`, `null` is returned.
-
-  * Throws an exception if `pattern` is not a valid PCRE.
-
-`std.string.pcre_named_match(text, from, [length], pattern)`
-
-  * Searches `text` for the first match of the Perl-compatible
-    regular expressions (PCRE) `pattern`. The search operation is
-    performed on the same subrange that would be returned by
-    `slice(text, from, length)`.
-
-  * Returns an object of all named groups. Each key is the name of
-    a group and its value is the matched substring. If there are no
-    named groups in `pattern`, an empty object is returned. If a
-    group fails to match, its corresponding value is an explicit
-    `null`. If `text` does not match `pattern`, `null` is returned.
-
-  * Throws an exception if `pattern` is not a valid PCRE.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.pcre_named_match"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    V_string text;
-    V_string pattern;
-    if(reader.I().v(text).S(state).v(pattern).F()) {
-      Reference::S_temporary xref = { std_string_pcre_named_match(::std::move(text), 0, nullopt,
-                                                                       ::std::move(pattern)) };
-      return self = ::std::move(xref);
-    }
-    V_integer from;
-    if(reader.L(state).v(from).S(state).v(pattern).F()) {
-      Reference::S_temporary xref = { std_string_pcre_named_match(::std::move(text), from, nullopt,
-                                                                       ::std::move(pattern)) };
-      return self = ::std::move(xref);
-    }
-    Opt_integer length;
-    if(reader.L(state).o(length).v(pattern).F()) {
-      Reference::S_temporary xref = { std_string_pcre_named_match(::std::move(text), from, length,
-                                                                       ::std::move(pattern)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.string.pcre_replace()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("pcre_replace"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.string.pcre_replace(text, pattern, replacement)`
+      ASTERIA_BINDING_BEGIN("std.string.pcre_replace", self, global, reader) {
+        V_string text;
+        V_integer from;
+        Opt_integer len;
+        V_string patt;
+        V_string rep;
 
-  * Searches `text` and replaces all matches of the Perl-compatible
-    regular expressions (PCRE) `pattern` with `replacement`. This
-    function returns a new string without modifying `text`.
+        reader.start_overload();
+        reader.required(text);     // text
+        reader.save_state(0);
+        reader.required(patt);     // pattern
+        reader.required(rep);     // replacement
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pcre_replace, text, 0, nullopt, patt, rep);
 
-  * Returns the string with `pattern` replaced. If `text` does not
-    contain `pattern`, it is returned intact.
+        reader.load_state(0);      // text
+        reader.required(from);     // from
+        reader.save_state(0);
+        reader.required(patt);     // pattern
+        reader.required(rep);     // replacement
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pcre_replace, text, from, nullopt, patt, rep);
 
-  * Throws an exception if `pattern` is not a valid PCRE.
-
-`std.string.pcre_replace(text, from, pattern, replacement)`
-
-  * Searches `text` and replaces all matches of the Perl-compatible
-    regular expressions (PCRE) `pattern` with `replacement`. The
-    search operation is performed on the same subrange that would
-    be returned by `slice(text, from)`. This function returns a new
-    string without modifying `text`.
-
-  * Returns the string with `pattern` replaced. If `text` does not
-    contain `pattern`, it is returned intact.
-
-  * Throws an exception if `pattern` is not a valid PCRE.
-
-`std.string.pcre_replace(text, from, [length], pattern, replacement)`
-
-  * Searches `text` and replaces all matches of the Perl-compatible
-    regular expressions (PCRE) `pattern` with `replacement`. The
-    search operation is performed on the same subrange that would
-    be returned by `slice(text, from, length)`. This function
-    returns a new string without modifying `text`.
-
-  * Returns the string with `pattern` replaced. If `text` does not
-    contain `pattern`, it is returned intact.
-
-  * Throws an exception if `pattern` is not a valid PCRE.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.string.pcre_replace"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    V_string text;
-    V_string pattern;
-    V_string replacement;
-    if(reader.I().v(text).S(state).v(pattern).v(replacement).F()) {
-      Reference::S_temporary xref = { std_string_pcre_replace(::std::move(text), 0, nullopt,
-                                                          ::std::move(pattern), ::std::move(replacement)) };
-      return self = ::std::move(xref);
-    }
-    V_integer from;
-    if(reader.L(state).v(from).S(state).v(pattern).v(replacement).F()) {
-      Reference::S_temporary xref = { std_string_pcre_replace(::std::move(text), from, nullopt,
-                                                           ::std::move(pattern), ::std::move(replacement)) };
-      return self = ::std::move(xref);
-    }
-    Opt_integer length;
-    if(reader.L(state).o(length).v(pattern).v(replacement).F()) {
-      Reference::S_temporary xref = { std_string_pcre_replace(::std::move(text), from, length,
-                                                           ::std::move(pattern), ::std::move(replacement)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.load_state(0);      // text, from
+        reader.optional(len);      // [length]
+        reader.required(patt);     // pattern
+        reader.required(rep);     // replacement
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_string_pcre_replace, text, from, len, patt, rep);
+      }
+      ASTERIA_BINDING_END);
   }
 
 }  // namespace asteria

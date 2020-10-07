@@ -8,13 +8,6 @@
 #include "../util.hpp"
 
 namespace asteria {
-namespace {
-
-constexpr double s_const_e    = 2.7182818284590452353602874713526624977572470937000;
-constexpr double s_const_pi   = 3.1415926535897932384626433832795028841971693993751;
-constexpr double s_const_lb10 = 3.3219280948873623478703194294893901758648313930246;
-
-}  // namespace
 
 V_real
 std_math_exp(V_real y, Opt_real base)
@@ -25,22 +18,10 @@ std_math_exp(V_real y, Opt_real base)
     if(*base == 2)
       return ::exp2(y);
 
-    if(*base == s_const_e)
-      return ::exp(y);
+    if(*base == 10)
+      return ::exp10(y);
 
     return ::pow(*base, y);
-  }
-
-V_real
-std_math_expm1(V_real y)
-  {
-    return ::expm1(y);
-  }
-
-V_real
-std_math_pow(V_real x, V_real y)
-  {
-    return ::pow(x, y);
   }
 
 V_real
@@ -62,9 +43,21 @@ std_math_log(V_real x, Opt_real base)
   }
 
 V_real
+std_math_expm1(V_real y)
+  {
+    return ::expm1(y);
+  }
+
+V_real
 std_math_log1p(V_real x)
   {
     return ::log1p(x);
+  }
+
+V_real
+std_math_pow(V_real x, V_real y)
+  {
+    return ::pow(x, y);
   }
 
 V_real
@@ -82,9 +75,9 @@ std_math_cos(V_real x)
 pair<V_real, V_real>
 std_math_sincos(V_real x)
   {
-    double sinv, cosv;
-    ::sincos(x, &sinv, &cosv);
-    return ::std::make_pair(sinv, cosv);
+    double sin, cos;
+    ::sincos(x, &sin, &cos);
+    return ::std::make_pair(sin, cos);
   }
 
 V_real
@@ -120,19 +113,11 @@ std_math_atan2(V_real y, V_real x)
 V_real
 std_math_hypot(cow_vector<Value> values)
   {
-    // Return zero if no argument is provided.
-    if(values.size() == 0)
-      return 0;
-
-    // Return the absolute value of the only argument.
-    if(values.size() == 1)
-      return ::fabs(values[0].convert_to_real());
-
-    // Call the C `hypot()` function for every two values.
-    auto res = ::hypot(values[0].convert_to_real(), values[1].convert_to_real());
-    for(size_t i = 2;  i < values.size();  ++i)
-      res = ::hypot(res, values[i].convert_to_real());
-    return res;
+    V_real len = 0;
+    for(const auto& val : values)
+      if(!val.is_null())
+        len = ::hypot(len, val.convert_to_real());
+    return len;
   }
 
 V_real
@@ -198,672 +183,315 @@ std_math_lgamma(V_real x)
 void
 create_bindings_math(V_object& result, API_Version /*version*/)
   {
-    //===================================================================
-    // `std.math.e`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("e"),
       V_real(
-        // The base of the natural logarithm.
-        s_const_e
+        2.7182818284590452353602874713526624977572470937000
       ));
 
-    //===================================================================
-    // `std.math.pi`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("pi"),
       V_real(
-        // The ratio of a circle's circumference to its diameter.
-        s_const_pi
+        3.1415926535897932384626433832795028841971693993751
       ));
 
-    //===================================================================
-    // `std.math.lb10`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("real_max"),
       V_real(
-        // The binary logarithm of the integer ten.
-        s_const_lb10
+        3.3219280948873623478703194294893901758648313930246
       ));
 
-    //===================================================================
-    // `std.math.exp()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("exp"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.math.exp(y, [base])`
+      ASTERIA_BINDING_BEGIN("std.math.exp", self, global, reader) {
+        V_real y;
+        Opt_real base;
 
-  * Calculates `base` raised to the power `y`. If `base` is absent,
-    `e` is assumed. This function is equivalent to `pow(base, y)`.
+        reader.start_overload();
+        reader.required(y);      // y
+        reader.optional(base);   // [base]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_exp, y, base);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the power as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.math.exp"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real y;
-    Opt_real base;
-    if(reader.I().v(y).o(base).F()) {
-      Reference::S_temporary xref = { std_math_exp(::std::move(y), ::std::move(base)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.math.expm1()`
-    //===================================================================
-    result.insert_or_assign(::rocket::sref("expm1"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.math.expm1(y)`
-
-  * Calculates `exp(y) - 1` without losing precision when `y` is
-    close to zero.
-
-  * Returns the result as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.math.expm1"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real y;
-    if(reader.I().v(y).F()) {
-      Reference::S_temporary xref = { std_math_expm1(::std::move(y)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.math.pow()`
-    //===================================================================
-    result.insert_or_assign(::rocket::sref("pow"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.math.pow(x, y)`
-
-  * Calculates `x` raised to the power `y`. According to C99, when
-    `x` is `1` or `y` is `0`, the result is always `1`, even when
-    the other argument is an infinity or NaN.
-
-  * Returns the power as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.math.pow"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real x;
-    V_real y;
-    if(reader.I().v(x).v(y).F()) {
-      Reference::S_temporary xref = { std_math_pow(::std::move(x), ::std::move(y)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.math.log()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("log"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.math.log(x, [base])`
+      ASTERIA_BINDING_BEGIN("std.math.log", self, global, reader) {
+        V_real x;
+        Opt_real base;
 
-  * Calculates the logarithm of `x` to `base`. If `base` is absent,
-    `e` is assumed.
+        reader.start_overload();
+        reader.required(x);      // x
+        reader.optional(base);   // [base]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_log, x, base);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the logarithm as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.math.log"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real y;
-    Opt_real base;
-    if(reader.I().v(y).o(base).F()) {
-      Reference::S_temporary xref = { std_math_log(::std::move(y), ::std::move(base)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+    result.insert_or_assign(::rocket::sref("expm1"),
+      ASTERIA_BINDING_BEGIN("std.math.expm1", self, global, reader) {
+        V_real y;
 
-    //===================================================================
-    // `std.math.log1p()`
-    //===================================================================
+        reader.start_overload();
+        reader.required(y);      // y
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_expm1, y);
+      }
+      ASTERIA_BINDING_END);
+
     result.insert_or_assign(::rocket::sref("log1p"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.math.log1p(x)`
+      ASTERIA_BINDING_BEGIN("std.math.log1p", self, global, reader) {
+        V_real x;
 
-  * Calculates `log(1 + x)` without losing precision when `x` is
-    close to zero.
+        reader.start_overload();
+        reader.required(x);      // x
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_log1p, x);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the result as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.math.log1p"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real y;
-    if(reader.I().v(y).F()) {
-      Reference::S_temporary xref = { std_math_log1p(::std::move(y)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+    result.insert_or_assign(::rocket::sref("pow"),
+      ASTERIA_BINDING_BEGIN("std.math.pow", self, global, reader) {
+        V_real x;
+        V_real y;
 
-    //===================================================================
-    // `std.math.sin()`
-    //===================================================================
+        reader.start_overload();
+        reader.required(x);    // x
+        reader.required(y);    // y
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_pow, x, y);
+      }
+      ASTERIA_BINDING_END);
+
     result.insert_or_assign(::rocket::sref("sin"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.math.sin(x)`
+      ASTERIA_BINDING_BEGIN("std.math.sin", self, global, reader) {
+        V_real x;
 
-  * Calculates the sine of `x` in radians.
+        reader.start_overload();
+        reader.required(x);      // x
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_sin, x);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the result as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.math.sin"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real x;
-    if(reader.I().v(x).F()) {
-      Reference::S_temporary xref = { std_math_sin(::std::move(x)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.math.cos()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("cos"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.math.cos(x)`
+      ASTERIA_BINDING_BEGIN("std.math.cos", self, global, reader) {
+        V_real x;
 
-  * Calculates the cosine of `x` in radians.
+        reader.start_overload();
+        reader.required(x);      // x
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_cos, x);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the result as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.math.cos"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real x;
-    if(reader.I().v(x).F()) {
-      Reference::S_temporary xref = { std_math_cos(::std::move(x)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.math.sincos()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("sincos"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.math.sincos(x)`
+      ASTERIA_BINDING_BEGIN("std.math.sincos", self, global, reader) {
+        V_real x;
 
- * Calculates the sine and cosine of `x` in radians.
+        reader.start_overload();
+        reader.required(x);      // x
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_sincos, x);
+      }
+      ASTERIA_BINDING_END);
 
- * Returns an array of two reals. The first element is the sine
-   and the other is the cosine.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.math.sincos"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real x;
-    if(reader.I().v(x).F()) {
-      Reference::S_temporary xref = { std_math_sincos(::std::move(x)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.math.tan()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("tan"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.math.tan(x)`
+      ASTERIA_BINDING_BEGIN("std.math.tan", self, global, reader) {
+        V_real x;
 
-  * Calculates the tangent of `x` in radians.
+        reader.start_overload();
+        reader.required(x);      // x
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_tan, x);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the result as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.math.tan"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real x;
-    if(reader.I().v(x).F()) {
-      Reference::S_temporary xref = { std_math_tan(::std::move(x)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.math.asin()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("asin"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.math.asin(x)`
+      ASTERIA_BINDING_BEGIN("std.math.asin", self, global, reader) {
+        V_real x;
 
-  * Calculates the inverse sine of `x` in radians.
+        reader.start_overload();
+        reader.required(x);      // x
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_asin, x);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the result as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.math.asin"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real x;
-    if(reader.I().v(x).F()) {
-      Reference::S_temporary xref = { std_math_asin(::std::move(x)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.math.acos()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("acos"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.math.acos(x)`
+      ASTERIA_BINDING_BEGIN("std.math.acos", self, global, reader) {
+        V_real x;
 
-  * Calculates the inverse cosine of `x` in radians.
+        reader.start_overload();
+        reader.required(x);      // x
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_acos, x);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the result as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.math.acos"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real x;
-    if(reader.I().v(x).F()) {
-      Reference::S_temporary xref = { std_math_acos(::std::move(x)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.math.atan()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("atan"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.math.atan(x)`
+      ASTERIA_BINDING_BEGIN("std.math.atan", self, global, reader) {
+        V_real x;
 
-  * Calculates the inverse tangent of `x` in radians.
+        reader.start_overload();
+        reader.required(x);      // x
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_atan, x);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the result as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.math.atan"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real x;
-    if(reader.I().v(x).F()) {
-      Reference::S_temporary xref = { std_math_atan(::std::move(x)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.math.atan2()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("atan2"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.math.atan2(y, x)`
+      ASTERIA_BINDING_BEGIN("std.math.atan2", self, global, reader) {
+        V_real y;
+        V_real x;
 
-  * Calculates the angle of the vector `<x,y>` in radians.
+        reader.start_overload();
+        reader.required(y);      // x
+        reader.required(x);      // x
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_atan2, y, x);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the result as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.math.atan2"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real y;
-    V_real x;
-    if(reader.I().v(y).v(x).F()) {
-      Reference::S_temporary xref = { std_math_atan2(::std::move(y), ::std::move(x)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.math.hypot()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("hypot"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.math.hypot(...)`
+      ASTERIA_BINDING_BEGIN("std.math.hypot", self, global, reader) {
+        cow_vector<Value> vals;
 
-  * Calculates the length of the n-dimension vector defined by all
-    arguments. If no argument is provided, this function returns
-    zero. If any argument is an infinity, this function returns a
-    positive infinity; otherwise, if any argument is a NaN, this
-    function returns a NaN.
+        reader.start_overload();
+        if(reader.end_overload(vals))   // ...
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_hypot, vals);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the length as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.math.hypot"), ::rocket::cref(args));
-    // Parse variadic arguments.
-    cow_vector<Value> values;
-    if(reader.I().F(values)) {
-      Reference::S_temporary xref = { std_math_hypot(::std::move(values)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.math.sinh()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("sinh"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.math.sinh(x)`
+      ASTERIA_BINDING_BEGIN("std.math.sinh", self, global, reader) {
+        V_real x;
 
-  * Calculates the hyperbolic sine of `x`.
+        reader.start_overload();
+        reader.required(x);      // x
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_sinh, x);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the result as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.math.sinh"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real x;
-    if(reader.I().v(x).F()) {
-      Reference::S_temporary xref = { std_math_sinh(::std::move(x)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.math.cosh()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("cosh"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.math.cosh(x)`
+      ASTERIA_BINDING_BEGIN("std.math.cosh", self, global, reader) {
+        V_real x;
 
-  * Calculates the hyperbolic cosine of `x`.
+        reader.start_overload();
+        reader.required(x);      // x
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_cosh, x);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the result as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.math.cosh"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real x;
-    if(reader.I().v(x).F()) {
-      Reference::S_temporary xref = { std_math_cosh(::std::move(x)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.math.tanh()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("tanh"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.math.tanh(x)`
+      ASTERIA_BINDING_BEGIN("std.math.tanh", self, global, reader) {
+        V_real x;
 
-  * Calculates the hyperbolic tangent of `x`.
+        reader.start_overload();
+        reader.required(x);      // x
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_tanh, x);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the result as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.math.tanh"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real x;
-    if(reader.I().v(x).F()) {
-      Reference::S_temporary xref = { std_math_tanh(::std::move(x)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.math.asinh()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("asinh"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.math.asinh(x)`
+      ASTERIA_BINDING_BEGIN("std.math.asinh", self, global, reader) {
+        V_real x;
 
-  * Calculates the inverse hyperbolic sine of `x`.
+        reader.start_overload();
+        reader.required(x);      // x
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_asinh, x);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the result as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.math.asinh"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real x;
-    if(reader.I().v(x).F()) {
-      Reference::S_temporary xref = { std_math_asinh(::std::move(x)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.math.acosh()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("acosh"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.math.acosh(x)`
+      ASTERIA_BINDING_BEGIN("std.math.acosh", self, global, reader) {
+        V_real x;
 
-  * Calculates the inverse hyperbolic cosine of `x`.
+        reader.start_overload();
+        reader.required(x);      // x
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_acosh, x);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the result as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.math.acosh"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real x;
-    if(reader.I().v(x).F()) {
-      Reference::S_temporary xref = { std_math_acosh(::std::move(x)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.math.atanh()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("atanh"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.math.atanh(x)`
+      ASTERIA_BINDING_BEGIN("std.math.atanh", self, global, reader) {
+        V_real x;
 
-  * Calculates the inverse hyperbolic tangent of `x`.
+        reader.start_overload();
+        reader.required(x);      // x
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_atanh, x);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the result as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.math.atanh"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real x;
-    if(reader.I().v(x).F()) {
-      Reference::S_temporary xref = { std_math_atanh(::std::move(x)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.math.erf()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("erf"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.math.erf(x)`
+      ASTERIA_BINDING_BEGIN("std.math.erf", self, global, reader) {
+        V_real x;
 
-  * Calculates the error function of `x`.
+        reader.start_overload();
+        reader.required(x);      // x
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_erf, x);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the result as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.math.erf"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real x;
-    if(reader.I().v(x).F()) {
-      Reference::S_temporary xref = { std_math_erf(::std::move(x)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.math.cerf()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("cerf"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.math.cerf(x)`
+      ASTERIA_BINDING_BEGIN("std.math.cerf", self, global, reader) {
+        V_real x;
 
-  * Calculates the complementary error function of `x`.
+        reader.start_overload();
+        reader.required(x);      // x
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_cerf, x);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the result as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.math.cerf"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real x;
-    if(reader.I().v(x).F()) {
-      Reference::S_temporary xref = { std_math_cerf(::std::move(x)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.math.gamma()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("gamma"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.math.gamma(x)`
+      ASTERIA_BINDING_BEGIN("std.math.gamma", self, global, reader) {
+        V_real x;
 
-  * Calculates the Gamma function of `x`.
+        reader.start_overload();
+        reader.required(x);      // x
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_gamma, x);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the result as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.math.gamma"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real x;
-    if(reader.I().v(x).F()) {
-      Reference::S_temporary xref = { std_math_gamma(::std::move(x)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.math.lgamma()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("lgamma"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.math.lgamma(x)`
+      ASTERIA_BINDING_BEGIN("std.math.lgamma", self, global, reader) {
+        V_real x;
 
-  * Calculates the natural logarithm of the absolute value of the
-    Gamma function of `x`.
-
-  * Returns the result as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.math.lgamma"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real x;
-    if(reader.I().v(x).F()) {
-      Reference::S_temporary xref = { std_math_lgamma(::std::move(x)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(x);      // x
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_lgamma, x);
+      }
+      ASTERIA_BINDING_END);
   }
 
 }  // namespace asteria

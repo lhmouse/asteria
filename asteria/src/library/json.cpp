@@ -766,160 +766,71 @@ std_json_parse_file(V_string path)
 void
 create_bindings_json(V_object& result, API_Version /*version*/)
   {
-    //===================================================================
-    // `std.json.format()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("format"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.json.format(value, [indent])`
+      ASTERIA_BINDING_BEGIN("std.json.format", self, global, reader) {
+        Value value;
+        Opt_string sind;
+        V_integer iind;
 
-  * Converts a value to a string in the JSON format, according to
-    IETF RFC 7159. This function generates text that conforms to
-    JSON strictly; values whose types cannot be represented in JSON
-    are discarded if they are found in an object and censored to
-    `null` otherwise. If `indent` is set to a string, it is used as
-    each level of indention following a line break, unless it is
-    empty, in which case no line break is inserted. If `indent` is
-    set to an integer, it is clamped between `0` and `10`
-    inclusively and this function behaves as if a string consisting
-    of this number of spaces was set. Its default value is an empty
-    string.
+        reader.start_overload();
+        reader.optional(value);   // [value]
+        reader.save_state(0);
+        reader.optional(sind);    // [indent]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_json_format, value, sind);
 
-  * Returns the formatted text as a string.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.json.format"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    Value value;
-    Opt_string sindent;
-    if(reader.I().o(value).S(state).o(sindent).F()) {
-      Reference::S_temporary xref = { std_json_format(::std::move(value), ::std::move(sindent)) };
-      return self = ::std::move(xref);
-    }
-    V_integer nindent;
-    if(reader.L(state).v(nindent).F()) {
-      Reference::S_temporary xref = { std_json_format(::std::move(value), ::std::move(nindent)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.load_state(0);     // [value]
+        reader.required(iind);    // indent
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_json_format, value, iind);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `std.json.format5()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("format5"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.json.format5(value, [indent])`
+      ASTERIA_BINDING_BEGIN("std.json.format5", self, global, reader) {
+        Value value;
+        Opt_string sind;
+        V_integer iind;
 
-  * Converts a value to a string in the JSON5 format. In addition
-    to IETF RFC 7159, a few extensions in ECMAScript 5.1 have been
-    introduced to make the syntax more human-readable. Infinities
-    and NaNs are preserved. Object keys that are valid identifiers
-    are not quoted. Trailing commas of array and object members are
-    appended if `indent` is neither null nor zero nor an empty
-    string. This function is otherwise identical to `format()`.
+        reader.start_overload();
+        reader.optional(value);   // [value]
+        reader.save_state(0);
+        reader.optional(sind);    // [indent]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_json_format5, value, sind);
 
-  * Returns the formatted text as a string.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.json.format5"), ::rocket::cref(args));
-    Argument_Reader::State state;
-    // Parse arguments.
-    Value value;
-    Opt_string sindent;
-    if(reader.I().o(value).S(state).o(sindent).F()) {
-      Reference::S_temporary xref = { std_json_format5(::std::move(value), ::std::move(sindent)) };
-      return self = ::std::move(xref);
-    }
-    V_integer nindent;
-    if(reader.L(state).v(nindent).F()) {
-      Reference::S_temporary xref = { std_json_format5(::std::move(value), ::std::move(nindent)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.load_state(0);     // [value]
+        reader.required(iind);    // indent
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_json_format5, value, iind);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `std.json.parse()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("parse"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.json.parse(text)`
+      ASTERIA_BINDING_BEGIN("std.json.parse", self, global, reader) {
+        V_string text;
 
-  * Parses a string containing data encoded in the JSON format and
-    converts it to a value. This function reuses the tokenizer of
-    Asteria and allows quite a few extensions, some of which are
-    also supported by JSON5:
+        reader.start_overload();
+        reader.required(text);    // text
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_json_parse, text);
+      }
+      ASTERIA_BINDING_END);
 
-    * Single-line and multiple-line comments are allowed.
-    * Binary and hexadecimal numbers are allowed.
-    * Numbers can have binary exponents.
-    * Infinities and NaNs are allowed.
-    * Numbers can start with plus signs.
-    * Strings and object keys may be single-quoted.
-    * Escape sequences (including UTF-32) are allowed in strings.
-    * Element lists of arrays and objects may end in commas.
-    * Object keys may be unquoted if they are valid identifiers.
-
-    Be advised that numbers are always parsed as reals.
-
-  * Returns the parsed value.
-
-  * Throws an exception if the string is invalid.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.json.parse"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    if(reader.I().v(text).F()) {
-      Reference::S_temporary xref = { std_json_parse(::std::move(text)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.json.parse_file()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("parse_file"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.json.parse_file(path)`
+      ASTERIA_BINDING_BEGIN("std.json.parse_file", self, global, reader) {
+        V_string path;
 
-  * Parses the contents of the file denoted by `path` as a JSON
-    string. This function behaves identical to `parse()` otherwise.
-
-  * Returns the parsed value.
-
-  * Throws an exception if a read error occurs, or if the string is
-    invalid.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.json.parse_file"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string path;
-    if(reader.I().v(path).F()) {
-      Reference::S_temporary xref = { std_json_parse_file(::std::move(path)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(path);    // path
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_json_parse_file, path);
+      }
+      ASTERIA_BINDING_END);
   }
 
 }  // namespace asteria

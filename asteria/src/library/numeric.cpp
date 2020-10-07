@@ -198,6 +198,48 @@ std_numeric_is_nan(V_real value)
     return ::std::isnan(value);
   }
 
+Value
+std_numeric_max(cow_vector<Value> values)
+  {
+    Value res;
+    for(const auto& val : values) {
+      if(val.is_null())
+        continue;
+
+      if(!res.is_null()) {
+        auto cmp = res.compare(val);
+        if(cmp == compare_unordered)
+          ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)", cmp, val);
+
+        if(cmp != compare_less)
+          continue;
+      }
+      res = val;
+    }
+    return res;
+  }
+
+Value
+std_numeric_min(cow_vector<Value> values)
+  {
+    Value res;
+    for(const auto& val : values) {
+      if(val.is_null())
+        continue;
+
+      if(!res.is_null()) {
+        auto cmp = res.compare(val);
+        if(cmp == compare_unordered)
+          ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)", cmp, val);
+
+        if(cmp != compare_greater)
+          continue;
+      }
+      res = val;
+    }
+    return res;
+  }
+
 V_integer
 std_numeric_clamp(V_integer value, V_integer lower, V_integer upper)
   {
@@ -364,8 +406,7 @@ std_numeric_frexp(V_real x)
 V_real
 std_numeric_ldexp(V_real frac, V_integer exp)
   {
-    int rexp = static_cast<int>(::rocket::clamp(exp, INT_MIN, INT_MAX));
-    return ::std::ldexp(frac, rexp);
+    return ::std::ldexp(frac, static_cast<int>(::rocket::clamp(exp, INT_MIN, INT_MAX)));
   }
 
 V_integer
@@ -671,1235 +712,641 @@ std_numeric_parse_real(V_string text, Opt_boolean saturating)
 void
 create_bindings_numeric(V_object& result, API_Version /*version*/)
   {
-    //===================================================================
-    // `std.numeric.integer_max`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("integer_max"),
       V_integer(
-        // The maximum value of an `integer`.
         ::std::numeric_limits<V_integer>::max()
       ));
 
-    //===================================================================
-    // `std.numeric.integer_min`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("integer_min"),
       V_integer(
-        // The minimum value of an `integer`.
         ::std::numeric_limits<V_integer>::lowest()
       ));
 
-    //===================================================================
-    // `std.numeric.real_max`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("real_max"),
       V_real(
-        // The maximum finite value of a `real`.
         ::std::numeric_limits<V_real>::max()
       ));
 
-    //===================================================================
-    // `std.numeric.real_min`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("real_min"),
       V_real(
-        // The minimum finite value of a `real`.
         ::std::numeric_limits<V_real>::lowest()
       ));
 
-    //===================================================================
-    // `std.numeric.real_epsilon`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("real_epsilon"),
       V_real(
-        // The minimum finite value of a `real` such that `1 + real_epsilon > 1`.
         ::std::numeric_limits<V_real>::epsilon()
       ));
 
-    //===================================================================
-    // `std.numeric.size_max`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("size_max"),
       V_integer(
-        // The maximum length of a `string` or `array`.
         ::std::numeric_limits<ptrdiff_t>::max()
       ));
 
-    //===================================================================
-    // `std.numeric.abs()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("abs"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.abs(value)`
+      ASTERIA_BINDING_BEGIN("std.numeric.abs", self, global, reader) {
+        V_integer ival;
+        V_real fval;
 
-  * Gets the absolute value of `value`, which may be an integer or
-    real. Negative integers are negated, which might cause an
-    exception to be thrown due to overflow. Sign bits of reals are
-    removed, which works on infinities and NaNs and does not
-    result in exceptions.
+        reader.start_overload();
+        reader.required(ival);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_abs, ival);
 
-  * Return the absolute value.
+        reader.start_overload();
+        reader.required(fval);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_abs, fval);
+      }
+      ASTERIA_BINDING_END);
 
-  * Throws an exception if `value` is the integer `-0x1p63`.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.abs"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer ivalue;
-    if(reader.I().v(ivalue).F()) {
-      Reference::S_temporary xref = { std_numeric_abs(::std::move(ivalue)) };
-      return self = ::std::move(xref);
-    }
-    V_real rvalue;
-    if(reader.I().v(rvalue).F()) {
-      Reference::S_temporary xref = { std_numeric_abs(::std::move(rvalue)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.numeric.sign()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("sign"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.sign(value)`
+      ASTERIA_BINDING_BEGIN("std.numeric.sign", self, global, reader) {
+        V_integer ival;
+        V_real fval;
 
-  * Propagates the sign bit of the number `value`, which may be an
-    integer or real, to all bits of an integer. Be advised that
-    `-0.0` is distinct from `0.0` despite the equality.
+        reader.start_overload();
+        reader.required(ival);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_sign, ival);
 
-  * Returns `-1` if `value` is negative, or `0` otherwise.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.sign"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer ivalue;
-    if(reader.I().v(ivalue).F()) {
-      Reference::S_temporary xref = { std_numeric_sign(::std::move(ivalue)) };
-      return self = ::std::move(xref);
-    }
-    V_real rvalue;
-    if(reader.I().v(rvalue).F()) {
-      Reference::S_temporary xref = { std_numeric_sign(::std::move(rvalue)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(fval);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_sign, fval);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `std.numeric.is_finite()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("is_finite"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.is_finite(value)`
+      ASTERIA_BINDING_BEGIN("std.numeric.is_finite", self, global, reader) {
+        V_integer ival;
+        V_real fval;
 
-  * Checks whether `value` is a finite number. `value` may be an
-    integer or real. Be adviced that this functions returns `true`
-    for integers for consistency; integers do not support
-    infinities or NaNs.
+        reader.start_overload();
+        reader.required(ival);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_is_finite, ival);
 
-  * Returns `true` if `value` is an integer or is a real that
-    is neither an infinity or a NaN, or `false` otherwise.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.is_finite"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer ivalue;
-    if(reader.I().v(ivalue).F()) {
-      Reference::S_temporary xref = { std_numeric_is_finite(::std::move(ivalue)) };
-      return self = ::std::move(xref);
-    }
-    V_real rvalue;
-    if(reader.I().v(rvalue).F()) {
-      Reference::S_temporary xref = { std_numeric_is_finite(::std::move(rvalue)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(fval);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_is_finite, fval);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `std.numeric.is_infinity()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("is_infinity"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.is_infinity(value)`
+      ASTERIA_BINDING_BEGIN("std.numeric.is_infinity", self, global, reader) {
+        V_integer ival;
+        V_real fval;
 
-  * Checks whether `value` is an infinity. `value` may be an
-    integer or real. Be adviced that this functions returns `false`
-    for integers for consistency; integers do not support
-    infinities.
+        reader.start_overload();
+        reader.required(ival);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_is_infinity, ival);
 
-  * Returns `true` if `value` is a real that denotes an infinity;
-    or `false` otherwise.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.is_infinity"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer ivalue;
-    if(reader.I().v(ivalue).F()) {
-      Reference::S_temporary xref = { std_numeric_is_infinity(::std::move(ivalue)) };
-      return self = ::std::move(xref);
-    }
-    V_real rvalue;
-    if(reader.I().v(rvalue).F()) {
-      Reference::S_temporary xref = { std_numeric_is_infinity(::std::move(rvalue)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(fval);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_is_infinity, fval);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `std.numeric.is_nan()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("is_nan"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.is_nan(value)`
+      ASTERIA_BINDING_BEGIN("std.numeric.is_nan", self, global, reader) {
+        V_integer ival;
+        V_real fval;
 
-  * Checks whether `value` is a NaN. `value` may be an integer or
-    real. Be adviced that this functions returns `false` for
-    integers for consistency; integers do not support NaNs.
+        reader.start_overload();
+        reader.required(ival);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_is_nan, ival);
 
-  * Returns `true` if `value` is a real denoting a NaN, or
-    `false` otherwise.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.is_nan"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer ivalue;
-    if(reader.I().v(ivalue).F()) {
-      Reference::S_temporary xref = { std_numeric_is_nan(::std::move(ivalue)) };
-      return self = ::std::move(xref);
-    }
-    V_real rvalue;
-    if(reader.I().v(rvalue).F()) {
-      Reference::S_temporary xref = { std_numeric_is_nan(::std::move(rvalue)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(fval);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_is_nan, fval);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `std.numeric.clamp()`
-    //===================================================================
+    result.insert_or_assign(::rocket::sref("max"),
+      ASTERIA_BINDING_BEGIN("std.numeric.max", self, global, reader) {
+        cow_vector<Value> vals;
+
+        reader.start_overload();
+        if(reader.end_overload(vals))   // ...
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_max, vals);
+      }
+      ASTERIA_BINDING_END);
+
+    result.insert_or_assign(::rocket::sref("min"),
+      ASTERIA_BINDING_BEGIN("std.numeric.min", self, global, reader) {
+        cow_vector<Value> vals;
+
+        reader.start_overload();
+        if(reader.end_overload(vals))   // ...
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_min, vals);
+      }
+      ASTERIA_BINDING_END);
+
     result.insert_or_assign(::rocket::sref("clamp"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.clamp(value, lower, upper)`
+      ASTERIA_BINDING_BEGIN("std.numeric.clamp", self, global, reader) {
+        V_integer ival;
+        V_integer ilo;
+        V_integer iup;
+        V_real fval;
+        V_real flo;
+        V_real fup;
 
-  * Limits `value` between `lower` and `upper`.
+        reader.start_overload();
+        reader.required(ival);     // value
+        reader.required(ilo);      // lower
+        reader.required(iup);      // upper
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_clamp, ival, ilo, iup);
 
-  * Returns `lower` if `value < lower`, `upper` if `value > upper`,
-    or `value` otherwise, including when `value` is a NaN. The
-    returned value is an integer if all arguments are integers;
-    otherwise it is a real.
+        reader.start_overload();
+        reader.required(fval);     // value
+        reader.required(flo);      // lower
+        reader.required(fup);      // upper
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_clamp, fval, flo, fup);
+      }
+      ASTERIA_BINDING_END);
 
-  * Throws an exception if `lower` is not less than or equal to
-    `upper`.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.clamp"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer ivalue;
-    V_integer ilower;
-    V_integer iupper;
-    if(reader.I().v(ivalue).v(ilower).v(iupper).F()) {
-      Reference::S_temporary xref = { std_numeric_clamp(::std::move(ivalue), ::std::move(ilower),
-                                                             ::std::move(iupper)) };
-      return self = ::std::move(xref);
-    }
-    V_real rvalue;
-    V_real flower;
-    V_real fupper;
-    if(reader.I().v(rvalue).v(flower).v(fupper).F()) {
-      Reference::S_temporary xref = { std_numeric_clamp(::std::move(rvalue), ::std::move(flower),
-                                                             ::std::move(fupper)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.numeric.round()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("round"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.round(value)`
+      ASTERIA_BINDING_BEGIN("std.numeric.round", self, global, reader) {
+        V_integer ival;
+        V_real fval;
 
-  * Rounds `value`, which may be an integer or real, to the nearest
-    integer; halfway values are rounded away from zero. If `value`
-    is an integer, it is returned intact.
+        reader.start_overload();
+        reader.required(ival);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_round, ival);
 
-  * Returns the rounded value.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.round"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer ivalue;
-    if(reader.I().v(ivalue).F()) {
-      Reference::S_temporary xref = { std_numeric_round(::std::move(ivalue)) };
-      return self = ::std::move(xref);
-    }
-    V_real rvalue;
-    if(reader.I().v(rvalue).F()) {
-      Reference::S_temporary xref = { std_numeric_round(::std::move(rvalue)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(fval);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_round, fval);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `std.numeric.iround()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("iround"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.iround(value)`
+      ASTERIA_BINDING_BEGIN("std.numeric.iround", self, global, reader) {
+        V_integer ival;
+        V_real fval;
 
-  * Rounds `value`, which may be an integer or real, to the nearest
-    integer; halfway values are rounded away from zero. If `value`
-    is an integer, it is returned intact. If `value` is a real, it
-    is converted to an integer.
+        reader.start_overload();
+        reader.required(ival);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_iround, ival);
 
-  * Returns the rounded value as an integer.
+        reader.start_overload();
+        reader.required(fval);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_iround, fval);
+      }
+      ASTERIA_BINDING_END);
 
-  * Throws an exception if the result cannot be represented as an
-    integer.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.iround"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer ivalue;
-    if(reader.I().v(ivalue).F()) {
-      Reference::S_temporary xref = { std_numeric_iround(::std::move(ivalue)) };
-      return self = ::std::move(xref);
-    }
-    V_real rvalue;
-    if(reader.I().v(rvalue).F()) {
-      Reference::S_temporary xref = { std_numeric_iround(::std::move(rvalue)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.numeric.floor()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("floor"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.floor(value)`
+      ASTERIA_BINDING_BEGIN("std.numeric.floor", self, global, reader) {
+        V_integer ival;
+        V_real fval;
 
-  * Rounds `value`, which may be an integer or real, to the nearest
-    integer towards negative infinity. If `value` is an integer, it
-    is returned intact.
+        reader.start_overload();
+        reader.required(ival);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_floor, ival);
 
-  * Returns the rounded value.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.floor"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer ivalue;
-    if(reader.I().v(ivalue).F()) {
-      Reference::S_temporary xref = { std_numeric_floor(::std::move(ivalue)) };
-      return self = ::std::move(xref);
-    }
-    V_real rvalue;
-    if(reader.I().v(rvalue).F()) {
-      Reference::S_temporary xref = { std_numeric_floor(::std::move(rvalue)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(fval);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_floor, fval);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `std.numeric.ifloor()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("ifloor"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.ifloor(value)`
+      ASTERIA_BINDING_BEGIN("std.numeric.ifloor", self, global, reader) {
+        V_integer ival;
+        V_real fval;
 
-  * Rounds `value`, which may be an integer or real, to the nearest
-    integer towards negative infinity. If `value` is an integer, it
-    is returned intact. If `value` is a real, it is converted to an
-    integer.
+        reader.start_overload();
+        reader.required(ival);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_ifloor, ival);
 
-  * Returns the rounded value as an integer.
+        reader.start_overload();
+        reader.required(fval);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_ifloor, fval);
+      }
+      ASTERIA_BINDING_END);
 
-  * Throws an exception if the result cannot be represented as an
-    integer.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.ifloor"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer ivalue;
-    if(reader.I().v(ivalue).F()) {
-      Reference::S_temporary xref = { std_numeric_ifloor(::std::move(ivalue)) };
-      return self = ::std::move(xref);
-    }
-    V_real rvalue;
-    if(reader.I().v(rvalue).F()) {
-      Reference::S_temporary xref = { std_numeric_ifloor(::std::move(rvalue)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.numeric.ceil()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("ceil"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.ceil(value)`
+      ASTERIA_BINDING_BEGIN("std.numeric.ceil", self, global, reader) {
+        V_integer ival;
+        V_real fval;
 
-  * Rounds `value`, which may be an integer or real, to the nearest
-    integer towards positive infinity. If `value` is an integer,
-    it is returned intact.
+        reader.start_overload();
+        reader.required(ival);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_ceil, ival);
 
-  * Returns the rounded value.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.ceil"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer ivalue;
-    if(reader.I().v(ivalue).F()) {
-      Reference::S_temporary xref = { std_numeric_ceil(::std::move(ivalue)) };
-      return self = ::std::move(xref);
-    }
-    V_real rvalue;
-    if(reader.I().v(rvalue).F()) {
-      Reference::S_temporary xref = { std_numeric_ceil(::std::move(rvalue)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(fval);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_ceil, fval);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `std.numeric.iceil()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("iceil"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.iceil(value)`
+      ASTERIA_BINDING_BEGIN("std.numeric.iceil", self, global, reader) {
+        V_integer ival;
+        V_real fval;
 
-  * Rounds `value`, which may be an integer or real, to the nearest
-    integer towards positive infinity. If `value` is an integer, it
-    is returned intact. If `value` is a real, it is converted to an
-    integer.
+        reader.start_overload();
+        reader.required(ival);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_iceil, ival);
 
-  * Returns the rounded value as an integer.
+        reader.start_overload();
+        reader.required(fval);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_iceil, fval);
+      }
+      ASTERIA_BINDING_END);
 
-  * Throws an exception if the result cannot be represented as an
-    integer.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.iceil"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer ivalue;
-    if(reader.I().v(ivalue).F()) {
-      Reference::S_temporary xref = { std_numeric_iceil(::std::move(ivalue)) };
-      return self = ::std::move(xref);
-    }
-    V_real rvalue;
-    if(reader.I().v(rvalue).F()) {
-      Reference::S_temporary xref = { std_numeric_iceil(::std::move(rvalue)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.numeric.trunc()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("trunc"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.trunc(value)`
+      ASTERIA_BINDING_BEGIN("std.numeric.trunc", self, global, reader) {
+        V_integer ival;
+        V_real fval;
 
-  * Rounds `value`, which may be an integer or real, to the nearest
-    integer towards zero. If `value` is an integer, it is returned
-    intact.
+        reader.start_overload();
+        reader.required(ival);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_trunc, ival);
 
-  * Returns the rounded value.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.trunc"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer ivalue;
-    if(reader.I().v(ivalue).F()) {
-      Reference::S_temporary xref = { std_numeric_trunc(::std::move(ivalue)) };
-      return self = ::std::move(xref);
-    }
-    V_real rvalue;
-    if(reader.I().v(rvalue).F()) {
-      Reference::S_temporary xref = { std_numeric_trunc(::std::move(rvalue)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(fval);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_trunc, fval);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `std.numeric.itrunc()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("itrunc"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.itrunc(value)`
+      ASTERIA_BINDING_BEGIN("std.numeric.itrunc", self, global, reader) {
+        V_integer ival;
+        V_real fval;
 
-  * Rounds `value`, which may be an integer or real, to the nearest
-    integer towards zero. If `value` is an integer, it is returned
-    intact. If `value` is a real, it is converted to an integer.
+        reader.start_overload();
+        reader.required(ival);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_itrunc, ival);
 
-  * Returns the rounded value as an integer.
+        reader.start_overload();
+        reader.required(fval);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_itrunc, fval);
+      }
+      ASTERIA_BINDING_END);
 
-  * Throws an exception if the result cannot be represented as an
-    integer.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.itrunc"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer ivalue;
-    if(reader.I().v(ivalue).F()) {
-      Reference::S_temporary xref = { std_numeric_itrunc(::std::move(ivalue)) };
-      return self = ::std::move(xref);
-    }
-    V_real rvalue;
-    if(reader.I().v(rvalue).F()) {
-      Reference::S_temporary xref = { std_numeric_itrunc(::std::move(rvalue)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.numeric.random()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("random"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.random([limit])`
+      ASTERIA_BINDING_BEGIN("std.numeric.random", self, global, reader) {
+        Opt_real lim;
 
-  * Generates a random real value whose sign agrees with `limit`
-    and whose absolute value is less than `limit`. If `limit` is
-    absent, `1` is assumed.
+        reader.start_overload();
+        reader.optional(lim);     // [limit]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_random, global, lim);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns a random real value.
-
-  * Throws an exception if `limit` is zero or non-finite.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.random"), ::rocket::cref(args));
-    // Parse arguments.
-    Opt_real limit;
-    if(reader.I().o(limit).F()) {
-      Reference::S_temporary xref = { std_numeric_random(global, ::std::move(limit)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.numeric.sqrt()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("sqrt"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.sqrt(x)`
+      ASTERIA_BINDING_BEGIN("std.numeric.sqrt", self, global, reader) {
+        V_real val;
 
-  * Calculates the square root of `x` which may be of either the
-    integer or the real type. The result is always a real.
+        reader.start_overload();
+        reader.required(val);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_sqrt, val);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the square root of `x` as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.sqrt"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real x;
-    if(reader.I().v(x).F()) {
-      Reference::S_temporary xref = { std_numeric_sqrt(::std::move(x)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.numeric.fma()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("fma"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.fma(x, y, z)`
+      ASTERIA_BINDING_BEGIN("std.numeric.fma", self, global, reader) {
+        V_real x;
+        V_real y;
+        V_real z;
 
-  * Performs fused multiply-add operation on `x`, `y` and `z`. This
-    functions calculates `x * y + z` without intermediate rounding
-    operations.
+        reader.start_overload();
+        reader.required(x);     // x
+        reader.required(y);     // y
+        reader.required(z);     // z
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_fma, x, y, z);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the value of `x * y + z` as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.fma"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real x;
-    V_real y;
-    V_real z;
-    if(reader.I().v(x).v(y).v(z).F()) {
-      Reference::S_temporary xref = { std_numeric_fma(::std::move(x), ::std::move(y), ::std::move(z)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.numeric.remainder()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("remainder"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.remainder(x, y)`
+      ASTERIA_BINDING_BEGIN("std.numeric.remainder", self, global, reader) {
+        V_real x;
+        V_real y;
 
-  * Calculates the IEEE floating-point remainder of division of `x`
-    by `y`. The remainder is defined to be `x - q * y` where `q` is
-    the quotient of division of `x` by `y` rounding to nearest.
+        reader.start_overload();
+        reader.required(x);     // x
+        reader.required(y);     // y
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_remainder, x, y);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the remainder as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.remainder"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real x;
-    V_real y;
-    if(reader.I().v(x).v(y).F()) {
-      Reference::S_temporary xref = { std_numeric_remainder(::std::move(x), ::std::move(y)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.numeric.frexp()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("frexp"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.frexp(x)`
+      ASTERIA_BINDING_BEGIN("std.numeric.frexp", self, global, reader) {
+        V_real val;
 
-  * Decomposes `x` into normalized fractional and exponent parts
-    such that `x = frac * pow(2,exp)` where `frac` and `exp` denote
-    the fraction and the exponent respectively and `frac` is always
-    within the range `[0.5,1.0)`. If `x` is non-finite, `exp` is
-    unspecified.
+        reader.start_overload();
+        reader.required(val);     // value
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_frexp, val);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns an array having two elements, whose first element is
-    `frac` that is of type real and whose second element is `exp`
-    that is of type integer.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.frexp"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real x;
-    if(reader.I().v(x).F()) {
-      Reference::S_temporary xref = { std_numeric_frexp(::std::move(x)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.numeric.ldexp()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("ldexp"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.ldexp(frac, exp)`
+      ASTERIA_BINDING_BEGIN("std.numeric.ldexp", self, global, reader) {
+        V_real frac;
+        V_integer exp;
 
-  * Composes `frac` and `exp` to make a real number `x`, as if by
-    multiplying `frac` with `pow(2,exp)`. `exp` shall be of type
-    integer. This function is the inverse of `frexp()`.
+        reader.start_overload();
+        reader.required(frac);    // frac
+        reader.required(exp);     // exp
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_ldexp, frac, exp);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the product as a real.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.ldexp"), ::rocket::cref(args));
-    // Parse arguments.
-    V_real frac;
-    V_integer exp;
-    if(reader.I().v(frac).v(exp).F()) {
-      Reference::S_temporary xref = { std_numeric_ldexp(::std::move(frac), ::std::move(exp)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.numeric.addm()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("addm"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.addm(x, y)`
+      ASTERIA_BINDING_BEGIN("std.numeric.addm", self, global, reader) {
+        V_integer x;
+        V_integer y;
 
-  * Adds `y` to `x` using modular arithmetic. `x` and `y` must be
-    of the integer type. The result is reduced to be congruent to
-    the sum of `x` and `y` modulo `0x1p64` in infinite precision.
-    This function will not cause overflow exceptions to be thrown.
+        reader.start_overload();
+        reader.required(x);    // x
+        reader.required(y);    // y
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_addm, x, y);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the reduced sum of `x` and `y`.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.addm"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer x;
-    V_integer y;
-    if(reader.I().v(x).v(y).F()) {
-      Reference::S_temporary xref = { std_numeric_addm(::std::move(x), ::std::move(y)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.numeric.subm()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("subm"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.subm(x, y)`
+      ASTERIA_BINDING_BEGIN("std.numeric.subm", self, global, reader) {
+        V_integer x;
+        V_integer y;
 
-  * Subtracts `y` from `x` using modular arithmetic. `x` and `y`
-    must be of the integer type. The result is reduced to be
-    congruent to the difference of `x` and `y` modulo `0x1p64` in
-    infinite precision. This function will not cause overflow
-    exceptions to be thrown.
+        reader.start_overload();
+        reader.required(x);    // x
+        reader.required(y);    // y
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_subm, x, y);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the reduced difference of `x` and `y`.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.subm"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer x;
-    V_integer y;
-    if(reader.I().v(x).v(y).F()) {
-      Reference::S_temporary xref = { std_numeric_subm(::std::move(x), ::std::move(y)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.numeric.mulm()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("mulm"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.mulm(x, y)`
+      ASTERIA_BINDING_BEGIN("std.numeric.mulm", self, global, reader) {
+        V_integer x;
+        V_integer y;
 
-  * Multiplies `x` by `y` using modular arithmetic. `x` and `y`
-    must be of the integer type. The result is reduced to be
-    congruent to the product of `x` and `y` modulo `0x1p64` in
-    infinite precision. This function will not cause overflow
-    exceptions to be thrown.
+        reader.start_overload();
+        reader.required(x);    // x
+        reader.required(y);    // y
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_mulm, x, y);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the reduced product of `x` and `y`.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.mulm"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer x;
-    V_integer y;
-    if(reader.I().v(x).v(y).F()) {
-      Reference::S_temporary xref = { std_numeric_mulm(::std::move(x), ::std::move(y)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.numeric.adds()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("adds"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.adds(x, y)`
+      ASTERIA_BINDING_BEGIN("std.numeric.adds", self, global, reader) {
+        V_integer ix;
+        V_integer iy;
+        V_real fx;
+        V_real fy;
 
-  * Adds `y` to `x` using saturating arithmetic. `x` and `y` may be
-    integer or real values. The result is limited within the
-    range of representable values of its type, hence will not cause
-    overflow exceptions to be thrown. When either argument is of
-    type real which supports infinities, this function is
-    equivalent to the built-in addition operator.
+        reader.start_overload();
+        reader.required(ix);    // x
+        reader.required(iy);    // y
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_adds, ix, iy);
 
-  * Returns the saturated sum of `x` and `y`.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.adds"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer ix;
-    V_integer iy;
-    if(reader.I().v(ix).v(iy).F()) {
-      Reference::S_temporary xref = { std_numeric_adds(::std::move(ix), ::std::move(iy)) };
-      return self = ::std::move(xref);
-    }
-    V_real fx;
-    V_real fy;
-    if(reader.I().v(fx).v(fy).F()) {
-      Reference::S_temporary xref = { std_numeric_adds(::std::move(fx), ::std::move(fy)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(fx);    // x
+        reader.required(fy);    // y
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_adds, fx, fy);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `std.numeric.subs()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("subs"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.subs(x, y)`
+      ASTERIA_BINDING_BEGIN("std.numeric.subs", self, global, reader) {
+        V_integer ix;
+        V_integer iy;
+        V_real fx;
+        V_real fy;
 
-  * Subtracts `y` from `x` using saturating arithmetic. `x` and `y`
-    may be integer or real values. The result is limited within the
-    range of representable values of its type, hence will not cause
-    overflow exceptions to be thrown. When either argument is of
-    type real which supports infinities, this function is
-    equivalent to the built-in subtraction operator.
+        reader.start_overload();
+        reader.required(ix);    // x
+        reader.required(iy);    // y
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_subs, ix, iy);
 
-  * Returns the saturated difference of `x` and `y`.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.subs"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer ix;
-    V_integer iy;
-    if(reader.I().v(ix).v(iy).F()) {
-      Reference::S_temporary xref = { std_numeric_subs(::std::move(ix), ::std::move(iy)) };
-      return self = ::std::move(xref);
-    }
-    V_real fx;
-    V_real fy;
-    if(reader.I().v(fx).v(fy).F()) {
-      Reference::S_temporary xref = { std_numeric_subs(::std::move(fx), ::std::move(fy)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(fx);    // x
+        reader.required(fy);    // y
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_subs, fx, fy);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `std.numeric.muls()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("muls"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.muls(x, y)`
+      ASTERIA_BINDING_BEGIN("std.numeric.muls", self, global, reader) {
+        V_integer ix;
+        V_integer iy;
+        V_real fx;
+        V_real fy;
 
-  * Multiplies `x` by `y` using saturating arithmetic. `x` and `y`
-    may be integer or real values. The result is limited within the
-    range of representable values of its type, hence will not cause
-    overflow exceptions to be thrown. When either argument is of
-    type real which supports infinities, this function is
-    equivalent to the built-in multiplication operator.
+        reader.start_overload();
+        reader.required(ix);    // x
+        reader.required(iy);    // y
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_muls, ix, iy);
 
-  * Returns the saturated product of `x` and `y`.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.muls"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer ix;
-    V_integer iy;
-    if(reader.I().v(ix).v(iy).F()) {
-      Reference::S_temporary xref = { std_numeric_muls(::std::move(ix), ::std::move(iy)) };
-      return self = ::std::move(xref);
-    }
-    V_real fx;
-    V_real fy;
-    if(reader.I().v(fx).v(fy).F()) {
-      Reference::S_temporary xref = { std_numeric_muls(::std::move(fx), ::std::move(fy)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(fx);    // x
+        reader.required(fy);    // y
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_muls, fx, fy);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `std.numeric.lzcnt()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("lzcnt"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.lzcnt(x)`
+      ASTERIA_BINDING_BEGIN("std.numeric.lzcnt", self, global, reader) {
+        V_integer x;
 
-  * Counts the number of leading zero bits in `x`, which shall be
-    of type integer.
+        reader.start_overload();
+        reader.required(x);    // x
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_lzcnt, x);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the bit count as an integer. If `x` is zero, `64` is
-    returned.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.lzcnt"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer x;
-    if(reader.I().v(x).F()) {
-      Reference::S_temporary xref = { std_numeric_lzcnt(::std::move(x)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.numeric.tzcnt()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("tzcnt"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.tzcnt(x)`
+      ASTERIA_BINDING_BEGIN("std.numeric.tzcnt", self, global, reader) {
+        V_integer x;
 
-  * Counts the number of trailing zero bits in `x`, which shall be
-    of type integer.
+        reader.start_overload();
+        reader.required(x);    // x
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_tzcnt, x);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the bit count as an integer. If `x` is zero, `64` is
-    returned.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.tzcnt"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer x;
-    if(reader.I().v(x).F()) {
-      Reference::S_temporary xref = { std_numeric_tzcnt(::std::move(x)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.numeric.popcnt()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("popcnt"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.popcnt(x)`
+      ASTERIA_BINDING_BEGIN("std.numeric.popcnt", self, global, reader) {
+        V_integer x;
 
-  * Counts the number of one bits in `x`, which shall be of type
-    integer.
+        reader.start_overload();
+        reader.required(x);    // x
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_popcnt, x);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the bit count as an integer.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.popcnt"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer x;
-    if(reader.I().v(x).F()) {
-      Reference::S_temporary xref = { std_numeric_popcnt(::std::move(x)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.numeric.rotl()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("rotl"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.rotl(m, x, n)`
+      ASTERIA_BINDING_BEGIN("std.numeric.rotl", self, global, reader) {
+        V_integer m;
+        V_integer x;
+        V_integer sh;
 
-  * Rotates the rightmost `m` bits of `x` to the left by `n`; all
-    arguments must be of type integer. This has the effect of
-    shifting `x` by `n` to the left then filling the vacuum in the
-    right with the last `n` bits that have just been shifted past
-    the left boundary. `n` is modulo `m` so rotating by a negative
-    count to the left has the same effect as rotating by its
-    absolute value to the right. All other bits are zeroed. If `m`
-    is zero, zero is returned.
+        reader.start_overload();
+        reader.required(m);    // m
+        reader.required(x);    // x
+        reader.required(sh);   // shift
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_rotl, m, x, sh);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the rotated value as an integer.
-
-  * Throws an exception if `m` is negative or greater than `64`.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.rotl"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer m;
-    V_integer x;
-    V_integer n;
-    if(reader.I().v(m).v(x).v(n).F()) {
-      Reference::S_temporary xref = { std_numeric_rotl(::std::move(m), ::std::move(x), ::std::move(n)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.numeric.rotr()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("rotr"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.rotr(m, x, n)`
+      ASTERIA_BINDING_BEGIN("std.numeric.rotr", self, global, reader) {
+        V_integer m;
+        V_integer x;
+        V_integer sh;
 
-  * Rotates the rightmost `m` bits of `x` to the right by `n`; all
-    arguments must be of type integer. This has the effect of
-    shifting `x` by `n` to the right then filling the vacuum in the
-    left with the last `n` bits that have just been shifted past
-    the right boundary. `n` is modulo `m` so rotating by a negative
-    count to the right has the same effect as rotating by its
-    absolute value to the left. All other bits are zeroed. If `m`
-    is zero, zero is returned.
+        reader.start_overload();
+        reader.required(m);    // m
+        reader.required(x);    // x
+        reader.required(sh);   // shift
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_rotr, m, x, sh);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the rotated value as an integer.
-
-  * Throws an exception if `m` is negative or greater than `64`.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.rotr"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer m;
-    V_integer x;
-    V_integer n;
-    if(reader.I().v(m).v(x).v(n).F()) {
-      Reference::S_temporary xref = { std_numeric_rotr(::std::move(m), ::std::move(x), ::std::move(n)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.numeric.format()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("format"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.format(value, [base], [ebase])`
+      ASTERIA_BINDING_BEGIN("std.numeric.format", self, global, reader) {
+        V_integer ival;
+        V_real fval;
+        Opt_integer base;
+        Opt_integer ebase;
 
-  * Converts an integer or real number to a string in `base`. This
-    function writes as many digits as possible to ensure precision.
-    No plus sign precedes the significant figures. If `base` is
-    absent, `10` is assumed. If `ebase` is specified, an exponent
-    is appended to the significand as follows: If `value` is of
-    type integer, the significand is kept as short as possible;
-    otherwise (when `value` is of type real), it is written in
-    scientific notation. In both cases, the exponent comprises at
-    least two digits with an explicit sign. If `ebase` is absent,
-    no exponent appears. The result is exact as long as `base` is a
-    power of two.
+        reader.start_overload();
+        reader.required(ival);    // value
+        reader.optional(base);    // [base]
+        reader.optional(ebase);   // [ebase]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_format, ival, base, ebase);
 
-  * Returns a string converted from `value`.
+        reader.start_overload();
+        reader.required(fval);    // value
+        reader.optional(base);    // [base]
+        reader.optional(ebase);   // [ebase]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_format, fval, base, ebase);
+      }
+      ASTERIA_BINDING_END);
 
-  * Throws an exception if `base` is neither `2` nor `10` nor `16`,
-    or if `ebase` is neither `2` nor `10`, or if `base` is not `10`
-    but `ebase` is `10`.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.format"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer ivalue;
-    Opt_integer base;
-    Opt_integer ebase;
-    if(reader.I().v(ivalue).o(base).o(ebase).F()) {
-      Reference::S_temporary xref = { std_numeric_format(::std::move(ivalue), ::std::move(base),
-                                                              ::std::move(ebase)) };
-      return self = ::std::move(xref);
-    }
-    V_real fvalue;
-    if(reader.I().v(fvalue).o(base).o(ebase).F()) {
-      Reference::S_temporary xref = { std_numeric_format(::std::move(fvalue), ::std::move(base),
-                                                              ::std::move(ebase)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.numeric.parse_integer()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("parse_integer"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.parse_integer(text)`
+      ASTERIA_BINDING_BEGIN("std.numeric.parse_integer", self, global, reader) {
+        V_string text;
 
-  * Parses `text` for an integer. `text` shall be a string. All
-    leading and trailing blank characters are stripped from `text`.
-    If it becomes empty, this function fails; otherwise, it shall
-    match one of the following extended regular expressions:
+        reader.start_overload();
+        reader.required(text);    // text
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_parse_integer, text);
+      }
+      ASTERIA_BINDING_END);
 
-    * Binary (base-2):
-      `[+-]?0[bB][01]+`
-    * Hexadecimal (base-16):
-      `[+-]?0[xX][0-9a-fA-F]+`
-    * Decimal (base-10):
-      `[+-]?[0-9]+`
-
-    If the string does not match any of the above, this function
-    fails. If the result is outside the range of representable
-    values of type integer, this function fails.
-
-  * Returns the integer value converted from `text`.
-
-  * Throws an exception on failure.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.parse_integer"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    if(reader.I().v(text).F()) {
-      Reference::S_temporary xref = { std_numeric_parse_integer(::std::move(text)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.numeric.parse_real()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("parse_real"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.numeric.parse_real(text, [saturating])`
+      ASTERIA_BINDING_BEGIN("std.numeric.parse_real", self, global, reader) {
+        V_string text;
+        Opt_boolean satur;
 
-  * Parses `text` for a real number. `text` shall be a string. All
-    leading and trailing blank characters are stripped from `text`.
-    If it becomes empty, this function fails; otherwise, it shall
-    match any of the following extended regular expressions:
-
-    * Infinities:
-      `[+-]?infinity`
-    * NaNs:
-      `[+-]?nan`
-    * Binary (base-2):
-      `[+-]?0[bB][01]+(\.[01]+)?([epEP][-+]?[0-9]+)?`
-    * Hexadecimal (base-16):
-      `[+-]?0x[0-9a-fA-F]+(\.[0-9a-fA-F]+)?([epEP][-+]?[0-9]+)?`
-    * Decimal (base-10):
-      `[+-]?[0-9]+(\.[0-9]+)?([eE][-+]?[0-9]+)?`
-
-    If the string does not match any of the above, this function
-    fails. If the absolute value of the result is too small to fit
-    in a real, a signed zero is returned. When the absolute value
-    is too large, if `saturating` is set to `true`, a signed
-    infinity is returned; otherwise this function fails.
-
-  * Returns the real value converted from `text`.
-
-  * Throws an exception on failure.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.numeric.parse_real"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string text;
-    Opt_boolean saturating;
-    if(reader.I().v(text).o(saturating).F()) {
-      Reference::S_temporary xref = { std_numeric_parse_real(::std::move(text), saturating) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(text);    // text
+        reader.optional(satur);   // [saturating]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_numeric_parse_real, text, satur);
+      }
+      ASTERIA_BINDING_END);
   }
 
 }  // namespace asteria

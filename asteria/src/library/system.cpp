@@ -548,414 +548,161 @@ std_system_conf_load_file(V_string path)
 void
 create_bindings_system(V_object& result, API_Version /*version*/)
   {
-    //===================================================================
-    // `std.system.gc_count_variables()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("gc_count_variables"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.system.gc_count_variables(generation)`
+      ASTERIA_BINDING_BEGIN("std.system.gc_count_variables", self, global, reader) {
+        V_integer gen;
 
-  * Gets the number of variables that are being tracked by the
-    collector for `generation`. Valid values for `generation` are
-    `0`, `1` and `2`.
+        reader.start_overload();
+        reader.required(gen);      // generation
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_system_gc_count_variables, global, gen);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the number of variables being tracked. This value is
-    only informative. If `generation` is not valid, `null` is
-    returned.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.system.gc_count_variables"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer generation;
-    if(reader.I().v(generation).F()) {
-      Reference::S_temporary xref = { std_system_gc_count_variables(global, ::std::move(generation)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.system.gc_get_threshold()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("gc_get_threshold"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.system.gc_get_threshold(generation)`
+      ASTERIA_BINDING_BEGIN("std.system.gc_get_threshold", self, global, reader) {
+        V_integer gen;
 
-  * Gets the threshold of the collector for `generation`. Valid
-    values for `generation` are `0`, `1` and `2`.
+        reader.start_overload();
+        reader.required(gen);      // generation
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_system_gc_get_threshold, global, gen);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the threshold. If `generation` is not valid, `null` is
-    returned.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.system.gc_get_threshold"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer generation;
-    if(reader.I().v(generation).F()) {
-      Reference::S_temporary xref = { std_system_gc_get_threshold(global, ::std::move(generation)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.system.gc_set_threshold()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("gc_set_threshold"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.system.gc_set_threshold(generation, threshold)`
+      ASTERIA_BINDING_BEGIN("std.system.gc_set_threshold", self, global, reader) {
+        V_integer gen;
+        V_integer thrs;
 
-  * Sets the threshold of the collector for `generation` to
-    `threshold`. Valid values for `generation` are `0`, `1` and
-    `2`. Valid values for `threshold` range from `0` to an
-    unspecified positive integer; overlarge values are capped
-    silently without failure. A larger `threshold` makes garbage
-    collection run less often but slower. Setting `threshold` to
-    `0` ensures all unreachable variables be collected immediately.
+        reader.start_overload();
+        reader.required(gen);      // generation
+        reader.required(thrs);     // threshold
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_system_gc_set_threshold, global, gen, thrs);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the threshold before the call. If `generation` is not
-    valid, `null` is returned.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.system.gc_set_threshold"), ::rocket::cref(args));
-    // Parse arguments.
-    V_integer generation;
-    V_integer threshold;
-    if(reader.I().v(generation).v(threshold).F()) {
-      Reference::S_temporary xref = { std_system_gc_set_threshold(global, ::std::move(generation),
-                                                                       ::std::move(threshold)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.system.gc_collect()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("gc_collect"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.system.gc_collect([generation_limit])`
+      ASTERIA_BINDING_BEGIN("std.system.collect", self, global, reader) {
+        Opt_integer glim;
 
-  * Performs garbage collection on all generations including and
-    up to `generation_limit`. If it is absent, all generations are
-    collected.
+        reader.start_overload();
+        reader.optional(glim);     // [generation_limit]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_system_gc_collect, global, glim);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the number of variables that have been collected in
-    total.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.system.gc_collect"), ::rocket::cref(args));
-    // Parse arguments.
-    Opt_integer generation_limit;
-    if(reader.I().o(generation_limit).F()) {
-      Reference::S_temporary xref = { std_system_gc_collect(global, ::std::move(generation_limit)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.system.env_get_variable()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("env_get_variable"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.system.env_get_variable(name)`
+      ASTERIA_BINDING_BEGIN("std.system.env_get_variable", self, global, reader) {
+        V_string name;
 
-  * Retrieves an environment variable with `name`.
+        reader.start_overload();
+        reader.required(name);     // name
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_system_env_get_variable, name);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the environment variable's value if a match is found,
-    or `null` if no such variable exists.
-
-  * Throws an exception if `name` is not valid.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.system.env_get_variable"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string name;
-    if(reader.I().v(name).F()) {
-      Reference::S_temporary xref = { std_system_env_get_variable(::std::move(name)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.system.env_get_variables()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("env_get_variables"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.system.env_get_variables()`
+      ASTERIA_BINDING_BEGIN("std.system.env_get_variables", self, global, reader) {
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_system_env_get_variables);
+      }
+      ASTERIA_BINDING_END);
 
-  * Retrieves all environment variables.
-
-  * Returns an object of strings which consists of copies of all
-    environment variables.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.system.env_get_variables"), ::rocket::cref(args));
-    // Parse arguments.
-    if(reader.I().F()) {
-      Reference::S_temporary xref = { std_system_env_get_variables() };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.system.uuid()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("uuid"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-  * Generates a UUID according to the following specification:
+      ASTERIA_BINDING_BEGIN("std.system.uuid", self, global, reader) {
+        Opt_boolean lowc;
 
-    Canonical form: `xxxxxxxx-xxxx-Myyy-Nzzz-wwwwwwwwwwww`
+        reader.start_overload();
+        reader.optional(lowc);     // [lowercase]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_system_uuid, global, lowc);
+      }
+      ASTERIA_BINDING_END);
 
-     * x: number of 1/30,518 seconds since UNIX Epoch
-     * M: always `4` (UUID version)
-     * y: process ID
-     * N: any of `0`-`7` (UUID variant)
-     * z: context ID
-     * w: random bytes
-
-     Unlike version-1 UUIDs in RFC 4122, the timestamp is written
-     in pure big-endian order. This ensures the case-insensitive
-     lexicographical order of such UUIDs will match their order of
-     creation. If `lowercase` is set to `true`, hexadecimal digits
-     above `9` are encoded as `abcdef`; otherwise they are encoded
-     as `ABCDEF`.
-
-  * Returns a UUID as a string of 36 characters without braces.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.system.uuid"), ::rocket::cref(args));
-    // Parse arguments.
-    Opt_boolean lowercase;
-    if(reader.I().o(lowercase).F()) {
-      Reference::S_temporary xref = { std_system_uuid(global, lowercase) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.system.proc_get_pid()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("proc_get_pid"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-  * Gets the ID of the current process.
+      ASTERIA_BINDING_BEGIN("std.system.proc_get_pid", self, global, reader) {
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_system_proc_get_pid);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the process ID as an integer.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.system.proc_get_pid"), ::rocket::cref(args));
-    // Parse arguments.
-    if(reader.I().F()) {
-      Reference::S_temporary xref = { std_system_proc_get_pid() };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.system.proc_get_ppid()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("proc_get_ppid"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-  * Gets the ID of the parent process.
+      ASTERIA_BINDING_BEGIN("std.system.proc_get_ppid", self, global, reader) {
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_system_proc_get_ppid);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the parent process ID as an integer.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.system.proc_get_ppid"), ::rocket::cref(args));
-    // Parse arguments.
-    if(reader.I().F()) {
-      Reference::S_temporary xref = { std_system_proc_get_ppid() };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.system.proc_get_uid()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("proc_get_uid"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-  * Gets the real user ID of the current process.
+      ASTERIA_BINDING_BEGIN("std.system.proc_get_uid", self, global, reader) {
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_system_proc_get_uid);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the real user ID as an integer.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.system.proc_get_uid"), ::rocket::cref(args));
-    // Parse arguments.
-    if(reader.I().F()) {
-      Reference::S_temporary xref = { std_system_proc_get_uid() };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.system.proc_get_euid()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("proc_get_euid"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-  * Gets the effective user ID of the current process.
+      ASTERIA_BINDING_BEGIN("std.system.proc_get_euid", self, global, reader) {
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_system_proc_get_euid);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the effective user ID as an integer.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.system.proc_get_euid"), ::rocket::cref(args));
-    // Parse arguments.
-    if(reader.I().F()) {
-      Reference::S_temporary xref = { std_system_proc_get_euid() };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.system.proc_invoke()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("proc_invoke"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.system.proc_invoke(cmd, [argv], [envp])`
+      ASTERIA_BINDING_BEGIN("std.system.proc_invoke", self, global, reader) {
+        V_string cmd;
+        Opt_array argv;
+        Opt_array envp;
 
-  * Launches the program denoted by `cmd`, awaits its termination,
-    and returns its exit status. If `argv` is provided, it shall be
-    an array of strings, which specify additional arguments to pass
-    to the program along with `cmd`. If `envp` is specified, it
-    shall also be an array of strings, which specify environment
-    variables to pass to the program.
+        reader.start_overload();
+        reader.required(cmd);      // cmd
+        reader.optional(argv);     // [argv]
+        reader.optional(envp);     // [envp]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_system_proc_invoke, cmd, argv, envp);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the exit status as an integer. If the process exits due
-    to a signal, the exit status is `128+N` where `N` is the signal
-    number.
-
-  * Throws an exception if the program could not be launched or its
-    exit status could not be retrieved.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.system.proc_invoke"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string cmd;
-    Opt_array argv;
-    Opt_array envp;
-    if(reader.I().v(cmd).o(argv).o(envp).F()) {
-      Reference::S_temporary xref = { std_system_proc_invoke(::std::move(cmd), ::std::move(argv),
-                                                                  ::std::move(envp)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.system.proc_daemonize()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("proc_daemonize"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.system.proc_daemonize()`
+      ASTERIA_BINDING_BEGIN("std.system.proc_daemonize", self, global, reader) {
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_system_proc_daemonize);
+      }
+      ASTERIA_BINDING_END);
 
-  * Detaches the current process from its controlling terminal and
-    continues in the background. The calling process terminates on
-    success so this function never returns.
-
-  * Throws an exception on failure.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.system.proc_daemonize"), ::rocket::cref(args));
-    // Parse arguments.
-    if(reader.I().F()) {
-      std_system_proc_daemonize();
-      return self = Reference::S_void();
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.system.conf_load_file()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("conf_load_file"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.system.conf_load_file(path)`
+      ASTERIA_BINDING_BEGIN("std.system.conf_load_file", self, global, reader) {
+        V_string path;
 
-  * Loads the configuration file denoted by `path`. Its syntax is
-    similar to JSON5, except that commas, semicolons and top-level
-    braces are omitted for simplicity, and single-quoted strings do
-    not support escapes. A sample configuration file can be found
-    at 'doc/sample.conf'.
-
-  * Returns an object of all values from the file, if it was parsed
-    successfully.
-
-  * Throws an exception if the file could not be opened, or there
-    was an error in it.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.system.conf_load_file"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string path;
-    if(reader.I().v(path).F()) {
-      Reference::S_temporary xref = { std_system_conf_load_file(::std::move(path)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(path);
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_system_conf_load_file, path);
+      }
+      ASTERIA_BINDING_END);
   }
 
 }  // namespace asteria

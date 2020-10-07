@@ -275,7 +275,7 @@ std_filesystem_remove_recursive(V_string path)
   }
 
 V_object
-std_filesystem_directory_list(V_string path)
+std_filesystem_dir_list(V_string path)
   {
     // Try opening t he directory.
     ::rocket::unique_posix_dir dp(::opendir(path.safe_c_str()), ::closedir);
@@ -336,7 +336,7 @@ std_filesystem_directory_list(V_string path)
   }
 
 V_integer
-std_filesystem_directory_create(V_string path)
+std_filesystem_dir_create(V_string path)
   {
     // Try creating an empty directory.
     if(::mkdir(path.safe_c_str(), 0777) == 0)
@@ -366,7 +366,7 @@ std_filesystem_directory_create(V_string path)
   }
 
 V_integer
-std_filesystem_directory_remove(V_string path)
+std_filesystem_dir_remove(V_string path)
   {
     // Try removing an empty directory.
     if(::rmdir(path.safe_c_str()) == 0)
@@ -387,6 +387,7 @@ std_filesystem_file_read(V_string path, Opt_integer offset, Opt_integer limit)
   {
     if(offset && (*offset < 0))
       ASTERIA_THROW("Negative file offset (offset `$1`)", *offset);
+
     int64_t roffset = offset.value_or(0);
     int64_t rlimit = ::rocket::clamp(limit.value_or(INT32_MAX), 0, 0x10'00000);
 
@@ -427,6 +428,7 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
   {
     if(offset && (*offset < 0))
       ASTERIA_THROW("Negative file offset (offset `$1`)", *offset);
+
     int64_t roffset = offset.value_or(0);
     int64_t rlimit = ::rocket::clamp(limit.value_or(INT32_MAX), 0, 0x10'00000);
 
@@ -488,10 +490,11 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
   }
 
 void
-std_filesystem_file_write(V_string path, V_string data, Opt_integer offset)
+std_filesystem_file_write(V_string path, Opt_integer offset, V_string data)
   {
     if(offset && (*offset < 0))
       ASTERIA_THROW("Negative file offset (offset `$1`)", *offset);
+
     int64_t roffset = offset.value_or(0);
 
     // Calculate the `flags` argument.
@@ -612,476 +615,199 @@ std_filesystem_file_remove(V_string path)
 void
 create_bindings_filesystem(V_object& result, API_Version /*version*/)
   {
-    //===================================================================
-    // `std.filesystem.get_working_directory()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("get_working_directory"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.filesystem.get_working_directory()`
+      ASTERIA_BINDING_BEGIN("std.filesystem.get_working_directory", self, global, reader) {
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_filesystem_get_working_directory);
+      }
+      ASTERIA_BINDING_END);
 
-  * Gets the absolute path of the current working directory.
-
-  * Returns a string containing the path to the current working
-    directory.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.filesystem.get_working_directory"), ::rocket::cref(args));
-    // Parse arguments.
-    if(reader.I().F()) {
-      Reference::S_temporary xref = { std_filesystem_get_working_directory() };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.filesystem.get_real_path()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("get_real_path"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.filesystem.get_real_path(path)`
+      ASTERIA_BINDING_BEGIN("std.filesystem.get_real_path", self, global, reader) {
+        V_string path;
 
-  * Converts `path` to an absolute one. The result is a canonical
-    path that contains no symbolic links. The path must be valid
-    and accessible.
+        reader.start_overload();
+        reader.required(path);      // path
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_filesystem_get_real_path, path);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns a string denoting the absolute path.
-
-  * Throws an exception if `path` is invalid or inaccessible.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.filesystem.get_real_path"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string path;
-    if(reader.I().v(path).F()) {
-      Reference::S_temporary xref = { std_filesystem_get_real_path(::std::move(path)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.filesystem.get_information()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("get_information"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.filesystem.get_information(path)`
+      ASTERIA_BINDING_BEGIN("std.filesystem.get_information", self, global, reader) {
+        V_string path;
 
-  * Retrieves information of the file or directory designated by
-    `path`.
+        reader.start_overload();
+        reader.required(path);      // path
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_filesystem_get_information, path);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns an object consisting of the following members (names
-    that start with `b_` are boolean values; names that start with
-    `i_` are IDs as integers; names that start with `n_` are
-    plain integers; names that start with `t_` are timestamps in
-    UTC as integers):
-
-    * `i_dev`   unique device id on this machine.
-    * `i_file`  unique file id on this device.
-    * `n_ref`   number of hard links to this file.
-    * `b_dir`   whether this is a directory.
-    * `b_sym`   whether this is a symbolic link.
-    * `n_size`  number of bytes this file contains.
-    * `n_ocup`  number of bytes this file occupies.
-    * `t_accs`  timestamp of last access.
-    * `t_mod`   timestamp of last modification.
-
-    On failure, `null` is returned.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.filesystem.get_information"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string path;
-    if(reader.I().v(path).F()) {
-      Reference::S_temporary xref = { std_filesystem_get_information(::std::move(path)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.filesystem.remove_recursive()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("remove_recursive"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.filesystem.move_from(path_new, path_old)`
+      ASTERIA_BINDING_BEGIN("std.filesystem.remove_recursive", self, global, reader) {
+        V_string path;
 
-  * Moves (renames) the file or directory at `path_old` to
-    `path_new`.
+        reader.start_overload();
+        reader.required(path);      // path
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_filesystem_remove_recursive, path);
+      }
+      ASTERIA_BINDING_END);
 
-  * Throws an exception on failure.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.filesystem.remove_recursive"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string path;
-    if(reader.I().v(path).F()) {
-      Reference::S_temporary xref = { std_filesystem_remove_recursive(::std::move(path)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.filesystem.move_from(path_new, path_old)`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("move_from"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.filesystem.remove_recursive(path)`
+      ASTERIA_BINDING_BEGIN("std.filesystem.move_from", self, global, reader) {
+        V_string to;
+        V_string from;
 
-  * Removes the file or directory at `path`. If `path` designates a
-    directory, all of its contents are removed recursively.
+        reader.start_overload();
+        reader.required(to);       // path_new
+        reader.required(from);     // path_old
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_filesystem_move_from, to, from);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the number of files and directories that have been
-    successfully removed in total. If `path` does not reference an
-    existent file or directory, `0` is returned.
+    result.insert_or_assign(::rocket::sref("dir_list"),
+      ASTERIA_BINDING_BEGIN("std.filesystem.dir_list", self, global, reader) {
+        V_string path;
 
-  * Throws an exception if the file or directory at `path` cannot
-    be removed.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.filesystem.move_from"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string path_new;
-    V_string path_old;
-    if(reader.I().v(path_new).v(path_old).F()) {
-      std_filesystem_move_from(path_new, path_old);
-      return self = Reference::S_void();
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(path);      // path
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_filesystem_dir_list, path);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `std.filesystem.directory_list()`
-    //===================================================================
-    result.insert_or_assign(::rocket::sref("directory_list"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.filesystem.directory_list(path)`
+    result.insert_or_assign(::rocket::sref("dir_create"),
+      ASTERIA_BINDING_BEGIN("std.filesystem.dir_create", self, global, reader) {
+        V_string path;
 
-  * Lists the contents of the directory at `path`.
+        reader.start_overload();
+        reader.required(path);      // path
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_filesystem_dir_create, path);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns an object containing all entries of the directory at
-    `path`, excluding the special subdirectories '.' and '..'. For
-    each element, its key specifies the filename and the value is
-    an object consisting of the following members (names that
-    start with `b_` are boolean values; names that start with `i_`
-    are IDs as integers):
+    result.insert_or_assign(::rocket::sref("dir_remove"),
+      ASTERIA_BINDING_BEGIN("std.filesystem.dir_remove", self, global, reader) {
+        V_string path;
 
-    * `b_dir`   whether this is a directory.
-    * `b_sym`   whether this is a symbolic link.
+        reader.start_overload();
+        reader.required(path);      // path
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_filesystem_dir_remove, path);
+      }
+      ASTERIA_BINDING_END);
 
-    If `path` references a non-existent directory, `null` is
-    returned.
-
-  * Throws an exception if `path` does not designate a directory,
-    or some other errors occur.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.filesystem.directory_list"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string path;
-    if(reader.I().v(path).F()) {
-      Reference::S_temporary xref = { std_filesystem_directory_list(::std::move(path)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.filesystem.directory_create()`
-    //===================================================================
-    result.insert_or_assign(::rocket::sref("directory_create"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.filesystem.directory_create(path)`
-
-  * Creates a directory at `path`. Its parent directory must exist
-    and must be accessible. This function does not fail if either a
-    directory or a symbolic link to a directory already exists on
-    `path`.
-
-  * Returns `1` if a new directory has been created, or `0` if a
-    directory already exists.
-
-  * Throws an exception if `path` designates a non-directory, or
-    some other errors occur.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.filesystem.directory_create"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string path;
-    if(reader.I().v(path).F()) {
-      Reference::S_temporary xref = { std_filesystem_directory_create(::std::move(path)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.filesystem.directory_remove()`
-    //===================================================================
-    result.insert_or_assign(::rocket::sref("directory_remove"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.filesystem.directory_remove(path)`
-
-  * Removes the directory at `path`. The directory must be empty.
-    This function fails if `path` does not designate a directory.
-
-  * Returns `1` if a directory has been removed successfully, or
-    `0` if no such directory exists.
-
-  * Throws an exception if `path` designates a non-directory, or
-    some other errors occur.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.filesystem.directory_remove"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string path;
-    if(reader.I().v(path).F()) {
-      Reference::S_temporary xref = { std_filesystem_directory_remove(::std::move(path)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.filesystem.file_read()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("file_read"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.filesystem.file_read(path, [offset], [limit])`
+      ASTERIA_BINDING_BEGIN("std.filesystem.file_read", self, global, reader) {
+        V_string path;
+        Opt_integer off;
+        Opt_integer lim;
 
-  * Reads the file at `path` in binary mode. The read operation
-    starts from the byte offset that is denoted by `offset` if it
-    is specified, or from the beginning of the file otherwise. If
-    `limit` is specified, no more than this number of bytes will be
-    read.
+        reader.start_overload();
+        reader.required(path);     // path
+        reader.optional(off);      // [offset]
+        reader.optional(lim);      // [limit]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_filesystem_file_read, path, off, lim);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the bytes that have been read as a string.
-
-  * Throws an exception if `offset` is negative, or a read error
-    occurs.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.filesystem.file_read"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string path;
-    Opt_integer offset;
-    Opt_integer limit;
-    if(reader.I().v(path).o(offset).o(limit).F()) {
-      Reference::S_temporary xref = { std_filesystem_file_read(::std::move(path), ::std::move(offset),
-                                                                    ::std::move(limit)) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.filesystem.file_stream()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("file_stream"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.filesystem.file_stream(path, callback, [offset], [limit])`
+      ASTERIA_BINDING_BEGIN("std.filesystem.file_stream", self, global, reader) {
+        V_string path;
+        V_function func;
+        Opt_integer off;
+        Opt_integer lim;
 
-  * Reads the file at `path` in binary mode and invokes `callback`
-    with the data read repeatedly. `callback` shall be a binary
-    function whose first argument is the absolute offset of the
-    data block that has been read, and whose second argument is the
-    bytes read and stored in a string. Data may be transferred in
-    multiple blocks of variable sizes; the caller shall make no
-    assumption about the number of times that `callback` will be
-    called or the size of each individual block. The read operation
-    starts from the byte offset that is denoted by `offset` if it
-    is specified, or from the beginning of the file otherwise. If
-    `limit` is specified, no more than this number of bytes will be
-    read.
+        reader.start_overload();
+        reader.required(path);     // path
+        reader.required(func);     // callback
+        reader.optional(off);      // [offset]
+        reader.optional(lim);      // [limit]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_filesystem_file_stream, global, path, func, off, lim);
+      }
+      ASTERIA_BINDING_END);
 
-  * Returns the number of bytes that have been read and processed
-    as an integer.
-
-  * Throws an exception if `offset` is negative, or a read error
-    occurs.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.filesystem.file_stream"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string path;
-    V_function callback;
-    Opt_integer offset;
-    Opt_integer limit;
-    if(reader.I().v(path).v(callback).o(offset).o(limit).F()) {
-      Reference::S_temporary xref = { std_filesystem_file_stream(global, path, callback, offset, limit) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.filesystem.file_write()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("file_write"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.filesystem.file_write(path, data, [offset])`
+      ASTERIA_BINDING_BEGIN("std.filesystem.file_write", self, global, reader) {
+        V_string path;
+        Opt_integer off;
+        V_string data;
 
-  * Writes the file at `path` in binary mode. The write operation
-    starts from the byte offset that is denoted by `offset` if it
-    is specified, or from the beginning of the file otherwise. The
-    file is truncated to this length before the write operation;
-    any existent contents after the write point are discarded. This
-    function fails if the data can only be written partially.
+        reader.start_overload();
+        reader.required(path);     // path
+        reader.save_state(0);
+        reader.required(data);     // data
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_filesystem_file_write, path, nullopt, data);
 
-  * Throws an exception if `offset` is negative, or a write error
-    occurs.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.filesystem.file_write"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string path;
-    V_string data;
-    Opt_integer offset;
-    if(reader.I().v(path).v(data).o(offset).F()) {
-      std_filesystem_file_write(path, data, offset);
-      return self = Reference::S_void();
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.load_state(0);      // path
+        reader.optional(off);      // [offset]
+        reader.required(data);     // data
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_filesystem_file_write, path, off, data);
+      }
+      ASTERIA_BINDING_END);
 
-    //===================================================================
-    // `std.filesystem.file_append()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("file_append"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.filesystem.file_append(path, data, [exclusive])`
+      ASTERIA_BINDING_BEGIN("std.filesystem.file_append", self, global, reader) {
+        V_string path;
+        V_string data;
+        Opt_boolean excl;
 
-  * Writes the file at `path` in binary mode. The write operation
-    starts from the end of the file; existent contents of the file
-    are left intact. If `exclusive` is `true` and a file exists on
-    `path`, this function fails. This function also fails if the
-    data can only be written partially.
+        reader.start_overload();
+        reader.required(path);     // path
+        reader.required(data);     // data
+        reader.optional(excl);      // [exclusive]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_filesystem_file_append, path, data, excl);
+      }
+      ASTERIA_BINDING_END);
 
-  * Throws an exception if `offset` is negative, or a write error
-    occurs.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.filesystem.file_append"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string path;
-    V_string data;
-    Opt_boolean exclusive;
-    if(reader.I().v(path).v(data).o(exclusive).F()) {
-      std_filesystem_file_append(path, data, exclusive);
-      return self = Reference::S_void();
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.filesystem.file_copy_from(path_new, path_old)`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("file_copy_from"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.filesystem.file_copy_from(path_new, path_old)`
+      ASTERIA_BINDING_BEGIN("std.filesystem.file_copy_from", self, global, reader) {
+        V_string to;
+        V_string from;
 
-  * Copies the file `path_old` to `path_new`. If `path_old` is a
-    symbolic link, it is the target that will be copied, rather
-    than the symbolic link itself. This function fails if
-    `path_old` designates a directory.
+        reader.start_overload();
+        reader.required(to);       // path_new
+        reader.required(from);     // path_old
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_filesystem_file_copy_from, to, from);
+      }
+      ASTERIA_BINDING_END);
 
-  * Throws an exception on failure.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.filesystem.file_copy_from"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string path_new;
-    V_string path_old;
-    if(reader.I().v(path_new).v(path_old).F()) {
-      std_filesystem_file_copy_from(path_new, path_old);
-      return self = Reference::S_void();
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
-
-    //===================================================================
-    // `std.filesystem.file_remove()`
-    //===================================================================
     result.insert_or_assign(::rocket::sref("file_remove"),
-      V_function(
-"""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-`std.filesystem.file_remove(path)`
+      ASTERIA_BINDING_BEGIN("std.filesystem.file_remove", self, global, reader) {
+        V_string path;
 
-  * Removes the file at `path`. This function fails if `path`
-    designates a directory.
-
-  * Returns `1` if a file has been removed successfully, or `0` if
-    no such file exists.
-
-  * Throws an exception if `path` designates a directory, or some
-    other errors occur.
-)'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
-  {
-    Argument_Reader reader(::rocket::sref("std.filesystem.file_remove"), ::rocket::cref(args));
-    // Parse arguments.
-    V_string path;
-    if(reader.I().v(path).F()) {
-      Reference::S_temporary xref = { std_filesystem_file_remove(path) };
-      return self = ::std::move(xref);
-    }
-    // Fail.
-    reader.throw_no_matching_function_call();
-  }
-      ));
+        reader.start_overload();
+        reader.required(path);      // path
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_filesystem_file_remove, path);
+      }
+      ASTERIA_BINDING_END);
   }
 
 }  // namespace asteria
