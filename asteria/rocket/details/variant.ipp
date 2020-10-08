@@ -109,17 +109,17 @@ struct pack_ubyte<u32seq<A, B, C, D, N...>>
 
 // Store packed integers into an array.
 template<typename S>
-class u32_t_storage;
+class uint32_storage;
 
 template<u32_t... M>
-class u32_t_storage<u32seq<M...>>
+class uint32_storage<u32seq<M...>>
   {
   private:
     u32_t m_words[sizeof...(M)] = { M... };
 
   public:
     constexpr
-    u32_t_storage()
+    uint32_storage()
     noexcept
       { }
 
@@ -133,7 +133,7 @@ class u32_t_storage<u32seq<M...>>
 
 template<bool... M>
 struct constexpr_bitset
-  : u32_t_storage<typename pack_ubyte<typename pack_bool<u32seq<M...>>::type>::type>
+  : uint32_storage<typename pack_ubyte<typename pack_bool<u32seq<M...>>::type>::type>
   { };
 
 template<size_t indexT, typename targetT, typename... alternsT>
