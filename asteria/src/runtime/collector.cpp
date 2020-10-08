@@ -104,12 +104,11 @@ bool
 Collector::
 track_variable(const rcptr<Variable>& var)
   {
-    if(!this->m_tracked.insert(var))
-      return false;
-
-    if(ROCKET_UNEXPECT(++(this->m_counter) > this->m_threshold))
+    this->m_counter++;
+    if(ROCKET_UNEXPECT(this->m_counter > this->m_threshold))
       this->auto_collect();
-    return true;
+
+    return this->m_tracked.insert(var);
   }
 
 bool
