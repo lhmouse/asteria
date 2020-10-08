@@ -3,6 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "infix_element.hpp"
+#include "statement.hpp"
 #include "expression_unit.hpp"
 #include "enums.hpp"
 #include "../runtime/enums.hpp"

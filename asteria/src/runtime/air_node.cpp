@@ -17,6 +17,8 @@
 #include "air_optimizer.hpp"
 #include "../compiler/token_stream.hpp"
 #include "../compiler/statement_sequence.hpp"
+#include "../compiler/statement.hpp"
+#include "../compiler/expression_unit.hpp"
 #include "../llds/avmc_queue.hpp"
 #include "../util.hpp"
 
