@@ -152,8 +152,7 @@ collect_single_opt()
 
         // If `root` is the last reference to this variable, it can be marked for collection
         // immediately.
-        auto nref = root->use_count();
-        if(nref <= 1) {
+        if(root->use_count() <= 2) {
           root->uninitialize();
           return false;
         }
