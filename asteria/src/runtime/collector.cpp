@@ -106,9 +106,8 @@ track_variable(const rcptr<Variable>& var)
   {
     if(!this->m_tracked.insert(var))
       return false;
-    this->m_counter++;
-    // The variable has been inserted successfully.
-    if(ROCKET_UNEXPECT(this->m_counter > this->m_threshold))
+
+    if(ROCKET_UNEXPECT(++(this->m_counter) > this->m_threshold))
       this->auto_collect();
     return true;
   }
@@ -118,11 +117,7 @@ Collector::
 untrack_variable(const rcptr<Variable>& var)
 noexcept
   {
-    if(!this->m_tracked.erase(var))
-      return false;
-    this->m_counter--;
-    // The variable has been erased successfully.
-    return true;
+    return this->m_tracked.erase(var);
   }
 
 Collector*
@@ -144,18 +139,14 @@ collect_single_opt()
     auto tied = this->m_tied_opt;
     this->m_staging.clear();
 
-    ///////////////////////////////////////////////////////////////////////////
-    // Phase 1
-    //   Add variables that are either tracked or reachable from tracked ones
-    //   into the staging area.
-    ///////////////////////////////////////////////////////////////////////////
-
+    // Add variables that are either tracked or reachable indirectly into the staging area.
     do_traverse(this->m_tracked,
       [&](const rcptr<Variable>& root) {
         // Add a variable that is reachable directly.
         // The reference from `m_tracked` should be excluded, so we initialize the gcref
         // counter to 1.
         root->reset_gcref(1);
+
         // If this variable has been inserted indirectly, finish.
         if(!this->m_staging.insert(root))
           return false;
@@ -179,17 +170,12 @@ collect_single_opt()
             // N.B. If this variable is encountered later from `m_tracked`, the gcref counter
             // will be overwritten with 1.
             child->reset_gcref(0);
-            // Descend into grandchildren.
             return true;
           });
         return false;
       });
 
-    ///////////////////////////////////////////////////////////////////////////
-    // Phase 2
-    //   Drop references directly or indirectly from `m_staging`.
-    ///////////////////////////////////////////////////////////////////////////
-
+    // Drop references directly or indirectly from `m_staging`.
     do_traverse(this->m_staging,
       [&](const rcptr<Variable>& root) {
         // Drop a direct reference.
@@ -207,17 +193,12 @@ collect_single_opt()
             // Drop an indirect reference.
             child->increment_gcref(split);
             ROCKET_ASSERT(child->get_gcref() <= child->use_count());
-            // This is not going to be recursive.
             return false;
           });
         return false;
       });
 
-    ///////////////////////////////////////////////////////////////////////////
-    // Phase 3
-    //   Mark variables reachable indirectly from those reachable directly.
-    ///////////////////////////////////////////////////////////////////////////
-
+    // Mark variables reachable indirectly from those reachable directly.
     do_traverse(this->m_staging,
       [&](const rcptr<Variable>& root) {
         // Skip variables that are possibly unreachable.
@@ -241,21 +222,18 @@ collect_single_opt()
         return false;
       });
 
-    ///////////////////////////////////////////////////////////////////////////
-    // Phase 4
-    //   Wipe out variables whose `gcref` counters have excceeded their
-    //   reference counts.
-    ///////////////////////////////////////////////////////////////////////////
-
+    // Wipe out variables whose `gcref` counters have excceeded their reference counts.
     do_traverse(this->m_staging,
       [&](const rcptr<Variable>& root) {
         // All reachable variables will have negative gcref counters.
         if(root->get_gcref() >= 0) {
-          // Overwrite the value of this variable with a scalar value to break reference cycles.
+          // Break reference cycles.
           root->uninitialize();
+
           // Cache this variable if a pool is specified.
           if(output)
             output->insert(root);
+
           this->m_tracked.erase(root);
           return false;
         }
@@ -263,9 +241,11 @@ collect_single_opt()
         if(tied) {
           // Transfer this variable to the next generational collector, if one has been tied.
           tied->m_tracked.insert(root);
+
           // Check whether the next generation needs to be checked as well.
           if(tied->m_counter++ >= tied->m_threshold)
             next = tied;
+
           this->m_tracked.erase(root);
           return false;
         }
@@ -273,10 +253,6 @@ collect_single_opt()
         // Leave this variable intact.
         return false;
       });
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Finish
-    ///////////////////////////////////////////////////////////////////////////
 
     this->m_staging.clear();
     this->m_counter = 0;
