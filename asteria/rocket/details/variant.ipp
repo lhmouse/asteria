@@ -119,6 +119,12 @@ class u32_t_storage<u32seq<M...>>
 
   public:
     constexpr
+    u32_t_storage()
+    noexcept
+      { }
+
+  public:
+    constexpr
     bool
     operator[](size_t k)
     const noexcept
