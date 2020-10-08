@@ -9,12 +9,12 @@ namespace details_unique_ptr {
 
 template<typename elementT, typename deleterT, typename = void>
 struct pointer_of
-  : enable_if<1, elementT*>
+  : identity<elementT*>
   { };
 
 template<typename elementT, typename deleterT>
-struct pointer_of<elementT, deleterT, typename enable_if<1, typename deleterT::pointer>::type>
-  : enable_if<1, typename deleterT::pointer>
+struct pointer_of<elementT, deleterT, typename identity<typename deleterT::pointer>::type>
+  : identity<typename deleterT::pointer>
   { };
 
 template<typename deleterT>

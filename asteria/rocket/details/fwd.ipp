@@ -117,7 +117,7 @@ template<typename integerT, integerT valueT, typename firstT, typename... remain
 struct integer_selector<integerT, valueT, firstT, remainingT...>
   : conditional<firstT(valueT) != valueT,
                 integer_selector<integerT, valueT, remainingT...>,
-                enable_if<1, firstT>>::type
+                identity<firstT>>::type
   { };
 
 // `static_or_dynamic_cast()`

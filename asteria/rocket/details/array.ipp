@@ -9,12 +9,12 @@ namespace details_array {
 
 template<typename valueT, size_t capT, size_t... nestedT>
 struct element_type_of
-  : enable_if<1, array<valueT, nestedT...>>
+  : identity<array<valueT, nestedT...>>
   { };
 
 template<typename valueT, size_t capT>
 struct element_type_of<valueT, capT>
-  : enable_if<1, valueT>
+  : identity<valueT>
   { };
 
 }  // namespace details_array

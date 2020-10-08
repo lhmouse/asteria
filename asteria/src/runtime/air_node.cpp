@@ -3866,7 +3866,7 @@ struct AIR_Traits<AIR_Node::S_initialize_reference>
 // check for `make_uparam`
 template<typename TraitsT, typename XaNodeT, typename = void>
 struct Uparam_of
-  : ::std::enable_if<true>  // `::type` is void
+  : ::rocket::identity<void>
   { };
 
 template<typename TraitsT, typename XaNodeT>
@@ -3877,7 +3877,7 @@ struct Uparam_of<TraitsT, XaNodeT, ROCKET_VOID_T(decltype(&TraitsT::make_uparam)
 // check for `make_sparam`
 template<typename TraitsT, typename XaNodeT, typename = void>
 struct Sparam_of
-  : ::std::enable_if<true>  // `::type` is void
+  : ::rocket::identity<void>
   { };
 
 template<typename TraitsT, typename XaNodeT>
@@ -3888,7 +3888,7 @@ struct Sparam_of<TraitsT, XaNodeT, ROCKET_VOID_T(decltype(&TraitsT::make_sparam)
 // check for `make_symbols`
 template<typename TraitsT, typename XaNodeT, typename = void>
 struct Symbols_of
-  : ::std::enable_if<true>  // `::type` is void
+  : ::rocket::identity<void>
   { };
 
 template<typename TraitsT, typename XaNodeT>

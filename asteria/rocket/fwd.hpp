@@ -145,8 +145,6 @@ using ::std::swap;
 #define ROCKET_ENABLE_IF_HAS_TYPE(...)       ROCKET_VOID_T(__VA_ARGS__)* = nullptr
 #define ROCKET_ENABLE_IF_HAS_VALUE(...)      ROCKET_ENABLE_IF(sizeof(__VA_ARGS__) | 1)
 
-#include "details/fwd.ipp"
-
 template<typename typeT>
 struct remove_cvref
   : remove_cv<typename remove_reference<typeT>::type>
@@ -156,6 +154,67 @@ template<typename typeT>
 struct is_nothrow_swappable
   : integral_constant<bool, noexcept(swap(::std::declval<typeT&>(), ::std::declval<typeT&>()))>
   { };
+
+template<typename typeT>
+struct identity
+  : enable_if<true, typeT>
+  { };
+
+template<typename containerT>
+constexpr
+decltype(::std::declval<const containerT&>().size())
+size(const containerT& cont)
+noexcept(noexcept(cont.size()))
+  { return cont.size();  }
+
+template<typename elementT, size_t countT>
+constexpr
+size_t
+size(const elementT (&)[countT])
+noexcept
+  { return countT;  }
+
+template<typename... typesT>
+struct conjunction
+  : true_type
+  { };
+
+template<typename firstT, typename... restT>
+struct conjunction<firstT, restT...>
+  : conditional<bool(firstT::value), conjunction<restT...>, firstT>::type
+  { };
+
+template<typename... typesT>
+struct disjunction
+  : false_type
+  { };
+
+template<typename firstT, typename... restT>
+struct disjunction<firstT, restT...>
+  : conditional<bool(firstT::value), firstT, disjunction<restT...>>::type
+  { };
+
+template<typename targetT, typename sourceT>
+struct copy_cv
+  : identity<targetT>
+  { };
+
+template<typename targetT, typename sourceT>
+struct copy_cv<targetT, const sourceT>
+  : add_const<targetT>
+  { };
+
+template<typename targetT, typename sourceT>
+struct copy_cv<targetT, volatile sourceT>
+  : add_volatile<targetT>
+  { };
+
+template<typename targetT, typename sourceT>
+struct copy_cv<targetT, const volatile sourceT>
+  : add_cv<targetT>
+  { };
+
+#include "details/fwd.ipp"
 
 template<typename typeT>
 inline
@@ -171,7 +230,7 @@ struct select_type
 
 template<typename firstT, typename secondT>
 struct select_type<firstT, secondT>
-  : enable_if<true, decltype(1 ? ::std::declval<firstT ()>()() : ::std::declval<secondT ()>()())>
+  : identity<decltype(true ? ::std::declval<firstT()>()() : ::std::declval<secondT()>()())>
   { };
 
 template<typename lhsT, typename rhsT>
@@ -239,46 +298,6 @@ ranged_do_while(firstT first, lastT last, funcT&& func, const paramsT&... params
       ::std::forward<funcT>(func)(qit, params...);
     while(++qit != last);
   }
-
-template<typename... typesT>
-struct conjunction
-  : true_type
-  { };
-
-template<typename firstT, typename... restT>
-struct conjunction<firstT, restT...>
-  : conditional<bool(firstT::value), conjunction<restT...>, firstT>::type
-  { };
-
-template<typename... typesT>
-struct disjunction
-  : false_type
-  { };
-
-template<typename firstT, typename... restT>
-struct disjunction<firstT, restT...>
-  : conditional<bool(firstT::value), firstT, disjunction<restT...>>::type
-  { };
-
-template<typename targetT, typename sourceT>
-struct copy_cv
-  : enable_if<true, targetT>
-  { };
-
-template<typename targetT, typename sourceT>
-struct copy_cv<targetT, const sourceT>
-  : add_const<targetT>
-  { };
-
-template<typename targetT, typename sourceT>
-struct copy_cv<targetT, volatile sourceT>
-  : add_volatile<targetT>
-  { };
-
-template<typename targetT, typename sourceT>
-struct copy_cv<targetT, const volatile sourceT>
-  : add_cv<targetT>
-  { };
 
 template<typename iteratorT>
 constexpr
@@ -494,20 +513,6 @@ is_none_of(targetT&& targ, initializer_list<elementT> init)
     return details_fwd::is_none_of_nonconstexpr(
                   ::std::forward<targetT>(targ), init);
   }
-
-template<typename containerT>
-constexpr
-decltype(::std::declval<const containerT&>().size())
-size(const containerT& cont)
-noexcept(noexcept(cont.size()))
-  { return cont.size();  }
-
-template<typename elementT, size_t countT>
-constexpr
-size_t
-size(const elementT (&)[countT])
-noexcept
-  { return countT;  }
 
 template<intmax_t valueT>
 struct lowest_signed

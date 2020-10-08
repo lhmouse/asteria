@@ -20,54 +20,54 @@ struct prepend_u32seq;
 
 template<u32_t M, u32_t... N>
 struct prepend_u32seq<M, u32seq<N...>>
-  : ::std::enable_if<true, u32seq<M, N...>>
+  : identity<u32seq<M, N...>>
   { };
 
 // Pack bools as bytes.
 template<typename S>
 struct pack_bool
-  : ::std::enable_if<true, u32seq<>>
+  : identity<u32seq<>>
   { };
 
 template<u32_t A>
 struct pack_bool<u32seq<A>>
-  : ::std::enable_if<true,
+  : identity<
             u32seq<(A)>>
   { };
 
 template<u32_t A, u32_t B>
 struct pack_bool<u32seq<A, B>>
-  : ::std::enable_if<true,
+  : identity<
             u32seq<(A | B << 1)>>
   { };
 
 template<u32_t A, u32_t B, u32_t C>
 struct pack_bool<u32seq<A, B, C>>
-  : ::std::enable_if<true,
+  : identity<
             u32seq<(A | B << 1 | C << 2)>>
   { };
 
 template<u32_t A, u32_t B, u32_t C, u32_t D>
 struct pack_bool<u32seq<A, B, C, D>>
-  : ::std::enable_if<true,
+  : identity<
             u32seq<(A | B << 1 | C << 2 | D << 3)>>
   { };
 
 template<u32_t A, u32_t B, u32_t C, u32_t D, u32_t E>
 struct pack_bool<u32seq<A, B, C, D, E>>
-  : ::std::enable_if<true,
+  : identity<
             u32seq<(A | B << 1 | C << 2 | D << 3 | E << 4)>>
   { };
 
 template<u32_t A, u32_t B, u32_t C, u32_t D, u32_t E, u32_t F>
 struct pack_bool<u32seq<A, B, C, D, E, F>>
-  : ::std::enable_if<true,
+  : identity<
             u32seq<(A | B << 1 | C << 2 | D << 3 | E << 4 | F << 5)>>
   { };
 
 template<u32_t A, u32_t B, u32_t C, u32_t D, u32_t E, u32_t F, u32_t G>
 struct pack_bool<u32seq<A, B, C, D, E, F, G>>
-  : ::std::enable_if<true,
+  : identity<
             u32seq<(A | B << 1 | C << 2 | D << 3 | E << 4 | F << 5 | G << 6)>>
   { };
 
@@ -80,24 +80,24 @@ struct pack_bool<u32seq<A, B, C, D, E, F, G, H, N...>>
 // Pack bytes as 32-bit integers in little endian.
 template<typename S>
 struct pack_ubyte
-  : ::std::enable_if<true, u32seq<>>
+  : identity<u32seq<>>
   { };
 
 template<u32_t A>
 struct pack_ubyte<u32seq<A>>
-  : ::std::enable_if<true,
+  : identity<
             u32seq<(A)>>
   { };
 
 template<u32_t A, u32_t B>
 struct pack_ubyte<u32seq<A, B>>
-  : ::std::enable_if<true,
+  : identity<
             u32seq<(A | B << 8)>>
   { };
 
 template<u32_t A, u32_t B, u32_t C>
 struct pack_ubyte<u32seq<A, B, C>>
-  : ::std::enable_if<true,
+  : identity<
             u32seq<(A | B << 8 | C << 16)>>
   { };
 
@@ -157,7 +157,7 @@ struct type_getter<indexT, firstT, restT...>
 
 template<typename firstT, typename... restT>
 struct type_getter<0, firstT, restT...>
-  : enable_if<1, firstT>  // found
+  : identity<firstT>  // found
   { };
 
 // In a `catch` block that is conditionally unreachable, direct use of `throw` is subject to compiler warnings.

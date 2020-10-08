@@ -42,7 +42,7 @@ struct ebo_select_aux
 
 template<typename baseT, size_t indexT, typename... othersT>
 struct ebo_select_aux<baseT, indexT, baseT, othersT...>
-  : enable_if<1, ebo_placeholder<indexT>>  // duplicate
+  : identity<ebo_placeholder<indexT>>  // duplicate
   { };
 
 template<typename baseT, size_t indexT, typename firstT, typename... restT>
