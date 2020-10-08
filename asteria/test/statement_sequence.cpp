@@ -3,6 +3,8 @@
 
 #include "util.hpp"
 #include "../src/compiler/statement_sequence.hpp"
+#include "../src/compiler/statement.hpp"
+#include "../src/compiler/expression_unit.hpp"
 #include "../src/compiler/token_stream.hpp"
 #include "../src/runtime/executive_context.hpp"
 #include "../src/runtime/reference.hpp"
