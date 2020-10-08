@@ -83,9 +83,8 @@ noexcept
           return false;
 
         // Relocate the bucket.
-        //   ::rocket::construct_at(qbkt->kstor, ::std::move(sbkt->kstor[0]));
-        //   ::rocket::destroy_at(sbkt->kstor);
-        ::std::memcpy(qbkt->kstor, sbkt->kstor, sizeof(sbkt->kstor));
+        ::rocket::construct_at(qbkt->kstor, ::std::move(sbkt->kstor[0]));
+        ::rocket::destroy_at(sbkt->kstor);
 
         // Keep probing until an empty bucket is found.
         return false;
@@ -158,9 +157,8 @@ do_rehash(size_t nbkt)
       this->do_list_attach(qbkt);
 
       // Relocate the bucket.
-      //   ::rocket::construct_at(qbkt->kstor, ::std::move(sbkt->kstor[0]));
-      //   ::rocket::destroy_at(sbkt->kstor);
-      ::std::memcpy(qbkt->kstor, sbkt->kstor, sizeof(sbkt->kstor));
+      ::rocket::construct_at(qbkt->kstor, ::std::move(sbkt->kstor[0]));
+      ::rocket::destroy_at(sbkt->kstor);
 
       // Process the next bucket.
       sbkt = sbkt->next;

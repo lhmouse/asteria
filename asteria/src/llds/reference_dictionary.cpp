@@ -84,12 +84,10 @@ noexcept
           return false;
 
         // Relocate the bucket.
-        //   ::rocket::construct_at(qbkt->kstor, ::std::move(sbkt->kstor[0]));
-        //   ::rocket::destroy_at(sbkt->kstor);
-        ::std::memcpy(qbkt->kstor, sbkt->kstor, sizeof(sbkt->kstor));
-        //   ::rocket::construct_at(qbkt->vstor, ::std::move(sbkt->vstor[0]));
-        //   ::rocket::destroy_at(sbkt->vstor);
-        ::std::memcpy(qbkt->vstor, sbkt->vstor, sizeof(sbkt->vstor));
+        ::rocket::construct_at(qbkt->kstor, ::std::move(sbkt->kstor[0]));
+        ::rocket::destroy_at(sbkt->kstor);
+        ::rocket::construct_at(qbkt->vstor, ::std::move(sbkt->vstor[0]));
+        ::rocket::destroy_at(sbkt->vstor);
 
         // Keep probing until an empty bucket is found.
         return false;
