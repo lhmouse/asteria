@@ -53,6 +53,14 @@ constexpr char s_escapes[][8] =
     "\\xF8", "\\xF9", "\\xFA", "\\xFB", "\\xFC", "\\xFD", "\\xFE", "\\xFF",
   };
 
+inline
+void
+do_nump_DU(cow_string& line, ::rocket::ascii_numput& nump, long value, size_t prec = 1)
+  {
+    nump.put_DU(static_cast<uint64_t>(value), prec);
+    line.append(nump.begin(), nump.end());
+  }
+
 // POSIX
 constexpr
 const char*
@@ -152,8 +160,8 @@ operator<<(tinyfmt& fmt, const Formatted_errno& e)
   {
     // Write the error number, followed by its description.
     char sbuf[256];
-    fmt << "error " << e.err << ": " << do_xstrerror_r(e.err, sbuf, sizeof(sbuf));
-    return fmt;
+    return fmt << "error " << e.err << ": "
+         << do_xstrerror_r(e.err, sbuf, sizeof(sbuf));
   }
 
 }  // namespace details_util
@@ -162,9 +170,8 @@ ptrdiff_t
 write_log_to_stderr(const char* file, long line, cow_string&& msg)
 noexcept
   {
-    ::rocket::tinyfmt_str fmt;
-    fmt.set_string(cow_string(1023, '/'));
-    fmt.clear_string();
+    cow_string log_text;
+    log_text.reserve(1023);
 
     // Append the timestamp.
     ::timespec ts;
@@ -174,31 +181,41 @@ noexcept
 
     // 'yyyy-mmmm-dd HH:MM:SS.sss'
     ::rocket::ascii_numput nump;
-    fmt << nump.put_DU(static_cast<uint64_t>(tr.tm_year + 1900), 4);
-    fmt << '-' << nump.put_DU(static_cast<uint64_t>(tr.tm_mon + 1), 2);
-    fmt << '-' << nump.put_DU(static_cast<uint64_t>(tr.tm_mday), 2);
-    fmt << ' ' << nump.put_DU(static_cast<uint64_t>(tr.tm_hour), 2);
-    fmt << ':' << nump.put_DU(static_cast<uint64_t>(tr.tm_min), 2);
-    fmt << ':' << nump.put_DU(static_cast<uint64_t>(tr.tm_sec), 2);
-    fmt << '.' << nump.put_DU(static_cast<uint64_t>(ts.tv_nsec), 9);
+    do_nump_DU(log_text, nump, tr.tm_year + 1900, 4);
+    log_text += '-';
+    do_nump_DU(log_text, nump, tr.tm_mon + 1, 2);
+    log_text += '-';
+    do_nump_DU(log_text, nump, tr.tm_mday, 2);
+    log_text += ' ';
+    do_nump_DU(log_text, nump, tr.tm_hour, 2);
+    log_text += ':';
+    do_nump_DU(log_text, nump, tr.tm_min, 2);
+    log_text += ':';
+    do_nump_DU(log_text, nump, tr.tm_sec, 2);
+    log_text += '.';
+    do_nump_DU(log_text, nump, ts.tv_nsec, 9);
 
     // Append the file name and line number, followed by a line feed.
-    fmt << " @ " << file << ':' << line << "\n\t";
+    log_text += " @ ";
+    log_text += file;
+    log_text += ':';
+    do_nump_DU(log_text, nump, line);
+    log_text += "\n\t";
 
     // Neutralize control characters. That is ['\x00','\x1F'] and '\x7F'.
     for(size_t i = 0;  i < msg.size();  ++i) {
       size_t ch = msg[i] & 0xFF;
       if(ch <= 0x1F)
-        fmt << s_lcchars[ch];
+        log_text += s_lcchars[ch];
       else if(ch == 0x7F)
-        fmt << "[DEL]";
+        log_text += "[DEL]";
       else
-        fmt << static_cast<char>(ch);
+        log_text += static_cast<char>(ch);
     }
-    fmt << "\n\n";
+    log_text += "\n\n";
 
     // Write the string now. If the operation fails, we don't retry.
-    return ::write(STDERR_FILENO, fmt.c_str(), fmt.length());
+    return ::write(STDERR_FILENO, log_text.data(), log_text.size());
   }
 
 bool
