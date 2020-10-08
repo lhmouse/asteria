@@ -7,102 +7,128 @@
 
 namespace details_variant {
 
-template<uint8_t... M>
-struct iseq
+// Unsigned SI mode iNTeger
+using u32_t = uint32_t;
+
+template<u32_t... M>
+struct u32seq
   { };
 
-template<uint8_t M, typename N>
-struct front_insert;
+// Prepend `M` to `N...` to create a new sequence.
+template<u32_t M, typename S>
+struct prepend_u32seq;
 
-template<uint8_t M, uint8_t... N>
-struct front_insert<M, iseq<N...>>
-  : ::std::enable_if<true, iseq<M, N...>>
+template<u32_t M, u32_t... N>
+struct prepend_u32seq<M, u32seq<N...>>
+  : ::std::enable_if<true, u32seq<M, N...>>
   { };
 
-template<bool... M>
-struct pack_bool
-  : ::std::enable_if<true, iseq<>>
-  { };
-
-template<bool A>
-struct pack_bool<A>
-  : ::std::enable_if<true,
-     iseq<uint8_t(A)>>
-  { };
-
-template<bool A, bool B>
-struct pack_bool<A, B>
-  : ::std::enable_if<true,
-     iseq<uint8_t(A | B <<1)>>
-  { };
-
-template<bool A, bool B, bool C>
-struct pack_bool<A, B, C>
-  : ::std::enable_if<true,
-     iseq<uint8_t(A | B <<1 | C <<2)>>
-  { };
-
-template<bool A, bool B, bool C, bool D>
-struct pack_bool<A, B, C, D>
-  : ::std::enable_if<true,
-     iseq<uint8_t(A | B <<1 | C <<2 | D <<3)>>
-  { };
-
-template<bool A, bool B, bool C, bool D, bool E>
-struct pack_bool<A, B, C, D, E>
-  : ::std::enable_if<true,
-     iseq<uint8_t(A | B <<1 | C <<2 | D <<3 | E <<4)>>
-  { };
-
-template<bool A, bool B, bool C, bool D, bool E, bool F>
-struct pack_bool<A, B, C, D, E, F>
-  : ::std::enable_if<true,
-     iseq<uint8_t(A | B <<1 | C <<2 | D <<3 | E <<4 | F <<5)>>
-  { };
-
-template<bool A, bool B, bool C, bool D, bool E, bool F, bool G>
-struct pack_bool<A, B, C, D, E, F, G>
-  : ::std::enable_if<true,
-     iseq<uint8_t(A | B <<1 | C <<2 | D <<3 | E <<4 | F <<5 | G <<6)>>
-  { };
-
-template<bool A, bool B, bool C, bool D, bool E, bool F, bool G, bool H, bool... N>
-struct pack_bool<A, B, C, D, E, F, G, H, N...>
-  : front_insert<
-          uint8_t(A | B <<1 | C <<2 | D <<3 | E <<4 | F <<5 | G <<6 | H <<7),
-          typename pack_bool<N...>::type>
-  { };
-
+// Pack bools as bytes.
 template<typename S>
-struct packed_bool_storage;
+struct pack_bool
+  : ::std::enable_if<true, u32seq<>>
+  { };
 
-template<uint8_t... M>
-struct packed_bool_storage<iseq<M...>>
-  {
-    uint8_t values[sizeof...(M)] = { M... };
-  };
+template<u32_t A>
+struct pack_bool<u32seq<A>>
+  : ::std::enable_if<true,
+            u32seq<(A)>>
+  { };
 
-template<bool... M>
-union constexpr_bitest
+template<u32_t A, u32_t B>
+struct pack_bool<u32seq<A, B>>
+  : ::std::enable_if<true,
+            u32seq<(A | B << 1)>>
+  { };
+
+template<u32_t A, u32_t B, u32_t C>
+struct pack_bool<u32seq<A, B, C>>
+  : ::std::enable_if<true,
+            u32seq<(A | B << 1 | C << 2)>>
+  { };
+
+template<u32_t A, u32_t B, u32_t C, u32_t D>
+struct pack_bool<u32seq<A, B, C, D>>
+  : ::std::enable_if<true,
+            u32seq<(A | B << 1 | C << 2 | D << 3)>>
+  { };
+
+template<u32_t A, u32_t B, u32_t C, u32_t D, u32_t E>
+struct pack_bool<u32seq<A, B, C, D, E>>
+  : ::std::enable_if<true,
+            u32seq<(A | B << 1 | C << 2 | D << 3 | E << 4)>>
+  { };
+
+template<u32_t A, u32_t B, u32_t C, u32_t D, u32_t E, u32_t F>
+struct pack_bool<u32seq<A, B, C, D, E, F>>
+  : ::std::enable_if<true,
+            u32seq<(A | B << 1 | C << 2 | D << 3 | E << 4 | F << 5)>>
+  { };
+
+template<u32_t A, u32_t B, u32_t C, u32_t D, u32_t E, u32_t F, u32_t G>
+struct pack_bool<u32seq<A, B, C, D, E, F, G>>
+  : ::std::enable_if<true,
+            u32seq<(A | B << 1 | C << 2 | D << 3 | E << 4 | F << 5 | G << 6)>>
+  { };
+
+template<u32_t A, u32_t B, u32_t C, u32_t D, u32_t E, u32_t F, u32_t G, u32_t H, u32_t... N>
+struct pack_bool<u32seq<A, B, C, D, E, F, G, H, N...>>
+  : prepend_u32seq<(A | B << 1 | C << 2 | D << 3 | E << 4 | F << 5 | G << 6 | H << 7),
+                   typename pack_bool<u32seq<N...>>::type>
+  { };
+
+// Pack bytes as 32-bit integers in little endian.
+template<typename S>
+struct pack_ubyte
+  : ::std::enable_if<true, u32seq<>>
+  { };
+
+template<u32_t A>
+struct pack_ubyte<u32seq<A>>
+  : ::std::enable_if<true,
+            u32seq<(A)>>
+  { };
+
+template<u32_t A, u32_t B>
+struct pack_ubyte<u32seq<A, B>>
+  : ::std::enable_if<true,
+            u32seq<(A | B << 8)>>
+  { };
+
+template<u32_t A, u32_t B, u32_t C>
+struct pack_ubyte<u32seq<A, B, C>>
+  : ::std::enable_if<true,
+            u32seq<(A | B << 8 | C << 16)>>
+  { };
+
+template<u32_t A, u32_t B, u32_t C, u32_t D, u32_t... N>
+struct pack_ubyte<u32seq<A, B, C, D, N...>>
+  : prepend_u32seq<(A | B << 8 | C << 16 | D << 24),
+                   typename pack_ubyte<u32seq<N...>>::type>
+  { };
+
+// Store packed integers into an array.
+template<typename S>
+class u32_t_storage;
+
+template<u32_t... M>
+class u32_t_storage<u32seq<M...>>
   {
   private:
-    packed_bool_storage<typename pack_bool<M...>::type> m_bits;
-    uint32_t m_words[(sizeof...(M) + 31) / 32];
-
-  public:
-    constexpr
-    constexpr_bitest()
-    noexcept
-      : m_bits()
-      { }
+    u32_t m_words[sizeof...(M)] = { M... };
 
   public:
     constexpr
     bool
     operator[](size_t k)
     const noexcept
-      { return this->m_words[k / 32] & (UINT32_C(1) << k % 32);  }
+      { return this->m_words[k / 32] & (u32_t(1) << k % 32);  }
   };
+
+template<bool... M>
+struct constexpr_bitset
+  : u32_t_storage<typename pack_ubyte<typename pack_bool<u32seq<M...>>::type>::type>
+  { };
 
 template<size_t indexT, typename targetT, typename... alternsT>
 struct type_finder
@@ -153,7 +179,7 @@ ROCKET_FORCED_INLINE_FUNCTION
 void*
 dispatch_copy_construct(size_t k, void* dptr, const void* sptr)
   {
-    static constexpr constexpr_bitest<is_trivially_copy_constructible<alternsT>::value...> trivial;
+    static constexpr constexpr_bitset<is_trivially_copy_constructible<alternsT>::value...> trivial;
     using function_type = void* (void*, const void*);
     static constexpr function_type* functions[] = { wrapped_copy_construct<alternsT>... };
 
@@ -175,7 +201,7 @@ ROCKET_FORCED_INLINE_FUNCTION
 void*
 dispatch_move_construct(size_t k, void* dptr, void* sptr)
   {
-    static constexpr constexpr_bitest<is_trivially_move_constructible<alternsT>::value...> trivial;
+    static constexpr constexpr_bitset<is_trivially_move_constructible<alternsT>::value...> trivial;
     using function_type = void* (void*, void*);
     static constexpr function_type* functions[] = { wrapped_move_construct<alternsT>... };
 
@@ -197,7 +223,7 @@ ROCKET_FORCED_INLINE_FUNCTION
 void*
 dispatch_copy_assign(size_t k, void* dptr, const void* sptr)
   {
-    static constexpr constexpr_bitest<is_trivially_copy_assignable<alternsT>::value...> trivial;
+    static constexpr constexpr_bitset<is_trivially_copy_assignable<alternsT>::value...> trivial;
     using function_type = void* (void*, const void*);
     static constexpr function_type* functions[] = { wrapped_copy_assign<alternsT>... };
 
@@ -219,7 +245,7 @@ ROCKET_FORCED_INLINE_FUNCTION
 void*
 dispatch_move_assign(size_t k, void* dptr, void* sptr)
   {
-    static constexpr constexpr_bitest<is_trivially_move_assignable<alternsT>::value...> trivial;
+    static constexpr constexpr_bitset<is_trivially_move_assignable<alternsT>::value...> trivial;
     using function_type = void* (void*, void*);
     static constexpr function_type* functions[] = { wrapped_move_assign<alternsT>... };
 
@@ -241,7 +267,7 @@ ROCKET_FORCED_INLINE_FUNCTION
 void
 dispatch_destroy(size_t k, void* dptr)
   {
-    static constexpr constexpr_bitest<is_trivially_destructible<alternsT>::value...> trivial;
+    static constexpr constexpr_bitset<is_trivially_destructible<alternsT>::value...> trivial;
     using function_type = void (void*);
     static constexpr function_type* functions[] = { wrapped_destroy<alternsT>... };
 
@@ -265,7 +291,7 @@ ROCKET_FORCED_INLINE_FUNCTION
 void*
 dispatch_move_then_destroy(size_t k, void* dptr, void* sptr)
   {
-    static constexpr constexpr_bitest<conjunction<is_trivially_move_constructible<alternsT>,
+    static constexpr constexpr_bitset<conjunction<is_trivially_move_constructible<alternsT>,
                                                   is_trivially_destructible<alternsT>>::value...> trivial;
     using function_type = void* (void*, void*);
     static constexpr function_type* functions[] = { wrapped_move_then_destroy<alternsT>... };
@@ -288,7 +314,7 @@ ROCKET_FORCED_INLINE_FUNCTION
 void
 dispatch_swap(size_t k, void* dptr, void* sptr)
   {
-    static constexpr constexpr_bitest<conjunction<is_trivially_move_constructible<alternsT>,
+    static constexpr constexpr_bitset<conjunction<is_trivially_move_constructible<alternsT>,
                                                   is_trivially_move_assignable<alternsT>,
                                                   is_trivially_destructible<alternsT>>::value...> trivial;
     using function_type = void (void*, void*);
