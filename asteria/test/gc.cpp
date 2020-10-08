@@ -14,18 +14,18 @@ using namespace asteria;
 void* operator new(size_t cb)
   {
     auto ptr = ::std::malloc(cb);
-    if(!ptr) {
+    if(!ptr)
       throw ::std::bad_alloc();
-    }
+
     bcnt.fetch_add(1, ::std::memory_order_relaxed);
     return ptr;
   }
 
 void operator delete(void* ptr) noexcept
   {
-    if(!ptr) {
+    if(!ptr)
       return;
-    }
+
     bcnt.fetch_sub(1, ::std::memory_order_relaxed);
     ::std::free(ptr);
   }
@@ -62,7 +62,8 @@ int main()
           func leak() {
             var f;
             f = func() { return f; };
-            g = f;
+            var k = f;
+            g = k;
           }
           for(var i = 0;  i < nloop;  ++i) {
             leak();
