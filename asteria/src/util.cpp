@@ -53,14 +53,6 @@ constexpr char s_escapes[][8] =
     "\\xF8", "\\xF9", "\\xFA", "\\xFB", "\\xFC", "\\xFD", "\\xFE", "\\xFF",
   };
 
-inline
-void
-do_nump_DU(cow_string& line, ::rocket::ascii_numput& nump, long value, size_t prec = 1)
-  {
-    nump.put_DU(static_cast<uint64_t>(value), prec);
-    line.append(nump.begin(), nump.end());
-  }
-
 // POSIX
 constexpr
 const char*
@@ -179,27 +171,17 @@ noexcept
     ::tm tr;
     ::localtime_r(&(ts.tv_sec), &tr);
 
-    // 'yyyy-mmmm-dd HH:MM:SS.sss'
-    ::rocket::ascii_numput nump;
-    do_nump_DU(log_text, nump, tr.tm_year + 1900, 4);
-    log_text += '-';
-    do_nump_DU(log_text, nump, tr.tm_mon + 1, 2);
-    log_text += '-';
-    do_nump_DU(log_text, nump, tr.tm_mday, 2);
-    log_text += ' ';
-    do_nump_DU(log_text, nump, tr.tm_hour, 2);
-    log_text += ':';
-    do_nump_DU(log_text, nump, tr.tm_min, 2);
-    log_text += ':';
-    do_nump_DU(log_text, nump, tr.tm_sec, 2);
-    log_text += '.';
-    do_nump_DU(log_text, nump, ts.tv_nsec, 9);
+    char temp[64];
+    ::strftime(temp, sizeof(temp), "%F %R", &tr);
+    log_text += temp;
+    ::sprintf(temp, ":%2.9f", tr.tm_sec + double(ts.tv_nsec) / 1.0e9);
+    log_text += temp;
 
     // Append the file name and line number, followed by a line feed.
     log_text += " @ ";
     log_text += file;
-    log_text += ':';
-    do_nump_DU(log_text, nump, line);
+    ::sprintf(temp, ":%ld", line);
+    log_text += temp;
     log_text += "\n\t";
 
     // Neutralize control characters. That is ['\x00','\x1F'] and '\x7F'.
