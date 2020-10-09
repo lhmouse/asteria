@@ -31,33 +31,38 @@ class Value
     constexpr
     Value(nullopt_t = nullopt)
     noexcept
-      : m_stor()
       { }
 
     template<typename XValT,
     ROCKET_ENABLE_IF(details_value::Valuable<XValT>::direct_init::value)>
     Value(XValT&& xval)
     noexcept(::std::is_nothrow_constructible<Storage&,
-                          typename details_value::Valuable<XValT>::via_type&&>::value)
-      : m_stor(typename details_value::Valuable<XValT>::via_type(::std::forward<XValT>(xval)))
+                  typename details_value::Valuable<XValT>::via_type&&>::value)
+      : m_stor(typename details_value::Valuable<XValT>::via_type(
+                  ::std::forward<XValT>(xval)))
       { }
 
     template<typename XValT,
     ROCKET_DISABLE_IF(details_value::Valuable<XValT>::direct_init::value)>
     Value(XValT&& xval)
     noexcept(::std::is_nothrow_assignable<Storage&,
-                          typename details_value::Valuable<XValT>::via_type&&>::value)
-      : m_stor()
-      { details_value::Valuable<XValT>::assign(this->m_stor, ::std::forward<XValT>(xval));  }
+                  typename details_value::Valuable<XValT>::via_type&&>::value)
+      {
+        details_value::Valuable<XValT>::assign(this->m_stor,
+                  ::std::forward<XValT>(xval));
+      }
 
     template<typename XValT,
     ROCKET_ENABLE_IF_HAS_TYPE(typename details_value::Valuable<XValT>::via_type)>
     Value&
     operator=(XValT&& xval)
     noexcept(::std::is_nothrow_assignable<Storage&,
-                          typename details_value::Valuable<XValT>::via_type&&>::value)
-      { details_value::Valuable<XValT>::assign(this->m_stor, ::std::forward<XValT>(xval));
-        return *this;  }
+                  typename details_value::Valuable<XValT>::via_type&&>::value)
+      {
+        details_value::Valuable<XValT>::assign(this->m_stor,
+                  ::std::forward<XValT>(xval));
+        return *this;
+      }
 
   public:
     Type
