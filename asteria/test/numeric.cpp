@@ -73,6 +73,40 @@ int main()
         assert std.numeric.is_nan(+0.0 / 0);
         assert std.numeric.is_nan(+0.0 / 0);
 
+        assert std.numeric.max() == null;
+        assert std.numeric.max(1) == 1;
+        assert std.numeric.max(-1) == -1;
+        assert std.numeric.max(0.5) == 0.5;
+        assert std.numeric.max(-0.5) == -0.5;
+        assert typeof std.numeric.max(1, 1.5) == "real";
+        assert std.numeric.max(1, 1.5) == 1.5;
+        assert typeof std.numeric.max(1, 1.5, 2) == "integer";
+        assert std.numeric.max(1, 1.5, 2) == 2;
+        assert typeof std.numeric.max(1, 1.5, 2, 0.5) == "integer";
+        assert std.numeric.max(1, 1.5, 2, 0.5) == 2;
+        assert std.numeric.max(null, 1, 1.5, 2, 0.5) == 2;
+        assert std.numeric.max(1, null, 1.5, 2, 0.5) == 2;
+        assert std.numeric.max(1, 1.5, null, 2, 0.5) == 2;
+        assert std.numeric.max(1, 1.5, 2, null, 0.5) == 2;
+        assert std.numeric.max(1, 1.5, 2, 0.5, null) == 2;
+
+        assert std.numeric.min() == null;
+        assert std.numeric.min(1) == 1;
+        assert std.numeric.min(-1) == -1;
+        assert std.numeric.min(0.5) == 0.5;
+        assert std.numeric.min(-0.5) == -0.5;
+        assert typeof std.numeric.min(1, 1.5) == "integer";
+        assert std.numeric.min(1, 1.5) == 1;
+        assert typeof std.numeric.min(1, 1.5, 2) == "integer";
+        assert std.numeric.min(1, 1.5, 2) == 1;
+        assert typeof std.numeric.min(1, 1.5, 2, 0.5) == "real";
+        assert std.numeric.min(1, 1.5, 2, 0.5) == 0.5;
+        assert std.numeric.min(null, 1, 1.5, 2, 0.5) == 0.5;
+        assert std.numeric.min(1, null, 1.5, 2, 0.5) == 0.5;
+        assert std.numeric.min(1, 1.5, null, 2, 0.5) == 0.5;
+        assert std.numeric.min(1, 1.5, 2, null, 0.5) == 0.5;
+        assert std.numeric.min(1, 1.5, 2, 0.5, null) == 0.5;
+
         assert std.numeric.clamp(1, 2, 3) == 2;
         assert std.numeric.clamp(2, 2, 3) == 2;
         assert std.numeric.clamp(3, 2, 3) == 3;

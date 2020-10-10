@@ -58,6 +58,11 @@ int main()
         assert std.array.replace_slice([0,1,2,3,4], -9, ["a","b","c"]) == ["a","b","c"];
         assert std.array.replace_slice([0,1,2,3,4], -9, 1, ["a","b","c"]) == ["a","b","c",0,1,2,3,4];
 
+        assert std.array.replace_slice([0,1,2,3,4], -2, 1, ["a","b","c","d"], 1) == [0,1,2,"b","c","d",4];
+        assert std.array.replace_slice([0,1,2,3,4], -2, 1, ["a","b","c","d"], 1, 2) == [0,1,2,"b","c",4];
+        assert std.array.replace_slice([0,1,2,3,4], -2, 1, ["a","b","c","d"], -2) == [0,1,2,"c","d",4];
+        assert std.array.replace_slice([0,1,2,3,4], -2, 1, ["a","b","c","d"], -2, 1) == [0,1,2,"c",4];
+
         assert std.array.find([0,1,2,3,4,3,2,1,0], 2) == 2;
         assert std.array.find([0,1,2,3,4,3,2,1,0], 2, 2) == 2;
         assert std.array.find([0,1,2,3,4,3,2,1,0], 3, 2) == 6;

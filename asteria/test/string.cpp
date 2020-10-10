@@ -58,6 +58,11 @@ int main()
         assert std.string.replace_slice("hello", -9, "##") == "##";
         assert std.string.replace_slice("hello", -9, 1, "##") == "##hello";
 
+        assert std.string.replace_slice("hello", -2, 1, "01234", 1) == "hel1234o";
+        assert std.string.replace_slice("hello", -2, 1, "01234", 1, 2) == "hel12o";
+        assert std.string.replace_slice("hello", -2, 1, "01234", -3) == "hel234o";
+        assert std.string.replace_slice("hello", -2, 1, "01234", -3, 2) == "hel23o";
+
         assert std.string.compare("abcd", "abcc") >  0;
         assert std.string.compare("abcd", "abcd") == 0;
         assert std.string.compare("abcd", "abce") <  0;

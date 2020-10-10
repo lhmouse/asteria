@@ -124,6 +124,10 @@ int main()
         assert std.math.hypot(+nan, -infinity) == infinity;
         assert std.math.hypot(nan, 1, infinity) == infinity;
         assert __isnan std.math.hypot(nan, 1, nan);
+        assert std.math.hypot(null, 3, 4, 12) == 13;
+        assert std.math.hypot(3, null, 4, 12) == 13;
+        assert std.math.hypot(3, 4, null, 12) == 13;
+        assert std.math.hypot(3, 4, 12, null) == 13;
 
 ///////////////////////////////////////////////////////////////////////////////
       )__"));
