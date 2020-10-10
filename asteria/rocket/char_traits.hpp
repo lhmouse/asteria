@@ -78,11 +78,11 @@ struct char_traits<char>
     noexcept
       { return (char*)::memchr(p, c, n);  }
 
-    static
+    static constexpr
     size_type
     length(const char_type* p)
     noexcept
-      { return ::strlen(p);  }
+      { return details_char_traits::length<char>(p);  }
 
     static
     int
@@ -208,11 +208,11 @@ struct char_traits<wchar_t>
     noexcept
       { return ::wmemchr(p, c, n);  }
 
-    static
+    static constexpr
     size_type
     length(const char_type* p)
     noexcept
-      { return ::wcslen(p);  }
+      { return details_char_traits::length<wchar_t>(p);  }
 
     static
     int
@@ -338,7 +338,7 @@ struct char_traits<char16_t>
     noexcept
       { return details_char_traits::find<char16_t>(p, n, c);  }
 
-    static
+    static constexpr
     size_type
     length(const char_type* p)
     noexcept
@@ -444,7 +444,7 @@ struct char_traits<char32_t>
     noexcept
       { return details_char_traits::find<char32_t>(p, n, c);  }
 
-    static
+    static constexpr
     size_type
     length(const char_type* p)
     noexcept
