@@ -11,9 +11,7 @@
 *.exe
 *.dll
 
-.dirstamp
-.libs
-.deps
+precompiled.*
 aclocal.m4
 autom4te.cache/
 compile
