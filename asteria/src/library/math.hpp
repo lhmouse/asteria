@@ -10,11 +10,17 @@ namespace asteria {
 
 // `std.math.exp`
 V_real
-std_math_exp(V_real y, Opt_real base);
+std_math_exp(V_real y);
+
+V_real
+std_math_exp(V_real base, V_real y);
 
 // `std.math.log`
 V_real
-std_math_log(V_real x, Opt_real base);
+std_math_log(V_real x);
+
+V_real
+std_math_log(V_real base, V_real x);
 
 // `std.math.expm1`
 V_real
@@ -23,10 +29,6 @@ std_math_expm1(V_real y);
 // `std.math.log1p`
 V_real
 std_math_log1p(V_real x);
-
-// `std.math.pow`
-V_real
-std_math_pow(V_real x, V_real y);
 
 // `std.math.sin`
 V_real

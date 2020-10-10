@@ -1860,7 +1860,7 @@
 `std.numeric.frexp(x)`
 
 	* Decomposes `x` into normalized fractional and exponent parts
-	  such that `x = frac * pow(2,exp)` where `frac` and `exp` denote
+	  such that `x = frac * exp2(exp)` where `frac` and `exp` denote
 	  the fraction and the exponent respectively and `frac` is always
 	  within the range `[0.5,1.0)`. If `x` is non-finite, `exp` is
 	  unspecified.
@@ -1872,7 +1872,7 @@
 `std.numeric.ldexp(frac, exp)`
 
 	* Composes `frac` and `exp` to make a real number `x`, as if by
-	  multiplying `frac` with `pow(2,exp)`. `exp` must be an integer.
+	  multiplying `frac` with `exp2(exp)`. `exp` must be an integer.
 	  This function is the inverse of `frexp()`.
 
 	* Returns the product as a real.
@@ -2109,17 +2109,27 @@
 	* Denotes the binary logarithm of 10 as a real number. The value
 	  is `3.3219280948873623478703194294894`.
 
-`std.math.exp(y, [base])`
+`std.math.exp(y)`
 
-	* Calculates `base` raised to the power `y`. If `base` is absent,
-	  `e` is assumed. This function is equivalent to `pow(base, y)`.
+	* Calculates the constant `e` raised to the `y`-th power.
 
 	* Returns the power as a real.
 
-`std.math.log(x, [base])`
+`std.math.exp(base, y)`
 
-	* Calculates the logarithm of `x` to `base`. If `base` is absent,
-	  `e` is assumed.
+	* Calculates `base` raised to the `y`-th power.
+
+	* Returns the power as a real.
+
+`std.math.log(x)`
+
+	* Calculates the natural logarithm of `x`.
+
+	* Returns the logarithm as a real.
+
+`std.math.log(base, x)`
+
+	* Calculates the logarithm base `base` of `x`.
 
 	* Returns the logarithm as a real.
 
@@ -2136,14 +2146,6 @@
 	  close to zero.
 
 	* Returns the result as a real.
-
-`std.math.pow(x, y)`
-
-	* Calculates `x` raised to the power `y`. According to C99, when
-	  `x` is `1` or `y` is `0`, the result is always `1`, even when
-	  the other argument is an infinity or NaN.
-
-	* Returns the power as a real.
 
 `std.math.sin(x)`
 

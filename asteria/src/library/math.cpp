@@ -10,36 +10,48 @@
 namespace asteria {
 
 V_real
-std_math_exp(V_real y, Opt_real base)
+std_math_exp(V_real y)
   {
-    if(!base)
-      return ::exp(y);
-
-    if(*base == 2)
-      return ::exp2(y);
-
-    if(*base == 10)
-      return ::exp10(y);
-
-    return ::pow(*base, y);
+    return ::exp(y);
   }
 
 V_real
-std_math_log(V_real x, Opt_real base)
+std_math_exp(V_real base, V_real y)
   {
-    if(!base)
-      return ::log(x);
+    if(base == 2.7182818284590452353602874713527)
+      return ::exp(y);
 
-    if(*base == 2)
-      return ::log2(x);
+    if(base == 2)
+      return ::exp2(y);
 
-    if(*base == 10)
-      return ::log10(x);
+    if(base == 10)
+      return ::exp10(y);
 
-    if((*base == 1) || (*base <= 0))
+    return ::pow(base, y);
+  }
+
+V_real
+std_math_log(V_real x)
+  {
+    return ::log(x);
+  }
+
+V_real
+std_math_log(V_real base, V_real x)
+  {
+    if((base == 1) || (base <= 0))
       return ::std::numeric_limits<double>::quiet_NaN();
 
-    return ::log2(x) / ::log2(*base);
+    if(base == 2.7182818284590452353602874713527)
+      return ::log(x);
+
+    if(base == 2)
+      return ::log2(x);
+
+    if(base == 10)
+      return ::log10(x);
+
+    return ::log2(x) / ::log2(base);
   }
 
 V_real
@@ -52,12 +64,6 @@ V_real
 std_math_log1p(V_real x)
   {
     return ::log1p(x);
-  }
-
-V_real
-std_math_pow(V_real x, V_real y)
-  {
-    return ::pow(x, y);
   }
 
 V_real
@@ -230,29 +236,41 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
     result.insert_or_assign(::rocket::sref("exp"),
       ASTERIA_BINDING_BEGIN("std.math.exp", self, global, reader) {
+        V_real base;
         V_real y;
-        Opt_real base;
 
         reader.start_overload();
         reader.required(y);      // y
-        reader.optional(base);   // [base]
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_exp, y, base);
+                    std_math_exp, y);
+
+        reader.start_overload();
+        reader.required(base);   // base
+        reader.required(y);      // y
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_exp, base, y);
       }
       ASTERIA_BINDING_END);
 
     result.insert_or_assign(::rocket::sref("log"),
       ASTERIA_BINDING_BEGIN("std.math.log", self, global, reader) {
+        V_real base;
         V_real x;
-        Opt_real base;
 
         reader.start_overload();
         reader.required(x);      // x
-        reader.optional(base);   // [base]
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_log, x, base);
+                    std_math_log, x);
+
+        reader.start_overload();
+        reader.required(base);   // base
+        reader.required(x);      // x
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_math_log, base, x);
       }
       ASTERIA_BINDING_END);
 
@@ -277,20 +295,6 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
                     std_math_log1p, x);
-      }
-      ASTERIA_BINDING_END);
-
-    result.insert_or_assign(::rocket::sref("pow"),
-      ASTERIA_BINDING_BEGIN("std.math.pow", self, global, reader) {
-        V_real x;
-        V_real y;
-
-        reader.start_overload();
-        reader.required(x);    // x
-        reader.required(y);    // y
-        if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_pow, x, y);
       }
       ASTERIA_BINDING_END);
 

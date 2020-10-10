@@ -26,46 +26,37 @@ int main()
         assert std.math.deg * 180 == std.math.pi;
         assert std.math.rad * std.math.deg == 1;
 
-        assert std.math.log(std.math.e) == 1;
-
         assert std.math.exp(1) == std.math.e;
         assert lt_1ups(std.math.sqrt2 * std.math.sqrt2, 2);
         assert lt_1ups(std.math.sqrt3 * std.math.sqrt3, 3);
         assert lt_1ups(std.math.cbrt2 * std.math.cbrt2 * std.math.cbrt2, 2);
 
-        assert std.math.log(2, 10) == std.math.lg2;
-        assert std.math.log(10, 2) == std.math.lb10;
+        assert std.math.log(10, 2) == std.math.lg2;
+        assert std.math.log(2, 10) == std.math.lb10;
         assert std.math.lg2 * std.math.lb10 == 1;
 
-        assert lt_1ups(std.math.exp(1), 2.7182818284590452);
-        assert std.math.exp(3, 2) == 8;
-        assert std.math.exp(2, 3) == 9;
-        assert std.math.exp(0, nan) == 1;
-        assert __isnan std.math.exp(2, nan);
-        assert std.math.exp(nan, 1) == 1;
+        assert std.math.exp(1) == std.math.e;
+        assert std.math.exp(2, 3) == 8;
+        assert std.math.exp(3, 2) == 9;
+        assert std.math.exp(nan, 0) == 1;
         assert __isnan std.math.exp(nan, 2);
-
-        assert std.math.expm1(0) == 0;
-        assert lt_1ups(std.math.expm1(1), 1.7182818284590452);
-
-        assert std.math.pow(2, 3) == 8;
-        assert std.math.pow(3, 2) == 9;
-        assert std.math.pow(nan, 0) == 1;
-        assert __isnan std.math.pow(nan, 2);
-        assert std.math.pow(1, nan) == 1;
-        assert __isnan std.math.pow(2, nan);
+        assert std.math.exp(1, nan) == 1;
+        assert __isnan std.math.exp(2, nan);
 
         assert std.math.log(std.math.e) == 1;
-        assert lt_1ups(std.math.log(9, 3), 2.0);
-        assert lt_1ups(std.math.log(3, 9), 0.5);
-        assert std.math.log(0, 10) == -infinity;
-        assert __isnan std.math.log(-1, 10);
-        assert __isnan std.math.log(10,  0);
+        assert std.math.log(3, 9) == 2.0;
+        assert std.math.log(9, 3) == 0.5;
+        assert std.math.log(10, 0) == -infinity;
+        assert __isnan std.math.log(10, -1);
+        assert __isnan std.math.log(0, 10);
+
+        assert std.math.expm1(0) == 0;
+        assert std.math.expm1(1) == 1.7182818284590452;
 
         assert std.math.log1p(0) == 0;
         assert std.math.log1p(-1) == -infinity;
         assert __isnan std.math.log1p(-2);
-        assert lt_1ups(std.math.log1p(1.7182818284590452), 1);
+        assert std.math.log1p(1.7182818284590452) == 1;
 
         assert std.math.sin(0) == 0;
         assert lt_1ups(std.math.sin(std.math.pi / 2), 1);
