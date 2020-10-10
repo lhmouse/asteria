@@ -183,19 +183,49 @@ std_math_lgamma(V_real x)
 void
 create_bindings_math(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(::rocket::sref("e"),
-      V_real(
-        2.7182818284590452353602874713526624977572470937000
-      ));
-
     result.insert_or_assign(::rocket::sref("pi"),
       V_real(
-        3.1415926535897932384626433832795028841971693993751
+        3.1415926535897932384626433832795
       ));
 
-    result.insert_or_assign(::rocket::sref("real_max"),
+    result.insert_or_assign(::rocket::sref("rad"),
       V_real(
-        3.3219280948873623478703194294893901758648313930246
+        57.295779513082320876798154814105
+      ));
+
+    result.insert_or_assign(::rocket::sref("deg"),
+      V_real(
+        0.01745329251994329576923690768489
+      ));
+
+    result.insert_or_assign(::rocket::sref("e"),
+      V_real(
+        2.7182818284590452353602874713527
+      ));
+
+    result.insert_or_assign(::rocket::sref("sqrt2"),
+      V_real(
+        1.4142135623730950488016887242097
+      ));
+
+    result.insert_or_assign(::rocket::sref("sqrt3"),
+      V_real(
+        1.7320508075688772935274463415059
+      ));
+
+    result.insert_or_assign(::rocket::sref("cbrt2"),
+      V_real(
+        1.2599210498948731647672106072782
+      ));
+
+    result.insert_or_assign(::rocket::sref("lg2"),
+      V_real(
+        0.30102999566398119521373889472449
+      ));
+
+    result.insert_or_assign(::rocket::sref("lb10"),
+      V_real(
+        3.3219280948873623478703194294894
       ));
 
     result.insert_or_assign(::rocket::sref("exp"),

@@ -22,6 +22,21 @@ int main()
           return ((y == 0) ? __abs(x) : __abs(1-x/y)) <= 0x1.0p-50;
         }
 
+        assert 180 / std.math.pi == std.math.rad;
+        assert std.math.deg * 180 == std.math.pi;
+        assert std.math.rad * std.math.deg == 1;
+
+        assert std.math.log(std.math.e) == 1;
+
+        assert std.math.exp(1) == std.math.e;
+        assert lt_1ups(std.math.sqrt2 * std.math.sqrt2, 2);
+        assert lt_1ups(std.math.sqrt3 * std.math.sqrt3, 3);
+        assert lt_1ups(std.math.cbrt2 * std.math.cbrt2 * std.math.cbrt2, 2);
+
+        assert std.math.log(2, 10) == std.math.lg2;
+        assert std.math.log(10, 2) == std.math.lb10;
+        assert std.math.lg2 * std.math.lb10 == 1;
+
         assert lt_1ups(std.math.exp(1), 2.7182818284590452);
         assert std.math.exp(3, 2) == 8;
         assert std.math.exp(2, 3) == 9;
