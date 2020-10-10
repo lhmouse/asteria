@@ -238,7 +238,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the power as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.math.exp"), ::rocket::cref(args));
     // Parse arguments.
@@ -266,7 +266,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.math.expm1"), ::rocket::cref(args));
     // Parse arguments.
@@ -294,7 +294,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the power as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.math.pow"), ::rocket::cref(args));
     // Parse arguments.
@@ -322,7 +322,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the logarithm as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.math.log"), ::rocket::cref(args));
     // Parse arguments.
@@ -350,7 +350,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.math.log1p"), ::rocket::cref(args));
     // Parse arguments.
@@ -376,7 +376,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.math.sin"), ::rocket::cref(args));
     // Parse arguments.
@@ -402,7 +402,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.math.cos"), ::rocket::cref(args));
     // Parse arguments.
@@ -429,7 +429,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
  * Returns an array of two reals. The first element is the sine
    and the other is the cosine.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.math.sincos"), ::rocket::cref(args));
     // Parse arguments.
@@ -455,7 +455,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.math.tan"), ::rocket::cref(args));
     // Parse arguments.
@@ -481,7 +481,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.math.asin"), ::rocket::cref(args));
     // Parse arguments.
@@ -507,7 +507,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.math.acos"), ::rocket::cref(args));
     // Parse arguments.
@@ -533,7 +533,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.math.atan"), ::rocket::cref(args));
     // Parse arguments.
@@ -559,7 +559,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.math.atan2"), ::rocket::cref(args));
     // Parse arguments.
@@ -590,7 +590,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the length as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.math.hypot"), ::rocket::cref(args));
     // Parse variadic arguments.
@@ -616,7 +616,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.math.sinh"), ::rocket::cref(args));
     // Parse arguments.
@@ -642,7 +642,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.math.cosh"), ::rocket::cref(args));
     // Parse arguments.
@@ -668,7 +668,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.math.tanh"), ::rocket::cref(args));
     // Parse arguments.
@@ -694,7 +694,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.math.asinh"), ::rocket::cref(args));
     // Parse arguments.
@@ -720,7 +720,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.math.acosh"), ::rocket::cref(args));
     // Parse arguments.
@@ -746,7 +746,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.math.atanh"), ::rocket::cref(args));
     // Parse arguments.
@@ -772,7 +772,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.math.erf"), ::rocket::cref(args));
     // Parse arguments.
@@ -798,7 +798,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.math.cerf"), ::rocket::cref(args));
     // Parse arguments.
@@ -824,7 +824,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.math.gamma"), ::rocket::cref(args));
     // Parse arguments.
@@ -851,7 +851,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
   * Returns the result as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.math.lgamma"), ::rocket::cref(args));
     // Parse arguments.

@@ -72,7 +72,7 @@ create_bindings_debug(V_object& result, API_Version /*version*/)
   * Returns the number of bytes written if the operation succeeds,
     or `null` otherwise.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.debug.logf"), ::rocket::cref(args));
     // Parse variadic arguments.
@@ -104,7 +104,7 @@ create_bindings_debug(V_object& result, API_Version /*version*/)
   * Returns the number of bytes written if the operation succeeds,
     or `null` otherwise.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.debug.dump"), ::rocket::cref(args));
     // Parse arguments.

@@ -357,7 +357,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
   * Throws an exception if standard input is binary-oriented, or if
     a read error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.io.getc"), ::rocket::cref(args));
     // Parse arguments.
@@ -389,7 +389,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     a read error occurs, or if source data cannot be converted to a
     valid UTF code point sequence.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.io.getln"), ::rocket::cref(args));
     // Parse arguments.
@@ -419,7 +419,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     if source data cannot be converted to a valid UTF code point
     sequence, or if a write error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.io.putc"), ::rocket::cref(args));
     // Parse arguments.
@@ -457,7 +457,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     if source data cannot be converted to a valid UTF code point
     sequence, or if a write error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.io.putln"), ::rocket::cref(args));
     // Parse arguments.
@@ -488,7 +488,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
    if source data cannot be converted to a valid UTF code point
    sequence, or if a write error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.io.putf"), ::rocket::cref(args));
     // Parse arguments.
@@ -521,7 +521,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
     a read error occurs, or if source data cannot be converted to a
     valid UTF code point sequence.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.io.read"), ::rocket::cref(args));
     // Parse arguments.
@@ -551,7 +551,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
   * Throws an exception if standard output is text-oriented, or if
     a write error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.io.write"), ::rocket::cref(args));
     // Parse arguments.
@@ -579,7 +579,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
 
   * Throws an exception if a write error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.io.flush"), ::rocket::cref(args));
     // Parse arguments.

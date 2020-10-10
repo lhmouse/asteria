@@ -1692,7 +1692,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns the specified substring of `text`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.slice"), ::rocket::cref(args));
     // Parse arguments.
@@ -1735,7 +1735,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns a string with the subrange replaced.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.replace"), ::rocket::cref(args));
     Argument_Reader::State state;
@@ -1777,7 +1777,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     `text2`, a negative integer if `text1` compares less than
     `text2`, or zero if `text1` compares equal to `text2`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.compare"), ::rocket::cref(args));
     // Parse arguments.
@@ -1807,7 +1807,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
   * Returns `true` if `prefix` is a prefix of `text`, or `false`
     otherwise.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.starts_with"), ::rocket::cref(args));
     // Parse arguments.
@@ -1836,7 +1836,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
   * Returns `true` if `suffix` is a suffix of `text`, or `false`
     otherwise.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.ends_with"), ::rocket::cref(args));
     // Parse arguments.
@@ -1885,7 +1885,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     `pattern` in `text` if one is found, which is always
     non-negative, or `null` otherwise.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.find"), ::rocket::cref(args));
     Argument_Reader::State state;
@@ -1946,7 +1946,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     `pattern` in `text` if one is found, which is always
     non-negative, or `null` otherwise.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.rfind"), ::rocket::cref(args));
     Argument_Reader::State state;
@@ -2010,7 +2010,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
   * Returns the string with `pattern` replaced. If `text` does not
     contain `pattern`, it is returned intact.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.find_and_replace"), ::rocket::cref(args));
     Argument_Reader::State state;
@@ -2071,7 +2071,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
   * Returns the subscript of the first byte found, which is always
     non-negative; or `null` if no such byte exists.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.find_any_of"), ::rocket::cref(args));
     Argument_Reader::State state;
@@ -2131,7 +2131,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
   * Returns the subscript of the last byte found, which is always
     non-negative; or `null` if no such byte exists.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.rfind_any_of"), ::rocket::cref(args));
     Argument_Reader::State state;
@@ -2191,7 +2191,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
   * Returns the subscript of the first byte found, which is always
     non-negative; or `null` if no such byte exists.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.find_not_of"), ::rocket::cref(args));
     Argument_Reader::State state;
@@ -2251,7 +2251,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
   * Returns the subscript of the last byte found, which is always
     non-negative; or `null` if no such byte exists.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.rfind_not_of"), ::rocket::cref(args));
     Argument_Reader::State state;
@@ -2293,7 +2293,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns the reversed string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.reverse"), ::rocket::cref(args));
     // Parse arguments.
@@ -2322,7 +2322,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns the trimmed string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.trim"), ::rocket::cref(args));
     // Parse arguments.
@@ -2352,7 +2352,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns the trimmed string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.triml"), ::rocket::cref(args));
     // Parse arguments.
@@ -2382,7 +2382,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns the trimmed string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.trimr"), ::rocket::cref(args));
     // Parse arguments.
@@ -2414,7 +2414,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Throws an exception if `padding` is empty.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.padl"), ::rocket::cref(args));
     // Parse arguments.
@@ -2447,7 +2447,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Throws an exception if `padding` is empty.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.padr"), ::rocket::cref(args));
     // Parse arguments.
@@ -2477,7 +2477,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns a new string after the conversion.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.to_upper"), ::rocket::cref(args));
     // Parse arguments.
@@ -2505,7 +2505,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns a new string after the conversion.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.to_lower"), ::rocket::cref(args));
     // Parse arguments.
@@ -2539,7 +2539,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns the translated string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.translate"), ::rocket::cref(args));
     // Parse arguments.
@@ -2575,7 +2575,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Throws an exception if `limit` is negative or zero.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.explode"), ::rocket::cref(args));
     // Parse arguments.
@@ -2606,7 +2606,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
   * Returns a string containing all segments. If `segments` is
     empty, an empty string is returned.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.implode"), ::rocket::cref(args));
     // Parse arguments.
@@ -2638,7 +2638,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
   * Returns the encoded string. If `data` is empty, an empty
     string is returned.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.hex_encode"), ::rocket::cref(args));
     // Parse arguments.
@@ -2674,7 +2674,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Throws an exception if the string is invalid.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.hex_decode"), ::rocket::cref(args));
     // Parse arguments.
@@ -2705,7 +2705,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns the encoded string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.base32_encode"), ::rocket::cref(args));
     // Parse arguments.
@@ -2739,7 +2739,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Throws an exception if the string is invalid.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.base32_decode"), ::rocket::cref(args));
     // Parse arguments.
@@ -2767,7 +2767,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns the encoded string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.base64_encode"), ::rocket::cref(args));
     // Parse arguments.
@@ -2800,7 +2800,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Throws an exception if the string is invalid.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.base64_decode"), ::rocket::cref(args));
     // Parse arguments.
@@ -2831,7 +2831,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
   * Returns the encoded string. If `data` is empty, an empty
     string is returned.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.url_encode"), ::rocket::cref(args));
     // Parse arguments.
@@ -2865,7 +2865,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Throws an exception if the string contains invalid characters.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.url_decode"), ::rocket::cref(args));
     // Parse arguments.
@@ -2895,7 +2895,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
   * Returns the encoded string. If `data` is empty, an empty
     string is returned.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.url_encode"), ::rocket::cref(args));
     // Parse arguments.
@@ -2926,7 +2926,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Throws an exception if the string contains invalid characters.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.url_decode"), ::rocket::cref(args));
     // Parse arguments.
@@ -2952,7 +2952,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns `true` if `text` is valid, or `false` otherwise.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.utf8_validate"), ::rocket::cref(args));
     // Parse arguments.
@@ -2985,7 +2985,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Throws an exception on failure.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.utf8_encode"), ::rocket::cref(args));
     // Parse arguments.
@@ -3024,7 +3024,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Throws an exception on failure.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.utf8_decode"), ::rocket::cref(args));
     // Parse arguments.
@@ -3053,7 +3053,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns the packed string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.pack_8"), ::rocket::cref(args));
     // Parse arguments.
@@ -3086,7 +3086,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns an array containing unpacked integers.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.unpack_8"), ::rocket::cref(args));
     // Parse arguments.
@@ -3115,7 +3115,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns the packed string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.pack_16be"), ::rocket::cref(args));
     // Parse arguments.
@@ -3152,7 +3152,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
   * Throws an exception if the length of `text` is not a multiple
     of 2.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.unpack_16be"), ::rocket::cref(args));
     // Parse arguments.
@@ -3181,7 +3181,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns the packed string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.pack_16le"), ::rocket::cref(args));
     // Parse arguments.
@@ -3218,7 +3218,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
   * Throws an exception if the length of `text` is not a multiple
     of 2.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.unpack_16le"), ::rocket::cref(args));
     // Parse arguments.
@@ -3247,7 +3247,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns the packed string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.pack_32be"), ::rocket::cref(args));
     // Parse arguments.
@@ -3284,7 +3284,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
   * Throws an exception if the length of `text` is not a multiple
     of 4.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.unpack_32be"), ::rocket::cref(args));
     // Parse arguments.
@@ -3313,7 +3313,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns the packed string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.pack_32le"), ::rocket::cref(args));
     // Parse arguments.
@@ -3350,7 +3350,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
   * Throws an exception if the length of `text` is not a multiple
     of 4.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.unpack_32le"), ::rocket::cref(args));
     // Parse arguments.
@@ -3378,7 +3378,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns the packed string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.pack_64be"), ::rocket::cref(args));
     // Parse arguments.
@@ -3414,7 +3414,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
   * Throws an exception if the length of `text` is not a multiple
     of 8.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.unpack_64be"), ::rocket::cref(args));
     // Parse arguments.
@@ -3442,7 +3442,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Returns the packed string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.pack_64le"), ::rocket::cref(args));
     // Parse arguments.
@@ -3479,7 +3479,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
   * Throws an exception if the length of `text` is not a multiple
     of 8.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.unpack_64le"), ::rocket::cref(args));
     // Parse arguments.
@@ -3518,7 +3518,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     sequences, or when a placeholder sequence has no corresponding
     argument.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.format"), ::rocket::cref(args));
     // Parse arguments.
@@ -3579,7 +3579,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Throws an exception if `pattern` is not a valid PCRE.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.pcre_find"), ::rocket::cref(args));
     Argument_Reader::State state;
@@ -3657,7 +3657,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Throws an exception if `pattern` is not a valid PCRE.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.pcre_match"), ::rocket::cref(args));
     Argument_Reader::State state;
@@ -3735,7 +3735,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Throws an exception if `pattern` is not a valid PCRE.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.pcre_named_match"), ::rocket::cref(args));
     Argument_Reader::State state;
@@ -3807,7 +3807,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
   * Throws an exception if `pattern` is not a valid PCRE.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.string.pcre_replace"), ::rocket::cref(args));
     Argument_Reader::State state;

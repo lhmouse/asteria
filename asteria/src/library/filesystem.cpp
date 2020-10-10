@@ -625,7 +625,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
   * Returns a string containing the path to the current working
     directory.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.filesystem.get_working_directory"), ::rocket::cref(args));
     // Parse arguments.
@@ -654,7 +654,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
 
   * Throws an exception if `path` is invalid or inaccessible.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.filesystem.get_real_path"), ::rocket::cref(args));
     // Parse arguments.
@@ -697,7 +697,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
 
     On failure, `null` is returned.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.filesystem.get_information"), ::rocket::cref(args));
     // Parse arguments.
@@ -724,7 +724,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
 
   * Throws an exception on failure.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.filesystem.remove_recursive"), ::rocket::cref(args));
     // Parse arguments.
@@ -756,7 +756,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
   * Throws an exception if the file or directory at `path` cannot
     be removed.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.filesystem.move_from"), ::rocket::cref(args));
     // Parse arguments.
@@ -797,7 +797,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
   * Throws an exception if `path` does not designate a directory,
     or some other errors occur.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.filesystem.directory_list"), ::rocket::cref(args));
     // Parse arguments.
@@ -830,7 +830,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
   * Throws an exception if `path` designates a non-directory, or
     some other errors occur.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.filesystem.directory_create"), ::rocket::cref(args));
     // Parse arguments.
@@ -861,7 +861,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
   * Throws an exception if `path` designates a non-directory, or
     some other errors occur.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.filesystem.directory_remove"), ::rocket::cref(args));
     // Parse arguments.
@@ -894,7 +894,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
   * Throws an exception if `offset` is negative, or a read error
     occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.filesystem.file_read"), ::rocket::cref(args));
     // Parse arguments.
@@ -938,7 +938,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
   * Throws an exception if `offset` is negative, or a read error
     occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
+*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.filesystem.file_stream"), ::rocket::cref(args));
     // Parse arguments.
@@ -973,7 +973,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
   * Throws an exception if `offset` is negative, or a write error
     occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.filesystem.file_write"), ::rocket::cref(args));
     // Parse arguments.
@@ -1006,7 +1006,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
   * Throws an exception if `offset` is negative, or a write error
     occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.filesystem.file_append"), ::rocket::cref(args));
     // Parse arguments.
@@ -1037,7 +1037,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
 
   * Throws an exception on failure.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.filesystem.file_copy_from"), ::rocket::cref(args));
     // Parse arguments.
@@ -1069,7 +1069,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
   * Throws an exception if `path` designates a directory, or some
     other errors occur.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.filesystem.file_remove"), ::rocket::cref(args));
     // Parse arguments.

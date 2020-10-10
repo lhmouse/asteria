@@ -453,8 +453,7 @@ cow_opaque::
 get_opt()
 const
   {
-    auto ptr = this->m_sptr.get();
-    if(!ptr)
+    if(!this->m_sptr)
       this->do_throw_null_pointer();
 
     auto tsptr = ::rocket::dynamic_pointer_cast<const OpaqueT>(this->m_sptr);
@@ -467,28 +466,26 @@ rcptr<OpaqueT>
 cow_opaque::
 open_opt()
   {
-    auto ptr = this->m_sptr.get();
-    if(!ptr)
+    if(!this->m_sptr)
       this->do_throw_null_pointer();
 
     auto tsptr = ::rocket::dynamic_pointer_cast<OpaqueT>(this->m_sptr);
-    if(!tsptr)
+    if(tsptr.use_count() <= 2)
       return tsptr;
 
     // Clone the existent instance if it is shared.
     // If the overriding function returns a null pointer, the shared instance is used.
     // Note the covariance of the return type of `clone_opt()`.
-    rcptr<Abstract_Opaque> sptr2;
-    auto tptr2 = tsptr->clone_opt(sptr2);
-    if(tptr2) {
-      // Take ownership of the clone.
-      // Don't introduce a dependent name here.
-      ROCKET_ASSERT(tptr2 == sptr2.get());
-      this->m_sptr.swap(sptr2);
-      ptr = tptr2;
-      ptr->add_reference();
-      tsptr.reset(tptr2);
-    }
+    rcptr<Abstract_Opaque> csptr;
+    auto cptr = tsptr->clone_opt(csptr);  // `clone_opt()` is a dependent name
+    if(!cptr)
+      return tsptr;
+
+    // Take ownership of the clone.
+    ROCKET_ASSERT(cptr == csptr.get());
+    csptr->add_reference();
+    tsptr.reset(cptr);
+    this->m_sptr.swap(csptr);
     return tsptr;
   }
 
@@ -507,8 +504,8 @@ clone_opaque(rcptr<Abstract_Opaque>& output, const OpaqueT& src)
 // Function type support
 using simple_function =
           Reference& (Reference& self,  // `this` (input) and return (output) reference
-                      cow_vector<Reference>&& args,  // positional arguments
-                      Global_Context& global);
+                      Global_Context& global,
+                      cow_vector<Reference>&& args);  // positional arguments)
 
 class cow_function
   {

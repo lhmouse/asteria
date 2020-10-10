@@ -71,7 +71,7 @@ invoke_ptc_aware(Reference& self, Global_Context& global, cow_vector<Reference>&
 const
   {
     if(auto fptr = this->m_fptr)
-      return fptr(self, ::std::move(args), global);  // static
+      return fptr(self, global, ::std::move(args));  // static
 
     if(auto ptr = this->m_sptr.get())
       return ptr->invoke_ptc_aware(self, global, ::std::move(args));  // dynamic

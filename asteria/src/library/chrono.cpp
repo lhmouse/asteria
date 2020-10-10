@@ -481,7 +481,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
   * Returns the number of milliseconds since the Unix epoch,
     represented as an integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.chrono.utc_now"), ::rocket::cref(args));
     // Parse arguments.
@@ -507,7 +507,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
   * Returns the number of milliseconds since `1970-01-01 00:00:00`
     in the local time zone, represented as an integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.chrono.local_now"), ::rocket::cref(args));
     // Parse arguments.
@@ -536,7 +536,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
   * Returns the number of milliseconds since an unspecified time
     point, represented as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.chrono.hires_now"), ::rocket::cref(args));
     // Parse arguments.
@@ -565,7 +565,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
   * Returns the number of milliseconds since an unspecified time
     point, represented as an integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.chrono.steady_now"), ::rocket::cref(args));
     // Parse arguments.
@@ -592,7 +592,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
   * Returns the number of milliseconds since `1970-01-01 00:00:00`
     in the local time zone, represented as an integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.chrono.local_from_utc"), ::rocket::cref(args));
     // Parse arguments.
@@ -621,7 +621,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
   * Returns the number of milliseconds since the Unix epoch,
     represented as an integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.chrono.utc_from_local"), ::rocket::cref(args));
     // Parse arguments.
@@ -651,7 +651,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
 
   * Returns a string representing the time point.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.chrono.utc_format"), ::rocket::cref(args));
     // Parse arguments.
@@ -683,7 +683,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
 
   * Throws an exception if the string is invalid.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.chrono.utc_parse"), ::rocket::cref(args));
     // Parse arguments.

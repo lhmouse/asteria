@@ -743,7 +743,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Throws an exception if `value` is the integer `-0x1p63`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.abs"), ::rocket::cref(args));
     // Parse arguments.
@@ -776,7 +776,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns `-1` if `value` is negative, or `0` otherwise.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.sign"), ::rocket::cref(args));
     // Parse arguments.
@@ -811,7 +811,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
   * Returns `true` if `value` is an integer or is a real that
     is neither an infinity or a NaN, or `false` otherwise.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.is_finite"), ::rocket::cref(args));
     // Parse arguments.
@@ -846,7 +846,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
   * Returns `true` if `value` is a real that denotes an infinity;
     or `false` otherwise.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.is_infinity"), ::rocket::cref(args));
     // Parse arguments.
@@ -880,7 +880,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
   * Returns `true` if `value` is a real denoting a NaN, or
     `false` otherwise.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.is_nan"), ::rocket::cref(args));
     // Parse arguments.
@@ -917,7 +917,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
   * Throws an exception if `lower` is not less than or equal to
     `upper`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.clamp"), ::rocket::cref(args));
     // Parse arguments.
@@ -956,7 +956,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the rounded value.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.round"), ::rocket::cref(args));
     // Parse arguments.
@@ -993,7 +993,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
   * Throws an exception if the result cannot be represented as an
     integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.iround"), ::rocket::cref(args));
     // Parse arguments.
@@ -1026,7 +1026,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the rounded value.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.floor"), ::rocket::cref(args));
     // Parse arguments.
@@ -1063,7 +1063,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
   * Throws an exception if the result cannot be represented as an
     integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.ifloor"), ::rocket::cref(args));
     // Parse arguments.
@@ -1096,7 +1096,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the rounded value.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.ceil"), ::rocket::cref(args));
     // Parse arguments.
@@ -1133,7 +1133,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
   * Throws an exception if the result cannot be represented as an
     integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.iceil"), ::rocket::cref(args));
     // Parse arguments.
@@ -1166,7 +1166,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the rounded value.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.trunc"), ::rocket::cref(args));
     // Parse arguments.
@@ -1202,7 +1202,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
   * Throws an exception if the result cannot be represented as an
     integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.itrunc"), ::rocket::cref(args));
     // Parse arguments.
@@ -1237,7 +1237,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Throws an exception if `limit` is zero or non-finite.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
+*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.random"), ::rocket::cref(args));
     // Parse arguments.
@@ -1264,7 +1264,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the square root of `x` as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.sqrt"), ::rocket::cref(args));
     // Parse arguments.
@@ -1292,7 +1292,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the value of `x * y + z` as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.fma"), ::rocket::cref(args));
     // Parse arguments.
@@ -1322,7 +1322,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the remainder as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.remainder"), ::rocket::cref(args));
     // Parse arguments.
@@ -1355,7 +1355,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     `frac` that is of type real and whose second element is `exp`
     that is of type integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.frexp"), ::rocket::cref(args));
     // Parse arguments.
@@ -1383,7 +1383,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the product as a real.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.ldexp"), ::rocket::cref(args));
     // Parse arguments.
@@ -1413,7 +1413,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the reduced sum of `x` and `y`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.addm"), ::rocket::cref(args));
     // Parse arguments.
@@ -1444,7 +1444,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the reduced difference of `x` and `y`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.subm"), ::rocket::cref(args));
     // Parse arguments.
@@ -1475,7 +1475,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the reduced product of `x` and `y`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.mulm"), ::rocket::cref(args));
     // Parse arguments.
@@ -1507,7 +1507,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the saturated sum of `x` and `y`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.adds"), ::rocket::cref(args));
     // Parse arguments.
@@ -1545,7 +1545,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the saturated difference of `x` and `y`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.subs"), ::rocket::cref(args));
     // Parse arguments.
@@ -1583,7 +1583,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the saturated product of `x` and `y`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.muls"), ::rocket::cref(args));
     // Parse arguments.
@@ -1618,7 +1618,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
   * Returns the bit count as an integer. If `x` is zero, `64` is
     returned.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.lzcnt"), ::rocket::cref(args));
     // Parse arguments.
@@ -1646,7 +1646,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
   * Returns the bit count as an integer. If `x` is zero, `64` is
     returned.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.tzcnt"), ::rocket::cref(args));
     // Parse arguments.
@@ -1673,7 +1673,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Returns the bit count as an integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.popcnt"), ::rocket::cref(args));
     // Parse arguments.
@@ -1708,7 +1708,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Throws an exception if `m` is negative or greater than `64`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.rotl"), ::rocket::cref(args));
     // Parse arguments.
@@ -1745,7 +1745,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Throws an exception if `m` is negative or greater than `64`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.rotr"), ::rocket::cref(args));
     // Parse arguments.
@@ -1787,7 +1787,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     or if `ebase` is neither `2` nor `10`, or if `base` is not `10`
     but `ebase` is `10`.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.format"), ::rocket::cref(args));
     // Parse arguments.
@@ -1838,7 +1838,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Throws an exception on failure.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.parse_integer"), ::rocket::cref(args));
     // Parse arguments.
@@ -1886,7 +1886,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
   * Throws an exception on failure.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.numeric.parse_real"), ::rocket::cref(args));
     // Parse arguments.

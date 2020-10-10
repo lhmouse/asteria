@@ -564,7 +564,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     only informative. If `generation` is not valid, `null` is
     returned.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
+*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.system.gc_count_variables"), ::rocket::cref(args));
     // Parse arguments.
@@ -592,7 +592,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
   * Returns the threshold. If `generation` is not valid, `null` is
     returned.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
+*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.system.gc_get_threshold"), ::rocket::cref(args));
     // Parse arguments.
@@ -625,7 +625,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
   * Returns the threshold before the call. If `generation` is not
     valid, `null` is returned.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
+*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.system.gc_set_threshold"), ::rocket::cref(args));
     // Parse arguments.
@@ -656,7 +656,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
   * Returns the number of variables that have been collected in
     total.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
+*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.system.gc_collect"), ::rocket::cref(args));
     // Parse arguments.
@@ -685,7 +685,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 
   * Throws an exception if `name` is not valid.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.system.env_get_variable"), ::rocket::cref(args));
     // Parse arguments.
@@ -712,7 +712,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
   * Returns an object of strings which consists of copies of all
     environment variables.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.system.env_get_variables"), ::rocket::cref(args));
     // Parse arguments.
@@ -751,7 +751,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 
   * Returns a UUID as a string of 36 characters without braces.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& global) -> Reference&
+*[](Reference& self, Global_Context& global, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.system.uuid"), ::rocket::cref(args));
     // Parse arguments.
@@ -775,7 +775,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 
   * Returns the process ID as an integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.system.proc_get_pid"), ::rocket::cref(args));
     // Parse arguments.
@@ -798,7 +798,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 
   * Returns the parent process ID as an integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.system.proc_get_ppid"), ::rocket::cref(args));
     // Parse arguments.
@@ -821,7 +821,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 
   * Returns the real user ID as an integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.system.proc_get_uid"), ::rocket::cref(args));
     // Parse arguments.
@@ -844,7 +844,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 
   * Returns the effective user ID as an integer.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.system.proc_get_euid"), ::rocket::cref(args));
     // Parse arguments.
@@ -879,7 +879,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
   * Throws an exception if the program could not be launched or its
     exit status could not be retrieved.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.system.proc_invoke"), ::rocket::cref(args));
     // Parse arguments.
@@ -910,7 +910,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 
   * Throws an exception on failure.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.system.proc_daemonize"), ::rocket::cref(args));
     // Parse arguments.
@@ -943,7 +943,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
   * Throws an exception if the file could not be opened, or there
     was an error in it.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.system.conf_load_file"), ::rocket::cref(args));
     // Parse arguments.

@@ -788,7 +788,7 @@ create_bindings_json(V_object& result, API_Version /*version*/)
 
   * Returns the formatted text as a string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.json.format"), ::rocket::cref(args));
     Argument_Reader::State state;
@@ -827,7 +827,7 @@ create_bindings_json(V_object& result, API_Version /*version*/)
 
   * Returns the formatted text as a string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.json.format5"), ::rocket::cref(args));
     Argument_Reader::State state;
@@ -877,7 +877,7 @@ create_bindings_json(V_object& result, API_Version /*version*/)
 
   * Throws an exception if the string is invalid.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.json.parse"), ::rocket::cref(args));
     // Parse arguments.
@@ -907,7 +907,7 @@ create_bindings_json(V_object& result, API_Version /*version*/)
   * Throws an exception if a read error occurs, or if the string is
     invalid.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.json.parse_file"), ::rocket::cref(args));
     // Parse arguments.

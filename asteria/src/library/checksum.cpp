@@ -108,7 +108,7 @@ do_construct_crc32(V_object& result)
   * Puts `data` into the hasher denoted by `this`, which shall be
     a byte string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.checksum.CRC32().update"), ::rocket::cref(args));
     // Get the hasher.
@@ -139,7 +139,7 @@ do_construct_crc32(V_object& result)
   * Returns the checksum as an integer, whose high-order 32 bits
     are always zeroes.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.checksum.CRC32().finish"), ::rocket::cref(args));
     // Get the hasher.
@@ -232,7 +232,7 @@ do_construct_fnv1a32(V_object& result)
   * Puts `data` into the hasher denoted by `this`, which shall be
     a byte string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.checksum.FNV1a32().update"), ::rocket::cref(args));
     // Get the hasher.
@@ -263,7 +263,7 @@ do_construct_fnv1a32(V_object& result)
   * Returns the checksum as an integer, whose high-order 32 bits
     are always zeroes.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.checksum.FNV1a32().finish"), ::rocket::cref(args));
     // Get the hasher.
@@ -602,7 +602,7 @@ do_construct_md5(V_object& result)
   * Puts `data` into the hasher denoted by `this`, which shall be
     a byte string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.checksum.MD5().update"), ::rocket::cref(args));
     // Get the hasher.
@@ -633,7 +633,7 @@ do_construct_md5(V_object& result)
   * Returns the checksum as a string of 32 hexadecimal digits in
     uppercase.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.checksum.MD5().finish"), ::rocket::cref(args));
     // Get the hasher.
@@ -929,7 +929,7 @@ do_construct_sha1(V_object& result)
   * Puts `data` into the hasher denoted by `this`, which shall be
     a byte string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.checksum.SHA1().update"), ::rocket::cref(args));
     // Get the hasher.
@@ -960,7 +960,7 @@ do_construct_sha1(V_object& result)
   * Returns the checksum as  a string of 40 hexadecimal digits in
     uppercase.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.checksum.SHA1().finish"), ::rocket::cref(args));
     // Get the hasher.
@@ -1228,7 +1228,7 @@ do_construct_sha256(V_object& result)
   * Puts `data` into the hasher denoted by `this`, which shall be
     a byte string.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.checksum.SHA256().update"), ::rocket::cref(args));
     // Get the hasher.
@@ -1259,7 +1259,7 @@ do_construct_sha256(V_object& result)
   * Returns the checksum as  a string of 64 hexadecimal digits in
     uppercase.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.checksum.SHA256().finish"), ::rocket::cref(args));
     // Get the hasher.
@@ -1553,7 +1553,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     making it suitable for further data as if it had just been
     created.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.checksum.CRC32"), ::rocket::cref(args));
     // Parse arguments.
@@ -1591,7 +1591,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
   * Returns the CRC-32 checksum as an integer. The high-order 32
     bits are always zeroes.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.checksum.crc32"), ::rocket::cref(args));
     // Parse arguments.
@@ -1632,7 +1632,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
 
   * Throws an exception if a read error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.checksum.crc32_file"), ::rocket::cref(args));
     // Parse arguments.
@@ -1671,7 +1671,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     making it suitable for further data as if it had just been
     created.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.checksum.FNV1a32"), ::rocket::cref(args));
     // Parse arguments.
@@ -1709,7 +1709,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
   * Returns the 32-bit FNV-1a checksum as an integer. The
     high-order 32 bits are always zeroes.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.checksum.fnv1a32"), ::rocket::cref(args));
     // Parse arguments.
@@ -1754,7 +1754,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
 
   * Throws an exception if a read error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.checksum.fnv1a32_file"), ::rocket::cref(args));
     // Parse arguments.
@@ -1790,7 +1790,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     hexadecimal digits in uppercase, then resets the hasher, making
     it suitable for further data as if it had just been created.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.checksum.MD5"), ::rocket::cref(args));
     // Parse arguments.
@@ -1828,7 +1828,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
   * Returns the MD5 checksum as a string of 32 hexadecimal digits
     in uppercase.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.checksum.md5"), ::rocket::cref(args));
     // Parse arguments.
@@ -1869,7 +1869,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
 
   * Throws an exception if a read error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.checksum.md5_file"), ::rocket::cref(args));
     // Parse arguments.
@@ -1905,7 +1905,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     hexadecimal digits in uppercase, then resets the hasher, making
     it suitable for further data as if it had just been created.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.checksum.SHA1"), ::rocket::cref(args));
     // Parse arguments.
@@ -1943,7 +1943,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
   * Returns the SHA-1 checksum as a string of 40 hexadecimal
     digits in uppercase.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.checksum.sha1"), ::rocket::cref(args));
     // Parse arguments.
@@ -1984,7 +1984,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
 
   * Throws an exception if a read error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.checksum.sha1_file"), ::rocket::cref(args));
     // Parse arguments.
@@ -2020,7 +2020,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
     hexadecimal digits in uppercase, then resets the hasher, making
     it suitable for further data as if it had just been created.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.checksum.SHA256"), ::rocket::cref(args));
     // Parse arguments.
@@ -2058,7 +2058,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
   * Returns the SHA-256 checksum as a string of 64 hexadecimal
     digits in uppercase.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.checksum.sha256"), ::rocket::cref(args));
     // Parse arguments.
@@ -2099,7 +2099,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
 
   * Throws an exception if a read error occurs.
 )'''''''''''''''" """""""""""""""""""""""""""""""""""""""""""""""",
-*[](Reference& self, cow_vector<Reference>&& args, Global_Context& /*global*/) -> Reference&
+*[](Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) -> Reference&
   {
     Argument_Reader reader(::rocket::sref("std.checksum.sha256_file"), ::rocket::cref(args));
     // Parse arguments.
