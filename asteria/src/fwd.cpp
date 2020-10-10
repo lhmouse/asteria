@@ -56,8 +56,8 @@ cow_function::
 describe(tinyfmt& fmt)
 const
   {
-    if(auto fptr = this->m_fptr)
-      return format(fmt, "native function `$1`: $2", (void*)fptr, this->m_desc);  // static
+    if(this->m_fptr)
+      return fmt << "native function " << this->m_desc;  // static
 
     if(auto ptr = this->m_sptr.get())
       return ptr->describe(fmt);  // dynamic
