@@ -136,7 +136,7 @@ struct constexpr_bitset
   : uint32_storage<typename pack_ubyte<typename pack_bool<u32seq<M...>>::type>::type>
   { };
 
-template<size_t indexT, typename targetT, typename... alternsT>
+template<size_t indexT, typename targetT, typename... altsT>
 struct type_finder
   // no value
   { };
@@ -151,7 +151,7 @@ struct type_finder<indexT, targetT, targetT, restT...>
   : integral_constant<size_t, indexT>  // found
   { };
 
-template<size_t indexT, typename... alternsT>
+template<size_t indexT, typename... altsT>
 struct type_getter
   // no type
   { };
@@ -173,109 +173,109 @@ void
 rethrow_current_exception()
   { throw;  }
 
-template<typename alternT>
+template<typename altT>
 void*
 wrapped_copy_construct(void* dptr, const void* sptr)
   {
-    return noadl::construct_at(static_cast<alternT*>(dptr), *static_cast<const alternT*>(sptr));
+    return noadl::construct_at(static_cast<altT*>(dptr), *static_cast<const altT*>(sptr));
   }
 
-template<typename... alternsT>
+template<typename... altsT>
 ROCKET_FORCED_INLINE_FUNCTION
 void*
 dispatch_copy_construct(size_t k, void* dptr, const void* sptr)
   {
-    static constexpr constexpr_bitset<is_trivially_copy_constructible<alternsT>::value...> trivial;
+    static constexpr constexpr_bitset<is_trivially_copy_constructible<altsT>::value...> trivial;
     using function_type = void* (void*, const void*);
-    static constexpr function_type* functions[] = { wrapped_copy_construct<alternsT>... };
+    static constexpr function_type* functions[] = { wrapped_copy_construct<altsT>... };
 
     if(ROCKET_EXPECT(trivial[k]))
-      return ::std::memcpy(dptr, sptr, sizeof(typename aligned_union<1, alternsT...>::type));
+      return ::std::memcpy(dptr, sptr, sizeof(typename aligned_union<1, altsT...>::type));
     else
       return functions[k](dptr, sptr);
   }
 
-template<typename alternT>
+template<typename altT>
 void*
 wrapped_move_construct(void* dptr, void* sptr)
   {
-    return noadl::construct_at(static_cast<alternT*>(dptr), ::std::move(*static_cast<alternT*>(sptr)));
+    return noadl::construct_at(static_cast<altT*>(dptr), ::std::move(*static_cast<altT*>(sptr)));
   }
 
-template<typename... alternsT>
+template<typename... altsT>
 ROCKET_FORCED_INLINE_FUNCTION
 void*
 dispatch_move_construct(size_t k, void* dptr, void* sptr)
   {
-    static constexpr constexpr_bitset<is_trivially_move_constructible<alternsT>::value...> trivial;
+    static constexpr constexpr_bitset<is_trivially_move_constructible<altsT>::value...> trivial;
     using function_type = void* (void*, void*);
-    static constexpr function_type* functions[] = { wrapped_move_construct<alternsT>... };
+    static constexpr function_type* functions[] = { wrapped_move_construct<altsT>... };
 
     if(ROCKET_EXPECT(trivial[k]))
-      return ::std::memcpy(dptr, sptr, sizeof(typename aligned_union<1, alternsT...>::type));
+      return ::std::memcpy(dptr, sptr, sizeof(typename aligned_union<1, altsT...>::type));
     else
       return functions[k](dptr, sptr);
   }
 
-template<typename alternT>
+template<typename altT>
 void*
 wrapped_copy_assign(void* dptr, const void* sptr)
   {
-    return ::std::addressof(*static_cast<alternT*>(dptr) = *static_cast<const alternT*>(sptr));
+    return ::std::addressof(*static_cast<altT*>(dptr) = *static_cast<const altT*>(sptr));
   }
 
-template<typename... alternsT>
+template<typename... altsT>
 ROCKET_FORCED_INLINE_FUNCTION
 void*
 dispatch_copy_assign(size_t k, void* dptr, const void* sptr)
   {
-    static constexpr constexpr_bitset<is_trivially_copy_assignable<alternsT>::value...> trivial;
+    static constexpr constexpr_bitset<is_trivially_copy_assignable<altsT>::value...> trivial;
     using function_type = void* (void*, const void*);
-    static constexpr function_type* functions[] = { wrapped_copy_assign<alternsT>... };
+    static constexpr function_type* functions[] = { wrapped_copy_assign<altsT>... };
 
     if(ROCKET_EXPECT(trivial[k]))
-      return ::std::memmove(dptr, sptr, sizeof(typename aligned_union<1, alternsT...>::type));
+      return ::std::memmove(dptr, sptr, sizeof(typename aligned_union<1, altsT...>::type));
     else
       return functions[k](dptr, sptr);
   }
 
-template<typename alternT>
+template<typename altT>
 void*
 wrapped_move_assign(void* dptr, void* sptr)
   {
-    return ::std::addressof(*static_cast<alternT*>(dptr) = ::std::move(*static_cast<alternT*>(sptr)));
+    return ::std::addressof(*static_cast<altT*>(dptr) = ::std::move(*static_cast<altT*>(sptr)));
   }
 
-template<typename... alternsT>
+template<typename... altsT>
 ROCKET_FORCED_INLINE_FUNCTION
 void*
 dispatch_move_assign(size_t k, void* dptr, void* sptr)
   {
-    static constexpr constexpr_bitset<is_trivially_move_assignable<alternsT>::value...> trivial;
+    static constexpr constexpr_bitset<is_trivially_move_assignable<altsT>::value...> trivial;
     using function_type = void* (void*, void*);
-    static constexpr function_type* functions[] = { wrapped_move_assign<alternsT>... };
+    static constexpr function_type* functions[] = { wrapped_move_assign<altsT>... };
 
     if(ROCKET_EXPECT(trivial[k]))
-      return ::std::memmove(dptr, sptr, sizeof(typename aligned_union<1, alternsT...>::type));
+      return ::std::memmove(dptr, sptr, sizeof(typename aligned_union<1, altsT...>::type));
     else
       return functions[k](dptr, sptr);
   }
 
-template<typename alternT>
+template<typename altT>
 void
 wrapped_destroy(void* dptr)
   {
-    return noadl::destroy_at(static_cast<alternT*>(dptr));
+    return noadl::destroy_at(static_cast<altT*>(dptr));
   }
 
-template<typename... alternsT>
+template<typename... altsT>
 ROCKET_FORCED_INLINE_FUNCTION
 void
 dispatch_destroy(size_t k, void* dptr)
   {
-    static constexpr constexpr_bitset<is_trivially_destructible<alternsT>::value...> trivial;
+    static constexpr constexpr_bitset<is_trivially_destructible<altsT>::value...> trivial;
     using function_type = void (void*);
-    static constexpr function_type* functions[] = { wrapped_destroy<alternsT>... };
+    static constexpr function_type* functions[] = { wrapped_destroy<altsT>... };
 
     if(ROCKET_EXPECT(trivial[k]))
       return;
@@ -283,60 +283,60 @@ dispatch_destroy(size_t k, void* dptr)
       return functions[k](dptr);
   }
 
-template<typename alternT>
+template<typename altT>
 void*
 wrapped_move_then_destroy(void* dptr, void* sptr)
   {
-    auto p = noadl::construct_at(static_cast<alternT*>(dptr), ::std::move(*static_cast<alternT*>(sptr)));
-    noadl::destroy_at(static_cast<alternT*>(sptr));
+    auto p = noadl::construct_at(static_cast<altT*>(dptr), ::std::move(*static_cast<altT*>(sptr)));
+    noadl::destroy_at(static_cast<altT*>(sptr));
     return p;
   }
 
-template<typename... alternsT>
+template<typename... altsT>
 ROCKET_FORCED_INLINE_FUNCTION
 void*
 dispatch_move_then_destroy(size_t k, void* dptr, void* sptr)
   {
-    static constexpr constexpr_bitset<conjunction<is_trivially_move_constructible<alternsT>,
-                                                  is_trivially_destructible<alternsT>>::value...> trivial;
+    static constexpr constexpr_bitset<conjunction<is_trivially_move_constructible<altsT>,
+                                                  is_trivially_destructible<altsT>>::value...> trivial;
     using function_type = void* (void*, void*);
-    static constexpr function_type* functions[] = { wrapped_move_then_destroy<alternsT>... };
+    static constexpr function_type* functions[] = { wrapped_move_then_destroy<altsT>... };
 
     if(ROCKET_EXPECT(trivial[k]))
-      return ::std::memcpy(dptr, sptr, sizeof(typename aligned_union<1, alternsT...>::type));
+      return ::std::memcpy(dptr, sptr, sizeof(typename aligned_union<1, altsT...>::type));
     else
       return functions[k](dptr, sptr);
   }
 
-template<typename alternT>
+template<typename altT>
 void
 wrapped_xswap(void* dptr, void* sptr)
   {
-    return noadl::xswap(*static_cast<alternT*>(dptr), *static_cast<alternT*>(sptr));
+    return noadl::xswap(*static_cast<altT*>(dptr), *static_cast<altT*>(sptr));
   }
 
-template<typename... alternsT>
+template<typename... altsT>
 ROCKET_FORCED_INLINE_FUNCTION
 void
 dispatch_swap(size_t k, void* dptr, void* sptr)
   {
-    static constexpr constexpr_bitset<conjunction<is_trivially_move_constructible<alternsT>,
-                                                  is_trivially_move_assignable<alternsT>,
-                                                  is_trivially_destructible<alternsT>>::value...> trivial;
+    static constexpr constexpr_bitset<conjunction<is_trivially_move_constructible<altsT>,
+                                                  is_trivially_move_assignable<altsT>,
+                                                  is_trivially_destructible<altsT>>::value...> trivial;
     using function_type = void (void*, void*);
-    static constexpr function_type* functions[] = { wrapped_xswap<alternsT>... };
+    static constexpr function_type* functions[] = { wrapped_xswap<altsT>... };
 
     if(ROCKET_EXPECT(trivial[k]))
-      return wrapped_xswap<typename aligned_union<1, alternsT...>::type>(dptr, sptr);
+      return wrapped_xswap<typename aligned_union<1, altsT...>::type>(dptr, sptr);
     else
       return functions[k](dptr, sptr);
   }
 
-template<typename alternT, typename voidT, typename visitorT>
+template<typename altT, typename voidT, typename visitorT>
 void
 wrapped_visit(voidT* sptr, visitorT&& visitor)
   {
-    ::std::forward<visitorT>(visitor)(*static_cast<alternT*>(sptr));
+    ::std::forward<visitorT>(visitor)(*static_cast<altT*>(sptr));
   }
 
 }  // namespace details_variant
