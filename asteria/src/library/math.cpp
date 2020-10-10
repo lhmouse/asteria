@@ -39,9 +39,6 @@ std_math_log(V_real x)
 V_real
 std_math_log(V_real base, V_real x)
   {
-    if((base == 1) || (base <= 0))
-      return ::std::numeric_limits<double>::quiet_NaN();
-
     if(base == 2.7182818284590452353602874713527)
       return ::log(x);
 
@@ -51,7 +48,9 @@ std_math_log(V_real base, V_real x)
     if(base == 10)
       return ::log10(x);
 
-    return ::log2(x) / ::log2(base);
+    auto r = ::log2(base);
+    return ::std::isgreater(r, 1) ? ::log2(x) / r
+             : ::std::numeric_limits<double>::quiet_NaN();
   }
 
 V_real
