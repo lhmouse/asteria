@@ -974,7 +974,88 @@ struct AIR_Traits_glvalue_to_prvalue
       }
   };
 
-struct AIR_Traits_push_immediate
+struct AIR_Traits_push_immediate_null
+  {
+    // `Uparam` is unused.
+    // `Sparam` is unused.
+
+    static
+    AIR_Status
+    execute(Executive_Context& ctx)
+      {
+        // Push a constant `null`.
+        Reference::S_constant xref = { };
+        ctx.stack().push(::std::move(xref));
+        return air_status_next;
+      }
+  };
+
+struct AIR_Traits_push_immediate_boolean
+  {
+    // `Uparam` is the value to push.
+    // `Sparam` is unused.
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_push_immediate& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.x32 = altr.value.as_boolean();
+        return up;
+      }
+
+    static
+    AIR_Status
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+      {
+        // Push a constant boolean.
+        Reference::S_constant xref = { V_boolean(up.x32) };
+        ctx.stack().push(::std::move(xref));
+        return air_status_next;
+      }
+  };
+
+constexpr
+bool
+do_is_int48(int64_t value)
+noexcept
+  { return (value >> 47) == (value >> 48);  }
+
+struct AIR_Traits_push_immediate_int48
+  {
+    // `Uparam` is the value to push.
+    // `Sparam` is unused.
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_push_immediate& altr)
+      {
+        int64_t value = altr.value.as_integer();
+        ROCKET_ASSERT(do_is_int48(value));
+        uint64_t bits = static_cast<uint64_t>(value);
+
+        AVMC_Queue::Uparam up;
+        up.x16 = static_cast<uint16_t>(bits >> 32);
+        up.x32 = static_cast<uint32_t>(bits);
+        return up;
+      }
+
+    static
+    AIR_Status
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+      {
+        uint64_t bits = static_cast<uint64_t>(static_cast<int16_t>(up.x16));
+        bits = bits << 32 | up.x32;
+        int64_t value = static_cast<int64_t>(bits);
+
+        // Push a constant integer.
+        Reference::S_constant xref = { V_integer(value) };
+        ctx.stack().push(::std::move(xref));
+        return air_status_next;
+      }
+  };
+
+struct AIR_Traits_push_immediate_generic
   {
     // `Uparam` is unused.
     // `Sparam` is the value to push.
@@ -4306,9 +4387,24 @@ const
         return do_solidify<AIR_Traits_glvalue_to_prvalue>(queue,
                                      this->m_stor.as<index_glvalue_to_prvalue>());
 
-      case index_push_immediate:
-        return do_solidify<AIR_Traits_push_immediate>(queue,
-                                     this->m_stor.as<index_push_immediate>());
+      case index_push_immediate: {
+        const auto& altr = this->m_stor.as<index_push_immediate>();
+        switch(weaken_enum(altr.value.type())) {
+          case type_null:
+            return do_solidify<AIR_Traits_push_immediate_null>(queue, altr);
+
+          case type_boolean:
+            return do_solidify<AIR_Traits_push_immediate_boolean>(queue, altr);
+
+          case type_integer:
+            if(do_is_int48(altr.value.as_integer()))
+              return do_solidify<AIR_Traits_push_immediate_int48>(queue, altr);
+            else
+              // Fallthrough
+          default:
+              return do_solidify<AIR_Traits_push_immediate_generic>(queue, altr);
+        }
+      }
 
       case index_push_global_reference:
         return do_solidify<AIR_Traits_push_global_reference>(queue,
