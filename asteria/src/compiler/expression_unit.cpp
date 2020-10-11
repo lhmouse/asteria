@@ -52,6 +52,7 @@ const
         const Reference* qref;
         const Abstract_Context* qctx = &ctx;
         uint32_t depth = 0;
+
         for(;;) {
           // Look for the name in the current context.
           qref = qctx->get_named_reference_opt(altr.name);
@@ -61,6 +62,7 @@ const
             code.emplace_back(::std::move(xnode));
             return code;
           }
+
           // Step out to its parent context.
           qctx = qctx->get_parent_opt();
           if(!qctx) {
@@ -69,6 +71,8 @@ const
             code.emplace_back(::std::move(xnode));
             return code;
           }
+
+          // Search in the outer context.
           ++depth;
         }
       }
