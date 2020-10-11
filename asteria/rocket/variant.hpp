@@ -261,7 +261,7 @@ class variant
     type()
     const noexcept
       {
-        static constexpr const type_info* table[] = { &(typeid(alternativesT))... };
+        static const type_info* const table[] = { &(typeid(alternativesT))... };
         return *(table[this->m_index]);
       }
 
@@ -347,8 +347,8 @@ class variant
     visit(visitorT&& visitor)
     const
       {
-        using function_type = void (const void*, visitorT&&);
-        static constexpr function_type* table[] = { details_variant::wrapped_visit<const alternativesT>... };
+        static constexpr details_variant::ptr_table<void (const void*, visitorT&&),
+                                        details_variant::wrapped_visit<const alternativesT>...> table;
         table[this->m_index](this->m_stor, ::std::forward<visitorT>(visitor));
       }
 
@@ -356,8 +356,8 @@ class variant
     void
     visit(visitorT&& visitor)
       {
-        using function_type = void (void*, visitorT&&);
-        static constexpr function_type* table[] = { details_variant::wrapped_visit<alternativesT>... };
+        static constexpr details_variant::ptr_table<void (void*, visitorT&&),
+                                        details_variant::wrapped_visit<alternativesT>...> table;
         table[this->m_index](this->m_stor, ::std::forward<visitorT>(visitor));
       }
 
