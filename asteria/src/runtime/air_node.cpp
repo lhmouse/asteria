@@ -65,6 +65,14 @@ do_forward_if_opt(bool dirty, XNodeT&& xnode)
       return nullopt;
   }
 
+bool
+do_solidify_nodes(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
+  {
+    bool r = ::rocket::all_of(code, [&](const AIR_Node& node) { return node.solidify(queue);  });
+    queue.shrink_to_fit();
+    return r;
+  }
+
 Executive_Context&
 do_set_temporary(Executive_Context& ctx, bool assign, Reference::S_temporary&& xref)
   {
@@ -261,14 +269,7 @@ struct Sparam_defer
 // Each traits struct must contain the `execute()` function, and optionally,
 // these functions: `make_uparam()`, `make_sparam()`, `make_symbols()`.
 
-template<typename XaNodeT>
-struct AIR_Traits;
-
-template<Xop xopT>
-struct AIR_Traits_Xop;
-
-template<>
-struct AIR_Traits<AIR_Node::S_clear_stack>
+struct AIR_Traits_clear_stack
   {
     // `Uparam` is unused.
     // `Sparam` is unused.
@@ -282,16 +283,7 @@ struct AIR_Traits<AIR_Node::S_clear_stack>
       }
   };
 
-bool
-do_solidify_full(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
-  {
-    bool r = ::rocket::all_of(code, [&](const AIR_Node& node) { return node.solidify(queue);  });
-    queue.shrink_to_fit();
-    return r;
-  }
-
-template<>
-struct AIR_Traits<AIR_Node::S_execute_block>
+struct AIR_Traits_execute_block
   {
     // `Uparam` is unused.
     // `Sparam` is the solidified body.
@@ -301,7 +293,7 @@ struct AIR_Traits<AIR_Node::S_execute_block>
     make_sparam(bool& reachable, const AIR_Node::S_execute_block& altr)
       {
         AVMC_Queue queue;
-        reachable &= do_solidify_full(queue, altr.code_body);
+        reachable &= do_solidify_nodes(queue, altr.code_body);
         return queue;
       }
 
@@ -313,8 +305,7 @@ struct AIR_Traits<AIR_Node::S_execute_block>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_declare_variable>
+struct AIR_Traits_declare_variable
   {
     // `Uparam` is unused.
     // `Sparam` is the source location and name;
@@ -360,8 +351,7 @@ struct AIR_Traits<AIR_Node::S_declare_variable>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_initialize_variable>
+struct AIR_Traits_initialize_variable
   {
     // `Uparam` is `immutable`.
     // `Sparam` is unused.
@@ -404,8 +394,7 @@ struct AIR_Traits<AIR_Node::S_initialize_variable>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_if_statement>
+struct AIR_Traits_if_statement
   {
     // `Uparam` is `negative`.
     // `Sparam` is the two branches.
@@ -424,8 +413,8 @@ struct AIR_Traits<AIR_Node::S_if_statement>
     make_sparam(bool& reachable, const AIR_Node::S_if_statement& altr)
       {
         Sparam_queues_2 sp;
-        bool rtrue = do_solidify_full(sp.queues[0], altr.code_true);
-        bool rfalse = do_solidify_full(sp.queues[1], altr.code_false);
+        bool rtrue = do_solidify_nodes(sp.queues[0], altr.code_true);
+        bool rfalse = do_solidify_nodes(sp.queues[1], altr.code_false);
         reachable &= rtrue | rfalse;
         return sp;
       }
@@ -444,8 +433,7 @@ struct AIR_Traits<AIR_Node::S_if_statement>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_switch_statement>
+struct AIR_Traits_switch_statement
   {
     // `Uparam` is unused.
     // `Sparam` is ... everything.
@@ -456,7 +444,7 @@ struct AIR_Traits<AIR_Node::S_switch_statement>
       {
         ROCKET_ASSERT(queues.empty());
         queues.reserve(seqs.size());
-        ::rocket::for_each(seqs, [&](const auto& code) { do_solidify_full(queues.emplace_back(), code);  });
+        ::rocket::for_each(seqs, [&](const auto& code) { do_solidify_nodes(queues.emplace_back(), code);  });
       }
 
     static
@@ -536,8 +524,7 @@ struct AIR_Traits<AIR_Node::S_switch_statement>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_do_while_statement>
+struct AIR_Traits_do_while_statement
   {
     // `Uparam` is `negative`.
     // `Sparam` is the loop body and condition.
@@ -556,8 +543,8 @@ struct AIR_Traits<AIR_Node::S_do_while_statement>
     make_sparam(bool& /*reachable*/, const AIR_Node::S_do_while_statement& altr)
       {
         Sparam_queues_2 sp;
-        do_solidify_full(sp.queues[0], altr.code_body);
-        do_solidify_full(sp.queues[1], altr.code_cond);
+        do_solidify_nodes(sp.queues[0], altr.code_body);
+        do_solidify_nodes(sp.queues[1], altr.code_cond);
         return sp;
       }
 
@@ -586,8 +573,7 @@ struct AIR_Traits<AIR_Node::S_do_while_statement>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_while_statement>
+struct AIR_Traits_while_statement
   {
     // `Uparam` is `negative`.
     // `Sparam` is the condition and loop body.
@@ -606,8 +592,8 @@ struct AIR_Traits<AIR_Node::S_while_statement>
     make_sparam(bool& /*reachable*/, const AIR_Node::S_while_statement& altr)
       {
         Sparam_queues_2 sp;
-        do_solidify_full(sp.queues[0], altr.code_cond);
-        do_solidify_full(sp.queues[1], altr.code_body);
+        do_solidify_nodes(sp.queues[0], altr.code_cond);
+        do_solidify_nodes(sp.queues[1], altr.code_body);
         return sp;
       }
 
@@ -636,8 +622,7 @@ struct AIR_Traits<AIR_Node::S_while_statement>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_for_each_statement>
+struct AIR_Traits_for_each_statement
   {
     // `Uparam` is unused.
     // `Sparam` is ... everything.
@@ -649,8 +634,8 @@ struct AIR_Traits<AIR_Node::S_for_each_statement>
         Sparam_for_each sp;
         sp.name_key = altr.name_key;
         sp.name_mapped = altr.name_mapped;
-        do_solidify_full(sp.queue_init, altr.code_init);
-        do_solidify_full(sp.queue_body, altr.code_body);
+        do_solidify_nodes(sp.queue_init, altr.code_init);
+        do_solidify_nodes(sp.queue_body, altr.code_body);
         return sp;
       }
 
@@ -739,8 +724,7 @@ struct AIR_Traits<AIR_Node::S_for_each_statement>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_for_statement>
+struct AIR_Traits_for_statement
   {
     // `Uparam` is unused.
     // `Sparam` is ... everything.
@@ -750,10 +734,10 @@ struct AIR_Traits<AIR_Node::S_for_statement>
     make_sparam(bool& /*reachable*/, const AIR_Node::S_for_statement& altr)
       {
         Sparam_queues_4 sp;
-        do_solidify_full(sp.queues[0], altr.code_init);
-        do_solidify_full(sp.queues[1], altr.code_cond);
-        do_solidify_full(sp.queues[2], altr.code_step);
-        do_solidify_full(sp.queues[3], altr.code_body);
+        do_solidify_nodes(sp.queues[0], altr.code_init);
+        do_solidify_nodes(sp.queues[1], altr.code_cond);
+        do_solidify_nodes(sp.queues[2], altr.code_step);
+        do_solidify_nodes(sp.queues[3], altr.code_body);
         return sp;
       }
 
@@ -794,8 +778,7 @@ struct AIR_Traits<AIR_Node::S_for_statement>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_try_statement>
+struct AIR_Traits_try_statement
   {
     // `Uparam` is unused.
     // `Sparam` is ... everything.
@@ -806,10 +789,10 @@ struct AIR_Traits<AIR_Node::S_try_statement>
       {
         Sparam_try_catch sp;
         sp.sloc_try = altr.sloc_try;
-        bool rtry = do_solidify_full(sp.queue_try, altr.code_try);
+        bool rtry = do_solidify_nodes(sp.queue_try, altr.code_try);
         sp.sloc_catch = altr.sloc_catch;
         sp.name_except = altr.name_except;
-        bool rcatch = do_solidify_full(sp.queue_catch, altr.code_catch);
+        bool rcatch = do_solidify_nodes(sp.queue_catch, altr.code_catch);
         reachable &= rtry | rcatch;
         return sp;
       }
@@ -875,8 +858,7 @@ struct AIR_Traits<AIR_Node::S_try_statement>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_throw_statement>
+struct AIR_Traits_throw_statement
   {
     // `Uparam` is unused.
     // `Sparam` is the source location.
@@ -898,8 +880,7 @@ struct AIR_Traits<AIR_Node::S_throw_statement>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_assert_statement>
+struct AIR_Traits_assert_statement
   {
     // `Uparam` is `negative`.
     // `Sparam` is the source location.
@@ -937,8 +918,7 @@ struct AIR_Traits<AIR_Node::S_assert_statement>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_return_statement>
+struct AIR_Traits_return_statement
   {
     // `Uparam` is `status`.
     // `Sparam` is unused.
@@ -963,8 +943,7 @@ struct AIR_Traits<AIR_Node::S_return_statement>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_glvalue_to_prvalue>
+struct AIR_Traits_glvalue_to_prvalue
   {
     // `Uparam` is unused.
     // `Sparam` is unused.
@@ -995,8 +974,7 @@ struct AIR_Traits<AIR_Node::S_glvalue_to_prvalue>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_push_immediate>
+struct AIR_Traits_push_immediate
   {
     // `Uparam` is unused.
     // `Sparam` is the value to push.
@@ -1019,8 +997,7 @@ struct AIR_Traits<AIR_Node::S_push_immediate>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_push_global_reference>
+struct AIR_Traits_push_global_reference
   {
     // `Uparam` is unused.
     // `Sparam` is the source location and name;
@@ -1059,8 +1036,7 @@ struct AIR_Traits<AIR_Node::S_push_global_reference>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_push_local_reference>
+struct AIR_Traits_push_local_reference
   {
     // `Uparam` is the depth.
     // `Sparam` is the source location and name;
@@ -1117,8 +1093,7 @@ struct AIR_Traits<AIR_Node::S_push_local_reference>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_push_bound_reference>
+struct AIR_Traits_push_bound_reference
   {
     // `Uparam` is unused.
     // `Sparam` is the reference to push.
@@ -1140,8 +1115,7 @@ struct AIR_Traits<AIR_Node::S_push_bound_reference>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_define_function>
+struct AIR_Traits_define_function
   {
     // `Uparam` is unused.
     // `Sparam` is ... everything.
@@ -1175,8 +1149,7 @@ struct AIR_Traits<AIR_Node::S_define_function>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_branch_expression>
+struct AIR_Traits_branch_expression
   {
     // `Uparam` is `assign`.
     // `Sparam` is the branches.
@@ -1195,8 +1168,8 @@ struct AIR_Traits<AIR_Node::S_branch_expression>
     make_sparam(bool& reachable, const AIR_Node::S_branch_expression& altr)
       {
         Sparam_queues_2 sp;
-        bool rtrue = do_solidify_full(sp.queues[0], altr.code_true);
-        bool rfalse = do_solidify_full(sp.queues[1], altr.code_false);
+        bool rtrue = do_solidify_nodes(sp.queues[0], altr.code_true);
+        bool rfalse = do_solidify_nodes(sp.queues[1], altr.code_false);
         reachable &= rtrue | rfalse;
         return sp;
       }
@@ -1224,8 +1197,7 @@ struct AIR_Traits<AIR_Node::S_branch_expression>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_coalescence>
+struct AIR_Traits_coalescence
   {
     // `Uparam` is `assign`.
     // `Sparam` is the null branch.
@@ -1244,7 +1216,7 @@ struct AIR_Traits<AIR_Node::S_coalescence>
     make_sparam(bool& /*reachable*/, const AIR_Node::S_coalescence& altr)
       {
         AVMC_Queue queue;
-        do_solidify_full(queue, altr.code_null);
+        do_solidify_nodes(queue, altr.code_null);
         return queue;
       }
 
@@ -1335,8 +1307,7 @@ do_pop_positional_arguments(Executive_Context& ctx, size_t nargs)
     return args;
   }
 
-template<>
-struct AIR_Traits<AIR_Node::S_function_call>
+struct AIR_Traits_function_call
   {
     // `Uparam` is `nargs` and `ptc`.
     // `Sparam` is the source location.
@@ -1393,8 +1364,7 @@ struct AIR_Traits<AIR_Node::S_function_call>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_member_access>
+struct AIR_Traits_member_access
   {
     // `Uparam` is unused.
     // `Sparam` is the name.
@@ -1426,8 +1396,7 @@ struct AIR_Traits<AIR_Node::S_member_access>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_push_unnamed_array>
+struct AIR_Traits_push_unnamed_array
   {
     // `Uparam` is `nelems`.
     // `Sparam` is unused.
@@ -1470,8 +1439,7 @@ struct AIR_Traits<AIR_Node::S_push_unnamed_array>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_push_unnamed_object>
+struct AIR_Traits_push_unnamed_object
   {
     // `Uparam` is unused.
     // `Sparam` is the list of keys.
@@ -1839,8 +1807,7 @@ do_string_xorb(const cow_string& lhs, cow_string&& rhs)
     return ::std::move(rhs);
   }
 
-template<>
-struct AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_common
   {
     // `Uparam` is `assign`.
     // `Sparam` is unused.
@@ -1864,8 +1831,7 @@ struct AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_inc_post> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_inc_post : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -1894,8 +1860,7 @@ struct AIR_Traits_Xop<xop_inc_post> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_dec_post> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_dec_post : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -1924,8 +1889,7 @@ struct AIR_Traits_Xop<xop_dec_post> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_subscr> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_subscr : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -1959,8 +1923,7 @@ struct AIR_Traits_Xop<xop_subscr> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_pos> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_pos : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -1976,8 +1939,7 @@ struct AIR_Traits_Xop<xop_pos> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_neg> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_neg : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2006,8 +1968,7 @@ struct AIR_Traits_Xop<xop_neg> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_notb> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_notb : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2041,8 +2002,7 @@ struct AIR_Traits_Xop<xop_notb> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_notl> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_notl : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2061,8 +2021,7 @@ struct AIR_Traits_Xop<xop_notl> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_inc_pre> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_inc_pre : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2089,8 +2048,7 @@ struct AIR_Traits_Xop<xop_inc_pre> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_dec_pre> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_dec_pre : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2117,8 +2075,7 @@ struct AIR_Traits_Xop<xop_dec_pre> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_unset> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_unset : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2133,8 +2090,7 @@ struct AIR_Traits_Xop<xop_unset> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_countof> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_countof : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2170,8 +2126,7 @@ struct AIR_Traits_Xop<xop_countof> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_typeof> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_typeof : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2190,8 +2145,7 @@ struct AIR_Traits_Xop<xop_typeof> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_sqrt> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_sqrt : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2220,8 +2174,7 @@ struct AIR_Traits_Xop<xop_sqrt> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_isnan> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_isnan : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2250,8 +2203,7 @@ struct AIR_Traits_Xop<xop_isnan> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_isinf> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_isinf : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2280,8 +2232,7 @@ struct AIR_Traits_Xop<xop_isinf> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_abs> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_abs : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2310,8 +2261,7 @@ struct AIR_Traits_Xop<xop_abs> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_sign> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_sign : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2340,8 +2290,7 @@ struct AIR_Traits_Xop<xop_sign> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_round> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_round : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2369,8 +2318,7 @@ struct AIR_Traits_Xop<xop_round> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_floor> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_floor : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2398,8 +2346,7 @@ struct AIR_Traits_Xop<xop_floor> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_ceil> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_ceil : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2427,8 +2374,7 @@ struct AIR_Traits_Xop<xop_ceil> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_trunc> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_trunc : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2456,8 +2402,7 @@ struct AIR_Traits_Xop<xop_trunc> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_iround> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_iround : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2485,8 +2430,7 @@ struct AIR_Traits_Xop<xop_iround> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_ifloor> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_ifloor : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2514,8 +2458,7 @@ struct AIR_Traits_Xop<xop_ifloor> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_iceil> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_iceil : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2543,8 +2486,7 @@ struct AIR_Traits_Xop<xop_iceil> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_itrunc> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_itrunc : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2572,8 +2514,7 @@ struct AIR_Traits_Xop<xop_itrunc> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_cmp_eq> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_cmp_eq : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2595,8 +2536,7 @@ struct AIR_Traits_Xop<xop_cmp_eq> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_cmp_ne> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_cmp_ne : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2618,8 +2558,7 @@ struct AIR_Traits_Xop<xop_cmp_ne> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_cmp_lt> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_cmp_lt : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2642,8 +2581,7 @@ struct AIR_Traits_Xop<xop_cmp_lt> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_cmp_gt> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_cmp_gt : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2666,8 +2604,7 @@ struct AIR_Traits_Xop<xop_cmp_gt> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_cmp_lte> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_cmp_lte : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2690,8 +2627,7 @@ struct AIR_Traits_Xop<xop_cmp_lte> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_cmp_gte> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_cmp_gte : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2714,8 +2650,7 @@ struct AIR_Traits_Xop<xop_cmp_gte> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_cmp_3way> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_cmp_3way : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2755,8 +2690,7 @@ struct AIR_Traits_Xop<xop_cmp_3way> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_add> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_add : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2798,8 +2732,7 @@ struct AIR_Traits_Xop<xop_add> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_sub> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_sub : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2836,8 +2769,7 @@ struct AIR_Traits_Xop<xop_sub> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_mul> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_mul : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2881,8 +2813,7 @@ struct AIR_Traits_Xop<xop_mul> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_div> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_div : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2914,8 +2845,7 @@ struct AIR_Traits_Xop<xop_div> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_mod> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_mod : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2947,8 +2877,7 @@ struct AIR_Traits_Xop<xop_mod> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_sll> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_sll : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -2984,8 +2913,7 @@ struct AIR_Traits_Xop<xop_sll> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_srl> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_srl : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -3021,8 +2949,7 @@ struct AIR_Traits_Xop<xop_srl> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_sla> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_sla : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -3059,8 +2986,7 @@ struct AIR_Traits_Xop<xop_sla> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_sra> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_sra : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -3096,8 +3022,7 @@ struct AIR_Traits_Xop<xop_sra> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_andb> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_andb : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -3134,8 +3059,7 @@ struct AIR_Traits_Xop<xop_andb> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_orb> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_orb : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -3172,8 +3096,7 @@ struct AIR_Traits_Xop<xop_orb> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_xorb> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_xorb : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -3210,8 +3133,7 @@ struct AIR_Traits_Xop<xop_xorb> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_assign> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_assign : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -3227,8 +3149,7 @@ struct AIR_Traits_Xop<xop_assign> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_fma> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_fma : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -3258,8 +3179,7 @@ struct AIR_Traits_Xop<xop_fma> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_head> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_head : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -3274,8 +3194,7 @@ struct AIR_Traits_Xop<xop_head> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits_Xop<xop_tail> : AIR_Traits<AIR_Node::S_apply_operator>
+struct AIR_Traits_apply_operator_tail : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
@@ -3290,8 +3209,7 @@ struct AIR_Traits_Xop<xop_tail> : AIR_Traits<AIR_Node::S_apply_operator>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_unpack_struct_array>
+struct AIR_Traits_unpack_struct_array
   {
     // `Uparam` is `immutable` and `nelems`.
     // `Sparam` is unused.
@@ -3349,8 +3267,7 @@ struct AIR_Traits<AIR_Node::S_unpack_struct_array>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_unpack_struct_object>
+struct AIR_Traits_unpack_struct_object
   {
     // `Uparam` is `immutable`.
     // `Sparam` is the list of keys.
@@ -3414,8 +3331,7 @@ struct AIR_Traits<AIR_Node::S_unpack_struct_object>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_define_null_variable>
+struct AIR_Traits_define_null_variable
   {
     // `Uparam` is `immutable`.
     // `Sparam` is the source location and name.
@@ -3470,8 +3386,7 @@ struct AIR_Traits<AIR_Node::S_define_null_variable>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_single_step_trap>
+struct AIR_Traits_single_step_trap
   {
     // `Uparam` is unused.
     // `Sparam` is the source location.
@@ -3503,8 +3418,7 @@ struct AIR_Traits<AIR_Node::S_single_step_trap>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_variadic_call>
+struct AIR_Traits_variadic_call
   {
     // `Uparam` is `ptc`.
     // `Sparam` is the source location.
@@ -3614,8 +3528,7 @@ struct AIR_Traits<AIR_Node::S_variadic_call>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_defer_expression>
+struct AIR_Traits_defer_expression
   {
     // `Uparam` is unused.
     // `Sparam` is the source location and body.
@@ -3650,7 +3563,7 @@ struct AIR_Traits<AIR_Node::S_defer_expression>
 
         // Solidify it.
         AVMC_Queue queue;
-        do_solidify_full(queue, bound_body);
+        do_solidify_nodes(queue, bound_body);
 
         // Push this expression.
         ctx.defer_expression(sp.sloc, ::std::move(queue));
@@ -3658,8 +3571,7 @@ struct AIR_Traits<AIR_Node::S_defer_expression>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_import_call>
+struct AIR_Traits_import_call
   {
     // `Uparam` is `nargs`.
     // `Sparam` is the source location and compiler options.
@@ -3757,8 +3669,7 @@ struct AIR_Traits<AIR_Node::S_import_call>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_break_or_continue>
+struct AIR_Traits_break_or_continue
   {
     // `Uparam` is `status`.
     // `Sparam` is the source location.
@@ -3796,8 +3707,7 @@ struct AIR_Traits<AIR_Node::S_break_or_continue>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_declare_reference>
+struct AIR_Traits_declare_reference
   {
     // `Uparam` is unused.
     // `Sparam` is the name;
@@ -3821,8 +3731,7 @@ struct AIR_Traits<AIR_Node::S_declare_reference>
       }
   };
 
-template<>
-struct AIR_Traits<AIR_Node::S_initialize_reference>
+struct AIR_Traits_initialize_reference
   {
     // `Uparam` is unused.
     // `Sparam` is the name;
@@ -3864,36 +3773,36 @@ struct AIR_Traits<AIR_Node::S_initialize_reference>
 // Depending on the existence of Uparam, Sparam and Symbols, the code will look very different.
 
 // check for `make_uparam`
-template<typename TraitsT, typename XaNodeT, typename = void>
+template<typename TraitsT, typename XNodeT, typename = void>
 struct Uparam_of
   : ::rocket::identity<void>
   { };
 
-template<typename TraitsT, typename XaNodeT>
-struct Uparam_of<TraitsT, XaNodeT, ROCKET_VOID_T(decltype(&TraitsT::make_uparam))>
-  : ::std::decay<decltype(TraitsT::make_uparam(::std::declval<bool&>(), ::std::declval<const XaNodeT&>()))>
+template<typename TraitsT, typename XNodeT>
+struct Uparam_of<TraitsT, XNodeT, ROCKET_VOID_T(decltype(&TraitsT::make_uparam))>
+  : ::std::decay<decltype(TraitsT::make_uparam(::std::declval<bool&>(), ::std::declval<const XNodeT&>()))>
   { };
 
 // check for `make_sparam`
-template<typename TraitsT, typename XaNodeT, typename = void>
+template<typename TraitsT, typename XNodeT, typename = void>
 struct Sparam_of
   : ::rocket::identity<void>
   { };
 
-template<typename TraitsT, typename XaNodeT>
-struct Sparam_of<TraitsT, XaNodeT, ROCKET_VOID_T(decltype(&TraitsT::make_sparam))>
-  : ::std::decay<decltype(TraitsT::make_sparam(::std::declval<bool&>(), ::std::declval<const XaNodeT&>()))>
+template<typename TraitsT, typename XNodeT>
+struct Sparam_of<TraitsT, XNodeT, ROCKET_VOID_T(decltype(&TraitsT::make_sparam))>
+  : ::std::decay<decltype(TraitsT::make_sparam(::std::declval<bool&>(), ::std::declval<const XNodeT&>()))>
   { };
 
 // check for `make_symbols`
-template<typename TraitsT, typename XaNodeT, typename = void>
+template<typename TraitsT, typename XNodeT, typename = void>
 struct Symbols_of
   : ::rocket::identity<void>
   { };
 
-template<typename TraitsT, typename XaNodeT>
-struct Symbols_of<TraitsT, XaNodeT, ROCKET_VOID_T(decltype(&TraitsT::make_symbols))>
-  : ::std::decay<decltype(TraitsT::make_symbols(::std::declval<const XaNodeT&>()))>
+template<typename TraitsT, typename XNodeT>
+struct Symbols_of<TraitsT, XNodeT, ROCKET_VOID_T(decltype(&TraitsT::make_symbols))>
+  : ::std::decay<decltype(TraitsT::make_symbols(::std::declval<const XNodeT&>()))>
   { };
 
 // executor thunk
@@ -3950,12 +3859,12 @@ struct Enumerator_of<SparamT, ROCKET_VOID_T(decltype(&SparamT::enumerate_variabl
   };
 
 // Finally...
-template<typename TraitsT, typename XaNodeT, typename UparamT, typename SparamT, typename SymbolT>
+template<typename TraitsT, typename XNodeT, typename UparamT, typename SparamT, typename SymbolT>
 struct AVMC_Appender
   {
     static
     bool
-    do_append(AVMC_Queue& queue, const XaNodeT& altr)
+    do_append(AVMC_Queue& queue, const XNodeT& altr)
       {
         bool reachable = true;
         queue.template append<Executor_of<TraitsT, UparamT, SparamT>::thunk,
@@ -3967,12 +3876,12 @@ struct AVMC_Appender
       }
   };
 
-template<typename TraitsT, typename XaNodeT, typename UparamT, typename SparamT>
-struct AVMC_Appender<TraitsT, XaNodeT, UparamT, SparamT, void>
+template<typename TraitsT, typename XNodeT, typename UparamT, typename SparamT>
+struct AVMC_Appender<TraitsT, XNodeT, UparamT, SparamT, void>
   {
     static
     bool
-    do_append(AVMC_Queue& queue, const XaNodeT& altr)
+    do_append(AVMC_Queue& queue, const XNodeT& altr)
       {
         bool reachable = true;
         queue.template append<Executor_of<TraitsT, UparamT, SparamT>::thunk,
@@ -3983,12 +3892,12 @@ struct AVMC_Appender<TraitsT, XaNodeT, UparamT, SparamT, void>
       }
   };
 
-template<typename TraitsT, typename XaNodeT, typename UparamT, typename SymbolT>
-struct AVMC_Appender<TraitsT, XaNodeT, UparamT, void, SymbolT>
+template<typename TraitsT, typename XNodeT, typename UparamT, typename SymbolT>
+struct AVMC_Appender<TraitsT, XNodeT, UparamT, void, SymbolT>
   {
     static
     bool
-    do_append(AVMC_Queue& queue, const XaNodeT& altr)
+    do_append(AVMC_Queue& queue, const XNodeT& altr)
       {
         bool reachable = true;
         queue.template append<Executor_of<TraitsT, UparamT, void>::thunk,
@@ -3999,12 +3908,12 @@ struct AVMC_Appender<TraitsT, XaNodeT, UparamT, void, SymbolT>
       }
   };
 
-template<typename TraitsT, typename XaNodeT, typename UparamT>
-struct AVMC_Appender<TraitsT, XaNodeT, UparamT, void, void>
+template<typename TraitsT, typename XNodeT, typename UparamT>
+struct AVMC_Appender<TraitsT, XNodeT, UparamT, void, void>
   {
     static
     bool
-    do_append(AVMC_Queue& queue, const XaNodeT& altr)
+    do_append(AVMC_Queue& queue, const XNodeT& altr)
       {
         bool reachable = true;
         queue.template append<Executor_of<TraitsT, UparamT, void>::thunk,
@@ -4014,12 +3923,12 @@ struct AVMC_Appender<TraitsT, XaNodeT, UparamT, void, void>
       }
   };
 
-template<typename TraitsT, typename XaNodeT, typename SparamT, typename SymbolT>
-struct AVMC_Appender<TraitsT, XaNodeT, void, SparamT, SymbolT>
+template<typename TraitsT, typename XNodeT, typename SparamT, typename SymbolT>
+struct AVMC_Appender<TraitsT, XNodeT, void, SparamT, SymbolT>
   {
     static
     bool
-    do_append(AVMC_Queue& queue, const XaNodeT& altr)
+    do_append(AVMC_Queue& queue, const XNodeT& altr)
       {
         bool reachable = true;
         queue.template append<Executor_of<TraitsT, void, SparamT>::thunk,
@@ -4031,12 +3940,12 @@ struct AVMC_Appender<TraitsT, XaNodeT, void, SparamT, SymbolT>
       }
   };
 
-template<typename TraitsT, typename XaNodeT, typename SparamT>
-struct AVMC_Appender<TraitsT, XaNodeT, void, SparamT, void>
+template<typename TraitsT, typename XNodeT, typename SparamT>
+struct AVMC_Appender<TraitsT, XNodeT, void, SparamT, void>
   {
     static
     bool
-    do_append(AVMC_Queue& queue, const XaNodeT& altr)
+    do_append(AVMC_Queue& queue, const XNodeT& altr)
       {
         bool reachable = true;
         queue.template append<Executor_of<TraitsT, void, SparamT>::thunk,
@@ -4047,12 +3956,12 @@ struct AVMC_Appender<TraitsT, XaNodeT, void, SparamT, void>
       }
   };
 
-template<typename TraitsT, typename XaNodeT, typename SymbolT>
-struct AVMC_Appender<TraitsT, XaNodeT, void, void, SymbolT>
+template<typename TraitsT, typename XNodeT, typename SymbolT>
+struct AVMC_Appender<TraitsT, XNodeT, void, void, SymbolT>
   {
     static
     bool
-    do_append(AVMC_Queue& queue, const XaNodeT& altr)
+    do_append(AVMC_Queue& queue, const XNodeT& altr)
       {
         bool reachable = true;
         queue.template append<Executor_of<TraitsT, void, void>::thunk,
@@ -4063,12 +3972,12 @@ struct AVMC_Appender<TraitsT, XaNodeT, void, void, SymbolT>
       }
   };
 
-template<typename TraitsT, typename XaNodeT>
-struct AVMC_Appender<TraitsT, XaNodeT, void, void, void>
+template<typename TraitsT, typename XNodeT>
+struct AVMC_Appender<TraitsT, XNodeT, void, void, void>
   {
     static
     bool
-    do_append(AVMC_Queue& queue, const XaNodeT& /*altr*/)
+    do_append(AVMC_Queue& queue, const XNodeT& /*altr*/)
       {
         bool reachable = true;
         queue.template append<Executor_of<TraitsT, void, void>::thunk,
@@ -4078,32 +3987,16 @@ struct AVMC_Appender<TraitsT, XaNodeT, void, void, void>
       }
   };
 
-template<typename TraitsT, typename XaNodeT>
+template<typename TraitsT, typename XNodeT>
 inline
 bool
-do_solidify_explicit(AVMC_Queue& queue, const XaNodeT& altr)
+do_solidify(AVMC_Queue& queue, const XNodeT& altr)
   {
-    return AVMC_Appender<TraitsT, XaNodeT,
-                         typename Uparam_of<TraitsT, XaNodeT>::type,
-                         typename Sparam_of<TraitsT, XaNodeT>::type,
-                         typename Symbols_of<TraitsT, XaNodeT>::type>
+    return AVMC_Appender<TraitsT, XNodeT,
+                         typename Uparam_of<TraitsT, XNodeT>::type,
+                         typename Sparam_of<TraitsT, XNodeT>::type,
+                         typename Symbols_of<TraitsT, XNodeT>::type>
                ::do_append(queue, altr);
-  }
-
-template<typename XaNodeT>
-inline
-bool
-do_solidify(AVMC_Queue& queue, const XaNodeT& altr)
-  {
-    return do_solidify_explicit<AIR_Traits<XaNodeT>>(queue, altr);
-  }
-
-template<Xop xopT>
-inline
-bool
-do_solidify(AVMC_Queue& queue, const AIR_Node::S_apply_operator& altr)
-  {
-    return do_solidify_explicit<AIR_Traits_Xop<xopT>>(queue, altr);
   }
 
 }  // namespace
@@ -4353,338 +4246,301 @@ solidify(AVMC_Queue& queue)
 const
   {
     switch(this->index()) {
-      case index_clear_stack: {
-        const auto& altr = this->m_stor.as<index_clear_stack>();
-        return do_solidify(queue, altr);
-      }
+      case index_clear_stack:
+        return do_solidify<AIR_Traits_clear_stack>(queue,
+                                     this->m_stor.as<index_clear_stack>());
 
-      case index_execute_block: {
-        const auto& altr = this->m_stor.as<index_execute_block>();
-        return do_solidify(queue, altr);
-      }
+      case index_execute_block:
+        return do_solidify<AIR_Traits_execute_block>(queue,
+                                     this->m_stor.as<index_execute_block>());
 
-      case index_declare_variable: {
-        const auto& altr = this->m_stor.as<index_declare_variable>();
-        return do_solidify(queue, altr);
-      }
+      case index_declare_variable:
+        return do_solidify<AIR_Traits_declare_variable>(queue,
+                                     this->m_stor.as<index_declare_variable>());
 
-      case index_initialize_variable: {
-        const auto& altr = this->m_stor.as<index_initialize_variable>();
-        return do_solidify(queue, altr);
-      }
+      case index_initialize_variable:
+        return do_solidify<AIR_Traits_initialize_variable>(queue,
+                                     this->m_stor.as<index_initialize_variable>());
 
-      case index_if_statement: {
-        const auto& altr = this->m_stor.as<index_if_statement>();
-        return do_solidify(queue, altr);
-      }
+      case index_if_statement:
+        return do_solidify<AIR_Traits_if_statement>(queue,
+                                     this->m_stor.as<index_if_statement>());
 
-      case index_switch_statement: {
-        const auto& altr = this->m_stor.as<index_switch_statement>();
-        return do_solidify(queue, altr);
-      }
+      case index_switch_statement:
+        return do_solidify<AIR_Traits_switch_statement>(queue,
+                                     this->m_stor.as<index_switch_statement>());
 
-      case index_do_while_statement: {
-        const auto& altr = this->m_stor.as<index_do_while_statement>();
-        return do_solidify(queue, altr);
-      }
+      case index_do_while_statement:
+        return do_solidify<AIR_Traits_do_while_statement>(queue,
+                                     this->m_stor.as<index_do_while_statement>());
 
-      case index_while_statement: {
-        const auto& altr = this->m_stor.as<index_while_statement>();
-        return do_solidify(queue, altr);
-      }
+      case index_while_statement:
+        return do_solidify<AIR_Traits_while_statement>(queue,
+                                     this->m_stor.as<index_while_statement>());
 
-      case index_for_each_statement: {
-        const auto& altr = this->m_stor.as<index_for_each_statement>();
-        return do_solidify(queue, altr);
-      }
+      case index_for_each_statement:
+        return do_solidify<AIR_Traits_for_each_statement>(queue,
+                                     this->m_stor.as<index_for_each_statement>());
 
-      case index_for_statement: {
-        const auto& altr = this->m_stor.as<index_for_statement>();
-        return do_solidify(queue, altr);
-      }
+      case index_for_statement:
+        return do_solidify<AIR_Traits_for_statement>(queue,
+                                     this->m_stor.as<index_for_statement>());
 
-      case index_try_statement: {
-        const auto& altr = this->m_stor.as<index_try_statement>();
-        return do_solidify(queue, altr);
-      }
+      case index_try_statement:
+        return do_solidify<AIR_Traits_try_statement>(queue,
+                                     this->m_stor.as<index_try_statement>());
 
-      case index_throw_statement: {
-        const auto& altr = this->m_stor.as<index_throw_statement>();
-        return do_solidify(queue, altr);
-      }
+      case index_throw_statement:
+        return do_solidify<AIR_Traits_throw_statement>(queue,
+                                     this->m_stor.as<index_throw_statement>());
 
-      case index_assert_statement: {
-        const auto& altr = this->m_stor.as<index_assert_statement>();
-        return do_solidify(queue, altr);
-      }
+      case index_assert_statement:
+        return do_solidify<AIR_Traits_assert_statement>(queue,
+                                     this->m_stor.as<index_assert_statement>());
 
-      case index_return_statement: {
-        const auto& altr = this->m_stor.as<index_return_statement>();
-        return do_solidify(queue, altr);
-      }
+      case index_return_statement:
+        return do_solidify<AIR_Traits_return_statement>(queue,
+                                     this->m_stor.as<index_return_statement>());
 
-      case index_glvalue_to_prvalue: {
-        const auto& altr = this->m_stor.as<index_glvalue_to_prvalue>();
-        return do_solidify(queue, altr);
-      }
+      case index_glvalue_to_prvalue:
+        return do_solidify<AIR_Traits_glvalue_to_prvalue>(queue,
+                                     this->m_stor.as<index_glvalue_to_prvalue>());
 
-      case index_push_immediate: {
-        const auto& altr = this->m_stor.as<index_push_immediate>();
-        return do_solidify(queue, altr);
-      }
+      case index_push_immediate:
+        return do_solidify<AIR_Traits_push_immediate>(queue,
+                                     this->m_stor.as<index_push_immediate>());
 
-      case index_push_global_reference: {
-        const auto& altr = this->m_stor.as<index_push_global_reference>();
-        return do_solidify(queue, altr);
-      }
+      case index_push_global_reference:
+        return do_solidify<AIR_Traits_push_global_reference>(queue,
+                                     this->m_stor.as<index_push_global_reference>());
 
-      case index_push_local_reference: {
-        const auto& altr = this->m_stor.as<index_push_local_reference>();
-        return do_solidify(queue, altr);
-      }
+      case index_push_local_reference:
+        return do_solidify<AIR_Traits_push_local_reference>(queue,
+                                     this->m_stor.as<index_push_local_reference>());
 
-      case index_push_bound_reference: {
-        const auto& altr = this->m_stor.as<index_push_bound_reference>();
-        return do_solidify(queue, altr);
-      }
+      case index_push_bound_reference:
+        return do_solidify<AIR_Traits_push_bound_reference>(queue,
+                                     this->m_stor.as<index_push_bound_reference>());
 
-      case index_define_function: {
-        const auto& altr = this->m_stor.as<index_define_function>();
-        return do_solidify(queue, altr);
-      }
+      case index_define_function:
+        return do_solidify<AIR_Traits_define_function>(queue,
+                                     this->m_stor.as<index_define_function>());
 
-      case index_branch_expression: {
-        const auto& altr = this->m_stor.as<index_branch_expression>();
-        return do_solidify(queue, altr);
-      }
+      case index_branch_expression:
+        return do_solidify<AIR_Traits_branch_expression>(queue,
+                                     this->m_stor.as<index_branch_expression>());
 
-      case index_coalescence: {
-        const auto& altr = this->m_stor.as<index_coalescence>();
-        return do_solidify(queue, altr);
-      }
+      case index_coalescence:
+        return do_solidify<AIR_Traits_coalescence>(queue,
+                                     this->m_stor.as<index_coalescence>());
 
-      case index_function_call: {
-        const auto& altr = this->m_stor.as<index_function_call>();
-        return do_solidify(queue, altr);
-      }
+      case index_function_call:
+        return do_solidify<AIR_Traits_function_call>(queue,
+                                     this->m_stor.as<index_function_call>());
 
-      case index_member_access: {
-        const auto& altr = this->m_stor.as<index_member_access>();
-        return do_solidify(queue, altr);
-      }
+      case index_member_access:
+        return do_solidify<AIR_Traits_member_access>(queue,
+                                     this->m_stor.as<index_member_access>());
 
-      case index_push_unnamed_array: {
-        const auto& altr = this->m_stor.as<index_push_unnamed_array>();
-        return do_solidify(queue, altr);
-      }
+      case index_push_unnamed_array:
+        return do_solidify<AIR_Traits_push_unnamed_array>(queue,
+                                     this->m_stor.as<index_push_unnamed_array>());
 
-      case index_push_unnamed_object: {
-        const auto& altr = this->m_stor.as<index_push_unnamed_object>();
-        return do_solidify(queue, altr);
-      }
+      case index_push_unnamed_object:
+        return do_solidify<AIR_Traits_push_unnamed_object>(queue,
+                                     this->m_stor.as<index_push_unnamed_object>());
 
       case index_apply_operator: {
         const auto& altr = this->m_stor.as<index_apply_operator>();
-
         switch(altr.xop) {
           case xop_inc_post:
-            return do_solidify<xop_inc_post>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_inc_post>(queue, altr);
 
           case xop_dec_post:
-            return do_solidify<xop_dec_post>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_dec_post>(queue, altr);
 
           case xop_subscr:
-            return do_solidify<xop_subscr>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_subscr>(queue, altr);
 
           case xop_pos:
-            return do_solidify<xop_pos>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_pos>(queue, altr);
 
           case xop_neg:
-            return do_solidify<xop_neg>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_neg>(queue, altr);
 
           case xop_notb:
-            return do_solidify<xop_notb>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_notb>(queue, altr);
 
           case xop_notl:
-            return do_solidify<xop_notl>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_notl>(queue, altr);
 
           case xop_inc_pre:
-            return do_solidify<xop_inc_pre>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_inc_pre>(queue, altr);
 
           case xop_dec_pre:
-            return do_solidify<xop_dec_pre>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_dec_pre>(queue, altr);
 
           case xop_unset:
-            return do_solidify<xop_unset>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_unset>(queue, altr);
 
           case xop_countof:
-            return do_solidify<xop_countof>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_countof>(queue, altr);
 
           case xop_typeof:
-            return do_solidify<xop_typeof>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_typeof>(queue, altr);
 
           case xop_sqrt:
-            return do_solidify<xop_sqrt>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_sqrt>(queue, altr);
 
           case xop_isnan:
-            return do_solidify<xop_isnan>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_isnan>(queue, altr);
 
           case xop_isinf:
-            return do_solidify<xop_isinf>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_isinf>(queue, altr);
 
           case xop_abs:
-            return do_solidify<xop_abs>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_abs>(queue, altr);
 
           case xop_sign:
-            return do_solidify<xop_sign>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_sign>(queue, altr);
 
           case xop_round:
-            return do_solidify<xop_round>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_round>(queue, altr);
 
           case xop_floor:
-            return do_solidify<xop_floor>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_floor>(queue, altr);
 
           case xop_ceil:
-            return do_solidify<xop_ceil>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_ceil>(queue, altr);
 
           case xop_trunc:
-            return do_solidify<xop_trunc>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_trunc>(queue, altr);
 
           case xop_iround:
-            return do_solidify<xop_iround>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_iround>(queue, altr);
 
           case xop_ifloor:
-            return do_solidify<xop_ifloor>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_ifloor>(queue, altr);
 
           case xop_iceil:
-            return do_solidify<xop_iceil>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_iceil>(queue, altr);
 
           case xop_itrunc:
-            return do_solidify<xop_itrunc>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_itrunc>(queue, altr);
 
           case xop_cmp_eq:
-            return do_solidify<xop_cmp_eq>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_cmp_eq>(queue, altr);
 
           case xop_cmp_ne:
-            return do_solidify<xop_cmp_ne>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_cmp_ne>(queue, altr);
 
           case xop_cmp_lt:
-            return do_solidify<xop_cmp_lt>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_cmp_lt>(queue, altr);
 
           case xop_cmp_gt:
-            return do_solidify<xop_cmp_gt>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_cmp_gt>(queue, altr);
 
           case xop_cmp_lte:
-            return do_solidify<xop_cmp_lte>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_cmp_lte>(queue, altr);
 
           case xop_cmp_gte:
-            return do_solidify<xop_cmp_gte>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_cmp_gte>(queue, altr);
 
           case xop_cmp_3way:
-            return do_solidify<xop_cmp_3way>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_cmp_3way>(queue, altr);
 
           case xop_add:
-            return do_solidify<xop_add>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_add>(queue, altr);
 
           case xop_sub:
-            return do_solidify<xop_sub>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_sub>(queue, altr);
 
           case xop_mul:
-            return do_solidify<xop_mul>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_mul>(queue, altr);
 
           case xop_div:
-            return do_solidify<xop_div>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_div>(queue, altr);
 
           case xop_mod:
-            return do_solidify<xop_mod>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_mod>(queue, altr);
 
           case xop_sll:
-            return do_solidify<xop_sll>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_sll>(queue, altr);
 
           case xop_srl:
-            return do_solidify<xop_srl>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_srl>(queue, altr);
 
           case xop_sla:
-            return do_solidify<xop_sla>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_sla>(queue, altr);
 
           case xop_sra:
-            return do_solidify<xop_sra>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_sra>(queue, altr);
 
           case xop_andb:
-            return do_solidify<xop_andb>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_andb>(queue, altr);
 
           case xop_orb:
-            return do_solidify<xop_orb>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_orb>(queue, altr);
 
           case xop_xorb:
-            return do_solidify<xop_xorb>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_xorb>(queue, altr);
 
           case xop_assign:
-            return do_solidify<xop_assign>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_assign>(queue, altr);
 
           case xop_fma:
-            return do_solidify<xop_fma>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_fma>(queue, altr);
 
           case xop_head:
-            return do_solidify<xop_head>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_head>(queue, altr);
 
           case xop_tail:
-            return do_solidify<xop_tail>(queue, altr);
+            return do_solidify<AIR_Traits_apply_operator_tail>(queue, altr);
 
           default:
             ASTERIA_TERMINATE("invalid operator type (xop `$1`)", altr.xop);
         }
       }
 
-      case index_unpack_struct_array: {
-        const auto& altr = this->m_stor.as<index_unpack_struct_array>();
-        return do_solidify(queue, altr);
-      }
+      case index_unpack_struct_array:
+        return do_solidify<AIR_Traits_unpack_struct_array>(queue,
+                                     this->m_stor.as<index_unpack_struct_array>());
 
-      case index_unpack_struct_object: {
-        const auto& altr = this->m_stor.as<index_unpack_struct_object>();
-        return do_solidify(queue, altr);
-      }
+      case index_unpack_struct_object:
+        return do_solidify<AIR_Traits_unpack_struct_object>(queue,
+                                     this->m_stor.as<index_unpack_struct_object>());
 
-      case index_define_null_variable: {
-        const auto& altr = this->m_stor.as<index_define_null_variable>();
-        return do_solidify(queue, altr);
-      }
+      case index_define_null_variable:
+        return do_solidify<AIR_Traits_define_null_variable>(queue,
+                                     this->m_stor.as<index_define_null_variable>());
 
-      case index_single_step_trap: {
-        const auto& altr = this->m_stor.as<index_single_step_trap>();
-        return do_solidify(queue, altr);
-      }
+      case index_single_step_trap:
+        return do_solidify<AIR_Traits_single_step_trap>(queue,
+                                     this->m_stor.as<index_single_step_trap>());
 
-      case index_variadic_call: {
-        const auto& altr = this->m_stor.as<index_variadic_call>();
-        return do_solidify(queue, altr);
-      }
+      case index_variadic_call:
+        return do_solidify<AIR_Traits_variadic_call>(queue,
+                                     this->m_stor.as<index_variadic_call>());
 
-      case index_defer_expression: {
-        const auto& altr = this->m_stor.as<index_defer_expression>();
-        return do_solidify(queue, altr);
-      }
+      case index_defer_expression:
+        return do_solidify<AIR_Traits_defer_expression>(queue,
+                                     this->m_stor.as<index_defer_expression>());
 
-      case index_import_call: {
-        const auto& altr = this->m_stor.as<index_import_call>();
-        return do_solidify(queue, altr);
-      }
+      case index_import_call:
+        return do_solidify<AIR_Traits_import_call>(queue,
+                                     this->m_stor.as<index_import_call>());
 
-      case index_break_or_continue: {
-        const auto& altr = this->m_stor.as<index_break_or_continue>();
-        return do_solidify(queue, altr);
-      }
+      case index_break_or_continue:
+        return do_solidify<AIR_Traits_break_or_continue>(queue,
+                                     this->m_stor.as<index_break_or_continue>());
 
-      case index_declare_reference: {
-        const auto& altr = this->m_stor.as<index_declare_reference>();
-        return do_solidify(queue, altr);
-      }
+      case index_declare_reference:
+        return do_solidify<AIR_Traits_declare_reference>(queue,
+                                     this->m_stor.as<index_declare_reference>());
 
-      case index_initialize_reference: {
-        const auto& altr = this->m_stor.as<index_initialize_reference>();
-        return do_solidify(queue, altr);
-      }
+      case index_initialize_reference:
+        return do_solidify<AIR_Traits_initialize_reference>(queue,
+                                     this->m_stor.as<index_initialize_reference>());
 
       default:
         ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
