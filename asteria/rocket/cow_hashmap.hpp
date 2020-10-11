@@ -499,7 +499,7 @@ class cow_hashmap
         }
         else {
           // The length is not known.
-          bkts = sth.reallocate_reserve(this->m_sth, false, 5 | cap / 2);
+          bkts = sth.reallocate_reserve(this->m_sth, false, 17 | cap / 2);
           cap = sth.capacity();
 
           // Insert new elements into the new storage.
@@ -559,7 +559,7 @@ class cow_hashmap
 
         // Allocate new storage.
         storage_handle sth(this->m_sth.as_allocator(), this->m_sth.as_hasher(), this->m_sth.as_key_equal());
-        bkts = sth.reallocate_reserve(this->m_sth, false, 1 | cap / 2);
+        bkts = sth.reallocate_reserve(this->m_sth, false, 17 | cap / 2);
 
         // Insert the new element into the new storage.
         sth.keyed_try_emplace(tpos, ykey,

@@ -543,7 +543,7 @@ class cow_vector
         }
         else {
           // The length is not known.
-          ptr = sth.reallocate_prepare(this->m_sth, this->size(), 5 | cap / 2);
+          ptr = sth.reallocate_prepare(this->m_sth, this->size(), 17 | cap / 2);
           cap = sth.capacity();
 
           // Append new elements to the new storage.
@@ -579,7 +579,7 @@ class cow_vector
 
         // Allocate new storage.
         storage_handle sth(this->m_sth.as_allocator());
-        ptr = sth.reallocate_prepare(this->m_sth, this->size(), 1 | cap / 2);
+        ptr = sth.reallocate_prepare(this->m_sth, this->size(), 17 | cap / 2);
 
         // Append the new element to the new storage.
         auto& ref = sth.emplace_back_unchecked(::std::forward<paramsT>(params)...);
