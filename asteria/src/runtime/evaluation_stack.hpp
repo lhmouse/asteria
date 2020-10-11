@@ -87,8 +87,12 @@ class Evaluation_Stack
     Reference&
     push(XRefT&& xref)
       {
+        // Reserve much more space.
+        if(ROCKET_UNEXPECT(this->m_refs.capacity() == 0))
+          this->m_refs.reserve(29);
+
         // Construct a new reference.
-        if(ROCKET_EXPECT(this->size() < this->m_refs.size()))
+        if(ROCKET_EXPECT(this->m_etop < this->m_refs.data() + this->m_refs.size()))
           this->m_etop[0] = ::std::forward<XRefT>(xref);
         else
           this->m_etop = &(this->m_refs.emplace_back(::std::forward<XRefT>(xref)));
@@ -101,8 +105,9 @@ class Evaluation_Stack
     pop(size_t cnt = 1)
     noexcept
       {
-        // Move the top pointer without destroying elements.
         ROCKET_ASSERT(cnt <= this->size());
+
+        // Move the top pointer without destroying elements.
         this->m_etop -= cnt;
         return *this;
       }
