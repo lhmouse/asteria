@@ -87,10 +87,12 @@ class Evaluation_Stack
     Reference&
     push(XRefT&& xref)
       {
+        // Construct a new reference.
         if(ROCKET_EXPECT(this->size() < this->m_refs.size()))
           this->m_etop[0] = ::std::forward<XRefT>(xref);
         else
           this->m_etop = &(this->m_refs.emplace_back(::std::forward<XRefT>(xref)));
+
         this->m_etop += 1;
         return this->m_etop[-1];
       }
