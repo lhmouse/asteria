@@ -959,7 +959,7 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
     bexp += mult.exp2;
 
     // Compose the new value.
-    ireg |= (uint64_t)(unsigned)bexp << 52;
+    ireg |= (uint64_t)(uint32_t)bexp << 52;
     ::std::memcpy(&freg, &ireg, sizeof(double));
 
     // On x86, conversion from `double` to `int64_t` is very inefficient.
