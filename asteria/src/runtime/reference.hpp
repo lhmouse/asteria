@@ -241,24 +241,20 @@ class Reference
     rcptr<Variable>
     get_variable_opt()
     const noexcept
-      {
-        return ROCKET_EXPECT(this->is_variable())
+      { return ROCKET_EXPECT(this->is_variable())
                    ? unerase_cast<Variable>(this->m_root.as<index_variable>().var)
-                   : nullptr;
-      }
+                   : nullptr;  }
 
     ASTERIA_INCOMPLET(PTC_Arguments)
     rcptr<PTC_Arguments>
     get_ptc_args_opt()
     const noexcept
-      {
-        return ROCKET_EXPECT(this->is_ptc_args())
+      { return ROCKET_EXPECT(this->is_ptc_args())
                    ? unerase_cast<PTC_Arguments>(this->m_root.as<index_ptc_args>().ptca)
-                   : nullptr;
-      }
+                   : nullptr;  }
 
     Reference&
-    finish_call(Global_Context& global);
+    finish_call(Global_Context& global, Evaluation_Stack& stack);
 
     const Source_Location&
     as_jump_src()

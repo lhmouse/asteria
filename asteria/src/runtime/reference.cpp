@@ -15,109 +15,6 @@
 #include "../util.hpp"
 
 namespace asteria {
-namespace {
-
-Reference&
-do_unpack_tail_calls(Reference& self, Global_Context& global)
-  {
-    // The function call shall yield an rvalue unless all wrapped calls return by reference.
-    PTC_Aware ptc_conj = ptc_aware_by_ref;
-    rcptr<PTC_Arguments> ptca;
-
-    // We must rebuild the backtrace using this queue if an exception is thrown.
-    cow_vector<rcptr<PTC_Arguments>> frames;
-    Evaluation_Stack stack;
-
-    ASTERIA_RUNTIME_TRY {
-      // Unpack all frames recursively.
-      // Note that `self` is overwritten before the wrapped function is called.
-      while(!!(ptca = self.get_ptc_args_opt())) {
-        // Generate a single-step trap before unpacking arguments.
-        if(auto qhooks = global.get_hooks_opt())
-          qhooks->on_single_step_trap(ptca->sloc());
-
-        // Get the `this` reference and all the other arguments.
-        auto args = ::std::move(ptca->open_arguments_and_self());
-        self = ::std::move(args.mut_back());
-        args.pop_back();
-
-        // Call the hook function if any.
-        if(auto qhooks = global.get_hooks_opt())
-          qhooks->on_function_call(ptca->sloc(), ptca->get_target());
-
-        // Figure out how to forward the result.
-        if(ptca->ptc_aware() == ptc_aware_void) {
-          ptc_conj = ptc_aware_void;
-        }
-        else if((ptca->ptc_aware() == ptc_aware_by_val) && (ptc_conj == ptc_aware_by_ref)) {
-          ptc_conj = ptc_aware_by_val;
-        }
-        // Record this frame.
-        frames.emplace_back(ptca);
-
-        // Perform a non-tail call.
-        ptca->get_target().invoke_ptc_aware(self, global, ::std::move(args));
-      }
-
-      // Check for deferred expressions.
-      while(frames.size()) {
-        // Pop frames in reverse order.
-        ptca = ::std::move(frames.mut_back());
-        frames.pop_back();
-
-        // Evaluate deferred expressions if any.
-        if(ptca->get_defer().size())
-          Executive_Context(::rocket::ref(global), ::rocket::ref(stack),
-                            ::std::move(ptca->open_defer()))
-            .on_scope_exit(air_status_next);
-
-        // Call the hook function if any.
-        if(auto qhooks = global.get_hooks_opt())
-          qhooks->on_function_return(ptca->sloc(), ptca->get_target(), self);
-      }
-    }
-    ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
-      // Check for deferred expressions.
-      while(frames.size()) {
-        // Pop frames in reverse order.
-        ptca = ::std::move(frames.mut_back());
-        frames.pop_back();
-
-        // Push the function call.
-        except.push_frame_plain(ptca->sloc(), ::rocket::sref("[proper tail call]"));
-
-        // Call the hook function if any.
-        if(auto qhooks = global.get_hooks_opt())
-          qhooks->on_function_except(ptca->sloc(), ptca->get_target(), except);
-
-        // Evaluate deferred expressions if any.
-        if(ptca->get_defer().size())
-          Executive_Context(::rocket::ref(global), ::rocket::ref(stack),
-                            ::std::move(ptca->open_defer()))
-            .on_scope_exit(except);
-
-        // Push the caller.
-        // Note that if we arrive here, there must have been an exception thrown when
-        // unpacking the last frame (i.e. the last call did not return), so the last
-        // frame does not have its enclosing function set.
-        if(ptca->enclosing_sloc().offset() >= 0)
-          except.push_frame_func(ptca->enclosing_sloc(), ptca->enclosing_func());
-      }
-      throw;
-    }
-
-    // Convert the result.
-    if(ptc_conj == ptc_aware_void) {
-      self = Reference::S_void();
-    }
-    else if((ptc_conj == ptc_aware_by_val) && self.is_glvalue()) {
-      Reference::S_temporary xref = { self.read() };
-      self = ::std::move(xref);
-    }
-    return self;
-  }
-
-}  // namespace
 
 Reference::
 ~Reference()
@@ -619,9 +516,102 @@ const
 
 Reference&
 Reference::
-finish_call(Global_Context& global)
+finish_call(Global_Context& global, Evaluation_Stack& stack)
   {
-    return do_unpack_tail_calls(*this, global);
+    // The function call shall yield an rvalue unless all wrapped calls return by reference.
+    PTC_Aware ptc_conj = ptc_aware_by_ref;
+
+    // We must rebuild the backtrace using this queue if an exception is thrown.
+    cow_vector<rcptr<PTC_Arguments>> frames;
+    rcptr<PTC_Arguments> ptca;
+
+    ASTERIA_RUNTIME_TRY {
+      // Unpack all frames recursively.
+      // Note that `*this` is overwritten before the wrapped function is called.
+      while(!!(ptca = this->get_ptc_args_opt())) {
+        // Generate a single-step trap before unpacking arguments.
+        if(auto qhooks = global.get_hooks_opt())
+          qhooks->on_single_step_trap(ptca->sloc());
+
+        // Get the `this` reference and all the other arguments.
+        auto args = ::std::move(ptca->open_arguments_and_self());
+        *this = ::std::move(args.mut_back());
+        args.pop_back();
+
+        // Call the hook function if any.
+        if(auto qhooks = global.get_hooks_opt())
+          qhooks->on_function_call(ptca->sloc(), ptca->get_target());
+
+        // Figure out how to forward the result.
+        if(ptca->ptc_aware() == ptc_aware_void) {
+          ptc_conj = ptc_aware_void;
+        }
+        else if((ptca->ptc_aware() == ptc_aware_by_val) && (ptc_conj == ptc_aware_by_ref)) {
+          ptc_conj = ptc_aware_by_val;
+        }
+        // Record this frame.
+        frames.emplace_back(ptca);
+
+        // Perform a non-tail call.
+        ptca->get_target().invoke_ptc_aware(*this, global, ::std::move(args));
+      }
+
+      // Check for deferred expressions.
+      while(frames.size()) {
+        // Pop frames in reverse order.
+        ptca = ::std::move(frames.mut_back());
+        frames.pop_back();
+
+        // Evaluate deferred expressions if any.
+        if(ptca->get_defer().size())
+          Executive_Context(::rocket::ref(global), ::rocket::ref(stack),
+                            ::std::move(ptca->open_defer()))
+            .on_scope_exit(air_status_next);
+
+        // Call the hook function if any.
+        if(auto qhooks = global.get_hooks_opt())
+          qhooks->on_function_return(ptca->sloc(), ptca->get_target(), *this);
+      }
+    }
+    ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+      // Check for deferred expressions.
+      while(frames.size()) {
+        // Pop frames in reverse order.
+        ptca = ::std::move(frames.mut_back());
+        frames.pop_back();
+
+        // Push the function call.
+        except.push_frame_plain(ptca->sloc(), ::rocket::sref("[proper tail call]"));
+
+        // Call the hook function if any.
+        if(auto qhooks = global.get_hooks_opt())
+          qhooks->on_function_except(ptca->sloc(), ptca->get_target(), except);
+
+        // Evaluate deferred expressions if any.
+        if(ptca->get_defer().size())
+          Executive_Context(::rocket::ref(global), ::rocket::ref(stack),
+                            ::std::move(ptca->open_defer()))
+            .on_scope_exit(except);
+
+        // Push the caller.
+        // Note that if we arrive here, there must have been an exception thrown when
+        // unpacking the last frame (i.e. the last call did not return), so the last
+        // frame does not have its enclosing function set.
+        if(ptca->enclosing_sloc().offset() >= 0)
+          except.push_frame_func(ptca->enclosing_sloc(), ptca->enclosing_func());
+      }
+      throw;
+    }
+
+    // Convert the result.
+    if(ptc_conj == ptc_aware_void) {
+      *this = Reference::S_void();
+    }
+    else if((ptc_conj == ptc_aware_by_val) && this->is_glvalue()) {
+      Reference::S_temporary xref = { this->read() };
+      *this = ::std::move(xref);
+    }
+    return *this;
   }
 
 }  // namespace asteria

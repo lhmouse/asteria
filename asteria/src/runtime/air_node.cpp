@@ -808,7 +808,9 @@ struct AIR_Traits_try_statement
           return status;
 
         // This must not be PTC'd, otherwise exceptions thrown from tail calls won't be caught.
-        ctx.stack().open_top().finish_call(ctx.global());
+        auto self = ::std::move(ctx.stack().open_top());
+        self.finish_call(ctx.global(), ctx.stack());
+        ctx.stack().push(::std::move(self));
         return status;
       }
       ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {

@@ -4,6 +4,7 @@
 #include "precompiled.hpp"
 #include "fwd.hpp"
 #include "runtime/reference.hpp"
+#include "runtime/evaluation_stack.hpp"
 #include "value.hpp"
 #include "util.hpp"
 
@@ -84,8 +85,11 @@ cow_function::
 invoke(Reference& self, Global_Context& global, cow_vector<Reference>&& args)
 const
   {
+    Evaluation_Stack stack;
     this->invoke_ptc_aware(self, global, ::std::move(args));
-    self.finish_call(global);
+    stack.reserve(::std::move(args));
+    self.finish_call(global, stack);
+    stack.unreserve(args);
     return self;
   }
 
