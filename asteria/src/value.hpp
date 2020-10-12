@@ -196,8 +196,8 @@ class Value
     is_scalar()
     const noexcept
       { return (1 << this->type()) &
-                   (1 << type_null | 1 << type_boolean | 1 << type_integer |
-                    1 << type_real | 1 << type_string);  }
+          (1 << type_null | 1 << type_boolean | 1 << type_integer |
+           1 << type_real | 1 << type_string);  }
 
     bool
     is_convertible_to_real()
@@ -208,14 +208,14 @@ class Value
     convert_to_real()
     const
       { return this->is_integer()
-                 ? V_real(this->as_integer())
-                 : this->as_real();  }
+          ? V_real(this->as_integer())
+          : this->as_real();  }
 
     V_real&
     mutate_into_real()
       { return this->is_integer()
-                 ? this->m_stor.emplace<type_real>(V_real(this->as_integer()))
-                 : this->open_real();  }
+          ? this->m_stor.emplace<type_real>(V_real(this->as_integer()))
+          : this->open_real();  }
 
     Value&
     swap(Value& other)

@@ -150,15 +150,39 @@ class Reference
     const noexcept
       { return this->index() == index_variable;  }
 
+    ASTERIA_INCOMPLET(Variable)
+    rcptr<Variable>
+    get_variable_opt()
+    const noexcept
+      { return ROCKET_EXPECT(this->is_variable())
+          ? unerase_cast<Variable>(this->m_root.as<index_variable>().var)
+          : nullptr;  }
+
     bool
     is_ptc_args()
     const noexcept
       { return this->index() == index_ptc_args;  }
 
+    ASTERIA_INCOMPLET(PTC_Arguments)
+    rcptr<PTC_Arguments>
+    get_ptc_args_opt()
+    const noexcept
+      { return ROCKET_EXPECT(this->is_ptc_args())
+          ? unerase_cast<PTC_Arguments>(this->m_root.as<index_ptc_args>().ptca)
+          : nullptr;  }
+
+    Reference&
+    finish_call(Global_Context& global, Evaluation_Stack& stack);
+
     bool
     is_jump_src()
     const noexcept
       { return this->index() == index_jump_src;  }
+
+    const Source_Location&
+    as_jump_src()
+    const
+      { return this->m_root.as<index_jump_src>().sloc;  }
 
     Reference&
     swap(Reference& other)
@@ -235,31 +259,6 @@ class Reference
     Value
     unset()
     const;
-
-    // These are placeholder accessors.
-    ASTERIA_INCOMPLET(Variable)
-    rcptr<Variable>
-    get_variable_opt()
-    const noexcept
-      { return ROCKET_EXPECT(this->is_variable())
-                   ? unerase_cast<Variable>(this->m_root.as<index_variable>().var)
-                   : nullptr;  }
-
-    ASTERIA_INCOMPLET(PTC_Arguments)
-    rcptr<PTC_Arguments>
-    get_ptc_args_opt()
-    const noexcept
-      { return ROCKET_EXPECT(this->is_ptc_args())
-                   ? unerase_cast<PTC_Arguments>(this->m_root.as<index_ptc_args>().ptca)
-                   : nullptr;  }
-
-    Reference&
-    finish_call(Global_Context& global, Evaluation_Stack& stack);
-
-    const Source_Location&
-    as_jump_src()
-    const
-      { return this->m_root.as<index_jump_src>().sloc;  }
   };
 
 inline
