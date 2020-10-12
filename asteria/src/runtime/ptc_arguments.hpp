@@ -52,12 +52,12 @@ final
       { return this->m_ptc;  }
 
     const cow_bivector<Source_Location, AVMC_Queue>&
-    get_defer_stack()
+    get_defer()
     const noexcept
       { return this->m_defer;  }
 
     cow_bivector<Source_Location, AVMC_Queue>&
-    open_defer_stack()
+    open_defer()
     noexcept
       { return this->m_defer;  }
 

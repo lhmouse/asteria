@@ -66,9 +66,9 @@ do_unpack_tail_calls(Reference& self, Global_Context& global)
         frames.pop_back();
 
         // Evaluate deferred expressions if any.
-        if(ptca->get_defer_stack().size())
+        if(ptca->get_defer().size())
           Executive_Context(::rocket::ref(global), ::rocket::ref(stack),
-                            ::std::move(ptca->open_defer_stack()))
+                            ::std::move(ptca->open_defer()))
             .on_scope_exit(air_status_next);
 
         // Call the hook function if any.
@@ -91,9 +91,9 @@ do_unpack_tail_calls(Reference& self, Global_Context& global)
           qhooks->on_function_except(ptca->sloc(), ptca->get_target(), except);
 
         // Evaluate deferred expressions if any.
-        if(ptca->get_defer_stack().size())
+        if(ptca->get_defer().size())
           Executive_Context(::rocket::ref(global), ::rocket::ref(stack),
-                            ::std::move(ptca->open_defer_stack()))
+                            ::std::move(ptca->open_defer()))
             .on_scope_exit(except);
 
         // Push the caller.

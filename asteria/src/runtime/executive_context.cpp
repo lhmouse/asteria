@@ -151,7 +151,7 @@ on_scope_exit(AIR_Status status)
     if(auto ptca = self.get_ptc_args_opt()) {
       // If a PTC wrapper was returned, prepend all deferred expressions to it.
       // These callbacks will be unpacked later, so we just return.
-      do_concatenate(ptca->open_defer_stack(), ::std::move(this->m_defer));
+      do_concatenate(ptca->open_defer(), ::std::move(this->m_defer));
       ROCKET_ASSERT(!self.is_uninit());
     }
     else {
