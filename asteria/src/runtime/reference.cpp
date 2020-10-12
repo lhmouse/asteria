@@ -147,13 +147,7 @@ const
         return callback;
       }
 
-      case index_ptc_args: {
-        auto ptca = unerase_cast(this->m_root.as<index_ptc_args>().ptca);
-        if(ptca)
-          ptca->enumerate_variables(callback);
-        return callback;
-      }
-
+      case index_ptc_args:
       case index_jump_src:
         return callback;
 

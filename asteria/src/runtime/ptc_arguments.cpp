@@ -3,8 +3,6 @@
 
 #include "../precompiled.hpp"
 #include "ptc_arguments.hpp"
-#include "reference.hpp"
-#include "variable_callback.hpp"
 #include "../util.hpp"
 
 namespace asteria {
@@ -12,16 +10,6 @@ namespace asteria {
 PTC_Arguments::
 ~PTC_Arguments()
   {
-  }
-
-Variable_Callback&
-PTC_Arguments::
-enumerate_variables(Variable_Callback& callback)
-const
-  {
-    this->m_target.enumerate_variables(callback);
-    ::rocket::for_each(this->m_args_self, callback);
-    return callback;
   }
 
 }  // namespace asteria

@@ -93,10 +93,6 @@ final
         this->m_enclosing_func = xfunc;
         return *this;
       }
-
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback)
-    const;
   };
 
 }  // namespace asteria
