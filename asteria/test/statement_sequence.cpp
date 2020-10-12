@@ -9,6 +9,7 @@
 #include "../src/runtime/executive_context.hpp"
 #include "../src/runtime/reference.hpp"
 #include "../src/runtime/variadic_arguer.hpp"
+#include "../src/llds/avmc_queue.hpp"
 
 using namespace asteria;
 
