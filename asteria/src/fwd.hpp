@@ -588,15 +588,15 @@ class cow_function
       }
 
     Reference&
-    invoke_ptc_aware(Reference& self, Global_Context& global, cow_vector<Reference>&& args = { })
+    invoke_ptc_aware(Reference& self, Global_Context& global, cow_vector<Reference>&& args)
     const;
 
     Reference&
-    invoke(Reference& self, Global_Context& global, cow_vector<Reference>&& args = { })
+    invoke(Reference& self, Global_Context& global, cow_vector<Reference>&& args)
     const;
 
     Reference
-    invoke(Global_Context& global, cow_vector<Reference>&& args = { })
+    invoke(Global_Context& global, cow_vector<Reference>&& args)
     const;
   };
 
