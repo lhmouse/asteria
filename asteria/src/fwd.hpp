@@ -505,7 +505,7 @@ clone_opaque(rcptr<Abstract_Opaque>& output, const OpaqueT& src)
 using simple_function =
           Reference& (Reference& self,  // `this` (input) and return (output) reference
                       Global_Context& global,
-                      cow_vector<Reference>&& args);  // positional arguments)
+                      cow_vector<Reference>&& args);  // positional arguments
 
 class cow_function
   {
