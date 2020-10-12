@@ -18,22 +18,20 @@ final
     Source_Location m_sloc;
     PTC_Aware m_ptc;
 
+    // These are the target function and its arguments.
+    cow_function m_target;
+    cow_vector<Reference> m_args_self;
+
     // These are deferred expressions.
     cow_bivector<Source_Location, AVMC_Queue> m_defer;
 
-    // This is the target function.
-    cow_function m_target;
-    // The last reference is `self`.
-    // We can't store a `Reference` directly as the class `Reference` is incomplete here.
-    cow_vector<Reference> m_args_self;
-
     // These are source information of the enclosing function.
-    Source_Location m_enclosing_sloc;
-    cow_string m_enclosing_func;
+    Source_Location m_encl_sloc;
+    cow_string m_encl_func;
 
   public:
-    PTC_Arguments(const Source_Location& sloc, PTC_Aware ptc, const cow_function& target,
-                  cow_vector<Reference>&& args_self)
+    PTC_Arguments(const Source_Location& sloc, PTC_Aware ptc,
+                  const cow_function& target, cow_vector<Reference>&& args_self)
       : m_sloc(sloc), m_ptc(ptc),
         m_target(target), m_args_self(::std::move(args_self))
       { }
@@ -51,16 +49,6 @@ final
     const noexcept
       { return this->m_ptc;  }
 
-    const cow_bivector<Source_Location, AVMC_Queue>&
-    get_defer()
-    const noexcept
-      { return this->m_defer;  }
-
-    cow_bivector<Source_Location, AVMC_Queue>&
-    open_defer()
-    noexcept
-      { return this->m_defer;  }
-
     const cow_function&
     get_target()
     const noexcept
@@ -76,21 +64,31 @@ final
     noexcept
       { return this->m_args_self;  }
 
+    const cow_bivector<Source_Location, AVMC_Queue>&
+    get_defer()
+    const noexcept
+      { return this->m_defer;  }
+
+    cow_bivector<Source_Location, AVMC_Queue>&
+    open_defer()
+    noexcept
+      { return this->m_defer;  }
+
     const Source_Location&
     enclosing_sloc()
     const noexcept
-      { return this->m_enclosing_sloc;  }
+      { return this->m_encl_sloc;  }
 
     const cow_string&
     enclosing_func()
     const noexcept
-      { return this->m_enclosing_func;  }
+      { return this->m_encl_func;  }
 
     PTC_Arguments&
     set_enclosing_function(const Source_Location& xsloc, const cow_string& xfunc)
       {
-        this->m_enclosing_sloc = xsloc;
-        this->m_enclosing_func = xfunc;
+        this->m_encl_sloc = xsloc;
+        this->m_encl_func = xfunc;
         return *this;
       }
   };

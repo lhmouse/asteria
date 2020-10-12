@@ -22,21 +22,6 @@ do_set_lazy_reference(Executive_Context& ctx, const phsh_string& name, XRefT&& x
     return ::std::addressof(ref);
   }
 
-template<typename ElemT>
-inline
-cow_vector<ElemT>&
-do_concatenate(cow_vector<ElemT>& lhs, cow_vector<ElemT>&& rhs)
-  {
-    if(lhs.size()) {
-      lhs.append(rhs.move_begin(), rhs.move_end());
-      rhs.clear();
-    }
-    else {
-      lhs.swap(rhs);
-    }
-    return lhs;
-  }
-
 }  // namespace
 
 Executive_Context::
@@ -151,8 +136,10 @@ on_scope_exit(AIR_Status status)
     if(auto ptca = self.get_ptc_args_opt()) {
       // If a PTC wrapper was returned, prepend all deferred expressions to it.
       // These callbacks will be unpacked later, so we just return.
-      do_concatenate(ptca->open_defer(), ::std::move(this->m_defer));
-      ROCKET_ASSERT(!self.is_uninit());
+      if(ptca->get_defer().empty())
+        ptca->open_defer().swap(this->m_defer);
+      else
+        ptca->open_defer().append(this->m_defer.move_begin(), this->m_defer.move_end());
     }
     else {
       // Execute all deferred expressions backwards.
@@ -175,6 +162,7 @@ on_scope_exit(AIR_Status status)
       if(self.is_uninit())
         return status;
     }
+    ROCKET_ASSERT(!self.is_uninit());
 
     // Restore the returned reference.
     this->m_stack.get().open_top() = ::std::move(self);
