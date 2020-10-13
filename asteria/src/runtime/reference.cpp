@@ -64,7 +64,7 @@ finish_call(Global_Context& global, Evaluation_Stack& stack)
     // We must rebuild the backtrace using this queue if an exception is thrown.
     cow_vector<rcptr<PTC_Arguments>> frames;
     rcptr<PTC_Arguments> ptca;
-    PTC_Aware ptc_conj = ptc_aware_by_ref;
+    int ptc_conj = ptc_aware_by_ref;
 
     ASTERIA_RUNTIME_TRY {
       // Unpack all frames recursively.
@@ -83,15 +83,9 @@ finish_call(Global_Context& global, Evaluation_Stack& stack)
         if(auto qhooks = global.get_hooks_opt())
           qhooks->on_function_call(ptca->sloc(), ptca->get_target());
 
-        // Figure out how to forward the result.
-        if(ptca->ptc_aware() == ptc_aware_void) {
-          ptc_conj = ptc_aware_void;
-        }
-        else if((ptca->ptc_aware() == ptc_aware_by_val) && (ptc_conj == ptc_aware_by_ref)) {
-          ptc_conj = ptc_aware_by_val;
-        }
         // Record this frame.
         frames.emplace_back(ptca);
+        ptc_conj |= ptca->ptc_aware();
 
         // Perform a non-tail call.
         ptca->get_target().invoke_ptc_aware(*this, global, ::std::move(args));

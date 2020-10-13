@@ -1401,7 +1401,7 @@ struct AIR_Traits_function_call
       {
         AVMC_Queue::Uparam up;
         up.y32 = altr.nargs;
-        up.y8s[0] = weaken_enum(altr.ptc);
+        up.y8s[0] = static_cast<uint8_t>(altr.ptc);
         reachable &= (altr.ptc == ptc_aware_none);
         return up;
       }
@@ -3511,7 +3511,7 @@ struct AIR_Traits_variadic_call
     make_uparam(bool& /*reachable*/, const AIR_Node::S_variadic_call& altr)
       {
         AVMC_Queue::Uparam up;
-        up.y8s[0] = weaken_enum(altr.ptc);
+        up.y8s[0] = static_cast<uint8_t>(altr.ptc);
         return up;
       }
 

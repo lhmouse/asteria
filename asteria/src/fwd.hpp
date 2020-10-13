@@ -159,7 +159,7 @@ class AVMC_Queue;
 
 // Runtime
 enum AIR_Status : uint8_t;
-enum PTC_Aware : uint8_t;
+enum PTC_Aware : int8_t;  // this is a bitmask!
 class Abstract_Hooks;
 class Runtime_Error;
 class Reference;
