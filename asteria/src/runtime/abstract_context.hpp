@@ -17,7 +17,6 @@ class Abstract_Context
     Reference_Dictionary m_named_refs;
 
   public:
-    constexpr
     Abstract_Context()
     noexcept
       { }
