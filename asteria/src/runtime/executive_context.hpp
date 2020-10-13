@@ -40,8 +40,9 @@ class Executive_Context
     Executive_Context(ref<Global_Context> xglobal, ref<Evaluation_Stack> xstack,
                       cow_bivector<Source_Location, AVMC_Queue>&& defer)  // for proper tail calls
       : m_parent_opt(nullptr),
-        m_global(xglobal), m_stack(xstack)
-      { this->m_defer = ::std::move(defer);  }
+        m_global(xglobal), m_stack(xstack),
+        m_defer(::std::move(defer))
+      { }
 
     Executive_Context(ref<Global_Context> xglobal, ref<Evaluation_Stack> xstack,
                       const rcptr<Variadic_Arguer>& zvarg, const cow_vector<phsh_string>& params,
