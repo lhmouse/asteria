@@ -10,27 +10,22 @@ namespace details_avmc_queue {
 
 // This union can be used to encapsulate trivial information in solidified nodes.
 // At most 48 bits can be stored here. You may make appropriate use of them.
-// Fields of each struct here share a unique prefix. This helps you ensure that
-// you don't mix access to fields of different structs at the same time.
 union Uparam
   {
     struct {
-      uint16_t x_DO_NOT_USE_;
-      uint16_t x16;
-      uint32_t x32;
+      uint16_t _do_not_use_2_;
+      uint16_t s16;
+      uint32_t s32;
     };
+
     struct {
-      uint16_t y_DO_NOT_USE_;
-      uint8_t y8s[2];
-      uint32_t y32;
+      uint16_t _do_not_use_0_;
+      uint8_t p8[6];
     };
+
     struct {
-      uint16_t z_DO_NOT_USE_;
-      uint16_t z16s[3];
-    };
-    struct {
-      uint16_t v_DO_NOT_USE_;
-      uint8_t v8s[6];
+      uint16_t _do_not_use_1_;
+      uint16_t p16[3];
     };
   };
 

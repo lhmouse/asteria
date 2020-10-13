@@ -361,7 +361,7 @@ struct AIR_Traits_initialize_variable
     make_uparam(bool& /*reachable*/, const AIR_Node::S_initialize_variable& altr)
       {
         AVMC_Queue::Uparam up;
-        up.v8s[0] = altr.immutable;
+        up.p8[0] = altr.immutable;
         return up;
       }
 
@@ -389,7 +389,7 @@ struct AIR_Traits_initialize_variable
         ctx.stack().pop();
 
         // Initialize it.
-        var->initialize(::std::move(val), up.v8s[0]);
+        var->initialize(::std::move(val), up.p8[0]);
         return air_status_next;
       }
   };
@@ -404,7 +404,7 @@ struct AIR_Traits_if_statement
     make_uparam(bool& /*reachable*/, const AIR_Node::S_if_statement& altr)
       {
         AVMC_Queue::Uparam up;
-        up.v8s[0] = altr.negative;
+        up.p8[0] = altr.negative;
         return up;
       }
 
@@ -424,7 +424,7 @@ struct AIR_Traits_if_statement
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Sparam_queues_2& sp)
       {
         // Check the value of the condition.
-        if(ctx.stack().get_top().read().test() != up.v8s[0])
+        if(ctx.stack().get_top().read().test() != up.p8[0])
           // Execute the true branch and forward the status verbatim.
           return do_execute_block(sp.queues[0], ctx);
 
@@ -534,7 +534,7 @@ struct AIR_Traits_do_while_statement
     make_uparam(bool& /*reachable*/, const AIR_Node::S_do_while_statement& altr)
       {
         AVMC_Queue::Uparam up;
-        up.v8s[0] = altr.negative;
+        up.p8[0] = altr.negative;
         return up;
       }
 
@@ -566,7 +566,7 @@ struct AIR_Traits_do_while_statement
           // Check the condition.
           status = sp.queues[1].execute(ctx);
           ROCKET_ASSERT(status == air_status_next);
-          if(ctx.stack().get_top().read().test() == up.v8s[0])
+          if(ctx.stack().get_top().read().test() == up.p8[0])
             break;
         }
         return air_status_next;
@@ -583,7 +583,7 @@ struct AIR_Traits_while_statement
     make_uparam(bool& /*reachable*/, const AIR_Node::S_while_statement& altr)
       {
         AVMC_Queue::Uparam up;
-        up.v8s[0] = altr.negative;
+        up.p8[0] = altr.negative;
         return up;
       }
 
@@ -606,7 +606,7 @@ struct AIR_Traits_while_statement
           // Check the condition.
           auto status = sp.queues[0].execute(ctx);
           ROCKET_ASSERT(status == air_status_next);
-          if(ctx.stack().get_top().read().test() == up.v8s[0])
+          if(ctx.stack().get_top().read().test() == up.p8[0])
             break;
 
           // Execute the body.
@@ -892,7 +892,7 @@ struct AIR_Traits_assert_statement
     make_uparam(bool& /*reachable*/, const AIR_Node::S_assert_statement& altr)
       {
         AVMC_Queue::Uparam up;
-        up.v8s[0] = altr.negative;
+        up.p8[0] = altr.negative;
         return up;
       }
 
@@ -911,7 +911,7 @@ struct AIR_Traits_assert_statement
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Sparam_sloc_text& sp)
       {
         // Check the value of the condition.
-        if(ROCKET_EXPECT(ctx.stack().get_top().read().test() != up.v8s[0]))
+        if(ROCKET_EXPECT(ctx.stack().get_top().read().test() != up.p8[0]))
           // When the assertion succeeds, there is nothing to do.
           return air_status_next;
 
@@ -930,7 +930,7 @@ struct AIR_Traits_return_statement
     make_uparam(bool& reachable, const AIR_Node::S_return_statement& altr)
       {
         AVMC_Queue::Uparam up;
-        up.v8s[0] = weaken_enum(altr.status);
+        up.p8[0] = weaken_enum(altr.status);
         reachable = false;
         return up;
       }
@@ -939,7 +939,7 @@ struct AIR_Traits_return_statement
     AIR_Status
     execute(Executive_Context& /*ctx*/, const AVMC_Queue::Uparam& up)
       {
-        auto status = static_cast<AIR_Status>(up.v8s[0]);
+        auto status = static_cast<AIR_Status>(up.p8[0]);
         ROCKET_ASSERT(::rocket::is_any_of(status, { air_status_return_void, air_status_return_ref }));
         return status;
       }
@@ -1002,7 +1002,7 @@ struct AIR_Traits_push_immediate_boolean
     make_uparam(bool& /*reachable*/, const AIR_Node::S_push_immediate& altr)
       {
         AVMC_Queue::Uparam up;
-        up.x32 = altr.value.as_boolean();
+        up.s32 = altr.value.as_boolean();
         return up;
       }
 
@@ -1011,7 +1011,7 @@ struct AIR_Traits_push_immediate_boolean
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // Push a constant boolean.
-        Reference::S_constant xref = { V_boolean(up.x32) };
+        Reference::S_constant xref = { V_boolean(up.s32) };
         ctx.stack().push(::std::move(xref));
         return air_status_next;
       }
@@ -1037,8 +1037,8 @@ struct AIR_Traits_push_immediate_int48
         uint64_t bits = static_cast<uint64_t>(value);
 
         AVMC_Queue::Uparam up;
-        up.x16 = static_cast<uint16_t>(bits >> 32);
-        up.x32 = static_cast<uint32_t>(bits);
+        up.s16 = static_cast<uint16_t>(bits >> 32);
+        up.s32 = static_cast<uint32_t>(bits);
         return up;
       }
 
@@ -1046,8 +1046,8 @@ struct AIR_Traits_push_immediate_int48
     AIR_Status
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
-        uint64_t bits = static_cast<uint64_t>(static_cast<int16_t>(up.x16));
-        bits = bits << 32 | up.x32;
+        uint64_t bits = static_cast<uint64_t>(static_cast<int16_t>(up.s16));
+        bits = bits << 32 | up.s32;
         int64_t value = static_cast<int64_t>(bits);
 
         // Push a constant integer.
@@ -1129,7 +1129,7 @@ struct AIR_Traits_push_local_reference
     make_uparam(bool& /*reachable*/, const AIR_Node::S_push_local_reference& altr)
       {
         AVMC_Queue::Uparam up;
-        up.x32 = altr.depth;
+        up.s32 = altr.depth;
         return up;
       }
 
@@ -1158,7 +1158,7 @@ struct AIR_Traits_push_local_reference
       {
         // Get the context.
         const Executive_Context* qctx = &ctx;
-        ::rocket::ranged_for(UINT32_C(0), up.x32, [&](uint32_t) { qctx = qctx->get_parent_opt();  });
+        ::rocket::ranged_for(UINT32_C(0), up.s32, [&](uint32_t) { qctx = qctx->get_parent_opt();  });
         ROCKET_ASSERT(qctx);
 
         // Look for the name in the context.
@@ -1242,7 +1242,7 @@ struct AIR_Traits_branch_expression
     make_uparam(bool& /*reachable*/, const AIR_Node::S_branch_expression& altr)
       {
         AVMC_Queue::Uparam up;
-        up.v8s[0] = altr.assign;
+        up.p8[0] = altr.assign;
         return up;
       }
 
@@ -1273,10 +1273,10 @@ struct AIR_Traits_branch_expression
         // Check the value of the condition.
         if(ctx.stack().get_top().read().test())
           // Execute the true branch and forward the status verbatim.
-          return do_evaluate_subexpression(ctx, up.v8s[0], sp.queues[0]);
+          return do_evaluate_subexpression(ctx, up.p8[0], sp.queues[0]);
 
         // Execute the false branch and forward the status verbatim.
-        return do_evaluate_subexpression(ctx, up.v8s[0], sp.queues[1]);
+        return do_evaluate_subexpression(ctx, up.p8[0], sp.queues[1]);
       }
   };
 
@@ -1290,7 +1290,7 @@ struct AIR_Traits_coalescence
     make_uparam(bool& /*reachable*/, const AIR_Node::S_coalescence& altr)
       {
         AVMC_Queue::Uparam up;
-        up.v8s[0] = altr.assign;
+        up.p8[0] = altr.assign;
         return up;
       }
 
@@ -1322,7 +1322,7 @@ struct AIR_Traits_coalescence
           return air_status_next;
 
         // Execute the null branch and forward the status verbatim.
-        return do_evaluate_subexpression(ctx, up.v8s[0], queue);
+        return do_evaluate_subexpression(ctx, up.p8[0], queue);
       }
   };
 
@@ -1400,8 +1400,8 @@ struct AIR_Traits_function_call
     make_uparam(bool& reachable, const AIR_Node::S_function_call& altr)
       {
         AVMC_Queue::Uparam up;
-        up.y32 = altr.nargs;
-        up.y8s[0] = static_cast<uint8_t>(altr.ptc);
+        up.s32 = altr.nargs;
+        up.p8[0] = static_cast<uint8_t>(altr.ptc);
         reachable &= (altr.ptc == ptc_aware_none);
         return up;
       }
@@ -1434,7 +1434,7 @@ struct AIR_Traits_function_call
           qhooks->on_single_step_trap(sloc);
 
         // Pop arguments off the stack backwards.
-        auto args = do_pop_positional_arguments(ctx, up.y32);
+        auto args = do_pop_positional_arguments(ctx, up.s32);
 
         // Copy the target, which shall be of type `function`.
         auto value = ctx.stack().get_top().read();
@@ -1443,7 +1443,7 @@ struct AIR_Traits_function_call
         auto& self = ctx.stack().open_top().zoom_out();
 
         return do_function_call_common(self, sloc, ctx, value.as_function(),
-                                       static_cast<PTC_Aware>(up.y8s[0]), ::std::move(args));
+                                       static_cast<PTC_Aware>(up.p8[0]), ::std::move(args));
       }
   };
 
@@ -1489,7 +1489,7 @@ struct AIR_Traits_push_unnamed_array
     make_uparam(bool& /*reachable*/, const AIR_Node::S_push_unnamed_array& altr)
       {
         AVMC_Queue::Uparam up;
-        up.x32 = altr.nelems;
+        up.s32 = altr.nelems;
         return up;
       }
 
@@ -1508,7 +1508,7 @@ struct AIR_Traits_push_unnamed_array
       {
         // Pop elements from the stack and store them in an array backwards.
         V_array array;
-        array.resize(up.x32);
+        array.resize(up.s32);
         for(auto it = array.mut_rbegin();  it != array.rend();  ++it) {
           // Write elements backwards.
           *it = ctx.stack().get_top().read();
@@ -1900,7 +1900,7 @@ struct AIR_Traits_apply_operator_common
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.v8s[0] = altr.assign;
+        up.p8[0] = altr.assign;
         return up;
       }
 
@@ -2017,7 +2017,7 @@ struct AIR_Traits_apply_operator_pos : AIR_Traits_apply_operator_common
 
         // Copy the operand to create a temporary value.
         // N.B. This is one of the few operators that work on all types.
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2046,7 +2046,7 @@ struct AIR_Traits_apply_operator_neg : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Prefix negation not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2080,7 +2080,7 @@ struct AIR_Traits_apply_operator_notb : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Prefix bitwise NOT not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2099,7 +2099,7 @@ struct AIR_Traits_apply_operator_notl : AIR_Traits_apply_operator_common
         // N.B. This is one of the few operators that work on all types.
         rhs = !rhs.test();
 
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2168,7 +2168,7 @@ struct AIR_Traits_apply_operator_unset : AIR_Traits_apply_operator_common
         Reference::S_temporary xref = { ctx.stack().get_top().unset() };
 
         // Unset the reference and return the old value.
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2204,7 +2204,7 @@ struct AIR_Traits_apply_operator_countof : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Prefix `countof` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2223,7 +2223,7 @@ struct AIR_Traits_apply_operator_typeof : AIR_Traits_apply_operator_common
         // N.B. This is one of the few operators that work on all types.
         rhs = ::rocket::sref(rhs.what_type());
 
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2252,7 +2252,7 @@ struct AIR_Traits_apply_operator_sqrt : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Prefix `__sqrt` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2281,7 +2281,7 @@ struct AIR_Traits_apply_operator_isnan : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Prefix `__isnan` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2310,7 +2310,7 @@ struct AIR_Traits_apply_operator_isinf : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Prefix `__isinf` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2339,7 +2339,7 @@ struct AIR_Traits_apply_operator_abs : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Prefix `__abs` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2368,7 +2368,7 @@ struct AIR_Traits_apply_operator_sign : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Prefix `__sign` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2396,7 +2396,7 @@ struct AIR_Traits_apply_operator_round : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Prefix `__round` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2424,7 +2424,7 @@ struct AIR_Traits_apply_operator_floor : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Prefix `__floor` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2452,7 +2452,7 @@ struct AIR_Traits_apply_operator_ceil : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Prefix `__ceil` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2480,7 +2480,7 @@ struct AIR_Traits_apply_operator_trunc : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Prefix `__trunc` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2508,7 +2508,7 @@ struct AIR_Traits_apply_operator_iround : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Prefix `__iround` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2536,7 +2536,7 @@ struct AIR_Traits_apply_operator_ifloor : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Prefix `__ifloor` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2564,7 +2564,7 @@ struct AIR_Traits_apply_operator_iceil : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Prefix `__iceil` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2592,7 +2592,7 @@ struct AIR_Traits_apply_operator_itrunc : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Prefix `__itrunc` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2614,7 +2614,7 @@ struct AIR_Traits_apply_operator_cmp_eq : AIR_Traits_apply_operator_common
         auto comp = lhs.compare(rhs);
         rhs = comp == compare_equal;
 
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2636,7 +2636,7 @@ struct AIR_Traits_apply_operator_cmp_ne : AIR_Traits_apply_operator_common
         auto comp = lhs.compare(rhs);
         rhs = comp != compare_equal;
 
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2659,7 +2659,7 @@ struct AIR_Traits_apply_operator_cmp_lt : AIR_Traits_apply_operator_common
           ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)", lhs, rhs);
         rhs = comp == compare_less;
 
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2682,7 +2682,7 @@ struct AIR_Traits_apply_operator_cmp_gt : AIR_Traits_apply_operator_common
           ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)", lhs, rhs);
         rhs = comp == compare_greater;
 
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2705,7 +2705,7 @@ struct AIR_Traits_apply_operator_cmp_lte : AIR_Traits_apply_operator_common
           ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)", lhs, rhs);
         rhs = comp != compare_greater;
 
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2728,7 +2728,7 @@ struct AIR_Traits_apply_operator_cmp_gte : AIR_Traits_apply_operator_common
           ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)", lhs, rhs);
         rhs = comp != compare_less;
 
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2768,7 +2768,7 @@ struct AIR_Traits_apply_operator_cmp_3way : AIR_Traits_apply_operator_common
           default:
             ROCKET_ASSERT(false);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2810,7 +2810,7 @@ struct AIR_Traits_apply_operator_add : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Infix addition not applicable (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2847,7 +2847,7 @@ struct AIR_Traits_apply_operator_sub : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Infix subtraction not applicable (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2891,7 +2891,7 @@ struct AIR_Traits_apply_operator_mul : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Infix multiplication not applicable (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2923,7 +2923,7 @@ struct AIR_Traits_apply_operator_div : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Infix division not applicable (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2955,7 +2955,7 @@ struct AIR_Traits_apply_operator_mod : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Infix modulo not applicable (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -2991,7 +2991,7 @@ struct AIR_Traits_apply_operator_sll : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Infix logical left shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -3027,7 +3027,7 @@ struct AIR_Traits_apply_operator_srl : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Infix logical right shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -3064,7 +3064,7 @@ struct AIR_Traits_apply_operator_sla : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Infix arithmetic left shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -3100,7 +3100,7 @@ struct AIR_Traits_apply_operator_sra : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Infix arithmetic right shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -3137,7 +3137,7 @@ struct AIR_Traits_apply_operator_andb : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Infix bitwise AND not applicable (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -3174,7 +3174,7 @@ struct AIR_Traits_apply_operator_orb : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Infix bitwise OR not applicable (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -3211,7 +3211,7 @@ struct AIR_Traits_apply_operator_xorb : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Infix bitwise XOR not applicable (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -3257,7 +3257,7 @@ struct AIR_Traits_apply_operator_fma : AIR_Traits_apply_operator_common
           default:
             ASTERIA_THROW("Fused multiply-add not applicable (operands were `$1`, `$2` and `$3`)", lhs, mid, rhs);
         }
-        do_set_temporary(ctx, up.v8s[0], ::std::move(xref));
+        do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
       }
   };
@@ -3302,8 +3302,8 @@ struct AIR_Traits_unpack_struct_array
     make_uparam(bool& /*reachable*/, const AIR_Node::S_unpack_struct_array& altr)
       {
         AVMC_Queue::Uparam up;
-        up.y32 = altr.nelems;
-        up.y8s[0] = altr.immutable;
+        up.s32 = altr.nelems;
+        up.p8[0] = altr.immutable;
         return up;
       }
 
@@ -3333,7 +3333,7 @@ struct AIR_Traits_unpack_struct_array
         if(val.is_array())
           arr = ::std::move(val.open_array());
 
-        for(uint32_t i = up.y32 - 1;  i != UINT32_MAX;  --i) {
+        for(uint32_t i = up.s32 - 1;  i != UINT32_MAX;  --i) {
           // Get the variable back.
           auto var = ctx.stack().get_top().get_variable_opt();
           ctx.stack().pop();
@@ -3342,9 +3342,9 @@ struct AIR_Traits_unpack_struct_array
           ROCKET_ASSERT(var && !var->is_initialized());
           auto qinit = arr.mut_ptr(i);
           if(qinit)
-            var->initialize(::std::move(*qinit), up.y8s[0]);
+            var->initialize(::std::move(*qinit), up.p8[0]);
           else
-            var->initialize(V_null(), up.y8s[0]);
+            var->initialize(V_null(), up.p8[0]);
         }
         return air_status_next;
       }
@@ -3360,7 +3360,7 @@ struct AIR_Traits_unpack_struct_object
     make_uparam(bool& /*reachable*/, const AIR_Node::S_unpack_struct_object& altr)
       {
         AVMC_Queue::Uparam up;
-        up.y8s[0] = altr.immutable;
+        up.p8[0] = altr.immutable;
         return up;
       }
 
@@ -3406,9 +3406,9 @@ struct AIR_Traits_unpack_struct_object
           ROCKET_ASSERT(var && !var->is_initialized());
           auto qinit = obj.mut_ptr(*it);
           if(qinit)
-            var->initialize(::std::move(*qinit), up.y8s[0]);
+            var->initialize(::std::move(*qinit), up.p8[0]);
           else
-            var->initialize(V_null(), up.y8s[0]);
+            var->initialize(V_null(), up.p8[0]);
         }
         return air_status_next;
       }
@@ -3424,7 +3424,7 @@ struct AIR_Traits_define_null_variable
     make_uparam(bool& /*reachable*/, const AIR_Node::S_define_null_variable& altr)
       {
         AVMC_Queue::Uparam up;
-        up.v8s[0] = altr.immutable;
+        up.p8[0] = altr.immutable;
         return up;
       }
 
@@ -3464,7 +3464,7 @@ struct AIR_Traits_define_null_variable
           qhooks->on_variable_declare(sp.sloc, sp.name);
 
         // Initialize the variable to `null`.
-        var->initialize(V_null(), up.v8s[0]);
+        var->initialize(V_null(), up.p8[0]);
         return air_status_next;
       }
   };
@@ -3511,7 +3511,7 @@ struct AIR_Traits_variadic_call
     make_uparam(bool& /*reachable*/, const AIR_Node::S_variadic_call& altr)
       {
         AVMC_Queue::Uparam up;
-        up.y8s[0] = static_cast<uint8_t>(altr.ptc);
+        up.p8[0] = static_cast<uint8_t>(altr.ptc);
         return up;
       }
 
@@ -3607,7 +3607,7 @@ struct AIR_Traits_variadic_call
         auto& self = ctx.stack().open_top().zoom_out();
 
         return do_function_call_common(self, sloc, ctx, value.as_function(),
-                                       static_cast<PTC_Aware>(up.y8s[0]), ::std::move(args));
+                                       static_cast<PTC_Aware>(up.p8[0]), ::std::move(args));
       }
   };
 
@@ -3664,7 +3664,7 @@ struct AIR_Traits_import_call
     make_uparam(bool& /*reachable*/, const AIR_Node::S_import_call& altr)
       {
         AVMC_Queue::Uparam up;
-        up.y32 = altr.nargs;
+        up.s32 = altr.nargs;
         return up;
       }
 
@@ -3699,8 +3699,8 @@ struct AIR_Traits_import_call
           qhooks->on_single_step_trap(sp.sloc);
 
         // Pop arguments off the stack backwards.
-        ROCKET_ASSERT(up.y32 != 0);
-        auto args = do_pop_positional_arguments(ctx, up.y32 - 1);
+        ROCKET_ASSERT(up.s32 != 0);
+        auto args = do_pop_positional_arguments(ctx, up.s32 - 1);
 
         // Copy the filename, which shall be of type `string`.
         auto value = ctx.stack().get_top().read();
@@ -3762,7 +3762,7 @@ struct AIR_Traits_break_or_continue
     make_uparam(bool& reachable, const AIR_Node::S_break_or_continue& altr)
       {
         AVMC_Queue::Uparam up;
-        up.v8s[0] = weaken_enum(altr.status);
+        up.p8[0] = weaken_enum(altr.status);
         reachable = false;
         return up;
       }
@@ -3781,7 +3781,7 @@ struct AIR_Traits_break_or_continue
         Reference::S_jump_src xref = { sloc };
         ctx.stack().push(::std::move(xref));
 
-        auto status = static_cast<AIR_Status>(up.v8s[0]);
+        auto status = static_cast<AIR_Status>(up.p8[0]);
         ROCKET_ASSERT(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch,
                                                     air_status_break_while, air_status_break_for,
                                                     air_status_continue_unspec, air_status_continue_while,
