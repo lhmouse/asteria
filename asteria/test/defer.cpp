@@ -14,6 +14,22 @@ int main()
       ::rocket::sref(__FILE__), __LINE__, ::rocket::sref(R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
+        func foo() {
+          var i = 42;
+          defer "meow";
+          defer ++i;
+          return i;  // by val
+        }
+        assert foo() == 42;
+
+        func foo() {
+          var i = 42;
+          defer "meow";
+          defer ++i;
+          return ref i;  // by ref
+        }
+        assert foo() == 43;
+
         var rec;
 
         func foo() {
