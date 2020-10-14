@@ -19,7 +19,11 @@ class AVMC_Queue
     using Enumerator  = details_avmc_queue::Enumerator;
 
   private:
-    details_avmc_queue::Header* m_bptr = nullptr;  // beginning of raw storage
+    using Header       = details_avmc_queue::Header;
+    using Constructor  = details_avmc_queue::Constructor;
+    using Vtable       = details_avmc_queue::Vtable;
+
+    Header* m_bptr = nullptr;  // beginning of raw storage
     uint32_t m_rsrv = 0;  // size of raw storage, in number of `Header`s [!]
     uint32_t m_used = 0;  // size of used storage, in number of `Header`s [!]
 
@@ -61,7 +65,7 @@ class AVMC_Queue
 
     // Reserve storage for the next node.
     inline
-    details_avmc_queue::Header*
+    Header*
     do_reserve_one(Uparam up, const opt<Symbols>& syms_opt, size_t nbytes);
 
     // Append a new node to the end. `nbytes` is the size of `sp` to initialize.

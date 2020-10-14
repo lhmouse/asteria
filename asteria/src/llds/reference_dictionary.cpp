@@ -8,8 +8,6 @@
 
 namespace asteria {
 
-using details_reference_dictionary::Bucket;
-
 void
 Reference_Dictionary::
 do_destroy_buckets()
@@ -26,12 +24,13 @@ noexcept
       ::rocket::destroy_at(qbkt->vstor);
       qbkt->next = nullptr;
     }
+
 #ifdef ROCKET_DEBUG
     this->m_head = reinterpret_cast<Bucket*>(0xDEADBEEF);
 #endif
   }
 
-Bucket*
+details_reference_dictionary::Bucket*
 Reference_Dictionary::
 do_xprobe(const phsh_string& name)
 const noexcept

@@ -8,8 +8,6 @@
 
 namespace asteria {
 
-using details_variable_hashset::Bucket;
-
 void
 Variable_HashSet::
 do_destroy_buckets()
@@ -25,12 +23,13 @@ noexcept
       ::rocket::destroy_at(qbkt->kstor);
       qbkt->prev = nullptr;
     }
+
 #ifdef ROCKET_DEBUG
     this->m_head = reinterpret_cast<Bucket*>(0xDEADBEEF);
 #endif
   }
 
-Bucket*
+details_variable_hashset::Bucket*
 Variable_HashSet::
 do_xprobe(const rcptr<Variable>& var)
 const noexcept

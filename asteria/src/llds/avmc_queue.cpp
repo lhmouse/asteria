@@ -11,13 +11,6 @@
 
 namespace asteria {
 
-using details_avmc_queue::Uparam;
-using details_avmc_queue::Symbols;
-using details_avmc_queue::Constructor;
-using details_avmc_queue::Executor;
-using details_avmc_queue::Vtable;
-using details_avmc_queue::Header;
-
 void
 AVMC_Queue::
 do_destroy_nodes()
@@ -75,7 +68,7 @@ do_reallocate(uint32_t nadd)
       ::operator delete(bold);
   }
 
-Header*
+details_avmc_queue::Header*
 AVMC_Queue::
 do_reserve_one(Uparam uparam, const opt<Symbols>& syms_opt, size_t nbytes)
   {
