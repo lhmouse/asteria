@@ -25,9 +25,8 @@ noexcept
     }
 
 #ifdef ROCKET_DEBUG
-    ::std::memset(this->m_bptr, 0xD3,
-                     static_cast<size_t>(reinterpret_cast<char*>(this->m_eptr)
-                               - reinterpret_cast<char*>(this->m_bptr)));
+    ::std::for_each(this->m_bptr, this->m_eptr, [&](Bucket& r) {
+              ::std::memset((void*)&r, 0xD3, sizeof(r));  r.prev = nullptr;  });
     this->m_head = reinterpret_cast<Bucket*>(0xDEADBEEF);
 #endif
   }
@@ -137,12 +136,12 @@ do_rehash(size_t nbkt)
     // Allocate a new table.
     if(nbkt > PTRDIFF_MAX / sizeof(Bucket))
       throw ::std::bad_array_new_length();
+
     auto bptr = static_cast<Bucket*>(::operator new(nbkt * sizeof(Bucket)));
     auto eptr = bptr + nbkt;
 
     // Initialize an empty table.
-    for(auto qbkt = bptr;  qbkt != eptr;  ++qbkt)
-      qbkt->prev = nullptr;
+    ::std::for_each(bptr, eptr, [&](Bucket& r) { r.prev = nullptr;  });
     auto bold = ::std::exchange(this->m_bptr, bptr);
     this->m_eptr = eptr;
 

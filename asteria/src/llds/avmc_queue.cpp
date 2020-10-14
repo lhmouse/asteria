@@ -42,6 +42,7 @@ do_reallocate(uint32_t nadd)
     constexpr size_t nhdrs_max = UINT32_MAX / sizeof(Header);
     if(nhdrs_max - this->m_used < nadd)
       throw ::std::bad_array_new_length();
+
     uint32_t rsrv = this->m_used + nadd;
     auto bptr = static_cast<Header*>(::operator new(rsrv * sizeof(Header)));
 
@@ -49,8 +50,7 @@ do_reallocate(uint32_t nadd)
     // This copies all existent headers and trivial data.
     // Note that the size is unchanged.
     auto bold = ::std::exchange(this->m_bptr, bptr);
-    if(this->m_used)
-      ::std::memcpy(bptr, bold, this->m_used * sizeof(Header));
+    ::std::memcpy(bptr, bold, this->m_used * sizeof(Header));
     this->m_rsrv = rsrv;
 
     // Move old non-trivial nodes if any.
