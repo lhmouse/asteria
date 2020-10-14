@@ -126,7 +126,7 @@ class Reference_Dictionary
       }
 
     const Reference*
-    get_opt(const phsh_string& name)
+    find_opt(const phsh_string& name)
     const noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.

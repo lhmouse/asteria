@@ -58,7 +58,7 @@ class Abstract_Context
     get_named_reference_opt(const phsh_string& name)
     const
       {
-        auto qref = this->m_named_refs.get_opt(name);
+        auto qref = this->m_named_refs.find_opt(name);
         if(ROCKET_UNEXPECT(!qref))
           qref = const_cast<Abstract_Context*>(this)->do_lazy_lookup_opt(name);
         return qref;
