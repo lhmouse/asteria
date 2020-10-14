@@ -731,7 +731,7 @@ reload(const cow_string& file, int line, tinybuf& cbuf)
     // Save the position of an unterminated block comment.
     Tack bcomm;
     // Read source code line by line.
-    Line_Reader reader(::rocket::ref(cbuf), file, static_cast<size_t>(line));
+    Line_Reader reader(cbuf, file, static_cast<size_t>(line));
 
     while(reader.advance()) {
       // Discard the first line if it looks like a shebang.
