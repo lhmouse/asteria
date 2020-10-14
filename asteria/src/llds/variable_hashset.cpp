@@ -25,6 +25,9 @@ noexcept
     }
 
 #ifdef ROCKET_DEBUG
+    ::std::memset(this->m_head, 0xD3,
+                  static_cast<size_t>(reinterpret_cast<char*>(this->m_eptr) -
+                                      reinterpret_cast<char*>(this->m_bptr)));
     this->m_head = reinterpret_cast<Bucket*>(0xDEADBEEF);
 #endif
   }
@@ -38,10 +41,12 @@ const noexcept
     auto eptr = this->m_eptr;
 
     // Find a bucket using linear probing.
-    // We keep the load factor below 1.0 so there will always be some empty buckets in the table.
-    auto mptr = ::rocket::get_probing_origin(bptr, eptr, reinterpret_cast<uintptr_t>(var.get()));
+    // We keep the load factor below 1.0 so there will always be some empty buckets
+    // in the table.
+    auto mptr = ::rocket::get_probing_origin(bptr, eptr,
+                            reinterpret_cast<uintptr_t>(var.get()));
     auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr,
-                                       [&](const Bucket& r) { return r.kstor[0] == var;  });
+                            [&](const Bucket& r) { return r.kstor[0] == var;  });
     ROCKET_ASSERT(qbkt);
     return qbkt;
   }
@@ -68,9 +73,12 @@ noexcept
         this->do_list_detach(sbkt);
 
         // Find a new bucket for the variable using linear probing.
-        // Uniqueness has already been implied for all elements, so there is no need to check for collisions.
-        auto mptr = ::rocket::get_probing_origin(bptr, eptr, reinterpret_cast<uintptr_t>(sbkt->kstor->get()));
-        auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr, [&](const Bucket&) { return false;  });
+        // Uniqueness has already been implied for all elements, so there is no need
+        // to check for collisions.
+        auto mptr = ::rocket::get_probing_origin(bptr, eptr,
+                                reinterpret_cast<uintptr_t>(sbkt->kstor->get()));
+        auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr,
+                                [&](const Bucket&) { return false;  });
         ROCKET_ASSERT(qbkt);
 
         // Mark the new bucket non-empty.
@@ -146,9 +154,12 @@ do_rehash(size_t nbkt)
       ROCKET_ASSERT(*sbkt);
 
       // Find a new bucket for the variable using linear probing.
-      // Uniqueness has already been implied for all elements, so there is no need to check for collisions.
-      auto mptr = ::rocket::get_probing_origin(bptr, eptr, reinterpret_cast<uintptr_t>(sbkt->kstor->get()));
-      auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr, [&](const Bucket&) { return false;  });
+      // Uniqueness has already been implied for all elements, so there is no need
+      // to check for collisions.
+      auto mptr = ::rocket::get_probing_origin(bptr, eptr,
+                              reinterpret_cast<uintptr_t>(sbkt->kstor->get()));
+      auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr,
+                              [&](const Bucket&) { return false;  });
       ROCKET_ASSERT(qbkt);
 
       // Mark the new bucket non-empty.

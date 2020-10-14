@@ -27,6 +27,7 @@ noexcept
     }
 
 #ifdef ROCKET_DEBUG
+    ::std::memset(this->m_bptr, 0xE6, this->m_rsrv * sizeof(Header));
     this->m_used = 0xDEADBEEF;
 #endif
   }
@@ -45,7 +46,8 @@ do_reallocate(uint32_t nadd)
     auto bptr = static_cast<Header*>(::operator new(rsrv * sizeof(Header)));
 
     // Performa bitwise copy of all contents of the old block.
-    // This copies all existent headers and trivial data. Note that the size is unchanged.
+    // This copies all existent headers and trivial data.
+    // Note that the size is unchanged.
     auto bold = ::std::exchange(this->m_bptr, bptr);
     if(this->m_used)
       ::std::memcpy(bptr, bold, this->m_used * sizeof(Header));
@@ -77,8 +79,8 @@ do_reserve_one(Uparam uparam, const opt<Symbols>& syms_opt, size_t nbytes)
       ASTERIA_THROW("Invalid AVMC node size (`$1` > `$2`)", nbytes, nbytes_max);
 
     // Create a dummy header for calculation.
-    // Note `up_stor` is partially overlapped with other fields, so it must be assigned first.
-    // The others may occur in any order.
+    // Note `up_stor` is partially overlapped with other fields, so it must be assigned
+    // first. The others may occur in any order.
     Header temph;
     temph.up_stor = uparam;
     temph.nphdrs = static_cast<uint8_t>((nbytes + sizeof(Header) - 1) / sizeof(Header));
