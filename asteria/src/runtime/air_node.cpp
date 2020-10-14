@@ -80,7 +80,7 @@ do_set_temporary(Executive_Context& ctx, bool assign, Reference::S_temporary&& x
 
     if(assign) {
       // Write the value to the top refernce.
-      ctx.stack().get_top().open() = ::std::move(xref.val);
+      ctx.stack().get_top().dereference_mutable() = ::std::move(xref.val);
       return ctx;
     }
 
@@ -102,7 +102,7 @@ do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVMC_Queue&
       ROCKET_ASSERT(status == air_status_next);
 
       // Read a value from the top reference and write it to the one beneath it.
-      ctx.stack().get_top(1).open() = ctx.stack().get_top().read();
+      ctx.stack().get_top(1).dereference_mutable() = ctx.stack().get_top().dereference_readonly();
       // Discard the reference whose value has just been copied from.
       ctx.stack().pop();
       return air_status_next;
@@ -380,7 +380,7 @@ struct AIR_Traits_initialize_variable
       {
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this function.
-        auto val = ctx.stack().get_top().read();
+        auto val = ctx.stack().get_top().dereference_readonly();
         ctx.stack().pop();
 
         // Get the variable back.
@@ -424,7 +424,7 @@ struct AIR_Traits_if_statement
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Sparam_queues_2& sp)
       {
         // Check the value of the condition.
-        if(ctx.stack().get_top().read().test() != up.p8[0])
+        if(ctx.stack().get_top().dereference_readonly().test() != up.p8[0])
           // Execute the true branch and forward the status verbatim.
           return do_execute_block(sp.queues[0], ctx);
 
@@ -468,7 +468,7 @@ struct AIR_Traits_switch_statement
         ROCKET_ASSERT(nclauses == sp.names_added.size());
 
         // Read the value of the condition.
-        auto cond = ctx.stack().get_top().read();
+        auto cond = ctx.stack().get_top().dereference_readonly();
 
         // Find a target clause.
         size_t bp = SIZE_MAX;
@@ -486,7 +486,7 @@ struct AIR_Traits_switch_statement
           // Evaluate the operand and check whether it equals `cond`.
           auto status = sp.queues_labels[i].execute(ctx);
           ROCKET_ASSERT(status == air_status_next);
-          if(ctx.stack().get_top().read().compare(cond) == compare_equal) {
+          if(ctx.stack().get_top().dereference_readonly().compare(cond) == compare_equal) {
             bp = i;
             break;
           }
@@ -566,7 +566,7 @@ struct AIR_Traits_do_while_statement
           // Check the condition.
           status = sp.queues[1].execute(ctx);
           ROCKET_ASSERT(status == air_status_next);
-          if(ctx.stack().get_top().read().test() == up.p8[0])
+          if(ctx.stack().get_top().dereference_readonly().test() == up.p8[0])
             break;
         }
         return air_status_next;
@@ -606,7 +606,7 @@ struct AIR_Traits_while_statement
           // Check the condition.
           auto status = sp.queues[0].execute(ctx);
           ROCKET_ASSERT(status == air_status_next);
-          if(ctx.stack().get_top().read().test() == up.p8[0])
+          if(ctx.stack().get_top().dereference_readonly().test() == up.p8[0])
             break;
 
           // Execute the body.
@@ -664,7 +664,7 @@ struct AIR_Traits_for_each_statement
         // Set the range up, which isn't going to change for the entire loop.
         mapped = ::std::move(ctx_for.stack().open_top());
 
-        const auto range = mapped.read();
+        const auto range = mapped.dereference_readonly();
         switch(weaken_enum(range.type())) {
           case type_null:
             // Do nothing.
@@ -758,7 +758,7 @@ struct AIR_Traits_for_statement
           status = sp.queues[1].execute(ctx_for);
           ROCKET_ASSERT(status == air_status_next);
           // This is a special case: If the condition is empty then the loop is infinite.
-          if(!ctx_for.stack().empty() && !ctx_for.stack().get_top().read().test())
+          if(!ctx_for.stack().empty() && !ctx_for.stack().get_top().dereference_readonly().test())
             break;
 
           // Execute the body.
@@ -878,7 +878,7 @@ struct AIR_Traits_throw_statement
       {
         // Read the value to throw.
         // Note that the operand must not have been empty for this code.
-        throw Runtime_Error(Runtime_Error::M_throw(), ctx.stack().get_top().read(), sloc);
+        throw Runtime_Error(Runtime_Error::M_throw(), ctx.stack().get_top().dereference_readonly(), sloc);
       }
   };
 
@@ -911,7 +911,7 @@ struct AIR_Traits_assert_statement
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Sparam_sloc_text& sp)
       {
         // Check the value of the condition.
-        if(ROCKET_EXPECT(ctx.stack().get_top().read().test() != up.p8[0]))
+        if(ROCKET_EXPECT(ctx.stack().get_top().dereference_readonly().test() != up.p8[0]))
           // When the assertion succeeds, there is nothing to do.
           return air_status_next;
 
@@ -970,7 +970,7 @@ struct AIR_Traits_glvalue_to_prvalue
           return air_status_next;
 
         // Convert the result to an rvalue.
-        Reference::S_temporary xref = { self.read() };
+        Reference::S_temporary xref = { self.dereference_readonly() };
         self = ::std::move(xref);
         return air_status_next;
       }
@@ -1271,7 +1271,7 @@ struct AIR_Traits_branch_expression
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Sparam_queues_2& sp)
       {
         // Check the value of the condition.
-        if(ctx.stack().get_top().read().test())
+        if(ctx.stack().get_top().dereference_readonly().test())
           // Execute the true branch and forward the status verbatim.
           return do_evaluate_subexpression(ctx, up.p8[0], sp.queues[0]);
 
@@ -1317,7 +1317,7 @@ struct AIR_Traits_coalescence
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const AVMC_Queue& queue)
       {
         // Check the value of the condition.
-        if(!ctx.stack().get_top().read().is_null())
+        if(!ctx.stack().get_top().dereference_readonly().is_null())
           // Leave the condition on the stack.
           return air_status_next;
 
@@ -1381,7 +1381,7 @@ do_pop_positional_arguments(Executive_Context& ctx, size_t nargs)
     for(size_t i = args.size() - 1;  i != SIZE_MAX;  --i) {
       // Get an argument. Ensure it is dereferenceable.
       auto& arg = ctx.stack().open_top();
-      static_cast<void>(arg.read());
+      static_cast<void>(arg.dereference_readonly());
 
       // Set the argument as is.
       args.mut(i) = ::std::move(arg);
@@ -1437,7 +1437,7 @@ struct AIR_Traits_function_call
         auto args = do_pop_positional_arguments(ctx, up.s32);
 
         // Copy the target, which shall be of type `function`.
-        auto value = ctx.stack().get_top().read();
+        auto value = ctx.stack().get_top().dereference_readonly();
         if(!value.is_function())
           ASTERIA_THROW("Attempt to call a non-function (value `$1`)", value);
         auto& self = ctx.stack().open_top().zoom_out();
@@ -1511,7 +1511,7 @@ struct AIR_Traits_push_unnamed_array
         array.resize(up.s32);
         for(auto it = array.mut_rbegin();  it != array.rend();  ++it) {
           // Write elements backwards.
-          *it = ctx.stack().get_top().read();
+          *it = ctx.stack().get_top().dereference_readonly();
           ctx.stack().pop();
         }
 
@@ -1553,7 +1553,7 @@ struct AIR_Traits_push_unnamed_object
         for(auto it = keys.rbegin();  it != keys.rend();  ++it) {
           // Use `try_emplace()` instead of `insert_or_assign()`. In case of duplicate keys,
           // the last value takes precedence.
-          object.try_emplace(*it, ctx.stack().get_top().read());
+          object.try_emplace(*it, ctx.stack().get_top().dereference_readonly());
           ctx.stack().pop();
         }
 
@@ -1921,7 +1921,7 @@ struct AIR_Traits_apply_operator_inc_post : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
       {
         // This operator is unary.
-        auto& lhs = ctx.stack().get_top().open();
+        auto& lhs = ctx.stack().get_top().dereference_mutable();
         Reference::S_temporary xref = { lhs };
 
         switch(do_vmask_of(lhs)) {
@@ -1950,7 +1950,7 @@ struct AIR_Traits_apply_operator_dec_post : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
       {
         // This operator is unary.
-        auto& lhs = ctx.stack().get_top().open();
+        auto& lhs = ctx.stack().get_top().dereference_mutable();
         Reference::S_temporary xref = { lhs };
 
         switch(do_vmask_of(lhs)) {
@@ -1979,7 +1979,7 @@ struct AIR_Traits_apply_operator_subscr : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
       {
         // This operator is binary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
         ctx.stack().pop();
         auto& lref = ctx.stack().open_top();
@@ -2013,7 +2013,7 @@ struct AIR_Traits_apply_operator_pos : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
 
         // Copy the operand to create a temporary value.
         // N.B. This is one of the few operators that work on all types.
@@ -2029,7 +2029,7 @@ struct AIR_Traits_apply_operator_neg : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2058,7 +2058,7 @@ struct AIR_Traits_apply_operator_notb : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2092,7 +2092,7 @@ struct AIR_Traits_apply_operator_notl : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
 
         // Perform logical NOT operation on the operand to create a temporary value.
@@ -2111,7 +2111,7 @@ struct AIR_Traits_apply_operator_inc_pre : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
       {
         // This operator is unary.
-        auto& rhs = ctx.stack().get_top().open();
+        auto& rhs = ctx.stack().get_top().dereference_mutable();
 
         switch(do_vmask_of(rhs)) {
           case vmask_integer:
@@ -2138,7 +2138,7 @@ struct AIR_Traits_apply_operator_dec_pre : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
       {
         // This operator is unary.
-        auto& rhs = ctx.stack().get_top().open();
+        auto& rhs = ctx.stack().get_top().dereference_mutable();
 
         switch(do_vmask_of(rhs)) {
           case vmask_integer:
@@ -2165,7 +2165,7 @@ struct AIR_Traits_apply_operator_unset : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference::S_temporary xref = { ctx.stack().get_top().unset() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_unset() };
 
         // Unset the reference and return the old value.
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
@@ -2180,7 +2180,7 @@ struct AIR_Traits_apply_operator_countof : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
 
         // Return the number of elements in the operand.
@@ -2216,7 +2216,7 @@ struct AIR_Traits_apply_operator_typeof : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
 
         // Return the type name of the operand, which is static.
@@ -2235,7 +2235,7 @@ struct AIR_Traits_apply_operator_sqrt : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2264,7 +2264,7 @@ struct AIR_Traits_apply_operator_isnan : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2293,7 +2293,7 @@ struct AIR_Traits_apply_operator_isinf : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2322,7 +2322,7 @@ struct AIR_Traits_apply_operator_abs : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2351,7 +2351,7 @@ struct AIR_Traits_apply_operator_sign : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2380,7 +2380,7 @@ struct AIR_Traits_apply_operator_round : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2408,7 +2408,7 @@ struct AIR_Traits_apply_operator_floor : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2436,7 +2436,7 @@ struct AIR_Traits_apply_operator_ceil : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2464,7 +2464,7 @@ struct AIR_Traits_apply_operator_trunc : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2492,7 +2492,7 @@ struct AIR_Traits_apply_operator_iround : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2520,7 +2520,7 @@ struct AIR_Traits_apply_operator_ifloor : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2548,7 +2548,7 @@ struct AIR_Traits_apply_operator_iceil : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2576,7 +2576,7 @@ struct AIR_Traits_apply_operator_itrunc : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
 
         switch(do_vmask_of(rhs)) {
@@ -2604,10 +2604,10 @@ struct AIR_Traits_apply_operator_cmp_eq : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().get_top().read();
+        const auto& lhs = ctx.stack().get_top().dereference_readonly();
 
         // Report unordered operands as being unequal.
         // N.B. This is one of the few operators that work on all types.
@@ -2626,10 +2626,10 @@ struct AIR_Traits_apply_operator_cmp_ne : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().get_top().read();
+        const auto& lhs = ctx.stack().get_top().dereference_readonly();
 
         // Report unordered operands as being unequal.
         // N.B. This is one of the few operators that work on all types.
@@ -2648,10 +2648,10 @@ struct AIR_Traits_apply_operator_cmp_lt : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().get_top().read();
+        const auto& lhs = ctx.stack().get_top().dereference_readonly();
 
         // Throw an exception if the operands compare unequal.
         auto comp = lhs.compare(rhs);
@@ -2671,10 +2671,10 @@ struct AIR_Traits_apply_operator_cmp_gt : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().get_top().read();
+        const auto& lhs = ctx.stack().get_top().dereference_readonly();
 
         // Throw an exception if the operands compare unequal.
         auto comp = lhs.compare(rhs);
@@ -2694,10 +2694,10 @@ struct AIR_Traits_apply_operator_cmp_lte : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().get_top().read();
+        const auto& lhs = ctx.stack().get_top().dereference_readonly();
 
         // Throw an exception if the operands compare unequal.
         auto comp = lhs.compare(rhs);
@@ -2717,10 +2717,10 @@ struct AIR_Traits_apply_operator_cmp_gte : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().get_top().read();
+        const auto& lhs = ctx.stack().get_top().dereference_readonly();
 
         // Throw an exception if the operands compare unequal.
         auto comp = lhs.compare(rhs);
@@ -2740,10 +2740,10 @@ struct AIR_Traits_apply_operator_cmp_3way : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().get_top().read();
+        const auto& lhs = ctx.stack().get_top().dereference_readonly();
 
         // Report unordered operands as being unequal.
         // N.B. This is one of the few operators that work on all types.
@@ -2780,10 +2780,10 @@ struct AIR_Traits_apply_operator_add : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().get_top().read();
+        const auto& lhs = ctx.stack().get_top().dereference_readonly();
 
         switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
           case vmask_boolean:
@@ -2822,10 +2822,10 @@ struct AIR_Traits_apply_operator_sub : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().get_top().read();
+        const auto& lhs = ctx.stack().get_top().dereference_readonly();
 
         switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
           case vmask_boolean:
@@ -2859,10 +2859,10 @@ struct AIR_Traits_apply_operator_mul : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().get_top().read();
+        const auto& lhs = ctx.stack().get_top().dereference_readonly();
 
         switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
           case vmask_boolean:
@@ -2903,10 +2903,10 @@ struct AIR_Traits_apply_operator_div : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().get_top().read();
+        const auto& lhs = ctx.stack().get_top().dereference_readonly();
 
         switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
           case vmask_integer:
@@ -2935,10 +2935,10 @@ struct AIR_Traits_apply_operator_mod : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().get_top().read();
+        const auto& lhs = ctx.stack().get_top().dereference_readonly();
 
         switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
           case vmask_integer:
@@ -2967,10 +2967,10 @@ struct AIR_Traits_apply_operator_sll : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().get_top().read();
+        const auto& lhs = ctx.stack().get_top().dereference_readonly();
 
         if(!rhs.is_integer())
           ASTERIA_THROW("Shift count not an integer (operands were `$1` and `$2`)", lhs, rhs);
@@ -3003,10 +3003,10 @@ struct AIR_Traits_apply_operator_srl : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().get_top().read();
+        const auto& lhs = ctx.stack().get_top().dereference_readonly();
 
         if(!rhs.is_integer())
           ASTERIA_THROW("Shift count not an integer (operands were `$1` and `$2`)", lhs, rhs);
@@ -3039,10 +3039,10 @@ struct AIR_Traits_apply_operator_sla : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().get_top().read();
+        const auto& lhs = ctx.stack().get_top().dereference_readonly();
 
         if(!rhs.is_integer())
           ASTERIA_THROW("Shift count not an integer (operands were `$1` and `$2`)", lhs, rhs);
@@ -3076,10 +3076,10 @@ struct AIR_Traits_apply_operator_sra : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().get_top().read();
+        const auto& lhs = ctx.stack().get_top().dereference_readonly();
 
         if(!rhs.is_integer())
           ASTERIA_THROW("Shift count not an integer (operands were `$1` and `$2`)", lhs, rhs);
@@ -3112,10 +3112,10 @@ struct AIR_Traits_apply_operator_andb : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().get_top().read();
+        const auto& lhs = ctx.stack().get_top().dereference_readonly();
 
         switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
           case vmask_boolean:
@@ -3149,10 +3149,10 @@ struct AIR_Traits_apply_operator_orb : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().get_top().read();
+        const auto& lhs = ctx.stack().get_top().dereference_readonly();
 
         switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
           case vmask_boolean:
@@ -3186,10 +3186,10 @@ struct AIR_Traits_apply_operator_xorb : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is binary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().get_top().read();
+        const auto& lhs = ctx.stack().get_top().dereference_readonly();
 
         switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
           case vmask_boolean:
@@ -3223,11 +3223,11 @@ struct AIR_Traits_apply_operator_assign : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
       {
         // Pop the RHS operand.
-        auto rhs = ctx.stack().get_top().read();
+        auto rhs = ctx.stack().get_top().dereference_readonly();
         ctx.stack().pop();
 
         // Copy the value to the LHS operand which is write-only. `assign` is ignored.
-        ctx.stack().get_top().open() = ::std::move(rhs);
+        ctx.stack().get_top().dereference_mutable() = ::std::move(rhs);
         return air_status_next;
       }
   };
@@ -3239,12 +3239,12 @@ struct AIR_Traits_apply_operator_fma : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is ternary.
-        Reference::S_temporary xref = { ctx.stack().get_top().read() };
+        Reference::S_temporary xref = { ctx.stack().get_top().dereference_readonly() };
         auto& rhs = xref.val;
         ctx.stack().pop();
-        auto mid = ctx.stack().get_top().read();
+        auto mid = ctx.stack().get_top().dereference_readonly();
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().get_top().read();
+        const auto& lhs = ctx.stack().get_top().dereference_readonly();
 
         switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
           case vmask_integer:
@@ -3322,7 +3322,7 @@ struct AIR_Traits_unpack_struct_array
       {
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this function.
-        auto val = ctx.stack().get_top().read();
+        auto val = ctx.stack().get_top().dereference_readonly();
         ctx.stack().pop();
 
         // Make sure it is really an `array`.
@@ -3386,7 +3386,7 @@ struct AIR_Traits_unpack_struct_object
       {
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this function.
-        auto val = ctx.stack().get_top().read();
+        auto val = ctx.stack().get_top().dereference_readonly();
         ctx.stack().pop();
 
         // Make sure it is really an `object`.
@@ -3544,7 +3544,7 @@ struct AIR_Traits_variadic_call
 
         // Pop the argument generator.
         cow_vector<Reference> args;
-        auto value = ctx.stack().get_top().read();
+        auto value = ctx.stack().get_top().dereference_readonly();
         switch(weaken_enum(value.type())) {
           case type_null:
             // Leave `args` empty.
@@ -3571,7 +3571,7 @@ struct AIR_Traits_variadic_call
             // Pass an empty argument list to get the number of arguments to generate.
             cow_vector<Reference> gargs;
             do_invoke_nontail(ctx.stack().open_top(), sloc, ctx, generator, ::std::move(gargs));
-            value = ctx.stack().get_top().read();
+            value = ctx.stack().get_top().dereference_readonly();
             ctx.stack().pop();
 
             // Verify the argument count.
@@ -3591,7 +3591,7 @@ struct AIR_Traits_variadic_call
 
               // Generate an argument. Ensure it is dereferenceable.
               do_invoke_nontail(args.mut(i), sloc, ctx, generator, ::std::move(gargs));
-              static_cast<void>(args[i].read());
+              static_cast<void>(args[i].dereference_readonly());
             }
             break;
           }
@@ -3601,7 +3601,7 @@ struct AIR_Traits_variadic_call
         }
 
         // Copy the target, which shall be of type `function`.
-        value = ctx.stack().get_top().read();
+        value = ctx.stack().get_top().dereference_readonly();
         if(!value.is_function())
           ASTERIA_THROW("Attempt to call a non-function (value `$1`)", value);
         auto& self = ctx.stack().open_top().zoom_out();
@@ -3703,7 +3703,7 @@ struct AIR_Traits_import_call
         auto args = do_pop_positional_arguments(ctx, up.s32 - 1);
 
         // Copy the filename, which shall be of type `string`.
-        auto value = ctx.stack().get_top().read();
+        auto value = ctx.stack().get_top().dereference_readonly();
         if(!value.is_string())
           ASTERIA_THROW("Invalid path specified for `import` (value `$1` not a string)", value);
 
@@ -3745,7 +3745,7 @@ struct AIR_Traits_import_call
         // `this` is null for imported scripts.
         auto& self = ctx.stack().open_top();
         if(self.is_lvalue())
-          self.open() = path;
+          self.dereference_mutable() = path;
         self = Reference::S_constant();
 
         return do_function_call_common(self, sp.sloc, ctx, qtarget, ptc_aware_none, ::std::move(args));
@@ -3843,7 +3843,7 @@ struct AIR_Traits_initialize_reference
       {
         // Pop a reference from the stack. Ensure it is dereferenceable.
         auto& top = ctx.stack().open_top();
-        static_cast<void>(top.read());
+        static_cast<void>(top.dereference_readonly());
 
         // Move it into the context.
         ctx.open_named_reference(sp.name) = ::std::move(top);

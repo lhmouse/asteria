@@ -496,7 +496,7 @@ do_REP_single()
       const auto ref = script.execute(global, ::std::move(cmdline.args));
       auto str = "[void]";
       if(!ref.is_void()) {
-        const auto& val = ref.read();
+        const auto& val = ref.dereference_readonly();
         val.dump(fmt.clear_string());
         str = fmt.c_str();
       }
@@ -570,7 +570,7 @@ do_single_noreturn()
       const auto ref = script.execute(global, ::std::move(cmdline.args));
       auto stat = exit_success;
       if(!ref.is_void()) {
-        const auto& val = ref.read();
+        const auto& val = ref.dereference_readonly();
         stat = val.is_integer() ? static_cast<Exit_Status>(val.as_integer())
                                 : exit_system_error;
       }

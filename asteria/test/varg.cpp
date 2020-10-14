@@ -32,7 +32,7 @@ int main()
     Global_Context global;
     auto res = code.execute(global);
 
-    const auto& array = res.read().as_array();
+    const auto& array = res.dereference_readonly().as_array();
     ASTERIA_TEST_CHECK(array.size() == 5);
     ASTERIA_TEST_CHECK(array.at(0).as_array().at(0).as_integer() == 0);
     ASTERIA_TEST_CHECK(array.at(0).as_array().at(1).is_null());

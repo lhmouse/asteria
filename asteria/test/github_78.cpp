@@ -28,5 +28,5 @@ int main()
 ///////////////////////////////////////////////////////////////////////////////
       )__"));
     Global_Context global;
-    ASTERIA_TEST_CHECK(code.execute(global).read().as_string() == "function");
+    ASTERIA_TEST_CHECK(code.execute(global).dereference_readonly().as_string() == "function");
   }

@@ -28,5 +28,5 @@ int main()
       )__"));
     Global_Context global;
     auto res = code.execute(global);
-    ASTERIA_TEST_CHECK(res.read().as_integer() == 90);
+    ASTERIA_TEST_CHECK(res.dereference_readonly().as_integer() == 90);
   }

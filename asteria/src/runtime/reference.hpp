@@ -249,15 +249,15 @@ class Reference
     // These are general read/write functions.
     // Note that not all references denote values. Some of them are placeholders.
     const Value&
-    read()
+    dereference_readonly()
     const;
 
     Value&
-    open()
+    dereference_mutable()
     const;
 
     Value
-    unset()
+    dereference_unset()
     const;
   };
 

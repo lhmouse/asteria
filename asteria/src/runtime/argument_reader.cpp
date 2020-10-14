@@ -126,7 +126,7 @@ optional(Value& out)
       return *this;
 
     // Dereference the argument and copy the value as is.
-    out = qref->read();
+    out = qref->dereference_readonly();
     return *this;
   }
 
@@ -142,7 +142,7 @@ optional(Opt_boolean& out)
       return *this;
 
     // Dereference the argument and check its type.
-    const auto& val = qref->read();
+    const auto& val = qref->dereference_readonly();
     if(val.is_null())
       return *this;
 
@@ -165,7 +165,7 @@ optional(Opt_integer& out)
       return *this;
 
     // Dereference the argument and check its type.
-    const auto& val = qref->read();
+    const auto& val = qref->dereference_readonly();
     if(!val.is_integer())
       return this->do_mark_match_failure();
 
@@ -188,7 +188,7 @@ optional(Opt_real& out)
       return *this;
 
     // Dereference the argument and check its type.
-    const auto& val = qref->read();
+    const auto& val = qref->dereference_readonly();
     if(!val.is_convertible_to_real())
       return this->do_mark_match_failure();
 
@@ -211,7 +211,7 @@ optional(Opt_string& out)
       return *this;
 
     // Dereference the argument and check its type.
-    const auto& val = qref->read();
+    const auto& val = qref->dereference_readonly();
     if(!val.is_string())
       return this->do_mark_match_failure();
 
@@ -234,7 +234,7 @@ optional(Opt_opaque& out)
       return *this;
 
     // Dereference the argument and check its type.
-    const auto& val = qref->read();
+    const auto& val = qref->dereference_readonly();
     if(!val.is_opaque())
       return this->do_mark_match_failure();
 
@@ -257,7 +257,7 @@ optional(Opt_function& out)
       return *this;
 
     // Dereference the argument and check its type.
-    const auto& val = qref->read();
+    const auto& val = qref->dereference_readonly();
     if(!val.is_function())
       return this->do_mark_match_failure();
 
@@ -280,7 +280,7 @@ optional(Opt_array& out)
       return *this;
 
     // Dereference the argument and check its type.
-    const auto& val = qref->read();
+    const auto& val = qref->dereference_readonly();
     if(!val.is_array())
       return this->do_mark_match_failure();
 
@@ -303,7 +303,7 @@ optional(Opt_object& out)
       return *this;
 
     // Dereference the argument and check its type.
-    const auto& val = qref->read();
+    const auto& val = qref->dereference_readonly();
     if(!val.is_object())
       return this->do_mark_match_failure();
 
@@ -326,7 +326,7 @@ required(V_boolean& out)
       return this->do_mark_match_failure();
 
     // Dereference the argument and check its type.
-    const auto& val = qref->read();
+    const auto& val = qref->dereference_readonly();
     if(!val.is_boolean())
       return this->do_mark_match_failure();
 
@@ -346,7 +346,7 @@ required(V_integer& out)
       return this->do_mark_match_failure();
 
     // Dereference the argument and check its type.
-    const auto& val = qref->read();
+    const auto& val = qref->dereference_readonly();
     if(!val.is_integer())
       return this->do_mark_match_failure();
 
@@ -366,7 +366,7 @@ required(V_real& out)
       return this->do_mark_match_failure();
 
     // Dereference the argument and check its type.
-    const auto& val = qref->read();
+    const auto& val = qref->dereference_readonly();
     if(!val.is_convertible_to_real())
       return this->do_mark_match_failure();
 
@@ -386,7 +386,7 @@ required(V_string& out)
       return this->do_mark_match_failure();
 
     // Dereference the argument and check its type.
-    const auto& val = qref->read();
+    const auto& val = qref->dereference_readonly();
     if(!val.is_string())
       return this->do_mark_match_failure();
 
@@ -406,7 +406,7 @@ required(V_opaque& out)
       return this->do_mark_match_failure();
 
     // Dereference the argument and check its type.
-    const auto& val = qref->read();
+    const auto& val = qref->dereference_readonly();
     if(!val.is_opaque())
       return this->do_mark_match_failure();
 
@@ -426,7 +426,7 @@ required(V_function& out)
       return this->do_mark_match_failure();
 
     // Dereference the argument and check its type.
-    const auto& val = qref->read();
+    const auto& val = qref->dereference_readonly();
     if(!val.is_function())
       return this->do_mark_match_failure();
 
@@ -446,7 +446,7 @@ required(V_array& out)
       return this->do_mark_match_failure();
 
     // Dereference the argument and check its type.
-    const auto& val = qref->read();
+    const auto& val = qref->dereference_readonly();
     if(!val.is_array())
       return this->do_mark_match_failure();
 
@@ -466,7 +466,7 @@ required(V_object& out)
       return this->do_mark_match_failure();
 
     // Dereference the argument and check its type.
-    const auto& val = qref->read();
+    const auto& val = qref->dereference_readonly();
     if(!val.is_object())
       return this->do_mark_match_failure();
 
@@ -528,8 +528,9 @@ end_overload(cow_vector<Value>& vargs)
     if(index < this->m_args->size()) {
       vargs.reserve(this->m_args->size() - index);
       ::std::transform(this->m_args->begin() + static_cast<ptrdiff_t>(index),
-                       this->m_args->end(), ::std::back_inserter(vargs),
-                       ::std::mem_fn(&Reference::read));
+                       this->m_args->end(),
+                       ::std::back_inserter(vargs),
+                       ::std::mem_fn(&Reference::dereference_readonly));
     }
     return true;
   }
@@ -542,9 +543,9 @@ const
     // Compose the list of types of arguments.
     cow_string arguments;
     if(this->m_args->size()) {
-      arguments << this->m_args->front().read().what_type();
+      arguments << this->m_args->front().dereference_readonly().what_type();
       for(size_t k = 1;  k < this->m_args->size();  ++k)
-        arguments << ", " << this->m_args->at(k).read().what_type();
+        arguments << ", " << this->m_args->at(k).dereference_readonly().what_type();
     }
 
     // Compose the list of overloads.

@@ -148,13 +148,13 @@ finish_call(Global_Context& global, Evaluation_Stack& stack)
     if(!this->is_glvalue())
       return *this;
 
-    Reference::S_temporary xref = { this->read() };
+    Reference::S_temporary xref = { this->dereference_readonly() };
     return *this = ::std::move(xref);
   }
 
 const Value&
 Reference::
-read()
+dereference_readonly()
 const
   {
     const Value* qval;
@@ -283,7 +283,7 @@ const
 
 Value&
 Reference::
-open()
+dereference_mutable()
 const
   {
     Value* qval;
@@ -405,7 +405,7 @@ const
 
 Value
 Reference::
-unset()
+dereference_unset()
 const
   {
     Value* qval;

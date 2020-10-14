@@ -26,6 +26,7 @@ Analytic_Context(M_function, Abstract_Context* parent_opt,
         ROCKET_ASSERT(i == params.size() - 1);
         break;
       }
+
       // Its contents are out of interest.
       this->open_named_reference(name) /*= Reference::S_uninit()*/;
     }

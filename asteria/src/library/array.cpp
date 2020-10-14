@@ -87,7 +87,7 @@ do_find_if_opt(Global_Context& global, IterT begin, IterT end, const V_function&
 
       // Call the predictor function and check the return value.
       auto self = pred.invoke(global, ::std::move(args));
-      if(self.read().test() == match)
+      if(self.dereference_readonly().test() == match)
         return ::std::move(it);
     }
     // Fail to find an element.
@@ -109,7 +109,7 @@ do_compare(Global_Context& global, cow_vector<Reference>& args,
 
     // Call the predictor function and compare the result with `0`.
     auto self = kcomp.invoke(global, ::std::move(args));
-    return self.read().compare(V_integer(0));
+    return self.dereference_readonly().compare(V_integer(0));
   }
 
 template<typename IterT>
@@ -587,7 +587,7 @@ std_array_generate(Global_Context& global, V_function generator, V_integer lengt
 
       // Call the generator function and push the return value.
       auto self = generator.invoke(global, ::std::move(args));
-      data.emplace_back(self.read());
+      data.emplace_back(self.dereference_readonly());
     }
     return data;
   }

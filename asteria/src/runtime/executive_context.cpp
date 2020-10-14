@@ -23,7 +23,7 @@ Executive_Context(M_function, Global_Context& global, Evaluation_Stack& stack,
     // Set the `this` reference.
     // If the self reference is void, it is likely that `this` isn't ever referenced in this function,
     // so perform lazy initialization to avoid this overhead.
-    if(!self.is_void() && !(self.is_constant() && self.read().is_null()))
+    if(!self.is_void() && !(self.is_constant() && self.dereference_readonly().is_null()))
       this->open_named_reference(::rocket::sref("__this")) = ::std::move(self);
 
     // This is the subscript of the special parameter placeholder `...`.
@@ -44,6 +44,7 @@ Executive_Context(M_function, Global_Context& global, Evaluation_Stack& stack,
         elps = i;
         break;
       }
+
       // Set the parameter.
       if(ROCKET_UNEXPECT(i >= args.size()))
         this->open_named_reference(name) = Reference::S_constant();

@@ -17,7 +17,7 @@ do_open_private(Reference&& self, const phsh_string& name)
   {
     Reference::M_object_key xmod = { name };
     self.zoom_in(::std::move(xmod));
-    return ::std::ref(self.open().open_opaque());
+    return ::std::ref(self.dereference_mutable().open_opaque());
   }
 
 void
