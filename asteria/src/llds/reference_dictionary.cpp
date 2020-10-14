@@ -26,9 +26,9 @@ noexcept
     }
 
 #ifdef ROCKET_DEBUG
-    ::std::memset(this->m_head, 0xD3,
-                  static_cast<size_t>(reinterpret_cast<char*>(this->m_eptr) -
-                                      reinterpret_cast<char*>(this->m_bptr)));
+    ::std::memset(this->m_bptr, 0xD3,
+                     static_cast<size_t>(reinterpret_cast<char*>(this->m_eptr)
+                               - reinterpret_cast<char*>(this->m_bptr)));
     this->m_head = reinterpret_cast<Bucket*>(0xDEADBEEF);
 #endif
   }
