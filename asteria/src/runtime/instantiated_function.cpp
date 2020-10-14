@@ -49,9 +49,8 @@ const
   {
     // Create the stack and context for this function.
     Evaluation_Stack stack;
-    Executive_Context ctx_func(::rocket::ref(global), ::rocket::ref(stack),
-                               this->m_zvarg, this->m_params,
-                               ::std::move(self), ::std::move(args));
+    Executive_Context ctx_func(Executive_Context::M_function(), global, stack,
+                               this->m_zvarg, this->m_params, ::std::move(self), ::std::move(args));
     stack.reserve(::std::move(args));
     AIR_Status status;
 

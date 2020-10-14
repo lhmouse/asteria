@@ -363,7 +363,7 @@ class AIR_Node
     // If this node refers to a local reference, which has been allocated in an
     // executive context now, we need to replace `*this` with a copy of it.
     opt<AIR_Node>
-    rebind_opt(const Abstract_Context& ctx)
+    rebind_opt(Abstract_Context& ctx)
     const;
 
     // Compress this IR node.

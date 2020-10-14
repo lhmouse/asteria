@@ -165,7 +165,7 @@ class Expression_Unit
 
     cow_vector<AIR_Node>&
     generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
-                  const Analytic_Context& ctx, PTC_Aware ptc)
+                  Analytic_Context& ctx, PTC_Aware ptc)
     const;
   };
 

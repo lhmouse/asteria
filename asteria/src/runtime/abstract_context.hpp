@@ -11,6 +11,11 @@ namespace asteria {
 
 class Abstract_Context
   {
+  public:
+    struct M_plain     { };
+    struct M_defer     { };
+    struct M_function  { };
+
   private:
     // This stores all named references (variables, parameters, etc.) of
     // this context.
@@ -32,7 +37,6 @@ class Abstract_Context
       = 0;
 
     virtual
-    const
     Abstract_Context*
     do_get_parent_opt()
     const noexcept
@@ -49,18 +53,17 @@ class Abstract_Context
     const noexcept
       { return this->do_is_analytic();  }
 
-    const Abstract_Context*
+    Abstract_Context*
     get_parent_opt()
     const noexcept
       { return this->do_get_parent_opt();  }
 
     const Reference*
     get_named_reference_opt(const phsh_string& name)
-    const
       {
         auto qref = this->m_named_refs.find_opt(name);
         if(ROCKET_UNEXPECT(!qref))
-          qref = const_cast<Abstract_Context*>(this)->do_lazy_lookup_opt(name);
+          qref = this->do_lazy_lookup_opt(name);
         return qref;
       }
 

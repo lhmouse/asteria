@@ -13,18 +13,18 @@ namespace {
 class Sentry
   {
   private:
-    ref<long> m_ref;
     long m_old;
+    long* m_ptr;
 
   public:
     explicit
     Sentry(long& ref)
     noexcept
-      : m_ref(ref), m_old(ref)
-      { this->m_ref++;  }
+      : m_old(ref), m_ptr(::std::addressof(ref))
+      { ++*(this->m_ptr);  }
 
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Sentry)
-      { this->m_ref--;  }
+      { --*(this->m_ptr);  }
 
   public:
     explicit operator

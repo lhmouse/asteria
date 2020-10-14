@@ -21,10 +21,15 @@ class Argument_Reader
     cow_string m_overloads;
 
   public:
-    Argument_Reader(const cow_string& name, ref<const cow_vector<Reference>> args)
+    Argument_Reader(const cow_string& name,
+                    const cow_vector<Reference>& args)
     noexcept
-      : m_name(name), m_args(args.ptr())
+      : m_name(name), m_args(::std::addressof(args))
       { }
+
+    Argument_Reader(const cow_string& name,
+                    const cow_vector<Reference>&& args)
+      = delete;
 
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Argument_Reader);
 
@@ -54,11 +59,11 @@ class Argument_Reader
       { return this->m_name;  }
 
     // These functions access `m_saved_states`.
-    // Under a number of circumstances, function overloads share a common initial
-    // parameter sequence. We allow saving and loading parser states to eliminate
-    // the overhead of re-parsing this sequence.
-    // The `index` argument is a subscript of `m_saved_states`, which is resized
-    // by `save_state()` as necessary.
+    // Under a number of circumstances, function overloads share a common
+    // initial parameter sequence. We allow saving and loading parser
+    // states to eliminate the overhead of re-parsing this sequence. The
+    // `index` argument is a subscript of `m_saved_states`, which is
+    // resized by `save_state()` as necessary.
     Argument_Reader&
     load_state(size_t index);
 
@@ -70,7 +75,8 @@ class Argument_Reader
     start_overload()
     noexcept;
 
-    // Gets an optional argument. The argument may be of the desired type or null.
+    // Gets an optional argument. The argument may be of the desired type
+    // or null.
     Argument_Reader&
     optional(Reference& out);
 
@@ -126,9 +132,9 @@ class Argument_Reader
     Argument_Reader&
     required(V_object& out);
 
-    // Terminate the current overload. The return value indicates whether the
-    // overload has been accepted. The second and third functions accept variadic
-    // arguments.
+    // Terminate the current overload. The return value indicates whether
+    // the overload has been accepted. The second and third functions
+    // accept variadic arguments.
     bool
     end_overload();
 
@@ -138,8 +144,8 @@ class Argument_Reader
     bool
     end_overload(cow_vector<Value>& vargs);
 
-    // This function throws an exception containing a message composed from all
-    // overloads that have been tested so far.
+    // This function throws an exception containing a message composed
+    // from all overloads that have been tested so far.
     [[noreturn]]
     void
     throw_no_matching_function_call()
@@ -152,8 +158,7 @@ class Argument_Reader
       *[](::asteria::Reference& self, ::asteria::Global_Context& global,  \
           ::rocket::cow_vector<::asteria::Reference>&& tfiXopzY) -> Reference& \
         {  \
-          ::asteria::Argument_Reader reader(::rocket::sref("" name),  \
-                                            ::rocket::cref(tfiXopzY));  \
+          ::asteria::Argument_Reader reader(::rocket::sref("" name), tfiXopzY);  \
           (void)global;  \
           do  \
           // Add function body here.

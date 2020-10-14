@@ -14,7 +14,7 @@ namespace {
 class Line_Reader
   {
   private:
-    ref<tinybuf> m_cbuf;
+    tinybuf* m_cbuf;
     cow_string m_file;
 
     size_t m_line = 0;
@@ -22,8 +22,8 @@ class Line_Reader
     cow_string m_str;
 
   public:
-    Line_Reader(ref<tinybuf> xcbuf, const cow_string& xfile, size_t xline)
-      : m_cbuf(xcbuf), m_file(xfile), m_line(xline - 1)
+    Line_Reader(tinybuf& xcbuf, const cow_string& xfile, size_t xline)
+      : m_cbuf(&xcbuf), m_file(xfile), m_line(xline - 1)
       { }
 
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Line_Reader)
@@ -33,7 +33,7 @@ class Line_Reader
     tinybuf&
     cbuf()
     const noexcept
-      { return this->m_cbuf;  }
+      { return *(this->m_cbuf);  }
 
     const cow_string&
     file()
@@ -64,7 +64,7 @@ class Line_Reader
 
         // Buffer a line.
         for(;;) {
-          int ch = this->m_cbuf.get().getc();
+          int ch = this->m_cbuf->getc();
           if(ch == EOF) {
             // When the EOF is encountered, ...
             if(this->m_str.empty())

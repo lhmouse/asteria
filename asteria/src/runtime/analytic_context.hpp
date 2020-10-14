@@ -13,26 +13,22 @@ class Analytic_Context
   : public Abstract_Context
   {
   private:
-    const Abstract_Context* m_parent_opt;
+    Abstract_Context* m_parent_opt;
 
   public:
-    template<typename ContextT,
-    ROCKET_ENABLE_IF(::std::is_base_of<Abstract_Context, ContextT>::value)>
-    Analytic_Context(ref<ContextT> parent)  // for non-functions
-      : m_parent_opt(parent.ptr())
+    // A plain context must have a parent context.
+    // Its parent context shall outlast itself.
+    Analytic_Context(M_plain, Abstract_Context& parent)
+      : m_parent_opt(::std::addressof(parent))
       { }
 
-    template<typename ContextT,
-    ROCKET_ENABLE_IF(::std::is_base_of<Abstract_Context, ContextT>::value)>
-    Analytic_Context(ContextT* parent_opt, const cow_vector<phsh_string>& params)  // for functions
-      : m_parent_opt(parent_opt)
-      { this->do_prepare_function(params);  }
+    // A function context may have a parent.
+    // Names found in ancestor contexts will be bound into the
+    // instantiated function object.
+    Analytic_Context(M_function, Abstract_Context* parent_opt,
+                     const cow_vector<phsh_string>& params);
 
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Analytic_Context);
-
-  private:
-    void
-    do_prepare_function(const cow_vector<phsh_string>& params);
 
   protected:
     bool
@@ -40,7 +36,7 @@ class Analytic_Context
     const noexcept final
       { return this->is_analytic();  }
 
-    const Abstract_Context*
+    Abstract_Context*
     do_get_parent_opt()
     const noexcept override
       { return this->get_parent_opt();  }
@@ -56,7 +52,7 @@ class Analytic_Context
     const noexcept
       { return true;  }
 
-    const Abstract_Context*
+    Abstract_Context*
     get_parent_opt()
     const noexcept
       { return this->m_parent_opt;  }

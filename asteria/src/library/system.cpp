@@ -471,15 +471,17 @@ std_system_proc_invoke(V_string cmd, Opt_array argv, Opt_array envp)
     ptrs.emplace_back(nullptr);
 
     // Append environment variables.
-    if(envp)
-      eoff = ptrs.ssize(),
-      ::rocket::for_each(*envp, [&](const Value& env) { ptrs.emplace_back(env.as_string().safe_c_str());  }),
+    if(envp) {
+      eoff = ptrs.ssize();
+      ::rocket::for_each(*envp, [&](const Value& env) { ptrs.emplace_back(env.as_string().safe_c_str());  });
       ptrs.emplace_back(nullptr);
+    }
+    char** argv_pp = const_cast<char**>(ptrs.data());
+    char** envp_pp = const_cast<char**>(ptrs.data() + eoff);
 
     // Launch the program.
     ::pid_t pid;
-    if(::posix_spawnp(&pid, cmd.c_str(), nullptr, nullptr, const_cast<char**>(ptrs.data()),
-                                                           const_cast<char**>(ptrs.data() + eoff)) != 0)
+    if(::posix_spawnp(&pid, cmd.c_str(), nullptr, nullptr, argv_pp, envp_pp) != 0)
       ASTERIA_THROW("Could not spawn process '$2'\n"
                     "[`posix_spawnp()` failed: $1]",
                     format_errno(errno), cmd);

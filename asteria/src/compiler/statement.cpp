@@ -56,7 +56,7 @@ do_generate_glvalue_to_prvalue(cow_vector<AIR_Node>& code, const Source_Location
 
 cow_vector<AIR_Node>&
 do_generate_subexpression(cow_vector<AIR_Node>& code, const Compiler_Options& opts, PTC_Aware ptc,
-                          const Analytic_Context& ctx, const Statement::S_expression& expr)
+                          Analytic_Context& ctx, const Statement::S_expression& expr)
   {
     // Expression units other than the last one cannot be PTC'd.
     for(size_t i = 0;  i < expr.units.size();  ++i) {
@@ -81,7 +81,7 @@ do_generate_single_step_trap(cow_vector<AIR_Node>& code, const Compiler_Options&
 
 cow_vector<AIR_Node>&
 do_generate_expression(cow_vector<AIR_Node>& code, const Compiler_Options& opts, PTC_Aware ptc,
-                       const Analytic_Context& ctx, const Statement::S_expression& expr)
+                       Analytic_Context& ctx, const Statement::S_expression& expr)
   {
     do_generate_single_step_trap(code, opts, expr.sloc);
     do_generate_clear_stack(code);
@@ -90,7 +90,7 @@ do_generate_expression(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
   }
 
 cow_vector<AIR_Node>
-do_generate_expression(const Compiler_Options& opts, PTC_Aware ptc, const Analytic_Context& ctx,
+do_generate_expression(const Compiler_Options& opts, PTC_Aware ptc, Analytic_Context& ctx,
                        const Statement::S_expression& expr)
   {
     cow_vector<AIR_Node> code;
@@ -122,11 +122,11 @@ do_generate_statement_list(cow_vector<phsh_string>* names_opt, Analytic_Context&
   }
 
 cow_vector<AIR_Node>
-do_generate_block(const Compiler_Options& opts, PTC_Aware ptc, const Analytic_Context& ctx,
+do_generate_block(const Compiler_Options& opts, PTC_Aware ptc, Analytic_Context& ctx,
                   const Statement::S_block& block)
   {
     cow_vector<AIR_Node> code;
-    Analytic_Context ctx_stmts(::rocket::ref(ctx));
+    Analytic_Context ctx_stmts(Analytic_Context::M_plain(), ctx);
     do_generate_statement_list(code, nullptr, ctx_stmts, opts, ptc, block);
     return code;
   }
@@ -295,7 +295,7 @@ const
 
         // Create a fresh context for the `switch` body.
         // Be advised that all clauses inside a `switch` statement share the same context.
-        Analytic_Context ctx_body(::rocket::ref(ctx));
+        Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
         cow_vector<phsh_string> names;
 
         // Get the number of clauses.
@@ -359,7 +359,7 @@ const
 
         // Note that the key and value references outlasts every iteration, so we have to create
         // an outer contexts here.
-        Analytic_Context ctx_for(::rocket::ref(ctx));
+        Analytic_Context ctx_for(Analytic_Context::M_plain(), ctx);
         do_user_declare(names_opt, ctx_for, altr.name_key, "key placeholder");
         do_user_declare(names_opt, ctx_for, altr.name_mapped, "value placeholder");
 
@@ -383,7 +383,7 @@ const
 
         // Note that names declared in the first segment of a for-statement outlasts every iteration,
         // so we have to create an outer contexts here.
-        Analytic_Context ctx_for(::rocket::ref(ctx));
+        Analytic_Context ctx_for(Analytic_Context::M_plain(), ctx);
 
         // Generate code for the initializer, the condition and the loop increment.
         auto code_init = do_generate_statement_list(nullptr, ctx_for, opts, ptc_aware_none, altr.init);
@@ -408,7 +408,7 @@ const
         auto code_try = do_generate_block(opts, ptc, ctx, altr.body_try);
 
         // Create a fresh context for the `catch` clause.
-        Analytic_Context ctx_catch(::rocket::ref(ctx));
+        Analytic_Context ctx_catch(Analytic_Context::M_plain(), ctx);
         do_user_declare(names_opt, ctx_catch, altr.name_except, "exception placeholder");
         ctx_catch.open_named_reference(::rocket::sref("__backtrace"));
         // Generate code for the `catch` body.

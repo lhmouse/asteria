@@ -15,48 +15,44 @@ class Executive_Context
   : public Abstract_Context
   {
   private:
-    const Executive_Context* m_parent_opt;
+    Executive_Context* m_parent_opt;
 
     // Store some references to the enclosing function,
     // so they are not passed here and there upon each native call.
-    ref<Global_Context> m_global;
-    ref<Evaluation_Stack> m_stack;
+    Global_Context* m_global;
+    Evaluation_Stack* m_stack;
 
-    // These members are used for lazy initialization.
+    cow_bivector<Source_Location, AVMC_Queue> m_defer;
     rcptr<Variadic_Arguer> m_zvarg;
     cow_vector<Reference> m_lazy_args;
 
-    // This stores deferred expressions.
-    cow_bivector<Source_Location, AVMC_Queue> m_defer;
-
   public:
-    template<typename ContextT,
-    ROCKET_ENABLE_IF(::std::is_base_of<Executive_Context, ContextT>::value)>
-    Executive_Context(ref<ContextT> parent)  // for non-functions
-      : m_parent_opt(parent.ptr()),
-        m_global(parent.get().m_global), m_stack(parent.get().m_stack)
+    // A plain context must have a parent context.
+    // Its parent context shall outlast itself.
+    Executive_Context(M_plain, Executive_Context& parent)
+      : m_parent_opt(::std::addressof(parent)),
+        m_global(parent.m_global), m_stack(parent.m_stack)
       { }
 
-    Executive_Context(ref<Global_Context> xglobal, ref<Evaluation_Stack> xstack,
-                      cow_bivector<Source_Location, AVMC_Queue>&& defer)  // for proper tail calls
-      : m_parent_opt(nullptr),
-        m_global(xglobal), m_stack(xstack),
+    // A defer context is used to evaluate deferred expressions.
+    // They are evaluated in separated contexts, as in case of proper tail calls,
+    // contexts of enclosing function will have been destroyed.
+    Executive_Context(M_defer, Global_Context& global, Evaluation_Stack& stack,
+                      cow_bivector<Source_Location, AVMC_Queue>&& defer)
+      : m_parent_opt(),
+        m_global(::std::addressof(global)), m_stack(::std::addressof(stack)),
         m_defer(::std::move(defer))
       { }
 
-    Executive_Context(ref<Global_Context> xglobal, ref<Evaluation_Stack> xstack,
-                      const rcptr<Variadic_Arguer>& zvarg, const cow_vector<phsh_string>& params,
-                      Reference&& self, cow_vector<Reference>&& args)  // for functions
-      : m_parent_opt(nullptr),
-        m_global(xglobal), m_stack(xstack)
-      { this->do_bind_parameters(zvarg, params, ::std::move(self), ::std::move(args));  }
+    // A function context has no parent.
+    // The caller shall define a global context and evaluation stack, both of which
+    // shall outlast this context.
+    Executive_Context(M_function, Global_Context& global, Evaluation_Stack& stack,
+                      const rcptr<Variadic_Arguer>& zvarg,
+                      const cow_vector<phsh_string>& params,
+                      Reference&& self, cow_vector<Reference>&& args);
 
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Executive_Context);
-
-  private:
-    void
-    do_bind_parameters(const rcptr<Variadic_Arguer>& zvarg, const cow_vector<phsh_string>& params,
-                       Reference&& self, cow_vector<Reference>&& args);
 
   protected:
     bool
@@ -64,7 +60,7 @@ class Executive_Context
     const noexcept final
       { return this->is_analytic();  }
 
-    const Abstract_Context*
+    Abstract_Context*
     do_get_parent_opt()
     const noexcept override
       { return this->get_parent_opt();  }
@@ -79,7 +75,7 @@ class Executive_Context
     const noexcept
       { return false;  }
 
-    const Executive_Context*
+    Executive_Context*
     get_parent_opt()
     const noexcept
       { return this->m_parent_opt;  }
@@ -87,12 +83,12 @@ class Executive_Context
     Global_Context&
     global()
     const noexcept
-      { return this->m_global;  }
+      { return *(this->m_global);  }
 
     Evaluation_Stack&
     stack()
     const noexcept
-      { return this->m_stack;  }
+      { return *(this->m_stack);  }
 
     // Defer an expression which will be evaluated at scope exit.
     // The result of such expressions are discarded.

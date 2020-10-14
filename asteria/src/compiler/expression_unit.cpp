@@ -14,7 +14,7 @@ namespace asteria {
 namespace {
 
 cow_vector<AIR_Node>
-do_generate_code_branch(const Compiler_Options& opts, PTC_Aware ptc, const Analytic_Context& ctx,
+do_generate_code_branch(const Compiler_Options& opts, PTC_Aware ptc, Analytic_Context& ctx,
                         const cow_vector<Expression_Unit>& units)
   {
     // Expression units other than the last one cannot be PTC'd.
@@ -31,7 +31,7 @@ do_generate_code_branch(const Compiler_Options& opts, PTC_Aware ptc, const Analy
 cow_vector<AIR_Node>&
 Expression_Unit::
 generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
-              const Analytic_Context& ctx, PTC_Aware ptc)
+              Analytic_Context& ctx, PTC_Aware ptc)
 const
   {
     switch(this->index()) {
@@ -50,7 +50,7 @@ const
         // Perform early lookup when the expression is defined.
         // If a named reference is found, it will not be replaced or hidden by a later-declared one.
         const Reference* qref;
-        const Abstract_Context* qctx = &ctx;
+        Abstract_Context* qctx = &ctx;
         uint32_t depth = 0;
 
         for(;;) {

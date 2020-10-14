@@ -19,14 +19,15 @@ AIR_Optimizer::
 
 AIR_Optimizer&
 AIR_Optimizer::
-reload(const Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
+reload(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
        const cow_vector<Statement>& stmts)
   {
     this->m_code.clear();
     this->m_params = params;
 
     // Generate code for all statements.
-    Analytic_Context ctx_func(ctx_opt, this->m_params);
+    Analytic_Context ctx_func(Analytic_Context::M_function(),
+                              ctx_opt, this->m_params);
     for(size_t i = 0;  i < stmts.size();  ++i) {
       auto qnext = stmts.ptr(i + 1);
       bool rvoid = !qnext || qnext->is_empty_return();
@@ -40,7 +41,7 @@ reload(const Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
 
 AIR_Optimizer&
 AIR_Optimizer::
-rebind(const Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
+rebind(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
        const cow_vector<AIR_Node>& code)
   {
     this->m_code = code;
@@ -48,7 +49,8 @@ rebind(const Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
 
     // Rebind all nodes recursively.
     // Don't trigger copy-on-write unless a node needs rewriting.
-    Analytic_Context ctx_func(ctx_opt, params);
+    Analytic_Context ctx_func(Analytic_Context::M_function(),
+                              ctx_opt, this->m_params);
     for(size_t i = 0;  i < code.size();  ++i) {
       auto qnode = code.at(i).rebind_opt(ctx_func);
       if(!qnode)

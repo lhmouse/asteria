@@ -23,9 +23,9 @@ class Global_Context
     rcfwdp<Variable> m_vstd;
 
   public:
+    // A global context has no parent.
     explicit
-    Global_Context(API_Version version = api_version_latest)
-      { this->initialize(version);  }
+    Global_Context(API_Version version = api_version_latest);
 
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Global_Context);
 
@@ -35,7 +35,7 @@ class Global_Context
     const noexcept final
       { return this->is_analytic();  }
 
-    const Abstract_Context*
+    Abstract_Context*
     do_get_parent_opt()
     const noexcept final
       { return this->get_parent_opt();  }
@@ -51,7 +51,7 @@ class Global_Context
     const noexcept
       { return false;  }
 
-    const Abstract_Context*
+    Abstract_Context*
     get_parent_opt()
     const noexcept
       { return nullptr;  }
@@ -115,10 +115,6 @@ class Global_Context
     API_Version
     max_api_version()
     const noexcept;
-
-    // Clear all references, perform a full garbage collection, then reload the standard library.
-    void
-    initialize(API_Version version = api_version_latest);
   };
 
 }  // namespace asteria

@@ -258,13 +258,13 @@ do_find_uncensored(V_object::const_iterator& curp, const V_object& object)
 
 struct S_xformat_array
   {
-    ref<const V_array> refa;
+    const V_array* refa;
     V_array::const_iterator curp;
   };
 
 struct S_xformat_object
   {
-    ref<const V_object> refo;
+    const V_object* refo;
     V_object::const_iterator curp;
   };
 
@@ -323,7 +323,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
           fmt << '[';
 
           // Open an array.
-          S_xformat_array ctxa = { ::rocket::ref(array), array.begin() };
+          S_xformat_array ctxa = { ::std::addressof(array), array.begin() };
           if(ctxa.curp != array.end()) {
             indent.increment_level();
             indent.break_line(fmt);
@@ -344,7 +344,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
           fmt << '{';
 
           // Open an object.
-          S_xformat_object ctxo = { ::rocket::ref(object), object.begin() };
+          S_xformat_object ctxo = { ::std::addressof(object), object.begin() };
           if(do_find_uncensored(ctxo.curp, object)) {
             indent.increment_level();
             indent.break_line(fmt);
@@ -378,7 +378,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
         // Advance to the next element.
         if(stack.back().index() == 0) {
           auto& ctxa = stack.mut_back().as<0>();
-          if(++(ctxa.curp) != ctxa.refa.get().end()) {
+          if(++(ctxa.curp) != ctxa.refa->end()) {
             fmt << ',';
             indent.break_line(fmt);
 
@@ -397,7 +397,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
         }
         else {
           auto& ctxo = stack.mut_back().as<1>();
-          if(do_find_uncensored(++(ctxo.curp), ctxo.refo)) {
+          if(do_find_uncensored(++(ctxo.curp), *(ctxo.refo))) {
             fmt << ',';
             indent.break_line(fmt);
 

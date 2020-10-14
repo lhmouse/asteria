@@ -12,7 +12,7 @@
 namespace asteria {
 namespace {
 
-ref<V_opaque>
+::std::reference_wrapper<V_opaque>
 do_open_private(Reference&& self, const phsh_string& name)
   {
     Reference::M_object_key xmod = { name };

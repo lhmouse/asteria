@@ -10,33 +10,16 @@
 #include "../util.hpp"
 
 namespace asteria {
-namespace {
-
-template<typename XRefT>
-inline
-Reference*
-do_set_lazy_reference(Executive_Context& ctx, const phsh_string& name, XRefT&& xref)
-  {
-    auto& ref = ctx.open_named_reference(name);
-    ref = ::std::forward<XRefT>(xref);
-    return ::std::addressof(ref);
-  }
-
-}  // namespace
 
 Executive_Context::
-~Executive_Context()
+Executive_Context(M_function, Global_Context& global, Evaluation_Stack& stack,
+                  const rcptr<Variadic_Arguer>& zvarg,
+                  const cow_vector<phsh_string>& params,
+                  Reference&& self, cow_vector<Reference>&& args)
+  : m_parent_opt(),
+    m_global(::std::addressof(global)), m_stack(::std::addressof(stack)),
+    m_zvarg(zvarg)
   {
-  }
-
-void
-Executive_Context::
-do_bind_parameters(const rcptr<Variadic_Arguer>& zvarg, const cow_vector<phsh_string>& params,
-                   Reference&& self, cow_vector<Reference>&& args)
-  {
-    // Set the zero-ary argument getter.
-    this->m_zvarg = zvarg;
-
     // Set the `this` reference.
     // If the self reference is void, it is likely that `this` isn't ever referenced in this function,
     // so perform lazy initialization to avoid this overhead.
@@ -80,6 +63,11 @@ do_bind_parameters(const rcptr<Variadic_Arguer>& zvarg, const cow_vector<phsh_st
       this->m_lazy_args = ::std::move(args);
   }
 
+Executive_Context::
+~Executive_Context()
+  {
+  }
+
 Reference*
 Executive_Context::
 do_lazy_lookup_opt(const phsh_string& name)
@@ -89,13 +77,13 @@ do_lazy_lookup_opt(const phsh_string& name)
     if(name == "__func") {
       // Note: This can only happen inside a function context.
       Reference::S_constant xref = { this->m_zvarg->func() };
-      return do_set_lazy_reference(*this, name, ::std::move(xref));
+      return &(this->open_named_reference(name) = ::std::move(xref));
     }
 
     if(name == "__this") {
       // Note: This can only happen inside a function context and the `this` argument is null.
       Reference::S_constant xref = { };
-      return do_set_lazy_reference(*this, name, ::std::move(xref));
+      return &(this->open_named_reference(name) = ::std::move(xref));
     }
 
     if(name == "__varg") {
@@ -107,7 +95,7 @@ do_lazy_lookup_opt(const phsh_string& name)
         varg = this->m_zvarg;
 
       Reference::S_constant xref = { ::std::move(varg) };
-      return do_set_lazy_reference(*this, name, ::std::move(xref));
+      return &(this->open_named_reference(name) = ::std::move(xref));
     }
 
     return nullptr;
@@ -131,7 +119,7 @@ on_scope_exit(AIR_Status status)
     // Stash the returned reference, if any.
     Reference self = Reference::S_uninit();
     if(status == air_status_return_ref)
-      self = ::std::move(this->m_stack.get().get_top());
+      self = ::std::move(this->m_stack->get_top());
 
     if(auto ptca = self.get_ptc_args_opt()) {
       // If a PTC wrapper was returned, prepend all deferred expressions to it.
@@ -165,7 +153,7 @@ on_scope_exit(AIR_Status status)
     ROCKET_ASSERT(!self.is_uninit());
 
     // Restore the returned reference.
-    this->m_stack.get().open_top() = ::std::move(self);
+    this->m_stack->open_top() = ::std::move(self);
     return status;
   }
 

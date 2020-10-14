@@ -64,13 +64,13 @@ class AIR_Optimizer
     // This function performs code generation.
     // `ctx_opt` is the parent context this closure.
     AIR_Optimizer&
-    reload(const Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
+    reload(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
            const cow_vector<Statement>& stmts);
 
     // This function loads some already-generated code.
     // `ctx_opt` is the parent context this closure.
     AIR_Optimizer&
-    rebind(const Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
+    rebind(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
            const cow_vector<AIR_Node>& code);
 
     // Create a closure value that can be assigned to a variable.

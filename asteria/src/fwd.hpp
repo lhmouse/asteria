@@ -143,9 +143,6 @@ using array = ::rocket::array<E, k...>;
 template<typename T>
 using opt = ::rocket::optional<T>;
 
-template<typename E>
-using ref = ::rocket::reference_wrapper<E>;
-
 // Core
 class Value;
 class Source_Location;

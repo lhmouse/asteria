@@ -99,7 +99,7 @@ finish_call(Global_Context& global, Evaluation_Stack& stack)
 
         // Evaluate deferred expressions if any.
         if(ptca->get_defer().size())
-          Executive_Context(::rocket::ref(global), ::rocket::ref(stack),
+          Executive_Context(Executive_Context::M_defer(), global, stack,
                             ::std::move(ptca->open_defer()))
             .on_scope_exit(air_status_next);
 
@@ -124,7 +124,7 @@ finish_call(Global_Context& global, Evaluation_Stack& stack)
 
         // Evaluate deferred expressions if any.
         if(ptca->get_defer().size())
-          Executive_Context(::rocket::ref(global), ::rocket::ref(stack),
+          Executive_Context(Executive_Context::M_defer(), global, stack,
                             ::std::move(ptca->open_defer()))
             .on_scope_exit(except);
 
