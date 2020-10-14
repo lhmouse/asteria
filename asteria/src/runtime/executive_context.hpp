@@ -7,7 +7,6 @@
 #include "../fwd.hpp"
 #include "abstract_context.hpp"
 #include "variadic_arguer.hpp"
-#include "evaluation_stack.hpp"
 
 namespace asteria {
 
@@ -20,7 +19,7 @@ class Executive_Context
     // Store some references to the enclosing function,
     // so they are not passed here and there upon each native call.
     Global_Context* m_global;
-    Evaluation_Stack* m_stack;
+    Reference_Stack* m_stack;
 
     cow_bivector<Source_Location, AVMC_Queue> m_defer;
     rcptr<Variadic_Arguer> m_zvarg;
@@ -37,7 +36,7 @@ class Executive_Context
     // A defer context is used to evaluate deferred expressions.
     // They are evaluated in separated contexts, as in case of proper tail calls,
     // contexts of enclosing function will have been destroyed.
-    Executive_Context(M_defer, Global_Context& global, Evaluation_Stack& stack,
+    Executive_Context(M_defer, Global_Context& global, Reference_Stack& stack,
                       cow_bivector<Source_Location, AVMC_Queue>&& defer)
       : m_parent_opt(),
         m_global(::std::addressof(global)), m_stack(::std::addressof(stack)),
@@ -47,7 +46,7 @@ class Executive_Context
     // A function context has no parent.
     // The caller shall define a global context and evaluation stack, both of which
     // shall outlast this context.
-    Executive_Context(M_function, Global_Context& global, Evaluation_Stack& stack,
+    Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
                       const rcptr<Variadic_Arguer>& zvarg,
                       const cow_vector<phsh_string>& params,
                       Reference&& self, cow_vector<Reference>&& args);
@@ -85,7 +84,7 @@ class Executive_Context
     const noexcept
       { return *(this->m_global);  }
 
-    Evaluation_Stack&
+    Reference_Stack&
     stack()
     const noexcept
       { return *(this->m_stack);  }

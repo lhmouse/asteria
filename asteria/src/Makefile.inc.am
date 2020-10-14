@@ -23,6 +23,7 @@ include_asteria_lldsdir = ${includedir}/asteria/llds
 include_asteria_llds_HEADERS =  \
   %reldir%/llds/variable_hashset.hpp  \
   %reldir%/llds/reference_dictionary.hpp  \
+  %reldir%/llds/reference_stack.hpp  \
   %reldir%/llds/avmc_queue.hpp  \
   ${NOTHING}
 
@@ -45,7 +46,6 @@ include_asteria_runtime_HEADERS =  \
   %reldir%/runtime/random_engine.hpp  \
   %reldir%/runtime/loader_lock.hpp  \
   %reldir%/runtime/variadic_arguer.hpp  \
-  %reldir%/runtime/evaluation_stack.hpp  \
   %reldir%/runtime/instantiated_function.hpp  \
   %reldir%/runtime/air_node.hpp  \
   %reldir%/runtime/air_optimizer.hpp  \
@@ -90,6 +90,7 @@ lib_libasteria_la_SOURCES =  \
   %reldir%/simple_script.cpp  \
   %reldir%/llds/variable_hashset.cpp  \
   %reldir%/llds/reference_dictionary.cpp  \
+  %reldir%/llds/reference_stack.cpp  \
   %reldir%/llds/avmc_queue.cpp  \
   %reldir%/runtime/enums.cpp  \
   %reldir%/runtime/abstract_hooks.cpp  \
@@ -108,7 +109,6 @@ lib_libasteria_la_SOURCES =  \
   %reldir%/runtime/random_engine.cpp  \
   %reldir%/runtime/loader_lock.cpp  \
   %reldir%/runtime/variadic_arguer.cpp  \
-  %reldir%/runtime/evaluation_stack.cpp  \
   %reldir%/runtime/instantiated_function.cpp  \
   %reldir%/runtime/air_node.cpp  \
   %reldir%/runtime/air_optimizer.cpp  \

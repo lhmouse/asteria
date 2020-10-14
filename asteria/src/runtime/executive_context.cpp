@@ -7,12 +7,13 @@
 #include "ptc_arguments.hpp"
 #include "enums.hpp"
 #include "../llds/avmc_queue.hpp"
+#include "../llds/reference_stack.hpp"
 #include "../util.hpp"
 
 namespace asteria {
 
 Executive_Context::
-Executive_Context(M_function, Global_Context& global, Evaluation_Stack& stack,
+Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
                   const rcptr<Variadic_Arguer>& zvarg,
                   const cow_vector<phsh_string>& params,
                   Reference&& self, cow_vector<Reference>&& args)
@@ -120,7 +121,7 @@ on_scope_exit(AIR_Status status)
     // Stash the returned reference, if any.
     Reference self = Reference::S_uninit();
     if(status == air_status_return_ref)
-      self = ::std::move(this->m_stack->get_top());
+      self = ::std::move(this->m_stack->mut_front());
 
     if(auto ptca = self.get_ptc_args_opt()) {
       // If a PTC wrapper was returned, prepend all deferred expressions to it.
@@ -154,7 +155,7 @@ on_scope_exit(AIR_Status status)
     ROCKET_ASSERT(!self.is_uninit());
 
     // Restore the returned reference.
-    this->m_stack->open_top() = ::std::move(self);
+    this->m_stack->mut_front() = ::std::move(self);
     return status;
   }
 

@@ -152,6 +152,7 @@ class Simple_Script;
 // Low-level data structures
 class Variable_HashSet;
 class Reference_Dictionary;
+class Reference_Stack;
 class AVMC_Queue;
 
 // Runtime
@@ -160,7 +161,6 @@ enum PTC_Aware : int8_t;  // this is a bitmask!
 class Abstract_Hooks;
 class Runtime_Error;
 class Reference;
-class Evaluation_Stack;
 class Variable;
 class Variable_Callback;
 class PTC_Arguments;

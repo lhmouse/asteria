@@ -16,8 +16,8 @@ AVMC_Queue::
 do_destroy_nodes()
 noexcept
   {
-    auto eptr = this->m_bptr + this->m_used;
     auto next = this->m_bptr;
+    const auto eptr = this->m_bptr + this->m_used;
     while(ROCKET_EXPECT(next != eptr)) {
       auto qnode = ::std::exchange(next, next + next->total_size_in_headers());
 
@@ -166,8 +166,8 @@ AVMC_Queue::
 execute(Executive_Context& ctx)
 const
   {
-    auto eptr = this->m_bptr + this->m_used;
     auto next = this->m_bptr;
+    const auto eptr = this->m_bptr + this->m_used;
     while(ROCKET_EXPECT(next != eptr)) {
       auto qnode = ::std::exchange(next, next + next->total_size_in_headers());
 
@@ -190,8 +190,8 @@ AVMC_Queue::
 enumerate_variables(Variable_Callback& callback)
 const
   {
-    auto eptr = this->m_bptr + this->m_used;
     auto next = this->m_bptr;
+    const auto eptr = this->m_bptr + this->m_used;
     while(ROCKET_EXPECT(next != eptr)) {
       auto qnode = ::std::exchange(next, next + next->total_size_in_headers());
 

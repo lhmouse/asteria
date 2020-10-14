@@ -5,7 +5,6 @@
 #include "reference.hpp"
 #include "global_context.hpp"
 #include "abstract_hooks.hpp"
-#include "evaluation_stack.hpp"
 #include "executive_context.hpp"
 #include "runtime_error.hpp"
 #include "variable.hpp"
@@ -13,6 +12,7 @@
 #include "ptc_arguments.hpp"
 #include "enums.hpp"
 #include "../llds/avmc_queue.hpp"
+#include "../llds/reference_stack.hpp"
 #include "../util.hpp"
 
 namespace asteria {
@@ -56,7 +56,7 @@ const
 
 Reference&
 Reference::
-finish_call(Global_Context& global, Evaluation_Stack& stack)
+finish_call(Global_Context& global, Reference_Stack& stack)
   {
     if(ROCKET_EXPECT(!this->is_ptc_args()))
       return *this;

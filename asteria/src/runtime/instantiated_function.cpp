@@ -9,6 +9,7 @@
 #include "runtime_error.hpp"
 #include "ptc_arguments.hpp"
 #include "enums.hpp"
+#include "../llds/reference_stack.hpp"
 #include "../util.hpp"
 
 namespace asteria {
@@ -48,10 +49,9 @@ invoke_ptc_aware(Reference& self, Global_Context& global, cow_vector<Reference>&
 const
   {
     // Create the stack and context for this function.
-    Evaluation_Stack stack;
+    Reference_Stack stack;
     Executive_Context ctx_func(Executive_Context::M_function(), global, stack,
                                this->m_zvarg, this->m_params, ::std::move(self), ::std::move(args));
-    stack.reserve(::std::move(args));
     AIR_Status status;
 
     // Execute the function body.
@@ -74,7 +74,7 @@ const
 
       case air_status_return_ref:
         // Return the reference at the top of `stack`.
-        self = ::std::move(stack.open_top());
+        self = ::std::move(stack.mut_front());
 
         // In case of PTCs, set up source location.
         // This cannot be set at the call site where such information isn't available.
@@ -86,19 +86,16 @@ const
       case air_status_break_switch:
       case air_status_break_while:
       case air_status_break_for:
-        ASTERIA_THROW("Stray `break` statement\n[jumped from '$1']", stack.open_top().as_jump_src());
+        ASTERIA_THROW("Stray `break` statement\n[jumped from '$1']", stack.front().as_jump_src());
 
       case air_status_continue_unspec:
       case air_status_continue_while:
       case air_status_continue_for:
-        ASTERIA_THROW("Stray `continue` statement\n[jumped from '$1']", stack.open_top().as_jump_src());
+        ASTERIA_THROW("Stray `continue` statement\n[jumped from '$1']", stack.front().as_jump_src());
 
       default:
         ASTERIA_TERMINATE("invalid AIR status code (status `$1`)", status);
     }
-
-    // Enable `args` to be reused after this call.
-    stack.unreserve(args);
     return self;
   }
 
