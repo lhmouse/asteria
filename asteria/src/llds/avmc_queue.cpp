@@ -19,17 +19,15 @@ noexcept
     auto eptr = this->m_bptr + this->m_used;
     auto next = this->m_bptr;
     while(ROCKET_EXPECT(next != eptr)) {
-      auto qnode = next;
-      next += qnode->total_size_in_headers();
+      auto qnode = ::std::exchange(next, next + next->total_size_in_headers());
 
       // Destroy symbols and user-defined data.
       qnode->destroy();
     }
-
 #ifdef ROCKET_DEBUG
     ::std::memset(this->m_bptr, 0xE6, this->m_rsrv * sizeof(Header));
-    this->m_used = 0xDEADBEEF;
 #endif
+    this->m_used = 0xDEADBEEF;
   }
 
 void
@@ -64,8 +62,6 @@ do_reallocate(uint32_t nadd)
       // Relocate user-defined data.
       qnode->relocate(::std::move(*qfrom));
     }
-
-    // Deallocate the old block.
     if(bold)
       ::operator delete(bold);
   }
@@ -173,8 +169,7 @@ const
     auto eptr = this->m_bptr + this->m_used;
     auto next = this->m_bptr;
     while(ROCKET_EXPECT(next != eptr)) {
-      auto qnode = next;
-      next += qnode->total_size_in_headers();
+      auto qnode = ::std::exchange(next, next + next->total_size_in_headers());
 
       // Call the executor function for this node.
       ASTERIA_RUNTIME_TRY {
@@ -198,8 +193,7 @@ const
     auto eptr = this->m_bptr + this->m_used;
     auto next = this->m_bptr;
     while(ROCKET_EXPECT(next != eptr)) {
-      auto qnode = next;
-      next += qnode->total_size_in_headers();
+      auto qnode = ::std::exchange(next, next + next->total_size_in_headers());
 
       // Enumerate variables in this node.
       qnode->enumerate_variables(callback);

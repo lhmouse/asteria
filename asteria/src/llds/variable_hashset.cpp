@@ -15,20 +15,18 @@ noexcept
   {
     auto next = this->m_head;
     while(ROCKET_EXPECT(next)) {
-      auto qbkt = next;
-      next = qbkt->next;
+      auto qbkt = ::std::exchange(next, next->next);
 
       // Destroy this bucket.
       ROCKET_ASSERT(*qbkt);
       ::rocket::destroy_at(qbkt->kstor);
       qbkt->prev = nullptr;
     }
-
 #ifdef ROCKET_DEBUG
     ::std::for_each(this->m_bptr, this->m_eptr, [&](Bucket& r) {
               ::std::memset((void*)&r, 0xD3, sizeof(r));  r.prev = nullptr;  });
-    this->m_head = reinterpret_cast<Bucket*>(0xDEADBEEF);
 #endif
+    this->m_head = reinterpret_cast<Bucket*>(0xDEADBEEF);
   }
 
 details_variable_hashset::Bucket*
@@ -149,7 +147,6 @@ do_rehash(size_t nbkt)
     // Warning: No exception shall be thrown from the code below.
     auto sbkt = ::std::exchange(this->m_head, nullptr);
     while(ROCKET_EXPECT(sbkt)) {
-      // Mark this bucket empty, without destroying its contents.
       ROCKET_ASSERT(*sbkt);
 
       // Find a new bucket for the variable using linear probing.
@@ -172,8 +169,6 @@ do_rehash(size_t nbkt)
       // Process the next bucket.
       sbkt = sbkt->next;
     }
-
-    // Deallocate the old table.
     if(bold)
       ::operator delete(bold);
   }
@@ -214,8 +209,7 @@ const
   {
     auto next = this->m_head;
     while(ROCKET_EXPECT(next)) {
-      auto qbkt = next;
-      next = qbkt->next;
+      auto qbkt = ::std::exchange(next, next->next);
 
       // Enumerate a child variable.
       ROCKET_ASSERT(*qbkt);
