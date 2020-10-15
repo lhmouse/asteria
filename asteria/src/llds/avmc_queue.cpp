@@ -44,7 +44,7 @@ do_reallocate(uint32_t nadd)
     uint32_t rsrv = this->m_used + nadd;
     auto bptr = static_cast<Header*>(::operator new(rsrv * sizeof(Header)));
 
-    // Performa bitwise copy of all contents of the old block.
+    // Perform a bitwise copy of all contents of the old block.
     // This copies all existent headers and trivial data.
     // Note that the size is unchanged.
     auto bold = ::std::exchange(this->m_bptr, bptr);
