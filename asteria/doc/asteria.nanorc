@@ -18,7 +18,7 @@ color yellow "\<__(file|line|func|varg|this|backtrace)\>"
 # Operators
 color cyan "[].+*/%=&|!^~?:,;(){}<>$[-]"
 color brightgreen "\<(unset|(count|type)of|and|or|not|import)\>"
-color brightgreen "\<__(sqrt|is(nan|inf)|abs|sign|(round|floor|ceil|trunc)i?|fma|vcall)\>"
+color brightgreen "\<__(sqrt|is(nan|inf)|abs|sign|i?(round|floor|ceil|trunc)|fma|vcall)\>"
 
 # Modifiers
 color brightcyan "\<(__global)\>"
