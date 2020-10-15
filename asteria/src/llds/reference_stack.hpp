@@ -153,7 +153,8 @@ class Reference_Stack
           return *ptr;
         }
 
-        // If there is an uninitialized element above the top, construct a new one.
+        // If there is an uninitialized element above the top, construct a
+        // new one.
         if(ROCKET_EXPECT(this->m_bstor != 0)) {
           auto ptr = this->m_bptr + this->m_top - 1;
           ::rocket::construct_at(ptr, ::std::forward<XRefT>(xref));
@@ -162,8 +163,9 @@ class Reference_Stack
           return *ptr;
         }
 
-        // Allocate a larger block of memory and then construct the new element
-        // above the top. If the operation succeeds, replace the old block.
+        // Allocate a larger block of memory and then construct the new
+        // element  above the top. If the operation succeeds, replace the
+        // old block.
         Reference* next_bptr;
         uint32_t next_estor;
 
