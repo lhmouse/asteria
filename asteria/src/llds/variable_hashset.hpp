@@ -53,8 +53,9 @@ class Variable_HashSet
     do_destroy_buckets()
     noexcept;
 
-    // This function returns a pointer to either an empty bucket or a bucket containing
-    // a key which is equal to `var`, but in no case can a null pointer be returned.
+    // This function returns a pointer to either an empty bucket or a
+    // bucket containing a key which is equal to `var`, but in no case
+    // can a null pointer be returned.
     Bucket*
     do_xprobe(const rcptr<Variable>& var)
     const noexcept;
@@ -131,7 +132,8 @@ class Variable_HashSet
     has(const rcptr<Variable>& var)
     const noexcept
       {
-        // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.
+        // Be advised that `do_xprobe()` shall not be called when the
+        // table has not been allocated.
         if(!this->m_bptr)
           return false;
 
@@ -148,7 +150,8 @@ class Variable_HashSet
     insert(const rcptr<Variable>& var)
     noexcept
       {
-        // Reserve more room by rehashing if the load factor would exceed 0.5.
+        // Reserve more room by rehashing if the load factor would
+        // exceed 0.5.
         auto nbkt = static_cast<size_t>(this->m_eptr - this->m_bptr);
         if(ROCKET_UNEXPECT(this->m_size >= nbkt / 2))
           // Ensure the number of buckets is an odd number.
@@ -168,7 +171,8 @@ class Variable_HashSet
     erase(const rcptr<Variable>& var)
     noexcept
       {
-        // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.
+        // Be advised that `do_xprobe()` shall not be called when the
+        // table has not been allocated.
         if(!this->m_bptr)
           return false;
 
@@ -177,7 +181,8 @@ class Variable_HashSet
         if(!*qbkt)
           return false;
 
-        // Detach this variable. It cannot be unique because `var` outlives this function.
+        // Detach this variable.
+        // It cannot be unique because `var` outlives this function.
         qbkt->kstor[0].release()->drop_reference();
         this->do_detach(qbkt);
         return true;

@@ -79,8 +79,9 @@ class AVMC_Queue
     // If `ctor_opt` is specified, it is called to initialize `sp`.
     // Otherwise, `sp` is filled with zeroes.
     AVMC_Queue&
-    do_append_nontrivial(const details_avmc_queue::Vtable* vtbl, Uparam up, opt<Symbols>&& syms_opt,
-                         size_t nbytes, details_avmc_queue::Constructor* ctor_opt, intptr_t ctor_arg);
+    do_append_nontrivial(const details_avmc_queue::Vtable* vtbl, Uparam up,
+                         opt<Symbols>&& syms_opt, size_t nbytes,
+                         details_avmc_queue::Constructor* ctor_opt, intptr_t ctor_arg);
 
     // Append a trivial or non-trivial node basing on trivialness of the argument.
     template<Executor execT, Enumerator* qvenumT, typename XSparamT>
@@ -91,17 +92,18 @@ class AVMC_Queue
 
         if(::std::is_trivial<Sparam>::value)
           return this->do_append_trivial(
-                     execT, up, ::std::move(syms_opt),
-                     sizeof(Sparam), ::std::addressof(xsp));
+                   execT, up, ::std::move(syms_opt),
+                   sizeof(Sparam), ::std::addressof(xsp));
 
         return this->do_append_nontrivial(
-                     details_avmc_queue::get_vtable<execT, qvenumT, Sparam>(), up,
-                     ::std::move(syms_opt), sizeof(Sparam),
-                     +[](Uparam, void* sp, intptr_t ctor_arg)
-                       { ::rocket::construct_at(static_cast<Sparam*>(sp),
-                               static_cast<XSparamT&&>(*(reinterpret_cast<Sparam*>(ctor_arg))));  },
-                     reinterpret_cast<intptr_t>(static_cast<const void*>(
-                                                   ::std::addressof(xsp))));
+                 details_avmc_queue::get_vtable<execT, qvenumT, Sparam>(), up,
+                 ::std::move(syms_opt), sizeof(Sparam),
+                 +[](Uparam, void* sp, intptr_t ctor_arg)
+                   { ::rocket::construct_at(static_cast<Sparam*>(sp),
+                           static_cast<XSparamT&&>(*(reinterpret_cast<Sparam*>(
+                                 ctor_arg))));  },
+                 reinterpret_cast<intptr_t>(static_cast<const void*>(
+                           ::std::addressof(xsp))));
       }
 
   public:
@@ -186,24 +188,28 @@ class AVMC_Queue
     ROCKET_DISABLE_IF(::std::is_convertible<XSparamT&&, Symbols>::value)>
     AVMC_Queue&
     append(XSparamT&& xsp)
-      { return this->do_append_chk<execT, qvenumT>(Uparam(), nullopt, ::std::forward<XSparamT>(xsp));  }
+      { return this->do_append_chk<execT, qvenumT>(Uparam(), nullopt,
+                              ::std::forward<XSparamT>(xsp));  }
 
     template<Executor execT, Enumerator* qvenumT, typename XSparamT,
     ROCKET_DISABLE_IF(::std::is_convertible<XSparamT&&, Uparam>::value),
     ROCKET_DISABLE_IF(::std::is_convertible<XSparamT&&, Symbols>::value)>
     AVMC_Queue&
     append(Symbols syms, XSparamT&& xsp)
-      { return this->do_append_chk<execT, qvenumT>(Uparam(), ::std::move(syms), ::std::forward<XSparamT>(xsp));  }
+      { return this->do_append_chk<execT, qvenumT>(Uparam(), ::std::move(syms),
+                              ::std::forward<XSparamT>(xsp));  }
 
     template<Executor execT, Enumerator* qvenumT, typename XSparamT>
     AVMC_Queue&
     append(Uparam up, XSparamT&& xsp)
-      { return this->do_append_chk<execT, qvenumT>(up, nullopt, ::std::forward<XSparamT>(xsp));  }
+      { return this->do_append_chk<execT, qvenumT>(up, nullopt,
+                              ::std::forward<XSparamT>(xsp));  }
 
     template<Executor execT, Enumerator* qvenumT, typename XSparamT>
     AVMC_Queue&
     append(Symbols syms, Uparam up, XSparamT&& xsp)
-      { return this->do_append_chk<execT, qvenumT>(up, ::std::move(syms), ::std::forward<XSparamT>(xsp));  }
+      { return this->do_append_chk<execT, qvenumT>(up, ::std::move(syms),
+                              ::std::forward<XSparamT>(xsp));  }
 
     // These are interfaces called by the runtime.
     AIR_Status

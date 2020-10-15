@@ -53,8 +53,9 @@ class Reference_Dictionary
     do_destroy_buckets()
     noexcept;
 
-    // This function returns a pointer to either an empty bucket or a bucket containing
-    // a key which is equal to `name`, but in no case can a null pointer be returned.
+    // This function returns a pointer to either an empty bucket or a
+    // bucket containing a key which is equal to `name`, but in no case
+    // can a null pointer be returned.
     Bucket*
     do_xprobe(const phsh_string& name)
     const noexcept;
@@ -131,7 +132,8 @@ class Reference_Dictionary
     find_opt(const phsh_string& name)
     const noexcept
       {
-        // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.
+        // Be advised that `do_xprobe()` shall not be called when the
+        // table has not been allocated.
         if(!this->m_bptr)
           return nullptr;
 
@@ -147,7 +149,8 @@ class Reference_Dictionary
     Reference&
     open(const phsh_string& name)
       {
-        // Reserve more room by rehashing if the load factor would exceed 0.5.
+        // Reserve more room by rehashing if the load factor would
+        // exceed 0.5.
         auto nbkt = static_cast<size_t>(this->m_eptr - this->m_bptr);
         if(ROCKET_UNEXPECT(this->m_size >= nbkt / 2))
           // Ensure the number of buckets is an odd number.
@@ -167,7 +170,8 @@ class Reference_Dictionary
     erase(const phsh_string& name)
     noexcept
       {
-        // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.
+        // Be advised that `do_xprobe()` shall not be called when the
+        // table has not been allocated.
         if(!this->m_bptr)
           return false;
 
