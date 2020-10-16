@@ -23,7 +23,7 @@ do_user_declare(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
       ASTERIA_THROW("Attempt to declare a nameless $1", desc);
 
     if(name.rdstr().starts_with("__"))
-      ASTERIA_THROW("Reserved name not declarable as $2 (name `$1`)", name);
+      ASTERIA_THROW("Reserved name not declarable as $2 (name `$1`)", name, desc);
 
     // Record this name.
     if(names_opt) {

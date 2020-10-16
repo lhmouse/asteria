@@ -19,20 +19,20 @@ Analytic_Context(M_function, Abstract_Context* parent_opt,
         continue;
 
       if(name.rdstr().starts_with("__"))
-        ASTERIA_THROW("Reserved name not declarable as parameter (name `", name, "`)");
+        ASTERIA_THROW("Reserved name not declarable as parameter (name `$1`)", name);
 
-      if(name == "...") {
-        // Nothing is set for the variadic placeholder, but the parameter list terminates here.
-        ROCKET_ASSERT(i == params.size() - 1);
+      // Nothing is set for the variadic placeholder, but the parameter list
+      // terminates here.
+      if(name == "...")
         break;
-      }
 
       // Its contents are out of interest.
       this->open_named_reference(name) /*= Reference::S_uninit()*/;
     }
 
     // Set pre-defined references.
-    // N.B. If you have ever changed these, remember to update 'executive_context.cpp' as well.
+    // N.B. If you have ever changed these, remember to update 'executive_context.cpp'
+    // as well.
     this->open_named_reference(::rocket::sref("__varg")) /*= Reference::S_uninit()*/;
     this->open_named_reference(::rocket::sref("__this")) /*= Reference::S_uninit()*/;
     this->open_named_reference(::rocket::sref("__func")) /*= Reference::S_uninit()*/;
