@@ -43,3 +43,9 @@ check_PROGRAMS +=  \
   %reldir%/ascii_numget.test  \
   %reldir%/github_108.test  \
   ${NOTHING}
+
+EXTRA_DIST +=  \
+  %reldir%/checksum.txt  \
+  %reldir%/import_recursive.txt  \
+  %reldir%/import_sub.txt  \
+  ${NOTHING}

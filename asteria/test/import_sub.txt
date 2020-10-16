@@ -5,4 +5,4 @@ assert __varg() == 2 : "insufficient arguments";
 
 var x = __varg(0);
 var y = __varg(1);
-return x + y;
+return x - y;

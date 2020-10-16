@@ -18,8 +18,8 @@ int main()
 ///////////////////////////////////////////////////////////////////////////////
 
         std.debug.logf("__file = $1", __file);
-        assert import("import_add.txt", 3, 5) == 8;
-        assert import("import_add.txt", 3, 5,) == 8;
+        assert import("import_sub.txt", 3, 5) == -2;
+        assert import("import_sub.txt", 3, 5,) == -2;
 
         try { import("nonexistent file");  assert false;  }
           catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
