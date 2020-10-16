@@ -8,6 +8,7 @@
 #include "compiler/statement.hpp"
 #include "compiler/expression_unit.hpp"
 #include "runtime/air_optimizer.hpp"
+#include "llds/reference_stack.hpp"
 #include "util.hpp"
 
 namespace asteria {
@@ -88,15 +89,12 @@ reload_file(const char* path)
 
 Reference
 Simple_Script::
-execute(Global_Context& global, cow_vector<Reference>&& args)
+execute(Global_Context& global, Reference_Stack&& stack)
 const
   {
-    if(!this->m_func)
-      ASTERIA_THROW("No script loaded");
-
     // Execute the script as a plain function.
     const StdIO_Sentry sentry;
-    return this->m_func.invoke(global, ::std::move(args));
+    return this->m_func.invoke(global, ::std::move(stack));
   }
 
 Reference
@@ -104,14 +102,13 @@ Simple_Script::
 execute(Global_Context& global, cow_vector<Value>&& vals)
 const
   {
-    // Convert all arguments to references to temporaries.
-    cow_vector<Reference> args;
-    args.reserve(vals.size());
-    for(size_t i = 0;  i < vals.size();  ++i) {
-      Reference::S_temporary xref = { ::std::move(vals.mut(i)) };
-      args.emplace_back(::std::move(xref));
+    // Push all arguments backwards as temporaries.
+    Reference_Stack stack;
+    for(auto it = vals.mut_rbegin();  it != vals.rend();  ++it) {
+      Reference::S_temporary xref = { ::std::move(*it) };
+      stack.emplace_front(::std::move(xref));
     }
-    return this->execute(global, ::std::move(args));
+    return this->execute(global, ::std::move(stack));
   }
 
 }  // namespace asteria

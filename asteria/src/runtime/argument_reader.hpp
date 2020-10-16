@@ -14,21 +14,19 @@ class Argument_Reader
   {
   private:
     cow_string m_name;
-    const cow_vector<Reference>* m_args;
+    const Reference_Stack* m_stack;
 
     details_argument_reader::State m_state;
     cow_vector<details_argument_reader::State> m_saved_states;
     cow_string m_overloads;
 
   public:
-    Argument_Reader(const cow_string& name,
-                    const cow_vector<Reference>& args)
+    Argument_Reader(const cow_string& name, const Reference_Stack& stack)
     noexcept
-      : m_name(name), m_args(::std::addressof(args))
+      : m_name(name), m_stack(::std::addressof(stack))
       { }
 
-    Argument_Reader(const cow_string& name,
-                    const cow_vector<Reference>&& args)
+    Argument_Reader(const cow_string& name, const Reference_Stack&& stack)
       = delete;
 
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Argument_Reader);
@@ -155,8 +153,9 @@ class Argument_Reader
 #define ASTERIA_BINDING_BEGIN(name, self, global, reader)  \
     (::asteria::V_function(  \
       "`" name "(...)` at '" __FILE__  ":" ROCKET_LAZY(ROCKET_QUOTE, __LINE__) "'",  \
-      *[](::asteria::Reference& self, ::asteria::Global_Context& global,  \
-          ::rocket::cow_vector<::asteria::Reference>&& tfiXopzY) -> Reference& \
+      *[](::asteria::Reference& self,  \
+          ::asteria::Global_Context& global, ::asteria::Reference_Stack&& tfiXopzY)  \
+        -> Reference& \
         {  \
           ::asteria::Argument_Reader reader(::rocket::sref("" name), tfiXopzY);  \
           (void)global;  \

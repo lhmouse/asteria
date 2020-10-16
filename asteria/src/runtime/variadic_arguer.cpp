@@ -27,17 +27,17 @@ const
 
 Reference&
 Variadic_Arguer::
-invoke_ptc_aware(Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args)
+invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack)
 const
   {
-    Argument_Reader reader(::rocket::sref("__varg"), args);
+    Argument_Reader reader(::rocket::sref("__varg"), stack);
 
     // If an argument is specified, it shall be the index of a variadic argument as
     // an integer, or an explicit `null`.
     Opt_integer qindex;
 
     reader.start_overload();
-    reader.optional(qindex);  //   [index]
+    reader.optional(qindex);    // [index]
     if(!reader.end_overload())
       reader.throw_no_matching_function_call();
 

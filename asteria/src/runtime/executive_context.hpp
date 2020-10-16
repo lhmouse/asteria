@@ -48,8 +48,7 @@ class Executive_Context
     // shall outlast this context.
     Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
                       const rcptr<Variadic_Arguer>& zvarg,
-                      const cow_vector<phsh_string>& params,
-                      Reference&& self, cow_vector<Reference>&& args);
+                      const cow_vector<phsh_string>& params, Reference&& self);
 
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Executive_Context);
 

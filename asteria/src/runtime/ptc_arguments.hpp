@@ -5,6 +5,7 @@
 #define ASTERIA_RUNTIME_PTC_ARGUMENTS_HPP_
 
 #include "../fwd.hpp"
+#include "../llds/reference_stack.hpp"
 #include "../source_location.hpp"
 
 namespace asteria {
@@ -20,7 +21,7 @@ final
 
     // These are the target function and its arguments.
     cow_function m_target;
-    cow_vector<Reference> m_args_self;
+    Reference_Stack m_stack;
 
     // These are deferred expressions.
     cow_bivector<Source_Location, AVMC_Queue> m_defer;
@@ -31,9 +32,9 @@ final
 
   public:
     PTC_Arguments(const Source_Location& sloc, PTC_Aware ptc,
-                  const cow_function& target, cow_vector<Reference>&& args_self)
+                  const cow_function& target, Reference_Stack&& stack)
       : m_sloc(sloc), m_ptc(ptc),
-        m_target(target), m_args_self(::std::move(args_self))
+        m_target(target), m_stack(::std::move(stack))
       { }
 
     ASTERIA_COPYABLE_DESTRUCTOR(PTC_Arguments);
@@ -54,15 +55,15 @@ final
     const noexcept
       { return this->m_target;  }
 
-    const cow_vector<Reference>&
-    get_arguments_and_self()
+    const Reference_Stack&
+    get_stack()
     const noexcept
-      { return this->m_args_self;  }
+      { return this->m_stack;  }
 
-    cow_vector<Reference>&
-    open_arguments_and_self()
+    Reference_Stack&
+    open_stack()
     noexcept
-      { return this->m_args_self;  }
+      { return this->m_stack;  }
 
     const cow_bivector<Source_Location, AVMC_Queue>&
     get_defer()

@@ -15,51 +15,49 @@ namespace asteria {
 Executive_Context::
 Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
                   const rcptr<Variadic_Arguer>& zvarg,
-                  const cow_vector<phsh_string>& params,
-                  Reference&& self, cow_vector<Reference>&& args)
+                  const cow_vector<phsh_string>& params, Reference&& self)
   : m_parent_opt(),
     m_global(::std::addressof(global)), m_stack(::std::addressof(stack)),
     m_zvarg(zvarg)
   {
     // Set the `this` reference.
-    // If the self reference is void, it is likely that `this` isn't ever referenced in this function,
-    // so perform lazy initialization to avoid this overhead.
+    // If the self reference is void, it is likely that `this` isn't ever referenced in
+    // this function, so perform lazy initialization to avoid this overhead.
     if(!self.is_void() && !(self.is_constant() && self.dereference_readonly().is_null()))
       this->open_named_reference(::rocket::sref("__this")) = ::std::move(self);
 
-    // This is the subscript of the special parameter placeholder `...`.
-    size_t elps = SIZE_MAX;
+    // Prepare iterators to arguments.
+    // As function arguments are evaluated from left to right, the reference at the top
+    // is the last argument, which means we have to read in reverse order.
+    auto bpos = ::std::make_reverse_iterator(stack.end());
+    auto epos = ::std::make_reverse_iterator(stack.begin());
 
     // Set parameters, which are local references.
-    for(size_t i = 0;  i < params.size();  ++i) {
-      const auto& name = params.at(i);
+    bool variadic = false;
+    for(const auto& name : params) {
       if(name.empty())
         continue;
 
-      if(name == "...") {
-        // Nothing is set for the parameter placeholder, but the parameter list terminates here.
-        ROCKET_ASSERT(i == params.size() - 1);
-        elps = i;
+      // Nothing is set for the variadic placeholder, but the parameter list
+      // terminates here.
+      variadic = (name.size() == 3) && (::std::memcmp(name.c_str(), "...", 4) == 0);
+      if(variadic)
         break;
-      }
 
-      // Set the parameter.
-      if(ROCKET_UNEXPECT(i >= args.size()))
-        this->open_named_reference(name) = Reference::S_constant();
+      // Try popping an argument from `stack` and assign it to this parameter.
+      // If no more arguments follow, declare a constant `null`.
+      if(ROCKET_EXPECT(bpos != epos))
+        this->open_named_reference(name) = ::std::move(*(bpos++));
       else
-        this->open_named_reference(name) = ::std::move(args.mut(i));
+        this->open_named_reference(name) = Reference::S_constant();
     }
 
-    // Disallow exceess arguments if the function is not variadic.
-    if((elps == SIZE_MAX) && (args.size() > params.size())) {
-      ASTERIA_THROW("Too many arguments (`$1` > `$2`)", args.size(), params.size());
-    }
-    args.erase(0, elps);
+    // If the function is not variadic, then all arguments shall have been consumed.
+    if(!variadic && (bpos != epos))
+      ASTERIA_THROW("Too many arguments passed to `$1`", zvarg->func());
 
-    // Stash variadic arguments for lazy initialization.
-    // If all arguments are positional, `args` may be reused for the evaluation stack, so don't move it.
-    if(args.size())
-      this->m_lazy_args = ::std::move(args);
+    // Stash variadic arguments, if any.
+    this->m_lazy_args.append(::std::make_move_iterator(bpos), ::std::make_move_iterator(epos));
   }
 
 Executive_Context::
@@ -89,7 +87,8 @@ do_lazy_lookup_opt(const phsh_string& name)
       // Note: This can only happen inside a function context.
       cow_function varg;
       if(ROCKET_EXPECT(this->m_lazy_args.size()))
-        varg = ::rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg), ::std::move(this->m_lazy_args));
+        varg = ::rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg),
+                                                      ::std::move(this->m_lazy_args));
       else
         varg = this->m_zvarg;
 

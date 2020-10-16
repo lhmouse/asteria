@@ -12,7 +12,6 @@
 #include "ptc_arguments.hpp"
 #include "enums.hpp"
 #include "../llds/avmc_queue.hpp"
-#include "../llds/reference_stack.hpp"
 #include "../util.hpp"
 
 namespace asteria {
@@ -65,7 +64,6 @@ finish_call(Global_Context& global)
     cow_vector<rcptr<PTC_Arguments>> frames;
     rcptr<PTC_Arguments> ptca;
     int ptc_conj = ptc_aware_by_ref;
-    Reference_Stack stack;
 
     ASTERIA_RUNTIME_TRY {
       // Unpack all frames recursively.
@@ -76,9 +74,9 @@ finish_call(Global_Context& global)
           qhooks->on_single_step_trap(ptca->sloc());
 
         // Get the `this` reference and all the other arguments.
-        auto args = ::std::move(ptca->open_arguments_and_self());
-        *this = ::std::move(args.mut_back());
-        args.pop_back();
+        auto& stack = ptca->open_stack();
+        *this = ::std::move(stack.mut_front());
+        stack.pop_front();
 
         // Call the hook function if any.
         if(auto qhooks = global.get_hooks_opt())
@@ -89,7 +87,7 @@ finish_call(Global_Context& global)
         ptc_conj |= ptca->ptc_aware();
 
         // Perform a non-tail call.
-        ptca->get_target().invoke_ptc_aware(*this, global, ::std::move(args));
+        ptca->get_target().invoke_ptc_aware(*this, global, ::std::move(stack));
       }
 
       // Check for deferred expressions.
@@ -100,7 +98,7 @@ finish_call(Global_Context& global)
 
         // Evaluate deferred expressions if any.
         if(ptca->get_defer().size())
-          Executive_Context(Executive_Context::M_defer(), global, stack,
+          Executive_Context(Executive_Context::M_defer(), global, ptca->open_stack(),
                             ::std::move(ptca->open_defer()))
             .on_scope_exit(air_status_next);
 
@@ -125,7 +123,7 @@ finish_call(Global_Context& global)
 
         // Evaluate deferred expressions if any.
         if(ptca->get_defer().size())
-          Executive_Context(Executive_Context::M_defer(), global, stack,
+          Executive_Context(Executive_Context::M_defer(), global, ptca->open_stack(),
                             ::std::move(ptca->open_defer()))
             .on_scope_exit(except);
 

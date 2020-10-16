@@ -4,7 +4,6 @@
 #include "precompiled.hpp"
 #include "fwd.hpp"
 #include "runtime/reference.hpp"
-#include "llds/reference_stack.hpp"
 #include "util.hpp"
 
 namespace asteria {
@@ -67,36 +66,34 @@ const
 
 Reference&
 cow_function::
-invoke_ptc_aware(Reference& self, Global_Context& global, cow_vector<Reference>&& args)
+invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack)
 const
   {
     if(auto fptr = this->m_fptr)
-      return fptr(self, global, ::std::move(args));  // static
+      return fptr(self, global, ::std::move(stack));  // static
 
     if(auto ptr = this->m_sptr.get())
-      return ptr->invoke_ptc_aware(self, global, ::std::move(args));  // dynamic
+      return ptr->invoke_ptc_aware(self, global, ::std::move(stack));  // dynamic
 
     this->do_throw_null_pointer();
   }
 
 Reference&
 cow_function::
-invoke(Reference& self, Global_Context& global, cow_vector<Reference>&& args)
+invoke(Reference& self, Global_Context& global, Reference_Stack&& stack)
 const
   {
-    Reference_Stack stack;
-    this->invoke_ptc_aware(self, global, ::std::move(args));
-    self.finish_call(global);
-    return self;
+    this->invoke_ptc_aware(self, global, ::std::move(stack));
+    return self.finish_call(global);
   }
 
 Reference
 cow_function::
-invoke(Global_Context& global, cow_vector<Reference>&& args)
+invoke(Global_Context& global, Reference_Stack&& stack)
 const
   {
     Reference self = Reference::S_constant();
-    return this->invoke(self, global, ::std::move(args));
+    return this->invoke(self, global, ::std::move(stack));
   }
 
 const char*

@@ -89,6 +89,26 @@ class Reference_Stack
     noexcept
       { return this->m_bptr + this->m_top;  }
 
+    const Reference*
+    begin()
+    const noexcept
+      { return this->m_bptr + this->m_top;  }
+
+    const Reference*
+    end()
+    const noexcept
+      { return this->m_bptr + this->m_estor;  }
+
+    Reference*
+    begin()
+    noexcept
+      { return this->m_bptr + this->m_top;  }
+
+    Reference*
+    end()
+    noexcept
+      { return this->m_bptr + this->m_estor;  }
+
     Reference_Stack&
     clear()
     noexcept
@@ -118,11 +138,28 @@ class Reference_Stack
       }
 
     const Reference&
+    rat(size_t index)
+    const
+      {
+        if(index >= this->size())
+          this->do_throw_subscript_out_of_range(index, ">=");
+        return this->data()[this->size() - 1 - index];
+      }
+
+    const Reference&
     front()
     const noexcept
       {
         ROCKET_ASSERT(!this->empty());
         return this->data()[0];
+      }
+
+    const Reference&
+    back()
+    const noexcept
+      {
+        ROCKET_ASSERT(!this->empty());
+        return this->data()[this->size() - 1];
       }
 
     Reference&
@@ -134,11 +171,27 @@ class Reference_Stack
       }
 
     Reference&
+    rmut(size_t index)
+      {
+        if(index >= this->size())
+          this->do_throw_subscript_out_of_range(index, ">=");
+        return this->mut_data()[this->size() - 1 - index];
+      }
+
+    Reference&
     mut_front()
     noexcept
       {
         ROCKET_ASSERT(!this->empty());
         return this->mut_data()[0];
+      }
+
+    Reference&
+    mut_back()
+    noexcept
+      {
+        ROCKET_ASSERT(!this->empty());
+        return this->mut_data()[this->size() - 1];
       }
 
     template<typename XRefT>

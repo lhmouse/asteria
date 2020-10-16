@@ -5,6 +5,7 @@
 #include "array.hpp"
 #include "../runtime/argument_reader.hpp"
 #include "../runtime/global_context.hpp"
+#include "../llds/reference_stack.hpp"
 #include "../util.hpp"
 
 namespace asteria {
@@ -68,25 +69,26 @@ do_find_opt(IterT begin, IterT end, const Value& target)
     return nullopt;
   }
 
-void
-do_make_temporary(cow_vector<Reference>& args, const Value& value)
+inline
+Reference&
+do_push_temporary(Reference_Stack& stack, const Value& value)
   {
     Reference::S_temporary xref = { value };
-    args.emplace_back(::std::move(xref));
+    return stack.emplace_front(::std::move(xref));
   }
 
 template<typename IterT>
 opt<IterT>
 do_find_if_opt(Global_Context& global, IterT begin, IterT end, const V_function& pred, bool match)
   {
-    cow_vector<Reference> args;
+    Reference_Stack stack;
     for(auto it = ::std::move(begin);  it != end;  ++it) {
       // Set up arguments for the user-defined predictor.
-      args.clear();
-      do_make_temporary(args, *it);
+      stack.clear();
+      do_push_temporary(stack, *it);
 
       // Call the predictor function and check the return value.
-      auto self = pred.invoke(global, ::std::move(args));
+      auto self = pred.invoke(global, ::std::move(stack));
       if(self.dereference_readonly().test() == match)
         return ::std::move(it);
     }
@@ -95,7 +97,7 @@ do_find_if_opt(Global_Context& global, IterT begin, IterT end, const V_function&
   }
 
 Compare
-do_compare(Global_Context& global, cow_vector<Reference>& args,
+do_compare(Global_Context& global, Reference_Stack& stack,
            const Opt_function& kcomp, const Value& lhs, const Value& rhs)
   {
     // Use the builtin 3-way comparison operator if no comparator is provided.
@@ -103,18 +105,18 @@ do_compare(Global_Context& global, cow_vector<Reference>& args,
       return lhs.compare(rhs);
 
     // Set up arguments for the user-defined comparator.
-    args.clear();
-    do_make_temporary(args, lhs);
-    do_make_temporary(args, rhs);
+    stack.clear();
+    do_push_temporary(stack, lhs);
+    do_push_temporary(stack, rhs);
 
     // Call the predictor function and compare the result with `0`.
-    auto self = kcomp.invoke(global, ::std::move(args));
+    auto self = kcomp.invoke(global, ::std::move(stack));
     return self.dereference_readonly().compare(V_integer(0));
   }
 
 template<typename IterT>
 pair<IterT, bool>
-do_bsearch(Global_Context& global, cow_vector<Reference>& args, IterT begin, IterT end,
+do_bsearch(Global_Context& global, Reference_Stack& stack, IterT begin, IterT end,
            const Opt_function& kcomp, const Value& target)
   {
     auto bpos = ::std::move(begin);
@@ -126,7 +128,7 @@ do_bsearch(Global_Context& global, cow_vector<Reference>& args, IterT begin, Ite
 
       // Compare `target` to the element in the middle.
       auto mpos = bpos + dist / 2;
-      auto cmp = do_compare(global, args, kcomp, target, *mpos);
+      auto cmp = do_compare(global, stack, kcomp, target, *mpos);
       if(cmp == compare_unordered)
         ASTERIA_THROW("Unordered elements (operands were `$1` and `$2`)", target, *mpos);
 
@@ -142,7 +144,7 @@ do_bsearch(Global_Context& global, cow_vector<Reference>& args, IterT begin, Ite
 
 template<typename IterT, typename PredT>
 IterT
-do_bound(Global_Context& global, cow_vector<Reference>& args, IterT begin, IterT end,
+do_bound(Global_Context& global, Reference_Stack& stack, IterT begin, IterT end,
          const Opt_function& kcomp, const Value& target, PredT&& pred)
   {
     auto bpos = ::std::move(begin);
@@ -154,7 +156,7 @@ do_bound(Global_Context& global, cow_vector<Reference>& args, IterT begin, IterT
 
       // Compare `target` to the element in the middle.
       auto mpos = bpos + dist / 2;
-      auto cmp = do_compare(global, args, kcomp, target, *mpos);
+      auto cmp = do_compare(global, stack, kcomp, target, *mpos);
       if(cmp == compare_unordered)
         ASTERIA_THROW("Unordered elements (operands were `$1` and `$2`)", target, *mpos);
 
@@ -166,17 +168,18 @@ do_bound(Global_Context& global, cow_vector<Reference>& args, IterT begin, IterT
   }
 
 V_array::iterator&
-do_merge_range(V_array::iterator& opos, Global_Context& global, cow_vector<Reference>& args,
-               const Opt_function& kcomp, V_array::iterator ibegin, V_array::iterator iend, bool unique)
+do_merge_range(V_array::iterator& opos, Global_Context& global, Reference_Stack& stack,
+               const Opt_function& kcomp, V_array::iterator ibegin, V_array::iterator iend,
+               bool unique)
   {
     for(auto ipos = ibegin;  ipos != iend;  ++ipos)
-      if(!unique || (do_compare(global, args, kcomp, ipos[0], opos[-1]) != compare_equal))
+      if(!unique || (do_compare(global, stack, kcomp, ipos[0], opos[-1]) != compare_equal))
         *(opos++) = ::std::move(*ipos);
     return opos;
   }
 
 V_array::iterator
-do_merge_blocks(V_array& output, Global_Context& global, cow_vector<Reference>& args,
+do_merge_blocks(V_array& output, Global_Context& global, Reference_Stack& stack,
                 const Opt_function& kcomp, V_array&& input, ptrdiff_t bsize, bool unique)
   {
     ROCKET_ASSERT(output.size() >= input.size());
@@ -203,7 +206,7 @@ do_merge_blocks(V_array& output, Global_Context& global, cow_vector<Reference>& 
       // Merge elements one by one, until either block has been exhausted, then store the index of it here.
       size_t bi;
       for(;;) {
-        auto cmp = do_compare(global, args, kcomp, *(bpos[0]), *(bpos[1]));
+        auto cmp = do_compare(global, stack, kcomp, *(bpos[0]), *(bpos[1]));
         if(cmp == compare_unordered)
           ASTERIA_THROW("Unordered elements (operands were `$1` and `$2`)", *(bpos[0]), *(bpos[1]));
 
@@ -213,7 +216,7 @@ do_merge_blocks(V_array& output, Global_Context& global, cow_vector<Reference>& 
 
         // Move this element unless uniqueness is requested and it is equal to the previous output.
         bool discard = unique && (opos != output.begin())
-                              && (do_compare(global, args, kcomp, *(bpos[bi]), opos[-1]) == compare_equal);
+                              && (do_compare(global, stack, kcomp, *(bpos[bi]), opos[-1]) == compare_equal);
         if(!discard)
           *(opos++) = ::std::move(*(bpos[bi]));
         bpos[bi]++;
@@ -236,11 +239,11 @@ do_merge_blocks(V_array& output, Global_Context& global, cow_vector<Reference>& 
       // Move all elements from the other block.
       ROCKET_ASSERT(opos != output.begin());
       bi ^= 1;
-      do_merge_range(opos, global, args, kcomp, bpos[bi], bend[bi], unique);
+      do_merge_range(opos, global, stack, kcomp, bpos[bi], bend[bi], unique);
     }
     // Copy all remaining elements.
     ROCKET_ASSERT(opos != output.begin());
-    do_merge_range(opos, global, args, kcomp, ipos, iend, unique);
+    do_merge_range(opos, global, stack, kcomp, ipos, iend, unique);
     return opos;
   }
 
@@ -441,10 +444,10 @@ std_array_is_sorted(Global_Context& global, V_array data, Opt_function comparato
       // If `data` contains no more than 2 elements, it is considered sorted.
       return true;
 
-    cow_vector<Reference> args;
+    Reference_Stack stack;
     for(auto it = data.begin() + 1;  it != data.end();  ++it) {
       // Compare the two elements.
-      auto cmp = do_compare(global, args, comparator, it[-1], it[0]);
+      auto cmp = do_compare(global, stack, comparator, it[-1], it[0]);
       if((cmp == compare_greater) || (cmp == compare_unordered))
         return false;
     }
@@ -454,8 +457,8 @@ std_array_is_sorted(Global_Context& global, V_array data, Opt_function comparato
 Opt_integer
 std_array_binary_search(Global_Context& global, V_array data, Value target, Opt_function comparator)
   {
-    cow_vector<Reference> args;
-    auto pair = do_bsearch(global, args, data.begin(), data.end(), comparator, target);
+    Reference_Stack stack;
+    auto pair = do_bsearch(global, stack, data.begin(), data.end(), comparator, target);
     if(!pair.second)
       return nullopt;
     return pair.first - data.begin();
@@ -464,8 +467,8 @@ std_array_binary_search(Global_Context& global, V_array data, Value target, Opt_
 V_integer
 std_array_lower_bound(Global_Context& global, V_array data, Value target, Opt_function comparator)
   {
-    cow_vector<Reference> args;
-    auto lpos = do_bound(global, args, data.begin(), data.end(), comparator, target,
+    Reference_Stack stack;
+    auto lpos = do_bound(global, stack, data.begin(), data.end(), comparator, target,
                          [](Compare cmp) { return cmp != compare_greater;  });
     return lpos - data.begin();
   }
@@ -473,8 +476,8 @@ std_array_lower_bound(Global_Context& global, V_array data, Value target, Opt_fu
 V_integer
 std_array_upper_bound(Global_Context& global, V_array data, Value target, Opt_function comparator)
   {
-    cow_vector<Reference> args;
-    auto upos = do_bound(global, args, data.begin(), data.end(), comparator, target,
+    Reference_Stack stack;
+    auto upos = do_bound(global, stack, data.begin(), data.end(), comparator, target,
                          [](Compare cmp) { return cmp == compare_less;  });
     return upos - data.begin();
   }
@@ -482,11 +485,11 @@ std_array_upper_bound(Global_Context& global, V_array data, Value target, Opt_fu
 pair<V_integer, V_integer>
 std_array_equal_range(Global_Context& global, V_array data, Value target, Opt_function comparator)
   {
-    cow_vector<Reference> args;
-    auto pair = do_bsearch(global, args, data.begin(), data.end(), comparator, target);
-    auto lpos = do_bound(global, args, data.begin(), pair.first, comparator, target,
+    Reference_Stack stack;
+    auto pair = do_bsearch(global, stack, data.begin(), data.end(), comparator, target);
+    auto lpos = do_bound(global, stack, data.begin(), pair.first, comparator, target,
                          [](Compare cmp) { return cmp != compare_greater;  });
-    auto upos = do_bound(global, args, pair.first, data.end(), comparator, target,
+    auto upos = do_bound(global, stack, pair.first, data.end(), comparator, target,
                          [](Compare cmp) { return cmp == compare_less;  });
     return ::std::make_pair(lpos - data.begin(), upos - lpos);
   }
@@ -498,13 +501,12 @@ std_array_sort(Global_Context& global, V_array data, Opt_function comparator)
       // Use reference counting as our advantage.
       return ::std::move(data);
 
-    // The Merge Sort algorithm requires `O(n)` space.
-    V_array temp(data.size());
     // Merge blocks of exponential sizes.
-    cow_vector<Reference> args;
+    V_array temp(data.size());
+    Reference_Stack stack;
     ptrdiff_t bsize = 1;
     while(bsize < data.ssize()) {
-      do_merge_blocks(temp, global, args, comparator, ::std::move(data), bsize, false);
+      do_merge_blocks(temp, global, stack, comparator, ::std::move(data), bsize, false);
       data.swap(temp);
       bsize *= 2;
     }
@@ -518,17 +520,16 @@ std_array_sortu(Global_Context& global, V_array data, Opt_function comparator)
       // Use reference counting as our advantage.
       return ::std::move(data);
 
-    // The Merge Sort algorithm requires `O(n)` space.
-    V_array temp(data.size());
     // Merge blocks of exponential sizes.
-    cow_vector<Reference> args;
+    V_array temp(data.size());
+    Reference_Stack stack;
     ptrdiff_t bsize = 1;
     while(bsize * 2 < data.ssize()) {
-      do_merge_blocks(temp, global, args, comparator, ::std::move(data), bsize, false);
+      do_merge_blocks(temp, global, stack, comparator, ::std::move(data), bsize, false);
       data.swap(temp);
       bsize *= 2;
     }
-    auto epos = do_merge_blocks(temp, global, args, comparator, ::std::move(data), bsize, true);
+    auto epos = do_merge_blocks(temp, global, stack, comparator, ::std::move(data), bsize, true);
     temp.erase(epos, temp.end());
     data.swap(temp);
     return ::std::move(data);
@@ -543,9 +544,9 @@ std_array_max_of(Global_Context& global, V_array data, Opt_function comparator)
       return V_null();
 
     // Compare `*qmax` with the other elements, ignoring unordered elements.
-    cow_vector<Reference> args;
+    Reference_Stack stack;
     for(auto it = qmax + 1;  it != data.end();  ++it)
-      if(do_compare(global, args, comparator, *qmax, *it) == compare_less)
+      if(do_compare(global, stack, comparator, *qmax, *it) == compare_less)
         qmax = it;
     return *qmax;
   }
@@ -559,9 +560,9 @@ std_array_min_of(Global_Context& global, V_array data, Opt_function comparator)
       return V_null();
 
     // Compare `*qmin` with the other elements, ignoring unordered elements.
-    cow_vector<Reference> args;
+    Reference_Stack stack;
     for(auto it = qmin + 1;  it != data.end();  ++it)
-      if(do_compare(global, args, comparator, *qmin, *it) == compare_greater)
+      if(do_compare(global, stack, comparator, *qmin, *it) == compare_greater)
         qmin = it;
     return *qmin;
   }
@@ -578,15 +579,15 @@ std_array_generate(Global_Context& global, V_function generator, V_integer lengt
   {
     V_array data;
     data.reserve(static_cast<size_t>(length));
-    cow_vector<Reference> args;
+    Reference_Stack stack;
     for(int64_t i = 0;  i < length;  ++i) {
       // Set up arguments for the user-defined generator.
-      args.clear();
-      do_make_temporary(args, i);
-      do_make_temporary(args, data.empty() ? null_value : data.back());
+      stack.clear();
+      do_push_temporary(stack, i);
+      do_push_temporary(stack, data.empty() ? null_value : data.back());
 
       // Call the generator function and push the return value.
-      auto self = generator.invoke(global, ::std::move(args));
+      auto self = generator.invoke(global, ::std::move(stack));
       data.emplace_back(self.dereference_readonly());
     }
     return data;

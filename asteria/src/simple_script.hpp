@@ -99,11 +99,11 @@ class Simple_Script
 
     // Execute the script that has been loaded.
     Reference
-    execute(Global_Context& global, cow_vector<Reference>&& args = { })
+    execute(Global_Context& global, Reference_Stack&& stack)
     const;
 
     Reference
-    execute(Global_Context& global, cow_vector<Value>&& vals)
+    execute(Global_Context& global, cow_vector<Value>&& args = { })
     const;
   };
 

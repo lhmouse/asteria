@@ -348,7 +348,7 @@ struct Abstract_Function
     // This function may return a proper tail call wrapper.
     virtual
     Reference&
-    invoke_ptc_aware(Reference& self, Global_Context& global, cow_vector<Reference>&& args)
+    invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& args)
     const
       = 0;
   };
@@ -499,10 +499,9 @@ clone_opaque(rcptr<Abstract_Opaque>& output, const OpaqueT& src)
   }
 
 // Function type support
-using simple_function =
-          Reference& (Reference& self,  // `this` (input) and return (output) reference
-                      Global_Context& global,
-                      cow_vector<Reference>&& args);  // positional arguments
+using simple_function = Reference& (Reference& self,  // `this` (in) and return (out) reference
+                                    Global_Context& global,
+                                    Reference_Stack&& stack);  // positional arguments
 
 class cow_function
   {
@@ -585,15 +584,15 @@ class cow_function
       }
 
     Reference&
-    invoke_ptc_aware(Reference& self, Global_Context& global, cow_vector<Reference>&& args)
+    invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack)
     const;
 
     Reference&
-    invoke(Reference& self, Global_Context& global, cow_vector<Reference>&& args)
+    invoke(Reference& self, Global_Context& global, Reference_Stack&& stack)
     const;
 
     Reference
-    invoke(Global_Context& global, cow_vector<Reference>&& args)
+    invoke(Global_Context& global, Reference_Stack&& stack)
     const;
   };
 

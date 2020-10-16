@@ -20,7 +20,6 @@
 #include "../compiler/statement.hpp"
 #include "../compiler/expression_unit.hpp"
 #include "../llds/avmc_queue.hpp"
-#include "../llds/reference_stack.hpp"
 #include "../util.hpp"
 
 namespace asteria {
@@ -466,10 +465,8 @@ struct AIR_Traits_switch_statement
         ROCKET_ASSERT(nclauses == sp.queues_bodies.size());
         ROCKET_ASSERT(nclauses == sp.names_added.size());
 
-        // Read the value of the condition.
+        // Read the value of the condition and find the target clause for it.
         auto cond = ctx.stack().front().dereference_readonly();
-
-        // Find a target clause.
         size_t bp = SIZE_MAX;
 
         // This is different from the `switch` statement in C, where `case` labels must have constant operands.
@@ -1327,7 +1324,7 @@ struct AIR_Traits_coalescence
 ROCKET_NOINLINE
 Reference&
 do_invoke_nontail(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
-                  const cow_function& target, cow_vector<Reference>&& args)
+                  const cow_function& target, Reference_Stack&& stack)
   {
     // Note exceptions thrown here are not caught.
     if(auto qhooks = ctx.global().get_hooks_opt())
@@ -1335,7 +1332,7 @@ do_invoke_nontail(Reference& self, const Source_Location& sloc, Executive_Contex
 
     // Execute the target function
     ASTERIA_RUNTIME_TRY {
-      target.invoke(self, ctx.global(), ::std::move(args));
+      target.invoke(self, ctx.global(), ::std::move(stack));
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
       if(auto qhooks = ctx.global().get_hooks_opt())
@@ -1349,18 +1346,17 @@ do_invoke_nontail(Reference& self, const Source_Location& sloc, Executive_Contex
 
 AIR_Status
 do_function_call_common(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
-                        const cow_function& target, PTC_Aware ptc, cow_vector<Reference>&& args)
+                        const cow_function& target, PTC_Aware ptc, Reference_Stack&& stack)
   {
     if(ROCKET_EXPECT(ptc == ptc_aware_none)) {
       // Perform plain calls.
-      do_invoke_nontail(self, sloc, ctx, target, ::std::move(args));
-      // The result will have been stored into `self`
+      do_invoke_nontail(self, sloc, ctx, target, ::std::move(stack));
       return air_status_next;
     }
 
     // Pack arguments for this proper tail call.
-    args.emplace_back(::std::move(self));
-    auto ptca = ::rocket::make_refcnt<PTC_Arguments>(sloc, ptc, target, ::std::move(args));
+    stack.emplace_front(::std::move(self));
+    auto ptca = ::rocket::make_refcnt<PTC_Arguments>(sloc, ptc, target, ::std::move(stack));
 
     // Set the result, which will be unpacked outside this scope.
     Reference::S_ptc_args xref = { ::std::move(ptca) };
@@ -1371,21 +1367,20 @@ do_function_call_common(Reference& self, const Source_Location& sloc, Executive_
     return air_status_return_ref;
   }
 
-cow_vector<Reference>
+Reference_Stack
 do_pop_positional_arguments(Executive_Context& ctx, size_t nargs)
   {
-    cow_vector<Reference> args;
-    args.append(nargs, Reference::S_uninit());
-    for(size_t i = args.size() - 1;  i != SIZE_MAX;  --i) {
+    Reference_Stack stack;
+    for(size_t k = nargs - 1;  k != SIZE_MAX;  --k) {
       // Get an argument. Ensure it is dereferenceable.
-      auto& arg = ctx.stack().mut_front();
+      auto& arg = ctx.stack().mut(k);
       static_cast<void>(arg.dereference_readonly());
 
-      // Set the argument as is.
-      args.mut(i) = ::std::move(arg);
-      ctx.stack().pop_front();
+      // Push the argument verbatim.
+      stack.emplace_front(::std::move(arg));
     }
-    return args;
+    ctx.stack().pop_front(nargs);
+    return stack;
   }
 
 struct AIR_Traits_function_call
@@ -1438,10 +1433,10 @@ struct AIR_Traits_function_call
         auto value = ctx.stack().front().dereference_readonly();
         if(!value.is_function())
           ASTERIA_THROW("Attempt to call a non-function (value `$1`)", value);
-        auto& self = ctx.stack().mut_front().zoom_out();
 
-        return do_function_call_common(self, sloc, ctx, value.as_function(),
-                                       static_cast<PTC_Aware>(up.p8[0]), ::std::move(args));
+        return do_function_call_common(ctx.stack().mut_front().zoom_out(), sloc, ctx,
+                                       value.as_function(), static_cast<PTC_Aware>(up.p8[0]),
+                                       ::std::move(args));
       }
   };
 
@@ -3541,34 +3536,32 @@ struct AIR_Traits_variadic_call
           qhooks->on_single_step_trap(sloc);
 
         // Pop the argument generator.
-        cow_vector<Reference> args;
+        Reference_Stack stack;
         auto value = ctx.stack().front().dereference_readonly();
         switch(weaken_enum(value.type())) {
           case type_null:
-            // Leave `args` empty.
+            // Leave `stack` empty.
             break;
 
           case type_array: {
-            auto source = ::std::move(value.open_array());
+            auto vals = ::std::move(value.open_array());
             ctx.stack().pop_front();
 
-            // Convert all elements to temporaries.
-            args.reserve(source.size());
-            for(size_t i = 0;  i < source.size();  ++i) {
-              // Make a reference to temporary.
-              Reference::S_temporary xref = { ::std::move(source.mut(i)) };
-              args.emplace_back(::std::move(xref));
+            // Push all arguments backwards as temporaries.
+            for(auto it = vals.mut_rbegin();  it != vals.rend();  ++it) {
+              Reference::S_temporary xref = { ::std::move(*it) };
+              stack.emplace_front(::std::move(xref));
             }
             break;
           }
 
           case type_function: {
-            const auto generator = ::std::move(value.open_function());
-            auto gself = ctx.stack().mut_front().zoom_out();
+            const auto gfunc = ::std::move(value.open_function());
 
             // Pass an empty argument list to get the number of arguments to generate.
-            cow_vector<Reference> gargs;
-            do_invoke_nontail(ctx.stack().mut_front(), sloc, ctx, generator, ::std::move(gargs));
+            Reference_Stack gstack;
+            const auto gself = ctx.stack().mut_front().zoom_out();
+            do_invoke_nontail(ctx.stack().mut_front(), sloc, ctx, gfunc, ::std::move(gstack));
             value = ctx.stack().front().dereference_readonly();
             ctx.stack().pop_front();
 
@@ -3578,18 +3571,18 @@ struct AIR_Traits_variadic_call
 
             int64_t nvargs = value.as_integer();
             if((nvargs < 0) || (nvargs > INT_MAX))
-              ASTERIA_THROW("Number of variadic arguments not acceptable (nvargs `$1`)", nvargs);
+              ASTERIA_THROW("Number of variadic arguments not acceptable (value `$1`)", nvargs);
 
             // Generate arguments.
-            args.assign(static_cast<size_t>(nvargs), gself);
-            for(size_t i = 0;  i < args.size();  ++i) {
-              // Initialize the argument list for the generator.
-              Reference::S_constant xref = { int64_t(i) };
-              gargs.clear().emplace_back(::std::move(xref));
+            for(int64_t k = 0;  k < nvargs;  ++k) {
+              // Initialize the argument list for the generator function.
+              gstack.clear();
+              Reference::S_constant xref = { k };
+              gstack.emplace_front(::std::move(xref));
 
               // Generate an argument. Ensure it is dereferenceable.
-              do_invoke_nontail(args.mut(i), sloc, ctx, generator, ::std::move(gargs));
-              static_cast<void>(args[i].dereference_readonly());
+              do_invoke_nontail(stack.emplace_front(gself), sloc, ctx, gfunc, ::std::move(gstack));
+              static_cast<void>(stack.front());
             }
             break;
           }
@@ -3602,10 +3595,10 @@ struct AIR_Traits_variadic_call
         value = ctx.stack().front().dereference_readonly();
         if(!value.is_function())
           ASTERIA_THROW("Attempt to call a non-function (value `$1`)", value);
-        auto& self = ctx.stack().mut_front().zoom_out();
 
-        return do_function_call_common(self, sloc, ctx, value.as_function(),
-                                       static_cast<PTC_Aware>(up.p8[0]), ::std::move(args));
+        return do_function_call_common(ctx.stack().mut_front().zoom_out(), sloc, ctx,
+                                       value.as_function(), static_cast<PTC_Aware>(up.p8[0]),
+                                       ::std::move(stack));
       }
   };
 
@@ -3721,7 +3714,13 @@ struct AIR_Traits_import_call
           ASTERIA_THROW("Could not open script file '$2'\n"
                         "[`realpath()` failed: $1]",
                         format_errno(errno), path);
+
         path.assign(abspath);
+
+        // Update the first argument to `import` if it was passed by reference.
+        auto& self = ctx.stack().mut_front();
+        if(self.is_lvalue())
+          self.dereference_mutable() = path;
 
         // Compile the script file into a function object.
         Loader_Lock::Unique_Stream strm;
@@ -3739,11 +3738,7 @@ struct AIR_Traits_import_call
         optmz.reload(nullptr, cow_vector<phsh_string>(1, ::rocket::sref("...")), stmtq);
         auto qtarget = optmz.create_function(Source_Location(path, 0, 0), ::rocket::sref("[file scope]"));
 
-        // Update the first argument to `import` if it was passed by reference.
         // `this` is null for imported scripts.
-        auto& self = ctx.stack().mut_front();
-        if(self.is_lvalue())
-          self.dereference_mutable() = path;
         self = Reference::S_constant();
 
         return do_function_call_common(self, sp.sloc, ctx, qtarget, ptc_aware_none, ::std::move(args));

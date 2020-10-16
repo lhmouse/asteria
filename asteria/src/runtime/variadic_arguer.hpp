@@ -20,16 +20,12 @@ final
     cow_vector<Reference> m_vargs;
 
   public:
-    template<typename... XVargsT>
-    Variadic_Arguer(const Source_Location& xsloc, cow_string&& xfunc, XVargsT&&... xvargs)
-      : m_sloc(xsloc), m_func(::std::move(xfunc)),
-        m_vargs(::std::forward<XVargsT>(xvargs)...)
+    Variadic_Arguer(const Source_Location& xsloc, cow_string&& xfunc)
+      : m_sloc(xsloc), m_func(::std::move(xfunc))
       { }
 
-    template<typename... XVargsT>
-    Variadic_Arguer(const Variadic_Arguer& other, XVargsT&&... xvargs)
-      : m_sloc(other.m_sloc), m_func(other.m_func),
-        m_vargs(::std::forward<XVargsT>(xvargs)...)
+    Variadic_Arguer(const Variadic_Arguer& other, cow_vector<Reference>&& xvargs)
+      : m_sloc(other.m_sloc), m_func(other.m_func), m_vargs(::std::move(xvargs))
       { }
 
   public:
@@ -82,7 +78,7 @@ final
     const override;
 
     Reference&
-    invoke_ptc_aware(Reference& self, Global_Context& global, cow_vector<Reference>&& args)
+    invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack)
     const override;
   };
 

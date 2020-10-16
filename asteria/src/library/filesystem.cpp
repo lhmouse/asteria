@@ -5,6 +5,7 @@
 #include "filesystem.hpp"
 #include "../runtime/argument_reader.hpp"
 #include "../runtime/global_context.hpp"
+#include "../llds/reference_stack.hpp"
 #include "../util.hpp"
 #include <sys/stat.h>  // ::stat(), ::fstat(), ::lstat(), ::mkdir(), ::fchmod()
 #include <dirent.h>  // ::opendir(), ::closedir()
@@ -442,9 +443,9 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
     // These are reused for each iteration.
     V_string data;
     ::ssize_t nread;
+    Reference_Stack stack;
 
     // Read and process all data in blocks.
-    cow_vector<Reference> args;
     int64_t ntlimit = ::rocket::max(limit.value_or(INT64_MAX), 0);
     int64_t ntotal = 0;
     for(;;) {
@@ -468,19 +469,17 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
                         "[`read()` failed: $1]",
                         format_errno(errno), path);
       }
-      if(nread == 0)
+      data.erase(static_cast<size_t>(nread));
+      if(data.empty())
         break;
 
-      data.erase(static_cast<size_t>(nread));
-
-      // Prepare arguments for the user-defined function.
-      args.reserve(2);
-      Reference::S_temporary xref = { roffset };
-      args.emplace_back(::std::move(xref));
-      xref.val = ::std::move(data);
-      args.emplace_back(::std::move(xref));
       // Call the function but discard its return value.
-      callback.invoke(global, ::std::move(args));
+      stack.clear();
+      Reference::S_temporary xref = { roffset };
+      stack.emplace_front(::std::move(xref));
+      xref.val = ::std::move(data);
+      stack.emplace_front(::std::move(xref));
+      callback.invoke(global, ::std::move(stack));
 
       // Read the next block.
       roffset += nread;

@@ -13,14 +13,15 @@ Analytic_Context(M_function, Abstract_Context* parent_opt,
   : m_parent_opt(parent_opt)
   {
     // Set parameters, which are local references.
-    for(size_t i = 0;  i < params.size();  ++i) {
-      const auto& name = params.at(i);
+    bool variadic = false;
+    for(const auto& name : params) {
       if(name.empty())
         continue;
 
       // Nothing is set for the variadic placeholder, but the parameter list
       // terminates here.
-      if(name == "...")
+      variadic = (name.size() == 3) && (::std::memcmp(name.c_str(), "...", 4) == 0);
+      if(variadic)
         break;
 
       // Its contents are out of interest.

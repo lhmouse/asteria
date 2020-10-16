@@ -20,8 +20,8 @@ final
     AVMC_Queue m_queue;
 
   public:
-    Instantiated_Function(const cow_vector<phsh_string>& params, rcptr<Variadic_Arguer>&& zvarg,
-                          const cow_vector<AIR_Node>& code)
+    Instantiated_Function(const cow_vector<phsh_string>& params,
+                rcptr<Variadic_Arguer>&& zvarg, const cow_vector<AIR_Node>& code)
       : m_params(params), m_zvarg(::std::move(zvarg))
       { this->do_solidify(code);  }
 
@@ -40,7 +40,7 @@ final
     const override;
 
     Reference&
-    invoke_ptc_aware(Reference& self, Global_Context& global, cow_vector<Reference>&& args)
+    invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack)
     const override;
   };
 
