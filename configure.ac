@@ -23,5 +23,18 @@ AM_COND_IF([enable_debug_checks], [
   AC_DEFINE([_DEBUG], [1], [Define to 1 to enable debug checks of MSVC standard library.])
 ])
 
+AC_ARG_ENABLE([sanitizer], AS_HELP_STRING([--enable-sanitizer=address|thread],
+  [enable sanitizer (address sanitizer and thread sanitizer cannot be enabled at the same time)]))
+AM_CONDITIONAL([enable_address_sanitizer], [test "${enable_sanitizer}" == "address"])
+AM_COND_IF([enable_address_sanitizer], [
+  AC_CHECK_LIB([asan], [__asan_report_error], [], [AC_MSG_ERROR([address sanitizer not found])])
+  AC_DEFINE([POSEIDON_ENABLE_ADDRESS_SANITIZER], [1], [Define to 1 to enable address sanitizer.])
+])
+AM_CONDITIONAL([enable_thread_sanitizer], [test "${enable_sanitizer}" == "thread"])
+AM_COND_IF([enable_thread_sanitizer], [
+  AC_CHECK_LIB([tsan], [__tsan_on_report], [], [AC_MSG_ERROR([thread sanitizer not found])])
+  AC_DEFINE([POSEIDON_ENABLE_THREAD_SANITIZER], [1], [Define to 1 to enable thread sanitizer.])
+])
+
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
