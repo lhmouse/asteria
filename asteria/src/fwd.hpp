@@ -729,6 +729,7 @@ enum Parser_Status : uint32_t
     parser_status_argument_expected                          = 3029,
     parser_status_closed_parenthesis_or_argument_expected    = 3030,
     parser_status_arrow_expected                             = 3031,
+    parser_status_reserved_identifier_not_declarable         = 3032,
   };
 
 ROCKET_CONST_FUNCTION

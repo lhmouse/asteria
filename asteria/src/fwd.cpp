@@ -325,6 +325,9 @@ noexcept
       case parser_status_arrow_expected:
         return "`->` expected";
 
+      case parser_status_reserved_identifier_not_declarable:
+        return "reserved identifier not declarable";
+
       default:
         return "[unknown parser error]";
     }

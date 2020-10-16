@@ -57,7 +57,7 @@ do_accept_punctuator_opt(Token_Stream& tstrm, initializer_list<Punctuator> accep
   }
 
 opt<cow_string>
-do_accept_identifier_opt(Token_Stream& tstrm)
+do_accept_identifier_opt(Token_Stream& tstrm, bool user_decl)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok)
@@ -67,8 +67,11 @@ do_accept_identifier_opt(Token_Stream& tstrm)
     if(!qtok->is_identifier())
       return nullopt;
 
-    // Return the identifier and discard this token.
     auto name = qtok->as_identifier();
+    if(user_decl && name.starts_with("__"))
+      throw Parser_Error(parser_status_reserved_identifier_not_declarable, tstrm);
+
+    // Return the identifier and discard this token.
     tstrm.shift();
     return name;
   }
@@ -243,13 +246,13 @@ do_accept_negation_opt(Token_Stream& tstrm)
   }
 
 opt<cow_vector<phsh_string>>
-do_accept_identifier_list_opt(Token_Stream& tstrm)
+do_accept_user_declared_identifier_list_opt(Token_Stream& tstrm)
   {
     // identifier-list-opt ::=
     //   identifier-list | ""
     // identifier-list ::=
     //   identifier identifier-list-opt
-    auto qname = do_accept_identifier_opt(tstrm);
+    auto qname = do_accept_identifier_opt(tstrm, true);
     if(!qname)
       return nullopt;
 
@@ -262,7 +265,7 @@ do_accept_identifier_list_opt(Token_Stream& tstrm)
       if(!kpunct)
         break;
 
-      qname = do_accept_identifier_opt(tstrm);
+      qname = do_accept_identifier_opt(tstrm, true);
       if(!qname)
         throw Parser_Error(parser_status_identifier_expected, tstrm);
     }
@@ -278,7 +281,7 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
     //   "[" identifier-list "]"
     // structured-binding-object ::=
     //   "{" identifier-list "}"
-    auto qname = do_accept_identifier_opt(tstrm);
+    auto qname = do_accept_identifier_opt(tstrm, true);
     if(qname) {
       // Accept a single identifier.
       cow_vector<phsh_string> names;
@@ -290,7 +293,7 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
     if(kpunct) {
       // Accept a list of identifiers wrapped in a pair of brackets and separated by commas.
       // There must be at least one identifier.
-      auto qnames = do_accept_identifier_list_opt(tstrm);
+      auto qnames = do_accept_user_declared_identifier_list_opt(tstrm);
       if(!qnames)
         throw Parser_Error(parser_status_identifier_expected, tstrm);
 
@@ -308,7 +311,7 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
     if(kpunct) {
       // Accept a list of identifiers wrapped in a pair of braces and separated by commas.
       // There must be at least one identifier.
-      auto qnames = do_accept_identifier_list_opt(tstrm);
+      auto qnames = do_accept_user_declared_identifier_list_opt(tstrm);
       if(!qnames)
         throw Parser_Error(parser_status_identifier_expected, tstrm);
 
@@ -539,7 +542,7 @@ do_accept_reference_definition_opt(Token_Stream& tstrm)
       return nullopt;
 
     auto sloc = tstrm.next_sloc();
-    auto qname = do_accept_identifier_opt(tstrm);
+    auto qname = do_accept_identifier_opt(tstrm, true);
     if(!qname)
       throw Parser_Error(parser_status_identifier_expected, tstrm);
 
@@ -570,9 +573,10 @@ do_accept_parameter_list_opt(Token_Stream& tstrm)
         break;
       }
 
-      auto qname = do_accept_identifier_opt(tstrm);
+      auto qname = do_accept_identifier_opt(tstrm, true);
       if(!qname)
         break;
+
       params.emplace_back(::std::move(*qname));
 
       // Look for the separator.
@@ -593,7 +597,7 @@ do_accept_function_definition_opt(Token_Stream& tstrm)
     if(!qkwrd)
       return nullopt;
 
-    auto qname = do_accept_identifier_opt(tstrm);
+    auto qname = do_accept_identifier_opt(tstrm, true);
     if(!qname)
       throw Parser_Error(parser_status_identifier_expected, tstrm);
 
@@ -848,7 +852,7 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm)
     if(!qkwrd)
       return nullopt;
 
-    auto qkname = do_accept_identifier_opt(tstrm);
+    auto qkname = do_accept_identifier_opt(tstrm, true);
     if(!qkname)
       throw Parser_Error(parser_status_identifier_expected, tstrm);
 
@@ -856,7 +860,7 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm)
     if(!kpunct)
       throw Parser_Error(parser_status_comma_expected, tstrm);
 
-    auto qmname = do_accept_identifier_opt(tstrm);
+    auto qmname = do_accept_identifier_opt(tstrm, true);
     if(!qmname)
       throw Parser_Error(parser_status_identifier_expected, tstrm);
 
@@ -1242,7 +1246,7 @@ do_accept_try_statement_opt(Token_Stream& tstrm)
     if(!kpunct)
       throw Parser_Error(parser_status_open_parenthesis_expected, tstrm);
 
-    auto kexcept = do_accept_identifier_opt(tstrm);
+    auto kexcept = do_accept_identifier_opt(tstrm, true);
     if(!kexcept)
       throw Parser_Error(parser_status_identifier_expected, tstrm);
 
@@ -1487,7 +1491,7 @@ do_accept_named_reference(cow_vector<Expression_Unit>& units, Token_Stream& tstr
   {
     // Get an identifier.
     auto sloc = tstrm.next_sloc();
-    auto qname = do_accept_identifier_opt(tstrm);
+    auto qname = do_accept_identifier_opt(tstrm, false);
     if(!qname)
       return false;
 
@@ -1519,7 +1523,7 @@ do_accept_global_reference(cow_vector<Expression_Unit>& units, Token_Stream& tst
     if(!qkwrd)
       return false;
 
-    auto qname = do_accept_identifier_opt(tstrm);
+    auto qname = do_accept_identifier_opt(tstrm, false);
     if(!qname)
       throw Parser_Error(parser_status_identifier_expected, tstrm);
 
