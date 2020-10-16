@@ -936,10 +936,8 @@ do_xldexp_I_generic(uint64_t ubits, int exp2)
 double
 do_xldexp_I(uint64_t ireg, int exp2, bool single)
   {
-    if(single)
-      return do_xldexp_I_generic<float, uint32_t, 8, 23>(ireg, exp2);
-    else
-      return do_xldexp_I_generic<double, uint64_t, 11, 52>(ireg, exp2);
+    return single ? do_xldexp_I_generic<float, uint32_t, 8, 23>(ireg, exp2)
+                  : do_xldexp_I_generic<double, uint64_t, 11, 52>(ireg, exp2);
   }
 
 }  // namespace
