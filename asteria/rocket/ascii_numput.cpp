@@ -900,6 +900,17 @@ constexpr s_decmult_F[] =
   };
 static_assert(size(s_decmult_F) == 633, "");
 
+inline
+uint64_t
+do_get_max_bias(uint64_t ireg, uint32_t add, bool single)
+  {
+    uint64_t m = ireg >> (single ? 24 : 53);
+    m |= m >> 1;
+    m |= m >> 2;
+    m |= m >> 4;
+    return m * (55 + add) / 256;
+  }
+
 void
 do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
   {
@@ -967,6 +978,11 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
     // floating-point number to `int64_t`, followed by conversion to `uint64_t`.
     ireg = (uint64_t)(int64_t)freg;
 
+    // Calculate the max tolerable bias of the final digits.
+    // Note `mbias_lo` is a bit smaller because `ireg` was truncated towards zero.
+    uint64_t mbias_lo = do_get_max_bias(ireg - 1, 0, single);
+    uint64_t mbias_hi = do_get_max_bias(ireg + 1, 1, single);
+
     // Multiply two 64-bit values and get the high-order half.
     // This produces 18 significant figures.
     // TODO: Modern CPUs have intrinsics for this.
@@ -978,30 +994,20 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
     ireg += (((xlo * yhi >> 30) + (xhi * ylo >> 30) + (xlo * ylo >> 62)) >> 2);
 
     // Round the mantissa. We now have 18 digits.
-    uint64_t half_ulp;
-    uint64_t tz_mult;
-    if(single) {
-      half_ulp = ireg >> 24;
-      tz_mult = 1000000000;
-    }
-    else {
-      half_ulp = ireg >> 53;
-      tz_mult = 10;
-    }
-
+    uint64_t tz_mult = single ? UINT64_C(1000000000) : UINT64_C(10);
     uint64_t next = ireg / tz_mult;
+
     int tzcnt_lo = -1;
     uint64_t bound_lo = ireg;
     int tzcnt_hi = -1;
     uint64_t bound_hi = ireg;
+
     for(;;) {
       uint64_t bound_next = next * tz_mult;
       if(tzcnt_lo < 0) {
         // Try removing a trailing zero from the lower bound.
-        // Note `ireg` is a bit smaller because it was truncated towards zero.
-        // The maximum tolerable round-off error in this case is `(ULP / 2 - 2)`.
         ROCKET_ASSERT(ireg >= bound_next);
-        if(ireg - bound_next <= half_ulp - 2) {
+        if(ireg - bound_next <= mbias_lo) {
           // Record a digit if the result is close enough.
           tzcnt_lo -= 1;
           bound_lo = bound_next;
@@ -1013,9 +1019,8 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
       bound_next += tz_mult;
       if(tzcnt_hi < 0) {
         // Try removing a trailing zero from the upper bound.
-        // The maximum tolerable round-off error in this case is `(ULP / 2 - 1)`.
         ROCKET_ASSERT(bound_next >= ireg);
-        if(bound_next - ireg <= half_ulp - 1) {
+        if(bound_next - ireg <= mbias_hi) {
           // Record a digit if the result is close enough.
           tzcnt_hi -= 1;
           bound_hi = bound_next;
@@ -1032,14 +1037,12 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
       tz_mult *= 10;
     }
 
-    if(tzcnt_lo != tzcnt_hi) {
-      // Pick the bound with more trailing zeroes if their counts don't equal.
+    // Pick the bound with more trailing zeroes if their counts don't equal.
+    // Pick the nestest bound otherwise, rounding upwards on a par.
+    if(tzcnt_lo != tzcnt_hi)
       next = (tzcnt_lo > tzcnt_hi) ? bound_lo : bound_hi;
-    }
-    else {
-      // Pick the nestest bound otherwise, rounding upwards on a par.
+    else
       next = (ireg - bound_lo < bound_hi - ireg) ? bound_lo : bound_hi;
-    }
 
     // Check for carries.
     if(next >= 1000'00000'00000'00000) {
