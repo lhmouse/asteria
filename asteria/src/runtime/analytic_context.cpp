@@ -18,9 +18,6 @@ Analytic_Context(M_function, Abstract_Context* parent_opt,
       if(name.empty())
         continue;
 
-      if(name.rdstr().starts_with("__"))
-        ASTERIA_THROW("Reserved name not declarable as parameter (name `$1`)", name);
-
       // Nothing is set for the variadic placeholder, but the parameter list
       // terminates here.
       if(name == "...")

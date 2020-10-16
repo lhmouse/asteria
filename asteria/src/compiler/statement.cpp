@@ -16,14 +16,10 @@ namespace {
 
 void
 do_user_declare(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
-                const phsh_string& name, const char* desc)
+                const phsh_string& name)
   {
-    // Check for special names.
-    if(name.rdstr().empty())
-      ASTERIA_THROW("Attempt to declare a nameless $1", desc);
-
-    if(name.rdstr().starts_with("__"))
-      ASTERIA_THROW("Reserved name not declarable as $2 (name `$1`)", name, desc);
+    if(name.empty())
+      return;
 
     // Record this name.
     if(names_opt) {
@@ -99,8 +95,9 @@ do_generate_expression(const Compiler_Options& opts, PTC_Aware ptc, Analytic_Con
   }
 
 cow_vector<AIR_Node>&
-do_generate_statement_list(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
-                           const Compiler_Options& opts, PTC_Aware ptc, const Statement::S_block& block)
+do_generate_statement_list(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
+                           Analytic_Context& ctx, const Compiler_Options& opts, PTC_Aware ptc,
+                           const Statement::S_block& block)
   {
     // Statements other than the last one cannot be the end of function.
     for(size_t i = 0;  i < block.stmts.size();  ++i) {
@@ -114,7 +111,8 @@ do_generate_statement_list(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* 
 
 cow_vector<AIR_Node>
 do_generate_statement_list(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
-                           const Compiler_Options& opts, PTC_Aware ptc, const Statement::S_block& block)
+                           const Compiler_Options& opts, PTC_Aware ptc,
+                           const Statement::S_block& block)
   {
     cow_vector<AIR_Node> code;
     do_generate_statement_list(code, names_opt, ctx, opts, ptc, block);
@@ -195,12 +193,13 @@ const
 
           // Create dummy references for further name lookups.
           for(size_t k = bpos;  k < epos;  ++k)
-            do_user_declare(names_opt, ctx, altr.decls[i][k], "variable placeholder");
+            do_user_declare(names_opt, ctx, altr.decls[i][k]);
 
           if(altr.inits[i].units.empty()) {
             // If no initializer is provided, no further initialization is required.
             for(size_t k = bpos;  k < epos;  ++k) {
-              AIR_Node::S_define_null_variable xnode = { altr.immutable, altr.slocs[i], altr.decls[i][k] };
+              AIR_Node::S_define_null_variable xnode = { altr.immutable, altr.slocs[i],
+                                                         altr.decls[i][k] };
               code.emplace_back(::std::move(xnode));
             }
           }
@@ -242,7 +241,7 @@ const
         const auto& altr = this->m_stor.as<index_function>();
 
         // Create a dummy reference for further name lookups.
-        do_user_declare(names_opt, ctx, altr.name, "function placeholder");
+        do_user_declare(names_opt, ctx, altr.name);
 
         // Declare the function, which is effectively an immutable variable.
         AIR_Node::S_declare_variable xnode_decl = { altr.sloc, altr.name };
@@ -253,7 +252,8 @@ const
         optmz.reload(&ctx, altr.params, altr.body);
 
         // Encode arguments.
-        AIR_Node::S_define_function xnode_defn = { opts, altr.sloc, altr.name, altr.params, optmz };
+        AIR_Node::S_define_function xnode_defn = { opts, altr.sloc, altr.name, altr.params,
+                                                   optmz };
         code.emplace_back(::std::move(xnode_defn));
 
         // Initialize the function.
@@ -276,7 +276,8 @@ const
         auto code_false = do_generate_block(opts, ptc, ctx, altr.branch_false);
 
         // Encode arguments.
-        AIR_Node::S_if_statement xnode = { altr.negative, ::std::move(code_true), ::std::move(code_false) };
+        AIR_Node::S_if_statement xnode = { altr.negative, ::std::move(code_true),
+                                           ::std::move(code_false) };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -305,11 +306,14 @@ const
         for(size_t i = 0;  i < nclauses;  ++i) {
           // Generate code for the label.
           // Note labels are not part of the body.
-          do_generate_expression(code_labels.emplace_back(), opts, ptc_aware_none, ctx, altr.labels[i]);
+          do_generate_expression(code_labels.emplace_back(), opts, ptc_aware_none, ctx,
+                                 altr.labels[i]);
+
           // Generate code for the clause and accumulate names.
           // This cannot be PTC'd.
-          do_generate_statement_list(code_bodies.emplace_back(), &names, ctx_body, opts, ptc_aware_none,
-                                     altr.bodies[i]);
+          do_generate_statement_list(code_bodies.emplace_back(), &names, ctx_body, opts,
+                                     ptc_aware_none, altr.bodies[i]);
+
           names_added.emplace_back(names);
         }
 
@@ -332,7 +336,8 @@ const
         auto code_cond = do_generate_expression(opts, ptc_aware_none, ctx, altr.cond);
 
         // Encode arguments.
-        AIR_Node::S_do_while_statement xnode = { ::std::move(code_body), altr.negative, ::std::move(code_cond) };
+        AIR_Node::S_do_while_statement xnode = { ::std::move(code_body), altr.negative,
+                                                 ::std::move(code_cond) };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -349,7 +354,8 @@ const
         auto code_body = do_generate_block(opts, ptc_aware_none, ctx, altr.body);
 
         // Encode arguments.
-        AIR_Node::S_while_statement xnode = { altr.negative, ::std::move(code_cond), ::std::move(code_body) };
+        AIR_Node::S_while_statement xnode = { altr.negative, ::std::move(code_cond),
+                                              ::std::move(code_body) };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -360,8 +366,8 @@ const
         // Note that the key and value references outlasts every iteration, so we have to create
         // an outer contexts here.
         Analytic_Context ctx_for(Analytic_Context::M_plain(), ctx);
-        do_user_declare(names_opt, ctx_for, altr.name_key, "key placeholder");
-        do_user_declare(names_opt, ctx_for, altr.name_mapped, "value placeholder");
+        do_user_declare(names_opt, ctx_for, altr.name_key);
+        do_user_declare(names_opt, ctx_for, altr.name_mapped);
 
         // Generate code for the range initializer.
         ROCKET_ASSERT(!altr.init.units.empty());
@@ -372,8 +378,8 @@ const
         auto code_body = do_generate_block(opts, ptc_aware_none, ctx_for, altr.body);
 
         // Encode arguments.
-        AIR_Node::S_for_each_statement xnode = { altr.name_key, altr.name_mapped, ::std::move(code_init),
-                                                 ::std::move(code_body) };
+        AIR_Node::S_for_each_statement xnode = { altr.name_key, altr.name_mapped,
+                                                 ::std::move(code_init), ::std::move(code_body) };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -381,12 +387,13 @@ const
       case index_for: {
         const auto& altr = this->m_stor.as<index_for>();
 
-        // Note that names declared in the first segment of a for-statement outlasts every iteration,
-        // so we have to create an outer contexts here.
+        // Note that names declared in the first segment of a for-statement outlasts every
+        // iteration, so we have to create an outer contexts here.
         Analytic_Context ctx_for(Analytic_Context::M_plain(), ctx);
 
         // Generate code for the initializer, the condition and the loop increment.
-        auto code_init = do_generate_statement_list(nullptr, ctx_for, opts, ptc_aware_none, altr.init);
+        auto code_init = do_generate_statement_list(nullptr, ctx_for, opts, ptc_aware_none,
+                                                    altr.init);
         auto code_cond = do_generate_expression(opts, ptc_aware_none, ctx_for, altr.cond);
         auto code_step = do_generate_expression(opts, ptc_aware_none, ctx_for, altr.step);
 
@@ -409,15 +416,17 @@ const
 
         // Create a fresh context for the `catch` clause.
         Analytic_Context ctx_catch(Analytic_Context::M_plain(), ctx);
-        do_user_declare(names_opt, ctx_catch, altr.name_except, "exception placeholder");
+        do_user_declare(names_opt, ctx_catch, altr.name_except);
         ctx_catch.open_named_reference(::rocket::sref("__backtrace"));
+
         // Generate code for the `catch` body.
         // Unlike the `try` body, this may be PTC'd.
-        auto code_catch = do_generate_statement_list(nullptr, ctx_catch, opts, ptc, altr.body_catch);
+        auto code_catch = do_generate_statement_list(nullptr, ctx_catch, opts, ptc,
+                                                     altr.body_catch);
 
         // Encode arguments.
-        AIR_Node::S_try_statement xnode = { altr.sloc_try, ::std::move(code_try),
-                                            altr.sloc_catch, altr.name_except, ::std::move(code_catch) };
+        AIR_Node::S_try_statement xnode = { altr.sloc_try, ::std::move(code_try), altr.sloc_catch,
+                                            altr.name_except, ::std::move(code_catch) };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -557,7 +566,7 @@ const
         const auto& altr = this->m_stor.as<index_reference>();
 
         // Create a reference for further name lookups.
-        do_user_declare(names_opt, ctx, altr.name, "reference placeholder");
+        do_user_declare(names_opt, ctx, altr.name);
 
         // Clear the stack before pushing variables.
         do_generate_clear_stack(code);

@@ -199,6 +199,7 @@ do_accept_literal_opt(Token_Stream& tstrm)
       auto qcnf = ::std::find(begin(s_literal_table), end(s_literal_table), qtok->as_keyword());
       if(qcnf == end(s_literal_table))
         return nullopt;
+
       // Discard this token and create a new value using the generator.
       tstrm.shift();
       return qcnf->vgen();

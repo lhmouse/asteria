@@ -53,6 +53,9 @@ const
         Abstract_Context* qctx = &ctx;
         uint32_t depth = 0;
 
+        if(altr.name.empty())
+          ASTERIA_THROW("Unnamed reference\n[inside expression at '$1']", altr.sloc);
+
         for(;;) {
           // Look for the name in the current context.
           qref = qctx->get_named_reference_opt(altr.name);

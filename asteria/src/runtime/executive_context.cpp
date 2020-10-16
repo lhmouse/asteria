@@ -36,9 +36,6 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
       if(name.empty())
         continue;
 
-      if(name.rdstr().starts_with("__"))
-        ASTERIA_THROW("Reserved name not declarable as parameter (name `$1`)", name);
-
       if(name == "...") {
         // Nothing is set for the parameter placeholder, but the parameter list terminates here.
         ROCKET_ASSERT(i == params.size() - 1);
