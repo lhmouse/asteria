@@ -451,8 +451,7 @@ do_accept_object_key(Token_Stream& tstrm)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok)
-      throw Parser_Error(parser_status_closed_brace_or_json5_key_expected, tstrm.next_sloc(),
-                         tstrm.next_length());
+      throw Parser_Error(parser_status_closed_brace_or_json5_key_expected, tstrm);
 
     cow_string name;
     switch(weaken_enum(qtok->index())) {
@@ -465,14 +464,13 @@ do_accept_object_key(Token_Stream& tstrm)
         break;
 
       default:
-        throw Parser_Error(parser_status_closed_brace_or_json5_key_expected, tstrm.next_sloc(),
-                           tstrm.next_length());
+        throw Parser_Error(parser_status_closed_brace_or_json5_key_expected, tstrm);
     }
     tstrm.shift();
 
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
     if(!kpunct)
-      throw Parser_Error(parser_status_colon_expected, tstrm.next_sloc(), tstrm.next_length());
+      throw Parser_Error(parser_status_colon_expected, tstrm);
 
     return name;
   }
@@ -502,7 +500,7 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
       // Accept a value. No other things such as closed brackets are allowed.
       auto qtok = tstrm.peek_opt();
       if(!qtok)
-        throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
+        throw Parser_Error(parser_status_expression_expected, tstrm);
 
       switch(weaken_enum(qtok->index())) {
         case Token::index_punctuator: {
@@ -519,8 +517,7 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
               // Only `Infinity` and `NaN` may follow.
               // Note that the tokenizer will have merged sign symbols into adjacent number literals.
               if(::rocket::is_none_of(name, { "Infinity", "NaN" }))
-                throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(),
-                                   tstrm.next_length());
+                throw Parser_Error(parser_status_expression_expected, tstrm);
 
               // Accept a special numeric value.
               double sign = (punct == punctuator_add) - 1;
@@ -567,7 +564,7 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
             }
 
             default:
-              throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
+              throw Parser_Error(parser_status_expression_expected, tstrm);
           }
           break;
         }
@@ -576,7 +573,7 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
           // Accept a literal.
           const auto& name = qtok->as_identifier();
           if(::rocket::is_none_of(name, { "null", "true", "false", "Infinity", "NaN" }))
-            throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
+            throw Parser_Error(parser_status_expression_expected, tstrm);
 
           switch(name[0]) {
             case 'n':
@@ -619,7 +616,7 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
           break;
 
         default:
-          throw Parser_Error(parser_status_expression_expected, tstrm.next_sloc(), tstrm.next_length());
+          throw Parser_Error(parser_status_expression_expected, tstrm);
       }
 
       // A complete value has been accepted. Insert it into its parent array or object.
@@ -635,8 +632,7 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
           // Look for the next element.
           auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl, punctuator_comma });
           if(!kpunct)
-            throw Parser_Error(parser_status_closed_bracket_or_comma_expected, tstrm.next_sloc(),
-                               tstrm.next_length());
+            throw Parser_Error(parser_status_closed_bracket_or_comma_expected, tstrm);
 
           // Check for termination of this array.
           if(*kpunct != punctuator_bracket_cl) {
@@ -657,8 +653,7 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
           // Look for the next element.
           auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl, punctuator_comma });
           if(!kpunct)
-            throw Parser_Error(parser_status_closed_brace_or_comma_expected, tstrm.next_sloc(),
-                               tstrm.next_length());
+            throw Parser_Error(parser_status_closed_brace_or_comma_expected, tstrm);
 
           // Check for termination of this array.
           if(*kpunct != punctuator_brace_cl) {

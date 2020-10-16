@@ -25,6 +25,11 @@ class Parser_Error
       : m_stat(xstat), m_sloc(xsloc), m_length(xlength)
       { this->do_compose_message();  }
 
+    ASTERIA_INCOMPLET(Token_Stream)
+    Parser_Error(Parser_Status xstat, const Token_Stream& xtstrm)
+      : m_stat(xstat), m_sloc(xtstrm.next_sloc()), m_length(xtstrm.next_length())
+      { this->do_compose_message();  }
+
     ASTERIA_COPYABLE_DESTRUCTOR(Parser_Error);
 
   private:
