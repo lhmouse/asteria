@@ -86,7 +86,7 @@ const
   {
     Reference_Stack stack;
     this->invoke_ptc_aware(self, global, ::std::move(args));
-    self.finish_call(global, stack);
+    self.finish_call(global);
     return self;
   }
 

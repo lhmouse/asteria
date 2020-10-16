@@ -56,7 +56,7 @@ const
 
 Reference&
 Reference::
-finish_call(Global_Context& global, Reference_Stack& stack)
+finish_call(Global_Context& global)
   {
     if(ROCKET_EXPECT(!this->is_ptc_args()))
       return *this;
@@ -65,6 +65,7 @@ finish_call(Global_Context& global, Reference_Stack& stack)
     cow_vector<rcptr<PTC_Arguments>> frames;
     rcptr<PTC_Arguments> ptca;
     int ptc_conj = ptc_aware_by_ref;
+    Reference_Stack stack;
 
     ASTERIA_RUNTIME_TRY {
       // Unpack all frames recursively.

@@ -172,7 +172,7 @@ class Reference
           : nullptr;  }
 
     Reference&
-    finish_call(Global_Context& global, Reference_Stack& stack);
+    finish_call(Global_Context& global);
 
     bool
     is_jump_src()

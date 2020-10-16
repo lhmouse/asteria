@@ -807,9 +807,7 @@ struct AIR_Traits_try_statement
           return status;
 
         // This must not be PTC'd, otherwise exceptions thrown from tail calls won't be caught.
-        auto self = ::std::move(ctx.stack().mut_front());
-        self.finish_call(ctx.global(), ctx.stack());
-        ctx.stack().emplace_front(::std::move(self));
+        ctx.stack().mut_front().finish_call(ctx.global());
         return status;
       }
       ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
@@ -877,7 +875,8 @@ struct AIR_Traits_throw_statement
       {
         // Read the value to throw.
         // Note that the operand must not have been empty for this code.
-        throw Runtime_Error(Runtime_Error::M_throw(), ctx.stack().front().dereference_readonly(), sloc);
+        throw Runtime_Error(Runtime_Error::M_throw(),
+                            ctx.stack().front().dereference_readonly(), sloc);
       }
   };
 
