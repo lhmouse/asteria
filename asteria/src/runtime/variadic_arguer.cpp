@@ -30,15 +30,15 @@ Variadic_Arguer::
 invoke_ptc_aware(Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args)
 const
   {
-    Argument_Reader reader(::rocket::sref("__varg"), ::rocket::cref(args));
+    Argument_Reader reader(::rocket::sref("__varg"), args);
 
     // If an argument is specified, it shall be the index of a variadic argument as
     // an integer, or an explicit `null`.
     Opt_integer qindex;
 
-    reader.start_overload();     // (
-    reader.optional(qindex);     //   [index]
-    if(!reader.end_overload())   // )
+    reader.start_overload();
+    reader.optional(qindex);  //   [index]
+    if(!reader.end_overload())
       reader.throw_no_matching_function_call();
 
     // If no argument is given, return the number of variadic arguments.

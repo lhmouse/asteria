@@ -66,10 +66,9 @@ cow_function
 AIR_Optimizer::
 create_function(const Source_Location& sloc, const cow_string& name)
   {
-    cow_string func = name;
-
-    // Append the parameter list to `name`.
+    // Compose the function signature.
     // We only do this if `name` really looks like a function name.
+    cow_string func = name;
     if(is_cctype(name.front(), cctype_namei) && (name.back() != ')')) {
       func << '(';
       if(this->m_params.size()) {
@@ -82,8 +81,8 @@ create_function(const Source_Location& sloc, const cow_string& name)
 
     // Instantiate the function.
     return ::rocket::make_refcnt<Instantiated_Function>(this->m_params,
-                         ::rocket::make_refcnt<Variadic_Arguer>(sloc, ::std::move(func)),
-                         this->m_code);
+               ::rocket::make_refcnt<Variadic_Arguer>(sloc, ::std::move(func)),
+               this->m_code);
   }
 
 }  // namespace asteria
