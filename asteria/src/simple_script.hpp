@@ -18,7 +18,7 @@ class Simple_Script
   public:
     constexpr
     Simple_Script()
-    noexcept
+      noexcept
       : m_opts()
       { }
 
@@ -32,7 +32,7 @@ class Simple_Script
 
     explicit constexpr
     Simple_Script(const Compiler_Options& opts)
-    noexcept
+      noexcept
       : m_opts(opts)
       { }
 
@@ -47,27 +47,27 @@ class Simple_Script
   public:
     const Compiler_Options&
     get_options()
-    const noexcept
+      const noexcept
       { return this->m_opts;  }
 
     Compiler_Options&
     open_options()
-    noexcept
+      noexcept
       { return this->m_opts;  }
 
     Simple_Script&
     set_options(const Compiler_Options& opts)
-    noexcept
+      noexcept
       { return this->m_opts = opts, *this;  }
 
     explicit operator
     bool()
-    const noexcept
+      const noexcept
       { return bool(this->m_func);  }
 
     Simple_Script&
     clear()
-    noexcept
+      noexcept
       {
         this->m_func.reset();
         return *this;
@@ -75,7 +75,7 @@ class Simple_Script
 
     operator
     const cow_function&()
-    const noexcept
+      const noexcept
       { return this->m_func;  }
 
     // Load a script.
@@ -100,11 +100,11 @@ class Simple_Script
     // Execute the script that has been loaded.
     Reference
     execute(Global_Context& global, Reference_Stack&& stack)
-    const;
+      const;
 
     Reference
     execute(Global_Context& global, cow_vector<Value>&& args = { })
-    const;
+      const;
   };
 
 }  // namespace asteria

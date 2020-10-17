@@ -116,7 +116,7 @@ volatile ::sig_atomic_t interrupted;
 
 void
 do_trap_sigint()
-noexcept
+  noexcept
   {
     // Trap Ctrl-C. Failure to set the signal handler is ignored.
     struct ::sigaction sigx = { };
@@ -154,7 +154,7 @@ enum Exit_Status : uint8_t
 [[noreturn]]
 int
 do_exit(Exit_Status stat, const char* fmt = nullptr, ...)
-noexcept
+  noexcept
   {
     // Output the string to standard error.
     if(fmt) {
@@ -176,7 +176,7 @@ noexcept
   }
 
 class REPL_Hooks
-final
+  final
   : public Abstract_Hooks
   {
   private:
@@ -207,7 +207,7 @@ final
   public:
     void
     on_single_step_trap(const Source_Location& sloc)
-    override
+      override
       {
         if(interrupted)
           ASTERIA_THROW("Interrupt received\n[callback inside '$1']", sloc);
@@ -215,22 +215,22 @@ final
 
     void
     on_variable_declare(const Source_Location& sloc, const phsh_string& name)
-    override
+      override
       { this->do_verbose_trace(sloc, "declaring variable `$1`", name);  }
 
     void
     on_function_call(const Source_Location& sloc, const cow_function& target)
-    override
+      override
       { this->do_verbose_trace(sloc, "initiating function call: $1", target);  }
 
     void
     on_function_return(const Source_Location& sloc, const cow_function& target, const Reference&)
-    override
+      override
       { this->do_verbose_trace(sloc, "returned from function call: $1", target);  }
 
     void
     on_function_except(const Source_Location& sloc, const cow_function& target, const Runtime_Error&)
-    override
+      override
       { this->do_verbose_trace(sloc, "caught an exception from function call: $1", target);  }
   };
 

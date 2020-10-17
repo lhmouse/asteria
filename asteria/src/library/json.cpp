@@ -23,7 +23,7 @@ class Indenter
     virtual
     tinyfmt&
     break_line(tinyfmt& fmt)
-    const
+      const
       = 0;
 
     virtual
@@ -39,7 +39,7 @@ class Indenter
     virtual
     bool
     has_indention()
-    const noexcept
+      const noexcept
       = 0;
   };
 
@@ -49,7 +49,7 @@ Indenter::
   }
 
 class Indenter_none
-final
+  final
   : public Indenter
   {
   public:
@@ -60,27 +60,27 @@ final
   public:
     tinyfmt&
     break_line(tinyfmt& fmt)
-    const override
+      const override
       { return fmt;  }
 
     void
     increment_level()
-    override
+      override
       { }
 
     void
     decrement_level()
-    override
+      override
       { }
 
     bool
     has_indention()
-    const noexcept override
+      const noexcept override
       { return false;  }
   };
 
 class Indenter_string
-final
+  final
   : public Indenter
   {
   private:
@@ -96,27 +96,27 @@ final
   public:
     tinyfmt&
     break_line(tinyfmt& fmt)
-    const override
+      const override
       { return fmt << this->m_cur;  }
 
     void
     increment_level()
-    override
+      override
       { this->m_cur.append(this->m_add);  }
 
     void
     decrement_level()
-    override
+      override
       { this->m_cur.pop_back(this->m_add.size());  }
 
     bool
     has_indention()
-    const noexcept override
+      const noexcept override
       { return this->m_add.size();  }
   };
 
 class Indenter_spaces
-final
+  final
   : public Indenter
   {
   private:
@@ -132,22 +132,22 @@ final
   public:
     tinyfmt&
     break_line(tinyfmt& fmt)
-    const override
+      const override
       { return fmt << pwrap(this->m_add, this->m_cur);  }
 
     void
     increment_level()
-    override
+      override
       { this->m_cur += this->m_add;  }
 
     void
     decrement_level()
-    override
+      override
       { this->m_cur -= this->m_add;  }
 
     bool
     has_indention()
-    const noexcept override
+      const noexcept override
       { return this->m_add;  }
   };
 

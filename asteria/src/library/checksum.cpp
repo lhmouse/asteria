@@ -40,20 +40,20 @@ template<uint32_t divT, size_t... S>
 constexpr
 array<uint32_t, 256>
 do_CRC32_table_impl(const index_sequence<S...>&)
-noexcept
+  noexcept
   { return { CRC32_Generator<uint8_t(S), divT, 0>::value... };  }
 
 template<uint32_t divT>
 constexpr
 array<uint32_t, 256>
 do_CRC32_table()
-noexcept
+  noexcept
   { return do_CRC32_table_impl<divT>(::std::make_index_sequence<256>());  }
 
 constexpr auto s_iso3309_CRC32_table = do_CRC32_table<0xEDB88320>();
 
 class CRC32_Hasher
-final
+  final
   : public Abstract_Opaque
   {
   private:
@@ -62,22 +62,22 @@ final
   public:
     tinyfmt&
     describe(tinyfmt& fmt)
-    const override
+      const override
       { return fmt << "instance of `std.checksum.CRC32` at `" << this << "`";  }
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const override
+      const override
       { return callback;  }
 
     CRC32_Hasher*
     clone_opt(rcptr<Abstract_Opaque>& output)
-    const override
+      const override
       { return noadl::clone_opaque(output, *this);  }
 
     void
     update(const void* data, size_t size)
-    noexcept
+      noexcept
       {
         auto bp = static_cast<const uint8_t*>(data);
         auto ep = bp + size;
@@ -91,7 +91,7 @@ final
 
     V_integer
     finish()
-    noexcept
+      noexcept
       {
         // Get the checksum.
         uint32_t ck = ~(this->m_reg);
@@ -134,7 +134,7 @@ do_construct_CRC32(V_object& result)
   }
 
 class FNV1a32_Hasher
-final
+  final
   : public Abstract_Opaque
   {
   public:
@@ -150,22 +150,22 @@ final
   public:
     tinyfmt&
     describe(tinyfmt& fmt)
-    const override
+      const override
       { return fmt << "instance of `std.checksum.FNV1a32` at `" << this << "`";  }
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const override
+      const override
       { return callback;  }
 
     FNV1a32_Hasher*
     clone_opt(rcptr<Abstract_Opaque>& output)
-    const override
+      const override
       { return noadl::clone_opaque(output, *this);  }
 
     void
     update(const void* data, size_t size)
-    noexcept
+      noexcept
       {
         auto bp = static_cast<const uint8_t*>(data);
         auto ep = bp + size;
@@ -179,7 +179,7 @@ final
 
     V_integer
     finish()
-    noexcept
+      noexcept
       {
         // Get the checksum.
         uint32_t ck = this->m_reg;
@@ -262,7 +262,7 @@ do_print_words_le(const array<uint32_t, N>& words)
 template<size_t N>
 void
 do_accumulate_words(array<uint32_t, N>& lhs, const array<uint32_t, N>& rhs)
-noexcept
+  noexcept
   {
     for(size_t k = 0;  k != N;  ++k)
       lhs[k] += rhs[k];
@@ -270,7 +270,7 @@ noexcept
 
 uint32_t
 do_load_be(const uint8_t* ptr)
-noexcept
+  noexcept
   {
     uint32_t word;
     ::std::memcpy(&word, ptr, 4);
@@ -279,7 +279,7 @@ noexcept
 
 uint32_t
 do_load_le(const uint8_t* ptr)
-noexcept
+  noexcept
   {
     uint32_t word;
     ::std::memcpy(&word, ptr, 4);
@@ -289,20 +289,20 @@ noexcept
 constexpr
 uint32_t
 do_rotl(uint32_t value, size_t n)
-noexcept
+  noexcept
   {
     return value << n % 32 | value >> (32 - n) % 32;
   }
 
 class MD5_Hasher
-final
+  final
   : public Abstract_Opaque
   {
   private:
     static constexpr
     array<uint32_t, 4>
     init()
-    noexcept
+      noexcept
       { return { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476 };  }
 
   private:
@@ -313,7 +313,7 @@ final
   private:
     void
     do_consume_chunk(const uint8_t* p)
-    noexcept
+      noexcept
       {
         // https://en.wikipedia.org/wiki/MD5
         auto r = this->m_regs;
@@ -421,22 +421,22 @@ final
   public:
     tinyfmt&
     describe(tinyfmt& fmt)
-    const override
+      const override
       { return fmt << "instance of `std.checksum.MD5` at `" << this << "`";  }
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const override
+      const override
       { return callback;  }
 
     MD5_Hasher*
     clone_opt(rcptr<Abstract_Opaque>& output)
-    const override
+      const override
       { return noadl::clone_opaque(output, *this);  }
 
     void
     update(const void* data, size_t size)
-    noexcept
+      noexcept
       {
         auto bp = static_cast<const uint8_t*>(data);
         auto ep = bp + size;
@@ -485,7 +485,7 @@ final
 
     V_string
     finish()
-    noexcept
+      noexcept
       {
         auto bc = this->m_chunk.mut_begin() + this->m_size % 64;
         auto ec = this->m_chunk.mut_end();
@@ -556,14 +556,14 @@ do_construct_MD5(V_object& result)
   }
 
 class SHA1_Hasher
-final
+  final
   : public Abstract_Opaque
   {
   private:
     static constexpr
     array<uint32_t, 5>
     init()
-    noexcept
+      noexcept
       { return { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 };  }
 
   private:
@@ -574,7 +574,7 @@ final
   private:
     void
     do_consume_chunk(const uint8_t* p)
-    noexcept
+      noexcept
       {
         // https://en.wikipedia.org/wiki/SHA-1
         auto r = this->m_regs;
@@ -712,22 +712,22 @@ final
   public:
     tinyfmt&
     describe(tinyfmt& fmt)
-    const override
+      const override
       { return fmt << "instance of `std.checksum.SHA1` at `" << this << "`";  }
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const override
+      const override
       { return callback;  }
 
     SHA1_Hasher*
     clone_opt(rcptr<Abstract_Opaque>& output)
-    const override
+      const override
       { return noadl::clone_opaque(output, *this);  }
 
     void
     update(const void* data, size_t size)
-    noexcept
+      noexcept
       {
         auto bp = static_cast<const uint8_t*>(data);
         auto ep = bp + size;
@@ -776,7 +776,7 @@ final
 
     V_string
     finish()
-    noexcept
+      noexcept
       {
         auto bc = this->m_chunk.mut_begin() + this->m_size % 64;
         auto ec = this->m_chunk.mut_end();
@@ -847,14 +847,14 @@ do_construct_SHA1(V_object& result)
   }
 
 class SHA256_Hasher
-final
+  final
   : public Abstract_Opaque
   {
   private:
     static constexpr
     array<uint32_t, 8>
     init()
-    noexcept
+      noexcept
       { return { 0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
                  0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19 };  }
 
@@ -866,7 +866,7 @@ final
   private:
     void
     do_consume_chunk(const uint8_t* p)
-    noexcept
+      noexcept
       {
         // https://en.wikipedia.org/wiki/SHA-2
         auto r = this->m_regs;
@@ -975,22 +975,22 @@ final
   public:
     tinyfmt&
     describe(tinyfmt& fmt)
-    const override
+      const override
       { return fmt << "instance of `std.checksum.SHA256` at `" << this << "`";  }
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const override
+      const override
       { return callback;  }
 
     SHA256_Hasher*
     clone_opt(rcptr<Abstract_Opaque>& output)
-    const override
+      const override
       { return noadl::clone_opaque(output, *this);  }
 
     void
     update(const void* data, size_t size)
-    noexcept
+      noexcept
       {
         auto bp = static_cast<const uint8_t*>(data);
         auto ep = bp + size;
@@ -1039,7 +1039,7 @@ final
 
     V_string
     finish()
-    noexcept
+      noexcept
       {
         auto bc = this->m_chunk.mut_begin() + this->m_size % 64;
         auto ec = this->m_chunk.mut_end();

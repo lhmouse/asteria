@@ -8,7 +8,7 @@ namespace asteria {
 
 const char*
 stringify_punctuator(Punctuator punct)
-noexcept
+  noexcept
   {
     switch(punct) {
       case punctuator_add:
@@ -192,7 +192,7 @@ noexcept
 
 const char*
 stringify_keyword(Keyword kwrd)
-noexcept
+  noexcept
   {
     switch(kwrd) {
       case keyword_var:

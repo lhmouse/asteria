@@ -170,7 +170,7 @@ struct Sparam_queues
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const
+      const
       {
         ::rocket::for_each(this->queues, callback);
         return callback;
@@ -189,7 +189,7 @@ struct Sparam_switch
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const
+      const
       {
         ::rocket::for_each(this->queues_labels, callback);
         ::rocket::for_each(this->queues_bodies, callback);
@@ -206,7 +206,7 @@ struct Sparam_for_each
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const
+      const
       {
         this->queue_init.enumerate_variables(callback);
         this->queue_body.enumerate_variables(callback);
@@ -224,7 +224,7 @@ struct Sparam_try_catch
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const
+      const
       {
         this->queue_try.enumerate_variables(callback);
         this->queue_catch.enumerate_variables(callback);
@@ -242,7 +242,7 @@ struct Sparam_func
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const
+      const
       {
         ::rocket::for_each(this->code_body, callback);
         return callback;
@@ -256,7 +256,7 @@ struct Sparam_defer
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const
+      const
       {
         ::rocket::for_each(this->code_body, callback);
         return callback;
@@ -1015,7 +1015,7 @@ struct AIR_Traits_push_immediate_boolean
 constexpr
 bool
 do_is_int48(int64_t value)
-noexcept
+  noexcept
   { return (value >> 47) == (value >> 48);  }
 
 struct AIR_Traits_push_immediate_int48
@@ -1572,7 +1572,7 @@ enum Vmask : uint32_t
 
 inline
 uint32_t do_vmask_of(const Value& val)
-noexcept
+  noexcept
   {
     return UINT32_C(1) << val.type();
   }
@@ -4080,7 +4080,7 @@ do_solidify(AVMC_Queue& queue, const XNodeT& altr)
 opt<AIR_Node>
 AIR_Node::
 rebind_opt(Abstract_Context& ctx)
-const
+  const
   {
     switch(this->index()) {
       case index_clear_stack:
@@ -4320,7 +4320,7 @@ const
 bool
 AIR_Node::
 solidify(AVMC_Queue& queue)
-const
+  const
   {
     switch(this->index()) {
       case index_clear_stack:
@@ -4642,7 +4642,7 @@ const
 Variable_Callback&
 AIR_Node::
 enumerate_variables(Variable_Callback& callback)
-const
+  const
   {
     switch(this->index()) {
       case index_clear_stack:

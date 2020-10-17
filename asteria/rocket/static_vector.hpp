@@ -57,32 +57,32 @@ class static_vector
     // 26.3.11.2, construct/copy/destroy
     explicit
     static_vector(const allocator_type& alloc)
-    noexcept
+      noexcept
       : m_sth(alloc)
       { }
 
     static_vector(const static_vector& other)
-    noexcept(is_nothrow_copy_constructible<value_type>::value)
+      noexcept(is_nothrow_copy_constructible<value_type>::value)
       : m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
       { this->assign(other);  }
 
     static_vector(const static_vector& other, const allocator_type& alloc)
-    noexcept(is_nothrow_copy_constructible<value_type>::value)
+      noexcept(is_nothrow_copy_constructible<value_type>::value)
       : m_sth(alloc)
       { this->assign(other);  }
 
     static_vector(static_vector&& other)
-    noexcept(is_nothrow_move_constructible<value_type>::value)
+      noexcept(is_nothrow_move_constructible<value_type>::value)
       : m_sth(::std::move(other.m_sth.as_allocator()))
       { this->assign(::std::move(other));  }
 
     static_vector(static_vector&& other, const allocator_type& alloc)
-    noexcept(is_nothrow_move_constructible<value_type>::value)
+      noexcept(is_nothrow_move_constructible<value_type>::value)
       : m_sth(alloc)
       { this->assign(::std::move(other));  }
 
     static_vector()
-    noexcept(is_nothrow_constructible<allocator_type>::value)
+      noexcept(is_nothrow_constructible<allocator_type>::value)
       : static_vector(allocator_type())
       { }
 
@@ -114,14 +114,14 @@ class static_vector
 
     static_vector&
     operator=(const static_vector& other)
-    noexcept(conjunction<is_nothrow_copy_assignable<value_type>,
+      noexcept(conjunction<is_nothrow_copy_assignable<value_type>,
                          is_nothrow_copy_constructible<value_type>>::value)
       { noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         return this->assign(other);  }
 
     static_vector&
     operator=(static_vector&& other)
-    noexcept(conjunction<is_nothrow_move_assignable<value_type>,
+      noexcept(conjunction<is_nothrow_move_assignable<value_type>,
                          is_nothrow_move_constructible<value_type>>::value)
       { noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         return this->assign(::std::move(other));  }
@@ -134,7 +134,7 @@ class static_vector
     [[noreturn]] ROCKET_NOINLINE
     void
     do_throw_subscript_out_of_range(size_type pos, const char* rel)
-    const
+      const
       {
         noadl::sprintf_and_throw<out_of_range>("static_vector: Subscript out of range (`%llu` %s `%llu`)",
                                                static_cast<unsigned long long>(pos), rel,
@@ -145,7 +145,7 @@ class static_vector
     // Ensure `tpos` is in `[0, size()]` and return `min(tn, size() - tpos)`.
     size_type
     do_clamp_subvec(size_type tpos, size_type tn)
-    const
+      const
       {
         size_type len = this->size();
         if(tpos > len)
@@ -188,22 +188,22 @@ class static_vector
     // iterators
     const_iterator
     begin()
-    const noexcept
+      const noexcept
       { return const_iterator(this->data(), 0, this->size());  }
 
     const_iterator
     end()
-    const noexcept
+      const noexcept
       { return const_iterator(this->data(), this->size(), this->size());  }
 
     const_reverse_iterator
     rbegin()
-    const noexcept
+      const noexcept
       { return const_reverse_iterator(this->end());  }
 
     const_reverse_iterator
     rend()
-    const noexcept
+      const noexcept
       { return const_reverse_iterator(this->begin());  }
 
     // N.B. This is a non-standard extension.
@@ -250,26 +250,26 @@ class static_vector
     constexpr
     bool
     empty()
-    const noexcept
+      const noexcept
       { return this->m_sth.size() == 0;  }
 
     constexpr
     size_type
     size()
-    const noexcept
+      const noexcept
       { return this->m_sth.size();  }
 
     // N.B. This is a non-standard extension.
     constexpr
     difference_type
     ssize()
-    const noexcept
+      const noexcept
       { return static_cast<difference_type>(this->size());  }
 
     constexpr
     size_type
     max_size()
-    const noexcept
+      const noexcept
       { return this->m_sth.max_size();  }
 
     // N.B. The return type and the parameter pack are non-standard extensions.
@@ -286,7 +286,7 @@ class static_vector
     static constexpr
     size_type
     capacity()
-    noexcept
+      noexcept
       { return storage_handle::capacity();  }
 
     // N.B. The return type is a non-standard extension.
@@ -300,13 +300,13 @@ class static_vector
     // N.B. The return type is a non-standard extension.
     static_vector&
     shrink_to_fit()
-    noexcept
+      noexcept
       { return *this;  }
 
     // N.B. The return type is a non-standard extension.
     static_vector&
     clear()
-    noexcept
+      noexcept
       {
         this->m_sth.pop_back_unchecked(this->size());
         return *this;
@@ -315,7 +315,7 @@ class static_vector
     // element access
     const_reference
     at(size_type pos)
-    const
+      const
       {
         if(pos >= this->size())
           this->do_throw_subscript_out_of_range(pos, ">=");
@@ -326,12 +326,12 @@ class static_vector
     ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
     const_reference
     at(subscriptT pos)
-    const
+      const
       { return this->at(static_cast<size_type>(pos));  }
 
     const_reference
     operator[](size_type pos)
-    const noexcept
+      const noexcept
       {
         ROCKET_ASSERT(pos < this->size());
         return this->data()[pos];
@@ -342,12 +342,12 @@ class static_vector
     ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
     const_reference
     operator[](subscriptT pos)
-    const noexcept
+      const noexcept
       { return this->operator[](static_cast<size_type>(pos));  }
 
     const_reference
     front()
-    const noexcept
+      const noexcept
       {
         ROCKET_ASSERT(!this->empty());
         return this->data()[0];
@@ -355,7 +355,7 @@ class static_vector
 
     const_reference
     back()
-    const noexcept
+      const noexcept
       {
         ROCKET_ASSERT(!this->empty());
         return this->data()[this->size() - 1];
@@ -364,7 +364,7 @@ class static_vector
     // N.B. This is a non-standard extension.
     const value_type*
     ptr(size_type pos)
-    const noexcept
+      const noexcept
       {
         if(pos >= this->size())
           return nullptr;
@@ -661,7 +661,7 @@ class static_vector
     // N.B. This is a non-standard extension.
     static_vector
     subvec(size_type tpos, size_type tn = size_type(-1))
-    const
+      const
       { return static_vector(this->data() + tpos,
                              this->data() + tpos + this->do_clamp_subvec(tpos, tn),
                              this->m_sth.as_allocator());  }
@@ -669,7 +669,7 @@ class static_vector
     // N.B. The return type is a non-standard extension.
     static_vector&
     assign(const static_vector& other)
-    noexcept(conjunction<is_nothrow_copy_assignable<value_type>,
+      noexcept(conjunction<is_nothrow_copy_assignable<value_type>,
                          is_nothrow_copy_constructible<value_type>>::value)
       {
         this->m_sth.copy_from(other.m_sth);
@@ -679,7 +679,7 @@ class static_vector
     // N.B. The return type is a non-standard extension.
     static_vector&
     assign(static_vector&& other)
-    noexcept(conjunction<is_nothrow_move_assignable<value_type>,
+      noexcept(conjunction<is_nothrow_move_assignable<value_type>,
                          is_nothrow_move_constructible<value_type>>::value)
       {
         this->m_sth.move_from(other.m_sth);
@@ -719,7 +719,7 @@ class static_vector
 
     static_vector&
     swap(static_vector& other)
-    noexcept(conjunction<is_nothrow_swappable<value_type>,
+      noexcept(conjunction<is_nothrow_swappable<value_type>,
                          is_nothrow_move_constructible<value_type>>::value)
       {
         noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
@@ -730,7 +730,7 @@ class static_vector
     // 26.3.11.4, data access
     const value_type*
     data()
-    const noexcept
+      const noexcept
       { return this->m_sth.data();  }
 
     // Get a pointer to mutable data.
@@ -743,12 +743,12 @@ class static_vector
     constexpr
     const allocator_type&
     get_allocator()
-    const noexcept
+      const noexcept
       { return this->m_sth.as_allocator();  }
 
     allocator_type&
     get_allocator()
-    noexcept
+      noexcept
       { return this->m_sth.as_allocator();  }
   };
 
@@ -756,7 +756,7 @@ template<typename valueT, size_t capacityT, typename allocT>
 inline
 void
 swap(static_vector<valueT, capacityT, allocT>& lhs, static_vector<valueT, capacityT, allocT>& rhs)
-noexcept(noexcept(lhs.swap(rhs)))
+  noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
 }  // namespace rocket

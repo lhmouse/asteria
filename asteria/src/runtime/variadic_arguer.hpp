@@ -11,7 +11,7 @@
 namespace asteria {
 
 class Variadic_Arguer
-final
+  final
   : public Abstract_Function
   {
   private:
@@ -31,55 +31,55 @@ final
   public:
     const Source_Location&
     sloc()
-    const noexcept
+      const noexcept
       { return this->m_sloc;  }
 
     const cow_string&
     file()
-    const noexcept
+      const noexcept
       { return this->m_sloc.file();  }
 
     int
     line()
-    const noexcept
+      const noexcept
       { return this->m_sloc.line();  }
 
     int
     offset()
-    const noexcept
+      const noexcept
       { return this->m_sloc.offset();  }
 
     const cow_string&
     func()
-    const noexcept
+      const noexcept
       { return this->m_func;  }
 
     bool
     empty()
-    const noexcept
+      const noexcept
       { return this->m_vargs.empty();  }
 
     size_t
     size()
-    const noexcept
+      const noexcept
       { return this->m_vargs.size();  }
 
     const Reference&
     arg(size_t index)
-    const
+      const
       { return this->m_vargs.at(index);  }
 
     tinyfmt&
     describe(tinyfmt& fmt)
-    const override;
+      const override;
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const override;
+      const override;
 
     Reference&
     invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack)
-    const override;
+      const override;
   };
 
 }  // namespace asteria

@@ -26,7 +26,7 @@ class mutex
   public:
     constexpr
     mutex()
-    noexcept
+      noexcept
       { }
 
     mutex(const mutex&)
@@ -53,21 +53,21 @@ class mutex::unique_lock
   public:
     constexpr
     unique_lock()
-    noexcept
+      noexcept
       { }
 
     explicit
     unique_lock(mutex& parent)
-    noexcept
+      noexcept
       { this->lock(parent);  }
 
     unique_lock(unique_lock&& other)
-    noexcept
+      noexcept
       { this->swap(other);  }
 
     unique_lock&
     operator=(unique_lock&& other)
-    noexcept
+      noexcept
       { return this->swap(other);  }
 
     ~unique_lock()
@@ -76,22 +76,22 @@ class mutex::unique_lock
   public:
     explicit operator
     bool()
-    const noexcept
+      const noexcept
       { return this->m_sth.get() != nullptr;  }
 
     bool
     is_locking(const mutex& m)
-    const noexcept
+      const noexcept
       { return this->m_sth.get() == m.m_mutex;  }
 
     bool
     is_locking(const mutex&&)
-    const noexcept
+      const noexcept
       = delete;
 
     unique_lock&
     unlock()
-    noexcept
+      noexcept
       {
         this->m_sth.reset(nullptr);
         return *this;
@@ -99,7 +99,7 @@ class mutex::unique_lock
 
     unique_lock&
     try_lock(mutex& m)
-    noexcept
+      noexcept
       {
         // Return immediately if the same mutex is already held.
         // Otherwise deadlocks would occur.
@@ -120,7 +120,7 @@ class mutex::unique_lock
 
     unique_lock&
     lock(mutex& m)
-    noexcept
+      noexcept
       {
         // Return immediately if the same mutex is already held.
         // Otherwise deadlocks would occur.
@@ -138,7 +138,7 @@ class mutex::unique_lock
 
     unique_lock&
     swap(unique_lock& other)
-    noexcept
+      noexcept
       {
         this->m_sth.exchange_with(other.m_sth);
         return *this;
@@ -148,7 +148,7 @@ class mutex::unique_lock
 inline
 void
 swap(mutex::unique_lock& lhs, mutex::unique_lock& rhs)
-noexcept(noexcept(lhs.swap(rhs)))
+  noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
 }  // namespace rocket

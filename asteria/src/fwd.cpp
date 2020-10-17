@@ -26,7 +26,7 @@ Abstract_Function::
 void
 cow_opaque::
 do_throw_null_pointer()
-const
+  const
   {
     ASTERIA_THROW("Attempt to dereference a null opaque pointer");
   }
@@ -34,7 +34,7 @@ const
 tinyfmt&
 cow_opaque::
 describe(tinyfmt& fmt)
-const
+  const
   {
     if(auto ptr = this->m_sptr.get())
       return ptr->describe(fmt);
@@ -45,7 +45,7 @@ const
 void
 cow_function::
 do_throw_null_pointer()
-const
+  const
   {
     ASTERIA_THROW("Attempt to dereference a null function pointer");
   }
@@ -53,7 +53,7 @@ const
 tinyfmt&
 cow_function::
 describe(tinyfmt& fmt)
-const
+  const
   {
     if(this->m_fptr)
       return fmt << "native function " << this->m_desc;  // static
@@ -67,7 +67,7 @@ const
 Reference&
 cow_function::
 invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack)
-const
+  const
   {
     if(auto fptr = this->m_fptr)
       return fptr(self, global, ::std::move(stack));  // static
@@ -81,7 +81,7 @@ const
 Reference&
 cow_function::
 invoke(Reference& self, Global_Context& global, Reference_Stack&& stack)
-const
+  const
   {
     this->invoke_ptc_aware(self, global, ::std::move(stack));
     return self.finish_call(global);
@@ -90,7 +90,7 @@ const
 Reference
 cow_function::
 invoke(Global_Context& global, Reference_Stack&& stack)
-const
+  const
   {
     Reference self = Reference::S_constant();
     return this->invoke(self, global, ::std::move(stack));
@@ -98,7 +98,7 @@ const
 
 const char*
 describe_type(Type type)
-noexcept
+  noexcept
   {
     switch(type) {
       case type_null:
@@ -135,7 +135,7 @@ noexcept
 
 const char*
 describe_frame_type(Frame_Type type)
-noexcept
+  noexcept
   {
     switch(type) {
       case frame_type_native:
@@ -169,7 +169,7 @@ noexcept
 
 const char*
 describe_parser_status(Parser_Status status)
-noexcept
+  noexcept
   {
     switch(status) {
       case parser_status_success:

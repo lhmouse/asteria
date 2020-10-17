@@ -24,7 +24,7 @@ Reference::
 Variable_Callback&
 Reference::
 enumerate_variables(Variable_Callback& callback)
-const
+  const
   {
     switch(this->index()) {
       case index_uninit:
@@ -154,7 +154,7 @@ finish_call(Global_Context& global)
 const Value&
 Reference::
 dereference_readonly()
-const
+  const
   {
     const Value* qval;
 
@@ -283,7 +283,7 @@ const
 Value&
 Reference::
 dereference_mutable()
-const
+  const
   {
     Value* qval;
 
@@ -405,7 +405,7 @@ const
 Value
 Reference::
 dereference_unset()
-const
+  const
   {
     Value* qval;
 

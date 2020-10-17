@@ -28,13 +28,13 @@ class basic_storage
   public:
     explicit constexpr
     basic_storage(const allocator_type& alloc)
-    noexcept
+      noexcept
       : allocator_base(alloc)
       { }
 
     explicit constexpr
     basic_storage(allocator_type&& alloc)
-    noexcept
+      noexcept
       : allocator_base(::std::move(alloc))
       { }
 
@@ -51,32 +51,32 @@ class basic_storage
   public:
     const allocator_type&
     as_allocator()
-    const noexcept
+      const noexcept
       { return static_cast<const allocator_base&>(*this);  }
 
     allocator_type&
     as_allocator()
-    noexcept
+      noexcept
       { return static_cast<allocator_base&>(*this);  }
 
     const value_type*
     data()
-    const noexcept
+      const noexcept
       { return noadl::unfancy(this->m_ptr);  }
 
     value_type*
     mut_data()
-    noexcept
+      noexcept
       { return noadl::unfancy(this->m_ptr);  }
 
     size_type
     max_size()
-    const noexcept
+      const noexcept
       { return allocator_traits<allocator_type>::max_size(*this);  }
 
     size_type
     capacity()
-    const noexcept
+      const noexcept
       { return this->m_cap;  }
 
     ROCKET_NOINLINE
@@ -135,7 +135,7 @@ class basic_storage
 
     void
     deallocate()
-    noexcept
+      noexcept
       {
         // If the pointer is null we assume the capacity is zero.
         auto ptr = ::std::exchange(this->m_ptr, nullptr);
@@ -149,7 +149,7 @@ class basic_storage
 
     void
     exchange_with(basic_storage& other)
-    noexcept
+      noexcept
       {
         ::std::swap(this->m_ptr, other.m_ptr);
         ::std::swap(this->m_cap, other.m_cap);

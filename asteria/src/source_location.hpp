@@ -17,39 +17,39 @@ class Source_Location
 
   public:
     Source_Location()
-    noexcept
+      noexcept
       : m_file(::rocket::sref("[unknown]")), m_line(-1), m_offset(-1)
       { }
 
     Source_Location(const cow_string& xfile, int xline, int xoffset)
-    noexcept
+      noexcept
       : m_file(xfile), m_line(xline), m_offset(xoffset)
       { }
 
   public:
     const cow_string&
     file()
-    const noexcept
+      const noexcept
       { return this->m_file;  }
 
     const char*
     c_file()
-    const noexcept
+      const noexcept
       { return this->m_file.c_str();  }
 
     int
     line()
-    const noexcept
+      const noexcept
       { return this->m_line;  }
 
     int
     offset()
-    const noexcept
+      const noexcept
       { return this->m_offset;  }
 
     Source_Location&
     swap(Source_Location& other)
-    noexcept
+      noexcept
       {
         this->m_file.swap(other.m_file);
         ::std::swap(this->m_line, other.m_line);
@@ -59,13 +59,13 @@ class Source_Location
 
     tinyfmt&
     print(tinyfmt& fmt)
-    const;
+      const;
   };
 
 inline
 void
 swap(Source_Location& lhs, Source_Location& rhs)
-noexcept
+  noexcept
   { lhs.swap(rhs);  }
 
 inline

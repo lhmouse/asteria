@@ -10,7 +10,7 @@
 namespace asteria {
 
 class Variable
-final
+  final
   : public Rcfwd<Variable>
   {
   private:
@@ -28,7 +28,7 @@ final
 
   public:
     Variable()
-    noexcept
+      noexcept
       { }
 
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Variable);
@@ -36,7 +36,7 @@ final
   public:
     const Value&
     get_value()
-    const noexcept
+      const noexcept
       { return this->m_value;  }
 
     Value&
@@ -45,17 +45,17 @@ final
 
     bool
     is_immutable()
-    const noexcept
+      const noexcept
       { return this->m_immut;  }
 
     Variable&
     set_immutable(bool immutable)
-    noexcept
+      noexcept
       { return this->m_immut = immutable, *this;  }
 
     bool
     is_initialized()
-    const noexcept
+      const noexcept
       { return this->m_alive;  }
 
     template<typename XValT>
@@ -70,7 +70,7 @@ final
 
     Variable&
     uninitialize()
-    noexcept
+      noexcept
       {
         this->m_value = INT64_C(0x6eef8badf00ddead);
         this->m_immut = true;
@@ -80,17 +80,17 @@ final
 
     long
     gcref_split()
-    const noexcept
+      const noexcept
       { return this->m_value.gcref_split();  }
 
     long
     get_gcref()
-    const noexcept
+      const noexcept
       { return this->m_gcref_i;  }
 
     Variable&
     reset_gcref(long iref)
-    noexcept
+      noexcept
       {
         this->m_gcref_i = iref;
         this->m_gcref_f = 0x1p-26;
@@ -99,7 +99,7 @@ final
 
     Variable&
     increment_gcref(long split)
-    noexcept
+      noexcept
       {
         // Optimize for the non-split case.
         if(split > 1) {
@@ -117,7 +117,7 @@ final
 
     Variable_Callback&
     enumerate_variables_descent(Variable_Callback& callback)
-    const;
+      const;
   };
 
 }  // namespace asteria

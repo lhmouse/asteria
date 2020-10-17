@@ -47,7 +47,7 @@ class basic_prehashed_string
   public:
     constexpr
     basic_prehashed_string()
-    noexcept(conjunction<is_nothrow_constructible<string_type>,
+      noexcept(conjunction<is_nothrow_constructible<string_type>,
                          is_nothrow_constructible<hasher>,
                          is_nothrow_copy_constructible<hasher>>::value)
       : m_sth(hasher())
@@ -56,21 +56,21 @@ class basic_prehashed_string
     template<typename... paramsT>
     explicit constexpr
     basic_prehashed_string(const hasher& hf, paramsT&&... params)
-    noexcept(conjunction<is_nothrow_constructible<string_type, paramsT&&...>,
+      noexcept(conjunction<is_nothrow_constructible<string_type, paramsT&&...>,
                          is_nothrow_copy_constructible<hasher>>::value)
       : m_sth(hf, ::std::forward<paramsT>(params)...)
       { }
 
     explicit constexpr
     basic_prehashed_string(const string_type& str, const hasher& hf = hasher())
-    noexcept(conjunction<is_nothrow_copy_constructible<string_type>,
+      noexcept(conjunction<is_nothrow_copy_constructible<string_type>,
                          is_nothrow_copy_constructible<hasher>>::value)
       : m_sth(hf, str)
       { }
 
     constexpr
     basic_prehashed_string(string_type&& str, const hasher& hf = hasher())
-    noexcept(conjunction<is_nothrow_move_constructible<string_type>,
+      noexcept(conjunction<is_nothrow_move_constructible<string_type>,
                          is_nothrow_copy_constructible<hasher>>::value)
       : m_sth(hf, ::std::move(str))
       { }
@@ -79,7 +79,7 @@ class basic_prehashed_string
     ROCKET_ENABLE_IF(is_convertible<xstringT&, string_type>::value)>
     explicit constexpr
     basic_prehashed_string(xstringT& xstr, const hasher& hf = hasher())
-    noexcept(conjunction<is_nothrow_constructible<string_type, xstringT&>,
+      noexcept(conjunction<is_nothrow_constructible<string_type, xstringT&>,
                          is_nothrow_copy_constructible<hasher>>::value)
       : m_sth(hf, xstr)
       { }
@@ -88,7 +88,7 @@ class basic_prehashed_string
     ROCKET_ENABLE_IF(is_convertible<xstringT&&, string_type>::value)>
     constexpr
     basic_prehashed_string(xstringT&& xstr, const hasher& hf = hasher())
-    noexcept(conjunction<is_nothrow_constructible<string_type, xstringT&&>,
+      noexcept(conjunction<is_nothrow_constructible<string_type, xstringT&&>,
                          is_nothrow_copy_constructible<hasher>>::value)
       : m_sth(hf, ::std::forward<xstringT>(xstr))
       { }
@@ -99,14 +99,14 @@ class basic_prehashed_string
       { }
 
     basic_prehashed_string(const basic_prehashed_string& other)
-    noexcept(conjunction<is_nothrow_constructible<string_type>,
+      noexcept(conjunction<is_nothrow_constructible<string_type>,
                          is_nothrow_copy_assignable<string_type>,
                          is_nothrow_copy_constructible<hasher>>::value)
       : m_sth(other.m_sth.as_hasher())
       { this->m_sth.assign(other.m_sth);  }
 
     basic_prehashed_string(basic_prehashed_string&& other)
-    noexcept(conjunction<is_nothrow_constructible<string_type>,
+      noexcept(conjunction<is_nothrow_constructible<string_type>,
                          is_nothrow_move_assignable<string_type>,
                          is_nothrow_copy_constructible<hasher>>::value)
       : m_sth(other.m_sth.as_hasher())
@@ -121,7 +121,7 @@ class basic_prehashed_string
 
     basic_prehashed_string&
     operator=(const basic_prehashed_string& other)
-    noexcept(is_nothrow_copy_assignable<string_type>::value)
+      noexcept(is_nothrow_copy_assignable<string_type>::value)
       {
         this->m_sth.assign(other.m_sth);
         return *this;
@@ -129,7 +129,7 @@ class basic_prehashed_string
 
     basic_prehashed_string&
     operator=(basic_prehashed_string&& other)
-    noexcept(is_nothrow_move_assignable<string_type>::value)
+      noexcept(is_nothrow_move_assignable<string_type>::value)
       {
         this->m_sth.assign(::std::move(other.m_sth));
         return *this;
@@ -140,71 +140,71 @@ class basic_prehashed_string
     constexpr
     const string_type&
     rdstr()
-    const noexcept
+      const noexcept
       { return this->m_sth.str();  }
 
     operator
     const string_type&()
-    const noexcept
+      const noexcept
       { return this->m_sth.str();  }
 
     constexpr
     size_t
     rdhash()
-    const noexcept
+      const noexcept
       { return this->m_sth.hval();  }
 
     // 24.3.2.3, iterators
     const_iterator
     begin()
-    const noexcept
+      const noexcept
       { return this->m_sth.str().begin();  }
 
     const_iterator
     end()
-    const noexcept
+      const noexcept
       { return this->m_sth.str().end();  }
 
     const_reverse_iterator
     rbegin()
-    const noexcept
+      const noexcept
       { return this->m_sth.str().rbegin();  }
 
     const_reverse_iterator
     rend()
-    const noexcept
+      const noexcept
       { return this->m_sth.str().rend();  }
 
     // 24.3.2.4, capacity
     bool
     empty()
-    const noexcept
+      const noexcept
       { return this->m_sth.str().empty();  }
 
     size_type
     size()
-    const noexcept
+      const noexcept
       { return this->m_sth.str().size();  }
 
     size_type
     length()
-    const noexcept
+      const noexcept
       { return this->m_sth.str().length();  }
 
     // N.B. This is a non-standard extension.
     difference_type
     ssize()
-    const noexcept
+      const noexcept
       { return static_cast<difference_type>(this->m_sth.str().size());  }
 
     size_type
     max_size()
-    const noexcept
+      const noexcept
       { return this->m_sth.str().max_size();  }
 
     basic_prehashed_string&
     clear()
-    noexcept(noexcept(::std::declval<string_type&>().clear()))
+      noexcept(noexcept(::std::declval<string_type&>().clear()))
       {
         this->m_sth.clear();
         return *this;
@@ -213,27 +213,27 @@ class basic_prehashed_string
     // 24.3.2.5, element access
     const_reference
     at(size_type pos)
-    const
+      const
       { return this->m_sth.str().at(pos);  }
 
     const_reference
     operator[](size_type pos)
-    const noexcept
+      const noexcept
       { return this->m_sth.str()[pos];  }
 
     const_reference
     front()
-    const noexcept
+      const noexcept
       { return this->m_sth.str().front();  }
 
     const_reference
     back()
-    const noexcept
+      const noexcept
       { return this->m_sth.str().back();  }
 
     basic_prehashed_string&
     assign(const basic_prehashed_string& other)
-    noexcept(is_nothrow_copy_constructible<string_type>::value)
+      noexcept(is_nothrow_copy_constructible<string_type>::value)
       {
         this->m_sth.assign(other.m_sth);
         return *this;
@@ -241,7 +241,7 @@ class basic_prehashed_string
 
     basic_prehashed_string&
     assign(basic_prehashed_string&& other)
-    noexcept(is_nothrow_move_constructible<string_type>::value)
+      noexcept(is_nothrow_move_constructible<string_type>::value)
       {
         this->m_sth.assign(::std::move(other.m_sth));
         return *this;
@@ -264,12 +264,12 @@ class basic_prehashed_string
 
     size_type
     copy(value_type* s, size_type tn, size_type tpos = 0)
-    const
+      const
       { return this->m_sth.str().copy(s, tn, tpos);  }
 
     basic_prehashed_string&
     swap(basic_prehashed_string& other)
-    noexcept(is_nothrow_swappable<string_type>::value)
+      noexcept(is_nothrow_swappable<string_type>::value)
       {
         this->m_sth.exchange_with(other.m_sth);
         return *this;
@@ -278,12 +278,12 @@ class basic_prehashed_string
     // 24.3.2.7, string operations
     constexpr const value_type*
     data()
-    const noexcept
+      const noexcept
       { return this->m_sth.str().data();  }
 
     const value_type*
     c_str()
-    const noexcept
+      const noexcept
       { return this->m_sth.str().c_str();  }
   };
 
@@ -296,7 +296,7 @@ struct basic_prehashed_string<stringT, hashT>::hash
     constexpr
     result_type
     operator()(const argument_type& str)
-    const noexcept
+      const noexcept
       { return str.rdhash();  }
   };
 
@@ -356,7 +356,7 @@ template<typename stringT, typename hashT>
 inline
 void
 swap(basic_prehashed_string<stringT, hashT>& lhs, basic_prehashed_string<stringT, hashT>& rhs)
-noexcept(noexcept(lhs.swap(rhs)))
+  noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
 template<typename charT, typename traitsT, typename stringT, typename hashT>

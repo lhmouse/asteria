@@ -46,23 +46,23 @@ class basic_tinybuf_file
 
   public:
     basic_tinybuf_file()
-    noexcept(is_nothrow_constructible<file_buffer>::value)
+      noexcept(is_nothrow_constructible<file_buffer>::value)
       : m_gbuf()
       { }
 
     explicit
     basic_tinybuf_file(const allocator_type& alloc)
-    noexcept
+      noexcept
       : m_gbuf(alloc)
       { }
 
     basic_tinybuf_file(unique_posix_file&& file, const allocator_type& alloc = allocator_type())
-    noexcept
+      noexcept
       : basic_tinybuf_file(alloc)
       { this->reset(::std::move(file));  }
 
     basic_tinybuf_file(handle_type fp, closer_type cl, const allocator_type& alloc = allocator_type())
-    noexcept
+      noexcept
       : basic_tinybuf_file(alloc)
       { this->reset(fp, cl);  }
 
@@ -71,7 +71,7 @@ class basic_tinybuf_file
       { this->open(path, mode);  }
 
     ~basic_tinybuf_file()
-    override;
+      override;
 
     basic_tinybuf_file(basic_tinybuf_file&&)
       = default;
@@ -116,7 +116,7 @@ class basic_tinybuf_file
   protected:
     off_type
     do_fortell()
-    const override
+      const override
       {
         if(!this->m_file)
           // No file has been opened. There are no characters to read.
@@ -132,7 +132,7 @@ class basic_tinybuf_file
 
     basic_tinybuf_file&
     do_flush(const char_type*& gcur, const char_type*& gend, char_type*& /*pcur*/, char_type*& /*pend*/)
-    override
+      override
       {
         if(gcur) {
           // If the get area exists, a file must have been opened.
@@ -154,7 +154,7 @@ class basic_tinybuf_file
 
     off_type
     do_seek(off_type off, seek_dir dir)
-    override
+      override
       {
         // Invalidate the get area before doing anything else.
         this->do_sync_areas();
@@ -182,7 +182,7 @@ class basic_tinybuf_file
 
     int_type
     do_underflow(const char_type*& gcur, const char_type*& gend, bool peek)
-    override
+      override
       {
         // If the get area exists, update the offset and clear it.
         this->do_sync_areas();
@@ -245,7 +245,7 @@ class basic_tinybuf_file
 
     basic_tinybuf_file&
     do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/, const char_type* sadd, size_type nadd)
-    override
+      override
       {
         // If the get area exists, update the offset and clear it.
         this->do_sync_areas();
@@ -268,22 +268,22 @@ class basic_tinybuf_file
   public:
     handle_type
     get_handle()
-    const noexcept
+      const noexcept
       { return this->m_file.get();  }
 
     const closer_type&
     get_closer()
-    const noexcept
+      const noexcept
       { return this->m_file.get_closer();  }
 
     closer_type&
     get_closer()
-    noexcept
+      noexcept
       { return this->m_file.get_closer();  }
 
     basic_tinybuf_file&
     reset(unique_posix_file&& file)
-    noexcept
+      noexcept
       {
         this->do_purge_areas();
 
@@ -295,7 +295,7 @@ class basic_tinybuf_file
 
     basic_tinybuf_file&
     reset(handle_type fp, closer_type cl)
-    noexcept
+      noexcept
       {
         this->do_purge_areas();
 
@@ -370,7 +370,7 @@ class basic_tinybuf_file
 
     basic_tinybuf_file&
     close()
-    noexcept
+      noexcept
       {
         // Discard the input buffer and close the file, ignoring any errors.
         return this->reset(nullptr, nullptr);
@@ -378,7 +378,7 @@ class basic_tinybuf_file
 
     basic_tinybuf_file&
     swap(basic_tinybuf_file& other)
-    noexcept(is_nothrow_swappable<file_buffer>::value)
+      noexcept(is_nothrow_swappable<file_buffer>::value)
       {
         this->tinybuf_type::swap(other);
 
@@ -398,7 +398,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 void
 swap(basic_tinybuf_file<charT, traitsT, allocT>& lhs, basic_tinybuf_file<charT, traitsT, allocT>& rhs)
-noexcept(noexcept(lhs.swap(rhs)))
+  noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
 extern template

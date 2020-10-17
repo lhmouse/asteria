@@ -11,7 +11,7 @@ namespace asteria {
 void
 Reference_Stack::
 do_destroy_elements()
-noexcept
+  noexcept
   {
     auto next = this->m_bptr + this->m_bstor;
     const auto eptr = this->m_bptr + this->m_estor;
@@ -30,7 +30,7 @@ noexcept
 void
 Reference_Stack::
 do_reallocate_reserve(Reference*& bptr, uint32_t& estor, uint32_t nadd)
-const
+  const
   {
     // Allocate a new table.
     constexpr size_t size_max = PTRDIFF_MAX / sizeof(Reference);
@@ -45,7 +45,7 @@ const
 void
 Reference_Stack::
 do_reallocate_finish(Reference* bptr, uint32_t estor)
-noexcept
+  noexcept
   {
     // Calculate the new top offset.
     // The caller may have constructed elements above the top.
@@ -72,7 +72,7 @@ noexcept
 Variable_Callback&
 Reference_Stack::
 enumerate_variables(Variable_Callback& callback)
-const
+  const
   {
     auto next = this->m_bptr + this->m_bstor;
     const auto eptr = this->m_bptr + this->m_estor;

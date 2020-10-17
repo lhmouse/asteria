@@ -11,7 +11,7 @@
 namespace asteria {
 
 class Instantiated_Function
-final
+  final
   : public Abstract_Function
   {
   private:
@@ -33,15 +33,15 @@ final
   public:
     tinyfmt&
     describe(tinyfmt& fmt)
-    const override;
+      const override;
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const override;
+      const override;
 
     Reference&
     invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack)
-    const override;
+      const override;
   };
 
 }  // namespace asteria

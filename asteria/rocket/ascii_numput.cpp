@@ -1088,7 +1088,7 @@ do_xput_M_dec(char*& ep, const uint64_t& mant, const char* rdxp)
 ascii_numput&
 ascii_numput::
 put_TB(bool value)
-noexcept
+  noexcept
   {
     this->clear();
     char* bp;
@@ -1113,7 +1113,7 @@ noexcept
 ascii_numput&
 ascii_numput::
 put_XP(const void* value)
-noexcept
+  noexcept
   {
     this->clear();
     char* bp = this->m_stor + M;
@@ -1138,7 +1138,7 @@ noexcept
 ascii_numput&
 ascii_numput::
 put_BU(uint64_t value, size_t precision)
-noexcept
+  noexcept
   {
     this->clear();
     char* bp = this->m_stor + M;
@@ -1163,7 +1163,7 @@ noexcept
 ascii_numput&
 ascii_numput::
 put_XU(uint64_t value, size_t precision)
-noexcept
+  noexcept
   {
     this->clear();
     char* bp = this->m_stor + M;
@@ -1188,7 +1188,7 @@ noexcept
 ascii_numput&
 ascii_numput::
 put_DU(uint64_t value, size_t precision)
-noexcept
+  noexcept
   {
     this->clear();
     char* bp = this->m_stor + M;
@@ -1209,7 +1209,7 @@ noexcept
 ascii_numput&
 ascii_numput::
 put_BI(int64_t value, size_t precision)
-noexcept
+  noexcept
   {
     this->clear();
     char* bp = this->m_stor + M;
@@ -1241,7 +1241,7 @@ noexcept
 ascii_numput&
 ascii_numput::
 put_XI(int64_t value, size_t precision)
-noexcept
+  noexcept
   {
     this->clear();
     char* bp = this->m_stor + M;
@@ -1273,7 +1273,7 @@ noexcept
 ascii_numput&
 ascii_numput::
 put_DI(int64_t value, size_t precision)
-noexcept
+  noexcept
   {
     this->clear();
     char* bp = this->m_stor + M;
@@ -1301,7 +1301,7 @@ noexcept
 ascii_numput&
 ascii_numput::
 put_BF(double value, bool single)
-noexcept
+  noexcept
   {
     this->clear();
     char* bp;
@@ -1366,7 +1366,7 @@ noexcept
 ascii_numput&
 ascii_numput::
 put_BE(double value, bool /*single*/)
-noexcept
+  noexcept
   {
     this->clear();
     char* bp;
@@ -1417,7 +1417,7 @@ noexcept
 ascii_numput&
 ascii_numput::
 put_XF(double value, bool single)
-noexcept
+  noexcept
   {
     this->clear();
     char* bp;
@@ -1485,7 +1485,7 @@ noexcept
 ascii_numput&
 ascii_numput::
 put_XE(double value, bool /*single*/)
-noexcept
+  noexcept
   {
     this->clear();
     char* bp;
@@ -1540,7 +1540,7 @@ noexcept
 ascii_numput&
 ascii_numput::
 put_DF(double value, bool single)
-noexcept
+  noexcept
   {
     this->clear();
     char* bp;
@@ -1600,7 +1600,7 @@ noexcept
 ascii_numput&
 ascii_numput::
 put_DE(double value, bool single)
-noexcept
+  noexcept
   {
     this->clear();
     char* bp;

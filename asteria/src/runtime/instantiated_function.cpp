@@ -30,7 +30,7 @@ do_solidify(const cow_vector<AIR_Node>& code)
 tinyfmt&
 Instantiated_Function::
 describe(tinyfmt& fmt)
-const
+  const
   {
     return fmt << "`" << this->m_zvarg->func() << "` at '" << this->m_zvarg->sloc() << "'";
   }
@@ -38,7 +38,7 @@ const
 Variable_Callback&
 Instantiated_Function::
 enumerate_variables(Variable_Callback& callback)
-const
+  const
   {
     return this->m_queue.enumerate_variables(callback);
   }
@@ -46,7 +46,7 @@ const
 Reference&
 Instantiated_Function::
 invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack)
-const
+  const
   {
     // Create the stack and context for this function.
     Executive_Context ctx_func(Executive_Context::M_function(), global, stack,

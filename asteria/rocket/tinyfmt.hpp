@@ -39,16 +39,16 @@ class basic_tinyfmt
   protected:
     // This interface class is stateless.
     basic_tinyfmt()
-    noexcept
+      noexcept
       = default;
 
     basic_tinyfmt(const basic_tinyfmt&)
-    noexcept
+      noexcept
       = default;
 
     basic_tinyfmt&
     operator=(const basic_tinyfmt&)
-    noexcept
+      noexcept
       = default;
 
   public:
@@ -60,7 +60,7 @@ class basic_tinyfmt
     virtual
     tinybuf_type&
     get_tinybuf()
-    const
+      const
       = 0;
 
     // unformatted output functions

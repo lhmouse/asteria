@@ -15,22 +15,22 @@ class reference_counter_base
   public:
     bool
     unique()
-    const noexcept
+      const noexcept
       { return this->m_nref.unique();  }
 
     long
     use_count()
-    const noexcept
+      const noexcept
       { return this->m_nref.get();  }
 
     void
     add_reference()
-    const noexcept
+      const noexcept
       { return this->m_nref.increment();  }
 
     bool
     drop_reference()
-    const noexcept
+      const noexcept
       { return this->m_nref.decrement();  }
   };
 
@@ -38,7 +38,7 @@ template<typename elementT, typename deleterT>
 constexpr
 deleterT
 copy_deleter(const refcnt_base<elementT, deleterT>& base)
-noexcept
+  noexcept
   { return base.as_deleter();  }
 
 template<typename elementT>
@@ -54,7 +54,7 @@ class stored_pointer
   public:
     constexpr
     stored_pointer()
-    noexcept
+      noexcept
       { }
 
     ~stored_pointer()
@@ -76,7 +76,7 @@ class stored_pointer
   public:
     bool
     unique()
-    const noexcept
+      const noexcept
       {
         auto ptr = this->m_ptr;
         if(!ptr)
@@ -86,7 +86,7 @@ class stored_pointer
 
     long
     use_count()
-    const noexcept
+      const noexcept
       {
         auto ptr = this->m_ptr;
         if(!ptr)
@@ -97,17 +97,17 @@ class stored_pointer
     constexpr
     pointer
     get()
-    const noexcept
+      const noexcept
       { return this->m_ptr;  }
 
     pointer
     release()
-    noexcept
+      noexcept
       { return ::std::exchange(this->m_ptr, nullptr);  }
 
     pointer
     fork()
-    const noexcept
+      const noexcept
       {
         auto ptr = this->m_ptr;
         if(ptr)
@@ -117,7 +117,7 @@ class stored_pointer
 
     void
     reset(pointer ptr_new)
-    noexcept
+      noexcept
       {
         auto ptr = ::std::exchange(this->m_ptr, ptr_new);
         if(ptr)
@@ -127,7 +127,7 @@ class stored_pointer
 
     void
     exchange_with(stored_pointer& other)
-    noexcept
+      noexcept
       { ::std::swap(this->m_ptr, other.m_ptr);  }
   };
 

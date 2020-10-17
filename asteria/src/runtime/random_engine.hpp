@@ -9,7 +9,7 @@
 namespace asteria {
 
 class Random_Engine
-final
+  final
   : public Rcfwd<Random_Engine>
   {
   public:
@@ -30,7 +30,7 @@ final
 
   public:
     Random_Engine()
-    noexcept
+      noexcept
       { this->init();  }
 
     ASTERIA_COPYABLE_DESTRUCTOR(Random_Engine);
@@ -38,18 +38,18 @@ final
   private:
     void
     do_isaac()
-    noexcept;
+      noexcept;
 
   public:
     // Initializes this PRNG with some external entropy source.
     void
     init()
-    noexcept;
+      noexcept;
 
     // Gets a random 32-bit number.
     uint32_t
     bump()
-    noexcept
+      noexcept
       {
         // This matches `main()` from 'rand.c'.
         //   https://www.burtleburtle.net/bob/c/rand.c
@@ -63,18 +63,18 @@ final
     static constexpr
     result_type
     min()
-    noexcept
+      noexcept
       { return 0; }
 
     static constexpr
     result_type
     max()
-    noexcept
+      noexcept
       { return UINT32_MAX;  }
 
     result_type
     operator()()
-    noexcept
+      noexcept
       { return this->bump();  }
   };
 

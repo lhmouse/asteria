@@ -11,7 +11,7 @@ namespace asteria {
 void
 Variable_HashSet::
 do_destroy_buckets()
-noexcept
+  noexcept
   {
     auto next = this->m_head;
     while(ROCKET_EXPECT(next)) {
@@ -32,7 +32,7 @@ noexcept
 details_variable_hashset::Bucket*
 Variable_HashSet::
 do_xprobe(const rcptr<Variable>& var)
-const noexcept
+  const noexcept
   {
     auto bptr = this->m_bptr;
     auto eptr = this->m_eptr;
@@ -51,7 +51,7 @@ const noexcept
 void
 Variable_HashSet::
 do_xrelocate_but(Bucket* qxcld)
-noexcept
+  noexcept
   {
     auto bptr = this->m_bptr;
     auto eptr = this->m_eptr;
@@ -98,7 +98,7 @@ noexcept
 void
 Variable_HashSet::
 do_list_attach(Bucket* qbkt)
-noexcept
+  noexcept
   {
     // Insert the bucket before `head`.
     auto next = ::std::exchange(this->m_head, qbkt);
@@ -111,7 +111,7 @@ noexcept
 void
 Variable_HashSet::
 do_list_detach(Bucket* qbkt)
-noexcept
+  noexcept
   {
     auto next = qbkt->next;
     auto prev = qbkt->prev;
@@ -176,7 +176,7 @@ do_rehash(size_t nbkt)
 void
 Variable_HashSet::
 do_attach(Bucket* qbkt, const rcptr<Variable>& var)
-noexcept
+  noexcept
   {
     // Construct the node, then attach it.
     ROCKET_ASSERT(!*qbkt);
@@ -189,7 +189,7 @@ noexcept
 void
 Variable_HashSet::
 do_detach(Bucket* qbkt)
-noexcept
+  noexcept
   {
     // Transfer ownership of the old variable, then detach the bucket.
     this->m_size--;
@@ -205,7 +205,7 @@ noexcept
 Variable_Callback&
 Variable_HashSet::
 enumerate_variables(Variable_Callback& callback)
-const
+  const
   {
     auto next = this->m_head;
     while(ROCKET_EXPECT(next)) {

@@ -23,46 +23,46 @@ class ascii_numput
 
   public:
     ascii_numput()
-    noexcept
+      noexcept
       { this->clear();  }
 
     template<typename valueT,
     ROCKET_ENABLE_IF(is_scalar<valueT>::value)>
     explicit
     ascii_numput(const valueT& value)
-    noexcept
+      noexcept
       { this->put(value);  }
 
   public:
     // accessors
     const char*
     begin()
-    const noexcept
+      const noexcept
       { return this->m_bptr;  }
 
     const char*
     end()
-    const noexcept
+      const noexcept
       { return this->m_eptr;  }
 
     bool
     empty()
-    const noexcept
+      const noexcept
       { return this->m_bptr == this->m_eptr;  }
 
     size_t
     size()
-    const noexcept
+      const noexcept
       { return static_cast<size_t>(this->m_eptr - this->m_bptr);  }
 
     const char*
     data()
-    const noexcept
+      const noexcept
       { return this->m_bptr;  }
 
     ascii_numput&
     clear()
-    noexcept
+      noexcept
       {
         this->m_bptr = this->m_stor;
         this->m_eptr = this->m_stor;
@@ -73,76 +73,76 @@ class ascii_numput
     // * boolean
     ascii_numput&
     put_TB(bool value)
-    noexcept;
+      noexcept;
 
     // * pointer
     ascii_numput&
     put_XP(const void* value)
-    noexcept;
+      noexcept;
 
     // * unsigned 64-bit integer in binary
     ascii_numput&
     put_BU(uint64_t value, size_t precision = 1)
-    noexcept;
+      noexcept;
 
     // * unsigned 64-bit integer in hexadecimal
     ascii_numput&
     put_XU(uint64_t value, size_t precision = 1)
-    noexcept;
+      noexcept;
 
     // * unsigned 64-bit integer in decimal
     ascii_numput&
     put_DU(uint64_t value, size_t precision = 1)
-    noexcept;
+      noexcept;
 
     // * signed 64-bit integer in binary
     ascii_numput&
     put_BI(int64_t value, size_t precision = 1)
-    noexcept;
+      noexcept;
 
     // * signed 64-bit integer in hexadecimal
     ascii_numput&
     put_XI(int64_t value, size_t precision = 1)
-    noexcept;
+      noexcept;
 
     // * signed 64-bit integer in decimal
     ascii_numput&
     put_DI(int64_t value, size_t precision = 1)
-    noexcept;
+      noexcept;
 
     // * IEEE-754 double-precision floating-point in binary
     ascii_numput&
     put_BF(double value, bool single = false)
-    noexcept;
+      noexcept;
 
     // * IEEE-754 double-precision floating-point in binary scientific notation
     ascii_numput&
     put_BE(double value, bool single = false)
-    noexcept;
+      noexcept;
 
     // * IEEE-754 double-precision floating-point in hexadecimal
     ascii_numput&
     put_XF(double value, bool single = false)
-    noexcept;
+      noexcept;
 
     // * IEEE-754 double-precision floating-point in hexadecimal scientific notation
     ascii_numput&
     put_XE(double value, bool single = false)
-    noexcept;
+      noexcept;
 
     // * IEEE-754 double-precision floating-point in decimal
     ascii_numput&
     put_DF(double value, bool single = false)
-    noexcept;
+      noexcept;
 
     // * IEEE-754 double-precision floating-point in decimal scientific notation
     ascii_numput&
     put_DE(double value, bool single = false)
-    noexcept;
+      noexcept;
 
     ascii_numput&
     put(bool value)
-    noexcept
+      noexcept
       {
         this->put_TB(value);
         return *this;
@@ -150,7 +150,7 @@ class ascii_numput
 
     ascii_numput&
     put(const void* value)
-    noexcept
+      noexcept
       {
         this->put_XP(value);
         return *this;
@@ -158,7 +158,7 @@ class ascii_numput
 
     ascii_numput&
     put(unsigned char value)
-    noexcept
+      noexcept
       {
         this->put_DU(value);
         return *this;
@@ -166,7 +166,7 @@ class ascii_numput
 
     ascii_numput&
     put(unsigned short value)
-    noexcept
+      noexcept
       {
         this->put_DU(value);
         return *this;
@@ -174,7 +174,7 @@ class ascii_numput
 
     ascii_numput&
     put(unsigned value)
-    noexcept
+      noexcept
       {
         this->put_DU(value);
         return *this;
@@ -182,7 +182,7 @@ class ascii_numput
 
     ascii_numput&
     put(unsigned long value)
-    noexcept
+      noexcept
       {
         this->put_DU(value);
         return *this;
@@ -190,7 +190,7 @@ class ascii_numput
 
     ascii_numput&
     put(unsigned long long value)
-    noexcept
+      noexcept
       {
         this->put_DU(value);
         return *this;
@@ -198,7 +198,7 @@ class ascii_numput
 
     ascii_numput&
     put(signed char value)
-    noexcept
+      noexcept
       {
         this->put_DI(value);
         return *this;
@@ -206,7 +206,7 @@ class ascii_numput
 
     ascii_numput&
     put(signed short value)
-    noexcept
+      noexcept
       {
         this->put_DI(value);
         return *this;
@@ -214,7 +214,7 @@ class ascii_numput
 
     ascii_numput&
     put(signed value)
-    noexcept
+      noexcept
       {
         this->put_DI(value);
         return *this;
@@ -222,7 +222,7 @@ class ascii_numput
 
     ascii_numput&
     put(signed long value)
-    noexcept
+      noexcept
       {
         this->put_DI(value);
         return *this;
@@ -230,7 +230,7 @@ class ascii_numput
 
     ascii_numput&
     put(signed long long value)
-    noexcept
+      noexcept
       {
         this->put_DI(value);
         return *this;
@@ -238,7 +238,7 @@ class ascii_numput
 
     ascii_numput&
     put(float value)
-    noexcept
+      noexcept
       {
         this->put_DF(static_cast<double>(value), true);
         return *this;
@@ -246,7 +246,7 @@ class ascii_numput
 
     ascii_numput&
     put(double value)
-    noexcept
+      noexcept
       {
         this->put_DF(value);
         return *this;

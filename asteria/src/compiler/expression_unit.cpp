@@ -32,7 +32,7 @@ cow_vector<AIR_Node>&
 Expression_Unit::
 generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
               Analytic_Context& ctx, PTC_Aware ptc)
-const
+  const
   {
     switch(this->index()) {
       case index_literal: {

@@ -141,21 +141,21 @@ class const_bitset
     template<uint32_t... M>
     explicit constexpr
     const_bitset(u32seq<M...>)
-    noexcept
+      noexcept
       : m_words{ M... }
       { }
 
   public:
     constexpr
     const_bitset()
-    noexcept
+      noexcept
       : const_bitset(typename pack_byte<typename pack_bool<u32seq<B...>>::type>::type())
       { }
 
     constexpr
     bool
     operator[](size_t k)
-    const noexcept
+      const noexcept
       { return this->m_words[k / 32] & (uint32_t(1) << k % 32);  }
   };
 
@@ -168,13 +168,13 @@ class ptr_table
   public:
     constexpr
     ptr_table()
-    noexcept
+      noexcept
       { }
 
     constexpr
     targetT*
     operator[](size_t k)
-    const noexcept
+      const noexcept
       { return this->m_ptrs[k];  }
   };
 

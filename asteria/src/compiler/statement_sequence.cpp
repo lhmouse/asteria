@@ -182,7 +182,7 @@ constexpr s_literal_table[] =
 constexpr
 bool
 operator==(const Literal_Element& lhs, Keyword rhs)
-noexcept
+  noexcept
   {
     return lhs.kwrd == rhs;
   }
@@ -1415,7 +1415,7 @@ constexpr s_keyword_table[] =
 constexpr
 bool
 operator==(const Keyword_Element& lhs, Keyword rhs)
-noexcept
+  noexcept
   {
     return lhs.kwrd == rhs;
   }
@@ -1438,7 +1438,7 @@ constexpr s_punctuator_table[] =
 constexpr
 bool
 operator==(const Punctuator_Element& lhs, Punctuator rhs)
-noexcept
+  noexcept
   {
     return lhs.punct == rhs;
   }
@@ -1913,7 +1913,7 @@ constexpr s_postfix_xop_table[] =
 constexpr
 bool
 operator==(const Postfix_Operator_Element& lhs, Punctuator rhs)
-noexcept
+  noexcept
   {
     return lhs.punct == rhs;
   }
@@ -2203,7 +2203,7 @@ constexpr s_infix_xop_table[] =
 constexpr
 bool
 operator==(const Infix_Operator_Element& lhs, Punctuator rhs)
-noexcept
+  noexcept
   {
     return lhs.punct == rhs;
   }

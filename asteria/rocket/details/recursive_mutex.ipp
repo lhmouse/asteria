@@ -15,7 +15,7 @@ class stored_pointer
   public:
     constexpr
     stored_pointer()
-    noexcept
+      noexcept
       { };
 
     stored_pointer(const stored_pointer&)
@@ -31,17 +31,17 @@ class stored_pointer
   public:
     ::pthread_mutex_t*
     get()
-    const noexcept
+      const noexcept
       { return this->m_ptr;  }
 
     ::pthread_mutex_t*
     release()
-    noexcept
+      noexcept
       { return ::std::exchange(this->m_ptr, nullptr);  }
 
     void
     reset(::pthread_mutex_t* ptr_new)
-    noexcept
+      noexcept
       {
         auto ptr = ::std::exchange(this->m_ptr, ::std::move(ptr_new));
         if(ptr)
@@ -50,7 +50,7 @@ class stored_pointer
 
     void
     exchange_with(stored_pointer& other)
-    noexcept
+      noexcept
       { ::std::swap(this->m_ptr, other.m_ptr);  }
   };
 

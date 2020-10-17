@@ -46,7 +46,7 @@ struct basic_formatter
 
     tinyfmt_type&
     submit(tinyfmt_type& fmt)
-    const
+      const
       { return this->ifunc(fmt, this->param);  }
   };
 
@@ -54,7 +54,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename paramT>
 constexpr
 basic_formatter<charT, traitsT>
 make_default_formatter(paramT& param)
-noexcept
+  noexcept
   {
     return { [](basic_tinyfmt<charT, traitsT>& fmt, const void* ptr) -> basic_tinyfmt<charT, traitsT>&
                  { return fmt << *(static_cast<const paramT*>(ptr));  },

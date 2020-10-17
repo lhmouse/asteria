@@ -11,7 +11,7 @@
 namespace asteria {
 
 class Genius_Collector
-final
+  final
   : public Rcfwd<Genius_Collector>
   {
   private:
@@ -23,7 +23,7 @@ final
 
   public:
     Genius_Collector()
-    noexcept
+      noexcept
       : m_oldest(&(this->m_pool), nullptr, 10),
         m_middle(&(this->m_pool), &(this->m_oldest), 60),
         m_newest(&(this->m_pool), &(this->m_middle), 800)
@@ -34,22 +34,22 @@ final
   private:
     Collector Genius_Collector::*
     do_locate(GC_Generation gc_gen)
-    const;
+      const;
 
   public:
     size_t
     get_pool_size()
-    const noexcept
+      const noexcept
       { return this->m_pool.size();  }
 
     Genius_Collector&
     clear_pool()
-    noexcept
+      noexcept
       { return this->m_pool.clear(), *this;  }
 
     const Collector&
     get_collector(GC_Generation gc_gen)
-    const
+      const
       { return this->*(this->do_locate(gc_gen));  }
 
     Collector&
@@ -64,7 +64,7 @@ final
 
     Genius_Collector&
     wipe_out_variables()
-    noexcept;
+      noexcept;
   };
 
 }  // namespace asteria

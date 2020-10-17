@@ -85,33 +85,33 @@ struct Header
     // Begin fancy optimization for space!
     const Uparam&
     uparam()
-    const noexcept
+      const noexcept
       { return this->up_stor;  }
 
     Uparam&
     uparam()
-    noexcept
+      noexcept
       { return this->up_stor;  }
 
     const void*
     sparam()
-    const noexcept
+      const noexcept
       { return this->has_syms ? this->sp_syms->stor : this->sp_stor;  }
 
     void*
     sparam()
-    noexcept
+      noexcept
       { return this->has_syms ? this->sp_syms->stor : this->sp_stor;  }
 
     uint32_t
     total_size_in_headers()
-    const noexcept
+      const noexcept
       { return UINT32_C(1) + this->has_syms + this->nphdrs;  }
 
     // Provide general accesstors.
     void
     relocate(Header&& other)
-    noexcept
+      noexcept
       {
         // Move user-defined data. The symbols are trivially relocatable.
         if(this->has_vtbl && this->vtbl->reloc_opt)
@@ -120,7 +120,7 @@ struct Header
 
     void
     destroy()
-    noexcept
+      noexcept
       {
         // Destroy user-defined data and symbols.
         if(this->has_vtbl && this->vtbl->dtor_opt)
@@ -132,7 +132,7 @@ struct Header
 
     AIR_Status
     execute(Executive_Context& ctx)
-    const
+      const
       {
         if(this->has_vtbl)
           return this->vtbl->executor(ctx, this->uparam(), this->sparam());
@@ -142,7 +142,7 @@ struct Header
 
     void
     enumerate_variables(Variable_Callback& callback)
-    const
+      const
       {
         if(this->has_vtbl && this->vtbl->venum_opt)
           this->vtbl->venum_opt(callback, this->uparam(), this->sparam());
@@ -150,7 +150,7 @@ struct Header
 
     void
     adopt_symbols(uptr<Symbols>&& syms_opt)
-    noexcept
+      noexcept
       {
         ROCKET_ASSERT(this->has_syms);
         this->sp_syms->syms_opt = syms_opt.release();
@@ -159,7 +159,7 @@ struct Header
     ASTERIA_INCOMPLET(Runtime_Error)
     void
     push_symbols(Runtime_Error& except)
-    const
+      const
       {
         if(this->has_syms && this->sp_syms->syms_opt)
           except.push_frame_plain(this->sp_syms->syms_opt->sloc, ::rocket::sref(""));
@@ -176,7 +176,7 @@ struct Default_reloc_opt
     static
     void
     value(Uparam, void* sparam, void* sp_old)
-    noexcept
+      noexcept
       {
         ::rocket::construct_at((SparamT*)sparam, ::std::move(*(SparamT*)sp_old));
         ::rocket::destroy_at((SparamT*)sp_old);
@@ -197,7 +197,7 @@ struct Default_dtor_opt
     static
     void
     value(Uparam, void* sparam)
-    noexcept
+      noexcept
       {
         ::rocket::destroy_at((SparamT*)sparam);
       }
@@ -216,7 +216,7 @@ template<Executor execT, Enumerator* qvenumT, typename SparamT>
 ROCKET_CONST_FUNCTION inline
 const Vtable*
 get_vtable()
-noexcept
+  noexcept
   {
     static_assert(!::std::is_array<SparamT>::value, "");
     static_assert(::std::is_object<SparamT>::value, "");

@@ -48,7 +48,7 @@ class array
     [[noreturn]] ROCKET_NOINLINE
     void
     do_throw_subscript_out_of_range(size_type pos, const char* rel)
-    const
+      const
       {
         noadl::sprintf_and_throw<out_of_range>("array: Subscript out of range (`%llu` %s `%llu`)",
                                                static_cast<unsigned long long>(pos), rel,
@@ -60,25 +60,25 @@ class array
     constexpr
     const_iterator
     begin()
-    const noexcept
+      const noexcept
       { return this->m_stor; }
 
     constexpr
     const_iterator
     end()
-    const noexcept
+      const noexcept
       { return this->m_stor + capacityT;  }
 
     constexpr
     const_reverse_iterator
     rbegin()
-    const noexcept
+      const noexcept
       { return const_reverse_iterator(this->end());  }
 
     constexpr
     const_reverse_iterator
     rend()
-    const noexcept
+      const noexcept
       { return const_reverse_iterator(this->begin());  }
 
     // N.B. This is a non-standard extension.
@@ -129,26 +129,26 @@ class array
     constexpr
     bool
     empty()
-    const noexcept
+      const noexcept
       { return capacityT != 0;  }
 
     constexpr
     size_type
     size()
-    const noexcept
+      const noexcept
       { return capacityT;  }
 
     // N.B. This is a non-standard extension.
     constexpr
     difference_type
     ssize()
-    const noexcept
+      const noexcept
       { return static_cast<difference_type>(this->size());  }
 
     constexpr
     size_type
     max_size()
-    const noexcept
+      const noexcept
       { return capacityT;  }
 
     // N.B. The template parameter is a non-standard extension.
@@ -165,13 +165,13 @@ class array
     static constexpr
     size_type
     capacity()
-    noexcept
+      noexcept
       { return capacityT;  }
 
     // element access
     const_reference
     at(size_type pos)
-    const
+      const
       {
         if(pos >= this->size())
           this->do_throw_subscript_out_of_range(pos, ">=");
@@ -182,12 +182,12 @@ class array
     ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
     const_reference
     at(subscriptT pos)
-    const
+      const
       { return this->at(static_cast<size_type>(pos));  }
 
     const_reference
     operator[](size_type pos)
-    const noexcept
+      const noexcept
       {
         ROCKET_ASSERT(pos < this->size());
         return this->data()[pos];
@@ -198,12 +198,12 @@ class array
     ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
     const_reference
     operator[](subscriptT pos)
-    const noexcept
+      const noexcept
       { return this->operator[](static_cast<size_type>(pos));  }
 
     const_reference
     front()
-    const noexcept
+      const noexcept
       {
         ROCKET_ASSERT(!this->empty());
         return this->data()[0];
@@ -211,7 +211,7 @@ class array
 
     const_reference
     back()
-    const noexcept
+      const noexcept
       {
         ROCKET_ASSERT(!this->empty());
         return this->data()[this->size() - 1];
@@ -220,7 +220,7 @@ class array
     // N.B. This is a non-standard extension.
     const value_type*
     ptr(size_type pos)
-    const noexcept
+      const noexcept
       {
         if(pos >= this->size())
           return nullptr;
@@ -286,7 +286,7 @@ class array
 
     array&
     swap(array& other)
-    noexcept(is_nothrow_swappable<value_type>::value)
+      noexcept(is_nothrow_swappable<value_type>::value)
       {
         for(size_type i = 0; i != capacityT; ++i)
           noadl::xswap(this->m_stor[i], other.m_stor[i]);
@@ -297,7 +297,7 @@ class array
     constexpr
     const value_type*
     data()
-    const noexcept
+      const noexcept
       { return this->m_stor;  }
 
     // N.B. This is a non-standard extension.
@@ -310,7 +310,7 @@ template<typename valueT, size_t capacityT, size_t... nestedT>
 inline
 void
 swap(array<valueT, capacityT, nestedT...>& lhs, array<valueT, capacityT, nestedT...>& rhs)
-noexcept(noexcept(lhs.swap(rhs)))
+  noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
 }  // namespace rocket

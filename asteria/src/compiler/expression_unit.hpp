@@ -152,12 +152,12 @@ class Expression_Unit
   public:
     Index
     index()
-    const noexcept
+      const noexcept
       { return static_cast<Index>(this->m_stor.index());  }
 
     Expression_Unit&
     swap(Expression_Unit& other)
-    noexcept
+      noexcept
       {
         this->m_stor.swap(other.m_stor);
         return *this;
@@ -166,13 +166,13 @@ class Expression_Unit
     cow_vector<AIR_Node>&
     generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
                   Analytic_Context& ctx, PTC_Aware ptc)
-    const;
+      const;
   };
 
 inline
 void
 swap(Expression_Unit& lhs, Expression_Unit& rhs)
-noexcept
+  noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

@@ -11,7 +11,7 @@ namespace asteria {
 tinyfmt&
 Token::
 print(tinyfmt& fmt)
-const
+  const
   {
     switch(this->index()) {
       case index_keyword:

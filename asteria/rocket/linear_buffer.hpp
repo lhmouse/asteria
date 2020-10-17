@@ -40,7 +40,7 @@ class basic_linear_buffer
   public:
     explicit constexpr
     basic_linear_buffer(const allocator_type& alloc)
-    noexcept
+      noexcept
       : m_stor(alloc)
       { }
 
@@ -53,12 +53,12 @@ class basic_linear_buffer
       { this->putn(other.data(), other.size());  }
 
     basic_linear_buffer(basic_linear_buffer&& other)
-    noexcept
+      noexcept
       : m_stor(::std::move(other.m_stor.as_allocator()))
       { this->do_exchange_with(other);  }
 
     basic_linear_buffer(basic_linear_buffer&& other, const allocator_type& alloc)
-    noexcept(is_always_equal_allocator<allocator_type>::value)
+      noexcept(is_always_equal_allocator<allocator_type>::value)
       : m_stor(alloc)
       {
         if(ROCKET_EXPECT(this->m_stor.as_allocator() == alloc))
@@ -71,7 +71,7 @@ class basic_linear_buffer
 
     constexpr
     basic_linear_buffer()
-    noexcept(is_nothrow_constructible<allocator_type>::value)
+      noexcept(is_nothrow_constructible<allocator_type>::value)
       : basic_linear_buffer(allocator_type())
       { }
 
@@ -99,7 +99,7 @@ class basic_linear_buffer
 
     basic_linear_buffer&
     operator=(basic_linear_buffer&& other)
-    noexcept(is_always_equal_allocator<allocator_type>::value ||
+      noexcept(is_always_equal_allocator<allocator_type>::value ||
              allocator_traits<allocator_type>::propagate_on_container_move_assignment::value)
       {
         if(ROCKET_EXPECT(this->m_stor.as_allocator() == other.m_stor.as_allocator())) {
@@ -124,7 +124,7 @@ class basic_linear_buffer
   private:
     void
     do_deallocate()
-    noexcept
+      noexcept
       {
         this->m_stor.deallocate();
         this->m_goff = 0;
@@ -133,7 +133,7 @@ class basic_linear_buffer
 
     void
     do_exchange_with(basic_linear_buffer& other)
-    noexcept
+      noexcept
       {
         this->m_stor.exchange_with(other.m_stor);
         noadl::xswap(this->m_goff, other.m_goff);
@@ -152,42 +152,42 @@ class basic_linear_buffer
     constexpr
     const allocator_type&
     get_allocator()
-    const noexcept
+      const noexcept
       { return this->m_stor.as_allocator();  }
 
     allocator_type&
     get_allocator()
-    noexcept
+      noexcept
       { return this->m_stor.as_allocator();  }
 
     bool
     empty()
-    const noexcept
+      const noexcept
       { return this->m_goff == this->m_eoff;  }
 
     size_type
     size()
-    const noexcept
+      const noexcept
       { return this->m_eoff - this->m_goff;  }
 
     difference_type
     ssize()
-    const noexcept
+      const noexcept
       { return static_cast<difference_type>(this->m_eoff - this->m_goff);  }
 
     size_type
     max_size()
-    const noexcept
+      const noexcept
       { return this->m_stor.max_size();  }
 
     size_type
     capacity()
-    const noexcept
+      const noexcept
       { return this->m_stor.capacity();  }
 
     basic_linear_buffer&
     clear()
-    noexcept
+      noexcept
       {
         this->m_goff = 0;
         this->m_eoff = 0;
@@ -197,22 +197,22 @@ class basic_linear_buffer
     // read functions
     const value_type*
     begin()
-    const noexcept
+      const noexcept
       { return this->m_stor.data() + this->m_goff;  }
 
     const value_type*
     end()
-    const noexcept
+      const noexcept
       { return this->m_stor.data() + this->m_eoff;  }
 
     const value_type*
     data()
-    const noexcept
+      const noexcept
       { return this->m_stor.data() + this->m_goff;  }
 
     basic_linear_buffer&
     discard(size_type nbump)
-    noexcept
+      noexcept
       {
         ROCKET_ASSERT(nbump <= this->m_eoff - this->m_goff);
 #ifdef ROCKET_DEBUG
@@ -224,7 +224,7 @@ class basic_linear_buffer
 
     size_type
     peekn(value_type* s, size_type n)
-    const noexcept
+      const noexcept
       {
         size_type nread = noadl::min(n, this->size());
         if(nread <= 0)
@@ -236,7 +236,7 @@ class basic_linear_buffer
 
     size_type
     getn(value_type* s, size_type n)
-    noexcept
+      noexcept
       {
         size_type nread = noadl::min(n, this->size());
         if(nread <= 0)
@@ -249,7 +249,7 @@ class basic_linear_buffer
 
     int_type
     peekc()
-    const noexcept
+      const noexcept
       {
         value_type s[1];
         if(this->peekn(s, 1) == 0)
@@ -261,7 +261,7 @@ class basic_linear_buffer
 
     int_type
     getc()
-    noexcept
+      noexcept
       {
         value_type s[1];
         if(this->getn(s, 1) == 0)
@@ -274,17 +274,17 @@ class basic_linear_buffer
     // write functions
     value_type*
     mut_begin()
-    noexcept
+      noexcept
       { return this->m_stor.mut_data() + this->m_goff;  }
 
     value_type*
     mut_end()
-    noexcept
+      noexcept
       { return this->m_stor.mut_data() + this->m_eoff;  }
 
     value_type*
     mut_data()
-    noexcept
+      noexcept
       { return this->m_stor.mut_data() + this->m_goff;  }
 
     size_type
@@ -305,7 +305,7 @@ class basic_linear_buffer
 
     basic_linear_buffer&
     accept(size_type nbump)
-    noexcept
+      noexcept
       {
         ROCKET_ASSERT(nbump <= this->m_stor.capacity() - this->m_eoff);
         this->m_eoff += nbump;
@@ -345,7 +345,7 @@ class basic_linear_buffer
 
     basic_linear_buffer&
     swap(basic_linear_buffer& other)
-    noexcept(is_always_equal_allocator<allocator_type>::value ||
+      noexcept(is_always_equal_allocator<allocator_type>::value ||
              allocator_traits<allocator_type>::propagate_on_container_swap::value)
       {
         ROCKET_ASSERT((this->m_stor.as_allocator() == other.m_stor.as_allocator()) ||
@@ -363,7 +363,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 void
 swap(basic_linear_buffer<charT, traitsT, allocT>& lhs, basic_linear_buffer<charT, traitsT, allocT>& rhs)
-noexcept(noexcept(lhs.swap(rhs)))
+  noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
 extern template

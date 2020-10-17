@@ -44,7 +44,7 @@ class ascii_numget
 
   public:
     ascii_numget()
-    noexcept
+      noexcept
       { this->clear();  }
 
     template<typename valueT,
@@ -56,47 +56,47 @@ class ascii_numget
     // accessors
     explicit operator
     bool()
-    const noexcept
+      const noexcept
       { return this->m_succ;  }
 
     bool
     overflowed()
-    const noexcept
+      const noexcept
       { return this->m_ovfl;  }
 
     bool
     underflowed()
-    const noexcept
+      const noexcept
       { return this->m_udfl;  }
 
     bool
     inexact()
-    const noexcept
+      const noexcept
       { return this->m_inxc;  }
 
     bool
     is_finite()
-    const noexcept
+      const noexcept
       { return this->m_vcls == 0;  }
 
     bool
     is_infinitesimal()
-    const noexcept
+      const noexcept
       { return this->m_vcls == 1;  }
 
     bool
     is_infinity()
-    const noexcept
+      const noexcept
       { return this->m_vcls == 2;  }
 
     bool
     is_nan()
-    const noexcept
+      const noexcept
       { return this->m_vcls == 3;  }
 
     ascii_numget&
     clear()
-    noexcept
+      noexcept
       {
         this->m_bits = 0;
         this->m_expo = 0;
@@ -127,17 +127,17 @@ class ascii_numget
     // * unsigned 64-bit integer
     ascii_numget&
     cast_U(uint64_t& value, uint64_t lower, uint64_t upper)
-    noexcept;
+      noexcept;
 
     // * signed 64-bit integer
     ascii_numget&
     cast_I(int64_t& value, int64_t lower, int64_t upper)
-    noexcept;
+      noexcept;
 
     // * IEEE-754 double-precision floating-point
     ascii_numget&
     cast_F(double& value, double lower, double upper, bool single = false)
-    noexcept;
+      noexcept;
 
     ascii_numget&
     get(bool& value, const char*& bptr, const char* eptr)

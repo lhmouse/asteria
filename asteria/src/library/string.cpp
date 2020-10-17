@@ -83,13 +83,13 @@ class BMH_Searcher
   public:
     ptrdiff_t
     pattern_length()
-    const noexcept
+      const noexcept
       { return this->m_plen;  }
 
     template<typename IterT>
     opt<IterT>
     search_opt(IterT tbegin, IterT tend, IterT pbegin)
-    const
+      const
       {
         // Search for the pattern.
         auto tcur = tbegin;
@@ -267,24 +267,24 @@ constexpr char s_url_chars[256] =
 constexpr
 bool
 do_is_url_invalid_char(char c)
-noexcept
+  noexcept
   { return s_url_chars[uint8_t(c)] == 0;  }
 
 constexpr
 bool
 do_is_url_unreserved_char(char c)
-noexcept
+  noexcept
   { return s_url_chars[uint8_t(c)] == 2;  }
 
 constexpr
 bool
 do_is_url_query_char(char c)
-noexcept
+  noexcept
   { return s_url_chars[uint8_t(c)] & 2;  }
 
 const char*
 do_xstrchr(const char* str, char c)
-noexcept
+  noexcept
   {
     // If `c == 0`, this function returns a null pointer.
     for(auto p = str;  *p != 0;  ++p)
@@ -380,49 +380,49 @@ do_url_decode(const V_string& text)
 ROCKET_CONST_FUNCTION inline
 int64_t
 bswap_be(int64_t value)
-noexcept
+  noexcept
   { return static_cast<int64_t>(be64toh(static_cast<uint64_t>(value)));  }
 
 ROCKET_CONST_FUNCTION inline
 int32_t
 bswap_be(int32_t value)
-noexcept
+  noexcept
   { return static_cast<int32_t>(be32toh(static_cast<uint32_t>(value)));  }
 
 ROCKET_CONST_FUNCTION inline
 int16_t
 bswap_be(int16_t value)
-noexcept
+  noexcept
   { return static_cast<int16_t>(be16toh(static_cast<uint16_t>(value)));  }
 
 ROCKET_CONST_FUNCTION inline
 int8_t
 bswap_be(int8_t value)
-noexcept
+  noexcept
   { return value;  }
 
 ROCKET_CONST_FUNCTION inline
 int64_t
 bswap_le(int64_t value)
-noexcept
+  noexcept
   { return static_cast<int64_t>(le64toh(static_cast<uint64_t>(value)));  }
 
 ROCKET_CONST_FUNCTION inline
 int32_t
 bswap_le(int32_t value)
-noexcept
+  noexcept
   { return static_cast<int32_t>(le32toh(static_cast<uint32_t>(value)));  }
 
 ROCKET_CONST_FUNCTION inline
 int16_t
 bswap_le(int16_t value)
-noexcept
+  noexcept
   { return static_cast<int16_t>(le16toh(static_cast<uint16_t>(value)));  }
 
 ROCKET_CONST_FUNCTION inline
 int8_t
 bswap_le(int8_t value)
-noexcept
+  noexcept
   { return value;  }
 
 template<typename WordT>
@@ -513,14 +513,14 @@ class PCRE2_Error
   public:
     explicit
     PCRE2_Error(int err)
-    noexcept
+      noexcept
       { ::pcre2_get_error_message(err, reinterpret_cast<uint8_t*>(this->m_buf.mut_data()),
                                   this->m_buf.size());  }
 
   public:
     const char*
     c_str()
-    const noexcept
+      const noexcept
       { return this->m_buf.data();  }
   };
 
@@ -559,12 +559,12 @@ class PCRE2_pcre
   public:
     ::pcre2_code*
     code()
-    noexcept
+      noexcept
       { return this->m_code;  }
 
     ::pcre2_match_data*
     match()
-    noexcept
+      noexcept
       { return this->m_match;  }
   };
 

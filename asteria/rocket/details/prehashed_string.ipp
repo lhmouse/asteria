@@ -41,22 +41,22 @@ class string_storage
   public:
     const hasher&
     as_hasher()
-    const noexcept
+      const noexcept
       { return static_cast<const hasher_base&>(*this);  }
 
     hasher&
     as_hasher()
-    noexcept
+      noexcept
       { return static_cast<hasher_base&>(*this);  }
 
     const string_type&
     str()
-    const noexcept
+      const noexcept
       { return this->m_str;  }
 
     size_t
     hval()
-    const noexcept
+      const noexcept
       { return this->m_hval;  }
 
     void

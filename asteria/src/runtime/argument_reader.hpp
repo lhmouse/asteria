@@ -22,7 +22,7 @@ class Argument_Reader
 
   public:
     Argument_Reader(const cow_string& name, const Reference_Stack& stack)
-    noexcept
+      noexcept
       : m_name(name), m_stack(::std::addressof(stack))
       { }
 
@@ -43,17 +43,17 @@ class Argument_Reader
     inline
     Argument_Reader&
     do_mark_match_failure()
-    noexcept;
+      noexcept;
 
     inline
     const Reference*
     do_peek_argument()
-    const;
+      const;
 
   public:
     const cow_string&
     name()
-    const noexcept
+      const noexcept
       { return this->m_name;  }
 
     // These functions access `m_saved_states`.
@@ -71,7 +71,7 @@ class Argument_Reader
     // Start an overload. Effectively, this function clears `m_state`.
     Argument_Reader&
     start_overload()
-    noexcept;
+      noexcept;
 
     // Gets an optional argument. The argument may be of the desired type
     // or null.
@@ -147,7 +147,7 @@ class Argument_Reader
     [[noreturn]]
     void
     throw_no_matching_function_call()
-    const;
+      const;
   };
 
 #define ASTERIA_BINDING_BEGIN(name, self, global, reader)  \

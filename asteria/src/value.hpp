@@ -30,13 +30,13 @@ class Value
   public:
     constexpr
     Value(nullopt_t = nullopt)
-    noexcept
+      noexcept
       { }
 
     template<typename XValT,
     ROCKET_ENABLE_IF(details_value::Valuable<XValT>::direct_init::value)>
     Value(XValT&& xval)
-    noexcept(::std::is_nothrow_constructible<Storage&,
+      noexcept(::std::is_nothrow_constructible<Storage&,
                   typename details_value::Valuable<XValT>::via_type&&>::value)
       : m_stor(typename details_value::Valuable<XValT>::via_type(
                   ::std::forward<XValT>(xval)))
@@ -45,7 +45,7 @@ class Value
     template<typename XValT,
     ROCKET_DISABLE_IF(details_value::Valuable<XValT>::direct_init::value)>
     Value(XValT&& xval)
-    noexcept(::std::is_nothrow_assignable<Storage&,
+      noexcept(::std::is_nothrow_assignable<Storage&,
                   typename details_value::Valuable<XValT>::via_type&&>::value)
       {
         details_value::Valuable<XValT>::assign(this->m_stor,
@@ -56,7 +56,7 @@ class Value
     ROCKET_ENABLE_IF_HAS_TYPE(typename details_value::Valuable<XValT>::via_type)>
     Value&
     operator=(XValT&& xval)
-    noexcept(::std::is_nothrow_assignable<Storage&,
+      noexcept(::std::is_nothrow_assignable<Storage&,
                   typename details_value::Valuable<XValT>::via_type&&>::value)
       {
         details_value::Valuable<XValT>::assign(this->m_stor,
@@ -67,27 +67,27 @@ class Value
   public:
     Type
     type()
-    const noexcept
+      const noexcept
       { return static_cast<Type>(this->m_stor.index());  }
 
     const char*
     what_type()
-    const noexcept
+      const noexcept
       { return describe_type(this->type());  }
 
     bool
     is_null()
-    const noexcept
+      const noexcept
       { return this->type() == type_null;  }
 
     bool
     is_boolean()
-    const noexcept
+      const noexcept
       { return this->type() == type_boolean;  }
 
     V_boolean
     as_boolean()
-    const
+      const
       { return this->m_stor.as<type_boolean>();  }
 
     V_boolean&
@@ -96,12 +96,12 @@ class Value
 
     bool
     is_integer()
-    const noexcept
+      const noexcept
       { return this->type() == type_integer;  }
 
     V_integer
     as_integer()
-    const
+      const
       { return this->m_stor.as<type_integer>();  }
 
     V_integer&
@@ -110,12 +110,12 @@ class Value
 
     bool
     is_real()
-    const noexcept
+      const noexcept
       { return this->type() == type_real;  }
 
     V_real
     as_real()
-    const
+      const
       { return this->m_stor.as<type_real>();  }
 
     V_real&
@@ -124,12 +124,12 @@ class Value
 
     bool
     is_string()
-    const noexcept
+      const noexcept
       { return this->type() == type_string;  }
 
     const V_string&
     as_string()
-    const
+      const
       { return this->m_stor.as<type_string>();  }
 
     V_string&
@@ -138,12 +138,12 @@ class Value
 
     bool
     is_function()
-    const noexcept
+      const noexcept
       { return this->type() == type_function;  }
 
     const V_function&
     as_function()
-    const
+      const
       { return this->m_stor.as<type_function>();  }
 
     V_function&
@@ -152,12 +152,12 @@ class Value
 
     bool
     is_opaque()
-    const noexcept
+      const noexcept
       { return this->type() == type_opaque;  }
 
     const V_opaque&
     as_opaque()
-    const
+      const
       { return this->m_stor.as<type_opaque>();  }
 
     V_opaque&
@@ -166,12 +166,12 @@ class Value
 
     bool
     is_array()
-    const noexcept
+      const noexcept
       { return this->type() == type_array;  }
 
     const V_array&
     as_array()
-    const
+      const
       { return this->m_stor.as<type_array>();  }
 
     V_array&
@@ -180,12 +180,12 @@ class Value
 
     bool
     is_object()
-    const noexcept
+      const noexcept
       { return this->type() == type_object;  }
 
     const V_object&
     as_object()
-    const
+      const
       { return this->m_stor.as<type_object>();  }
 
     V_object&
@@ -194,19 +194,19 @@ class Value
 
     bool
     is_scalar()
-    const noexcept
+      const noexcept
       { return (1 << this->type()) &
           (1 << type_null | 1 << type_boolean | 1 << type_integer |
            1 << type_real | 1 << type_string);  }
 
     bool
     is_convertible_to_real()
-    const noexcept
+      const noexcept
       { return this->is_integer() || this->is_real();  }
 
     V_real
     convert_to_real()
-    const
+      const
       { return this->is_integer()
           ? V_real(this->as_integer())
           : this->as_real();  }
@@ -219,7 +219,7 @@ class Value
 
     Value&
     swap(Value& other)
-    noexcept
+      noexcept
       {
         this->m_stor.swap(other.m_stor);
         return *this;
@@ -229,49 +229,49 @@ class Value
     ROCKET_PURE_FUNCTION
     bool
     test()
-    const noexcept;
+      const noexcept;
 
     // This performs the builtin comparison with another value.
     ROCKET_PURE_FUNCTION
     Compare
     compare(const Value& other)
-    const noexcept;
+      const noexcept;
 
     // These functions are used by the garbage collector.
     // Read `runtime/collector.cpp` for details.
     ROCKET_PURE_FUNCTION
     bool
     unique()
-    const noexcept;
+      const noexcept;
 
     ROCKET_PURE_FUNCTION
     long
     use_count()
-    const noexcept;
+      const noexcept;
 
     ROCKET_PURE_FUNCTION
     long
     gcref_split()
-    const noexcept;
+      const noexcept;
 
     // These are miscellaneous interfaces for debugging.
     tinyfmt&
     print(tinyfmt& fmt, bool escape = false)
-    const;
+      const;
 
     tinyfmt&
     dump(tinyfmt& fmt, size_t indent = 2, size_t hanging = 0)
-    const;
+      const;
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const;
+      const;
   };
 
 inline
 void
 swap(Value& lhs, Value& rhs)
-noexcept
+  noexcept
   { lhs.swap(rhs);  }
 
 inline

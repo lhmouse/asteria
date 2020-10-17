@@ -37,28 +37,28 @@ class basic_tinyfmt_file
 
   public:
     basic_tinyfmt_file()
-    noexcept
+      noexcept
       : m_buf()
       { }
 
     basic_tinyfmt_file(unique_posix_file&& file)
-    noexcept
+      noexcept
       : m_buf(::std::move(file))
       { }
 
     basic_tinyfmt_file(handle_type fp, closer_type cl)
-    noexcept
+      noexcept
       : m_buf(fp, cl)
       { }
 
     explicit
     basic_tinyfmt_file(const char* path, open_mode mode = tinybuf_base::open_write)
-    noexcept
+      noexcept
       : m_buf(path, mode)
       { }
 
     ~basic_tinyfmt_file()
-    override;
+      override;
 
     basic_tinyfmt_file(basic_tinyfmt_file&&)
       = default;
@@ -70,27 +70,27 @@ class basic_tinyfmt_file
   public:
     tinybuf_type&
     get_tinybuf()
-    const override
+      const override
       { return this->m_buf;  }
 
     handle_type
     get_handle()
-    const noexcept
+      const noexcept
       { return this->m_buf.get_handle();  }
 
     const closer_type&
     get_closer()
-    const noexcept
+      const noexcept
       { return this->m_buf.get_closer();  }
 
     closer_type&
     get_closer()
-    noexcept
+      noexcept
       { return this->m_buf.get_closer();  }
 
     basic_tinyfmt_file&
     reset(unique_posix_file&& file)
-    noexcept
+      noexcept
       {
         this->m_buf.reset(::std::move(file));
         return *this;
@@ -98,7 +98,7 @@ class basic_tinyfmt_file
 
     basic_tinyfmt_file&
     reset(handle_type fp, closer_type cl)
-    noexcept
+      noexcept
       {
         this->m_buf.reset(fp, cl);
         return *this;
@@ -113,7 +113,7 @@ class basic_tinyfmt_file
 
     basic_tinyfmt_file&
     close()
-    noexcept
+      noexcept
       {
         this->m_buf.close();
         return *this;
@@ -121,7 +121,7 @@ class basic_tinyfmt_file
 
     basic_tinyfmt_file&
     swap(basic_tinyfmt_file& other)
-    noexcept(is_nothrow_swappable<tinybuf_type>::value)
+      noexcept(is_nothrow_swappable<tinybuf_type>::value)
       {
         noadl::xswap(this->m_buf, other.m_buf);
         return *this;
@@ -137,7 +137,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 void
 swap(basic_tinyfmt_file<charT, traitsT, allocT>& lhs, basic_tinyfmt_file<charT, traitsT, allocT>& rhs)
-noexcept(noexcept(lhs.swap(rhs)))
+  noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
 extern template

@@ -15,7 +15,7 @@ Variable::
 Variable_Callback&
 Variable::
 enumerate_variables_descent(Variable_Callback& callback)
-const
+  const
   {
     return this->m_value.enumerate_variables(callback);
   }

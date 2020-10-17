@@ -76,97 +76,97 @@ class Token
   public:
     const Source_Location&
     sloc()
-    const noexcept
+      const noexcept
       { return this->m_sloc;  }
 
     const cow_string&
     file()
-    const noexcept
+      const noexcept
       { return this->m_sloc.file();  }
 
     int
     line()
-    const noexcept
+      const noexcept
       { return this->m_sloc.line();  }
 
     int
     offset()
-    const noexcept
+      const noexcept
       { return this->m_sloc.offset();  }
 
     size_t
     length()
-    const noexcept
+      const noexcept
       { return this->m_length;  }
 
     Index
     index()
-    const noexcept
+      const noexcept
       { return static_cast<Index>(this->m_stor.index());  }
 
     bool
     is_keyword()
-    const noexcept
+      const noexcept
       { return this->index() == index_keyword;  }
 
     Keyword
     as_keyword()
-    const
+      const
       { return this->m_stor.as<index_keyword>().kwrd;  }
 
     bool
     is_punctuator()
-    const noexcept
+      const noexcept
       { return this->index() == index_punctuator;  }
 
     Punctuator
     as_punctuator()
-    const
+      const
       { return this->m_stor.as<index_punctuator>().punct;  }
 
     bool
     is_identifier()
-    const noexcept
+      const noexcept
       { return this->index() == index_identifier;  }
 
     const cow_string&
     as_identifier()
-    const
+      const
       { return this->m_stor.as<index_identifier>().name;  }
 
     bool
     is_integer_literal()
-    const noexcept
+      const noexcept
       { return this->index() == index_integer_literal;  }
 
     int64_t
     as_integer_literal()
-    const
+      const
       { return this->m_stor.as<index_integer_literal>().val;  }
 
     bool
     is_real_literal()
-    const noexcept
+      const noexcept
       { return this->index() == index_real_literal;  }
 
     double
     as_real_literal()
-    const
+      const
       { return this->m_stor.as<index_real_literal>().val;  }
 
     bool
     is_string_literal()
-    const noexcept
+      const noexcept
       { return this->index() == index_string_literal;  }
 
     const cow_string&
     as_string_literal()
-    const
+      const
       { return this->m_stor.as<index_string_literal>().val;  }
 
     Token&
     swap(Token& other)
-    noexcept
+      noexcept
       {
         this->m_sloc.swap(other.m_sloc);
         ::std::swap(this->m_length, other.m_length);
@@ -176,13 +176,13 @@ class Token
 
     tinyfmt&
     print(tinyfmt& fmt)
-    const;
+      const;
   };
 
 inline
 void
 swap(Token& lhs, Token& rhs)
-noexcept
+  noexcept
   { lhs.swap(rhs);  }
 
 inline

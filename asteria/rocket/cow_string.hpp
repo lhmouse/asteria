@@ -48,20 +48,20 @@ class basic_shallow_string
   public:
     explicit constexpr
     basic_shallow_string(const charT* ptr)
-    noexcept
+      noexcept
       : m_ptr(ptr), m_len(traitsT::length(ptr))
       { }
 
     constexpr
     basic_shallow_string(const charT* ptr, size_t len)
-    noexcept
+      noexcept
       : m_ptr(ptr), m_len((ROCKET_ASSERT(traitsT::eq(ptr[len], charT())), len))
       { }
 
     template<typename allocT>
     explicit
     basic_shallow_string(const basic_cow_string<charT, traitsT, allocT>& str)
-    noexcept
+      noexcept
       : m_ptr(str.c_str()), m_len(str.length())
       { }
 
@@ -69,13 +69,13 @@ class basic_shallow_string
     constexpr
     const charT*
     c_str()
-    const noexcept
+      const noexcept
       { return this->m_ptr;  }
 
     constexpr
     size_t
     length()
-    const noexcept
+      const noexcept
       { return this->m_len;  }
   };
 
@@ -95,21 +95,21 @@ template<typename charT>
 constexpr
 basic_shallow_string<charT, char_traits<charT>>
 sref(const charT* ptr)
-noexcept
+  noexcept
   { return basic_shallow_string<charT, char_traits<charT>>(ptr);  }
 
 template<typename charT>
 constexpr
 basic_shallow_string<charT, char_traits<charT>>
 sref(const charT* ptr, ::std::size_t len)
-noexcept
+  noexcept
   { return basic_shallow_string<charT, char_traits<charT>>(ptr, len);  }
 
 template<typename charT, typename traitsT, typename allocT>
 constexpr
 basic_shallow_string<charT, traitsT>
 sref(const basic_cow_string<charT, traitsT, allocT>& str)
-noexcept
+  noexcept
   { return basic_shallow_string<charT, traitsT>(str);  }
 
 template<typename charT, typename traitsT>
@@ -158,39 +158,39 @@ class basic_cow_string
     // 24.3.2.2, construct/copy/destroy
     constexpr
     basic_cow_string(shallow_type sh, const allocator_type& alloc = allocator_type())
-    noexcept
+      noexcept
       : m_sth(alloc), m_ptr(sh.c_str()), m_len(sh.length())
       { }
 
     explicit constexpr
     basic_cow_string(const allocator_type& alloc)
-    noexcept
+      noexcept
       : m_sth(alloc)
       { }
 
     basic_cow_string(const basic_cow_string& other)
-    noexcept
+      noexcept
       : m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
       { this->assign(other);  }
 
     basic_cow_string(const basic_cow_string& other, const allocator_type& alloc)
-    noexcept
+      noexcept
       : m_sth(alloc)
       { this->assign(other);  }
 
     basic_cow_string(basic_cow_string&& other)
-    noexcept
+      noexcept
       : m_sth(::std::move(other.m_sth.as_allocator()))
       { this->assign(::std::move(other));  }
 
     basic_cow_string(basic_cow_string&& other, const allocator_type& alloc)
-    noexcept
+      noexcept
       : m_sth(alloc)
       { this->assign(::std::move(other));  }
 
     constexpr
     basic_cow_string()
-    noexcept(is_nothrow_constructible<allocator_type>::value)
+      noexcept(is_nothrow_constructible<allocator_type>::value)
       : basic_cow_string(allocator_type())
       { }
 
@@ -224,19 +224,19 @@ class basic_cow_string
 
     basic_cow_string&
     operator=(const basic_cow_string& other)
-    noexcept
+      noexcept
       { noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         return this->assign(other);  }
 
     basic_cow_string&
     operator=(basic_cow_string&& other)
-    noexcept
+      noexcept
       { noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         return this->assign(::std::move(other));  }
 
     basic_cow_string&
     operator=(shallow_type sh)
-    noexcept
+      noexcept
       { return this->assign(sh);  }
 
     basic_cow_string&
@@ -246,7 +246,7 @@ class basic_cow_string
   private:
     basic_cow_string&
     do_deallocate()
-    noexcept
+      noexcept
       {
         this->m_sth.deallocate();
         this->m_ptr = storage_handle::null_char;
@@ -257,7 +257,7 @@ class basic_cow_string
     [[noreturn]] ROCKET_NOINLINE
     void
     do_throw_subscript_out_of_range(size_type pos, const char* rel)
-    const
+      const
       {
         noadl::sprintf_and_throw<out_of_range>("cow_string: Subscript out of range (`%llu` %s `%llu`)",
                                                static_cast<unsigned long long>(pos), rel,
@@ -268,7 +268,7 @@ class basic_cow_string
     // Ensure `tpos` is in `[0, size()]` and return `min(tn, size() - tpos)`.
     size_type
     do_clamp_substr(size_type tpos, size_type tn)
-    const
+      const
       {
         size_type len = this->size();
         if(tpos > len)
@@ -322,7 +322,7 @@ class basic_cow_string
     template<typename predT>
     size_type
     do_find_forwards_if(size_type from, size_type n, predT&& pred)
-    const
+      const
       {
         // If the string is too short, no match could exist.
         if(this->size() < n)
@@ -347,7 +347,7 @@ class basic_cow_string
     template<typename predT>
     size_type
     do_find_backwards_if(size_type to, size_type n, predT&& pred)
-    const
+      const
       {
         // If the string is too short, no match could exist.
         if(this->size() < n)
@@ -372,22 +372,22 @@ class basic_cow_string
     // 24.3.2.3, iterators
     const_iterator
     begin()
-    const noexcept
+      const noexcept
       { return const_iterator(this->data(), 0, this->size());  }
 
     const_iterator
     end()
-    const noexcept
+      const noexcept
       { return const_iterator(this->data(), this->size(), this->size());  }
 
     const_reverse_iterator
     rbegin()
-    const noexcept
+      const noexcept
       { return const_reverse_iterator(this->end());  }
 
     const_reverse_iterator
     rend()
-    const noexcept
+      const noexcept
       { return const_reverse_iterator(this->begin());  }
 
     // N.B. This function may throw `std::bad_alloc`.
@@ -442,32 +442,32 @@ class basic_cow_string
     constexpr
     bool
     empty()
-    const noexcept
+      const noexcept
       { return this->m_len == 0;  }
 
     constexpr
     size_type
     size()
-    const noexcept
+      const noexcept
       { return this->m_len;  }
 
     constexpr
     size_type
     length()
-    const noexcept
+      const noexcept
       { return this->m_len;  }
 
     // N.B. This is a non-standard extension.
     constexpr
     difference_type
     ssize()
-    const noexcept
+      const noexcept
       { return static_cast<difference_type>(this->size());  }
 
     constexpr
     size_type
     max_size()
-    const noexcept
+      const noexcept
       { return this->m_sth.max_size();  }
 
     // N.B. The return type is a non-standard extension.
@@ -483,7 +483,7 @@ class basic_cow_string
     constexpr
     size_type
     capacity()
-    const noexcept
+      const noexcept
       { return this->m_sth.capacity();  }
 
     // N.B. The return type is a non-standard extension.
@@ -537,7 +537,7 @@ class basic_cow_string
     // N.B. The return type is a non-standard extension.
     basic_cow_string&
     clear()
-    noexcept
+      noexcept
       {
         // If storage is shared, detach it.
         if(!this->m_sth.unique())
@@ -551,19 +551,19 @@ class basic_cow_string
     // N.B. This is a non-standard extension.
     bool
     unique()
-    const noexcept
+      const noexcept
       { return this->m_sth.unique();  }
 
     // N.B. This is a non-standard extension.
     long
     use_count()
-    const noexcept
+      const noexcept
       { return this->m_sth.use_count();  }
 
     // 24.3.2.5, element access
     const_reference
     at(size_type pos)
-    const
+      const
       {
         if(pos >= this->size())
           this->do_throw_subscript_out_of_range(pos, ">=");
@@ -575,12 +575,12 @@ class basic_cow_string
     ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
     const_reference
     at(subscriptT pos)
-    const
+      const
       { return this->at(static_cast<size_type>(pos));  }
 
     const_reference
     operator[](size_type pos)
-    const noexcept
+      const noexcept
       {
         // Note reading from the character at `size()` is permitted.
         ROCKET_ASSERT(pos <= this->size());
@@ -592,12 +592,12 @@ class basic_cow_string
     ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
     const_reference
     operator[](subscriptT pos)
-    const noexcept
+      const noexcept
       { return this->operator[](static_cast<size_type>(pos));  }
 
     const_reference
     front()
-    const noexcept
+      const noexcept
       {
         ROCKET_ASSERT(!this->empty());
         return this->data()[0];
@@ -605,7 +605,7 @@ class basic_cow_string
 
     const_reference
     back()
-    const noexcept
+      const noexcept
       {
         ROCKET_ASSERT(!this->empty());
         return this->data()[this->size() - 1];
@@ -938,7 +938,7 @@ class basic_cow_string
 
     basic_cow_string&
     assign(shallow_type sh)
-    noexcept
+      noexcept
       {
         this->m_ptr = sh.c_str();
         this->m_len = sh.length();
@@ -947,7 +947,7 @@ class basic_cow_string
 
     basic_cow_string&
     assign(const basic_cow_string& other)
-    noexcept
+      noexcept
       {
         this->m_sth.share_with(other.m_sth);
         this->m_ptr = other.m_ptr;
@@ -957,7 +957,7 @@ class basic_cow_string
 
     basic_cow_string&
     assign(basic_cow_string&& other)
-    noexcept
+      noexcept
       {
         this->m_sth.exchange_with(other.m_sth);
         this->m_ptr = ::std::exchange(other.m_ptr, storage_handle::null_char);
@@ -1310,7 +1310,7 @@ class basic_cow_string
 
     size_type
     copy(value_type* s, size_type tn, size_type tpos = 0)
-    const
+      const
       {
         size_type tlen = this->do_clamp_substr(tpos, tn);
 
@@ -1320,7 +1320,7 @@ class basic_cow_string
 
     basic_cow_string&
     swap(basic_cow_string& other)
-    noexcept
+      noexcept
       {
         noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->m_sth.exchange_with(other.m_sth);
@@ -1332,18 +1332,18 @@ class basic_cow_string
     // 24.3.2.7, string operations
     const value_type*
     data()
-    const noexcept
+      const noexcept
       { return this->m_ptr;  }
 
     const value_type*
     c_str()
-    const noexcept
+      const noexcept
       { return this->m_ptr;  }
 
     // N.B. This is a non-standard extension.
     const value_type*
     safe_c_str()
-    const
+      const
       {
         size_type clen = traits_type::length(this->m_ptr);
         if(clen != this->m_len)
@@ -1375,67 +1375,67 @@ class basic_cow_string
     constexpr
     const allocator_type&
     get_allocator()
-    const noexcept
+      const noexcept
       { return this->m_sth.as_allocator();  }
 
     allocator_type&
     get_allocator()
-    noexcept
+      noexcept
       { return this->m_sth.as_allocator();  }
 
     // N.B. This is a non-standard extension.
     size_type
     find(size_type from, const basic_cow_string& other)
-    const noexcept
+      const noexcept
       { return this->find(from, other.data(), other.size());  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     find(const basic_cow_string& other)
-    const noexcept
+      const noexcept
       { return this->find(size_type(0), other);  }
 
     // N.B. This is a non-standard extension.
     size_type
     find(size_type from, const basic_cow_string& other, size_type pos, size_type n = npos)
-    const
+      const
       { return this->find(from, other.data() + pos, other.do_clamp_substr(pos, n));  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     find(const basic_cow_string& other, size_type pos, size_type n = npos)
-    const
+      const
       { return this->find(size_type(0), other, pos, n);  }
 
     // N.B. This is a non-standard extension.
     size_type
     find(size_type from, const value_type* s, size_type n)
-    const noexcept
+      const noexcept
       { return this->do_find_forwards_if(from, n,
                    [&](const value_type* ts) { return traits_type::compare(ts, s, n) == 0;  });  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     find(const value_type* s, size_type n)
-    const noexcept
+      const noexcept
       { return this->find(size_type(0), s, n);  }
 
     // N.B. This is a non-standard extension.
     size_type
     find(size_type from, const value_type* s)
-    const noexcept
+      const noexcept
       { return this->find(from, s, traits_type::length(s));  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     find(const value_type* s)
-    const noexcept
+      const noexcept
       { return this->find(size_type(0), s);  }
 
     // N.B. This is a non-standard extension.
     size_type
     find(size_type from, value_type ch)
-    const noexcept
+      const noexcept
       {
         // This can be optimized.
         if(from >= this->size())
@@ -1453,349 +1453,349 @@ class basic_cow_string
     // N.B. The signature differs from `std::basic_string`.
     size_type
     find(value_type ch)
-    const noexcept
+      const noexcept
       { return this->find(size_type(0), ch);  }
 
     // N.B. This is a non-standard extension.
     size_type
     rfind(size_type to, const basic_cow_string& other)
-    const noexcept
+      const noexcept
       { return this->rfind(to, other.data(), other.size());  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     rfind(const basic_cow_string& other)
-    const noexcept
+      const noexcept
       { return this->rfind(size_type(-1), other);  }
 
     // N.B. This is a non-standard extension.
     size_type
     rfind(size_type to, const basic_cow_string& other, size_type pos, size_type n = npos)
-    const
+      const
       { return this->rfind(to, other.data() + pos, other.do_clamp_substr(pos, n));  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     rfind(const basic_cow_string& other, size_type pos, size_type n = npos)
-    const
+      const
       { return this->rfind(size_type(-1), other, pos, n);  }
 
     // N.B. This is a non-standard extension.
     size_type
     rfind(size_type to, const value_type* s, size_type n)
-    const noexcept
+      const noexcept
       { return this->do_find_backwards_if(to, n,
                    [&](const value_type* ts) { return traits_type::compare(ts, s, n) == 0;  });  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     rfind(const value_type* s, size_type n)
-    const noexcept
+      const noexcept
       { return this->rfind(size_type(-1), s, n);  }
 
     // N.B. This is a non-standard extension.
     size_type
     rfind(size_type to, const value_type* s)
-    const noexcept
+      const noexcept
       { return this->rfind(to, s, traits_type::length(s));  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     rfind(const value_type* s)
-    const noexcept
+      const noexcept
       { return this->rfind(size_type(-1), s);  }
 
     // N.B. This is a non-standard extension.
     size_type
     rfind(size_type to, value_type ch)
-    const noexcept
+      const noexcept
       { return this->do_find_backwards_if(to, 1,
                    [&](const value_type* ts) { return traits_type::eq(*ts, ch);  });  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     rfind(value_type ch)
-    const noexcept
+      const noexcept
       { return this->rfind(size_type(-1), ch);  }
 
     // N.B. This is a non-standard extension.
     size_type
     find_first_of(size_type from, const basic_cow_string& other)
-    const noexcept
+      const noexcept
       { return this->find_first_of(from, other.data(), other.size());  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     find_first_of(const basic_cow_string& other)
-    const noexcept
+      const noexcept
       { return this->find_first_of(size_type(0), other);  }
 
     // N.B. This is a non-standard extension.
     size_type
     find_first_of(size_type from, const basic_cow_string& other, size_type pos, size_type n = npos)
-    const
+      const
       { return this->find_first_of(from, other.data() + pos, other.do_clamp_substr(pos, n));  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     find_first_of(const basic_cow_string& other, size_type pos, size_type n = npos)
-    const
+      const
       { return this->find_first_of(size_type(0), other, pos, n);  }
 
     // N.B. This is a non-standard extension.
     size_type
     find_first_of(size_type from, const value_type* s, size_type n)
-    const noexcept
+      const noexcept
       { return this->do_find_forwards_if(from, 1,
                    [&](const value_type* ts) { return traits_type::find(s, n, *ts);  });  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     find_first_of(const value_type* s, size_type n)
-    const noexcept
+      const noexcept
       { return this->find_first_of(size_type(0), s, n);  }
 
     // N.B. This is a non-standard extension.
     size_type
     find_first_of(size_type from, const value_type* s)
-    const noexcept
+      const noexcept
       { return this->find_first_of(from, s, traits_type::length(s));  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     find_first_of(const value_type* s)
-    const noexcept
+      const noexcept
       { return this->find_first_of(size_type(0), s);  }
 
     // N.B. This is a non-standard extension.
     size_type
     find_first_of(size_type from, value_type ch)
-    const noexcept
+      const noexcept
       { return this->find(from, ch);  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     find_first_of(value_type ch)
-    const noexcept
+      const noexcept
       { return this->find_first_of(size_type(0), ch);  }
 
     // N.B. This is a non-standard extension.
     size_type
     find_last_of(size_type to, const basic_cow_string& other)
-    const noexcept
+      const noexcept
       { return this->find_last_of(to, other.data(), other.size());  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     find_last_of(const basic_cow_string& other)
-    const noexcept
+      const noexcept
       { return this->find_last_of(size_type(-1), other);  }
 
     // N.B. This is a non-standard extension.
     size_type
     find_last_of(size_type to, const basic_cow_string& other, size_type pos, size_type n = npos)
-    const
+      const
       { return this->find_last_of(to, other.data() + pos, other.do_clamp_substr(pos, n));  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     find_last_of(const basic_cow_string& other, size_type pos, size_type n = npos)
-    const
+      const
       { return this->find_last_of(size_type(-1), other, pos, n);  }
 
     // N.B. This is a non-standard extension.
     size_type
     find_last_of(size_type to, const value_type* s, size_type n)
-    const noexcept
+      const noexcept
       { return this->do_find_backwards_if(to, 1,
                    [&](const value_type* ts) { return traits_type::find(s, n, *ts);  });  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     find_last_of(const value_type* s, size_type n)
-    const noexcept
+      const noexcept
       { return this->find_last_of(size_type(-1), s, n);  }
 
     // N.B. This is a non-standard extension.
     size_type
     find_last_of(size_type to, const value_type* s)
-    const noexcept
+      const noexcept
       { return this->find_last_of(to, s, traits_type::length(s));  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     find_last_of(const value_type* s)
-    const noexcept
+      const noexcept
       { return this->find_last_of(size_type(-1), s);  }
 
     // N.B. This is a non-standard extension.
     size_type
     find_last_of(size_type to, value_type ch)
-    const noexcept
+      const noexcept
       { return this->rfind(to, ch);  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     find_last_of(value_type ch)
-    const noexcept
+      const noexcept
       { return this->find_last_of(size_type(-1), ch);  }
 
     // N.B. This is a non-standard extension.
     size_type
     find_first_not_of(size_type from, const basic_cow_string& other)
-    const noexcept
+      const noexcept
       { return this->find_first_not_of(from, other.data(), other.size());  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     find_first_not_of(const basic_cow_string& other)
-    const noexcept
+      const noexcept
       { return this->find_first_not_of(size_type(0), other);  }
 
     // N.B. This is a non-standard extension.
     size_type
     find_first_not_of(size_type from, const basic_cow_string& other, size_type pos, size_type n = npos)
-    const
+      const
       { return this->find_first_not_of(from, other.data() + pos, other.do_clamp_substr(pos, n));  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     find_first_not_of(const basic_cow_string& other, size_type pos, size_type n = npos)
-    const
+      const
       { return this->find_first_not_of(size_type(0), other, pos, n);  }
 
     // N.B. This is a non-standard extension.
     size_type
     find_first_not_of(size_type from, const value_type* s, size_type n)
-    const noexcept
+      const noexcept
       { return this->do_find_forwards_if(from, 1,
                    [&](const value_type* ts) { return !traits_type::find(s, n, *ts);  });  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     find_first_not_of(const value_type* s, size_type n)
-    const noexcept
+      const noexcept
       { return this->find_first_not_of(size_type(0), s, n);  }
 
     // N.B. This is a non-standard extension.
     size_type
     find_first_not_of(size_type from, const value_type* s)
-    const noexcept
+      const noexcept
       { return this->find_first_not_of(from, s, traits_type::length(s));  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     find_first_not_of(const value_type* s)
-    const noexcept
+      const noexcept
       { return this->find_first_not_of(size_type(0), s);  }
 
     // N.B. This is a non-standard extension.
     size_type
     find_first_not_of(size_type from, value_type ch)
-    const noexcept
+      const noexcept
       { return this->do_find_forwards_if(from, 1,
                    [&](const value_type* ts) { return !traits_type::eq(*ts, ch);  });  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     find_first_not_of(value_type ch)
-    const noexcept
+      const noexcept
       { return this->find_first_not_of(size_type(0), ch);  }
 
     // N.B. This is a non-standard extension.
     size_type
     find_last_not_of(size_type to, const basic_cow_string& other)
-    const noexcept
+      const noexcept
       { return this->find_last_not_of(to, other.data(), other.size());  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     find_last_not_of(const basic_cow_string& other)
-    const noexcept
+      const noexcept
       { return this->find_last_not_of(size_type(-1), other);  }
 
     // N.B. This is a non-standard extension.
     size_type
     find_last_not_of(size_type to, const basic_cow_string& other, size_type pos, size_type n = npos)
-    const
+      const
       { return this->find_last_not_of(to, other.data() + pos, other.do_clamp_substr(pos, n));  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     find_last_not_of(const basic_cow_string& other, size_type pos, size_type n = npos)
-    const
+      const
       { return this->find_last_not_of(size_type(-1), other, pos, n);  }
 
     // N.B. This is a non-standard extension.
     size_type
     find_last_not_of(size_type to, const value_type* s, size_type n)
-    const noexcept
+      const noexcept
       { return this->do_find_backwards_if(to, 1,
                    [&](const value_type* ts) { return !traits_type::find(s, n, *ts);  });  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     find_last_not_of(const value_type* s, size_type n)
-    const noexcept
+      const noexcept
       { return this->find_last_not_of(size_type(-1), s, n);  }
 
     // N.B. This is a non-standard extension.
     size_type
     find_last_not_of(size_type to, const value_type* s)
-    const noexcept
+      const noexcept
       { return this->find_last_not_of(to, s, traits_type::length(s));  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     find_last_not_of(const value_type* s)
-    const noexcept
+      const noexcept
       { return this->find_last_not_of(size_type(-1), s);  }
 
     // N.B. This is a non-standard extension.
     size_type
     find_last_not_of(size_type to, value_type ch)
-    const noexcept
+      const noexcept
       { return this->do_find_backwards_if(to, 1,
                    [&](const value_type* ts) { return !traits_type::eq(*ts, ch);  });  }
 
     // N.B. The signature differs from `std::basic_string`.
     size_type
     find_last_not_of(value_type ch)
-    const noexcept
+      const noexcept
       { return this->find_last_not_of(size_type(-1), ch);  }
 
     // N.B. This is a non-standard extension.
     template<typename predT>
     size_type
     find_first_if(size_type from, predT&& pred)
-    const
+      const
       { return this->do_find_forwards_if(from, 1, [&](const char* p) { return pred(*p);  });  }
 
     // N.B. This is a non-standard extension.
     template<typename predT>
     size_type
     find_first_if(predT&& pred)
-    const
+      const
       { return this->find_first_if(size_type(0), ::std::forward<predT>(pred));  }
 
     // N.B. This is a non-standard extension.
     template<typename predT>
     size_type
     find_last_if(size_type to, predT&& pred)
-    const
+      const
       { return this->do_find_backwards_if(to, 1, [&](const char* p) { return pred(*p);  });  }
 
     // N.B. This is a non-standard extension.
     template<typename predT>
     size_type
     find_last_if(predT&& pred)
-    const
+      const
       { return this->find_last_if(size_type(-1), ::std::forward<predT>(pred));  }
 
     // N.B. There is no default argument for `tpos`.
     basic_cow_string
     substr(size_type tpos, size_type tn = npos)
-    const
+      const
       {
         if((tpos == 0) && (tn >= this->size()))
           // Utilize reference counting.
@@ -1806,113 +1806,113 @@ class basic_cow_string
 
     int
     compare(const basic_cow_string& other)
-    const noexcept
+      const noexcept
       { return this->compare(other.data(), other.size());  }
 
     // N.B. This is a non-standard extension.
     int
     compare(const basic_cow_string& other, size_type pos, size_type n = npos)
-    const
+      const
       { return this->compare(other.data() + pos, other.do_clamp_substr(pos, n));  }
 
     // N.B. This is a non-standard extension.
     int
     compare(const value_type* s, size_type n)
-    const noexcept
+      const noexcept
       { return details_cow_string::comparator<charT, traitsT>::relation(
                    this->data(), this->size(), s, n);  }
 
     int
     compare(const value_type* s)
-    const noexcept
+      const noexcept
       { return this->compare(s, traits_type::length(s));  }
 
     // N.B. The last two parameters are non-standard extensions.
     int
     compare(size_type tpos, size_type tn, const basic_cow_string& other, size_type pos = 0, size_type n = npos)
-    const
+      const
       { return this->compare(tpos, tn, other.data() + pos, other.do_clamp_substr(pos, n));  }
 
     int
     compare(size_type tpos, size_type tn, const value_type* s, size_type n)
-    const
+      const
       { return details_cow_string::comparator<charT, traitsT>::relation(
                    this->data() + tpos, this->do_clamp_substr(tpos, tn), s, n);  }
 
     int
     compare(size_type tpos, size_type tn, const value_type* s)
-    const
+      const
       { return this->compare(tpos, tn, s, traits_type::length(s));  }
 
     // N.B. This is a non-standard extension.
     int
     compare(size_type tpos, const basic_cow_string& other, size_type pos = 0, size_type n = npos)
-    const
+      const
       { return this->compare(tpos, npos, other, pos, n);  }
 
     // N.B. This is a non-standard extension.
     int
     compare(size_type tpos, const value_type* s, size_type n)
-    const
+      const
       { return this->compare(tpos, npos, s, n);  }
 
     // N.B. This is a non-standard extension.
     int
     compare(size_type tpos, const value_type* s)
-    const
+      const
       { return this->compare(tpos, npos, s);  }
 
     // N.B. These are extensions but might be standardized in C++20.
     bool
     starts_with(const basic_cow_string& other)
-    const noexcept
+      const noexcept
       { return this->starts_with(other.data(), other.size());  }
 
     // N.B. This is a non-standard extension.
     bool
     starts_with(const basic_cow_string& other, size_type pos, size_type n = npos)
-    const
+      const
       { return this->starts_with(other.data() + pos, other.do_clamp_substr(pos, n));  }
 
     bool
     starts_with(const value_type* s, size_type n)
-    const noexcept
+      const noexcept
       { return (n <= this->size()) && (traits_type::compare(this->data(), s, n) == 0);  }
 
     bool
     starts_with(const value_type* s)
-    const noexcept
+      const noexcept
       { return this->starts_with(s, traits_type::length(s));  }
 
     bool
     starts_with(value_type ch)
-    const noexcept
+      const noexcept
       { return (1 <= this->size()) && traits_type::eq(this->front(), ch);  }
 
     bool
     ends_with(const basic_cow_string& other)
-    const noexcept
+      const noexcept
       { return this->ends_with(other.data(), other.size());  }
 
     // N.B. This is a non-standard extension.
     bool
     ends_with(const basic_cow_string& other, size_type pos, size_type n = npos)
-    const
+      const
       { return this->ends_with(other.data() + pos, other.do_clamp_substr(pos, n));  }
 
     bool
     ends_with(const value_type* s, size_type n)
-    const noexcept
+      const noexcept
       { return (n <= this->size()) && (traits_type::compare(this->data() + this->size() - n, s, n) == 0);  }
 
     bool
     ends_with(const value_type* s)
-    const noexcept
+      const noexcept
       { return this->ends_with(s, traits_type::length(s));  }
 
     bool
     ends_with(value_type ch)
-    const noexcept
+      const noexcept
       { return (1 <= this->size()) && traits_type::eq(this->back(), ch);  }
   };
 
@@ -1930,7 +1930,7 @@ struct basic_cow_string<charT, traitsT, allocT>::hash
     constexpr
     result_type
     operator()(const argument_type& str)
-    const noexcept
+      const noexcept
       { return details_cow_string::basic_hasher<charT, traitsT>()
                    .append(str.data(), str.size())
                    .finish();  }
@@ -1938,7 +1938,7 @@ struct basic_cow_string<charT, traitsT, allocT>::hash
     constexpr
     result_type
     operator()(const charT* s)
-    const noexcept
+      const noexcept
       { return details_cow_string::basic_hasher<charT, traitsT>()
                    .append(s)
                    .finish();  }
@@ -2058,7 +2058,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator==(const basic_cow_string<charT, traitsT, allocT>& lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::inequality(
                lhs.data(), lhs.size(), rhs.data(), rhs.size()) == 0;  }
 
@@ -2066,7 +2066,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator!=(const basic_cow_string<charT, traitsT, allocT>& lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::inequality(
                lhs.data(), lhs.size(), rhs.data(), rhs.size()) != 0;  }
 
@@ -2074,7 +2074,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator<(const basic_cow_string<charT, traitsT, allocT>& lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::relation(
                lhs.data(), lhs.size(), rhs.data(), rhs.size()) < 0;  }
 
@@ -2082,7 +2082,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator>(const basic_cow_string<charT, traitsT, allocT>& lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::relation(
                lhs.data(), lhs.size(), rhs.data(), rhs.size()) > 0;  }
 
@@ -2090,7 +2090,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator<=(const basic_cow_string<charT, traitsT, allocT>& lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::relation(
                lhs.data(), lhs.size(), rhs.data(), rhs.size()) <= 0;  }
 
@@ -2098,7 +2098,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator>=(const basic_cow_string<charT, traitsT, allocT>& lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::relation(
                lhs.data(), lhs.size(), rhs.data(), rhs.size()) >= 0;  }
 
@@ -2106,7 +2106,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator==(const basic_cow_string<charT, traitsT, allocT>& lhs, const charT* rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::inequality(
                lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) == 0;  }
 
@@ -2114,7 +2114,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator!=(const basic_cow_string<charT, traitsT, allocT>& lhs, const charT* rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::inequality(
                lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) != 0;  }
 
@@ -2122,7 +2122,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator<(const basic_cow_string<charT, traitsT, allocT>& lhs, const charT* rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::relation(
                lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) < 0;  }
 
@@ -2130,7 +2130,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator>(const basic_cow_string<charT, traitsT, allocT>& lhs, const charT* rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::relation(
                lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) > 0;  }
 
@@ -2138,7 +2138,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator<=(const basic_cow_string<charT, traitsT, allocT>& lhs, const charT* rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::relation(
                lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) <= 0;  }
 
@@ -2146,7 +2146,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator>=(const basic_cow_string<charT, traitsT, allocT>& lhs, const charT* rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::relation(
                lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) >= 0;  }
 
@@ -2154,7 +2154,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator==(const charT* lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::inequality(
                lhs, traitsT::length(lhs), rhs.data(), rhs.size()) == 0;  }
 
@@ -2162,7 +2162,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator!=(const charT* lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::inequality(
                lhs, traitsT::length(lhs), rhs.data(), rhs.size()) != 0;  }
 
@@ -2170,7 +2170,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator<(const charT* lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::relation(
                lhs, traitsT::length(lhs), rhs.data(), rhs.size()) < 0;  }
 
@@ -2178,7 +2178,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator>(const charT* lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::relation(
                lhs, traitsT::length(lhs), rhs.data(), rhs.size()) > 0;  }
 
@@ -2186,7 +2186,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator<=(const charT* lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::relation(
                lhs, traitsT::length(lhs), rhs.data(), rhs.size()) <= 0;  }
 
@@ -2194,7 +2194,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator>=(const charT* lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::relation(
                lhs, traitsT::length(lhs), rhs.data(), rhs.size()) >= 0;  }
 
@@ -2202,7 +2202,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator==(const basic_cow_string<charT, traitsT, allocT>& lhs, basic_shallow_string<charT, traitsT> rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::inequality(
                lhs.data(), lhs.size(), rhs.c_str(), rhs.length()) == 0;  }
 
@@ -2210,7 +2210,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator!=(const basic_cow_string<charT, traitsT, allocT>& lhs, basic_shallow_string<charT, traitsT> rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::inequality(
                lhs.data(), lhs.size(), rhs.c_str(), rhs.length()) != 0;  }
 
@@ -2218,7 +2218,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator<(const basic_cow_string<charT, traitsT, allocT>& lhs, basic_shallow_string<charT, traitsT> rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::relation(
                lhs.data(), lhs.size(), rhs.c_str(), rhs.length()) < 0;  }
 
@@ -2226,7 +2226,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator>(const basic_cow_string<charT, traitsT, allocT>& lhs, basic_shallow_string<charT, traitsT> rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::relation(
                lhs.data(), lhs.size(), rhs.c_str(), rhs.length()) > 0;  }
 
@@ -2234,7 +2234,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator<=(const basic_cow_string<charT, traitsT, allocT>& lhs, basic_shallow_string<charT, traitsT> rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::relation(
                lhs.data(), lhs.size(), rhs.c_str(), rhs.length()) <= 0;  }
 
@@ -2242,7 +2242,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator>=(const basic_cow_string<charT, traitsT, allocT>& lhs, basic_shallow_string<charT, traitsT> rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::relation(
                lhs.data(), lhs.size(), rhs.c_str(), rhs.length()) >= 0;  }
 
@@ -2250,7 +2250,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator==(basic_shallow_string<charT, traitsT> lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::inequality(
                lhs.c_str(), lhs.length(), rhs.data(), rhs.size()) == 0;  }
 
@@ -2258,7 +2258,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator!=(basic_shallow_string<charT, traitsT> lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::inequality(
                lhs.c_str(), lhs.length(), rhs.data(), rhs.size()) != 0;  }
 
@@ -2266,7 +2266,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator<(basic_shallow_string<charT, traitsT> lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::relation(
                lhs.c_str(), lhs.length(), rhs.data(), rhs.size()) < 0;  }
 
@@ -2274,7 +2274,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator>(basic_shallow_string<charT, traitsT> lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::relation(
                lhs.c_str(), lhs.length(), rhs.data(), rhs.size()) > 0;  }
 
@@ -2282,7 +2282,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator<=(basic_shallow_string<charT, traitsT> lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::relation(
                lhs.c_str(), lhs.length(), rhs.data(), rhs.size()) <= 0;  }
 
@@ -2290,7 +2290,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 bool
 operator>=(basic_shallow_string<charT, traitsT> lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
-noexcept
+  noexcept
   { return details_cow_string::comparator<charT, traitsT>::relation(
                lhs.c_str(), lhs.length(), rhs.data(), rhs.size()) >= 0;  }
 
@@ -2298,7 +2298,7 @@ template<typename charT, typename traitsT, typename allocT>
 inline
 void
 swap(basic_cow_string<charT, traitsT, allocT>& lhs, basic_cow_string<charT, traitsT, allocT>& rhs)
-noexcept(noexcept(lhs.swap(rhs)))
+  noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
 template<typename charT, typename traitsT, typename allocT>

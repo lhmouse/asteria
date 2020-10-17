@@ -11,7 +11,7 @@ template<typename charT>
 constexpr
 charT*
 assign(charT* p, size_t n, charT c)
-noexcept
+  noexcept
   {
     for(auto bp = p, ep = p + n;  bp != ep;  ++bp)
       *bp = c;
@@ -22,7 +22,7 @@ template<typename charT>
 constexpr
 const charT*
 find(const charT* p, size_t n, charT c)
-noexcept
+  noexcept
   {
     for(auto bp = p, ep = p + n;  bp != ep;  ++bp)
       if(*bp == c)
@@ -34,7 +34,7 @@ template<typename charT>
 constexpr
 size_t
 length(const charT* p)
-noexcept
+  noexcept
   {
     for(auto bp = p;  true;  ++bp)
       if(*bp == charT())
@@ -45,14 +45,14 @@ template<typename charT>
 constexpr
 typename make_unsigned<charT>::type
 ucast(charT c)
-noexcept
+  noexcept
   { return static_cast<typename make_unsigned<charT>::type>(c);  }
 
 template<typename charT>
 constexpr
 int
 compare(const charT* p, const charT* s, size_t n)
-noexcept
+  noexcept
   {
     for(size_t k = 0;  k != n;  ++k)
       if(p[k] != s[k])

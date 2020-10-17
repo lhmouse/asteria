@@ -76,7 +76,7 @@ class cow_hashmap
     // 26.5.4.2, construct/copy/destroy
     explicit constexpr
     cow_hashmap(const allocator_type& alloc, const hasher& hf = hasher(), const key_equal& eq = key_equal())
-    noexcept(conjunction<is_nothrow_constructible<hasher>,
+      noexcept(conjunction<is_nothrow_constructible<hasher>,
                          is_nothrow_copy_constructible<hasher>,
                          is_nothrow_constructible<key_equal>,
                          is_nothrow_copy_constructible<key_equal>>::value)
@@ -84,33 +84,33 @@ class cow_hashmap
       { }
 
     cow_hashmap(const cow_hashmap& other)
-    noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
+      noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
                          is_nothrow_copy_constructible<key_equal>>::value)
       : m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()),
               other.m_sth.as_hasher(), other.m_sth.as_key_equal())
       { this->assign(other);  }
 
     cow_hashmap(const cow_hashmap& other, const allocator_type& alloc)
-    noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
+      noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
                          is_nothrow_copy_constructible<key_equal>>::value)
       : m_sth(alloc, other.m_sth.as_hasher(), other.m_sth.as_key_equal())
       { this->assign(other);  }
 
     cow_hashmap(cow_hashmap&& other)
-    noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
+      noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
                          is_nothrow_copy_constructible<key_equal>>::value)
       : m_sth(::std::move(other.m_sth.as_allocator()), other.m_sth.as_hasher(), other.m_sth.as_key_equal())
       { this->assign(::std::move(other));  }
 
     cow_hashmap(cow_hashmap&& other, const allocator_type& alloc)
-    noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
+      noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
                          is_nothrow_copy_constructible<key_equal>>::value)
       : m_sth(alloc, other.m_sth.as_hasher(), other.m_sth.as_key_equal())
       { this->assign(::std::move(other));  }
 
     constexpr
     cow_hashmap()
-    noexcept(conjunction<is_nothrow_constructible<allocator_type>,
+      noexcept(conjunction<is_nothrow_constructible<allocator_type>,
                          is_nothrow_constructible<hasher>,
                          is_nothrow_copy_constructible<hasher>,
                          is_nothrow_constructible<key_equal>,
@@ -166,13 +166,13 @@ class cow_hashmap
 
     cow_hashmap&
     operator=(const cow_hashmap& other)
-    noexcept
+      noexcept
       { noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         return this->assign(other);  }
 
     cow_hashmap&
     operator=(cow_hashmap&& other)
-    noexcept
+      noexcept
       { noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         return this->assign(::std::move(other));  }
 
@@ -183,7 +183,7 @@ class cow_hashmap
   private:
     cow_hashmap&
     do_deallocate()
-    noexcept
+      noexcept
       {
         this->m_sth.deallocate();
         return *this;
@@ -192,7 +192,7 @@ class cow_hashmap
     [[noreturn]] ROCKET_NOINLINE
     void
     do_throw_key_not_found(const details_cow_hashmap::stringified_key& skey)
-    const
+      const
       {
         noadl::sprintf_and_throw<out_of_range>("cow_hashmap: Key not found (key `%s`)",
                                                skey.c_str());
@@ -200,7 +200,7 @@ class cow_hashmap
 
     const bucket_type*
     do_buckets()
-    const noexcept
+      const noexcept
       { return this->m_sth.buckets();  }
 
     bucket_type*
@@ -239,22 +239,22 @@ class cow_hashmap
     // iterators
     const_iterator
     begin()
-    const noexcept
+      const noexcept
       { return const_iterator(this->do_buckets(), 0, this->bucket_count());  }
 
     const_iterator
     end()
-    const noexcept
+      const noexcept
       { return const_iterator(this->do_buckets(), this->bucket_count(), this->bucket_count());  }
 
     const_reverse_iterator
     rbegin()
-    const noexcept
+      const noexcept
       { return const_reverse_iterator(this->end());  }
 
     const_reverse_iterator
     rend()
-    const noexcept
+      const noexcept
       { return const_reverse_iterator(this->begin());  }
 
     // N.B. This is a non-standard extension.
@@ -308,28 +308,28 @@ class cow_hashmap
     // capacity
     bool
     empty()
-    const noexcept
+      const noexcept
       { return this->m_sth.size() == 0;  }
 
     size_type
     size()
-    const noexcept
+      const noexcept
       { return this->m_sth.size();  }
 
     // N.B. This is a non-standard extension.
     difference_type
     ssize()
-    const noexcept
+      const noexcept
       { return static_cast<difference_type>(this->size());  }
 
     size_type
     max_size()
-    const noexcept
+      const noexcept
       { return this->m_sth.max_size();  }
 
     size_type
     capacity()
-    const noexcept
+      const noexcept
       { return this->m_sth.capacity();  }
 
     // N.B. The return type is a non-standard extension.
@@ -381,7 +381,7 @@ class cow_hashmap
     // N.B. The return type is a non-standard extension.
     cow_hashmap&
     clear()
-    noexcept
+      noexcept
       {
         // If storage is shared, detach it.
         if(!this->m_sth.unique())
@@ -394,33 +394,33 @@ class cow_hashmap
     // N.B. This is a non-standard extension.
     bool
     unique()
-    const noexcept
+      const noexcept
       { return this->m_sth.unique();  }
 
     // N.B. This is a non-standard extension.
     long
     use_count()
-    const noexcept
+      const noexcept
       { return this->m_sth.use_count();  }
 
     // hash policy
     // N.B. This is a non-standard extension.
     size_type
     bucket_count()
-    const noexcept
+      const noexcept
       { return this->m_sth.bucket_count();  }
 
     // N.B. The return type differs from `std::unordered_map`.
     double
     load_factor()
-    const noexcept
+      const noexcept
       { return static_cast<double>(this->ssize()) /
                    static_cast<double>(static_cast<difference_type>(this->bucket_count()));  }
 
     // N.B. The return type differs from `std::unordered_map`.
     double
     max_load_factor()
-    const noexcept
+      const noexcept
       { return 1.0 / storage_handle::max_load_factor_reciprocal;  }
 
     // N.B. The return type is a non-standard extension.
@@ -635,7 +635,7 @@ class cow_hashmap
     template<typename ykeyT>
     const_iterator
     find(const ykeyT& ykey)
-    const
+      const
       {
         size_type tpos;
         if(!this->m_sth.find(tpos, ykey))
@@ -659,7 +659,7 @@ class cow_hashmap
     template<typename ykeyT>
     bool
     count(const ykeyT& ykey)
-    const
+      const
       {
         size_type tpos;
         return this->m_sth.find(tpos, ykey);
@@ -669,7 +669,7 @@ class cow_hashmap
     template<typename ykeyT, typename ydefaultT>
     typename select_type<const mapped_type&, ydefaultT&&>::type
     get_or(const ykeyT& ykey, ydefaultT&& ydef)
-    const
+      const
       {
         size_type tpos;
         if(!this->m_sth.find(tpos, ykey))
@@ -681,7 +681,7 @@ class cow_hashmap
     template<typename ykeyT, typename ydefaultT>
     typename select_type<mapped_type&&, ydefaultT&&>::type
     move_or(const ykeyT& ykey, ydefaultT&& ydef)
-    const
+      const
       {
         size_type tpos;
         if(!this->m_sth.find(tpos, ykey))
@@ -693,7 +693,7 @@ class cow_hashmap
     template<typename ykeyT>
     const mapped_type&
     at(const ykeyT& ykey)
-    const
+      const
       {
         size_type tpos;
         if(!this->m_sth.find(tpos, ykey))
@@ -705,7 +705,7 @@ class cow_hashmap
     template<typename ykeyT>
     const mapped_type*
     ptr(const ykeyT& ykey)
-    const
+      const
       {
         size_type tpos;
         if(!this->m_sth.find(tpos, ykey))
@@ -738,7 +738,7 @@ class cow_hashmap
     // N.B. This function is a non-standard extension.
     cow_hashmap&
     assign(const cow_hashmap& other)
-    noexcept
+      noexcept
       {
         this->m_sth.share_with(other.m_sth);
         return *this;
@@ -747,7 +747,7 @@ class cow_hashmap
     // N.B. This function is a non-standard extension.
     cow_hashmap&
     assign(cow_hashmap&& other)
-    noexcept
+      noexcept
       {
         this->m_sth.share_with(::std::move(other.m_sth));
         return *this;
@@ -775,7 +775,7 @@ class cow_hashmap
 
     cow_hashmap&
     swap(cow_hashmap& other)
-    noexcept
+      noexcept
       {
         noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->m_sth.exchange_with(other.m_sth);
@@ -784,40 +784,40 @@ class cow_hashmap
 
     // N.B. The return type differs from `std::unordered_map`.
     constexpr
-    const
+      const
     allocator_type&
     get_allocator()
-    const noexcept
+      const noexcept
       { return this->m_sth.as_allocator();  }
 
     allocator_type&
     get_allocator()
-    noexcept
+      noexcept
       { return this->m_sth.as_allocator();  }
 
     // N.B. The return type differs from `std::unordered_map`.
     constexpr
     const hasher&
     hash_function()
-    const noexcept
+      const noexcept
       { return this->m_sth.as_hasher();  }
 
     hasher&
     hash_function()
-    noexcept
+      noexcept
       { return this->m_sth.as_hasher();  }
 
     // N.B. The return type differs from `std::unordered_map`.
     constexpr
-    const
+      const
     key_equal&
     key_eq()
-    const noexcept
+      const noexcept
       { return this->m_sth.as_key_equal();  }
 
     key_equal&
     key_eq()
-    noexcept
+      noexcept
       { return this->m_sth.as_key_equal();  }
   };
 
@@ -825,7 +825,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
 inline
 void
 swap(cow_hashmap<keyT, mappedT, hashT, eqT, allocT>& lhs, cow_hashmap<keyT, mappedT, hashT, eqT, allocT>& rhs)
-noexcept(noexcept(lhs.swap(rhs)))
+  noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
 }  // namespace rocket

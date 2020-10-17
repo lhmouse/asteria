@@ -38,13 +38,13 @@
     template<typename T,  \
     ROCKET_ENABLE_IF(::std::is_constructible<V, T&&>::value)>  \
     C(T&& t)  \
-    noexcept(::std::is_nothrow_constructible<V, T&&>::value)
+      noexcept(::std::is_nothrow_constructible<V, T&&>::value)
 
 #define ASTERIA_VARIANT_ASSIGNMENT(C, V, T, t)  \
     template<typename T,  \
     ROCKET_ENABLE_IF(::std::is_assignable<V&, T&&>::value)>  \
     C& operator=(T&& t)  \
-    noexcept(::std::is_nothrow_assignable<V&, T&&>::value)
+      noexcept(::std::is_nothrow_assignable<V&, T&&>::value)
 
 #define ASTERIA_COPYABLE_DESTRUCTOR(C)  \
     C(const C&) = default;  \
@@ -197,16 +197,16 @@ class AIR_Optimizer;
 struct Rcbase : ::rocket::refcnt_base<Rcbase>
   {
     Rcbase()
-    noexcept
+      noexcept
       = default;
 
     Rcbase(const Rcbase&)
-    noexcept
+      noexcept
       = default;
 
     Rcbase&
     operator=(const Rcbase&)
-    noexcept
+      noexcept
       = default;
 
     virtual
@@ -217,16 +217,16 @@ template<typename RealT>
 struct Rcfwd : virtual Rcbase
   {
     Rcfwd()
-    noexcept
+      noexcept
       = default;
 
     Rcfwd(const Rcfwd&)
-    noexcept
+      noexcept
       = default;
 
     Rcfwd&
     operator=(const Rcfwd&)
-    noexcept
+      noexcept
       = default;
 
     virtual
@@ -235,7 +235,7 @@ struct Rcfwd : virtual Rcbase
     template<typename XRealT = RealT>
     rcptr<const XRealT>
     share_this()
-    const
+      const
       { return this->Rcbase::template share_this<XRealT, Rcfwd>();  }
 
     template<typename XRealT = RealT>
@@ -256,14 +256,14 @@ template<typename RealT>
 constexpr
 rcptr<RealT>
 unerase_cast(const rcfwdp<RealT>& ptr)
-noexcept
+  noexcept
   { return ::rocket::static_pointer_cast<RealT>(ptr);  }
 
 // Standard I/O synchronization
 struct StdIO_Sentry
   {
     StdIO_Sentry()
-    noexcept
+      noexcept
       {
         // Discard unread data. Clear EOF and error bits. Clear orientation.
         if(!::freopen(nullptr, "r", stdin))
@@ -283,7 +283,7 @@ struct Abstract_Opaque
   : public Rcfwd<Abstract_Opaque>
   {
     Abstract_Opaque()
-    noexcept
+      noexcept
       = default;
 
     ASTERIA_COPYABLE_DESTRUCTOR(Abstract_Opaque);
@@ -292,7 +292,7 @@ struct Abstract_Opaque
     virtual
     tinyfmt&
     describe(tinyfmt& fmt)
-    const
+      const
       = 0;
 
     // This function is called during garbage collection to mark variables that are not
@@ -301,7 +301,7 @@ struct Abstract_Opaque
     virtual
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const
+      const
       = 0;
 
     // This function is called when a mutable reference is requested and the current instance
@@ -311,7 +311,7 @@ struct Abstract_Opaque
     virtual
     Abstract_Opaque*
     clone_opt(rcptr<Abstract_Opaque>& output)
-    const
+      const
       = 0;
   };
 
@@ -324,7 +324,7 @@ struct Abstract_Function
   : public Rcfwd<Abstract_Function>
   {
     Abstract_Function()
-    noexcept
+      noexcept
       = default;
 
     ASTERIA_COPYABLE_DESTRUCTOR(Abstract_Function);
@@ -333,7 +333,7 @@ struct Abstract_Function
     virtual
     tinyfmt&
     describe(tinyfmt& fmt)
-    const
+      const
       = 0;
 
     // This function is called during garbage collection to mark variables that are not
@@ -342,14 +342,14 @@ struct Abstract_Function
     virtual
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const
+      const
       = 0;
 
     // This function may return a proper tail call wrapper.
     virtual
     Reference&
     invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& args)
-    const
+      const
       = 0;
   };
 
@@ -366,13 +366,13 @@ class cow_opaque
   public:
     constexpr
     cow_opaque(nullptr_t = nullptr)
-    noexcept
+      noexcept
       { }
 
     template<typename OpaqueT>
     constexpr
     cow_opaque(rcptr<OpaqueT> sptr)
-    noexcept
+      noexcept
       : m_sptr(::std::move(sptr))
       { }
 
@@ -384,22 +384,22 @@ class cow_opaque
     [[noreturn]]
     void
     do_throw_null_pointer()
-    const;
+      const;
 
   public:
     bool
     unique()
-    const noexcept
+      const noexcept
       { return this->m_sptr.unique();  }
 
     long
     use_count()
-    const noexcept
+      const noexcept
       { return this->m_sptr.use_count();  }
 
     cow_opaque&
     reset()
-    noexcept
+      noexcept
       {
         this->m_sptr = nullptr;
         return *this;
@@ -407,21 +407,21 @@ class cow_opaque
 
     explicit operator
     bool()
-    const noexcept
+      const noexcept
       { return bool(this->m_sptr);  }
 
     const type_info&
     type()
-    const
+      const
       { return typeid(*(this->m_sptr.get()));  }  // may throw `std::bad_typeid`
 
     tinyfmt&
     describe(tinyfmt& fmt)
-    const;
+      const;
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const
+      const
       {
         if(auto sptr = this->m_sptr.get())
           sptr->enumerate_variables(callback);
@@ -431,7 +431,7 @@ class cow_opaque
     template<typename OpaqueT = Abstract_Opaque>
     rcptr<const OpaqueT>
     get_opt()
-    const;
+      const;
 
     template<typename OpaqueT = Abstract_Opaque>
     rcptr<OpaqueT>
@@ -448,7 +448,7 @@ inline
 rcptr<const OpaqueT>
 cow_opaque::
 get_opt()
-const
+  const
   {
     if(!this->m_sptr)
       this->do_throw_null_pointer();
@@ -513,19 +513,19 @@ class cow_function
   public:
     constexpr
     cow_function(nullptr_t = nullptr)
-    noexcept
+      noexcept
       { }
 
     constexpr
     cow_function(const char* desc, simple_function& func)
-    noexcept
+      noexcept
       : m_desc(desc), m_fptr(func)
       { }
 
     template<typename FunctionT>
     constexpr
     cow_function(rcptr<FunctionT> sptr)
-    noexcept
+      noexcept
       : m_sptr(::std::move(sptr))
       { }
 
@@ -537,22 +537,22 @@ class cow_function
     [[noreturn]]
     void
     do_throw_null_pointer()
-    const;
+      const;
 
   public:
     bool
     unique()
-    const noexcept
+      const noexcept
       { return this->m_sptr.unique();  }
 
     long
     use_count()
-    const noexcept
+      const noexcept
       { return this->m_sptr.use_count();  }
 
     cow_function&
     reset()
-    noexcept
+      noexcept
       {
         this->m_fptr = nullptr;
         this->m_sptr = nullptr;
@@ -561,22 +561,22 @@ class cow_function
 
     explicit operator
     bool()
-    const noexcept
+      const noexcept
       { return this->m_fptr || this->m_sptr;  }
 
     const type_info&
     type()
-    const
+      const
       { return this->m_fptr ? typeid(simple_function)
                             : typeid(*(this->m_sptr.get()));  }  // may throw `std::bad_typeid`
 
     tinyfmt&
     describe(tinyfmt& fmt)
-    const;
+      const;
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const
+      const
       {
         if(auto sptr = this->m_sptr.get())
           sptr->enumerate_variables(callback);
@@ -585,15 +585,15 @@ class cow_function
 
     Reference&
     invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack)
-    const;
+      const;
 
     Reference&
     invoke(Reference& self, Global_Context& global, Reference_Stack&& stack)
-    const;
+      const;
 
     Reference
     invoke(Global_Context& global, Reference_Stack&& stack)
-    const;
+      const;
   };
 
 inline
@@ -638,7 +638,7 @@ enum Type : uint8_t
 ROCKET_CONST_FUNCTION
 const char*
 describe_type(Type type)
-noexcept;
+  noexcept;
 
 // Value comparison results
 enum Compare : uint8_t
@@ -665,7 +665,7 @@ enum Frame_Type : uint8_t
 ROCKET_CONST_FUNCTION
 const char*
 describe_frame_type(Frame_Type type)
-noexcept;
+  noexcept;
 
 // Garbage collection generations
 enum GC_Generation : uint8_t
@@ -734,7 +734,7 @@ enum Parser_Status : uint32_t
 ROCKET_CONST_FUNCTION
 const char*
 describe_parser_status(Parser_Status status)
-noexcept;
+  noexcept;
 
 // API versioning of the standard library
 enum API_Version : uint32_t

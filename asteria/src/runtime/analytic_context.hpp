@@ -33,28 +33,28 @@ class Analytic_Context
   protected:
     bool
     do_is_analytic()
-    const noexcept final
+      const noexcept final
       { return this->is_analytic();  }
 
     Abstract_Context*
     do_get_parent_opt()
-    const noexcept override
+      const noexcept override
       { return this->get_parent_opt();  }
 
     Reference*
     do_lazy_lookup_opt(const phsh_string& /*name*/)
-    override
+      override
       { return nullptr;  }
 
   public:
     bool
     is_analytic()
-    const noexcept
+      const noexcept
       { return true;  }
 
     Abstract_Context*
     get_parent_opt()
-    const noexcept
+      const noexcept
       { return this->m_parent_opt;  }
   };
 

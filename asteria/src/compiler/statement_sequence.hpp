@@ -18,7 +18,7 @@ class Statement_Sequence
   public:
     explicit constexpr
     Statement_Sequence(const Compiler_Options& opts)
-    noexcept
+      noexcept
       : m_opts(opts)
       { }
 
@@ -28,34 +28,34 @@ class Statement_Sequence
     // These are accessors and modifiers of options for parsing.
     const Compiler_Options&
     get_options()
-    const noexcept
+      const noexcept
       { return this->m_opts;  }
 
     Compiler_Options&
     open_options()
-    noexcept
+      noexcept
       { return this->m_opts;  }
 
     Statement_Sequence&
     set_options(const Compiler_Options& opts)
-    noexcept
+      noexcept
       { return this->m_opts = opts, *this;  }
 
     // These are accessors to the statements in this sequence.
     // Note that the sequence cannot be modified.
     bool
     empty()
-    const noexcept
+      const noexcept
       { return this->m_stmts.size();  }
 
     operator
     const cow_vector<Statement>&()
-    const noexcept
+      const noexcept
       { return this->m_stmts;  }
 
     Statement_Sequence&
     clear()
-    noexcept
+      noexcept
       {
         this->m_stmts.clear();
         return *this;

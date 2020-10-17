@@ -27,79 +27,79 @@ struct char_traits<char>
     static constexpr
     char_type
     to_char_type(int_type ch)
-    noexcept
+      noexcept
       { return (char)ch;  }
 
     static constexpr
     int_type
     to_int_type(char_type c)
-    noexcept
+      noexcept
       { return (uint8_t)c;  }
 
     static constexpr
     char_type&
     assign(char_type& r, char_type c)
-    noexcept
+      noexcept
       { return r = c;  }
 
     static constexpr
     bool
     eq(char_type x, char_type y)
-    noexcept
+      noexcept
       { return x == y;  }
 
     static constexpr
     bool
     lt(char_type x, char_type y)
-    noexcept
+      noexcept
       { return (uint8_t)x < (uint8_t)y;  }
 
     static
     char_type*
     copy(char_type* p, const char_type* s, size_type n)
-    noexcept
+      noexcept
       { return (char*)::memcpy(p, s, n);  }
 
     static
     char_type*
     move(char_type* p, const char_type* s, size_type n)
-    noexcept
+      noexcept
       { return (char*)::memmove(p, s, n);  }
 
     static
     char_type*
     assign(char_type* p, size_type n, char_type c)
-    noexcept
+      noexcept
       { return (char*)::memset(p, c, n);  }
 
     static
     const char_type*
     find(const char_type* p, size_type n, char_type c)
-    noexcept
+      noexcept
       { return (char*)::memchr(p, c, n);  }
 
     static constexpr
     size_type
     length(const char_type* p)
-    noexcept
+      noexcept
       { return details_char_traits::length<char>(p);  }
 
     static
     int
     compare(const char_type* p, const char_type* s, size_type n)
-    noexcept
+      noexcept
       { return ::memcmp(p, s, n);  }
 
     static constexpr
     int_type
     eof()
-    noexcept
+      noexcept
       { return EOF;  }
 
     static constexpr
     bool
     is_eof(int_type ch)
-    noexcept
+      noexcept
       { return ch == EOF;  }
 
     static
@@ -157,79 +157,79 @@ struct char_traits<wchar_t>
     static constexpr
     char_type
     to_char_type(int_type ch)
-    noexcept
+      noexcept
       { return (wchar_t)ch;  }
 
     static constexpr
     int_type
     to_int_type(char_type c)
-    noexcept
+      noexcept
       { return (::wint_t)c;  }
 
     static constexpr
     char_type&
     assign(char_type& r, char_type c)
-    noexcept
+      noexcept
       { return r = c;  }
 
     static constexpr
     bool
     eq(char_type x, char_type y)
-    noexcept
+      noexcept
       { return x == y;  }
 
     static constexpr
     bool
     lt(char_type x, char_type y)
-    noexcept
+      noexcept
       { return x < y;  }
 
     static
     char_type*
     copy(char_type* p, const char_type* s, size_type n)
-    noexcept
+      noexcept
       { return ::wmemcpy(p, s, n);  }
 
     static
     char_type*
     move(char_type* p, const char_type* s, size_type n)
-    noexcept
+      noexcept
       { return ::wmemmove(p, s, n);  }
 
     static
     char_type*
     assign(char_type* p, size_type n, char_type c)
-    noexcept
+      noexcept
       { return ::wmemset(p, c, n);  }
 
     static
     const char_type*
     find(const char_type* p, size_type n, char_type c)
-    noexcept
+      noexcept
       { return ::wmemchr(p, c, n);  }
 
     static constexpr
     size_type
     length(const char_type* p)
-    noexcept
+      noexcept
       { return details_char_traits::length<wchar_t>(p);  }
 
     static
     int
     compare(const char_type* p, const char_type* s, size_type n)
-    noexcept
+      noexcept
       { return ::wmemcmp(p, s, n);  }
 
     static constexpr
     int_type
     eof()
-    noexcept
+      noexcept
       { return WEOF;  }
 
     static constexpr
     bool
     is_eof(int_type ch)
-    noexcept
+      noexcept
       { return ch == WEOF;  }
 
     static
@@ -287,79 +287,79 @@ struct char_traits<char16_t>
     static constexpr
     char_type
     to_char_type(int_type ch)
-    noexcept
+      noexcept
       { return (char16_t)ch;  }
 
     static constexpr
     int_type
     to_int_type(char_type c)
-    noexcept
+      noexcept
       { return c;  }
 
     static constexpr
     char_type&
     assign(char_type& r, char_type c)
-    noexcept
+      noexcept
       { return r = c;  }
 
     static constexpr
     bool
     eq(char_type x, char_type y)
-    noexcept
+      noexcept
       { return x == y;  }
 
     static constexpr
     bool
     lt(char_type x, char_type y)
-    noexcept
+      noexcept
       { return x < y;  }
 
     static
     char_type*
     copy(char_type* p, const char_type* s, size_type n)
-    noexcept
+      noexcept
       { return (char16_t*)::memcpy(p, s, n * sizeof(char16_t));  }
 
     static
     char_type*
     move(char_type* p, const char_type* s, size_type n)
-    noexcept
+      noexcept
       { return (char16_t*)::memmove(p, s, n * sizeof(char16_t));  }
 
     static
     char_type*
     assign(char_type* p, size_type n, char_type c)
-    noexcept
+      noexcept
       { return details_char_traits::assign<char16_t>(p, n, c);  }
 
     static
     const char_type*
     find(const char_type* p, size_type n, char_type c)
-    noexcept
+      noexcept
       { return details_char_traits::find<char16_t>(p, n, c);  }
 
     static constexpr
     size_type
     length(const char_type* p)
-    noexcept
+      noexcept
       { return details_char_traits::length<char16_t>(p);  }
 
     static
     int
     compare(const char_type* p, const char_type* s, size_type n)
-    noexcept
+      noexcept
       { return details_char_traits::compare<char16_t>(p, s, n);  }
 
     static constexpr
     int_type
     eof()
-    noexcept
+      noexcept
       { return UINT_LEAST16_MAX;  }
 
     static constexpr
     bool
     is_eof(int_type ch)
-    noexcept
+      noexcept
       { return ch >= UINT_LEAST16_MAX;  }
 
     [[noreturn]] static
@@ -393,79 +393,79 @@ struct char_traits<char32_t>
     static constexpr
     char_type
     to_char_type(int_type ch)
-    noexcept
+      noexcept
       { return (char32_t)ch;  }
 
     static constexpr
     int_type
     to_int_type(char_type c)
-    noexcept
+      noexcept
       { return c;  }
 
     static constexpr
     char_type&
     assign(char_type& r, char_type c)
-    noexcept
+      noexcept
       { return r = c;  }
 
     static constexpr
     bool
     eq(char_type x, char_type y)
-    noexcept
+      noexcept
       { return x == y;  }
 
     static constexpr
     bool
     lt(char_type x, char_type y)
-    noexcept
+      noexcept
       { return x < y;  }
 
     static
     char_type*
     copy(char_type* p, const char_type* s, size_type n)
-    noexcept
+      noexcept
       { return (char32_t*)::memcpy(p, s, n * sizeof(char32_t));  }
 
     static
     char_type*
     move(char_type* p, const char_type* s, size_type n)
-    noexcept
+      noexcept
       { return (char32_t*)::memmove(p, s, n * sizeof(char32_t));  }
 
     static
     char_type*
     assign(char_type* p, size_type n, char_type c)
-    noexcept
+      noexcept
       { return details_char_traits::assign<char32_t>(p, n, c);  }
 
     static
     const char_type*
     find(const char_type* p, size_type n, char_type c)
-    noexcept
+      noexcept
       { return details_char_traits::find<char32_t>(p, n, c);  }
 
     static constexpr
     size_type
     length(const char_type* p)
-    noexcept
+      noexcept
       { return details_char_traits::length<char32_t>(p);  }
 
     static
     int
     compare(const char_type* p, const char_type* s, size_type n)
-    noexcept
+      noexcept
       { return details_char_traits::compare<char32_t>(p, s, n);  }
 
     static constexpr
     int_type
     eof()
-    noexcept
+      noexcept
       { return UINT_LEAST32_MAX;  }
 
     static constexpr
     bool
     is_eof(int_type ch)
-    noexcept
+      noexcept
       { return ch >= UINT_LEAST32_MAX;  }
 
     [[noreturn]] static

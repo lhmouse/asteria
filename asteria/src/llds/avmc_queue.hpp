@@ -30,16 +30,16 @@ class AVMC_Queue
   public:
     constexpr
     AVMC_Queue()
-    noexcept
+      noexcept
       { }
 
     AVMC_Queue(AVMC_Queue&& other)
-    noexcept
+      noexcept
       { this->swap(other);  }
 
     AVMC_Queue&
     operator=(AVMC_Queue&& other)
-    noexcept
+      noexcept
       { return this->swap(other);  }
 
     ~AVMC_Queue()
@@ -58,7 +58,7 @@ class AVMC_Queue
   private:
     void
     do_destroy_nodes()
-    noexcept;
+      noexcept;
 
     void
     do_reallocate(uint32_t nadd);
@@ -109,12 +109,12 @@ class AVMC_Queue
   public:
     bool
     empty()
-    const noexcept
+      const noexcept
       { return this->m_used == 0;  }
 
     AVMC_Queue&
     clear()
-    noexcept
+      noexcept
       {
         if(this->m_used)
           this->do_destroy_nodes();
@@ -134,7 +134,7 @@ class AVMC_Queue
 
     AVMC_Queue&
     swap(AVMC_Queue& other)
-    noexcept
+      noexcept
       {
         ::std::swap(this->m_bptr, other.m_bptr);
         ::std::swap(this->m_rsrv, other.m_rsrv);
@@ -214,17 +214,17 @@ class AVMC_Queue
     // These are interfaces called by the runtime.
     AIR_Status
     execute(Executive_Context& ctx)
-    const;
+      const;
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const;
+      const;
   };
 
 inline
 void
 swap(AVMC_Queue& lhs, AVMC_Queue& rhs)
-noexcept
+  noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

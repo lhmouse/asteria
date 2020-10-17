@@ -198,12 +198,12 @@ class Statement
   public:
     Index
     index()
-    const noexcept
+      const noexcept
       { return static_cast<Index>(this->m_stor.index());  }
 
     bool
     is_empty_return()
-    const noexcept
+      const noexcept
       {
         if(this->index() != index_return)
           return false;
@@ -213,7 +213,7 @@ class Statement
 
     Statement&
     swap(Statement& other)
-    noexcept
+      noexcept
       {
         this->m_stor.swap(other.m_stor);
         return *this;
@@ -222,13 +222,13 @@ class Statement
     cow_vector<AIR_Node>&
     generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
                   Analytic_Context& ctx, const Compiler_Options& opts, PTC_Aware ptc)
-    const;
+      const;
   };
 
 inline
 void
 swap(Statement& lhs, Statement& rhs)
-noexcept
+  noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

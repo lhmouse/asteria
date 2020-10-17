@@ -348,12 +348,12 @@ class AIR_Node
   public:
     Index
     index()
-    const noexcept
+      const noexcept
       { return static_cast<Index>(this->m_stor.index());  }
 
     AIR_Node&
     swap(AIR_Node& other)
-    noexcept
+      noexcept
       {
         this->m_stor.swap(other.m_stor);
         return *this;
@@ -364,25 +364,25 @@ class AIR_Node
     // executive context now, we need to replace `*this` with a copy of it.
     opt<AIR_Node>
     rebind_opt(Abstract_Context& ctx)
-    const;
+      const;
 
     // Compress this IR node.
     // The return value indicates whether this node terminates control flow i.e.
     // all subsequent nodes are unreachable.
     bool
     solidify(AVMC_Queue& queue)
-    const;
+      const;
 
     // This is needed because the body of a closure should not be solidified.
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const;
+      const;
   };
 
 inline
 void
 swap(AIR_Node& lhs, AIR_Node& rhs)
-noexcept
+  noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

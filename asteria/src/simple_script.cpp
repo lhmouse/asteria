@@ -90,7 +90,7 @@ reload_file(const char* path)
 Reference
 Simple_Script::
 execute(Global_Context& global, Reference_Stack&& stack)
-const
+  const
   {
     // Execute the script as a plain function.
     const StdIO_Sentry sentry;
@@ -100,7 +100,7 @@ const
 Reference
 Simple_Script::
 execute(Global_Context& global, cow_vector<Value>&& vals)
-const
+  const
   {
     // Push all arguments backwards as temporaries.
     Reference_Stack stack;

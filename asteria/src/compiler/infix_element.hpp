@@ -89,12 +89,12 @@ class Infix_Element
   public:
     Index
     index()
-    const noexcept
+      const noexcept
       { return static_cast<Index>(this->m_stor.index());  }
 
     Infix_Element&
     swap(Infix_Element& other)
-    noexcept
+      noexcept
       {
         this->m_stor.swap(other.m_stor);
         return *this;
@@ -103,7 +103,7 @@ class Infix_Element
     // Returns the precedence of this element.
     Precedence
     tell_precedence()
-    const noexcept;
+      const noexcept;
 
     // Moves all units into `units`.
     Infix_Element&
@@ -112,13 +112,13 @@ class Infix_Element
     // Returns a reference where new units will be appended.
     cow_vector<Expression_Unit>&
     open_junction()
-    noexcept;
+      noexcept;
   };
 
 inline
 void
 swap(Infix_Element& lhs, Infix_Element& rhs)
-noexcept
+  noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

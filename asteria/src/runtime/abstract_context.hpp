@@ -23,7 +23,7 @@ class Abstract_Context
 
   public:
     Abstract_Context()
-    noexcept
+      noexcept
       { }
 
     virtual
@@ -33,13 +33,13 @@ class Abstract_Context
     virtual
     bool
     do_is_analytic()
-    const noexcept
+      const noexcept
       = 0;
 
     virtual
     Abstract_Context*
     do_get_parent_opt()
-    const noexcept
+      const noexcept
       = 0;
 
     virtual
@@ -50,12 +50,12 @@ class Abstract_Context
   public:
     bool
     is_analytic()
-    const noexcept
+      const noexcept
       { return this->do_is_analytic();  }
 
     Abstract_Context*
     get_parent_opt()
-    const noexcept
+      const noexcept
       { return this->do_get_parent_opt();  }
 
     const Reference*
@@ -73,7 +73,7 @@ class Abstract_Context
 
     Abstract_Context&
     clear_named_references()
-    noexcept
+      noexcept
       { return this->m_named_refs.clear(), *this;  }
   };
 

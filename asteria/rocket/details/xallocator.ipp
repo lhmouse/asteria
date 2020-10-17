@@ -15,32 +15,32 @@ class final_wrapper
 
   public:
     constexpr
-    final_wrapper()
-    noexcept(is_nothrow_constructible<allocT>::value)
+      final_wrapper()
+      noexcept(is_nothrow_constructible<allocT>::value)
       : m_alloc()
       { }
 
     explicit constexpr
-    final_wrapper(const allocT& alloc)
-    noexcept
+      final_wrapper(const allocT& alloc)
+      noexcept
       : m_alloc(alloc)
       { }
 
     explicit constexpr
-    final_wrapper(allocT&& alloc)
-    noexcept
+      final_wrapper(allocT&& alloc)
+      noexcept
       : m_alloc(::std::move(alloc))
       { }
 
   public:
     constexpr operator
     const allocT&()
-    const noexcept
+      const noexcept
       { return this->m_alloc;  }
 
     operator
     allocT&()
-    noexcept
+      noexcept
       { return this->m_alloc;  }
   };
 
@@ -52,7 +52,7 @@ struct propagate_none_tag
 template<typename allocT>
 void
 propagate(propagate_none_tag, allocT& /*lhs*/, const allocT& /*rhs*/)
-noexcept
+  noexcept
   { }
 
 // propagate_on_container_copy_assignment
@@ -63,7 +63,7 @@ struct propagate_copy_tag
 template<typename allocT>
 void
 propagate(propagate_copy_tag, allocT& lhs, const allocT& rhs)
-noexcept
+  noexcept
   { lhs = rhs;  }
 
 // propagate_on_container_move_assignment
@@ -74,7 +74,7 @@ struct propagate_move_tag
 template<typename allocT>
 void
 propagate(propagate_move_tag, allocT& lhs, allocT& rhs)
-noexcept
+  noexcept
   { lhs = ::std::move(rhs);  }
 
 // propagate_on_container_swap
@@ -85,7 +85,7 @@ struct propagate_swap_tag
 template<typename allocT>
 void
 propagate(propagate_swap_tag, allocT& lhs, allocT& rhs)
-noexcept
+  noexcept
   { noadl::xswap(lhs, rhs);  }
 
 }  // namespace details_xallocator

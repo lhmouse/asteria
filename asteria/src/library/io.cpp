@@ -17,7 +17,7 @@ class IOF_Sentry
   public:
     explicit
     IOF_Sentry(::FILE* fp)
-    noexcept
+      noexcept
       : m_fp(fp)
       { ::flockfile(this->m_fp);  }
 
@@ -27,7 +27,7 @@ class IOF_Sentry
   public:
     operator
     ::FILE*()
-    const noexcept
+      const noexcept
       { return this->m_fp;  }
   };
 

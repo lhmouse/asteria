@@ -13,7 +13,7 @@ struct storage_header
 
     explicit
     storage_header()
-    noexcept
+      noexcept
       : nref()
       { }
   };
@@ -30,20 +30,20 @@ struct basic_storage
     static constexpr
     size_type
     min_nblk_for_nchar(size_t nchar)
-    noexcept
+      noexcept
       { return ((nchar + 1) * sizeof(value_type) + sizeof(basic_storage) - 1) / sizeof(basic_storage) + 1;  }
 
     static constexpr
     size_t
     max_nchar_for_nblk(size_type nblk)
-    noexcept
+      noexcept
       { return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type) - 1;  }
 
     size_type nblk;
     value_type data[0];
 
     basic_storage(const allocator_type& xalloc, size_type xnblk)
-    noexcept
+      noexcept
       : allocator_wrapper_base_for<allocT>::type(xalloc),
         nblk(xnblk)
       {
@@ -91,13 +91,13 @@ class storage_handle
   public:
     explicit constexpr
     storage_handle(const allocator_type& alloc)
-    noexcept
+      noexcept
       : allocator_base(alloc)
       { }
 
     explicit constexpr
     storage_handle(allocator_type&& alloc)
-    noexcept
+      noexcept
       : allocator_base(::std::move(alloc))
       { }
 
@@ -114,7 +114,7 @@ class storage_handle
   private:
     void
     do_reset(storage_pointer qstor_new)
-    noexcept
+      noexcept
       {
         // Decrement the reference count with acquire-release semantics to prevent
         // races on `*qstor`.
@@ -133,7 +133,7 @@ class storage_handle
     ROCKET_NOINLINE static
     void
     do_destroy_storage(storage_pointer qstor)
-    noexcept
+      noexcept
       {
         auto nblk = qstor->nblk;
         storage_allocator st_alloc(*qstor);
@@ -145,18 +145,18 @@ class storage_handle
     constexpr
     const allocator_type&
     as_allocator()
-    const noexcept
+      const noexcept
       { return static_cast<const allocator_base&>(*this);  }
 
     allocator_type&
     as_allocator()
-    noexcept
+      noexcept
       { return static_cast<allocator_base&>(*this);  }
 
     ROCKET_PURE_FUNCTION
     bool
     unique()
-    const noexcept
+      const noexcept
       {
         auto qstor = this->m_qstor;
         if(!qstor)
@@ -166,7 +166,7 @@ class storage_handle
 
     long
     use_count()
-    const noexcept
+      const noexcept
       {
         auto qstor = this->m_qstor;
         if(!qstor)
@@ -177,7 +177,7 @@ class storage_handle
     ROCKET_PURE_FUNCTION
     size_type
     capacity()
-    const noexcept
+      const noexcept
       {
         auto qstor = this->m_qstor;
         if(!qstor)
@@ -187,7 +187,7 @@ class storage_handle
 
     size_type
     max_size()
-    const noexcept
+      const noexcept
       {
         storage_allocator st_alloc(this->as_allocator());
         auto max_nblk = allocator_traits<storage_allocator>::max_size(st_alloc);
@@ -196,7 +196,7 @@ class storage_handle
 
     size_type
     check_size_add(size_type base, size_type add)
-    const
+      const
       {
         auto nmax = this->max_size();
         ROCKET_ASSERT(base <= nmax);
@@ -209,7 +209,7 @@ class storage_handle
 
     size_type
     round_up_capacity(size_type res_arg)
-    const
+      const
       {
         auto cap = this->check_size_add(0, res_arg);
         auto nblk = storage::min_nblk_for_nchar(cap);
@@ -219,7 +219,7 @@ class storage_handle
     ROCKET_PURE_FUNCTION
     const value_type*
     data()
-    const noexcept
+      const noexcept
       {
         auto qstor = this->m_qstor;
         if(!qstor)
@@ -229,7 +229,7 @@ class storage_handle
 
     value_type*
     mut_data_opt()
-    noexcept
+      noexcept
       {
         auto qstor = this->m_qstor;
         if(!qstor || !qstor->nref.unique())
@@ -268,12 +268,12 @@ class storage_handle
 
     void
     deallocate()
-    noexcept
+      noexcept
       { this->do_reset(nullptr);  }
 
     void
     share_with(const storage_handle& other)
-    noexcept
+      noexcept
       {
         auto qstor = other.m_qstor;
         if(qstor)
@@ -283,7 +283,7 @@ class storage_handle
 
     void
     exchange_with(storage_handle& other)
-    noexcept
+      noexcept
       { ::std::swap(this->m_qstor, other.m_qstor);  }
   };
 
@@ -301,7 +301,7 @@ struct comparator
     static
     int
     inequality(const char_type* s1, size_type n1, const char_type* s2, size_type n2)
-    noexcept
+      noexcept
       {
         if(n1 != n2)
           return 2;
@@ -314,7 +314,7 @@ struct comparator
     static
     int
     relation(const char_type* s1, size_type n1, const char_type* s2, size_type n2)
-    noexcept
+      noexcept
       {
         if(n1 < n2)
           return (traits_type::compare(s1, s2, n1) > 0) ? +1 : -1;
@@ -339,7 +339,7 @@ class basic_hasher
     constexpr
     basic_hasher&
     append(const charT& c)
-    noexcept
+      noexcept
       {
         char32_t word = static_cast<char32_t>(c);
         char32_t reg = this->m_reg;
@@ -372,7 +372,7 @@ class basic_hasher
     constexpr
     size_t
     finish()
-    noexcept
+      noexcept
       {
         char32_t reg = this->m_reg;
         this->m_reg = xoffset;
@@ -404,7 +404,7 @@ class string_iterator
     // This constructor is called by the container.
     constexpr
     string_iterator(charT* begin, size_t ncur, size_t nend)
-    noexcept
+      noexcept
       : m_begin(begin),
         m_cur(begin + ncur),
         m_end(begin + nend)
@@ -413,7 +413,7 @@ class string_iterator
   public:
     constexpr
     string_iterator()
-    noexcept
+      noexcept
       : m_begin(),
         m_cur(),
         m_end()
@@ -423,7 +423,7 @@ class string_iterator
     ROCKET_ENABLE_IF(is_convertible<ycharT*, charT*>::value)>
     constexpr
     string_iterator(const string_iterator<stringT, ycharT>& other)
-    noexcept
+      noexcept
       : m_begin(other.m_begin),
         m_cur(other.m_cur),
         m_end(other.m_end)
@@ -433,7 +433,7 @@ class string_iterator
     ROCKET_ENABLE_IF(is_convertible<ycharT*, charT*>::value)>
     string_iterator&
     operator=(const string_iterator<stringT, ycharT>& other)
-    noexcept
+      noexcept
       {
         this->m_begin = other.m_begin;
         this->m_cur = other.m_cur;
@@ -444,7 +444,7 @@ class string_iterator
   private:
     charT*
     do_validate(charT* cur, bool deref)
-    const noexcept
+      const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
         ROCKET_ASSERT_MSG((this->m_begin <= cur) && (cur <= this->m_end), "Iterator out of range");
@@ -455,22 +455,22 @@ class string_iterator
   public:
     reference
     operator*()
-    const noexcept
+      const noexcept
       { return *(this->do_validate(this->m_cur, true));  }
 
     reference
     operator[](difference_type off)
-    const noexcept
+      const noexcept
       { return *(this->do_validate(this->m_cur + off, true));  }
 
     pointer
     operator->()
-    const noexcept
+      const noexcept
       { return ::std::addressof(**this);  }
 
     string_iterator&
     operator+=(difference_type off)
-    noexcept
+      noexcept
       {
         this->m_cur = this->do_validate(this->m_cur + off, false);
         return *this;
@@ -478,7 +478,7 @@ class string_iterator
 
     string_iterator&
     operator-=(difference_type off)
-    noexcept
+      noexcept
       {
         this->m_cur = this->do_validate(this->m_cur - off, false);
         return *this;
@@ -486,7 +486,7 @@ class string_iterator
 
     string_iterator
     operator+(difference_type off)
-    const noexcept
+      const noexcept
       {
         auto res = *this;
         res += off;
@@ -495,7 +495,7 @@ class string_iterator
 
     string_iterator
     operator-(difference_type off)
-    const noexcept
+      const noexcept
       {
         auto res = *this;
         res -= off;
@@ -504,34 +504,34 @@ class string_iterator
 
     string_iterator&
     operator++()
-    noexcept
+      noexcept
       { return *this += 1;  }
 
     string_iterator&
     operator--()
-    noexcept
+      noexcept
       { return *this -= 1;  }
 
     string_iterator
     operator++(int)
-    noexcept
+      noexcept
       { return ::std::exchange(*this, *this + 1);  }
 
     string_iterator
     operator--(int)
-    noexcept
+      noexcept
       { return ::std::exchange(*this, *this - 1);  }
 
     friend
     string_iterator
     operator+(difference_type off, const string_iterator& other)
-    noexcept
+      noexcept
       { return other + off;  }
 
     template<typename ycharT>
     difference_type
     operator-(const string_iterator<stringT, ycharT>& other)
-    const noexcept
+      const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
         ROCKET_ASSERT_MSG(this->m_begin == other.m_begin, "Iterator not compatible");
@@ -543,38 +543,38 @@ class string_iterator
     constexpr
     bool
     operator==(const string_iterator<stringT, ycharT>& other)
-    const noexcept
+      const noexcept
       { return this->m_cur == other.m_cur;  }
 
     template<typename ycharT>
     constexpr
     bool
     operator!=(const string_iterator<stringT, ycharT>& other)
-    const noexcept
+      const noexcept
       { return this->m_cur != other.m_cur;  }
 
     template<typename ycharT>
     bool
     operator<(const string_iterator<stringT, ycharT>& other)
-    const noexcept
+      const noexcept
       { return *this - other < 0;  }
 
     template<typename ycharT>
     bool
     operator>(const string_iterator<stringT, ycharT>& other)
-    const noexcept
+      const noexcept
       { return *this - other > 0;  }
 
     template<typename ycharT>
     bool
     operator<=(const string_iterator<stringT, ycharT>& other)
-    const noexcept
+      const noexcept
       { return *this - other <= 0;  }
 
     template<typename ycharT>
     bool
     operator>=(const string_iterator<stringT, ycharT>& other)
-    const noexcept
+      const noexcept
       { return *this - other >= 0;  }
   };
 

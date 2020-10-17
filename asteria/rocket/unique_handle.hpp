@@ -46,41 +46,41 @@ class unique_handle
     // 23.11.1.2.1, constructors
     constexpr
     unique_handle()
-    noexcept(is_nothrow_constructible<closer_type>::value)
+      noexcept(is_nothrow_constructible<closer_type>::value)
       : m_sth()
       { }
 
     explicit constexpr
     unique_handle(const closer_type& cl)
-    noexcept
+      noexcept
       : m_sth(cl)
       { }
 
     explicit
     unique_handle(handle_type hv)
-    noexcept(is_nothrow_constructible<closer_type>::value)
+      noexcept(is_nothrow_constructible<closer_type>::value)
       : unique_handle()
       { this->reset(::std::move(hv));  }
 
     unique_handle(handle_type hv, const closer_type& cl)
-    noexcept
+      noexcept
       : unique_handle(cl)
       { this->reset(::std::move(hv));  }
 
     unique_handle(unique_handle&& other)
-    noexcept
+      noexcept
       : unique_handle(::std::move(other.m_sth.as_closer()))
       { this->reset(other.m_sth.release());  }
 
     unique_handle(unique_handle&& other, const closer_type& cl)
-    noexcept
+      noexcept
       : unique_handle(cl)
       { this->reset(other.m_sth.release());  }
 
     // 23.11.1.2.3, assignment
     unique_handle&
     operator=(unique_handle&& other)
-    noexcept
+      noexcept
       {
         this->m_sth.as_closer() = ::std::move(other.m_sth.as_closer());
         this->reset(other.m_sth.release());
@@ -92,40 +92,40 @@ class unique_handle
     constexpr
     handle_type
     get()
-    const noexcept
+      const noexcept
       { return this->m_sth.get();  }
 
     constexpr
     const closer_type&
     get_closer()
-    const noexcept
+      const noexcept
       { return this->m_sth.as_closer();  }
 
     closer_type&
     get_closer()
-    noexcept
+      noexcept
       { return this->m_sth.as_closer();  }
 
     explicit constexpr operator
     bool()
-    const noexcept
+      const noexcept
       { return !(this->m_sth.as_closer().is_null(this->m_sth.get()));  }
 
     constexpr operator
     const handle_type&()
-    const noexcept
+      const noexcept
       { return this->m_sth.get();  }
 
     // 23.11.1.2.5, modifiers
     handle_type
     release()
-    noexcept
+      noexcept
       { return this->m_sth.release();  }
 
     // N.B. The return type differs from `std::unique_ptr`.
     unique_handle&
     reset()
-    noexcept
+      noexcept
       {
         this->m_sth.reset(this->m_sth.as_closer().null());
         return *this;
@@ -133,7 +133,7 @@ class unique_handle
 
     unique_handle&
     reset(handle_type hv_new)
-    noexcept
+      noexcept
       {
         this->m_sth.reset(::std::move(hv_new));
         return *this;
@@ -141,7 +141,7 @@ class unique_handle
 
     unique_handle&
     reset(handle_type hv_new, const closer_type& cl)
-    noexcept
+      noexcept
       {
         this->m_sth.reset(::std::move(hv_new));
         this->m_sth.as_closer() = cl;
@@ -150,7 +150,7 @@ class unique_handle
 
     unique_handle&
     swap(unique_handle& other)
-    noexcept
+      noexcept
       {
         noadl::xswap(this->m_sth.as_closer(), other.m_sth.as_closer());
         this->m_sth.exchange_with(other.m_sth);
@@ -198,7 +198,7 @@ template<typename handleT, typename closerT>
 inline
 void
 swap(unique_handle<handleT, closerT>& lhs, unique_handle<handleT, closerT>& rhs)
-noexcept(noexcept(lhs.swap(rhs)))
+  noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
 template<typename charT, typename traitsT, typename handleT, typename closerT>
@@ -211,7 +211,7 @@ template<typename handleT, typename closerT>
 inline
 unique_handle<handleT, details_unique_handle::default_closer_wrapper<handleT, closerT>>
 make_unique_handle(handleT hv, closerT&& cl)
-noexcept
+  noexcept
   { return { hv, ::std::forward<closerT>(cl) };  }
 
 }  // namespace rocket

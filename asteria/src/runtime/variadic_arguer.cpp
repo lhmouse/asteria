@@ -12,7 +12,7 @@ namespace asteria {
 tinyfmt&
 Variadic_Arguer::
 describe(tinyfmt& fmt)
-const
+  const
   {
     return fmt << "`__varg([index])` at '" << this->m_sloc << "'";
   }
@@ -20,7 +20,7 @@ const
 Variable_Callback&
 Variadic_Arguer::
 enumerate_variables(Variable_Callback& callback)
-const
+  const
   {
     return ::rocket::for_each(this->m_vargs, callback), callback;
   }
@@ -28,7 +28,7 @@ const
 Reference&
 Variadic_Arguer::
 invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack)
-const
+  const
   {
     Argument_Reader reader(::rocket::sref("__varg"), stack);
 

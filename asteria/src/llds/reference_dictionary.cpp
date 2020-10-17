@@ -11,7 +11,7 @@ namespace asteria {
 void
 Reference_Dictionary::
 do_destroy_buckets()
-noexcept
+  noexcept
   {
     auto next = this->m_head;
     while(ROCKET_EXPECT(next)) {
@@ -33,7 +33,7 @@ noexcept
 details_reference_dictionary::Bucket*
 Reference_Dictionary::
 do_xprobe(const phsh_string& name)
-const noexcept
+  const noexcept
   {
     auto bptr = this->m_bptr;
     auto eptr = this->m_eptr;
@@ -51,7 +51,7 @@ const noexcept
 void
 Reference_Dictionary::
 do_xrelocate_but(Bucket* qxcld)
-noexcept
+  noexcept
   {
     auto bptr = this->m_bptr;
     auto eptr = this->m_eptr;
@@ -99,7 +99,7 @@ noexcept
 void
 Reference_Dictionary::
 do_list_attach(Bucket* qbkt)
-noexcept
+  noexcept
   {
     // Insert the bucket before `head`.
     auto next = ::std::exchange(this->m_head, qbkt);
@@ -112,7 +112,7 @@ noexcept
 void
 Reference_Dictionary::
 do_list_detach(Bucket* qbkt)
-noexcept
+  noexcept
   {
     auto next = qbkt->next;
     auto prev = qbkt->prev;
@@ -178,7 +178,7 @@ do_rehash(size_t nbkt)
 void
 Reference_Dictionary::
 do_attach(Bucket* qbkt, const phsh_string& name)
-noexcept
+  noexcept
   {
     // Construct the node, then attach it.
     ROCKET_ASSERT(!*qbkt);
@@ -192,7 +192,7 @@ noexcept
 void
 Reference_Dictionary::
 do_detach(Bucket* qbkt)
-noexcept
+  noexcept
   {
     // Destroy the old name and reference, then detach the bucket.
     this->m_size--;
@@ -209,7 +209,7 @@ noexcept
 Variable_Callback&
 Reference_Dictionary::
 enumerate_variables(Variable_Callback& callback)
-const
+  const
   {
     auto next = this->m_head;
     while(ROCKET_EXPECT(next)) {

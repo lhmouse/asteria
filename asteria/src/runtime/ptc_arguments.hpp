@@ -11,7 +11,7 @@
 namespace asteria {
 
 class PTC_Arguments
-final
+  final
   : public Rcfwd<PTC_Arguments>
   {
   private:
@@ -42,47 +42,47 @@ final
   public:
     const Source_Location&
     sloc()
-    const noexcept
+      const noexcept
       { return this->m_sloc;  }
 
     PTC_Aware
     ptc_aware()
-    const noexcept
+      const noexcept
       { return this->m_ptc;  }
 
     const cow_function&
     get_target()
-    const noexcept
+      const noexcept
       { return this->m_target;  }
 
     const Reference_Stack&
     get_stack()
-    const noexcept
+      const noexcept
       { return this->m_stack;  }
 
     Reference_Stack&
     open_stack()
-    noexcept
+      noexcept
       { return this->m_stack;  }
 
     const cow_bivector<Source_Location, AVMC_Queue>&
     get_defer()
-    const noexcept
+      const noexcept
       { return this->m_defer;  }
 
     cow_bivector<Source_Location, AVMC_Queue>&
     open_defer()
-    noexcept
+      noexcept
       { return this->m_defer;  }
 
     const Source_Location&
     enclosing_sloc()
-    const noexcept
+      const noexcept
       { return this->m_encl_sloc;  }
 
     const cow_string&
     enclosing_func()
-    const noexcept
+      const noexcept
       { return this->m_encl_func;  }
 
     PTC_Arguments&

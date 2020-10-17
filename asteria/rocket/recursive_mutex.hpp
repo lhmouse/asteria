@@ -25,7 +25,7 @@ class recursive_mutex
   public:
     constexpr
     recursive_mutex()
-    noexcept
+      noexcept
       { }
 
     recursive_mutex(const recursive_mutex&)
@@ -50,21 +50,21 @@ class recursive_mutex::unique_lock
   public:
     constexpr
     unique_lock()
-    noexcept
+      noexcept
       { }
 
     explicit
     unique_lock(recursive_mutex& parent)
-    noexcept
+      noexcept
       { this->lock(parent);  }
 
     unique_lock(unique_lock&& other)
-    noexcept
+      noexcept
       { this->swap(other);  }
 
     unique_lock&
     operator=(unique_lock&& other)
-    noexcept
+      noexcept
       { return this->swap(other);  }
 
     ~unique_lock()
@@ -73,22 +73,22 @@ class recursive_mutex::unique_lock
   public:
     explicit operator
     bool()
-    const noexcept
+      const noexcept
       { return this->m_sth.get() != nullptr;  }
 
     bool
     is_locking(const recursive_mutex& m)
-    const noexcept
+      const noexcept
       { return this->m_sth.get() == m.m_mutex;  }
 
     bool
     is_locking(const recursive_mutex&&)
-    const noexcept
+      const noexcept
       = delete;
 
     unique_lock&
     unlock()
-    noexcept
+      noexcept
       {
         this->m_sth.reset(nullptr);
         return *this;
@@ -96,7 +96,7 @@ class recursive_mutex::unique_lock
 
     unique_lock&
     try_lock(recursive_mutex& m)
-    noexcept
+      noexcept
       {
         // Return immediately if the same mutex is already held.
         // This is a bit faster than locking and relocking it.
@@ -117,7 +117,7 @@ class recursive_mutex::unique_lock
 
     unique_lock&
     lock(recursive_mutex& m)
-    noexcept
+      noexcept
       {
         // Return immediately if the same mutex is already held.
         // This is a bit faster than locking and relocking it.
@@ -135,7 +135,7 @@ class recursive_mutex::unique_lock
 
     unique_lock&
     swap(unique_lock& other)
-    noexcept
+      noexcept
       {
         this->m_sth.exchange_with(other.m_sth);
         return *this;
@@ -145,7 +145,7 @@ class recursive_mutex::unique_lock
 inline
 void
 swap(recursive_mutex::unique_lock& lhs, recursive_mutex::unique_lock& rhs)
-noexcept(noexcept(lhs.swap(rhs)))
+  noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
 }  // namespace rocket

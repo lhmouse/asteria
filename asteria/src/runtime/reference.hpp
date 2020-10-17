@@ -122,51 +122,51 @@ class Reference
   public:
     Index
     index()
-    const noexcept
+      const noexcept
       { return static_cast<Index>(this->m_root.index());  }
 
     bool
     is_uninit()
-    const noexcept
+      const noexcept
       { return this->index() == index_uninit;  }
 
     bool
     is_void()
-    const noexcept
+      const noexcept
       { return this->index() == index_void;  }
 
     bool
     is_constant()
-    const noexcept
+      const noexcept
       { return this->index() == index_constant;  }
 
     bool
     is_temporary()
-    const noexcept
+      const noexcept
       { return this->index() == index_temporary;  }
 
     bool
     is_variable()
-    const noexcept
+      const noexcept
       { return this->index() == index_variable;  }
 
     ASTERIA_INCOMPLET(Variable)
     rcptr<Variable>
     get_variable_opt()
-    const noexcept
+      const noexcept
       { return ROCKET_EXPECT(this->is_variable())
           ? unerase_cast<Variable>(this->m_root.as<index_variable>().var)
           : nullptr;  }
 
     bool
     is_ptc_args()
-    const noexcept
+      const noexcept
       { return this->index() == index_ptc_args;  }
 
     ASTERIA_INCOMPLET(PTC_Arguments)
     rcptr<PTC_Arguments>
     get_ptc_args_opt()
-    const noexcept
+      const noexcept
       { return ROCKET_EXPECT(this->is_ptc_args())
           ? unerase_cast<PTC_Arguments>(this->m_root.as<index_ptc_args>().ptca)
           : nullptr;  }
@@ -176,17 +176,17 @@ class Reference
 
     bool
     is_jump_src()
-    const noexcept
+      const noexcept
       { return this->index() == index_jump_src;  }
 
     const Source_Location&
     as_jump_src()
-    const
+      const
       { return this->m_root.as<index_jump_src>().sloc;  }
 
     Reference&
     swap(Reference& other)
-    noexcept
+      noexcept
       {
         this->m_root.swap(other.m_root);
         this->m_mods.swap(other.m_mods);
@@ -195,19 +195,19 @@ class Reference
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const;
+      const;
 
     // An lvalue is something writable.
     // An rvalue is something read-only.
     // Everything else is neither an lvalue or an rvalue.
     bool
     is_lvalue()
-    const noexcept
+      const noexcept
       { return this->is_variable();  }
 
     bool
     is_rvalue()
-    const noexcept
+      const noexcept
       { return this->is_constant() || this->is_temporary();  }
 
     // A glvalue is an lvalue or a subobject of an rvalue.
@@ -215,12 +215,12 @@ class Reference
     // These are used to determine whether a value can be further normalized.
     bool
     is_glvalue()
-    const noexcept
+      const noexcept
       { return this->is_lvalue() || (this->is_rvalue() && this->m_mods.size());  }
 
     bool
     is_prvalue()
-    const noexcept
+      const noexcept
       { return this->is_rvalue() && this->m_mods.empty();  }
 
     // A modifier is created by a dot or bracket operator.
@@ -250,21 +250,21 @@ class Reference
     // Note that not all references denote values. Some of them are placeholders.
     const Value&
     dereference_readonly()
-    const;
+      const;
 
     Value&
     dereference_mutable()
-    const;
+      const;
 
     Value
     dereference_unset()
-    const;
+      const;
   };
 
 inline
 void
 swap(Reference& lhs, Reference& rhs)
-noexcept
+  noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

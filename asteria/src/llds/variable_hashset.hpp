@@ -23,16 +23,16 @@ class Variable_HashSet
   public:
     constexpr
     Variable_HashSet()
-    noexcept
+      noexcept
       { }
 
     Variable_HashSet(Variable_HashSet&& other)
-    noexcept
+      noexcept
       { this->swap(other);  }
 
     Variable_HashSet&
     operator=(Variable_HashSet&& other)
-    noexcept
+      noexcept
       { return this->swap(other);  }
 
     ~Variable_HashSet()
@@ -51,31 +51,31 @@ class Variable_HashSet
   private:
     void
     do_destroy_buckets()
-    noexcept;
+      noexcept;
 
     // This function returns a pointer to either an empty bucket or a
     // bucket containing a key which is equal to `var`, but in no case
     // can a null pointer be returned.
     Bucket*
     do_xprobe(const rcptr<Variable>& var)
-    const noexcept;
+      const noexcept;
 
     // This function is used for relocation after an element is erased.
     inline
     void
     do_xrelocate_but(Bucket* qxcld)
-    noexcept;
+      noexcept;
 
     // Valid buckets are linked altogether for efficient iteration.
     inline
     void
     do_list_attach(Bucket* qbkt)
-    noexcept;
+      noexcept;
 
     inline
     void
     do_list_detach(Bucket* qbkt)
-    noexcept;
+      noexcept;
 
     // This function is primarily used to reallocate a larger table.
     void
@@ -85,28 +85,28 @@ class Variable_HashSet
     // `*qbkt` must be empty.
     void
     do_attach(Bucket* qbkt, const rcptr<Variable>& var)
-    noexcept;
+      noexcept;
 
     // This functions clears the bucket `*qbkt`
     // `*qbkt` must not be empty.
     void
     do_detach(Bucket* qbkt)
-    noexcept;
+      noexcept;
 
   public:
     bool
     empty()
-    const noexcept
+      const noexcept
       { return this->m_head == nullptr;  }
 
     size_t
     size()
-    const noexcept
+      const noexcept
       { return this->m_size;  }
 
     Variable_HashSet&
     clear()
-    noexcept
+      noexcept
       {
         if(this->m_head)
           this->do_destroy_buckets();
@@ -119,7 +119,7 @@ class Variable_HashSet
 
     Variable_HashSet&
     swap(Variable_HashSet& other)
-    noexcept
+      noexcept
       {
         ::std::swap(this->m_bptr, other.m_bptr);
         ::std::swap(this->m_eptr, other.m_eptr);
@@ -130,7 +130,7 @@ class Variable_HashSet
 
     bool
     has(const rcptr<Variable>& var)
-    const noexcept
+      const noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the
         // table has not been allocated.
@@ -148,7 +148,7 @@ class Variable_HashSet
 
     bool
     insert(const rcptr<Variable>& var)
-    noexcept
+      noexcept
       {
         // Reserve more room by rehashing if the load factor would
         // exceed 0.5.
@@ -169,7 +169,7 @@ class Variable_HashSet
 
     bool
     erase(const rcptr<Variable>& var)
-    noexcept
+      noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the
         // table has not been allocated.
@@ -190,7 +190,7 @@ class Variable_HashSet
 
     rcptr<Variable>
     erase_random_opt()
-    noexcept
+      noexcept
       {
         // Get a random bucket that contains a variable.
         auto qbkt = this->m_head;
@@ -205,13 +205,13 @@ class Variable_HashSet
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const;
+      const;
   };
 
 inline
 void
 swap(Variable_HashSet& lhs, Variable_HashSet& rhs)
-noexcept
+  noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

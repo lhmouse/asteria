@@ -20,16 +20,16 @@ class Reference_Stack
   public:
     constexpr
     Reference_Stack()
-    noexcept
+      noexcept
       { }
 
     Reference_Stack(Reference_Stack&& other)
-    noexcept
+      noexcept
       { this->swap(other);  }
 
     Reference_Stack&
     operator=(Reference_Stack&& other)
-    noexcept
+      noexcept
       { return this->swap(other);  }
 
     ~Reference_Stack()
@@ -49,7 +49,7 @@ class Reference_Stack
     [[noreturn]] inline
     void
     do_throw_subscript_out_of_range(size_t index, const char* rel)
-    const
+      const
       {
         ::rocket::sprintf_and_throw<::std::out_of_range>(
                        "Reference_Stack: Subscript out of range (`%zu` %s `%zu`)",
@@ -58,60 +58,60 @@ class Reference_Stack
 
     void
     do_destroy_elements()
-    noexcept;
+      noexcept;
 
     void
     do_reallocate_reserve(Reference*& bptr, uint32_t& estor, uint32_t nadd)
-    const;
+      const;
 
     void
     do_reallocate_finish(Reference* bptr, uint32_t estor)
-    noexcept;
+      noexcept;
 
   public:
     bool
     empty()
-    const noexcept
+      const noexcept
       { return this->m_top == this->m_estor;  }
 
     size_t
     size()
-    const noexcept
+      const noexcept
       { return this->m_estor - this->m_top;  }
 
     const Reference*
     data()
-    const noexcept
+      const noexcept
       { return this->m_bptr + this->m_top;  }
 
     Reference*
     mut_data()
-    noexcept
+      noexcept
       { return this->m_bptr + this->m_top;  }
 
     const Reference*
     begin()
-    const noexcept
+      const noexcept
       { return this->m_bptr + this->m_top;  }
 
     const Reference*
     end()
-    const noexcept
+      const noexcept
       { return this->m_bptr + this->m_estor;  }
 
     Reference*
     begin()
-    noexcept
+      noexcept
       { return this->m_bptr + this->m_top;  }
 
     Reference*
     end()
-    noexcept
+      noexcept
       { return this->m_bptr + this->m_estor;  }
 
     Reference_Stack&
     clear()
-    noexcept
+      noexcept
       {
         this->m_top = this->m_estor;
         return *this;
@@ -119,7 +119,7 @@ class Reference_Stack
 
     Reference_Stack&
     swap(Reference_Stack& other)
-    noexcept
+      noexcept
       {
         ::std::swap(this->m_bptr, other.m_bptr);
         ::std::swap(this->m_bstor, other.m_bstor);
@@ -130,7 +130,7 @@ class Reference_Stack
 
     const Reference&
     at(size_t index)
-    const
+      const
       {
         if(index >= this->size())
           this->do_throw_subscript_out_of_range(index, ">=");
@@ -139,7 +139,7 @@ class Reference_Stack
 
     const Reference&
     rat(size_t index)
-    const
+      const
       {
         if(index >= this->size())
           this->do_throw_subscript_out_of_range(index, ">=");
@@ -148,7 +148,7 @@ class Reference_Stack
 
     const Reference&
     front()
-    const noexcept
+      const noexcept
       {
         ROCKET_ASSERT(!this->empty());
         return this->data()[0];
@@ -156,7 +156,7 @@ class Reference_Stack
 
     const Reference&
     back()
-    const noexcept
+      const noexcept
       {
         ROCKET_ASSERT(!this->empty());
         return this->data()[this->size() - 1];
@@ -180,7 +180,7 @@ class Reference_Stack
 
     Reference&
     mut_front()
-    noexcept
+      noexcept
       {
         ROCKET_ASSERT(!this->empty());
         return this->mut_data()[0];
@@ -188,7 +188,7 @@ class Reference_Stack
 
     Reference&
     mut_back()
-    noexcept
+      noexcept
       {
         ROCKET_ASSERT(!this->empty());
         return this->mut_data()[this->size() - 1];
@@ -246,7 +246,7 @@ class Reference_Stack
 
     Reference_Stack&
     pop_front(size_t count = 1)
-    noexcept
+      noexcept
       {
         ROCKET_ASSERT(count <= this->size());
         this->m_top += static_cast<uint32_t>(count);
@@ -255,13 +255,13 @@ class Reference_Stack
 
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback)
-    const;
+      const;
   };
 
 inline
 void
 swap(Reference_Stack& lhs, Reference_Stack& rhs)
-noexcept
+  noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

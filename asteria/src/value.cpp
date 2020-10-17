@@ -13,7 +13,7 @@ ROCKET_ENABLE_IF(::std::is_integral<ValT>::value)>
 constexpr
 Compare
 do_3way_compare_scalar(const ValT& lhs, const ValT& rhs)
-noexcept
+  noexcept
   {
     return (lhs < rhs) ? compare_less
          : (lhs > rhs) ? compare_greater
@@ -25,7 +25,7 @@ ROCKET_ENABLE_IF(::std::is_floating_point<ValT>::value)>
 constexpr
 Compare
 do_3way_compare_scalar(const ValT& lhs, const ValT& rhs)
-noexcept
+  noexcept
   {
     return ::std::isless(lhs, rhs)      ? compare_less
          : ::std::isgreater(lhs, rhs)   ? compare_greater
@@ -38,7 +38,7 @@ noexcept
 bool
 Value::
 test()
-const noexcept
+  const noexcept
   {
     switch(this->type()) {
       case type_null:
@@ -74,7 +74,7 @@ const noexcept
 Compare
 Value::
 compare(const Value& other)
-const noexcept
+  const noexcept
   {
     // Compare values of different types
     if(this->type() != other.type()) {
@@ -132,7 +132,7 @@ const noexcept
 bool
 Value::
 unique()
-const noexcept
+  const noexcept
   {
     switch(this->type()) {
       case type_null:
@@ -166,7 +166,7 @@ const noexcept
 long
 Value::
 use_count()
-const noexcept
+  const noexcept
   {
     switch(this->type()) {
       case type_null:
@@ -200,7 +200,7 @@ const noexcept
 long
 Value::
 gcref_split()
-const noexcept
+  const noexcept
   {
     switch(this->type()) {
       case type_null:
@@ -230,7 +230,7 @@ const noexcept
 tinyfmt&
 Value::
 print(tinyfmt& fmt, bool escape)
-const
+  const
   {
     switch(this->type()) {
       case type_null:
@@ -299,7 +299,7 @@ const
 tinyfmt&
 Value::
 dump(tinyfmt& fmt, size_t indent, size_t hanging)
-const
+  const
   {
     switch(this->type()) {
       case type_null:
@@ -379,7 +379,7 @@ const
 Variable_Callback&
 Value::
 enumerate_variables(Variable_Callback& callback)
-const
+  const
   {
     switch(this->type()) {
       case type_null:
