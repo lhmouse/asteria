@@ -6,6 +6,7 @@
 
 #include "../fwd.hpp"
 #include "reference.hpp"
+#include "../llds/reference_stack.hpp"
 #include "../details/argument_reader.ipp"
 
 namespace asteria {
@@ -14,20 +15,17 @@ class Argument_Reader
   {
   private:
     cow_string m_name;
-    const Reference_Stack* m_stack;
+    Reference_Stack m_stack;
 
     details_argument_reader::State m_state;
     cow_vector<details_argument_reader::State> m_saved_states;
     cow_string m_overloads;
 
   public:
-    Argument_Reader(const cow_string& name, const Reference_Stack& stack)
+    Argument_Reader(const cow_string& name, Reference_Stack&& stack)
       noexcept
-      : m_name(name), m_stack(::std::addressof(stack))
+      : m_name(name), m_stack(::std::move(stack))
       { }
-
-    Argument_Reader(const cow_string& name, const Reference_Stack&& stack)
-      = delete;
 
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Argument_Reader);
 
@@ -157,7 +155,8 @@ class Argument_Reader
           ::asteria::Global_Context& global, ::asteria::Reference_Stack&& tfiXopzY)  \
         -> Reference& \
         {  \
-          ::asteria::Argument_Reader reader(::rocket::sref("" name), tfiXopzY);  \
+          ::asteria::Argument_Reader reader(::rocket::sref("" name),  \
+                                            ::std::move(tfiXopzY));  \
           (void)global;  \
           do  \
           // Add function body here.
