@@ -1373,6 +1373,7 @@ do_pop_positional_arguments(Executive_Context& ctx, size_t nargs)
     Reference_Stack stack;
     for(size_t k = nargs - 1;  k != SIZE_MAX;  --k) {
       // Get an argument. Ensure it is dereferenceable.
+      ROCKET_ASSERT(k < ctx.stack().size());
       auto& arg = ctx.stack().mut_back(k);
       static_cast<void>(arg.dereference_readonly());
 
