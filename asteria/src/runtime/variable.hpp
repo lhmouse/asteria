@@ -16,15 +16,15 @@ class Variable
   private:
     Value m_value;
     bool m_immut = false;
-    bool m_alive = false;
+    bool m_valid = false;
 
-    // These are reference counters for garbage collection and are
-    // uninitialized by default. As values are reference-counting,
-    // reference counts can be fractional. For example, if three
-    // variables share a single instance of a function, then each
-    // of them is supposed to have 1/3 reference of the object.
-    long m_gcref_i;
-    double m_gcref_f;
+    // These are fields for garbage collection and are uninitialized by
+    // default. Because values are reference-counted, it is possible for
+    // a variable to be encountered multiple times at the marking stage
+    // during garbage collection. It is essential that we mark the value
+    // exactly once.
+    bool m_gc_mark;
+    long m_gc_ref;
 
   public:
     Variable()
@@ -56,7 +56,7 @@ class Variable
     bool
     is_initialized()
       const noexcept
-      { return this->m_alive;  }
+      { return this->m_valid;  }
 
     template<typename XValT>
     Variable&
@@ -64,7 +64,7 @@ class Variable
       {
         this->m_value = ::std::forward<XValT>(xval);
         this->m_immut = immut;
-        this->m_alive = true;
+        this->m_valid = true;
         return *this;
       }
 
@@ -74,45 +74,31 @@ class Variable
       {
         this->m_value = INT64_C(0x6eef8badf00ddead);
         this->m_immut = true;
-        this->m_alive = false;
+        this->m_valid = false;
         return *this;
       }
 
     long
-    gcref_split()
+    get_gc_ref()
       const noexcept
-      { return this->m_value.gcref_split();  }
-
-    long
-    get_gcref()
-      const noexcept
-      { return this->m_gcref_i;  }
+      { return this->m_gc_ref;  }
 
     Variable&
-    reset_gcref(long iref)
+    reset_gc_ref(long ref)
       noexcept
       {
-        this->m_gcref_i = iref;
-        this->m_gcref_f = 0x1p-26;
+        this->m_gc_mark = false;
+        this->m_gc_ref = ref;
         return *this;
       }
 
-    Variable&
-    increment_gcref(long split)
+    bool
+    add_gc_ref()
       noexcept
       {
-        // Optimize for the non-split case.
-        if(split > 1) {
-          // Update the fractional part.
-          this->m_gcref_f += 1 / static_cast<double>(split);
-          if(static_cast<long>(this->m_gcref_f) == 0)
-            return *this;
-
-          // Accumulate the carry bit.
-          this->m_gcref_f -= 1;
-        }
-        this->m_gcref_i += 1;
-        return *this;
+        bool m = ::std::exchange(this->m_gc_mark, true);
+        this->m_gc_ref += 1;
+        return m;
       }
 
     Variable_Callback&

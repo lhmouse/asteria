@@ -249,11 +249,6 @@ class Value
     use_count()
       const noexcept;
 
-    ROCKET_PURE_FUNCTION
-    long
-    gcref_split()
-      const noexcept;
-
     // These are miscellaneous interfaces for debugging.
     tinyfmt&
     print(tinyfmt& fmt, bool escape = false)

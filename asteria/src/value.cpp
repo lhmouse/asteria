@@ -197,36 +197,6 @@ use_count()
     }
   }
 
-long
-Value::
-gcref_split()
-  const noexcept
-  {
-    switch(this->type()) {
-      case type_null:
-      case type_boolean:
-      case type_integer:
-      case type_real:
-      case type_string:
-        return 0;
-
-      case type_opaque:
-        return this->m_stor.as<type_opaque>().use_count();
-
-      case type_function:
-        return this->m_stor.as<type_function>().use_count();
-
-      case type_array:
-        return this->m_stor.as<type_array>().use_count();
-
-      case type_object:
-        return this->m_stor.as<type_object>().use_count();
-
-      default:
-        ASTERIA_TERMINATE("invalid value type (type `$1`)", this->type());
-    }
-  }
-
 tinyfmt&
 Value::
 print(tinyfmt& fmt, bool escape)

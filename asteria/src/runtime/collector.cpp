@@ -131,27 +131,29 @@ collect_single_opt()
     // The algorithm here is described at
     //   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
 
-    // We initialize `gcref` to zero then increment it, rather than initialize `gcref` to
-    // the reference count then decrement it. This saves a phase below for us.
+    // We initialize `gc_ref` to zero then increment it, rather than initialize
+    // `gc_ref` to the reference count then decrement it. This saves us a phase
+    // below.
     Collector* next = nullptr;
     auto output = this->m_output_opt;
     auto tied = this->m_tied_opt;
     this->m_staging.clear();
 
-    // Add variables that are either tracked or reachable indirectly into the staging area.
+    // Add variables that are either tracked or reachable indirectly into the
+    // staging area.
     do_traverse(this->m_tracked,
       [&](const rcptr<Variable>& root) {
         // Add a variable that is reachable directly.
-        // The reference from `m_tracked` should be excluded, so we initialize the gcref
-        // counter to 1.
-        root->reset_gcref(1);
+        // The reference from `m_tracked` should be excluded, so we initialize
+        // the `gc_ref` counter to 1.
+        root->reset_gc_ref(1);
 
         // If this variable has been inserted indirectly, finish.
         if(!this->m_staging.insert(root))
           return false;
 
-        // If `root` is the last reference to this variable, it can be marked for collection
-        // immediately.
+        // If `root` is the last reference to this variable, it can be marked
+        // for collection immediately.
         if(root->use_count() <= 2) {
           root->uninitialize();
           return false;
@@ -164,10 +166,10 @@ collect_single_opt()
             if(!this->m_staging.insert(child))
               return false;
 
-            // Initialize the gcref counter.
-            // N.B. If this variable is encountered later from `m_tracked`, the gcref counter
-            // will be overwritten with 1.
-            child->reset_gcref(0);
+            // Initialize the `gc_ref` counter.
+            // N.B. If this variable is encountered later from `m_tracked`,
+            // the `gc_ref` counter will be overwritten with 1.
+            child->reset_gc_ref(0);
             return true;
           });
         return false;
@@ -177,20 +179,17 @@ collect_single_opt()
     do_traverse(this->m_staging,
       [&](const rcptr<Variable>& root) {
         // Drop a direct reference.
-        root->increment_gcref(1);
-        ROCKET_ASSERT(root->get_gcref() <= root->use_count());
-
-        // Skip variables that cannot have any children.
-        auto split = root->gcref_split();
-        if(split <= 0)
+        bool marked = root->add_gc_ref();
+        ROCKET_ASSERT(root->get_gc_ref() <= root->use_count());
+        if(marked)
           return false;
 
         // Enumerate variables that are reachable from `root` indirectly.
         do_traverse(*root,
           [&](const rcptr<Variable>& child) {
             // Drop an indirect reference.
-            child->increment_gcref(split);
-            ROCKET_ASSERT(child->get_gcref() <= child->use_count());
+            child->add_gc_ref();
+            ROCKET_ASSERT(child->get_gc_ref() <= child->use_count());
             return false;
           });
         return false;
@@ -200,31 +199,31 @@ collect_single_opt()
     do_traverse(this->m_staging,
       [&](const rcptr<Variable>& root) {
         // Skip variables that are possibly unreachable.
-        if(root->get_gcref() >= root->use_count())
+        if(root->get_gc_ref() >= root->use_count())
           return false;
 
-        // Make this variable reachable, ...
-        root->reset_gcref(-1);
-        // ... as well as all children.
+        // Mark this variable reachable.
+        root->reset_gc_ref(-1);
+
+        // Mark all children reachable as well.
         do_traverse(*root,
           [&](const rcptr<Variable>& child) {
             // Skip variables that have already been marked.
-            if(child->get_gcref() < 0)
+            if(child->get_gc_ref() < 0)
               return false;
 
-            // Mark it, ...
-            child->reset_gcref(-1);
-            // ... as well as all grandchildren.
+            // Mark it and its children recursively.
+            child->reset_gc_ref(-1);
             return true;
           });
         return false;
       });
 
-    // Wipe out variables whose `gcref` counters have excceeded their reference counts.
+    // Collect unreachable variables.
     do_traverse(this->m_staging,
       [&](const rcptr<Variable>& root) {
-        // All reachable variables will have negative gcref counters.
-        if(root->get_gcref() >= 0) {
+        // All variables that are reachable shall have negative `gc_ref` values.
+        if(root->get_gc_ref() >= 0) {
           // Break reference cycles.
           root->uninitialize();
 
@@ -237,7 +236,8 @@ collect_single_opt()
         }
 
         if(tied) {
-          // Transfer this variable to the next generational collector, if one has been tied.
+          // Transfer this variable to the next generational collector, if one
+          // has been tied.
           tied->m_tracked.insert(root);
 
           // Check whether the next generation needs to be checked as well.
