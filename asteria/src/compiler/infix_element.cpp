@@ -121,8 +121,10 @@ extract(cow_vector<Expression_Unit>& units)
       case index_logical_and: {
         auto& altr = this->m_stor.as<index_logical_and>();
 
-        // Construct a branch unit from the TRUE branch and an empty FALSE branch, then append it to `units`.
-        Expression_Unit::S_branch xunit = { altr.sloc, ::std::move(altr.branch_true), { }, altr.assign };
+        // Construct a branch unit from the TRUE branch and an empty FALSE branch, then
+        // append it to `units`.
+        Expression_Unit::S_branch xunit = { altr.sloc, ::std::move(altr.branch_true), { },
+                                            altr.assign };
         units.emplace_back(::std::move(xunit));
         return *this;
       }
@@ -130,8 +132,10 @@ extract(cow_vector<Expression_Unit>& units)
       case index_logical_or: {
         auto& altr = this->m_stor.as<index_logical_or>();
 
-        // Construct a branch unit from an empty TRUE branch and the FALSE branch, then append it to `units`.
-        Expression_Unit::S_branch xunit = { altr.sloc, { }, ::std::move(altr.branch_false), altr.assign };
+        // Construct a branch unit from an empty TRUE branch and the FALSE branch, then
+        // append it to `units`.
+        Expression_Unit::S_branch xunit = { altr.sloc, { }, ::std::move(altr.branch_false),
+                                            altr.assign };
         units.emplace_back(::std::move(xunit));
         return *this;
       }
@@ -140,7 +144,8 @@ extract(cow_vector<Expression_Unit>& units)
         auto& altr = this->m_stor.as<index_coalescence>();
 
         // Construct a branch unit from the NULL branch, then append it to `units`.
-        Expression_Unit::S_coalescence xunit = { altr.sloc, ::std::move(altr.branch_null), altr.assign };
+        Expression_Unit::S_coalescence xunit = { altr.sloc, ::std::move(altr.branch_null),
+                                                 altr.assign };
         units.emplace_back(::std::move(xunit));
         return *this;
       }
@@ -149,8 +154,8 @@ extract(cow_vector<Expression_Unit>& units)
         auto& altr = this->m_stor.as<index_general>();
 
         // N.B. `units` is the LHS operand.
-        // Append the RHS operand to the LHS operand, followed by the operator, forming the Reverse Polish
-        // Notation (RPN).
+        // Append the RHS operand to the LHS operand, followed by the operator, forming the
+        // Reverse Polish Notation (RPN).
         units.append(altr.rhs.move_begin(), altr.rhs.move_end());
 
         // Append the operator itself.

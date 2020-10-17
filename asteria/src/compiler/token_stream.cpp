@@ -230,7 +230,8 @@ bool
 do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool integers_as_reals)
   {
     // numeric-literal ::=
-    //   number-sign-opt ( binary-literal | decimal-literal | hexadecimal-literal ) exponent-suffix-opt
+    //   number-sign-opt ( binary-literal | decimal-literal | hexadecimal-literal )
+    //   exponent-suffix-opt
     // number-sign-opt ::=
     //   PCRE([+-]?)
     // binary-literal ::=
@@ -247,6 +248,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool i
     //   PCRE([pP][-+]?([0-9]`?)+)
     cow_string tstr;
     size_t tlen = 0;
+
     // Look for an explicit sign symbol.
     switch(reader.peek(tlen)) {
       case '+':
@@ -259,7 +261,9 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool i
         tlen++;
         break;
     }
-    // If a sign symbol exists in a context where an infix operator is allowed, it is treated as the latter.
+
+    // If a sign symbol exists in a context where an infix operator is allowed, it is
+    // treated as the latter.
     if((tlen != 0) && do_may_infix_operators_follow(tokens))
       return false;
 
@@ -270,43 +274,54 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool i
     uint8_t mmask = cctype_digit;
     uint8_t expch = 'e';
     bool has_point = false;
+
     // Get the mask of mantissa digits and tell which character initiates the exponent.
     if(reader.peek(tlen) == '0') {
       tstr += reader.peek(tlen);
       tlen++;
+
       // Check the radix identifier.
       if(::rocket::is_any_of(static_cast<uint8_t>(reader.peek(tlen) | 0x20), { 'b', 'x' })) {
         tstr += reader.peek(tlen);
         tlen++;
+
         // Accept the radix identifier.
         mmask = cctype_xdigit;
         expch = 'p';
       }
     }
+
     // Accept the longest string composing the integral part.
     do_collect_digits(tstr, reader, tlen, mmask);
+
     // Check for a radix point. If one exists, the fractional part shall follow.
     if(reader.peek(tlen) == '.') {
       tstr += reader.peek(tlen);
       tlen++;
+
       // Accept the fractional part.
       has_point = true;
       do_collect_digits(tstr, reader, tlen, mmask);
     }
+
     // Check for the exponent.
     if(static_cast<uint8_t>(reader.peek(tlen) | 0x20) == expch) {
       tstr += reader.peek(tlen);
       tlen++;
+
       // Check for an optional sign symbol.
       if(::rocket::is_any_of(reader.peek(tlen), { '+', '-' })) {
         tstr += reader.peek(tlen);
         tlen++;
       }
+
       // Accept the exponent.
       do_collect_digits(tstr, reader, tlen, cctype_digit);
     }
+
     // Accept numeric suffixes.
-    // Note, at the moment we make no use of such suffixes, so any suffix will definitely cause parser errors.
+    // Note, at the moment we make no use of such suffixes, so any suffix will
+    // definitely cause parser errors.
     do_collect_digits(tstr, reader, tlen, cctype_alpha | cctype_digit);
     // Convert the token to a literal.
     // We always parse the literal as a floating-point number.
@@ -319,7 +334,8 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool i
     if(bp != ep)
       throw Parser_Error(parser_status_numeric_literal_suffix_invalid, reader.tell(), tlen);
 
-    // It is cast to an integer only when `integers_as_reals` is `false` and it does not contain a radix point.
+    // It is cast to an integer only when `integers_as_reals` is `false` and it does not
+    // contain a radix point.
     if(!integers_as_reals && !has_point) {
       // Try casting the value to an `integer`.
       Token::S_integer_literal xtoken;
@@ -360,7 +376,8 @@ struct Prefix_Comparator
     bool
     operator()(const ElementT& lhs, const ElementT& rhs)
       const noexcept
-      { return ::rocket::char_traits<char>::compare(lhs.first, rhs.first, sizeof(lhs.first)) < 0;  }
+      { return ::rocket::char_traits<char>::compare(lhs.first, rhs.first,
+                                                    ::rocket::size(lhs.first)) < 0;  }
 
     template<typename ElementT>
     bool
@@ -449,9 +466,10 @@ do_accept_punctuator(cow_vector<Token>& tokens, Line_Reader& reader)
     ROCKET_ASSERT(::std::is_sorted(begin(s_punctuators), end(s_punctuators), Prefix_Comparator()));
 #endif
     // For two elements X and Y, if X is in front of Y, then X is potential a prefix of Y.
-    // Traverse the range backwards to prevent premature matches, as a token is defined to be the longest valid
-    // character sequence.
-    auto range = ::std::equal_range(begin(s_punctuators), end(s_punctuators), reader.peek(), Prefix_Comparator());
+    // Traverse the range backwards to prevent premature matches, as a token is defined to be
+    // the longest valid character sequence.
+    auto range = ::std::equal_range(begin(s_punctuators), end(s_punctuators),
+                                    reader.peek(), Prefix_Comparator());
     for(;;) {
       if(range.first == range.second) {
         // No matching punctuator has been found so far.
@@ -470,7 +488,8 @@ do_accept_punctuator(cow_vector<Token>& tokens, Line_Reader& reader)
   }
 
 bool
-do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char head, bool escapable)
+do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char head,
+                         bool escapable)
   {
     // string-literal ::=
     //   escape-string-literal | noescape-string-literal
@@ -668,7 +687,8 @@ constexpr s_keywords[] =
   };
 
 bool
-do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Line_Reader& reader, bool keywords_as_identifiers)
+do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Line_Reader& reader,
+                                bool keywords_as_identifiers)
   {
     // identifier ::=
     //   PCRE([A-Za-z_][A-Za-z_0-9]*)
@@ -693,7 +713,8 @@ do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Line_Reader& reader, 
 #ifdef ROCKET_DEBUG
     ROCKET_ASSERT(::std::is_sorted(begin(s_keywords), end(s_keywords), Prefix_Comparator()));
 #endif
-    auto range = ::std::equal_range(begin(s_keywords), end(s_keywords), reader.peek(), Prefix_Comparator());
+    auto range = ::std::equal_range(begin(s_keywords), end(s_keywords),
+                                    reader.peek(), Prefix_Comparator());
     for(;;) {
       if(range.first == range.second) {
         // No matching keyword has been found so far.
@@ -807,9 +828,8 @@ reload(const cow_string& file, int line, tinybuf& cbuf)
       // A block comment may straddle multiple lines. We just mark the first line here.
       throw Parser_Error(parser_status_block_comment_unclosed, bcomm.tell(), bcomm.length());
 
-    // Reverse the token sequence now.
+    // Reverse the token sequence and accept it.
     ::std::reverse(tokens.mut_begin(), tokens.mut_end());
-    // Succeed.
     this->m_rtoks = ::std::move(tokens);
     return *this;
   }

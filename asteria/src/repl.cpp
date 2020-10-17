@@ -224,12 +224,14 @@ class REPL_Hooks
       { this->do_verbose_trace(sloc, "initiating function call: $1", target);  }
 
     void
-    on_function_return(const Source_Location& sloc, const cow_function& target, const Reference&)
+    on_function_return(const Source_Location& sloc, const cow_function& target,
+                       const Reference&)
       override
       { this->do_verbose_trace(sloc, "returned from function call: $1", target);  }
 
     void
-    on_function_except(const Source_Location& sloc, const cow_function& target, const Runtime_Error&)
+    on_function_except(const Source_Location& sloc, const cow_function& target,
+                       const Runtime_Error&)
       override
       { this->do_verbose_trace(sloc, "caught an exception from function call: $1", target);  }
   };

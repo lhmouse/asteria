@@ -133,7 +133,8 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
                 name = qtok->as_identifier();
 
               // Only `infinity` and `nan` may follow.
-              // Note that the tokenizer will have merged sign symbols into adjacent number literals.
+              // Note that the tokenizer will have merged sign symbols into adjacent number
+              // literals.
               if(::rocket::is_none_of(name, { "infinity", "nan" }))
                 throw Parser_Error(parser_status_expression_expected, tstrm);
 
@@ -461,7 +462,8 @@ std_system_proc_invoke(V_string cmd, Opt_array argv, Opt_array envp)
     // Append arguments.
     cow_vector<const char*> ptrs = { cmd.safe_c_str() };
     if(argv)
-      ::rocket::for_each(*argv, [&](const Value& arg) { ptrs.emplace_back(arg.as_string().safe_c_str());  });
+      ::rocket::for_each(*argv,
+          [&](const Value& arg) { ptrs.emplace_back(arg.as_string().safe_c_str());  });
 
     auto eoff = ptrs.ssize();  // beginning of environment variables
     ptrs.emplace_back(nullptr);
@@ -469,7 +471,8 @@ std_system_proc_invoke(V_string cmd, Opt_array argv, Opt_array envp)
     // Append environment variables.
     if(envp) {
       eoff = ptrs.ssize();
-      ::rocket::for_each(*envp, [&](const Value& env) { ptrs.emplace_back(env.as_string().safe_c_str());  });
+      ::rocket::for_each(*envp,
+         [&](const Value& env) { ptrs.emplace_back(env.as_string().safe_c_str());  });
       ptrs.emplace_back(nullptr);
     }
     char** argv_pp = const_cast<char**>(ptrs.data());

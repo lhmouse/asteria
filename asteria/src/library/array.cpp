@@ -29,8 +29,8 @@ do_slice(const V_array& data, const V_integer& from, const Opt_integer& length)
   {
     auto slen = static_cast<int64_t>(data.size());
     if(from >= 0) {
-      // Behave like `::std::string::substr()` except that no exception is thrown when `from` is
-      // greater than `data.size()`.
+      // Behave like `::std::string::substr()` except that no exception is thrown when `from`
+      // is greater than `data.size()`.
       if(from >= slen)
         return ::std::make_pair(data.end(), data.end());
 
@@ -38,13 +38,14 @@ do_slice(const V_array& data, const V_integer& from, const Opt_integer& length)
       return do_slice(data, data.begin() + static_cast<ptrdiff_t>(from), length);
     }
 
-    // Wrap `from` from the end. Notice that `from + slen` will not overflow when `from` is negative
-    // and `slen` is not.
+    // Wrap `from` from the end. Notice that `from + slen` will not overflow when `from` is
+    // negative and `slen` is not.
     auto rfrom = from + slen;
     if(rfrom >= 0)
       return do_slice(data, data.begin() + static_cast<ptrdiff_t>(rfrom), length);
 
-    // Get a subrange from the beginning of `data`, if the wrapped index is before the first byte.
+    // Get a subrange from the beginning of `data`, if the wrapped index is before the first
+    // byte.
     if(!length)
       return ::std::make_pair(data.begin(), data.end());
 
@@ -52,7 +53,8 @@ do_slice(const V_array& data, const V_integer& from, const Opt_integer& length)
       return ::std::make_pair(data.begin(), data.begin());
 
     // Get a subrange excluding the part before the beginning.
-    // Notice that `rfrom + *length` will not overflow when `rfrom` is negative and `*length` is not.
+    // Notice that `rfrom + *length` will not overflow when `rfrom` is negative and `*length`
+    // is not.
     return do_slice(data, data.begin(), rfrom + *length);
   }
 
@@ -203,26 +205,29 @@ do_merge_blocks(V_array& output, Global_Context& global, Reference_Stack& stack,
       ipos += ::rocket::min(iend - ipos, bsize);
       bend[1] = ipos;
 
-      // Merge elements one by one, until either block has been exhausted, then store the index of it here.
+      // Merge elements one by one, until either block has been exhausted, then store the index
+      // of it here.
       size_t bi;
       for(;;) {
         auto cmp = do_compare(global, stack, kcomp, *(bpos[0]), *(bpos[1]));
         if(cmp == compare_unordered)
-          ASTERIA_THROW("Unordered elements (operands were `$1` and `$2`)", *(bpos[0]), *(bpos[1]));
+          ASTERIA_THROW("Unordered elements (operands were `$1` and `$2`)",
+                        *(bpos[0]), *(bpos[1]));
 
-        // For Merge Sort to be stable, the two elements will only be swapped if the first one is greater
-        // than the second one.
+        // For Merge Sort to be stable, the two elements will only be swapped if the first one
+        // is greater than the second one.
         bi = (cmp == compare_greater);
 
-        // Move this element unless uniqueness is requested and it is equal to the previous output.
+        // Move this element unless uniqueness is requested and it is equal to the previous
+        // output.
         bool discard = unique && (opos != output.begin())
-                              && (do_compare(global, stack, kcomp, *(bpos[bi]), opos[-1]) == compare_equal);
+                       && (do_compare(global, stack, kcomp, *(bpos[bi]), opos[-1]) == compare_equal);
         if(!discard)
           *(opos++) = ::std::move(*(bpos[bi]));
         bpos[bi]++;
 
-        // When uniqueness is requested, if elements from the two blocks are equal, discard the one from
-        // the second block. This may exhaust the second block.
+        // When uniqueness is requested, if elements from the two blocks are equal, discard the one
+        // from the second block. This may exhaust the second block.
         if(unique && (cmp == compare_equal)) {
           size_t oi = bi ^ 1;
           bpos[oi]++;

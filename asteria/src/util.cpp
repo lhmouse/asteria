@@ -424,7 +424,9 @@ wrap_index(int64_t index, size_t size)
       auto nappend = ::rocket::max(index, ssize - 1) - (ssize - 1);
       w.nprepend = 0;
       w.nappend = static_cast<uint64_t>(nappend);
-      // `index` is truncated if it does not fit in `size_t`, but in this case it shouldn't be used.
+
+      // `index` is truncated if it does not fit in `size_t`, but in this case it
+      // shouldn't be used.
       w.rindex = static_cast<size_t>(index);
     }
     else {
@@ -432,6 +434,7 @@ wrap_index(int64_t index, size_t size)
       auto nprepend = ::rocket::max(index - 1, ~ssize) - (index - 1);
       w.nprepend = static_cast<uint64_t>(nprepend);
       w.nappend = 0;
+
       // `index + ssize` cannot overflow when `index` is negative and `ssize` is not.
       w.rindex = static_cast<size_t>(index + ssize) + static_cast<size_t>(nprepend);
     }

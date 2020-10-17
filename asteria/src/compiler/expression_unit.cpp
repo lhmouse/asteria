@@ -48,7 +48,8 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         const auto& altr = this->m_stor.as<index_named_reference>();
 
         // Perform early lookup when the expression is defined.
-        // If a named reference is found, it will not be replaced or hidden by a later-declared one.
+        // If a named reference is found, it will not be replaced or hidden by a
+        // later-declared one.
         const Reference* qref;
         Abstract_Context* qctx = &ctx;
         uint32_t depth = 0;
@@ -60,7 +61,8 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
           // Look for the name in the current context.
           qref = qctx->get_named_reference_opt(altr.name);
           if(qref) {
-            // A reference declared later has been found. Record the context depth for later lookups.
+            // A reference declared later has been found. Record the context depth for
+            // later lookups.
             AIR_Node::S_push_local_reference xnode = { altr.sloc, depth, altr.name };
             code.emplace_back(::std::move(xnode));
             return code;
@@ -69,7 +71,8 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
           // Step out to its parent context.
           qctx = qctx->get_parent_opt();
           if(!qctx) {
-            // No name has been found so far. Assume that the name will be found in the global context.
+            // No name has been found so far. Assume that the name will be found in the
+            // global context.
             AIR_Node::S_push_global_reference xnode = { altr.sloc, altr.name };
             code.emplace_back(::std::move(xnode));
             return code;
@@ -88,7 +91,8 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         optmz.reload(&ctx, altr.params, altr.body);
 
         // Encode arguments.
-        AIR_Node::S_define_function xnode = { opts, altr.sloc, altr.unique_name, altr.params, optmz };
+        AIR_Node::S_define_function xnode = { opts, altr.sloc, altr.unique_name, altr.params,
+                                              optmz };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -104,8 +108,8 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         auto code_false = do_generate_code_branch(opts, real_ptc, ctx, altr.branch_false);
 
         // Encode arguments.
-        AIR_Node::S_branch_expression xnode = { altr.sloc, ::std::move(code_true), ::std::move(code_false),
-                                                altr.assign };
+        AIR_Node::S_branch_expression xnode = { altr.sloc, ::std::move(code_true),
+                                                ::std::move(code_false), altr.assign };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -186,7 +190,8 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         const auto& altr = this->m_stor.as<index_variadic_call>();
 
         // Encode arguments.
-        AIR_Node::S_variadic_call xnode = { altr.sloc, opts.proper_tail_calls ? ptc : ptc_aware_none };
+        AIR_Node::S_variadic_call xnode = { altr.sloc, opts.proper_tail_calls
+                                                         ? ptc : ptc_aware_none };
         code.emplace_back(::std::move(xnode));
         return code;
       }

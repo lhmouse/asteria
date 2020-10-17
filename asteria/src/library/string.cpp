@@ -31,8 +31,8 @@ do_slice(const V_string& text, const V_integer& from, const Opt_integer& length)
   {
     auto slen = static_cast<int64_t>(text.size());
     if(from >= 0) {
-      // Behave like `::std::string::substr()` except that no exception is thrown when `from` is
-      // greater than `text.size()`.
+      // Behave like `::std::string::substr()` except that no exception is thrown when `from`
+      // is greater than `text.size()`.
       if(from >= slen)
         return ::std::make_pair(text.end(), text.end());
 
@@ -40,13 +40,14 @@ do_slice(const V_string& text, const V_integer& from, const Opt_integer& length)
       return do_slice(text, text.begin() + static_cast<ptrdiff_t>(from), length);
     }
 
-    // Wrap `from` from the end. Notice that `from + slen` will not overflow when `from` is negative
-    // and `slen` is not.
+    // Wrap `from` from the end. Notice that `from + slen` will not overflow when `from` is
+    // negative and `slen` is not.
     auto rfrom = from + slen;
     if(rfrom >= 0)
       return do_slice(text, text.begin() + static_cast<ptrdiff_t>(rfrom), length);
 
-    // Get a subrange from the beginning of `text`, if the wrapped index is before the first byte.
+    // Get a subrange from the beginning of `text`, if the wrapped index is before the first
+    // byte.
     if(!length)
       return ::std::make_pair(text.begin(), text.end());
 
@@ -54,7 +55,8 @@ do_slice(const V_string& text, const V_integer& from, const Opt_integer& length)
       return ::std::make_pair(text.begin(), text.begin());
 
     // Get a subrange excluding the part before the beginning.
-    // Notice that `rfrom + *length` will not overflow when `rfrom` is negative and `*length` is not.
+    // Notice that `rfrom + *length` will not overflow when `rfrom` is negative and `*length`
+    // is not.
     return do_slice(text, text.begin(), rfrom + *length);
   }
 
@@ -1648,11 +1650,11 @@ std_string_pcre_replace(V_string text, V_integer from, Opt_integer length, V_str
       output_str.assign(output_len, '*');
 
       err = ::pcre2_substitute(pcre.code(), sub_ptr, sub_len, 0,
-                               PCRE2_SUBSTITUTE_EXTENDED | PCRE2_SUBSTITUTE_GLOBAL
-                                   | PCRE2_SUBSTITUTE_OVERFLOW_LENGTH,
-                               pcre.match(), nullptr,
-                               reinterpret_cast<const uint8_t*>(replacement.data()), replacement.size(),
-                               reinterpret_cast<uint8_t*>(output_str.mut_data()), &output_len);
+                   PCRE2_SUBSTITUTE_EXTENDED | PCRE2_SUBSTITUTE_GLOBAL
+                     | PCRE2_SUBSTITUTE_OVERFLOW_LENGTH,
+                   pcre.match(), nullptr,
+                   reinterpret_cast<const uint8_t*>(replacement.data()), replacement.size(),
+                   reinterpret_cast<uint8_t*>(output_str.mut_data()), &output_len);
     }
     while(err == PCRE2_ERROR_NOMEMORY);
 

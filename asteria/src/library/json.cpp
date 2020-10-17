@@ -515,7 +515,8 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
                 name = qtok->as_identifier();
 
               // Only `Infinity` and `NaN` may follow.
-              // Note that the tokenizer will have merged sign symbols into adjacent number literals.
+              // Note that the tokenizer will have merged sign symbols into adjacent number
+              // literals.
               if(::rocket::is_none_of(name, { "Infinity", "NaN" }))
                 throw Parser_Error(parser_status_expression_expected, tstrm);
 
@@ -695,8 +696,8 @@ do_json_parse(tinybuf& cbuf)
     return value;
   }
   catch(Parser_Error& except) {
-    ASTERIA_THROW("Invalid JSON string: $3 (line $1, offset $2)", except.line(), except.offset(),
-                                                                  describe_parser_status(except.status()));
+    ASTERIA_THROW("Invalid JSON string: $3 (line $1, offset $2)",
+                  except.line(), except.offset(), describe_parser_status(except.status()));
   }
 
 }  // namespace
@@ -705,32 +706,36 @@ V_string
 std_json_format(Value value, Opt_string indent)
   {
     // No line break is inserted if `indent` is null or empty.
-    return (!indent || indent->empty()) ? do_format_nonrecursive(value, false, Indenter_none())
-                                        : do_format_nonrecursive(value, false, Indenter_string(*indent));
+    return (!indent || indent->empty())
+               ? do_format_nonrecursive(value, false, Indenter_none())
+               : do_format_nonrecursive(value, false, Indenter_string(*indent));
   }
 
 V_string
 std_json_format(Value value, V_integer indent)
   {
     // No line break is inserted if `indent` is non-positive.
-    return (indent <= 0) ? do_format_nonrecursive(value, false, Indenter_none())
-                         : do_format_nonrecursive(value, false, Indenter_spaces(indent));
+    return (indent <= 0)
+               ? do_format_nonrecursive(value, false, Indenter_none())
+               : do_format_nonrecursive(value, false, Indenter_spaces(indent));
   }
 
 V_string
 std_json_format5(Value value, Opt_string indent)
   {
     // No line break is inserted if `indent` is null or empty.
-    return (!indent || indent->empty()) ? do_format_nonrecursive(value, true, Indenter_none())
-                                        : do_format_nonrecursive(value, true, Indenter_string(*indent));
+    return (!indent || indent->empty())
+               ? do_format_nonrecursive(value, true, Indenter_none())
+               : do_format_nonrecursive(value, true, Indenter_string(*indent));
   }
 
 V_string
 std_json_format5(Value value, V_integer indent)
   {
     // No line break is inserted if `indent` is non-positive.
-    return (indent <= 0) ? do_format_nonrecursive(value, true, Indenter_none())
-                         : do_format_nonrecursive(value, true, Indenter_spaces(indent));
+    return (indent <= 0)
+               ? do_format_nonrecursive(value, true, Indenter_none())
+               : do_format_nonrecursive(value, true, Indenter_spaces(indent));
   }
 
 Value
