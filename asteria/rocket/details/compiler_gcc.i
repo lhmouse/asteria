@@ -13,7 +13,7 @@
 #define ROCKET_CONST_FUNCTION               __attribute__((__const__))
 #define ROCKET_ARTIFICIAL_FUNCTION          __attribute__((__artificial__, __always_inline__))
 #define ROCKET_FLATTEN_FUNCTION             __attribute__((__flatten__))
-#define ROCKET_FORCED_INLINE_FUNCTION       __attribute__((__gnu_inline__, __always_inline__)) __inline__
+#define ROCKET_FORCED_INLINE_FUNCTION       __attribute__((__always_inline__)) __inline__
 
 #define ROCKET_UNREACHABLE()                __builtin_unreachable()
 #define ROCKET_EXPECT(...)                  __builtin_expect((__VA_ARGS__) ? 1 : 0, 1)
