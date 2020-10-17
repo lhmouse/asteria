@@ -28,9 +28,9 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
 
     // Prepare iterators to arguments.
     // As function arguments are evaluated from left to right, the reference at the top
-    // is the last argument, which means we have to read in reverse order.
-    auto bpos = ::std::make_reverse_iterator(stack.end());
-    auto epos = ::std::make_reverse_iterator(stack.begin());
+    // is the last argument.
+    auto bpos = stack.bottom();
+    auto epos = stack.bottom() + stack.size();
 
     // Set parameters, which are local references.
     bool variadic = false;
@@ -117,7 +117,7 @@ on_scope_exit(AIR_Status status)
     // Stash the returned reference, if any.
     Reference self = Reference::S_uninit();
     if(status == air_status_return_ref)
-      self = ::std::move(this->m_stack->mut_front());
+      self = ::std::move(this->m_stack->mut_back());
 
     if(auto ptca = self.get_ptc_args_opt()) {
       // If a PTC wrapper was returned, prepend all deferred expressions to it.
@@ -151,7 +151,7 @@ on_scope_exit(AIR_Status status)
     ROCKET_ASSERT(!self.is_uninit());
 
     // Restore the returned reference.
-    this->m_stack->mut_front() = ::std::move(self);
+    this->m_stack->mut_back() = ::std::move(self);
     return status;
   }
 

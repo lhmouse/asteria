@@ -73,7 +73,7 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
 
       case air_status_return_ref:
         // Return the reference at the top of `stack`.
-        self = ::std::move(stack.mut_front());
+        self = ::std::move(stack.mut_back());
 
         // In case of PTCs, set up source location.
         // This cannot be set at the call site where such information isn't available.
@@ -85,12 +85,12 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
       case air_status_break_switch:
       case air_status_break_while:
       case air_status_break_for:
-        ASTERIA_THROW("Stray `break` statement\n[jumped from '$1']", stack.front().as_jump_src());
+        ASTERIA_THROW("Stray `break` statement\n[jumped from '$1']", stack.back().as_jump_src());
 
       case air_status_continue_unspec:
       case air_status_continue_while:
       case air_status_continue_for:
-        ASTERIA_THROW("Stray `continue` statement\n[jumped from '$1']", stack.front().as_jump_src());
+        ASTERIA_THROW("Stray `continue` statement\n[jumped from '$1']", stack.back().as_jump_src());
 
       default:
         ASTERIA_TERMINATE("invalid AIR status code (status `$1`)", status);

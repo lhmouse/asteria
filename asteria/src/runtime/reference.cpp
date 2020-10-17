@@ -75,8 +75,8 @@ finish_call(Global_Context& global)
 
         // Get the `this` reference and all the other arguments.
         auto& stack = ptca->open_stack();
-        *this = ::std::move(stack.mut_front());
-        stack.pop_front();
+        *this = ::std::move(stack.mut_back());
+        stack.pop_back();
 
         // Call the hook function if any.
         if(auto qhooks = global.get_hooks_opt())

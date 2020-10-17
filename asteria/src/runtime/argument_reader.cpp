@@ -67,7 +67,7 @@ do_peek_argument()
     if(index >= this->m_stack.size())
       return nullptr;
 
-    return ::std::addressof(this->m_stack.end()[~index]);
+    return this->m_stack.bottom() + index;
   }
 
 Argument_Reader&
@@ -508,9 +508,8 @@ end_overload(cow_vector<Reference>& vargs)
 
     size_t index = this->m_state.nparams - 1;
     if(index < this->m_stack.size()) {
-      vargs.append(
-          ::std::make_reverse_iterator(this->m_stack.end() - index),
-          ::std::make_reverse_iterator(this->m_stack.begin()));
+      vargs.append(this->m_stack.bottom() + index,
+                   this->m_stack.bottom() + this->m_stack.size());
     }
     return true;
   }
@@ -530,11 +529,10 @@ end_overload(cow_vector<Value>& vargs)
     size_t index = this->m_state.nparams - 1;
     if(index < this->m_stack.size()) {
       vargs.reserve(this->m_stack.size() - index);
-      ::std::transform(
-          ::std::make_reverse_iterator(this->m_stack.end() - index),
-          ::std::make_reverse_iterator(this->m_stack.begin()),
-          ::std::back_inserter(vargs),
-          ::std::mem_fn(&Reference::dereference_readonly));
+      ::std::transform(this->m_stack.bottom() + index,
+                       this->m_stack.bottom() + this->m_stack.size(),
+                       ::std::back_inserter(vargs),
+                       ::std::mem_fn(&Reference::dereference_readonly));
     }
     return true;
   }
@@ -546,18 +544,26 @@ throw_no_matching_function_call()
   {
     // Compose the list of types of arguments.
     cow_string arguments;
-    if(this->m_stack.size()) {
-      arguments << this->m_stack.back().dereference_readonly().what_type();
-      for(size_t k = 1;  k < this->m_stack.size();  ++k)
-        arguments << ", " << this->m_stack.at(k).dereference_readonly().what_type();
+    size_t index = 0;
+    switch(this->m_stack.size()) {
+        do {
+          arguments += ", ";  // fallthrough
+      default:
+          arguments += this->m_stack.bottom()[index]
+                              .dereference_readonly().what_type();
+        }
+        while(++index != this->m_stack.size());  // fallthrough
+      case 0:
+        break;
     }
 
     // Compose the list of overloads.
     ::rocket::tinyfmt_str overloads;
-    for(size_t k = 0;  k < this->m_overloads.size();  ++k) {
-      auto params = ::rocket::sref(this->m_overloads.c_str() + k);
+    index = 0;
+    while(index != this->m_overloads.size()) {
+      auto params = ::rocket::sref(this->m_overloads.c_str() + index);
       format(overloads, "  $1($2)\n", this->m_name, params);
-      k += params.length();
+      index += params.length() + 1;
     }
 
     // Throw the exception now.

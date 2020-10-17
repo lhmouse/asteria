@@ -106,7 +106,7 @@ execute(Global_Context& global, cow_vector<Value>&& vals)
     Reference_Stack stack;
     for(auto it = vals.mut_rbegin();  it != vals.rend();  ++it) {
       Reference::S_temporary xref = { ::std::move(*it) };
-      stack.emplace_front(::std::move(xref));
+      stack.emplace_back(::std::move(xref));
     }
     return this->execute(global, ::std::move(stack));
   }

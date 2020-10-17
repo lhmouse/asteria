@@ -74,7 +74,7 @@ Reference&
 do_push_temporary(Reference_Stack& stack, const Value& value)
   {
     Reference::S_temporary xref = { value };
-    return stack.emplace_front(::std::move(xref));
+    return stack.emplace_back(::std::move(xref));
   }
 
 template<typename IterT>

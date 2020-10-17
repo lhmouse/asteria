@@ -13,9 +13,9 @@ class Reference_Stack
   {
   private:
     Reference* m_bptr = nullptr;  // beginning of raw storage
-    uint32_t m_bstor = 0;  // offset to the first initialized reference
-    uint32_t m_top = 0;  // offset to the top (must be within [m_bstor,m_estor])
-    uint32_t m_estor = 0;  // number of references allocated
+    uint32_t m_etop = 0;   // offset past the top (must be within [0,einit])
+    uint32_t m_einit = 0;  // offset to the last initialized reference
+    uint32_t m_estor = 0;  // end of reserved storage
 
   public:
     constexpr
@@ -34,7 +34,7 @@ class Reference_Stack
 
     ~Reference_Stack()
       {
-        if(this->m_bstor != this->m_estor)
+        if(this->m_einit)
           this->do_destroy_elements();
 
         if(this->m_bptr)
@@ -72,48 +72,28 @@ class Reference_Stack
     bool
     empty()
       const noexcept
-      { return this->m_top == this->m_estor;  }
+      { return this->m_etop == 0;  }
 
     size_t
     size()
       const noexcept
-      { return this->m_estor - this->m_top;  }
+      { return this->m_etop;  }
 
     const Reference*
-    data()
+    bottom()
       const noexcept
-      { return this->m_bptr + this->m_top;  }
+      { return this->m_bptr;  }
 
     Reference*
-    mut_data()
+    mut_bottom()
       noexcept
-      { return this->m_bptr + this->m_top;  }
-
-    const Reference*
-    begin()
-      const noexcept
-      { return this->m_bptr + this->m_top;  }
-
-    const Reference*
-    end()
-      const noexcept
-      { return this->m_bptr + this->m_estor;  }
-
-    Reference*
-    begin()
-      noexcept
-      { return this->m_bptr + this->m_top;  }
-
-    Reference*
-    end()
-      noexcept
-      { return this->m_bptr + this->m_estor;  }
+      { return this->m_bptr;  }
 
     Reference_Stack&
     clear()
       noexcept
       {
-        this->m_top = this->m_estor;
+        this->m_etop = 0;
         return *this;
       }
 
@@ -122,28 +102,10 @@ class Reference_Stack
       noexcept
       {
         ::std::swap(this->m_bptr, other.m_bptr);
-        ::std::swap(this->m_bstor, other.m_bstor);
-        ::std::swap(this->m_top, other.m_top);
+        ::std::swap(this->m_etop, other.m_etop);
+        ::std::swap(this->m_einit, other.m_einit);
         ::std::swap(this->m_estor, other.m_estor);
         return *this;
-      }
-
-    const Reference&
-    at(size_t index)
-      const
-      {
-        if(index >= this->size())
-          this->do_throw_subscript_out_of_range(index, ">=");
-        return this->data()[index];
-      }
-
-    const Reference&
-    rat(size_t index)
-      const
-      {
-        if(index >= this->size())
-          this->do_throw_subscript_out_of_range(index, ">=");
-        return this->data()[this->size() - 1 - index];
       }
 
     const Reference&
@@ -151,7 +113,7 @@ class Reference_Stack
       const noexcept
       {
         ROCKET_ASSERT(!this->empty());
-        return this->data()[0];
+        return this->bottom()[0];
       }
 
     const Reference&
@@ -159,23 +121,7 @@ class Reference_Stack
       const noexcept
       {
         ROCKET_ASSERT(!this->empty());
-        return this->data()[this->size() - 1];
-      }
-
-    Reference&
-    mut(size_t index)
-      {
-        if(index >= this->size())
-          this->do_throw_subscript_out_of_range(index, ">=");
-        return this->mut_data()[index];
-      }
-
-    Reference&
-    rmut(size_t index)
-      {
-        if(index >= this->size())
-          this->do_throw_subscript_out_of_range(index, ">=");
-        return this->mut_data()[this->size() - 1 - index];
+        return this->bottom()[this->size() - 1];
       }
 
     Reference&
@@ -183,7 +129,7 @@ class Reference_Stack
       noexcept
       {
         ROCKET_ASSERT(!this->empty());
-        return this->mut_data()[0];
+        return this->mut_bottom()[0];
       }
 
     Reference&
@@ -191,34 +137,49 @@ class Reference_Stack
       noexcept
       {
         ROCKET_ASSERT(!this->empty());
-        return this->mut_data()[this->size() - 1];
+        return this->mut_bottom()[this->size() - 1];
+      }
+
+    const Reference&
+    back(size_t index)
+      const
+      {
+        if(index >= this->size())
+          this->do_throw_subscript_out_of_range(index, ">=");
+        return this->bottom()[this->size() + ~index];
+      }
+
+    Reference&
+    mut_back(size_t index)
+      {
+        if(index >= this->size())
+          this->do_throw_subscript_out_of_range(index, ">=");
+        return this->mut_bottom()[this->size() + ~index];
       }
 
     template<typename XRefT>
     Reference&
-    emplace_front(XRefT&& xref)
+    emplace_back(XRefT&& xref)
       {
         // If there is an initialized element above the top, reuse it.
-        if(ROCKET_EXPECT(this->m_bstor != this->m_top)) {
-          auto ptr = this->m_bptr + this->m_top - 1;
+        if(ROCKET_EXPECT(this->m_etop != this->m_einit)) {
+          auto ptr = this->m_bptr + this->m_etop;
           *ptr = ::std::forward<XRefT>(xref);
-          this->m_top -= 1;
+          this->m_etop += 1;
           return *ptr;
         }
 
-        // If there is an uninitialized element above the top, construct a
-        // new one.
-        if(ROCKET_EXPECT(this->m_bstor != 0)) {
-          auto ptr = this->m_bptr + this->m_top - 1;
+        // If there is an uninitialized element above the top, construct a new one.
+        if(ROCKET_EXPECT(this->m_etop != this->m_estor)) {
+          auto ptr = this->m_bptr + this->m_etop;
           ::rocket::construct_at(ptr, ::std::forward<XRefT>(xref));
-          this->m_bstor -= 1;
-          this->m_top -= 1;
+          this->m_etop += 1;
+          this->m_einit += 1;
           return *ptr;
         }
 
-        // Allocate a larger block of memory and then construct the new
-        // element  above the top. If the operation succeeds, replace the
-        // old block.
+        // Allocate a larger block of memory and then construct the new element
+        // above the top. If the operation succeeds, replace the old block.
         Reference* next_bptr;
         uint32_t next_estor;
 
@@ -230,7 +191,7 @@ class Reference_Stack
 #endif
         this->do_reallocate_reserve(next_bptr, next_estor, nadd);
 
-        auto ptr = next_bptr + next_estor - this->m_estor + this->m_top - 1;
+        auto ptr = next_bptr + this->m_etop;
         try {
           ::rocket::construct_at(ptr, ::std::forward<XRefT>(xref));
         }
@@ -239,17 +200,17 @@ class Reference_Stack
           throw;
         }
         this->do_reallocate_finish(next_bptr, next_estor);
-        this->m_bstor -= 1;
-        this->m_top -= 1;
+        this->m_etop += 1;
+        this->m_einit += 1;
         return *ptr;
       }
 
     Reference_Stack&
-    pop_front(size_t count = 1)
+    pop_back(size_t count = 1)
       noexcept
       {
         ROCKET_ASSERT(count <= this->size());
-        this->m_top += static_cast<uint32_t>(count);
+        this->m_etop -= static_cast<uint32_t>(count);
         return *this;
       }
 
