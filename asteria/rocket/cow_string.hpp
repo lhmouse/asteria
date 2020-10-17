@@ -289,10 +289,11 @@ class basic_cow_string
         // Swap the intervals [`tpos+tlen`,`kpos`) and [`kpos`,`size`).
         noadl::rotate(ptr, tlen, klen, slen);
 
-        // Erase the interval [`tpos`,`tpos+tlen`).
+        // If no relocation is necessary, return.
         if(tlen == 0)
           return ptr;
 
+        // Erase the interval [`tpos`,`tpos+tlen`).
         // Note the null terminator has to be copied as well.
         traits_type::move(ptr, ptr + tlen, slen + 1 - tlen);
         this->m_len -= tlen;
@@ -308,12 +309,29 @@ class basic_cow_string
         auto ptr = this->mut_data() + tpos;
         size_type slen = this->size() - tpos;
 
-        // Push the interval [`tpos+tlen`,`size`) by `n-tlen` characters.
+        // If no relocation is necessary, return.
         if(tlen == n)
           return ptr;
 
+        // If there is enough space, push [`tpos+tlen`,`size`] by `n-tlen` characters.
         // Note the null terminator has to be copied as well.
-        traits_type::move(ptr + n, ptr + tlen, slen + 1 - tlen);
+        if(n <= this->capacity() - this->size() + tlen) {
+          traits_type::move(ptr + n, ptr + tlen, slen + 1 - tlen);
+          this->m_len -= tlen - n;
+          return ptr;
+        }
+
+        // Allocate new storage.
+        storage_handle sth(this->m_sth.as_allocator());
+        ptr = sth.reallocate_more(ptr, tlen, (slen - tlen + n) | n);  // note overflow check
+
+        // Copy [`tpos+tlen`,`size`] into the new storage.
+        // Note the null terminator has to be copied as well.
+        traits_type::copy(ptr + n, this->data() + tpos + tlen, slen + 1 - tlen);
+
+        // Set the new storage up.
+        this->m_sth.exchange_with(sth);
+        this->m_ptr = ptr - tlen;
         this->m_len -= tlen - n;
         return ptr;
       }
@@ -840,10 +858,10 @@ class basic_cow_string
           // Append characters to the new storage.
           for(auto it = ::std::move(first);  it != last;  ++it) {
             // Reallocate the storage if necessary.
-            if(ROCKET_UNEXPECT(n >= cap - this->size()))
-              ptr = sth.reallocate_more(ptr - this->size(), this->size() + n, cap / 2) - n,
+            if(ROCKET_UNEXPECT(n >= cap - this->size())) {
+              ptr = sth.reallocate_more(ptr - this->size(), this->size() + n, cap / 2) - n;
               cap = sth.capacity();
-
+            }
             traits_type::assign(ptr[n++], *it);
           }
         }
