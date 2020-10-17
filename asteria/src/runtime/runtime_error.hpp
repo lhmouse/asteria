@@ -132,6 +132,13 @@ class Runtime_Error
       }
   };
 
+#define ASTERIA_RUNTIME_CONVERT_EXCEPTION_AND_RETHROW  \
+    catch(::asteria::Runtime_Error&)  \
+      { throw;  }  \
+    catch(::std::exception& yPb8wL9v)  \
+      { throw ::asteria::Runtime_Error(  \
+           ::asteria::Runtime_Error::M_native(), yPb8wL9v);  }
+
 #define ASTERIA_RUNTIME_TRY  \
     try {  \
       try  \
@@ -139,12 +146,7 @@ class Runtime_Error
         // exceptions here.
 
 #define ASTERIA_RUNTIME_CATCH(...)  \
-      catch(::asteria::Runtime_Error&)  \
-        { throw;  }  \
-      catch(::std::exception& yPb8wL9v)  \
-        { throw ::asteria::Runtime_Error(  \
-              ::asteria::Runtime_Error::M_native(),  \
-              yPb8wL9v);  }  \
+      ASTERIA_RUNTIME_CONVERT_EXCEPTION_AND_RETHROW  \
     }  \
     catch(__VA_ARGS__)
 

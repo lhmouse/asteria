@@ -6,6 +6,7 @@
 
 #include "../fwd.hpp"
 #include "reference.hpp"
+#include "runtime_error.hpp"
 #include "../llds/reference_stack.hpp"
 #include "../details/argument_reader.ipp"
 
@@ -150,7 +151,7 @@ class Argument_Reader
 
 #define ASTERIA_BINDING_BEGIN(name, self, global, reader)  \
     (::asteria::V_function(  \
-      "`" name "(...)` at '" __FILE__  ":" ROCKET_LAZY(ROCKET_QUOTE, __LINE__) "'",  \
+      "`" name "(...)` at '" ASTERIA_NATIVE_SOURCE_LOCATION "'",  \
       *[](::asteria::Reference& self,  \
           ::asteria::Global_Context& global, ::asteria::Reference_Stack&& tfiXopzY)  \
         -> Reference& \
@@ -158,11 +159,11 @@ class Argument_Reader
           ::asteria::Argument_Reader reader(::rocket::sref("" name),  \
                                             ::std::move(tfiXopzY));  \
           (void)global;  \
-          do  \
+          try  \
           // Add function body here.
 
 #define ASTERIA_BINDING_END  \
-          while(false);  \
+          ASTERIA_RUNTIME_CONVERT_EXCEPTION_AND_RETHROW  \
           reader.throw_no_matching_function_call();  \
         }  \
     ))
