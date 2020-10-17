@@ -19,9 +19,22 @@
 namespace asteria {
 namespace {
 
-constexpr int64_t xgcgen_newest = static_cast<int64_t>(gc_generation_newest);
-constexpr int64_t xgcgen_oldest = static_cast<int64_t>(gc_generation_oldest);
-constexpr char s_hex_digits[] = "00112233445566778899AaBbCcDdEeFf";
+inline
+void
+do_put_FFFF(cow_string::iterator wpos, bool rlowerc, uint64_t value)
+  {
+    static constexpr char xdigits[] = "00112233445566778899AaBbCcDdEeFf";
+    for(long k = 0;  k != 4;  ++k)
+      wpos[k] = xdigits[(value >> (12 - 4 * k)) % 16 * 2 + rlowerc];
+  }
+
+constexpr
+GC_Generation
+do_clamp_gc_gen(V_integer param)
+  {
+    return static_cast<GC_Generation>(::rocket::clamp(param,
+               weaken_enum(gc_generation_newest), weaken_enum(gc_generation_oldest)));
+  }
 
 inline
 bool
@@ -301,7 +314,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
 Opt_integer
 std_system_gc_count_variables(Global_Context& global, V_integer generation)
   {
-    auto gc_gen = static_cast<GC_Generation>(::rocket::clamp(generation, xgcgen_newest, xgcgen_oldest));
+    auto gc_gen = do_clamp_gc_gen(generation);
     if(gc_gen != generation)
       return nullopt;
 
@@ -314,7 +327,7 @@ std_system_gc_count_variables(Global_Context& global, V_integer generation)
 Opt_integer
 std_system_gc_get_threshold(Global_Context& global, V_integer generation)
   {
-    auto gc_gen = static_cast<GC_Generation>(::rocket::clamp(generation, xgcgen_newest, xgcgen_oldest));
+    auto gc_gen = do_clamp_gc_gen(generation);
     if(gc_gen != generation)
       return nullopt;
 
@@ -327,25 +340,24 @@ std_system_gc_get_threshold(Global_Context& global, V_integer generation)
 Opt_integer
 std_system_gc_set_threshold(Global_Context& global, V_integer generation, V_integer threshold)
   {
-    auto gc_gen = static_cast<GC_Generation>(::rocket::clamp(generation, xgcgen_newest, xgcgen_oldest));
+    auto gc_gen = do_clamp_gc_gen(generation);
     if(gc_gen != generation)
       return nullopt;
 
     // Set the threshold and return its old value.
     auto gcoll = global.genius_collector();
-    uint32_t thres = gcoll->get_collector(gc_gen).get_threshold();
-    gcoll->open_collector(gc_gen).set_threshold(static_cast<uint32_t>(::rocket::clamp(threshold, 0, INT32_MAX)));
-    return static_cast<int64_t>(thres);
+    uint32_t thres_new = static_cast<uint32_t>(::rocket::clamp(threshold, 0, INT32_MAX));
+    uint32_t thres_old = gcoll->get_collector(gc_gen).get_threshold();
+    gcoll->open_collector(gc_gen).set_threshold(thres_new);
+    return static_cast<int64_t>(thres_old);
   }
 
 V_integer
 std_system_gc_collect(Global_Context& global, Opt_integer generation_limit)
   {
     auto gc_limit = gc_generation_oldest;
-
-    // Unlike others, this function does not fail if `generation_limit` is out of range.
     if(generation_limit)
-      gc_limit = static_cast<GC_Generation>(::rocket::clamp(*generation_limit, xgcgen_newest, xgcgen_oldest));
+      gc_limit = do_clamp_gc_gen(*generation_limit);
 
     // Perform garbage collection up to the generation specified.
     auto gcoll = global.genius_collector();
@@ -381,6 +393,8 @@ std_system_env_get_variables()
 V_string
 std_system_uuid(Global_Context& global, Opt_boolean lowercase)
   {
+    bool rlowerc = lowercase.value_or(false);
+
     // Canonical form: `xxxxxxxx-xxxx-Myyy-Nzzz-wwwwwwwwwwww`
     //  * x: number of 1/10,000 seconds since UNIX Epoch
     //  * M: always `4` (UUID version)
@@ -388,44 +402,33 @@ std_system_uuid(Global_Context& global, Opt_boolean lowercase)
     //  * N: any of `0`-`7` (UUID variant)
     //  * z: context ID
     //  * w: random bytes
-    bool rlowerc = lowercase.value_or(false);
     const auto prng = global.random_engine();
     ::timespec ts;
     ::clock_gettime(CLOCK_REALTIME, &ts);
 
-    uint64_t x = static_cast<uint64_t>(ts.tv_sec) * 30518 + static_cast<uint64_t>(ts.tv_nsec) / 32768;
-    uint64_t y = static_cast<uint32_t>(::getpid());
-    uint64_t z = reinterpret_cast<uintptr_t>(::std::addressof(global)) >> 12;
-    uint64_t w = static_cast<uint64_t>(prng->bump()) << 32 | static_cast<uint64_t>(prng->bump());
+    uint64_t x = uint64_t(ts.tv_sec) * 30518 + uint64_t(ts.tv_nsec) / 32768;
+    uint64_t y = uint32_t(::getpid());
+    uint64_t z = uintptr_t((void*)&global) >> 12;
+    uint64_t w = uint64_t(prng->bump()) << 32 | prng->bump();
 
     // Set version and variant.
     y &= 0x0FFF;
     y |= 0x4000;
     z &= 0x7FFF;
 
-    // Compose the string backwards.
-    char sbuf[36];
-    size_t bp = 36;
+    // Compose the UUID string.
+    cow_string uuid_str;
+    auto wpos = uuid_str.insert(uuid_str.begin(), 36, '-');
 
-    auto put_field_bkwd = [&](uint64_t& value, size_t n)
-      {
-        for(size_t k = 0;  k != n;  ++k)
-          sbuf[--bp] = s_hex_digits[((value << 1) & 0x1E) + rlowerc],
-          value >>= 4;
-      };
-
-    put_field_bkwd(w, 12);
-    sbuf[--bp] = '-';
-    put_field_bkwd(z,  4);
-    sbuf[--bp] = '-';
-    put_field_bkwd(y,  4);
-    sbuf[--bp] = '-';
-    put_field_bkwd(x,  4);
-    sbuf[--bp] = '-';
-    put_field_bkwd(x,  8);
-
-    // Return the string. Note there is no null terminator in `sbuf`.
-    return cow_string(sbuf, sizeof(sbuf));
+    do_put_FFFF(wpos +  0, rlowerc, x >> 32);
+    do_put_FFFF(wpos +  4, rlowerc, x >> 16);
+    do_put_FFFF(wpos +  9, rlowerc, x >>  0);
+    do_put_FFFF(wpos + 14, rlowerc, y);
+    do_put_FFFF(wpos + 19, rlowerc, z);
+    do_put_FFFF(wpos + 24, rlowerc, w >> 32);
+    do_put_FFFF(wpos + 28, rlowerc, w >> 32);
+    do_put_FFFF(wpos + 32, rlowerc, w >>  0);
+    return uuid_str;
   }
 
 V_integer
