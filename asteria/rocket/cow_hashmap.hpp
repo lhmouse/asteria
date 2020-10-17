@@ -505,10 +505,10 @@ class cow_hashmap
           // Insert new elements into the new storage.
           for(auto it = ::std::move(first);  it != last;  ++it) {
             // Reallocate the storage if necessary.
-            if(ROCKET_UNEXPECT(sth.size() >= cap))
-              bkts = sth.reallocate_reserve(sth, this->size(), cap / 2),
+            if(ROCKET_UNEXPECT(sth.size() >= cap)) {
+              bkts = sth.reallocate_reserve(sth, this->size(), cap / 2);
               cap = sth.capacity();
-
+            }
             if(!this->m_sth.find(tpos, it->first))
               sth.keyed_try_emplace(tpos, it->first, it->first, it->second);
           }

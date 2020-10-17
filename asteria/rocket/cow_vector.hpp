@@ -549,10 +549,10 @@ class cow_vector
           // Append new elements to the new storage.
           for(auto it = ::std::move(first);  it != last;  ++it) {
             // Reallocate the storage if necessary.
-            if(ROCKET_UNEXPECT(sth.size() >= cap))
-              ptr = sth.reallocate_prepare(sth, this->size(), cap / 2),
+            if(ROCKET_UNEXPECT(sth.size() >= cap)) {
+              ptr = sth.reallocate_prepare(sth, this->size(), cap / 2);
               cap = sth.capacity();
-
+            }
             sth.emplace_back_unchecked(*it);
           }
         }
