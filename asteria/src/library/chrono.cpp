@@ -13,8 +13,8 @@ namespace {
 constexpr int64_t s_timestamp_min = -11644473600'000;
 constexpr int64_t s_timestamp_max = 253370764800'000;
 
-constexpr char s_strings_min[][24] = { "1601-01-01 00:00:00","1601-01-01 00:00:00.000" };
-constexpr char s_strings_max[][24] = { "9999-01-01 00:00:00","9999-01-01 00:00:00.000" };
+constexpr char s_strings_min[][24] = { "1601-01-01 00:00:00", "1601-01-01 00:00:00.000" };
+constexpr char s_strings_max[][24] = { "9999-01-01 00:00:00", "9999-01-01 00:00:00.000" };
 
 constexpr int64_t s_timestamp_1600_03_01 = -11670912000'000;
 constexpr uint8_t s_month_days[] = { 31,30,31,30,31,31,30,31,30,31,31,29 };  // from March
@@ -36,19 +36,11 @@ constexpr char s_nums_00_99[100][2] =
 
 inline
 void
-do_write_one(cow_string::iterator& wpos, char ch)
-  {
-    *(wpos++) = ch;
-  }
-
-inline
-void
-do_put_00_99(cow_string::iterator& wpos, uint64_t value)
+do_put_00_99(cow_string::iterator wpos, uint64_t value)
   {
     ROCKET_ASSERT(value <= 99);
-
-    do_write_one(wpos, s_nums_00_99[value][0]);
-    do_write_one(wpos, s_nums_00_99[value][1]);
+    for(long k = 0;  k != 2;  ++k)
+      wpos[k] = s_nums_00_99[value][k];
   }
 
 inline
@@ -294,23 +286,17 @@ std_chrono_utc_format(V_integer time_point, Opt_boolean with_ms)
     cow_string time_str;
     auto wpos = time_str.insert(time_str.begin(), s_strings_max[pms]);
 
-    do_put_00_99(wpos, year / 100);
-    do_put_00_99(wpos, year % 100);
-    do_write_one(wpos, '-');
-    do_put_00_99(wpos, month);
-    do_write_one(wpos, '-');
-    do_put_00_99(wpos, mday);
-    do_write_one(wpos, ' ');
-    do_put_00_99(wpos, hour);
-    do_write_one(wpos, ':');
-    do_put_00_99(wpos, min);
-    do_write_one(wpos, ':');
-    do_put_00_99(wpos, sec);
+    do_put_00_99(wpos +  0, year / 100);
+    do_put_00_99(wpos +  2, year % 100);
+    do_put_00_99(wpos +  5, month);
+    do_put_00_99(wpos +  8, mday);
+    do_put_00_99(wpos + 11, hour);
+    do_put_00_99(wpos + 14, min);
+    do_put_00_99(wpos + 17, sec);
 
     if(pms) {
-      do_write_one(wpos, '.');
-      do_put_00_99(wpos, msec / 10);
-      do_write_one(wpos, static_cast<char>('0' + msec % 10));
+      do_put_00_99(wpos + 20, msec / 10);
+      wpos[22] = static_cast<char>('0' + msec % 10);
     }
     return time_str;
   }
