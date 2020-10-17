@@ -229,11 +229,11 @@ print(tinyfmt& fmt, bool escape)
 
       case type_opaque:
         // #opaque [[my opaque]]
-        return fmt << "#opaque [[" << this->m_stor.as<type_opaque>() << "]]";
+        return fmt << "(opaque) [[" << this->m_stor.as<type_opaque>() << "]]";
 
       case type_function:
         // *function [[my function]]
-        return fmt << "*function [[" << this->m_stor.as<type_function>() << "]]";
+        return fmt << "(function) [[" << this->m_stor.as<type_function>() << "]]";
 
       case type_array: {
         const auto& altr = this->m_stor.as<type_array>();
@@ -298,14 +298,14 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging)
       case type_opaque: {
         const auto& altr = this->m_stor.as<type_opaque>();
         // #opaque(0x123456) [[my opaque]]
-        fmt << "#opaque(" << altr.get_opt() << ") [[" << altr << "]]";
+        fmt << "opaque(" << altr.get_opt() << ") [[" << altr << "]]";
         return fmt;
       }
 
       case type_function: {
         const auto& altr = this->m_stor.as<type_function>();
         // *function [[my function]]
-        fmt << "*function [[" << altr << "]]";
+        fmt << "function [[" << altr << "]]";
         return fmt;
       }
 
