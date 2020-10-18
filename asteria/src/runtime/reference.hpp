@@ -246,6 +246,26 @@ class Reference
         return *this;
       }
 
+    // This function is called during argument passing to catch early errors.
+    ROCKET_FORCED_INLINE_FUNCTION
+    const Reference&
+    dereference_validate()
+      const
+      {
+        // If the root is a value, and there is no modifier, then dereferencing
+        // will always succeed and yield the root.
+        int mask = (1 << this->index())
+                & (1 << index_constant | 1 << index_temporary | 1 << index_variable)
+                & (static_cast<int32_t>(this->m_mods.ssize() - 1) >> 31);
+        if(ROCKET_EXPECT(mask))
+          return *this;
+
+        // Otherwise, try dereferencing.
+        // If the operation fails, an exception is thrown.
+        static_cast<void>(this->dereference_readonly());
+        return *this;
+      }
+
     // These are general read/write functions.
     // Note that not all references denote values. Some of them are placeholders.
     const Value&

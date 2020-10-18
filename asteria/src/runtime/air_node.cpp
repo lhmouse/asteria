@@ -1375,7 +1375,7 @@ do_pop_positional_arguments(Executive_Context& ctx, size_t nargs)
       // Get an argument. Ensure it is dereferenceable.
       ROCKET_ASSERT(k < ctx.stack().size());
       auto& arg = ctx.stack().mut_back(k);
-      static_cast<void>(arg.dereference_readonly());
+      arg.dereference_validate();
 
       // Push the argument verbatim.
       stack.emplace_back(::std::move(arg));
@@ -3583,7 +3583,7 @@ struct AIR_Traits_variadic_call
 
               // Generate an argument. Ensure it is dereferenceable.
               do_invoke_nontail(stack.emplace_back(gself), sloc, ctx, gfunc, ::std::move(gstack));
-              static_cast<void>(stack.back());
+              stack.back().dereference_validate();
             }
             break;
           }
@@ -3837,7 +3837,7 @@ struct AIR_Traits_initialize_reference
       {
         // Pop a reference from the stack. Ensure it is dereferenceable.
         auto& top = ctx.stack().mut_back();
-        static_cast<void>(top.dereference_readonly());
+        top.dereference_validate();
 
         // Move it into the context.
         ctx.open_named_reference(sp.name) = ::std::move(top);
