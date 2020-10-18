@@ -77,7 +77,7 @@ class Global_Context
     rcptr<Abstract_Hooks>
     get_hooks_opt()
       const noexcept
-      { return unerase_cast<Abstract_Hooks>(this->m_qhooks);  }
+      { return unerase_pointer_cast<Abstract_Hooks>(this->m_qhooks);  }
 
     ASTERIA_INCOMPLET(Abstract_Hooks)
     Global_Context&
@@ -90,25 +90,25 @@ class Global_Context
     rcptr<Genius_Collector>
     genius_collector()
       const noexcept
-      { return unerase_cast<Genius_Collector>(this->m_gcoll);  }
+      { return unerase_pointer_cast<Genius_Collector>(this->m_gcoll);  }
 
     ASTERIA_INCOMPLET(Random_Engine)
     rcptr<Random_Engine>
     random_engine()
       const noexcept
-      { return unerase_cast<Random_Engine>(this->m_prng);  }
+      { return unerase_pointer_cast<Random_Engine>(this->m_prng);  }
 
     ASTERIA_INCOMPLET(Loader_Lock)
     rcptr<Loader_Lock>
     loader_lock()
       const noexcept
-      { return unerase_cast<Loader_Lock>(this->m_ldrlk);  }
+      { return unerase_pointer_cast<Loader_Lock>(this->m_ldrlk);  }
 
     ASTERIA_INCOMPLET(Variable)
     rcptr<Variable>
     std_variable()
       const noexcept
-      { return unerase_cast<Variable>(this->m_vstd);  }
+      { return unerase_pointer_cast<Variable>(this->m_vstd);  }
 
     // Get the maximum API version that is supported when this library is built.
     // N.B. This function must not be inlined for this reason.

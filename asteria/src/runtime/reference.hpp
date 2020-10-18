@@ -155,7 +155,7 @@ class Reference
     get_variable_opt()
       const noexcept
       { return ROCKET_EXPECT(this->is_variable())
-          ? unerase_cast<Variable>(this->m_root.as<index_variable>().var)
+          ? unerase_pointer_cast<Variable>(this->m_root.as<index_variable>().var)
           : nullptr;  }
 
     bool
@@ -168,7 +168,7 @@ class Reference
     get_ptc_args_opt()
       const noexcept
       { return ROCKET_EXPECT(this->is_ptc_args())
-          ? unerase_cast<PTC_Arguments>(this->m_root.as<index_ptc_args>().ptca)
+          ? unerase_pointer_cast<PTC_Arguments>(this->m_root.as<index_ptc_args>().ptca)
           : nullptr;  }
 
     Reference&

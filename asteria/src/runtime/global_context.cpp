@@ -77,6 +77,9 @@ Global_Context(API_Version version)
     m_prng(::rocket::make_refcnt<Random_Engine>()),
     m_ldrlk(::rocket::make_refcnt<Loader_Lock>())
   {
+    auto gcoll = unerase_cast(this->m_gcoll);
+    ROCKET_ASSERT(gcoll);
+
     // Get the range of modules to initialize.
     // This also determines the maximum version number of the library, which will be
     // referenced as `yend[-1].version`.
@@ -97,7 +100,7 @@ Global_Context(API_Version version)
       }
       q->init(pair.first->second.open_object(), eptr[-1].version);
     }
-    auto vstd = unerase_cast(this->m_gcoll)->create_variable(gc_generation_oldest);
+    auto vstd = gcoll->create_variable(gc_generation_oldest);
     vstd->initialize(::std::move(ostd), true);
 
     // Set the `std` reference now.

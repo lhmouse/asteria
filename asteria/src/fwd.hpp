@@ -257,8 +257,15 @@ using rcfwdp = rcptr<Rcfwd<RealT>>;
 
 template<typename RealT>
 constexpr
+RealT*
+unerase_cast(const rcfwdp<RealT>& ptr)  // like `static_cast`
+  noexcept
+  { return static_cast<RealT*>(ptr.get());  }
+
+template<typename RealT>
+constexpr
 rcptr<RealT>
-unerase_cast(const rcfwdp<RealT>& ptr)
+unerase_pointer_cast(const rcfwdp<RealT>& ptr)  // like `static_pointer_cast`
   noexcept
   { return ::rocket::static_pointer_cast<RealT>(ptr);  }
 
