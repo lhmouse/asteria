@@ -57,7 +57,8 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
       ASTERIA_THROW("Too many arguments passed to `$1`", zvarg->func());
 
     // Stash variadic arguments, if any.
-    this->m_lazy_args.append(::std::make_move_iterator(bpos), ::std::make_move_iterator(epos));
+    this->m_lazy_args.append(::std::make_move_iterator(bpos),
+                             ::std::make_move_iterator(epos));
   }
 
 Executive_Context::
@@ -70,7 +71,8 @@ Executive_Context::
 do_lazy_lookup_opt(const phsh_string& name)
   {
     // Create pre-defined references as needed.
-    // N.B. If you have ever changed these, remember to update 'analytic_context.cpp' as well.
+    // N.B. If you have ever changed these, remember to update 'analytic_context.cpp'
+    // as well.
     if(name == "__func") {
       // Note: This can only happen inside a function context.
       Reference::S_constant xref = { this->m_zvarg->func() };
@@ -78,7 +80,8 @@ do_lazy_lookup_opt(const phsh_string& name)
     }
 
     if(name == "__this") {
-      // Note: This can only happen inside a function context and the `this` argument is null.
+      // Note: This can only happen inside a function context and the `this` argument
+      // is null.
       Reference::S_constant xref = { };
       return &(this->open_named_reference(name) = ::std::move(xref));
     }
@@ -87,8 +90,8 @@ do_lazy_lookup_opt(const phsh_string& name)
       // Note: This can only happen inside a function context.
       cow_function varg;
       if(ROCKET_EXPECT(this->m_lazy_args.size()))
-        varg = ::rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg),
-                                                      ::std::move(this->m_lazy_args));
+        varg = ::rocket::make_refcnt<Variadic_Arguer>(
+                             *(this->m_zvarg), ::std::move(this->m_lazy_args));
       else
         varg = this->m_zvarg;
 
@@ -125,7 +128,8 @@ on_scope_exit(AIR_Status status)
       if(ptca->get_defer().empty())
         ptca->open_defer().swap(this->m_defer);
       else
-        ptca->open_defer().append(this->m_defer.move_begin(), this->m_defer.move_end());
+        ptca->open_defer().append(this->m_defer.move_begin(),
+                                  this->m_defer.move_end());
     }
     else {
       // Execute all deferred expressions backwards.
