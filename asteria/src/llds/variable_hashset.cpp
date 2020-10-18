@@ -15,7 +15,8 @@ do_destroy_buckets()
   {
     auto next = this->m_head;
     while(ROCKET_EXPECT(next)) {
-      auto qbkt = ::std::exchange(next, next->next);
+      auto qbkt = next;
+      next = qbkt->next;
 
       // Destroy this bucket.
       ROCKET_ASSERT(*qbkt);
@@ -155,7 +156,7 @@ do_rehash(size_t nbkt)
       auto mptr = ::rocket::get_probing_origin(bptr, eptr,
                               reinterpret_cast<uintptr_t>(sbkt->kstor->get()));
       auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr,
-                              [&](const Bucket&) { return false;  });
+                                         [&](const Bucket&) { return false;  });
       ROCKET_ASSERT(qbkt);
 
       // Mark the new bucket non-empty.
@@ -209,7 +210,8 @@ enumerate_variables(Variable_Callback& callback)
   {
     auto next = this->m_head;
     while(ROCKET_EXPECT(next)) {
-      auto qbkt = ::std::exchange(next, next->next);
+      auto qbkt = next;
+      next = qbkt->next;
 
       // Enumerate a child variable.
       ROCKET_ASSERT(*qbkt);

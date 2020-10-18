@@ -16,7 +16,8 @@ do_destroy_elements()
     auto next = this->m_bptr;
     const auto eptr = this->m_bptr + this->m_einit;
     while(ROCKET_EXPECT(next != eptr)) {
-      auto qref = ::std::exchange(next, next + 1);
+      auto qref = next;
+      next += 1;
 
       // Destroy this element.
       ::rocket::destroy_at(qref);
@@ -75,7 +76,8 @@ enumerate_variables(Variable_Callback& callback)
     auto next = this->m_bptr;
     const auto eptr = this->m_bptr + this->m_einit;
     while(ROCKET_EXPECT(next != eptr)) {
-      auto qref = ::std::exchange(next, next + 1);
+      auto qref = next;
+      next += 1;
 
       // Enumerate variables in this reference.
       qref->enumerate_variables(callback);

@@ -19,7 +19,8 @@ do_destroy_nodes()
     auto next = this->m_bptr;
     const auto eptr = this->m_bptr + this->m_used;
     while(ROCKET_EXPECT(next != eptr)) {
-      auto qnode = ::std::exchange(next, next + next->total_size_in_headers());
+      auto qnode = next;
+      next += qnode->total_size_in_headers();
 
       // Destroy symbols and user-defined data.
       qnode->destroy();
@@ -169,7 +170,8 @@ execute(Executive_Context& ctx)
     auto next = this->m_bptr;
     const auto eptr = this->m_bptr + this->m_used;
     while(ROCKET_EXPECT(next != eptr)) {
-      auto qnode = ::std::exchange(next, next + next->total_size_in_headers());
+      auto qnode = next;
+      next += qnode->total_size_in_headers();
 
       // Call the executor function for this node.
       ASTERIA_RUNTIME_TRY {
@@ -193,7 +195,8 @@ enumerate_variables(Variable_Callback& callback)
     auto next = this->m_bptr;
     const auto eptr = this->m_bptr + this->m_used;
     while(ROCKET_EXPECT(next != eptr)) {
-      auto qnode = ::std::exchange(next, next + next->total_size_in_headers());
+      auto qnode = next;
+      next += qnode->total_size_in_headers();
 
       // Enumerate variables in this node.
       qnode->enumerate_variables(callback);
