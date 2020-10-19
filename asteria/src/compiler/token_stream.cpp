@@ -184,13 +184,12 @@ do_push_token(cow_vector<Token>& tokens, Line_Reader& reader, size_t tlen, XToke
 bool
 do_may_infix_operators_follow(cow_vector<Token>& tokens)
   {
-    if(tokens.empty()) {
-      // No previous token exists.
+    // Infix operators are not allowed at the beginning.
+    if(tokens.empty())
       return false;
-    }
-    const auto& p = tokens.back();
 
     // Infix operators may follow if the keyword denotes a value or reference.
+    const auto& p = tokens.back();
     if(p.is_keyword())
       return ::rocket::is_any_of(p.as_keyword(),
                  { keyword_null, keyword_true, keyword_false, keyword_nan,
