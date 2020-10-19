@@ -612,8 +612,8 @@ main(int argc, char** argv)
     // Protect against stack overflows.
     global.set_recursion_base(&argc);
 
-    // Call other functions which are declared `noreturn`. `main()` itself is not
-    // `noreturn` so we don't get stupid warngings like 'function declared
+    // Call other functions which are declared `noreturn`. `main()` itself is
+    // not `noreturn` so we don't get stupid warngings like 'function declared
     // `noreturn` has a `return` statement'.
     if(cmdline.interactive)
       do_repl_noreturn();
