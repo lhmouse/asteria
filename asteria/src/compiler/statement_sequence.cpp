@@ -207,18 +207,21 @@ do_accept_literal_opt(Token_Stream& tstrm)
       tstrm.shift();
       return qcnf->vgen();
     }
+
     if(qtok->is_integer_literal()) {
       // Copy the value and discard this token.
       auto val = qtok->as_integer_literal();
       tstrm.shift();
       return val;
     }
+
     if(qtok->is_real_literal()) {
       // Copy the value and discard this token.
       auto val = qtok->as_real_literal();
       tstrm.shift();
       return val;
     }
+
     if(qtok->is_string_literal()) {
       // Copy the value and discard this token.
       auto val = qtok->as_string_literal();
@@ -226,6 +229,7 @@ do_accept_literal_opt(Token_Stream& tstrm)
       do_concatenate_string_literal_sequence(val, tstrm);
       return val;
     }
+
     return nullopt;
   }
 
