@@ -77,7 +77,7 @@ Global_Context(API_Version version)
     m_prng(::rocket::make_refcnt<Random_Engine>()),
     m_ldrlk(::rocket::make_refcnt<Loader_Lock>())
   {
-    auto gcoll = unerase_cast(this->m_gcoll);
+    const auto gcoll = unerase_cast<Genius_Collector*>(this->m_gcoll);
     ROCKET_ASSERT(gcoll);
 
     // Get the range of modules to initialize.
@@ -112,8 +112,11 @@ Global_Context(API_Version version)
 Global_Context::
 ~Global_Context()
   {
-    auto gcoll = unerase_cast(this->m_gcoll);
+    const auto gcoll = unerase_cast<Genius_Collector*>(this->m_gcoll);
     ROCKET_ASSERT(gcoll);
+
+    // Perform the final garbage collection.
+    // Note if there are still cyclic references afterwards, they are left uncollected!
     gcoll->wipe_out_variables();
   }
 

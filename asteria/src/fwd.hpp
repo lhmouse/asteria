@@ -255,19 +255,19 @@ Rcfwd<RealT>::
 template<typename RealT>
 using rcfwdp = rcptr<Rcfwd<RealT>>;
 
-template<typename RealT>
+template<typename TargetT, typename RealT>
 constexpr
-RealT*
+TargetT
 unerase_cast(const rcfwdp<RealT>& ptr)  // like `static_cast`
   noexcept
-  { return static_cast<RealT*>(ptr.get());  }
+  { return static_cast<TargetT>(ptr.get());  }
 
-template<typename RealT>
+template<typename TargetT, typename RealT>
 constexpr
-rcptr<RealT>
+rcptr<TargetT>
 unerase_pointer_cast(const rcfwdp<RealT>& ptr)  // like `static_pointer_cast`
   noexcept
-  { return ::rocket::static_pointer_cast<RealT>(ptr);  }
+  { return ::rocket::static_pointer_cast<TargetT>(ptr);  }
 
 // Standard I/O synchronization
 struct StdIO_Sentry

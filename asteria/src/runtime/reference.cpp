@@ -38,7 +38,7 @@ enumerate_variables(Variable_Callback& callback)
         return this->m_root.as<index_temporary>().val.enumerate_variables(callback);
 
       case index_variable: {
-        auto var = unerase_pointer_cast(this->m_root.as<index_variable>().var);
+        auto var = unerase_pointer_cast<Variable>(this->m_root.as<index_variable>().var);
         if(var)
           callback.process(var);
         return callback;
@@ -174,7 +174,7 @@ dereference_readonly()
         break;
 
       case index_variable: {
-        auto var = unerase_cast(this->m_root.as<index_variable>().var);
+        auto var = unerase_cast<Variable*>(this->m_root.as<index_variable>().var);
         if(!var)
           return null_value;
 
@@ -301,7 +301,7 @@ dereference_mutable()
         ASTERIA_THROW("Attempt to modify a temporary `$1`", this->m_root.as<index_temporary>().val);
 
       case index_variable: {
-        auto var = unerase_cast(this->m_root.as<index_variable>().var);
+        auto var = unerase_cast<Variable*>(this->m_root.as<index_variable>().var);
         if(!var)
           ASTERIA_THROW("Attempt to dereference a moved-away reference");
 
@@ -423,7 +423,7 @@ dereference_unset()
         ASTERIA_THROW("Attempt to modify a temporary `$1`", this->m_root.as<index_temporary>().val);
 
       case index_variable: {
-        auto var = unerase_cast(this->m_root.as<index_variable>().var);
+        auto var = unerase_cast<Variable*>(this->m_root.as<index_variable>().var);
         if(!var)
           ASTERIA_THROW("Attempt to dereference a moved-away reference");
 
