@@ -44,8 +44,8 @@ int
 do_print_help_and_exit(const char* self)
   {
     ::printf(
-//        1         2         3         4         5         6         7     |
-// 3456789012345678901234567890123456789012345678901234567890123456789012345|
+//       1         2         3         4         5         6         7      |
+// 4567890123456789012345678901234567890123456789012345678901234567890123456|
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 Usage: %s [OPTIONS] [[--] FILE [ARGUMENTS]...]
 
@@ -80,8 +80,8 @@ discover memory leaks upon exit.
 Visit the homepage at <%s>.
 Report bugs to <%s>.
 )'''''''''''''''" """"""""""""""""""""""""""""""""""""""""""""""""""""""""+1,
-// 3456789012345678901234567890123456789012345678901234567890123456789012345|
-//        1         2         3         4         5         6         7     |
+// 4567890123456789012345678901234567890123456789012345678901234567890123456|
+//       1         2         3         4         5         6         7      |
       self,
       PACKAGE_URL,
       PACKAGE_BUGREPORT);
@@ -94,16 +94,16 @@ int
 do_print_version_and_exit()
   {
     ::printf(
-//        1         2         3         4         5         6         7     |
-// 3456789012345678901234567890123456789012345678901234567890123456789012345|
+//       1         2         3         4         5         6         7      |
+// 4567890123456789012345678901234567890123456789012345678901234567890123456|
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 %s [built on %s]
 
 Visit the homepage at <%s>.
 Report bugs to <%s>.
 )'''''''''''''''" """"""""""""""""""""""""""""""""""""""""""""""""""""""""+1,
-// 3456789012345678901234567890123456789012345678901234567890123456789012345|
-//        1         2         3         4         5         6         7     |
+// 4567890123456789012345678901234567890123456789012345678901234567890123456|
+//       1         2         3         4         5         6         7      |
       PACKAGE_STRING, build_time,
       PACKAGE_URL,
       PACKAGE_BUGREPORT);
@@ -136,7 +136,8 @@ struct Command_Line_Options
     cow_vector<Value> args;
   };
 
-// These may also be automatic objects. They are declared here for convenience.
+// These may also be automatic objects but are declared here for
+// convenience.
 Command_Line_Options cmdline;
 Global_Context global;
 Simple_Script script;
@@ -185,7 +186,8 @@ class REPL_Hooks
   private:
     template<typename... ParamsT>
     void
-    do_verbose_trace(const Source_Location& sloc, const char* templ, const ParamsT&... params)
+    do_verbose_trace(const Source_Location& sloc, const char* templ,
+                     const ParamsT&... params)
       {
         if(ROCKET_EXPECT(!cmdline.verbose))
           return;
@@ -233,7 +235,8 @@ class REPL_Hooks
     on_function_except(const Source_Location& sloc, const cow_function& target,
                        const Runtime_Error&)
       override
-      { this->do_verbose_trace(sloc, "caught an exception from function call: $1", target);  }
+      { this->do_verbose_trace(sloc, "caught an exception inside function call: $1",
+                                     target);  }
   };
 
 void
@@ -312,20 +315,21 @@ do_parse_command_line(int argc, char** argv)
 
     // If more arguments follow, they denote the script to execute.
     if(optind < argc) {
-      // The first non-option argument is the filename to execute. `-` is not special.
+      // The first non-option argument is the filename to execute.
+      // `-` is not special.
       path = cow_string(argv[optind]);
 
       // All subsequent arguments are passed to the script verbatim.
       ::std::for_each(argv + optind + 1, argv + argc,
-                      [&](const char* arg) { args.emplace_back(cow_string(arg));  });
+          [&](const char* arg) { args.emplace_back(cow_string(arg));  });
     }
 
     // Verbose mode is off by default.
     if(verbose)
       cmdline.verbose = *verbose;
 
-    // Interactive mode is enabled when no FILE is given (not even `-`) and standard input is
-    // connected to a terminal.
+    // Interactive mode is enabled when no FILE is given (not even `-`) and
+    // standard input is connected to a terminal.
     if(interactive)
       cmdline.interactive = *interactive;
     else
@@ -336,8 +340,9 @@ do_parse_command_line(int argc, char** argv)
     cmdline.args = ::std::move(args);
 
     // The default optimization level is `2`.
-    // Note again that `-O` without an argument is equivalent to `-O1`, which effectively decreases
-    // optimization in comparison to when it wasn't specified.
+    // Note again that `-O` without an argument is equivalent to `-O1`, which
+    // effectively decreases optimization in comparison to when it wasn't
+    // specified.
     if(optimize)
       script.open_options().optimization_level = *optimize;
   }
@@ -345,16 +350,15 @@ do_parse_command_line(int argc, char** argv)
 int
 do_repl_help()
   {
-    // TODO tokenize
     return ::fputs(
-//        1         2         3         4         5         6         7     |
-// 3456789012345678901234567890123456789012345678901234567890123456789012345|
+//       1         2         3         4         5         6         7      |
+// 4567890123456789012345678901234567890123456789012345678901234567890123456|
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 * list of commands:
   :help      display information about a given command
 )'''''''''''''''" """"""""""""""""""""""""""""""""""""""""""""""""""""""""+1,
-// 3456789012345678901234567890123456789012345678901234567890123456789012345|
-//        1         2         3         4         5         6         7     |
+// 4567890123456789012345678901234567890123456789012345678901234567890123456|
+//       1         2         3         4         5         6         7      |
       stderr);
   }
 
@@ -377,10 +381,12 @@ do_REP_single()
   {
     // Reset standard streams.
     if(!::freopen(nullptr, "r", stdin))
-      do_exit(exit_system_error, "! could not reopen standard input (errno was `%d`)\n", errno);
+      do_exit(exit_system_error,
+              "! could not reopen standard input (errno was `%d`)\n", errno);
 
     if(!::freopen(nullptr, "w", stdout))
-      do_exit(exit_system_error, "! could not reopen standard output (errno was `%d`)\n", errno);
+      do_exit(exit_system_error,
+              "! could not reopen standard output (errno was `%d`)\n", errno);
 
     // Read the next snippet.
     ::fputc('\n', stderr);
@@ -405,7 +411,8 @@ do_REP_single()
       if(ch == '\n') {
         // Check for termination.
         if(heredoc.empty()) {
-          // In line input mode, the current snippet is terminated by an unescaped line feed.
+          // In line input mode, the current snippet is terminated by an unescaped
+          // line feed.
           if(!escape)
             break;
 
@@ -414,8 +421,9 @@ do_REP_single()
             break;
         }
         else {
-          // In heredoc mode, the current snippet is terminated by a line consisting of the
-          // user-defined terminator, which is not part of the snippet and must be removed.
+          // In heredoc mode, the current snippet is terminated by a line consisting
+          // of the user-defined terminator, which is not part of the snippet and
+          // must be removed.
           if(code.ends_with(heredoc)) {
             code.erase(code.size() - heredoc.size());
             heredoc.clear();
@@ -428,8 +436,8 @@ do_REP_single()
         ::fprintf(stderr, "%*lu> ", indent, ++line);
       }
       else if(heredoc.empty()) {
-        // In line input mode, backslashes that precede line feeds are deleted. Those that
-        // do not precede line feeds are kept as is.
+        // In line input mode, backslashes that precede line feeds are deleted.
+        // Those that do not precede line feeds are kept as is.
         if(escape)
           code.push_back('\\');
 
@@ -444,11 +452,12 @@ do_REP_single()
       escape = false;
     }
     if(interrupted)
-      return ::fprintf(stderr, "! interrupted\n");
+      return ::fprintf(stderr, "! interrupted (type `:exit` to quit)\n");
 
     // Check for termination.
     if(::ferror(stdin))
-      do_exit(exit_system_error, "! could not read standard input (errno was `%d`)\n", errno);
+      do_exit(exit_system_error,
+              "! could not read standard input (errno was `%d`)\n", errno);
 
     if(::feof(stdin) && code.empty())
       do_exit(exit_success, "* have a nice day :)\n");
@@ -472,8 +481,10 @@ do_REP_single()
       script.reload_string(cmdline.path, 1, code);
     }
     catch(Parser_Error& except) {
-      // We only want to make another attempt in the case of absence of a semicolon at the end.
-      bool retry = (except.status() == parser_status_semicolon_expected) && (except.line() < 0);
+      // We only want to make another attempt in the case of absence of
+      // a semicolon at the end.
+      bool retry = (except.status() == parser_status_semicolon_expected)
+                   && (except.line() < 0);
       if(retry) {
         // Rewrite the potential expression to a `return` statement.
         // The first line is skipped.
@@ -483,7 +494,8 @@ do_REP_single()
           script.reload_string(cmdline.path, 0, code);
         }
         catch(Parser_Error&) {
-          // If we fail again, it is the previous exception that we are interested in.
+          // If we fail again, it is the previous exception that we are
+          // interested in.
           retry = false;
         }
       }
@@ -515,8 +527,8 @@ int
 do_repl_noreturn()
   {
     ::fprintf(stderr,
-//        1         2         3         4         5         6         7      |
-// 34567890123456789012345678901234567890123456789012345678901234567890123456|
+//       1         2         3         4         5         6         7      |
+// 4567890123456789012345678901234567890123456789012345678901234567890123456|
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 %s [built on %s]
 
@@ -525,14 +537,15 @@ do_repl_noreturn()
   All REPL commands start with a `:`. Type `:help` for instructions.
   Multiple lines may be joined together using trailing backslashes.
 )'''''''''''''''" """"""""""""""""""""""""""""""""""""""""""""""""""""""""+1,
-// 34567890123456789012345678901234567890123456789012345678901234567890123456|
-//        1         2         3         4         5         6         7      |
+// 4567890123456789012345678901234567890123456789012345678901234567890123456|
+//       1         2         3         4         5         6         7      |
       PACKAGE_STRING, build_time,
       ::setlocale(LC_ALL, nullptr)
     );
 
     // Trap Ctrl-C. Failure to set the signal handler is ignored.
-    // This also makes I/O functions fail immediately, instead of attempting to try again.
+    // This also makes I/O functions fail immediately, instead of attempting to
+    // try again.
     do_trap_sigint();
 
     // Set up runtime hooks. This is sticky.
@@ -540,7 +553,8 @@ do_repl_noreturn()
     script.open_options().verbose_single_step_traps = true;
 
     // In interactive mode (a.k.a. REPL mode), read user inputs in lines.
-    // Outputs from the script go into standard output. Others go into standard error.
+    // Outputs from the script go into standard output. Others go into standard
+    // error.
     for(;;)
       do_REP_single();
   }
@@ -598,14 +612,16 @@ main(int argc, char** argv)
     // Protect against stack overflows.
     global.set_recursion_base(&argc);
 
-    // Call other functions which are declared `noreturn`. `main()` itself is not `noreturn` so we
-    // don't get stupid warngings like 'function declared `noreturn` has a `return` statement'.
+    // Call other functions which are declared `noreturn`. `main()` itself is not
+    // `noreturn` so we don't get stupid warngings like 'function declared
+    // `noreturn` has a `return` statement'.
     if(cmdline.interactive)
       do_repl_noreturn();
     else
       do_single_noreturn();
   }
   catch(exception& stdex) {
-    // Print a message followed by the backtrace if it is available. There isn't much we can do.
+    // Print a message followed by the backtrace if it is available. There isn't
+    // much we can do.
     do_exit(exit_system_error, "! unhandled exception: %s\n", stdex.what());
   }
