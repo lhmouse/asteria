@@ -1640,27 +1640,28 @@ std_string_pcre_replace(V_string text, V_integer from, Opt_integer length, V_str
     auto sub_len = static_cast<size_t>(range.second - range.first);
 
     // Reserve resonable storage for the replaced string.
-    size_t output_len = replacement.size() + text.size() + 15;
+    size_t output_len = 1;
+#ifndef ROCKET_DEBUG
+    output_len += replacement.size() + text.size();
+#endif
     V_string output_str;
 
     // Try matching using default options.
     PCRE2_pcre pcre(pattern);
-    int err;
-    do {
-      output_str.assign(output_len, '*');
-
-      err = ::pcre2_substitute(pcre.code(), sub_ptr, sub_len, 0,
-                   PCRE2_SUBSTITUTE_EXTENDED | PCRE2_SUBSTITUTE_GLOBAL
-                     | PCRE2_SUBSTITUTE_OVERFLOW_LENGTH,
-                   pcre.match(), nullptr,
-                   reinterpret_cast<const uint8_t*>(replacement.data()), replacement.size(),
-                   reinterpret_cast<uint8_t*>(output_str.mut_data()), &output_len);
-    }
-    while(err == PCRE2_ERROR_NOMEMORY);
-
+  r:
+    output_str.assign(output_len, '*');
+    int err = ::pcre2_substitute(pcre.code(), sub_ptr, sub_len, 0,
+                    PCRE2_SUBSTITUTE_EXTENDED | PCRE2_SUBSTITUTE_GLOBAL
+                      | PCRE2_SUBSTITUTE_OVERFLOW_LENGTH,
+                    pcre.match(), nullptr,
+                    reinterpret_cast<const uint8_t*>(replacement.data()), replacement.size(),
+                    reinterpret_cast<uint8_t*>(output_str.mut_data()), &output_len);
     if(err < 0) {
       if(err == PCRE2_ERROR_NOMATCH)
         return ::std::move(text);
+
+      if(err == PCRE2_ERROR_NOMEMORY)
+        goto r;
 
       ASTERIA_THROW("Regular expression substitution failure: $1\n"
                     "[`pcre2_substitute()` failed: $2]",
