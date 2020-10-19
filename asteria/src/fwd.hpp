@@ -112,6 +112,9 @@ using ::rocket::end;
 using ::rocket::xswap;
 using ::rocket::swap;
 using ::rocket::size;
+using ::rocket::static_pointer_cast;
+using ::rocket::dynamic_pointer_cast;
+using ::rocket::const_pointer_cast;
 
 using ::rocket::nullopt;
 
@@ -267,7 +270,7 @@ constexpr
 rcptr<TargetT>
 unerase_pointer_cast(const rcfwdp<RealT>& ptr)  // like `static_pointer_cast`
   noexcept
-  { return ::rocket::static_pointer_cast<TargetT>(ptr);  }
+  { return static_pointer_cast<TargetT>(ptr);  }
 
 // Standard I/O synchronization
 struct StdIO_Sentry
@@ -463,7 +466,7 @@ get_opt()
     if(!this->m_sptr)
       this->do_throw_null_pointer();
 
-    auto tsptr = ::rocket::dynamic_pointer_cast<const OpaqueT>(this->m_sptr);
+    auto tsptr = dynamic_pointer_cast<const OpaqueT>(this->m_sptr);
     return tsptr;
   }
 
@@ -476,7 +479,7 @@ open_opt()
     if(!this->m_sptr)
       this->do_throw_null_pointer();
 
-    auto tsptr = ::rocket::dynamic_pointer_cast<OpaqueT>(this->m_sptr);
+    auto tsptr = dynamic_pointer_cast<OpaqueT>(this->m_sptr);
     if(tsptr.use_count() <= 2)
       return tsptr;
 
