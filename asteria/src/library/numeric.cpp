@@ -15,7 +15,8 @@ int64_t
 do_verify_bounds(int64_t lower, int64_t upper)
   {
     if(!(lower <= upper))
-      ASTERIA_THROW("Bounds not valid (`$1` is not less than or equal to `$2`)", lower, upper);
+      ASTERIA_THROW("Bounds not valid (`$1` is not less than or equal to `$2`)",
+                    lower, upper);
     return upper;
   }
 
@@ -23,15 +24,18 @@ double
 do_verify_bounds(double lower, double upper)
   {
     if(!::std::islessequal(lower, upper))
-      ASTERIA_THROW("Bounds not valid (`$1` is not less than or equal to `$2`)", lower, upper);
+      ASTERIA_THROW("Bounds not valid (`$1` is not less than or equal to `$2`)",
+                    lower, upper);
     return upper;
   }
 
 V_integer
 do_cast_to_integer(double value)
   {
-    if(!::std::islessequal(-0x1p63, value) || !::std::islessequal(value, 0x1p63 - 0x1p10))
-      ASTERIA_THROW("`real` value not representable as an `integer` (value `$1`)", value);
+    if(!(::std::islessequal(-0x1p63, value) &&
+         ::std::islessequal(value, 0x1p63 - 0x1p10)))
+      ASTERIA_THROW("`real` value not representable as an `integer` (value `$1`)",
+                    value);
     return V_integer(value);
   }
 
@@ -73,9 +77,9 @@ do_saturating_mul(int64_t lhs, int64_t rhs)
     auto m = lhs >> 63;
     auto alhs = (lhs ^ m) - m;
     auto srhs = (rhs ^ m) - m;
-    // `alhs` may only be positive here.
     if((srhs >= 0) ? (alhs > INT64_MAX / srhs) : (alhs > INT64_MIN / srhs))
       return (srhs >> 63) ^ INT64_MAX;
+
     return alhs * srhs;
   }
 
@@ -108,9 +112,11 @@ do_decompose_integer(uint8_t ebase, int64_t value)
     for(;;) {
       if(ireg == 0)
         break;
+
       auto next = ireg / ebase;
       if(ireg % ebase != 0)
         break;
+
       ireg = next;
       iexp++;
     }
@@ -122,11 +128,14 @@ do_append_exponent(V_string& text, ::rocket::ascii_numput& nump, char delim, int
   {
     // Write the delimiter.
     text.push_back(delim);
+
     // If the exponent is non-negative, ensure there is a plus sign.
     if(exp >= 0)
       text.push_back('+');
+
     // Format the integer. If the exponent is negative, a minus sign will have been added.
     nump.put_DI(exp, 2);
+
     // Append significant figures.
     text.append(nump.begin(), nump.end());
     return text;
@@ -140,7 +149,8 @@ V_integer
 std_numeric_abs(V_integer value)
   {
     if(value == INT64_MIN)
-      ASTERIA_THROW("Integer absolute value overflow (value `$1`)", value);
+      ASTERIA_THROW("Integer absolute value overflow (value `$1`)",
+                    value);
     return ::std::abs(value);
   }
 
@@ -209,7 +219,8 @@ std_numeric_max(cow_vector<Value> values)
       if(!res.is_null()) {
         auto cmp = res.compare(val);
         if(cmp == compare_unordered)
-          ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)", cmp, val);
+          ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)",
+                        cmp, val);
 
         if(cmp != compare_less)
           continue;
@@ -230,7 +241,8 @@ std_numeric_min(cow_vector<Value> values)
       if(!res.is_null()) {
         auto cmp = res.compare(val);
         if(cmp == compare_unordered)
-          ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)", cmp, val);
+          ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)",
+                        cmp, val);
 
         if(cmp != compare_greater)
           continue;

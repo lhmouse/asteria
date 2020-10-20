@@ -1606,7 +1606,8 @@ int64_t
 do_check_neg(int64_t rhs)
   {
     if(rhs == INT64_MIN)
-      ASTERIA_THROW("Integer negation overflow (operand was `$1`)", rhs);
+      ASTERIA_THROW("Integer negation overflow (operand was `$1`)",
+                    rhs);
     return -rhs;
   }
 
