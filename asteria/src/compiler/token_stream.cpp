@@ -210,17 +210,20 @@ do_collect_digits(cow_string& tstr, Line_Reader& reader, size_t& tlen, uint8_t m
   {
     for(;;) {
       char c = reader.peek(tlen);
+
+      // Skip a digit separator.
       if(c == '`') {
-        // Skip a digit separator.
-        tlen++;
+        tlen += 1;
         continue;
       }
+
+      // Stop at an unwanted character.
       if(!is_cctype(c, mask))
         break;
 
       // Collect a digit.
-      tstr.push_back(c);
-      tlen++;
+      tstr += c;
+      tlen += 1;
     }
     return tstr;
   }
@@ -296,7 +299,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool i
     // Check for a radix point. If one exists, the fractional part shall follow.
     if(reader.peek(tlen) == '.') {
       tstr += reader.peek(tlen);
-      tlen++;
+      tlen += 1;
 
       // Accept the fractional part.
       has_point = true;
@@ -306,12 +309,12 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool i
     // Check for the exponent.
     if(static_cast<uint8_t>(reader.peek(tlen) | 0x20) == expch) {
       tstr += reader.peek(tlen);
-      tlen++;
+      tlen += 1;
 
       // Check for an optional sign symbol.
       if(::rocket::is_any_of(reader.peek(tlen), { '+', '-' })) {
         tstr += reader.peek(tlen);
-        tlen++;
+        tlen += 1;
       }
 
       // Accept the exponent.
@@ -322,6 +325,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool i
     // Note, at the moment we make no use of such suffixes, so any suffix will
     // definitely cause parser errors.
     do_collect_digits(tstr, reader, tlen, cctype_alpha | cctype_digit);
+
     // Convert the token to a literal.
     // We always parse the literal as a floating-point number.
     ::rocket::ascii_numget numg;
@@ -339,6 +343,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool i
       // Try casting the value to an `integer`.
       Token::S_integer_literal xtoken;
       numg.cast_I(xtoken.val, INT64_MIN, INT64_MAX);
+
       // Check for errors. Note that integer casts never underflows.
       if(numg.overflowed())
         throw Parser_Error(parser_status_integer_literal_overflow, reader.tell(), tlen);
@@ -349,12 +354,14 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool i
       if(!numg)
         throw Parser_Error(parser_status_numeric_literal_invalid, reader.tell(), tlen);
 
+      // Accept the integral value.
       return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
     }
     else {
       // Try casting the value to a `real`.
       Token::S_real_literal xtoken;
       numg.cast_F(xtoken.val, -DBL_MAX, DBL_MAX);
+
       // Check for errors. Note that integer casts are never inexact.
       if(numg.overflowed())
         throw Parser_Error(parser_status_real_literal_overflow, reader.tell(), tlen);
@@ -365,6 +372,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool i
       if(!numg)
         throw Parser_Error(parser_status_numeric_literal_invalid, reader.tell(), tlen);
 
+      // Accept the real value.
       return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
     }
   }
@@ -461,12 +469,12 @@ constexpr s_punctuators[] =
 bool
 do_accept_punctuator(cow_vector<Token>& tokens, Line_Reader& reader)
   {
-#ifdef ROCKET_DEBUG
-    ROCKET_ASSERT(::std::is_sorted(begin(s_punctuators), end(s_punctuators), Prefix_Comparator()));
-#endif
     // For two elements X and Y, if X is in front of Y, then X is potential a prefix of Y.
     // Traverse the range backwards to prevent premature matches, as a token is defined to be
     // the longest valid character sequence.
+#ifdef ROCKET_DEBUG
+    ROCKET_ASSERT(::std::is_sorted(begin(s_punctuators), end(s_punctuators), Prefix_Comparator()));
+#endif
     auto range = ::std::equal_range(begin(s_punctuators), end(s_punctuators),
                                     reader.peek(), Prefix_Comparator());
     for(;;) {
@@ -508,7 +516,7 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
       if(next == 0)
         throw Parser_Error(parser_status_string_literal_unclosed, reader.tell(), tlen);
 
-      tlen++;
+      tlen += 1;
 
       // Check it.
       if(next == head) {
@@ -527,7 +535,7 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
       if(next == 0)
         throw Parser_Error(parser_status_escape_sequence_incomplete, reader.tell(), tlen);
 
-      tlen++;
+      tlen += 1;
 
       // Translate it.
       int xcnt = 0;
@@ -600,7 +608,7 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
             if(!is_cctype(c, cctype_xdigit))
               throw Parser_Error(parser_status_escape_sequence_invalid_hex, reader.tell(), tlen);
 
-            tlen++;
+            tlen += 1;
             // Accumulate this digit.
             cp *= 16;
             cp += static_cast<uint32_t>((c <= '9') ? (c - '0') : ((c | 0x20) - 'a' + 10));
@@ -702,10 +710,11 @@ do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Line_Reader& reader,
         break;
       if(!is_cctype(next, cctype_namei | cctype_digit))
         break;
-      tlen++;
+      tlen += 1;
     }
+
+    // Check for keywords.
     if(keywords_as_identifiers) {
-      // Do not check for identifiers.
       Token::S_identifier xtoken = { cow_string(reader.data(), tlen) };
       return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
     }
