@@ -205,6 +205,15 @@ do_may_infix_operators_follow(cow_vector<Token>& tokens)
     return true;
   }
 
+size_t
+do_mask_length(Line_Reader& reader, uint8_t mask)
+  {
+    size_t tlen = 0;
+    while(is_cctype(reader.peek(tlen), mask))
+      ++tlen;
+    return tlen;
+  }
+
 cow_string&
 do_collect_digits(cow_string& tstr, Line_Reader& reader, size_t& tlen, uint8_t mask)
   {
@@ -473,25 +482,26 @@ do_accept_punctuator(cow_vector<Token>& tokens, Line_Reader& reader)
     // Traverse the range backwards to prevent premature matches, as a token is defined to be
     // the longest valid character sequence.
 #ifdef ROCKET_DEBUG
-    ROCKET_ASSERT(::std::is_sorted(begin(s_punctuators), end(s_punctuators), Prefix_Comparator()));
+    ROCKET_ASSERT(::std::is_sorted(begin(s_punctuators), end(s_punctuators),
+                                        Prefix_Comparator()));
 #endif
-    auto range = ::std::equal_range(begin(s_punctuators), end(s_punctuators),
-                                    reader.peek(), Prefix_Comparator());
-    for(;;) {
-      if(range.first == range.second) {
-        // No matching punctuator has been found so far.
-        return false;
-      }
-      const auto& cur = range.second[-1];
-      // Has a match been found?
-      auto tlen = ::std::strlen(cur.first);
-      if((tlen <= reader.navail()) && (::std::memcmp(reader.data(), cur.first, tlen) == 0)) {
-        // A punctuator has been found.
-        Token::S_punctuator xtoken = { cur.second };
-        return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
-      }
-      range.second--;
+    auto r = ::std::equal_range(begin(s_punctuators), end(s_punctuators), reader.peek(),
+                                        Prefix_Comparator());
+    while(r.first != r.second) {
+      const auto& cur = *--(r.second);
+      size_t tlen = ::std::strlen(cur.first);
+      if(reader.navail() < tlen)
+        continue;
+
+      if(::std::memcmp(reader.data(), cur.first, tlen) != 0)
+        continue;
+
+      Token::S_punctuator xtoken = { cur.second };
+      return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
     }
+
+    // No punctuator has been accepted.
+    return false;
   }
 
 bool
@@ -702,41 +712,31 @@ do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Line_Reader& reader,
     if(!is_cctype(reader.peek(), cctype_namei))
       return false;
 
-    // Get the length of this identifier.
-    size_t tlen = 1;
-    for(;;) {
-      char next = reader.peek(tlen);
-      if(next == 0)
-        break;
-      if(!is_cctype(next, cctype_namei | cctype_digit))
-        break;
-      tlen += 1;
-    }
-
-    // Check for keywords.
-    if(keywords_as_identifiers) {
-      Token::S_identifier xtoken = { cow_string(reader.data(), tlen) };
-      return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
-    }
+    // Check for keywords if not otherwise disabled.
+    size_t tlen = do_mask_length(reader, cctype_namei | cctype_digit);
+    if(!keywords_as_identifiers) {
 #ifdef ROCKET_DEBUG
-    ROCKET_ASSERT(::std::is_sorted(begin(s_keywords), end(s_keywords), Prefix_Comparator()));
+      ROCKET_ASSERT(::std::is_sorted(begin(s_keywords), end(s_keywords),
+                                          Prefix_Comparator()));
 #endif
-    auto range = ::std::equal_range(begin(s_keywords), end(s_keywords),
-                                    reader.peek(), Prefix_Comparator());
-    for(;;) {
-      if(range.first == range.second) {
-        // No matching keyword has been found so far.
-        Token::S_identifier xtoken = { cow_string(reader.data(), tlen) };
-        return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
-      }
-      const auto& cur = range.first[0];
-      if((::std::strlen(cur.first) == tlen) && (::std::memcmp(reader.data(), cur.first, tlen) == 0)) {
-        // A keyword has been found.
+      auto r = ::std::equal_range(begin(s_keywords), end(s_keywords), reader.peek(),
+                                          Prefix_Comparator());
+      while(r.first != r.second) {
+        const auto& cur = *(r.first++);
+        if(::std::strlen(cur.first) != tlen)
+          continue;
+
+        if(::std::memcmp(reader.data(), cur.first, tlen) != 0)
+          continue;
+
         Token::S_keyword xtoken = { cur.second };
         return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
       }
-      range.first++;
     }
+
+    // Accept a plain identifier.
+    Token::S_identifier xtoken = { cow_string(reader.data(), tlen) };
+    return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
   }
 
 }  // namespace
