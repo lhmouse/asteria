@@ -26,7 +26,8 @@ namespace asteria {
 namespace {
 
 bool&
-do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code, Abstract_Context& ctx)
+do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code,
+                Abstract_Context& ctx)
   {
     for(size_t i = 0;  i < code.size();  ++i) {
       auto qnode = code[i].rebind_opt(ctx);
@@ -40,7 +41,8 @@ do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code, Abstract_Context& ctx)
   }
 
 bool&
-do_rebind_nodes(bool& dirty, cow_vector<cow_vector<AIR_Node>>& seqs, Abstract_Context& ctx)
+do_rebind_nodes(bool& dirty, cow_vector<cow_vector<AIR_Node>>& seqs,
+                Abstract_Context& ctx)
   {
     for(size_t k = 0;  k < seqs.size();  ++k) {
       for(size_t i = 0;  i < seqs[k].size();  ++i) {
@@ -68,7 +70,8 @@ do_forward_if_opt(bool dirty, XNodeT&& xnode)
 bool
 do_solidify_nodes(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
   {
-    bool r = ::rocket::all_of(code, [&](const AIR_Node& node) { return node.solidify(queue);  });
+    bool r = ::rocket::all_of(code,
+                 [&](const AIR_Node& node) { return node.solidify(queue);  });
     queue.shrink_to_fit();
     return r;
   }
@@ -102,13 +105,15 @@ do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVMC_Queue&
       ROCKET_ASSERT(status == air_status_next);
 
       // Read a value from the top reference and write it to the one beneath it.
-      ctx.stack().mut_back(1).dereference_mutable() = ctx.stack().back().dereference_readonly();
+      const auto& val = ctx.stack().back().dereference_readonly();
+      ctx.stack().mut_back(1).dereference_mutable() = val;
       ctx.stack().pop_back();
       return air_status_next;
     }
 
-    // Discard the top which will be overwritten anyway. Evaluate the subexpression.
-    // You must forward the status code as is, because PTCs may return `air_status_return_ref`.
+    // Discard the top which will be overwritten anyway, then evaluate the
+    // subexpression. The status code must be forwarded as is, because PTCs may
+    // return `air_status_return_ref`.
     ctx.stack().pop_back();
     return queue.execute(ctx);
   }
@@ -438,11 +443,13 @@ struct AIR_Traits_switch_statement
 
     static
     void
-    do_xsolidify_code(cow_vector<AVMC_Queue>& queues, const cow_vector<cow_vector<AIR_Node>>& seqs)
+    do_xsolidify_code(cow_vector<AVMC_Queue>& queues,
+                      const cow_vector<cow_vector<AIR_Node>>& seqs)
       {
         ROCKET_ASSERT(queues.empty());
         queues.reserve(seqs.size());
-        ::rocket::for_each(seqs, [&](const auto& code) { do_solidify_nodes(queues.emplace_back(), code);  });
+        ::rocket::for_each(seqs,
+             [&](const auto& code) { do_solidify_nodes(queues.emplace_back(), code);  });
       }
 
     static
@@ -469,9 +476,11 @@ struct AIR_Traits_switch_statement
         auto cond = ctx.stack().back().dereference_readonly();
         size_t bp = SIZE_MAX;
 
-        // This is different from the `switch` statement in C, where `case` labels must have constant operands.
+        // This is different from the `switch` statement in C, where `case` labels must
+        // have constant operands.
         for(size_t i = 0;  i < nclauses;  ++i) {
-          // This is a `default` clause if the condition is empty, and a `case` clause otherwise.
+          // This is a `default` clause if the condition is empty, and a `case` clause
+          // otherwise.
           if(sp.queues_labels[i].empty()) {
             if(bp != SIZE_MAX)
               ASTERIA_THROW("Multiple `default` clauses");
@@ -502,7 +511,8 @@ struct AIR_Traits_switch_statement
             do {
               // Execute the body.
               status = sp.queues_bodies[bp].execute(ctx_body);
-              if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch }))
+              if(::rocket::is_any_of(status, { air_status_break_unspec,
+                                               air_status_break_switch }))
                 break;
 
               if(status != air_status_next)
@@ -677,7 +687,8 @@ struct AIR_Traits_for_each_statement
 
               // Execute the loop body.
               status = do_execute_block(sp.queue_body, ctx_for);
-              if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
+              if(::rocket::is_any_of(status, { air_status_break_unspec,
+                                               air_status_break_for }))
                 break;
 
               if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
@@ -701,7 +712,8 @@ struct AIR_Traits_for_each_statement
 
               // Execute the loop body.
               status = do_execute_block(sp.queue_body, ctx_for);
-              if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
+              if(::rocket::is_any_of(status, { air_status_break_unspec,
+                                               air_status_break_for }))
                 break;
 
               if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
@@ -742,19 +754,22 @@ struct AIR_Traits_for_statement
     execute(Executive_Context& ctx, const Sparam_queues_4& sp)
       {
         // This is the same as the `for` statement in C.
-        // We have to create an outer context due to the fact that names declared in the first segment
-        // outlast every iteration.
+        // We have to create an outer context due to the fact that names declared in the
+        // first segment outlast every iteration.
         Executive_Context ctx_for(Executive_Context::M_plain(), ctx);
 
-        // Execute the loop initializer, which shall only be a definition or an expression statement.
+        // Execute the loop initializer, which shall only be a definition or an expression
+        // statement.
         auto status = sp.queues[0].execute(ctx_for);
         ROCKET_ASSERT(status == air_status_next);
         for(;;) {
           // Check the condition.
           status = sp.queues[1].execute(ctx_for);
           ROCKET_ASSERT(status == air_status_next);
+
           // This is a special case: If the condition is empty then the loop is infinite.
-          if(!ctx_for.stack().empty() && !ctx_for.stack().back().dereference_readonly().test())
+          if(!ctx_for.stack().empty() &&
+             !ctx_for.stack().back().dereference_readonly().test())
             break;
 
           // Execute the body.
@@ -798,12 +813,14 @@ struct AIR_Traits_try_statement
     execute(Executive_Context& ctx, const Sparam_try_catch& sp)
       ASTERIA_RUNTIME_TRY {
         // This is almost identical to JavaScript.
-        // Execute the `try` block. If no exception is thrown, this will have little overhead.
+        // Execute the `try` block. If no exception is thrown, this will have
+        // little overhead.
         auto status = do_execute_block(sp.queue_try, ctx);
         if(status != air_status_return_ref)
           return status;
 
-        // This must not be PTC'd, otherwise exceptions thrown from tail calls won't be caught.
+        // This must not be PTC'd, otherwise exceptions thrown from tail calls
+        // won't be caught.
         ctx.stack().mut_back().finish_call(ctx.global());
         return status;
       }
@@ -813,7 +830,8 @@ struct AIR_Traits_try_statement
         except.push_frame_try(sp.sloc_try);
 
         // This branch must be executed inside this `catch` block.
-        // User-provided bindings may obtain the current exception using `::std::current_exception`.
+        // User-provided bindings may obtain the current exception using
+        // `::std::current_exception`.
         Executive_Context ctx_catch(Executive_Context::M_plain(), ctx);
         AIR_Status status;
 
@@ -935,7 +953,8 @@ struct AIR_Traits_return_statement
     execute(Executive_Context& /*ctx*/, const AVMC_Queue::Uparam& up)
       {
         auto status = static_cast<AIR_Status>(up.p8[0]);
-        ROCKET_ASSERT(::rocket::is_any_of(status, { air_status_return_void, air_status_return_ref }));
+        ROCKET_ASSERT(::rocket::is_any_of(status, { air_status_return_void,
+                                                    air_status_return_ref }));
         return status;
       }
   };
@@ -1153,7 +1172,8 @@ struct AIR_Traits_push_local_reference
       {
         // Get the context.
         Executive_Context* qctx = &ctx;
-        ::rocket::ranged_for(UINT32_C(0), up.s32, [&](uint32_t) { qctx = qctx->get_parent_opt();  });
+        ::rocket::ranged_for(UINT32_C(0), up.s32,
+                             [&](uint32_t) { qctx = qctx->get_parent_opt();  });
         ROCKET_ASSERT(qctx);
 
         // Look for the name in the context.
@@ -1363,15 +1383,16 @@ do_function_call_common(Reference& self, const Source_Location& sloc, Executive_
     self = ::std::move(xref);
 
     // Force `air_status_return_ref` if control flow reaches the end of a function.
-    // Otherwise a null reference is returned instead of this PTC wrapper, which can then never be unpacked.
+    // Otherwise a null reference is returned instead of this PTC wrapper, which can then
+    // never be unpacked.
     return air_status_return_ref;
   }
 
 Reference_Stack&
 do_pop_positional_arguments_into_alt_stack(Executive_Context& ctx, size_t nargs)
   {
-    auto& stack = ctx.alt_stack();
-    stack.clear();
+    auto& alt_stack = ctx.alt_stack();
+    alt_stack.clear();
 
     for(size_t k = nargs - 1;  k != SIZE_MAX;  --k) {
       // Get an argument. Ensure it is dereferenceable.
@@ -1380,10 +1401,10 @@ do_pop_positional_arguments_into_alt_stack(Executive_Context& ctx, size_t nargs)
       arg.dereference_validate();
 
       // Push the argument verbatim.
-      stack.emplace_back(::std::move(arg));
+      alt_stack.emplace_back(::std::move(arg));
     }
     ctx.stack().pop_back(nargs);
-    return stack;
+    return alt_stack;
   }
 
 struct AIR_Traits_function_call
@@ -1430,7 +1451,7 @@ struct AIR_Traits_function_call
           qhooks->on_single_step_trap(sloc);
 
         // Pop arguments off the stack backwards.
-        auto& stack = do_pop_positional_arguments_into_alt_stack(ctx, up.s32);
+        auto& alt_stack = do_pop_positional_arguments_into_alt_stack(ctx, up.s32);
 
         // Copy the target, which shall be of type `function`.
         auto value = ctx.stack().back().dereference_readonly();
@@ -1439,7 +1460,7 @@ struct AIR_Traits_function_call
 
         return do_function_call_common(ctx.stack().mut_back().zoom_out(), sloc, ctx,
                                        value.as_function(), static_cast<PTC_Aware>(up.p8[0]),
-                                       ::std::move(stack));
+                                       ::std::move(alt_stack));
       }
   };
 
@@ -1594,7 +1615,8 @@ int64_t
 do_check_add(int64_t lhs, int64_t rhs)
   {
     if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs))
-      ASTERIA_THROW("Integer addition overflow (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Integer addition overflow (operands were `$1` and `$2`)",
+                    lhs, rhs);
     return lhs + rhs;
   }
 
@@ -1603,7 +1625,8 @@ int64_t
 do_check_sub(int64_t lhs, int64_t rhs)
   {
     if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs))
-      ASTERIA_THROW("Integer subtraction overflow (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Integer subtraction overflow (operands were `$1` and `$2`)",
+                    lhs, rhs);
     return lhs - rhs;
   }
 
@@ -1618,7 +1641,8 @@ do_check_mul(int64_t lhs, int64_t rhs)
       return (lhs ^ rhs) ^ 1;
 
     if((lhs == INT64_MIN) || (rhs == INT64_MIN))
-      ASTERIA_THROW("Integer multiplication overflow (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Integer multiplication overflow (operands were `$1` and `$2`)",
+                    lhs, rhs);
 
     if((lhs == -1) || (rhs == -1))
       return (lhs ^ rhs) + 1;
@@ -1628,7 +1652,9 @@ do_check_mul(int64_t lhs, int64_t rhs)
     auto alhs = (lhs ^ m) - m;  // may only be positive
     auto srhs = (rhs ^ m) - m;
     if((srhs >= 0) ? (alhs > INT64_MAX / srhs) : (alhs > INT64_MIN / srhs))
-      ASTERIA_THROW("Integer multiplication overflow (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Integer multiplication overflow (operands were `$1` and `$2`)",
+                    lhs, rhs);
+
     return alhs * srhs;
   }
 
@@ -1637,10 +1663,13 @@ int64_t
 do_check_div(int64_t lhs, int64_t rhs)
   {
     if(rhs == 0)
-      ASTERIA_THROW("Integer divided by zero (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Integer divided by zero (operands were `$1` and `$2`)",
+                    lhs, rhs);
 
     if((lhs == INT64_MIN) && (rhs == -1))
-      ASTERIA_THROW("Integer division overflow (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Integer division overflow (operands were `$1` and `$2`)",
+                    lhs, rhs);
+
     return lhs / rhs;
   }
 
@@ -1649,10 +1678,13 @@ int64_t
 do_check_mod(int64_t lhs, int64_t rhs)
   {
     if(rhs == 0)
-      ASTERIA_THROW("Integer divided by zero (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Integer divided by zero (operands were `$1` and `$2`)",
+                    lhs, rhs);
 
     if((lhs == INT64_MIN) && (rhs == -1))
-      ASTERIA_THROW("Integer division overflow (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Integer division overflow (operands were `$1` and `$2`)",
+                    lhs, rhs);
+
     return lhs % rhs;
   }
 
@@ -1661,11 +1693,13 @@ int64_t
 do_check_sll(int64_t lhs, int64_t rhs)
   {
     if(rhs < 0)
-      ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)",
+                    lhs, rhs);
 
     if(rhs >= 64)
       return 0;
-    return int64_t(uint64_t(lhs) << rhs);
+
+    return static_cast<int64_t>(static_cast<uint64_t>(lhs) << rhs);
   }
 
 ROCKET_CONST_FUNCTION
@@ -1673,11 +1707,13 @@ int64_t
 do_check_srl(int64_t lhs, int64_t rhs)
   {
     if(rhs < 0)
-      ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)",
+                    lhs, rhs);
 
     if(rhs >= 64)
       return 0;
-    return int64_t(uint64_t(lhs) >> rhs);
+
+    return static_cast<int64_t>(static_cast<uint64_t>(lhs) >> rhs);
   }
 
 ROCKET_CONST_FUNCTION
@@ -1685,21 +1721,25 @@ int64_t
 do_check_sla(int64_t lhs, int64_t rhs)
   {
     if(rhs < 0)
-      ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)",
+                    lhs, rhs);
 
     if(lhs == 0)
       return 0;
 
     if(rhs >= 64)
-      ASTERIA_THROW("Integer left shift overflow (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Integer left shift overflow (operands were `$1` and `$2`)",
+                    lhs, rhs);
 
     // Bits that will be shifted out must be all zeroes or all ones.
     auto bc = 63 - int(rhs);
     auto mask_out = uint64_t(lhs) >> bc << bc;
     auto mask_sbt = uint64_t(lhs >> 63) << bc;
     if(mask_out != mask_sbt)
-      ASTERIA_THROW("Integer left shift overflow (operands were `$1` and `$2`)", lhs, rhs);
-    return int64_t(uint64_t(lhs) << rhs);
+      ASTERIA_THROW("Integer left shift overflow (operands were `$1` and `$2`)",
+                    lhs, rhs);
+
+    return static_cast<int64_t>(static_cast<uint64_t>(lhs) << rhs);
   }
 
 ROCKET_CONST_FUNCTION
@@ -1707,7 +1747,8 @@ int64_t
 do_check_sra(int64_t lhs, int64_t rhs)
   {
     if(rhs < 0)
-      ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)",
+                    lhs, rhs);
 
     if(rhs >= 64)
       return lhs >> 63;
@@ -1719,8 +1760,10 @@ ROCKET_CONST_FUNCTION
 int64_t
 do_check_itrunc(double value)
   {
-    if(!::std::islessequal(-0x1p63, value) || !::std::islessequal(value, 0x1p63 - 0x1p10))
-      ASTERIA_THROW("Value not representable as an `integer` (operand was `$1`)", value);
+    if(!(::std::islessequal(-0x1p63, value) &&
+         ::std::islessequal(value, 0x1p63 - 0x1p10)))
+      ASTERIA_THROW("Value not representable as an integer (operand was `$1`)",
+                    value);
     return int64_t(value);
   }
 
@@ -1736,7 +1779,8 @@ do_string_dup(const cow_string& src, int64_t count)
       return res;
 
     if(nchars > res.max_size() / static_cast<uint64_t>(count))
-      ASTERIA_THROW("String length overflow (`$1` * `$2` > `$3`)", nchars, count, res.max_size());
+      ASTERIA_THROW("String length overflow (`$1` * `$2` > `$3`)",
+                    nchars, count, res.max_size());
 
     size_t times = static_cast<size_t>(count);
     if(nchars == 1) {
@@ -1751,8 +1795,8 @@ do_string_dup(const cow_string& src, int64_t count)
       // Make the first copy of the src string.
       ::std::memcpy(ptr, src.data(), nchars);
 
-      // Append the result string to itself, doubling its length, until more than half of
-      // the result string has been populated.
+      // Append the result string to itself, doubling its length, until more
+      // than half of the result string has been populated.
       for(; nchars <= res.size() / 2; nchars *= 2)
         ::std::memcpy(ptr + nchars, ptr, nchars);
 
@@ -1767,7 +1811,8 @@ cow_string
 do_string_sll(const cow_string& lhs, int64_t rhs)
   {
     if(rhs < 0)
-      ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)",
+                    lhs, rhs);
 
     cow_string res;
     res.append(lhs.size(), ' ');
@@ -1784,7 +1829,8 @@ cow_string
 do_string_srl(const cow_string& lhs, int64_t rhs)
   {
     if(rhs < 0)
-      ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)",
+                    lhs, rhs);
 
     cow_string res;
     res.append(lhs.size(), ' ');
@@ -1801,11 +1847,13 @@ cow_string
 do_string_sla(const cow_string& lhs, int64_t rhs)
   {
     if(rhs < 0)
-      ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)",
+                    lhs, rhs);
 
     cow_string res;
     if(static_cast<uint64_t>(rhs) >= res.max_size() - lhs.size())
-      ASTERIA_THROW("String length overflow (`$1` + `$2` > `$3`)", lhs.size(), rhs, res.max_size());
+      ASTERIA_THROW("String length overflow (`$1` + `$2` > `$3`)",
+                    lhs.size(), rhs, res.max_size());
 
     // Append spaces in the right and return the result.
     size_t count = static_cast<size_t>(rhs);
@@ -1817,7 +1865,8 @@ cow_string
 do_string_sra(const cow_string& lhs, int64_t rhs)
   {
     if(rhs < 0)
-      ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)", lhs, rhs);
+      ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)",
+                    lhs, rhs);
 
     cow_string res;
     if(static_cast<uint64_t>(rhs) >= lhs.size())
@@ -1932,7 +1981,8 @@ struct AIR_Traits_apply_operator_inc_post : AIR_Traits_apply_operator_common
             break;
 
           default:
-            ASTERIA_THROW("Postfix increment not applicable (operand was `$1`)", lhs);
+            ASTERIA_THROW("Postfix increment not applicable (operand was `$1`)",
+                          lhs);
         }
         ctx.stack().mut_back() = ::std::move(xref);
         return air_status_next;
@@ -1961,7 +2011,8 @@ struct AIR_Traits_apply_operator_dec_post : AIR_Traits_apply_operator_common
             break;
 
           default:
-            ASTERIA_THROW("Postfix decrement not applicable (operand was `$1`)", lhs);
+            ASTERIA_THROW("Postfix decrement not applicable (operand was `$1`)",
+                          lhs);
         }
         ctx.stack().mut_back() = ::std::move(xref);
         return air_status_next;
@@ -2040,7 +2091,8 @@ struct AIR_Traits_apply_operator_neg : AIR_Traits_apply_operator_common
             break;
 
           default:
-            ASTERIA_THROW("Prefix negation not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix negation not applicable (operand was `$1`)",
+                          rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -2069,12 +2121,14 @@ struct AIR_Traits_apply_operator_notb : AIR_Traits_apply_operator_common
             break;
 
           case vmask_string:
-            // Perform bitwise NOT operation on all bytes in the operand to create a temporary value.
+            // Perform bitwise NOT operation on all bytes in the operand to create
+            // a temporary value.
             rhs = do_string_notb(::std::move(rhs.open_string()));
             break;
 
           default:
-            ASTERIA_THROW("Prefix bitwise NOT not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix bitwise NOT not applicable (operand was `$1`)",
+                          rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -2121,7 +2175,8 @@ struct AIR_Traits_apply_operator_inc_pre : AIR_Traits_apply_operator_common
             break;
 
           default:
-            ASTERIA_THROW("Prefix increment not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix increment not applicable (operand was `$1`)",
+                          rhs);
         }
         return air_status_next;
       }
@@ -2148,7 +2203,8 @@ struct AIR_Traits_apply_operator_dec_pre : AIR_Traits_apply_operator_common
             break;
 
           default:
-            ASTERIA_THROW("Prefix decrement not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix decrement not applicable (operand was `$1`)",
+                          rhs);
         }
         return air_status_next;
       }
@@ -2198,7 +2254,8 @@ struct AIR_Traits_apply_operator_countof : AIR_Traits_apply_operator_common
             break;
 
           default:
-            ASTERIA_THROW("Prefix `countof` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `countof` not applicable (operand was `$1`)",
+                          rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -2246,7 +2303,8 @@ struct AIR_Traits_apply_operator_sqrt : AIR_Traits_apply_operator_common
             break;
 
           default:
-            ASTERIA_THROW("Prefix `__sqrt` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__sqrt` not applicable (operand was `$1`)",
+                          rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -2270,12 +2328,13 @@ struct AIR_Traits_apply_operator_isnan : AIR_Traits_apply_operator_common
             break;
 
           case vmask_real:
-            // Check whether the operand is a NaN, store the result in a temporary value.
+            // Check whether the operand is a NaN.
             rhs = ::std::isnan(rhs.as_real());
             break;
 
           default:
-            ASTERIA_THROW("Prefix `__isnan` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__isnan` not applicable (operand was `$1`)",
+                          rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -2299,12 +2358,13 @@ struct AIR_Traits_apply_operator_isinf : AIR_Traits_apply_operator_common
             break;
 
           case vmask_real:
-            // Check whether the operand is an infinity, store the result in a temporary value.
+            // Check whether the operand is an infinity.
             rhs = ::std::isinf(rhs.as_real());
             break;
 
           default:
-            ASTERIA_THROW("Prefix `__isinf` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__isinf` not applicable (operand was `$1`)",
+                          rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -2333,7 +2393,8 @@ struct AIR_Traits_apply_operator_abs : AIR_Traits_apply_operator_common
             break;
 
           default:
-            ASTERIA_THROW("Prefix `__abs` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__abs` not applicable (operand was `$1`)",
+                          rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -2362,7 +2423,8 @@ struct AIR_Traits_apply_operator_sign : AIR_Traits_apply_operator_common
             break;
 
           default:
-            ASTERIA_THROW("Prefix `__sign` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__sign` not applicable (operand was `$1`)",
+                          rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -2390,7 +2452,8 @@ struct AIR_Traits_apply_operator_round : AIR_Traits_apply_operator_common
             break;
 
           default:
-            ASTERIA_THROW("Prefix `__round` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__round` not applicable (operand was `$1`)",
+                          rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -2418,7 +2481,8 @@ struct AIR_Traits_apply_operator_floor : AIR_Traits_apply_operator_common
             break;
 
           default:
-            ASTERIA_THROW("Prefix `__floor` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__floor` not applicable (operand was `$1`)",
+                          rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -2446,7 +2510,8 @@ struct AIR_Traits_apply_operator_ceil : AIR_Traits_apply_operator_common
             break;
 
           default:
-            ASTERIA_THROW("Prefix `__ceil` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__ceil` not applicable (operand was `$1`)",
+                          rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -2474,7 +2539,8 @@ struct AIR_Traits_apply_operator_trunc : AIR_Traits_apply_operator_common
             break;
 
           default:
-            ASTERIA_THROW("Prefix `__trunc` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__trunc` not applicable (operand was `$1`)",
+                          rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -2502,7 +2568,8 @@ struct AIR_Traits_apply_operator_iround : AIR_Traits_apply_operator_common
             break;
 
           default:
-            ASTERIA_THROW("Prefix `__iround` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__iround` not applicable (operand was `$1`)",
+                          rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -2530,7 +2597,8 @@ struct AIR_Traits_apply_operator_ifloor : AIR_Traits_apply_operator_common
             break;
 
           default:
-            ASTERIA_THROW("Prefix `__ifloor` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__ifloor` not applicable (operand was `$1`)",
+                          rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -2558,7 +2626,8 @@ struct AIR_Traits_apply_operator_iceil : AIR_Traits_apply_operator_common
             break;
 
           default:
-            ASTERIA_THROW("Prefix `__iceil` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__iceil` not applicable (operand was `$1`)",
+                          rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -2586,7 +2655,8 @@ struct AIR_Traits_apply_operator_itrunc : AIR_Traits_apply_operator_common
             break;
 
           default:
-            ASTERIA_THROW("Prefix `__itrunc` not applicable (operand was `$1`)", rhs);
+            ASTERIA_THROW("Prefix `__itrunc` not applicable (operand was `$1`)",
+                          rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -2652,7 +2722,8 @@ struct AIR_Traits_apply_operator_cmp_lt : AIR_Traits_apply_operator_common
         // Throw an exception if the operands compare unequal.
         auto comp = lhs.compare(rhs);
         if(comp == compare_unordered)
-          ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)", lhs, rhs);
+          ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)",
+                        lhs, rhs);
         rhs = comp == compare_less;
 
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
@@ -2675,7 +2746,8 @@ struct AIR_Traits_apply_operator_cmp_gt : AIR_Traits_apply_operator_common
         // Throw an exception if the operands compare unequal.
         auto comp = lhs.compare(rhs);
         if(comp == compare_unordered)
-          ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)", lhs, rhs);
+          ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)",
+                        lhs, rhs);
         rhs = comp == compare_greater;
 
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
@@ -2698,7 +2770,8 @@ struct AIR_Traits_apply_operator_cmp_lte : AIR_Traits_apply_operator_common
         // Throw an exception if the operands compare unequal.
         auto comp = lhs.compare(rhs);
         if(comp == compare_unordered)
-          ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)", lhs, rhs);
+          ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)",
+                        lhs, rhs);
         rhs = comp != compare_greater;
 
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
@@ -2721,7 +2794,8 @@ struct AIR_Traits_apply_operator_cmp_gte : AIR_Traits_apply_operator_common
         // Throw an exception if the operands compare unequal.
         auto comp = lhs.compare(rhs);
         if(comp == compare_unordered)
-          ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)", lhs, rhs);
+          ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)",
+                        lhs, rhs);
         rhs = comp != compare_less;
 
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
@@ -2794,17 +2868,20 @@ struct AIR_Traits_apply_operator_add : AIR_Traits_apply_operator_common
 
           case vmask_integer | vmask_real:
           case vmask_real:
-            // For the `integer` and `real` types, return the sum of both operands as `real`.
+            // For the `integer` and `real` types, return the sum of both operands
+            // as `real`.
             rhs.mutate_into_real() += lhs.convert_to_real();
             break;
 
           case vmask_string:
-            // For the `string` type, concatenate the operands in lexical order to create a new string.
+            // For the `string` type, concatenate the operands in lexical order to
+            // create a new string.
             rhs.open_string().insert(0, lhs.as_string());
             break;
 
           default:
-            ASTERIA_THROW("Infix addition not applicable (operands were `$1` and `$2`)", lhs, rhs);
+            ASTERIA_THROW("Infix addition not applicable (operands were `$1` and `$2`)",
+                          lhs, rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -2836,12 +2913,14 @@ struct AIR_Traits_apply_operator_sub : AIR_Traits_apply_operator_common
 
           case vmask_integer | vmask_real:
           case vmask_real:
-            // For the `integer` and `real` types, return the difference of both operands as `real`.
+            // For the `integer` and `real` types, return the difference of both operands
+            // as `real`.
             rhs = lhs.convert_to_real() - rhs.convert_to_real();
             break;
 
           default:
-            ASTERIA_THROW("Infix subtraction not applicable (operands were `$1` and `$2`)", lhs, rhs);
+            ASTERIA_THROW("Infix subtraction not applicable (operands were `$1` and `$2`)",
+                          lhs, rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -2873,19 +2952,22 @@ struct AIR_Traits_apply_operator_mul : AIR_Traits_apply_operator_common
 
           case vmask_integer | vmask_real:
           case vmask_real:
-            // For the `integer` and `real` types, return the product of both operands as `real`.
+            // For the `integer` and `real` types, return the product of both operands
+            // as `real`.
             rhs.mutate_into_real() *= lhs.convert_to_real();
             break;
 
           case vmask_integer | vmask_string:
-            // If either operand has type `string` and the other has type `integer`, duplicate
-            // the string up to the specified number of times and return the result.
+            // If either operand has type `string` and the other has type `integer`,
+            // duplicate/ the string up to the specified number of times and return the
+            // result.
             rhs = lhs.is_string() ? do_string_dup(lhs.as_string(), rhs.as_integer())
                                   : do_string_dup(rhs.as_string(), lhs.as_integer());
             break;
 
           default:
-            ASTERIA_THROW("Infix multiplication not applicable (operands were `$1` and `$2`)", lhs, rhs);
+            ASTERIA_THROW("Infix multiplication not applicable (operands were `$1` and `$2`)",
+                          lhs, rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -2912,12 +2994,14 @@ struct AIR_Traits_apply_operator_div : AIR_Traits_apply_operator_common
 
           case vmask_integer | vmask_real:
           case vmask_real:
-            // For the `integer` and `real` types, return the quotient of both operands as `real`.
+            // For the `integer` and `real` types, return the quotient of both operands
+            // as `real`.
             rhs = lhs.convert_to_real() / rhs.convert_to_real();
             break;
 
           default:
-            ASTERIA_THROW("Infix division not applicable (operands were `$1` and `$2`)", lhs, rhs);
+            ASTERIA_THROW("Infix division not applicable (operands were `$1` and `$2`)",
+                          lhs, rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -2949,7 +3033,8 @@ struct AIR_Traits_apply_operator_mod : AIR_Traits_apply_operator_common
             break;
 
           default:
-            ASTERIA_THROW("Infix modulo not applicable (operands were `$1` and `$2`)", lhs, rhs);
+            ASTERIA_THROW("Infix modulo not applicable (operands were `$1` and `$2`)",
+                          lhs, rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -2969,23 +3054,28 @@ struct AIR_Traits_apply_operator_sll : AIR_Traits_apply_operator_common
         const auto& lhs = ctx.stack().back().dereference_readonly();
 
         if(!rhs.is_integer())
-          ASTERIA_THROW("Shift count not an integer (operands were `$1` and `$2`)", lhs, rhs);
+          ASTERIA_THROW("Shift count not an integer (operands were `$1` and `$2`)",
+                        lhs, rhs);
 
         switch(do_vmask_of(lhs)) {
           case vmask_integer:
-            // If the LHS operand has type `integer`, shift the LHS operand to the left by the number of bits
-            // specified by the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with zeroes.
+            // If the LHS operand has type `integer`, shift the LHS operand to the left
+            // by the number of bits specified by the RHS operand. Bits shifted out are
+            // discarded. Bits shifted in are filled with zeroes.
             rhs = do_check_sll(lhs.as_integer(), rhs.as_integer());
             break;
 
           case vmask_string:
-            // If the LHS operand has type `string`, fill space characters in the right and discard characters from
-            // the left. The number of bytes in the LHS operand will be preserved.
+            // If the LHS operand has type `string`, fill space characters in the right
+            // and discard characters from the left. The number of bytes in the LHS
+            // operand will be preserved.
             rhs = do_string_sll(lhs.as_string(), rhs.as_integer());
             break;
 
           default:
-            ASTERIA_THROW("Infix logical left shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+            ASTERIA_THROW(
+                "Infix logical left shift not applicable (operands were `$1` and `$2`)",
+                lhs, rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -3005,23 +3095,28 @@ struct AIR_Traits_apply_operator_srl : AIR_Traits_apply_operator_common
         const auto& lhs = ctx.stack().back().dereference_readonly();
 
         if(!rhs.is_integer())
-          ASTERIA_THROW("Shift count not an integer (operands were `$1` and `$2`)", lhs, rhs);
+          ASTERIA_THROW("Shift count not an integer (operands were `$1` and `$2`)",
+                        lhs, rhs);
 
         switch(do_vmask_of(lhs)) {
           case vmask_integer:
-            // If the LHS operand has type `integer`, shift the LHS operand to the right by the number of bits
-            // specified by the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with zeroes.
+            // If the LHS operand has type `integer`, shift the LHS operand to the right
+            // by the number of bits specified by the RHS operand. Bits shifted out are
+            // discarded. Bits shifted in are filled with zeroes.
             rhs = do_check_srl(lhs.as_integer(), rhs.as_integer());
             break;
 
           case vmask_string:
-            // If the LHS operand has type `string`, fill space characters in the left and discard characters from
-            // the right. The number of bytes in the LHS operand will be preserved.
+            // If the LHS operand has type `string`, fill space characters in the left
+            // and discard characters from the right. The number of bytes in the LHS
+            // operand will be preserved.
             rhs = do_string_srl(lhs.as_string(), rhs.as_integer());
             break;
 
           default:
-            ASTERIA_THROW("Infix logical right shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+            ASTERIA_THROW(
+                "Infix logical right shift not applicable (operands were `$1` and `$2`)",
+                lhs, rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -3041,14 +3136,16 @@ struct AIR_Traits_apply_operator_sla : AIR_Traits_apply_operator_common
         const auto& lhs = ctx.stack().back().dereference_readonly();
 
         if(!rhs.is_integer())
-          ASTERIA_THROW("Shift count not an integer (operands were `$1` and `$2`)", lhs, rhs);
+          ASTERIA_THROW("Shift count not an integer (operands were `$1` and `$2`)",
+                        lhs, rhs);
 
         switch(do_vmask_of(lhs)) {
           case vmask_integer:
-            // If the LHS operand is of type `integer`, shift the LHS operand to the left by the number of bits
-            // specified by the RHS operand. Bits shifted out that are equal to the sign bit are discarded. Bits
-            // shifted in are filled with zeroes. If any bits that are different from the sign bit would be shifted
-            // out, an exception is thrown.
+            // If the LHS operand is of type `integer`, shift the LHS operand to the
+            // left by the number of bits specified by the RHS operand. Bits shifted
+            // out that are equal to the sign bit are discarded. Bits shifted in are
+            // filled with zeroes. If any bits that are different from the sign bit
+            // would be shifted out, an exception is thrown.
             rhs = do_check_sla(lhs.as_integer(), rhs.as_integer());
             break;
 
@@ -3058,7 +3155,9 @@ struct AIR_Traits_apply_operator_sla : AIR_Traits_apply_operator_common
             break;
 
           default:
-            ASTERIA_THROW("Infix arithmetic left shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+            ASTERIA_THROW(
+                "Infix arithmetic left shift not applicable (operands were `$1` and `$2`)",
+                lhs, rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -3078,13 +3177,14 @@ struct AIR_Traits_apply_operator_sra : AIR_Traits_apply_operator_common
         const auto& lhs = ctx.stack().back().dereference_readonly();
 
         if(!rhs.is_integer())
-          ASTERIA_THROW("Shift count not an integer (operands were `$1` and `$2`)", lhs, rhs);
+          ASTERIA_THROW("Shift count not an integer (operands were `$1` and `$2`)",
+                        lhs, rhs);
 
         switch(do_vmask_of(lhs)) {
           case vmask_integer:
-            // If the LHS operand is of type `integer`, shift the LHS operand to the right by the number of bits
-            // specified by the RHS operand. Bits shifted out are discarded. Bits shifted in are filled with the
-            // sign bit.
+            // If the LHS operand is of type `integer`, shift the LHS operand to the
+            // right by the number of bits specified by the RHS operand. Bits shifted
+            // out are discarded. Bits shifted in are filled with the sign bit.
             rhs = do_check_sra(lhs.as_integer(), rhs.as_integer());
             break;
 
@@ -3094,7 +3194,9 @@ struct AIR_Traits_apply_operator_sra : AIR_Traits_apply_operator_common
             break;
 
           default:
-            ASTERIA_THROW("Infix arithmetic right shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+            ASTERIA_THROW(
+                "Infix arithmetic right shift not applicable (operands were `$1` and `$2`)",
+                lhs, rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -3131,7 +3233,8 @@ struct AIR_Traits_apply_operator_andb : AIR_Traits_apply_operator_common
             break;
 
           default:
-            ASTERIA_THROW("Infix bitwise AND not applicable (operands were `$1` and `$2`)", lhs, rhs);
+            ASTERIA_THROW("Infix bitwise AND not applicable (operands were `$1` and `$2`)",
+                          lhs, rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -3168,7 +3271,8 @@ struct AIR_Traits_apply_operator_orb : AIR_Traits_apply_operator_common
             break;
 
           default:
-            ASTERIA_THROW("Infix bitwise OR not applicable (operands were `$1` and `$2`)", lhs, rhs);
+            ASTERIA_THROW("Infix bitwise OR not applicable (operands were `$1` and `$2`)",
+                          lhs, rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -3205,7 +3309,8 @@ struct AIR_Traits_apply_operator_xorb : AIR_Traits_apply_operator_common
             break;
 
           default:
-            ASTERIA_THROW("Infix bitwise XOR not applicable (operands were `$1` and `$2`)", lhs, rhs);
+            ASTERIA_THROW("Infix bitwise XOR not applicable (operands were `$1` and `$2`)",
+                          lhs, rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -3247,11 +3352,14 @@ struct AIR_Traits_apply_operator_fma : AIR_Traits_apply_operator_common
           case vmask_integer | vmask_real:
           case vmask_real:
             // Calculate the fused multiply-add result of the operands.
-            rhs = ::std::fma(lhs.convert_to_real(), mid.convert_to_real(), rhs.convert_to_real());
+            rhs = ::std::fma(lhs.convert_to_real(), mid.convert_to_real(),
+                             rhs.convert_to_real());
             break;
 
           default:
-            ASTERIA_THROW("Fused multiply-add not applicable (operands were `$1`, `$2` and `$3`)", lhs, mid, rhs);
+            ASTERIA_THROW(
+                "Fused multiply-add not applicable (operands were `$1`, `$2` and `$3`)",
+                lhs, mid, rhs);
         }
         do_set_temporary(ctx, up.p8[0], ::std::move(xref));
         return air_status_next;
@@ -3324,7 +3432,9 @@ struct AIR_Traits_unpack_struct_array
         // Make sure it is really an `array`.
         V_array arr;
         if(!val.is_null() && !val.is_array())
-          ASTERIA_THROW("Invalid argument for structured array binding (initializer was `$1`)", val);
+          ASTERIA_THROW(
+              "Invalid argument for structured array binding (value was `$1`)",
+              val);
 
         if(val.is_array())
           arr = ::std::move(val.open_array());
@@ -3378,7 +3488,8 @@ struct AIR_Traits_unpack_struct_object
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const cow_vector<phsh_string>& keys)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up,
+            const cow_vector<phsh_string>& keys)
       {
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this function.
@@ -3388,7 +3499,9 @@ struct AIR_Traits_unpack_struct_object
         // Make sure it is really an `object`.
         V_object obj;
         if(!val.is_null() && !val.is_object())
-          ASTERIA_THROW("Invalid argument for structured object binding (initializer was `$1`)", val);
+          ASTERIA_THROW(
+              "Invalid argument for structured object binding (value was `$1`)",
+              val);
 
         if(val.is_object())
           obj = ::std::move(val.open_object());
@@ -3445,7 +3558,8 @@ struct AIR_Traits_define_null_variable
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Sparam_sloc_name& sp)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up,
+            const Sparam_sloc_name& sp)
       {
         // Allocate an uninitialized variable.
         auto gcoll = ctx.global().genius_collector();
@@ -3529,7 +3643,8 @@ struct AIR_Traits_variadic_call
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Source_Location& sloc)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up,
+            const Source_Location& sloc)
       {
         // Check for stack overflows.
         const auto sentry = ctx.global().copy_recursion_sentry();
@@ -3539,8 +3654,8 @@ struct AIR_Traits_variadic_call
           qhooks->on_single_step_trap(sloc);
 
         // Initialize arguments.
-        auto& stack = ctx.alt_stack();
-        stack.clear();
+        auto& alt_stack = ctx.alt_stack();
+        alt_stack.clear();
         auto value = ctx.stack().back().dereference_readonly();
         switch(weaken_enum(value.type())) {
           case type_null:
@@ -3553,7 +3668,7 @@ struct AIR_Traits_variadic_call
             // Push all arguments backwards as temporaries.
             for(auto it = vals.mut_rbegin();  it != vals.rend();  ++it) {
               Reference::S_temporary xref = { ::std::move(*it) };
-              stack.emplace_back(::std::move(xref));
+              alt_stack.emplace_back(::std::move(xref));
             }
             break;
           }
@@ -3562,10 +3677,11 @@ struct AIR_Traits_variadic_call
             const auto gfunc = ::std::move(value.open_function());
             ctx.stack().mut_back().zoom_out();
 
-            // Pass an empty argument list to get the number of arguments to generate.
+            // Pass an empty argument stack to get the number of arguments to generate.
             // This invalidates the `self` reference so we have to copy it first.
             ctx.stack().emplace_back(ctx.stack().back());
-            do_invoke_nontail(ctx.stack().mut_back(), sloc, ctx, gfunc, ::std::move(stack));
+            do_invoke_nontail(ctx.stack().mut_back(), sloc, ctx, gfunc,
+                              ::std::move(alt_stack));
             value = ctx.stack().back().dereference_readonly();
             ctx.stack().pop_back();
 
@@ -3575,7 +3691,8 @@ struct AIR_Traits_variadic_call
 
             int64_t nvargs = value.as_integer();
             if((nvargs < 0) || (nvargs > INT_MAX))
-              ASTERIA_THROW("Number of variadic arguments not acceptable (value `$1`)", nvargs);
+              ASTERIA_THROW("Number of variadic arguments not acceptable (value `$1`)",
+                            nvargs);
 
             // Prepare `self` references for all upcoming  calls.
             for(int64_t k = 0;  k < nvargs;  ++k)
@@ -3585,21 +3702,21 @@ struct AIR_Traits_variadic_call
             // The top is the first argument.
             for(int64_t k = 0;  k < nvargs;  ++k) {
               // Initialize arguments for the generator function.
-              stack.clear();
+              alt_stack.clear();
               Reference::S_constant xref = { k };
-              stack.emplace_back(::std::move(xref));
+              alt_stack.emplace_back(::std::move(xref));
 
               // Generate an argument. Ensure it is dereferenceable.
               auto& arg = ctx.stack().mut_back(static_cast<size_t>(k));
-              do_invoke_nontail(arg, sloc, ctx, gfunc, ::std::move(stack));
+              do_invoke_nontail(arg, sloc, ctx, gfunc, ::std::move(alt_stack));
               arg.dereference_validate();
             }
 
             // Pop arguments and re-push them into the alternative stack.
             // This reverses all arguments so the top will be the last argument.
-            stack.clear();
+            alt_stack.clear();
             for(int64_t k = 0;  k < nvargs;  ++k) {
-              stack.emplace_back(::std::move(ctx.stack().mut_back()));
+              alt_stack.emplace_back(::std::move(ctx.stack().mut_back()));
               ctx.stack().pop_back();
             }
             break;
@@ -3617,7 +3734,7 @@ struct AIR_Traits_variadic_call
 
         return do_function_call_common(ctx.stack().mut_back().zoom_out(), sloc, ctx,
                                        value.as_function(), static_cast<PTC_Aware>(up.p8[0]),
-                                       ::std::move(stack));
+                                       ::std::move(alt_stack));
       }
   };
 
@@ -3710,12 +3827,13 @@ struct AIR_Traits_import_call
 
         // Pop arguments off the stack backwards.
         ROCKET_ASSERT(up.s32 != 0);
-        auto& stack = do_pop_positional_arguments_into_alt_stack(ctx, up.s32 - 1);
+        auto& alt_stack = do_pop_positional_arguments_into_alt_stack(ctx, up.s32 - 1);
 
         // Copy the filename, which shall be of type `string`.
         auto value = ctx.stack().back().dereference_readonly();
         if(!value.is_string())
-          ASTERIA_THROW("Invalid path specified for `import` (value `$1` not a string)", value);
+          ASTERIA_THROW("Invalid path specified for `import` (value `$1` not a string)",
+                        value);
 
         auto path = value.as_string();
         if(path.empty())
@@ -3728,7 +3846,8 @@ struct AIR_Traits_import_call
           path.append(value.as_string());
         }
 
-        auto abspath = ::rocket::make_unique_handle(::realpath(path.safe_c_str(), nullptr), ::free);
+        auto abspath = ::rocket::make_unique_handle(
+                             ::realpath(path.safe_c_str(), nullptr), ::free);
         if(!abspath)
           ASTERIA_THROW("Could not open script file '$2'\n"
                         "[`realpath()` failed: $1]",
@@ -3758,9 +3877,11 @@ struct AIR_Traits_import_call
         // Instantiate the function.
         AIR_Optimizer optmz(sp.opts);
         optmz.reload(nullptr, cow_vector<phsh_string>(1, ::rocket::sref("...")), stmtq);
-        auto qtarget = optmz.create_function(Source_Location(path, 0, 0), ::rocket::sref("[file scope]"));
+        auto qtarget = optmz.create_function(
+                          Source_Location(path, 0, 0), ::rocket::sref("[file scope]"));
 
-        return do_function_call_common(self, sp.sloc, ctx, qtarget, ptc_aware_none, ::std::move(stack));
+        return do_function_call_common(self, sp.sloc, ctx, qtarget,
+                                       ptc_aware_none, ::std::move(alt_stack));
       }
   };
 
@@ -3788,16 +3909,18 @@ struct AIR_Traits_break_or_continue
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Source_Location& sloc)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up,
+            const Source_Location& sloc)
       {
         Reference::S_jump_src xref = { sloc };
         ctx.stack().emplace_back(::std::move(xref));
 
         auto status = static_cast<AIR_Status>(up.p8[0]);
-        ROCKET_ASSERT(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch,
-                                                    air_status_break_while, air_status_break_for,
-                                                    air_status_continue_unspec, air_status_continue_while,
-                                                    air_status_continue_for }));
+        ROCKET_ASSERT(::rocket::is_any_of(status,
+                           { air_status_break_unspec, air_status_break_switch,
+                             air_status_break_while, air_status_break_for,
+                             air_status_continue_unspec, air_status_continue_while,
+                             air_status_continue_for }));
         return status;
       }
   };
@@ -3865,7 +3988,8 @@ struct AIR_Traits_initialize_reference
   };
 
 // These are helper type traits.
-// Depending on the existence of Uparam, Sparam and Symbols, the code will look very different.
+// Depending on the existence of Uparam, Sparam and Symbols, the code will look very
+// different.
 
 // check for `make_uparam`
 template<typename TraitsT, typename XNodeT, typename = void>
@@ -3875,7 +3999,8 @@ struct Uparam_of
 
 template<typename TraitsT, typename XNodeT>
 struct Uparam_of<TraitsT, XNodeT, ROCKET_VOID_T(decltype(&TraitsT::make_uparam))>
-  : ::std::decay<decltype(TraitsT::make_uparam(::std::declval<bool&>(), ::std::declval<const XNodeT&>()))>
+  : ::std::decay<decltype(TraitsT::make_uparam(::std::declval<bool&>(),
+                                               ::std::declval<const XNodeT&>()))>
   { };
 
 // check for `make_sparam`
@@ -3886,7 +4011,8 @@ struct Sparam_of
 
 template<typename TraitsT, typename XNodeT>
 struct Sparam_of<TraitsT, XNodeT, ROCKET_VOID_T(decltype(&TraitsT::make_sparam))>
-  : ::std::decay<decltype(TraitsT::make_sparam(::std::declval<bool&>(), ::std::declval<const XNodeT&>()))>
+  : ::std::decay<decltype(TraitsT::make_sparam(::std::declval<bool&>(),
+                                               ::std::declval<const XNodeT&>()))>
   { };
 
 // check for `make_symbols`
@@ -3954,7 +4080,8 @@ struct Enumerator_of<SparamT, ROCKET_VOID_T(decltype(&SparamT::enumerate_variabl
   };
 
 // Finally...
-template<typename TraitsT, typename XNodeT, typename UparamT, typename SparamT, typename SymbolT>
+template<typename TraitsT, typename XNodeT, typename UparamT, typename SparamT,
+         typename SymbolT>
 struct AVMC_Appender
   {
     static
@@ -4241,7 +4368,8 @@ rebind_opt(Abstract_Context& ctx)
         // Get the context.
         // Don't bind references in analytic contexts.
         Abstract_Context* qctx = &ctx;
-        ::rocket::ranged_for(uint32_t(0), altr.depth, [&](uint32_t) { qctx = qctx->get_parent_opt();  });
+        ::rocket::ranged_for(UINT32_C(0), altr.depth,
+                             [&](uint32_t) { qctx = qctx->get_parent_opt();  });
         ROCKET_ASSERT(qctx);
         if(qctx->is_analytic())
           return nullopt;
