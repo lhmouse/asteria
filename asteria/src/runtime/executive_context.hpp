@@ -20,6 +20,7 @@ class Executive_Context
     // so they are not passed here and there upon each native call.
     Global_Context* m_global;
     Reference_Stack* m_stack;
+    Reference_Stack* m_alt_stack;  // for nested calls
 
     cow_bivector<Source_Location, AVMC_Queue> m_defer;
     rcptr<Variadic_Arguer> m_zvarg;
@@ -30,16 +31,18 @@ class Executive_Context
     // Its parent context shall outlast itself.
     Executive_Context(M_plain, Executive_Context& parent)
       : m_parent_opt(::std::addressof(parent)),
-        m_global(parent.m_global), m_stack(parent.m_stack)
+        m_global(parent.m_global), m_stack(parent.m_stack),
+        m_alt_stack(parent.m_alt_stack)
       { }
 
     // A defer context is used to evaluate deferred expressions.
     // They are evaluated in separated contexts, as in case of proper tail calls,
     // contexts of enclosing function will have been destroyed.
     Executive_Context(M_defer, Global_Context& global, Reference_Stack& stack,
+                      Reference_Stack& alt_stack,
                       cow_bivector<Source_Location, AVMC_Queue>&& defer)
       : m_parent_opt(),
-        m_global(::std::addressof(global)), m_stack(::std::addressof(stack)),
+        m_global(&global), m_stack(&stack), m_alt_stack(&alt_stack),
         m_defer(::std::move(defer))
       { }
 
@@ -47,7 +50,7 @@ class Executive_Context
     // The caller shall define a global context and evaluation stack, both of which
     // shall outlast this context.
     Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
-                      const rcptr<Variadic_Arguer>& zvarg,
+                      Reference_Stack& alt_stack, const rcptr<Variadic_Arguer>& zvarg,
                       const cow_vector<phsh_string>& params, Reference&& self);
 
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Executive_Context);
@@ -87,6 +90,11 @@ class Executive_Context
     stack()
       const noexcept
       { return *(this->m_stack);  }
+
+    Reference_Stack&
+    alt_stack()
+      const noexcept
+      { return *(this->m_alt_stack);  }
 
     // Defer an expression which will be evaluated at scope exit.
     // The result of such expressions are discarded.

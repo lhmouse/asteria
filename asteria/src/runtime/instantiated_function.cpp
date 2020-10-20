@@ -49,8 +49,9 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
   const
   {
     // Create the stack and context for this function.
+    Reference_Stack alt_stack;
     Executive_Context ctx_func(Executive_Context::M_function(), global, stack,
-                               this->m_zvarg, this->m_params, ::std::move(self));
+                               alt_stack, this->m_zvarg, this->m_params, ::std::move(self));
     AIR_Status status;
 
     // Execute the function body.

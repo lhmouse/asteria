@@ -1367,10 +1367,12 @@ do_function_call_common(Reference& self, const Source_Location& sloc, Executive_
     return air_status_return_ref;
   }
 
-Reference_Stack
-do_pop_positional_arguments(Executive_Context& ctx, size_t nargs)
+Reference_Stack&
+do_pop_positional_arguments_into_alt_stack(Executive_Context& ctx, size_t nargs)
   {
-    Reference_Stack stack;
+    auto& stack = ctx.alt_stack();
+    stack.clear();
+
     for(size_t k = nargs - 1;  k != SIZE_MAX;  --k) {
       // Get an argument. Ensure it is dereferenceable.
       ROCKET_ASSERT(k < ctx.stack().size());
@@ -1428,7 +1430,7 @@ struct AIR_Traits_function_call
           qhooks->on_single_step_trap(sloc);
 
         // Pop arguments off the stack backwards.
-        auto args = do_pop_positional_arguments(ctx, up.s32);
+        auto& stack = do_pop_positional_arguments_into_alt_stack(ctx, up.s32);
 
         // Copy the target, which shall be of type `function`.
         auto value = ctx.stack().back().dereference_readonly();
@@ -1437,7 +1439,7 @@ struct AIR_Traits_function_call
 
         return do_function_call_common(ctx.stack().mut_back().zoom_out(), sloc, ctx,
                                        value.as_function(), static_cast<PTC_Aware>(up.p8[0]),
-                                       ::std::move(args));
+                                       ::std::move(stack));
       }
   };
 
@@ -3692,7 +3694,7 @@ struct AIR_Traits_import_call
 
         // Pop arguments off the stack backwards.
         ROCKET_ASSERT(up.s32 != 0);
-        auto args = do_pop_positional_arguments(ctx, up.s32 - 1);
+        auto& stack = do_pop_positional_arguments_into_alt_stack(ctx, up.s32 - 1);
 
         // Copy the filename, which shall be of type `string`.
         auto value = ctx.stack().back().dereference_readonly();
@@ -3716,12 +3718,15 @@ struct AIR_Traits_import_call
                         "[`realpath()` failed: $1]",
                         format_errno(errno), path);
 
+        // Update the first argument to `import` if it was passed by reference.
         path.assign(abspath);
 
-        // Update the first argument to `import` if it was passed by reference.
         auto& self = ctx.stack().mut_back();
         if(self.is_lvalue())
           self.dereference_mutable() = path;
+
+        // `this` is null for imported scripts.
+        self = Reference::S_constant();
 
         // Compile the script file into a function object.
         Loader_Lock::Unique_Stream strm;
@@ -3739,10 +3744,7 @@ struct AIR_Traits_import_call
         optmz.reload(nullptr, cow_vector<phsh_string>(1, ::rocket::sref("...")), stmtq);
         auto qtarget = optmz.create_function(Source_Location(path, 0, 0), ::rocket::sref("[file scope]"));
 
-        // `this` is null for imported scripts.
-        self = Reference::S_constant();
-
-        return do_function_call_common(self, sp.sloc, ctx, qtarget, ptc_aware_none, ::std::move(args));
+        return do_function_call_common(self, sp.sloc, ctx, qtarget, ptc_aware_none, ::std::move(stack));
       }
   };
 

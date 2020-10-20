@@ -14,10 +14,10 @@ namespace asteria {
 
 Executive_Context::
 Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
-                  const rcptr<Variadic_Arguer>& zvarg,
+                  Reference_Stack& alt_stack, const rcptr<Variadic_Arguer>& zvarg,
                   const cow_vector<phsh_string>& params, Reference&& self)
   : m_parent_opt(),
-    m_global(::std::addressof(global)), m_stack(::std::addressof(stack)),
+    m_global(&global), m_stack(&stack), m_alt_stack(&alt_stack),
     m_zvarg(zvarg)
   {
     // Set the `this` reference.

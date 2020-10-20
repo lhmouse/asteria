@@ -12,6 +12,7 @@
 #include "ptc_arguments.hpp"
 #include "enums.hpp"
 #include "../llds/avmc_queue.hpp"
+#include "../llds/reference_stack.hpp"
 #include "../util.hpp"
 
 namespace asteria {
@@ -64,6 +65,7 @@ finish_call(Global_Context& global)
     cow_vector<rcptr<PTC_Arguments>> frames;
     rcptr<PTC_Arguments> ptca;
     int ptc_conj = ptc_aware_by_ref;
+    Reference_Stack alt_stack;
 
     ASTERIA_RUNTIME_TRY {
       // Unpack all frames recursively.
@@ -99,7 +101,7 @@ finish_call(Global_Context& global)
         // Evaluate deferred expressions if any.
         if(ptca->get_defer().size())
           Executive_Context(Executive_Context::M_defer(), global, ptca->open_stack(),
-                            ::std::move(ptca->open_defer()))
+                            alt_stack, ::std::move(ptca->open_defer()))
             .on_scope_exit(air_status_next);
 
         // Call the hook function if any.
@@ -124,7 +126,7 @@ finish_call(Global_Context& global)
         // Evaluate deferred expressions if any.
         if(ptca->get_defer().size())
           Executive_Context(Executive_Context::M_defer(), global, ptca->open_stack(),
-                            ::std::move(ptca->open_defer()))
+                            alt_stack, ::std::move(ptca->open_defer()))
             .on_scope_exit(except);
 
         // Push the caller.
