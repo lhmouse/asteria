@@ -101,8 +101,8 @@ enum Keyword : uint8_t
     keyword_null      = 19,
     keyword_true      = 20,
     keyword_false     = 21,
-    keyword_nan       = 22,
-    keyword_infinity  = 23,
+    keyword_import    = 22,
+    keyword_ref       = 23,
     keyword_this      = 24,
     keyword_unset     = 25,
     keyword_countof   = 26,
@@ -127,8 +127,6 @@ enum Keyword : uint8_t
     keyword_fma       = 45,  // __fma
     keyword_global    = 46,  // __global
     keyword_vcall     = 47,  // __vcall
-    keyword_import    = 48,  // import
-    keyword_ref       = 49,
   };
 
 ROCKET_CONST_FUNCTION

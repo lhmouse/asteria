@@ -261,11 +261,11 @@ stringify_keyword(Keyword kwrd)
       case keyword_false:
         return "false";
 
-      case keyword_nan:
-        return "nan";
+      case keyword_import:
+        return "import";
 
-      case keyword_infinity:
-        return "infinity";
+      case keyword_ref:
+        return "ref";
 
       case keyword_this:
         return "this";
@@ -338,12 +338,6 @@ stringify_keyword(Keyword kwrd)
 
       case keyword_vcall:
         return "__vcall";
-
-      case keyword_import:
-        return "import";
-
-      case keyword_ref:
-        return "ref";
 
       default:
         return "[unknown keyword]";

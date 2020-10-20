@@ -7,7 +7,7 @@ literal ::=
 	keyword-literal | string-literal | numeric-literal
 
 keyword-literal ::=
-	"null" | "false" | "true" | "nan" | "infinity"
+	"null" | "false" | "true"
 
 string-literal ::=
 	( escape-string-literal | noescape-string-literal ) string-literal-add-opt
@@ -22,10 +22,14 @@ string-literal-add-opt ::=
 	string-literal | ""
 
 numeric-literal ::=
-	number-sign-opt ( binary-literal | decimal-literal | hexadecimal-literal ) exponent-suffix-opt
+	number-sign-opt unsigned-numeric-literal
 
 number-sign-opt ::=
 	PCRE([+-]?)
+
+unsigned-numeric-literal ::=
+	"nan" | "NaN" | "infinity" | "Infinity" |
+	( binary-literal | decimal-literal | hexadecimal-literal ) exponent-suffix-opt
 
 binary-literal ::=
 	PCRE(0[bB]([01]`?)+(\.([01]`?)+))

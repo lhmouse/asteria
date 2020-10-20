@@ -504,32 +504,9 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
 
       switch(weaken_enum(qtok->index())) {
         case Token::index_punctuator: {
-          // Accept a `+`, `-`, `[` or `{`.
+          // Accept an `[` or `{`.
           auto punct = qtok->as_punctuator();
           switch(weaken_enum(punct)) {
-            case punctuator_add:
-            case punctuator_sub: {
-              cow_string name;
-              qtok = tstrm.peek_opt(1);
-              if(qtok && qtok->is_identifier())
-                name = qtok->as_identifier();
-
-              // Only `Infinity` and `NaN` may follow.
-              // Note that the tokenizer will have merged sign symbols into adjacent number
-              // literals.
-              if(::rocket::is_none_of(name, { "Infinity", "NaN" }))
-                throw Parser_Error(parser_status_expression_expected, tstrm);
-
-              // Accept a special numeric value.
-              double sign = (punct == punctuator_add) - 1;
-              double real = (name[0] == 'I') ? ::std::numeric_limits<double>::infinity()
-                                             : ::std::numeric_limits<double>::quiet_NaN();
-
-              value = ::std::copysign(real, sign);
-              tstrm.shift(2);
-              break;
-            }
-
             case punctuator_bracket_op: {
               tstrm.shift();
 

@@ -205,12 +205,14 @@ do_may_infix_operators_follow(cow_vector<Token>& tokens)
   }
 
 size_t
-do_mask_length(Line_Reader& reader, uint8_t mask)
+do_mask_length(size_t& tlen, Line_Reader& reader, uint8_t mask)
   {
-    size_t tlen = 0;
-    while(is_cctype(reader.peek(tlen), mask))
-      ++tlen;
-    return tlen;
+    size_t mlen = 0;
+    while(is_cctype(reader.peek(tlen), mask)) {
+      mlen += 1;
+      tlen += 1;
+    }
+    return mlen;
   }
 
 cow_string&
@@ -258,6 +260,12 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool i
     cow_string tstr;
     size_t tlen = 0;
 
+    // These specify what are allowed in each individual part of the literal.
+    double sign = 1;
+    bool has_point = false;
+    uint8_t mmask = cctype_digit;
+    uint8_t expch = 'e';
+
     // Look for an explicit sign symbol.
     switch(reader.peek(tlen)) {
       case '+':
@@ -268,6 +276,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool i
       case '-':
         tstr = ::rocket::sref("-");
         tlen += 1;
+        sign = -1;
         break;
     }
 
@@ -276,28 +285,63 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool i
     if((tlen != 0) && do_may_infix_operators_follow(tokens))
       return false;
 
-    if(!is_cctype(reader.peek(tlen), cctype_digit))
-      return false;
+    switch(reader.peek(tlen)) {
+      case 'n':
+      case 'N': {
+        if(do_mask_length(tlen, reader, cctype_namei | cctype_digit) != 3)
+          return false;
 
-    // These are characterstics of the literal.
-    uint8_t mmask = cctype_digit;
-    uint8_t expch = 'e';
-    bool has_point = false;
+        auto sptr = reader.data() + tlen - 3;
+        if((sptr[1] != 'a') || (sptr[2] != sptr[0]))  // `nan` or `NaN`
+          return false;
 
-    // Get the mask of mantissa digits and tell which character initiates the exponent.
-    if(reader.peek(tlen) == '0') {
-      tstr += reader.peek(tlen);
-      tlen += 1;
+        Token::S_real_literal xtoken;
+        xtoken.val = ::std::copysign(::std::numeric_limits<V_real>::quiet_NaN(), sign);
+        return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
+      }
 
-      // Check the radix identifier.
-      if(::rocket::is_any_of(reader.peek(tlen) | 0x20, { 'b', 'x' })) {
+      case 'i':
+      case 'I': {
+        if(do_mask_length(tlen, reader, cctype_namei | cctype_digit) != 8)
+          return false;
+
+        auto sptr = reader.data() + tlen - 8;
+        if(!mem_equal(sptr + 1, "nfinity", 7))  // `infinity` or `Infinity`
+          return false;
+
+        Token::S_real_literal xtoken;
+        xtoken.val = ::std::copysign(::std::numeric_limits<V_real>::infinity(), sign);
+        return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
+      }
+
+      case '0':
         tstr += reader.peek(tlen);
         tlen += 1;
 
-        // Accept the radix identifier.
-        mmask = cctype_xdigit;
-        expch = 'p';
-      }
+        // Check the radix identifier.
+        if(::rocket::is_any_of(reader.peek(tlen) | 0x20, { 'b', 'x' })) {
+          tstr += reader.peek(tlen);
+          tlen += 1;
+
+          // Accept the radix identifier.
+          mmask = cctype_xdigit;
+          expch = 'p';
+        }
+
+        // Fallthrough
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+        break;
+
+      default:
+        return false;
     }
 
     // Accept the longest string composing the integral part.
@@ -493,6 +537,7 @@ do_accept_punctuator(cow_vector<Token>& tokens, Line_Reader& reader)
     auto r = do_prefix_range(s_punctuators, reader.peek());
     while(r.first != r.second) {
       const auto& cur = *--(r.second);
+
       size_t tlen = ::std::strlen(cur.str);
       if(reader.navail() < tlen)
         continue;
@@ -546,9 +591,9 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
       // Translate this escape sequence.
       // Read the next charactter.
       next = reader.peek(tlen);
-      if(next == 0)
+      if(next == 0) {
         throw Parser_Error(parser_status_escape_sequence_incomplete, reader.tell(), tlen);
-
+      }
       tlen += 1;
 
       // Translate it.
@@ -611,6 +656,7 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
         case 'x': {
           // How many hex digits are there?
           xcnt += 2;
+
           // Read hex digits.
           char32_t cp = 0;
           for(int i = 0;  i < xcnt;  ++i) {
@@ -627,15 +673,16 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
             cp *= 16;
             cp += static_cast<uint32_t>((c <= '9') ? (c - '0') : ((c | 0x20) - 'a' + 10));
           }
+
           if(next == 'x') {
             // Write the character verbatim.
             val.push_back(static_cast<char>(cp));
-            break;
           }
-          // Write a Unicode code point.
-          if(!utf8_encode(val, cp))
-            throw Parser_Error(parser_status_escape_utf_code_point_invalid, reader.tell(), tlen);
-
+          else {
+            // Write a Unicode code point.
+            if(!utf8_encode(val, cp))
+              throw Parser_Error(parser_status_escape_utf_code_point_invalid, reader.tell(), tlen);
+          }
           break;
         }
 
@@ -715,11 +762,14 @@ do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Line_Reader& reader,
       return false;
 
     // Check for keywords if not otherwise disabled.
-    size_t tlen = do_mask_length(reader, cctype_namei | cctype_digit);
+    size_t tlen = 0;
+    do_mask_length(tlen, reader, cctype_namei | cctype_digit);
+
     if(!keywords_as_identifiers) {
       auto r = do_prefix_range(s_keywords, reader.peek());
       while(r.first != r.second) {
         const auto& cur = *(r.first++);
+
         if(::std::strlen(cur.str) != tlen)
           continue;
 
@@ -806,6 +856,7 @@ reload(const cow_string& file, int line, tinybuf& cbuf)
           reader.consume(1);
           continue;
         }
+
         if(reader.peek() == '/') {
           if(reader.peek(1) == '/') {
             // Start a line comment. Discard all remaining characters in this line.

@@ -145,67 +145,37 @@ do_accept_json5_key_opt(Token_Stream& tstrm)
     return nullopt;
   }
 
-Value
-do_generate_null()
-  { return V_null();  }
-
-Value
-do_generate_false()
-  { return V_boolean(false);  }
-
-Value
-do_generate_true()
-  { return V_boolean(true);  }
-
-Value
-do_generate_nan()
-  { return ::std::numeric_limits<V_real>::quiet_NaN();  }
-
-Value
-do_generate_infinity()
-  { return ::std::numeric_limits<V_real>::infinity();  }
-
-struct Literal_Element
-  {
-    Keyword kwrd;
-    decltype(do_generate_null)& vgen;
-  }
-constexpr s_literal_table[] =
-  {
-    { keyword_null,      do_generate_null      },
-    { keyword_false,     do_generate_false     },
-    { keyword_true,      do_generate_true      },
-    { keyword_nan,       do_generate_nan       },
-    { keyword_infinity,  do_generate_infinity  },
-  };
-
-constexpr
-bool
-operator==(const Literal_Element& lhs, Keyword rhs)
-  noexcept
-  {
-    return lhs.kwrd == rhs;
-  }
-
 opt<Value>
 do_accept_literal_opt(Token_Stream& tstrm)
   {
     // literal ::=
     //   keyword-literal | string-literal | numeric-literal
     // keyword-literal ::=
-    //   "null" | "false" | "true" | "nan" | "infinity"
+    //   "null" | "false" | "true"
     auto qtok = tstrm.peek_opt();
     if(!qtok)
       return nullopt;
 
     if(qtok->is_keyword()) {
-      auto qcnf = ::std::find(begin(s_literal_table), end(s_literal_table), qtok->as_keyword());
-      if(qcnf == end(s_literal_table))
-        return nullopt;
+      switch(weaken_enum(qtok->as_keyword())) {
+        case keyword_null:
+          // Discard this token and create a `null`.
+          tstrm.shift();
+          return null_value;
 
-      // Discard this token and create a new value using the generator.
-      tstrm.shift();
-      return qcnf->vgen();
+        case keyword_true:
+          // Discard this token and create a `true`.
+          tstrm.shift();
+          return true;
+
+        case keyword_false:
+          // Discard this token and create a `false`.
+          tstrm.shift();
+          return false;
+
+        default:
+          return nullopt;
+      }
     }
 
     if(qtok->is_integer_literal()) {

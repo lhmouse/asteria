@@ -12,7 +12,7 @@ color brightmagenta "\<(break|continue|throw|return)\>"
 color brightred "\<(assert|defer)\>"
 
 # Values
-color yellow "\<(null|true|false|nan|infinity|this)\>"
+color yellow "\<(null|true|false|nan|NaN|infinity|Infinity|this)\>"
 color yellow "\<__(file|line|func|varg|this|backtrace)\>"
 
 # Operators
