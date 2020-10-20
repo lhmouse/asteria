@@ -392,26 +392,37 @@ struct Prefix_Comparator
     bool
     operator()(const ElementT& lhs, const ElementT& rhs)
       const noexcept
-      { return ::rocket::char_traits<char>::compare(lhs.first, rhs.first,
-                                                    ::rocket::size(lhs.first)) < 0;  }
+      { return ::rocket::char_traits<char>::compare(
+                   lhs.str, rhs.str, ::rocket::size(lhs.str)) < 0;  }
 
     template<typename ElementT>
     bool
     operator()(char lhs, const ElementT& rhs)
       const noexcept
-      { return ::rocket::char_traits<char>::lt(lhs, rhs.first[0]);  }
+      { return ::rocket::char_traits<char>::lt(lhs, rhs.str[0]);  }
 
     template<typename ElementT>
     bool
     operator()(const ElementT& lhs, char rhs)
       const noexcept
-      { return ::rocket::char_traits<char>::lt(lhs.first[0], rhs);  }
+      { return ::rocket::char_traits<char>::lt(lhs.str[0], rhs);  }
   };
+
+template<typename ElementT, size_t N>
+pair<ElementT*, ElementT*>
+do_prefix_range(ElementT (&table)[N], char ch)
+  {
+    Prefix_Comparator comp;
+#ifdef ROCKET_DEBUG
+    ROCKET_ASSERT(::std::is_sorted(table, table + N, comp));
+#endif
+    return ::std::equal_range(table, table + N, ch, comp);
+  }
 
 struct Punctuator_Element
   {
-    char first[6];
-    Punctuator second;
+    char str[6];
+    Punctuator punct;
   }
 constexpr s_punctuators[] =
   {
@@ -481,22 +492,17 @@ do_accept_punctuator(cow_vector<Token>& tokens, Line_Reader& reader)
     // For two elements X and Y, if X is in front of Y, then X is potential a prefix of Y.
     // Traverse the range backwards to prevent premature matches, as a token is defined to be
     // the longest valid character sequence.
-#ifdef ROCKET_DEBUG
-    ROCKET_ASSERT(::std::is_sorted(begin(s_punctuators), end(s_punctuators),
-                                        Prefix_Comparator()));
-#endif
-    auto r = ::std::equal_range(begin(s_punctuators), end(s_punctuators), reader.peek(),
-                                        Prefix_Comparator());
+    auto r = do_prefix_range(s_punctuators, reader.peek());
     while(r.first != r.second) {
       const auto& cur = *--(r.second);
-      size_t tlen = ::std::strlen(cur.first);
+      size_t tlen = ::std::strlen(cur.str);
       if(reader.navail() < tlen)
         continue;
 
-      if(::std::memcmp(reader.data(), cur.first, tlen) != 0)
+      if(::std::memcmp(reader.data(), cur.str, tlen) != 0)
         continue;
 
-      Token::S_punctuator xtoken = { cur.second };
+      Token::S_punctuator xtoken = { cur.punct };
       return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
     }
 
@@ -646,8 +652,8 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
 
 struct Keyword_Element
   {
-    char first[10];
-    Keyword second;
+    char str[10];
+    Keyword kwrd;
   }
 constexpr s_keywords[] =
   {
@@ -715,21 +721,16 @@ do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Line_Reader& reader,
     // Check for keywords if not otherwise disabled.
     size_t tlen = do_mask_length(reader, cctype_namei | cctype_digit);
     if(!keywords_as_identifiers) {
-#ifdef ROCKET_DEBUG
-      ROCKET_ASSERT(::std::is_sorted(begin(s_keywords), end(s_keywords),
-                                          Prefix_Comparator()));
-#endif
-      auto r = ::std::equal_range(begin(s_keywords), end(s_keywords), reader.peek(),
-                                          Prefix_Comparator());
+      auto r = do_prefix_range(s_keywords, reader.peek());
       while(r.first != r.second) {
         const auto& cur = *(r.first++);
-        if(::std::strlen(cur.first) != tlen)
+        if(::std::strlen(cur.str) != tlen)
           continue;
 
-        if(::std::memcmp(reader.data(), cur.first, tlen) != 0)
+        if(::std::memcmp(reader.data(), cur.str, tlen) != 0)
           continue;
 
-        Token::S_keyword xtoken = { cur.second };
+        Token::S_keyword xtoken = { cur.kwrd };
         return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
       }
     }
