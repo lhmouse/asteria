@@ -493,6 +493,7 @@ constexpr s_punctuators[] =
     { "/",     punctuator_div         },
     { "/=",    punctuator_div_eq      },
     { ":",     punctuator_colon       },
+    { "::",    punctuator_scope       },
     { ";",     punctuator_semicol     },
     { "<",     punctuator_cmp_lt      },
     { "<<",    punctuator_sla         },

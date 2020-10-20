@@ -69,6 +69,7 @@ enum Punctuator : uint8_t
     punctuator_head        = 55,  // [^]
     punctuator_tail        = 56,  // [$]
     punctuator_arrow       = 57,  // ->
+    punctuator_scope       = 58,  // ::
   };
 
 ROCKET_CONST_FUNCTION

@@ -185,6 +185,9 @@ stringify_punctuator(Punctuator punct)
       case punctuator_arrow:
         return "->";
 
+      case punctuator_scope:
+        return "::";
+
       default:
         return "[unknown punctuator]";
     }
