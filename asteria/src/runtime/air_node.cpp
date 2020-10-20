@@ -3240,7 +3240,7 @@ struct AIR_Traits_apply_operator_fma : AIR_Traits_apply_operator_common
         ctx.stack().pop_back();
         const auto& lhs = ctx.stack().back().dereference_readonly();
 
-        switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
+        switch(do_vmask_of(lhs) | do_vmask_of(mid) | do_vmask_of(rhs)) {
           case vmask_integer:
           case vmask_integer | vmask_real:
           case vmask_real:
