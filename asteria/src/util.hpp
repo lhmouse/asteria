@@ -77,6 +77,13 @@ weaken_enum(enumT value)
   noexcept
   { return static_cast<typename ::std::underlying_type<enumT>::type>(value);  }
 
+// Bytewise comparison
+inline
+bool
+mem_equal(const void* s, const void* r, size_t n)
+noexcept
+  { return ::std::memcmp(s, r, n) == 0;  }
+
 // C character types
 enum : uint8_t
   {

@@ -499,7 +499,7 @@ do_accept_punctuator(cow_vector<Token>& tokens, Line_Reader& reader)
       if(reader.navail() < tlen)
         continue;
 
-      if(::std::memcmp(reader.data(), cur.str, tlen) != 0)
+      if(!mem_equal(reader.data(), cur.str, tlen))
         continue;
 
       Token::S_punctuator xtoken = { cur.punct };
@@ -727,7 +727,7 @@ do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Line_Reader& reader,
         if(::std::strlen(cur.str) != tlen)
           continue;
 
-        if(::std::memcmp(reader.data(), cur.str, tlen) != 0)
+        if(!mem_equal(reader.data(), cur.str, tlen))
           continue;
 
         Token::S_keyword xtoken = { cur.kwrd };
