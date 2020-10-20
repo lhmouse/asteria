@@ -192,8 +192,7 @@ do_may_infix_operators_follow(cow_vector<Token>& tokens)
     const auto& p = tokens.back();
     if(p.is_keyword())
       return ::rocket::is_any_of(p.as_keyword(),
-                 { keyword_null, keyword_true, keyword_false, keyword_nan,
-                   keyword_infinity, keyword_this });
+                 { keyword_null, keyword_true, keyword_false, keyword_this });
 
     // Infix operators may follow if the punctuator can terminate an expression.
     if(p.is_punctuator())
@@ -215,12 +214,11 @@ do_mask_length(Line_Reader& reader, uint8_t mask)
   }
 
 cow_string&
-do_collect_digits(cow_string& tstr, Line_Reader& reader, size_t& tlen, uint8_t mask)
+do_collect_digits(cow_string& tstr, size_t& tlen, Line_Reader& reader, uint8_t mask)
   {
     for(;;) {
-      char c = reader.peek(tlen);
-
       // Skip a digit separator.
+      char c = reader.peek(tlen);
       if(c == '`') {
         tlen += 1;
         continue;
@@ -264,12 +262,12 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool i
     switch(reader.peek(tlen)) {
       case '+':
         tstr = ::rocket::sref("+");
-        tlen++;
+        tlen += 1;
         break;
 
       case '-':
         tstr = ::rocket::sref("-");
-        tlen++;
+        tlen += 1;
         break;
     }
 
@@ -289,12 +287,12 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool i
     // Get the mask of mantissa digits and tell which character initiates the exponent.
     if(reader.peek(tlen) == '0') {
       tstr += reader.peek(tlen);
-      tlen++;
+      tlen += 1;
 
       // Check the radix identifier.
-      if(::rocket::is_any_of(static_cast<uint8_t>(reader.peek(tlen) | 0x20), { 'b', 'x' })) {
+      if(::rocket::is_any_of(reader.peek(tlen) | 0x20, { 'b', 'x' })) {
         tstr += reader.peek(tlen);
-        tlen++;
+        tlen += 1;
 
         // Accept the radix identifier.
         mmask = cctype_xdigit;
@@ -303,7 +301,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool i
     }
 
     // Accept the longest string composing the integral part.
-    do_collect_digits(tstr, reader, tlen, mmask);
+    do_collect_digits(tstr, tlen, reader, mmask);
 
     // Check for a radix point. If one exists, the fractional part shall follow.
     if(reader.peek(tlen) == '.') {
@@ -312,11 +310,11 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool i
 
       // Accept the fractional part.
       has_point = true;
-      do_collect_digits(tstr, reader, tlen, mmask);
+      do_collect_digits(tstr, tlen, reader, mmask);
     }
 
     // Check for the exponent.
-    if(static_cast<uint8_t>(reader.peek(tlen) | 0x20) == expch) {
+    if((reader.peek(tlen) | 0x20) == expch) {
       tstr += reader.peek(tlen);
       tlen += 1;
 
@@ -327,13 +325,13 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool i
       }
 
       // Accept the exponent.
-      do_collect_digits(tstr, reader, tlen, cctype_digit);
+      do_collect_digits(tstr, tlen, reader, cctype_digit);
     }
 
     // Accept numeric suffixes.
     // Note, at the moment we make no use of such suffixes, so any suffix will
     // definitely cause parser errors.
-    do_collect_digits(tstr, reader, tlen, cctype_alpha | cctype_digit);
+    do_collect_digits(tstr, tlen, reader, cctype_alpha | cctype_digit);
 
     // Convert the token to a literal.
     // We always parse the literal as a floating-point number.
@@ -691,8 +689,6 @@ constexpr s_keywords[] =
     { "func",      keyword_func      },
     { "if",        keyword_if        },
     { "import",    keyword_import    },
-    { "infinity",  keyword_infinity  },
-    { "nan",       keyword_nan       },
     { "not",       keyword_not       },
     { "null",      keyword_null      },
     { "or",        keyword_or        },
@@ -753,16 +749,15 @@ reload(const cow_string& file, int line, tinybuf& cbuf)
   {
     // Tokens are parsed and stored here in normal order.
     // We will have to reverse this sequence before storing it into `*this` if it is accepted.
+    // The storage may be reused.
     cow_vector<Token> tokens;
-    // Destroy the contents of `*this` and reuse their storage, if any.
     tokens.swap(this->m_rtoks);
     tokens.clear();
 
     // Save the position of an unterminated block comment.
     Tack bcomm;
-    // Read source code line by line.
-    Line_Reader reader(cbuf, file, static_cast<size_t>(line));
 
+    Line_Reader reader(cbuf, file, static_cast<size_t>(line));
     while(reader.advance()) {
       // Discard the first line if it looks like a shebang.
       if((reader.line() == line) && (::std::strncmp(reader.data(), "#!", 2) == 0))
