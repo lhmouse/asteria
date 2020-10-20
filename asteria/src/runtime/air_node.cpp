@@ -3538,8 +3538,9 @@ struct AIR_Traits_variadic_call
         if(auto qhooks = ctx.global().get_hooks_opt())
           qhooks->on_single_step_trap(sloc);
 
-        // Pop the argument generator.
-        Reference_Stack stack;
+        // Initialize arguments.
+        auto& stack = ctx.alt_stack();
+        stack.clear();
         auto value = ctx.stack().back().dereference_readonly();
         switch(weaken_enum(value.type())) {
           case type_null:
@@ -3547,8 +3548,7 @@ struct AIR_Traits_variadic_call
             break;
 
           case type_array: {
-            auto vals = ::std::move(value.open_array());
-            ctx.stack().pop_back();
+            auto& vals = value.open_array();
 
             // Push all arguments backwards as temporaries.
             for(auto it = vals.mut_rbegin();  it != vals.rend();  ++it) {
@@ -3560,11 +3560,12 @@ struct AIR_Traits_variadic_call
 
           case type_function: {
             const auto gfunc = ::std::move(value.open_function());
+            ctx.stack().mut_back().zoom_out();
 
             // Pass an empty argument list to get the number of arguments to generate.
-            Reference_Stack gstack;
-            const auto gself = ctx.stack().mut_back().zoom_out();
-            do_invoke_nontail(ctx.stack().mut_back(), sloc, ctx, gfunc, ::std::move(gstack));
+            // This invalidates the `self` reference so we have to copy it first.
+            ctx.stack().emplace_back(ctx.stack().back());
+            do_invoke_nontail(ctx.stack().mut_back(), sloc, ctx, gfunc, ::std::move(stack));
             value = ctx.stack().back().dereference_readonly();
             ctx.stack().pop_back();
 
@@ -3576,16 +3577,30 @@ struct AIR_Traits_variadic_call
             if((nvargs < 0) || (nvargs > INT_MAX))
               ASTERIA_THROW("Number of variadic arguments not acceptable (value `$1`)", nvargs);
 
-            // Generate arguments.
+            // Prepare `self` references for all upcoming  calls.
+            for(int64_t k = 0;  k < nvargs;  ++k)
+              ctx.stack().emplace_back(ctx.stack().back());
+
+            // Generate arguments and push them onto `ctx.stack()`.
+            // The top is the first argument.
             for(int64_t k = 0;  k < nvargs;  ++k) {
-              // Initialize the argument list for the generator function.
-              gstack.clear();
+              // Initialize arguments for the generator function.
+              stack.clear();
               Reference::S_constant xref = { k };
-              gstack.emplace_back(::std::move(xref));
+              stack.emplace_back(::std::move(xref));
 
               // Generate an argument. Ensure it is dereferenceable.
-              do_invoke_nontail(stack.emplace_back(gself), sloc, ctx, gfunc, ::std::move(gstack));
-              stack.back().dereference_validate();
+              auto& arg = ctx.stack().mut_back(static_cast<size_t>(k));
+              do_invoke_nontail(arg, sloc, ctx, gfunc, ::std::move(stack));
+              arg.dereference_validate();
+            }
+
+            // Pop arguments and re-push them into the alternative stack.
+            // This reverses all arguments so the top will be the last argument.
+            stack.clear();
+            for(int64_t k = 0;  k < nvargs;  ++k) {
+              stack.emplace_back(::std::move(ctx.stack().mut_back()));
+              ctx.stack().pop_back();
             }
             break;
           }
@@ -3593,6 +3608,7 @@ struct AIR_Traits_variadic_call
           default:
             ASTERIA_THROW("Invalid variadic argument generator (value `$1`)", value);
         }
+        ctx.stack().pop_back();
 
         // Copy the target, which shall be of type `function`.
         value = ctx.stack().back().dereference_readonly();
