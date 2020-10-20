@@ -106,7 +106,7 @@ struct Header
     uint32_t
     total_size_in_headers()
       const noexcept
-      { return UINT32_C(1) + this->has_syms + this->nphdrs;  }
+      { return UINT32_C(1) + this->nphdrs + this->has_syms;  }
 
     // Provide general accesstors.
     void
