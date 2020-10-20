@@ -66,8 +66,8 @@ struct Header
     union {
       struct {
         uint8_t nphdrs;         // size of `sparam`, in number of `Header`s [!]
-        uint8_t has_vtbl : 1;   // vtable exists?
         uint8_t has_syms : 1;   // symbols exist?
+        uint8_t has_vtbl : 1;   // vtable exists?
       };
       Uparam up_stor;
     };
