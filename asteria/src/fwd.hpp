@@ -789,20 +789,29 @@ struct Compiler_Options_template<versionT, 0>
 template<>
 struct Compiler_Options_fragment<1>
   {
-    // Make single quotes behave similiar to double quotes. [useful when parsing JSON5 text]
+    // Make single quotes behave similiar to double quotes.
+    // [useful when parsing JSON5 text]
     bool escapable_single_quotes = false;
-    // Parse keywords as identifiers. [useful when parsing JSON text]
+
+    // Parse keywords as identifiers.
+    // Note `NaN` and `Infinity`, as well as their lowercase forms, are not keywords.
+    // [useful when parsing JSON text]
     bool keywords_as_identifiers = false;
-    // Parse integer literals as real literals. [useful when parsing JSON text]
+
+    // Parse integer literals as real literals.
+    // [useful when parsing JSON text]
     bool integers_as_reals = false;
 
-    // Enable proper tail calls. [more commonly known as tail call optimization]
+    // Enable proper tail calls.
+    // This is semantical behavior and is not subject to optimization.
+    // [more commonly known as tail call optimization]
     bool proper_tail_calls = true;
-    // Enable optimization. [master switch]
-    int8_t optimization_level = 2;
 
     // Generate calls to single-step hooks for every expression, not just function calls.
     bool verbose_single_step_traps = false;
+
+    // Enable optimization.
+    int8_t optimization_level = 2;
   };
 
 template<>
