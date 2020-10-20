@@ -13,18 +13,18 @@ namespace details_avmc_queue {
 union Uparam
   {
     struct {
-      uint16_t _do_not_use_2_;
+      uint16_t _do_not_use_0_;
       uint16_t s16;
       uint32_t s32;
     };
 
     struct {
-      uint16_t _do_not_use_0_;
+      uint16_t _do_not_use_1_;
       uint8_t p8[6];
     };
 
     struct {
-      uint16_t _do_not_use_1_;
+      uint16_t _do_not_use_2_;
       uint16_t p16[3];
     };
   };
@@ -134,10 +134,8 @@ struct Header
     execute(Executive_Context& ctx)
       const
       {
-        if(this->has_vtbl)
-          return this->vtbl->executor(ctx, this->uparam(), this->sparam());
-        else
-          return this->executor(ctx, this->uparam(), this->sparam());
+        return (this->has_vtbl ? this->vtbl->executor : this->executor)(
+                                         ctx, this->uparam(), this->sparam());
       }
 
     void
