@@ -10,8 +10,8 @@ namespace details_value {
 
 // This controls implicit conversions to `Value` from other types.
 // The main templte is undefined and is SFINAE-friendly.
-// A member type alias `via_type` shall be provided, which shall designate one of
-// the `V_*` candidates.
+// A member type alias `via_type` shall be provided, which shall designate
+// one of the `V_*` candidates.
 template<typename ValT, typename = void>
 struct Valuable_impl;
 
@@ -222,8 +222,8 @@ struct Valuable_impl<XValT [N]>
         arr.reserve(N);
         for(size_t k = 0;  k != N;  ++k)
           arr.emplace_back(static_cast<typename ::std::conditional<
-                       ::std::is_lvalue_reference<XArrT&&>::value,
-                                       const XValT&, XValT&&>::type>(xarr[k]));
+                  ::std::is_lvalue_reference<XArrT&&>::value,
+                           const XValT&, XValT&&>::type>(xarr[k]));
         stor = ::std::move(arr);
       }
   };
@@ -239,10 +239,11 @@ struct Valuable_impl<TupleT, typename ::std::conditional<
     template<size_t... N, typename XTupT>
     static
     void
-    unpack_tuple_aux(V_array& arr, ::std::index_sequence<N...>, XTupT&& xtup)
+    unpack_tuple_aux(V_array& arr, ::std::index_sequence<N...>,
+                     XTupT&& xtup)
       {
         int dummy[] = { (static_cast<void>(arr.emplace_back(
-                               ::std::get<N>(::std::forward<XTupT>(xtup)))), 1)...  };
+               ::std::get<N>(::std::forward<XTupT>(xtup)))), 1)...  };
         (void)dummy;
       }
 
@@ -255,7 +256,7 @@ struct Valuable_impl<TupleT, typename ::std::conditional<
         constexpr size_t N = ::std::tuple_size<TupleT>::value;
         arr.reserve(N);
         unpack_tuple_aux(arr, ::std::make_index_sequence<N>(),
-                                               ::std::forward<XTupT>(xtup));
+                        ::std::forward<XTupT>(xtup));
         stor = ::std::move(arr);
       }
   };
@@ -275,16 +276,17 @@ struct Valuable_impl<opt<XValT>, typename ::std::conditional<
       {
         if(xopt)
           Valuable_impl<XValT>::assign(stor,
-                  static_cast<typename ::std::conditional<
-                                 ::std::is_lvalue_reference<XOptT&&>::value,
-                                                const XValT&, XValT&&>::type>(*xopt));
+              static_cast<typename ::std::conditional<
+                  ::std::is_lvalue_reference<XOptT&&>::value,
+                            const XValT&, XValT&&>::type>(*xopt));
         else
           stor = V_null();
       }
   };
 
 template<typename XValT>
-using Valuable = Valuable_impl<typename ::rocket::remove_cvref<XValT>::type, void>;
+using Valuable = Valuable_impl<
+           typename ::rocket::remove_cvref<XValT>::type, void>;
 
 }  // namespace details_value
 }  // namespace asteria
