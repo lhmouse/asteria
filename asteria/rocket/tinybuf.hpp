@@ -199,11 +199,9 @@ class basic_tinybuf
     do_purge_areas()
       noexcept
       {
-        // Purge the get area.
+        // Purge both the get area and the put area.
         this->m_gcur = nullptr;
         this->m_gend = nullptr;
-
-        // Purge the put area.
         this->m_pcur = nullptr;
         this->m_pend = nullptr;
         return *this;
