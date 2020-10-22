@@ -658,16 +658,18 @@ struct AIR_Traits_for_each_statement
 
         // Allocate an uninitialized variable for the key.
         const auto vkey = gcoll->create_variable();
+
         // Inject the variable into the current context.
         Reference::S_variable xref = { vkey };
         ctx_for.open_named_reference(sp.name_key) = xref;
 
         // Create the mapped reference.
         auto& mapped = do_declare(ctx_for, sp.name_mapped);
-        // Evaluate the range initializer.
+
+        // Evaluate the range initializer and set the range up, which isn't going to
+        // change for all loops.
         auto status = sp.queue_init.execute(ctx_for);
         ROCKET_ASSERT(status == air_status_next);
-        // Set the range up, which isn't going to change for the entire loop.
         mapped = ::std::move(ctx_for.stack().mut_back());
 
         const auto range = mapped.dereference_readonly();
@@ -681,6 +683,7 @@ struct AIR_Traits_for_each_statement
             for(int64_t i = 0;  i < arr.ssize();  ++i) {
               // Set the key which is the subscript of the mapped element in the array.
               vkey->initialize(i, true);
+
               // Set the mapped reference.
               Reference::M_array_index xmod = { i };
               mapped.zoom_in(::std::move(xmod));
@@ -706,6 +709,7 @@ struct AIR_Traits_for_each_statement
             for(auto it = obj.begin();  it != obj.end();  ++it) {
               // Set the key which is the key of this element in the object.
               vkey->initialize(it->first.rdstr(), true);
+
               // Set the mapped reference.
               Reference::M_object_key xmod = { it->first.rdstr() };
               mapped.zoom_in(::std::move(xmod));
