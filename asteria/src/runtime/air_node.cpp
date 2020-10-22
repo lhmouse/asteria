@@ -1583,21 +1583,22 @@ struct AIR_Traits_push_unnamed_object
       }
   };
 
-enum Vmask : int
+enum : int
   {
-    vmask_null        = 1 << type_null,
-    vmask_boolean     = 1 << type_boolean,
-    vmask_integer     = 1 << type_integer,
-    vmask_real        = 1 << type_real,
-    vmask_string      = 1 << type_string,
-    vmask_opaque      = 1 << type_opaque,
-    vmask_function    = 1 << type_function,
-    vmask_array       = 1 << type_array,
-    vmask_object      = 1 << type_object,
+    tmask_null        = 1 << type_null,
+    tmask_boolean     = 1 << type_boolean,
+    tmask_integer     = 1 << type_integer,
+    tmask_real        = 1 << type_real,
+    tmask_string      = 1 << type_string,
+    tmask_opaque      = 1 << type_opaque,
+    tmask_function    = 1 << type_function,
+    tmask_array       = 1 << type_array,
+    tmask_object      = 1 << type_object,
   };
 
 inline
-int do_vmask_of(const Value& val)
+int
+do_tmask_of(const Value& val)
   noexcept
   {
     return 1 << val.type();
@@ -1972,13 +1973,13 @@ struct AIR_Traits_apply_operator_inc_post : AIR_Traits_apply_operator_common
         auto& lhs = ctx.stack().back().dereference_mutable();
         Reference::S_temporary xref = { lhs };
 
-        switch(do_vmask_of(lhs)) {
-          case vmask_integer:
+        switch(do_tmask_of(lhs)) {
+          case tmask_integer:
             // Increment the operand and return the old value. `assign` is ignored.
             lhs = do_check_add(lhs.as_integer(), 1);
             break;
 
-          case vmask_real:
+          case tmask_real:
             // Increment the operand and return the old value. `assign` is ignored.
             lhs.open_real() += 1;
             break;
@@ -2002,13 +2003,13 @@ struct AIR_Traits_apply_operator_dec_post : AIR_Traits_apply_operator_common
         auto& lhs = ctx.stack().back().dereference_mutable();
         Reference::S_temporary xref = { lhs };
 
-        switch(do_vmask_of(lhs)) {
-          case vmask_integer:
+        switch(do_tmask_of(lhs)) {
+          case tmask_integer:
             // Decrement the operand and return the old value. `assign` is ignored.
             lhs = do_check_sub(lhs.as_integer(), 1);
             break;
 
-          case vmask_real:
+          case tmask_real:
             // Decrement the operand and return the old value. `assign` is ignored.
             lhs.open_real() -= 1;
             break;
@@ -2034,15 +2035,15 @@ struct AIR_Traits_apply_operator_subscr : AIR_Traits_apply_operator_common
         ctx.stack().pop_back();
         auto& lref = ctx.stack().mut_back();
 
-        switch(do_vmask_of(rhs)) {
-          case vmask_integer: {
+        switch(do_tmask_of(rhs)) {
+          case tmask_integer: {
             // Append an array subscript. `assign` is ignored.
             Reference::M_array_index xmod = { rhs.as_integer() };
             lref.zoom_in(::std::move(xmod));
             break;
           }
 
-          case vmask_string: {
+          case tmask_string: {
             // Append an object subscript. `assign` is ignored.
             Reference::M_object_key xmod = { ::std::move(rhs.open_string()) };
             lref.zoom_in(::std::move(xmod));
@@ -2082,13 +2083,13 @@ struct AIR_Traits_apply_operator_neg : AIR_Traits_apply_operator_common
         Reference::S_temporary xref = { ctx.stack().back().dereference_readonly() };
         auto& rhs = xref.val;
 
-        switch(do_vmask_of(rhs)) {
-          case vmask_integer:
+        switch(do_tmask_of(rhs)) {
+          case tmask_integer:
             // Get the opposite of the operand as a temporary value.
             rhs = do_check_neg(rhs.as_integer());
             break;
 
-          case vmask_real:
+          case tmask_real:
             // Get the opposite of the operand as a temporary value.
             rhs = -rhs.as_real();
             break;
@@ -2112,18 +2113,18 @@ struct AIR_Traits_apply_operator_notb : AIR_Traits_apply_operator_common
         Reference::S_temporary xref = { ctx.stack().back().dereference_readonly() };
         auto& rhs = xref.val;
 
-        switch(do_vmask_of(rhs)) {
-          case vmask_boolean:
+        switch(do_tmask_of(rhs)) {
+          case tmask_boolean:
             // Perform logical NOT operation on the operand to create a temporary value.
             rhs.open_boolean() ^= true;
             break;
 
-          case vmask_integer:
+          case tmask_integer:
             // Perform bitwise NOT operation on the operand to create a temporary value.
             rhs.open_integer() ^= -1;
             break;
 
-          case vmask_string:
+          case tmask_string:
             // Perform bitwise NOT operation on all bytes in the operand to create
             // a temporary value.
             rhs = do_string_notb(::std::move(rhs.open_string()));
@@ -2166,13 +2167,13 @@ struct AIR_Traits_apply_operator_inc_pre : AIR_Traits_apply_operator_common
         // This operator is unary.
         auto& rhs = ctx.stack().back().dereference_mutable();
 
-        switch(do_vmask_of(rhs)) {
-          case vmask_integer:
+        switch(do_tmask_of(rhs)) {
+          case tmask_integer:
             // Increment the operand and return it. `assign` is ignored.
             rhs = do_check_add(rhs.as_integer(), 1);
             break;
 
-          case vmask_real:
+          case tmask_real:
             // Increment the operand and return it. `assign` is ignored.
             rhs.open_real() += 1;
             break;
@@ -2194,13 +2195,13 @@ struct AIR_Traits_apply_operator_dec_pre : AIR_Traits_apply_operator_common
         // This operator is unary.
         auto& rhs = ctx.stack().back().dereference_mutable();
 
-        switch(do_vmask_of(rhs)) {
-          case vmask_integer:
+        switch(do_tmask_of(rhs)) {
+          case tmask_integer:
             // Decrement the operand and return it. `assign` is ignored.
             rhs = do_check_sub(rhs.as_integer(), 1);
             break;
 
-          case vmask_real:
+          case tmask_real:
             // Decrement the operand and return it. `assign` is ignored.
             rhs.open_real() -= 1;
             break;
@@ -2239,20 +2240,20 @@ struct AIR_Traits_apply_operator_countof : AIR_Traits_apply_operator_common
         auto& rhs = xref.val;
 
         // Return the number of elements in the operand.
-        switch(do_vmask_of(rhs)) {
-          case vmask_null:
+        switch(do_tmask_of(rhs)) {
+          case tmask_null:
             rhs = 0;
             break;
 
-          case vmask_string:
+          case tmask_string:
             rhs = rhs.as_string().ssize();
             break;
 
-          case vmask_array:
+          case tmask_array:
             rhs = rhs.as_array().ssize();
             break;
 
-          case vmask_object:
+          case tmask_object:
             rhs = rhs.as_object().ssize();
             break;
 
@@ -2294,13 +2295,13 @@ struct AIR_Traits_apply_operator_sqrt : AIR_Traits_apply_operator_common
         Reference::S_temporary xref = { ctx.stack().back().dereference_readonly() };
         auto& rhs = xref.val;
 
-        switch(do_vmask_of(rhs)) {
-          case vmask_integer:
+        switch(do_tmask_of(rhs)) {
+          case tmask_integer:
             // Get the square root of the operand as a temporary value.
             rhs = ::std::sqrt(static_cast<double>(rhs.as_integer()));
             break;
 
-          case vmask_real:
+          case tmask_real:
             // Get the square root of the operand as a temporary value.
             rhs = ::std::sqrt(rhs.as_real());
             break;
@@ -2324,13 +2325,13 @@ struct AIR_Traits_apply_operator_isnan : AIR_Traits_apply_operator_common
         Reference::S_temporary xref = { ctx.stack().back().dereference_readonly() };
         auto& rhs = xref.val;
 
-        switch(do_vmask_of(rhs)) {
-          case vmask_integer:
+        switch(do_tmask_of(rhs)) {
+          case tmask_integer:
             // An integer is never a NaN.
             rhs = false;
             break;
 
-          case vmask_real:
+          case tmask_real:
             // Check whether the operand is a NaN.
             rhs = ::std::isnan(rhs.as_real());
             break;
@@ -2354,13 +2355,13 @@ struct AIR_Traits_apply_operator_isinf : AIR_Traits_apply_operator_common
         Reference::S_temporary xref = { ctx.stack().back().dereference_readonly() };
         auto& rhs = xref.val;
 
-        switch(do_vmask_of(rhs)) {
-          case vmask_integer:
+        switch(do_tmask_of(rhs)) {
+          case tmask_integer:
             // An integer is never an infinity.
             rhs = false;
             break;
 
-          case vmask_real:
+          case tmask_real:
             // Check whether the operand is an infinity.
             rhs = ::std::isinf(rhs.as_real());
             break;
@@ -2384,13 +2385,13 @@ struct AIR_Traits_apply_operator_abs : AIR_Traits_apply_operator_common
         Reference::S_temporary xref = { ctx.stack().back().dereference_readonly() };
         auto& rhs = xref.val;
 
-        switch(do_vmask_of(rhs)) {
-          case vmask_integer:
+        switch(do_tmask_of(rhs)) {
+          case tmask_integer:
             // Get the absolute value of the operand as a temporary value.
             rhs = ::std::abs(do_check_neg(rhs.as_integer()));
             break;
 
-          case vmask_real:
+          case tmask_real:
             // Get the absolute value of the operand as a temporary value.
             rhs = ::std::fabs(rhs.as_real());
             break;
@@ -2414,13 +2415,13 @@ struct AIR_Traits_apply_operator_sign : AIR_Traits_apply_operator_common
         Reference::S_temporary xref = { ctx.stack().back().dereference_readonly() };
         auto& rhs = xref.val;
 
-        switch(do_vmask_of(rhs)) {
-          case vmask_integer:
+        switch(do_tmask_of(rhs)) {
+          case tmask_integer:
             // Get the sign bit of the operand as a temporary value.
             rhs.open_integer() >>= 63;
             break;
 
-          case vmask_real:
+          case tmask_real:
             // Get the sign bit of the operand as a temporary value.
             rhs = ::std::signbit(rhs.as_real()) ? INT64_C(-1) : 0;
             break;
@@ -2444,12 +2445,12 @@ struct AIR_Traits_apply_operator_round : AIR_Traits_apply_operator_common
         Reference::S_temporary xref = { ctx.stack().back().dereference_readonly() };
         auto& rhs = xref.val;
 
-        switch(do_vmask_of(rhs)) {
-          case vmask_integer:
+        switch(do_tmask_of(rhs)) {
+          case tmask_integer:
             // No conversion is needed.
             break;
 
-          case vmask_real:
+          case tmask_real:
             // Round the operand to the nearest integer as a temporary real.
             rhs = ::std::round(rhs.as_real());
             break;
@@ -2473,12 +2474,12 @@ struct AIR_Traits_apply_operator_floor : AIR_Traits_apply_operator_common
         Reference::S_temporary xref = { ctx.stack().back().dereference_readonly() };
         auto& rhs = xref.val;
 
-        switch(do_vmask_of(rhs)) {
-          case vmask_integer:
+        switch(do_tmask_of(rhs)) {
+          case tmask_integer:
             // No conversion is needed.
             break;
 
-          case vmask_real:
+          case tmask_real:
             // Round the operand towards positive infinity as a temporary real.
             rhs = ::std::floor(rhs.as_real());
             break;
@@ -2502,12 +2503,12 @@ struct AIR_Traits_apply_operator_ceil : AIR_Traits_apply_operator_common
         Reference::S_temporary xref = { ctx.stack().back().dereference_readonly() };
         auto& rhs = xref.val;
 
-        switch(do_vmask_of(rhs)) {
-          case vmask_integer:
+        switch(do_tmask_of(rhs)) {
+          case tmask_integer:
             // No conversion is needed.
             break;
 
-          case vmask_real:
+          case tmask_real:
             // Round the operand towards negative infinity as a temporary real.
             rhs = ::std::ceil(rhs.as_real());
             break;
@@ -2531,12 +2532,12 @@ struct AIR_Traits_apply_operator_trunc : AIR_Traits_apply_operator_common
         Reference::S_temporary xref = { ctx.stack().back().dereference_readonly() };
         auto& rhs = xref.val;
 
-        switch(do_vmask_of(rhs)) {
-          case vmask_integer:
+        switch(do_tmask_of(rhs)) {
+          case tmask_integer:
             // No conversion is needed.
             break;
 
-          case vmask_real:
+          case tmask_real:
             // Round the operand to zero as a temporary real.
             rhs = ::std::trunc(rhs.as_real());
             break;
@@ -2560,12 +2561,12 @@ struct AIR_Traits_apply_operator_iround : AIR_Traits_apply_operator_common
         Reference::S_temporary xref = { ctx.stack().back().dereference_readonly() };
         auto& rhs = xref.val;
 
-        switch(do_vmask_of(rhs)) {
-          case vmask_integer:
+        switch(do_tmask_of(rhs)) {
+          case tmask_integer:
             // No conversion is needed.
             break;
 
-          case vmask_real:
+          case tmask_real:
             // Round the operand to the nearest integer as a temporary integer.
             rhs = do_check_itrunc(::std::round(rhs.as_real()));
             break;
@@ -2589,12 +2590,12 @@ struct AIR_Traits_apply_operator_ifloor : AIR_Traits_apply_operator_common
         Reference::S_temporary xref = { ctx.stack().back().dereference_readonly() };
         auto& rhs = xref.val;
 
-        switch(do_vmask_of(rhs)) {
-          case vmask_integer:
+        switch(do_tmask_of(rhs)) {
+          case tmask_integer:
             // No conversion is needed.
             break;
 
-          case vmask_real:
+          case tmask_real:
             // Round the operand to negative infinity as a temporary integer.
             rhs = do_check_itrunc(::std::floor(rhs.as_real()));
             break;
@@ -2618,12 +2619,12 @@ struct AIR_Traits_apply_operator_iceil : AIR_Traits_apply_operator_common
         Reference::S_temporary xref = { ctx.stack().back().dereference_readonly() };
         auto& rhs = xref.val;
 
-        switch(do_vmask_of(rhs)) {
-          case vmask_integer:
+        switch(do_tmask_of(rhs)) {
+          case tmask_integer:
             // No conversion is needed.
             break;
 
-          case vmask_real:
+          case tmask_real:
             // Round the operand to positive infinity as a temporary integer.
             rhs = do_check_itrunc(::std::ceil(rhs.as_real()));
             break;
@@ -2647,12 +2648,12 @@ struct AIR_Traits_apply_operator_itrunc : AIR_Traits_apply_operator_common
         Reference::S_temporary xref = { ctx.stack().back().dereference_readonly() };
         auto& rhs = xref.val;
 
-        switch(do_vmask_of(rhs)) {
-          case vmask_integer:
+        switch(do_tmask_of(rhs)) {
+          case tmask_integer:
             // No conversion is needed.
             break;
 
-          case vmask_real:
+          case tmask_real:
             // Round the operand to zero as a temporary integer.
             rhs = do_check_itrunc(rhs.as_real());
             break;
@@ -2858,25 +2859,25 @@ struct AIR_Traits_apply_operator_add : AIR_Traits_apply_operator_common
         ctx.stack().pop_back();
         const auto& lhs = ctx.stack().back().dereference_readonly();
 
-        switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
-          case vmask_boolean:
+        switch(do_tmask_of(lhs) | do_tmask_of(rhs)) {
+          case tmask_boolean:
             // For the `boolean` type, return the logical OR'd result of both operands.
             rhs.open_boolean() |= lhs.as_boolean();
             break;
 
-          case vmask_integer:
+          case tmask_integer:
             // For the `integer` type, return the sum of both operands.
             rhs = do_check_add(lhs.as_integer(), rhs.as_integer());
             break;
 
-          case vmask_integer | vmask_real:
-          case vmask_real:
+          case tmask_integer | tmask_real:
+          case tmask_real:
             // For the `integer` and `real` types, return the sum of both operands
             // as `real`.
             rhs.mutate_into_real() += lhs.convert_to_real();
             break;
 
-          case vmask_string:
+          case tmask_string:
             // For the `string` type, concatenate the operands in lexical order to
             // create a new string.
             rhs.open_string().insert(0, lhs.as_string());
@@ -2903,19 +2904,19 @@ struct AIR_Traits_apply_operator_sub : AIR_Traits_apply_operator_common
         ctx.stack().pop_back();
         const auto& lhs = ctx.stack().back().dereference_readonly();
 
-        switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
-          case vmask_boolean:
+        switch(do_tmask_of(lhs) | do_tmask_of(rhs)) {
+          case tmask_boolean:
             // For the `boolean` type, return the logical XOR'd result of both operands.
             rhs.open_boolean() ^= lhs.as_boolean();
             break;
 
-          case vmask_integer:
+          case tmask_integer:
             // For the `integer` type, return the difference of both operands.
             rhs = do_check_sub(lhs.as_integer(), rhs.as_integer());
             break;
 
-          case vmask_integer | vmask_real:
-          case vmask_real:
+          case tmask_integer | tmask_real:
+          case tmask_real:
             // For the `integer` and `real` types, return the difference of both operands
             // as `real`.
             rhs = lhs.convert_to_real() - rhs.convert_to_real();
@@ -2942,25 +2943,25 @@ struct AIR_Traits_apply_operator_mul : AIR_Traits_apply_operator_common
         ctx.stack().pop_back();
         const auto& lhs = ctx.stack().back().dereference_readonly();
 
-        switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
-          case vmask_boolean:
+        switch(do_tmask_of(lhs) | do_tmask_of(rhs)) {
+          case tmask_boolean:
             // For the `boolean` type, return the logical AND'd result of both operands.
             rhs.open_boolean() &= lhs.as_boolean();
             break;
 
-          case vmask_integer:
+          case tmask_integer:
             // For the `integer` type, return the product of both operands.
             rhs = do_check_mul(lhs.as_integer(), rhs.as_integer());
             break;
 
-          case vmask_integer | vmask_real:
-          case vmask_real:
+          case tmask_integer | tmask_real:
+          case tmask_real:
             // For the `integer` and `real` types, return the product of both operands
             // as `real`.
             rhs.mutate_into_real() *= lhs.convert_to_real();
             break;
 
-          case vmask_integer | vmask_string:
+          case tmask_integer | tmask_string:
             // If either operand has type `string` and the other has type `integer`,
             // duplicate/ the string up to the specified number of times and return the
             // result.
@@ -2989,14 +2990,14 @@ struct AIR_Traits_apply_operator_div : AIR_Traits_apply_operator_common
         ctx.stack().pop_back();
         const auto& lhs = ctx.stack().back().dereference_readonly();
 
-        switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
-          case vmask_integer:
+        switch(do_tmask_of(lhs) | do_tmask_of(rhs)) {
+          case tmask_integer:
             // For the `integer` type, return the quotient of both operands.
             rhs = do_check_div(lhs.as_integer(), rhs.as_integer());
             break;
 
-          case vmask_integer | vmask_real:
-          case vmask_real:
+          case tmask_integer | tmask_real:
+          case tmask_real:
             // For the `integer` and `real` types, return the quotient of both operands
             // as `real`.
             rhs = lhs.convert_to_real() / rhs.convert_to_real();
@@ -3023,14 +3024,14 @@ struct AIR_Traits_apply_operator_mod : AIR_Traits_apply_operator_common
         ctx.stack().pop_back();
         const auto& lhs = ctx.stack().back().dereference_readonly();
 
-        switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
-          case vmask_integer:
+        switch(do_tmask_of(lhs) | do_tmask_of(rhs)) {
+          case tmask_integer:
             // For the `integer` type, return the remainder of both operands.
             rhs = do_check_mod(lhs.as_integer(), rhs.as_integer());
             break;
 
-          case vmask_integer | vmask_real:
-          case vmask_real:
+          case tmask_integer | tmask_real:
+          case tmask_real:
             // For the `integer` and `real` types, return the remainder of both operands.
             rhs = ::std::fmod(lhs.convert_to_real(), rhs.convert_to_real());
             break;
@@ -3060,15 +3061,15 @@ struct AIR_Traits_apply_operator_sll : AIR_Traits_apply_operator_common
           ASTERIA_THROW("Shift count not an integer (operands were `$1` and `$2`)",
                         lhs, rhs);
 
-        switch(do_vmask_of(lhs)) {
-          case vmask_integer:
+        switch(do_tmask_of(lhs)) {
+          case tmask_integer:
             // If the LHS operand has type `integer`, shift the LHS operand to the left
             // by the number of bits specified by the RHS operand. Bits shifted out are
             // discarded. Bits shifted in are filled with zeroes.
             rhs = do_check_sll(lhs.as_integer(), rhs.as_integer());
             break;
 
-          case vmask_string:
+          case tmask_string:
             // If the LHS operand has type `string`, fill space characters in the right
             // and discard characters from the left. The number of bytes in the LHS
             // operand will be preserved.
@@ -3101,15 +3102,15 @@ struct AIR_Traits_apply_operator_srl : AIR_Traits_apply_operator_common
           ASTERIA_THROW("Shift count not an integer (operands were `$1` and `$2`)",
                         lhs, rhs);
 
-        switch(do_vmask_of(lhs)) {
-          case vmask_integer:
+        switch(do_tmask_of(lhs)) {
+          case tmask_integer:
             // If the LHS operand has type `integer`, shift the LHS operand to the right
             // by the number of bits specified by the RHS operand. Bits shifted out are
             // discarded. Bits shifted in are filled with zeroes.
             rhs = do_check_srl(lhs.as_integer(), rhs.as_integer());
             break;
 
-          case vmask_string:
+          case tmask_string:
             // If the LHS operand has type `string`, fill space characters in the left
             // and discard characters from the right. The number of bytes in the LHS
             // operand will be preserved.
@@ -3142,8 +3143,8 @@ struct AIR_Traits_apply_operator_sla : AIR_Traits_apply_operator_common
           ASTERIA_THROW("Shift count not an integer (operands were `$1` and `$2`)",
                         lhs, rhs);
 
-        switch(do_vmask_of(lhs)) {
-          case vmask_integer:
+        switch(do_tmask_of(lhs)) {
+          case tmask_integer:
             // If the LHS operand is of type `integer`, shift the LHS operand to the
             // left by the number of bits specified by the RHS operand. Bits shifted
             // out that are equal to the sign bit are discarded. Bits shifted in are
@@ -3152,7 +3153,7 @@ struct AIR_Traits_apply_operator_sla : AIR_Traits_apply_operator_common
             rhs = do_check_sla(lhs.as_integer(), rhs.as_integer());
             break;
 
-          case vmask_string:
+          case tmask_string:
             // If the LHS operand has type `string`, fill space characters in the right.
             rhs = do_string_sla(lhs.as_string(), rhs.as_integer());
             break;
@@ -3183,15 +3184,15 @@ struct AIR_Traits_apply_operator_sra : AIR_Traits_apply_operator_common
           ASTERIA_THROW("Shift count not an integer (operands were `$1` and `$2`)",
                         lhs, rhs);
 
-        switch(do_vmask_of(lhs)) {
-          case vmask_integer:
+        switch(do_tmask_of(lhs)) {
+          case tmask_integer:
             // If the LHS operand is of type `integer`, shift the LHS operand to the
             // right by the number of bits specified by the RHS operand. Bits shifted
             // out are discarded. Bits shifted in are filled with the sign bit.
             rhs = do_check_sra(lhs.as_integer(), rhs.as_integer());
             break;
 
-          case vmask_string:
+          case tmask_string:
             // If the LHS operand has type `string`, discard characters from the right.
             rhs = do_string_sra(lhs.as_string(), rhs.as_integer());
             break;
@@ -3218,18 +3219,18 @@ struct AIR_Traits_apply_operator_andb : AIR_Traits_apply_operator_common
         ctx.stack().pop_back();
         const auto& lhs = ctx.stack().back().dereference_readonly();
 
-        switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
-          case vmask_boolean:
+        switch(do_tmask_of(lhs) | do_tmask_of(rhs)) {
+          case tmask_boolean:
             // For the `boolean` type, return the logical AND'd result of both operands.
             rhs.open_boolean() &= lhs.as_boolean();
             break;
 
-          case vmask_integer:
+          case tmask_integer:
             // For the `integer` type, return bitwise AND'd result of both operands.
             rhs.open_integer() &= lhs.as_integer();
             break;
 
-          case vmask_string:
+          case tmask_string:
             // For the `string` type, return bitwise AND'd result of bytes from operands.
             // The result contains no more bytes than either operand.
             rhs = do_string_andb(lhs.as_string(), ::std::move(rhs.open_string()));
@@ -3256,18 +3257,18 @@ struct AIR_Traits_apply_operator_orb : AIR_Traits_apply_operator_common
         ctx.stack().pop_back();
         const auto& lhs = ctx.stack().back().dereference_readonly();
 
-        switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
-          case vmask_boolean:
+        switch(do_tmask_of(lhs) | do_tmask_of(rhs)) {
+          case tmask_boolean:
             // For the `boolean` type, return the logical OR'd result of both operands.
             rhs.open_boolean() |= lhs.as_boolean();
             break;
 
-          case vmask_integer:
+          case tmask_integer:
             // For the `integer` type, return bitwise OR'd result of both operands.
             rhs.open_integer() |= lhs.as_integer();
             break;
 
-          case vmask_string:
+          case tmask_string:
             // For the `string` type, return bitwise OR'd result of bytes from operands.
             // The result contains no fewer bytes than either operand.
             rhs = do_string_orb(lhs.as_string(), ::std::move(rhs.open_string()));
@@ -3294,18 +3295,18 @@ struct AIR_Traits_apply_operator_xorb : AIR_Traits_apply_operator_common
         ctx.stack().pop_back();
         const auto& lhs = ctx.stack().back().dereference_readonly();
 
-        switch(do_vmask_of(lhs) | do_vmask_of(rhs)) {
-          case vmask_boolean:
+        switch(do_tmask_of(lhs) | do_tmask_of(rhs)) {
+          case tmask_boolean:
             // For the `boolean` type, return the logical XOR'd result of both operands.
             rhs.open_boolean() ^= lhs.as_boolean();
             break;
 
-          case vmask_integer:
+          case tmask_integer:
             // For the `integer` type, return bitwise XOR'd result of both operands.
             rhs.open_integer() ^= lhs.as_integer();
             break;
 
-          case vmask_string:
+          case tmask_string:
             // For the `string` type, return bitwise XOR'd result of bytes from operands.
             // The result contains no fewer bytes than either operand.
             rhs = do_string_xorb(lhs.as_string(), ::std::move(rhs.open_string()));
@@ -3350,10 +3351,10 @@ struct AIR_Traits_apply_operator_fma : AIR_Traits_apply_operator_common
         ctx.stack().pop_back();
         const auto& lhs = ctx.stack().back().dereference_readonly();
 
-        switch(do_vmask_of(lhs) | do_vmask_of(mid) | do_vmask_of(rhs)) {
-          case vmask_integer:
-          case vmask_integer | vmask_real:
-          case vmask_real:
+        switch(do_tmask_of(lhs) | do_tmask_of(mid) | do_tmask_of(rhs)) {
+          case tmask_integer:
+          case tmask_integer | tmask_real:
+          case tmask_real:
             // Calculate the fused multiply-add result of the operands.
             rhs = ::std::fma(lhs.convert_to_real(), mid.convert_to_real(),
                              rhs.convert_to_real());
