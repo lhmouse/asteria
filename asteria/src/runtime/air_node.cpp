@@ -1583,7 +1583,7 @@ struct AIR_Traits_push_unnamed_object
       }
   };
 
-enum Vmask : uint32_t
+enum Vmask : int
   {
     vmask_null        = 1 << type_null,
     vmask_boolean     = 1 << type_boolean,
@@ -1597,10 +1597,10 @@ enum Vmask : uint32_t
   };
 
 inline
-uint32_t do_vmask_of(const Value& val)
+int do_vmask_of(const Value& val)
   noexcept
   {
-    return UINT32_C(1) << val.type();
+    return 1 << val.type();
   }
 
 ROCKET_CONST_FUNCTION
