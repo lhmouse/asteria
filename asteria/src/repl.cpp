@@ -5,7 +5,6 @@
 #include "runtime/reference.hpp"
 #include "runtime/variable.hpp"
 #include "runtime/global_context.hpp"
-#include "runtime/runtime_error.hpp"
 #include "runtime/abstract_hooks.hpp"
 #include "compiler/parser_error.hpp"
 #include "simple_script.hpp"
@@ -475,38 +474,28 @@ do_REP_single()
     fmt << "snippet #" << index;
     cmdline.path = fmt.get_string();
 
-    // The snippet might be a statement list or an expression.
-    // First, try parsing it as the former.
+    // The snippet might be an expression or a statement list.
     try {
-      script.reload_string(cmdline.path, 1, code);
-    }
-    catch(Parser_Error& except) {
-      // We only want to make another attempt in the case of absence of
-      // a semicolon at the end.
-      bool retry = (except.status() == parser_status_semicolon_expected)
-                   && (except.line() < 0);
-      if(retry) {
-        // Rewrite the potential expression to a `return` statement.
-        // The first line is skipped.
-        try {
-          code.insert(0, "return ->(\n");
-          code.append("\n);");
-          script.reload_string(cmdline.path, 0, code);
-        }
-        catch(Parser_Error&) {
-          // If we fail again, it is the previous exception that we are
-          // interested in.
-          retry = false;
-        }
+      // First, try parsing it as the former. We do this by complementing the
+      // expression to a return statement. As the first line of that expression
+      // is supposed to be 'line #1', the `return` statement should start at
+      // line zero.
+      try {
+        script.reload_string(cmdline.path, 0, "return ref\n" + code + "\n;");
       }
-
+      catch(Parser_Error& e) {
+        // In case of failure, make another attempt to parse the string as a
+        // statement list.
+        script.reload_string(cmdline.path, code);
+      }
+    }
+    catch(exception& stdex) {
       // Bail out upon irrecoverable errors.
-      if(!retry)
-        return ::fprintf(stderr, "! error: %s\n", except.what());
+      return ::fprintf(stderr, "! error: %s\n", stdex.what());
     }
 
     // Execute the script as a function, which returns a `Reference`.
-    ASTERIA_RUNTIME_TRY {
+    try {
       const auto ref = script.execute(global, ::std::move(cmdline.args));
       auto str = "[void]";
       if(!ref.is_void()) {
@@ -516,9 +505,9 @@ do_REP_single()
       }
       return ::fprintf(stderr, "* result #%lu: %s\n", index, str);
     }
-    ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+    catch(exception& stdex) {
       // If an exception was thrown, print something informative.
-      return ::fprintf(stderr, "! error: %s\n", except.what());
+      return ::fprintf(stderr, "! error: %s\n", stdex.what());
     }
   }
 
@@ -576,13 +565,13 @@ do_single_noreturn()
       else
         script.reload_file(cmdline.path.c_str());
     }
-    catch(Parser_Error& except) {
+    catch(exception& stdex) {
       // Report the error and exit.
-      do_exit(exit_parser_error, "! error: %s\n", except.what());
+      do_exit(exit_parser_error, "! error: %s\n", stdex.what());
     }
 
     // Execute the script.
-    ASTERIA_RUNTIME_TRY {
+    try {
       const auto ref = script.execute(global, ::std::move(cmdline.args));
       auto stat = exit_success;
       if(!ref.is_void()) {
@@ -592,9 +581,9 @@ do_single_noreturn()
       }
       do_exit(stat);
     }
-    ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+    catch(exception& stdex) {
       // If an exception was thrown, print something informative.
-      do_exit(exit_runtime_error, "! error: %s\n", except.what());
+      do_exit(exit_runtime_error, "! error: %s\n", stdex.what());
     }
   }
 
