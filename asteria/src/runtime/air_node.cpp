@@ -1035,7 +1035,9 @@ constexpr
 bool
 do_is_int48(int64_t value)
   noexcept
-  { return (value >> 47) == (value >> 48);  }
+  {
+    return value >> 47 == value >> 48;
+  }
 
 struct AIR_Traits_push_immediate_int48
   {
