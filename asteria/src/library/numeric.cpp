@@ -29,13 +29,13 @@ do_verify_bounds(double lower, double upper)
     return upper;
   }
 
-V_integer
+int64_t
 do_cast_to_integer(double value)
   {
     if(!is_convertible_to_integer(value))
-      ASTERIA_THROW("`real` value not representable as an `integer` (value `$1`)",
+      ASTERIA_THROW("Real value not representable as integer (value `$1`)",
                     value);
-    return V_integer(value);
+    return static_cast<int64_t>(value);
   }
 
 ROCKET_CONST_FUNCTION
