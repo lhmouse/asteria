@@ -8,6 +8,7 @@
 #include "../rocket/tinyfmt_str.hpp"
 #include "../rocket/format.hpp"
 #include "details/util.ipp"
+#include <cmath>
 
 namespace asteria {
 

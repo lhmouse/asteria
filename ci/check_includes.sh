@@ -6,7 +6,7 @@ export CPPFLAGS="-D_FILE_OFFSET_BITS=64 -D_POSIX_C_SOURCE=200809 -D_GNU_SOURCE -
 export CXXFLAGS='-std=gnu++14 -fno-gnu-keywords -Wno-zero-as-null-pointer-constant'
 
 # note: `sem` is not always available
-_sem="parallel --will-cite --semaphore"
+_sem="parallel --will-cite --semaphore --halt soon,fail=1"
 
 for _file in $(find -L "asteria" -name "*.[hc]pp")
 do
