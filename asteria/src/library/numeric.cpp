@@ -32,8 +32,7 @@ do_verify_bounds(double lower, double upper)
 V_integer
 do_cast_to_integer(double value)
   {
-    if(!(::std::islessequal(-0x1p63, value) &&
-         ::std::islessequal(value, 0x1p63 - 0x1p10)))
+    if(!is_convertible_to_integer(value))
       ASTERIA_THROW("`real` value not representable as an `integer` (value `$1`)",
                     value);
     return V_integer(value);

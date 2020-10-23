@@ -1764,8 +1764,7 @@ ROCKET_CONST_FUNCTION
 int64_t
 do_check_itrunc(double value)
   {
-    if(!(::std::islessequal(-0x1p63, value) &&
-         ::std::islessequal(value, 0x1p63 - 0x1p10)))
+    if(!is_convertible_to_integer(value))
       ASTERIA_THROW("Value not representable as an integer (operand was `$1`)",
                     value);
     return int64_t(value);

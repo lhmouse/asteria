@@ -99,13 +99,38 @@ ROCKET_CONST_FUNCTION inline
 uint8_t
 get_cctype(char c)
   noexcept
-  { return (uint8_t(c) < 128) ? details_util::cctype_table[uint8_t(c)] : 0;  }
+  {
+    size_t m = static_cast<uint8_t>(c);
+    if(m >= 128)
+      return 0;
+    return details_util::cctype_table[m];
+  }
 
 ROCKET_CONST_FUNCTION inline
 bool
 is_cctype(char c, uint8_t mask)
   noexcept
   { return noadl::get_cctype(c) & mask;  }
+
+// Numeric conversion
+ROCKET_CONST_FUNCTION inline
+bool
+is_convertible_to_integer(double val)
+  noexcept
+  {
+    return ::std::islessequal(-0x1p63, val) && ::std::isless(val, 0x1p63);
+  }
+
+ROCKET_CONST_FUNCTION inline
+bool
+is_safe_integer(double val)
+  noexcept
+  {
+    double absv = ::std::abs(val);
+    return ::std::islessequal(1 - 0x1p53, absv) &&
+           ::std::islessequal(absv, 0x1p53 - 1) &&
+           static_cast<double>(static_cast<int64_t>(val)) == val;
+  }
 
 // C-style quoting
 constexpr
@@ -144,8 +169,9 @@ format_errno(int err)
 struct Wrapped_Index
   {
     uint64_t nprepend;  // number of elements to prepend
-    uint64_t nappend;  // number of elements to append
-    size_t rindex;  // the wrapped index (valid if both `nprepend` and `nappend` are zeroes)
+    uint64_t nappend;   // number of elements to append
+    size_t rindex;      // the wrapped index (valid if both
+                        // `nprepend` and `nappend` are zeroes)
   };
 
 ROCKET_CONST_FUNCTION
