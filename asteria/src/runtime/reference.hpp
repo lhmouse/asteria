@@ -279,6 +279,9 @@ class Reference
     Value
     dereference_unset()
       const;
+
+    Value&
+    mutate_into_temporary();
   };
 
 inline
