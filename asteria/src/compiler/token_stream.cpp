@@ -131,47 +131,6 @@ class Line_Reader
       }
   };
 
-class Tack
-  {
-  private:
-    Source_Location m_sloc;
-    size_t m_length = 0;
-
-  public:
-    explicit operator
-    bool()
-      const noexcept
-      { return this->m_sloc.line() != -1;  }
-
-    Source_Location
-    tell()
-      const noexcept
-      { return this->m_sloc;  }
-
-    size_t
-    length()
-      const noexcept
-      { return this->m_length;  }
-
-    Tack&
-    set(const Line_Reader& reader, size_t xlength)
-      noexcept
-      {
-        this->m_sloc = reader.tell();
-        this->m_length = xlength;
-        return *this;
-      }
-
-    Tack&
-    clear()
-      noexcept
-      {
-        this->m_sloc = { };
-        this->m_length = 0;
-        return *this;
-      }
-  };
-
 template<typename XTokenT>
 bool
 do_push_token(cow_vector<Token>& tokens, Line_Reader& reader, size_t tlen, XTokenT&& xtoken)
@@ -806,8 +765,9 @@ reload(const cow_string& file, int line, tinybuf& cbuf)
     tokens.clear();
 
     // Save the position of an unterminated block comment.
-    Tack bcomm;
+    opt<pair<Source_Location, size_t>> bcomm;
 
+    // Read source code line by line.
     Line_Reader reader(cbuf, file, static_cast<size_t>(line));
     while(reader.advance()) {
       // Discard the first line if it looks like a shebang.
@@ -840,14 +800,13 @@ reload(const cow_string& file, int line, tinybuf& cbuf)
         if(bcomm) {
           // Search for the terminator of this block comment.
           auto tptr = ::std::strstr(reader.data(), "*/");
-          if(!tptr) {
+          if(!tptr)
             // The block comment will not end in this line. Stop.
             break;
-          }
-          auto tlen = static_cast<size_t>(tptr + 2 - reader.data());
+
           // Finish this comment and resume from the end of it.
-          bcomm.clear();
-          reader.consume(tlen);
+          bcomm.reset();
+          reader.consume(static_cast<size_t>(tptr + 2 - reader.data()));
           continue;
         }
 
@@ -865,7 +824,7 @@ reload(const cow_string& file, int line, tinybuf& cbuf)
           }
           if(reader.peek(1) == '*') {
             // Start a block comment.
-            bcomm.set(reader, 2);
+            bcomm.emplace(reader.tell(), size_t(2));
             reader.consume(2);
             continue;
           }
@@ -880,9 +839,11 @@ reload(const cow_string& file, int line, tinybuf& cbuf)
           throw Parser_Error(parser_status_token_character_unrecognized, reader.tell(), 1);
       }
     }
+
+    // Fail if a block comment was not closed.
+    // A block comment may straddle multiple lines. We just mark the first line here.
     if(bcomm)
-      // A block comment may straddle multiple lines. We just mark the first line here.
-      throw Parser_Error(parser_status_block_comment_unclosed, bcomm.tell(), bcomm.length());
+      throw Parser_Error(parser_status_block_comment_unclosed, bcomm->first, bcomm->second);
 
     // Reverse the token sequence and accept it.
     ::std::reverse(tokens.mut_begin(), tokens.mut_end());

@@ -14,6 +14,13 @@ class PTC_Arguments
   final
   : public Rcfwd<PTC_Arguments>
   {
+  public:
+    struct Caller
+      {
+        Source_Location sloc;
+        cow_string func;
+      };
+
   private:
     // These describe characteristics of the function call.
     Source_Location m_sloc;
@@ -23,12 +30,9 @@ class PTC_Arguments
     cow_function m_target;
     Reference_Stack m_stack;
 
-    // These are deferred expressions.
+    // These are captured data.
+    opt<Caller> m_caller;
     cow_bivector<Source_Location, AVMC_Queue> m_defer;
-
-    // These are source information of the enclosing function.
-    Source_Location m_encl_sloc;
-    cow_string m_encl_func;
 
   public:
     PTC_Arguments(const Source_Location& sloc, PTC_Aware ptc,
@@ -65,6 +69,21 @@ class PTC_Arguments
       noexcept
       { return this->m_stack;  }
 
+    const Caller*
+    caller_opt()
+      const noexcept
+      { return this->m_caller.value_ptr();  }
+
+    PTC_Arguments&
+    set_caller(Caller&& caller)
+      noexcept
+      { return this->m_caller = ::std::move(caller), *this;  }
+
+    PTC_Arguments&
+    clear_caller()
+      noexcept
+      { return this->m_caller.reset(), *this;  }
+
     const cow_bivector<Source_Location, AVMC_Queue>&
     get_defer()
       const noexcept
@@ -74,24 +93,6 @@ class PTC_Arguments
     open_defer()
       noexcept
       { return this->m_defer;  }
-
-    const Source_Location&
-    enclosing_sloc()
-      const noexcept
-      { return this->m_encl_sloc;  }
-
-    const cow_string&
-    enclosing_func()
-      const noexcept
-      { return this->m_encl_func;  }
-
-    PTC_Arguments&
-    set_enclosing_function(const Source_Location& xsloc, const cow_string& xfunc)
-      {
-        this->m_encl_sloc = xsloc;
-        this->m_encl_func = xfunc;
-        return *this;
-      }
   };
 
 }  // namespace asteria

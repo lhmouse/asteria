@@ -78,8 +78,10 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
 
         // In case of PTCs, set up source location.
         // This cannot be set at the call site where such information isn't available.
-        if(auto ptca = self.get_ptc_args_opt())
-          ptca->set_enclosing_function(this->m_zvarg->sloc(), this->m_zvarg->func());
+        if(auto ptca = self.get_ptc_args_opt()) {
+          PTC_Arguments::Caller call = { this->m_zvarg->sloc(), this->m_zvarg->func() };
+          ptca->set_caller(::std::move(call));
+        }
         break;
 
       case air_status_break_unspec:

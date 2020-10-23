@@ -28,7 +28,9 @@ class Runtime_Error
   public:
     Runtime_Error(M_native, const exception& stdex)
       : m_value(cow_string(stdex.what()))
-      { this->do_backtrace({ frame_type_native, this->m_value });  }
+      { this->do_backtrace({ frame_type_native,
+                             Source_Location(::rocket::sref("[native code]"), -1, 0),
+                             this->m_value });  }
 
     template<typename XValT>
     Runtime_Error(M_throw, XValT&& xval, const Source_Location& sloc)

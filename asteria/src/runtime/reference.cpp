@@ -133,8 +133,8 @@ finish_call(Global_Context& global)
         // Note that if we arrive here, there must have been an exception thrown when
         // unpacking the last frame (i.e. the last call did not return), so the last
         // frame does not have its enclosing function set.
-        if(ptca->enclosing_sloc().offset() >= 0)
-          except.push_frame_func(ptca->enclosing_sloc(), ptca->enclosing_func());
+        if(auto qcall = ptca->caller_opt())
+          except.push_frame_func(qcall->sloc, qcall->func);
       }
       throw;
     }
