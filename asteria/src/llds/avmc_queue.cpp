@@ -112,7 +112,7 @@ do_append_trivial(Executor* executor, Uparam uparam, opt<Symbols>&& syms_opt,
     // Copy symbols.
     uptr<Symbols> usyms;
     if(syms_opt)
-      usyms.reset(new Symbols(::std::move(*syms_opt)));
+      usyms = ::rocket::make_unique<Symbols>(::std::move(*syms_opt));
 
     // Copy source data if `src_opt` is non-null. Fill zeroes otherwise.
     // This operation will not throw exceptions.
@@ -143,7 +143,7 @@ do_append_nontrivial(const Vtable* vtbl, Uparam uparam, opt<Symbols>&& syms_opt,
     // Copy symbols.
     uptr<Symbols> usyms;
     if(syms_opt)
-      usyms.reset(new Symbols(::std::move(*syms_opt)));
+      usyms = ::rocket::make_unique<Symbols>(::std::move(*syms_opt));
 
     // Invoke the constructor if `ctor_opt` is non-null. Fill zeroes otherwise.
     // If an exception is thrown, there is no effect.
