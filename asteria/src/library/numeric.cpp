@@ -38,71 +38,6 @@ do_cast_to_integer(double value)
     return static_cast<int64_t>(value);
   }
 
-ROCKET_CONST_FUNCTION
-V_integer
-do_saturating_add(int64_t lhs, int64_t rhs)
-  {
-    if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs))
-      return (rhs >> 63) ^ INT64_MAX;
-    return lhs + rhs;
-  }
-
-ROCKET_CONST_FUNCTION
-V_integer
-do_saturating_sub(int64_t lhs, int64_t rhs)
-  {
-    if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs))
-      return (rhs >> 63) ^ INT64_MIN;
-    return lhs - rhs;
-  }
-
-ROCKET_CONST_FUNCTION
-V_integer
-do_saturating_mul(int64_t lhs, int64_t rhs)
-  {
-    if((lhs == 0) || (rhs == 0))
-      return 0;
-
-    if((lhs == 1) || (rhs == 1))
-      return (lhs ^ rhs) ^ 1;
-
-    if((lhs == INT64_MIN) || (rhs == INT64_MIN))
-      return (lhs >> 63) ^ (rhs >> 63) ^ INT64_MAX;
-
-    if((lhs == -1) || (rhs == -1))
-      return (lhs ^ rhs) + 1;
-
-    // absolute lhs and signed rhs
-    auto m = lhs >> 63;
-    auto alhs = (lhs ^ m) - m;
-    auto srhs = (rhs ^ m) - m;
-    if((srhs >= 0) ? (alhs > INT64_MAX / srhs) : (alhs > INT64_MIN / srhs))
-      return (srhs >> 63) ^ INT64_MAX;
-
-    return alhs * srhs;
-  }
-
-ROCKET_CONST_FUNCTION
-V_real
-do_saturating_add(double lhs, double rhs)
-  {
-    return lhs + rhs;
-  }
-
-ROCKET_CONST_FUNCTION
-V_real
-do_saturating_sub(double lhs, double rhs)
-  {
-    return lhs - rhs;
-  }
-
-ROCKET_CONST_FUNCTION
-V_real
-do_saturating_mul(double lhs, double rhs)
-  {
-    return lhs * rhs;
-  }
-
 pair<V_integer, int>
 do_decompose_integer(uint8_t ebase, int64_t value)
   {
@@ -150,13 +85,14 @@ std_numeric_abs(V_integer value)
     if(value == INT64_MIN)
       ASTERIA_THROW("Integer absolute value overflow (value `$1`)",
                     value);
+
     return ::std::abs(value);
   }
 
 V_real
 std_numeric_abs(V_real value)
   {
-    return ::std::fabs(value);
+    return ::std::abs(value);
   }
 
 V_integer
@@ -168,7 +104,7 @@ std_numeric_sign(V_integer value)
 V_integer
 std_numeric_sign(V_real value)
   {
-    return ::std::signbit(value) ? -1 : 0;
+    return ::std::signbit(value) ? INT64_C(-1) : 0;
   }
 
 V_boolean
@@ -379,7 +315,8 @@ std_numeric_random(Global_Context& global, Opt_real limit)
 
         case FP_INFINITE:
         case FP_NAN:
-          ASTERIA_THROW("Random number limit shall be finite (limit `$1`)", *limit);
+          ASTERIA_THROW("Random number limit shall be finite (limit `$1`)",
+                        *limit);
 
         default:
           ratio *= *limit;
@@ -417,61 +354,99 @@ std_numeric_frexp(V_real x)
 V_real
 std_numeric_ldexp(V_real frac, V_integer exp)
   {
-    return ::std::ldexp(frac, static_cast<int>(::rocket::clamp(exp, INT_MIN, INT_MAX)));
+    return ::std::ldexp(frac,
+               static_cast<int>(::rocket::clamp(exp, INT_MIN, INT_MAX)));
   }
 
 V_integer
 std_numeric_addm(V_integer x, V_integer y)
   {
-    return V_integer(static_cast<uint64_t>(x) + static_cast<uint64_t>(y));
+    return static_cast<int64_t>(
+               static_cast<uint64_t>(x) + static_cast<uint64_t>(y));
   }
 
 V_integer
 std_numeric_subm(V_integer x, V_integer y)
   {
-    return V_integer(static_cast<uint64_t>(x) - static_cast<uint64_t>(y));
+    return static_cast<int64_t>(
+               static_cast<uint64_t>(x) - static_cast<uint64_t>(y));
   }
 
 V_integer
 std_numeric_mulm(V_integer x, V_integer y)
   {
-    return V_integer(static_cast<uint64_t>(x) * static_cast<uint64_t>(y));
+    return static_cast<int64_t>(
+               static_cast<uint64_t>(x) * static_cast<uint64_t>(y));
   }
 
 V_integer
 std_numeric_adds(V_integer x, V_integer y)
   {
-    return do_saturating_add(x, y);
+    if((y >= 0) && (x > INT64_MAX - y))
+      return INT64_MAX;
+
+    if((y <= 0) && (x < INT64_MIN - y))
+      return INT64_MIN;
+
+    return x + y;
   }
 
 V_real
 std_numeric_adds(V_real x, V_real y)
   {
-    return do_saturating_add(x, y);
+    return x + y;
   }
 
 V_integer
 std_numeric_subs(V_integer x, V_integer y)
   {
-    return do_saturating_sub(x, y);
+    if((y >= 0) && (x < INT64_MIN + y))
+      return INT64_MIN;
+
+    if((y <= 0) && (x > INT64_MAX + y))
+      return INT64_MAX;
+
+    return x - y;
   }
 
 V_real
 std_numeric_subs(V_real x, V_real y)
   {
-    return do_saturating_sub(x, y);
+    return x - y;
   }
 
 V_integer
 std_numeric_muls(V_integer x, V_integer y)
   {
-    return do_saturating_mul(x, y);
+    if((x == 0) || (y == 0))
+      return 0;
+
+    if((x == INT64_MIN) || (y == INT64_MIN))
+      return ((x ^ y) >> 63) ^ INT64_MAX;
+
+    if((x == 1) || (y == 1))
+      return x ^ y ^ 1;
+
+    if((x == -1) || (y == -1))
+      return (x ^ y) + 1;
+
+    int64_t m = y >> 63;
+    int64_t s = (x ^ m) - m;  // x
+    int64_t u = (y ^ m) - m;  // abs(y)
+
+    if((s >= 0) && (s > INT64_MAX / u))
+      return INT64_MAX;
+
+    if((s <= 0) && (s < INT64_MIN / u))
+      return INT64_MIN;
+
+    return x * y;
   }
 
 V_real
 std_numeric_muls(V_real x, V_real y)
   {
-    return do_saturating_mul(x, y);
+    return x * y;
   }
 
 V_integer
@@ -479,8 +454,8 @@ std_numeric_lzcnt(V_integer x)
   {
     if(ROCKET_UNEXPECT(x == 0))
       return 64;
-    else
-      return ROCKET_LZCNT64_NZ(static_cast<uint64_t>(x));
+
+    return ROCKET_LZCNT64_NZ(static_cast<uint64_t>(x));
   }
 
 V_integer
@@ -488,8 +463,8 @@ std_numeric_tzcnt(V_integer x)
   {
     if(ROCKET_UNEXPECT(x == 0))
       return 64;
-    else
-      return ROCKET_TZCNT64_NZ(static_cast<uint64_t>(x));
+
+    return ROCKET_TZCNT64_NZ(static_cast<uint64_t>(x));
   }
 
 V_integer
