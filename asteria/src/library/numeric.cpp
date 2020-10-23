@@ -424,12 +424,6 @@ std_numeric_muls(V_integer x, V_integer y)
     if((x == INT64_MIN) || (y == INT64_MIN))
       return ((x ^ y) >> 63) ^ INT64_MAX;
 
-    if((x == 1) || (y == 1))
-      return x ^ y ^ 1;
-
-    if((x == -1) || (y == -1))
-      return (x ^ y) + 1;
-
     int64_t m = y >> 63;
     int64_t s = (x ^ m) - m;  // x
     int64_t u = (y ^ m) - m;  // abs(y)
