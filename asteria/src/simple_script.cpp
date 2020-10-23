@@ -17,11 +17,6 @@ Simple_Script&
 Simple_Script::
 reload(const cow_string& name, int line, tinybuf& cbuf)
   {
-    // Initialize the parameter list.
-    // This is the same for all scripts so we only do this once.
-    if(ROCKET_UNEXPECT(this->m_params.empty()))
-      this->m_params.emplace_back(::rocket::sref("..."));
-
     // Parse source code.
     Token_Stream tstrm(this->m_opts);
     tstrm.reload(name, line, cbuf);
@@ -30,10 +25,13 @@ reload(const cow_string& name, int line, tinybuf& cbuf)
     stmtq.reload(tstrm);
 
     // Instantiate the function.
+    const Source_Location sloc(name, 0, 0);
+    if(ROCKET_UNEXPECT(this->m_params.empty()))
+      this->m_params.emplace_back(::rocket::sref("..."));
+
     AIR_Optimizer optmz(this->m_opts);
     optmz.reload(nullptr, this->m_params, stmtq);
-    this->m_func = optmz.create_function(Source_Location(name, 0, 0),
-                                         ::rocket::sref("[file scope]"));
+    this->m_func = optmz.create_function(sloc, ::rocket::sref("[file scope]"));
     return *this;
   }
 
