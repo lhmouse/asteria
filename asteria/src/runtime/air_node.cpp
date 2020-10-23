@@ -924,11 +924,12 @@ struct AIR_Traits_assert_statement
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Sparam_sloc_text& sp)
       {
         // Check the value of the condition.
+        // When the assertion succeeds, there is nothing to do.
         if(ROCKET_EXPECT(ctx.stack().back().dereference_readonly().test() != up.p8[0]))
-          // When the assertion succeeds, there is nothing to do.
           return air_status_next;
 
-        // Throw a `Runtime_Error`.
+        // Throw an exception if the assertion fails.
+        // This cannot be disabled.
         throw Runtime_Error(Runtime_Error::M_assert(), sp.sloc, sp.text);
       }
   };
@@ -977,15 +978,14 @@ struct AIR_Traits_glvalue_to_prvalue
     AIR_Status
     execute(Executive_Context& ctx)
       {
-        // Check for glvalues only.
-        // Void references and PTC wrappers are forwarded as is.
+        // If the current reference is a constant or temporary,
+        // don't do anything.
         auto& self = ctx.stack().mut_back();
         if(self.is_prvalue())
           return air_status_next;
 
-        // Convert the result to an rvalue.
-        Reference::S_temporary xref = { self.dereference_readonly() };
-        self = ::std::move(xref);
+        // Convert the result to a temporary.
+        self.mutate_into_temporary();
         return air_status_next;
       }
   };

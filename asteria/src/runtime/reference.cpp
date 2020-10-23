@@ -614,4 +614,19 @@ dereference_unset()
     }
   }
 
+Value&
+Reference::
+mutate_into_temporary()
+  {
+    // Return a mutable reference to the existent temporary value if any.
+    if(ROCKET_EXPECT(this->is_temporary() && this->m_mods.empty()))
+      return this->m_root.as<index_temporary>().val;
+
+    // Replace `*this` with a temporary.
+    S_temporary xref = { this->dereference_readonly() };
+    auto& r = this->m_root.emplace<index_temporary>(::std::move(xref));
+    this->m_mods.clear();
+    return r.val;
+  }
+
 }  // namespace asteria
