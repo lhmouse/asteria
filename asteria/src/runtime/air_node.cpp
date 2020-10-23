@@ -3864,9 +3864,6 @@ struct AIR_Traits_import_call
         if(self.is_lvalue())
           self.dereference_mutable() = path;
 
-        // `this` is null for imported scripts.
-        self = Reference::S_constant();
-
         // Compile the script file into a function object.
         Loader_Lock::Unique_Stream strm;
         strm.reset(ctx.global().loader_lock(), path.safe_c_str());
@@ -3879,13 +3876,18 @@ struct AIR_Traits_import_call
         stmtq.reload(tstrm);
 
         // Instantiate the function.
-        AIR_Optimizer optmz(sp.opts);
-        optmz.reload(nullptr, cow_vector<phsh_string>(1, ::rocket::sref("...")), stmtq);
-        auto qtarget = optmz.create_function(
-                          Source_Location(path, 0, 0), ::rocket::sref("[file scope]"));
+        const Source_Location sloc(path, 0, 0);
+        const cow_vector<phsh_string> params(1, ::rocket::sref("..."));
 
-        return do_function_call_common(self, sp.sloc, ctx, qtarget,
-                                       ptc_aware_none, ::std::move(alt_stack));
+        AIR_Optimizer optmz(sp.opts);
+        optmz.reload(nullptr, params, stmtq);
+        auto qtarget = optmz.create_function(sloc, ::rocket::sref("[file scope]"));
+
+        // Invoke the script.
+        // `this` is null for imported scripts.
+        self = Reference::S_constant();
+        do_invoke_nontail(self, sp.sloc, ctx, qtarget, ::std::move(alt_stack));
+        return air_status_next;
       }
   };
 
