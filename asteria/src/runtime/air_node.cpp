@@ -962,14 +962,10 @@ struct AIR_Traits_glvalue_to_prvalue
     AIR_Status
     execute(Executive_Context& ctx)
       {
-        // If the current reference is a constant or temporary,
-        // don't do anything.
+        // If the current reference is a constant or temporary, don't do anything.
         auto& self = ctx.stack().mut_back();
-        if(self.is_prvalue())
-          return air_status_next;
-
-        // Convert the result to a temporary.
-        self.mutate_into_temporary();
+        if(!self.is_prvalue())
+          self.mutate_into_temporary();
         return air_status_next;
       }
   };
