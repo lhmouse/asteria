@@ -351,7 +351,6 @@ dereference_mutable()
             arr.insert(arr.begin(), w.nprepend);
           else if(w.nappend)
             arr.append(w.nappend);
-
           qval = arr.mut_data() + w.rindex;
           break;
         }
@@ -367,7 +366,8 @@ dereference_mutable()
 
           // Get the value with the given key.
           auto& obj = qval->open_object();
-          qval = &(obj.try_emplace(altr.key).first->second);
+          auto it = obj.try_emplace(altr.key).first;
+          qval = &(it->second);
           break;
         }
 
@@ -378,9 +378,10 @@ dereference_mutable()
           else if(!qval->is_array())
             ASTERIA_THROW("Head operator inapplicable (value `$1`)", *qval);
 
-          // Prepend a new element.
+          // Prepend a copy of the first element.
           auto& arr = qval->open_array();
-          qval = &*(arr.insert(arr.begin(), 1));
+          auto it = arr.insert(arr.begin(), arr.empty() ? null_value : arr.front());
+          qval = &*it;
           break;
         }
 
@@ -391,9 +392,10 @@ dereference_mutable()
           else if(!qval->is_array())
             ASTERIA_THROW("Tail operator inapplicable (value `$1`)", *qval);
 
-          // Append a new element.
+          // Append a copy of the last element.
           auto& arr = qval->open_array();
-          qval = &(arr.emplace_back());
+          auto& back = arr.emplace_back(arr.empty() ? null_value : arr.back());
+          qval = &back;
           break;
         }
 
