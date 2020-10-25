@@ -362,9 +362,12 @@ do_repl_help()
   }
 
 int
-do_repl_command(cow_string&& cmd)
+do_repl_command(cow_string&& cmd, cow_string&& arg)
   {
     // TODO tokenize
+    ::fprintf(stderr, "! CMD: %s\n", cmd.c_str());
+    ::fprintf(stderr, "! ARG: %s\n", arg.c_str());
+
     if(cmd == "help")
       return do_repl_help();
 
@@ -465,9 +468,30 @@ do_REP_single()
     if(code.find_first_not_of(" \f\n\r\t\v") == cow_string::npos)
       return 0;
 
-    // If it is an REPL command, erase the initiator and process the remaining.
-    if(code[0] == ':')
-      return do_repl_command(::std::move(code.erase(0, 1)));
+    // Check for REPL commands.
+    if(code[0] == ':') {
+      code.erase(0, 1);
+
+      // Remove leading spaces.
+      size_t pos = code.find_first_not_of(" \t");
+      code.erase(0, pos);
+      if(code.empty())
+        return 0;
+
+      // Get the command name, which is terminated by a space, then erase the
+      // separating spaces, as well as trailing ones.
+      pos = code.find_first_of(" \t");
+      cow_string cmd = code.substr(0, pos);
+
+      pos = code.find_first_not_of(pos, " \t");
+      code.erase(0, pos);
+
+      pos = code.find_last_not_of(" \t");
+      code.erase(pos + 1);
+
+      // Process the command.
+      return do_repl_command(::std::move(cmd), ::std::move(code));
+    }
 
     // Name the snippet.
     ::rocket::tinyfmt_str fmt;
@@ -483,7 +507,7 @@ do_REP_single()
       try {
         script.reload_string(cmdline.path, 0, "return ref\n" + code + "\n;");
       }
-      catch(Parser_Error& e) {
+      catch(Parser_Error&) {
         // In case of failure, make another attempt to parse the string as a
         // statement list.
         script.reload_string(cmdline.path, code);
