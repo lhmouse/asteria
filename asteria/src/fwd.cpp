@@ -185,10 +185,13 @@ describe_parser_status(Parser_Status status)
         return "UTF code point invalid";
 
       case parser_status_null_character_disallowed:
-        return "null character disallowed in source code";
+        return "null character disallowed";
+
+      case parser_status_conflict_marker_detected:
+        return "merge conflict marker detected";
 
       case parser_status_token_character_unrecognized:
-        return "character invalid in source code";
+        return "character not recognizable";
 
       case parser_status_string_literal_unclosed:
         return "string literal unclosed";

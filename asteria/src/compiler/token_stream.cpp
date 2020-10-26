@@ -56,7 +56,7 @@ class Line_Reader
       { return Source_Location(this->file(), this->line(), this->offset());  }
 
     bool
-    advance()
+    next_line()
       {
         // Clear the current line buffer.
         this->m_str.clear();
@@ -71,7 +71,8 @@ class Line_Reader
               // ... if the last line is empty, fail; ...
               return false;
 
-            // ... otherwise, accept the last line which does not end in an LF anyway.
+            // ... otherwise, accept the last line which does not end in
+            // an LF anyway.
             break;
           }
           else if(ch == '\n')
@@ -133,7 +134,8 @@ class Line_Reader
 
 template<typename XTokenT>
 bool
-do_push_token(cow_vector<Token>& tokens, Line_Reader& reader, size_t tlen, XTokenT&& xtoken)
+do_push_token(cow_vector<Token>& tokens, Line_Reader& reader, size_t tlen,
+              XTokenT&& xtoken)
   {
     tokens.emplace_back(reader.tell(), tlen, ::std::forward<XTokenT>(xtoken));
     reader.consume(tlen);
@@ -197,7 +199,8 @@ do_collect_digits(cow_string& tstr, size_t& tlen, Line_Reader& reader, uint8_t m
   }
 
 bool
-do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool integers_as_reals)
+do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader,
+                          bool integers_as_reals)
   {
     // numeric-literal ::=
     //   number-sign-opt ( binary-literal | decimal-literal | hexadecimal-literal )
@@ -345,7 +348,8 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool i
       throw Parser_Error(parser_status_numeric_literal_invalid, reader.tell(), tlen);
 
     if(bp != ep)
-      throw Parser_Error(parser_status_numeric_literal_suffix_invalid, reader.tell(), tlen);
+      throw Parser_Error(parser_status_numeric_literal_suffix_invalid,
+                         reader.tell(), tlen);
 
     // It is cast to an integer only when `integers_as_reals` is `false` and it does not
     // contain a radix point.
@@ -491,9 +495,9 @@ constexpr s_punctuators[] =
 bool
 do_accept_punctuator(cow_vector<Token>& tokens, Line_Reader& reader)
   {
-    // For two elements X and Y, if X is in front of Y, then X is potential a prefix of Y.
-    // Traverse the range backwards to prevent premature matches, as a token is defined to be
-    // the longest valid character sequence.
+    // For two elements X and Y, if X is in front of Y, then X is potential a prefix
+    // of Y. Traverse the range backwards to prevent premature matches, as a token is
+    // defined to be the longest valid character sequence.
     auto r = do_prefix_range(s_punctuators, reader.peek());
     while(r.first != r.second) {
       const auto& cur = *--(r.second);
@@ -520,7 +524,8 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
     // string-literal ::=
     //   escape-string-literal | noescape-string-literal
     // escape-string-literal ::=
-    //   PCRE("([^\\]|(\\([abfnrtveZ0'"?\\/]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|(U[0-9A-Fa-f]{6}))))*?")
+    //   PCRE("([^\\]|(\\([abfnrtveZ0'"?\\/]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|
+    //         (U[0-9A-Fa-f]{6}))))*?")
     // noescape-string-literal ::=
     //   PCRE('[^']*?')
     if(reader.peek() != head)
@@ -533,7 +538,8 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
       // Read a character.
       char next = reader.peek(tlen);
       if(next == 0)
-        throw Parser_Error(parser_status_string_literal_unclosed, reader.tell(), tlen);
+        throw Parser_Error(parser_status_string_literal_unclosed,
+                           reader.tell(), tlen);
 
       tlen += 1;
 
@@ -551,9 +557,9 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
       // Translate this escape sequence.
       // Read the next charactter.
       next = reader.peek(tlen);
-      if(next == 0) {
-        throw Parser_Error(parser_status_escape_sequence_incomplete, reader.tell(), tlen);
-      }
+      if(next == 0)
+        throw Parser_Error(parser_status_escape_sequence_incomplete,
+                           reader.tell(), tlen);
       tlen += 1;
 
       // Translate it.
@@ -623,15 +629,20 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
             // Read a hex digit.
             char c = reader.peek(tlen);
             if(c == 0)
-              throw Parser_Error(parser_status_escape_sequence_incomplete, reader.tell(), tlen);
+              throw Parser_Error(parser_status_escape_sequence_incomplete,
+                                 reader.tell(), tlen);
 
             if(!is_cctype(c, cctype_xdigit))
-              throw Parser_Error(parser_status_escape_sequence_invalid_hex, reader.tell(), tlen);
+              throw Parser_Error(parser_status_escape_sequence_invalid_hex,
+                                 reader.tell(), tlen);
 
-            tlen += 1;
             // Accumulate this digit.
+            tlen += 1;
+            uint32_t dval = static_cast<uint8_t>(c);
+            dval |= 0x20;
+
             cp *= 16;
-            cp += static_cast<uint32_t>((c <= '9') ? (c - '0') : ((c | 0x20) - 'a' + 10));
+            cp += (dval <= '9') ? (dval - '0') : (dval - 'a' + 10);
           }
 
           if(next == 'x') {
@@ -641,7 +652,8 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
           else {
             // Write a Unicode code point.
             if(!utf8_encode(val, cp))
-              throw Parser_Error(parser_status_escape_utf_code_point_invalid, reader.tell(), tlen);
+              throw Parser_Error(parser_status_escape_utf_code_point_invalid,
+                                 reader.tell(), tlen);
           }
           break;
         }
@@ -758,8 +770,8 @@ Token_Stream::
 reload(const cow_string& file, int line, tinybuf& cbuf)
   {
     // Tokens are parsed and stored here in normal order.
-    // We will have to reverse this sequence before storing it into `*this` if it is accepted.
-    // The storage may be reused.
+    // We will have to reverse this sequence before storing it into `*this` if
+    // it is accepted. The storage may be reused.
     cow_vector<Token> tokens;
     tokens.swap(this->m_rtoks);
     tokens.clear();
@@ -769,10 +781,17 @@ reload(const cow_string& file, int line, tinybuf& cbuf)
 
     // Read source code line by line.
     Line_Reader reader(cbuf, file, static_cast<size_t>(line));
-    while(reader.advance()) {
+    while(reader.next_line()) {
       // Discard the first line if it looks like a shebang.
       if((reader.line() == line) && (::std::strncmp(reader.data(), "#!", 2) == 0))
         continue;
+
+      // Check for conflict markers.
+      if((reader.navail() >= 7)
+         && ::rocket::is_any_of(reader.peek(), { '<', '|', '=', '>' })
+         && ::std::all_of(reader.data() + 1, reader.data() + 7,
+                          [&](char ch) { return ch == reader.peek();  }))
+        throw Parser_Error(parser_status_conflict_marker_detected, reader.tell(), 7);
 
       // Ensure this line is a valid UTF-8 string.
       while(reader.navail() != 0) {
@@ -780,15 +799,15 @@ reload(const cow_string& file, int line, tinybuf& cbuf)
         char32_t cp;
         auto tptr = reader.data();
         if(!utf8_decode(cp, tptr, reader.navail()))
-          throw Parser_Error(parser_status_utf8_sequence_invalid, reader.tell(), reader.navail());
+          throw Parser_Error(parser_status_utf8_sequence_invalid,
+                             reader.tell(), reader.navail());
 
-        auto u8len = static_cast<size_t>(tptr - reader.data());
         // Disallow plain null characters in source data.
         if(cp == 0)
-          throw Parser_Error(parser_status_null_character_disallowed, reader.tell(), u8len);
+          throw Parser_Error(parser_status_null_character_disallowed, reader.tell(), 1);
 
         // Accept this code point.
-        reader.consume(u8len);
+        reader.consume(static_cast<size_t>(tptr - reader.data()));
       }
 
       // Re-scan this line from the beginning.
@@ -801,7 +820,6 @@ reload(const cow_string& file, int line, tinybuf& cbuf)
           // Search for the terminator of this block comment.
           auto tptr = ::std::strstr(reader.data(), "*/");
           if(!tptr)
-            // The block comment will not end in this line. Stop.
             break;
 
           // Finish this comment and resume from the end of it.
@@ -830,20 +848,26 @@ reload(const cow_string& file, int line, tinybuf& cbuf)
           }
         }
 
-        bool token_got = do_accept_numeric_literal(tokens, reader, this->m_opts.integers_as_reals) ||
+        bool token_got = do_accept_numeric_literal(tokens, reader,
+                                              this->m_opts.integers_as_reals) ||
                          do_accept_punctuator(tokens, reader) ||
                          do_accept_string_literal(tokens, reader, '\"', true) ||
-                         do_accept_string_literal(tokens, reader, '\'', this->m_opts.escapable_single_quotes) ||
-                         do_accept_identifier_or_keyword(tokens, reader, this->m_opts.keywords_as_identifiers);
+                         do_accept_string_literal(tokens, reader, '\'',
+                                        this->m_opts.escapable_single_quotes) ||
+                         do_accept_identifier_or_keyword(tokens, reader,
+                                        this->m_opts.keywords_as_identifiers);
         if(!token_got)
-          throw Parser_Error(parser_status_token_character_unrecognized, reader.tell(), 1);
+          throw Parser_Error(parser_status_token_character_unrecognized,
+                             reader.tell(), 1);
       }
     }
 
     // Fail if a block comment was not closed.
-    // A block comment may straddle multiple lines. We just mark the first line here.
+    // A block comment may straddle multiple lines. We just mark the
+    // first line here.
     if(bcomm)
-      throw Parser_Error(parser_status_block_comment_unclosed, bcomm->first, bcomm->second);
+      throw Parser_Error(parser_status_block_comment_unclosed,
+                         bcomm->first, bcomm->second);
 
     // Reverse the token sequence and accept it.
     ::std::reverse(tokens.mut_begin(), tokens.mut_end());

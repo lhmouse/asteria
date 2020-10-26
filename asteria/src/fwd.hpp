@@ -696,6 +696,7 @@ enum Parser_Status : uint32_t
     parser_status_utf8_sequence_incomplete                   = 1002,
     parser_status_utf_code_point_invalid                     = 1003,
     parser_status_null_character_disallowed                  = 1004,
+    parser_status_conflict_marker_detected                   = 1005,
     parser_status_token_character_unrecognized               = 2001,
     parser_status_string_literal_unclosed                    = 2002,
     parser_status_escape_sequence_unknown                    = 2003,
