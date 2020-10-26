@@ -35,7 +35,7 @@ int main()
         assert std.system.proc_invoke('bash',
           [ '-c', 'test $VAR == yes' ], [ 'VAR=no' ]) != 0;
 
-        var o = std.system.conf_load_file('test/sample.conf');
+        var o = std.system.conf_load_file(std.string.pcre_replace(__file, '/[^/]*$', '/sample.conf'));
         assert o.key == "value";
         assert o["keys may be quoted"] == "equals signs are allowed";
         assert o.values.may == "be";
