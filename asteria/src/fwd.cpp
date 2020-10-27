@@ -87,15 +87,6 @@ invoke(Reference& self, Global_Context& global, Reference_Stack&& stack)
     return self.finish_call(global);
   }
 
-Reference
-cow_function::
-invoke(Global_Context& global, Reference_Stack&& stack)
-  const
-  {
-    Reference self = Reference::S_constant();
-    return this->invoke(self, global, ::std::move(stack));
-  }
-
 const char*
 describe_type(Type type)
   noexcept

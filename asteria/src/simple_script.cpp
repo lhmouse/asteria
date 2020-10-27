@@ -92,7 +92,9 @@ execute(Global_Context& global, Reference_Stack&& stack)
   {
     // Execute the script as a plain function.
     const StdIO_Sentry sentry;
-    return this->m_func.invoke(global, ::std::move(stack));
+    Reference self = Reference::S_constant();
+    this->m_func.invoke(self, global, ::std::move(stack));
+    return self;
   }
 
 Reference

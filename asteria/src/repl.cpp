@@ -521,10 +521,11 @@ do_REP_single()
     // Execute the script as a function, which returns a `Reference`.
     try {
       const auto ref = script.execute(global, ::std::move(cmdline.args));
-      auto str = "[void]";
+      const char* str = "[void]";
       if(!ref.is_void()) {
         const auto& val = ref.dereference_readonly();
-        val.dump(fmt.clear_string());
+        fmt.clear_string();
+        val.dump(fmt);
         str = fmt.c_str();
       }
       return ::fprintf(stderr, "* result #%lu: %s\n", index, str);

@@ -90,7 +90,8 @@ do_find_if_opt(Global_Context& global, IterT begin, IterT end, const V_function&
       do_push_temporary(stack, *it);
 
       // Call the predictor function and check the return value.
-      auto self = pred.invoke(global, ::std::move(stack));
+      Reference self = Reference::S_constant();
+      pred.invoke(self, global, ::std::move(stack));
       if(self.dereference_readonly().test() == match)
         return ::std::move(it);
     }
@@ -112,7 +113,8 @@ do_compare(Global_Context& global, Reference_Stack& stack,
     do_push_temporary(stack, rhs);
 
     // Call the predictor function and compare the result with `0`.
-    auto self = kcomp.invoke(global, ::std::move(stack));
+    Reference self = Reference::S_constant();
+    kcomp.invoke(self, global, ::std::move(stack));
     return self.dereference_readonly().compare(V_integer(0));
   }
 
@@ -592,7 +594,8 @@ std_array_generate(Global_Context& global, V_function generator, V_integer lengt
       do_push_temporary(stack, data.empty() ? null_value : data.back());
 
       // Call the generator function and push the return value.
-      auto self = generator.invoke(global, ::std::move(stack));
+      Reference self = Reference::S_constant();
+      generator.invoke(self, global, ::std::move(stack));
       data.emplace_back(self.dereference_readonly());
     }
     return data;

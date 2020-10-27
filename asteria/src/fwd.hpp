@@ -603,10 +603,6 @@ class cow_function
     Reference&
     invoke(Reference& self, Global_Context& global, Reference_Stack&& stack)
       const;
-
-    Reference
-    invoke(Global_Context& global, Reference_Stack&& stack)
-      const;
   };
 
 inline
