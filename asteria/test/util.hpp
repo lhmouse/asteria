@@ -63,6 +63,32 @@
       }  \
     while(false)
 
+// Set terminate handler.
+static const auto asteria_test_terminate = ::std::set_terminate(
+    [] {
+      auto eptr = ::std::current_exception();
+      if(eptr) {
+        try {
+          ::std::rethrow_exception(eptr);
+        }
+        catch(::std::exception& stdex) {
+          ::fprintf(stderr,
+              "`::std::terminate()` called after `::std::exception`:\n%s\n",
+              stdex.what());
+        }
+        catch(...) {
+          ::fprintf(stderr,
+              "`::std::terminate()` called after an unknown exception\n");
+        }
+      }
+      else
+        ::fprintf(stderr,
+            "`::std::terminate()` called without an exception\n");
+
+      ::fflush(nullptr);
+      ::_Exit(1);
+    });
+
 // Set kill timer.
 static const auto asteria_test_alarm = ::alarm(30);
 
