@@ -82,7 +82,7 @@ weaken_enum(enumT value)
 inline
 bool
 mem_equal(const void* s, const void* r, size_t n)
-noexcept
+  noexcept
   { return ::std::memcmp(s, r, n) == 0;  }
 
 // C character types
@@ -119,7 +119,8 @@ bool
 is_convertible_to_integer(double val)
   noexcept
   {
-    return ::std::islessequal(-0x1p63, val) && ::std::isless(val, 0x1p63);
+    return ::std::islessequal(-0x1p63, val) &&
+           ::std::isless(val, 0x1p63);
   }
 
 ROCKET_CONST_FUNCTION inline
