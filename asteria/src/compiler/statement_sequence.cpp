@@ -220,33 +220,6 @@ do_accept_negation_opt(Token_Stream& tstrm)
   }
 
 opt<cow_vector<phsh_string>>
-do_accept_user_declared_identifier_list_opt(Token_Stream& tstrm)
-  {
-    // identifier-list-opt ::=
-    //   identifier-list | ""
-    // identifier-list ::=
-    //   identifier identifier-list-opt
-    auto qname = do_accept_identifier_opt(tstrm, true);
-    if(!qname)
-      return nullopt;
-
-    cow_vector<phsh_string> names;
-    for(;;) {
-      names.emplace_back(::std::move(*qname));
-
-      // Look for the separator.
-      auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
-      if(!kpunct)
-        break;
-
-      qname = do_accept_identifier_opt(tstrm, true);
-      if(!qname)
-        throw Parser_Error(parser_status_identifier_expected, tstrm);
-    }
-    return ::std::move(names);
-  }
-
-opt<cow_vector<phsh_string>>
 do_accept_variable_declarator_opt(Token_Stream& tstrm)
   {
     // variable-declarator ::=
@@ -255,48 +228,84 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
     //   "[" identifier-list "]"
     // structured-binding-object ::=
     //   "{" identifier-list "}"
+    // identifier-list-opt ::=
+    //   identifier-list | ""
+    // identifier-list ::=
+    //   identifier ( "," identifier-list-opt | "" )
+    cow_vector<phsh_string> names;
+    bool comma_allowed = false;
+
     auto qname = do_accept_identifier_opt(tstrm, true);
     if(qname) {
       // Accept a single identifier.
-      cow_vector<phsh_string> names;
       names.emplace_back(::std::move(*qname));
-      return names;
+      return ::std::move(names);
     }
 
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_op });
     if(kpunct) {
       // Accept a list of identifiers wrapped in a pair of brackets and separated by commas.
       // There must be at least one identifier.
-      auto qnames = do_accept_user_declared_identifier_list_opt(tstrm);
-      if(!qnames)
+      for(;;) {
+        qname = do_accept_identifier_opt(tstrm, true);
+        if(!qname)
+          break;
+
+        names.emplace_back(::std::move(*qname));
+
+        // Look for the separator.
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
+        comma_allowed = !kpunct;
+        if(!kpunct)
+          break;
+      }
+
+      if(names.size() < 1)
         throw Parser_Error(parser_status_identifier_expected, tstrm);
 
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
       if(!kpunct)
-        throw Parser_Error(parser_status_closed_bracket_expected, tstrm);
+        throw Parser_Error(comma_allowed ? parser_status_closed_bracket_or_comma_expected
+                                         : parser_status_closed_bracket_expected,
+                           tstrm);
 
       // Make the list different from a plain, sole one.
-      qnames->insert(0, ::rocket::sref("["));
-      qnames->emplace_back(::rocket::sref("]"));
-      return qnames;
+      names.insert(0, ::rocket::sref("["));
+      names.emplace_back(::rocket::sref("]"));
+      return ::std::move(names);
     }
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
     if(kpunct) {
       // Accept a list of identifiers wrapped in a pair of braces and separated by commas.
       // There must be at least one identifier.
-      auto qnames = do_accept_user_declared_identifier_list_opt(tstrm);
-      if(!qnames)
+      for(;;) {
+        qname = do_accept_identifier_opt(tstrm, true);
+        if(!qname)
+          break;
+
+        names.emplace_back(::std::move(*qname));
+
+        // Look for the separator.
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
+        comma_allowed = !kpunct;
+        if(!kpunct)
+          break;
+      }
+
+      if(names.size() < 1)
         throw Parser_Error(parser_status_identifier_expected, tstrm);
 
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
       if(!kpunct)
-        throw Parser_Error(parser_status_closed_brace_expected, tstrm);
+        throw Parser_Error(comma_allowed ? parser_status_closed_brace_or_comma_expected
+                                         : parser_status_closed_brace_expected,
+                           tstrm);
 
       // Make the list different from a plain, sole one.
-      qnames->insert(0, ::rocket::sref("{"));
-      qnames->emplace_back(::rocket::sref("}"));
-      return qnames;
+      names.insert(0, ::rocket::sref("{"));
+      names.emplace_back(::rocket::sref("}"));
+      return ::std::move(names);
     }
 
     return nullopt;

@@ -93,7 +93,7 @@ identifier-list-opt ::=
 	identifier-list | ""
 
 identifier-list ::=
-	identifier identifier-list-opt
+	identifier ( "," identifier-list-opt | "" )
 
 equal-initializer-opt ::=
 	equal-initializer | ""
