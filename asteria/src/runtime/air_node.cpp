@@ -316,16 +316,15 @@ struct AIR_Traits_declare_variable
     AIR_Status
     execute(Executive_Context& ctx, const Sparam_sloc_name& sp)
       {
-        // Allocate an uninitialized variable.
-        auto gcoll = ctx.global().genius_collector();
-        auto var = gcoll->create_variable();
+        const auto qhooks = ctx.global().get_hooks_opt();
+        const auto gcoll = ctx.global().genius_collector();
 
+        // Allocate an uninitialized variable.
         // Inject the variable into the current context.
+        auto var = gcoll->create_variable();
         Reference::S_variable xref = { ::std::move(var) };
         ctx.open_named_reference(sp.name) = xref;  // it'll be used later so don't move!
-
-        // Call the hook function if any.
-        if(auto qhooks = ctx.global().get_hooks_opt())
+        if(qhooks)
           qhooks->on_variable_declare(sp.sloc, sp.name);
 
         // Push a copy of the reference onto the stack.
@@ -638,8 +637,6 @@ struct AIR_Traits_for_each_statement
 
         // Allocate an uninitialized variable for the key.
         const auto vkey = gcoll->create_variable();
-
-        // Inject the variable into the current context.
         Reference::S_variable xref = { vkey };
         ctx_for.open_named_reference(sp.name_key) = xref;
 
@@ -1428,11 +1425,11 @@ struct AIR_Traits_function_call
     AIR_Status
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Source_Location& sloc)
       {
-        // Check for stack overflows.
         const auto sentry = ctx.global().copy_recursion_sentry();
+        const auto qhooks = ctx.global().get_hooks_opt();
 
         // Generate a single-step trap before unpacking arguments.
-        if(auto qhooks = ctx.global().get_hooks_opt())
+        if(qhooks)
           qhooks->on_single_step_trap(sloc);
 
         // Pop arguments off the stack backwards.
@@ -3570,19 +3567,19 @@ struct AIR_Traits_define_null_variable
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up,
-            const Sparam_sloc_name& sp)
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Sparam_sloc_name& sp)
       {
-        // Allocate an uninitialized variable.
-        auto gcoll = ctx.global().genius_collector();
-        auto var = gcoll->create_variable();
+        const auto qhooks = ctx.global().get_hooks_opt();
+        const auto gcoll = ctx.global().genius_collector();
 
+        // Allocate an uninitialized variable.
         // Inject the variable into the current context.
+        auto var = gcoll->create_variable();
         Reference::S_variable xref = { var };
         ctx.open_named_reference(sp.name) = ::std::move(xref);
 
         // Call the hook function if any.
-        if(auto qhooks = ctx.global().get_hooks_opt())
+        if(qhooks)
           qhooks->on_variable_declare(sp.sloc, sp.name);
 
         // Initialize the variable to `null`.
@@ -3616,8 +3613,8 @@ struct AIR_Traits_single_step_trap
     AIR_Status
     execute(Executive_Context& ctx, const Source_Location& sloc)
       {
-        // Call the hook function if any.
-        if(auto qhooks = ctx.global().get_hooks_opt())
+        const auto qhooks = ctx.global().get_hooks_opt();
+        if(qhooks)
           qhooks->on_single_step_trap(sloc);
         return air_status_next;
       }
@@ -3658,11 +3655,11 @@ struct AIR_Traits_variadic_call
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up,
             const Source_Location& sloc)
       {
-        // Check for stack overflows.
         const auto sentry = ctx.global().copy_recursion_sentry();
+        const auto qhooks = ctx.global().get_hooks_opt();
 
-        // Generate a single-step trap.
-        if(auto qhooks = ctx.global().get_hooks_opt())
+        // Generate a single-step trap before the call.
+        if(qhooks)
           qhooks->on_single_step_trap(sloc);
 
         // Initialize arguments.
@@ -3830,11 +3827,11 @@ struct AIR_Traits_import_call
     AIR_Status
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Sparam_import& sp)
       {
-        // Check for stack overflows.
         const auto sentry = ctx.global().copy_recursion_sentry();
+        const auto qhooks = ctx.global().get_hooks_opt();
 
-        // Generate a single-step trap.
-        if(auto qhooks = ctx.global().get_hooks_opt())
+        // Generate a single-step trap before the call.
+        if(qhooks)
           qhooks->on_single_step_trap(sp.sloc);
 
         // Pop arguments off the stack backwards.
