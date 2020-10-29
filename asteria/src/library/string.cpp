@@ -531,7 +531,7 @@ tinyfmt&
 operator<<(tinyfmt& fmt, const PCRE2_Error& err)
   { return fmt << err.c_str();  }
 
-class PCRE2_pcre
+class PCRE2_Matcher
   {
   private:
     uptr<::pcre2_code, void (&)(::pcre2_code*)> m_code;
@@ -539,7 +539,7 @@ class PCRE2_pcre
 
   public:
     explicit
-    PCRE2_pcre(const V_string& pattern, uint32_t opts = 0)
+    PCRE2_Matcher(const V_string& pattern, uint32_t opts = 0)
       : m_code(::pcre2_code_free),
         m_match(::pcre2_match_data_free)
       {
@@ -1510,7 +1510,7 @@ std_string_pcre_find(V_string text, V_integer from, Opt_integer length, V_string
     auto sub_len = static_cast<size_t>(range.second - range.first);
 
     // Try matching using default options.
-    PCRE2_pcre pcre(pattern);
+    PCRE2_Matcher pcre(pattern);
     int err = ::pcre2_match(pcre.code(), sub_ptr, sub_len, 0, 0, pcre.match(), nullptr);
     if(err < 0) {
       if(err == PCRE2_ERROR_NOMATCH)
@@ -1542,7 +1542,7 @@ std_string_pcre_match(V_string text, V_integer from, Opt_integer length, V_strin
     auto sub_len = static_cast<size_t>(range.second - range.first);
 
     // Try matching using default options.
-    PCRE2_pcre pcre(pattern);
+    PCRE2_Matcher pcre(pattern);
     int err = ::pcre2_match(pcre.code(), sub_ptr, sub_len, 0, 0, pcre.match(), nullptr);
     if(err < 0) {
       if(err == PCRE2_ERROR_NOMATCH)
@@ -1585,7 +1585,7 @@ std_string_pcre_named_match(V_string text, V_integer from, Opt_integer length, V
     auto sub_len = static_cast<size_t>(range.second - range.first);
 
     // Try matching using default options.
-    PCRE2_pcre pcre(pattern);
+    PCRE2_Matcher pcre(pattern);
     int err = ::pcre2_match(pcre.code(), sub_ptr, sub_len, 0, 0, pcre.match(), nullptr);
     if(err < 0) {
       if(err == PCRE2_ERROR_NOMATCH)
@@ -1647,7 +1647,7 @@ std_string_pcre_replace(V_string text, V_integer from, Opt_integer length, V_str
     V_string output_str;
 
     // Try matching using default options.
-    PCRE2_pcre pcre(pattern);
+    PCRE2_Matcher pcre(pattern);
   r:
     output_str.assign(output_len, '*');
     int err = ::pcre2_substitute(pcre.code(), sub_ptr, sub_len, 0,
