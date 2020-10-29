@@ -1328,21 +1328,24 @@ Reference&
 do_invoke_nontail(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
                   const cow_function& target, Reference_Stack&& stack)
   {
-    // Note exceptions thrown here are not caught.
-    if(auto qhooks = ctx.global().get_hooks_opt())
-      qhooks->on_function_call(sloc, target);
+    // Perform plain calls if there is no hook.
+    const auto qhooks = ctx.global().get_hooks_opt();
+    if(ROCKET_EXPECT(!qhooks)) {
+      target.invoke(self, ctx.global(), ::std::move(stack));
+      return self;
+    }
 
-    // Execute the target function
+    // Note exceptions thrown here are not caught.
+    qhooks->on_function_call(sloc, target);
+
     ASTERIA_RUNTIME_TRY {
       target.invoke(self, ctx.global(), ::std::move(stack));
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
-      if(auto qhooks = ctx.global().get_hooks_opt())
-        qhooks->on_function_except(sloc, target, except);
+      qhooks->on_function_except(sloc, target, except);
       throw;
     }
-    if(auto qhooks = ctx.global().get_hooks_opt())
-      qhooks->on_function_return(sloc, target, self);
+    qhooks->on_function_return(sloc, target, self);
     return self;
   }
 
@@ -1350,8 +1353,8 @@ AIR_Status
 do_function_call_common(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
                         const cow_function& target, PTC_Aware ptc, Reference_Stack&& stack)
   {
+    // Perform plain calls in non-PTC contexts.
     if(ROCKET_EXPECT(ptc == ptc_aware_none)) {
-      // Perform plain calls.
       do_invoke_nontail(self, sloc, ctx, target, ::std::move(stack));
       return air_status_next;
     }
