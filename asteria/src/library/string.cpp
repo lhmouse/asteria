@@ -497,7 +497,7 @@ do_unpack_le(const V_string& text)
     if(nwords * sizeof(WordT) != text.size())
       ASTERIA_THROW("String length `$1` not divisible by `$2`", text.size(), sizeof(WordT));
 
-    V_array values	;
+    V_array values;
     values.reserve(nwords);
     for(size_t k = 0;  k != nwords;  ++k) {
       WordT word;
