@@ -4,8 +4,8 @@ NOTHING =
 ## Compiler options
 AM_CPPFLAGS = -pipe -pthread -Wall -Wextra -fPIC -DPIC -DDLL_EXPORT  \
   -D_FILE_OFFSET_BITS=64 -D_POSIX_C_SOURCE=200809 -D_GNU_SOURCE -D_WIN32_WINNT=0x0600  \
-  -f{inline-limit=2400,strict-{aliasing,overflow},merge-all-constants}  \
-  -fno-{math-errno,trapping-math,devirtualize-speculatively,stack-protector}  \
+  -f{declone-ctor-dtor,strict-{aliasing,overflow},merge-all-constants}  \
+  -fno-{if-conversion2,math-errno,trapping-math,devirtualize-speculatively,stack-protector}  \
   -Werror={{,sign-}conversion,sign-compare,write-strings,return-type,double-promotion}  \
   -W{invalid-pch,switch-enum,suggest-attribute=noreturn,shadow,missing-field-initializers}  \
   -Wunused-{function,label,local-typedefs,{,but-set-}{variable,parameter}}
