@@ -516,8 +516,9 @@ class PCRE2_Error
     explicit
     PCRE2_Error(int err)
       noexcept
-      { ::pcre2_get_error_message(err, reinterpret_cast<uint8_t*>(this->m_buf.mut_data()),
-                                  this->m_buf.size());  }
+      { ::pcre2_get_error_message(err,
+            reinterpret_cast<uint8_t*>(this->m_buf.mut_data()),
+            this->m_buf.size());  }
 
   public:
     const char*
@@ -545,14 +546,15 @@ class PCRE2_Matcher
       {
         int err;
         size_t off;
-        if(!this->m_code.reset(::pcre2_compile(reinterpret_cast<const uint8_t*>(pattern.data()),
-                               pattern.size(), opts | PCRE2_NEVER_UTF | PCRE2_NEVER_UCP,
-                               &err, &off, nullptr)))
+        if(!this->m_code.reset(::pcre2_compile(
+              reinterpret_cast<const uint8_t*>(pattern.data()), pattern.size(),
+              opts | PCRE2_NEVER_UTF | PCRE2_NEVER_UCP, &err, &off, nullptr)))
           ASTERIA_THROW("Invalid regular expression: $1\n"
                         "[`pcre2_compile()` failed at offset `$3`: $2]",
                         pattern, PCRE2_Error(err), off);
 
-        if(!this->m_match.reset(::pcre2_match_data_create_from_pattern(this->m_code, nullptr)))
+        if(!this->m_match.reset(::pcre2_match_data_create_from_pattern(
+              this->m_code, nullptr)))
           ASTERIA_THROW("Could not allocate `match_data` structure: $1\n"
                         "[`pcre2_match_data_create_from_pattern()` failed]",
                         pattern);
@@ -1600,10 +1602,8 @@ std_string_pcre_named_match(V_string text, V_integer from, Opt_integer length, V
     // Get named group information.
     const uint8_t* gptr;
     ::pcre2_pattern_info(pcre.code(), PCRE2_INFO_NAMETABLE, &gptr);
-
     uint32_t ngroups;
     ::pcre2_pattern_info(pcre.code(), PCRE2_INFO_NAMECOUNT, &ngroups);
-
     uint32_t gsize;
     ::pcre2_pattern_info(pcre.code(), PCRE2_INFO_NAMEENTRYSIZE, &gsize);
 
@@ -1651,11 +1651,10 @@ std_string_pcre_replace(V_string text, V_integer from, Opt_integer length, V_str
   r:
     output_str.assign(output_len, '*');
     int err = ::pcre2_substitute(pcre.code(), sub_ptr, sub_len, 0,
-                    PCRE2_SUBSTITUTE_EXTENDED | PCRE2_SUBSTITUTE_GLOBAL
-                      | PCRE2_SUBSTITUTE_OVERFLOW_LENGTH,
-                    pcre.match(), nullptr,
-                    reinterpret_cast<const uint8_t*>(replacement.data()), replacement.size(),
-                    reinterpret_cast<uint8_t*>(output_str.mut_data()), &output_len);
+                  PCRE2_SUBSTITUTE_EXTENDED | PCRE2_SUBSTITUTE_GLOBAL
+                    | PCRE2_SUBSTITUTE_OVERFLOW_LENGTH, pcre.match(), nullptr,
+                  reinterpret_cast<const uint8_t*>(replacement.data()), replacement.size(),
+                  reinterpret_cast<uint8_t*>(output_str.mut_data()), &output_len);
     if(err < 0) {
       if(err == PCRE2_ERROR_NOMATCH)
         return ::std::move(text);
