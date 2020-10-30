@@ -438,10 +438,10 @@ std_system_proc_invoke(V_string cmd, Opt_array argv, Opt_array envp)
   {
     // Append arguments.
     cow_vector<const char*> ptrs = { cmd.safe_c_str() };
-    if(argv)
+    if(argv) {
       ::rocket::for_each(*argv,
           [&](const Value& arg) { ptrs.emplace_back(arg.as_string().safe_c_str());  });
-
+    }
     auto eoff = ptrs.ssize();  // beginning of environment variables
     ptrs.emplace_back(nullptr);
 
@@ -452,8 +452,8 @@ std_system_proc_invoke(V_string cmd, Opt_array argv, Opt_array envp)
          [&](const Value& env) { ptrs.emplace_back(env.as_string().safe_c_str());  });
       ptrs.emplace_back(nullptr);
     }
-    char** argv_pp = const_cast<char**>(ptrs.data());
-    char** envp_pp = const_cast<char**>(ptrs.data() + eoff);
+    auto argv_pp = const_cast<char**>(ptrs.data());
+    auto envp_pp = const_cast<char**>(ptrs.data() + eoff);
 
     // Launch the program.
     ::pid_t pid;
@@ -463,22 +463,21 @@ std_system_proc_invoke(V_string cmd, Opt_array argv, Opt_array envp)
                     format_errno(errno), cmd);
 
     // Await its termination.
-    for(;;) {
-      // Note: `waitpid()` may return if the child has been stopped or continued.
+    // Note: `waitpid()` may return if the child has been stopped or continued.
+    do {
       int wstat;
       if(::waitpid(pid, &wstat, 0) == -1)
         ASTERIA_THROW("Error awaiting child process '$2'\n"
                       "[`waitpid()` failed: $1]",
                       format_errno(errno), pid);
 
-      // Check whether the process has terminated normally.
       if(WIFEXITED(wstat))
         return WEXITSTATUS(wstat);
 
-      // Check whether the process has been terminated by a signal.
       if(WIFSIGNALED(wstat))
         return 128 + WTERMSIG(wstat);
     }
+    while(true);
   }
 
 void
