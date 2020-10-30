@@ -6,7 +6,6 @@
 #include "../runtime/argument_reader.hpp"
 #include "../runtime/global_context.hpp"
 #include "../util.hpp"
-#include <endian.h>
 #include <sys/stat.h>
 
 namespace asteria {

@@ -25,14 +25,16 @@
 #include "../rocket/array.hpp"
 #include "../rocket/reference_wrapper.hpp"
 #include "../rocket/tinyfmt.hpp"
+#include "../rocket/ascii_case.hpp"
 #include <utility>
 #include <stdexcept>
 #include <typeinfo>
 #include <cstddef>
 #include <cstdint>
-#include <climits>
-#include <cstdio>
-#include <cwchar>
+#include <limits.h>
+#include <stdio.h>
+#include <wchar.h>
+#include <endian.h>
 
 #define ASTERIA_VARIANT_CONSTRUCTOR(C, V, T, t)  \
     template<typename T,  \

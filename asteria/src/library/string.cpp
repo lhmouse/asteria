@@ -5,10 +5,8 @@
 #include "string.hpp"
 #include "../runtime/argument_reader.hpp"
 #include "../util.hpp"
-#include "../../rocket/ascii_case.hpp"
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include <pcre2.h>
-#include <endian.h>
 
 namespace asteria {
 namespace {
