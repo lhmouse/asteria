@@ -143,4 +143,11 @@ lib_libasteria_la_LDFLAGS =  \
 
 bin_PROGRAMS += bin/asteria
 bin_asteria_SOURCES =  \
-  %reldir%/repl.cpp
+  %reldir%/repl/fwd.hpp  \
+  %reldir%/repl/globals.cpp  \
+  %reldir%/repl/hooks.cpp  \
+  %reldir%/repl/single.cpp  \
+  %reldir%/repl/interact.cpp  \
+  %reldir%/repl/commands.cpp  \
+  %reldir%/repl/main.cpp  \
+  ${NOTHING}
