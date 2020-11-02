@@ -129,7 +129,7 @@ do_parse_command_line(int argc, char** argv)
           char* ep;
           long val = ::strtol(optarg, &ep, 10);
           if((*ep != 0) || (val < 0) || (val > 99))
-            printf_and_exit(exit_invalid_argument,
+            exit_printf(exit_invalid_argument,
                   "%s: invalid optimization level -- '%s'\n", argv[0], optarg);
 
           optimize = static_cast<int8_t>(val);
@@ -146,7 +146,7 @@ do_parse_command_line(int argc, char** argv)
       }
 
       // `getopt()` will have written an error message to standard error.
-      printf_and_exit(exit_invalid_argument, "Try `%s -h` for help.\n", argv[0]);
+      exit_printf(exit_invalid_argument, "Try `%s -h` for help.\n", argv[0]);
     }
 
     // Check for early exit conditions.
@@ -242,11 +242,11 @@ main(int argc, char** argv)
     do {
       // Reset standard streams.
       if(!::freopen(nullptr, "r", stdin))
-        printf_and_exit(exit_system_error,
+        exit_printf(exit_system_error,
               "! could not reopen standard input (errno was `%d`)\n", errno);
 
       if(!::freopen(nullptr, "w", stdout))
-        printf_and_exit(exit_system_error,
+        exit_printf(exit_system_error,
               "! could not reopen standard output (errno was `%d`)\n", errno);
 
       // Process the next snippet.
@@ -255,17 +255,17 @@ main(int argc, char** argv)
 
       // Check for errors.
       if(::ferror(stdin))
-        printf_and_exit(exit_system_error,
+        exit_printf(exit_system_error,
               "! could not read standard input (errno was `%d`)\n", errno);
 
       if(::feof(stdin))
-        printf_and_exit(exit_success, "* have a nice day :)\n");
+        exit_printf(exit_success, "* have a nice day :)\n");
     }
     while(1);
   }
   catch(exception& stdex) {
     // Print a message followed by the backtrace if it is available.
     // There isn't much we can do.
-    printf_and_exit(exit_system_error,
+    exit_printf(exit_system_error,
           "! unhandled exception: %s\n", stdex.what());
   }

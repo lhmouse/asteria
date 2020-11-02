@@ -23,7 +23,7 @@ load_and_execute_single_noreturn()
         repl_script.reload_file(repl_cmdline.path.c_str());
     }
     catch(exception& stdex) {
-      printf_and_exit(exit_parser_error, "! error: %s\n", stdex.what());
+      exit_printf(exit_parser_error, "! error: %s\n", stdex.what());
     }
 
     // Execute the script, passing all command-line arguments to it.
@@ -33,18 +33,18 @@ load_and_execute_single_noreturn()
 
     // If the script exits without returning a value, success is assumed.
     if(ref.is_void())
-      printf_and_exit(exit_success);
+      exit_printf(exit_success);
 
     // Check whether the result is an integer.
     const auto& val = ref.dereference_readonly();
     if(!val.is_integer())
-      printf_and_exit(exit_non_integer);
+      exit_printf(exit_non_integer);
 
     // Exit with this code.
-    printf_and_exit(static_cast<Exit_Status>(val.as_integer()));
+    exit_printf(static_cast<Exit_Status>(val.as_integer()));
   }
   catch(exception& stdex) {
-    printf_and_exit(exit_runtime_error, "! error: %s\n", stdex.what());
+    exit_printf(exit_runtime_error, "! error: %s\n", stdex.what());
   }
 
 }  // namespace asteria

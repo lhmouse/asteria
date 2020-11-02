@@ -84,7 +84,7 @@ struct Command_exit
         const char* bptr = args.data();
         const char* eptr = bptr + args.size();
         if(bptr == eptr)
-          printf_and_exit(exit_success, "* have a nice day :)\n");
+          exit_printf(exit_success, "* have a nice day :)\n");
 
         uint8_t stat;
         ::rocket::ascii_numget numg;
@@ -93,7 +93,7 @@ struct Command_exit
                             args.c_str());
           stat = exit_non_integer;
         }
-        printf_and_exit(static_cast<Exit_Status>(stat), "* exiting: %d\n", stat);
+        exit_printf(static_cast<Exit_Status>(stat), "* exiting: %d\n", stat);
       }
   };
 

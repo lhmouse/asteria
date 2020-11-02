@@ -22,7 +22,7 @@ unsigned long repl_index;  // snippet index
 cow_string repl_heredoc;  // heredoc terminator
 
 void
-printf_and_exit(Exit_Status stat, const char* fmt, ...)
+exit_printf(Exit_Status stat, const char* fmt, ...)
   noexcept
   {
     // Output the string to standard error.

@@ -45,7 +45,7 @@ extern cow_string repl_heredoc;  // heredoc terminator
 // These functions are defined in 'globals.cpp'.
 [[noreturn]]
 void
-printf_and_exit(Exit_Status stat, const char* fmt = "", ...)
+exit_printf(Exit_Status stat, const char* fmt = "", ...)
   noexcept;
 
 void
