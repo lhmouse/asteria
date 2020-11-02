@@ -89,8 +89,7 @@ struct Command_exit
         uint8_t stat;
         ::rocket::ascii_numget numg;
         if(!numg.get(stat, bptr, eptr) || (bptr != eptr)) {
-          ::fprintf(stderr, "! warning: invalid exit status ignored: %s\n",
-                            args.c_str());
+          repl_printf("! warning: invalid exit status: %s\n", args.c_str());
           stat = exit_non_integer;
         }
         exit_printf(static_cast<Exit_Status>(stat), "* exiting: %d\n", stat);
@@ -156,21 +155,19 @@ handle(cow_string&& args)
           return (void)::fputs(ptr->description(), stderr);
 
       // Report the failure, followed by all commands for reference.
-      ::fprintf(stderr, "! unknown command `%s`\n", args.c_str());
+      repl_printf("! unknown command `%s`\n", args.c_str());
     }
-
-    // List all commands.
-    ::fprintf(stderr, "* list of commands:\n");
 
     // Get the maximum length of commands.
     size_t max_len = 8;
     for(const auto& ptr : s_commands)
       max_len = ::rocket::max(max_len, ::std::strlen(ptr->cmd()));
 
-    // Print all of them.
+    // List all commands.
+    repl_printf("* list of commands:\n");
     for(const auto& ptr : s_commands)
-      ::fprintf(stderr, "  %-*s  %s\n",
-                static_cast<int>(max_len), ptr->cmd(), ptr->oneline());
+      repl_printf("  :%-*s  %s\n", static_cast<int>(max_len), ptr->cmd(),
+                                  ptr->oneline());
   }
 
 }  // namesapce
@@ -188,7 +185,7 @@ handle_repl_command(cow_string&& cmd, cow_string&& args)
         return ptr->handle(::std::move(args));
 
     // Ignore this command.
-    ::fprintf(stderr,
+    repl_printf(
         "! unknown command `%s` (type `:help` for available commands)\n",
         cmd.c_str());
   }

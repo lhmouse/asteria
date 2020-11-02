@@ -22,6 +22,17 @@ unsigned long repl_index;  // snippet index
 cow_string repl_heredoc;  // heredoc terminator
 
 void
+repl_printf(const char* fmt, ...)
+  noexcept
+  {
+    // Output the string to standard error.
+    ::va_list ap;
+    va_start(ap, fmt);
+    ::vfprintf(stderr, fmt, ap);
+    va_end(ap);
+  }
+
+void
 exit_printf(Exit_Status stat, const char* fmt, ...)
   noexcept
   {

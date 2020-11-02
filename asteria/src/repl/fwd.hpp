@@ -43,6 +43,10 @@ extern unsigned long repl_index;  // snippet index
 extern cow_string repl_heredoc;  // heredoc terminator
 
 // These functions are defined in 'globals.cpp'.
+void
+repl_printf(const char* fmt, ...)
+  noexcept;
+
 [[noreturn]]
 void
 exit_printf(Exit_Status stat, const char* fmt = "", ...)

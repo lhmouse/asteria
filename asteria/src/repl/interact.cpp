@@ -26,7 +26,7 @@ read_execute_print_single()
     // Prompt for the first line.
     int indent;
     long line = 0;
-    ::fprintf(stderr, "#%lu:%lu%n> ", repl_index, ++line, &indent);
+    repl_printf("#%lu:%lu%n> ", repl_index, ++line, &indent);
 
     for(;;) {
       // Read a character. Break upon read errors.
@@ -61,7 +61,7 @@ read_execute_print_single()
 
         // The line feed should be preserved. It'll be appended later.
         // Prompt for the next consecutive line.
-        ::fprintf(stderr, "%*lu> ", indent, ++line);
+        repl_printf("%*lu> ", indent, ++line);
       }
       else if(heredoc.empty()) {
         // In line input mode, backslashes that precede line feeds are deleted.
@@ -82,7 +82,7 @@ read_execute_print_single()
 
     // Discard this snippet if Ctrl-C was received.
     if(get_and_clear_last_signal() != 0) {
-      ::fprintf(stderr, "! interrupted (type `:exit` to quit)\n");
+      repl_printf("! interrupted (type `:exit` to quit)\n");
       ::clearerr(stdin);
       return;
     }
@@ -146,7 +146,7 @@ read_execute_print_single()
 
    // If the script exits without returning anything, say void.
     if(ref.is_void()) {
-      ::fprintf(stderr, "* result #%lu: void\n", repl_index);
+      repl_printf("* result #%lu: void\n", repl_index);
       return;
     }
 
@@ -154,10 +154,10 @@ read_execute_print_single()
     const auto& val = ref.dereference_readonly();
     fmt.clear_string();
     val.dump(fmt);
-    ::fprintf(stderr, "* result #%lu: %s\n", repl_index, fmt.c_str());
+    repl_printf("* result #%lu: %s\n", repl_index, fmt.c_str());
   }
   catch(exception& stdex) {
-    ::fprintf(stderr, "! error: %s\n", stdex.what());
+    repl_printf("! error: %s\n", stdex.what());
   }
 
 }  // namespace asteria
