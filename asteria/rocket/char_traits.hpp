@@ -123,7 +123,7 @@ struct char_traits<char>
           if(ROCKET_UNEXPECT(ch == EOF))
             break;
           p[k++] = (char)ch;
-          if(ch == '\n')
+          if((ch == 0) || (ch == '\n'))
             break;
         }
         ::funlockfile(fp);
@@ -253,7 +253,7 @@ struct char_traits<wchar_t>
           if(ROCKET_UNEXPECT(ch == WEOF))
             break;
           p[k++] = (wchar_t)ch;
-          if(ch == L'\n')
+          if((ch == 0) || (ch == L'\n'))
             break;
         }
         ::funlockfile(fp);
