@@ -132,11 +132,56 @@ struct Command_help
       const override;
   };
 
+struct Command_heredoc
+  final
+  : public Command
+  {
+    const char*
+    cmd()
+      const noexcept override
+      { return "heredoc";  }
+
+    const char*
+    oneline()
+      const noexcept override
+      { return "enters heredoc mode";  }
+
+    const char*
+    description()
+      const noexcept override
+      { return
+//       1         2         3         4         5         6         7      |
+// 4567890123456789012345678901234567890123456789012345678901234567890123456|
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+* heredoc [DELIM]
+
+  Prevents the interpreter from submitting scripts on line breaks. Instead,
+  a script is terminated by a line that matches DELIM, without any leading
+  trailing spaces.
+)'''''''''''''''" """"""""""""""""""""""""""""""""""""""""""""""""""""""""+1;
+// 4567890123456789012345678901234567890123456789012345678901234567890123456|
+//       1         2         3         4         5         6         7      |
+      }
+
+    void
+    handle(cow_string&& args)
+      const override
+      {
+        if(args.empty())
+          return repl_printf("! heredoc requires a terminator string\n");
+
+        repl_heredoc = ::std::move(args);
+        repl_printf("* the next snippet will be terminated by `%s`\n",
+                    repl_heredoc.c_str());
+      }
+  };
+
 const uptr<const Command> s_commands[] =
   {
     // Please keep this list in lexicographical order.
     ::rocket::make_unique<Command_exit>(),
     ::rocket::make_unique<Command_help>(),
+    ::rocket::make_unique<Command_heredoc>(),
   };
 
 void
