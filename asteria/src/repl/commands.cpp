@@ -3,8 +3,6 @@
 
 #include "../precompiled.hpp"
 #include "fwd.hpp"
-#define PCRE2_CODE_UNIT_WIDTH 8
-#include <pcre2.h>
 
 namespace asteria {
 namespace {
@@ -153,7 +151,7 @@ struct Command_heredoc
 //       1         2         3         4         5         6         7      |
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-* heredoc [DELIM]
+* heredoc DELIM
 
   Prevents the interpreter from submitting scripts on line breaks. Instead,
   a script is terminated by a line that matches DELIM, without any leading
@@ -168,7 +166,7 @@ struct Command_heredoc
       const override
       {
         if(args.empty())
-          return repl_printf("! heredoc requires a terminator string\n");
+          return repl_printf("! `heredoc` requires a terminator string\n");
 
         repl_heredoc = ::std::move(args);
         repl_printf("* the next snippet will be terminated by `%s`\n",
