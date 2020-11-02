@@ -15,13 +15,12 @@ void
 read_execute_print_single()
   try {
     // Prepare for the next snippet.
-    cow_string source;
-    bool escape = false;
-
+    repl_script.set_options(repl_cmdline.opts);
+    repl_source.clear();
     cow_string heredoc = ::std::move(repl_heredoc);
     repl_heredoc.clear();
+    bool escape = false;
     ++repl_index;
-    repl_script.set_options(repl_cmdline.opts);
 
     // Prompt for the first line.
     int indent;
@@ -45,15 +44,15 @@ read_execute_print_single()
             break;
 
           // REPL commands can't straddle multiple lines.
-          if(!source.empty() && (source.front() == ':'))
+          if(!repl_source.empty() && (repl_source.front() == ':'))
             break;
         }
         else {
           // In heredoc mode, the current snippet is terminated by a line
           // consisting of the user-defined terminator, which is not part of
           // the snippet and must be removed.
-          if(source.ends_with(heredoc)) {
-            source.erase(source.size() - heredoc.size());
+          if(repl_source.ends_with(heredoc)) {
+            repl_source.erase(repl_source.size() - heredoc.size());
             heredoc.clear();
             break;
           }
@@ -67,7 +66,7 @@ read_execute_print_single()
         // In line input mode, backslashes that precede line feeds are deleted.
         // Those that do not precede line feeds are kept as is.
         if(escape)
-          source.push_back('\\');
+          repl_source.push_back('\\');
 
         if(ch == '\\') {
           escape = true;
@@ -76,7 +75,7 @@ read_execute_print_single()
       }
 
       // Append the character.
-      source.push_back(static_cast<char>(ch));
+      repl_source.push_back(static_cast<char>(ch));
       escape = false;
     }
 
@@ -91,36 +90,40 @@ read_execute_print_single()
     if(::ferror(stdin))
       return;
 
-    if(::feof(stdin) && source.empty())
+    if(::feof(stdin) && repl_source.empty())
       return;
 
     // If user input was empty, don't do anything.
-    size_t pos = source.find_first_not_of(" \f\n\r\t\v");
+    size_t pos = repl_source.find_first_not_of(" \f\n\r\t\v");
     if(pos == cow_string::npos)
       return;
 
     // Check for REPL commands.
-    if(source.front() == ':') {
-      source.erase(0, 1);
+    if(repl_source.front() == ':') {
+      repl_source.erase(0, 1);
 
       // Remove leading spaces.
-      pos = source.find_first_not_of(" \t");
-      source.erase(0, pos);
-      if(source.empty())
+      pos = repl_source.find_first_not_of(" \t");
+      repl_source.erase(0, pos);
+      if(repl_source.empty())
         return;
 
       // Get the command name, which is terminated by a space.
-      pos = source.find_first_of(" \t");
-      cow_string cmd = source.substr(0, pos);
+      pos = repl_source.find_first_of(" \t");
+      auto cmd = repl_source.substr(0, pos);
 
       // Erase separating space characterss, as well as trailing ones.
-      pos = source.find_first_not_of(pos, " \t");
-      source.erase(0, pos);
-      pos = source.find_last_not_of(" \t");
-      source.erase(pos + 1);
+      pos = repl_source.find_first_not_of(pos, " \t");
+      repl_source.erase(0, pos);
+      pos = repl_source.find_last_not_of(" \t");
+      auto args = repl_source.substr(0, pos + 1);
 
       // Process the command.
-      return handle_repl_command(::std::move(cmd), ::std::move(source));
+      // If the command fills something into `repl_source`, execute it.
+      repl_source.clear();
+      handle_repl_command(::std::move(cmd), ::std::move(args));
+      if(repl_source.empty())
+        return;
     }
 
     // Name the snippet.
@@ -133,12 +136,12 @@ read_execute_print_single()
     // start at 'line 1', the `return` statement should start at 'line 0'.
     try {
       repl_script.reload_string(fmt.get_string(), 0,
-                                "return ref\n" + source + "\n;");
+                                "return ref\n" + repl_source + "\n;");
     }
     catch(Parser_Error&) {
       // If the snippet is not a valid expression, try parsing it as a
       // statement.
-      repl_script.reload_string(fmt.get_string(), source);
+      repl_script.reload_string(fmt.get_string(), repl_source);
     }
 
     // Execute the script.

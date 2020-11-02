@@ -19,6 +19,7 @@ Global_Context repl_global;
 Simple_Script repl_script;
 
 unsigned long repl_index;  // snippet index
+cow_string repl_source;  // snippet text
 cow_string repl_heredoc;  // heredoc terminator
 
 void

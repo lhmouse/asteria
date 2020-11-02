@@ -40,6 +40,7 @@ extern Global_Context repl_global;
 extern Simple_Script repl_script;
 
 extern unsigned long repl_index;  // snippet index
+extern cow_string repl_source;  // snippet text
 extern cow_string repl_heredoc;  // heredoc terminator
 
 // These functions are defined in 'globals.cpp'.
