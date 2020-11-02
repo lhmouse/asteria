@@ -222,24 +222,25 @@ struct Command_source
         ::snprintf(nullptr, 0, "#%lu:%lu%n> ", repl_index, line, &indent);
         repl_printf("* loading file '%s'...\n", args.c_str());
 
-        repl_printf("  ----------\n");
         int ch;
-        bool noeol;
+        bool noeol = false;
+        repl_printf("  ----------\n");
 
         do {
           ch = file.getc();
-          if(ch != EOF)
-            textln += static_cast<char>(ch);
-
           if(get_and_clear_last_signal()) {
             ::fputc('\n', stderr);
             repl_printf("! operation cancelled\n");
             return;
           }
 
-          noeol = (ch == EOF) && textln.size() && (textln.back() != '\n');
-          if(noeol)
-            textln += '\n';
+          if(ch == EOF) {
+            noeol = textln.size() && (textln.back() != '\n');
+            if(noeol)
+              textln.push_back('\n');
+          }
+          else
+            textln.push_back(static_cast<char>(ch));
 
           if(textln.size() && (textln.back() == '\n')) {
             source.append(textln);
