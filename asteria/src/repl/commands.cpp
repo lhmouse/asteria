@@ -67,10 +67,10 @@ struct Command_exit
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 * exit [CODE]
 
-  Exits the interpreter. If CODE is specified, it shall be a decimal integer
-  which is used as the process exit status. If CODE is not a valid integer,
-  the process exits with an unspecified non-zero status. If CODE is absent,
-  the process exits with zero.
+  Exits the interpreter. If CODE is absent, the process exits with zero. If
+  CODE is specified, it shall be a decimal integer denoting the process exit
+  status. If CODE is not a valid integer, the process exits anyway, with an
+  unspecified non-zero status.
 )'''''''''''''''" """"""""""""""""""""""""""""""""""""""""""""""""""""""""+1;
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
 //       1         2         3         4         5         6         7      |
@@ -144,7 +144,7 @@ struct Command_heredoc
     const char*
     oneline()
       const noexcept override
-      { return "enters heredoc mode";  }
+      { return "activates heredoc mode";  }
 
     const char*
     description()
@@ -197,7 +197,7 @@ handle(cow_string&& args)
       // Search for the argument.
       for(const auto& ptr : s_commands)
         if(ptr->cmd() == args)
-          return (void)::fputs(ptr->description(), stderr);
+          return repl_printf("%s", ptr->description());
 
       // Report the failure, followed by all commands for reference.
       repl_printf("! unknown command `%s`\n", args.c_str());
