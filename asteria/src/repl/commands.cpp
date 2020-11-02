@@ -3,6 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "fwd.hpp"
+#include "rocket/tinybuf_file.hpp"
 
 namespace asteria {
 namespace {
@@ -174,12 +175,96 @@ struct Command_heredoc
       }
   };
 
+struct Command_source
+  final
+  : public Command
+  {
+    const char*
+    cmd()
+      const noexcept override
+      { return "source";  }
+
+    const char*
+    oneline()
+      const noexcept override
+      { return "loads and executes a script file";  }
+
+    const char*
+    description()
+      const noexcept override
+      { return
+//       1         2         3         4         5         6         7      |
+// 4567890123456789012345678901234567890123456789012345678901234567890123456|
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+* source PATH
+
+  Loads and executes the file designated by PATH.
+)'''''''''''''''" """"""""""""""""""""""""""""""""""""""""""""""""""""""""+1;
+// 4567890123456789012345678901234567890123456789012345678901234567890123456|
+//       1         2         3         4         5         6         7      |
+      }
+
+    void
+    handle(cow_string&& args)
+      const override
+      {
+        if(args.empty())
+          return repl_printf("! `source` requires a file path\n");
+
+        cow_string source;
+        long line = 0;
+        cow_string textln;
+
+        ::rocket::tinybuf_file file;
+        file.open(args.safe_c_str(), ::rocket::tinybuf::open_read);
+
+        int indent;
+        ::snprintf(nullptr, 0, "#%lu:%lu%n> ", repl_index, line, &indent);
+        repl_printf("* loading file '%s'...\n", args.c_str());
+
+        repl_printf("  ----------\n");
+        int ch;
+        bool noeol;
+
+        do {
+          ch = file.getc();
+          if(ch != EOF)
+            textln += static_cast<char>(ch);
+
+          if(get_and_clear_last_signal()) {
+            ::fputc('\n', stderr);
+            repl_printf("! operation cancelled\n");
+            return;
+          }
+
+          noeol = (ch == EOF) && textln.size() && (textln.back() != '\n');
+          if(noeol)
+            textln += '\n';
+
+          if(textln.size() && (textln.back() == '\n')) {
+            source.append(textln);
+            repl_printf("%*lu> %s", indent, ++line, textln.c_str());
+            textln.clear();
+          }
+        }
+        while(ch != EOF);
+
+        repl_printf("  ----------\n");
+        if(noeol)
+          repl_printf("! warning: missing new line at end of file\n");
+
+        repl_printf("* finished loading file '%s'\n", args.c_str());
+        repl_source = ::std::move(source);
+      }
+  };
+
 const uptr<const Command> s_commands[] =
   {
     // Please keep this list in lexicographical order.
     ::rocket::make_unique<Command_exit>(),
     ::rocket::make_unique<Command_help>(),
     ::rocket::make_unique<Command_heredoc>(),
+    ::rocket::make_unique<Command_source>(),
   };
 
 void
