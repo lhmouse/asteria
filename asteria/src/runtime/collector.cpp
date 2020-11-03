@@ -226,12 +226,11 @@ collect_single_opt()
         if(root->get_gc_ref() >= 0) {
           // Break reference cycles.
           root->uninitialize();
+          this->m_tracked.erase(root);
 
-          // Cache this variable if a pool is specified.
+          // Cache this variable for reallocation.
           if(output)
             output->insert(root);
-
-          this->m_tracked.erase(root);
           return false;
         }
 
@@ -239,12 +238,11 @@ collect_single_opt()
           // Transfer this variable to the next generational collector, if one
           // has been tied.
           tied->m_tracked.insert(root);
+          this->m_tracked.erase(root);
 
           // Check whether the next generation needs to be checked as well.
           if(tied->m_counter++ >= tied->m_threshold)
             next = tied;
-
-          this->m_tracked.erase(root);
           return false;
         }
 

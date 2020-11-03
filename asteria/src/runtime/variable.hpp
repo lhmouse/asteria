@@ -72,7 +72,7 @@ class Variable
     uninitialize()
       noexcept
       {
-        this->m_value = INT64_C(0x6eef8badf00ddead);
+        this->m_value = INT64_C(0x6EEF8BADF00DDEAD);
         this->m_immut = true;
         this->m_valid = false;
         return *this;
