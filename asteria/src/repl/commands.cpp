@@ -233,7 +233,6 @@ struct Command_source
             repl_printf("! operation cancelled\n");
             return;
           }
-
           if(ch == EOF) {
             noeol = textln.size() && (textln.back() != '\n');
             if(noeol)
