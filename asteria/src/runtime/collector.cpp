@@ -184,6 +184,17 @@ collect_single_opt()
         if(marked)
           return false;
 
+        if(!root->is_initialized()) {
+          // Zombie variables can now be erased safely.
+          root->uninitialize();
+          this->m_tracked.erase(root);
+
+          // Cache this variable for reallocation.
+          if(output)
+            output->insert(root);
+          return false;
+        }
+
         // Enumerate variables that are reachable from `root` indirectly.
         do_traverse(*root,
           [&](const rcptr<Variable>& child) {
