@@ -186,9 +186,10 @@ class basic_tinybuf_file
         if(goff != -2) {
           // The stream looks seekable.
           goff = ::ftello(this->m_file);
+
           // Perform a zero seek in case of interleaving reads and writes.
+          // Mark the file non-seekable if the operation fails.
           if((goff == -1) || (::fseeko(this->m_file, 0, SEEK_CUR) != 0))
-            // Mark the file non-seekable.
             goff = -2;
         }
 
@@ -204,6 +205,7 @@ class basic_tinybuf_file
           // The file is non-seekable so the buffer cannot be cleared.
           // In this case we discard characters that have been read so far.
           this->m_gbuf.discard(static_cast<size_type>(gcur - this->m_gbuf.begin()));
+
           // Reallocate the buffer as needed.
           navail = this->m_gbuf.reserve(0x2000);
           gcur = this->m_gbuf.begin();
@@ -214,20 +216,20 @@ class basic_tinybuf_file
         navail = traits_type::fgetn(this->m_file, this->m_gbuf.mut_end(), navail);
         this->m_gbuf.accept(navail);
         this->m_goff = goff;
+
         // Check for read errors.
         if((navail == 0) && ::ferror(this->m_file))
           noadl::sprintf_and_throw<runtime_error>("tinybuf_file: Read error (errno `%d`, fileno `%d`)",
                                                   errno, ::fileno(this->m_file));
 
         // Get the number of characters available in total.
+        // If no more characters are available, return EOF.
         navail = this->m_gbuf.size();
         if(navail == 0)
-          // If no more characters are available, return EOF.
           return traits_type::eof();
 
-        // Get the range of remaining characters.
-        auto gbase = this->m_gbuf.begin();
         // Set the new get area. Exclude the first character if `peek` is not set.
+        auto gbase = this->m_gbuf.begin();
         gcur = gbase + !peek;
         gend = gbase + navail;
         return traits_type::to_int_type(gbase[0]);
