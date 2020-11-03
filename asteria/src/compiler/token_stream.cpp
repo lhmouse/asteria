@@ -58,30 +58,18 @@ class Line_Reader
     bool
     next_line()
       {
-        // Clear the current line buffer.
+        // Clear the current line.
         this->m_str.clear();
         this->m_off = 0;
 
         // Buffer a line.
-        for(;;) {
-          int ch = this->m_cbuf->getc();
-          if(ch == EOF) {
-            // When the EOF is encountered, ...
-            if(this->m_str.empty())
-              // ... if the last line is empty, fail; ...
-              return false;
-
-            // ... otherwise, accept the last line which does not end in
-            // an LF anyway.
-            break;
-          }
-          else if(ch == '\n')
-            // Accept a line without the LF.
-            break;
-
-          // Append the character to the line buffer.
+        int ch;
+        while(((ch = this->m_cbuf->getc()) != EOF) && (ch != '\n'))
           this->m_str.push_back(static_cast<char>(ch));
-        }
+
+        // Fail if the last line is empty and EOF is encountered.
+        if(this->m_str.empty() && (ch == EOF))
+          return false;
 
         // Accept the line.
         // Increment the line number if a line has been read successfully.
