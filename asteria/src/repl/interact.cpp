@@ -23,13 +23,14 @@ read_execute_print_single()
     ++repl_index;
 
     // Prompt for the first line.
+    int ch;
     int indent;
     long line = 0;
     repl_printf("#%lu:%lu%n> ", repl_index, ++line, &indent);
 
-    for(;;) {
+    do {
       // Read a character. Break upon read errors.
-      int ch = ::fgetc(stdin);
+      ch = ::fgetc(stdin);
       if(ch == EOF) {
         ::fputc('\n', stderr);
         break;
@@ -78,6 +79,7 @@ read_execute_print_single()
       repl_source.push_back(static_cast<char>(ch));
       escape = false;
     }
+    while(1);
 
     // Discard this snippet if Ctrl-C was received.
     if(get_and_clear_last_signal() != 0) {
