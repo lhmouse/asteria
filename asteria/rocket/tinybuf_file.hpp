@@ -80,18 +80,42 @@ class basic_tinybuf_file
     operator=(basic_tinybuf_file&&)
       = default;
 
-  private:
-    basic_tinybuf_file&
-    do_xsync_gbuf(const char_type*& gcur, const char_type*& gend)
+  protected:
+    off_type
+    do_fortell()
+      const override
       {
-        // Note that this function may or may not clear the get area.
-        if(this->m_goff < 0)
-          // If the input buffer is inactive or the file is non-seekable, don't do anything.
+        // If no file has been opened or there is an error, don't do anything.
+        if(!this->m_file)
+          return -1;
+
+        if(::feof(this->m_file) || ::ferror(this->m_file))
+          return -1;
+
+        // TODO: Not implemented yet.
+        return 0;
+      }
+
+    basic_tinybuf_file&
+    do_flush(const char_type*& gcur, const char_type*& gend, char_type*& /*pcur*/, char_type*& /*pend*/)
+      override
+      {
+        // If no file has been opened or there is an error, don't do anything.
+        if(!this->m_file)
           return *this;
 
+        // We don't use put areas.
+        // If there is no get area, there is nothing to do.
+        if(!gcur)
+          return *this;
+
+        // If the input buffer is inactive or the file is non-seekable, don't do anything.
+        if(this->m_goff < 0)
+          return *this;
+
+        // If the get area has been consumed partially, rewind the file position to the beginning of it,
+        // then discard characters that have been consumed so far.
         if(gcur != gend) {
-          // If the get area has been consumed partially, rewind the file position to the beginning of it,
-          // then discard characters that have been consumed so far.
           ROCKET_ASSERT(gend == this->m_gbuf.end());
           if(::fseeko(this->m_file, this->m_goff, SEEK_SET) != 0) {
             // If the seek operation fails, mark the file non-seekable and preserve the get area.
@@ -110,45 +134,11 @@ class basic_tinybuf_file
         this->m_goff = -1;
         gcur = nullptr;
         gend = nullptr;
-        return *this;
-      }
 
-  protected:
-    off_type
-    do_fortell()
-      const override
-      {
-        if(!this->m_file)
-          // No file has been opened. There are no characters to read.
-          return -1;
-
-        if(::feof(this->m_file) || ::ferror(this->m_file))
-          // No characters could be read.
-          return -1;
-
-        // TODO: Not implemented yet.
-        return 0;
-      }
-
-    basic_tinybuf_file&
-    do_flush(const char_type*& gcur, const char_type*& gend, char_type*& /*pcur*/, char_type*& /*pend*/)
-      override
-      {
-        if(gcur) {
-          // If the get area exists, a file must have been opened.
-          ROCKET_ASSERT(this->m_file);
-          // Synchronize the input buffer.
-          this->do_xsync_gbuf(gcur, gend);
-        }
-
-        // Notice that we don't use put areas.
-        if(this->m_file) {
-          // Although ISO C says flushing an update stream whose most recent operation is an input operation
-          // results in undefined behavior, such effects are actually specified by POSIX-2008. It should be
-          // safe to just call `fflush()` without checking.
-          ::fflush(this->m_file);
-        }
-
+        // Although ISO C says flushing an update stream whose most recent operation is an input operation
+        // results in undefined behavior, such effects are actually specified by POSIX-2008. It should be
+        // safe to just call `fflush()` without checking.
+        ::fflush(this->m_file);
         return *this;
       }
 
