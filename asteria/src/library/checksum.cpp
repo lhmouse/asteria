@@ -506,11 +506,8 @@ class MD5_Hasher
         ROCKET_ASSERT(ec - bc == 8);
 
         // Write the number of bits in little-endian order.
-        auto bits = this->m_size * 8;
-        for(long k = 0;  k < 8;  ++k) {
-          bc[k] = bits & 0xFF;
-          bits >>= 8;
-        }
+        uint64_t bits = htole64(this->m_size * 8);
+        ::std::memcpy(bc, &bits, 8);
         this->do_consume_chunk(this->m_chunk.data());
 
         // Get the checksum.
@@ -797,11 +794,8 @@ class SHA1_Hasher
         ROCKET_ASSERT(ec - bc == 8);
 
         // Write the number of bits in big-endian order.
-        auto bits = this->m_size * 8;
-        for(long k = 7;  k != -1;  --k) {
-          bc[k] = bits & 0xFF;
-          bits >>= 8;
-        }
+        uint64_t bits = htobe64(this->m_size * 8);
+        ::std::memcpy(bc, &bits, 8);
         this->do_consume_chunk(this->m_chunk.data());
 
         // Get the checksum.
@@ -1060,11 +1054,8 @@ class SHA256_Hasher
         ROCKET_ASSERT(ec - bc == 8);
 
         // Write the number of bits in big-endian order.
-        auto bits = this->m_size * 8;
-        for(long k = 7;  k != -1;  --k) {
-          bc[k] = bits & 0xFF;
-          bits >>= 8;
-        }
+        uint64_t bits = htobe64(this->m_size * 8);
+        ::std::memcpy(bc, &bits, 8);
         this->do_consume_chunk(this->m_chunk.data());
 
         // Get the checksum.
