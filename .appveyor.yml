@@ -1,5 +1,5 @@
 image:
-  - Previous Visual Studio 2019
+  - Visual Studio 2019
 
 environment:
   PATH: C:\msys64\usr\bin
