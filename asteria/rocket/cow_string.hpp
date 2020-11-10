@@ -77,6 +77,12 @@ class basic_shallow_string
     length()
       const noexcept
       { return this->m_len;  }
+
+    constexpr
+    charT
+    operator[](size_t pos)
+      const noexcept
+      { return ROCKET_ASSERT(pos <= this->m_len), this->m_ptr[pos];  }
   };
 
 template
