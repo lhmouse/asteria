@@ -1354,11 +1354,13 @@ class basic_cow_string
       }
 
     // 24.3.2.7, string operations
+    constexpr
     const value_type*
     data()
       const noexcept
       { return this->m_ptr;  }
 
+    constexpr
     const value_type*
     c_str()
       const noexcept
