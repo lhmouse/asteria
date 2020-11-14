@@ -79,6 +79,30 @@ class basic_shallow_string
       { return this->m_len;  }
 
     constexpr
+    const charT*
+    begin()
+      const noexcept
+      { return this->m_ptr;  }
+
+    constexpr
+    const charT*
+    end()
+      const noexcept
+      { return this->m_ptr + this->m_len;  }
+
+    constexpr
+    const charT*
+    data()
+      const noexcept
+      { return this->m_ptr;  }
+
+    constexpr
+    size_t
+    size()
+      const noexcept
+      { return this->m_len;  }
+
+    constexpr
     charT
     operator[](size_t pos)
       const noexcept
