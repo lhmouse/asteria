@@ -93,7 +93,7 @@ class optional
     optional&
     operator=(const value_type& value)
       noexcept(conjunction<is_nothrow_copy_constructible<value_type>,
-                         is_nothrow_copy_assignable<value_type>>::value)
+                           is_nothrow_copy_assignable<value_type>>::value)
       {
         if(!this->m_stor.empty())
           this->m_stor.mut_front() = value;
@@ -105,7 +105,7 @@ class optional
     optional&
     operator=(value_type&& value)
       noexcept(conjunction<is_nothrow_move_constructible<value_type>,
-                         is_nothrow_move_assignable<value_type>>::value)
+                           is_nothrow_move_assignable<value_type>>::value)
       {
         if(!this->m_stor.empty())
           this->m_stor.mut_front() = ::std::move(value);
@@ -119,7 +119,7 @@ class optional
     optional&
     operator=(yvalueT&& yvalue)
       noexcept(conjunction<is_nothrow_constructible<value_type, yvalueT&&>,
-                         is_nothrow_assignable<value_type, yvalueT&&>>::value)
+                           is_nothrow_assignable<value_type&, yvalueT&&>>::value)
       {
         if(!this->m_stor.empty())
           this->m_stor.mut_front() = ::std::forward<yvalueT>(yvalue);
@@ -133,7 +133,7 @@ class optional
     optional&
     operator=(const optional<yvalueT>& other)
       noexcept(conjunction<is_nothrow_constructible<value_type, const typename optional<yvalueT>::value_type&>,
-                         is_nothrow_assignable<value_type, const typename optional<yvalueT>::value_type&>>::value)
+                           is_nothrow_assignable<value_type&, const typename optional<yvalueT>::value_type&>>::value)
       {
         if(other.m_stor.empty())
           this->m_stor.clear();
@@ -149,7 +149,7 @@ class optional
     optional&
     operator=(optional<yvalueT>&& other)
       noexcept(conjunction<is_nothrow_constructible<value_type, typename optional<yvalueT>::value_type&&>,
-                         is_nothrow_assignable<value_type, typename optional<yvalueT>::value_type&&>>::value)
+                           is_nothrow_assignable<value_type&, typename optional<yvalueT>::value_type&&>>::value)
       {
         if(other.m_stor.empty())
           this->m_stor.clear();
@@ -275,8 +275,8 @@ class optional
     optional&
     swap(optional& other)
       noexcept(conjunction<is_nothrow_swappable<value_type>,
-                         is_nothrow_move_constructible<value_type>,
-                         is_nothrow_move_assignable<value_type>>::value)
+                           is_nothrow_move_constructible<value_type>,
+                           is_nothrow_move_assignable<value_type>>::value)
       {
         this->m_stor.swap(other.m_stor);
         return *this;
