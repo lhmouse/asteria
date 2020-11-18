@@ -21,7 +21,7 @@ class variant
   {
     static_assert(sizeof...(alternativesT) > 0, "No alternative types provided");
     static_assert(conjunction<is_nothrow_move_constructible<alternativesT>...>::value,
-                  "move constructors of alternative types must not throw exceptions");
+                  "Move constructors of alternative types must not throw exceptions");
 
   public:
     template<typename targetT>

@@ -42,9 +42,9 @@ class cow_hashmap
     static_assert(!is_array<keyT>::value, "Invalid key type");
     static_assert(!is_array<mappedT>::value, "Invalid mapped value type");
     static_assert(is_same<typename allocT::value_type, pair<const keyT, mappedT>>::value,
-                  "inappropriate allocator type");
+                  "Inappropriate allocator type");
     static_assert(noexcept(::std::declval<const hashT&>()(::std::declval<const keyT&>())),
-                  "hash operations must not throw exceptions");
+                  "Hash operations must not throw exceptions");
 
   public:
     // types

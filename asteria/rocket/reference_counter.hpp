@@ -18,7 +18,7 @@ template<typename valueT>
 class reference_counter
   {
     static_assert(is_integral<valueT>::value && !is_same<valueT, bool>::value,
-                  "invalid reference counter value type");
+                  "Invalid reference counter value type");
 
   public:
     using value_type  = valueT;
