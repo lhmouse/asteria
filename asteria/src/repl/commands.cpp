@@ -55,7 +55,7 @@ struct Command_exit
     const char*
     oneline()
       const noexcept override
-      { return "exits the interpreter";  }
+      { return "exit the interpreter";  }
 
     const char*
     description()
@@ -66,7 +66,7 @@ struct Command_exit
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 * exit [CODE]
 
-  Exits the interpreter. If CODE is absent, the process exits with zero. If
+  Exit the interpreter. If CODE is absent, the process exits with zero. If
   CODE is specified, it shall be a decimal integer denoting the process exit
   status. If CODE is not a valid integer, the process exits anyway, with an
   unspecified non-zero status.
@@ -107,7 +107,7 @@ struct Command_help
     const char*
     oneline()
       const noexcept override
-      { return "obtains information about a command";  }
+      { return "obtain information about a command";  }
 
     const char*
     description()
@@ -143,7 +143,7 @@ struct Command_heredoc
     const char*
     oneline()
       const noexcept override
-      { return "activates heredoc mode";  }
+      { return "enter heredoc mode";  }
 
     const char*
     description()
@@ -154,9 +154,9 @@ struct Command_heredoc
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 * heredoc DELIM
 
-  Prevents the interpreter from submitting scripts on line breaks. Instead,
-  a script is terminated by a line that matches DELIM, without any leading
-  trailing spaces.
+  Enter heredoc mode. This prevents the interpreter from submitting scripts
+  on line breaks. Instead, a script is terminated by a line that matches
+  DELIM, without any leading or trailing spaces.
 )'''''''''''''''" """"""""""""""""""""""""""""""""""""""""""""""""""""""""+1;
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
 //       1         2         3         4         5         6         7      |
@@ -187,7 +187,7 @@ struct Command_source
     const char*
     oneline()
       const noexcept override
-      { return "loads and executes a script file";  }
+      { return "load and execute a script file";  }
 
     const char*
     description()
@@ -198,7 +198,7 @@ struct Command_source
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
 * source PATH
 
-  Loads and executes the file designated by PATH.
+  Load and execute the file designated by PATH.
 )'''''''''''''''" """"""""""""""""""""""""""""""""""""""""""""""""""""""""+1;
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
 //       1         2         3         4         5         6         7      |
@@ -294,7 +294,7 @@ handle(cow_string&& args)
     // List all commands.
     repl_printf("* list of commands:\n");
     for(const auto& ptr : s_commands)
-      repl_printf("  :%-*s  %s\n", static_cast<int>(max_len), ptr->cmd(),
+      repl_printf("  %-*s  %s\n", static_cast<int>(max_len), ptr->cmd(),
                                   ptr->oneline());
   }
 
