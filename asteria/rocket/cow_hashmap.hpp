@@ -77,44 +77,44 @@ class cow_hashmap
     explicit constexpr
     cow_hashmap(const allocator_type& alloc, const hasher& hf = hasher(), const key_equal& eq = key_equal())
       noexcept(conjunction<is_nothrow_constructible<hasher>,
-                         is_nothrow_copy_constructible<hasher>,
-                         is_nothrow_constructible<key_equal>,
-                         is_nothrow_copy_constructible<key_equal>>::value)
+                           is_nothrow_copy_constructible<hasher>,
+                           is_nothrow_constructible<key_equal>,
+                           is_nothrow_copy_constructible<key_equal>>::value)
       : m_sth(alloc, hf, eq)
       { }
 
     cow_hashmap(const cow_hashmap& other)
       noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
-                         is_nothrow_copy_constructible<key_equal>>::value)
+                           is_nothrow_copy_constructible<key_equal>>::value)
       : m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()),
               other.m_sth.as_hasher(), other.m_sth.as_key_equal())
       { this->assign(other);  }
 
     cow_hashmap(const cow_hashmap& other, const allocator_type& alloc)
       noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
-                         is_nothrow_copy_constructible<key_equal>>::value)
+                           is_nothrow_copy_constructible<key_equal>>::value)
       : m_sth(alloc, other.m_sth.as_hasher(), other.m_sth.as_key_equal())
       { this->assign(other);  }
 
     cow_hashmap(cow_hashmap&& other)
       noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
-                         is_nothrow_copy_constructible<key_equal>>::value)
+                           is_nothrow_copy_constructible<key_equal>>::value)
       : m_sth(::std::move(other.m_sth.as_allocator()), other.m_sth.as_hasher(), other.m_sth.as_key_equal())
       { this->assign(::std::move(other));  }
 
     cow_hashmap(cow_hashmap&& other, const allocator_type& alloc)
       noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
-                         is_nothrow_copy_constructible<key_equal>>::value)
+                           is_nothrow_copy_constructible<key_equal>>::value)
       : m_sth(alloc, other.m_sth.as_hasher(), other.m_sth.as_key_equal())
       { this->assign(::std::move(other));  }
 
     constexpr
     cow_hashmap()
       noexcept(conjunction<is_nothrow_constructible<allocator_type>,
-                         is_nothrow_constructible<hasher>,
-                         is_nothrow_copy_constructible<hasher>,
-                         is_nothrow_constructible<key_equal>,
-                         is_nothrow_copy_constructible<key_equal>>::value)
+                           is_nothrow_constructible<hasher>,
+                           is_nothrow_copy_constructible<hasher>,
+                           is_nothrow_constructible<key_equal>,
+                           is_nothrow_copy_constructible<key_equal>>::value)
       : cow_hashmap(allocator_type())
       { }
 
