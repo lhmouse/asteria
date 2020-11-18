@@ -255,14 +255,18 @@ class basic_cow_string
     basic_cow_string&
     operator=(const basic_cow_string& other)
       noexcept
-      { noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        return this->assign(other);  }
+      {
+        noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+        return this->assign(other);
+      }
 
     basic_cow_string&
     operator=(basic_cow_string&& other)
       noexcept
-      { noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        return this->assign(::std::move(other));  }
+      {
+        noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+        return this->assign(::std::move(other));
+      }
 
     basic_cow_string&
     operator=(shallow_type sh)
