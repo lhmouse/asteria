@@ -8,12 +8,12 @@
 
 namespace rocket {
 
-template<typename stringT, typename hashT = hash<stringT>>
+template<typename stringT, typename hashT = hash<stringT>, typename eqT = equal_to<void>>
 class basic_prehashed_string;
 
 #include "details/prehashed_string.ipp"
 
-template<typename stringT, typename hashT>
+template<typename stringT, typename hashT, typename eqT>
 class basic_prehashed_string
   {
     static_assert(noexcept(::std::declval<const hashT&>()(::std::declval<const stringT&>())),
@@ -23,6 +23,7 @@ class basic_prehashed_string
     // types
     using string_type  = stringT;
     using hasher       = hashT;
+    using key_equal    = eqT;
 
     using value_type      = typename string_type::value_type;
     using traits_type     = typename string_type::traits_type;
@@ -42,74 +43,88 @@ class basic_prehashed_string
     struct hash;
 
   private:
-    details_prehashed_string::string_storage<string_type, hasher> m_sth;
+    details_prehashed_string::string_storage<string_type, hasher, key_equal> m_sth;
 
   public:
     constexpr
     basic_prehashed_string()
       noexcept(conjunction<is_nothrow_constructible<string_type>,
-                         is_nothrow_constructible<hasher>,
-                         is_nothrow_copy_constructible<hasher>>::value)
-      : m_sth(hasher())
+                           is_nothrow_constructible<hasher>,
+                           is_nothrow_copy_constructible<hasher>,
+                           is_nothrow_constructible<key_equal>,
+                           is_nothrow_copy_constructible<key_equal>>::value)
+      : m_sth(hasher(), key_equal())
       { }
 
     template<typename... paramsT>
     explicit constexpr
-    basic_prehashed_string(const hasher& hf, paramsT&&... params)
+    basic_prehashed_string(const hasher& hf, const key_equal& eq, paramsT&&... params)
       noexcept(conjunction<is_nothrow_constructible<string_type, paramsT&&...>,
-                         is_nothrow_copy_constructible<hasher>>::value)
-      : m_sth(hf, ::std::forward<paramsT>(params)...)
+                           is_nothrow_copy_constructible<hasher>,
+                           is_nothrow_copy_constructible<key_equal>>::value)
+      : m_sth(hf, eq, ::std::forward<paramsT>(params)...)
       { }
 
     explicit constexpr
-    basic_prehashed_string(const string_type& str, const hasher& hf = hasher())
+    basic_prehashed_string(const string_type& str, const hasher& hf = hasher(),
+                           const key_equal& eq = key_equal())
       noexcept(conjunction<is_nothrow_copy_constructible<string_type>,
-                         is_nothrow_copy_constructible<hasher>>::value)
-      : m_sth(hf, str)
+                           is_nothrow_copy_constructible<hasher>,
+                           is_nothrow_copy_constructible<key_equal>>::value)
+      : m_sth(hf, eq, str)
       { }
 
     constexpr
-    basic_prehashed_string(string_type&& str, const hasher& hf = hasher())
+    basic_prehashed_string(string_type&& str, const hasher& hf = hasher(),
+                           const key_equal& eq = key_equal())
       noexcept(conjunction<is_nothrow_move_constructible<string_type>,
-                         is_nothrow_copy_constructible<hasher>>::value)
-      : m_sth(hf, ::std::move(str))
+                           is_nothrow_copy_constructible<hasher>,
+                           is_nothrow_copy_constructible<key_equal>>::value)
+      : m_sth(hf, eq, ::std::move(str))
       { }
 
     template<typename xstringT,
     ROCKET_ENABLE_IF(is_convertible<xstringT&, string_type>::value)>
     explicit constexpr
-    basic_prehashed_string(xstringT& xstr, const hasher& hf = hasher())
+    basic_prehashed_string(xstringT& xstr, const hasher& hf = hasher(),
+                           const key_equal& eq = key_equal())
       noexcept(conjunction<is_nothrow_constructible<string_type, xstringT&>,
-                         is_nothrow_copy_constructible<hasher>>::value)
-      : m_sth(hf, xstr)
+                           is_nothrow_copy_constructible<hasher>,
+                           is_nothrow_copy_constructible<key_equal>>::value)
+      : m_sth(hf, eq, xstr)
       { }
 
     template<typename xstringT,
     ROCKET_ENABLE_IF(is_convertible<xstringT&&, string_type>::value)>
     constexpr
-    basic_prehashed_string(xstringT&& xstr, const hasher& hf = hasher())
+    basic_prehashed_string(xstringT&& xstr, const hasher& hf = hasher(),
+                           const key_equal& eq = key_equal())
       noexcept(conjunction<is_nothrow_constructible<string_type, xstringT&&>,
-                         is_nothrow_copy_constructible<hasher>>::value)
-      : m_sth(hf, ::std::forward<xstringT>(xstr))
+                           is_nothrow_copy_constructible<hasher>,
+                           is_nothrow_copy_constructible<key_equal>>::value)
+      : m_sth(hf, eq, ::std::forward<xstringT>(xstr))
       { }
 
     constexpr
-    basic_prehashed_string(initializer_list<value_type> init, const hasher& hf = hasher())
-      : m_sth(hf, init)
+    basic_prehashed_string(initializer_list<value_type> init, const hasher& hf = hasher(),
+                           const key_equal& eq = key_equal())
+      : m_sth(hf, eq, init)
       { }
 
     basic_prehashed_string(const basic_prehashed_string& other)
       noexcept(conjunction<is_nothrow_constructible<string_type>,
-                         is_nothrow_copy_assignable<string_type>,
-                         is_nothrow_copy_constructible<hasher>>::value)
-      : m_sth(other.m_sth.as_hasher())
+                           is_nothrow_copy_assignable<string_type>,
+                           is_nothrow_copy_constructible<hasher>,
+                           is_nothrow_copy_constructible<key_equal>>::value)
+      : m_sth(other.m_sth.as_hasher(), other.m_sth.as_key_equal())
       { this->m_sth.assign(other.m_sth);  }
 
     basic_prehashed_string(basic_prehashed_string&& other)
       noexcept(conjunction<is_nothrow_constructible<string_type>,
-                         is_nothrow_move_assignable<string_type>,
-                         is_nothrow_copy_constructible<hasher>>::value)
-      : m_sth(other.m_sth.as_hasher())
+                           is_nothrow_move_assignable<string_type>,
+                           is_nothrow_copy_constructible<hasher>,
+                           is_nothrow_copy_constructible<key_equal>>::value)
+      : m_sth(other.m_sth.as_hasher(), other.m_sth.as_key_equal())
       { this->m_sth.assign(::std::move(other.m_sth));  }
 
     basic_prehashed_string&
@@ -153,6 +168,40 @@ class basic_prehashed_string
     rdhash()
       const noexcept
       { return this->m_sth.hval();  }
+
+    constexpr
+    bool
+    equals(const basic_prehashed_string& other)
+      const
+      noexcept(noexcept(::std::declval<const key_equal&>()(
+          ::std::declval<const string_type&>(), ::std::declval<const string_type&>())))
+      {
+        return (this->m_sth.hval() == other.m_sth.hval())
+               && (this->m_sth.str().size() == other.m_sth.str().size())
+               && this->m_sth.as_key_equal()(this->m_sth.str(), other.m_sth.str());
+      }
+
+    constexpr
+    bool
+    equals(const string_type& other)
+      const
+      noexcept(noexcept(::std::declval<const key_equal&>()(
+          ::std::declval<const string_type&>(), ::std::declval<const string_type&>())))
+      {
+        return (this->m_sth.str().size() == other.size())
+               && this->m_sth.as_key_equal()(this->m_sth.str(), other);
+      }
+
+    template<typename otherT>
+    constexpr
+    bool
+    equals(const otherT& other)
+      const
+      noexcept(noexcept(::std::declval<const key_equal&>()(
+          ::std::declval<const string_type&>(), ::std::declval<const otherT&>())))
+      {
+        return this->m_sth.as_key_equal()(this->m_sth.str(), other);
+      }
 
     // 24.3.2.3, iterators
     const_iterator
@@ -276,7 +325,8 @@ class basic_prehashed_string
       }
 
     // 24.3.2.7, string operations
-    constexpr const value_type*
+    constexpr
+    const value_type*
     data()
       const noexcept
       { return this->m_sth.str().data();  }
@@ -287,8 +337,8 @@ class basic_prehashed_string
       { return this->m_sth.str().c_str();  }
   };
 
-template<typename stringT, typename hashT>
-struct basic_prehashed_string<stringT, hashT>::hash
+template<typename stringT, typename hashT, typename eqT>
+struct basic_prehashed_string<stringT, hashT, eqT>::hash
   {
     using result_type    = size_t;
     using argument_type  = basic_prehashed_string;
@@ -300,57 +350,59 @@ struct basic_prehashed_string<stringT, hashT>::hash
       { return str.rdhash();  }
   };
 
-template class
-basic_prehashed_string<cow_string, cow_string::hash>;
+extern template
+class basic_prehashed_string<cow_string, cow_string::hash>;
 
-template class
-basic_prehashed_string<cow_wstring, cow_wstring::hash>;
+extern template
+class basic_prehashed_string<cow_wstring, cow_wstring::hash>;
 
-template class
-basic_prehashed_string<cow_u16string, cow_u16string::hash>;
+extern template
+class basic_prehashed_string<cow_u16string, cow_u16string::hash>;
 
-template class
-basic_prehashed_string<cow_u32string, cow_u32string::hash>;
+extern template
+class basic_prehashed_string<cow_u32string, cow_u32string::hash>;
 
-template<typename stringT, typename hashT>
+template<typename stringT, typename hashT, typename eqT>
 constexpr
 bool
-operator==(const basic_prehashed_string<stringT, hashT>& lhs, const basic_prehashed_string<stringT, hashT>& rhs)
-  { return (lhs.rdhash() == rhs.rdhash()) && (lhs.rdstr() == rhs.rdstr());  }
+operator==(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const basic_prehashed_string<stringT, hashT>& rhs)
+  noexcept(noexcept(lhs.equals(rhs)))
+  { return lhs.equals(rhs);  }
 
-template<typename stringT, typename hashT>
+template<typename stringT, typename hashT, typename eqT, typename otherT>
 constexpr
 bool
-operator!=(const basic_prehashed_string<stringT, hashT>& lhs, const basic_prehashed_string<stringT, hashT>& rhs)
-  { return (lhs.rdhash() != rhs.rdhash()) || (lhs.rdstr() != rhs.rdstr());  }
+operator==(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const otherT& rhs)
+  noexcept(noexcept(lhs.equals(rhs)))
+  { return lhs.equals(rhs);  }
 
-template<typename stringT, typename hashT, typename otherT,
-ROCKET_ENABLE_IF_HAS_TYPE(decltype(::std::declval<const stringT&>() == ::std::declval<const otherT&>()))>
-constexpr
-bool
-operator==(const basic_prehashed_string<stringT, hashT>& lhs, const otherT& rhs)
-  { return lhs.rdstr() == rhs;  }
-
-template<typename stringT, typename hashT, typename otherT,
-ROCKET_ENABLE_IF_HAS_TYPE(decltype(::std::declval<const stringT&>() != ::std::declval<const otherT&>()))>
-constexpr
-bool
-operator!=(const basic_prehashed_string<stringT, hashT>& lhs, const otherT& rhs)
-  { return lhs.rdstr() != rhs;  }
-
-template<typename stringT, typename hashT, typename otherT,
-ROCKET_ENABLE_IF_HAS_TYPE(decltype(::std::declval<const otherT&>() == ::std::declval<const stringT&>()))>
+template<typename stringT, typename hashT, typename eqT, typename otherT>
 constexpr
 bool
 operator==(const otherT& lhs, const basic_prehashed_string<stringT, hashT>& rhs)
-  { return lhs == rhs.rdstr();  }
+  noexcept(noexcept(rhs.equals(lhs)))
+  { return rhs.equals(lhs);  }
 
-template<typename stringT, typename hashT, typename otherT,
-ROCKET_ENABLE_IF_HAS_TYPE(decltype(::std::declval<const otherT&>() != ::std::declval<const stringT&>()))>
+template<typename stringT, typename hashT, typename eqT>
+constexpr
+bool
+operator!=(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const basic_prehashed_string<stringT, hashT>& rhs)
+  noexcept(noexcept(lhs.equals(rhs)))
+  { return !lhs.equals(rhs);  }
+
+template<typename stringT, typename hashT, typename eqT, typename otherT>
+constexpr
+bool
+operator!=(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const otherT& rhs)
+  noexcept(noexcept(lhs.equals(rhs)))
+  { return !lhs.equals(rhs);  }
+
+template<typename stringT, typename hashT, typename eqT, typename otherT>
 constexpr
 bool
 operator!=(const otherT& lhs, const basic_prehashed_string<stringT, hashT>& rhs)
-  { return lhs != rhs.rdstr();  }
+  noexcept(noexcept(rhs.equals(lhs)))
+  { return !rhs.equals(lhs);  }
 
 template<typename stringT, typename hashT>
 inline

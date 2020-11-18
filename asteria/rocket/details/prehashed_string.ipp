@@ -7,16 +7,19 @@
 
 namespace details_prehashed_string {
 
-template<typename stringT, typename hashT>
+template<typename stringT, typename hashT, typename eqT>
 class string_storage
-  : private allocator_wrapper_base_for<hashT>::type
+  : private allocator_wrapper_base_for<hashT>::type,
+    private allocator_wrapper_base_for<eqT>::type
   {
   public:
     using string_type  = stringT;
     using hasher       = hashT;
+    using key_equal    = eqT;
 
   private:
-    using hasher_base   = typename allocator_wrapper_base_for<hasher>::type;
+    using hasher_base     = typename allocator_wrapper_base_for<hasher>::type;
+    using key_equal_base  = typename allocator_wrapper_base_for<key_equal>::type;
 
   private:
     string_type m_str;
@@ -24,9 +27,10 @@ class string_storage
 
   public:
     template<typename... paramsT>
-    explicit
-    string_storage(const hasher& hf, paramsT&&... params)
+    explicit constexpr
+    string_storage(const hasher& hf, const key_equal& eq, paramsT&&... params)
       : hasher_base(hf),
+        key_equal_base(eq),
         m_str(::std::forward<paramsT>(params)...),
         m_hval(this->as_hasher()(this->m_str))
       { }
@@ -39,21 +43,37 @@ class string_storage
       = delete;
 
   public:
+    constexpr
     const hasher&
     as_hasher()
       const noexcept
       { return static_cast<const hasher_base&>(*this);  }
 
+    constexpr
     hasher&
     as_hasher()
       noexcept
       { return static_cast<hasher_base&>(*this);  }
 
+    constexpr
+    const key_equal&
+    as_key_equal()
+      const noexcept
+      { return static_cast<const key_equal_base&>(*this);  }
+
+    constexpr
+    key_equal&
+    as_key_equal()
+      noexcept
+      { return static_cast<key_equal_base&>(*this);  }
+
+    constexpr
     const string_type&
     str()
       const noexcept
       { return this->m_str;  }
 
+    constexpr
     size_t
     hval()
       const noexcept
