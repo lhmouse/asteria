@@ -249,13 +249,11 @@ class variant
 
   public:
     // 23.7.3.5, value status
+    constexpr
     size_t
     index()
       const noexcept
-      {
-        ROCKET_ASSERT(this->m_index < alternative_size);
-        return this->m_index;
-      }
+      { return ROCKET_ASSERT(this->m_index < alternative_size), this->m_index;  }
 
     const type_info&
     type()
