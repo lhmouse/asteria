@@ -312,7 +312,7 @@ constexpr
 bool
 operator==(const refcnt_ptr<elementT>& lhs, nullptr_t)
   noexcept
-  { return +!lhs;  }
+  { return !lhs;  }
 
 template<typename elementT>
 constexpr
@@ -326,7 +326,7 @@ constexpr
 bool
 operator==(nullptr_t, const refcnt_ptr<elementT>& rhs)
   noexcept
-  { return +!rhs;  }
+  { return !rhs;  }
 
 template<typename elementT>
 constexpr

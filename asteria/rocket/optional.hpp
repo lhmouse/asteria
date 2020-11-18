@@ -303,7 +303,7 @@ constexpr
 bool
 operator==(const optional<valueT>& lhs, nullopt_t)
   noexcept
-  { return +!lhs;  }
+  { return !lhs;  }
 
 template<typename valueT>
 constexpr
@@ -317,7 +317,7 @@ constexpr
 bool
 operator==(nullopt_t, const optional<valueT>& rhs)
   noexcept
-  { return +!rhs;  }
+  { return !rhs;  }
 
 template<typename valueT>
 constexpr
@@ -338,7 +338,7 @@ constexpr
 bool
 operator!=(const optional<valueT>& lhs, const valueT& rhs)
   noexcept(noexcept(::std::declval<const valueT&>() != ::std::declval<const valueT&>()))
-  { return +!lhs || (*lhs != rhs);  }
+  { return !lhs || (*lhs != rhs);  }
 
 template<typename valueT>
 constexpr
@@ -352,7 +352,7 @@ constexpr
 bool
 operator!=(const valueT& lhs, const optional<valueT>& rhs)
   noexcept(noexcept(::std::declval<const valueT&>() != ::std::declval<const valueT&>()))
-  { return +!rhs || (lhs != *rhs);  }
+  { return !rhs || (lhs != *rhs);  }
 
 template<typename charT, typename traitsT, typename valueT>
 inline

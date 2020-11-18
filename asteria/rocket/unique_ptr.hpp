@@ -215,7 +215,7 @@ constexpr
 bool
 operator==(const unique_ptr<elementT, deleterT>& lhs, nullptr_t)
   noexcept
-  { return +!lhs;  }
+  { return !lhs;  }
 
 template<typename elementT, typename deleterT>
 constexpr
@@ -229,7 +229,7 @@ constexpr
 bool
 operator==(nullptr_t, const unique_ptr<elementT, deleterT>& rhs)
   noexcept
-  { return +!rhs;  }
+  { return !rhs;  }
 
 template<typename elementT, typename deleterT>
 constexpr
