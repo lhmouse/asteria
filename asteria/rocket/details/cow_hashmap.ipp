@@ -949,17 +949,13 @@ class hashmap_iterator
       const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
-
-        auto cur = this->m_cur;
+        auto res = *this;
         do {
-          ROCKET_ASSERT_MSG(cur != this->m_end, "Past-the-end iterator not incrementable");
-          ++cur;
+          ROCKET_ASSERT_MSG(res.m_cur != this->m_end, "Past-the-end iterator not incrementable");
+          ++(res.m_cur);
         }
-        while((cur != this->m_end) && !*cur);
-
-        return hashmap_iterator(this->m_begin,
-                                static_cast<size_t>(cur - this->m_begin),
-                                static_cast<size_t>(this->m_end - this->m_begin));
+        while((res.m_cur != this->m_end) && !*(res.m_cur));
+        return res;
       }
 
     hashmap_iterator
@@ -967,17 +963,13 @@ class hashmap_iterator
       const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
-
-        auto cur = this->m_cur;
+        auto res = *this;
         do {
-          ROCKET_ASSERT_MSG(cur != this->m_begin, "Beginning iterator not decrementable");
-          --cur;
+          ROCKET_ASSERT_MSG(res.m_cur != this->m_begin, "Beginning iterator not decrementable");
+          --(res.m_cur);
         }
-        while(!*cur);
-
-        return hashmap_iterator(this->m_begin,
-                                static_cast<size_t>(cur - this->m_begin),
-                                static_cast<size_t>(this->m_end - this->m_begin));
+        while(!*(res.m_cur));
+        return res;
       }
 
   public:
