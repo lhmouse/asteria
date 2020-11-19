@@ -882,7 +882,7 @@ class hashmap_iterator
         m_end(begin + nend)
       {
         // Go to the first following non-empty bucket if any.
-        if((ncur != nend) && !*(this->m_cur))
+        if((this->m_cur != this->m_end) && !*(this->m_cur))
           ++*this;
       }
 
