@@ -877,9 +877,7 @@ class hashmap_iterator
     // This constructor is called by the container.
     hashmap_iterator(bucketT* begin, size_t ncur, size_t nend)
       noexcept
-      : m_begin(begin),
-        m_cur(begin + ncur),
-        m_end(begin + nend)
+      : m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)
       {
         // Go to the first following non-empty bucket if any.
         if((this->m_cur != this->m_end) && !*(this->m_cur))
@@ -890,9 +888,7 @@ class hashmap_iterator
     constexpr
     hashmap_iterator()
       noexcept
-      : m_begin(),
-        m_cur(),
-        m_end()
+      : m_begin(), m_cur(), m_end()
       { }
 
     template<typename yvalueT, typename ybucketT,
