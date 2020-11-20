@@ -921,7 +921,7 @@ class hashmap_iterator
         ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
         ROCKET_ASSERT_MSG((this->m_begin <= cur) && (cur <= this->m_end), "Iterator out of range");
         ROCKET_ASSERT_MSG(!deref || (cur < this->m_end), "Past-the-end iterator not dereferenceable");
-        ROCKET_ASSERT_MSG(*cur, "Iterator invalidated");
+        ROCKET_ASSERT_MSG(!deref || *cur, "Iterator invalidated");
         return cur;
       }
 
@@ -931,7 +931,7 @@ class hashmap_iterator
       {
         ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
         ROCKET_ASSERT_MSG(this->m_begin == begin, "Iterator not compatible");
-        return this->m_cur - begin;
+        return this->do_validate(this->m_cur, false) - begin;
       }
 
     difference_type
@@ -941,7 +941,7 @@ class hashmap_iterator
         ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
         ROCKET_ASSERT_MSG(this->m_begin == other.m_begin, "Iterator not compatible");
         ROCKET_ASSERT_MSG(this->m_end == other.m_end, "Iterator not compatible");
-        return this->m_cur - other.m_cur;
+        return this->do_validate(this->m_cur, false) - other.m_cur;
       }
 
     hashmap_iterator
