@@ -58,18 +58,22 @@ class optional
       { this->m_stor.emplace_back(::std::forward<yvalueT>(yvalue));  }
 
     template<typename yvalueT,
-    ROCKET_ENABLE_IF(is_convertible<const typename optional<yvalueT>::value_type&, value_type>::value)>
+    ROCKET_ENABLE_IF(is_convertible<const typename optional<yvalueT>::value_type&,
+                                    value_type>::value)>
     optional(const optional<yvalueT>& other)
-      noexcept(is_nothrow_constructible<value_type, const typename optional<yvalueT>::value_type&>::value)
+      noexcept(is_nothrow_constructible<value_type,
+                 const typename optional<yvalueT>::value_type&>::value)
       {
         if(other.m_stor.empty())
           this->m_stor.emplace_back(other.m_stor.front());
       }
 
     template<typename yvalueT,
-    ROCKET_ENABLE_IF(is_convertible<typename optional<yvalueT>::value_type&&, value_type>::value)>
+    ROCKET_ENABLE_IF(is_convertible<typename optional<yvalueT>::value_type&&,
+                                    value_type>::value)>
     optional(optional<yvalueT>&& other)
-      noexcept(is_nothrow_constructible<value_type, typename optional<yvalueT>::value_type&&>::value)
+      noexcept(is_nothrow_constructible<value_type,
+                 typename optional<yvalueT>::value_type&&>::value)
       {
         if(!other.m_stor.empty())
           this->m_stor.emplace_back(::std::move(other.m_stor.mut_front()));
@@ -123,11 +127,14 @@ class optional
       }
 
     template<typename yvalueT,
-    ROCKET_ENABLE_IF(is_assignable<value_type&, const typename optional<yvalueT>::value_type&>::value)>
+    ROCKET_ENABLE_IF(is_assignable<value_type&,
+                          const typename optional<yvalueT>::value_type&>::value)>
     optional&
     operator=(const optional<yvalueT>& other)
-      noexcept(conjunction<is_nothrow_constructible<value_type, const typename optional<yvalueT>::value_type&>,
-                           is_nothrow_assignable<value_type&, const typename optional<yvalueT>::value_type&>>::value)
+      noexcept(conjunction<is_nothrow_constructible<value_type,
+                                 const typename optional<yvalueT>::value_type&>,
+                           is_nothrow_assignable<value_type&,
+                                 const typename optional<yvalueT>::value_type&>>::value)
       {
         if(other.m_stor.empty())
           this->m_stor.clear();
@@ -139,11 +146,14 @@ class optional
       }
 
     template<typename yvalueT,
-    ROCKET_ENABLE_IF(is_assignable<value_type&, typename optional<yvalueT>::value_type&&>::value)>
+    ROCKET_ENABLE_IF(is_assignable<value_type&,
+                         typename optional<yvalueT>::value_type&&>::value)>
     optional&
     operator=(optional<yvalueT>&& other)
-      noexcept(conjunction<is_nothrow_constructible<value_type, typename optional<yvalueT>::value_type&&>,
-                           is_nothrow_assignable<value_type&, typename optional<yvalueT>::value_type&&>>::value)
+      noexcept(conjunction<is_nothrow_constructible<value_type,
+                                typename optional<yvalueT>::value_type&&>,
+                           is_nothrow_assignable<value_type&,
+                                typename optional<yvalueT>::value_type&&>>::value)
       {
         if(other.m_stor.empty())
           this->m_stor.clear();
@@ -179,41 +189,48 @@ class optional
     const_reference
     value()
       const
-      { return this->m_stor.empty() ? this->do_throw_valueless() : this->m_stor.front();  }
+      { return this->m_stor.empty() ? this->do_throw_valueless()
+                   : this->m_stor.front();  }
 
     reference
     value()
-      { return this->m_stor.empty() ? this->do_throw_valueless() : this->m_stor.mut_front();  }
+      { return this->m_stor.empty() ? this->do_throw_valueless()
+                   : this->m_stor.mut_front();  }
 
     // N.B. This is a non-standard extension.
     const value_type*
     value_ptr()
       const
-      { return this->m_stor.empty() ? nullptr : ::std::addressof(this->m_stor.front());  }
+      { return this->m_stor.empty() ? nullptr
+                   : ::std::addressof(this->m_stor.front());  }
 
     // N.B. This is a non-standard extension.
     value_type*
     value_ptr()
-      { return this->m_stor.empty() ? nullptr : ::std::addressof(this->m_stor.mut_front());  }
+      { return this->m_stor.empty() ? nullptr
+                   : ::std::addressof(this->m_stor.mut_front());  }
 
     // N.B. The return type differs from `std::variant`.
     template<typename dvalueT>
     typename select_type<const_reference, dvalueT&&>::type
     value_or(dvalueT&& dvalue)
       const
-      { return this->m_stor.empty() ? ::std::forward<dvalueT>(dvalue) : this->m_stor.front();  }
+      { return this->m_stor.empty() ? ::std::forward<dvalueT>(dvalue)
+                   : this->m_stor.front();  }
 
     // N.B. The return type differs from `std::variant`.
     template<typename dvalueT>
     typename select_type<reference, dvalueT&&>::type
     value_or(dvalueT&& dvalue)
-      { return this->m_stor.empty() ? ::std::forward<dvalueT>(dvalue) : this->m_stor.mut_front();  }
+      { return this->m_stor.empty() ? ::std::forward<dvalueT>(dvalue)
+                   : this->m_stor.mut_front();  }
 
     // N.B. This is a non-standard extension.
     template<typename dvalueT>
     typename select_type<value_type&&, dvalueT&&>::type
     move_value_or(dvalueT&& dvalue)
-      { return this->m_stor.empty() ? ::std::forward<dvalueT>(dvalue) : ::std::move(this->m_stor.mut_front());  }
+      { return this->m_stor.empty() ? ::std::forward<dvalueT>(dvalue)
+                   : ::std::move(this->m_stor.mut_front());  }
 
     constexpr
     const_reference

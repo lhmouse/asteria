@@ -17,7 +17,8 @@ class static_vector;
 #include "details/static_vector.ipp"
 
 /* Differences from `std::vector`:
- * 1. The storage of elements are allocated inside the vector object, which eliminates dynamic allocation.
+ * 1. The storage of elements are allocated inside the vector object, which eliminates dynamic
+ *    allocation.
  * 2. An additional capacity template parameter is required.
  * 3. The specialization for `bool` is not provided.
  * 4. `emplace()` is not provided.
@@ -42,8 +43,8 @@ class static_vector
     using const_reference  = const value_type&;
     using reference        = value_type&;
 
-    using const_iterator          = details_static_vector::vector_iterator<static_vector, const value_type>;
-    using iterator                = details_static_vector::vector_iterator<static_vector, value_type>;
+    using const_iterator      = details_static_vector::vector_iterator<static_vector, const value_type>;
+    using iterator            = details_static_vector::vector_iterator<static_vector, value_type>;
     using const_reverse_iterator  = ::std::reverse_iterator<const_iterator>;
     using reverse_iterator        = ::std::reverse_iterator<iterator>;
 
@@ -63,7 +64,8 @@ class static_vector
 
     static_vector(const static_vector& other)
       noexcept(is_nothrow_copy_constructible<value_type>::value)
-      : m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
+      : m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(
+                                                      other.m_sth.as_allocator()))
       { this->assign(other);  }
 
     static_vector(const static_vector& other, const allocator_type& alloc)
@@ -140,9 +142,10 @@ class static_vector
     do_throw_subscript_out_of_range(size_type pos, const char* rel)
       const
       {
-        noadl::sprintf_and_throw<out_of_range>("static_vector: Subscript out of range (`%llu` %s `%llu`)",
-                                               static_cast<unsigned long long>(pos), rel,
-                                               static_cast<unsigned long long>(this->size()));
+        noadl::sprintf_and_throw<out_of_range>(
+                   "static_vector: Subscript out of range (`%llu` %s `%llu`)",
+                   static_cast<unsigned long long>(pos), rel,
+                   static_cast<unsigned long long>(this->size()));
       }
 
     // This function works the same way as `substr()`.

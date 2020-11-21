@@ -97,7 +97,8 @@ class basic_tinybuf_file
       }
 
     basic_tinybuf_file&
-    do_flush(const char_type*& gcur, const char_type*& gend, char_type*& /*pcur*/, char_type*& /*pend*/)
+    do_flush(const char_type*& gcur, const char_type*& gend,
+             char_type*& /*pcur*/, char_type*& /*pend*/)
       override
       {
         // If no file has been opened or there is an error, don't do anything.
@@ -113,8 +114,8 @@ class basic_tinybuf_file
         if(this->m_goff < 0)
           return *this;
 
-        // If the get area has been consumed partially, rewind the file position to the beginning of it,
-        // then discard characters that have been consumed so far.
+        // If the get area has been consumed partially, rewind the file position to the
+        // beginning of it, then discard characters that have been consumed so far.
         if(gcur != gend) {
           ROCKET_ASSERT(gend == this->m_gbuf.end());
           if(::fseeko(this->m_file, this->m_goff, SEEK_SET) != 0) {
@@ -126,8 +127,9 @@ class basic_tinybuf_file
           // Discard all characters preceding `*gcur`.
           auto nbump = static_cast<size_type>(gcur - this->m_gbuf.begin());
           if(traits_type::fgetn(this->m_file, this->m_gbuf.mut_begin(), nbump) != nbump)
-            noadl::sprintf_and_throw<runtime_error>("tinybuf_file: Read error (errno `%d`, fileno `%d`)",
-                                                    errno, ::fileno(this->m_file));
+            noadl::sprintf_and_throw<runtime_error>(
+                "tinybuf_file: Read error (errno `%d`, fileno `%d`)",
+                errno, ::fileno(this->m_file));
         }
 
         // Deactivate the input buffer and clear the get area.
@@ -135,9 +137,9 @@ class basic_tinybuf_file
         gcur = nullptr;
         gend = nullptr;
 
-        // Although ISO C says flushing an update stream whose most recent operation is an input operation
-        // results in undefined behavior, such effects are actually specified by POSIX-2008. It should be
-        // safe to just call `fflush()` without checking.
+        // Although ISO C says flushing an update stream whose most recent operation is an
+        // input operation results in undefined behavior, such effects are actually specified
+        // by POSIX-2008. It should be safe to just call `fflush()` without checking.
         ::fflush(this->m_file);
         return *this;
       }
@@ -319,8 +321,9 @@ class basic_tinybuf_file
           mstr[mlen++] = 'w';
         }
         else
-          noadl::sprintf_and_throw<invalid_argument>("tinybuf_file: No access specified (path `%s`, mode `%u`)",
-                                                     path, mode);
+          noadl::sprintf_and_throw<invalid_argument>(
+              "tinybuf_file: No access specified (path `%s`, mode `%u`)",
+              path, mode);
 
         // Translate combination flags.
         if(tinybuf_base::has_mode(mode, tinybuf_base::open_append)) {
@@ -344,15 +347,20 @@ class basic_tinybuf_file
         // Open the file.
         unique_posix_fd fd(::open(path, flags, 0666), ::close);
         if(!fd)
-          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: Open error (errno `%d`, path `%s`, mode `%u`)",
-                                                  errno, path, mode);
+          noadl::sprintf_and_throw<runtime_error>(
+              "tinybuf_file: Open error (errno `%d`, path `%s`, mode `%u`)",
+              errno, path, mode);
+
         // Convert it to a `FILE*`.
         unique_posix_file file(::fdopen(fd, mstr), ::fclose);
         if(!file)
-          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: Open error (errno `%d`, path `%s`, mode `%u`)",
-                                                  errno, path, mode);
+          noadl::sprintf_and_throw<runtime_error>(
+              "tinybuf_file: Open error (errno `%d`, path `%s`, mode `%u`)",
+              errno, path, mode);
+
         // If `fdopen()` succeeds it will have taken the ownership of `fd`.
         fd.release();
+
         // Disable stdio buffering, as we provide our own.
         ::setbuf(file, nullptr);
 

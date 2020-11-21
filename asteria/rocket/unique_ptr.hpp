@@ -61,8 +61,10 @@ class unique_ptr
       { this->reset(::std::move(ptr));  }
 
     template<typename yelementT, typename ydeleterT,
-    ROCKET_ENABLE_IF(is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer, pointer>::value),
-    ROCKET_ENABLE_IF(is_constructible<deleter_type, typename unique_ptr<yelementT, ydeleterT>::deleter_type&&>::value)>
+    ROCKET_ENABLE_IF(is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer,
+                                    pointer>::value),
+    ROCKET_ENABLE_IF(is_constructible<deleter_type, typename unique_ptr<yelementT,
+                                      ydeleterT>::deleter_type&&>::value)>
     unique_ptr(unique_ptr<yelementT, ydeleterT>&& other)
       noexcept
       : unique_ptr(::std::move(other.m_sth.as_deleter()))
@@ -89,8 +91,10 @@ class unique_ptr
       }
 
     template<typename yelementT, typename ydeleterT,
-    ROCKET_ENABLE_IF(is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer, pointer>::value),
-    ROCKET_ENABLE_IF(is_assignable<deleter_type&, typename unique_ptr<yelementT, ydeleterT>::deleter_type&&>::value)>
+    ROCKET_ENABLE_IF(is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer,
+                                    pointer>::value),
+    ROCKET_ENABLE_IF(is_assignable<deleter_type&, typename unique_ptr<yelementT,
+                                   ydeleterT>::deleter_type&&>::value)>
     unique_ptr&
     operator=(unique_ptr<yelementT, ydeleterT>&& other)
       noexcept
@@ -175,39 +179,45 @@ class unique_ptr
 template<typename xelementT, typename xdeleterT, typename yelementT, typename ydeleterT>
 constexpr
 bool
-operator==(const unique_ptr<xelementT, xdeleterT>& lhs, const unique_ptr<yelementT, ydeleterT>& rhs)
+operator==(const unique_ptr<xelementT, xdeleterT>& lhs,
+           const unique_ptr<yelementT, ydeleterT>& rhs)
   noexcept
   { return lhs.get() == rhs.get();  }
 
 template<typename xelementT, typename xdeleterT, typename yelementT, typename ydeleterT>
 constexpr
 bool
-operator!=(const unique_ptr<xelementT, xdeleterT>& lhs, const unique_ptr<yelementT, ydeleterT>& rhs)
+operator!=(const unique_ptr<xelementT, xdeleterT>& lhs,
+           const unique_ptr<yelementT, ydeleterT>& rhs)
   noexcept
   { return lhs.get() != rhs.get();  }
 
 template<typename xelementT, typename xdeleterT, typename yelementT, typename ydeleterT>
 constexpr
 bool
-operator<(const unique_ptr<xelementT, xdeleterT>& lhs, const unique_ptr<yelementT, ydeleterT>& rhs)
+operator<(const unique_ptr<xelementT, xdeleterT>& lhs,
+           const unique_ptr<yelementT, ydeleterT>& rhs)
   { return lhs.get() < rhs.get();  }
 
 template<typename xelementT, typename xdeleterT, typename yelementT, typename ydeleterT>
 constexpr
 bool
-operator>(const unique_ptr<xelementT, xdeleterT>& lhs, const unique_ptr<yelementT, ydeleterT>& rhs)
+operator>(const unique_ptr<xelementT, xdeleterT>& lhs,
+           const unique_ptr<yelementT, ydeleterT>& rhs)
   { return lhs.get() > rhs.get();  }
 
 template<typename xelementT, typename xdeleterT, typename yelementT, typename ydeleterT>
 constexpr
 bool
-operator<=(const unique_ptr<xelementT, xdeleterT>& lhs, const unique_ptr<yelementT, ydeleterT>& rhs)
+operator<=(const unique_ptr<xelementT, xdeleterT>& lhs,
+           const unique_ptr<yelementT, ydeleterT>& rhs)
   { return lhs.get() <= rhs.get();  }
 
 template<typename xelementT, typename xdeleterT, typename yelementT, typename ydeleterT>
 constexpr
 bool
-operator>=(const unique_ptr<xelementT, xdeleterT>& lhs, const unique_ptr<yelementT, ydeleterT>& rhs)
+operator>=(const unique_ptr<xelementT, xdeleterT>& lhs,
+           const unique_ptr<yelementT, ydeleterT>& rhs)
   { return lhs.get() >= rhs.get();  }
 
 template<typename elementT, typename deleterT>
@@ -248,7 +258,8 @@ swap(unique_ptr<elementT, deleterT>& lhs, unique_ptr<elementT, deleterT>& rhs)
 template<typename charT, typename traitsT, typename elementT, typename deleterT>
 inline
 basic_tinyfmt<charT, traitsT>&
-operator<<(basic_tinyfmt<charT, traitsT>& fmt, const unique_ptr<elementT, deleterT>& rhs)
+operator<<(basic_tinyfmt<charT, traitsT>& fmt,
+           const unique_ptr<elementT, deleterT>& rhs)
   { return fmt << rhs.get();  }
 
 template<typename elementT, typename... paramsT>
@@ -263,7 +274,7 @@ unique_ptr<targetT>
 static_pointer_cast(unique_ptr<sourceT>&& sptr)
   noexcept
   { return details_unique_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
-                               [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });  }
+               [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });  }
 
 template<typename targetT, typename sourceT>
 inline
@@ -271,7 +282,7 @@ unique_ptr<targetT>
 dynamic_pointer_cast(unique_ptr<sourceT>&& sptr)
   noexcept
   { return details_unique_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
-                               [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });  }
+               [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });  }
 
 template<typename targetT, typename sourceT>
 inline
@@ -279,7 +290,7 @@ unique_ptr<targetT>
 const_pointer_cast(unique_ptr<sourceT>&& sptr)
   noexcept
   { return details_unique_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
-                               [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });  }
+               [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });  }
 
 }  // namespace rocket
 

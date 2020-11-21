@@ -40,8 +40,10 @@ struct Symbols
 using Constructor  = void (Uparam uparam, void* sparam, intptr_t ctor_arg);
 using Relocator    = void (Uparam uparam, void* sparam, void* sp_old);
 using Destructor   = void (Uparam uparam, void* sparam);
-using Executor     = AIR_Status (Executive_Context& ctx, Uparam uparam, const void* sparam);
-using Enumerator   = Variable_Callback& (Variable_Callback& callback, Uparam uparam, const void* sparam);
+using Executor     = AIR_Status (Executive_Context& ctx, Uparam uparam,
+                                 const void* sparam);
+using Enumerator   = Variable_Callback& (Variable_Callback& callback,
+                                         Uparam uparam, const void* sparam);
 
 struct Vtable
   {

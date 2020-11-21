@@ -138,7 +138,8 @@ class basic_tinybuf
     // * Throws an exception on failure.
     virtual
     basic_tinybuf&
-    do_flush(const char_type*& /*gcur*/, const char_type*& /*gend*/, char_type*& /*pcur*/, char_type*& /*pend*/)
+    do_flush(const char_type*& /*gcur*/, const char_type*& /*gend*/,
+             char_type*& /*pcur*/, char_type*& /*pend*/)
       {
         // The default implementation does nothing.
         return *this;
@@ -155,9 +156,10 @@ class basic_tinybuf
         noadl::sprintf_and_throw<invalid_argument>("tinybuf: Stream not seekable");
       }
 
-    // * Reads data from the external device into the get area and discards it unless `peek` is set.
-    // * Returns the first character that has been read, or `traits::eof()` if there are no more
-    //   characters.
+    // * Reads data from the external device into the get area and discards it unless `peek`
+    //   is set.
+    // * Returns the first character that has been read, or `traits::eof()` if there are no
+    //   more characters.
     // * Throws an exception in case of failure.
     // This function may reallocate the get area as needed.
     virtual
@@ -174,7 +176,8 @@ class basic_tinybuf
     // This function may reallocate the put area as needed.
     virtual
     basic_tinybuf&
-    do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/, const char_type* /*sadd*/, size_type /*nadd*/)
+    do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/,
+                const char_type* /*sadd*/, size_type /*nadd*/)
       {
        // The default implementation always fails.
         noadl::sprintf_and_throw<invalid_argument>("tinybuf: Stream not writable");
@@ -301,8 +304,8 @@ class basic_tinybuf
 
         auto k = static_cast<size_type>(this->m_pend - this->m_pcur);
         if(ROCKET_UNEXPECT(n >= k))
-          // If there is no enough room in the put area, evict its contents, followed by
-          // the string specified.
+          // If there is no enough room in the put area, evict its contents, followed
+          // by the string specified.
           return this->do_call_overflow(s, n);
 
         // Append the string to the put area.

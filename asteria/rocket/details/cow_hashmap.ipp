@@ -139,7 +139,8 @@ struct basic_storage
     size_type
     min_nblk_for_nbkt(size_t nbkt)
       noexcept
-      { return (nbkt * sizeof(bucket_type) + sizeof(basic_storage) - 1) / sizeof(basic_storage) + 1;  }
+      { return (nbkt * sizeof(bucket_type) + sizeof(basic_storage) - 1)
+                    / sizeof(basic_storage) + 1;  }
 
     static constexpr
     size_t
@@ -150,7 +151,8 @@ struct basic_storage
     size_type nblk;
     bucket_type bkts[0];
 
-    basic_storage(unknown_function* xdtor, const allocator_type& xalloc, const hasher& hf, size_type xnblk)
+    basic_storage(unknown_function* xdtor, const allocator_type& xalloc,
+                  const hasher& hf, size_type xnblk)
       noexcept
       : allocator_wrapper_base_for<allocT>::type(xalloc),
         ebo_select<hashT, allocT>(hf),
@@ -178,7 +180,8 @@ struct basic_storage
 
 #ifdef ROCKET_DEBUG
         this->nelem = static_cast<size_type>(0xBAD1BEEF);
-        ::std::memset(static_cast<void*>(this->bkts), '~', (this->nblk - 1) * sizeof(basic_storage));
+        ::std::memset(static_cast<void*>(this->bkts), '~',
+                      (this->nblk - 1) * sizeof(basic_storage));
 #endif
       }
 
@@ -193,7 +196,8 @@ struct basic_storage
     bool
     compatible(const basic_storage& other)
       const noexcept
-      { return static_cast<const allocator_type&>(*this) == static_cast<const allocator_type&>(other);  }
+      { return static_cast<const allocator_type&>(*this) ==
+               static_cast<const allocator_type&>(other);  }
 
     size_t
     bucket_count()
@@ -207,7 +211,7 @@ struct basic_storage
         auto qval = allocator_traits<allocator_type>::allocate(*this, size_type(1));
         try {
           allocator_traits<allocator_type>::construct(*this,
-                                    noadl::unfancy(qval), ::std::forward<paramsT>(params)...);
+              noadl::unfancy(qval), ::std::forward<paramsT>(params)...);
         }
         catch(...) {
           allocator_traits<allocator_type>::deallocate(*this, qval, size_type(1));
@@ -247,7 +251,8 @@ struct basic_storage
 
         // Find an empty bucket for the new element.
         auto orig = noadl::get_probing_origin(bptr, eptr, this->hash(qval->first));
-        auto qbkt = noadl::linear_probe(bptr, orig, orig, eptr, [&](const bucket_type&) { return false;  });
+        auto qbkt = noadl::linear_probe(bptr, orig, orig, eptr,
+                                        [&](const bucket_type&) { return false;  });
         ROCKET_ASSERT(qbkt);
 
         // Insert it into the new bucket.
@@ -381,7 +386,8 @@ class storage_handle
     using hasher_base       = typename allocator_wrapper_base_for<hasher>::type;
     using key_equal_base    = typename allocator_wrapper_base_for<key_equal>::type;
     using storage           = basic_storage<allocator_type, hasher>;
-    using storage_allocator = typename allocator_traits<allocator_type>::template rebind_alloc<storage>;
+    using storage_allocator = typename allocator_traits<allocator_type>::
+                                             template rebind_alloc<storage>;
     using storage_pointer   = typename allocator_traits<storage_allocator>::pointer;
 
   private:
@@ -530,9 +536,10 @@ class storage_handle
         auto nmax = this->max_size();
         ROCKET_ASSERT(base <= nmax);
         if(nmax - base < add)
-          noadl::sprintf_and_throw<length_error>("cow_hashmap: Max size exceeded (`%lld` + `%lld` > `%lld`)",
-                                                 static_cast<long long>(base), static_cast<long long>(add),
-                                                 static_cast<long long>(nmax));
+          noadl::sprintf_and_throw<length_error>(
+              "cow_hashmap: Max size exceeded (`%lld` + `%lld` > `%lld`)",
+              static_cast<long long>(base), static_cast<long long>(add),
+              static_cast<long long>(nmax));
         return base + add;
       }
 

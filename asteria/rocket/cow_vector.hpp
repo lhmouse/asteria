@@ -67,7 +67,8 @@ class cow_vector
 
     cow_vector(const cow_vector& other)
       noexcept
-      : m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
+      : m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(
+                                                    other.m_sth.as_allocator()))
       { this->assign(other);  }
 
     cow_vector(const cow_vector& other, const allocator_type& alloc)

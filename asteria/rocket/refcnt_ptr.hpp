@@ -42,8 +42,9 @@ class refcnt_base
     do_throw_bad_cast(const type_info& to, const type_info& from)
       const
       {
-        noadl::sprintf_and_throw<domain_error>("refcnt_base: Bad dynamic cast to type `%s` from type `%s`",
-                                               to.name(), from.name());
+        noadl::sprintf_and_throw<domain_error>(
+            "refcnt_base: Bad dynamic cast to type `%s` from type `%s`",
+            to.name(), from.name());
       }
 
   public:
@@ -132,14 +133,16 @@ class refcnt_ptr
       { this->reset(ptr);  }
 
     template<typename yelementT,
-    ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
+    ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer,
+                                    pointer>::value)>
     refcnt_ptr(const refcnt_ptr<yelementT>& other)
       noexcept
       : refcnt_ptr()
       { this->reset(other.m_sth.fork());  }
 
     template<typename yelementT,
-    ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
+    ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer,
+                                    pointer>::value)>
     refcnt_ptr(refcnt_ptr<yelementT>&& other)
       noexcept
       : refcnt_ptr()
@@ -164,7 +167,8 @@ class refcnt_ptr
       }
 
     template<typename yelementT,
-    ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
+    ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer,
+                                    pointer>::value)>
     refcnt_ptr&
     operator=(const refcnt_ptr<yelementT>& other)
       noexcept
@@ -174,7 +178,8 @@ class refcnt_ptr
       }
 
     template<typename yelementT,
-    ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
+    ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer,
+                                    pointer>::value)>
     refcnt_ptr&
     operator=(refcnt_ptr<yelementT>&& other)
       noexcept
@@ -360,7 +365,7 @@ refcnt_ptr<targetT>
 static_pointer_cast(const refcnt_ptr<sourceT>& sptr)
   noexcept
   { return details_refcnt_ptr::pointer_cast_aux<targetT>(sptr,
-                               [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });  }
+               [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });  }
 
 template<typename targetT, typename sourceT>
 inline
@@ -368,7 +373,7 @@ refcnt_ptr<targetT>
 dynamic_pointer_cast(const refcnt_ptr<sourceT>& sptr)
   noexcept
   { return details_refcnt_ptr::pointer_cast_aux<targetT>(sptr,
-                               [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });  }
+               [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });  }
 
 template<typename targetT, typename sourceT>
 inline
@@ -376,7 +381,7 @@ refcnt_ptr<targetT>
 const_pointer_cast(const refcnt_ptr<sourceT>& sptr)
   noexcept
   { return details_refcnt_ptr::pointer_cast_aux<targetT>(sptr,
-                               [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });  }
+               [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });  }
 
 template<typename targetT, typename sourceT>
 inline
@@ -384,7 +389,7 @@ refcnt_ptr<targetT>
 static_pointer_cast(refcnt_ptr<sourceT>&& sptr)
   noexcept
   { return details_refcnt_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
-                               [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });  }
+               [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });  }
 
 template<typename targetT, typename sourceT>
 inline
@@ -392,7 +397,7 @@ refcnt_ptr<targetT>
 dynamic_pointer_cast(refcnt_ptr<sourceT>&& sptr)
   noexcept
   { return details_refcnt_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
-                               [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });  }
+               [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });  }
 
 template<typename targetT, typename sourceT>
 inline
@@ -400,7 +405,7 @@ refcnt_ptr<targetT>
 const_pointer_cast(refcnt_ptr<sourceT>&& sptr)
   noexcept
   { return details_refcnt_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
-                               [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });  }
+               [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });  }
 
 }  // namespace rocket
 

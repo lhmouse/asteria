@@ -60,8 +60,8 @@ class cow_hashmap
     using const_reference  = const value_type&;
     using reference        = value_type&;
 
-    using const_iterator          = details_cow_hashmap::hashmap_iterator<cow_hashmap, const value_type>;
-    using iterator                = details_cow_hashmap::hashmap_iterator<cow_hashmap, value_type>;
+    using const_iterator     = details_cow_hashmap::hashmap_iterator<cow_hashmap, const value_type>;
+    using iterator           = details_cow_hashmap::hashmap_iterator<cow_hashmap, value_type>;
     using const_reverse_iterator  = ::std::reverse_iterator<const_iterator>;
     using reverse_iterator        = ::std::reverse_iterator<iterator>;
 
@@ -75,7 +75,8 @@ class cow_hashmap
   public:
     // 26.5.4.2, construct/copy/destroy
     explicit constexpr
-    cow_hashmap(const allocator_type& alloc, const hasher& hf = hasher(), const key_equal& eq = key_equal())
+    cow_hashmap(const allocator_type& alloc, const hasher& hf = hasher(),
+                const key_equal& eq = key_equal())
       noexcept(conjunction<is_nothrow_constructible<hasher>,
                            is_nothrow_copy_constructible<hasher>,
                            is_nothrow_constructible<key_equal>,
@@ -86,7 +87,8 @@ class cow_hashmap
     cow_hashmap(const cow_hashmap& other)
       noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
                            is_nothrow_copy_constructible<key_equal>>::value)
-      : m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()),
+      : m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(
+                                                   other.m_sth.as_allocator()),
               other.m_sth.as_hasher(), other.m_sth.as_key_equal())
       { this->assign(other);  }
 
@@ -99,7 +101,8 @@ class cow_hashmap
     cow_hashmap(cow_hashmap&& other)
       noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
                            is_nothrow_copy_constructible<key_equal>>::value)
-      : m_sth(::std::move(other.m_sth.as_allocator()), other.m_sth.as_hasher(), other.m_sth.as_key_equal())
+      : m_sth(::std::move(other.m_sth.as_allocator()), other.m_sth.as_hasher(),
+              other.m_sth.as_key_equal())
       { this->assign(::std::move(other));  }
 
     cow_hashmap(cow_hashmap&& other, const allocator_type& alloc)
@@ -131,8 +134,9 @@ class cow_hashmap
       : cow_hashmap(res_arg, hf, eq, alloc)
       { this->assign(::std::move(first), ::std::move(last));  }
 
-    cow_hashmap(initializer_list<value_type> init, size_type res_arg = 0, const hasher& hf = hasher(),
-                const key_equal& eq = key_equal(), const allocator_type& alloc = allocator_type())
+    cow_hashmap(initializer_list<value_type> init, size_type res_arg = 0,
+                const hasher& hf = hasher(), const key_equal& eq = key_equal(),
+                const allocator_type& alloc = allocator_type())
       : cow_hashmap(res_arg, hf, eq, alloc)
       { this->assign(init);  }
 
@@ -142,11 +146,13 @@ class cow_hashmap
 
     template<typename inputT,
     ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
-    cow_hashmap(inputT first, inputT last, size_type res_arg, const hasher& hf, const allocator_type& alloc)
+    cow_hashmap(inputT first, inputT last, size_type res_arg, const hasher& hf,
+                const allocator_type& alloc)
       : cow_hashmap(::std::move(first), ::std::move(last), res_arg, hf, key_equal(), alloc)
       { }
 
-    cow_hashmap(initializer_list<value_type> init, size_type res_arg, const hasher& hf, const allocator_type& alloc)
+    cow_hashmap(initializer_list<value_type> init, size_type res_arg, const hasher& hf,
+                const allocator_type& alloc)
       : cow_hashmap(init, res_arg, hf, key_equal(), alloc)
       { }
 
@@ -351,7 +357,8 @@ class cow_hashmap
           return *this;
 
         // Allocate new storage.
-        storage_handle sth(this->m_sth.as_allocator(), this->m_sth.as_hasher(), this->m_sth.as_key_equal());
+        storage_handle sth(this->m_sth.as_allocator(), this->m_sth.as_hasher(),
+                           this->m_sth.as_key_equal());
         sth.reallocate_reserve(this->m_sth, true, rcap - this->size());
 
         // Set the new storage up. The size is left intact.
@@ -374,7 +381,8 @@ class cow_hashmap
           return *this;
 
         // Allocate new storage.
-        storage_handle sth(this->m_sth.as_allocator(), this->m_sth.as_hasher(), this->m_sth.as_key_equal());
+        storage_handle sth(this->m_sth.as_allocator(), this->m_sth.as_hasher(),
+                           this->m_sth.as_key_equal());
         sth.reallocate_reserve(this->m_sth, true, 0);
 
         // Set the new storage up. The size is left intact.
@@ -434,12 +442,13 @@ class cow_hashmap
         // Calculate the minimum bucket count to reserve. This must include all existent elements.
         // Don't reallocate if the storage is unique and there is enough room.
         size_type rcap = this->m_sth.round_up_capacity(noadl::max(
-                                          this->size(), n / storage_handle::max_load_factor_reciprocal));
+                             this->size(), n / storage_handle::max_load_factor_reciprocal));
         if(this->capacity() == rcap)
           return *this;
 
         // Allocate new storage.
-        storage_handle sth(this->m_sth.as_allocator(), this->m_sth.as_hasher(), this->m_sth.as_key_equal());
+        storage_handle sth(this->m_sth.as_allocator(), this->m_sth.as_hasher(),
+                           this->m_sth.as_key_equal());
         sth.reallocate_reserve(this->m_sth, true, rcap - this->size());
 
         // Set the new storage up. The size is left intact.
@@ -491,7 +500,8 @@ class cow_hashmap
         }
 
         // Allocate new storage.
-        storage_handle sth(this->m_sth.as_allocator(), this->m_sth.as_hasher(), this->m_sth.as_key_equal());
+        storage_handle sth(this->m_sth.as_allocator(), this->m_sth.as_hasher(),
+                           this->m_sth.as_key_equal());
         if(ROCKET_EXPECT(n && (n == dist))) {
           // The length is known.
           bkts = sth.reallocate_reserve(this->m_sth, false, n | cap / 2);
@@ -549,8 +559,9 @@ class cow_hashmap
         if(ROCKET_EXPECT(bkts && (this->size() < cap))) {
           // Insert the new element in place.
           bool inserted = this->m_sth.keyed_try_emplace(tpos, ykey,
-                      ::std::piecewise_construct, ::std::forward_as_tuple(::std::forward<ykeyT>(ykey)),
-                                                  ::std::forward_as_tuple(::std::forward<paramsT>(params)...));
+                    ::std::piecewise_construct,
+                    ::std::forward_as_tuple(::std::forward<ykeyT>(ykey)),
+                    ::std::forward_as_tuple(::std::forward<paramsT>(params)...));
 
           // The return type aligns with `std::unordered_map::try_emplace()`.
           return { iterator(bkts, tpos, this->bucket_count()), inserted };
@@ -562,13 +573,15 @@ class cow_hashmap
           return { iterator(this->do_mut_buckets(), tpos, this->bucket_count()), false };
 
         // Allocate new storage.
-        storage_handle sth(this->m_sth.as_allocator(), this->m_sth.as_hasher(), this->m_sth.as_key_equal());
+        storage_handle sth(this->m_sth.as_allocator(), this->m_sth.as_hasher(),
+                           this->m_sth.as_key_equal());
         bkts = sth.reallocate_reserve(this->m_sth, false, 17 | cap / 2);
 
         // Insert the new element into the new storage.
         sth.keyed_try_emplace(tpos, ykey,
-                      ::std::piecewise_construct, ::std::forward_as_tuple(::std::forward<ykeyT>(ykey)),
-                                                  ::std::forward_as_tuple(::std::forward<paramsT>(params)...));
+                    ::std::piecewise_construct,
+                    ::std::forward_as_tuple(::std::forward<ykeyT>(ykey)),
+                    ::std::forward_as_tuple(::std::forward<paramsT>(params)...));
         sth.reallocate_finish(this->m_sth);
 
         // Set the new storage up.
@@ -580,7 +593,8 @@ class cow_hashmap
     template<typename ykeyT, typename... paramsT>
     iterator
     try_emplace(const_iterator /*hint*/, ykeyT&& ykey, paramsT&&... params)
-      { return this->try_emplace(::std::forward<ykeyT>(ykey), ::std::forward<paramsT>(params)...).first;  }
+      { return this->try_emplace(::std::forward<ykeyT>(ykey),
+                                 ::std::forward<paramsT>(params)...).first;  }
 
     template<typename ykeyT, typename ymappedT>
     pair<iterator, bool>
@@ -596,7 +610,8 @@ class cow_hashmap
     template<typename ykeyT, typename ymappedT>
     iterator
     insert_or_assign(const_iterator /*hint*/, ykeyT&& ykey, ymappedT&& ymapped)
-      { return this->insert_or_assign(::std::forward<ykeyT>(ykey), ::std::forward<ymappedT>(ymapped)).first;  }
+      { return this->insert_or_assign(::std::forward<ykeyT>(ykey),
+                                      ::std::forward<ymappedT>(ymapped)).first;  }
 
     // N.B. This function may throw `std::bad_alloc`.
     // N.B. The return type differs from `std::unordered_map`.
@@ -828,7 +843,8 @@ class cow_hashmap
 template<typename keyT, typename mappedT, typename hashT, typename eqT, typename allocT>
 inline
 void
-swap(cow_hashmap<keyT, mappedT, hashT, eqT, allocT>& lhs, cow_hashmap<keyT, mappedT, hashT, eqT, allocT>& rhs)
+swap(cow_hashmap<keyT, mappedT, hashT, eqT, allocT>& lhs,
+     cow_hashmap<keyT, mappedT, hashT, eqT, allocT>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 

@@ -92,17 +92,18 @@ class basic_storage
         // Get the number of characters that have been buffered.
         auto nused = eoff - goff;
         if(ROCKET_EXPECT(nadd <= this->m_cap - nused)) {
-          // If the buffer is large enough for the combined data, shift the string to the beginning
-          // to make some room after its the end.
+          // If the buffer is large enough for the combined data, shift the string to
+          // the beginning to make some room after its the end.
           traits_type::move(pbuf, pbuf + goff, nused);
         }
         else {
           // If the buffer is not large enough, allocate a new one.
           auto nmax = this->max_size();
           if(nmax - nused < nadd)
-            noadl::sprintf_and_throw<length_error>("linear_buffer: Max size exceeded (`%lld` + `%lld` > `%lld`)",
-                                                   static_cast<long long>(nused), static_cast<long long>(nadd),
-                                                   static_cast<long long>(nmax));
+            noadl::sprintf_and_throw<length_error>(
+                "linear_buffer: Max size exceeded (`%lld` + `%lld` > `%lld`)",
+                static_cast<long long>(nused), static_cast<long long>(nadd),
+                static_cast<long long>(nmax));
 
           auto cap_new = (nused + nadd) | 0x1000;
           auto ptr_new = allocator_traits<allocator_type>::allocate(*this, cap_new);

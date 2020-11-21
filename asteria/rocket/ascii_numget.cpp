@@ -74,7 +74,8 @@ do_get_base(const char*& rp, const char* eptr, uint8_t ibase)
         return ibase;
 
       default:
-        sprintf_and_throw<invalid_argument>("ascii_numget: Invalid radix (`%d` not 2, 10 or 16)", ibase);
+        sprintf_and_throw<invalid_argument>(
+            "ascii_numget: Invalid radix (`%d` not 2, 10 or 16)", ibase);
     }
   }
 
@@ -106,7 +107,8 @@ constexpr int8_t s_digits[] =
   };
 
 size_t
-do_collect_U_generic(mantissa& m, const char*& rp, const char* eptr, uint8_t base, uint64_t limit)
+do_collect_U_generic(mantissa& m, const char*& rp,
+                     const char* eptr, uint8_t base, uint64_t limit)
   {
     size_t nrd = 0;
     while(rp != eptr) {
@@ -138,7 +140,8 @@ do_collect_U_generic(mantissa& m, const char*& rp, const char* eptr, uint8_t bas
   }
 
 size_t
-do_collect_U(mantissa& m, const char*& rp, const char* eptr, uint8_t base, uint64_t limit)
+do_collect_U(mantissa& m, const char*& rp,
+             const char* eptr, uint8_t base, uint64_t limit)
   {
     switch(base) {
       case 2:

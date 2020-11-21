@@ -14,14 +14,16 @@ report_assertion_failure(const char* expr, const char* file, long line, const ch
   noexcept;
 
 #ifdef ROCKET_DEBUG
-#  define ROCKET_XASSERT_FAIL_(...)        ::rocket::report_assertion_failure(__VA_ARGS__)
+#  define ROCKET_XASSERT_FAIL_(...)     ::rocket::report_assertion_failure(__VA_ARGS__)
 #else
-#  define ROCKET_XASSERT_FAIL_(...)        ROCKET_UNREACHABLE()
+#  define ROCKET_XASSERT_FAIL_(...)     ROCKET_UNREACHABLE()
 #endif
-#define ROCKET_XASSERT_(cond, str, mt)     ((cond) ? void(0) : ROCKET_XASSERT_FAIL_(str, __FILE__, __LINE__, mt))
 
-#define ROCKET_ASSERT(expr)                ROCKET_XASSERT_(expr, #expr, "")
-#define ROCKET_ASSERT_MSG(expr, mt)        ROCKET_XASSERT_(expr, #expr, mt)
+#define ROCKET_XASSERT_(cond, str, mt)  \
+    ((cond) ? void(0) : ROCKET_XASSERT_FAIL_(str, __FILE__, __LINE__, mt))
+
+#define ROCKET_ASSERT(expr)             ROCKET_XASSERT_(expr, #expr, "")
+#define ROCKET_ASSERT_MSG(expr, mt)     ROCKET_XASSERT_(expr, #expr, mt)
 
 }  // namespace rocket
 

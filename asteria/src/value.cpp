@@ -92,16 +92,21 @@ compare(const Value& other)
         return compare_equal;
 
       case type_boolean:
-        return do_3way_compare_scalar(this->m_stor.as<type_boolean>(), other.m_stor.as<type_boolean>());
+        return do_3way_compare_scalar(this->m_stor.as<type_boolean>(),
+                                      other.m_stor.as<type_boolean>());
 
       case type_integer:
-        return do_3way_compare_scalar(this->m_stor.as<type_integer>(), other.m_stor.as<type_integer>());
+        return do_3way_compare_scalar(this->m_stor.as<type_integer>(),
+                                      other.m_stor.as<type_integer>());
 
       case type_real:
-        return do_3way_compare_scalar(this->m_stor.as<type_real>(), other.m_stor.as<type_real>());
+        return do_3way_compare_scalar(this->m_stor.as<type_real>(),
+                                      other.m_stor.as<type_real>());
 
       case type_string:
-        return do_3way_compare_scalar(this->m_stor.as<type_string>().compare(other.m_stor.as<type_string>()), 0);
+        return do_3way_compare_scalar(this->m_stor.as<type_string>().compare(
+                                               other.m_stor.as<type_string>()),
+                                      0);
 
       case type_opaque:
       case type_function:

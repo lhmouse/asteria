@@ -218,11 +218,13 @@ std_filesystem_get_information(V_string path)
       ));
     stat.try_emplace(sref("t_accs"),
       V_integer(
-        int64_t(stb.st_atim.tv_sec) * 1000 + stb.st_atim.tv_nsec / 1000000  // timestamp of last access
+        int64_t(stb.st_atim.tv_sec) * 1000
+        + stb.st_atim.tv_nsec / 1000000  // timestamp of last access
       ));
     stat.try_emplace(sref("t_mod"),
       V_integer(
-        int64_t(stb.st_mtim.tv_sec) * 1000 + stb.st_mtim.tv_nsec / 1000000  // timestamp of last modification
+        int64_t(stb.st_mtim.tv_sec) * 1000
+        + stb.st_mtim.tv_nsec / 1000000  // timestamp of last modification
       ));
     return ::std::move(stat);
   }

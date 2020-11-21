@@ -21,13 +21,16 @@ class basic_tinyfmt;
 /* Requirements:
  * 1. Handles must be trivial types other than arrays.
  * 2. Closers shall be copy-constructible.
- *    The following operations are required, all of which, as well as copy/move construction/assignment and swap,
+ *    The following operations are required, all of which, as well as copy/move
+ *    construction/assignment and swap,
  *    shall not throw exceptions.
  *    1) `Closer().null()` returns a handle value called the 'null handle value'.
- *    2) `Closer().is_null()` returns `true` if the argument is a 'null handle value' and `false` otherwise.
- *       N.B. There could more than one null handle value. It is required that `Closer().is_null(Closer().null())`
- *            is always `true`.
- *    3) `Closer().close(hv)` closes the handle `hv`. Null handle values will not be passed to this function.
+ *    2) `Closer().is_null()` returns `true` if the argument is a 'null handle value'
+ *       and `false` otherwise.
+ *       N.B. There could more than one null handle value. It is required that
+ *            `Closer().is_null(Closer().null())` is always `true`.
+ *    3) `Closer().close(hv)` closes the handle `hv`. Null handle values will not be
+ *       passed to this function.
 **/
 
 template<typename handleT, typename closerT>
@@ -161,37 +164,43 @@ class unique_handle
 template<typename handleT, typename closerT>
 constexpr
 bool
-operator==(const unique_handle<handleT, closerT>& lhs, const unique_handle<handleT, closerT>& rhs)
+operator==(const unique_handle<handleT, closerT>& lhs,
+           const unique_handle<handleT, closerT>& rhs)
   { return lhs.get() == rhs.get();  }
 
 template<typename handleT, typename closerT>
 constexpr
 bool
-operator!=(const unique_handle<handleT, closerT>& lhs, const unique_handle<handleT, closerT>& rhs)
+operator!=(const unique_handle<handleT, closerT>& lhs,
+           const unique_handle<handleT, closerT>& rhs)
   { return lhs.get() != rhs.get();  }
 
 template<typename handleT, typename closerT>
 constexpr
 bool
-operator<(const unique_handle<handleT, closerT>& lhs, const unique_handle<handleT, closerT>& rhs)
+operator<(const unique_handle<handleT, closerT>& lhs,
+           const unique_handle<handleT, closerT>& rhs)
   { return lhs.get() < rhs.get();  }
 
 template<typename handleT, typename closerT>
 constexpr
 bool
-operator>(const unique_handle<handleT, closerT>& lhs, const unique_handle<handleT, closerT>& rhs)
+operator>(const unique_handle<handleT, closerT>& lhs,
+           const unique_handle<handleT, closerT>& rhs)
   { return lhs.get() > rhs.get();  }
 
 template<typename handleT, typename closerT>
 constexpr
 bool
-operator<=(const unique_handle<handleT, closerT>& lhs, const unique_handle<handleT, closerT>& rhs)
+operator<=(const unique_handle<handleT, closerT>& lhs,
+           const unique_handle<handleT, closerT>& rhs)
   { return lhs.get() <= rhs.get();  }
 
 template<typename handleT, typename closerT>
 constexpr
 bool
-operator>=(const unique_handle<handleT, closerT>& lhs, const unique_handle<handleT, closerT>& rhs)
+operator>=(const unique_handle<handleT, closerT>& lhs,
+           const unique_handle<handleT, closerT>& rhs)
   { return lhs.get() >= rhs.get();  }
 
 template<typename handleT, typename closerT>

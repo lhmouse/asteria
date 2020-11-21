@@ -41,7 +41,8 @@ struct basic_storage
     size_type
     min_nblk_for_nelem(size_t nelem)
       noexcept
-      { return (nelem * sizeof(value_type) + sizeof(basic_storage) - 1) / sizeof(basic_storage) + 1;  }
+      { return (nelem * sizeof(value_type) + sizeof(basic_storage) - 1)
+                    / sizeof(basic_storage) + 1;  }
 
     static constexpr
     size_t
@@ -52,7 +53,8 @@ struct basic_storage
     size_type nblk;
     value_type data[0];
 
-    basic_storage(unknown_function* xdtor, size_t xnskip, const allocator_type& xalloc, size_type xnblk)
+    basic_storage(unknown_function* xdtor, size_t xnskip,
+                  const allocator_type& xalloc, size_type xnblk)
       noexcept
       : allocator_wrapper_base_for<allocT>::type(xalloc),
         nblk(xnblk)
@@ -62,7 +64,8 @@ struct basic_storage
         this->nskip = xnskip;
 
 #ifdef ROCKET_DEBUG
-        ::std::memset(static_cast<void*>(this->data), '*', (this->nblk - 1) * sizeof(basic_storage));
+        ::std::memset(static_cast<void*>(this->data), '*',
+                      (this->nblk - 1) * sizeof(basic_storage));
 #endif
       }
 
@@ -75,7 +78,8 @@ struct basic_storage
 
 #ifdef ROCKET_DEBUG
         this->nelem = static_cast<size_type>(0xBAD1BEEF);
-        ::std::memset(static_cast<void*>(this->data), '~', (this->nblk - 1) * sizeof(basic_storage));
+        ::std::memset(static_cast<void*>(this->data), '~',
+                      (this->nblk - 1) * sizeof(basic_storage));
 #endif
       }
 
@@ -91,10 +95,12 @@ struct basic_storage
     emplace_back_unchecked(paramsT&&... params)
       {
         ROCKET_ASSERT_MSG(this->nref.unique(), "Shared storage shall not be modified");
-        ROCKET_ASSERT_MSG(this->nelem < this->max_nelem_for_nblk(this->nblk), "No space for new elements");
+        ROCKET_ASSERT_MSG(this->nelem < this->max_nelem_for_nblk(this->nblk),
+                          "No space for new elements");
 
         size_t off = this->nelem;
-        allocator_traits<allocator_type>::construct(*this, this->data + off, ::std::forward<paramsT>(params)...);
+        allocator_traits<allocator_type>::construct(*this, this->data + off,
+                                                    ::std::forward<paramsT>(params)...);
         this->nelem = static_cast<size_type>(off + 1);
 
         return this->data[off];
@@ -328,9 +334,10 @@ class storage_handle
         auto nmax = this->max_size();
         ROCKET_ASSERT(base <= nmax);
         if(nmax - base < add)
-          noadl::sprintf_and_throw<length_error>("cow_vector: Max size exceeded (`%lld` + `%lld` > `%lld`)",
-                                                 static_cast<long long>(base), static_cast<long long>(add),
-                                                 static_cast<long long>(nmax));
+          noadl::sprintf_and_throw<length_error>(
+              "cow_vector: Max size exceeded (`%lld` + `%lld` > `%lld`)",
+              static_cast<long long>(base), static_cast<long long>(add),
+              static_cast<long long>(nmax));
         return base + add;
       }
 

@@ -31,7 +31,8 @@ struct basic_storage
     size_type
     min_nblk_for_nchar(size_t nchar)
       noexcept
-      { return ((nchar + 1) * sizeof(value_type) + sizeof(basic_storage) - 1) / sizeof(basic_storage) + 1;  }
+      { return ((nchar + 1) * sizeof(value_type) + sizeof(basic_storage) - 1)
+                    / sizeof(basic_storage) + 1;  }
 
     static constexpr
     size_t
@@ -48,14 +49,16 @@ struct basic_storage
         nblk(xnblk)
       {
 #ifdef ROCKET_DEBUG
-        ::std::memset(static_cast<void*>(this->data), '*', (this->nblk - 1) * sizeof(basic_storage));
+        ::std::memset(static_cast<void*>(this->data), '*',
+                      (this->nblk - 1) * sizeof(basic_storage));
 #endif
       }
 
     ~basic_storage()
       {
 #ifdef ROCKET_DEBUG
-        ::std::memset(static_cast<void*>(this->data), '~', (this->nblk - 1) * sizeof(basic_storage));
+        ::std::memset(static_cast<void*>(this->data), '~',
+                      (this->nblk - 1) * sizeof(basic_storage));
 #endif
       }
 
@@ -201,9 +204,10 @@ class storage_handle
         auto nmax = this->max_size();
         ROCKET_ASSERT(base <= nmax);
         if(nmax - base < add)
-          noadl::sprintf_and_throw<length_error>("cow_string: Max size exceeded (`%lld` + `%lld` > `%lld`)",
-                                                 static_cast<long long>(base), static_cast<long long>(add),
-                                                 static_cast<long long>(nmax));
+          noadl::sprintf_and_throw<length_error>(
+              "cow_string: Max size exceeded (`%lld` + `%lld` > `%lld`)",
+              static_cast<long long>(base), static_cast<long long>(add),
+              static_cast<long long>(nmax));
         return base + add;
       }
 
