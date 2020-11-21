@@ -365,7 +365,8 @@ class basic_prehashed_string<cow_u32string, cow_u32string::hash>;
 template<typename stringT, typename hashT, typename eqT>
 constexpr
 bool
-operator==(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const basic_prehashed_string<stringT, hashT>& rhs)
+operator==(const basic_prehashed_string<stringT, hashT, eqT>& lhs,
+           const basic_prehashed_string<stringT, hashT, eqT>& rhs)
   noexcept(noexcept(lhs.equals(rhs)))
   { return lhs.equals(rhs);  }
 
@@ -379,14 +380,15 @@ operator==(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const otherT&
 template<typename stringT, typename hashT, typename eqT, typename otherT>
 constexpr
 bool
-operator==(const otherT& lhs, const basic_prehashed_string<stringT, hashT>& rhs)
+operator==(const otherT& lhs, const basic_prehashed_string<stringT, hashT, eqT>& rhs)
   noexcept(noexcept(rhs.equals(lhs)))
   { return rhs.equals(lhs);  }
 
 template<typename stringT, typename hashT, typename eqT>
 constexpr
 bool
-operator!=(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const basic_prehashed_string<stringT, hashT>& rhs)
+operator!=(const basic_prehashed_string<stringT, hashT, eqT>& lhs,
+           const basic_prehashed_string<stringT, hashT, eqT>& rhs)
   noexcept(noexcept(lhs.equals(rhs)))
   { return !lhs.equals(rhs);  }
 
@@ -400,21 +402,23 @@ operator!=(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const otherT&
 template<typename stringT, typename hashT, typename eqT, typename otherT>
 constexpr
 bool
-operator!=(const otherT& lhs, const basic_prehashed_string<stringT, hashT>& rhs)
+operator!=(const otherT& lhs, const basic_prehashed_string<stringT, hashT, eqT>& rhs)
   noexcept(noexcept(rhs.equals(lhs)))
   { return !rhs.equals(lhs);  }
 
-template<typename stringT, typename hashT>
+template<typename stringT, typename hashT, typename eqT>
 inline
 void
-swap(basic_prehashed_string<stringT, hashT>& lhs, basic_prehashed_string<stringT, hashT>& rhs)
+swap(basic_prehashed_string<stringT, hashT, eqT>& lhs,
+     basic_prehashed_string<stringT, hashT, eqT>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
-template<typename charT, typename traitsT, typename stringT, typename hashT>
+template<typename charT, typename traitsT, typename stringT, typename hashT, typename eqT>
 inline
 basic_tinyfmt<charT, traitsT>&
-operator<<(basic_tinyfmt<charT, traitsT>& fmt, const basic_prehashed_string<stringT, hashT>& str)
+operator<<(basic_tinyfmt<charT, traitsT>& fmt,
+           const basic_prehashed_string<stringT, hashT, eqT>& str)
   { return fmt << str.rdstr();  }
 
 using prehashed_string     = basic_prehashed_string<cow_string,    cow_string::hash>;
