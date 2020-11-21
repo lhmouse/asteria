@@ -11,7 +11,7 @@ int main()
   {
     Simple_Script code;
     code.reload_string(
-      ::rocket::sref(__FILE__), __LINE__, ::rocket::sref(R"__(
+      sref(__FILE__), __LINE__, sref(R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         assert std.numeric.parse_real(" 0x1p-100") == +0x1.0p-100;

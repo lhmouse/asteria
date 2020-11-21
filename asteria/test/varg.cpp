@@ -11,7 +11,7 @@ int main()
   {
     Simple_Script code;
     code.reload_string(
-      ::rocket::sref(__FILE__), __LINE__, ::rocket::sref(R"__(
+      sref(__FILE__), __LINE__, sref(R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         func binary(a, b, ...) {
@@ -46,7 +46,7 @@ int main()
     ASTERIA_TEST_CHECK(array.at(4).as_array().at(1).as_integer() == 4);
 
     code.reload_string(
-      ::rocket::sref(__FILE__), __LINE__, ::rocket::sref(R"__(
+      sref(__FILE__), __LINE__, sref(R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         return __varg('meow', 42, true);

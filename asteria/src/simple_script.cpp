@@ -27,11 +27,11 @@ reload(const cow_string& name, int line, tinybuf& cbuf)
     // Instantiate the function.
     const Source_Location sloc(name, 0, 0);
     if(ROCKET_UNEXPECT(this->m_params.empty()))
-      this->m_params.emplace_back(::rocket::sref("..."));
+      this->m_params.emplace_back(sref("..."));
 
     AIR_Optimizer optmz(this->m_opts);
     optmz.reload(nullptr, this->m_params, stmtq);
-    this->m_func = optmz.create_function(sloc, ::rocket::sref("[file scope]"));
+    this->m_func = optmz.create_function(sloc, sref("[file scope]"));
     return *this;
   }
 
@@ -65,7 +65,7 @@ reload_stdin(int line)
     // Initialize a stream using `stdin`.
     ::rocket::tinybuf_file cbuf;
     cbuf.reset(stdin, nullptr);
-    return this->reload(::rocket::sref("[stdin]"), line, cbuf);
+    return this->reload(sref("[stdin]"), line, cbuf);
   }
 
 Simple_Script&

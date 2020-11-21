@@ -11,12 +11,12 @@ namespace asteria {
 void
 create_bindings_version(V_object& result, API_Version version)
   {
-    result.insert_or_assign(::rocket::sref("major"),
+    result.insert_or_assign(sref("major"),
       V_integer(
         version / 0x10000
       ));
 
-    result.insert_or_assign(::rocket::sref("minor"),
+    result.insert_or_assign(sref("minor"),
       V_integer(
         version % 0x10000
       ));

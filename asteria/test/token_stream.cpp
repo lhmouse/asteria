@@ -12,7 +12,7 @@ int main()
   {
     Token_Stream ts({});
     ::rocket::tinybuf_str cbuf;
-    cbuf.set_string(::rocket::sref(
+    cbuf.set_string(sref(
       R"__(#!some shebang
         hh+++
         if <<<&>>>>>"\u55b5b喵"/
@@ -20,7 +20,7 @@ int main()
         .false/*more
         comments*/;/*yet more*/-42e13
       )__"), tinybuf::open_read);
-    ts.reload(::rocket::sref("dummy_file"), 16, cbuf);
+    ts.reload(sref("dummy_file"), 16, cbuf);
     ASTERIA_TEST_CHECK(cbuf.getc() == EOF);
 
     auto p = ts.peek_opt();

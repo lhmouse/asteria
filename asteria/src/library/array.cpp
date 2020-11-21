@@ -669,7 +669,7 @@ std_array_copy_values(V_object source)
 void
 create_bindings_array(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(::rocket::sref("slice"),
+    result.insert_or_assign(sref("slice"),
       ASTERIA_BINDING_BEGIN("std.array.slice", self, global, reader) {
         V_array data;
         V_integer from;
@@ -685,7 +685,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("replace_slice"),
+    result.insert_or_assign(sref("replace_slice"),
       ASTERIA_BINDING_BEGIN("std.array.replace_slice", self, global, reader) {
         V_array text;
         V_integer from;
@@ -716,7 +716,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("find"),
+    result.insert_or_assign(sref("find"),
       ASTERIA_BINDING_BEGIN("std.array.find", self, global, reader) {
         V_array data;
         V_integer from;
@@ -748,7 +748,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("find_if"),
+    result.insert_or_assign(sref("find_if"),
       ASTERIA_BINDING_BEGIN("std.array.find_if", self, global, reader) {
         V_array data;
         V_integer from;
@@ -780,7 +780,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("find_if_not"),
+    result.insert_or_assign(sref("find_if_not"),
       ASTERIA_BINDING_BEGIN("std.array.find_if_not", self, global, reader) {
         V_array data;
         V_integer from;
@@ -812,7 +812,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("rfind"),
+    result.insert_or_assign(sref("rfind"),
       ASTERIA_BINDING_BEGIN("std.array.rfind", self, global, reader) {
         V_array data;
         V_integer from;
@@ -844,7 +844,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("rfind_if"),
+    result.insert_or_assign(sref("rfind_if"),
       ASTERIA_BINDING_BEGIN("std.array.rfind_if", self, global, reader) {
         V_array data;
         V_integer from;
@@ -876,7 +876,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("rfind_if_not"),
+    result.insert_or_assign(sref("rfind_if_not"),
       ASTERIA_BINDING_BEGIN("std.array.rfind_if_not", self, global, reader) {
         V_array data;
         V_integer from;
@@ -908,7 +908,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("count"),
+    result.insert_or_assign(sref("count"),
       ASTERIA_BINDING_BEGIN("std.array.count", self, global, reader) {
         V_array data;
         V_integer from;
@@ -940,7 +940,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("count_if"),
+    result.insert_or_assign(sref("count_if"),
       ASTERIA_BINDING_BEGIN("std.array.count_if", self, global, reader) {
         V_array data;
         V_integer from;
@@ -972,7 +972,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("count_if_not"),
+    result.insert_or_assign(sref("count_if_not"),
       ASTERIA_BINDING_BEGIN("std.array.count_if_not", self, global, reader) {
         V_array data;
         V_integer from;
@@ -1004,7 +1004,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("exclude"),
+    result.insert_or_assign(sref("exclude"),
       ASTERIA_BINDING_BEGIN("std.array.exclude", self, global, reader) {
         V_array data;
         V_integer from;
@@ -1036,7 +1036,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("exclude_if"),
+    result.insert_or_assign(sref("exclude_if"),
       ASTERIA_BINDING_BEGIN("std.array.exclude_if", self, global, reader) {
         V_array data;
         V_integer from;
@@ -1068,7 +1068,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("exclude_if_not"),
+    result.insert_or_assign(sref("exclude_if_not"),
       ASTERIA_BINDING_BEGIN("std.array.exclude_if_not", self, global, reader) {
         V_array data;
         V_integer from;
@@ -1100,7 +1100,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("is_sorted"),
+    result.insert_or_assign(sref("is_sorted"),
       ASTERIA_BINDING_BEGIN("std.array.is_sorted", self, global, reader) {
         V_array data;
         Opt_function comp;
@@ -1114,7 +1114,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("binary_search"),
+    result.insert_or_assign(sref("binary_search"),
       ASTERIA_BINDING_BEGIN("std.array.binary_search", self, global, reader) {
         V_array data;
         Value targ;
@@ -1130,7 +1130,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("lower_bound"),
+    result.insert_or_assign(sref("lower_bound"),
       ASTERIA_BINDING_BEGIN("std.array.lower_bound", self, global, reader) {
         V_array data;
         Value targ;
@@ -1146,7 +1146,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("upper_bound"),
+    result.insert_or_assign(sref("upper_bound"),
       ASTERIA_BINDING_BEGIN("std.array.upper_bound", self, global, reader) {
         V_array data;
         Value targ;
@@ -1162,7 +1162,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("equal_range"),
+    result.insert_or_assign(sref("equal_range"),
       ASTERIA_BINDING_BEGIN("std.array.equal_range", self, global, reader) {
         V_array data;
         Value targ;
@@ -1178,7 +1178,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("sort"),
+    result.insert_or_assign(sref("sort"),
       ASTERIA_BINDING_BEGIN("std.array.sort", self, global, reader) {
         V_array data;
         Opt_function comp;
@@ -1192,7 +1192,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("sortu"),
+    result.insert_or_assign(sref("sortu"),
       ASTERIA_BINDING_BEGIN("std.array.sortu", self, global, reader) {
         V_array data;
         Opt_function comp;
@@ -1206,7 +1206,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("max_of"),
+    result.insert_or_assign(sref("max_of"),
       ASTERIA_BINDING_BEGIN("std.array.max_of", self, global, reader) {
         V_array data;
         Opt_function comp;
@@ -1220,7 +1220,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("min_of"),
+    result.insert_or_assign(sref("min_of"),
       ASTERIA_BINDING_BEGIN("std.array.min_of", self, global, reader) {
         V_array data;
         Opt_function comp;
@@ -1234,7 +1234,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("reverse"),
+    result.insert_or_assign(sref("reverse"),
       ASTERIA_BINDING_BEGIN("std.array.reverse", self, global, reader) {
         V_array data;
 
@@ -1246,7 +1246,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("generate"),
+    result.insert_or_assign(sref("generate"),
       ASTERIA_BINDING_BEGIN("std.array.generate", self, global, reader) {
         V_function gen;
         V_integer len;
@@ -1260,7 +1260,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("shuffle"),
+    result.insert_or_assign(sref("shuffle"),
       ASTERIA_BINDING_BEGIN("std.array.shuffle", self, global, reader) {
         V_array data;
         Opt_integer seed;
@@ -1274,7 +1274,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("rotate"),
+    result.insert_or_assign(sref("rotate"),
       ASTERIA_BINDING_BEGIN("std.array.rotate", self, global, reader) {
         V_array data;
         V_integer shift;
@@ -1288,7 +1288,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("copy_keys"),
+    result.insert_or_assign(sref("copy_keys"),
       ASTERIA_BINDING_BEGIN("std.array.copy_keys", self, global, reader) {
         V_object obj;
 
@@ -1300,7 +1300,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("copy_values"),
+    result.insert_or_assign(sref("copy_values"),
       ASTERIA_BINDING_BEGIN("std.array.copy_values", self, global, reader) {
         V_object obj;
 

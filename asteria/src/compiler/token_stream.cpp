@@ -219,12 +219,12 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader,
     // Look for an explicit sign symbol.
     switch(reader.peek(tlen)) {
       case '+':
-        tstr = ::rocket::sref("+");
+        tstr = sref("+");
         tlen += 1;
         break;
 
       case '-':
-        tstr = ::rocket::sref("-");
+        tstr = sref("-");
         tlen += 1;
         sign = -1;
         break;

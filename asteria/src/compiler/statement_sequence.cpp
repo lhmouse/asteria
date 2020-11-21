@@ -125,7 +125,7 @@ do_accept_json5_key_opt(Token_Stream& tstrm)
       // Treat the keyword as a plain identifier and discard this token.
       auto kwrd = qtok->as_keyword();
       tstrm.shift();
-      return ::rocket::sref(stringify_keyword(kwrd));
+      return sref(stringify_keyword(kwrd));
     }
 
     if(qtok->is_identifier()) {
@@ -270,8 +270,8 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
                            tstrm);
 
       // Make the list different from a plain, sole one.
-      names.insert(0, ::rocket::sref("["));
-      names.emplace_back(::rocket::sref("]"));
+      names.insert(0, sref("["));
+      names.emplace_back(sref("]"));
       return ::std::move(names);
     }
 
@@ -303,8 +303,8 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
                            tstrm);
 
       // Make the list different from a plain, sole one.
-      names.insert(0, ::rocket::sref("{"));
-      names.emplace_back(::rocket::sref("}"));
+      names.insert(0, sref("{"));
+      names.emplace_back(sref("}"));
       return ::std::move(names);
     }
 
@@ -552,7 +552,7 @@ do_accept_parameter_list_opt(Token_Stream& tstrm)
     for(;;) {
       auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_ellipsis });
       if(kpunct) {
-        params.emplace_back(::rocket::sref("..."));
+        params.emplace_back(sref("..."));
         break;
       }
 
@@ -1194,7 +1194,7 @@ do_accept_assert_statement_opt(Token_Stream& tstrm)
 
     auto kmsg = do_accept_assert_message_opt(tstrm);
     if(!kmsg)
-      kmsg.emplace(::rocket::sref("[no message]"));
+      kmsg.emplace(sref("[no message]"));
 
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
@@ -1537,7 +1537,7 @@ do_accept_this(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
     if(!qkwrd)
       return false;
 
-    Expression_Unit::S_named_reference xunit = { sloc, ::rocket::sref("__this") };
+    Expression_Unit::S_named_reference xunit = { sloc, sref("__this") };
     units.emplace_back(::std::move(xunit));
     return true;
   }

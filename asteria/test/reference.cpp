@@ -9,7 +9,7 @@ using namespace asteria;
 
 int main()
   {
-    auto ref = Reference(Reference::S_constant { V_string(::rocket::sref("meow")) });
+    auto ref = Reference(Reference::S_constant { V_string(sref("meow")) });
     auto val = ref.dereference_readonly();
     ASTERIA_TEST_CHECK(val.is_string());
     ASTERIA_TEST_CHECK(val.as_string() == "meow");
@@ -45,7 +45,7 @@ int main()
     ref.zoom_out();
 
     ref.zoom_in(Reference::M_array_index { 2 });
-    ref.zoom_in(Reference::M_object_key { phsh_string(::rocket::sref("my_key")) });
+    ref.zoom_in(Reference::M_object_key { phsh_string(sref("my_key")) });
     val = ref.dereference_readonly();
     ASTERIA_TEST_CHECK(val.is_null());
     ref.dereference_mutable() = V_real(10.5);
@@ -55,11 +55,11 @@ int main()
     ref.zoom_out();
     ref.zoom_out();
     ref.zoom_in(Reference::M_array_index { -1 });
-    ref.zoom_in(Reference::M_object_key { phsh_string(::rocket::sref("my_key")) });
+    ref.zoom_in(Reference::M_object_key { phsh_string(sref("my_key")) });
     val = ref.dereference_readonly();
     ASTERIA_TEST_CHECK(val.is_real());
     ASTERIA_TEST_CHECK(val.as_real() == 10.5);
-    ref.zoom_in(Reference::M_object_key { phsh_string(::rocket::sref("invalid_access")) });
+    ref.zoom_in(Reference::M_object_key { phsh_string(sref("invalid_access")) });
     ASTERIA_TEST_CHECK_CATCH(val = ref.dereference_readonly());
     ref.zoom_out();
 

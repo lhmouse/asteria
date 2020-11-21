@@ -93,7 +93,7 @@ Global_Context(API_Version version)
     // Initialize library modules.
     for(auto q = bptr;  q != eptr;  ++q) {
       // Create the subobject if it doesn't exist.
-      auto pair = ostd.try_emplace(::rocket::sref(q->name));
+      auto pair = ostd.try_emplace(sref(q->name));
       if(pair.second) {
         ROCKET_ASSERT(pair.first->second.is_null());
         pair.first->second = cow_dictionary<Value>();
@@ -105,7 +105,7 @@ Global_Context(API_Version version)
 
     // Set the `std` reference now.
     Reference::S_variable xref = { vstd };
-    this->open_named_reference(::rocket::sref("std")) = ::std::move(xref);
+    this->open_named_reference(sref("std")) = ::std::move(xref);
     this->m_vstd = vstd;
   }
 

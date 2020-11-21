@@ -57,7 +57,7 @@ std_debug_dump(Value value, Opt_integer indent)
 void
 create_bindings_debug(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(::rocket::sref("logf"),
+    result.insert_or_assign(sref("logf"),
       ASTERIA_BINDING_BEGIN("std.debug.logf", self, global, reader) {
         V_string templ;
         cow_vector<Value> values;
@@ -70,7 +70,7 @@ create_bindings_debug(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("dump"),
+    result.insert_or_assign(sref("dump"),
       ASTERIA_BINDING_BEGIN("std.debug.dump", self, global, reader) {
         Value value;
         Opt_integer indent;

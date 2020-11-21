@@ -11,7 +11,7 @@ int main()
   {
     Simple_Script code;
     code.reload_string(
-      ::rocket::sref(__FILE__), __LINE__, ::rocket::sref(R"__(
+      sref(__FILE__), __LINE__, sref(R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         assert std.chrono.utc_format(std.numeric.integer_min) == "1601-01-01 00:00:00";

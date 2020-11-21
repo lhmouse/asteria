@@ -49,7 +49,7 @@ int main()
 
       Simple_Script code;
       code.reload_string(
-        ::rocket::sref(__FILE__), __LINE__, ::rocket::sref(""
+        sref(__FILE__), __LINE__, sref(""
 #ifdef __OPTIMIZE__
         "const nloop = 1000000;"
 #else

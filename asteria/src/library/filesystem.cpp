@@ -34,7 +34,7 @@ do_remove_recursive(const char* path)
   {
     // Push the first element.
     cow_vector<RM_Element> stack;
-    stack.push_back({ rm_disp_expand, ::rocket::sref(path) });
+    stack.push_back({ rm_disp_expand, sref(path) });
 
     // Expand non-empty directories and remove all contents.
     int64_t nremoved = 0;
@@ -188,39 +188,39 @@ std_filesystem_get_information(V_string path)
 
     // Convert the result to an `object`.
     V_object stat;
-    stat.try_emplace(::rocket::sref("i_dev"),
+    stat.try_emplace(sref("i_dev"),
       V_integer(
         stb.st_dev  // unique device id on this machine
       ));
-    stat.try_emplace(::rocket::sref("i_file"),
+    stat.try_emplace(sref("i_file"),
       V_integer(
         stb.st_ino  // unique file id on this device
       ));
-    stat.try_emplace(::rocket::sref("n_ref"),
+    stat.try_emplace(sref("n_ref"),
       V_integer(
         stb.st_nlink  // number of hard links to this file
       ));
-    stat.try_emplace(::rocket::sref("b_dir"),
+    stat.try_emplace(sref("b_dir"),
       V_boolean(
         S_ISDIR(stb.st_mode)  // whether this is a directory
       ));
-    stat.try_emplace(::rocket::sref("b_sym"),
+    stat.try_emplace(sref("b_sym"),
       V_boolean(
         S_ISLNK(stb.st_mode)  // whether this is a symbolic link
       ));
-    stat.try_emplace(::rocket::sref("n_size"),
+    stat.try_emplace(sref("n_size"),
       V_integer(
         stb.st_size  // number of bytes this file contains
       ));
-    stat.try_emplace(::rocket::sref("n_ocup"),
+    stat.try_emplace(sref("n_ocup"),
       V_integer(
         int64_t(stb.st_blocks) * 512  // number of bytes this file occupies
       ));
-    stat.try_emplace(::rocket::sref("t_accs"),
+    stat.try_emplace(sref("t_accs"),
       V_integer(
         int64_t(stb.st_atim.tv_sec) * 1000 + stb.st_atim.tv_nsec / 1000000  // timestamp of last access
       ));
-    stat.try_emplace(::rocket::sref("t_mod"),
+    stat.try_emplace(sref("t_mod"),
       V_integer(
         int64_t(stb.st_mtim.tv_sec) * 1000 + stb.st_mtim.tv_nsec / 1000000  // timestamp of last modification
       ));
@@ -323,11 +323,11 @@ std_filesystem_dir_list(V_string path)
 
       // Append this entry, assuming the name is in UTF-8.
       V_object entry;
-      entry.try_emplace(::rocket::sref("b_dir"),
+      entry.try_emplace(sref("b_dir"),
         V_boolean(
           is_dir
         ));
-      entry.try_emplace(::rocket::sref("b_sym"),
+      entry.try_emplace(sref("b_sym"),
         V_boolean(
           is_sym
         ));
@@ -615,7 +615,7 @@ std_filesystem_file_remove(V_string path)
 void
 create_bindings_filesystem(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(::rocket::sref("get_working_directory"),
+    result.insert_or_assign(sref("get_working_directory"),
       ASTERIA_BINDING_BEGIN("std.filesystem.get_working_directory", self, global, reader) {
         reader.start_overload();
         if(reader.end_overload())
@@ -624,7 +624,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("get_real_path"),
+    result.insert_or_assign(sref("get_real_path"),
       ASTERIA_BINDING_BEGIN("std.filesystem.get_real_path", self, global, reader) {
         V_string path;
 
@@ -636,7 +636,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("get_information"),
+    result.insert_or_assign(sref("get_information"),
       ASTERIA_BINDING_BEGIN("std.filesystem.get_information", self, global, reader) {
         V_string path;
 
@@ -648,7 +648,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("remove_recursive"),
+    result.insert_or_assign(sref("remove_recursive"),
       ASTERIA_BINDING_BEGIN("std.filesystem.remove_recursive", self, global, reader) {
         V_string path;
 
@@ -660,7 +660,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("move_from"),
+    result.insert_or_assign(sref("move_from"),
       ASTERIA_BINDING_BEGIN("std.filesystem.move_from", self, global, reader) {
         V_string to;
         V_string from;
@@ -674,7 +674,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("dir_list"),
+    result.insert_or_assign(sref("dir_list"),
       ASTERIA_BINDING_BEGIN("std.filesystem.dir_list", self, global, reader) {
         V_string path;
 
@@ -686,7 +686,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("dir_create"),
+    result.insert_or_assign(sref("dir_create"),
       ASTERIA_BINDING_BEGIN("std.filesystem.dir_create", self, global, reader) {
         V_string path;
 
@@ -698,7 +698,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("dir_remove"),
+    result.insert_or_assign(sref("dir_remove"),
       ASTERIA_BINDING_BEGIN("std.filesystem.dir_remove", self, global, reader) {
         V_string path;
 
@@ -710,7 +710,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("file_read"),
+    result.insert_or_assign(sref("file_read"),
       ASTERIA_BINDING_BEGIN("std.filesystem.file_read", self, global, reader) {
         V_string path;
         Opt_integer off;
@@ -726,7 +726,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("file_stream"),
+    result.insert_or_assign(sref("file_stream"),
       ASTERIA_BINDING_BEGIN("std.filesystem.file_stream", self, global, reader) {
         V_string path;
         V_function func;
@@ -744,7 +744,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("file_write"),
+    result.insert_or_assign(sref("file_write"),
       ASTERIA_BINDING_BEGIN("std.filesystem.file_write", self, global, reader) {
         V_string path;
         Opt_integer off;
@@ -767,7 +767,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("file_append"),
+    result.insert_or_assign(sref("file_append"),
       ASTERIA_BINDING_BEGIN("std.filesystem.file_append", self, global, reader) {
         V_string path;
         V_string data;
@@ -783,7 +783,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("file_copy_from"),
+    result.insert_or_assign(sref("file_copy_from"),
       ASTERIA_BINDING_BEGIN("std.filesystem.file_copy_from", self, global, reader) {
         V_string to;
         V_string from;
@@ -797,7 +797,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("file_remove"),
+    result.insert_or_assign(sref("file_remove"),
       ASTERIA_BINDING_BEGIN("std.filesystem.file_remove", self, global, reader) {
         V_string path;
 

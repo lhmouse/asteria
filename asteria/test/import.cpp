@@ -14,7 +14,7 @@ int main()
 
     Simple_Script code;
     code.reload_string(
-      cow_string(abspath), __LINE__, ::rocket::sref(R"__(
+      cow_string(abspath), __LINE__, sref(R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         std.debug.logf("__file = $1", __file);

@@ -184,7 +184,7 @@ V_string
 do_get_reject(const Opt_string& reject)
   {
     if(!reject)
-      return ::rocket::sref(" \t");
+      return sref(" \t");
     return *reject;
   }
 
@@ -192,7 +192,7 @@ V_string
 do_get_padding(const Opt_string& padding)
   {
     if(!padding)
-      return ::rocket::sref(" ");
+      return sref(" ");
 
     if(padding->empty())
       ASTERIA_THROW("Empty padding string not valid");
@@ -905,7 +905,7 @@ std_string_explode(V_string text, Opt_string delim, Opt_integer limit)
         uint32_t b = text[i] & 0xFF;
         // Store a reference to the null-terminated string allocated statically.
         // Don't bother allocating a new buffer of only two characters.
-        segments.emplace_back(V_string(::rocket::sref(s_char_table[b], 1)));
+        segments.emplace_back(V_string(sref(s_char_table[b], 1)));
       }
       return segments;
     }
@@ -954,7 +954,7 @@ V_string
 std_string_hex_encode(V_string data, Opt_boolean lowercase, Opt_string delim)
   {
     V_string text;
-    auto rdelim = delim ? ::rocket::sref(*delim) : ::rocket::sref("");
+    auto rdelim = delim ? sref(*delim) : sref("");
     bool rlowerc = lowercase.value_or(false);
     text.reserve(data.size() * (2 + rdelim.length()));
 
@@ -1678,7 +1678,7 @@ std_string_pcre_replace(V_string text, V_integer from, Opt_integer length, V_str
 void
 create_bindings_string(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(::rocket::sref("slice"),
+    result.insert_or_assign(sref("slice"),
       ASTERIA_BINDING_BEGIN("std.string.slice", self, global, reader) {
         V_string text;
         V_integer from;
@@ -1694,7 +1694,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("replace_slice"),
+    result.insert_or_assign(sref("replace_slice"),
       ASTERIA_BINDING_BEGIN("std.string.replace_slice", self, global, reader) {
         V_string text;
         V_integer from;
@@ -1725,7 +1725,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("compare"),
+    result.insert_or_assign(sref("compare"),
       ASTERIA_BINDING_BEGIN("std.string.compare", self, global, reader) {
         V_string text1;
         V_string text2;
@@ -1741,7 +1741,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("starts_with"),
+    result.insert_or_assign(sref("starts_with"),
       ASTERIA_BINDING_BEGIN("std.string.starts_with", self, global, reader) {
         V_string text;
         V_string prfx;
@@ -1755,7 +1755,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("ends_with"),
+    result.insert_or_assign(sref("ends_with"),
       ASTERIA_BINDING_BEGIN("std.string.ends_with", self, global, reader) {
         V_string text;
         V_string sufx;
@@ -1769,7 +1769,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("find"),
+    result.insert_or_assign(sref("find"),
       ASTERIA_BINDING_BEGIN("std.string.find", self, global, reader) {
         V_string text;
         V_integer from;
@@ -1801,7 +1801,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("rfind"),
+    result.insert_or_assign(sref("rfind"),
       ASTERIA_BINDING_BEGIN("std.string.rfind", self, global, reader) {
         V_string text;
         V_integer from;
@@ -1833,7 +1833,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("find_and_replace"),
+    result.insert_or_assign(sref("find_and_replace"),
       ASTERIA_BINDING_BEGIN("std.string.find_and_replace", self, global, reader) {
         V_string text;
         V_integer from;
@@ -1869,7 +1869,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("find_any_of"),
+    result.insert_or_assign(sref("find_any_of"),
       ASTERIA_BINDING_BEGIN("std.string.find_any_of", self, global, reader) {
         V_string text;
         V_integer from;
@@ -1901,7 +1901,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("rfind_any_of"),
+    result.insert_or_assign(sref("rfind_any_of"),
       ASTERIA_BINDING_BEGIN("std.string.rfind_any_of", self, global, reader) {
         V_string text;
         V_integer from;
@@ -1933,7 +1933,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("find_not_of"),
+    result.insert_or_assign(sref("find_not_of"),
       ASTERIA_BINDING_BEGIN("std.string.find_not_of", self, global, reader) {
         V_string text;
         V_integer from;
@@ -1965,7 +1965,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("rfind_not_of"),
+    result.insert_or_assign(sref("rfind_not_of"),
       ASTERIA_BINDING_BEGIN("std.string.rfind_not_of", self, global, reader) {
         V_string text;
         V_integer from;
@@ -1997,7 +1997,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("reverse"),
+    result.insert_or_assign(sref("reverse"),
       ASTERIA_BINDING_BEGIN("std.string.reverse", self, global, reader) {
         V_string text;
 
@@ -2009,7 +2009,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("trim"),
+    result.insert_or_assign(sref("trim"),
       ASTERIA_BINDING_BEGIN("std.string.trim", self, global, reader) {
         V_string text;
         Opt_string rej;
@@ -2023,7 +2023,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("triml"),
+    result.insert_or_assign(sref("triml"),
       ASTERIA_BINDING_BEGIN("std.string.triml", self, global, reader) {
         V_string text;
         Opt_string rej;
@@ -2037,7 +2037,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("trimr"),
+    result.insert_or_assign(sref("trimr"),
       ASTERIA_BINDING_BEGIN("std.string.trimr", self, global, reader) {
         V_string text;
         Opt_string rej;
@@ -2051,7 +2051,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("padl"),
+    result.insert_or_assign(sref("padl"),
       ASTERIA_BINDING_BEGIN("std.string.padl", self, global, reader) {
         V_string text;
         V_integer len;
@@ -2067,7 +2067,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("padr"),
+    result.insert_or_assign(sref("padr"),
       ASTERIA_BINDING_BEGIN("std.string.padr", self, global, reader) {
         V_string text;
         V_integer len;
@@ -2083,7 +2083,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("to_upper"),
+    result.insert_or_assign(sref("to_upper"),
       ASTERIA_BINDING_BEGIN("std.string.to_upper", self, global, reader) {
         V_string text;
 
@@ -2095,7 +2095,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("to_lower"),
+    result.insert_or_assign(sref("to_lower"),
       ASTERIA_BINDING_BEGIN("std.string.to_lower", self, global, reader) {
         V_string text;
 
@@ -2107,7 +2107,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("translate"),
+    result.insert_or_assign(sref("translate"),
       ASTERIA_BINDING_BEGIN("std.string.translate", self, global, reader) {
         V_string text;
         V_string in;
@@ -2123,7 +2123,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("explode"),
+    result.insert_or_assign(sref("explode"),
       ASTERIA_BINDING_BEGIN("std.string.explode", self, global, reader) {
         V_string text;
         Opt_string delim;
@@ -2139,7 +2139,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("implode"),
+    result.insert_or_assign(sref("implode"),
       ASTERIA_BINDING_BEGIN("std.string.implode", self, global, reader) {
         V_array segs;
         Opt_string delim;
@@ -2153,7 +2153,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("hex_encode"),
+    result.insert_or_assign(sref("hex_encode"),
       ASTERIA_BINDING_BEGIN("std.string.hex_encode", self, global, reader) {
         V_string data;
         Opt_boolean lowc;
@@ -2169,7 +2169,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("hex_decode"),
+    result.insert_or_assign(sref("hex_decode"),
       ASTERIA_BINDING_BEGIN("std.string.hex_decode", self, global, reader) {
         V_string text;
 
@@ -2181,7 +2181,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("base32_encode"),
+    result.insert_or_assign(sref("base32_encode"),
       ASTERIA_BINDING_BEGIN("std.string.base32_encode", self, global, reader) {
         V_string data;
         Opt_boolean lowc;
@@ -2195,7 +2195,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("base32_decode"),
+    result.insert_or_assign(sref("base32_decode"),
       ASTERIA_BINDING_BEGIN("std.string.base32_decode", self, global, reader) {
         V_string text;
 
@@ -2207,7 +2207,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("base64_encode"),
+    result.insert_or_assign(sref("base64_encode"),
       ASTERIA_BINDING_BEGIN("std.string.base64_encode", self, global, reader) {
         V_string data;
 
@@ -2219,7 +2219,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("base64_decode"),
+    result.insert_or_assign(sref("base64_decode"),
       ASTERIA_BINDING_BEGIN("std.string.base64_decode", self, global, reader) {
         V_string text;
 
@@ -2231,7 +2231,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("url_encode"),
+    result.insert_or_assign(sref("url_encode"),
       ASTERIA_BINDING_BEGIN("std.string.url_encode", self, global, reader) {
         V_string data;
         Opt_boolean lowc;
@@ -2245,7 +2245,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("url_decode"),
+    result.insert_or_assign(sref("url_decode"),
       ASTERIA_BINDING_BEGIN("std.string.url_decode", self, global, reader) {
         V_string text;
 
@@ -2257,7 +2257,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("url_encode_query"),
+    result.insert_or_assign(sref("url_encode_query"),
       ASTERIA_BINDING_BEGIN("std.string.url_encode_query", self, global, reader) {
         V_string data;
         Opt_boolean lowc;
@@ -2271,7 +2271,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("url_decode_query"),
+    result.insert_or_assign(sref("url_decode_query"),
       ASTERIA_BINDING_BEGIN("std.string.url_decode_query", self, global, reader) {
         V_string text;
 
@@ -2283,7 +2283,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("utf8_validate"),
+    result.insert_or_assign(sref("utf8_validate"),
       ASTERIA_BINDING_BEGIN("std.string.utf8_validate", self, global, reader) {
         V_string text;
 
@@ -2295,7 +2295,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("utf8_encode"),
+    result.insert_or_assign(sref("utf8_encode"),
       ASTERIA_BINDING_BEGIN("std.string.utf8_encode", self, global, reader) {
         V_integer cp;
         V_array cps;
@@ -2317,7 +2317,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("utf8_decode"),
+    result.insert_or_assign(sref("utf8_decode"),
       ASTERIA_BINDING_BEGIN("std.string.utf8_decode", self, global, reader) {
         V_string text;
         Opt_boolean perm;
@@ -2331,7 +2331,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("pack_8"),
+    result.insert_or_assign(sref("pack_8"),
       ASTERIA_BINDING_BEGIN("std.string.pack_8", self, global, reader) {
         V_integer val;
         V_array vals;
@@ -2350,7 +2350,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("unpack_8"),
+    result.insert_or_assign(sref("unpack_8"),
       ASTERIA_BINDING_BEGIN("std.string.unpack_8", self, global, reader) {
         V_string text;
 
@@ -2362,7 +2362,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("pack_16be"),
+    result.insert_or_assign(sref("pack_16be"),
       ASTERIA_BINDING_BEGIN("std.string.pack_16be", self, global, reader) {
         V_integer val;
         V_array vals;
@@ -2381,7 +2381,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("unpack_16be"),
+    result.insert_or_assign(sref("unpack_16be"),
       ASTERIA_BINDING_BEGIN("std.string.unpack_16be", self, global, reader) {
         V_string text;
 
@@ -2393,7 +2393,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("pack_16le"),
+    result.insert_or_assign(sref("pack_16le"),
       ASTERIA_BINDING_BEGIN("std.string.pack_16le", self, global, reader) {
         V_integer val;
         V_array vals;
@@ -2412,7 +2412,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("unpack_16le"),
+    result.insert_or_assign(sref("unpack_16le"),
       ASTERIA_BINDING_BEGIN("std.string.unpack_16le", self, global, reader) {
         V_string text;
 
@@ -2424,7 +2424,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("pack_32be"),
+    result.insert_or_assign(sref("pack_32be"),
       ASTERIA_BINDING_BEGIN("std.string.pack_32be", self, global, reader) {
         V_integer val;
         V_array vals;
@@ -2443,7 +2443,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("unpack_32be"),
+    result.insert_or_assign(sref("unpack_32be"),
       ASTERIA_BINDING_BEGIN("std.string.unpack_32be", self, global, reader) {
         V_string text;
 
@@ -2455,7 +2455,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("pack_32le"),
+    result.insert_or_assign(sref("pack_32le"),
       ASTERIA_BINDING_BEGIN("std.string.pack_32le", self, global, reader) {
         V_integer val;
         V_array vals;
@@ -2474,7 +2474,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("unpack_32le"),
+    result.insert_or_assign(sref("unpack_32le"),
       ASTERIA_BINDING_BEGIN("std.string.unpack_32le", self, global, reader) {
         V_string text;
 
@@ -2486,7 +2486,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("pack_64be"),
+    result.insert_or_assign(sref("pack_64be"),
       ASTERIA_BINDING_BEGIN("std.string.pack_64be", self, global, reader) {
         V_integer val;
         V_array vals;
@@ -2505,7 +2505,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("unpack_64be"),
+    result.insert_or_assign(sref("unpack_64be"),
       ASTERIA_BINDING_BEGIN("std.string.unpack_64be", self, global, reader) {
         V_string text;
 
@@ -2517,7 +2517,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("pack_64le"),
+    result.insert_or_assign(sref("pack_64le"),
       ASTERIA_BINDING_BEGIN("std.string.pack_64le", self, global, reader) {
         V_integer val;
         V_array vals;
@@ -2536,7 +2536,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("unpack_64le"),
+    result.insert_or_assign(sref("unpack_64le"),
       ASTERIA_BINDING_BEGIN("std.string.unpack_64le", self, global, reader) {
         V_string text;
 
@@ -2548,7 +2548,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("format"),
+    result.insert_or_assign(sref("format"),
       ASTERIA_BINDING_BEGIN("std.string.format", self, global, reader) {
         V_string templ;
         cow_vector<Value> args;
@@ -2561,7 +2561,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("pcre_find"),
+    result.insert_or_assign(sref("pcre_find"),
       ASTERIA_BINDING_BEGIN("std.string.pcre_find", self, global, reader) {
         V_string text;
         V_integer from;
@@ -2593,7 +2593,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("pcre_match"),
+    result.insert_or_assign(sref("pcre_match"),
       ASTERIA_BINDING_BEGIN("std.string.pcre_match", self, global, reader) {
         V_string text;
         V_integer from;
@@ -2625,7 +2625,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("pcre_named_match"),
+    result.insert_or_assign(sref("pcre_named_match"),
       ASTERIA_BINDING_BEGIN("std.string.pcre_named_match", self, global, reader) {
         V_string text;
         V_integer from;
@@ -2657,7 +2657,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("pcre_replace"),
+    result.insert_or_assign(sref("pcre_replace"),
       ASTERIA_BINDING_BEGIN("std.string.pcre_replace", self, global, reader) {
         V_string text;
         V_integer from;

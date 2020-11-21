@@ -16,7 +16,7 @@ using namespace asteria;
 int main()
   {
     ::rocket::tinybuf_str cbuf;
-    cbuf.set_string(::rocket::sref(
+    cbuf.set_string(sref(
       R"__(
         func third() {
           const f = func(p) = p + "ow";
@@ -36,7 +36,7 @@ int main()
         }
       )__"), tinybuf::open_read);
     Token_Stream tstrm({ });
-    tstrm.reload(::rocket::sref("dummy file"), 16, cbuf);
+    tstrm.reload(sref("dummy file"), 16, cbuf);
     Statement_Sequence stmtq({ });
     stmtq.reload(tstrm);
     ASTERIA_TEST_CHECK(cow_vector<Statement>(stmtq).size() == 4);

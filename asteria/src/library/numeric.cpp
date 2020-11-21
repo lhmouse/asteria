@@ -692,37 +692,37 @@ std_numeric_parse_real(V_string text, Opt_boolean saturating)
 void
 create_bindings_numeric(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(::rocket::sref("integer_max"),
+    result.insert_or_assign(sref("integer_max"),
       V_integer(
         ::std::numeric_limits<V_integer>::max()
       ));
 
-    result.insert_or_assign(::rocket::sref("integer_min"),
+    result.insert_or_assign(sref("integer_min"),
       V_integer(
         ::std::numeric_limits<V_integer>::lowest()
       ));
 
-    result.insert_or_assign(::rocket::sref("real_max"),
+    result.insert_or_assign(sref("real_max"),
       V_real(
         ::std::numeric_limits<V_real>::max()
       ));
 
-    result.insert_or_assign(::rocket::sref("real_min"),
+    result.insert_or_assign(sref("real_min"),
       V_real(
         ::std::numeric_limits<V_real>::lowest()
       ));
 
-    result.insert_or_assign(::rocket::sref("real_epsilon"),
+    result.insert_or_assign(sref("real_epsilon"),
       V_real(
         ::std::numeric_limits<V_real>::epsilon()
       ));
 
-    result.insert_or_assign(::rocket::sref("size_max"),
+    result.insert_or_assign(sref("size_max"),
       V_integer(
         ::std::numeric_limits<ptrdiff_t>::max()
       ));
 
-    result.insert_or_assign(::rocket::sref("abs"),
+    result.insert_or_assign(sref("abs"),
       ASTERIA_BINDING_BEGIN("std.numeric.abs", self, global, reader) {
         V_integer ival;
         V_real fval;
@@ -741,7 +741,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("sign"),
+    result.insert_or_assign(sref("sign"),
       ASTERIA_BINDING_BEGIN("std.numeric.sign", self, global, reader) {
         V_integer ival;
         V_real fval;
@@ -760,7 +760,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("is_finite"),
+    result.insert_or_assign(sref("is_finite"),
       ASTERIA_BINDING_BEGIN("std.numeric.is_finite", self, global, reader) {
         V_integer ival;
         V_real fval;
@@ -779,7 +779,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("is_infinity"),
+    result.insert_or_assign(sref("is_infinity"),
       ASTERIA_BINDING_BEGIN("std.numeric.is_infinity", self, global, reader) {
         V_integer ival;
         V_real fval;
@@ -798,7 +798,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("is_nan"),
+    result.insert_or_assign(sref("is_nan"),
       ASTERIA_BINDING_BEGIN("std.numeric.is_nan", self, global, reader) {
         V_integer ival;
         V_real fval;
@@ -817,7 +817,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("max"),
+    result.insert_or_assign(sref("max"),
       ASTERIA_BINDING_BEGIN("std.numeric.max", self, global, reader) {
         cow_vector<Value> vals;
 
@@ -828,7 +828,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("min"),
+    result.insert_or_assign(sref("min"),
       ASTERIA_BINDING_BEGIN("std.numeric.min", self, global, reader) {
         cow_vector<Value> vals;
 
@@ -839,7 +839,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("clamp"),
+    result.insert_or_assign(sref("clamp"),
       ASTERIA_BINDING_BEGIN("std.numeric.clamp", self, global, reader) {
         V_integer ival;
         V_integer ilo;
@@ -866,7 +866,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("round"),
+    result.insert_or_assign(sref("round"),
       ASTERIA_BINDING_BEGIN("std.numeric.round", self, global, reader) {
         V_integer ival;
         V_real fval;
@@ -885,7 +885,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("iround"),
+    result.insert_or_assign(sref("iround"),
       ASTERIA_BINDING_BEGIN("std.numeric.iround", self, global, reader) {
         V_integer ival;
         V_real fval;
@@ -904,7 +904,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("floor"),
+    result.insert_or_assign(sref("floor"),
       ASTERIA_BINDING_BEGIN("std.numeric.floor", self, global, reader) {
         V_integer ival;
         V_real fval;
@@ -923,7 +923,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("ifloor"),
+    result.insert_or_assign(sref("ifloor"),
       ASTERIA_BINDING_BEGIN("std.numeric.ifloor", self, global, reader) {
         V_integer ival;
         V_real fval;
@@ -942,7 +942,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("ceil"),
+    result.insert_or_assign(sref("ceil"),
       ASTERIA_BINDING_BEGIN("std.numeric.ceil", self, global, reader) {
         V_integer ival;
         V_real fval;
@@ -961,7 +961,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("iceil"),
+    result.insert_or_assign(sref("iceil"),
       ASTERIA_BINDING_BEGIN("std.numeric.iceil", self, global, reader) {
         V_integer ival;
         V_real fval;
@@ -980,7 +980,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("trunc"),
+    result.insert_or_assign(sref("trunc"),
       ASTERIA_BINDING_BEGIN("std.numeric.trunc", self, global, reader) {
         V_integer ival;
         V_real fval;
@@ -999,7 +999,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("itrunc"),
+    result.insert_or_assign(sref("itrunc"),
       ASTERIA_BINDING_BEGIN("std.numeric.itrunc", self, global, reader) {
         V_integer ival;
         V_real fval;
@@ -1018,7 +1018,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("random"),
+    result.insert_or_assign(sref("random"),
       ASTERIA_BINDING_BEGIN("std.numeric.random", self, global, reader) {
         Opt_real lim;
 
@@ -1030,7 +1030,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("sqrt"),
+    result.insert_or_assign(sref("sqrt"),
       ASTERIA_BINDING_BEGIN("std.numeric.sqrt", self, global, reader) {
         V_real val;
 
@@ -1042,7 +1042,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("fma"),
+    result.insert_or_assign(sref("fma"),
       ASTERIA_BINDING_BEGIN("std.numeric.fma", self, global, reader) {
         V_real x;
         V_real y;
@@ -1058,7 +1058,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("remainder"),
+    result.insert_or_assign(sref("remainder"),
       ASTERIA_BINDING_BEGIN("std.numeric.remainder", self, global, reader) {
         V_real x;
         V_real y;
@@ -1072,7 +1072,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("frexp"),
+    result.insert_or_assign(sref("frexp"),
       ASTERIA_BINDING_BEGIN("std.numeric.frexp", self, global, reader) {
         V_real val;
 
@@ -1084,7 +1084,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("ldexp"),
+    result.insert_or_assign(sref("ldexp"),
       ASTERIA_BINDING_BEGIN("std.numeric.ldexp", self, global, reader) {
         V_real frac;
         V_integer exp;
@@ -1098,7 +1098,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("addm"),
+    result.insert_or_assign(sref("addm"),
       ASTERIA_BINDING_BEGIN("std.numeric.addm", self, global, reader) {
         V_integer x;
         V_integer y;
@@ -1112,7 +1112,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("subm"),
+    result.insert_or_assign(sref("subm"),
       ASTERIA_BINDING_BEGIN("std.numeric.subm", self, global, reader) {
         V_integer x;
         V_integer y;
@@ -1126,7 +1126,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("mulm"),
+    result.insert_or_assign(sref("mulm"),
       ASTERIA_BINDING_BEGIN("std.numeric.mulm", self, global, reader) {
         V_integer x;
         V_integer y;
@@ -1140,7 +1140,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("adds"),
+    result.insert_or_assign(sref("adds"),
       ASTERIA_BINDING_BEGIN("std.numeric.adds", self, global, reader) {
         V_integer ix;
         V_integer iy;
@@ -1163,7 +1163,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("subs"),
+    result.insert_or_assign(sref("subs"),
       ASTERIA_BINDING_BEGIN("std.numeric.subs", self, global, reader) {
         V_integer ix;
         V_integer iy;
@@ -1186,7 +1186,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("muls"),
+    result.insert_or_assign(sref("muls"),
       ASTERIA_BINDING_BEGIN("std.numeric.muls", self, global, reader) {
         V_integer ix;
         V_integer iy;
@@ -1209,7 +1209,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("lzcnt"),
+    result.insert_or_assign(sref("lzcnt"),
       ASTERIA_BINDING_BEGIN("std.numeric.lzcnt", self, global, reader) {
         V_integer x;
 
@@ -1221,7 +1221,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("tzcnt"),
+    result.insert_or_assign(sref("tzcnt"),
       ASTERIA_BINDING_BEGIN("std.numeric.tzcnt", self, global, reader) {
         V_integer x;
 
@@ -1233,7 +1233,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("popcnt"),
+    result.insert_or_assign(sref("popcnt"),
       ASTERIA_BINDING_BEGIN("std.numeric.popcnt", self, global, reader) {
         V_integer x;
 
@@ -1245,7 +1245,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("rotl"),
+    result.insert_or_assign(sref("rotl"),
       ASTERIA_BINDING_BEGIN("std.numeric.rotl", self, global, reader) {
         V_integer m;
         V_integer x;
@@ -1261,7 +1261,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("rotr"),
+    result.insert_or_assign(sref("rotr"),
       ASTERIA_BINDING_BEGIN("std.numeric.rotr", self, global, reader) {
         V_integer m;
         V_integer x;
@@ -1277,7 +1277,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("format"),
+    result.insert_or_assign(sref("format"),
       ASTERIA_BINDING_BEGIN("std.numeric.format", self, global, reader) {
         V_integer ival;
         V_real fval;
@@ -1302,7 +1302,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("parse_integer"),
+    result.insert_or_assign(sref("parse_integer"),
       ASTERIA_BINDING_BEGIN("std.numeric.parse_integer", self, global, reader) {
         V_string text;
 
@@ -1314,7 +1314,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("parse_real"),
+    result.insert_or_assign(sref("parse_real"),
       ASTERIA_BINDING_BEGIN("std.numeric.parse_real", self, global, reader) {
         V_string text;
         Opt_boolean satur;

@@ -561,7 +561,7 @@ throw_no_matching_function_call()
     ::rocket::tinyfmt_str overloads;
     index = 0;
     while(index != this->m_overloads.size()) {
-      auto params = ::rocket::sref(this->m_overloads.c_str() + index);
+      auto params = sref(this->m_overloads.c_str() + index);
       format(overloads, "  $1($2)\n", this->m_name, params);
       index += params.length() + 1;
     }

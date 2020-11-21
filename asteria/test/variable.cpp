@@ -15,7 +15,7 @@ int main()
     ASTERIA_TEST_CHECK(var->is_initialized());
     ASTERIA_TEST_CHECK(var->get_value().is_real());
 
-    var->open_value() = V_string(::rocket::sref("hello"));
+    var->open_value() = V_string(sref("hello"));
     ASTERIA_TEST_CHECK(var->is_initialized());
     ASTERIA_TEST_CHECK(var->get_value().is_string());
 

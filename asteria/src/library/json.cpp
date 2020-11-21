@@ -90,7 +90,7 @@ class Indenter_string
   public:
     explicit
     Indenter_string(const cow_string& add)
-      : m_add(add), m_cur(::rocket::sref("\n"))
+      : m_add(add), m_cur(sref("\n"))
       { }
 
   public:
@@ -212,7 +212,7 @@ do_quote_string(tinyfmt& fmt, const cow_string& str)
             nump.put_XU(*p, 4);
             char seq[8] = { "\\u" };
             ::std::memcpy(seq + 2, nump.data() + 2, 4);
-            fmt << ::rocket::sref(seq, 6);
+            fmt << sref(seq, 6);
           }
           break;
         }
@@ -662,7 +662,7 @@ do_json_parse(tinybuf& cbuf)
     opts.integers_as_reals = true;
 
     Token_Stream tstrm(opts);
-    tstrm.reload(::rocket::sref("[JSON text]"), 1, cbuf);
+    tstrm.reload(sref("[JSON text]"), 1, cbuf);
     if(tstrm.empty())
       ASTERIA_THROW("Empty JSON string");
 
@@ -743,7 +743,7 @@ std_json_parse_file(V_string path)
 void
 create_bindings_json(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(::rocket::sref("format"),
+    result.insert_or_assign(sref("format"),
       ASTERIA_BINDING_BEGIN("std.json.format", self, global, reader) {
         Value value;
         Opt_string sind;
@@ -764,7 +764,7 @@ create_bindings_json(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("format5"),
+    result.insert_or_assign(sref("format5"),
       ASTERIA_BINDING_BEGIN("std.json.format5", self, global, reader) {
         Value value;
         Opt_string sind;
@@ -785,7 +785,7 @@ create_bindings_json(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("parse"),
+    result.insert_or_assign(sref("parse"),
       ASTERIA_BINDING_BEGIN("std.json.parse", self, global, reader) {
         V_string text;
 
@@ -797,7 +797,7 @@ create_bindings_json(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("parse_file"),
+    result.insert_or_assign(sref("parse_file"),
       ASTERIA_BINDING_BEGIN("std.json.parse_file", self, global, reader) {
         V_string path;
 

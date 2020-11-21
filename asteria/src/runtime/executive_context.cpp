@@ -24,7 +24,7 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
     // If the self reference is void, it is likely that `this` isn't ever referenced in
     // this function, so perform lazy initialization to avoid this overhead.
     if(!self.is_void() && !(self.is_constant() && self.dereference_readonly().is_null()))
-      this->open_named_reference(::rocket::sref("__this")) = ::std::move(self);
+      this->open_named_reference(sref("__this")) = ::std::move(self);
 
     // Prepare iterators to arguments.
     // As function arguments are evaluated from left to right, the reference at the top

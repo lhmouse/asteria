@@ -186,7 +186,7 @@ do_parse_command_line(int argc, char** argv)
       repl_cmdline.opts.optimization_level = *optimize;
 
     // These arguments are always overwritten.
-    repl_cmdline.path = path.move_value_or(::rocket::sref("-"));
+    repl_cmdline.path = path.move_value_or(sref("-"));
     repl_cmdline.args = ::std::move(args);
   }
 

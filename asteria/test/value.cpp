@@ -23,7 +23,7 @@ int main()
     ASTERIA_TEST_CHECK(value.is_real());
     ASTERIA_TEST_CHECK(value.as_real() == 1.5);
 
-    value = V_string(::rocket::sref("hello"));
+    value = V_string(sref("hello"));
     ASTERIA_TEST_CHECK(value.is_string());
     ASTERIA_TEST_CHECK(value.as_string() == "hello");
 
@@ -36,12 +36,12 @@ int main()
     ASTERIA_TEST_CHECK(value.as_array().at(1).as_string() == "world");
 
     V_object object;
-    object.try_emplace(phsh_string(::rocket::sref("one")), V_boolean(true));
-    object.try_emplace(phsh_string(::rocket::sref("two")), V_string("world"));
+    object.try_emplace(phsh_string(sref("one")), V_boolean(true));
+    object.try_emplace(phsh_string(sref("two")), V_string("world"));
     value = ::std::move(object);
     ASTERIA_TEST_CHECK(value.is_object());
-    ASTERIA_TEST_CHECK(value.as_object().at(phsh_string(::rocket::sref("one"))).as_boolean() == true);
-    ASTERIA_TEST_CHECK(value.as_object().at(phsh_string(::rocket::sref("two"))).as_string() == "world");
+    ASTERIA_TEST_CHECK(value.as_object().at(phsh_string(sref("one"))).as_boolean() == true);
+    ASTERIA_TEST_CHECK(value.as_object().at(phsh_string(sref("two"))).as_string() == "world");
 
     value = nullopt;
     Value cmp(nullopt);
@@ -108,8 +108,8 @@ int main()
     swap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_unordered);
 
-    value = V_string(::rocket::sref("hello"));
-    cmp = V_string(::rocket::sref("world"));
+    value = V_string(sref("hello"));
+    cmp = V_string(sref("world"));
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_less);
     swap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_greater);
@@ -123,7 +123,7 @@ int main()
     swap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_equal);
 
-    value.open_array().mut(1) = V_string(::rocket::sref("hello"));
+    value.open_array().mut(1) = V_string(sref("hello"));
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_less);
     swap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_greater);
@@ -136,8 +136,8 @@ int main()
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_less);
 
     object.clear();
-    object.try_emplace(phsh_string(::rocket::sref("one")), V_boolean(true));
-    object.try_emplace(phsh_string(::rocket::sref("two")), V_string("world"));
+    object.try_emplace(phsh_string(sref("one")), V_boolean(true));
+    object.try_emplace(phsh_string(sref("two")), V_string("world"));
     value = ::std::move(object);
     cmp = value;
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_unordered);

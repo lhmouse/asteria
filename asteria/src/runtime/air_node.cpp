@@ -828,17 +828,17 @@ struct AIR_Traits_try_statement
 
             // Translate each frame into a human-readable format.
             V_object r;
-            r.try_emplace(::rocket::sref("frame"), ::rocket::sref(f.what_type()));
-            r.try_emplace(::rocket::sref("file"), f.file());
-            r.try_emplace(::rocket::sref("line"), f.line());
-            r.try_emplace(::rocket::sref("offset"), f.offset());
-            r.try_emplace(::rocket::sref("value"), f.value());
+            r.try_emplace(sref("frame"), sref(f.what_type()));
+            r.try_emplace(sref("file"), f.file());
+            r.try_emplace(sref("line"), f.line());
+            r.try_emplace(sref("offset"), f.offset());
+            r.try_emplace(sref("value"), f.value());
 
             // Append this frame.
             backtrace.emplace_back(::std::move(r));
           }
           xref.val = ::std::move(backtrace);
-          ctx_catch.open_named_reference(::rocket::sref("__backtrace")) = ::std::move(xref);
+          ctx_catch.open_named_reference(sref("__backtrace")) = ::std::move(xref);
 
           // Execute the `catch` clause.
           status = sp.queue_catch.execute(ctx_catch);
@@ -1987,7 +1987,7 @@ struct AIR_Traits_apply_operator_typeof : AIR_Traits_apply_operator_common
 
         // Get the type name of the operand, which is constant.
         // N.B. This is one of the few operators that work on all types.
-        rhs = ::rocket::sref(rhs.what_type());
+        rhs = sref(rhs.what_type());
         return air_status_next;
       }
   };
@@ -2567,7 +2567,7 @@ struct AIR_Traits_apply_operator_cmp_3way : AIR_Traits_apply_operator_common
         auto cmp = lhs.compare(rhs);
         switch(cmp) {
           case compare_unordered:
-            lhs = ::rocket::sref("[unordered]");
+            lhs = sref("[unordered]");
             break;
 
           case compare_less:
@@ -3882,11 +3882,11 @@ struct AIR_Traits_import_call
 
         // Instantiate the function.
         const Source_Location sloc(path, 0, 0);
-        const cow_vector<phsh_string> params(1, ::rocket::sref("..."));
+        const cow_vector<phsh_string> params(1, sref("..."));
 
         AIR_Optimizer optmz(sp.opts);
         optmz.reload(nullptr, params, stmtq);
-        auto qtarget = optmz.create_function(sloc, ::rocket::sref("[file scope]"));
+        auto qtarget = optmz.create_function(sloc, sref("[file scope]"));
 
         // Invoke the script.
         // `this` is null for imported scripts.

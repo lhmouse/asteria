@@ -13,7 +13,7 @@ int main()
     code.reload_string(
 ///////////////////////////////////////////////////////////////////////////////
 
-      ::rocket::sref(__FILE__), __LINE__, ::rocket::sref(R"__(
+      sref(__FILE__), __LINE__, sref(R"__(
         func recur(n) {
           std.debug.logf("recur($1)", n + 1);
           return recur(n + 1) + 1;

@@ -188,52 +188,52 @@ std_math_lgamma(V_real x)
 void
 create_bindings_math(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(::rocket::sref("pi"),
+    result.insert_or_assign(sref("pi"),
       V_real(
         3.1415926535897932384626433832795
       ));
 
-    result.insert_or_assign(::rocket::sref("rad"),
+    result.insert_or_assign(sref("rad"),
       V_real(
         57.295779513082320876798154814105
       ));
 
-    result.insert_or_assign(::rocket::sref("deg"),
+    result.insert_or_assign(sref("deg"),
       V_real(
         0.01745329251994329576923690768489
       ));
 
-    result.insert_or_assign(::rocket::sref("e"),
+    result.insert_or_assign(sref("e"),
       V_real(
         2.7182818284590452353602874713527
       ));
 
-    result.insert_or_assign(::rocket::sref("sqrt2"),
+    result.insert_or_assign(sref("sqrt2"),
       V_real(
         1.4142135623730950488016887242097
       ));
 
-    result.insert_or_assign(::rocket::sref("sqrt3"),
+    result.insert_or_assign(sref("sqrt3"),
       V_real(
         1.7320508075688772935274463415059
       ));
 
-    result.insert_or_assign(::rocket::sref("cbrt2"),
+    result.insert_or_assign(sref("cbrt2"),
       V_real(
         1.2599210498948731647672106072782
       ));
 
-    result.insert_or_assign(::rocket::sref("lg2"),
+    result.insert_or_assign(sref("lg2"),
       V_real(
         0.30102999566398119521373889472449
       ));
 
-    result.insert_or_assign(::rocket::sref("lb10"),
+    result.insert_or_assign(sref("lb10"),
       V_real(
         3.3219280948873623478703194294894
       ));
 
-    result.insert_or_assign(::rocket::sref("exp"),
+    result.insert_or_assign(sref("exp"),
       ASTERIA_BINDING_BEGIN("std.math.exp", self, global, reader) {
         V_real base;
         V_real y;
@@ -253,7 +253,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("log"),
+    result.insert_or_assign(sref("log"),
       ASTERIA_BINDING_BEGIN("std.math.log", self, global, reader) {
         V_real base;
         V_real x;
@@ -273,7 +273,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("expm1"),
+    result.insert_or_assign(sref("expm1"),
       ASTERIA_BINDING_BEGIN("std.math.expm1", self, global, reader) {
         V_real y;
 
@@ -285,7 +285,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("log1p"),
+    result.insert_or_assign(sref("log1p"),
       ASTERIA_BINDING_BEGIN("std.math.log1p", self, global, reader) {
         V_real x;
 
@@ -297,7 +297,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("sin"),
+    result.insert_or_assign(sref("sin"),
       ASTERIA_BINDING_BEGIN("std.math.sin", self, global, reader) {
         V_real x;
 
@@ -309,7 +309,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("cos"),
+    result.insert_or_assign(sref("cos"),
       ASTERIA_BINDING_BEGIN("std.math.cos", self, global, reader) {
         V_real x;
 
@@ -321,7 +321,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("sincos"),
+    result.insert_or_assign(sref("sincos"),
       ASTERIA_BINDING_BEGIN("std.math.sincos", self, global, reader) {
         V_real x;
 
@@ -333,7 +333,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("tan"),
+    result.insert_or_assign(sref("tan"),
       ASTERIA_BINDING_BEGIN("std.math.tan", self, global, reader) {
         V_real x;
 
@@ -345,7 +345,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("asin"),
+    result.insert_or_assign(sref("asin"),
       ASTERIA_BINDING_BEGIN("std.math.asin", self, global, reader) {
         V_real x;
 
@@ -357,7 +357,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("acos"),
+    result.insert_or_assign(sref("acos"),
       ASTERIA_BINDING_BEGIN("std.math.acos", self, global, reader) {
         V_real x;
 
@@ -369,7 +369,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("atan"),
+    result.insert_or_assign(sref("atan"),
       ASTERIA_BINDING_BEGIN("std.math.atan", self, global, reader) {
         V_real x;
 
@@ -381,7 +381,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("atan2"),
+    result.insert_or_assign(sref("atan2"),
       ASTERIA_BINDING_BEGIN("std.math.atan2", self, global, reader) {
         V_real y;
         V_real x;
@@ -395,7 +395,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("hypot"),
+    result.insert_or_assign(sref("hypot"),
       ASTERIA_BINDING_BEGIN("std.math.hypot", self, global, reader) {
         cow_vector<Value> vals;
 
@@ -406,7 +406,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("sinh"),
+    result.insert_or_assign(sref("sinh"),
       ASTERIA_BINDING_BEGIN("std.math.sinh", self, global, reader) {
         V_real x;
 
@@ -418,7 +418,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("cosh"),
+    result.insert_or_assign(sref("cosh"),
       ASTERIA_BINDING_BEGIN("std.math.cosh", self, global, reader) {
         V_real x;
 
@@ -430,7 +430,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("tanh"),
+    result.insert_or_assign(sref("tanh"),
       ASTERIA_BINDING_BEGIN("std.math.tanh", self, global, reader) {
         V_real x;
 
@@ -442,7 +442,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("asinh"),
+    result.insert_or_assign(sref("asinh"),
       ASTERIA_BINDING_BEGIN("std.math.asinh", self, global, reader) {
         V_real x;
 
@@ -454,7 +454,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("acosh"),
+    result.insert_or_assign(sref("acosh"),
       ASTERIA_BINDING_BEGIN("std.math.acosh", self, global, reader) {
         V_real x;
 
@@ -466,7 +466,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("atanh"),
+    result.insert_or_assign(sref("atanh"),
       ASTERIA_BINDING_BEGIN("std.math.atanh", self, global, reader) {
         V_real x;
 
@@ -478,7 +478,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("erf"),
+    result.insert_or_assign(sref("erf"),
       ASTERIA_BINDING_BEGIN("std.math.erf", self, global, reader) {
         V_real x;
 
@@ -490,7 +490,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("cerf"),
+    result.insert_or_assign(sref("cerf"),
       ASTERIA_BINDING_BEGIN("std.math.cerf", self, global, reader) {
         V_real x;
 
@@ -502,7 +502,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("gamma"),
+    result.insert_or_assign(sref("gamma"),
       ASTERIA_BINDING_BEGIN("std.math.gamma", self, global, reader) {
         V_real x;
 
@@ -514,7 +514,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("lgamma"),
+    result.insert_or_assign(sref("lgamma"),
       ASTERIA_BINDING_BEGIN("std.math.lgamma", self, global, reader) {
         V_real x;
 

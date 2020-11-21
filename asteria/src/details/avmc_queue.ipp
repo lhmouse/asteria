@@ -160,7 +160,7 @@ struct Header
       const
       {
         if(this->has_syms && this->sp_syms->syms_opt)
-          except.push_frame_plain(this->sp_syms->syms_opt->sloc, ::rocket::sref(""));
+          except.push_frame_plain(this->sp_syms->syms_opt->sloc, sref(""));
       }
   };
 

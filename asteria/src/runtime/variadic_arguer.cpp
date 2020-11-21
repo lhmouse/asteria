@@ -30,7 +30,7 @@ Variadic_Arguer::
 invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack)
   const
   {
-    Argument_Reader reader(::rocket::sref("__varg"), ::std::move(stack));
+    Argument_Reader reader(sref("__varg"), ::std::move(stack));
 
     // If an argument is specified, it shall be the index of a variadic argument as
     // an integer, or an explicit `null`.

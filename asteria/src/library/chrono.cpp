@@ -218,10 +218,10 @@ std_chrono_utc_format(V_integer time_point, Opt_boolean with_ms)
     bool pms = with_ms.value_or(false);
     // Handle special time points.
     if(time_point <= s_timestamp_min)
-      return ::rocket::sref(s_strings_min[pms]);
+      return sref(s_strings_min[pms]);
 
     if(time_point >= s_timestamp_max)
-      return ::rocket::sref(s_strings_max[pms]);
+      return sref(s_strings_max[pms]);
 
     // Convert the timestamp to the number of milliseconds since 1600-03-01.
     uint64_t temp = static_cast<uint64_t>(time_point - s_timestamp_1600_03_01);
@@ -454,7 +454,7 @@ std_chrono_utc_parse(V_string time_str)
 void
 create_bindings_chrono(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(::rocket::sref("utc_now"),
+    result.insert_or_assign(sref("utc_now"),
       ASTERIA_BINDING_BEGIN("std.chrono.utc_now", self, global, reader) {
         reader.start_overload();
         if(reader.end_overload())
@@ -463,7 +463,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("local_now"),
+    result.insert_or_assign(sref("local_now"),
       ASTERIA_BINDING_BEGIN("std.chrono.local_now", self, global, reader) {
         reader.start_overload();
         if(reader.end_overload())
@@ -472,7 +472,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("hires_now"),
+    result.insert_or_assign(sref("hires_now"),
       ASTERIA_BINDING_BEGIN("std.chrono.hires_now", self, global, reader) {
         reader.start_overload();
         if(reader.end_overload())
@@ -481,7 +481,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("steady_now"),
+    result.insert_or_assign(sref("steady_now"),
       ASTERIA_BINDING_BEGIN("std.chrono.steady_now", self, global, reader) {
         reader.start_overload();
         if(reader.end_overload())
@@ -490,7 +490,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("local_from_utc"),
+    result.insert_or_assign(sref("local_from_utc"),
       ASTERIA_BINDING_BEGIN("std.chrono.local_from_utc", self, global, reader) {
         V_integer utc;
 
@@ -502,7 +502,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("utc_from_local"),
+    result.insert_or_assign(sref("utc_from_local"),
       ASTERIA_BINDING_BEGIN("std.chrono.utc_from_local", self, global, reader) {
         V_integer local;
 
@@ -514,7 +514,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("utc_format"),
+    result.insert_or_assign(sref("utc_format"),
       ASTERIA_BINDING_BEGIN("std.chrono.utc_format", self, global, reader) {
         V_integer utc;
         Opt_boolean with_ms;
@@ -528,7 +528,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("utc_parse"),
+    result.insert_or_assign(sref("utc_parse"),
       ASTERIA_BINDING_BEGIN("std.chrono.utc_parse", self, global, reader) {
         V_string str;
 

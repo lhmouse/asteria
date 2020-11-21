@@ -31,9 +31,9 @@ Analytic_Context(M_function, Abstract_Context* parent_opt,
     // Set pre-defined references.
     // N.B. If you have ever changed these, remember to update 'executive_context.cpp'
     // as well.
-    this->open_named_reference(::rocket::sref("__varg")) /*= Reference::S_uninit()*/;
-    this->open_named_reference(::rocket::sref("__this")) /*= Reference::S_uninit()*/;
-    this->open_named_reference(::rocket::sref("__func")) /*= Reference::S_uninit()*/;
+    this->open_named_reference(sref("__varg")) /*= Reference::S_uninit()*/;
+    this->open_named_reference(sref("__this")) /*= Reference::S_uninit()*/;
+    this->open_named_reference(sref("__func")) /*= Reference::S_uninit()*/;
   }
 
 Analytic_Context::

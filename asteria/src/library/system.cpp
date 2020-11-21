@@ -361,7 +361,7 @@ std_system_env_get_variables()
       // The key is terminated by an equals sign.
       const char* equ = ::std::strchr(str, '=');
       if(ROCKET_UNEXPECT(!equ))
-        vars.insert_or_assign(cow_string(str), ::rocket::sref(""));  // no equals sign?
+        vars.insert_or_assign(cow_string(str), sref(""));  // no equals sign?
       else
         vars.insert_or_assign(cow_string(str, equ), cow_string(equ + 1));
     }
@@ -525,7 +525,7 @@ std_system_conf_load_file(V_string path)
 void
 create_bindings_system(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(::rocket::sref("gc_count_variables"),
+    result.insert_or_assign(sref("gc_count_variables"),
       ASTERIA_BINDING_BEGIN("std.system.gc_count_variables", self, global, reader) {
         V_integer gen;
 
@@ -537,7 +537,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("gc_get_threshold"),
+    result.insert_or_assign(sref("gc_get_threshold"),
       ASTERIA_BINDING_BEGIN("std.system.gc_get_threshold", self, global, reader) {
         V_integer gen;
 
@@ -549,7 +549,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("gc_set_threshold"),
+    result.insert_or_assign(sref("gc_set_threshold"),
       ASTERIA_BINDING_BEGIN("std.system.gc_set_threshold", self, global, reader) {
         V_integer gen;
         V_integer thrs;
@@ -563,7 +563,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("gc_collect"),
+    result.insert_or_assign(sref("gc_collect"),
       ASTERIA_BINDING_BEGIN("std.system.collect", self, global, reader) {
         Opt_integer glim;
 
@@ -575,7 +575,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("env_get_variable"),
+    result.insert_or_assign(sref("env_get_variable"),
       ASTERIA_BINDING_BEGIN("std.system.env_get_variable", self, global, reader) {
         V_string name;
 
@@ -587,7 +587,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("env_get_variables"),
+    result.insert_or_assign(sref("env_get_variables"),
       ASTERIA_BINDING_BEGIN("std.system.env_get_variables", self, global, reader) {
         reader.start_overload();
         if(reader.end_overload())
@@ -596,7 +596,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("uuid"),
+    result.insert_or_assign(sref("uuid"),
       ASTERIA_BINDING_BEGIN("std.system.uuid", self, global, reader) {
         Opt_boolean lowc;
 
@@ -608,7 +608,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("proc_get_pid"),
+    result.insert_or_assign(sref("proc_get_pid"),
       ASTERIA_BINDING_BEGIN("std.system.proc_get_pid", self, global, reader) {
         reader.start_overload();
         if(reader.end_overload())
@@ -617,7 +617,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("proc_get_ppid"),
+    result.insert_or_assign(sref("proc_get_ppid"),
       ASTERIA_BINDING_BEGIN("std.system.proc_get_ppid", self, global, reader) {
         reader.start_overload();
         if(reader.end_overload())
@@ -626,7 +626,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("proc_get_uid"),
+    result.insert_or_assign(sref("proc_get_uid"),
       ASTERIA_BINDING_BEGIN("std.system.proc_get_uid", self, global, reader) {
         reader.start_overload();
         if(reader.end_overload())
@@ -635,7 +635,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("proc_get_euid"),
+    result.insert_or_assign(sref("proc_get_euid"),
       ASTERIA_BINDING_BEGIN("std.system.proc_get_euid", self, global, reader) {
         reader.start_overload();
         if(reader.end_overload())
@@ -644,7 +644,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("proc_invoke"),
+    result.insert_or_assign(sref("proc_invoke"),
       ASTERIA_BINDING_BEGIN("std.system.proc_invoke", self, global, reader) {
         V_string cmd;
         Opt_array argv;
@@ -660,7 +660,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("proc_daemonize"),
+    result.insert_or_assign(sref("proc_daemonize"),
       ASTERIA_BINDING_BEGIN("std.system.proc_daemonize", self, global, reader) {
         reader.start_overload();
         if(reader.end_overload())
@@ -669,7 +669,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("conf_load_file"),
+    result.insert_or_assign(sref("conf_load_file"),
       ASTERIA_BINDING_BEGIN("std.system.conf_load_file", self, global, reader) {
         V_string path;
 

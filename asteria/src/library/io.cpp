@@ -341,7 +341,7 @@ std_io_flush()
 void
 create_bindings_io(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(::rocket::sref("getc"),
+    result.insert_or_assign(sref("getc"),
       ASTERIA_BINDING_BEGIN("std.io.getc", self, global, reader) {
         reader.start_overload();
         if(reader.end_overload())
@@ -350,7 +350,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("getln"),
+    result.insert_or_assign(sref("getln"),
       ASTERIA_BINDING_BEGIN("std.io.getln", self, global, reader) {
         reader.start_overload();
         if(reader.end_overload())
@@ -359,7 +359,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("putc"),
+    result.insert_or_assign(sref("putc"),
       ASTERIA_BINDING_BEGIN("std.io.putc", self, global, reader) {
         V_integer ch;
         V_string str;
@@ -378,7 +378,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("putln"),
+    result.insert_or_assign(sref("putln"),
       ASTERIA_BINDING_BEGIN("std.io.putln", self, global, reader) {
         V_string text;
 
@@ -390,7 +390,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("putf"),
+    result.insert_or_assign(sref("putf"),
       ASTERIA_BINDING_BEGIN("std.io.putf", self, global, reader) {
         V_string templ;
         cow_vector<Value> values;
@@ -403,7 +403,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("read"),
+    result.insert_or_assign(sref("read"),
       ASTERIA_BINDING_BEGIN("std.io.read", self, global, reader) {
         Opt_integer limit;
 
@@ -415,7 +415,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("write"),
+    result.insert_or_assign(sref("write"),
       ASTERIA_BINDING_BEGIN("std.io.write", self, global, reader) {
         V_string data;
 
@@ -427,7 +427,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("flush"),
+    result.insert_or_assign(sref("flush"),
       ASTERIA_BINDING_BEGIN("std.io.flush", self, global, reader) {
         reader.start_overload();
         if(reader.end_overload())

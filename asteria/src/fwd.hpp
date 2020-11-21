@@ -117,7 +117,7 @@ using ::rocket::size;
 using ::rocket::static_pointer_cast;
 using ::rocket::dynamic_pointer_cast;
 using ::rocket::const_pointer_cast;
-
+using ::rocket::sref;
 using ::rocket::nullopt;
 
 // Aliases

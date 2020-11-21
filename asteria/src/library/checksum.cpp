@@ -104,10 +104,10 @@ class CRC32_Hasher
 void
 do_construct_CRC32(V_object& result)
   {
-    static constexpr auto uuid = ::rocket::sref("#{2C78B9D8-A8F4-4CE9-36E7-12B9EE14AD3D}");
+    static constexpr auto uuid = sref("#{2C78B9D8-A8F4-4CE9-36E7-12B9EE14AD3D}");
     do_set_private(result, uuid, std_checksum_CRC32_private());
 
-    result.insert_or_assign(::rocket::sref("update"),
+    result.insert_or_assign(sref("update"),
       ASTERIA_BINDING_BEGIN("std.checksum.CRC32::update", self, global, reader) {
         const auto href = do_open_private(::std::move(self), uuid);
         V_string data;
@@ -120,7 +120,7 @@ do_construct_CRC32(V_object& result)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("finish"),
+    result.insert_or_assign(sref("finish"),
       ASTERIA_BINDING_BEGIN("std.checksum.CRC32::finish", self, global, reader) {
         const auto href = do_open_private(::std::move(self), uuid);
 
@@ -192,10 +192,10 @@ class FNV1a32_Hasher
 void
 do_construct_FNV1a32(V_object& result)
   {
-    static constexpr auto uuid = ::rocket::sref("#{2C79571C-5D7B-4674-056A-6C0D075A82FC}");
+    static constexpr auto uuid = sref("#{2C79571C-5D7B-4674-056A-6C0D075A82FC}");
     do_set_private(result, uuid, std_checksum_FNV1a32_private());
 
-    result.insert_or_assign(::rocket::sref("update"),
+    result.insert_or_assign(sref("update"),
       ASTERIA_BINDING_BEGIN("std.checksum.FNV1a32::update", self, global, reader) {
         const auto href = do_open_private(::std::move(self), uuid);
         V_string data;
@@ -208,7 +208,7 @@ do_construct_FNV1a32(V_object& result)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("finish"),
+    result.insert_or_assign(sref("finish"),
       ASTERIA_BINDING_BEGIN("std.checksum.FNV1a32::finish", self, global, reader) {
         const auto href = do_open_private(::std::move(self), uuid);
 
@@ -523,10 +523,10 @@ class MD5_Hasher
 void
 do_construct_MD5(V_object& result)
   {
-    static constexpr auto uuid = ::rocket::sref("#{2C795808-7290-4675-056A-D3825905F8E1}");
+    static constexpr auto uuid = sref("#{2C795808-7290-4675-056A-D3825905F8E1}");
     do_set_private(result, uuid, std_checksum_MD5_private());
 
-    result.insert_or_assign(::rocket::sref("update"),
+    result.insert_or_assign(sref("update"),
       ASTERIA_BINDING_BEGIN("std.checksum.MD5::update", self, global, reader) {
         const auto href = do_open_private(::std::move(self), uuid);
         V_string data;
@@ -539,7 +539,7 @@ do_construct_MD5(V_object& result)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("finish"),
+    result.insert_or_assign(sref("finish"),
       ASTERIA_BINDING_BEGIN("std.checksum.MD5::finish", self, global, reader) {
         const auto href = do_open_private(::std::move(self), uuid);
 
@@ -811,10 +811,10 @@ class SHA1_Hasher
 void
 do_construct_SHA1(V_object& result)
   {
-    static constexpr auto uuid = ::rocket::sref("#{2C795747-7003-4674-056A-91122125D892}");
+    static constexpr auto uuid = sref("#{2C795747-7003-4674-056A-91122125D892}");
     do_set_private(result, uuid, std_checksum_SHA1_private());
 
-    result.insert_or_assign(::rocket::sref("update"),
+    result.insert_or_assign(sref("update"),
       ASTERIA_BINDING_BEGIN("std.checksum.SHA1::update", self, global, reader) {
         const auto href = do_open_private(::std::move(self), uuid);
         V_string data;
@@ -827,7 +827,7 @@ do_construct_SHA1(V_object& result)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("finish"),
+    result.insert_or_assign(sref("finish"),
       ASTERIA_BINDING_BEGIN("std.checksum.SHA1::finish", self, global, reader) {
         const auto href = do_open_private(::std::move(self), uuid);
 
@@ -1071,10 +1071,10 @@ class SHA256_Hasher
 void
 do_construct_SHA256(V_object& result)
   {
-    static constexpr auto uuid = ::rocket::sref("#{2C795749-6F4F-4674-056A-B0E8CF4BBD7D}");
+    static constexpr auto uuid = sref("#{2C795749-6F4F-4674-056A-B0E8CF4BBD7D}");
     do_set_private(result, uuid, std_checksum_SHA256_private());
 
-    result.insert_or_assign(::rocket::sref("update"),
+    result.insert_or_assign(sref("update"),
       ASTERIA_BINDING_BEGIN("std.checksum.SHA256::update", self, global, reader) {
         const auto href = do_open_private(::std::move(self), uuid);
         V_string data;
@@ -1087,7 +1087,7 @@ do_construct_SHA256(V_object& result)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("finish"),
+    result.insert_or_assign(sref("finish"),
       ASTERIA_BINDING_BEGIN("std.checksum.SHA256::finish", self, global, reader) {
         const auto href = do_open_private(::std::move(self), uuid);
 
@@ -1352,7 +1352,7 @@ std_checksum_sha256_file(V_string path)
 void
 create_bindings_checksum(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(::rocket::sref("CRC32"),
+    result.insert_or_assign(sref("CRC32"),
       ASTERIA_BINDING_BEGIN("std.checksum.CRC32", self, global, reader) {
         reader.start_overload();
         if(reader.end_overload())
@@ -1361,7 +1361,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("crc32"),
+    result.insert_or_assign(sref("crc32"),
       ASTERIA_BINDING_BEGIN("std.checksum.crc32", self, global, reader) {
         V_string data;
 
@@ -1373,7 +1373,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("crc32_file"),
+    result.insert_or_assign(sref("crc32_file"),
       ASTERIA_BINDING_BEGIN("std.checksum.crc32_file", self, global, reader) {
         V_string path;
 
@@ -1385,7 +1385,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("FNV1a32"),
+    result.insert_or_assign(sref("FNV1a32"),
       ASTERIA_BINDING_BEGIN("std.checksum.FNV1a32", self, global, reader) {
         reader.start_overload();
         if(reader.end_overload())
@@ -1394,7 +1394,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("fnv1a32"),
+    result.insert_or_assign(sref("fnv1a32"),
       ASTERIA_BINDING_BEGIN("std.checksum.fnv1a32", self, global, reader) {
         V_string data;
 
@@ -1406,7 +1406,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("fnv1a32_file"),
+    result.insert_or_assign(sref("fnv1a32_file"),
       ASTERIA_BINDING_BEGIN("std.checksum.fnv1a32_file", self, global, reader) {
         V_string path;
 
@@ -1418,7 +1418,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("MD5"),
+    result.insert_or_assign(sref("MD5"),
       ASTERIA_BINDING_BEGIN("std.checksum.MD5", self, global, reader) {
         reader.start_overload();
         if(reader.end_overload())
@@ -1427,7 +1427,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("md5"),
+    result.insert_or_assign(sref("md5"),
       ASTERIA_BINDING_BEGIN("std.checksum.md5", self, global, reader) {
         V_string data;
 
@@ -1439,7 +1439,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("md5_file"),
+    result.insert_or_assign(sref("md5_file"),
       ASTERIA_BINDING_BEGIN("std.checksum.md5_file", self, global, reader) {
         V_string path;
 
@@ -1451,7 +1451,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("SHA1"),
+    result.insert_or_assign(sref("SHA1"),
       ASTERIA_BINDING_BEGIN("std.checksum.SHA1", self, global, reader) {
         reader.start_overload();
         if(reader.end_overload())
@@ -1460,7 +1460,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("sha1"),
+    result.insert_or_assign(sref("sha1"),
       ASTERIA_BINDING_BEGIN("std.checksum.sha1", self, global, reader) {
         V_string data;
 
@@ -1472,7 +1472,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("sha1_file"),
+    result.insert_or_assign(sref("sha1_file"),
       ASTERIA_BINDING_BEGIN("std.checksum.sha1_file", self, global, reader) {
         V_string path;
 
@@ -1484,7 +1484,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("SHA256"),
+    result.insert_or_assign(sref("SHA256"),
       ASTERIA_BINDING_BEGIN("std.checksum.SHA256", self, global, reader) {
         reader.start_overload();
         if(reader.end_overload())
@@ -1493,7 +1493,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("sha256"),
+    result.insert_or_assign(sref("sha256"),
       ASTERIA_BINDING_BEGIN("std.checksum.sha256", self, global, reader) {
         V_string data;
 
@@ -1505,7 +1505,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(::rocket::sref("sha256_file"),
+    result.insert_or_assign(sref("sha256_file"),
       ASTERIA_BINDING_BEGIN("std.checksum.sha256_file", self, global, reader) {
         V_string path;
 
