@@ -82,7 +82,11 @@ struct char_traits<char>
     size_type
     length(const char_type* p)
       noexcept
-      { return details_char_traits::length<char>(p);  }
+      {
+        return ROCKET_CONSTANT_P(*p)
+                   ? details_char_traits::length<char>(p)
+                   : ::strlen(p);
+      }
 
     static
     int
@@ -212,7 +216,11 @@ struct char_traits<wchar_t>
     size_type
     length(const char_type* p)
       noexcept
-      { return details_char_traits::length<wchar_t>(p);  }
+      {
+        return ROCKET_CONSTANT_P(*p)
+                   ? details_char_traits::length<wchar_t>(p)
+                   : ::wcslen(p);
+      }
 
     static
     int
