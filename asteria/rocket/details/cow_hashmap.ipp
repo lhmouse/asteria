@@ -884,8 +884,8 @@ class hashmap_iterator
       : m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)
       {
         // Go to the first following non-empty bucket if any.
-        if((this->m_cur != this->m_end) && !*(this->m_cur))
-          ++*this;
+        while((this->m_cur != this->m_end) && !*(this->m_cur))
+          this->m_cur++;
       }
 
   public:
@@ -956,7 +956,7 @@ class hashmap_iterator
         auto res = *this;
         do {
           ROCKET_ASSERT_MSG(res.m_cur != this->m_end, "Past-the-end iterator not incrementable");
-          ++(res.m_cur);
+          res.m_cur++;
         }
         while((res.m_cur != this->m_end) && !*(res.m_cur));
         return res;
@@ -970,7 +970,7 @@ class hashmap_iterator
         auto res = *this;
         do {
           ROCKET_ASSERT_MSG(res.m_cur != this->m_begin, "Beginning iterator not decrementable");
-          --(res.m_cur);
+          res.m_cur--;
         }
         while(!*(res.m_cur));
         return res;
