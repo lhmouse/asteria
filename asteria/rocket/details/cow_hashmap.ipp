@@ -652,14 +652,11 @@ class storage_handle
             qstor->free_value(qval);
 
         // Relocate elements that are not placed in their immediate locations.
-        auto bptr = qstor->bkts;
-        auto eptr = qstor->bkts + qstor->bucket_count();
-
         noadl::linear_probe(
-          bptr,
-          bptr + tpos,
-          bptr + tpos + tlen,
-          eptr,
+          qstor->bkts,
+          qstor->bkts + tpos,
+          qstor->bkts + tpos + tlen,
+          qstor->bkts + qstor->bucket_count(),
           [&](bucket_type& r) {
             // Clear this bucket temporarily.
             auto qval = r.exchange(nullptr);
