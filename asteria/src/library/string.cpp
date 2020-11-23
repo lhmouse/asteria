@@ -318,8 +318,10 @@ do_url_encode(const V_string& data, bool lcase)
       }
 
       // Escape it.
-      char rep[3] = { '%', s_base16_table[((c >> 3) & 0x1E) + lcase],
-                           s_base16_table[((c << 1) & 0x1E) + lcase] };
+      char rep[3];
+      rep[0] = '%';
+      rep[1] = s_base16_table[((c >> 3) & 0x1E) + lcase];
+      rep[2] = s_base16_table[((c << 1) & 0x1E) + lcase];
 
       // Replace this character with the escape string.
       text.replace(nread - 1, 1, rep, 3);
