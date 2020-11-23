@@ -350,7 +350,6 @@ do_url_decode(const V_string& text)
       if(c != '%') {
         if(do_is_url_invalid_char(c))
           ASTERIA_THROW("Invalid character in URL (character `$1`)", c);
-
         continue;
       }
 
