@@ -952,6 +952,7 @@ class basic_cow_string
       }
 
     // N.B. There is no default argument for `tpos`.
+    ROCKET_NOINLINE
     basic_cow_string&
     erase(size_type tpos, size_type tn = npos)
       {
@@ -962,6 +963,7 @@ class basic_cow_string
       }
 
     // N.B. This function may throw `std::bad_alloc`.
+    ROCKET_NOINLINE
     iterator
     erase(const_iterator first, const_iterator last)
       {
@@ -974,6 +976,7 @@ class basic_cow_string
       }
 
     // N.B. This function may throw `std::bad_alloc`.
+    ROCKET_NOINLINE
     iterator
     erase(const_iterator pos)
       {
@@ -1082,6 +1085,7 @@ class basic_cow_string
         return *this;
       }
 
+    ROCKET_NOINLINE
     basic_cow_string&
     insert(size_type tpos, const basic_cow_string& other, size_type pos = 0, size_type n = npos)
       {
@@ -1094,6 +1098,7 @@ class basic_cow_string
         return *this;
       }
 
+    ROCKET_NOINLINE
     basic_cow_string&
     insert(size_type tpos, const value_type* s, size_type n)
       {
@@ -1106,6 +1111,7 @@ class basic_cow_string
         return *this;
       }
 
+    ROCKET_NOINLINE
     basic_cow_string&
     insert(size_type tpos, const value_type* s)
       {
@@ -1118,6 +1124,7 @@ class basic_cow_string
         return *this;
       }
 
+    ROCKET_NOINLINE
     basic_cow_string&
     insert(size_type tpos, size_type n, value_type ch)
       {
@@ -1130,6 +1137,7 @@ class basic_cow_string
       }
 
     // N.B. This is a non-standard extension.
+    ROCKET_NOINLINE
     basic_cow_string&
     insert(size_type tpos, initializer_list<value_type> init)
       {
@@ -1142,6 +1150,7 @@ class basic_cow_string
       }
 
     // N.B. This is a non-standard extension.
+    ROCKET_NOINLINE
     iterator
     insert(const_iterator tins, const basic_cow_string& other, size_type pos = 0, size_type n = npos)
       {
@@ -1155,6 +1164,7 @@ class basic_cow_string
       }
 
     // N.B. This is a non-standard extension.
+    ROCKET_NOINLINE
     iterator
     insert(const_iterator tins, const value_type* s, size_type n)
       {
@@ -1168,6 +1178,7 @@ class basic_cow_string
       }
 
     // N.B. This is a non-standard extension.
+    ROCKET_NOINLINE
     iterator
     insert(const_iterator tins, const value_type* s)
       {
@@ -1180,6 +1191,7 @@ class basic_cow_string
         return iterator(ptr - tpos, tpos, this->size());
       }
 
+    ROCKET_NOINLINE
     iterator
     insert(const_iterator tins, size_type n, value_type ch)
       {
@@ -1191,6 +1203,7 @@ class basic_cow_string
         return iterator(ptr - tpos, tpos, this->size());
       }
 
+    ROCKET_NOINLINE
     iterator
     insert(const_iterator tins, initializer_list<value_type> init)
       {
@@ -1216,10 +1229,12 @@ class basic_cow_string
         return iterator(ptr - tpos, tpos, this->size());
       }
 
+    ROCKET_NOINLINE
     iterator
     insert(const_iterator tins, value_type ch)
       { return this->insert(tins, size_type(1), ch);  }
 
+    ROCKET_NOINLINE
     basic_cow_string&
     replace(size_type tpos, size_type tn, const basic_cow_string& other,
             size_type pos = 0, size_type n = npos)
@@ -1233,6 +1248,7 @@ class basic_cow_string
         return *this;
       }
 
+    ROCKET_NOINLINE
     basic_cow_string&
     replace(size_type tpos, size_type tn, const value_type* s, size_type n)
       {
@@ -1245,6 +1261,7 @@ class basic_cow_string
         return *this;
       }
 
+    ROCKET_NOINLINE
     basic_cow_string&
     replace(size_type tpos, size_type tn, const value_type* s)
       {
@@ -1257,6 +1274,7 @@ class basic_cow_string
         return *this;
       }
 
+    ROCKET_NOINLINE
     basic_cow_string&
     replace(size_type tpos, size_type tn, size_type n, value_type ch)
       {
@@ -1269,6 +1287,7 @@ class basic_cow_string
       }
 
     // N.B. The last two parameters are non-standard extensions.
+    ROCKET_NOINLINE
     basic_cow_string&
     replace(const_iterator first, const_iterator last, const basic_cow_string& other,
             size_type pos = 0, size_type n = npos)
@@ -1284,6 +1303,7 @@ class basic_cow_string
         return *this;
       }
 
+    ROCKET_NOINLINE
     basic_cow_string&
     replace(const_iterator first, const_iterator last, const value_type* s, size_type n)
       {
@@ -1298,6 +1318,7 @@ class basic_cow_string
         return *this;
       }
 
+    ROCKET_NOINLINE
     basic_cow_string&
     replace(const_iterator first, const_iterator last, const value_type* s)
       {
@@ -1312,6 +1333,7 @@ class basic_cow_string
         return *this;
       }
 
+    ROCKET_NOINLINE
     basic_cow_string&
     replace(const_iterator first, const_iterator last, size_type n, value_type ch)
       {
@@ -1325,6 +1347,7 @@ class basic_cow_string
         return *this;
       }
 
+    ROCKET_NOINLINE
     basic_cow_string&
     replace(const_iterator first, const_iterator last, initializer_list<value_type> init)
       {
@@ -1355,6 +1378,7 @@ class basic_cow_string
       }
 
     // N.B. This is a non-standard extension.
+    ROCKET_NOINLINE
     basic_cow_string&
     replace(const_iterator first, const_iterator last, value_type ch)
       {
