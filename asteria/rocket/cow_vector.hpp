@@ -801,9 +801,11 @@ class cow_vector
     cow_vector
     subvec(size_type tpos, size_type tn = size_type(-1))
       const
-      { return cow_vector(this->data() + tpos,
+      {
+        return cow_vector(this->data() + tpos,
                           this->data() + tpos + this->do_clamp_subvec(tpos, tn),
-                          this->m_sth.as_allocator());  }
+                          this->m_sth.as_allocator());
+      }
 
     // N.B. The return type is a non-standard extension.
     cow_vector&

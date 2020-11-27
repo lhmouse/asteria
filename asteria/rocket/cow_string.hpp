@@ -1885,7 +1885,6 @@ class basic_cow_string
       const
       {
         if((tpos == 0) && (tn >= this->size()))
-          // Utilize reference counting.
           return basic_cow_string(*this, this->m_sth.as_allocator());
         else
           return basic_cow_string(*this, tpos, tn, this->m_sth.as_allocator());
