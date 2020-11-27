@@ -337,6 +337,7 @@ class basic_cow_string
 
     // This function is used to implement `replace()` if the replacement cannot alias `*this`.
     // `tpos` and `tlen` are arguments to `replace()`. `n` is the length to reserve.
+    ROCKET_NOINLINE
     value_type*
     do_reserve_divide_unchecked(size_type tpos, size_type tlen, size_type n)
       {
@@ -540,6 +541,7 @@ class basic_cow_string
       { return this->m_sth.capacity();  }
 
     // N.B. The return type is a non-standard extension.
+    ROCKET_NOINLINE
     basic_cow_string&
     reserve(size_type res_arg)
       {
@@ -564,6 +566,7 @@ class basic_cow_string
       }
 
     // N.B. The return type is a non-standard extension.
+    ROCKET_NOINLINE
     basic_cow_string&
     shrink_to_fit()
       {
@@ -751,6 +754,7 @@ class basic_cow_string
     append(const basic_cow_string& other, size_type pos = 0, size_type n = npos)
       { return this->append(other.data() + pos, other.do_clamp_substr(pos, n));  }
 
+    ROCKET_NOINLINE
     basic_cow_string&
     append(const value_type* s, size_type n)
       {
@@ -789,6 +793,7 @@ class basic_cow_string
         return *this;
       }
 
+    ROCKET_NOINLINE
     basic_cow_string&
     append(size_type n, value_type ch)
       {
@@ -846,6 +851,7 @@ class basic_cow_string
     template<typename inputT,
     ROCKET_ENABLE_IF(is_input_iterator<inputT>::value),
     ROCKET_DISABLE_IF(is_convertible<inputT, const value_type*>::value)>
+    ROCKET_NOINLINE
     basic_cow_string&
     append(inputT first, inputT last)
       {
@@ -910,6 +916,7 @@ class basic_cow_string
       }
 
     // N.B. The return type is a non-standard extension.
+    ROCKET_NOINLINE
     basic_cow_string&
     push_back(value_type ch)
       {

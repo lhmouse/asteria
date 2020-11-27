@@ -343,6 +343,7 @@ class cow_hashmap
       { return this->m_sth.capacity();  }
 
     // N.B. The return type is a non-standard extension.
+    ROCKET_NOINLINE
     cow_hashmap&
     reserve(size_type res_arg)
       {
@@ -367,6 +368,7 @@ class cow_hashmap
       }
 
     // N.B. The return type is a non-standard extension.
+    ROCKET_NOINLINE
     cow_hashmap&
     shrink_to_fit()
       {
@@ -436,6 +438,7 @@ class cow_hashmap
       { return 1.0 / storage_handle::max_load_factor_reciprocal;  }
 
     // N.B. The return type is a non-standard extension.
+    ROCKET_NOINLINE
     cow_hashmap&
     rehash(size_type n)
       {
@@ -477,6 +480,7 @@ class cow_hashmap
     // N.B. The return type is a non-standard extension.
     template<typename inputT,
     ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
+    ROCKET_NOINLINE
     cow_hashmap&
     insert(inputT first, inputT last)
       {
@@ -549,6 +553,7 @@ class cow_hashmap
       { return this->insert(::std::move(value)).first;  }
 
     template<typename ykeyT, typename... paramsT>
+    ROCKET_NOINLINE
     pair<iterator, bool>
     try_emplace(ykeyT&& ykey, paramsT&&... params)
       {
