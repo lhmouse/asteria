@@ -477,7 +477,6 @@ class cow_vector
     // N.B. This is a non-standard extension.
     template<typename... paramsT,
     ROCKET_ENABLE_IF(is_constructible<value_type, const paramsT&...>::value)>
-    ROCKET_NOINLINE
     cow_vector&
     append(size_type n, const paramsT&... params)
       {
@@ -518,7 +517,6 @@ class cow_vector
     // N.B. This is a non-standard extension.
     template<typename inputT,
     ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
-    ROCKET_NOINLINE
     cow_vector&
     append(inputT first, inputT last)
       {
@@ -574,7 +572,6 @@ class cow_vector
 
     // 26.3.11.5, modifiers
     template<typename... paramsT>
-    ROCKET_NOINLINE
     reference
     emplace_back(paramsT&&... params)
       {
