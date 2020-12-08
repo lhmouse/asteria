@@ -10,6 +10,7 @@
 namespace asteria {
 
 class Abstract_Context
+  : public Rcfwd<Abstract_Context>
   {
   public:
     struct M_plain     { };
@@ -21,13 +22,10 @@ class Abstract_Context
     // this context.
     Reference_Dictionary m_named_refs;
 
-  public:
+  protected:
     Abstract_Context()
       noexcept
-      { }
-
-    virtual
-    ~Abstract_Context();
+      = default;
 
   protected:
     virtual
@@ -48,6 +46,8 @@ class Abstract_Context
       = 0;
 
   public:
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(Abstract_Context);
+
     bool
     is_analytic()
       const noexcept

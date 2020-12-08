@@ -27,9 +27,9 @@ class Collector
       : m_output_opt(output_opt), m_tied_opt(tied_opt), m_threshold(threshold)
       { }
 
+  public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Collector);
 
-  public:
     Variable_HashSet*
     get_output_pool_opt()
       const noexcept

@@ -23,9 +23,9 @@ class AIR_Optimizer
       : m_opts(opts)
       { }
 
+  public:
     ASTERIA_COPYABLE_DESTRUCTOR(AIR_Optimizer);
 
-  public:
     // These are accessors and modifiers of options for optimizing.
     const Compiler_Options&
     get_options()

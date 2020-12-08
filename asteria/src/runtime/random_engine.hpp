@@ -33,14 +33,14 @@ class Random_Engine
       noexcept
       { this->init();  }
 
-    ASTERIA_COPYABLE_DESTRUCTOR(Random_Engine);
-
   private:
     void
     do_isaac()
       noexcept;
 
   public:
+    ASTERIA_COPYABLE_DESTRUCTOR(Random_Engine);
+
     // Initializes this PRNG with some external entropy source.
     void
     init()

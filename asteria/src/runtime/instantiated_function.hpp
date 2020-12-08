@@ -25,12 +25,12 @@ class Instantiated_Function
       : m_params(params), m_zvarg(::std::move(zvarg))
       { this->do_solidify(code);  }
 
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(Instantiated_Function);
-
   private:
     void do_solidify(const cow_vector<AIR_Node>& code);
 
   public:
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(Instantiated_Function);
+
     tinyfmt&
     describe(tinyfmt& fmt)
       const override;

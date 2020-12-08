@@ -31,9 +31,9 @@ class Variable
       noexcept
       { }
 
+  public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Variable);
 
-  public:
     const Value&
     get_value()
       const noexcept

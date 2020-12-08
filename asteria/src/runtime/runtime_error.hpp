@@ -41,8 +41,6 @@ class Runtime_Error
       : m_value("Assertion failure: " + msg)
       { this->do_backtrace({ frame_type_assert, sloc, this->m_value });  }
 
-    ASTERIA_COPYABLE_DESTRUCTOR(Runtime_Error);
-
   private:
     void
     do_backtrace(Backtrace_Frame&& new_frm);
@@ -51,6 +49,8 @@ class Runtime_Error
     do_insert_frame(Backtrace_Frame&& new_frm);
 
   public:
+    ASTERIA_COPYABLE_DESTRUCTOR(Runtime_Error);
+
     const char*
     what()
       const noexcept override

@@ -27,8 +27,6 @@ class Global_Context
     explicit
     Global_Context(API_Version version = api_version_latest);
 
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(Global_Context);
-
   protected:
     bool
     do_is_analytic()
@@ -46,6 +44,8 @@ class Global_Context
       { return nullptr;  }
 
   public:
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(Global_Context);
+
     bool
     is_analytic()
       const noexcept

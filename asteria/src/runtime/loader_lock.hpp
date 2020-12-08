@@ -25,8 +25,6 @@ class Loader_Lock
       noexcept
       { }
 
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(Loader_Lock);
-
   private:
     element_type*
     do_lock_stream(const char* path);
@@ -34,6 +32,9 @@ class Loader_Lock
     void
     do_unlock_stream(element_type* qelem)
       noexcept;
+
+  public:
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(Loader_Lock);
   };
 
 class Loader_Lock::Unique_Stream

@@ -53,8 +53,6 @@ class Executive_Context
                       Reference_Stack& alt_stack, const rcptr<Variadic_Arguer>& zvarg,
                       const cow_vector<phsh_string>& params, Reference&& self);
 
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(Executive_Context);
-
   protected:
     bool
     do_is_analytic()
@@ -71,6 +69,8 @@ class Executive_Context
       override;
 
   public:
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(Executive_Context);
+
     bool
     is_analytic()
       const noexcept

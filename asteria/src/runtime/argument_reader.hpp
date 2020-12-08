@@ -28,8 +28,6 @@ class Argument_Reader
       : m_name(name), m_stack(::std::move(stack))
       { }
 
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(Argument_Reader);
-
   private:
     inline
     void
@@ -50,6 +48,8 @@ class Argument_Reader
       const;
 
   public:
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(Argument_Reader);
+
     const cow_string&
     name()
       const noexcept

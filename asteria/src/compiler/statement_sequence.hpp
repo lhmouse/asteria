@@ -22,9 +22,9 @@ class Statement_Sequence
       : m_opts(opts)
       { }
 
+  public:
     ASTERIA_COPYABLE_DESTRUCTOR(Statement_Sequence);
 
-  public:
     // These are accessors and modifiers of options for parsing.
     const Compiler_Options&
     get_options()

@@ -29,14 +29,14 @@ class Genius_Collector
         m_newest(&(this->m_pool), &(this->m_middle), 800)
       { }
 
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(Genius_Collector);
-
   private:
     Collector Genius_Collector::*
     do_locate(GC_Generation gc_gen)
       const;
 
   public:
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(Genius_Collector);
+
     size_t
     get_pool_size()
       const noexcept

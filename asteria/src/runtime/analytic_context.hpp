@@ -28,8 +28,6 @@ class Analytic_Context
     Analytic_Context(M_function, Abstract_Context* parent_opt,
                      const cow_vector<phsh_string>& params);
 
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(Analytic_Context);
-
   protected:
     bool
     do_is_analytic()
@@ -47,6 +45,8 @@ class Analytic_Context
       { return nullptr;  }
 
   public:
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(Analytic_Context);
+
     bool
     is_analytic()
       const noexcept

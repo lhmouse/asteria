@@ -8,17 +8,15 @@
 
 namespace asteria {
 
-class Abstract_Hooks
+struct Abstract_Hooks
   : public Rcfwd<Abstract_Hooks>
   {
-  public:
     Abstract_Hooks()
       noexcept
-      { }
+      = default;
 
     ASTERIA_COPYABLE_DESTRUCTOR(Abstract_Hooks);
 
-  public:
     // This hook is called when a variable (mutable or immutable) or function is declared,
     // and before its initializer is evaluated.
     virtual

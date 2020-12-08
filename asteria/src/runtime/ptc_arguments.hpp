@@ -41,9 +41,9 @@ class PTC_Arguments
         m_target(target), m_stack(::std::move(stack))
       { }
 
+  public:
     ASTERIA_COPYABLE_DESTRUCTOR(PTC_Arguments);
 
-  public:
     const Source_Location&
     sloc()
       const noexcept

@@ -24,9 +24,9 @@ class Token_Stream
       : m_opts(opts)
       { }
 
+  public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Token_Stream);
 
-  public:
     // This provides stack overflow protection.
     Recursion_Sentry
     copy_recursion_sentry()

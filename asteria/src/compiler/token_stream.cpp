@@ -26,10 +26,10 @@ class Line_Reader
       : m_cbuf(&xcbuf), m_file(xfile), m_line(xline - 1)
       { }
 
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(Line_Reader)
-      { }
-
   public:
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(Line_Reader)
+      = default;
+
     tinybuf&
     cbuf()
       const noexcept

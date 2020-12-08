@@ -20,8 +20,9 @@ class Verbose_Hooks
     ::rocket::tinyfmt_str m_fmt;  // reusable storage
 
   public:
-    ~Verbose_Hooks()
-      override;
+    Verbose_Hooks()
+      noexcept
+      = default;
 
   private:
     template<typename... ParamsT>
@@ -47,6 +48,8 @@ class Verbose_Hooks
       }
 
   public:
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(Verbose_Hooks);
+
     void
     on_single_step_trap(const Source_Location& sloc)
       override

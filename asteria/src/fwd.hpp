@@ -166,7 +166,7 @@ class AVMC_Queue;
 // Runtime
 enum AIR_Status : uint8_t;
 enum PTC_Aware : int8_t;  // this is a bitmask!
-class Abstract_Hooks;
+struct Abstract_Hooks;
 class Runtime_Error;
 class Reference;
 class Variable;
@@ -290,7 +290,10 @@ struct StdIO_Sentry
       }
 
     ASTERIA_NONCOPYABLE_DESTRUCTOR(StdIO_Sentry)
-      { ::fflush(nullptr);  }
+      {
+        // Flush all standard streams, ignoring any errors.
+        ::fflush(nullptr);
+      }
   };
 
 // Opaque (user-defined) type support

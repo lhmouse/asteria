@@ -117,9 +117,9 @@ class Reference
         this->m_mods.clear();
         return *this;  }
 
+  public:
     ASTERIA_COPYABLE_DESTRUCTOR(Reference);
 
-  public:
     Index
     index()
       const noexcept
