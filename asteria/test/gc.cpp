@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
-#include "util.hpp"
+#include "utils.hpp"
 #include "../src/simple_script.hpp"
 #include "../src/runtime/global_context.hpp"
 #include "../src/runtime/genius_collector.hpp"

@@ -9,7 +9,7 @@
 #include "compiler/expression_unit.hpp"
 #include "runtime/air_optimizer.hpp"
 #include "llds/reference_stack.hpp"
-#include "util.hpp"
+#include "utils.hpp"
 
 namespace asteria {
 

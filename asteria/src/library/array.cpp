@@ -6,7 +6,7 @@
 #include "../runtime/argument_reader.hpp"
 #include "../runtime/global_context.hpp"
 #include "../llds/reference_stack.hpp"
-#include "../util.hpp"
+#include "../utils.hpp"
 
 namespace asteria {
 namespace {

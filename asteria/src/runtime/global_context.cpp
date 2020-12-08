@@ -20,7 +20,7 @@
 #include "../library/checksum.hpp"
 #include "../library/json.hpp"
 #include "../library/io.hpp"
-#include "../util.hpp"
+#include "../utils.hpp"
 
 namespace asteria {
 namespace {

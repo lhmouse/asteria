@@ -1,13 +1,13 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_UTIL_HPP_
-#define ASTERIA_UTIL_HPP_
+#ifndef ASTERIA_UTILS_HPP_
+#define ASTERIA_UTILS_HPP_
 
 #include "fwd.hpp"
 #include "../rocket/tinyfmt_str.hpp"
 #include "../rocket/format.hpp"
-#include "details/util.ipp"
+#include "details/utils.ipp"
 #include <cmath>
 
 namespace asteria {
@@ -104,7 +104,7 @@ get_cctype(char c)
     size_t m = static_cast<uint8_t>(c);
     if(m >= 128)
       return 0;
-    return details_util::cctype_table[m];
+    return details_utils::cctype_table[m];
   }
 
 ROCKET_CONST_FUNCTION inline
@@ -136,33 +136,33 @@ is_safe_integer(double val)
 
 // C-style quoting
 constexpr
-details_util::Quote_Wrapper
+details_utils::Quote_Wrapper
 quote(const char* str, size_t len)
   noexcept
   { return { str, len };  }
 
 inline
-details_util::Quote_Wrapper
+details_utils::Quote_Wrapper
 quote(const char* str)
   noexcept
   { return noadl::quote(str, ::std::strlen(str));  }
 
 inline
-details_util::Quote_Wrapper
+details_utils::Quote_Wrapper
 quote(const cow_string& str)
   noexcept
   { return noadl::quote(str.data(), str.size());  }
 
 // Justifying
 constexpr
-details_util::Paragraph_Wrapper
+details_utils::Paragraph_Wrapper
 pwrap(size_t indent, size_t hanging)
   noexcept
   { return { indent, hanging };  }
 
 // Error numbers
 constexpr
-details_util::Formatted_errno
+details_utils::Formatted_errno
 format_errno(int err)
   noexcept
   { return { err };  }

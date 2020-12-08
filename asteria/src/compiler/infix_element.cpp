@@ -7,7 +7,7 @@
 #include "expression_unit.hpp"
 #include "enums.hpp"
 #include "../runtime/enums.hpp"
-#include "../util.hpp"
+#include "../utils.hpp"
 
 namespace asteria {
 

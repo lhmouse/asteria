@@ -2,7 +2,7 @@
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
 #include "precompiled.hpp"
-#include "util.hpp"
+#include "utils.hpp"
 #include <time.h>  // ::timespec, ::clock_gettime(), ::localtime()
 #include <unistd.h>  // ::write
 
@@ -83,7 +83,7 @@ do_xstrerror_r(int errnum, char *strerrbuf, size_t buflen)
 
 }  // namespace
 
-namespace details_util {
+namespace details_utils {
 
 const uint8_t cctype_table[128] =
   {
@@ -156,7 +156,7 @@ operator<<(tinyfmt& fmt, const Formatted_errno& e)
          << do_xstrerror_r(e.err, sbuf, sizeof(sbuf));
   }
 
-}  // namespace details_util
+}  // namespace details_utils
 
 ptrdiff_t
 write_log_to_stderr(const char* file, long line, cow_string&& msg)

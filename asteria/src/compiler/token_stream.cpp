@@ -6,7 +6,7 @@
 #include "enums.hpp"
 #include "token.hpp"
 #include "parser_error.hpp"
-#include "../util.hpp"
+#include "../utils.hpp"
 
 namespace asteria {
 namespace {

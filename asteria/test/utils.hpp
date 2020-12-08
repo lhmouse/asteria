@@ -1,11 +1,11 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_TEST_UTIL_HPP_
-#define ASTERIA_TEST_UTIL_HPP_
+#ifndef ASTERIA_TEST_UTILS_HPP_
+#define ASTERIA_TEST_UTILS_HPP_
 
 #include "../src/fwd.hpp"
-#include "../src/util.hpp"
+#include "../src/utils.hpp"
 #include <unistd.h>   // ::alarm()
 
 #define ASTERIA_TEST_CHECK(expr)  \

@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
-#include "util.hpp"
+#include "utils.hpp"
 #include "../src/compiler/token_stream.hpp"
 #include "../src/compiler/token.hpp"
 #include "../src/compiler/enums.hpp"

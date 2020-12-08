@@ -20,7 +20,7 @@
 #include "../compiler/statement.hpp"
 #include "../compiler/expression_unit.hpp"
 #include "../llds/avmc_queue.hpp"
-#include "../util.hpp"
+#include "../utils.hpp"
 
 namespace asteria {
 namespace {

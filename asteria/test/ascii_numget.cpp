@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
-#include "util.hpp"
+#include "utils.hpp"
 #include "asteria/rocket/ascii_numget.hpp"
 
 using namespace asteria;
