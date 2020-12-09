@@ -13,13 +13,11 @@
 namespace asteria {
 namespace {
 
-class Indenter
+struct Indenter
   {
-  public:
     virtual
     ~Indenter();
 
-  public:
     virtual
     tinyfmt&
     break_line(tinyfmt& fmt)

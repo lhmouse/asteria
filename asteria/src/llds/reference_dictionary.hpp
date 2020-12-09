@@ -21,7 +21,7 @@ class Reference_Dictionary
     size_t m_size = 0;         // number of initialized buckets
 
   public:
-    constexpr
+    explicit constexpr
     Reference_Dictionary()
       noexcept
       { }
@@ -34,19 +34,6 @@ class Reference_Dictionary
     operator=(Reference_Dictionary&& other)
       noexcept
       { return this->swap(other);  }
-
-    ~Reference_Dictionary()
-      {
-        if(this->m_head)
-          this->do_destroy_buckets();
-
-        if(this->m_bptr)
-          ::operator delete(this->m_bptr);
-
-#ifdef ROCKET_DEBUG
-        ::std::memset(static_cast<void*>(this), 0xA6, sizeof(*this));
-#endif
-      }
 
   private:
     void
@@ -94,6 +81,19 @@ class Reference_Dictionary
       noexcept;
 
   public:
+    ~Reference_Dictionary()
+      {
+        if(this->m_head)
+          this->do_destroy_buckets();
+
+        if(this->m_bptr)
+          ::operator delete(this->m_bptr);
+
+#ifdef ROCKET_DEBUG
+        ::std::memset(static_cast<void*>(this), 0xA6, sizeof(*this));
+#endif
+      }
+
     bool
     empty()
       const noexcept

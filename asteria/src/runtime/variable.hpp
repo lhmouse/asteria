@@ -27,6 +27,7 @@ class Variable
     long m_gc_ref;
 
   public:
+    explicit
     Variable()
       noexcept
       { }

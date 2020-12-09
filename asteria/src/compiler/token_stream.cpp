@@ -22,6 +22,7 @@ class Line_Reader
     cow_string m_str;
 
   public:
+    explicit
     Line_Reader(tinybuf& xcbuf, const cow_string& xfile, size_t xline)
       : m_cbuf(&xcbuf), m_file(xfile), m_line(xline - 1)
       { }

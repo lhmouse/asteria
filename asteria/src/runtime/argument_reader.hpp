@@ -23,6 +23,7 @@ class Argument_Reader
     cow_string m_overloads;
 
   public:
+    explicit
     Argument_Reader(const cow_string& name, Reference_Stack&& stack)
       noexcept
       : m_name(name), m_stack(::std::move(stack))

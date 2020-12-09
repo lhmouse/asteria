@@ -23,6 +23,7 @@ class Abstract_Context
     Reference_Dictionary m_named_refs;
 
   protected:
+    explicit
     Abstract_Context()
       noexcept
       = default;

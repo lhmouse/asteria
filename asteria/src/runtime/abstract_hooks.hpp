@@ -11,6 +11,7 @@ namespace asteria {
 struct Abstract_Hooks
   : public Rcfwd<Abstract_Hooks>
   {
+    explicit
     Abstract_Hooks()
       noexcept
       = default;

@@ -35,6 +35,7 @@ class PTC_Arguments
     cow_bivector<Source_Location, AVMC_Queue> m_defer;
 
   public:
+    explicit
     PTC_Arguments(const Source_Location& sloc, PTC_Aware ptc,
                   const cow_function& target, Reference_Stack&& stack)
       : m_sloc(sloc), m_ptc(ptc),

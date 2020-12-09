@@ -67,6 +67,7 @@ class BMH_Searcher
 
   public:
     template<typename IterT>
+    explicit
     BMH_Searcher(IterT pbegin, IterT pend)
       {
         // Calculate the pattern length.

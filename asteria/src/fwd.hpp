@@ -204,10 +204,12 @@ class AIR_Optimizer;
 // Type erasure
 struct Rcbase : ::rocket::refcnt_base<Rcbase>
   {
+    explicit
     Rcbase()
       noexcept
       = default;
 
+    explicit
     Rcbase(const Rcbase&)
       noexcept
       = default;
@@ -224,10 +226,12 @@ struct Rcbase : ::rocket::refcnt_base<Rcbase>
 template<typename RealT>
 struct Rcfwd : virtual Rcbase
   {
+    explicit
     Rcfwd()
       noexcept
       = default;
 
+    explicit
     Rcfwd(const Rcfwd&)
       noexcept
       = default;
@@ -277,6 +281,7 @@ unerase_pointer_cast(const rcfwdp<RealT>& ptr)  // like `static_pointer_cast`
 // Standard I/O synchronization
 struct StdIO_Sentry
   {
+    explicit
     StdIO_Sentry()
       noexcept
       {
@@ -300,6 +305,7 @@ struct StdIO_Sentry
 struct Abstract_Opaque
   : public Rcfwd<Abstract_Opaque>
   {
+    explicit
     Abstract_Opaque()
       noexcept
       = default;
@@ -341,6 +347,7 @@ operator<<(tinyfmt& fmt, const Abstract_Opaque& opaq)
 struct Abstract_Function
   : public Rcfwd<Abstract_Function>
   {
+    explicit
     Abstract_Function()
       noexcept
       = default;

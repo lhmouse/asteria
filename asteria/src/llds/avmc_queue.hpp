@@ -28,7 +28,7 @@ class AVMC_Queue
     uint32_t m_used = 0;  // size of used storage, in number of `Header`s [!]
 
   public:
-    constexpr
+    explicit constexpr
     AVMC_Queue()
       noexcept
       { }
@@ -41,19 +41,6 @@ class AVMC_Queue
     operator=(AVMC_Queue&& other)
       noexcept
       { return this->swap(other);  }
-
-    ~AVMC_Queue()
-      {
-        if(this->m_used)
-          this->do_destroy_nodes();
-
-        if(this->m_bptr)
-          ::operator delete(this->m_bptr);
-
-#ifdef ROCKET_DEBUG
-        ::std::memset(static_cast<void*>(this), 0xCA, sizeof(*this));
-#endif
-      }
 
   private:
     void
@@ -107,6 +94,19 @@ class AVMC_Queue
       }
 
   public:
+    ~AVMC_Queue()
+      {
+        if(this->m_used)
+          this->do_destroy_nodes();
+
+        if(this->m_bptr)
+          ::operator delete(this->m_bptr);
+
+#ifdef ROCKET_DEBUG
+        ::std::memset(static_cast<void*>(this), 0xCA, sizeof(*this));
+#endif
+      }
+
     bool
     empty()
       const noexcept

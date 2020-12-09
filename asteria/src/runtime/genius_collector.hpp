@@ -22,6 +22,7 @@ class Genius_Collector
     Collector m_newest;
 
   public:
+    explicit
     Genius_Collector()
       noexcept
       : m_oldest(&(this->m_pool), nullptr, 10),

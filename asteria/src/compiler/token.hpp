@@ -69,6 +69,7 @@ class Token
 
   public:
     template<typename XTokT>
+    explicit
     Token(const Source_Location& xsloc, size_t xlen, XTokT&& xtok)
       : m_sloc(xsloc), m_length(xlen), m_stor(::std::forward<XTokT>(xtok))
       { }

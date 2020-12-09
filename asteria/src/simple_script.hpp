@@ -16,16 +16,18 @@ class Simple_Script
     cow_function m_func;  // note type erasure
 
   public:
-    constexpr
+    explicit constexpr
     Simple_Script()
       noexcept
       : m_opts()
       { }
 
+    explicit
     Simple_Script(const cow_string& name, tinybuf& cbuf)
       : m_opts()
       { this->reload(name, 1, cbuf);  }
 
+    explicit
     Simple_Script(const cow_string& name, int line, tinybuf& cbuf)
       : m_opts()
       { this->reload(name, line, cbuf);  }
@@ -36,10 +38,12 @@ class Simple_Script
       : m_opts(opts)
       { }
 
+    explicit
     Simple_Script(const Compiler_Options& opts, const cow_string& name, tinybuf& cbuf)
       : m_opts(opts)
       { this->reload(name, 1, cbuf);  }
 
+    explicit
     Simple_Script(const Compiler_Options& opts, const cow_string& name, int line, tinybuf& cbuf)
       : m_opts(opts)
       { this->reload(name, line, cbuf);  }

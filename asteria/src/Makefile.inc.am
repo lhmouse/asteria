@@ -99,7 +99,6 @@ lib_libasteria_la_SOURCES =  \
   %reldir%/runtime/variable_callback.cpp  \
   %reldir%/runtime/ptc_arguments.cpp  \
   %reldir%/runtime/collector.cpp  \
-  %reldir%/runtime/backtrace_frame.cpp  \
   %reldir%/runtime/runtime_error.cpp  \
   %reldir%/runtime/abstract_context.cpp  \
   %reldir%/runtime/analytic_context.cpp  \

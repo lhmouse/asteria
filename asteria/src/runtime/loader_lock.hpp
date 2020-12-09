@@ -21,6 +21,7 @@ class Loader_Lock
     using element_type = decltype(m_strms)::value_type;
 
   public:
+    explicit
     Loader_Lock()
       noexcept
       { }
@@ -44,14 +45,16 @@ class Loader_Lock::Unique_Stream
     element_type* m_elem = nullptr;
 
   public:
-    constexpr
+    explicit constexpr
     Unique_Stream()
       noexcept
       { }
 
+    explicit
     Unique_Stream(const rcptr<Loader_Lock>& lock, const char* path)
       { this->reset(lock, path);  }
 
+    explicit
     Unique_Stream(Unique_Stream&& other)
       noexcept
       { this->swap(other);  }
@@ -61,10 +64,10 @@ class Loader_Lock::Unique_Stream
       noexcept
       { return this->swap(other);  }
 
+  public:
     ~Unique_Stream()
       { this->reset();  }
 
-  public:
     explicit operator
     bool()
       const noexcept

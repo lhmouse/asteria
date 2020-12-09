@@ -18,6 +18,7 @@ class Analytic_Context
   public:
     // A plain context must have a parent context.
     // Its parent context shall outlast itself.
+    explicit
     Analytic_Context(M_plain, Abstract_Context& parent)
       : m_parent_opt(::std::addressof(parent))
       { }
@@ -25,6 +26,7 @@ class Analytic_Context
     // A function context may have a parent.
     // Names found in ancestor contexts will be bound into the
     // instantiated function object.
+    explicit
     Analytic_Context(M_function, Abstract_Context* parent_opt,
                      const cow_vector<phsh_string>& params);
 

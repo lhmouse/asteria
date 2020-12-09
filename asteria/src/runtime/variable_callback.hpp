@@ -11,10 +11,6 @@ namespace asteria {
 
 class Variable_Callback
   {
-  public:
-    virtual
-    ~Variable_Callback();
-
   protected:
     // The return value indicates whether to invoke `*this` on child
     // variables recursively. It has no effect on children that are not
@@ -25,6 +21,9 @@ class Variable_Callback
       = 0;
 
   public:
+    virtual
+    ~Variable_Callback();
+
     Variable_Callback&
     process(const rcptr<Variable>& var)
       {

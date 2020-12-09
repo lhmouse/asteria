@@ -21,11 +21,13 @@ class Parser_Error
     cow_string m_what;  // a comprehensive string that is human-readable.
 
   public:
+    explicit
     Parser_Error(Parser_Status xstat, const Source_Location& xsloc, size_t xlength)
       : m_stat(xstat), m_sloc(xsloc), m_length(xlength)
       { this->do_compose_message();  }
 
     ASTERIA_INCOMPLET(Token_Stream)
+    explicit
     Parser_Error(Parser_Status xstat, const Token_Stream& xtstrm)
       : m_stat(xstat), m_sloc(xtstrm.next_sloc()), m_length(xtstrm.next_length())
       { this->do_compose_message();  }

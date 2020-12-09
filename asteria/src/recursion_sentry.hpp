@@ -11,13 +11,15 @@ namespace asteria {
 class Recursion_Sentry
   {
   public:
-    enum : size_t { stack_mask_bits = 19  };  // 512KiB
+    enum : size_t {
+      stack_mask_bits = 19,  // 512KiB
+    };
 
   private:
     const void* m_base;
 
   public:
-    constexpr
+    explicit constexpr
     Recursion_Sentry()
       noexcept
       : m_base(this)
@@ -41,9 +43,6 @@ class Recursion_Sentry
         return *this;
       }
 
-    ~Recursion_Sentry()
-      { }
-
   private:
     [[noreturn]]
     void
@@ -55,13 +54,18 @@ class Recursion_Sentry
       const
       {
         // Estimate stack usage.
-        size_t usage = static_cast<size_t>(::std::abs(reinterpret_cast<const char*>(this)
-                                                      - static_cast<const char*>(this->m_base)));
+        size_t usage = static_cast<size_t>(
+                         ::std::abs(reinterpret_cast<const char*>(this)
+                                    - static_cast<const char*>(this->m_base)));
         if(ROCKET_UNEXPECT(usage >> stack_mask_bits))
           this->do_throw_stack_overflow(usage, size_t(1) << stack_mask_bits);
       }
 
   public:
+    // Make this class non-trivial.
+    ~Recursion_Sentry()
+      { }
+
     const void*
     get_base()
       const noexcept

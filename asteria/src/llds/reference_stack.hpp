@@ -18,7 +18,7 @@ class Reference_Stack
     uint32_t m_estor = 0;  // end of reserved storage
 
   public:
-    constexpr
+    explicit constexpr
     Reference_Stack()
       noexcept
       { }
@@ -31,19 +31,6 @@ class Reference_Stack
     operator=(Reference_Stack&& other)
       noexcept
       { return this->swap(other);  }
-
-    ~Reference_Stack()
-      {
-        if(this->m_einit)
-          this->do_destroy_elements();
-
-        if(this->m_bptr)
-          ::operator delete(this->m_bptr);
-
-#ifdef ROCKET_DEBUG
-        ::std::memset(static_cast<void*>(this), 0xBA, sizeof(*this));
-#endif
-      }
 
   private:
     [[noreturn]] inline
@@ -69,6 +56,19 @@ class Reference_Stack
       noexcept;
 
   public:
+    ~Reference_Stack()
+      {
+        if(this->m_einit)
+          this->do_destroy_elements();
+
+        if(this->m_bptr)
+          ::operator delete(this->m_bptr);
+
+#ifdef ROCKET_DEBUG
+        ::std::memset(static_cast<void*>(this), 0xBA, sizeof(*this));
+#endif
+      }
+
     bool
     empty()
       const noexcept

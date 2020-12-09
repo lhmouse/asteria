@@ -26,8 +26,6 @@ class Backtrace_Frame
         m_value(::std::forward<XValT>(xval))
       { }
 
-    ~Backtrace_Frame();
-
   public:
     Frame_Type
     type()

@@ -20,6 +20,7 @@ class Instantiated_Function
     AVMC_Queue m_queue;
 
   public:
+    explicit
     Instantiated_Function(const cow_vector<phsh_string>& params,
                 rcptr<Variadic_Arguer>&& zvarg, const cow_vector<AIR_Node>& code)
       : m_params(params), m_zvarg(::std::move(zvarg))

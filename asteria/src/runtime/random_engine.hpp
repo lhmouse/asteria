@@ -29,6 +29,7 @@ class Random_Engine
     uint32_t m_randc;
 
   public:
+    explicit
     Random_Engine()
       noexcept
       { this->init();  }

@@ -21,7 +21,7 @@ class Variable_HashSet
     size_t m_size = 0;         // number of initialized buckets
 
   public:
-    constexpr
+    explicit constexpr
     Variable_HashSet()
       noexcept
       { }
@@ -34,19 +34,6 @@ class Variable_HashSet
     operator=(Variable_HashSet&& other)
       noexcept
       { return this->swap(other);  }
-
-    ~Variable_HashSet()
-      {
-        if(this->m_head)
-          this->do_destroy_buckets();
-
-        if(this->m_bptr)
-          ::operator delete(this->m_bptr);
-
-#ifdef ROCKET_DEBUG
-        ::std::memset(static_cast<void*>(this), 0x93, sizeof(*this));
-#endif
-      }
 
   private:
     void
@@ -94,6 +81,19 @@ class Variable_HashSet
       noexcept;
 
   public:
+    ~Variable_HashSet()
+      {
+        if(this->m_head)
+          this->do_destroy_buckets();
+
+        if(this->m_bptr)
+          ::operator delete(this->m_bptr);
+
+#ifdef ROCKET_DEBUG
+        ::std::memset(static_cast<void*>(this), 0x93, sizeof(*this));
+#endif
+      }
+
     bool
     empty()
       const noexcept

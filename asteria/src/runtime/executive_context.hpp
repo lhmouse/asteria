@@ -29,6 +29,7 @@ class Executive_Context
   public:
     // A plain context must have a parent context.
     // Its parent context shall outlast itself.
+    explicit
     Executive_Context(M_plain, Executive_Context& parent)
       : m_parent_opt(::std::addressof(parent)),
         m_global(parent.m_global), m_stack(parent.m_stack),
@@ -38,6 +39,7 @@ class Executive_Context
     // A defer context is used to evaluate deferred expressions.
     // They are evaluated in separated contexts, as in case of proper tail calls,
     // contexts of enclosing function will have been destroyed.
+    explicit
     Executive_Context(M_defer, Global_Context& global, Reference_Stack& stack,
                       Reference_Stack& alt_stack,
                       cow_bivector<Source_Location, AVMC_Queue>&& defer)
@@ -49,6 +51,7 @@ class Executive_Context
     // A function context has no parent.
     // The caller shall define a global context and evaluation stack, both of which
     // shall outlast this context.
+    explicit
     Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
                       Reference_Stack& alt_stack, const rcptr<Variadic_Arguer>& zvarg,
                       const cow_vector<phsh_string>& params, Reference&& self);

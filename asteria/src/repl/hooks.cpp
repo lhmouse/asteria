@@ -20,6 +20,7 @@ class Verbose_Hooks
     ::rocket::tinyfmt_str m_fmt;  // reusable storage
 
   public:
+    explicit
     Verbose_Hooks()
       noexcept
       = default;
