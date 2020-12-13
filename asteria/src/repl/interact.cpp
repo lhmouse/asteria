@@ -129,37 +129,36 @@ read_execute_print_single()
     }
 
     // Name the snippet.
-    ::rocket::tinyfmt_str fmt;
-    fmt << "snippet #" << repl_index;
+    cow_string name(63, '/');
+    pos = (uint8_t)::sprintf(name.mut_data(), "snippet #%lu", repl_index);
+    name.erase(pos);
 
     // The snippet might be an expression or a statement list.
-    // First, try parsing it as the former. We do this by complementing the
-    // expression to a return statement. As that expression is supposed to be
-    // start at 'line 1', the `return` statement should start at 'line 0'.
     try {
-      repl_script.reload_string(fmt.get_string(), 0,
-                                "return ref\n" + repl_source + "\n;");
+      // First, try parsing it as the former. We do this by complementing the
+      // expression to a return statement. As that expression is supposed to be
+      // start at 'line 1', the `return` statement should start at 'line 0'.
+      // Parentheses are required in case of embedded semicolons.
+      repl_script.reload_string(name, 0, "return ->(\n" + repl_source + "\n);");
     }
     catch(Parser_Error&) {
       // If the snippet is not a valid expression, try parsing it as a
       // statement.
-      repl_script.reload_string(fmt.get_string(), repl_source);
+      repl_script.reload_string(name, repl_source);
     }
 
     // Execute the script.
+    repl_printf("* running snippet #%lu...\n", repl_index);
     auto ref = repl_script.execute(repl_global);
 
-   // If the script exits without returning anything, say void.
-    if(ref.is_void()) {
-      repl_printf("* result #%lu: void\n", repl_index);
-      return;
-    }
+    // Stringify the result.
+    if(ref.is_void())
+      return repl_printf("* result #%lu: void\n", repl_index);
 
-    // Stringify the value.
     const auto& val = ref.dereference_readonly();
-    fmt.clear_string();
+    ::rocket::tinyfmt_str fmt;
     val.dump(fmt);
-    repl_printf("* result #%lu: %s\n", repl_index, fmt.c_str());
+    return repl_printf("* result #%lu: %s\n", repl_index, fmt.c_str());
   }
   catch(exception& stdex) {
     repl_printf("! error: %s\n", stdex.what());
