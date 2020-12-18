@@ -514,6 +514,42 @@ is_none_of(targetT&& targ, initializer_list<elementT> init)
                   ::std::forward<targetT>(targ), init);
   }
 
+template<typename containerT, typename targetT>
+constexpr
+typename remove_reference<decltype(*(begin(::std::declval<containerT>())))>::type*
+find(containerT&& cont, targetT&& targ)
+  {
+    return details_fwd::find_nonconstexpr(
+                  ::std::forward<containerT>(cont), ::std::forward<targetT>(targ));
+  }
+
+template<typename elementT, typename targetT>
+constexpr
+const elementT*
+find(initializer_list<elementT> init, targetT&& targ)
+  {
+    return details_fwd::find_nonconstexpr(
+                  init, ::std::forward<targetT>(targ));
+  }
+
+template<typename containerT, typename predictorT>
+constexpr
+typename remove_reference<decltype(*(begin(::std::declval<containerT>())))>::type*
+find_if(containerT&& cont, predictorT&& pred)
+  {
+    return details_fwd::find_if_nonconstexpr(
+                  ::std::forward<containerT>(cont), ::std::forward<predictorT>(pred));
+  }
+
+template<typename elementT, typename predictorT>
+constexpr
+const elementT*
+find_if(initializer_list<elementT> init, predictorT&& pred)
+  {
+    return details_fwd::find_if_nonconstexpr(
+                  init, ::std::forward<predictorT>(pred));
+  }
+
 template<intmax_t valueT>
 struct lowest_signed
   : details_fwd::integer_selector<intmax_t, valueT,

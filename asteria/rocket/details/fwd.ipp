@@ -108,6 +108,29 @@ is_none_of_nonconstexpr(targetT&& targ, containerT&& cont)
     return true;
   }
 
+// `find()`
+template<typename containerT, typename targetT>
+constexpr  // c++14
+typename remove_reference<decltype(*(begin(::std::declval<containerT>())))>::type*
+find_nonconstexpr(containerT&& cont, targetT&& targ)
+  {
+    for(auto&& elem : cont)
+      if(::std::forward<targetT>(targ) == elem)
+        return ::std::addressof(elem);
+    return nullptr;
+  }
+
+template<typename containerT, typename predictorT>
+constexpr  // c++14
+typename remove_reference<decltype(*(begin(::std::declval<containerT>())))>::type*
+find_if_nonconstexpr(containerT&& cont, predictorT&& pred)
+  {
+    for(auto&& elem : cont)
+      if(::std::forward<predictorT>(pred)(elem))
+        return ::std::addressof(elem);
+    return nullptr;
+  }
+
 // `lowest_signed` and `lowest_unsigned`
 template<typename integerT, integerT valueT, typename... candidatesT>
 struct integer_selector
