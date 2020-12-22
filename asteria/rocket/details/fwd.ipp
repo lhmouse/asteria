@@ -33,7 +33,7 @@ size_t
 estimate_distance_aux(::std::forward_iterator_tag, iteratorT first, iteratorT last)
   {
     size_t total = 0;
-    for(auto qit = ::std::move(first); qit != last; ++qit)
+    for(auto qit = ::std::move(first);  qit != last;  ++qit)
       ++total;
     return total;
   }
@@ -42,20 +42,20 @@ estimate_distance_aux(::std::forward_iterator_tag, iteratorT first, iteratorT la
 template<typename containerT, typename callbackT>
 constexpr  // c++14
 void
-for_each_nonconstexpr(containerT&& cont, callbackT&& callback)
+for_each_nonconstexpr(containerT&& cont, callbackT&& call)
   {
     for(auto&& elem : cont)
-      ::std::forward<callbackT>(callback)(elem);
+      ::std::forward<callbackT>(call)(elem);
   }
 
 // `any_of()`
 template<typename containerT, typename callbackT>
 constexpr  // c++14
 bool
-any_of_nonconstexpr(containerT&& cont, callbackT&& callback)
+any_of_nonconstexpr(containerT&& cont, callbackT&& call)
   {
     for(auto&& elem : cont)
-      if(::std::forward<callbackT>(callback)(elem))
+      if(::std::forward<callbackT>(call)(elem))
         return true;
     return false;
   }
@@ -64,10 +64,10 @@ any_of_nonconstexpr(containerT&& cont, callbackT&& callback)
 template<typename containerT, typename callbackT>
 constexpr  // c++14
 bool
-none_of_nonconstexpr(containerT&& cont, callbackT&& callback)
+none_of_nonconstexpr(containerT&& cont, callbackT&& call)
   {
     for(auto&& elem : cont)
-      if(::std::forward<callbackT>(callback)(elem))
+      if(::std::forward<callbackT>(call)(elem))
         return false;
     return true;
   }
@@ -76,10 +76,10 @@ none_of_nonconstexpr(containerT&& cont, callbackT&& callback)
 template<typename containerT, typename callbackT>
 constexpr  // c++14
 bool
-all_of_nonconstexpr(containerT&& cont, callbackT&& callback)
+all_of_nonconstexpr(containerT&& cont, callbackT&& call)
   {
     for(auto&& elem : cont)
-      if(!bool(::std::forward<callbackT>(callback)(elem)))
+      if(!bool(::std::forward<callbackT>(call)(elem)))
         return false;
     return true;
   }
@@ -133,9 +133,7 @@ find_if_nonconstexpr(containerT&& cont, predictorT&& pred)
 
 // `lowest_signed` and `lowest_unsigned`
 template<typename integerT, integerT valueT, typename... candidatesT>
-struct integer_selector
-  // Be SFINAE-friendly.
-  { };
+struct integer_selector;
 
 template<typename integerT, integerT valueT, typename firstT, typename... remainingT>
 struct integer_selector<integerT, valueT, firstT, remainingT...>
