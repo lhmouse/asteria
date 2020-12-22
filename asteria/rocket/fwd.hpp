@@ -411,8 +411,8 @@ constexpr
 void
 for_each(containerT&& cont, callbackT&& callback)
   {
-    return details_fwd::for_each_nonconstexpr(
-                  ::std::forward<containerT>(cont), ::std::forward<callbackT>(callback));
+    return details_fwd::for_each_nonconstexpr(::std::forward<containerT>(cont),
+                  ::std::forward<callbackT>(callback));
   }
 
 template<typename elementT, typename callbackT>
@@ -420,8 +420,8 @@ constexpr
 void
 for_each(initializer_list<elementT> init, callbackT&& callback)
   {
-    return details_fwd::for_each_nonconstexpr(
-                  init, ::std::forward<callbackT>(callback));
+    return details_fwd::for_each_nonconstexpr(init,
+                  ::std::forward<callbackT>(callback));
   }
 
 template<typename containerT, typename callbackT>
@@ -429,8 +429,8 @@ constexpr
 bool
 any_of(containerT&& cont, callbackT&& callback)
   {
-    return details_fwd::any_of_nonconstexpr(
-                  ::std::forward<containerT>(cont), ::std::forward<callbackT>(callback));
+    return details_fwd::any_of_nonconstexpr(::std::forward<containerT>(cont),
+                  ::std::forward<callbackT>(callback));
   }
 
 template<typename elementT, typename callbackT>
@@ -438,8 +438,8 @@ constexpr
 bool
 any_of(initializer_list<elementT> init, callbackT&& callback)
   {
-    return details_fwd::any_of_nonconstexpr(
-                  init, ::std::forward<callbackT>(callback));
+    return details_fwd::any_of_nonconstexpr(init,
+                  ::std::forward<callbackT>(callback));
   }
 
 template<typename containerT, typename callbackT>
@@ -447,8 +447,8 @@ constexpr
 bool
 none_of(containerT&& cont, callbackT&& callback)
   {
-    return details_fwd::none_of_nonconstexpr(
-                  ::std::forward<containerT>(cont), ::std::forward<callbackT>(callback));
+    return details_fwd::none_of_nonconstexpr(::std::forward<containerT>(cont),
+                  ::std::forward<callbackT>(callback));
   }
 
 template<typename elementT, typename callbackT>
@@ -456,8 +456,8 @@ constexpr
 bool
 none_of(initializer_list<elementT> init, callbackT&& callback)
   {
-    return details_fwd::none_of_nonconstexpr(
-                  init, ::std::forward<callbackT>(callback));
+    return details_fwd::none_of_nonconstexpr(init,
+                  ::std::forward<callbackT>(callback));
   }
 
 template<typename containerT, typename callbackT>
@@ -465,8 +465,8 @@ constexpr
 bool
 all_of(containerT&& cont, callbackT&& callback)
   {
-    return details_fwd::all_of_nonconstexpr(
-                  ::std::forward<containerT>(cont), ::std::forward<callbackT>(callback));
+    return details_fwd::all_of_nonconstexpr(::std::forward<containerT>(cont),
+                  ::std::forward<callbackT>(callback));
   }
 
 template<typename elementT, typename callbackT>
@@ -474,8 +474,8 @@ constexpr
 bool
 all_of(initializer_list<elementT> init, callbackT&& callback)
   {
-    return details_fwd::all_of_nonconstexpr(
-                  init, ::std::forward<callbackT>(callback));
+    return details_fwd::all_of_nonconstexpr(init,
+                  ::std::forward<callbackT>(callback));
   }
 
 template<typename targetT, typename containerT>
@@ -483,8 +483,8 @@ constexpr
 bool
 is_any_of(targetT&& targ, containerT&& cont)
   {
-    return details_fwd::is_any_of_nonconstexpr(
-                  ::std::forward<targetT>(targ), ::std::forward<containerT>(cont));
+    return details_fwd::is_any_of_nonconstexpr(::std::forward<containerT>(cont),
+                  ::std::forward<targetT>(targ), ::std::equal_to<void>());
   }
 
 template<typename targetT, typename elementT>
@@ -492,8 +492,26 @@ constexpr
 bool
 is_any_of(targetT&& targ, initializer_list<elementT> init)
   {
-    return details_fwd::is_any_of_nonconstexpr(
-                  ::std::forward<targetT>(targ), init);
+    return details_fwd::is_any_of_nonconstexpr(init,
+                  ::std::forward<targetT>(targ), ::std::equal_to<void>());
+  }
+
+template<typename targetT, typename containerT, typename predictorT>
+constexpr
+bool
+is_any_of(targetT&& targ, containerT&& cont, predictorT&& pred)
+  {
+    return details_fwd::is_any_of_nonconstexpr(::std::forward<containerT>(cont),
+                  ::std::forward<targetT>(targ), ::std::forward<predictorT>(pred));
+  }
+
+template<typename targetT, typename elementT, typename predictorT>
+constexpr
+bool
+is_any_of(targetT&& targ, initializer_list<elementT> init, predictorT&& pred)
+  {
+    return details_fwd::is_any_of_nonconstexpr(init,
+                  ::std::forward<targetT>(targ), ::std::forward<predictorT>(pred));
   }
 
 template<typename targetT, typename containerT>
@@ -501,8 +519,8 @@ constexpr
 bool
 is_none_of(targetT&& targ, containerT&& cont)
   {
-    return details_fwd::is_none_of_nonconstexpr(
-                  ::std::forward<targetT>(targ), ::std::forward<containerT>(cont));
+    return details_fwd::is_none_of_nonconstexpr(::std::forward<containerT>(cont),
+                  ::std::forward<targetT>(targ), ::std::equal_to<void>());
   }
 
 template<typename targetT, typename elementT>
@@ -510,8 +528,26 @@ constexpr
 bool
 is_none_of(targetT&& targ, initializer_list<elementT> init)
   {
-    return details_fwd::is_none_of_nonconstexpr(
-                  ::std::forward<targetT>(targ), init);
+    return details_fwd::is_none_of_nonconstexpr(init,
+                  ::std::forward<targetT>(targ), ::std::equal_to<void>());
+  }
+
+template<typename targetT, typename containerT, typename predictorT>
+constexpr
+bool
+is_none_of(targetT&& targ, containerT&& cont, predictorT&& pred)
+  {
+    return details_fwd::is_none_of_nonconstexpr(::std::forward<containerT>(cont),
+                  ::std::forward<targetT>(targ), ::std::forward<predictorT>(pred));
+  }
+
+template<typename targetT, typename elementT, typename predictorT>
+constexpr
+bool
+is_none_of(targetT&& targ, initializer_list<elementT> init, predictorT&& pred)
+  {
+    return details_fwd::is_none_of_nonconstexpr(init,
+                  ::std::forward<targetT>(targ), ::std::forward<predictorT>(pred));
   }
 
 template<typename containerT, typename targetT>
@@ -519,8 +555,8 @@ constexpr
 typename remove_reference<decltype(*(begin(::std::declval<containerT>())))>::type*
 find(containerT&& cont, targetT&& targ)
   {
-    return details_fwd::find_nonconstexpr(
-                  ::std::forward<containerT>(cont), ::std::forward<targetT>(targ));
+    return details_fwd::find_nonconstexpr(::std::forward<containerT>(cont),
+                  ::std::forward<targetT>(targ), ::std::equal_to<void>());
   }
 
 template<typename elementT, typename targetT>
@@ -528,8 +564,26 @@ constexpr
 const elementT*
 find(initializer_list<elementT> init, targetT&& targ)
   {
-    return details_fwd::find_nonconstexpr(
-                  init, ::std::forward<targetT>(targ));
+    return details_fwd::find_nonconstexpr(init,
+                  ::std::forward<targetT>(targ), ::std::equal_to<void>());
+  }
+
+template<typename containerT, typename targetT, typename predictorT>
+constexpr
+typename remove_reference<decltype(*(begin(::std::declval<containerT>())))>::type*
+find(containerT&& cont, targetT&& targ, predictorT&& pred)
+  {
+    return details_fwd::find_nonconstexpr(::std::forward<containerT>(cont),
+                  ::std::forward<targetT>(targ), ::std::forward<predictorT>(pred));
+  }
+
+template<typename elementT, typename targetT, typename predictorT>
+constexpr
+const elementT*
+find(initializer_list<elementT> init, targetT&& targ, predictorT&& pred)
+  {
+    return details_fwd::find_nonconstexpr(init,
+                  ::std::forward<targetT>(targ), ::std::forward<predictorT>(pred));
   }
 
 template<typename containerT, typename predictorT>
@@ -537,8 +591,8 @@ constexpr
 typename remove_reference<decltype(*(begin(::std::declval<containerT>())))>::type*
 find_if(containerT&& cont, predictorT&& pred)
   {
-    return details_fwd::find_if_nonconstexpr(
-                  ::std::forward<containerT>(cont), ::std::forward<predictorT>(pred));
+    return details_fwd::find_if_nonconstexpr(::std::forward<containerT>(cont),
+                  ::std::forward<predictorT>(pred));
   }
 
 template<typename elementT, typename predictorT>
@@ -546,8 +600,8 @@ constexpr
 const elementT*
 find_if(initializer_list<elementT> init, predictorT&& pred)
   {
-    return details_fwd::find_if_nonconstexpr(
-                  init, ::std::forward<predictorT>(pred));
+    return details_fwd::find_if_nonconstexpr(init,
+                  ::std::forward<predictorT>(pred));
   }
 
 template<intmax_t valueT>

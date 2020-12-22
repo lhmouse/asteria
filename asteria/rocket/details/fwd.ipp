@@ -85,37 +85,37 @@ all_of_nonconstexpr(containerT&& cont, callbackT&& call)
   }
 
 // `is_any_of()`
-template<typename targetT, typename containerT>
+template<typename targetT, typename containerT, typename predictorT>
 constexpr  // c++14
 bool
-is_any_of_nonconstexpr(targetT&& targ, containerT&& cont)
+is_any_of_nonconstexpr(containerT&& cont, targetT&& targ, predictorT&& pred)
   {
     for(auto&& elem : cont)
-      if(::std::forward<targetT>(targ) == elem)
+      if(::std::forward<predictorT>(pred)(elem, targ))
         return true;
     return false;
   }
 
 // `is_none_of()`
-template<typename targetT, typename containerT>
+template<typename targetT, typename containerT, typename predictorT>
 constexpr  // c++14
 bool
-is_none_of_nonconstexpr(targetT&& targ, containerT&& cont)
+is_none_of_nonconstexpr(containerT&& cont, targetT&& targ, predictorT&& pred)
   {
     for(auto&& elem : cont)
-      if(::std::forward<targetT>(targ) == elem)
+      if(::std::forward<predictorT>(pred)(elem, targ))
         return false;
     return true;
   }
 
 // `find()`
-template<typename containerT, typename targetT>
+template<typename containerT, typename targetT, typename predictorT>
 constexpr  // c++14
 typename remove_reference<decltype(*(begin(::std::declval<containerT>())))>::type*
-find_nonconstexpr(containerT&& cont, targetT&& targ)
+find_nonconstexpr(containerT&& cont, targetT&& targ, predictorT&& pred)
   {
     for(auto&& elem : cont)
-      if(::std::forward<targetT>(targ) == elem)
+      if(::std::forward<predictorT>(pred)(elem, targ))
         return ::std::addressof(elem);
     return nullptr;
   }
