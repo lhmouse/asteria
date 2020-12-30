@@ -1441,27 +1441,25 @@ do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tstr
 
     auto sloc = qtok->sloc();
     if(qtok->is_keyword()) {
-      auto qcnf = ::std::find(begin(s_keyword_table), end(s_keyword_table),
-                              qtok->as_keyword());
-      if(qcnf == end(s_keyword_table))
+      auto qconf = ::rocket::find(s_keyword_table, qtok->as_keyword());
+      if(!qconf)
         return false;
 
       // Return the prefix operator and discard this token.
       tstrm.shift();
-      Expression_Unit::S_operator_rpn xunit = { sloc, qcnf->xop, false };
+      Expression_Unit::S_operator_rpn xunit = { sloc, qconf->xop, false };
       units.emplace_back(::std::move(xunit));
       return true;
     }
 
     if(qtok->is_punctuator()) {
-      auto qcnf = ::std::find(begin(s_punctuator_table), end(s_punctuator_table),
-                              qtok->as_punctuator());
-      if(qcnf == end(s_punctuator_table))
+      auto qconf = ::rocket::find(s_punctuator_table, qtok->as_punctuator());
+      if(!qconf)
         return false;
 
       // Return the prefix operator and discard this token.
       tstrm.shift();
-      Expression_Unit::S_operator_rpn xunit = { sloc, qcnf->xop, false };
+      Expression_Unit::S_operator_rpn xunit = { sloc, qconf->xop, false };
       units.emplace_back(::std::move(xunit));
       return true;
     }
@@ -1664,8 +1662,9 @@ do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm
       if(!qkey)
         break;
 
-      if(::std::find(keys.begin(), keys.end(), *qkey) != keys.end())
+      if(::rocket::find(keys, *qkey))
         throw Parser_Error(parser_status_duplicate_key_in_object, sloc_k, length_k);
+
       keys.emplace_back(::std::move(*qkey));
 
       // Look for the value with an initiator.
@@ -1914,14 +1913,13 @@ do_accept_postfix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tst
 
     auto sloc = qtok->sloc();
     if(qtok->is_punctuator()) {
-      auto qcnf = ::std::find(begin(s_postfix_xop_table), end(s_postfix_xop_table),
-                              qtok->as_punctuator());
-      if(qcnf == end(s_postfix_xop_table))
+      auto qconf = ::rocket::find(s_postfix_xop_table, qtok->as_punctuator());
+      if(!qconf)
         return false;
 
       // Return the postfix operator and discard this token.
       tstrm.shift();
-      Expression_Unit::S_operator_rpn xunit = { sloc, qcnf->xop, false };
+      Expression_Unit::S_operator_rpn xunit = { sloc, qconf->xop, false };
       units.emplace_back(::std::move(xunit));
       return true;
     }
@@ -2206,14 +2204,13 @@ do_accept_infix_operator_general_opt(Token_Stream& tstrm)
 
     auto sloc = qtok->sloc();
     if(qtok->is_punctuator()) {
-      auto qcnf = ::std::find(begin(s_infix_xop_table), end(s_infix_xop_table),
-                              qtok->as_punctuator());
-      if(qcnf == end(s_infix_xop_table))
+      auto qconf = ::rocket::find(s_infix_xop_table, qtok->as_punctuator());
+      if(!qconf)
         return nullopt;
 
       // Return the infix operator and discard this token.
       tstrm.shift();
-      Infix_Element::S_general xelem = { sloc, qcnf->xop, qcnf->assign, { } };
+      Infix_Element::S_general xelem = { sloc, qconf->xop, qconf->assign, { } };
       return ::std::move(xelem);
     }
     return nullopt;

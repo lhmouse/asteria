@@ -22,13 +22,8 @@ do_user_declare(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
       return;
 
     // Record this name.
-    if(names_opt) {
-      auto oldp = ::std::find(names_opt->begin(), names_opt->end(), name);
-      if(oldp != names_opt->end())
-        names_opt->erase(oldp);
-
+    if(names_opt && !::rocket::find(*names_opt, name))
       names_opt->emplace_back(name);
-    }
 
     // Just ensure the name exists.
     ctx.open_named_reference(name) /*= Reference::S_uninit()*/;
