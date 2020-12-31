@@ -913,20 +913,22 @@ std_string_explode(V_string text, Opt_string delim, Opt_integer limit)
     }
 
     // Break `text` down.
+    BMH_Searcher srch(delim->begin(), delim->end());
     auto bpos = text.begin();
     auto epos = text.end();
+
     for(;;) {
       if(segments.size() + 1 >= rlimit) {
         segments.emplace_back(V_string(bpos, epos));
         break;
       }
-      auto mpos = ::std::search(bpos, epos, delim->begin(), delim->end());
-      if(mpos == epos) {
+      auto qbrk = srch.search_opt(bpos, epos, delim->begin());
+      if(!qbrk) {
         segments.emplace_back(V_string(bpos, epos));
         break;
       }
-      segments.emplace_back(V_string(bpos, mpos));
-      bpos = mpos + delim->ssize();
+      segments.emplace_back(V_string(bpos, *qbrk));
+      bpos = *qbrk + delim->ssize();
     }
     return segments;
   }
