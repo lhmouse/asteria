@@ -147,6 +147,7 @@ do_write_loop(int fd, const void* data, size_t size, const V_string& path)
         ASTERIA_THROW("Error writing file '$2'\n"
                       "[`write()` failed: $1]",
                       format_errno(errno), path);
+
       bp += nwrtn;
     }
     return bp;
@@ -306,7 +307,7 @@ std_filesystem_dir_list(V_string path)
       if(next->d_type != DT_UNKNOWN) {
         // Get the file type if it is available immediately.
         is_dir = next->d_type == DT_DIR;
-        is_dir = next->d_type == DT_LNK;
+        is_sym = next->d_type == DT_LNK;
       }
       else
 #endif
