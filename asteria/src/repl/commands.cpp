@@ -3,7 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "fwd.hpp"
-#include "rocket/tinybuf_file.hpp"
+#include "../../rocket/tinybuf_file.hpp"
 
 namespace asteria {
 namespace {
