@@ -849,7 +849,7 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm)
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_arrow });
     if(!kpunct)
-      throw Parser_Error(parser_status_colon_expected, tstrm);
+      throw Parser_Error(parser_status_arrow_expected, tstrm);
 
     auto qinit = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
     if(!qinit)
@@ -2082,7 +2082,7 @@ do_accept_infix_operator_ternary_opt(Token_Stream& tstrm)
     if(!do_accept_expression(btrue, tstrm))
       throw Parser_Error(parser_status_expression_expected, tstrm);
 
-    kpunct = do_accept_punctuator_opt(tstrm, { punctuator_quest, punctuator_colon });
+    kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
     if(!kpunct)
       throw Parser_Error(parser_status_colon_expected, tstrm);
 
