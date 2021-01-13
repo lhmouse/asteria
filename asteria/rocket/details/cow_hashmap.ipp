@@ -751,8 +751,6 @@ class storage_handle
         // Copy/move old elements from `sth`.
         if(sth.m_qstor)
           storage_traits<allocator_type, storage>::dispatch_transfer(*qstor, *(sth.m_qstor));
-
-        ROCKET_ASSERT(sth.size() == 0);
       }
 
     void
