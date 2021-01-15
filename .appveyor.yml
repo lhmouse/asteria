@@ -12,7 +12,7 @@ build:
   parallel: true
 
 build_script:
-  - cmd: bash -xe ./ci/build.sh
+  - cmd: bash -e ./ci/build.sh --disable-make-check
 
 on_success:
   - python3 ci/appveyor_irc-notify.py mcfproj "[ lh_mouse {repo_name}#{short_commit}] passed on {branch} by {author} ({build_url})"
