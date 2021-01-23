@@ -11,9 +11,9 @@ int main()
   {
     Simple_Script code;
     code.reload_string(
+      sref(__FILE__), __LINE__, sref(R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
-      sref(__FILE__), __LINE__, sref(R"__(
         func recur(n) {
           std.debug.logf("recur($1)", n + 1);
           return recur(n + 1) + 1;
