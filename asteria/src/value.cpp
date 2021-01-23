@@ -13,7 +13,6 @@ ROCKET_ENABLE_IF(::std::is_integral<ValT>::value)>
 constexpr
 Compare
 do_3way_compare_scalar(const ValT& lhs, const ValT& rhs)
-  noexcept
   {
     return (lhs < rhs) ? compare_less
          : (lhs > rhs) ? compare_greater
@@ -25,7 +24,6 @@ ROCKET_ENABLE_IF(::std::is_floating_point<ValT>::value)>
 constexpr
 Compare
 do_3way_compare_scalar(const ValT& lhs, const ValT& rhs)
-  noexcept
   {
     return ::std::isless(lhs, rhs)      ? compare_less
          : ::std::isgreater(lhs, rhs)   ? compare_greater
@@ -209,40 +207,31 @@ print(tinyfmt& fmt, bool escape)
   {
     switch(this->type()) {
       case type_null:
-        // null
         return fmt << "null";
 
       case type_boolean:
-        // true
         return fmt << this->m_stor.as<type_boolean>();
 
       case type_integer:
-        // 42
         return fmt << this->m_stor.as<type_integer>();
 
       case type_real:
-        // 123.456
         return fmt << this->m_stor.as<type_real>();
 
       case type_string:
         if(!escape)
-          // hello
           return fmt << this->m_stor.as<type_string>();
         else
-          // "hello"
           return fmt << quote(this->m_stor.as<type_string>());
 
       case type_opaque:
-        // #opaque [[my opaque]]
         return fmt << "(opaque) [[" << this->m_stor.as<type_opaque>() << "]]";
 
       case type_function:
-        // *function [[my function]]
         return fmt << "(function) [[" << this->m_stor.as<type_function>() << "]]";
 
       case type_array: {
         const auto& altr = this->m_stor.as<type_array>();
-        // [ 1, 2, 3, ]
         fmt << '[';
         for(size_t i = 0;  i < altr.size();  ++i) {
           fmt << ' ';
@@ -255,7 +244,6 @@ print(tinyfmt& fmt, bool escape)
 
       case type_object: {
         const auto& altr = this->m_stor.as<type_object>();
-        // { "one" = 1, "two" = 2, "three" = 3, }
         fmt << '{';
         for(auto q = altr.begin();  q != altr.end();  ++q) {
           fmt << ' ' << quote(q->first) << " = ";
@@ -278,49 +266,37 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging)
   {
     switch(this->type()) {
       case type_null:
-        // null
         return fmt << "null";
 
       case type_boolean:
-        // boolean true
         return fmt << "boolean " << this->m_stor.as<type_boolean>();
 
       case type_integer:
-        // integer 42
         return fmt << "integer " << this->m_stor.as<type_integer>();
 
       case type_real:
-        // real 123.456
         return fmt << "real " << this->m_stor.as<type_real>();
 
       case type_string: {
         const auto& altr = this->m_stor.as<type_string>();
-        // string(5) "hello"
         fmt << "string(" << altr.size() << ") " << quote(altr);
         return fmt;
       }
 
       case type_opaque: {
         const auto& altr = this->m_stor.as<type_opaque>();
-        // #opaque(0x123456) [[my opaque]]
         fmt << "opaque(" << altr.get_opt() << ") [[" << altr << "]]";
         return fmt;
       }
 
       case type_function: {
         const auto& altr = this->m_stor.as<type_function>();
-        // *function [[my function]]
         fmt << "function [[" << altr << "]]";
         return fmt;
       }
 
       case type_array: {
         const auto& altr = this->m_stor.as<type_array>();
-        // array(3) [
-        //   0 = integer 1;
-        //   1 = integer 2;
-        //   2 = integer 3;
-        // ]
         fmt << "array(" << altr.size() << ") [";
         for(size_t i = 0;  i < altr.size();  ++i) {
           fmt << pwrap(indent, hanging + indent) << i << " = ";
@@ -332,11 +308,6 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging)
 
       case type_object: {
         const auto& altr = this->m_stor.as<type_object>();
-        // object(3) {
-        //   "one" = integer 1;
-        //   "two" = integer 2;
-        //   "three" = integer 3;
-        // }
         fmt << "object(" << altr.size() << ") {";
         for(auto q = altr.begin();  q != altr.end();  ++q) {
           fmt << pwrap(indent, hanging + indent) << quote(q->first) << " = ";
