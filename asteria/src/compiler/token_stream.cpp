@@ -16,15 +16,15 @@ class Line_Reader
   private:
     tinybuf* m_cbuf;
     cow_string m_file;
-
     size_t m_line = 0;
+
     size_t m_off = 0;
     cow_string m_str;
 
   public:
     explicit
-    Line_Reader(tinybuf& xcbuf, const cow_string& xfile, size_t xline)
-      : m_cbuf(&xcbuf), m_file(xfile), m_line(xline - 1)
+    Line_Reader(tinybuf& xcbuf, const cow_string& xfile, int xline)
+      : m_cbuf(&xcbuf), m_file(xfile), m_line(static_cast<size_t>(xline) - 1)
       { }
 
   public:
@@ -47,14 +47,14 @@ class Line_Reader
       { return static_cast<int>(this->m_line);  }
 
     int
-    offset()
+    column()
       const noexcept
-      { return static_cast<int>(this->m_off);  }
+      { return static_cast<int>(this->m_off + 1);  }
 
     Source_Location
     tell()
       const noexcept
-      { return Source_Location(this->file(), this->line(), this->offset());  }
+      { return Source_Location(this->file(), this->line(), this->column());  }
 
     bool
     next_line()
@@ -769,7 +769,7 @@ reload(const cow_string& file, int line, tinybuf& cbuf)
     opt<pair<Source_Location, size_t>> bcomm;
 
     // Read source code line by line.
-    Line_Reader reader(cbuf, file, static_cast<size_t>(line));
+    Line_Reader reader(cbuf, file, line);
     while(reader.next_line()) {
       // Discard the first line if it looks like a shebang.
       if((reader.line() == line) && (::std::strncmp(reader.data(), "#!", 2) == 0))

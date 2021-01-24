@@ -30,7 +30,7 @@ class Runtime_Error
     Runtime_Error(M_native, const exception& stdex)
       : m_value(cow_string(stdex.what()))
       { this->do_backtrace({ frame_type_native,
-                             Source_Location(sref("[native code]"), -1, 0),
+                             Source_Location(sref("[native code]"), -1, -1),
                              this->m_value });  }
 
     template<typename XValT>

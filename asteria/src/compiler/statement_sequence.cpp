@@ -1586,7 +1586,7 @@ do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tst
     if(!qblock)
       throw Parser_Error(parser_status_open_brace_or_equal_initializer_expected, tstrm);
 
-    auto unique_name = format_string("__closure_$1_$2", sloc.line(), sloc.offset());
+    auto unique_name = format_string("__closure:[$1:$2]", sloc.line(), sloc.column());
 
     Expression_Unit::S_closure_function xunit = { ::std::move(sloc), ::std::move(unique_name),
                                                   ::std::move(*kparams),

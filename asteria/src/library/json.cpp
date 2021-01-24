@@ -671,8 +671,8 @@ do_json_parse(tinybuf& cbuf)
     return value;
   }
   catch(Parser_Error& except) {
-    ASTERIA_THROW("Invalid JSON string: $3 (line $1, offset $2)",
-                  except.line(), except.offset(), describe_parser_status(except.status()));
+    ASTERIA_THROW("Invalid JSON string: $3 (line $1, column $2)",
+                  except.line(), except.column(), describe_parser_status(except.status()));
   }
 
 }  // namespace

@@ -13,19 +13,19 @@ class Source_Location
   private:
     cow_string m_file;
     int m_line;
-    int m_offset;
+    int m_column;
 
   public:
     explicit
     Source_Location()
       noexcept
-      : m_file(sref("[unknown]")), m_line(-1), m_offset(-1)
+      : m_file(sref("[unknown]")), m_line(-1), m_column(-1)
       { }
 
     explicit
-    Source_Location(const cow_string& xfile, int xline, int xoffset)
+    Source_Location(const cow_string& xfile, int xline, int xcolumn)
       noexcept
-      : m_file(xfile), m_line(xline), m_offset(xoffset)
+      : m_file(xfile), m_line(xline), m_column(xcolumn)
       { }
 
   public:
@@ -45,9 +45,9 @@ class Source_Location
       { return this->m_line;  }
 
     int
-    offset()
+    column()
       const noexcept
-      { return this->m_offset;  }
+      { return this->m_column;  }
 
     Source_Location&
     swap(Source_Location& other)
@@ -55,7 +55,7 @@ class Source_Location
       {
         this->m_file.swap(other.m_file);
         ::std::swap(this->m_line, other.m_line);
-        ::std::swap(this->m_offset, other.m_offset);
+        ::std::swap(this->m_column, other.m_column);
         return *this;
       }
 

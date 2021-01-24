@@ -11,7 +11,7 @@ Source_Location::
 print(tinyfmt& fmt)
   const
   {
-    return fmt << this->m_file << ':' << this->m_line << ':' << this->m_offset;
+    return fmt << this->m_file << ':' << this->m_line << ':' << this->m_column;
   }
 
 }  // namespace asteria

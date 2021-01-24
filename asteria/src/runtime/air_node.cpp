@@ -831,7 +831,7 @@ struct AIR_Traits_try_statement
             r.try_emplace(sref("frame"), sref(f.what_type()));
             r.try_emplace(sref("file"), f.file());
             r.try_emplace(sref("line"), f.line());
-            r.try_emplace(sref("offset"), f.offset());
+            r.try_emplace(sref("column"), f.column());
             r.try_emplace(sref("value"), f.value());
 
             // Append this frame.

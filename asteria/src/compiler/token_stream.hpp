@@ -85,7 +85,7 @@ class Token_Stream
       const noexcept
       {
         if(this->m_rtoks.empty())
-          return Source_Location(sref("[end of stream]"), -1, 0);
+          return Source_Location(sref("[end of stream]"), -1, -1);
         else
           return this->m_rtoks.back().sloc();
       }
@@ -108,8 +108,8 @@ class Token_Stream
         return *this;
       }
 
-    // This function parses characters from the input stream and fills tokens into `*this`.
-    // The contents of `*this` are destroyed prior to any further operation.
+    // This function parses characters from the input stream and fills tokens into
+    // `*this`. The contents of `*this` are destroyed prior to any further operation.
     // This function throws a `Parser_Error` upon failure.
     Token_Stream&
     reload(const cow_string& file, int line, tinybuf& cbuf);

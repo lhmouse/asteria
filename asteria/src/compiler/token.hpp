@@ -91,9 +91,9 @@ class Token
       { return this->m_sloc.line();  }
 
     int
-    offset()
+    column()
       const noexcept
-      { return this->m_sloc.offset();  }
+      { return this->m_sloc.column();  }
 
     size_t
     length()

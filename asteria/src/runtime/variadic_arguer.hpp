@@ -47,9 +47,9 @@ class Variadic_Arguer
       { return this->m_sloc.line();  }
 
     int
-    offset()
+    column()
       const noexcept
-      { return this->m_sloc.offset();  }
+      { return this->m_sloc.column();  }
 
     const cow_string&
     func()
