@@ -16,23 +16,15 @@ get_probing_origin(bucketT* begin, bucketT* end, size_t hval)
   {
     ROCKET_ASSERT(begin < end);
 
-    // This makes a floating-point value in the interval [1,2).
-    uint64_t word = static_cast<uint32_t>(hval * 0x9E3779B9);
-    word = 0x3FF00000'00000000 | word << 20;
+    // Make a fixed-point value in the interval [0,1).
+    uint64_t dist = static_cast<uint32_t>(hval * 0x9E3779B9);
 
-    // We assume floating-point numbers have the same endianness as integers.
-    double ratio;
-    ::std::memcpy(&ratio, &word, sizeof(double));
-    ROCKET_ASSERT((1 <= ratio) && (ratio < 2));
+    // Multiply it by the number of buckets.
+    dist *= static_cast<size_t>(end - begin);
+    dist >>= 32;
 
-    // The compiler is free to transform this expression into a fused multiply-add.
-    double dist = static_cast<double>(end - begin);
-    dist = ratio * dist - dist;
-
-    // Truncate the distance towards zero.
-    auto bkt = begin + static_cast<ptrdiff_t>(dist);
-    ROCKET_ASSERT(bkt < end);
-    return bkt;
+    // Return a pointer to the origin.
+    return begin + static_cast<ptrdiff_t>(dist);
   }
 
 template<typename bucketT, typename predT>
