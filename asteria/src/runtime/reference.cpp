@@ -155,7 +155,7 @@ finish_call(Global_Context& global)
 
 const Value&
 Reference::
-dereference_readonly()
+do_dereference_readonly_slow()
   const
   {
     const Value* qval;

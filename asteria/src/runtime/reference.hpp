@@ -117,6 +117,11 @@ class Reference
         this->m_mods.clear();
         return *this;  }
 
+  private:
+    const Value&
+    do_dereference_readonly_slow()
+      const;
+
   public:
     ASTERIA_COPYABLE_DESTRUCTOR(Reference);
 
@@ -254,15 +259,15 @@ class Reference
       {
         // If the root is a value, and there is no modifier, then dereferencing
         // will always succeed and yield the root.
-        int mask = (1 << this->index())
-                & (1 << index_constant | 1 << index_temporary | 1 << index_variable)
-                & (static_cast<int32_t>(this->m_mods.ssize() - 1) >> 31);
+        int32_t mask = 1 << this->index();
+        mask &= static_cast<int32_t>(this->m_mods.ssize() - 1) >> 31;
+        mask &= 1 << index_constant | 1 << index_temporary | 1 << index_variable;
         if(ROCKET_EXPECT(mask))
           return *this;
 
         // Otherwise, try dereferencing.
         // If the operation fails, an exception is thrown.
-        static_cast<void>(this->dereference_readonly());
+        static_cast<void>(this->do_dereference_readonly_slow());
         return *this;
       }
 
@@ -270,7 +275,27 @@ class Reference
     // Note that not all references denote values. Some of them are placeholders.
     const Value&
     dereference_readonly()
-      const;
+      const
+      {
+        // If the root is an rvalue, and there is no modifier, then dereferencing
+        // will always succeed and yield the root.
+        int32_t mask = 1 << this->index();
+        mask &= static_cast<int32_t>(this->m_mods.ssize() - 1) >> 31;
+        mask &= 1 << index_constant | 1 << index_temporary;
+        if(ROCKET_EXPECT(mask)) {
+          // Perform fast indirection.
+          if(this->m_root.index() == index_constant)
+            return this->m_root.as<index_constant>().val;
+
+          if(this->m_root.index() == index_temporary)
+            return this->m_root.as<index_temporary>().val;
+
+          ROCKET_ASSERT(false);
+        }
+
+        // Otherwise, try dereferencing.
+        return this->do_dereference_readonly_slow();
+      }
 
     Value&
     dereference_mutable()
