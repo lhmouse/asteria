@@ -42,6 +42,7 @@ check_PROGRAMS +=  \
   %reldir%/github_105.test  \
   %reldir%/ascii_numget.test  \
   %reldir%/github_108.test  \
+  %reldir%/github_113.test  \
   ${NOTHING}
 
 EXTRA_DIST +=  \

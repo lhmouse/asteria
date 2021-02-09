@@ -2431,8 +2431,7 @@ struct AIR_Traits_apply_operator_cmp_eq : AIR_Traits_apply_operator_common
         // Check whether the two operands equal.
         // Unordered operands are not equal.
         // N.B. This is one of the few operators that work on all types.
-        auto cmp = lhs.compare(rhs);
-        lhs = cmp == compare_equal;
+        lhs = lhs.compare(rhs) == compare_equal;
         return air_status_next;
       }
   };
@@ -2452,8 +2451,7 @@ struct AIR_Traits_apply_operator_cmp_ne : AIR_Traits_apply_operator_common
         // Check whether the two operands don't equal.
         // Unordered operands are not equal.
         // N.B. This is one of the few operators that work on all types.
-        auto cmp = lhs.compare(rhs);
-        lhs = cmp != compare_equal;
+        lhs = lhs.compare(rhs) != compare_equal;
         return air_status_next;
       }
   };
@@ -2476,6 +2474,7 @@ struct AIR_Traits_apply_operator_cmp_lt : AIR_Traits_apply_operator_common
         if(cmp == compare_unordered)
           ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)",
                         lhs, rhs);
+
         lhs = cmp == compare_less;
         return air_status_next;
       }
@@ -2499,6 +2498,7 @@ struct AIR_Traits_apply_operator_cmp_gt : AIR_Traits_apply_operator_common
         if(cmp == compare_unordered)
           ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)",
                         lhs, rhs);
+
         lhs = cmp == compare_greater;
         return air_status_next;
       }
@@ -2522,6 +2522,7 @@ struct AIR_Traits_apply_operator_cmp_lte : AIR_Traits_apply_operator_common
         if(cmp == compare_unordered)
           ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)",
                         lhs, rhs);
+
         lhs = cmp != compare_greater;
         return air_status_next;
       }
@@ -2545,6 +2546,7 @@ struct AIR_Traits_apply_operator_cmp_gte : AIR_Traits_apply_operator_common
         if(cmp == compare_unordered)
           ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)",
                         lhs, rhs);
+
         lhs = cmp != compare_less;
         return air_status_next;
       }
