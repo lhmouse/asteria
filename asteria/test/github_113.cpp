@@ -14,49 +14,16 @@ int main()
       sref(__FILE__), __LINE__, sref(R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
-        func pack_frames(bt) {
-          var str = "";
-          for(each k, v -> bt) {
-            str += v.frame;
-            str += "\n";
-          }
-          return str;
-        }
+        var data = [];
+        data[0] = data;
 
-        func two() {
-          throw "boom";
-        }
+        var foo = [];
+        foo[0] ||= foo;
 
-        func one_ptc() {
-          try
-            two();
-          catch(e)
-            throw 123;
-        }
+        var bar = [];
+        bar[0] ??= bar;
 
-        func one_nptc() {
-          try
-            return 1 + two();
-          catch(e)
-            throw 123;
-        }
-
-        var str_ptc = "";
-        var str_nptc = "";
-
-        try
-          one_ptc();
-        catch(e)
-          str_ptc = pack_frames(__backtrace);
-
-        try
-          one_nptc();
-        catch(e)
-          str_nptc = pack_frames(__backtrace);
-
-        std.debug.logf("str_ptc:\n$1", str_ptc);
-        std.debug.logf("str_nptc:\n$1", str_nptc);
-        assert str_ptc == str_nptc;
+        std.system.gc_collect();
 
 ///////////////////////////////////////////////////////////////////////////////
       )__"));

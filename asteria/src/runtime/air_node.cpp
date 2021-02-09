@@ -72,6 +72,14 @@ do_solidify_nodes(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
     return r;
   }
 
+void
+do_simple_assign_value_common(Executive_Context& ctx)
+  {
+    auto value = ctx.stack().back().dereference_readonly();
+    ctx.stack().pop_back();
+    ctx.stack().back().dereference_mutable() = ::std::move(value);
+  }
+
 AIR_Status
 do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVMC_Queue& queue)
   {
@@ -90,11 +98,7 @@ do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVMC_Queue&
     // Evaluate the subexpression.
     auto status = queue.execute(ctx);
     ROCKET_ASSERT(status == air_status_next);
-
-    // Read a value from the top reference and write it to the one beneath it.
-    const auto& val = ctx.stack().back().dereference_readonly();
-    ctx.stack().pop_back();
-    ctx.stack().mut_back().dereference_mutable() = val;
+    do_simple_assign_value_common(ctx);
     return air_status_next;
   }
 
@@ -3338,9 +3342,7 @@ struct AIR_Traits_apply_operator_assign : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
       {
         // This operator is binary. `assign` is ignored.
-        const auto& val = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
-        ctx.stack().back().dereference_mutable() = val;
+        do_simple_assign_value_common(ctx);
         return air_status_next;
       }
   };
