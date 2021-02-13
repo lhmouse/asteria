@@ -118,6 +118,9 @@ class Reference
         return *this;  }
 
   private:
+    Reference&
+    do_finish_call_slow(Global_Context& global);
+
     const Value&
     do_dereference_readonly_slow()
       const;
@@ -159,9 +162,11 @@ class Reference
     rcptr<Variable>
     get_variable_opt()
       const noexcept
-      { return ROCKET_EXPECT(this->is_variable())
+      {
+        return ROCKET_EXPECT(this->is_variable())
           ? unerase_pointer_cast<Variable>(this->m_root.as<index_variable>().var)
-          : nullptr;  }
+          : nullptr;
+      }
 
     bool
     is_ptc_args()
@@ -172,12 +177,19 @@ class Reference
     rcptr<PTC_Arguments>
     get_ptc_args_opt()
       const noexcept
-      { return ROCKET_EXPECT(this->is_ptc_args())
+      {
+        return ROCKET_UNEXPECT(this->is_ptc_args())
           ? unerase_pointer_cast<PTC_Arguments>(this->m_root.as<index_ptc_args>().ptca)
-          : nullptr;  }
+          : nullptr;
+      }
 
     Reference&
-    finish_call(Global_Context& global);
+    finish_call(Global_Context& global)
+      {
+        return ROCKET_UNEXPECT(this->is_ptc_args())
+          ? this->do_finish_call_slow(global)
+          : *this;
+      }
 
     bool
     is_jump_src()
@@ -230,13 +242,13 @@ class Reference
 
     // A modifier is created by a dot or bracket operator.
     // For instance, the expression `obj.x[42]` results in a reference having two
-    // modifiers.
-    // Modifiers can be removed to yield references to ancestor objects. Removing
-    // the last modifier shall yield the constant `null`.
+    // modifiers. Modifiers can be removed to yield references to ancestor objects.
+    // Removing the last modifier shall yield the constant `null`.
     template<typename XModT>
     Reference&
     zoom_in(XModT&& xmod)
       {
+        // Push a new modifier.
         this->m_mods.emplace_back(::std::forward<XModT>(xmod));
         return *this;
       }
@@ -244,10 +256,18 @@ class Reference
     Reference&
     zoom_out()
       {
-        if(ROCKET_EXPECT(this->m_mods.empty()))
-          this->m_root = S_constant();
-        else
+        if(ROCKET_UNEXPECT(this->m_mods.size())) {
+          // Drop the last modifier.
           this->m_mods.pop_back();
+        }
+        else {
+          // Overwrite the root with a constant null.
+          auto qxroot = this->m_root.get<index_constant>();
+          if(qxroot)
+            qxroot->val = V_null();
+          else
+            this->m_root = S_constant();
+        }
         return *this;
       }
 
@@ -261,7 +281,7 @@ class Reference
         // will always succeed and yield the root.
         int32_t mask = 1 << this->index();
         mask &= static_cast<int32_t>(this->m_mods.ssize() - 1) >> 31;
-        mask &= 1 << index_constant | 1 << index_temporary | 1 << index_variable;
+        mask &= 1 << index_constant | 1 << index_temporary;
         if(ROCKET_EXPECT(mask))
           return *this;
 

@@ -56,11 +56,8 @@ enumerate_variables(Variable_Callback& callback)
 
 Reference&
 Reference::
-finish_call(Global_Context& global)
+do_finish_call_slow(Global_Context& global)
   {
-    if(ROCKET_EXPECT(!this->is_ptc_args()))
-      return *this;
-
     // We must rebuild the backtrace using this queue if an exception is thrown.
     cow_vector<rcptr<PTC_Arguments>> frames;
     rcptr<PTC_Arguments> ptca;

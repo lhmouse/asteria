@@ -115,6 +115,7 @@ class stored_pointer
         return ptr;
       }
 
+    ROCKET_FORCED_INLINE_FUNCTION
     void
     reset(pointer ptr_new)
       noexcept
