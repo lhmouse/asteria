@@ -293,6 +293,7 @@ class Reference
 
     // These are general read/write functions.
     // Note that not all references denote values. Some of them are placeholders.
+    ROCKET_FORCED_INLINE_FUNCTION
     const Value&
     dereference_readonly()
       const
