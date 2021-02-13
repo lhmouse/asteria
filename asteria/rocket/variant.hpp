@@ -357,7 +357,7 @@ class variant
     visit(visitorT&& visitor)
       const
       {
-        static constexpr details_variant::ptr_table<void (const void*, visitorT&&),
+        static constexpr details_variant::const_ptr_table<void (const void*, visitorT&&),
                    details_variant::wrapped_visit<const alternativesT>...> table;
         table[this->m_index](this->m_stor, ::std::forward<visitorT>(visitor));
       }
@@ -366,7 +366,7 @@ class variant
     void
     visit(visitorT&& visitor)
       {
-        static constexpr details_variant::ptr_table<void (void*, visitorT&&),
+        static constexpr details_variant::const_ptr_table<void (void*, visitorT&&),
                    details_variant::wrapped_visit<alternativesT>...> table;
         table[this->m_index](this->m_stor, ::std::forward<visitorT>(visitor));
       }

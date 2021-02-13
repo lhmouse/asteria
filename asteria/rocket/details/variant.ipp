@@ -160,14 +160,14 @@ class const_bitset
   };
 
 template<typename targetT, targetT*... ptrsT>
-class ptr_table
+class const_ptr_table
   {
   private:
     targetT* m_ptrs[sizeof...(ptrsT)] = { ptrsT... };
 
   public:
     constexpr
-    ptr_table()
+    const_ptr_table()
       noexcept
       { }
 
@@ -191,7 +191,7 @@ void*
 dispatch_copy_construct(size_t k, void* dptr, const void* sptr)
   {
     static constexpr const_bitset<is_trivially_copy_constructible<altsT>::value...> trivial;
-    static constexpr ptr_table<void* (void*, const void*), wrapped_copy_construct<altsT>...> ptrs;
+    static constexpr const_ptr_table<void* (void*, const void*), wrapped_copy_construct<altsT>...> ptrs;
 
     if(ROCKET_EXPECT(trivial[k]))
       return ::std::memcpy(dptr, sptr, sizeof(typename aligned_union<1, altsT...>::type));
@@ -212,7 +212,7 @@ void*
 dispatch_move_construct(size_t k, void* dptr, void* sptr)
   {
     static constexpr const_bitset<is_trivially_move_constructible<altsT>::value...> trivial;
-    static constexpr ptr_table<void* (void*, void*), wrapped_move_construct<altsT>...> ptrs;
+    static constexpr const_ptr_table<void* (void*, void*), wrapped_move_construct<altsT>...> ptrs;
 
     if(ROCKET_EXPECT(trivial[k]))
       return ::std::memcpy(dptr, sptr, sizeof(typename aligned_union<1, altsT...>::type));
@@ -233,7 +233,7 @@ void*
 dispatch_copy_assign(size_t k, void* dptr, const void* sptr)
   {
     static constexpr const_bitset<is_trivially_copy_assignable<altsT>::value...> trivial;
-    static constexpr ptr_table<void* (void*, const void*), wrapped_copy_assign<altsT>...> ptrs;
+    static constexpr const_ptr_table<void* (void*, const void*), wrapped_copy_assign<altsT>...> ptrs;
 
     if(ROCKET_EXPECT(trivial[k]))
       return ::std::memmove(dptr, sptr, sizeof(typename aligned_union<1, altsT...>::type));
@@ -254,7 +254,7 @@ void*
 dispatch_move_assign(size_t k, void* dptr, void* sptr)
   {
     static constexpr const_bitset<is_trivially_move_assignable<altsT>::value...> trivial;
-    static constexpr ptr_table<void* (void*, void*), wrapped_move_assign<altsT>...> ptrs;
+    static constexpr const_ptr_table<void* (void*, void*), wrapped_move_assign<altsT>...> ptrs;
 
     if(ROCKET_EXPECT(trivial[k]))
       return ::std::memmove(dptr, sptr, sizeof(typename aligned_union<1, altsT...>::type));
@@ -275,7 +275,7 @@ void
 dispatch_destroy(size_t k, void* dptr)
   {
     static constexpr const_bitset<is_trivially_destructible<altsT>::value...> trivial;
-    static constexpr ptr_table<void (void*), wrapped_destroy<altsT>...> ptrs;
+    static constexpr const_ptr_table<void (void*), wrapped_destroy<altsT>...> ptrs;
 
     if(ROCKET_EXPECT(trivial[k]))
       return;
@@ -298,7 +298,7 @@ void*
 dispatch_move_then_destroy(size_t k, void* dptr, void* sptr)
   {
     static constexpr const_bitset<is_trivially_copyable<altsT>::value...> trivial;
-    static constexpr ptr_table<void* (void*, void*), wrapped_move_then_destroy<altsT>...> ptrs;
+    static constexpr const_ptr_table<void* (void*, void*), wrapped_move_then_destroy<altsT>...> ptrs;
 
     if(ROCKET_EXPECT(trivial[k]))
       return ::std::memcpy(dptr, sptr, sizeof(typename aligned_union<1, altsT...>::type));
@@ -319,7 +319,7 @@ void
 dispatch_swap(size_t k, void* dptr, void* sptr)
   {
     static constexpr const_bitset<is_trivially_copyable<altsT>::value...> trivial;
-    static constexpr ptr_table<void (void*, void*), wrapped_xswap<altsT>...> ptrs;
+    static constexpr const_ptr_table<void (void*, void*), wrapped_xswap<altsT>...> ptrs;
 
     if(ROCKET_EXPECT(trivial[k]))
       return wrapped_xswap<typename aligned_union<1, altsT...>::type>(dptr, sptr);
