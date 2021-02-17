@@ -136,7 +136,6 @@ class variant
           try {
             // Copy-construct the alternative in place.
             noadl::construct_at(this->do_cast_storage<index_new>(), param);
-            this->m_index = index_new;
           }
           catch(...) {
             // Move the backup back in case of exceptions.
@@ -145,6 +144,7 @@ class variant
             details_variant::rethrow_current_exception();
           }
           details_variant::dispatch_destroy<alternativesT...>(index_old, backup);
+          this->m_index = index_new;
         }
         return *this;
       }
@@ -175,7 +175,7 @@ class variant
     variant&
     operator=(const variant& other)
       noexcept(conjunction<is_nothrow_copy_assignable<alternativesT>...,
-                         is_nothrow_copy_constructible<alternativesT>...>::value)
+                           is_nothrow_copy_constructible<alternativesT>...>::value)
       {
         auto index_old = this->m_index;
         auto index_new = other.m_index;
@@ -201,7 +201,6 @@ class variant
             // Copy-construct the alternative in place.
             details_variant::dispatch_copy_construct<alternativesT...>(
                 index_new, this->m_stor, other.m_stor);
-            this->m_index = index_new;
           }
           catch(...) {
             // Move the backup back in case of exceptions.
@@ -210,6 +209,7 @@ class variant
             details_variant::rethrow_current_exception();
           }
           details_variant::dispatch_destroy<alternativesT...>(index_old, backup);
+          this->m_index = index_new;
         }
         return *this;
       }
@@ -396,7 +396,6 @@ class variant
             // Construct the alternative in place.
             noadl::construct_at(this->do_cast_storage<index_new>(),
                                 ::std::forward<paramsT>(params)...);
-            this->m_index = index_new;
           }
           catch(...) {
             // Move the backup back in case of exceptions.
@@ -405,6 +404,7 @@ class variant
             details_variant::rethrow_current_exception();
           }
           details_variant::dispatch_destroy<alternativesT...>(index_old, backup);
+          this->m_index = index_new;
         }
         return this->do_cast_storage<index_new>()[0];
       }
