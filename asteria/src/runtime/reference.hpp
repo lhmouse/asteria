@@ -125,6 +125,9 @@ class Reference
     do_dereference_readonly_slow()
       const;
 
+    Value&
+    do_mutate_into_temporary_slow();
+
   public:
     ASTERIA_COPYABLE_DESTRUCTOR(Reference);
 
@@ -319,15 +322,32 @@ class Reference
       }
 
     Value&
+    mutate_into_temporary()
+      {
+        // If the root is a temporary, and there is no modifier, then this
+        // function can return the value directly.
+        int32_t mask = 1 << this->index();
+        mask &= static_cast<int32_t>(this->m_mods.ssize() - 1) >> 31;
+        mask &= 1 << index_temporary;
+        if(ROCKET_EXPECT(mask)) {
+          // Perform fast indirection.
+          if(this->m_root.index() == index_temporary)
+            return this->m_root.as<index_temporary>().val;
+
+          ROCKET_ASSERT(false);
+        }
+
+        // Otherwise, try dereferencing.
+        return this->do_mutate_into_temporary_slow();
+      }
+
+    Value&
     dereference_mutable()
       const;
 
     Value
     dereference_unset()
       const;
-
-    Value&
-    mutate_into_temporary();
   };
 
 inline

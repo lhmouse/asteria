@@ -615,7 +615,7 @@ dereference_unset()
 
 Value&
 Reference::
-mutate_into_temporary()
+do_mutate_into_temporary_slow()
   {
     // Return a mutable reference to the existent temporary value if any.
     if(ROCKET_EXPECT(this->is_temporary() && this->m_mods.empty()))
