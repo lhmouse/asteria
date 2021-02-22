@@ -425,23 +425,16 @@ struct AIR_Traits_switch_statement
     // `Sparam` is ... everything.
 
     static
-    void
-    do_xsolidify_code(cow_vector<AVMC_Queue>& queues,
-                      const cow_vector<cow_vector<AIR_Node>>& seqs)
-      {
-        ROCKET_ASSERT(queues.empty());
-        queues.reserve(seqs.size());
-        ::rocket::for_each(seqs,
-             [&](const auto& code) { do_solidify_nodes(queues.emplace_back(), code);  });
-      }
-
-    static
     Sparam_switch
     make_sparam(bool& /*reachable*/, const AIR_Node::S_switch_statement& altr)
       {
         Sparam_switch sp;
-        do_xsolidify_code(sp.queues_labels, altr.code_labels);
-        do_xsolidify_code(sp.queues_bodies, altr.code_bodies);
+        sp.queues_labels.append(altr.code_labels.size());
+        for(size_t k = 0;  k != altr.code_labels.size();  ++k)
+          do_solidify_nodes(sp.queues_labels.mut(k), altr.code_labels.at(k));
+        sp.queues_bodies.append(altr.code_bodies.size());
+        for(size_t k = 0;  k != altr.code_bodies.size();  ++k)
+          do_solidify_nodes(sp.queues_bodies.mut(k), altr.code_bodies.at(k));
         sp.names_added = altr.names_added;
         return sp;
       }
