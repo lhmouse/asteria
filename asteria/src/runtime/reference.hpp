@@ -186,6 +186,7 @@ class Reference
           : nullptr;
       }
 
+    ROCKET_FORCED_INLINE_FUNCTION
     Reference&
     finish_call(Global_Context& global)
       {
@@ -321,6 +322,7 @@ class Reference
         return this->do_dereference_readonly_slow();
       }
 
+    ROCKET_FORCED_INLINE_FUNCTION
     Value&
     mutate_into_temporary()
       {
