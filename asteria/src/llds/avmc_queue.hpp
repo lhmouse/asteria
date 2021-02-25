@@ -14,14 +14,15 @@ class AVMC_Queue
   {
   public:
     using Uparam      = details_avmc_queue::Uparam;
-    using Symbols     = details_avmc_queue::Symbols;
     using Executor    = details_avmc_queue::Executor;
     using Enumerator  = details_avmc_queue::Enumerator;
 
   private:
+    using Metadata     = details_avmc_queue::Metadata;
     using Header       = details_avmc_queue::Header;
     using Constructor  = details_avmc_queue::Constructor;
-    using Vtable       = details_avmc_queue::Vtable;
+    using Relocator    = details_avmc_queue::Relocator;
+    using Destructor   = details_avmc_queue::Destructor;
 
     Header* m_bptr = nullptr;  // beginning of raw storage
     uint32_t m_rsrv = 0;  // size of raw storage, in number of `Header`s [!]
@@ -50,48 +51,24 @@ class AVMC_Queue
     void
     do_reallocate(uint32_t nadd);
 
-    // Reserve storage for the next node.
+    // Reserve storage for the next node. `size` is the size of `sparam` to initialize.
     inline
     Header*
-    do_reserve_one(Uparam up, const opt<Symbols>& syms_opt, size_t nbytes);
+    do_reserve_one(size_t size);
 
-    // Append a new node to the end. `nbytes` is the size of `sp` to initialize.
-    // If `src_opt` is specified, it should point to the buffer containing data to copy.
-    // Otherwise, `sp` is filled with zeroes.
+    // Append a new node to the end. `size` is the size of `sparam` to initialize.
+    // If `data` is specified, it should point to the buffer containing data to copy.
+    // Otherwise, `sparam` is filled with zeroes.
     AVMC_Queue&
-    do_append_trivial(Executor* executor, Uparam up, opt<Symbols>&& syms_opt,
-                      size_t nbytes, const void* src_opt);
+    do_append_trivial(Uparam uparam, Executor* exec, const void* data, size_t size);
 
-    // Append a new node to the end. `nbytes` is the size of `sp` to initialize.
-    // If `ctor_opt` is specified, it is called to initialize `sp`.
-    // Otherwise, `sp` is filled with zeroes.
+    // Append a new node to the end. `size` is the size of `sparam` to initialize.
+    // If `ctor_opt` is specified, it is called to initialize `sparam`. Otherwise,
+    // `sparam` is filled with zeroes.
     AVMC_Queue&
-    do_append_nontrivial(const details_avmc_queue::Vtable* vtbl, Uparam up,
-                         opt<Symbols>&& syms_opt, size_t nbytes,
-                         details_avmc_queue::Constructor* ctor_opt, intptr_t ctor_arg);
-
-    // Append a trivial or non-trivial node basing on trivialness of the argument.
-    template<Executor execT, Enumerator* qvenumT, typename XSparamT>
-    AVMC_Queue&
-    do_append_chk(Uparam up, opt<Symbols>&& syms_opt, XSparamT&& xsp)
-      {
-        using Sparam = typename ::std::decay<XSparamT>::type;
-
-        if(::std::is_trivial<Sparam>::value)
-          return this->do_append_trivial(
-                   execT, up, ::std::move(syms_opt),
-                   sizeof(Sparam), ::std::addressof(xsp));
-
-        return this->do_append_nontrivial(
-                 details_avmc_queue::get_vtable<execT, qvenumT, Sparam>(), up,
-                 ::std::move(syms_opt), sizeof(Sparam),
-                 +[](Uparam, void* sp, intptr_t ctor_arg)
-                   { ::rocket::construct_at(static_cast<Sparam*>(sp),
-                           static_cast<XSparamT&&>(*(reinterpret_cast<Sparam*>(
-                                 ctor_arg))));  },
-                 reinterpret_cast<intptr_t>(static_cast<const void*>(
-                           ::std::addressof(xsp))));
-      }
+    do_append_nontrivial(Uparam uparam, Executor* exec, const Source_Location* sloc_opt,
+                         Enumerator* enum_opt, Relocator* reloc_opt, Destructor* dtor_opt,
+                         Constructor* ctor_opt, size_t size, intptr_t ctor_arg);
 
   public:
     ~AVMC_Queue()
@@ -146,70 +123,93 @@ class AVMC_Queue
     // If `sp_opt` is a null pointer, `nbytes` zero bytes are allocated.
     // Call `append()` if the parameter is non-trivial.
     AVMC_Queue&
-    append_trivial(Executor& executor, Uparam up = { })
-      { return this->do_append_trivial(executor, up, nullopt, 0, nullptr);  }
+    append(Executor& exec, Uparam uparam = { })
+      {
+        return this->append(exec, uparam, nullptr, 0);
+      }
 
     AVMC_Queue&
-    append_trivial(Executor& executor, Symbols syms, Uparam up = { })
-      { return this->do_append_trivial(executor, up, ::std::move(syms), 0, nullptr);  }
+    append(Executor& exec, const void* data, size_t size)
+      {
+        return this->append(exec, Uparam(), data, size);
+      }
 
     AVMC_Queue&
-    append_trivial(Executor& executor, const void* sp_opt, size_t nbytes)
-      { return this->do_append_trivial(executor, Uparam(), nullopt, nbytes, sp_opt);  }
+    append(Executor& exec, Uparam uparam, const void* data, size_t size)
+      {
+        return this->do_append_trivial(uparam, exec, data, size);
+      }
 
     AVMC_Queue&
-    append_trivial(Executor& executor, Symbols syms, const void* sp_opt, size_t nbytes)
-      { return this->do_append_trivial(executor, Uparam(), ::std::move(syms), nbytes, sp_opt);  }
+    append(Executor& exec, const Source_Location& sloc, Uparam uparam = { })
+      {
+        return this->append(exec, sloc, uparam, nullptr, 0);
+      }
 
     AVMC_Queue&
-    append_trivial(Executor& executor, Uparam up, const void* sp_opt, size_t nbytes)
-      { return this->do_append_trivial(executor, up, nullopt, nbytes, sp_opt);  }
+    append(Executor& exec, const Source_Location& sloc, const void* data, size_t size)
+      {
+        return this->append(exec, sloc, Uparam(), data, size);
+      }
 
     AVMC_Queue&
-    append_trivial(Executor& executor, Symbols syms, Uparam up, const void* sp_opt, size_t nbytes)
-      { return this->do_append_trivial(executor, up, ::std::move(syms), nbytes, sp_opt);  }
+    append(Executor& exec, const Source_Location& sloc, Uparam uparam,
+           const void* data, size_t size)
+      {
+        return this->do_append_nontrivial(uparam, exec, ::std::addressof(sloc),
+                          nullptr, nullptr, nullptr,
+                          details_avmc_queue::memcpy_ctor::func,
+                          size, reinterpret_cast<intptr_t>(data));
+      }
 
-    // Append a node with type-generic semantics.
-    // Both trivial and non-trivial parameter types are supported.
-    // However, as this may result in a virtual call, the executor function has to be specified as
-    // a template argument.
-    template<Executor execT, Enumerator* = nullptr>
+    template<typename XSparamT>
     AVMC_Queue&
-    append(Uparam up = { })
-      { return this->do_append_trivial(execT, up, nullopt, 0, nullptr);  }
+    append(Executor& exec, XSparamT&& xsparam, Enumerator* enum_opt)
+      {
+        return this->append(exec, Uparam(), ::std::forward<XSparamT>(xsparam), enum_opt);
+      }
 
-    template<Executor execT, Enumerator* = nullptr>
+    template<typename XSparamT>
     AVMC_Queue&
-    append(Symbols syms, Uparam up = { })
-      { return this->do_append_trivial(execT, up, ::std::move(syms), 0, nullptr);  }
+    append(Executor& exec, Uparam uparam, XSparamT&& xsparam, Enumerator* enum_opt)
+      {
+        using Sparam = typename ::std::decay<XSparamT>::type;
 
-    template<Executor execT, Enumerator* qvenumT, typename XSparamT,
-    ROCKET_DISABLE_IF(::std::is_convertible<XSparamT&&, Uparam>::value),
-    ROCKET_DISABLE_IF(::std::is_convertible<XSparamT&&, Symbols>::value)>
-    AVMC_Queue&
-    append(XSparamT&& xsp)
-      { return this->do_append_chk<execT, qvenumT>(Uparam(), nullopt,
-                              ::std::forward<XSparamT>(xsp));  }
+        if(::std::is_trivial<Sparam>::value && !enum_opt)
+          return this->do_append_trivial(uparam, exec,
+                            ::std::addressof(xsparam), sizeof(xsparam));
 
-    template<Executor execT, Enumerator* qvenumT, typename XSparamT,
-    ROCKET_DISABLE_IF(::std::is_convertible<XSparamT&&, Uparam>::value),
-    ROCKET_DISABLE_IF(::std::is_convertible<XSparamT&&, Symbols>::value)>
-    AVMC_Queue&
-    append(Symbols syms, XSparamT&& xsp)
-      { return this->do_append_chk<execT, qvenumT>(Uparam(), ::std::move(syms),
-                              ::std::forward<XSparamT>(xsp));  }
+        return this->do_append_nontrivial(uparam, exec, nullptr, enum_opt,
+                          details_avmc_queue::default_reloc<Sparam>::func_opt,
+                          details_avmc_queue::default_dtor<Sparam>::func_opt,
+                          details_avmc_queue::forward_ctor<Sparam, XSparamT>::func,
+                          sizeof(Sparam),
+                          reinterpret_cast<intptr_t>(::std::addressof(xsparam)));
+      }
 
-    template<Executor execT, Enumerator* qvenumT, typename XSparamT>
+    template<typename XSparamT>
     AVMC_Queue&
-    append(Uparam up, XSparamT&& xsp)
-      { return this->do_append_chk<execT, qvenumT>(up, nullopt,
-                              ::std::forward<XSparamT>(xsp));  }
+    append(Executor& exec, const Source_Location& sloc, XSparamT&& xsparam,
+           Enumerator* enum_opt)
+      {
+        return this->append(exec, sloc, Uparam(), ::std::forward<XSparamT>(xsparam),
+                            enum_opt);
+      }
 
-    template<Executor execT, Enumerator* qvenumT, typename XSparamT>
+    template<typename XSparamT>
     AVMC_Queue&
-    append(Symbols syms, Uparam up, XSparamT&& xsp)
-      { return this->do_append_chk<execT, qvenumT>(up, ::std::move(syms),
-                              ::std::forward<XSparamT>(xsp));  }
+    append(Executor& exec, const Source_Location& sloc, Uparam uparam, XSparamT&& xsparam,
+           Enumerator* enum_opt)
+      {
+        using Sparam = typename ::std::decay<XSparamT>::type;
+
+        return this->do_append_nontrivial(uparam, exec, ::std::addressof(sloc), enum_opt,
+                          details_avmc_queue::default_reloc<Sparam>::func_opt,
+                          details_avmc_queue::default_dtor<Sparam>::func_opt,
+                          details_avmc_queue::forward_ctor<Sparam, XSparamT>::func,
+                          sizeof(Sparam),
+                          reinterpret_cast<intptr_t>(::std::addressof(xsparam)));
+      }
 
     // These are interfaces called by the runtime.
     AIR_Status

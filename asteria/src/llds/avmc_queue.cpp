@@ -20,10 +20,15 @@ do_destroy_nodes()
     const auto eptr = this->m_bptr + this->m_used;
     while(ROCKET_EXPECT(next != eptr)) {
       auto qnode = next;
-      next += qnode->total_size_in_headers();
+      next += UINT32_C(1) + qnode->nhdrs;
 
-      // Destroy symbols and user-defined data.
-      qnode->destroy();
+      // Destroy `sparam`, if any.
+      if(qnode->has_meta && qnode->pv_meta->dtor_opt)
+        qnode->pv_meta->dtor_opt(qnode->uparam, qnode->sparam);
+
+      // Deallocate the vtable and symbols.
+      if(qnode->has_meta)
+        delete qnode->pv_meta;
     }
 #ifdef ROCKET_DEBUG
     ::std::memset(this->m_bptr, 0xE6, this->m_rsrv * sizeof(Header));
@@ -58,10 +63,11 @@ do_reallocate(uint32_t nadd)
     while(ROCKET_EXPECT(offset != this->m_used)) {
       auto qnode = bptr + offset;
       auto qfrom = bold + offset;
-      offset += qnode->total_size_in_headers();
+      offset += UINT32_C(1) + qnode->nhdrs;
 
-      // Relocate user-defined data.
-      qnode->relocate(::std::move(*qfrom));
+      // Relocate `sparam`, if any.
+      if(qnode->has_meta && qnode->pv_meta->reloc_opt)
+        qnode->pv_meta->reloc_opt(qnode->uparam, qnode->sparam, qfrom->sparam);
     }
     if(bold)
       ::operator delete(bold);
@@ -69,96 +75,82 @@ do_reallocate(uint32_t nadd)
 
 details_avmc_queue::Header*
 AVMC_Queue::
-do_reserve_one(Uparam uparam, const opt<Symbols>& syms_opt, size_t nbytes)
+do_reserve_one(size_t size)
   {
-    constexpr size_t nbytes_max = UINT8_MAX * sizeof(Header) - 1;
-    if(nbytes > nbytes_max)
-      ASTERIA_THROW("Invalid AVMC node size (`$1` > `$2`)", nbytes, nbytes_max);
-
-    // Create a dummy header for calculation.
-    // Note `up_stor` is partially overlapped with other fields, so it must be assigned
-    // first. The others may occur in any order.
-    Header temph;
-    temph.up_stor = uparam;
-    temph.nphdrs = static_cast<uint8_t>((nbytes + sizeof(Header) - 1) / sizeof(Header));
-    temph.has_syms = !!syms_opt;
+    constexpr size_t size_max = UINT8_MAX * sizeof(Header) - 1;
+    if(size > size_max)
+      ASTERIA_THROW("Invalid AVMC node size (`$1` > `$2`)", size, size_max);
 
     // Allocate a new memory block as needed.
-    uint32_t nadd = temph.total_size_in_headers();
+    size_t nadd = (sizeof(Header) * 2 - 1 + size) / sizeof(Header);
     if(ROCKET_UNEXPECT(this->m_rsrv - this->m_used < nadd)) {
 #ifndef ROCKET_DEBUG
       // Reserve more space for non-debug builds.
       nadd |= this->m_used * 4;
 #endif
-      this->do_reallocate(nadd);
+      this->do_reallocate(static_cast<uint32_t>(nadd));
     }
     ROCKET_ASSERT(this->m_rsrv - this->m_used >= nadd);
 
     // Append a new node.
     auto qnode = this->m_bptr + this->m_used;
-    ::std::memcpy(qnode, &temph, sizeof(temph));
+    ::std::memset(qnode, 0, sizeof(*qnode));
+    qnode->nhdrs = static_cast<uint8_t>(nadd - UINT32_C(1));
     return qnode;
   }
 
 AVMC_Queue&
 AVMC_Queue::
-do_append_trivial(Executor* executor, Uparam uparam, opt<Symbols>&& syms_opt,
-                  size_t nbytes, const void* src_opt)
+do_append_trivial(Uparam uparam, Executor* exec, const void* data, size_t size)
   {
-    auto qnode = this->do_reserve_one(uparam, syms_opt, nbytes);
-    qnode->has_vtbl = false;
-    qnode->executor = executor;
+    auto qnode = this->do_reserve_one(size);
 
-    // Copy symbols.
-    uptr<Symbols> usyms;
-    if(syms_opt)
-      usyms = ::rocket::make_unique<Symbols>(::std::move(*syms_opt));
-
-    // Copy source data if `src_opt` is non-null. Fill zeroes otherwise.
+    // Copy source data if `data` is non-null. Fill zeroes otherwise.
     // This operation will not throw exceptions.
-    if(src_opt)
-      ::std::memcpy(qnode->sparam(), src_opt, nbytes);
+    if(data)
+      ::std::memcpy(qnode->sparam, data, size);
     else
-      ::std::memset(qnode->sparam(), 0, nbytes);
-
-    // Set up symbols.
-    // This operation will not throw exceptions.
-    if(usyms)
-      qnode->adopt_symbols(::std::move(usyms));
+      ::std::memset(qnode->sparam, 0, size);
 
     // Accept this node.
-    this->m_used += qnode->total_size_in_headers();
+    qnode->uparam.s16 = uparam.s16;
+    qnode->uparam.s32 = uparam.s32;
+    qnode->has_meta = false;
+    qnode->pv_exec = exec;
+    this->m_used += UINT32_C(1) + qnode->nhdrs;
     return *this;
   }
 
 AVMC_Queue&
 AVMC_Queue::
-do_append_nontrivial(const Vtable* vtbl, Uparam uparam, opt<Symbols>&& syms_opt,
-                     size_t nbytes, Constructor* ctor_opt, intptr_t ctor_arg)
+do_append_nontrivial(Uparam uparam, Executor* exec, const Source_Location* sloc_opt,
+                     Enumerator* enum_opt, Relocator* reloc_opt, Destructor* dtor_opt,
+                     Constructor* ctor_opt, size_t size, intptr_t ctor_arg)
   {
-    auto qnode = this->do_reserve_one(uparam, syms_opt, nbytes);
-    qnode->has_vtbl = true;
-    qnode->vtbl = vtbl;
+    auto qnode = this->do_reserve_one(size);
 
-    // Copy symbols.
-    uptr<Symbols> usyms;
-    if(syms_opt)
-      usyms = ::rocket::make_unique<Symbols>(::std::move(*syms_opt));
+    // Allocate metadata for this node.
+    auto meta = ::rocket::make_unique<details_avmc_queue::Metadata>();
+    meta->reloc_opt = reloc_opt;
+    meta->dtor_opt = dtor_opt;
+    meta->enum_opt = enum_opt;
+    meta->exec = exec;
+    if(sloc_opt)
+      meta->sloc_opt.emplace(*sloc_opt);
 
     // Invoke the constructor if `ctor_opt` is non-null. Fill zeroes otherwise.
     // If an exception is thrown, there is no effect.
     if(ctor_opt)
-      ctor_opt(uparam, qnode->sparam(), ctor_arg);
+      ctor_opt(uparam, qnode->sparam, size, ctor_arg);
     else
-      ::std::memset(qnode->sparam(), 0, nbytes);
-
-    // Set up symbols.
-    // This operation will not throw exceptions.
-    if(usyms)
-      qnode->adopt_symbols(::std::move(usyms));
+      ::std::memset(qnode->sparam, 0, size);
 
     // Accept this node.
-    this->m_used += qnode->total_size_in_headers();
+    qnode->uparam.s16 = uparam.s16;
+    qnode->uparam.s32 = uparam.s32;
+    qnode->has_meta = true;
+    qnode->pv_meta = meta.release();
+    this->m_used += UINT32_C(1) + qnode->nhdrs;
     return *this;
   }
 
@@ -171,17 +163,31 @@ execute(Executive_Context& ctx)
     const auto eptr = this->m_bptr + this->m_used;
     while(ROCKET_EXPECT(next != eptr)) {
       auto qnode = next;
-      next += qnode->total_size_in_headers();
+      next += UINT32_C(1) + qnode->nhdrs;
 
-      // Call the executor function for this node.
-      ASTERIA_RUNTIME_TRY {
-        auto status = qnode->execute(ctx);
+      if(!qnode->has_meta) {
+        // This is a trivial node.
+        auto status = qnode->pv_exec(ctx, qnode->uparam, qnode->sparam);
         if(ROCKET_UNEXPECT(status != air_status_next))
           return status;
       }
-      ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
-        qnode->push_symbols(except);
-        throw;
+      else if(!qnode->pv_meta->sloc_opt) {
+        // There is no symbol.
+        auto status = qnode->pv_meta->exec(ctx, qnode->uparam, qnode->sparam);
+        if(ROCKET_UNEXPECT(status != air_status_next))
+          return status;
+      }
+      else {
+        // Symbols are available.
+        ASTERIA_RUNTIME_TRY {
+          auto status = qnode->pv_meta->exec(ctx, qnode->uparam, qnode->sparam);
+          if(ROCKET_UNEXPECT(status != air_status_next))
+            return status;
+        }
+        ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+          except.push_frame_plain(*(qnode->pv_meta->sloc_opt), sref(""));
+          throw;
+        }
       }
     }
     return air_status_next;
@@ -196,10 +202,11 @@ enumerate_variables(Variable_Callback& callback)
     const auto eptr = this->m_bptr + this->m_used;
     while(ROCKET_EXPECT(next != eptr)) {
       auto qnode = next;
-      next += qnode->total_size_in_headers();
+      next += UINT32_C(1) + qnode->nhdrs;
 
-      // Enumerate variables in this node.
-      qnode->enumerate_variables(callback);
+      // Enumerate variables from this node.
+      if(qnode->has_meta && qnode->pv_meta->enum_opt)
+        qnode->pv_meta->enum_opt(callback, qnode->uparam, qnode->sparam);
     }
     return callback;
   }

@@ -298,6 +298,13 @@ struct AIR_Traits_declare_variable
     // `Sparam` is the source location and name;
 
     static
+    Source_Location
+    make_symbols(const AIR_Node::S_declare_variable& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
     Sparam_sloc_name
     make_sparam(bool& /*reachable*/, const AIR_Node::S_declare_variable& altr)
       {
@@ -305,15 +312,6 @@ struct AIR_Traits_declare_variable
         sp.sloc = altr.sloc;
         sp.name = altr.name;
         return sp;
-      }
-
-    static
-    AVMC_Queue::Symbols
-    make_symbols(const AIR_Node::S_declare_variable& altr)
-      {
-        AVMC_Queue::Symbols syms;
-        syms.sloc = altr.sloc;
-        return syms;
       }
 
     static
@@ -343,21 +341,19 @@ struct AIR_Traits_initialize_variable
     // `Sparam` is unused.
 
     static
+    Source_Location
+    make_symbols(const AIR_Node::S_initialize_variable& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
     AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_initialize_variable& altr)
       {
         AVMC_Queue::Uparam up;
         up.p8[0] = altr.immutable;
         return up;
-      }
-
-    static
-    AVMC_Queue::Symbols
-    make_symbols(const AIR_Node::S_initialize_variable& altr)
-      {
-        AVMC_Queue::Symbols syms;
-        syms.sloc = altr.sloc;
-        return syms;
       }
 
     static
@@ -944,12 +940,10 @@ struct AIR_Traits_glvalue_to_prvalue
     // `Sparam` is unused.
 
     static
-    AVMC_Queue::Symbols
+    Source_Location
     make_symbols(const AIR_Node::S_glvalue_to_prvalue& altr)
       {
-        AVMC_Queue::Symbols syms;
-        syms.sloc = altr.sloc;
-        return syms;
+        return altr.sloc;
       }
 
     static
@@ -1076,6 +1070,13 @@ struct AIR_Traits_push_global_reference
     // `Sparam` is the source location and name;
 
     static
+    Source_Location
+    make_symbols(const AIR_Node::S_push_global_reference& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
     Sparam_sloc_name
     make_sparam(bool& /*reachable*/, const AIR_Node::S_push_global_reference& altr)
       {
@@ -1083,15 +1084,6 @@ struct AIR_Traits_push_global_reference
         sp.sloc = altr.sloc;
         sp.name = altr.name;
         return sp;
-      }
-
-    static
-    AVMC_Queue::Symbols
-    make_symbols(const AIR_Node::S_push_global_reference& altr)
-      {
-        AVMC_Queue::Symbols syms;
-        syms.sloc = altr.sloc;
-        return syms;
       }
 
     static
@@ -1115,6 +1107,13 @@ struct AIR_Traits_push_local_reference
     // `Sparam` is the source location and name;
 
     static
+    Source_Location
+    make_symbols(const AIR_Node::S_push_local_reference& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
     AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_push_local_reference& altr)
       {
@@ -1131,15 +1130,6 @@ struct AIR_Traits_push_local_reference
         sp.sloc = altr.sloc;
         sp.name = altr.name;
         return sp;
-      }
-
-    static
-    AVMC_Queue::Symbols
-    make_symbols(const AIR_Node::S_push_local_reference& altr)
-      {
-        AVMC_Queue::Symbols syms;
-        syms.sloc = altr.sloc;
-        return syms;
       }
 
     static
@@ -1229,6 +1219,13 @@ struct AIR_Traits_branch_expression
     // `Sparam` is the branches.
 
     static
+    Source_Location
+    make_symbols(const AIR_Node::S_branch_expression& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
     AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_branch_expression& altr)
       {
@@ -1246,15 +1243,6 @@ struct AIR_Traits_branch_expression
         bool rfalse = do_solidify_nodes(sp.queues[1], altr.code_false);
         reachable &= rtrue | rfalse;
         return sp;
-      }
-
-    static
-    AVMC_Queue::Symbols
-    make_symbols(const AIR_Node::S_branch_expression& altr)
-      {
-        AVMC_Queue::Symbols syms;
-        syms.sloc = altr.sloc;
-        return syms;
       }
 
     static
@@ -1277,6 +1265,13 @@ struct AIR_Traits_coalescence
     // `Sparam` is the null branch.
 
     static
+    Source_Location
+    make_symbols(const AIR_Node::S_coalescence& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
     AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_coalescence& altr)
       {
@@ -1292,15 +1287,6 @@ struct AIR_Traits_coalescence
         AVMC_Queue queue;
         do_solidify_nodes(queue, altr.code_null);
         return queue;
-      }
-
-    static
-    AVMC_Queue::Symbols
-    make_symbols(const AIR_Node::S_coalescence& altr)
-      {
-        AVMC_Queue::Symbols syms;
-        syms.sloc = altr.sloc;
-        return syms;
       }
 
     static
@@ -1392,6 +1378,13 @@ struct AIR_Traits_function_call
     // `Sparam` is the source location.
 
     static
+    Source_Location
+    make_symbols(const AIR_Node::S_function_call& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
     AVMC_Queue::Uparam
     make_uparam(bool& reachable, const AIR_Node::S_function_call& altr)
       {
@@ -1407,15 +1400,6 @@ struct AIR_Traits_function_call
     make_sparam(bool& /*reachable*/, const AIR_Node::S_function_call& altr)
       {
         return altr.sloc;
-      }
-
-    static
-    AVMC_Queue::Symbols
-    make_symbols(const AIR_Node::S_function_call& altr)
-      {
-        AVMC_Queue::Symbols syms;
-        syms.sloc = altr.sloc;
-        return syms;
       }
 
     static
@@ -1449,19 +1433,17 @@ struct AIR_Traits_member_access
     // `Sparam` is the name.
 
     static
+    Source_Location
+    make_symbols(const AIR_Node::S_member_access& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
     phsh_string
     make_sparam(bool& /*reachable*/, const AIR_Node::S_member_access& altr)
       {
         return altr.name;
-      }
-
-    static
-    AVMC_Queue::Symbols
-    make_symbols(const AIR_Node::S_member_access& altr)
-      {
-        AVMC_Queue::Symbols syms;
-        syms.sloc = altr.sloc;
-        return syms;
       }
 
     static
@@ -1481,21 +1463,19 @@ struct AIR_Traits_push_unnamed_array
     // `Sparam` is unused.
 
     static
+    Source_Location
+    make_symbols(const AIR_Node::S_push_unnamed_array& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
     AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_push_unnamed_array& altr)
       {
         AVMC_Queue::Uparam up;
         up.s32 = altr.nelems;
         return up;
-      }
-
-    static
-    AVMC_Queue::Symbols
-    make_symbols(const AIR_Node::S_push_unnamed_array& altr)
-      {
-        AVMC_Queue::Symbols syms;
-        syms.sloc = altr.sloc;
-        return syms;
       }
 
     static
@@ -1524,19 +1504,17 @@ struct AIR_Traits_push_unnamed_object
     // `Sparam` is the list of keys.
 
     static
+    Source_Location
+    make_symbols(const AIR_Node::S_push_unnamed_object& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
     cow_vector<phsh_string>
     make_sparam(bool& /*reachable*/, const AIR_Node::S_push_unnamed_object& altr)
       {
         return altr.keys;
-      }
-
-    static
-    AVMC_Queue::Symbols
-    make_symbols(const AIR_Node::S_push_unnamed_object& altr)
-      {
-        AVMC_Queue::Symbols syms;
-        syms.sloc = altr.sloc;
-        return syms;
       }
 
     static
@@ -1566,21 +1544,19 @@ struct AIR_Traits_apply_operator_common
     // `Sparam` is unused.
 
     static
+    Source_Location
+    make_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
     AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
         up.p8[0] = altr.assign;
         return up;
-      }
-
-    static
-    AVMC_Queue::Symbols
-    make_symbols(const AIR_Node::S_apply_operator& altr)
-      {
-        AVMC_Queue::Symbols syms;
-        syms.sloc = altr.sloc;
-        return syms;
       }
   };
 
@@ -3408,6 +3384,13 @@ struct AIR_Traits_unpack_struct_array
     // `Sparam` is unused.
 
     static
+    Source_Location
+    make_symbols(const AIR_Node::S_unpack_struct_array& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
     AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_unpack_struct_array& altr)
       {
@@ -3415,15 +3398,6 @@ struct AIR_Traits_unpack_struct_array
         up.s32 = altr.nelems;
         up.p8[0] = altr.immutable;
         return up;
-      }
-
-    static
-    AVMC_Queue::Symbols
-    make_symbols(const AIR_Node::S_unpack_struct_array& altr)
-      {
-        AVMC_Queue::Symbols syms;
-        syms.sloc = altr.sloc;
-        return syms;
       }
 
     static
@@ -3477,19 +3451,17 @@ struct AIR_Traits_unpack_struct_object
       }
 
     static
+    Source_Location
+    make_symbols(const AIR_Node::S_unpack_struct_object& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
     cow_vector<phsh_string>
     make_sparam(bool& /*reachable*/, const AIR_Node::S_unpack_struct_object& altr)
       {
         return altr.keys;
-      }
-
-    static
-    AVMC_Queue::Symbols
-    make_symbols(const AIR_Node::S_unpack_struct_object& altr)
-      {
-        AVMC_Queue::Symbols syms;
-        syms.sloc = altr.sloc;
-        return syms;
       }
 
     static
@@ -3544,6 +3516,13 @@ struct AIR_Traits_define_null_variable
       }
 
     static
+    Source_Location
+    make_symbols(const AIR_Node::S_define_null_variable& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
     Sparam_sloc_name
     make_sparam(bool& /*reachable*/, const AIR_Node::S_define_null_variable& altr)
       {
@@ -3551,15 +3530,6 @@ struct AIR_Traits_define_null_variable
         sp.sloc = altr.sloc;
         sp.name = altr.name;
         return sp;
-      }
-
-    static
-    AVMC_Queue::Symbols
-    make_symbols(const AIR_Node::S_define_null_variable& altr)
-      {
-        AVMC_Queue::Symbols syms;
-        syms.sloc = altr.sloc;
-        return syms;
       }
 
     static
@@ -3592,18 +3562,16 @@ struct AIR_Traits_single_step_trap
 
     static
     Source_Location
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_single_step_trap& altr)
+    make_symbols(const AIR_Node::S_single_step_trap& altr)
       {
         return altr.sloc;
       }
 
     static
-    AVMC_Queue::Symbols
-    make_symbols(const AIR_Node::S_single_step_trap& altr)
+    Source_Location
+    make_sparam(bool& /*reachable*/, const AIR_Node::S_single_step_trap& altr)
       {
-        AVMC_Queue::Symbols syms;
-        syms.sloc = altr.sloc;
-        return syms;
+        return altr.sloc;
       }
 
     static
@@ -3623,6 +3591,13 @@ struct AIR_Traits_variadic_call
     // `Sparam` is the source location.
 
     static
+    Source_Location
+    make_symbols(const AIR_Node::S_variadic_call& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
     AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_variadic_call& altr)
       {
@@ -3636,15 +3611,6 @@ struct AIR_Traits_variadic_call
     make_sparam(bool& /*reachable*/, const AIR_Node::S_variadic_call& altr)
       {
         return altr.sloc;
-      }
-
-    static
-    AVMC_Queue::Symbols
-    make_symbols(const AIR_Node::S_variadic_call& altr)
-      {
-        AVMC_Queue::Symbols syms;
-        syms.sloc = altr.sloc;
-        return syms;
       }
 
     static
@@ -3750,6 +3716,13 @@ struct AIR_Traits_defer_expression
     // `Sparam` is the source location and body.
 
     static
+    Source_Location
+    make_symbols(const AIR_Node::S_defer_expression& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
     Sparam_defer
     make_sparam(bool& /*reachable*/, const AIR_Node::S_defer_expression& altr)
       {
@@ -3757,15 +3730,6 @@ struct AIR_Traits_defer_expression
         sp.sloc = altr.sloc;
         sp.code_body = altr.code_body;
         return sp;
-      }
-
-    static
-    AVMC_Queue::Symbols
-    make_symbols(const AIR_Node::S_defer_expression& altr)
-      {
-        AVMC_Queue::Symbols syms;
-        syms.sloc = altr.sloc;
-        return syms;
       }
 
     static
@@ -3793,6 +3757,13 @@ struct AIR_Traits_import_call
     // `Sparam` is the source location and compiler options.
 
     static
+    Source_Location
+    make_symbols(const AIR_Node::S_import_call& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
     AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_import_call& altr)
       {
@@ -3809,15 +3780,6 @@ struct AIR_Traits_import_call
         sp.opts = altr.opts;
         sp.sloc = altr.sloc;
         return sp;
-      }
-
-    static
-    AVMC_Queue::Symbols
-    make_symbols(const AIR_Node::S_import_call& altr)
-      {
-        AVMC_Queue::Symbols syms;
-        syms.sloc = altr.sloc;
-        return syms;
       }
 
     static
@@ -3963,21 +3925,19 @@ struct AIR_Traits_initialize_reference
     // `Sparam` is the name;
 
     static
+    Source_Location
+    make_symbols(const AIR_Node::S_initialize_reference& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
     Sparam_name
     make_sparam(bool& /*reachable*/, const AIR_Node::S_initialize_reference& altr)
       {
         Sparam_name sp;
         sp.name = altr.name;
         return sp;
-      }
-
-    static
-    AVMC_Queue::Symbols
-    make_symbols(const AIR_Node::S_initialize_reference& altr)
-      {
-        AVMC_Queue::Symbols syms;
-        syms.sloc = altr.sloc;
-        return syms;
       }
 
     static
@@ -3998,41 +3958,6 @@ struct AIR_Traits_initialize_reference
 // These are helper type traits.
 // Depending on the existence of Uparam, Sparam and Symbols, the code will look very
 // different.
-
-// check for `make_uparam`
-template<typename TraitsT, typename XNodeT, typename = void>
-struct Uparam_of
-  : ::rocket::identity<void>
-  { };
-
-template<typename TraitsT, typename XNodeT>
-struct Uparam_of<TraitsT, XNodeT, ROCKET_VOID_T(decltype(&TraitsT::make_uparam))>
-  : ::std::decay<decltype(TraitsT::make_uparam(::std::declval<bool&>(),
-                                               ::std::declval<const XNodeT&>()))>
-  { };
-
-// check for `make_sparam`
-template<typename TraitsT, typename XNodeT, typename = void>
-struct Sparam_of
-  : ::rocket::identity<void>
-  { };
-
-template<typename TraitsT, typename XNodeT>
-struct Sparam_of<TraitsT, XNodeT, ROCKET_VOID_T(decltype(&TraitsT::make_sparam))>
-  : ::std::decay<decltype(TraitsT::make_sparam(::std::declval<bool&>(),
-                                               ::std::declval<const XNodeT&>()))>
-  { };
-
-// check for `make_symbols`
-template<typename TraitsT, typename XNodeT, typename = void>
-struct Symbols_of
-  : ::rocket::identity<void>
-  { };
-
-template<typename TraitsT, typename XNodeT>
-struct Symbols_of<TraitsT, XNodeT, ROCKET_VOID_T(decltype(&TraitsT::make_symbols))>
-  : ::std::decay<decltype(TraitsT::make_symbols(::std::declval<const XNodeT&>()))>
-  { };
 
 // executor thunk
 template<typename TraitsT, typename UparamT, typename SparamT>
@@ -4087,133 +4012,178 @@ struct Enumerator_of<SparamT, ROCKET_VOID_T(decltype(&SparamT::enumerate_variabl
       { return static_cast<const SparamT*>(sp)->enumerate_variables(callback);  }
   };
 
+// check for `make_symbols`
+template<typename TraitsT, typename XNodeT, typename = void>
+struct Symbols_of
+  : ::rocket::identity<void>
+  { };
+
+template<typename TraitsT, typename XNodeT>
+struct Symbols_of<TraitsT, XNodeT, ROCKET_VOID_T(decltype(&TraitsT::make_symbols))>
+  : ::std::decay<decltype(TraitsT::make_symbols(::std::declval<const XNodeT&>()))>
+  { };
+
+// check for `make_uparam`
+template<typename TraitsT, typename XNodeT, typename = void>
+struct Uparam_of
+  : ::rocket::identity<void>
+  { };
+
+template<typename TraitsT, typename XNodeT>
+struct Uparam_of<TraitsT, XNodeT, ROCKET_VOID_T(decltype(&TraitsT::make_uparam))>
+  : ::std::decay<decltype(TraitsT::make_uparam(::std::declval<bool&>(),
+                                               ::std::declval<const XNodeT&>()))>
+  { };
+
+// check for `make_sparam`
+template<typename TraitsT, typename XNodeT, typename = void>
+struct Sparam_of
+  : ::rocket::identity<void>
+  { };
+
+template<typename TraitsT, typename XNodeT>
+struct Sparam_of<TraitsT, XNodeT, ROCKET_VOID_T(decltype(&TraitsT::make_sparam))>
+  : ::std::decay<decltype(TraitsT::make_sparam(::std::declval<bool&>(),
+                                               ::std::declval<const XNodeT&>()))>
+  { };
+
 // Finally...
-template<typename TraitsT, typename XNodeT, typename UparamT, typename SparamT,
+template<typename... ParamsT>
+struct AVMC_Appender;
+
+template<typename TraitsT, typename XNodeT,
+         typename SymbolT,
+         typename UparamT,
+         typename SparamT>
+struct AVMC_Appender<TraitsT, XNodeT,
+         SymbolT,
+         UparamT,
+         SparamT>
+  {
+    static
+    void
+    do_append(bool& reachable, AVMC_Queue& queue, const XNodeT& altr)
+      {
+        queue.append(Executor_of<TraitsT, UparamT, SparamT>::thunk,
+                     TraitsT::make_symbols(altr),
+                     TraitsT::make_uparam(reachable, altr),
+                     TraitsT::make_sparam(reachable, altr), Enumerator_of<SparamT>::thunk);
+      }
+  };
+
+template<typename TraitsT, typename XNodeT,
+         typename UparamT,
+         typename SparamT>
+struct AVMC_Appender<TraitsT, XNodeT,
+         void,
+         UparamT,
+         SparamT>
+  {
+    static
+    void
+    do_append(bool& reachable, AVMC_Queue& queue, const XNodeT& altr)
+      {
+        queue.append(Executor_of<TraitsT, UparamT, SparamT>::thunk,
+                     TraitsT::make_uparam(reachable, altr),
+                     TraitsT::make_sparam(reachable, altr), Enumerator_of<SparamT>::thunk);
+      }
+  };
+
+template<typename TraitsT, typename XNodeT,
+         typename SymbolT,
+         typename SparamT>
+struct AVMC_Appender<TraitsT, XNodeT,
+         SymbolT,
+         void,
+         SparamT>
+  {
+    static
+    void
+    do_append(bool& reachable, AVMC_Queue& queue, const XNodeT& altr)
+      {
+        queue.append(Executor_of<TraitsT, void, SparamT>::thunk,
+                     TraitsT::make_symbols(altr),
+                     TraitsT::make_sparam(reachable, altr), Enumerator_of<SparamT>::thunk);
+      }
+  };
+
+template<typename TraitsT, typename XNodeT,
+         typename SparamT>
+struct AVMC_Appender<TraitsT, XNodeT,
+         void,
+         void,
+         SparamT>
+  {
+    static
+    void
+    do_append(bool& reachable, AVMC_Queue& queue, const XNodeT& altr)
+      {
+        queue.append(Executor_of<TraitsT, void, SparamT>::thunk,
+                     TraitsT::make_sparam(reachable, altr), Enumerator_of<SparamT>::thunk);
+      }
+  };
+
+template<typename TraitsT, typename XNodeT,
+         typename SymbolT,
+         typename UparamT>
+struct AVMC_Appender<TraitsT, XNodeT,
+         SymbolT,
+         UparamT,
+         void>
+  {
+    static
+    void
+    do_append(bool& reachable, AVMC_Queue& queue, const XNodeT& altr)
+      {
+        queue.append(Executor_of<TraitsT, UparamT, void>::thunk,
+                     TraitsT::make_symbols(altr),
+                     TraitsT::make_uparam(reachable, altr));
+      }
+  };
+
+template<typename TraitsT, typename XNodeT,
+         typename UparamT>
+struct AVMC_Appender<TraitsT, XNodeT,
+         void,
+         UparamT,
+         void>
+  {
+    static
+    void
+    do_append(bool& reachable, AVMC_Queue& queue, const XNodeT& altr)
+      {
+        queue.append(Executor_of<TraitsT, UparamT, void>::thunk,
+                     TraitsT::make_uparam(reachable, altr));
+      }
+  };
+
+template<typename TraitsT, typename XNodeT,
          typename SymbolT>
-struct AVMC_Appender
+struct AVMC_Appender<TraitsT, XNodeT,
+         SymbolT,
+         void,
+         void>
   {
     static
-    bool
-    do_append(AVMC_Queue& queue, const XNodeT& altr)
+    void
+    do_append(bool& /*reachable*/, AVMC_Queue& queue, const XNodeT& altr)
       {
-        bool reachable = true;
-        queue.template append<Executor_of<TraitsT, UparamT, SparamT>::thunk,
-                              Enumerator_of<SparamT>::thunk>(
-                              TraitsT::make_symbols(altr),
-                              TraitsT::make_uparam(reachable, altr),
-                              TraitsT::make_sparam(reachable, altr));
-        return reachable;
-      }
-  };
-
-template<typename TraitsT, typename XNodeT, typename UparamT, typename SparamT>
-struct AVMC_Appender<TraitsT, XNodeT, UparamT, SparamT, void>
-  {
-    static
-    bool
-    do_append(AVMC_Queue& queue, const XNodeT& altr)
-      {
-        bool reachable = true;
-        queue.template append<Executor_of<TraitsT, UparamT, SparamT>::thunk,
-                              Enumerator_of<SparamT>::thunk>(
-                              TraitsT::make_uparam(reachable, altr),
-                              TraitsT::make_sparam(reachable, altr));
-        return reachable;
-      }
-  };
-
-template<typename TraitsT, typename XNodeT, typename UparamT, typename SymbolT>
-struct AVMC_Appender<TraitsT, XNodeT, UparamT, void, SymbolT>
-  {
-    static
-    bool
-    do_append(AVMC_Queue& queue, const XNodeT& altr)
-      {
-        bool reachable = true;
-        queue.template append<Executor_of<TraitsT, UparamT, void>::thunk,
-                              nullptr>(
-                              TraitsT::make_symbols(altr),
-                              TraitsT::make_uparam(reachable, altr));
-        return reachable;
-      }
-  };
-
-template<typename TraitsT, typename XNodeT, typename UparamT>
-struct AVMC_Appender<TraitsT, XNodeT, UparamT, void, void>
-  {
-    static
-    bool
-    do_append(AVMC_Queue& queue, const XNodeT& altr)
-      {
-        bool reachable = true;
-        queue.template append<Executor_of<TraitsT, UparamT, void>::thunk,
-                              nullptr>(
-                              TraitsT::make_uparam(reachable, altr));
-        return reachable;
-      }
-  };
-
-template<typename TraitsT, typename XNodeT, typename SparamT, typename SymbolT>
-struct AVMC_Appender<TraitsT, XNodeT, void, SparamT, SymbolT>
-  {
-    static
-    bool
-    do_append(AVMC_Queue& queue, const XNodeT& altr)
-      {
-        bool reachable = true;
-        queue.template append<Executor_of<TraitsT, void, SparamT>::thunk,
-                              Enumerator_of<SparamT>::thunk>(
-                              TraitsT::make_symbols(altr),
-                              AVMC_Queue::Uparam(),
-                              TraitsT::make_sparam(reachable, altr));
-        return reachable;
-      }
-  };
-
-template<typename TraitsT, typename XNodeT, typename SparamT>
-struct AVMC_Appender<TraitsT, XNodeT, void, SparamT, void>
-  {
-    static
-    bool
-    do_append(AVMC_Queue& queue, const XNodeT& altr)
-      {
-        bool reachable = true;
-        queue.template append<Executor_of<TraitsT, void, SparamT>::thunk,
-                              Enumerator_of<SparamT>::thunk>(
-                              AVMC_Queue::Uparam(),
-                              TraitsT::make_sparam(reachable, altr));
-        return reachable;
-      }
-  };
-
-template<typename TraitsT, typename XNodeT, typename SymbolT>
-struct AVMC_Appender<TraitsT, XNodeT, void, void, SymbolT>
-  {
-    static
-    bool
-    do_append(AVMC_Queue& queue, const XNodeT& altr)
-      {
-        bool reachable = true;
-        queue.template append<Executor_of<TraitsT, void, void>::thunk,
-                              nullptr>(
-                              TraitsT::make_symbols(altr),
-                              AVMC_Queue::Uparam());
-        return reachable;
+        queue.append(Executor_of<TraitsT, void, void>::thunk,
+                     TraitsT::make_symbols(altr));
       }
   };
 
 template<typename TraitsT, typename XNodeT>
-struct AVMC_Appender<TraitsT, XNodeT, void, void, void>
+struct AVMC_Appender<TraitsT, XNodeT,
+         void,
+         void,
+         void>
   {
     static
-    bool
-    do_append(AVMC_Queue& queue, const XNodeT& /*altr*/)
+    void
+    do_append(bool& /*reachable*/, AVMC_Queue& queue, const XNodeT& /*altr*/)
       {
-        bool reachable = true;
-        queue.template append<Executor_of<TraitsT, void, void>::thunk,
-                              nullptr>(
-                              AVMC_Queue::Uparam());
-        return reachable;
+        queue.append(Executor_of<TraitsT, void, void>::thunk);
       }
   };
 
@@ -4222,11 +4192,14 @@ inline
 bool
 do_solidify(AVMC_Queue& queue, const XNodeT& altr)
   {
-    return AVMC_Appender<TraitsT, XNodeT,
+    using Appender = AVMC_Appender<TraitsT, XNodeT,
+                         typename Symbols_of<TraitsT, XNodeT>::type,
                          typename Uparam_of<TraitsT, XNodeT>::type,
-                         typename Sparam_of<TraitsT, XNodeT>::type,
-                         typename Symbols_of<TraitsT, XNodeT>::type>
-               ::do_append(queue, altr);
+                         typename Sparam_of<TraitsT, XNodeT>::type>;
+
+    bool reachable = true;
+    Appender::do_append(reachable, queue, altr);
+    return reachable;
   }
 
 }  // namespace
