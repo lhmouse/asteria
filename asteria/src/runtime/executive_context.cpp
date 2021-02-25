@@ -57,8 +57,9 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
       ASTERIA_THROW("Too many arguments passed to `$1`", zvarg->func());
 
     // Stash variadic arguments, if any.
-    this->m_lazy_args.append(::std::make_move_iterator(bpos),
-                             ::std::make_move_iterator(epos));
+    if(ROCKET_UNEXPECT(bpos != epos))
+      this->m_lazy_args.append(
+              ::std::make_move_iterator(bpos), ::std::make_move_iterator(epos));
   }
 
 Executive_Context::
@@ -128,8 +129,8 @@ on_scope_exit(AIR_Status status)
       if(ptca->get_defer().empty())
         ptca->open_defer().swap(this->m_defer);
       else
-        ptca->open_defer().append(this->m_defer.move_begin(),
-                                  this->m_defer.move_end());
+        ptca->open_defer().append(
+                  this->m_defer.move_begin(), this->m_defer.move_end());
     }
     else {
       // Execute all deferred expressions backwards.
