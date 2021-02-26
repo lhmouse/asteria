@@ -1,5 +1,5 @@
 // This file is part of Asteria.
-// Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
+// Copyleft 2018 - 2021, LH_Mouse. All wrongs reserved.
 
 #ifndef ROCKET_TINYFMT_HPP_
 #define ROCKET_TINYFMT_HPP_
