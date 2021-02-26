@@ -33,12 +33,8 @@ union Uparam
 using Constructor  = void (Uparam uparam, void* sparam, size_t size, intptr_t arg);
 using Relocator    = void (Uparam uparam, void* sparam, void* source);
 using Destructor   = void (Uparam uparam, void* sparam);
-
-using Executor     = AIR_Status (Executive_Context& ctx,
-                         Uparam uparam, const void* sparam);
-
-using Enumerator   = Variable_Callback& (Variable_Callback& callback,
-                         Uparam uparam, const void* sparam);
+using Executor     = AIR_Status (Executive_Context& ctx, Uparam uparam, const void* sparam);
+using Enumerator   = Variable_Callback& (Variable_Callback& callback, Uparam uparam, const void* sparam);
 
 struct Metadata
   {
