@@ -113,11 +113,8 @@ defer_expression(const Source_Location& sloc, AVMC_Queue&& queue)
 
 AIR_Status
 Executive_Context::
-on_scope_exit(AIR_Status status)
+do_on_scope_exit_slow(AIR_Status status)
   {
-    if(ROCKET_EXPECT(this->m_defer.empty()))
-      return status;
-
     // Stash the returned reference, if any.
     Reference self = Reference::S_uninit();
     if(status == air_status_return_ref)
@@ -162,11 +159,8 @@ on_scope_exit(AIR_Status status)
 
 Runtime_Error&
 Executive_Context::
-on_scope_exit(Runtime_Error& except)
+do_on_scope_exit_slow(Runtime_Error& except)
   {
-    if(ROCKET_EXPECT(this->m_defer.empty()))
-      return except;
-
     // Execute all deferred expressions backwards.
     while(this->m_defer.size()) {
       auto pair = ::std::move(this->m_defer.mut_back());

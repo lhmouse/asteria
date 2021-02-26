@@ -56,7 +56,7 @@ class Executive_Context
                       Reference_Stack& alt_stack, const rcptr<Variadic_Arguer>& zvarg,
                       const cow_vector<phsh_string>& params, Reference&& self);
 
-  protected:
+  private:
     bool
     do_is_analytic()
       const noexcept final
@@ -70,6 +70,12 @@ class Executive_Context
     Reference*
     do_lazy_lookup_opt(const phsh_string& name)
       override;
+
+    AIR_Status
+    do_on_scope_exit_slow(AIR_Status status);
+
+    Runtime_Error&
+    do_on_scope_exit_slow(Runtime_Error& except);
 
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Executive_Context);
@@ -108,10 +114,20 @@ class Executive_Context
     // Note that these functions may throw arbitrary exceptions, which
     // is why RAII is inapplicable.
     AIR_Status
-    on_scope_exit(AIR_Status status);
+    on_scope_exit(AIR_Status status)
+      {
+        return ROCKET_UNEXPECT(this->m_defer.size())
+          ? this->do_on_scope_exit_slow(status)
+          : status;
+      }
 
     Runtime_Error&
-    on_scope_exit(Runtime_Error& except);
+    on_scope_exit(Runtime_Error& except)
+      {
+        return ROCKET_UNEXPECT(this->m_defer.size())
+          ? this->do_on_scope_exit_slow(except)
+          : except;
+      }
   };
 
 }  // namespace asteria
