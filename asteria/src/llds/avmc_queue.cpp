@@ -179,11 +179,11 @@ execute(Executive_Context& ctx)
           throw;
         }
       }
-      else if(qnode->meta_ver == 1)
-        status = qnode->pv_meta->exec(ctx, qnode->uparam, qnode->sparam);
-      else
-        status = qnode->pv_exec(ctx, qnode->uparam, qnode->sparam);
-
+      else {
+        // Symbols are not available.
+        auto exec = qnode->meta_ver ? qnode->pv_meta->exec : qnode->pv_exec;
+        status = exec(ctx, qnode->uparam, qnode->sparam);
+      }
       if(ROCKET_UNEXPECT(status != air_status_next))
         return status;
     }
