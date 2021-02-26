@@ -20,14 +20,14 @@ do_destroy_nodes()
     const auto eptr = this->m_bptr + this->m_used;
     while(ROCKET_EXPECT(next != eptr)) {
       auto qnode = next;
-      next += UINT32_C(1) + qnode->nhdrs;
+      next += UINT32_C(1) + qnode->nheaders;
 
       // Destroy `sparam`, if any.
-      if(qnode->has_meta && qnode->pv_meta->dtor_opt)
+      if(qnode->meta_ver && qnode->pv_meta->dtor_opt)
         qnode->pv_meta->dtor_opt(qnode->uparam, qnode->sparam);
 
       // Deallocate the vtable and symbols.
-      if(qnode->has_meta)
+      if(qnode->meta_ver)
         delete qnode->pv_meta;
     }
 #ifdef ROCKET_DEBUG
@@ -43,8 +43,8 @@ do_reallocate(uint32_t nadd)
     ROCKET_ASSERT(nadd <= UINT16_MAX);
 
     // Allocate a new table.
-    constexpr size_t nhdrs_max = UINT32_MAX / sizeof(Header);
-    if(nhdrs_max - this->m_used < nadd)
+    constexpr size_t nheaders_max = UINT32_MAX / sizeof(Header);
+    if(nheaders_max - this->m_used < nadd)
       throw ::std::bad_array_new_length();
 
     uint32_t rsrv = this->m_used + nadd;
@@ -63,10 +63,10 @@ do_reallocate(uint32_t nadd)
     while(ROCKET_EXPECT(offset != this->m_used)) {
       auto qnode = bptr + offset;
       auto qfrom = bold + offset;
-      offset += UINT32_C(1) + qnode->nhdrs;
+      offset += UINT32_C(1) + qnode->nheaders;
 
       // Relocate `sparam`, if any.
-      if(qnode->has_meta && qnode->pv_meta->reloc_opt)
+      if(qnode->meta_ver && qnode->pv_meta->reloc_opt)
         qnode->pv_meta->reloc_opt(qnode->uparam, qnode->sparam, qfrom->sparam);
     }
     if(bold)
@@ -75,7 +75,7 @@ do_reallocate(uint32_t nadd)
 
 details_avmc_queue::Header*
 AVMC_Queue::
-do_reserve_one(size_t size)
+do_reserve_one(Uparam uparam, size_t size)
   {
     constexpr size_t size_max = UINT8_MAX * sizeof(Header) - 1;
     if(size > size_max)
@@ -93,9 +93,12 @@ do_reserve_one(size_t size)
     ROCKET_ASSERT(this->m_rsrv - this->m_used >= nadd);
 
     // Append a new node.
+    // `uparam` is overlapped with `nheaders` so it must be assigned first.
+    // The others can occur in any order.
     auto qnode = this->m_bptr + this->m_used;
-    ::std::memset(qnode, 0, sizeof(*qnode));
-    qnode->nhdrs = static_cast<uint8_t>(nadd - UINT32_C(1));
+    qnode->uparam = uparam;
+    qnode->nheaders = static_cast<uint8_t>(nadd - UINT32_C(1));
+    qnode->meta_ver = 0;
     return qnode;
   }
 
@@ -103,7 +106,7 @@ AVMC_Queue&
 AVMC_Queue::
 do_append_trivial(Uparam uparam, Executor* exec, const void* data, size_t size)
   {
-    auto qnode = this->do_reserve_one(size);
+    auto qnode = this->do_reserve_one(uparam, size);
 
     // Copy source data if `data` is non-null. Fill zeroes otherwise.
     // This operation will not throw exceptions.
@@ -113,11 +116,8 @@ do_append_trivial(Uparam uparam, Executor* exec, const void* data, size_t size)
       ::std::memset(qnode->sparam, 0, size);
 
     // Accept this node.
-    qnode->uparam.s16 = uparam.s16;
-    qnode->uparam.s32 = uparam.s32;
-    qnode->has_meta = false;
     qnode->pv_exec = exec;
-    this->m_used += UINT32_C(1) + qnode->nhdrs;
+    this->m_used += UINT32_C(1) + qnode->nheaders;
     return *this;
   }
 
@@ -127,16 +127,21 @@ do_append_nontrivial(Uparam uparam, Executor* exec, const Source_Location* sloc_
                      Enumerator* enum_opt, Relocator* reloc_opt, Destructor* dtor_opt,
                      Constructor* ctor_opt, size_t size, intptr_t ctor_arg)
   {
-    auto qnode = this->do_reserve_one(size);
+    auto qnode = this->do_reserve_one(uparam, size);
 
     // Allocate metadata for this node.
     auto meta = ::rocket::make_unique<details_avmc_queue::Metadata>();
+    uint8_t meta_ver = 1;
+
     meta->reloc_opt = reloc_opt;
     meta->dtor_opt = dtor_opt;
     meta->enum_opt = enum_opt;
     meta->exec = exec;
-    if(sloc_opt)
-      meta->sloc_opt.emplace(*sloc_opt);
+
+    if(sloc_opt) {
+      meta->syms = *sloc_opt;
+      meta_ver = 2;
+    }
 
     // Invoke the constructor if `ctor_opt` is non-null. Fill zeroes otherwise.
     // If an exception is thrown, there is no effect.
@@ -146,11 +151,9 @@ do_append_nontrivial(Uparam uparam, Executor* exec, const Source_Location* sloc_
       ::std::memset(qnode->sparam, 0, size);
 
     // Accept this node.
-    qnode->uparam.s16 = uparam.s16;
-    qnode->uparam.s32 = uparam.s32;
-    qnode->has_meta = true;
     qnode->pv_meta = meta.release();
-    this->m_used += UINT32_C(1) + qnode->nhdrs;
+    qnode->meta_ver = meta_ver;
+    this->m_used += UINT32_C(1) + qnode->nheaders;
     return *this;
   }
 
@@ -163,32 +166,26 @@ execute(Executive_Context& ctx)
     const auto eptr = this->m_bptr + this->m_used;
     while(ROCKET_EXPECT(next != eptr)) {
       auto qnode = next;
-      next += UINT32_C(1) + qnode->nhdrs;
+      next += UINT32_C(1) + qnode->nheaders;
 
-      if(!qnode->has_meta) {
-        // This is a trivial node.
-        auto status = qnode->pv_exec(ctx, qnode->uparam, qnode->sparam);
-        if(ROCKET_UNEXPECT(status != air_status_next))
-          return status;
-      }
-      else if(!qnode->pv_meta->sloc_opt) {
-        // There is no symbol.
-        auto status = qnode->pv_meta->exec(ctx, qnode->uparam, qnode->sparam);
-        if(ROCKET_UNEXPECT(status != air_status_next))
-          return status;
-      }
-      else {
+      AIR_Status status;
+      if(ROCKET_EXPECT(qnode->meta_ver >= 2)) {
         // Symbols are available.
         ASTERIA_RUNTIME_TRY {
-          auto status = qnode->pv_meta->exec(ctx, qnode->uparam, qnode->sparam);
-          if(ROCKET_UNEXPECT(status != air_status_next))
-            return status;
+          status = qnode->pv_meta->exec(ctx, qnode->uparam, qnode->sparam);
         }
         ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
-          except.push_frame_plain(*(qnode->pv_meta->sloc_opt), sref(""));
+          except.push_frame_plain(qnode->pv_meta->syms, sref(""));
           throw;
         }
       }
+      else if(qnode->meta_ver == 1)
+        status = qnode->pv_meta->exec(ctx, qnode->uparam, qnode->sparam);
+      else
+        status = qnode->pv_exec(ctx, qnode->uparam, qnode->sparam);
+
+      if(ROCKET_UNEXPECT(status != air_status_next))
+        return status;
     }
     return air_status_next;
   }
@@ -202,10 +199,10 @@ enumerate_variables(Variable_Callback& callback)
     const auto eptr = this->m_bptr + this->m_used;
     while(ROCKET_EXPECT(next != eptr)) {
       auto qnode = next;
-      next += UINT32_C(1) + qnode->nhdrs;
+      next += UINT32_C(1) + qnode->nheaders;
 
       // Enumerate variables from this node.
-      if(qnode->has_meta && qnode->pv_meta->enum_opt)
+      if(qnode->meta_ver && qnode->pv_meta->enum_opt)
         qnode->pv_meta->enum_opt(callback, qnode->uparam, qnode->sparam);
     }
     return callback;

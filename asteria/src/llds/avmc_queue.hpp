@@ -54,7 +54,7 @@ class AVMC_Queue
     // Reserve storage for the next node. `size` is the size of `sparam` to initialize.
     inline
     Header*
-    do_reserve_one(size_t size);
+    do_reserve_one(Uparam uparam, size_t size);
 
     // Append a new node to the end. `size` is the size of `sparam` to initialize.
     // If `data` is specified, it should point to the buffer containing data to copy.

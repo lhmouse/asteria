@@ -38,12 +38,14 @@ using Enumerator   = Variable_Callback& (Variable_Callback& callback, Uparam upa
 
 struct Metadata
   {
+    // Version 1
     Relocator* reloc_opt;  // if null then bitwise copy is performed
     Destructor* dtor_opt;  // if null then no cleanup is performed
     Enumerator* enum_opt;  // if null then no variable shall exist
+    Executor* exec;        // executor function, must not be null
 
-    Executor* exec;  // executor function, must not be null
-    opt<Source_Location> sloc_opt;
+    // Version 2
+    Source_Location syms;  // symbols
   };
 
 // This is the header of each variable-length element that is stored in an AVMC
@@ -53,14 +55,14 @@ struct Header
   {
     union {
       struct {
-        uint8_t nhdrs;         // size of `sparam`, in number of headers [!]
-        uint8_t has_meta : 1;  // `pv_meta` active
+        uint8_t nheaders;  // size of `sparam`, in number of headers [!]
+        uint8_t meta_ver;  // version of `Metadata`; `pv_meta` active
       };
       Uparam uparam;
     };
 
     union {
-      Executor* pv_exec;   // executor function
+      Executor* pv_exec;  // executor function
       Metadata* pv_meta;
     };
 
