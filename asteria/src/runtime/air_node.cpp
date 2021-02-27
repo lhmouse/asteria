@@ -2594,10 +2594,10 @@ struct AIR_Traits_apply_operator_add : AIR_Traits_apply_operator_common
             auto y = rhs.as_integer();
 
             // Check for overflows.
-            if((y >= 0) ? (x > INT64_MAX - y) : (x < INT64_MIN - y)) {
+            if((y >= 0) ? (x > INT64_MAX - y) : (x < INT64_MIN - y))
               ASTERIA_THROW("Integer addition overflow (operands were `$1` and `$2`)",
                             lhs, rhs);
-            }
+
             x += y;
             break;
           }
@@ -2654,10 +2654,10 @@ struct AIR_Traits_apply_operator_sub : AIR_Traits_apply_operator_common
             auto y = rhs.as_integer();
 
             // Check for overflows.
-            if((y >= 0) ? (x < INT64_MIN + y) : (x > INT64_MAX + y)) {
+            if((y >= 0) ? (x < INT64_MIN + y) : (x > INT64_MAX + y))
               ASTERIA_THROW("Integer subtraction overflow (operands were `$1` and `$2`)",
                             lhs, rhs);
-            }
+
             x -= y;
             break;
           }
@@ -2722,8 +2722,9 @@ struct AIR_Traits_apply_operator_mul : AIR_Traits_apply_operator_common
               if((s >= 0) ? (s > INT64_MAX / u) : (s < INT64_MIN / u))
                 ASTERIA_THROW("Integer multiplication overflow (operands were `$1` and `$2`)",
                               lhs, rhs);
+
+              x *= y;
             }
-            x *= y;
             break;
           }
 
@@ -2798,14 +2799,14 @@ struct AIR_Traits_apply_operator_div : AIR_Traits_apply_operator_common
             auto y = rhs.as_integer();
 
             // Check for overflows.
-            if(y == 0) {
+            if(y == 0)
               ASTERIA_THROW("Integer division by zero (operands were `$1` and `$2`)",
                             lhs, rhs);
-            }
-            else if((x == INT64_MIN) && (y == -1)) {
+
+            if((x == INT64_MIN) && (y == -1))
               ASTERIA_THROW("Integer division overflow (operands were `$1` and `$2`)",
                             lhs, rhs);
-            }
+
             x /= y;
             break;
           }
@@ -2847,14 +2848,14 @@ struct AIR_Traits_apply_operator_mod : AIR_Traits_apply_operator_common
             auto y = rhs.as_integer();
 
             // Check for overflows.
-            if(y == 0) {
+            if(y == 0)
               ASTERIA_THROW("Integer division by zero (operands were `$1` and `$2`)",
                             lhs, rhs);
-            }
-            else if((x == INT64_MIN) && (y == -1)) {
+
+            if((x == INT64_MIN) && (y == -1))
               ASTERIA_THROW("Integer division overflow (operands were `$1` and `$2`)",
                             lhs, rhs);
-            }
+
             x %= y;
             break;
           }
