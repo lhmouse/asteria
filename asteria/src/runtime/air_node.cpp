@@ -2655,7 +2655,7 @@ struct AIR_Traits_apply_operator_sub : AIR_Traits_apply_operator_common
 
             // Check for overflows.
             if((y >= 0) ? (x < INT64_MIN + y) : (x > INT64_MAX + y)) {
-              ASTERIA_THROW("Integer addition overflow (operands were `$1` and `$2`)",
+              ASTERIA_THROW("Integer subtraction overflow (operands were `$1` and `$2`)",
                             lhs, rhs);
             }
             x -= y;
