@@ -66,8 +66,7 @@ do_rebind_return_opt(bool dirty, XNodeT&& xnode)
 bool
 do_solidify_nodes(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
   {
-    bool r = ::rocket::all_of(code,
-        [&](const AIR_Node& node) { return node.solidify(queue);  });
+    bool r = ::rocket::all_of(code, [&](const AIR_Node& node) { return node.solidify(queue);  });
     queue.shrink_to_fit();
     return r;
   }
@@ -100,6 +99,15 @@ do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVMC_Queue&
     ROCKET_ASSERT(status == air_status_next);
     do_simple_assign_value_common(ctx);
     return air_status_next;
+  }
+
+Value&
+do_get_first_operand(Reference_Stack& stack, bool assign)
+  {
+    if(assign)
+      return stack.back().dereference_mutable();
+    else
+      return stack.mut_back().mutate_into_temporary();
   }
 
 Reference&
@@ -865,7 +873,7 @@ struct AIR_Traits_throw_statement
         // Read the value to throw.
         // Note that the operand must not have been empty for this code.
         throw Runtime_Error(Runtime_Error::M_throw(),
-                            ctx.stack().back().dereference_readonly(), sloc);
+                 ctx.stack().back().dereference_readonly(), sloc);
       }
   };
 
@@ -1725,8 +1733,7 @@ struct AIR_Traits_apply_operator_neg : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        auto& rhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // Get the opposite of the operand.
         switch(do_tmask_of(rhs)) {
@@ -1764,8 +1771,7 @@ struct AIR_Traits_apply_operator_notb : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        auto& rhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // Get the bitwise complement of the operand.
         switch(do_tmask_of(rhs)) {
@@ -1806,8 +1812,7 @@ struct AIR_Traits_apply_operator_notl : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        auto& rhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // Perform logical NOT operation on the operand.
         // N.B. This is one of the few operators that work on all types.
@@ -1911,8 +1916,7 @@ struct AIR_Traits_apply_operator_countof : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        auto& rhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // Get the number of bytes or elements in the operand.
         switch(do_tmask_of(rhs)) {
@@ -1955,8 +1959,7 @@ struct AIR_Traits_apply_operator_typeof : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        auto& rhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // Get the type name of the operand, which is constant.
         // N.B. This is one of the few operators that work on all types.
@@ -1972,8 +1975,7 @@ struct AIR_Traits_apply_operator_sqrt : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        auto& rhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // Get the square root of the operand as a real number.
         switch(do_tmask_of(rhs)) {
@@ -2004,8 +2006,7 @@ struct AIR_Traits_apply_operator_isnan : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        auto& rhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // Check whether the operand is an arithmetic type and is a NaN.
         // Note an integer is never a NaN.
@@ -2037,8 +2038,7 @@ struct AIR_Traits_apply_operator_isinf : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        auto& rhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // Check whether the operand is an arithmetic type and is an infinity.
         // Note an integer is never an infinity.
@@ -2070,8 +2070,7 @@ struct AIR_Traits_apply_operator_abs : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        auto& rhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // Get the absolute value of the operand.
         switch(do_tmask_of(rhs)) {
@@ -2108,8 +2107,7 @@ struct AIR_Traits_apply_operator_sign : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        auto& rhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // Get the sign bit of the operand and extend it to 64 bits.
         switch(do_tmask_of(rhs)) {
@@ -2140,8 +2138,7 @@ struct AIR_Traits_apply_operator_round : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        auto& rhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // Round the operand to the nearest integer.
         // This is a no-op for type `integer`.
@@ -2172,8 +2169,7 @@ struct AIR_Traits_apply_operator_floor : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        auto& rhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // Round the operand to the nearest integer towards negative infinity.
         // This is a no-op for type `integer`.
@@ -2204,8 +2200,7 @@ struct AIR_Traits_apply_operator_ceil : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        auto& rhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // Round the operand to the nearest integer towards positive infinity.
         // This is a no-op for type `integer`.
@@ -2236,8 +2231,7 @@ struct AIR_Traits_apply_operator_trunc : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        auto& rhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // Round the operand to the nearest integer towards zero.
         // This is a no-op for type `integer`.
@@ -2268,8 +2262,7 @@ struct AIR_Traits_apply_operator_iround : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        auto& rhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // Round the operand to the nearest integer.
         // This is a no-op for type `integer`.
@@ -2300,8 +2293,7 @@ struct AIR_Traits_apply_operator_ifloor : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        auto& rhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // Round the operand to the nearest integer towards negative infinity.
         // This is a no-op for type `integer`.
@@ -2332,8 +2324,7 @@ struct AIR_Traits_apply_operator_iceil : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        auto& rhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // Round the operand to the nearest integer towards positive infinity.
         // This is a no-op for type `integer`.
@@ -2364,8 +2355,7 @@ struct AIR_Traits_apply_operator_itrunc : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
       {
         // This operator is unary.
-        auto& rhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // Round the operand to the nearest integer towards zero.
         // This is a no-op for type `integer`.
@@ -2398,8 +2388,7 @@ struct AIR_Traits_apply_operator_cmp_eq : AIR_Traits_apply_operator_common
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
         ctx.stack().pop_back();
-        auto& lhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // Check whether the two operands equal.
         // Unordered operands are not equal.
@@ -2418,8 +2407,7 @@ struct AIR_Traits_apply_operator_cmp_ne : AIR_Traits_apply_operator_common
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
         ctx.stack().pop_back();
-        auto& lhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // Check whether the two operands don't equal.
         // Unordered operands are not equal.
@@ -2438,8 +2426,7 @@ struct AIR_Traits_apply_operator_cmp_lt : AIR_Traits_apply_operator_common
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
         ctx.stack().pop_back();
-        auto& lhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // Check whether the LHS operand is less than the RHS operand.
         // Throw an exception if they are unordered.
@@ -2462,8 +2449,7 @@ struct AIR_Traits_apply_operator_cmp_gt : AIR_Traits_apply_operator_common
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
         ctx.stack().pop_back();
-        auto& lhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // Check whether the LHS operand is greater than the RHS operand.
         // Throw an exception if they are unordered.
@@ -2486,8 +2472,7 @@ struct AIR_Traits_apply_operator_cmp_lte : AIR_Traits_apply_operator_common
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
         ctx.stack().pop_back();
-        auto& lhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // Check whether the LHS operand is less than or equal to the RHS operand.
         // Throw an exception if they are unordered.
@@ -2510,8 +2495,7 @@ struct AIR_Traits_apply_operator_cmp_gte : AIR_Traits_apply_operator_common
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
         ctx.stack().pop_back();
-        auto& lhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // Check whether the LHS operand is greater than or equal to the RHS operand.
         // Throw an exception if they are unordered.
@@ -2534,8 +2518,7 @@ struct AIR_Traits_apply_operator_cmp_3way : AIR_Traits_apply_operator_common
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
         ctx.stack().pop_back();
-        auto& lhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // Perform 3-way comparison on both operands.
         // N.B. This is one of the few operators that work on all types.
@@ -2573,8 +2556,7 @@ struct AIR_Traits_apply_operator_add : AIR_Traits_apply_operator_common
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
         ctx.stack().pop_back();
-        auto& lhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // For the `boolean` type, perform logical OR of the operands.
         // For the `integer` and `real` types, perform arithmetic addition.
@@ -2634,8 +2616,7 @@ struct AIR_Traits_apply_operator_sub : AIR_Traits_apply_operator_common
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
         ctx.stack().pop_back();
-        auto& lhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // For the `boolean` type, perform logical XOR of the operands.
         // For the `integer` and `real` types, perform arithmetic subtraction.
@@ -2687,8 +2668,7 @@ struct AIR_Traits_apply_operator_mul : AIR_Traits_apply_operator_common
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
         ctx.stack().pop_back();
-        auto& lhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // For the `boolean` type, perform logical AND of the operands.
         // For the `integer` and `real` types, perform arithmetic multiplication.
@@ -2787,8 +2767,7 @@ struct AIR_Traits_apply_operator_div : AIR_Traits_apply_operator_common
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
         ctx.stack().pop_back();
-        auto& lhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // For the `integer` and `real` types, perform arithmetic division.
         switch(do_tmask_of(lhs) | do_tmask_of(rhs)) {
@@ -2836,8 +2815,7 @@ struct AIR_Traits_apply_operator_mod : AIR_Traits_apply_operator_common
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
         ctx.stack().pop_back();
-        auto& lhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // For the `integer` and `real` types, perform arithmetic modulo.
         switch(do_tmask_of(lhs) | do_tmask_of(rhs)) {
@@ -2885,8 +2863,7 @@ struct AIR_Traits_apply_operator_sll : AIR_Traits_apply_operator_common
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
         ctx.stack().pop_back();
-        auto& lhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // The shift chount must be a non-negative integer.
         if(!rhs.is_integer())
@@ -2949,8 +2926,7 @@ struct AIR_Traits_apply_operator_srl : AIR_Traits_apply_operator_common
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
         ctx.stack().pop_back();
-        auto& lhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // The shift chount must be a non-negative integer.
         if(!rhs.is_integer())
@@ -3013,8 +2989,7 @@ struct AIR_Traits_apply_operator_sla : AIR_Traits_apply_operator_common
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
         ctx.stack().pop_back();
-        auto& lhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // The shift chount must be a non-negative integer.
         if(!rhs.is_integer())
@@ -3086,8 +3061,7 @@ struct AIR_Traits_apply_operator_sra : AIR_Traits_apply_operator_common
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
         ctx.stack().pop_back();
-        auto& lhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // The shift chount must be a non-negative integer.
         if(!rhs.is_integer())
@@ -3147,8 +3121,7 @@ struct AIR_Traits_apply_operator_andb : AIR_Traits_apply_operator_common
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
         ctx.stack().pop_back();
-        auto& lhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // For the `boolean` type, perform logical AND of the operands.
         // For the `integer` and `real` types, perform bitwise AND of the operands.
@@ -3202,8 +3175,7 @@ struct AIR_Traits_apply_operator_orb : AIR_Traits_apply_operator_common
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
         ctx.stack().pop_back();
-        auto& lhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // For the `boolean` type, perform logical OR of the operands.
         // For the `integer` and `real` types, perform bitwise OR of the operands.
@@ -3258,8 +3230,7 @@ struct AIR_Traits_apply_operator_xorb : AIR_Traits_apply_operator_common
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
         ctx.stack().pop_back();
-        auto& lhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // For the `boolean` type, perform logical XOR of the operands.
         // For the `integer` and `real` types, perform bitwise XOR of the operands.
@@ -3328,8 +3299,7 @@ struct AIR_Traits_apply_operator_fma : AIR_Traits_apply_operator_common
         ctx.stack().pop_back();
         const auto& mid = ctx.stack().back().dereference_readonly();
         ctx.stack().pop_back();
-        auto& lhs = up.p8[0] ? ctx.stack().back().dereference_mutable()  // assign
-                             : ctx.stack().mut_back().mutate_into_temporary();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
 
         // For the `integer` and `real` types, perform fused multiply-add.
         switch(do_tmask_of(lhs) | do_tmask_of(mid) | do_tmask_of(rhs)) {
