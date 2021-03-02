@@ -85,7 +85,6 @@ std_numeric_abs(V_integer value)
     if(value == INT64_MIN)
       ASTERIA_THROW("Integer absolute value overflow (value `$1`)",
                     value);
-
     return ::std::abs(value);
   }
 
