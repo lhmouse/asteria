@@ -16,8 +16,8 @@
 #define ROCKET_FORCED_INLINE_FUNCTION       __attribute__((__always_inline__)) __inline__
 
 #define ROCKET_UNREACHABLE()                __builtin_unreachable()
-#define ROCKET_EXPECT(...)                  __builtin_expect((__VA_ARGS__) ? 1 : 0, 1)
-#define ROCKET_UNEXPECT(...)                __builtin_expect((__VA_ARGS__) ? 1 : 0, 0)
+#define ROCKET_EXPECT(...)                  __builtin_expect(!!(__VA_ARGS__), 1)
+#define ROCKET_UNEXPECT(...)                __builtin_expect(!!(__VA_ARGS__), 0)
 #define ROCKET_CONSTANT_P(...)              __builtin_constant_p(__VA_ARGS__)
 
 #define ROCKET_FUNCSIG                      __PRETTY_FUNCTION__
