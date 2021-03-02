@@ -14,12 +14,12 @@ class AVMC_Queue
   {
   public:
     using Uparam      = details_avmc_queue::Uparam;
+    using Header      = details_avmc_queue::Header;
     using Executor    = details_avmc_queue::Executor;
     using Enumerator  = details_avmc_queue::Enumerator;
 
   private:
     using Metadata     = details_avmc_queue::Metadata;
-    using Header       = details_avmc_queue::Header;
     using Constructor  = details_avmc_queue::Constructor;
     using Relocator    = details_avmc_queue::Relocator;
     using Destructor   = details_avmc_queue::Destructor;

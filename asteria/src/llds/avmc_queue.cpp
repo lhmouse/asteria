@@ -24,7 +24,7 @@ do_destroy_nodes()
 
       // Destroy `sparam`, if any.
       if(qnode->meta_ver && qnode->pv_meta->dtor_opt)
-        qnode->pv_meta->dtor_opt(qnode->uparam, qnode->sparam);
+        qnode->pv_meta->dtor_opt(qnode);
 
       // Deallocate the vtable and symbols.
       if(qnode->meta_ver)
@@ -67,7 +67,7 @@ do_reallocate(uint32_t nadd)
 
       // Relocate `sparam`, if any.
       if(qnode->meta_ver && qnode->pv_meta->reloc_opt)
-        qnode->pv_meta->reloc_opt(qnode->uparam, qnode->sparam, qfrom->sparam);
+        qnode->pv_meta->reloc_opt(qnode, qfrom);
     }
     if(bold)
       ::operator delete(bold);
@@ -146,7 +146,7 @@ do_append_nontrivial(Uparam uparam, Executor* exec, const Source_Location* sloc_
     // Invoke the constructor if `ctor_opt` is non-null. Fill zeroes otherwise.
     // If an exception is thrown, there is no effect.
     if(ctor_opt)
-      ctor_opt(uparam, qnode->sparam, size, ctor_arg);
+      ctor_opt(qnode, size, ctor_arg);
     else
       ::std::memset(qnode->sparam, 0, size);
 
@@ -172,7 +172,7 @@ execute(Executive_Context& ctx)
       if(ROCKET_EXPECT(qnode->meta_ver >= 2)) {
         // Symbols are available.
         ASTERIA_RUNTIME_TRY {
-          status = qnode->pv_meta->exec(ctx, qnode->uparam, qnode->sparam);
+          status = qnode->pv_meta->exec(ctx, qnode);
         }
         ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
           except.push_frame_plain(qnode->pv_meta->syms, sref(""));
@@ -181,8 +181,8 @@ execute(Executive_Context& ctx)
       }
       else {
         // Symbols are not available.
-        auto exec = qnode->meta_ver ? qnode->pv_meta->exec : qnode->pv_exec;
-        status = exec(ctx, qnode->uparam, qnode->sparam);
+        status = (qnode->meta_ver ? qnode->pv_meta->exec
+                                  : qnode->pv_exec)(ctx, qnode);
       }
       if(ROCKET_UNEXPECT(status != air_status_next))
         return status;
@@ -203,7 +203,7 @@ enumerate_variables(Variable_Callback& callback)
 
       // Enumerate variables from this node.
       if(qnode->meta_ver && qnode->pv_meta->enum_opt)
-        qnode->pv_meta->enum_opt(callback, qnode->uparam, qnode->sparam);
+        qnode->pv_meta->enum_opt(callback, qnode);
     }
     return callback;
   }

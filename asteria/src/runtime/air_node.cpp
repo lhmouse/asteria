@@ -3887,8 +3887,11 @@ struct Executor_of
   {
     static
     AIR_Status
-    thunk(Executive_Context& ctx, AVMC_Queue::Uparam up, const void* sp)
-      { return TraitsT::execute(ctx, UparamT(up), *(const SparamT*)sp);  }
+    thunk(Executive_Context& ctx, const AVMC_Queue::Header* head)
+      {
+        return TraitsT::execute(ctx, UparamT(head->uparam),
+                   *(reinterpret_cast<const SparamT*>(head->sparam)));
+      }
   };
 
 template<typename TraitsT, typename UparamT>
@@ -3896,8 +3899,10 @@ struct Executor_of<TraitsT, UparamT, void>
   {
     static
     AIR_Status
-    thunk(Executive_Context& ctx, AVMC_Queue::Uparam up, const void* /*sp*/)
-      { return TraitsT::execute(ctx, UparamT(up));  }
+    thunk(Executive_Context& ctx, const AVMC_Queue::Header* head)
+      {
+        return TraitsT::execute(ctx, UparamT(head->uparam));
+      }
   };
 
 template<typename TraitsT, typename SparamT>
@@ -3905,8 +3910,11 @@ struct Executor_of<TraitsT, void, SparamT>
   {
     static
     AIR_Status
-    thunk(Executive_Context& ctx, AVMC_Queue::Uparam /*up*/, const void* sp)
-      { return TraitsT::execute(ctx, *(const SparamT*)sp);  }
+    thunk(Executive_Context& ctx, const AVMC_Queue::Header* head)
+      {
+        return TraitsT::execute(ctx,
+                   *(reinterpret_cast<const SparamT*>(head->sparam)));
+      }
   };
 
 template<typename TraitsT>
@@ -3914,8 +3922,10 @@ struct Executor_of<TraitsT, void, void>
   {
     static
     AIR_Status
-    thunk(Executive_Context& ctx, AVMC_Queue::Uparam /*up*/, const void* /*sp*/)
-      { return TraitsT::execute(ctx);  }
+    thunk(Executive_Context& ctx, const AVMC_Queue::Header* /*head*/)
+      {
+        return TraitsT::execute(ctx);
+      }
   };
 
 // enumerator thunk
@@ -3930,8 +3940,11 @@ struct Enumerator_of<SparamT, ROCKET_VOID_T(decltype(&SparamT::enumerate_variabl
   {
     static
     Variable_Callback&
-    thunk(Variable_Callback& callback, AVMC_Queue::Uparam /*up*/, const void* sp)
-      { return static_cast<const SparamT*>(sp)->enumerate_variables(callback);  }
+    thunk(Variable_Callback& callback, const AVMC_Queue::Header* head)
+      {
+        return reinterpret_cast<const SparamT*>(
+                   head->sparam)->enumerate_variables(callback);
+      }
   };
 
 // check for `make_symbols`

@@ -29,12 +29,15 @@ union Uparam
     };
   };
 
+struct Metadata;
+struct Header;
+
 // These are prototypes for callbacks.
-using Constructor  = void (Uparam uparam, void* sparam, size_t size, intptr_t arg);
-using Relocator    = void (Uparam uparam, void* sparam, void* source);
-using Destructor   = void (Uparam uparam, void* sparam);
-using Executor     = AIR_Status (Executive_Context& ctx, Uparam uparam, const void* sparam);
-using Enumerator   = Variable_Callback& (Variable_Callback& callback, Uparam uparam, const void* sparam);
+using Constructor  = void (Header* head, size_t size, intptr_t arg);
+using Relocator    = void (Header* head, Header* from);
+using Destructor   = void (Header* head);
+using Executor     = AIR_Status (Executive_Context& ctx, const Header* head);
+using Enumerator   = Variable_Callback& (Variable_Callback& callback, const Header* head);
 
 struct Metadata
   {
@@ -66,7 +69,8 @@ struct Header
       Metadata* pv_meta;
     };
 
-    max_align_t sparam[0];
+    max_align_t align[0];
+    char sparam[0];
   };
 
 template<typename SparamT, typename = void>
@@ -74,12 +78,13 @@ struct default_reloc
   {
     static
     void
-    func_opt(Uparam, void* sparam, void* source)
+    func_opt(Header* head, Header* from)
       noexcept
       {
-        ::rocket::construct_at(static_cast<SparamT*>(sparam),
-                        ::std::move(*static_cast<SparamT*>(source)));
-        ::rocket::destroy_at(static_cast<SparamT*>(source));
+        auto target = reinterpret_cast<SparamT*>(head->sparam);
+        auto source = reinterpret_cast<SparamT*>(from->sparam);
+        ::rocket::construct_at(target, ::std::move(*source));
+        ::rocket::destroy_at(source);
       }
   };
 
@@ -95,10 +100,11 @@ struct default_dtor
   {
     static
     void
-    func_opt(Uparam, void* sparam)
+    func_opt(Header* head)
       noexcept
       {
-        ::rocket::destroy_at(static_cast<SparamT*>(sparam));
+        auto target = reinterpret_cast<SparamT*>(head->sparam);
+        ::rocket::destroy_at(target);
       }
   };
 
@@ -114,11 +120,11 @@ struct forward_ctor
   {
     static
     void
-    func(Uparam, void* sparam, size_t, intptr_t arg)
+    func(Header* head, size_t /*size*/, intptr_t arg)
       {
-        ::rocket::construct_at(static_cast<SparamT*>(sparam),
-             static_cast<XSparamT&&>(*(reinterpret_cast<
-                 typename ::std::remove_reference<XSparamT>::type*>(arg))));
+        auto target = reinterpret_cast<SparamT*>(head->sparam);
+        auto source = reinterpret_cast<SparamT*>(arg);
+        ::rocket::construct_at(target, static_cast<XSparamT&&>(*source));
       }
   };
 
@@ -126,9 +132,9 @@ struct memcpy_ctor
   {
     static
     void
-    func(Uparam, void* sparam, size_t size, intptr_t arg)
+    func(Header* head, size_t size, intptr_t arg)
       {
-        ::std::memcpy(sparam, reinterpret_cast<const void*>(arg), size);
+        ::std::memcpy(head->sparam, reinterpret_cast<char*>(arg), size);
       }
   };
 
