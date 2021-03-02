@@ -1607,7 +1607,6 @@ struct AIR_Traits_apply_operator_inc_post : AIR_Traits_apply_operator_common
         // This operator is unary. `assign` is ignored.
         // First, get the old value.
         auto& lhs = ctx.stack().back().dereference_mutable();
-        Reference::S_temporary xref = { lhs };
 
         // Increment the value and replace the top with the old one.
         switch(do_tmask_of(lhs)) {
@@ -1616,25 +1615,26 @@ struct AIR_Traits_apply_operator_inc_post : AIR_Traits_apply_operator_common
             auto& val = lhs.open_integer();
 
             // Check for overflows.
-            if(val == INT64_MAX) {
+            if(val == INT64_MAX)
               ASTERIA_THROW("Integer increment overflow");
-            }
-            val += 1;
-            break;
+
+            Reference::S_temporary xref = { val++ };
+            ctx.stack().mut_back() = ::std::move(xref);
+            return air_status_next;
           }
 
           case tmask_real: {
             ROCKET_ASSERT(lhs.is_real());
-            lhs.open_real() += 1;
-            break;
+            auto& val = lhs.open_real();
+            Reference::S_temporary xref = { val++ };
+            ctx.stack().mut_back() = ::std::move(xref);
+            return air_status_next;
           }
 
           default:
             ASTERIA_THROW("Postfix increment not applicable (operand was `$1`)",
                           lhs);
         }
-        ctx.stack().mut_back() = ::std::move(xref);
-        return air_status_next;
       }
   };
 
@@ -1647,7 +1647,6 @@ struct AIR_Traits_apply_operator_dec_post : AIR_Traits_apply_operator_common
         // This operator is unary. `assign` is ignored.
         // First, get the old value.
         auto& lhs = ctx.stack().back().dereference_mutable();
-        Reference::S_temporary xref = { lhs };
 
         // Decrement the value and replace the top with the old one.
         switch(do_tmask_of(lhs)) {
@@ -1656,25 +1655,26 @@ struct AIR_Traits_apply_operator_dec_post : AIR_Traits_apply_operator_common
             auto& val = lhs.open_integer();
 
             // Check for overflows.
-            if(val == INT64_MIN) {
+            if(val == INT64_MIN)
               ASTERIA_THROW("Integer decrement overflow");
-            }
-            val -= 1;
-            break;
+
+            Reference::S_temporary xref = { val-- };
+            ctx.stack().mut_back() = ::std::move(xref);
+            return air_status_next;
           }
 
           case tmask_real: {
             ROCKET_ASSERT(lhs.is_real());
-            lhs.open_real() -= 1;
-            break;
+            auto& val = lhs.open_real();
+            Reference::S_temporary xref = { val-- };
+            ctx.stack().mut_back() = ::std::move(xref);
+            return air_status_next;
           }
 
           default:
             ASTERIA_THROW("Postfix decrement not applicable (operand was `$1`)",
                           lhs);
         }
-        ctx.stack().mut_back() = ::std::move(xref);
-        return air_status_next;
       }
   };
 
@@ -1687,28 +1687,26 @@ struct AIR_Traits_apply_operator_subscr : AIR_Traits_apply_operator_common
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
         ctx.stack().pop_back();
-        auto& lref = ctx.stack().mut_back();
 
-        // Push a modifier to `lref` depending the type of `rhs`.
+        // Push a modifier depending the type of `rhs`.
         switch(do_tmask_of(rhs)) {
           case tmask_integer: {
             ROCKET_ASSERT(rhs.is_integer());
             Reference::M_array_index xmod = { rhs.as_integer() };
-            lref.zoom_in(::std::move(xmod));
-            break;
+            ctx.stack().mut_back().zoom_in(::std::move(xmod));
+            return air_status_next;
           }
 
           case tmask_string: {
             ROCKET_ASSERT(rhs.is_string());
             Reference::M_object_key xmod = { rhs.as_string() };
-            lref.zoom_in(::std::move(xmod));
-            break;
+            ctx.stack().mut_back().zoom_in(::std::move(xmod));
+            return air_status_next;
           }
 
           default:
             ASTERIA_THROW("Subscript not valid (value was `$1`)", rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -1742,25 +1740,24 @@ struct AIR_Traits_apply_operator_neg : AIR_Traits_apply_operator_common
             auto& val = rhs.open_integer();
 
             // Check for overflows.
-            if(val == INT64_MIN) {
+            if(val == INT64_MIN)
               ASTERIA_THROW("Integer negation overflow");
-            }
+
             val = -val;
-            break;
+            return air_status_next;
           }
 
           case tmask_real: {
             ROCKET_ASSERT(rhs.is_real());
             auto& val = rhs.open_real();
             val = -val;
-            break;
+            return air_status_next;
           }
 
           default:
             ASTERIA_THROW("Prefix negation not applicable (operand was `$1`)",
                           rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -1779,14 +1776,14 @@ struct AIR_Traits_apply_operator_notb : AIR_Traits_apply_operator_common
             ROCKET_ASSERT(rhs.is_boolean());
             auto& val = rhs.open_boolean();
             val = !val;
-            break;
+            return air_status_next;
           }
 
           case tmask_integer: {
             ROCKET_ASSERT(rhs.is_integer());
             auto& val = rhs.open_integer();
             val = ~val;
-            break;
+            return air_status_next;
           }
 
           case tmask_string: {
@@ -1794,14 +1791,13 @@ struct AIR_Traits_apply_operator_notb : AIR_Traits_apply_operator_common
             auto& val = rhs.open_string();
             for(auto it = val.mut_begin();  it != val.end();  ++it)
               *it = static_cast<char>(~*it);
-            break;
+            return air_status_next;
           }
 
           default:
             ASTERIA_THROW("Prefix negation not applicable (operand was `$1`)",
                           rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -1837,24 +1833,24 @@ struct AIR_Traits_apply_operator_inc_pre : AIR_Traits_apply_operator_common
             auto& val = rhs.open_integer();
 
             // Check for overflows.
-            if(val == INT64_MAX) {
+            if(val == INT64_MAX)
               ASTERIA_THROW("Integer increment overflow");
-            }
-            val += 1;
-            break;
+
+            ++val;
+            return air_status_next;
           }
 
           case tmask_real: {
             ROCKET_ASSERT(rhs.is_real());
-            rhs.open_real() += 1;
-            break;
+            auto& val = rhs.open_real();
+            ++val;
+            return air_status_next;
           }
 
           default:
             ASTERIA_THROW("Prefix increment not applicable (operand was `$1`)",
                           rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -1874,24 +1870,24 @@ struct AIR_Traits_apply_operator_dec_pre : AIR_Traits_apply_operator_common
             auto& val = rhs.open_integer();
 
             // Check for overflows.
-            if(val == INT64_MIN) {
+            if(val == INT64_MIN)
               ASTERIA_THROW("Integer decrement overflow");
-            }
-            val -= 1;
-            break;
+
+            --val;
+            return air_status_next;
           }
 
           case tmask_real: {
             ROCKET_ASSERT(rhs.is_real());
-            rhs.open_real() -= 1;
-            break;
+            auto& val = rhs.open_real();
+            --val;
+            return air_status_next;
           }
 
           default:
             ASTERIA_THROW("Prefix decrement not applicable (operand was `$1`)",
                           rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -1923,32 +1919,31 @@ struct AIR_Traits_apply_operator_countof : AIR_Traits_apply_operator_common
           case tmask_null: {
             ROCKET_ASSERT(rhs.is_null());
             rhs = 0;
-            break;
+            return air_status_next;
           }
 
           case tmask_string: {
             ROCKET_ASSERT(rhs.is_string());
             rhs = rhs.as_string().ssize();
-            break;
+            return air_status_next;
           }
 
           case tmask_array: {
             ROCKET_ASSERT(rhs.is_array());
             rhs = rhs.as_array().ssize();
-            break;
+            return air_status_next;
           }
 
           case tmask_object: {
             ROCKET_ASSERT(rhs.is_object());
             rhs = rhs.as_object().ssize();
-            break;
+            return air_status_next;
           }
 
           default:
             ASTERIA_THROW("Prefix `countof` not applicable (operand was `$1`)",
                           rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -1982,20 +1977,19 @@ struct AIR_Traits_apply_operator_sqrt : AIR_Traits_apply_operator_common
           case tmask_integer: {
             ROCKET_ASSERT(rhs.is_integer());
             rhs = ::std::sqrt(rhs.convert_to_real());
-            break;
+            return air_status_next;
           }
 
           case tmask_real: {
             ROCKET_ASSERT(rhs.is_real());
             rhs = ::std::sqrt(rhs.as_real());
-            break;
+            return air_status_next;
           }
 
           default:
             ASTERIA_THROW("Prefix `__sqrt` not applicable (operand was `$1`)",
                           rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -2014,20 +2008,19 @@ struct AIR_Traits_apply_operator_isnan : AIR_Traits_apply_operator_common
           case tmask_integer: {
             ROCKET_ASSERT(rhs.is_integer());
             rhs = false;
-            break;
+            return air_status_next;
           }
 
           case tmask_real: {
             ROCKET_ASSERT(rhs.is_real());
             rhs = ::std::isnan(rhs.as_real());
-            break;
+            return air_status_next;
           }
 
           default:
             ASTERIA_THROW("Prefix `__isnan` not applicable (operand was `$1`)",
                           rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -2046,20 +2039,19 @@ struct AIR_Traits_apply_operator_isinf : AIR_Traits_apply_operator_common
           case tmask_integer: {
             ROCKET_ASSERT(rhs.is_integer());
             rhs = false;
-            break;
+            return air_status_next;
           }
 
           case tmask_real: {
             ROCKET_ASSERT(rhs.is_real());
             rhs = ::std::isinf(rhs.as_real());
-            break;
+            return air_status_next;
           }
 
           default:
             ASTERIA_THROW("Prefix `__isinf` not applicable (operand was `$1`)",
                           rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -2079,24 +2071,24 @@ struct AIR_Traits_apply_operator_abs : AIR_Traits_apply_operator_common
             auto& val = rhs.open_integer();
 
             // Check for overflows.
-            if(val == INT64_MIN) {
+            if(val == INT64_MIN)
               ASTERIA_THROW("Integer absolute value overflow");
-            }
+
             val = ::std::abs(val);
-            break;
+            return air_status_next;
           }
 
           case tmask_real: {
             ROCKET_ASSERT(rhs.is_real());
-            rhs = ::std::fabs(rhs.as_real());
-            break;
+            auto& val = rhs.open_real();
+            val = ::std::fabs(val);
+            return air_status_next;
           }
 
           default:
             ASTERIA_THROW("Prefix `__abs` not applicable (operand was `$1`)",
                           rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -2114,20 +2106,19 @@ struct AIR_Traits_apply_operator_sign : AIR_Traits_apply_operator_common
           case tmask_integer: {
             ROCKET_ASSERT(rhs.is_integer());
             rhs.open_integer() >>= 63;
-            break;
+            return air_status_next;
           }
 
           case tmask_real: {
             ROCKET_ASSERT(rhs.is_real());
-            rhs = ::std::signbit(rhs.as_real()) ? INT64_C(-1) : 0;
-            break;
+            rhs = ::std::signbit(rhs.as_real()) ? -1 : 0;
+            return air_status_next;
           }
 
           default:
             ASTERIA_THROW("Prefix `__abs` not applicable (operand was `$1`)",
                           rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -2143,22 +2134,19 @@ struct AIR_Traits_apply_operator_round : AIR_Traits_apply_operator_common
         // Round the operand to the nearest integer.
         // This is a no-op for type `integer`.
         switch(do_tmask_of(rhs)) {
-          case tmask_integer: {
+          case tmask_integer:
             ROCKET_ASSERT(rhs.is_integer());
-            break;
-          }
+            return air_status_next;
 
-          case tmask_real: {
+          case tmask_real:
             ROCKET_ASSERT(rhs.is_real());
             rhs = ::std::round(rhs.as_real());
-            break;
-          }
+            return air_status_next;
 
           default:
             ASTERIA_THROW("Prefix `__round` not applicable (operand was `$1`)",
                           rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -2174,22 +2162,19 @@ struct AIR_Traits_apply_operator_floor : AIR_Traits_apply_operator_common
         // Round the operand to the nearest integer towards negative infinity.
         // This is a no-op for type `integer`.
         switch(do_tmask_of(rhs)) {
-          case tmask_integer: {
+          case tmask_integer:
             ROCKET_ASSERT(rhs.is_integer());
-            break;
-          }
+            return air_status_next;
 
-          case tmask_real: {
+          case tmask_real:
             ROCKET_ASSERT(rhs.is_real());
             rhs = ::std::floor(rhs.as_real());
-            break;
-          }
+            return air_status_next;
 
           default:
             ASTERIA_THROW("Prefix `__floor` not applicable (operand was `$1`)",
                           rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -2205,22 +2190,19 @@ struct AIR_Traits_apply_operator_ceil : AIR_Traits_apply_operator_common
         // Round the operand to the nearest integer towards positive infinity.
         // This is a no-op for type `integer`.
         switch(do_tmask_of(rhs)) {
-          case tmask_integer: {
+          case tmask_integer:
             ROCKET_ASSERT(rhs.is_integer());
-            break;
-          }
+            return air_status_next;
 
-          case tmask_real: {
+          case tmask_real:
             ROCKET_ASSERT(rhs.is_real());
             rhs = ::std::ceil(rhs.as_real());
-            break;
-          }
+            return air_status_next;
 
           default:
             ASTERIA_THROW("Prefix `__ceil` not applicable (operand was `$1`)",
                           rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -2236,22 +2218,19 @@ struct AIR_Traits_apply_operator_trunc : AIR_Traits_apply_operator_common
         // Round the operand to the nearest integer towards zero.
         // This is a no-op for type `integer`.
         switch(do_tmask_of(rhs)) {
-          case tmask_integer: {
+          case tmask_integer:
             ROCKET_ASSERT(rhs.is_integer());
-            break;
-          }
+            return air_status_next;
 
-          case tmask_real: {
+          case tmask_real:
             ROCKET_ASSERT(rhs.is_real());
             rhs = ::std::trunc(rhs.as_real());
-            break;
-          }
+            return air_status_next;
 
           default:
             ASTERIA_THROW("Prefix `__trunc` not applicable (operand was `$1`)",
                           rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -2267,22 +2246,19 @@ struct AIR_Traits_apply_operator_iround : AIR_Traits_apply_operator_common
         // Round the operand to the nearest integer.
         // This is a no-op for type `integer`.
         switch(do_tmask_of(rhs)) {
-          case tmask_integer: {
+          case tmask_integer:
             ROCKET_ASSERT(rhs.is_integer());
-            break;
-          }
+            return air_status_next;
 
-          case tmask_real: {
+          case tmask_real:
             ROCKET_ASSERT(rhs.is_real());
             rhs = do_icast(::std::round(rhs.as_real()));
-            break;
-          }
+            return air_status_next;
 
           default:
             ASTERIA_THROW("Prefix `__iround` not applicable (operand was `$1`)",
                           rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -2298,22 +2274,19 @@ struct AIR_Traits_apply_operator_ifloor : AIR_Traits_apply_operator_common
         // Round the operand to the nearest integer towards negative infinity.
         // This is a no-op for type `integer`.
         switch(do_tmask_of(rhs)) {
-          case tmask_integer: {
+          case tmask_integer:
             ROCKET_ASSERT(rhs.is_integer());
-            break;
-          }
+            return air_status_next;
 
-          case tmask_real: {
+          case tmask_real:
             ROCKET_ASSERT(rhs.is_real());
             rhs = do_icast(::std::floor(rhs.as_real()));
-            break;
-          }
+            return air_status_next;
 
           default:
             ASTERIA_THROW("Prefix `__ifloor` not applicable (operand was `$1`)",
                           rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -2329,22 +2302,19 @@ struct AIR_Traits_apply_operator_iceil : AIR_Traits_apply_operator_common
         // Round the operand to the nearest integer towards positive infinity.
         // This is a no-op for type `integer`.
         switch(do_tmask_of(rhs)) {
-          case tmask_integer: {
+          case tmask_integer:
             ROCKET_ASSERT(rhs.is_integer());
-            break;
-          }
+            return air_status_next;
 
-          case tmask_real: {
+          case tmask_real:
             ROCKET_ASSERT(rhs.is_real());
             rhs = do_icast(::std::ceil(rhs.as_real()));
-            break;
-          }
+            return air_status_next;
 
           default:
             ASTERIA_THROW("Prefix `__iceil` not applicable (operand was `$1`)",
                           rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -2360,22 +2330,19 @@ struct AIR_Traits_apply_operator_itrunc : AIR_Traits_apply_operator_common
         // Round the operand to the nearest integer towards zero.
         // This is a no-op for type `integer`.
         switch(do_tmask_of(rhs)) {
-          case tmask_integer: {
+          case tmask_integer:
             ROCKET_ASSERT(rhs.is_integer());
-            break;
-          }
+            return air_status_next;
 
-          case tmask_real: {
+          case tmask_real:
             ROCKET_ASSERT(rhs.is_real());
             rhs = do_icast(::std::trunc(rhs.as_real()));
-            break;
-          }
+            return air_status_next;
 
           default:
             ASTERIA_THROW("Prefix `__itrunc` not applicable (operand was `$1`)",
                           rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -2526,24 +2493,23 @@ struct AIR_Traits_apply_operator_cmp_3way : AIR_Traits_apply_operator_common
         switch(cmp) {
           case compare_unordered:
             lhs = sref("[unordered]");
-            break;
+            return air_status_next;
 
           case compare_less:
-            lhs = INT64_C(-1);
-            break;
+            lhs = -1;
+            return air_status_next;
 
           case compare_equal:
             lhs = 0;
-            break;
+            return air_status_next;
 
           case compare_greater:
-            lhs = INT64_C(+1);
-            break;
+            lhs = +1;
+            return air_status_next;
 
           default:
             ROCKET_ASSERT(false);
         }
-        return air_status_next;
       }
   };
 
@@ -2566,7 +2532,7 @@ struct AIR_Traits_apply_operator_add : AIR_Traits_apply_operator_common
             ROCKET_ASSERT(lhs.is_boolean());
             ROCKET_ASSERT(rhs.is_boolean());
             lhs.open_boolean() |= rhs.as_boolean();
-            break;
+            return air_status_next;
           }
 
           case tmask_integer: {
@@ -2581,7 +2547,7 @@ struct AIR_Traits_apply_operator_add : AIR_Traits_apply_operator_common
                             lhs, rhs);
 
             x += y;
-            break;
+            return air_status_next;
           }
 
           case tmask_real | tmask_integer:
@@ -2589,21 +2555,20 @@ struct AIR_Traits_apply_operator_add : AIR_Traits_apply_operator_common
             ROCKET_ASSERT(lhs.is_convertible_to_real());
             ROCKET_ASSERT(rhs.is_convertible_to_real());
             lhs.mutate_into_real() += rhs.convert_to_real();
-            break;
+            return air_status_next;
           }
 
           case tmask_string: {
             ROCKET_ASSERT(lhs.is_string());
             ROCKET_ASSERT(rhs.is_string());
             lhs.open_string() += rhs.as_string();
-            break;
+            return air_status_next;
           }
 
           default:
             ASTERIA_THROW("Infix addition not applicable (operands were `$1` and `$2`)",
                           lhs, rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -2625,7 +2590,7 @@ struct AIR_Traits_apply_operator_sub : AIR_Traits_apply_operator_common
             ROCKET_ASSERT(lhs.is_boolean());
             ROCKET_ASSERT(rhs.is_boolean());
             lhs.open_boolean() ^= rhs.as_boolean();
-            break;
+            return air_status_next;
           }
 
           case tmask_integer: {
@@ -2640,7 +2605,7 @@ struct AIR_Traits_apply_operator_sub : AIR_Traits_apply_operator_common
                             lhs, rhs);
 
             x -= y;
-            break;
+            return air_status_next;
           }
 
           case tmask_real | tmask_integer:
@@ -2648,14 +2613,13 @@ struct AIR_Traits_apply_operator_sub : AIR_Traits_apply_operator_common
             ROCKET_ASSERT(lhs.is_convertible_to_real());
             ROCKET_ASSERT(rhs.is_convertible_to_real());
             lhs.mutate_into_real() -= rhs.convert_to_real();
-            break;
+            return air_status_next;
           }
 
           default:
             ASTERIA_THROW("Infix subtraction not applicable (operands were `$1` and `$2`)",
                           lhs, rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -2678,7 +2642,7 @@ struct AIR_Traits_apply_operator_mul : AIR_Traits_apply_operator_common
             ROCKET_ASSERT(lhs.is_boolean());
             ROCKET_ASSERT(rhs.is_boolean());
             lhs.open_boolean() &= rhs.as_boolean();
-            break;
+            return air_status_next;
           }
 
           case tmask_integer: {
@@ -2705,7 +2669,7 @@ struct AIR_Traits_apply_operator_mul : AIR_Traits_apply_operator_common
 
               x *= y;
             }
-            break;
+            return air_status_next;
           }
 
           case tmask_real | tmask_integer:
@@ -2713,7 +2677,7 @@ struct AIR_Traits_apply_operator_mul : AIR_Traits_apply_operator_common
             ROCKET_ASSERT(lhs.is_convertible_to_real());
             ROCKET_ASSERT(rhs.is_convertible_to_real());
             lhs.mutate_into_real() *= rhs.convert_to_real();
-            break;
+            return air_status_next;
           }
 
           case tmask_string | tmask_integer: {
@@ -2747,14 +2711,13 @@ struct AIR_Traits_apply_operator_mul : AIR_Traits_apply_operator_common
                 ::std::memcpy(ptr + total, ptr, str.size() - total);
             }
             lhs = ::std::move(str);
-            break;
+            return air_status_next;
           }
 
           default:
             ASTERIA_THROW("Infix multiplication not applicable (operands were `$1` and `$2`)",
                           lhs, rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -2787,7 +2750,7 @@ struct AIR_Traits_apply_operator_div : AIR_Traits_apply_operator_common
                             lhs, rhs);
 
             x /= y;
-            break;
+            return air_status_next;
           }
 
           case tmask_real | tmask_integer:
@@ -2795,14 +2758,13 @@ struct AIR_Traits_apply_operator_div : AIR_Traits_apply_operator_common
             ROCKET_ASSERT(lhs.is_convertible_to_real());
             ROCKET_ASSERT(rhs.is_convertible_to_real());
             lhs.mutate_into_real() /= rhs.convert_to_real();
-            break;
+            return air_status_next;
           }
 
           default:
             ASTERIA_THROW("Infix division not applicable (operands were `$1` and `$2`)",
                           lhs, rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -2835,7 +2797,7 @@ struct AIR_Traits_apply_operator_mod : AIR_Traits_apply_operator_common
                             lhs, rhs);
 
             x %= y;
-            break;
+            return air_status_next;
           }
 
           case tmask_real | tmask_integer:
@@ -2843,14 +2805,13 @@ struct AIR_Traits_apply_operator_mod : AIR_Traits_apply_operator_common
             ROCKET_ASSERT(lhs.is_convertible_to_real());
             ROCKET_ASSERT(rhs.is_convertible_to_real());
             lhs = ::std::fmod(lhs.convert_to_real(), rhs.convert_to_real());
-            break;
+            return air_status_next;
           }
 
           default:
             ASTERIA_THROW("Infix modulo not applicable (operands were `$1` and `$2`)",
                           lhs, rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -2891,7 +2852,7 @@ struct AIR_Traits_apply_operator_sll : AIR_Traits_apply_operator_common
             else {
               reinterpret_cast<uint64_t&>(val) <<= n;
             }
-            break;
+            return air_status_next;
           }
 
           case tmask_string: {
@@ -2905,7 +2866,7 @@ struct AIR_Traits_apply_operator_sll : AIR_Traits_apply_operator_common
               val.erase(0, static_cast<size_t>(n));
               val.append(static_cast<size_t>(n), ' ');
             }
-            break;
+            return air_status_next;
           }
 
           default:
@@ -2913,7 +2874,6 @@ struct AIR_Traits_apply_operator_sll : AIR_Traits_apply_operator_common
                 "Infix logical left shift not applicable (operands were `$1` and `$2`)",
                 lhs, rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -2954,7 +2914,7 @@ struct AIR_Traits_apply_operator_srl : AIR_Traits_apply_operator_common
             else {
               reinterpret_cast<uint64_t&>(val) >>= n;
             }
-            break;
+            return air_status_next;
           }
 
           case tmask_string: {
@@ -2968,7 +2928,7 @@ struct AIR_Traits_apply_operator_srl : AIR_Traits_apply_operator_common
               val.pop_back(static_cast<size_t>(n));
               val.insert(0, static_cast<size_t>(n), ' ');
             }
-            break;
+            return air_status_next;
           }
 
           default:
@@ -2976,7 +2936,6 @@ struct AIR_Traits_apply_operator_srl : AIR_Traits_apply_operator_common
                 "Infix logical right shift not applicable (operands were `$1` and `$2`)",
                 lhs, rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -3026,7 +2985,7 @@ struct AIR_Traits_apply_operator_sla : AIR_Traits_apply_operator_common
 
               reinterpret_cast<uint64_t&>(val) <<= n;
             }
-            break;
+            return air_status_next;
           }
 
           case tmask_string: {
@@ -3040,7 +2999,7 @@ struct AIR_Traits_apply_operator_sla : AIR_Traits_apply_operator_common
             else {
               val.append(static_cast<size_t>(n), ' ');
             }
-            break;
+            return air_status_next;
           }
 
           default:
@@ -3048,7 +3007,6 @@ struct AIR_Traits_apply_operator_sla : AIR_Traits_apply_operator_common
                 "Infix arithmetic left shift not applicable (operands were `$1` and `$2`)",
                 lhs, rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -3087,7 +3045,7 @@ struct AIR_Traits_apply_operator_sra : AIR_Traits_apply_operator_common
             else {
               val >>= n;
             }
-            break;
+            return air_status_next;
           }
 
           case tmask_string: {
@@ -3100,7 +3058,7 @@ struct AIR_Traits_apply_operator_sra : AIR_Traits_apply_operator_common
             else {
               val.pop_back(static_cast<size_t>(n));
             }
-            break;
+            return air_status_next;
           }
 
           default:
@@ -3108,7 +3066,6 @@ struct AIR_Traits_apply_operator_sra : AIR_Traits_apply_operator_common
                 "Infix arithmetic right shift not applicable (operands were `$1` and `$2`)",
                 lhs, rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -3131,14 +3088,14 @@ struct AIR_Traits_apply_operator_andb : AIR_Traits_apply_operator_common
             ROCKET_ASSERT(lhs.is_boolean());
             ROCKET_ASSERT(rhs.is_boolean());
             lhs.open_boolean() &= rhs.as_boolean();
-            break;
+            return air_status_next;
           }
 
           case tmask_integer: {
             ROCKET_ASSERT(lhs.is_integer());
             ROCKET_ASSERT(rhs.is_integer());
             lhs.open_integer() &= rhs.as_integer();
-            break;
+            return air_status_next;
           }
 
           case tmask_string: {
@@ -3155,14 +3112,13 @@ struct AIR_Traits_apply_operator_andb : AIR_Traits_apply_operator_common
             char* ptr = val.mut_data();
             for(size_t k = 0;  k != n;  ++k)
               ptr[k] = static_cast<char>(ptr[k] & mask[k]);
-            break;
+            return air_status_next;
           }
 
           default:
             ASTERIA_THROW("Infix bitwise AND not applicable (operands were `$1` and `$2`)",
                           lhs, rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -3185,14 +3141,14 @@ struct AIR_Traits_apply_operator_orb : AIR_Traits_apply_operator_common
             ROCKET_ASSERT(lhs.is_boolean());
             ROCKET_ASSERT(rhs.is_boolean());
             lhs.open_boolean() |= rhs.as_boolean();
-            break;
+            return air_status_next;
           }
 
           case tmask_integer: {
             ROCKET_ASSERT(lhs.is_integer());
             ROCKET_ASSERT(rhs.is_integer());
             lhs.open_integer() |= rhs.as_integer();
-            break;
+            return air_status_next;
           }
 
           case tmask_string: {
@@ -3210,14 +3166,13 @@ struct AIR_Traits_apply_operator_orb : AIR_Traits_apply_operator_common
             char* ptr = val.mut_data();
             for(size_t k = 0;  k != n;  ++k)
               ptr[k] = static_cast<char>(ptr[k] | mask[k]);
-            break;
+            return air_status_next;
           }
 
           default:
             ASTERIA_THROW("Infix bitwise OR not applicable (operands were `$1` and `$2`)",
                           lhs, rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -3240,14 +3195,14 @@ struct AIR_Traits_apply_operator_xorb : AIR_Traits_apply_operator_common
             ROCKET_ASSERT(lhs.is_boolean());
             ROCKET_ASSERT(rhs.is_boolean());
             lhs.open_boolean() ^= rhs.as_boolean();
-            break;
+            return air_status_next;
           }
 
           case tmask_integer: {
             ROCKET_ASSERT(lhs.is_integer());
             ROCKET_ASSERT(rhs.is_integer());
             lhs.open_integer() ^= rhs.as_integer();
-            break;
+            return air_status_next;
           }
 
           case tmask_string: {
@@ -3265,14 +3220,13 @@ struct AIR_Traits_apply_operator_xorb : AIR_Traits_apply_operator_common
             char* ptr = val.mut_data();
             for(size_t k = 0;  k != n;  ++k)
               ptr[k] = static_cast<char>(ptr[k] ^ mask[k]);
-            break;
+            return air_status_next;
           }
 
           default:
             ASTERIA_THROW("Infix bitwise XOR not applicable (operands were `$1` and `$2`)",
                           lhs, rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -3311,7 +3265,7 @@ struct AIR_Traits_apply_operator_fma : AIR_Traits_apply_operator_common
             ROCKET_ASSERT(rhs.is_convertible_to_real());
             lhs = ::std::fma(lhs.convert_to_real(), mid.convert_to_real(),
                              rhs.convert_to_real());
-            break;
+            return air_status_next;
           }
 
           default:
@@ -3319,7 +3273,6 @@ struct AIR_Traits_apply_operator_fma : AIR_Traits_apply_operator_common
                 "Fused multiply-add not applicable (operands were `$1`, `$2` and `$3`)",
                 lhs, mid, rhs);
         }
-        return air_status_next;
       }
   };
 
@@ -3330,8 +3283,7 @@ struct AIR_Traits_apply_operator_head : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
       {
         // This operator is binary. `assign` is ignored.
-        auto& lref = ctx.stack().mut_back();
-        lref.zoom_in(Reference::M_array_head());
+        ctx.stack().mut_back().zoom_in(Reference::M_array_head());
         return air_status_next;
       }
   };
@@ -3343,8 +3295,7 @@ struct AIR_Traits_apply_operator_tail : AIR_Traits_apply_operator_common
     execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
       {
         // This operator is binary. `assign` is ignored.
-        auto& lref = ctx.stack().mut_back();
-        lref.zoom_in(Reference::M_array_tail());
+        ctx.stack().mut_back().zoom_in(Reference::M_array_tail());
         return air_status_next;
       }
   };
