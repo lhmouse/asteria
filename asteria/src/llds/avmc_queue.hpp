@@ -174,6 +174,7 @@ class AVMC_Queue
     append(Executor& exec, Uparam uparam, XSparamT&& xsparam, Enumerator* enum_opt)
       {
         using Sparam = typename ::std::decay<XSparamT>::type;
+        static_assert(::std::is_nothrow_move_constructible<Sparam>::value);
 
         if(::std::is_trivial<Sparam>::value && !enum_opt)
           return this->do_append_trivial(uparam, exec,
