@@ -37,7 +37,7 @@ using Constructor  = void (Header* head, size_t size, intptr_t arg);
 using Relocator    = void (Header* head, Header* from);
 using Destructor   = void (Header* head);
 using Executor     = AIR_Status (Executive_Context& ctx, const Header* head);
-using Enumerator   = Variable_Callback& (Variable_Callback& callback, const Header* head);
+using Enumerator   = void (Variable_Callback& callback, const Header* head);
 
 struct Metadata
   {
@@ -73,70 +73,83 @@ struct Header
     char sparam[0];
   };
 
+template<typename SparamT>
+inline
+void
+do_nontrivial_reloc(Header* head, Header* from)
+  {
+    auto ptr = reinterpret_cast<SparamT*>(head->sparam);
+    auto src = reinterpret_cast<SparamT*>(from->sparam);
+    ::rocket::construct_at(ptr, ::std::move(*src));
+    ::rocket::destroy_at(src);
+  }
+
+template<typename SparamT>
+inline
+void
+do_nontrivial_dtor(Header* head)
+  {
+    auto ptr = reinterpret_cast<SparamT*>(head->sparam);
+    ::rocket::destroy_at(ptr);
+  }
+
 template<typename SparamT, typename = void>
-struct default_reloc
+struct select_enumerate_variables
+  {
+    static constexpr Enumerator* value = nullptr;
+  };
+
+template<typename SparamT>
+struct select_enumerate_variables<SparamT,
+    ROCKET_VOID_T(decltype(
+        ::std::declval<const SparamT&>().enumerate_variables(
+            ::std::declval<Variable_Callback&>())))>
   {
     static
     void
-    func_opt(Header* head, Header* from)
-      noexcept
+    value(Variable_Callback& callback, const Header* head)
       {
-        auto target = reinterpret_cast<SparamT*>(head->sparam);
-        auto source = reinterpret_cast<SparamT*>(from->sparam);
-        ::rocket::construct_at(target, ::std::move(*source));
-        ::rocket::destroy_at(source);
+        reinterpret_cast<const SparamT*>(head->sparam)->
+                                 enumerate_variables(callback);
       }
   };
 
 template<typename SparamT>
-struct default_reloc<SparamT, typename ::std::enable_if<
-           ::std::is_trivially_copyable<SparamT>::value>::type>
+struct Sparam_traits
   {
-    static constexpr Relocator* func_opt = nullptr;
+    static constexpr Relocator* reloc_opt =
+        ::std::is_trivially_copyable<SparamT>::value
+            ? nullptr
+            : do_nontrivial_reloc<SparamT>;
+
+    static constexpr Destructor* dtor_opt =
+        ::std::is_trivially_destructible<SparamT>::value
+            ? nullptr
+            : do_nontrivial_dtor<SparamT>;
+
+    static constexpr Enumerator* enum_opt =
+        select_enumerate_variables<SparamT>::value;
   };
 
-template<typename SparamT, typename = void>
-struct default_dtor
+template<typename XSparamT>
+inline
+void
+do_forward_ctor(Header* head, size_t size, intptr_t arg)
   {
-    static
-    void
-    func_opt(Header* head)
-      noexcept
-      {
-        auto target = reinterpret_cast<SparamT*>(head->sparam);
-        ::rocket::destroy_at(target);
-      }
-  };
+    using Sparam = typename ::std::decay<XSparamT>::type;
+    ROCKET_ASSERT(size == sizeof(Sparam));
 
-template<typename SparamT>
-struct default_dtor<SparamT, typename ::std::enable_if<
-           ::std::is_trivially_destructible<SparamT>::value>::type>
-  {
-    static constexpr Destructor* func_opt = nullptr;
-  };
+    auto ptr = reinterpret_cast<Sparam*>(head->sparam);
+    auto src = reinterpret_cast<Sparam*>(arg);
+    ::rocket::construct_at(ptr, static_cast<XSparamT&&>(*src));
+  }
 
-template<typename SparamT, typename XSparamT>
-struct forward_ctor
+inline
+void
+do_trivial_ctor(Header* head, size_t size, intptr_t arg)
   {
-    static
-    void
-    func(Header* head, size_t /*size*/, intptr_t arg)
-      {
-        auto target = reinterpret_cast<SparamT*>(head->sparam);
-        auto source = reinterpret_cast<SparamT*>(arg);
-        ::rocket::construct_at(target, static_cast<XSparamT&&>(*source));
-      }
-  };
-
-struct memcpy_ctor
-  {
-    static
-    void
-    func(Header* head, size_t size, intptr_t arg)
-      {
-        ::std::memcpy(head->sparam, reinterpret_cast<char*>(arg), size);
-      }
-  };
+    ::std::memcpy(head->sparam, reinterpret_cast<const char*>(arg), size);
+  }
 
 }  // namespace details_avmc_queue
 }  // namespace asteria

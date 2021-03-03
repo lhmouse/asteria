@@ -158,57 +158,55 @@ class AVMC_Queue
       {
         return this->do_append_nontrivial(uparam, exec, ::std::addressof(sloc),
                           nullptr, nullptr, nullptr,
-                          details_avmc_queue::memcpy_ctor::func,
-                          size, reinterpret_cast<intptr_t>(data));
+                          details_avmc_queue::do_trivial_ctor, size,
+                          reinterpret_cast<intptr_t>(data));
       }
 
     template<typename XSparamT>
     AVMC_Queue&
-    append(Executor& exec, XSparamT&& xsparam, Enumerator* enum_opt)
+    append(Executor& exec, XSparamT&& xsparam)
       {
-        return this->append(exec, Uparam(), ::std::forward<XSparamT>(xsparam), enum_opt);
+        return this->append(exec, Uparam(), ::std::forward<XSparamT>(xsparam));
       }
 
     template<typename XSparamT>
     AVMC_Queue&
-    append(Executor& exec, Uparam uparam, XSparamT&& xsparam, Enumerator* enum_opt)
+    append(Executor& exec, Uparam uparam, XSparamT&& xsparam)
       {
         using Sparam = typename ::std::decay<XSparamT>::type;
         static_assert(::std::is_nothrow_move_constructible<Sparam>::value);
+        using Traits = details_avmc_queue::Sparam_traits<Sparam>;
+        /*constexpr*/ auto enum_opt = Traits::enum_opt;
 
         if(::std::is_trivial<Sparam>::value && !enum_opt)
           return this->do_append_trivial(uparam, exec,
                             ::std::addressof(xsparam), sizeof(xsparam));
 
-        return this->do_append_nontrivial(uparam, exec, nullptr, enum_opt,
-                          details_avmc_queue::default_reloc<Sparam>::func_opt,
-                          details_avmc_queue::default_dtor<Sparam>::func_opt,
-                          details_avmc_queue::forward_ctor<Sparam, XSparamT>::func,
-                          sizeof(Sparam),
+        return this->do_append_nontrivial(uparam, exec, nullptr,
+                          enum_opt, Traits::reloc_opt, Traits::dtor_opt,
+                          details_avmc_queue::do_forward_ctor<XSparamT>, sizeof(xsparam),
                           reinterpret_cast<intptr_t>(::std::addressof(xsparam)));
       }
 
     template<typename XSparamT>
     AVMC_Queue&
-    append(Executor& exec, const Source_Location& sloc, XSparamT&& xsparam,
-           Enumerator* enum_opt)
+    append(Executor& exec, const Source_Location& sloc, XSparamT&& xsparam)
       {
-        return this->append(exec, sloc, Uparam(), ::std::forward<XSparamT>(xsparam),
-                            enum_opt);
+        return this->append(exec, sloc, Uparam(), ::std::forward<XSparamT>(xsparam));
       }
 
     template<typename XSparamT>
     AVMC_Queue&
-    append(Executor& exec, const Source_Location& sloc, Uparam uparam, XSparamT&& xsparam,
-           Enumerator* enum_opt)
+    append(Executor& exec, const Source_Location& sloc, Uparam uparam, XSparamT&& xsparam)
       {
         using Sparam = typename ::std::decay<XSparamT>::type;
+        static_assert(::std::is_nothrow_move_constructible<Sparam>::value);
+        using Traits = details_avmc_queue::Sparam_traits<Sparam>;
+        constexpr auto enum_opt = Traits::enum_opt;
 
-        return this->do_append_nontrivial(uparam, exec, ::std::addressof(sloc), enum_opt,
-                          details_avmc_queue::default_reloc<Sparam>::func_opt,
-                          details_avmc_queue::default_dtor<Sparam>::func_opt,
-                          details_avmc_queue::forward_ctor<Sparam, XSparamT>::func,
-                          sizeof(Sparam),
+        return this->do_append_nontrivial(uparam, exec, &sloc,
+                          enum_opt, Traits::reloc_opt, Traits::dtor_opt,
+                          details_avmc_queue::do_forward_ctor<XSparamT>, sizeof(xsparam),
                           reinterpret_cast<intptr_t>(::std::addressof(xsparam)));
       }
 

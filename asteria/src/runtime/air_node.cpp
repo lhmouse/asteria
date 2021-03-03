@@ -53,14 +53,14 @@ do_rebind_nodes(bool& dirty, cow_vector<cow_vector<AIR_Node>>& seqs,
     return dirty;
   }
 
-template<typename XNodeT>
+template<typename NodeT>
 opt<AIR_Node>
-do_rebind_return_opt(bool dirty, XNodeT&& xnode)
+do_rebind_return_opt(bool dirty, NodeT&& xnode)
   {
     if(!dirty)
       return nullopt;
     else
-      return ::std::forward<XNodeT>(xnode);
+      return ::std::forward<NodeT>(xnode);
   }
 
 bool
@@ -3877,263 +3877,190 @@ struct AIR_Traits_initialize_reference
       }
   };
 
-// These are helper type traits.
-// Depending on the existence of Uparam, Sparam and Symbols, the code will look very
-// different.
+// Finally...
+template<typename TraitsT, typename NodeT, typename = void>
+struct has_symbols
+  : ::std::false_type
+  { };
 
-// executor thunk
-template<typename TraitsT, typename UparamT, typename SparamT>
-struct Executor_of
+template<typename TraitsT, typename NodeT>
+struct has_symbols<TraitsT, NodeT,
+    ROCKET_VOID_T(decltype(
+        TraitsT::make_symbols(
+            ::std::declval<const NodeT&>())))>
+  : ::std::true_type
+  { };
+
+template<typename TraitsT, typename NodeT, typename = void>
+struct has_uparam
+  : ::std::false_type
+  { };
+
+template<typename TraitsT, typename NodeT>
+struct has_uparam<TraitsT, NodeT,
+    ROCKET_VOID_T(decltype(
+        TraitsT::make_uparam(
+            ::std::declval<bool&>(), ::std::declval<const NodeT&>())))>
+  : ::std::true_type
+  { };
+
+template<typename TraitsT, typename NodeT, typename = void>
+struct has_sparam
+  : ::std::false_type
+  { };
+
+template<typename TraitsT, typename NodeT>
+struct has_sparam<TraitsT, NodeT,
+    ROCKET_VOID_T(decltype(
+        TraitsT::make_sparam(
+            ::std::declval<bool&>(), ::std::declval<const NodeT&>())))>
+  : ::std::true_type
+  { };
+
+template<typename TraitsT, typename NodeT>
+inline
+void
+do_solidify_dispatch(bool& reachable, AVMC_Queue& queue, const NodeT& altr,
+      ::std::true_type /*syms*/, ::std::true_type /*up*/, ::std::true_type /*sp*/)
   {
-    static
-    AIR_Status
-    thunk(Executive_Context& ctx, const AVMC_Queue::Header* head)
+    auto syms = TraitsT::make_symbols(altr);
+    auto up = TraitsT::make_uparam(reachable, altr);
+    auto sp = TraitsT::make_sparam(reachable, altr);
+
+    auto exec = +[](Executive_Context& ctx, const AVMC_Queue::Header* head)
       {
-        return TraitsT::execute(ctx, UparamT(head->uparam),
-                   *(reinterpret_cast<const SparamT*>(head->sparam)));
-      }
-  };
+        return TraitsT::execute(ctx, static_cast<decltype(up)>(head->uparam),
+                 *(reinterpret_cast<const decltype(sp)*>(head->sparam)));
+      };
 
-template<typename TraitsT, typename UparamT>
-struct Executor_of<TraitsT, UparamT, void>
+    queue.append(*exec, ::std::move(syms), ::std::move(up), ::std::move(sp));
+  }
+
+template<typename TraitsT, typename NodeT>
+inline
+void
+do_solidify_dispatch(bool& reachable, AVMC_Queue& queue, const NodeT& altr,
+      ::std::false_type /*syms*/, ::std::true_type /*up*/, ::std::true_type /*sp*/)
   {
-    static
-    AIR_Status
-    thunk(Executive_Context& ctx, const AVMC_Queue::Header* head)
+    auto up = TraitsT::make_uparam(reachable, altr);
+    auto sp = TraitsT::make_sparam(reachable, altr);
+
+    auto exec = +[](Executive_Context& ctx, const AVMC_Queue::Header* head)
       {
-        return TraitsT::execute(ctx, UparamT(head->uparam));
-      }
-  };
+        return TraitsT::execute(ctx, static_cast<decltype(up)>(head->uparam),
+                 *(reinterpret_cast<const decltype(sp)*>(head->sparam)));
+      };
 
-template<typename TraitsT, typename SparamT>
-struct Executor_of<TraitsT, void, SparamT>
+    queue.append(*exec, ::std::move(up), ::std::move(sp));
+  }
+
+template<typename TraitsT, typename NodeT>
+inline
+void
+do_solidify_dispatch(bool& reachable, AVMC_Queue& queue, const NodeT& altr,
+      ::std::true_type /*syms*/, ::std::true_type /*up*/, ::std::false_type /*sp*/)
   {
-    static
-    AIR_Status
-    thunk(Executive_Context& ctx, const AVMC_Queue::Header* head)
+    auto syms = TraitsT::make_symbols(altr);
+    auto up = TraitsT::make_uparam(reachable, altr);
+
+    auto exec = +[](Executive_Context& ctx, const AVMC_Queue::Header* head)
+      {
+        return TraitsT::execute(ctx, static_cast<decltype(up)>(head->uparam));
+      };
+
+    queue.append(*exec, ::std::move(syms), ::std::move(up));
+  }
+
+template<typename TraitsT, typename NodeT>
+inline
+void
+do_solidify_dispatch(bool& reachable, AVMC_Queue& queue, const NodeT& altr,
+      ::std::false_type /*syms*/, ::std::true_type /*up*/, ::std::false_type /*sp*/)
+  {
+    auto up = TraitsT::make_uparam(reachable, altr);
+
+    auto exec = +[](Executive_Context& ctx, const AVMC_Queue::Header* head)
+      {
+        return TraitsT::execute(ctx, static_cast<decltype(up)>(head->uparam));
+      };
+
+    queue.append(*exec, ::std::move(up));
+  }
+
+template<typename TraitsT, typename NodeT>
+inline
+void
+do_solidify_dispatch(bool& reachable, AVMC_Queue& queue, const NodeT& altr,
+      ::std::true_type /*syms*/, ::std::false_type /*up*/, ::std::true_type /*sp*/)
+  {
+    auto syms = TraitsT::make_symbols(altr);
+    auto sp = TraitsT::make_sparam(reachable, altr);
+
+    auto exec = +[](Executive_Context& ctx, const AVMC_Queue::Header* head)
       {
         return TraitsT::execute(ctx,
-                   *(reinterpret_cast<const SparamT*>(head->sparam)));
-      }
-  };
+                 *(reinterpret_cast<const decltype(sp)*>(head->sparam)));
+      };
 
-template<typename TraitsT>
-struct Executor_of<TraitsT, void, void>
+    queue.append(*exec, ::std::move(syms), ::std::move(sp));
+  }
+
+template<typename TraitsT, typename NodeT>
+inline
+void
+do_solidify_dispatch(bool& reachable, AVMC_Queue& queue, const NodeT& altr,
+      ::std::false_type /*syms*/, ::std::false_type /*up*/, ::std::true_type /*sp*/)
   {
-    static
-    AIR_Status
-    thunk(Executive_Context& ctx, const AVMC_Queue::Header* /*head*/)
+    auto sp = TraitsT::make_sparam(reachable, altr);
+
+    auto exec = +[](Executive_Context& ctx, const AVMC_Queue::Header* head)
+      {
+        return TraitsT::execute(ctx,
+                 *(reinterpret_cast<const decltype(sp)*>(head->sparam)));
+      };
+
+    queue.append(*exec, ::std::move(sp));
+  }
+
+template<typename TraitsT, typename NodeT>
+inline
+void
+do_solidify_dispatch(bool& /*reachable*/, AVMC_Queue& queue, const NodeT& /*altr*/,
+      ::std::false_type /*syms*/, ::std::false_type /*up*/, ::std::false_type /*sp*/)
+  {
+    auto exec = +[](Executive_Context& ctx, const AVMC_Queue::Header* /*head*/)
       {
         return TraitsT::execute(ctx);
-      }
-  };
+      };
 
-// enumerator thunk
-template<typename SparamT, typename = void>
-struct Enumerator_of
-  {
-    static constexpr AVMC_Queue::Enumerator* thunk = nullptr;
-  };
+    queue.append(*exec);
+  }
 
-template<typename SparamT>
-struct Enumerator_of<SparamT, ROCKET_VOID_T(decltype(&SparamT::enumerate_variables))>
+template<typename TraitsT, typename NodeT>
+inline
+void
+do_solidify_dispatch(bool& /*reachable*/, AVMC_Queue& queue, const NodeT& altr,
+      ::std::true_type /*syms*/, ::std::false_type /*up*/, ::std::false_type /*sp*/)
   {
-    static
-    Variable_Callback&
-    thunk(Variable_Callback& callback, const AVMC_Queue::Header* head)
+    auto syms = TraitsT::make_symbols(altr);
+
+    auto exec = +[](Executive_Context& ctx, const AVMC_Queue::Header* /*head*/)
       {
-        return reinterpret_cast<const SparamT*>(
-                   head->sparam)->enumerate_variables(callback);
-      }
-  };
+        return TraitsT::execute(ctx);
+      };
 
-// check for `make_symbols`
-template<typename TraitsT, typename XNodeT, typename = void>
-struct Symbols_of
-  : ::rocket::identity<void>
-  { };
+    queue.append(*exec, ::std::move(syms));
+  }
 
-template<typename TraitsT, typename XNodeT>
-struct Symbols_of<TraitsT, XNodeT, ROCKET_VOID_T(decltype(&TraitsT::make_symbols))>
-  : ::std::decay<decltype(TraitsT::make_symbols(::std::declval<const XNodeT&>()))>
-  { };
-
-// check for `make_uparam`
-template<typename TraitsT, typename XNodeT, typename = void>
-struct Uparam_of
-  : ::rocket::identity<void>
-  { };
-
-template<typename TraitsT, typename XNodeT>
-struct Uparam_of<TraitsT, XNodeT, ROCKET_VOID_T(decltype(&TraitsT::make_uparam))>
-  : ::std::decay<decltype(TraitsT::make_uparam(::std::declval<bool&>(),
-                                               ::std::declval<const XNodeT&>()))>
-  { };
-
-// check for `make_sparam`
-template<typename TraitsT, typename XNodeT, typename = void>
-struct Sparam_of
-  : ::rocket::identity<void>
-  { };
-
-template<typename TraitsT, typename XNodeT>
-struct Sparam_of<TraitsT, XNodeT, ROCKET_VOID_T(decltype(&TraitsT::make_sparam))>
-  : ::std::decay<decltype(TraitsT::make_sparam(::std::declval<bool&>(),
-                                               ::std::declval<const XNodeT&>()))>
-  { };
-
-// Finally...
-template<typename... ParamsT>
-struct AVMC_Appender;
-
-template<typename TraitsT, typename XNodeT,
-         typename SymbolT,
-         typename UparamT,
-         typename SparamT>
-struct AVMC_Appender<TraitsT, XNodeT,
-         SymbolT,
-         UparamT,
-         SparamT>
-  {
-    static
-    void
-    do_append(bool& reachable, AVMC_Queue& queue, const XNodeT& altr)
-      {
-        queue.append(Executor_of<TraitsT, UparamT, SparamT>::thunk,
-                     TraitsT::make_symbols(altr),
-                     TraitsT::make_uparam(reachable, altr),
-                     TraitsT::make_sparam(reachable, altr), Enumerator_of<SparamT>::thunk);
-      }
-  };
-
-template<typename TraitsT, typename XNodeT,
-         typename UparamT,
-         typename SparamT>
-struct AVMC_Appender<TraitsT, XNodeT,
-         void,
-         UparamT,
-         SparamT>
-  {
-    static
-    void
-    do_append(bool& reachable, AVMC_Queue& queue, const XNodeT& altr)
-      {
-        queue.append(Executor_of<TraitsT, UparamT, SparamT>::thunk,
-                     TraitsT::make_uparam(reachable, altr),
-                     TraitsT::make_sparam(reachable, altr), Enumerator_of<SparamT>::thunk);
-      }
-  };
-
-template<typename TraitsT, typename XNodeT,
-         typename SymbolT,
-         typename SparamT>
-struct AVMC_Appender<TraitsT, XNodeT,
-         SymbolT,
-         void,
-         SparamT>
-  {
-    static
-    void
-    do_append(bool& reachable, AVMC_Queue& queue, const XNodeT& altr)
-      {
-        queue.append(Executor_of<TraitsT, void, SparamT>::thunk,
-                     TraitsT::make_symbols(altr),
-                     TraitsT::make_sparam(reachable, altr), Enumerator_of<SparamT>::thunk);
-      }
-  };
-
-template<typename TraitsT, typename XNodeT,
-         typename SparamT>
-struct AVMC_Appender<TraitsT, XNodeT,
-         void,
-         void,
-         SparamT>
-  {
-    static
-    void
-    do_append(bool& reachable, AVMC_Queue& queue, const XNodeT& altr)
-      {
-        queue.append(Executor_of<TraitsT, void, SparamT>::thunk,
-                     TraitsT::make_sparam(reachable, altr), Enumerator_of<SparamT>::thunk);
-      }
-  };
-
-template<typename TraitsT, typename XNodeT,
-         typename SymbolT,
-         typename UparamT>
-struct AVMC_Appender<TraitsT, XNodeT,
-         SymbolT,
-         UparamT,
-         void>
-  {
-    static
-    void
-    do_append(bool& reachable, AVMC_Queue& queue, const XNodeT& altr)
-      {
-        queue.append(Executor_of<TraitsT, UparamT, void>::thunk,
-                     TraitsT::make_symbols(altr),
-                     TraitsT::make_uparam(reachable, altr));
-      }
-  };
-
-template<typename TraitsT, typename XNodeT,
-         typename UparamT>
-struct AVMC_Appender<TraitsT, XNodeT,
-         void,
-         UparamT,
-         void>
-  {
-    static
-    void
-    do_append(bool& reachable, AVMC_Queue& queue, const XNodeT& altr)
-      {
-        queue.append(Executor_of<TraitsT, UparamT, void>::thunk,
-                     TraitsT::make_uparam(reachable, altr));
-      }
-  };
-
-template<typename TraitsT, typename XNodeT,
-         typename SymbolT>
-struct AVMC_Appender<TraitsT, XNodeT,
-         SymbolT,
-         void,
-         void>
-  {
-    static
-    void
-    do_append(bool& /*reachable*/, AVMC_Queue& queue, const XNodeT& altr)
-      {
-        queue.append(Executor_of<TraitsT, void, void>::thunk,
-                     TraitsT::make_symbols(altr));
-      }
-  };
-
-template<typename TraitsT, typename XNodeT>
-struct AVMC_Appender<TraitsT, XNodeT,
-         void,
-         void,
-         void>
-  {
-    static
-    void
-    do_append(bool& /*reachable*/, AVMC_Queue& queue, const XNodeT& /*altr*/)
-      {
-        queue.append(Executor_of<TraitsT, void, void>::thunk);
-      }
-  };
-
-template<typename TraitsT, typename XNodeT>
+template<typename TraitsT, typename NodeT>
 inline
 bool
-do_solidify(AVMC_Queue& queue, const XNodeT& altr)
+do_solidify(AVMC_Queue& queue, const NodeT& altr)
   {
-    using Appender = AVMC_Appender<TraitsT, XNodeT,
-                         typename Symbols_of<TraitsT, XNodeT>::type,
-                         typename Uparam_of<TraitsT, XNodeT>::type,
-                         typename Sparam_of<TraitsT, XNodeT>::type>;
-
     bool reachable = true;
-    Appender::do_append(reachable, queue, altr);
+    do_solidify_dispatch<TraitsT>(reachable, queue, altr,
+        has_symbols<TraitsT, NodeT>(), has_uparam<TraitsT, NodeT>(),
+        has_sparam<TraitsT, NodeT>());
     return reachable;
   }
 
