@@ -861,8 +861,9 @@ struct AIR_Traits_throw_statement
 
     static
     Source_Location
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_throw_statement& altr)
+    make_sparam(bool& reachable, const AIR_Node::S_throw_statement& altr)
       {
+        reachable = false;
         return altr.sloc;
       }
 
