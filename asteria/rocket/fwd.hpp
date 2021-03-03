@@ -336,8 +336,8 @@ void
 destroy_at(elementT* ptr)
   noexcept(is_nothrow_destructible<elementT>::value)
   {
+    // The C++ standard says the lifetime of a trivial object does not end.
     if(is_trivially_destructible<elementT>::value)
-      // Don't do anything. The C++ standard says the lifetime of such an object does not end.
       return;
 
     ptr->~elementT();
