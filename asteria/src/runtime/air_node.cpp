@@ -1596,6 +1596,7 @@ do_icast(double value)
     if(!is_convertible_to_integer(value))
       ASTERIA_THROW("Real value not representable as integer (value `$1`)",
                     value);
+
     return static_cast<int64_t>(value);
   }
 
