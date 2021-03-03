@@ -176,14 +176,13 @@ class AVMC_Queue
         using Sparam = typename ::std::decay<XSparamT>::type;
         static_assert(::std::is_nothrow_move_constructible<Sparam>::value);
         using Traits = details_avmc_queue::Sparam_traits<Sparam>;
-        /*constexpr*/ auto enum_opt = Traits::enum_opt;
 
-        if(::std::is_trivial<Sparam>::value && !enum_opt)
+        if(::std::is_trivial<Sparam>::value && !Traits::enum_opt)
           return this->do_append_trivial(uparam, exec,
                             ::std::addressof(xsparam), sizeof(xsparam));
 
         return this->do_append_nontrivial(uparam, exec, nullptr,
-                          enum_opt, Traits::reloc_opt, Traits::dtor_opt,
+                          Traits::enum_opt, Traits::reloc_opt, Traits::dtor_opt,
                           details_avmc_queue::do_forward_ctor<XSparamT>, sizeof(xsparam),
                           reinterpret_cast<intptr_t>(::std::addressof(xsparam)));
       }
@@ -202,10 +201,9 @@ class AVMC_Queue
         using Sparam = typename ::std::decay<XSparamT>::type;
         static_assert(::std::is_nothrow_move_constructible<Sparam>::value);
         using Traits = details_avmc_queue::Sparam_traits<Sparam>;
-        constexpr auto enum_opt = Traits::enum_opt;
 
         return this->do_append_nontrivial(uparam, exec, &sloc,
-                          enum_opt, Traits::reloc_opt, Traits::dtor_opt,
+                          Traits::enum_opt, Traits::reloc_opt, Traits::dtor_opt,
                           details_avmc_queue::do_forward_ctor<XSparamT>, sizeof(xsparam),
                           reinterpret_cast<intptr_t>(::std::addressof(xsparam)));
       }

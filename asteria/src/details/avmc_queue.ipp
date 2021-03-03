@@ -93,10 +93,22 @@ do_nontrivial_dtor(Header* head)
     ::rocket::destroy_at(ptr);
   }
 
+template<typename SparamT>
+inline
+void
+do_call_enumerate_variables(Variable_Callback& callback, const Header* head)
+  {
+    reinterpret_cast<const SparamT*>(head->sparam)->
+                             enumerate_variables(callback);
+  }
+
 template<typename SparamT, typename = void>
 struct select_enumerate_variables
   {
-    static constexpr Enumerator* value = nullptr;
+    constexpr operator
+    Enumerator*()
+      const noexcept
+      { return nullptr;  }
   };
 
 template<typename SparamT>
@@ -105,13 +117,10 @@ struct select_enumerate_variables<SparamT,
         ::std::declval<const SparamT&>().enumerate_variables(
             ::std::declval<Variable_Callback&>())))>
   {
-    static
-    void
-    value(Variable_Callback& callback, const Header* head)
-      {
-        reinterpret_cast<const SparamT*>(head->sparam)->
-                                 enumerate_variables(callback);
-      }
+    constexpr operator
+    Enumerator*()
+      const noexcept
+      { return do_call_enumerate_variables<SparamT>;  }
   };
 
 template<typename SparamT>
@@ -128,7 +137,7 @@ struct Sparam_traits
             : do_nontrivial_dtor<SparamT>;
 
     static constexpr Enumerator* enum_opt =
-        select_enumerate_variables<SparamT>::value;
+        select_enumerate_variables<SparamT>();
   };
 
 template<typename XSparamT>
