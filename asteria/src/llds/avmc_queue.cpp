@@ -169,7 +169,7 @@ execute(Executive_Context& ctx)
       next += UINT32_C(1) + qnode->nheaders;
 
       AIR_Status status;
-      if(ROCKET_EXPECT(qnode->meta_ver >= 2)) {
+      if(ROCKET_UNEXPECT(qnode->meta_ver >= 2)) {
         // Symbols are available.
         ASTERIA_RUNTIME_TRY {
           status = qnode->pv_meta->exec(ctx, qnode);
