@@ -275,29 +275,6 @@ class Reference
         return *this;
       }
 
-    // This function is called during argument passing to catch early errors.
-    ROCKET_FORCED_INLINE_FUNCTION
-    const Reference&
-    dereference_validate()
-      const
-      {
-        // If the root is a value, and there is no modifier, then dereferencing
-        // will always succeed and yield the root.
-        if(ROCKET_EXPECT(this->m_mods.empty())) {
-          // Perform fast indirection.
-          if(this->m_root.index() == index_constant)
-            return *this;
-
-          if(this->m_root.index() == index_temporary)
-            return *this;
-        }
-
-        // Otherwise, try dereferencing.
-        // If the operation fails, an exception is thrown.
-        this->do_dereference_readonly_slow();
-        return *this;
-      }
-
     // These are general read/write functions.
     // Note that not all references denote values. Some of them are placeholders.
     ROCKET_FORCED_INLINE_FUNCTION
