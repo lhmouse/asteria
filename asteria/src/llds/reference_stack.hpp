@@ -55,6 +55,38 @@ class Reference_Stack
     do_reallocate_finish(Reference* bptr, uint32_t estor)
       noexcept;
 
+    template<typename XRefT>
+    ROCKET_NOINLINE
+    Reference&
+    do_reallocate_emplace_back(XRefT&& xref)
+      {
+        // Allocate a larger block of memory and then construct the new element
+        // above the top. If the operation succeeds, replace the old block.
+        Reference* next_bptr;
+        uint32_t next_estor;
+
+        uint32_t nadd = 1;
+#ifndef ROCKET_DEBUG
+        // Reserve more space for non-debug builds.
+        nadd |= 31;
+        nadd |= this->m_estor * 2;
+#endif
+        this->do_reallocate_reserve(next_bptr, next_estor, nadd);
+
+        auto ptr = next_bptr + this->m_etop;
+        try {
+          ::rocket::construct_at(ptr, ::std::forward<XRefT>(xref));
+        }
+        catch(...) {
+          ::operator delete(next_bptr);
+          throw;
+        }
+        this->do_reallocate_finish(next_bptr, next_estor);
+        this->m_etop += 1;
+        this->m_einit += 1;
+        return *ptr;
+      }
+
   public:
     ~Reference_Stack()
       {
@@ -158,6 +190,7 @@ class Reference_Stack
       }
 
     template<typename XRefT>
+    ROCKET_FORCED_INLINE_FUNCTION
     Reference&
     emplace_back(XRefT&& xref)
       {
@@ -178,31 +211,7 @@ class Reference_Stack
           return *ptr;
         }
 
-        // Allocate a larger block of memory and then construct the new element
-        // above the top. If the operation succeeds, replace the old block.
-        Reference* next_bptr;
-        uint32_t next_estor;
-
-        uint32_t nadd = 1;
-#ifndef ROCKET_DEBUG
-        // Reserve more space for non-debug builds.
-        nadd |= 31;
-        nadd |= this->m_estor * 2;
-#endif
-        this->do_reallocate_reserve(next_bptr, next_estor, nadd);
-
-        auto ptr = next_bptr + this->m_etop;
-        try {
-          ::rocket::construct_at(ptr, ::std::forward<XRefT>(xref));
-        }
-        catch(...) {
-          ::operator delete(next_bptr);
-          throw;
-        }
-        this->do_reallocate_finish(next_bptr, next_estor);
-        this->m_etop += 1;
-        this->m_einit += 1;
-        return *ptr;
+        return this->do_reallocate_emplace_back(::std::forward<XRefT>(xref));
       }
 
     Reference_Stack&
