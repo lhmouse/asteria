@@ -1569,33 +1569,34 @@ struct AIR_Traits_apply_operator_common
       }
   };
 
-enum : int
+enum : uint32_t
   {
-    tmask_null        = 1 << type_null,
-    tmask_boolean     = 1 << type_boolean,
-    tmask_integer     = 1 << type_integer,
-    tmask_real        = 1 << type_real,
-    tmask_string      = 1 << type_string,
-    tmask_opaque      = 1 << type_opaque,
-    tmask_function    = 1 << type_function,
-    tmask_array       = 1 << type_array,
-    tmask_object      = 1 << type_object,
+    tmask_null      = UINT32_C(1) << type_null,
+    tmask_boolean   = UINT32_C(1) << type_boolean,
+    tmask_integer   = UINT32_C(1) << type_integer,
+    tmask_real      = UINT32_C(1) << type_real,
+    tmask_string    = UINT32_C(1) << type_string,
+    tmask_opaque    = UINT32_C(1) << type_opaque,
+    tmask_function  = UINT32_C(1) << type_function,
+    tmask_array     = UINT32_C(1) << type_array,
+    tmask_object    = UINT32_C(1) << type_object,
   };
 
 inline
-int
+uint32_t
 do_tmask_of(const Value& val)
   noexcept
   {
-    return 1 << val.type();
+    return UINT32_C(1) << val.type();
   }
 
 int64_t
 do_icast(double value)
   {
     if(!is_convertible_to_integer(value))
-      ASTERIA_THROW("Real value not representable as integer (value `$1`)",
-                    value);
+      ASTERIA_THROW(
+          "Real value not representable as integer (value `$1`)",
+          value);
 
     return static_cast<int64_t>(value);
   }
