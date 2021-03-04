@@ -104,15 +104,15 @@ do_reserve_one(Uparam uparam, size_t size)
 
 AVMC_Queue&
 AVMC_Queue::
-do_append_trivial(Uparam uparam, Executor* exec, const void* data, size_t size)
+do_append_trivial(Uparam uparam, Executor* exec, size_t size, const void* data_opt)
   {
     auto qnode = this->do_reserve_one(uparam, size);
 
-    // Copy source data if `data` is non-null. Fill zeroes otherwise.
+    // Copy source data if `data_opt` is non-null. Fill zeroes otherwise.
     // This operation will not throw exceptions.
-    if(data)
-      ::std::memcpy(qnode->sparam, data, size);
-    else
+    if(data_opt)
+      ::std::memcpy(qnode->sparam, data_opt, size);
+    else if(size)
       ::std::memset(qnode->sparam, 0, size);
 
     // Accept this node.
@@ -125,7 +125,7 @@ AVMC_Queue&
 AVMC_Queue::
 do_append_nontrivial(Uparam uparam, Executor* exec, const Source_Location* sloc_opt,
                      Enumerator* enum_opt, Relocator* reloc_opt, Destructor* dtor_opt,
-                     Constructor* ctor_opt, size_t size, intptr_t ctor_arg)
+                     size_t size, Constructor* ctor_opt, intptr_t ctor_arg)
   {
     auto qnode = this->do_reserve_one(uparam, size);
 
@@ -146,8 +146,8 @@ do_append_nontrivial(Uparam uparam, Executor* exec, const Source_Location* sloc_
     // Invoke the constructor if `ctor_opt` is non-null. Fill zeroes otherwise.
     // If an exception is thrown, there is no effect.
     if(ctor_opt)
-      ctor_opt(qnode, size, ctor_arg);
-    else
+      ctor_opt(qnode, ctor_arg);
+    else if(size)
       ::std::memset(qnode->sparam, 0, size);
 
     // Accept this node.

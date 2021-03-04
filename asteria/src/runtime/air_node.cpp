@@ -262,7 +262,7 @@ struct Sparam_defer
 
 // These are traits for individual AIR node types.
 // Each traits struct must contain the `execute()` function, and optionally,
-// these functions: `make_uparam()`, `make_sparam()`, `make_symbols()`.
+// these functions: `make_uparam()`, `make_sparam()`, `get_symbols()`.
 
 struct AIR_Traits_clear_stack
   {
@@ -306,8 +306,8 @@ struct AIR_Traits_declare_variable
     // `Sparam` is the source location and name;
 
     static
-    Source_Location
-    make_symbols(const AIR_Node::S_declare_variable& altr)
+    const Source_Location&
+    get_symbols(const AIR_Node::S_declare_variable& altr)
       {
         return altr.sloc;
       }
@@ -349,8 +349,8 @@ struct AIR_Traits_initialize_variable
     // `Sparam` is unused.
 
     static
-    Source_Location
-    make_symbols(const AIR_Node::S_initialize_variable& altr)
+    const Source_Location&
+    get_symbols(const AIR_Node::S_initialize_variable& altr)
       {
         return altr.sloc;
       }
@@ -949,8 +949,8 @@ struct AIR_Traits_glvalue_to_prvalue
     // `Sparam` is unused.
 
     static
-    Source_Location
-    make_symbols(const AIR_Node::S_glvalue_to_prvalue& altr)
+    const Source_Location&
+    get_symbols(const AIR_Node::S_glvalue_to_prvalue& altr)
       {
         return altr.sloc;
       }
@@ -1079,8 +1079,8 @@ struct AIR_Traits_push_global_reference
     // `Sparam` is the source location and name;
 
     static
-    Source_Location
-    make_symbols(const AIR_Node::S_push_global_reference& altr)
+    const Source_Location&
+    get_symbols(const AIR_Node::S_push_global_reference& altr)
       {
         return altr.sloc;
       }
@@ -1116,8 +1116,8 @@ struct AIR_Traits_push_local_reference
     // `Sparam` is the source location and name;
 
     static
-    Source_Location
-    make_symbols(const AIR_Node::S_push_local_reference& altr)
+    const Source_Location&
+    get_symbols(const AIR_Node::S_push_local_reference& altr)
       {
         return altr.sloc;
       }
@@ -1228,8 +1228,8 @@ struct AIR_Traits_branch_expression
     // `Sparam` is the branches.
 
     static
-    Source_Location
-    make_symbols(const AIR_Node::S_branch_expression& altr)
+    const Source_Location&
+    get_symbols(const AIR_Node::S_branch_expression& altr)
       {
         return altr.sloc;
       }
@@ -1274,8 +1274,8 @@ struct AIR_Traits_coalescence
     // `Sparam` is the null branch.
 
     static
-    Source_Location
-    make_symbols(const AIR_Node::S_coalescence& altr)
+    const Source_Location&
+    get_symbols(const AIR_Node::S_coalescence& altr)
       {
         return altr.sloc;
       }
@@ -1387,8 +1387,8 @@ struct AIR_Traits_function_call
     // `Sparam` is the source location.
 
     static
-    Source_Location
-    make_symbols(const AIR_Node::S_function_call& altr)
+    const Source_Location&
+    get_symbols(const AIR_Node::S_function_call& altr)
       {
         return altr.sloc;
       }
@@ -1442,8 +1442,8 @@ struct AIR_Traits_member_access
     // `Sparam` is the name.
 
     static
-    Source_Location
-    make_symbols(const AIR_Node::S_member_access& altr)
+    const Source_Location&
+    get_symbols(const AIR_Node::S_member_access& altr)
       {
         return altr.sloc;
       }
@@ -1472,8 +1472,8 @@ struct AIR_Traits_push_unnamed_array
     // `Sparam` is unused.
 
     static
-    Source_Location
-    make_symbols(const AIR_Node::S_push_unnamed_array& altr)
+    const Source_Location&
+    get_symbols(const AIR_Node::S_push_unnamed_array& altr)
       {
         return altr.sloc;
       }
@@ -1513,8 +1513,8 @@ struct AIR_Traits_push_unnamed_object
     // `Sparam` is the list of keys.
 
     static
-    Source_Location
-    make_symbols(const AIR_Node::S_push_unnamed_object& altr)
+    const Source_Location&
+    get_symbols(const AIR_Node::S_push_unnamed_object& altr)
       {
         return altr.sloc;
       }
@@ -1553,8 +1553,8 @@ struct AIR_Traits_apply_operator_common
     // `Sparam` is unused.
 
     static
-    Source_Location
-    make_symbols(const AIR_Node::S_apply_operator& altr)
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
@@ -3308,8 +3308,8 @@ struct AIR_Traits_unpack_struct_array
     // `Sparam` is unused.
 
     static
-    Source_Location
-    make_symbols(const AIR_Node::S_unpack_struct_array& altr)
+    const Source_Location&
+    get_symbols(const AIR_Node::S_unpack_struct_array& altr)
       {
         return altr.sloc;
       }
@@ -3375,8 +3375,8 @@ struct AIR_Traits_unpack_struct_object
       }
 
     static
-    Source_Location
-    make_symbols(const AIR_Node::S_unpack_struct_object& altr)
+    const Source_Location&
+    get_symbols(const AIR_Node::S_unpack_struct_object& altr)
       {
         return altr.sloc;
       }
@@ -3440,8 +3440,8 @@ struct AIR_Traits_define_null_variable
       }
 
     static
-    Source_Location
-    make_symbols(const AIR_Node::S_define_null_variable& altr)
+    const Source_Location&
+    get_symbols(const AIR_Node::S_define_null_variable& altr)
       {
         return altr.sloc;
       }
@@ -3485,8 +3485,8 @@ struct AIR_Traits_single_step_trap
     // `Sparam` is the source location.
 
     static
-    Source_Location
-    make_symbols(const AIR_Node::S_single_step_trap& altr)
+    const Source_Location&
+    get_symbols(const AIR_Node::S_single_step_trap& altr)
       {
         return altr.sloc;
       }
@@ -3515,8 +3515,8 @@ struct AIR_Traits_variadic_call
     // `Sparam` is the source location.
 
     static
-    Source_Location
-    make_symbols(const AIR_Node::S_variadic_call& altr)
+    const Source_Location&
+    get_symbols(const AIR_Node::S_variadic_call& altr)
       {
         return altr.sloc;
       }
@@ -3640,8 +3640,8 @@ struct AIR_Traits_defer_expression
     // `Sparam` is the source location and body.
 
     static
-    Source_Location
-    make_symbols(const AIR_Node::S_defer_expression& altr)
+    const Source_Location&
+    get_symbols(const AIR_Node::S_defer_expression& altr)
       {
         return altr.sloc;
       }
@@ -3681,8 +3681,8 @@ struct AIR_Traits_import_call
     // `Sparam` is the source location and compiler options.
 
     static
-    Source_Location
-    make_symbols(const AIR_Node::S_import_call& altr)
+    const Source_Location&
+    get_symbols(const AIR_Node::S_import_call& altr)
       {
         return altr.sloc;
       }
@@ -3849,8 +3849,8 @@ struct AIR_Traits_initialize_reference
     // `Sparam` is the name;
 
     static
-    Source_Location
-    make_symbols(const AIR_Node::S_initialize_reference& altr)
+    const Source_Location&
+    get_symbols(const AIR_Node::S_initialize_reference& altr)
       {
         return altr.sloc;
       }
@@ -3881,17 +3881,27 @@ struct AIR_Traits_initialize_reference
 
 // Finally...
 template<typename TraitsT, typename NodeT, typename = void>
-struct has_symbols
-  : ::std::false_type
-  { };
+struct symbol_getter
+  {
+    static constexpr
+    const Source_Location*
+    opt(const NodeT&)
+      noexcept
+      { return nullptr;  }
+ };
 
 template<typename TraitsT, typename NodeT>
-struct has_symbols<TraitsT, NodeT,
+struct symbol_getter<TraitsT, NodeT,
     ROCKET_VOID_T(decltype(
-        TraitsT::make_symbols(
+        TraitsT::get_symbols(
             ::std::declval<const NodeT&>())))>
-  : ::std::true_type
-  { };
+  {
+    static constexpr
+    const Source_Location*
+    opt(const NodeT& altr)
+      noexcept
+      { return ::std::addressof(TraitsT::get_symbols(altr));  }
+  };
 
 template<typename TraitsT, typename NodeT, typename = void>
 struct has_uparam
@@ -3923,135 +3933,59 @@ template<typename TraitsT, typename NodeT>
 inline
 void
 do_solidify_dispatch(bool& reachable, AVMC_Queue& queue, const NodeT& altr,
-      ::std::true_type /*syms*/, ::std::true_type /*up*/, ::std::true_type /*sp*/)
+      ::std::true_type /*has_uparam*/, ::std::true_type /*has_sparam*/)
   {
-    auto syms = TraitsT::make_symbols(altr);
-    auto up = TraitsT::make_uparam(reachable, altr);
-    auto sp = TraitsT::make_sparam(reachable, altr);
-
-    auto exec = +[](Executive_Context& ctx, const AVMC_Queue::Header* head)
-      {
-        return TraitsT::execute(ctx, static_cast<decltype(up)>(head->uparam),
-                 *(reinterpret_cast<const decltype(sp)*>(head->sparam)));
-      };
-
-    queue.append(*exec, ::std::move(syms), ::std::move(up), ::std::move(sp));
+    auto uparam = TraitsT::make_uparam(reachable, altr);
+    auto sparam = TraitsT::make_sparam(reachable, altr);
+    queue.append(
+        *[](Executive_Context& ctx, const AVMC_Queue::Header* head)
+          { return TraitsT::execute(ctx,
+                static_cast<decltype(uparam)>(head->uparam),
+                reinterpret_cast<const decltype(sparam)&>(head->sparam));  },
+        symbol_getter<TraitsT, NodeT>::opt(altr),
+        ::std::move(uparam), ::std::move(sparam));
   }
 
 template<typename TraitsT, typename NodeT>
 inline
 void
 do_solidify_dispatch(bool& reachable, AVMC_Queue& queue, const NodeT& altr,
-      ::std::false_type /*syms*/, ::std::true_type /*up*/, ::std::true_type /*sp*/)
+      ::std::false_type /*has_uparam*/, ::std::true_type /*has_sparam*/)
   {
-    auto up = TraitsT::make_uparam(reachable, altr);
-    auto sp = TraitsT::make_sparam(reachable, altr);
-
-    auto exec = +[](Executive_Context& ctx, const AVMC_Queue::Header* head)
-      {
-        return TraitsT::execute(ctx, static_cast<decltype(up)>(head->uparam),
-                 *(reinterpret_cast<const decltype(sp)*>(head->sparam)));
-      };
-
-    queue.append(*exec, ::std::move(up), ::std::move(sp));
+    auto sparam = TraitsT::make_sparam(reachable, altr);
+    queue.append(
+        *[](Executive_Context& ctx, const AVMC_Queue::Header* head)
+          { return TraitsT::execute(ctx,
+                reinterpret_cast<const decltype(sparam)&>(head->sparam));  },
+        symbol_getter<TraitsT, NodeT>::opt(altr),
+        ::std::move(sparam));
   }
 
 template<typename TraitsT, typename NodeT>
 inline
 void
 do_solidify_dispatch(bool& reachable, AVMC_Queue& queue, const NodeT& altr,
-      ::std::true_type /*syms*/, ::std::true_type /*up*/, ::std::false_type /*sp*/)
+      ::std::true_type /*has_uparam*/, ::std::false_type /*has_sparam*/)
   {
-    auto syms = TraitsT::make_symbols(altr);
-    auto up = TraitsT::make_uparam(reachable, altr);
-
-    auto exec = +[](Executive_Context& ctx, const AVMC_Queue::Header* head)
-      {
-        return TraitsT::execute(ctx, static_cast<decltype(up)>(head->uparam));
-      };
-
-    queue.append(*exec, ::std::move(syms), ::std::move(up));
-  }
-
-template<typename TraitsT, typename NodeT>
-inline
-void
-do_solidify_dispatch(bool& reachable, AVMC_Queue& queue, const NodeT& altr,
-      ::std::false_type /*syms*/, ::std::true_type /*up*/, ::std::false_type /*sp*/)
-  {
-    auto up = TraitsT::make_uparam(reachable, altr);
-
-    auto exec = +[](Executive_Context& ctx, const AVMC_Queue::Header* head)
-      {
-        return TraitsT::execute(ctx, static_cast<decltype(up)>(head->uparam));
-      };
-
-    queue.append(*exec, ::std::move(up));
-  }
-
-template<typename TraitsT, typename NodeT>
-inline
-void
-do_solidify_dispatch(bool& reachable, AVMC_Queue& queue, const NodeT& altr,
-      ::std::true_type /*syms*/, ::std::false_type /*up*/, ::std::true_type /*sp*/)
-  {
-    auto syms = TraitsT::make_symbols(altr);
-    auto sp = TraitsT::make_sparam(reachable, altr);
-
-    auto exec = +[](Executive_Context& ctx, const AVMC_Queue::Header* head)
-      {
-        return TraitsT::execute(ctx,
-                 *(reinterpret_cast<const decltype(sp)*>(head->sparam)));
-      };
-
-    queue.append(*exec, ::std::move(syms), ::std::move(sp));
-  }
-
-template<typename TraitsT, typename NodeT>
-inline
-void
-do_solidify_dispatch(bool& reachable, AVMC_Queue& queue, const NodeT& altr,
-      ::std::false_type /*syms*/, ::std::false_type /*up*/, ::std::true_type /*sp*/)
-  {
-    auto sp = TraitsT::make_sparam(reachable, altr);
-
-    auto exec = +[](Executive_Context& ctx, const AVMC_Queue::Header* head)
-      {
-        return TraitsT::execute(ctx,
-                 *(reinterpret_cast<const decltype(sp)*>(head->sparam)));
-      };
-
-    queue.append(*exec, ::std::move(sp));
-  }
-
-template<typename TraitsT, typename NodeT>
-inline
-void
-do_solidify_dispatch(bool& /*reachable*/, AVMC_Queue& queue, const NodeT& /*altr*/,
-      ::std::false_type /*syms*/, ::std::false_type /*up*/, ::std::false_type /*sp*/)
-  {
-    auto exec = +[](Executive_Context& ctx, const AVMC_Queue::Header* /*head*/)
-      {
-        return TraitsT::execute(ctx);
-      };
-
-    queue.append(*exec);
+    auto uparam = TraitsT::make_uparam(reachable, altr);
+    queue.append(
+        *[](Executive_Context& ctx, const AVMC_Queue::Header* head)
+          { return TraitsT::execute(ctx,
+                static_cast<decltype(uparam)>(head->uparam));  },
+        symbol_getter<TraitsT, NodeT>::opt(altr),
+        ::std::move(uparam));
   }
 
 template<typename TraitsT, typename NodeT>
 inline
 void
 do_solidify_dispatch(bool& /*reachable*/, AVMC_Queue& queue, const NodeT& altr,
-      ::std::true_type /*syms*/, ::std::false_type /*up*/, ::std::false_type /*sp*/)
+      ::std::false_type /*has_uparam*/, ::std::false_type /*has_sparam*/)
   {
-    auto syms = TraitsT::make_symbols(altr);
-
-    auto exec = +[](Executive_Context& ctx, const AVMC_Queue::Header* /*head*/)
-      {
-        return TraitsT::execute(ctx);
-      };
-
-    queue.append(*exec, ::std::move(syms));
+    queue.append(
+        *[](Executive_Context& ctx, const AVMC_Queue::Header* /*head*/)
+          { return TraitsT::execute(ctx);  },
+        symbol_getter<TraitsT, NodeT>::opt(altr));
   }
 
 template<typename TraitsT, typename NodeT>
@@ -4061,8 +3995,7 @@ do_solidify(AVMC_Queue& queue, const NodeT& altr)
   {
     bool reachable = true;
     do_solidify_dispatch<TraitsT>(reachable, queue, altr,
-        has_symbols<TraitsT, NodeT>(), has_uparam<TraitsT, NodeT>(),
-        has_sparam<TraitsT, NodeT>());
+        has_uparam<TraitsT, NodeT>(), has_sparam<TraitsT, NodeT>());
     return reachable;
   }
 

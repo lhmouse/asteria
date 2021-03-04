@@ -33,7 +33,7 @@ struct Metadata;
 struct Header;
 
 // These are prototypes for callbacks.
-using Constructor  = void (Header* head, size_t size, intptr_t arg);
+using Constructor  = void (Header* head, intptr_t arg);
 using Relocator    = void (Header* head, Header* from);
 using Destructor   = void (Header* head);
 using Executor     = AIR_Status (Executive_Context& ctx, const Header* head);
@@ -143,21 +143,12 @@ struct Sparam_traits
 template<typename XSparamT>
 inline
 void
-do_forward_ctor(Header* head, size_t size, intptr_t arg)
+do_forward_ctor(Header* head, intptr_t arg)
   {
     using Sparam = typename ::std::decay<XSparamT>::type;
-    ROCKET_ASSERT(size == sizeof(Sparam));
-
     auto ptr = reinterpret_cast<Sparam*>(head->sparam);
     auto src = reinterpret_cast<Sparam*>(arg);
     ::rocket::construct_at(ptr, static_cast<XSparamT&&>(*src));
-  }
-
-inline
-void
-do_trivial_ctor(Header* head, size_t size, intptr_t arg)
-  {
-    ::std::memcpy(head->sparam, reinterpret_cast<const char*>(arg), size);
   }
 
 }  // namespace details_avmc_queue
