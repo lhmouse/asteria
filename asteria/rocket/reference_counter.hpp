@@ -17,8 +17,9 @@ class reference_counter;
 template<typename valueT>
 class reference_counter
   {
-    static_assert(is_integral<valueT>::value && !is_same<valueT, bool>::value,
-                  "Invalid reference counter value type");
+    static_assert(
+        is_integral<valueT>::value && !is_same<valueT, bool>::value,
+        "Invalid reference counter value type");
 
   public:
     using value_type  = valueT;
@@ -58,11 +59,10 @@ class reference_counter
       }
 
   public:
-    ROCKET_PURE_FUNCTION
     bool
     unique()
       const noexcept
-      { return ROCKET_EXPECT(this->m_nref.load(::std::memory_order_relaxed) == 1);  }
+      { return this->m_nref.load(::std::memory_order_relaxed) == 1;  }
 
     value_type
     get()
@@ -77,7 +77,8 @@ class reference_counter
         for(;;)
           if(old == 0)
             return false;
-          else if(this->m_nref.compare_exchange_weak(old, old + 1, ::std::memory_order_relaxed))
+          else if(this->m_nref.compare_exchange_weak(old, old + 1,
+                           ::std::memory_order_relaxed))
             return true;
       }
 
