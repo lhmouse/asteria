@@ -33,16 +33,6 @@ class Reference_Stack
       { return this->swap(other);  }
 
   private:
-    [[noreturn]] inline
-    void
-    do_throw_subscript_out_of_range(size_t index, const char* rel)
-      const
-      {
-        ::rocket::sprintf_and_throw<::std::out_of_range>(
-                       "Reference_Stack: Subscript out of range (`%zu` %s `%zu`)",
-                       index, rel, this->size());
-      }
-
     void
     do_destroy_elements()
       noexcept;
@@ -140,51 +130,17 @@ class Reference_Stack
       }
 
     const Reference&
-    front()
+    back(size_t index = 0)
       const noexcept
       {
-        ROCKET_ASSERT(!this->empty());
-        return this->bottom()[0];
-      }
-
-    const Reference&
-    back()
-      const noexcept
-      {
-        ROCKET_ASSERT(!this->empty());
-        return this->bottom()[this->size() - 1];
-      }
-
-    Reference&
-    mut_front()
-      noexcept
-      {
-        ROCKET_ASSERT(!this->empty());
-        return this->mut_bottom()[0];
-      }
-
-    Reference&
-    mut_back()
-      noexcept
-      {
-        ROCKET_ASSERT(!this->empty());
-        return this->mut_bottom()[this->size() - 1];
-      }
-
-    const Reference&
-    back(size_t index)
-      const
-      {
-        if(index >= this->size())
-          this->do_throw_subscript_out_of_range(index, ">=");
+        ROCKET_ASSERT(index < this->size());
         return this->bottom()[this->size() + ~index];
       }
 
     Reference&
-    mut_back(size_t index)
+    mut_back(size_t index = 0)
       {
-        if(index >= this->size())
-          this->do_throw_subscript_out_of_range(index, ">=");
+        ROCKET_ASSERT(index < this->size());
         return this->mut_bottom()[this->size() + ~index];
       }
 
