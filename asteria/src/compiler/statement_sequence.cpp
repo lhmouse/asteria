@@ -1468,7 +1468,7 @@ do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tstr
   }
 
 bool
-do_accept_named_reference(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+do_accept_local_reference(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // Get an identifier.
     auto sloc = tstrm.next_sloc();
@@ -1489,7 +1489,7 @@ do_accept_named_reference(cow_vector<Expression_Unit>& units, Token_Stream& tstr
       return true;
     }
 
-    Expression_Unit::S_named_reference xunit = { sloc, ::std::move(*qname) };
+    Expression_Unit::S_local_reference xunit = { sloc, ::std::move(*qname) };
     units.emplace_back(::std::move(xunit));
     return true;
   }
@@ -1535,7 +1535,7 @@ do_accept_this(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
     if(!qkwrd)
       return false;
 
-    Expression_Unit::S_named_reference xunit = { sloc, sref("__this") };
+    Expression_Unit::S_local_reference xunit = { sloc, sref("__this") };
     units.emplace_back(::std::move(xunit));
     return true;
   }
@@ -1845,7 +1845,7 @@ do_accept_primary_expression(cow_vector<Expression_Unit>& units, Token_Stream& t
     //   identifier | global-identifier | literal | "this" | closure-function | unnamed-array |
     //   unnamed-object | nested-expression | fused-multiply-add | variadic-function-call |
     //   import-function-call
-    if(do_accept_named_reference(units, tstrm))
+    if(do_accept_local_reference(units, tstrm))
       return true;
 
     if(do_accept_global_reference(units, tstrm))

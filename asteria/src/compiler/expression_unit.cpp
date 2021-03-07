@@ -44,8 +44,8 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         return code;
       }
 
-      case index_named_reference: {
-        const auto& altr = this->m_stor.as<index_named_reference>();
+      case index_local_reference: {
+        const auto& altr = this->m_stor.as<index_local_reference>();
 
         // Perform early lookup when the expression is defined.
         // If a named reference is found, it will not be replaced or hidden by a

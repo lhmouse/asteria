@@ -18,7 +18,7 @@ class Expression_Unit
         Value value;
       };
 
-    struct S_named_reference
+    struct S_local_reference
       {
         Source_Location sloc;
         phsh_string name;
@@ -104,7 +104,7 @@ class Expression_Unit
     enum Index : uint8_t
       {
         index_literal           =  0,
-        index_named_reference   =  1,
+        index_local_reference   =  1,
         index_closure_function  =  2,
         index_branch            =  3,
         index_function_call     =  4,
@@ -123,7 +123,7 @@ class Expression_Unit
     using Storage = ::rocket::variant<
       ROCKET_CDR(
         ,S_literal           //  0,
-        ,S_named_reference   //  1,
+        ,S_local_reference   //  1,
         ,S_closure_function  //  2,
         ,S_branch            //  3,
         ,S_function_call     //  4,
