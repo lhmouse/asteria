@@ -366,7 +366,7 @@ struct AIR_Traits_initialize_variable
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this function.
@@ -411,7 +411,7 @@ struct AIR_Traits_if_statement
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Sparam_queues_2& sp)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_queues_2& sp)
       {
         // Check the value of the condition.
         if(ctx.stack().back().dereference_readonly().test() != up.p8[0])
@@ -536,7 +536,7 @@ struct AIR_Traits_do_while_statement
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Sparam_queues_2& sp)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_queues_2& sp)
       {
         // This is the same as the `do...while` statement in C.
         for(;;) {
@@ -585,7 +585,7 @@ struct AIR_Traits_while_statement
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Sparam_queues_2& sp)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_queues_2& sp)
       {
         // This is the same as the `while` statement in C.
         for(;;) {
@@ -904,7 +904,7 @@ struct AIR_Traits_assert_statement
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Sparam_sloc_text& sp)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_sloc_text& sp)
       {
         // Check the value of the condition.
         // When the assertion succeeds, there is nothing to do.
@@ -934,7 +934,7 @@ struct AIR_Traits_return_statement
 
     static
     AIR_Status
-    execute(Executive_Context& /*ctx*/, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& /*ctx*/, AVMC_Queue::Uparam up)
       {
         auto status = static_cast<AIR_Status>(up.p8[0]);
         ROCKET_ASSERT(::rocket::is_any_of(status, { air_status_return_void,
@@ -999,7 +999,7 @@ struct AIR_Traits_push_immediate_boolean
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // Push a constant boolean.
         Reference::S_constant xref = { V_boolean(up.s32) };
@@ -1037,7 +1037,7 @@ struct AIR_Traits_push_immediate_int48
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         uint64_t bits = static_cast<uint64_t>(static_cast<int16_t>(up.s16));
         bits = bits << 32 | up.s32;
@@ -1143,7 +1143,7 @@ struct AIR_Traits_push_local_reference
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Sparam_sloc_name& sp)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_sloc_name& sp)
       {
         // Get the context.
         Executive_Context* qctx = &ctx;
@@ -1256,7 +1256,7 @@ struct AIR_Traits_branch_expression
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Sparam_queues_2& sp)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_queues_2& sp)
       {
         // Check the value of the condition.
         if(ctx.stack().back().dereference_readonly().test())
@@ -1300,7 +1300,7 @@ struct AIR_Traits_coalescence
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const AVMC_Queue& queue)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const AVMC_Queue& queue)
       {
         // Check the value of the condition.
         if(!ctx.stack().back().dereference_readonly().is_null())
@@ -1413,7 +1413,7 @@ struct AIR_Traits_function_call
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Source_Location& sloc)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Source_Location& sloc)
       {
         const auto sentry = ctx.global().copy_recursion_sentry();
         const auto qhooks = ctx.global().get_hooks_opt();
@@ -1489,7 +1489,7 @@ struct AIR_Traits_push_unnamed_array
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // Pop elements from the stack and store them in an array backwards.
         V_array array;
@@ -1605,7 +1605,7 @@ struct AIR_Traits_apply_operator_inc_post : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam /*up*/)
       {
         // This operator is unary. `assign` is ignored.
         // First, get the old value.
@@ -1645,7 +1645,7 @@ struct AIR_Traits_apply_operator_dec_post : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam /*up*/)
       {
         // This operator is unary. `assign` is ignored.
         // First, get the old value.
@@ -1685,7 +1685,7 @@ struct AIR_Traits_apply_operator_subscr : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam /*up*/)
       {
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
@@ -1717,7 +1717,7 @@ struct AIR_Traits_apply_operator_pos : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam /*up*/)
       {
         // This operator is unary. `assign` is ignored.
         // Copy the operand to create a temporary value.
@@ -1731,7 +1731,7 @@ struct AIR_Traits_apply_operator_neg : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
         auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
@@ -1768,7 +1768,7 @@ struct AIR_Traits_apply_operator_notb : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
         auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
@@ -1808,7 +1808,7 @@ struct AIR_Traits_apply_operator_notl : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
         auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
@@ -1824,7 +1824,7 @@ struct AIR_Traits_apply_operator_inc_pre : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam /*up*/)
       {
         // This operator is unary. `assign` is ignored.
         auto& rhs = ctx.stack().back().dereference_mutable();
@@ -1861,7 +1861,7 @@ struct AIR_Traits_apply_operator_dec_pre : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam /*up*/)
       {
         // This operator is unary. `assign` is ignored.
         auto& rhs = ctx.stack().back().dereference_mutable();
@@ -1898,7 +1898,7 @@ struct AIR_Traits_apply_operator_unset : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam /*up*/)
       {
         // This operator is unary. `assign` is ignored.
         // Unset the reference and store the result as a temporary.
@@ -1912,7 +1912,7 @@ struct AIR_Traits_apply_operator_countof : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
         auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
@@ -1954,7 +1954,7 @@ struct AIR_Traits_apply_operator_typeof : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
         auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
@@ -1970,7 +1970,7 @@ struct AIR_Traits_apply_operator_sqrt : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
         auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
@@ -2000,7 +2000,7 @@ struct AIR_Traits_apply_operator_isnan : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
         auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
@@ -2031,7 +2031,7 @@ struct AIR_Traits_apply_operator_isinf : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
         auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
@@ -2062,7 +2062,7 @@ struct AIR_Traits_apply_operator_abs : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
         auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
@@ -2099,7 +2099,7 @@ struct AIR_Traits_apply_operator_sign : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
         auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
@@ -2129,7 +2129,7 @@ struct AIR_Traits_apply_operator_round : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
         auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
@@ -2157,7 +2157,7 @@ struct AIR_Traits_apply_operator_floor : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
         auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
@@ -2185,7 +2185,7 @@ struct AIR_Traits_apply_operator_ceil : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
         auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
@@ -2213,7 +2213,7 @@ struct AIR_Traits_apply_operator_trunc : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
         auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
@@ -2241,7 +2241,7 @@ struct AIR_Traits_apply_operator_iround : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
         auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
@@ -2269,7 +2269,7 @@ struct AIR_Traits_apply_operator_ifloor : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
         auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
@@ -2297,7 +2297,7 @@ struct AIR_Traits_apply_operator_iceil : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
         auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
@@ -2325,7 +2325,7 @@ struct AIR_Traits_apply_operator_itrunc : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
         auto& rhs = do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
@@ -2353,7 +2353,7 @@ struct AIR_Traits_apply_operator_cmp_eq : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
@@ -2372,7 +2372,7 @@ struct AIR_Traits_apply_operator_cmp_ne : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
@@ -2391,7 +2391,7 @@ struct AIR_Traits_apply_operator_cmp_lt : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
@@ -2414,7 +2414,7 @@ struct AIR_Traits_apply_operator_cmp_gt : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
@@ -2437,7 +2437,7 @@ struct AIR_Traits_apply_operator_cmp_lte : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
@@ -2460,7 +2460,7 @@ struct AIR_Traits_apply_operator_cmp_gte : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
@@ -2483,7 +2483,7 @@ struct AIR_Traits_apply_operator_cmp_3way : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
@@ -2520,7 +2520,7 @@ struct AIR_Traits_apply_operator_add : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
@@ -2579,7 +2579,7 @@ struct AIR_Traits_apply_operator_sub : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
@@ -2630,7 +2630,7 @@ struct AIR_Traits_apply_operator_mul : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
@@ -2728,7 +2728,7 @@ struct AIR_Traits_apply_operator_div : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
@@ -2775,7 +2775,7 @@ struct AIR_Traits_apply_operator_mod : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
@@ -2822,7 +2822,7 @@ struct AIR_Traits_apply_operator_sll : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
@@ -2884,7 +2884,7 @@ struct AIR_Traits_apply_operator_srl : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
@@ -2946,7 +2946,7 @@ struct AIR_Traits_apply_operator_sla : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
@@ -3017,7 +3017,7 @@ struct AIR_Traits_apply_operator_sra : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
@@ -3076,7 +3076,7 @@ struct AIR_Traits_apply_operator_andb : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
@@ -3129,7 +3129,7 @@ struct AIR_Traits_apply_operator_orb : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
@@ -3183,7 +3183,7 @@ struct AIR_Traits_apply_operator_xorb : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
@@ -3237,7 +3237,7 @@ struct AIR_Traits_apply_operator_assign : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam /*up*/)
       {
         // This operator is binary. `assign` is ignored.
         do_simple_assign_value_common(ctx);
@@ -3249,7 +3249,7 @@ struct AIR_Traits_apply_operator_fma : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is ternary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
@@ -3283,7 +3283,7 @@ struct AIR_Traits_apply_operator_head : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam /*up*/)
       {
         // This operator is binary. `assign` is ignored.
         ctx.stack().mut_back().zoom_in(Reference::M_array_head());
@@ -3295,7 +3295,7 @@ struct AIR_Traits_apply_operator_tail : AIR_Traits_apply_operator_common
   {
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& /*up*/)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam /*up*/)
       {
         // This operator is binary. `assign` is ignored.
         ctx.stack().mut_back().zoom_in(Reference::M_array_tail());
@@ -3327,7 +3327,7 @@ struct AIR_Traits_unpack_struct_array
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this function.
@@ -3391,8 +3391,7 @@ struct AIR_Traits_unpack_struct_object
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up,
-            const cow_vector<phsh_string>& keys)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const cow_vector<phsh_string>& keys)
       {
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this function.
@@ -3459,7 +3458,7 @@ struct AIR_Traits_define_null_variable
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Sparam_sloc_name& sp)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_sloc_name& sp)
       {
         const auto qhooks = ctx.global().get_hooks_opt();
         const auto gcoll = ctx.global().genius_collector();
@@ -3540,8 +3539,7 @@ struct AIR_Traits_variadic_call
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up,
-            const Source_Location& sloc)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Source_Location& sloc)
       {
         const auto sentry = ctx.global().copy_recursion_sentry();
         const auto qhooks = ctx.global().get_hooks_opt();
@@ -3709,7 +3707,7 @@ struct AIR_Traits_import_call
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up, const Sparam_import& sp)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_import& sp)
       {
         const auto sentry = ctx.global().copy_recursion_sentry();
         const auto qhooks = ctx.global().get_hooks_opt();
@@ -3804,8 +3802,7 @@ struct AIR_Traits_break_or_continue
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up,
-            const Source_Location& sloc)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Source_Location& sloc)
       {
         Reference::S_jump_src xref = { sloc };
         ctx.stack().emplace_back(::std::move(xref));
