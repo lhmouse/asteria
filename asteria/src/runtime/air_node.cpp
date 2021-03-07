@@ -3877,6 +3877,30 @@ struct AIR_Traits_initialize_reference
       }
   };
 
+struct AIR_Traits_backreference
+  {
+    // `Uparam` is `depth`.
+    // `Sparam` is unused.
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_backreference& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.s32 = altr.depth;
+        return up;
+      }
+
+    static
+    AIR_Status
+    execute(Executive_Context& ctx, const AVMC_Queue::Uparam& up)
+      {
+        // Push a reference below the top.
+        ctx.stack().emplace_back(ctx.stack().back(up.s32));
+        return air_status_next;
+      }
+  };
+
 // Finally...
 template<typename TraitsT, typename NodeT, typename = void>
 struct symbol_getter
@@ -4232,6 +4256,7 @@ rebind_opt(Abstract_Context& ctx)
       case index_break_or_continue:
       case index_declare_reference:
       case index_initialize_reference:
+      case index_backreference:
         // There is nothing to rebind.
         return nullopt;
 
@@ -4557,6 +4582,10 @@ solidify(AVMC_Queue& queue)
         return do_solidify<AIR_Traits_initialize_reference>(queue,
                                      this->m_stor.as<index_initialize_reference>());
 
+      case index_backreference:
+        return do_solidify<AIR_Traits_backreference>(queue,
+                                     this->m_stor.as<index_backreference>());
+
       default:
         ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
     }
@@ -4697,6 +4726,7 @@ enumerate_variables(Variable_Callback& callback)
       case index_break_or_continue:
       case index_declare_reference:
       case index_initialize_reference:
+      case index_backreference:
         return callback;
 
       default:
