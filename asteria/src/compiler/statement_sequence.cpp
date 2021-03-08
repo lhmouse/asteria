@@ -1369,7 +1369,7 @@ do_accept_statement_as_block_opt(Token_Stream& tstrm)
     return nullopt;
   }
 
-struct Keyword_Element
+struct Prefix_Op_Keyword
   {
     Keyword kwrd;
     Xop xop;
@@ -1397,13 +1397,13 @@ constexpr s_prefix_op_keywords[] =
 
 constexpr
 bool
-operator==(const Keyword_Element& lhs, Keyword rhs)
+operator==(const Prefix_Op_Keyword& lhs, Keyword rhs)
   noexcept
   {
     return lhs.kwrd == rhs;
   }
 
-struct Punctuator_Element
+struct Prefix_Op_Punctuator
   {
     Punctuator punct;
     Xop xop;
@@ -1420,7 +1420,7 @@ constexpr s_prefix_op_punctuators[] =
 
 constexpr
 bool
-operator==(const Punctuator_Element& lhs, Punctuator rhs)
+operator==(const Prefix_Op_Punctuator& lhs, Punctuator rhs)
   noexcept
   {
     return lhs.punct == rhs;
@@ -1881,7 +1881,7 @@ do_accept_primary_expression(cow_vector<Expression_Unit>& units, Token_Stream& t
     return false;
   }
 
-struct Postfix_Operator_Element
+struct Postfix_Op_Punctuator
   {
     Punctuator punct;
     Xop xop;
@@ -1896,7 +1896,7 @@ constexpr s_postfix_op_punctuators[] =
 
 constexpr
 bool
-operator==(const Postfix_Operator_Element& lhs, Punctuator rhs)
+operator==(const Postfix_Op_Punctuator& lhs, Punctuator rhs)
   noexcept
   {
     return lhs.punct == rhs;
@@ -2141,7 +2141,7 @@ do_accept_infix_operator_coalescence_opt(Token_Stream& tstrm)
     return ::std::move(xelem);
   }
 
-struct Infix_Operator_Element
+struct Infix_Op_Punctuator
   {
     Punctuator punct;
     Xop xop;
@@ -2185,7 +2185,7 @@ constexpr s_infix_op_punctuators[] =
 
 constexpr
 bool
-operator==(const Infix_Operator_Element& lhs, Punctuator rhs)
+operator==(const Infix_Op_Punctuator& lhs, Punctuator rhs)
   noexcept
   {
     return lhs.punct == rhs;
