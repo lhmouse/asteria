@@ -47,31 +47,33 @@ do_recover(::FILE* fp)
     return err;
   }
 
-bool
-do_is_same_orientation(int x, int y)
+constexpr
+int
+do_normalize_fwide(int wide)
   noexcept
   {
-    return ((x < 0) && (y < 0)) || ((x == 0) && (y == 0)) || ((x > 0) && (y > 0));
+    return (wide == 0) ? 0 : ((wide >> (WORD_BIT - 1)) | 1);
   }
 
 bool
-do_set_orientation(::FILE* fp, const char* mode, int wide)
+do_set_wide(::FILE* fp, const char* mode, int wide)
   {
     // Get the current orientation.
-    int r = ::fwide(fp, wide);
-    if(do_is_same_orientation(r, wide))
-      return true;
+    int wcomp = do_normalize_fwide(wide);
+    if(do_normalize_fwide(::fwide(fp, wide)) != wcomp) {
+      // Clear the current orientation and try resetting it.
+      // XXX: Is it safe to do so when the file has been locked?
+      if(!::freopen(nullptr, mode, fp))
+        ::abort();
 
-    // Clear the current orientation and set it agail.
-    if(!::freopen(nullptr, mode, fp))
-      ::abort();
-
-    r = ::fwide(fp, wide);
-    return do_is_same_orientation(r, wide);
+      if(do_normalize_fwide(::fwide(fp, wide)) != wcomp)
+        return false;
+    }
+    return true;
   }
 
 size_t
-do_write_utf8_common(const IOF_Sentry& fp, const cow_string& text)
+do_write_utf8_common(::FILE* fp, const cow_string& text)
   {
     size_t ncps = 0;
     size_t off = 0;
@@ -105,7 +107,7 @@ std_io_getc()
     if(::ferror_unlocked(fp))
       ASTERIA_THROW("Standard input failure (error bit set)");
 
-    if(!do_set_orientation(fp, "r", +1))
+    if(!do_set_wide(fp, "r", +1))
       ASTERIA_THROW("Invalid text read from binary-oriented input");
 
     // Read a UTF code point.
@@ -135,7 +137,7 @@ std_io_getln()
     if(::ferror_unlocked(fp))
       ASTERIA_THROW("Standard input failure (error bit set)");
 
-    if(!do_set_orientation(fp, "r", +1))
+    if(!do_set_wide(fp, "r", +1))
       ASTERIA_THROW("Invalid text read from binary-oriented input");
 
     // Read a UTF-8 string.
@@ -179,7 +181,7 @@ std_io_putc(V_integer value)
     if(::ferror_unlocked(fp))
       ASTERIA_THROW("Standard output failure (error bit set)");
 
-    if(!do_set_orientation(fp, "w", +1))
+    if(!do_set_wide(fp, "w", +1))
       ASTERIA_THROW("Invalid text write to binary-oriented output");
 
     // Validate the code point.
@@ -215,7 +217,7 @@ std_io_putc(V_string value)
     if(::ferror_unlocked(fp))
       ASTERIA_THROW("Standard output failure (error bit set)");
 
-    if(!do_set_orientation(fp, "w", +1))
+    if(!do_set_wide(fp, "w", +1))
       ASTERIA_THROW("Invalid text write to binary-oriented output");
 
     // Write only the string.
@@ -235,7 +237,7 @@ std_io_putln(V_string value)
     if(::ferror_unlocked(fp))
       ASTERIA_THROW("Standard output failure (error bit set)");
 
-    if(!do_set_orientation(fp, "w", +1))
+    if(!do_set_wide(fp, "w", +1))
       ASTERIA_THROW("Invalid text write to binary-oriented output");
 
     // Write the string itself.
@@ -262,7 +264,7 @@ std_io_putf(V_string templ, cow_vector<Value> values)
     if(::ferror_unlocked(fp))
       ASTERIA_THROW("Standard output failure (error bit set)");
 
-    if(!do_set_orientation(fp, "w", +1))
+    if(!do_set_wide(fp, "w", +1))
       ASTERIA_THROW("Invalid text write to binary-oriented output");
 
     // Prepare inserters.
@@ -298,7 +300,7 @@ std_io_read(Opt_integer limit)
     if(::ferror_unlocked(fp))
       ASTERIA_THROW("Standard input failure (error bit set)");
 
-    if(!do_set_orientation(fp, "r", -1))
+    if(!do_set_wide(fp, "r", -1))
       ASTERIA_THROW("Invalid binary read from text-oriented input");
 
     // Read some bytes from the stream.
@@ -329,7 +331,7 @@ std_io_write(V_string data)
     if(::ferror_unlocked(fp))
       ASTERIA_THROW("Standard output failure (error bit set)");
 
-    if(!do_set_orientation(fp, "w", -1))
+    if(!do_set_wide(fp, "w", -1))
       ASTERIA_THROW("Invalid binary write to text-oriented output");
 
     // Don't pass zero to `fwrite()`
