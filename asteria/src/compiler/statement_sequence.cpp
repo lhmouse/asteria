@@ -1374,7 +1374,7 @@ struct Keyword_Element
     Keyword kwrd;
     Xop xop;
   }
-constexpr s_keyword_table[] =
+constexpr s_prefix_op_keywords[] =
   {
     { keyword_unset,     xop_unset    },
     { keyword_countof,   xop_countof  },
@@ -1408,7 +1408,7 @@ struct Punctuator_Element
     Punctuator punct;
     Xop xop;
   }
-constexpr s_punctuator_table[] =
+constexpr s_prefix_op_punctuators[] =
   {
     { punctuator_add,   xop_pos      },
     { punctuator_sub,   xop_neg      },
@@ -1441,7 +1441,7 @@ do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tstr
 
     auto sloc = qtok->sloc();
     if(qtok->is_keyword()) {
-      auto qconf = ::rocket::find(s_keyword_table, qtok->as_keyword());
+      auto qconf = ::rocket::find(s_prefix_op_keywords, qtok->as_keyword());
       if(!qconf)
         return false;
 
@@ -1453,7 +1453,7 @@ do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tstr
     }
 
     if(qtok->is_punctuator()) {
-      auto qconf = ::rocket::find(s_punctuator_table, qtok->as_punctuator());
+      auto qconf = ::rocket::find(s_prefix_op_punctuators, qtok->as_punctuator());
       if(!qconf)
         return false;
 
@@ -1886,7 +1886,7 @@ struct Postfix_Operator_Element
     Punctuator punct;
     Xop xop;
   }
-constexpr s_postfix_xop_table[] =
+constexpr s_postfix_op_punctuators[] =
   {
     { punctuator_inc,   xop_inc_post  },
     { punctuator_dec,   xop_dec_post  },
@@ -1913,7 +1913,7 @@ do_accept_postfix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tst
 
     auto sloc = qtok->sloc();
     if(qtok->is_punctuator()) {
-      auto qconf = ::rocket::find(s_postfix_xop_table, qtok->as_punctuator());
+      auto qconf = ::rocket::find(s_postfix_op_punctuators, qtok->as_punctuator());
       if(!qconf)
         return false;
 
@@ -2147,7 +2147,7 @@ struct Infix_Operator_Element
     Xop xop;
     bool assign;
   }
-constexpr s_infix_xop_table[] =
+constexpr s_infix_op_punctuators[] =
   {
     { punctuator_add,        xop_add,       0 },
     { punctuator_sub,        xop_sub,       0 },
@@ -2204,7 +2204,7 @@ do_accept_infix_operator_general_opt(Token_Stream& tstrm)
 
     auto sloc = qtok->sloc();
     if(qtok->is_punctuator()) {
-      auto qconf = ::rocket::find(s_infix_xop_table, qtok->as_punctuator());
+      auto qconf = ::rocket::find(s_infix_op_punctuators, qtok->as_punctuator());
       if(!qconf)
         return nullopt;
 
