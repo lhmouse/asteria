@@ -17,12 +17,15 @@ cow_vector<AIR_Node>
 do_generate_code_branch(const Compiler_Options& opts, PTC_Aware ptc, Analytic_Context& ctx,
                         const cow_vector<Expression_Unit>& units)
   {
-    // Expression units other than the last one cannot be PTC'd.
     cow_vector<AIR_Node> code;
-    for(size_t i = 0;  i < units.size();  ++i) {
-      auto qnext = units.ptr(i + 1);
-      units[i].generate_code(code, opts, ctx, qnext ? ptc_aware_none : ptc);
-    }
+    if(units.empty())
+      return code;
+
+    // Expression units other than the last one cannot be PTC'd.
+    for(size_t i = 0;  i + 1 < units.size();  ++i)
+      units.at(i).generate_code(code, opts, ctx, ptc_aware_none);
+
+    units.back().generate_code(code, opts, ctx, ptc);
     return code;
   }
 

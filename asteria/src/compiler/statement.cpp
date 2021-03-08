@@ -55,11 +55,14 @@ do_generate_subexpression(cow_vector<AIR_Node>& code, const Compiler_Options& op
       code.emplace_back(::std::move(xnode));
     }
 
+    if(expr.units.empty())
+      return code;
+
     // Generate code for the subexpression itself.
-    for(size_t i = 0;  i < expr.units.size();  ++i) {
-      auto qnext = expr.units.ptr(i + 1);
-      expr.units[i].generate_code(code, opts, ctx, qnext ? ptc_aware_none : ptc);
-    }
+    for(size_t i = 0;  i + 1 < expr.units.size();  ++i)
+      expr.units.at(i).generate_code(code, opts, ctx, ptc_aware_none);
+
+    expr.units.back().generate_code(code, opts, ctx, ptc);
     return code;
   }
 
@@ -86,13 +89,15 @@ do_generate_statement_list(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* 
                            Analytic_Context& ctx, const Compiler_Options& opts, PTC_Aware ptc,
                            const Statement::S_block& block)
   {
+    if(block.stmts.empty())
+      return code;
+
     // Statements other than the last one cannot be the end of function.
-    for(size_t i = 0;  i < block.stmts.size();  ++i) {
-      auto qnext = block.stmts.ptr(i + 1);
-      bool rvoid = qnext && qnext->is_empty_return();
-      block.stmts[i].generate_code(code, names_opt, ctx, opts, rvoid ? ptc_aware_void :
-                                                               qnext ? ptc_aware_none : ptc);
-    }
+    for(size_t i = 0;  i + 1 < block.stmts.size();  ++i)
+      block.stmts.at(i).generate_code(code, names_opt, ctx, opts,
+              block.stmts.at(i + 1).is_empty_return() ? ptc_aware_void : ptc_aware_none);
+
+    block.stmts.back().generate_code(code, names_opt, ctx, opts, ptc);
     return code;
   }
 

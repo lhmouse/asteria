@@ -25,17 +25,20 @@ reload(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
     this->m_code.clear();
     this->m_params = params;
 
+    if(stmts.empty())
+      return *this;
+
     // Create a context of the function body.
     Analytic_Context ctx_func(Analytic_Context::M_function(),
                               ctx_opt, this->m_params);
 
     // Generate code for all statements.
-    for(size_t i = 0;  i < stmts.size();  ++i) {
-      auto qnext = stmts.ptr(i + 1);
-      bool rvoid = !qnext || qnext->is_empty_return();
-      stmts[i].generate_code(this->m_code, nullptr, ctx_func, this->m_opts,
-                             rvoid ? ptc_aware_void : ptc_aware_none);
-    }
+    for(size_t i = 0;  i + 1 < stmts.size();  ++i)
+      stmts.at(i).generate_code(this->m_code, nullptr, ctx_func, this->m_opts,
+              stmts.at(i + 1).is_empty_return() ? ptc_aware_void : ptc_aware_none);
+
+    stmts.back().generate_code(this->m_code, nullptr, ctx_func, this->m_opts,
+            ptc_aware_void);
 
     // Check whether optimization is enabled during translation.
     if(this->m_opts.optimization_level < 2)
@@ -53,17 +56,18 @@ rebind(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
     this->m_code = code;
     this->m_params = params;
 
+    if(code.empty())
+      return *this;
+
     // Create a context of the function body.
     Analytic_Context ctx_func(Analytic_Context::M_function(),
                               ctx_opt, this->m_params);
 
     // Rebind all nodes recursively.
     // Don't trigger copy-on-write unless a node needs rewriting.
-    for(size_t i = 0;  i < code.size();  ++i) {
-      auto qnode = code.at(i).rebind_opt(ctx_func);
-      if(qnode)
+    for(size_t i = 0;  i < code.size();  ++i)
+      if(auto qnode = code.at(i).rebind_opt(ctx_func))
         this->m_code.mut(i) = ::std::move(*qnode);
-    }
 
     // Check whether optimization is enabled during execution.
     if(this->m_opts.optimization_level < 3)
