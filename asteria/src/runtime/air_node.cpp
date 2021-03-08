@@ -3909,8 +3909,8 @@ struct has_uparam
 template<typename TraitsT, typename NodeT>
 struct has_uparam<TraitsT, NodeT,
     ROCKET_VOID_T(decltype(
-        TraitsT::make_uparam(
-            ::std::declval<bool&>(), ::std::declval<const NodeT&>())))>
+        TraitsT::make_uparam(::std::declval<bool&>(),
+            ::std::declval<const NodeT&>())))>
   : ::std::true_type
   { };
 
@@ -3922,8 +3922,8 @@ struct has_sparam
 template<typename TraitsT, typename NodeT>
 struct has_sparam<TraitsT, NodeT,
     ROCKET_VOID_T(decltype(
-        TraitsT::make_sparam(
-            ::std::declval<bool&>(), ::std::declval<const NodeT&>())))>
+        TraitsT::make_sparam(::std::declval<bool&>(),
+            ::std::declval<const NodeT&>())))>
   : ::std::true_type
   { };
 
