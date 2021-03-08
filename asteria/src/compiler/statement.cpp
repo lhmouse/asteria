@@ -49,7 +49,13 @@ cow_vector<AIR_Node>&
 do_generate_subexpression(cow_vector<AIR_Node>& code, const Compiler_Options& opts, PTC_Aware ptc,
                           Analytic_Context& ctx, const Statement::S_expression& expr)
   {
-    // Expression units other than the last one cannot be PTC'd.
+    // Generate a single-step trap if it is not disabled.
+    if(opts.verbose_single_step_traps) {
+      AIR_Node::S_single_step_trap xnode = { expr.sloc };
+      code.emplace_back(::std::move(xnode));
+    }
+
+    // Generate code for the subexpression itself.
     for(size_t i = 0;  i < expr.units.size();  ++i) {
       auto qnext = expr.units.ptr(i + 1);
       expr.units[i].generate_code(code, opts, ctx, qnext ? ptc_aware_none : ptc);
@@ -58,23 +64,9 @@ do_generate_subexpression(cow_vector<AIR_Node>& code, const Compiler_Options& op
   }
 
 cow_vector<AIR_Node>&
-do_generate_single_step_trap(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
-                             const Source_Location& sloc)
-  {
-    // Note this can be disabled.
-    if(!opts.verbose_single_step_traps)
-      return code;
-
-    AIR_Node::S_single_step_trap xnode = { sloc };
-    code.emplace_back(::std::move(xnode));
-    return code;
-  }
-
-cow_vector<AIR_Node>&
 do_generate_expression(cow_vector<AIR_Node>& code, const Compiler_Options& opts, PTC_Aware ptc,
                        Analytic_Context& ctx, const Statement::S_expression& expr)
   {
-    do_generate_single_step_trap(code, opts, expr.sloc);
     do_generate_clear_stack(code);
     do_generate_subexpression(code, opts, ptc, ctx, expr);
     return code;
