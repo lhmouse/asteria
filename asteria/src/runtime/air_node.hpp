@@ -251,11 +251,6 @@ class AIR_Node
         phsh_string name;
       };
 
-    struct S_backreference
-      {
-        uint32_t depth;
-      };
-
     enum Index : uint8_t
       {
         index_clear_stack            =  0,
@@ -295,7 +290,6 @@ class AIR_Node
         index_break_or_continue      = 34,
         index_declare_reference      = 35,
         index_initialize_reference   = 36,
-        index_backreference          = 37,
       };
 
   private:
@@ -338,7 +332,6 @@ class AIR_Node
         ,S_break_or_continue      // 34,
         ,S_declare_reference      // 35,
         ,S_initialize_reference   // 36,
-        ,S_backreference          // 37
       )>;
 
     Storage m_stor;
