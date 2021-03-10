@@ -343,12 +343,12 @@ enumerate_variables(Variable_Callback& callback)
 
       case type_array:
         ::rocket::for_each(this->m_stor.as<type_array>(),
-                     [&](const auto& val) { val.enumerate_variables(callback);  });
+            [&](const auto& val) { val.enumerate_variables(callback);  });
         return callback;
 
       case type_object:
         ::rocket::for_each(this->m_stor.as<type_object>(),
-                     [&](const auto& pair) { pair.second.enumerate_variables(callback);  });
+            [&](const auto& pair) { pair.second.enumerate_variables(callback);  });
         return callback;
 
       default:
